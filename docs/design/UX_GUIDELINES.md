@@ -74,30 +74,30 @@ Less but better; simple as possible but not simpler.
 
 ### Font Families
 
-| Variable | Font | Usage |
+|Variable|Font|Usage|
 |----------|------|-------|
-| `--font--acme` | Acme | Headers, card titles, uppercase labels |
-| `--font-body` | System fonts | Body text, paragraphs, form inputs |
+|`--font--acme`|Acme|Headers, card titles, uppercase labels|
+|`--font-body`|System fonts|Body text, paragraphs, form inputs|
 
 ### Font Sizes (Fluid Typography)
 
-| Token | Value | Usage |
+|Token|Value|Usage|
 |-------|-------|-------|
-| `--font-size-xs` | `clamp(0.75rem, 2vw, 0.875rem)` | Fine print, captions |
-| `--font-size-sm` | `clamp(0.875rem, 2.5vw, 1rem)` | Secondary text, labels |
-| `--font-size-base` | `clamp(1rem, 3vw, 1.125rem)` | Body text |
-| `--font-size-lg` | `clamp(1.125rem, 3.5vw, 1.25rem)` | Emphasis text |
-| `--font-size-xl` | `clamp(1.25rem, 4vw, 1.5rem)` | Section headers |
-| `--font-size-2xl` | `clamp(1.5rem, 5vw, 2rem)` | Page headers |
-| `--font-size-3xl` | `clamp(2rem, 6vw, 3rem)` | Hero text |
+|`--font-size-xs`|`clamp(0.75rem, 2vw, 0.875rem)`|Fine print, captions|
+|`--font-size-sm`|`clamp(0.875rem, 2.5vw, 1rem)`|Secondary text, labels|
+|`--font-size-base`|`clamp(1rem, 3vw, 1.125rem)`|Body text|
+|`--font-size-lg`|`clamp(1.125rem, 3.5vw, 1.25rem)`|Emphasis text|
+|`--font-size-xl`|`clamp(1.25rem, 4vw, 1.5rem)`|Section headers|
+|`--font-size-2xl`|`clamp(1.5rem, 5vw, 2rem)`|Page headers|
+|`--font-size-3xl`|`clamp(2rem, 6vw, 3rem)`|Hero text|
 
 ### Font Weights
 
-| Weight | Usage |
+|Weight|Usage|
 |--------|-------|
-| 400 | Body text |
-| 600 | Emphasis, buttons, labels |
-| 700 | Headers, stat numbers |
+|400|Body text|
+|600|Emphasis, buttons, labels|
+|700|Headers, stat numbers|
 
 ### Text Transform
 
@@ -111,17 +111,16 @@ Less but better; simple as possible but not simpler.
 ### Critical Rule
 
 **NO EMOJIS IN DESIGN - USE LUCIDE ICONS**
-
 All icons must use the Lucide icon library. Never use emojis as visual elements in the UI.
 
 ### Icon Sizing
 
-| Size | Pixels | Usage |
+|Size|Pixels|Usage|
 |------|--------|-------|
-| Small | 16px | Inline with text, form field icons |
-| Medium | 20px | Buttons, navigation items |
-| Large | 24px | Section headers, feature cards |
-| XL | 32px | Hero sections, empty states |
+|Small|16px|Inline with text, form field icons|
+|Medium|20px|Buttons, navigation items|
+|Large|24px|Section headers, feature cards|
+|XL|32px|Hero sections, empty states|
 
 ### Icon + Text Alignment
 
@@ -131,25 +130,25 @@ All icons must use the Lucide icon library. Never use emojis as visual elements 
 
 ### Common Icon Mappings
 
-| Purpose | Lucide Icon |
+|Purpose|Lucide Icon|
 |---------|-------------|
-| Close/Cancel | `X` |
-| Edit | `Pencil` |
-| Delete | `Trash2` |
-| Add/Create | `Plus` |
-| Settings | `Settings` |
-| User/Profile | `User` |
-| Search | `Search` |
-| Menu | `Menu` |
-| Check/Success | `Check` |
-| Warning | `AlertTriangle` |
-| Error | `AlertCircle` |
-| Info | `Info` |
-| Download | `Download` |
-| Upload | `Upload` |
-| Send | `Send` |
-| Eye (show) | `Eye` |
-| Eye (hide) | `EyeOff` |
+|Close/Cancel|`X`|
+|Edit|`Pencil`|
+|Delete|`Trash2`|
+|Add/Create|`Plus`|
+|Settings|`Settings`|
+|User/Profile|`User`|
+|Search|`Search`|
+|Menu|`Menu`|
+|Check/Success|`Check`|
+|Warning|`AlertTriangle`|
+|Error|`AlertCircle`|
+|Info|`Info`|
+|Download|`Download`|
+|Upload|`Upload`|
+|Send|`Send`|
+|Eye (show)|`Eye`|
+|Eye (hide)|`EyeOff`|
 
 ---
 
@@ -192,19 +191,19 @@ box-shadow:
 
 ### Button Hierarchy
 
-| Type | Class | Usage |
+|Type|Class|Usage|
 |------|-------|-------|
-| Primary | `.btn-primary`, `.cp-btn-primary` | Main actions (Submit, Save, Confirm) |
-| Secondary | `.btn-secondary` | Secondary actions (Cancel, Back) |
-| Danger | `.btn-danger` | Destructive actions (Delete) |
-| Outline | `.btn-outline` | Tertiary actions |
+|Primary|`.btn-primary`, `.cp-btn-primary`|Main actions (Submit, Save, Confirm)|
+|Secondary|`.btn-secondary`|Secondary actions (Cancel, Back)|
+|Danger|`.btn-danger`|Destructive actions (Delete)|
+|Outline|`.btn-outline`|Tertiary actions|
 
 ### Button Sizing
 
-| Size | Class | Padding |
+|Size|Class|Padding|
 |------|-------|---------|
-| Default | `.btn` | `0.75rem 1.5rem` |
-| Small | `.btn-sm` | `0.5rem 1rem` |
+|Default|`.btn`|`0.75rem 1.5rem`|
+|Small|`.btn-sm`|`0.5rem 1rem`|
 
 ### Button States
 
@@ -255,12 +254,12 @@ Implementation pattern:
 
 ### Validation States
 
-| State | Border Color | Message Color |
+|State|Border Color|Message Color|
 |-------|--------------|---------------|
-| Default | `var(--color-dark)` | - |
-| Focus | `var(--color-primary)` | - |
-| Error | `var(--color-error-500)` | `var(--color-error-500)` |
-| Success | `var(--color-success-500)` | `var(--color-success-500)` |
+|Default|`var(--color-dark)`|-|
+|Focus|`var(--color-primary)`|-|
+|Error|`var(--color-error-500)`|`var(--color-error-500)`|
+|Success|`var(--color-success-500)`|`var(--color-success-500)`|
 
 ### Error Messages
 
@@ -275,23 +274,23 @@ Implementation pattern:
 
 ### Spacing Scale
 
-| Token | Value | Usage |
+|Token|Value|Usage|
 |-------|-------|-------|
-| `--space-xs` | `clamp(0.25rem, 1vw, 0.5rem)` | Tight spacing, inline elements |
-| `--space-sm` | `clamp(0.5rem, 2vw, 1rem)` | Form gaps, button groups |
-| `--space-md` | `clamp(1rem, 3vw, 1.5rem)` | Card padding, section gaps |
-| `--space-lg` | `clamp(1.5rem, 4vw, 2rem)` | Section padding |
-| `--space-xl` | `clamp(2rem, 5vw, 3rem)` | Page sections |
-| `--space-2xl` | `clamp(3rem, 6vw, 4rem)` | Major sections |
+|`--space-xs`|`clamp(0.25rem, 1vw, 0.5rem)`|Tight spacing, inline elements|
+|`--space-sm`|`clamp(0.5rem, 2vw, 1rem)`|Form gaps, button groups|
+|`--space-md`|`clamp(1rem, 3vw, 1.5rem)`|Card padding, section gaps|
+|`--space-lg`|`clamp(1.5rem, 4vw, 2rem)`|Section padding|
+|`--space-xl`|`clamp(2rem, 5vw, 3rem)`|Page sections|
+|`--space-2xl`|`clamp(3rem, 6vw, 4rem)`|Major sections|
 
 ### Component Spacing
 
-| Component | Internal Padding | External Margin |
+|Component|Internal Padding|External Margin|
 |-----------|------------------|-----------------|
-| Card | `1.5rem` | `0 0 1.5rem 0` |
-| Button | `0.75rem 1.5rem` | Context-dependent |
-| Input | `0.75rem` | `0 0 1rem 0` |
-| Section | `var(--section-padding)` | - |
+|Card|`1.5rem`|`0 0 1.5rem 0`|
+|Button|`0.75rem 1.5rem`|Context-dependent|
+|Input|`0.75rem`|`0 0 1rem 0`|
+|Section|`var(--section-padding)`|-|
 
 ---
 

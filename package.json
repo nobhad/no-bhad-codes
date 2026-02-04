@@ -90,6 +90,7 @@
     "postcss-custom-media": "^11.0.6",
     "prettier": "^3.6.2",
     "sqlite": "^5.1.1",
+    "supertest": "^6.3.3",
     "terser": "^5.44.0",
     "ts-node": "^1.7.1",
     "tsx": "^4.20.5",
@@ -134,7 +135,7 @@
     "pdfkit": "^0.17.2",
     "picocolors": "^1.1.1",
     "redis": "^5.8.2",
-    "sqlite3": "^5.1.7",
+    "sqlite3": "^5.0.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "ua-parser-js": "^2.0.7"

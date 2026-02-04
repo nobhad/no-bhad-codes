@@ -18,11 +18,11 @@ This audit covers accessibility compliance across the no-bhad-codes application.
 
 ### 1.1 Text Alternatives
 
-| Issue | Severity | Location | Status |
+|Issue|Severity|Location|Status|
 |-------|----------|----------|--------|
-| SVG icons have `aria-hidden="true"` | N/A | Throughout | PASS |
-| Form inputs have labels | N/A | Forms | PASS |
-| Images have alt text | N/A | Images | PASS |
+|SVG icons have `aria-hidden="true"`|N/A|Throughout|PASS|
+|Form inputs have labels|N/A|Forms|PASS|
+|Images have alt text|N/A|Images|PASS|
 
 **Findings:** Good use of `aria-hidden` on decorative icons. All interactive SVGs have associated text labels.
 
@@ -30,11 +30,11 @@ This audit covers accessibility compliance across the no-bhad-codes application.
 
 ### 1.3 Adaptable
 
-| Issue | Severity | Location | Status |
+|Issue|Severity|Location|Status|
 |-------|----------|----------|--------|
-| Semantic HTML structure | N/A | All pages | PASS |
-| Form field groupings | Minor | Modals | Recommend `<fieldset>` |
-| Tables have headers | N/A | Data tables | PASS |
+|Semantic HTML structure|N/A|All pages|PASS|
+|Form field groupings|Minor|Modals|Recommend `<fieldset>`|
+|Tables have headers|N/A|Data tables|PASS|
 
 **Recommendations:**
 
@@ -45,12 +45,12 @@ This audit covers accessibility compliance across the no-bhad-codes application.
 
 ### 1.4 Distinguishable
 
-| Issue | Severity | Location | Status |
+|Issue|Severity|Location|Status|
 |-------|----------|----------|--------|
-| Color contrast | Medium | Status badges | Review needed |
-| Color alone for meaning | Medium | Status badges | REVIEW (1.4.1) |
-| Text resize | N/A | All pages | PASS (using rem/em) |
-| Focus visible | N/A | Interactive elements | PASS |
+|Color contrast|Medium|Status badges|Review needed|
+|Color alone for meaning|Medium|Status badges|REVIEW (1.4.1)|
+|Text resize|N/A|All pages|PASS (using rem/em)|
+|Focus visible|N/A|Interactive elements|PASS|
 
 **Findings - 1.4.1 (Use of Color):**
 
@@ -74,12 +74,12 @@ Review needed for:
 
 ### 2.1 Keyboard Accessible
 
-| Issue | Severity | Location | Status |
+|Issue|Severity|Location|Status|
 |-------|----------|----------|--------|
-| All interactive elements focusable | N/A | Throughout | PASS |
-| Custom dropdowns keyboard navigable | N/A | Dropdowns | PASS |
-| Tab panels keyboard navigable | N/A | Tab strips | PASS |
-| No keyboard traps | N/A | Modals | PASS |
+|All interactive elements focusable|N/A|Throughout|PASS|
+|Custom dropdowns keyboard navigable|N/A|Dropdowns|PASS|
+|Tab panels keyboard navigable|N/A|Tab strips|PASS|
+|No keyboard traps|N/A|Modals|PASS|
 
 **Findings:** Good keyboard support implemented:
 
@@ -91,12 +91,12 @@ Review needed for:
 
 ### 2.4 Navigable
 
-| Issue | Severity | Location | Status |
+|Issue|Severity|Location|Status|
 |-------|----------|----------|--------|
-| Page titles | N/A | All pages | PASS |
-| Focus order | N/A | Forms/modals | PASS |
-| Link purpose | Minor | Some links | Review |
-| Skip links | Medium | Main pages | Missing |
+|Page titles|N/A|All pages|PASS|
+|Focus order|N/A|Forms/modals|PASS|
+|Link purpose|Minor|Some links|Review|
+|Skip links|Medium|Main pages|Missing|
 
 **Recommendation - Skip Links:**
 
@@ -126,21 +126,21 @@ Add skip link at top of pages to jump to main content:
 
 ### 3.2 Predictable
 
-| Issue | Severity | Location | Status |
+|Issue|Severity|Location|Status|
 |-------|----------|----------|--------|
-| Consistent navigation | N/A | Admin/Portal | PASS |
-| Consistent identification | N/A | UI components | PASS |
-| On focus changes | N/A | Form inputs | PASS |
+|Consistent navigation|N/A|Admin/Portal|PASS|
+|Consistent identification|N/A|UI components|PASS|
+|On focus changes|N/A|Form inputs|PASS|
 
 ---
 
 ### 4.1 Compatible
 
-| Issue | Severity | Location | Status |
+|Issue|Severity|Location|Status|
 |-------|----------|----------|--------|
-| Valid HTML | N/A | All pages | PASS |
-| Name, role, value | Minor | Custom components | Review |
-| Status messages | N/A | Notifications | PASS (`aria-live`) |
+|Valid HTML|N/A|All pages|PASS|
+|Name, role, value|Minor|Custom components|Review|
+|Status messages|N/A|Notifications|PASS (`aria-live`)|
 
 **Findings - ARIA Usage:**
 
@@ -162,37 +162,37 @@ Good ARIA implementation found:
 
 ### Admin Dashboard (`/admin`)
 
-| Feature | Status | Notes |
+|Feature|Status|Notes|
 |---------|--------|-------|
-| Sidebar navigation | PASS | Good focus management |
-| Tab navigation | PASS | Arrow key support |
-| Data tables | PASS | Sortable headers announced |
-| Modals | PASS | Focus trap works correctly |
-| Messages split-view | PASS | Thread list has proper ARIA |
+|Sidebar navigation|PASS|Good focus management|
+|Tab navigation|PASS|Arrow key support|
+|Data tables|PASS|Sortable headers announced|
+|Modals|PASS|Focus trap works correctly|
+|Messages split-view|PASS|Thread list has proper ARIA|
 
 ### Client Portal (`/client/portal`)
 
-| Feature | Status | Notes |
+|Feature|Status|Notes|
 |---------|--------|-------|
-| Navigation | PASS | Clear active states |
-| Dashboard cards | PASS | Semantic structure |
-| Messages | PASS | Live region for updates |
-| File uploads | PASS | Progress announced |
+|Navigation|PASS|Clear active states|
+|Dashboard cards|PASS|Semantic structure|
+|Messages|PASS|Live region for updates|
+|File uploads|PASS|Progress announced|
 
 ### Client Intake (`/client/intake`)
 
-| Feature | Status | Notes |
+|Feature|Status|Notes|
 |---------|--------|-------|
-| Form structure | PASS | Labels present |
-| Validation errors | PASS | Associated with fields |
-| Progress indication | Minor | Consider aria-valuenow |
+|Form structure|PASS|Labels present|
+|Validation errors|PASS|Associated with fields|
+|Progress indication|Minor|Consider aria-valuenow|
 
 ### Set Password (`/client/set-password`)
 
-| Feature | Status | Notes |
+|Feature|Status|Notes|
 |---------|--------|-------|
-| Password field | PASS | Has visibility toggle |
-| Form validation | PASS | Errors announced |
+|Password field|PASS|Has visibility toggle|
+|Form validation|PASS|Errors announced|
 
 ---
 
@@ -209,13 +209,13 @@ None identified - no critical WCAG failures found.
 
 ### Medium Priority
 
-3. **Review color contrast** for muted text and badges (1.4.3)
-4. **Add fieldset/legend** to form groups in modals (1.3.1)
+1. **Review color contrast** for muted text and badges (1.4.3)
+2. **Add fieldset/legend** to form groups in modals (1.3.1)
 
 ### Low Priority
 
-5. Add `aria-describedby` for complex form fields
-6. Add `aria-activedescendant` to listbox components
+1. Add `aria-describedby` for complex form fields
+2. Add `aria-activedescendant` to listbox components
 
 ---
 
@@ -290,6 +290,6 @@ test('admin dashboard has no accessibility violations', async ({ page }) => {
 
 ## Changelog
 
-| Date | Change | Author |
+|Date|Change|Author|
 |------|--------|--------|
-| 2026-02-03 | Initial Phase 1 audit | Claude |
+|2026-02-03|Initial Phase 1 audit|Claude|

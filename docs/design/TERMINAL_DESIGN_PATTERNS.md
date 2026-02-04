@@ -39,10 +39,10 @@ font-family: "Roboto Mono", monospace;
 
 ### 1.2 Dark Background, High Contrast Text
 
-| Site | Background | Primary Text |
+|Site|Background|Primary Text|
 |------|------------|--------------|
-| Codebyte | `#30353a` (dark gray) | `#e0e8f0` (light gray) |
-| Saloni Garg | `#000000` (pure black) | `#7FF709` (matrix green) |
+|Codebyte|`#30353a` (dark gray)|`#e0e8f0` (light gray)|
+|Saloni Garg|`#000000` (pure black)|`#7FF709` (matrix green)|
 
 **Principle:** Dark backgrounds reduce eye strain and feel authentic to terminal applications.
 
@@ -61,16 +61,17 @@ Both use visual indicators to simulate shell prompts:
 
 ### 1.4 Semantic Color Coding
 
-| Purpose | Codebyte | Saloni Garg |
+|Purpose|Codebyte|Saloni Garg|
 |---------|----------|-------------|
-| Success/Active | `#95F584` (green) | `#7FF709` (green) |
-| Accent/Interactive | `#EC4891` (pink) | `#268bd2` (blue) |
-| Links | `#88DEF2` (cyan) | `#7FF709` (green) |
-| Muted | `#888` (gray) | - |
+|Success/Active|`#95F584` (green)|`#7FF709` (green)|
+|Accent/Interactive|`#EC4891` (pink)|`#268bd2` (blue)|
+|Links|`#88DEF2` (cyan)|`#7FF709` (green)|
+|Muted|`#888` (gray)|-|
 
 ### 1.5 No Decorative Elements
 
 Neither site uses:
+
 - Gradients
 - Drop shadows (except subtle window shadow)
 - Border radius (except window chrome)
@@ -79,12 +80,12 @@ Neither site uses:
 
 ### 1.6 Keyboard-First Navigation
 
-| Feature | Codebyte | Saloni Garg |
+|Feature|Codebyte|Saloni Garg|
 |---------|----------|-------------|
-| Number keys for options | No | No |
-| Arrow key history | Yes | No |
-| Escape for fullscreen | Yes | No |
-| Enter to submit | Yes | Implicit |
+|Number keys for options|No|No|
+|Arrow key history|Yes|No|
+|Escape for fullscreen|Yes|No|
+|Enter to submit|Yes|Implicit|
 
 ---
 
@@ -171,6 +172,7 @@ h1, h2, h3, p, li {
 ```
 
 No visual hierarchy through font size - content structure comes from:
+
 - Prompt prefixes (`>`, `$`, `❯`)
 - Indentation
 - Color coding
@@ -337,12 +339,12 @@ commands.sudo = () => "Nice try.";
 
 **Keep some animation but reduce delays:**
 
-| Current | Recommended |
+|Current|Recommended|
 |---------|-------------|
-| 600ms typing indicator | 300ms typing indicator |
-| 15-25ms per character | 8-12ms per character |
-| 1000ms cursor pause after message | 400ms cursor pause |
-| 300-400ms boot line delays | 150-200ms boot line delays |
+|600ms typing indicator|300ms typing indicator|
+|15-25ms per character|8-12ms per character|
+|1000ms cursor pause after message|400ms cursor pause|
+|300-400ms boot line delays|150-200ms boot line delays|
 
 **Animation philosophy:** Feel responsive like a real terminal, but maintain the "AI is typing" illusion.
 
@@ -404,21 +406,21 @@ const rootPath = 'users/guest/nobhad';
 
 ### 8.2 Gaps vs Reference Sites
 
-| Feature | Codebyte | Saloni | nobhad.codes |
+|Feature|Codebyte|Saloni|nobhad.codes|
 |---------|----------|--------|--------------|
-| CLI commands | Yes | No | No |
-| Command history (arrows) | Yes | No | Partial (goBack) |
-| Window minimize | Yes | No | Yes |
-| Window fullscreen | Yes | No | Yes |
-| Escape key fullscreen | Yes | No | No |
-| Prompt prefix styling | Yes | Yes | Partial |
-| Flat typography | No | Yes | No |
-| Boot sequence | No | Yes | Yes |
-| Typing animation | No | Yes | Yes |
+|CLI commands|Yes|No|No|
+|Command history (arrows)|Yes|No|Partial (goBack)|
+|Window minimize|Yes|No|Yes|
+|Window fullscreen|Yes|No|Yes|
+|Escape key fullscreen|Yes|No|No|
+|Prompt prefix styling|Yes|Yes|Partial|
+|Flat typography|No|Yes|No|
+|Boot sequence|No|Yes|Yes|
+|Typing animation|No|Yes|Yes|
 
 ### 8.3 Current File Structure
 
-```
+```text
 src/features/client/
   terminal-intake.ts        # Main module class
   terminal-intake-ui.ts     # UI rendering, animations
@@ -665,25 +667,25 @@ private async handleCommand(cmd: string, args: string): Promise<void> {
 
 ### 10.2 Keyboard Shortcuts Reference
 
-| Key | Action | Priority |
+|Key|Action|Priority|
 |-----|--------|----------|
-| `1-9` | Select option | Existing |
-| `Enter` | Submit input | Existing |
-| `Arrow Up` | Previous history | Phase 1 |
-| `Arrow Down` | Next history | Phase 1 |
-| `Escape` | Toggle fullscreen | Phase 1 |
-| `/help` | Show commands | Phase 3 |
-| `/clear` | Clear terminal | Phase 3 |
-| `/back` | Go back | Phase 3 |
+|`1-9`|Select option|Existing|
+|`Enter`|Submit input|Existing|
+|`Arrow Up`|Previous history|Phase 1|
+|`Arrow Down`|Next history|Phase 1|
+|`Escape`|Toggle fullscreen|Phase 1|
+|`/help`|Show commands|Phase 3|
+|`/clear`|Clear terminal|Phase 3|
+|`/back`|Go back|Phase 3|
 
 ### 10.3 Animation Timing Reference
 
-| Animation | Current | Target | GSAP Config |
+|Animation|Current|Target|GSAP Config|
 |-----------|---------|--------|-------------|
-| Character typing | 15-25ms | 8-12ms | `delay: 0.01` |
-| Cursor blink | 500ms | 500ms | `duration: 0.5, repeat: -1, yoyo: true` |
-| Message fade | - | 200ms | `duration: 0.2, ease: 'power2.out'` |
-| Window state | 500ms | 300ms | `duration: 0.3, ease: 'power2.inOut'` |
+|Character typing|15-25ms|8-12ms|`delay: 0.01`|
+|Cursor blink|500ms|500ms|`duration: 0.5, repeat: -1, yoyo: true`|
+|Message fade|-|200ms|`duration: 0.2, ease: 'power2.out'`|
+|Window state|500ms|300ms|`duration: 0.3, ease: 'power2.inOut'`|
 
 ### 10.4 Accessibility Checklist
 
@@ -709,12 +711,12 @@ private async handleCommand(cmd: string, args: string): Promise<void> {
 
 ## Files to Modify
 
-| File | Changes |
+|File|Changes|
 |------|---------|
-| `terminal-intake.ts` | Escape key, arrow history, command handling |
-| `terminal-intake-ui.ts` | Animation timing constants |
-| `terminal-intake.css` | Typography, prompt styling |
-| `terminal-intake-commands.ts` | New file for CLI commands (Phase 3) |
+|`terminal-intake.ts`|Escape key, arrow history, command handling|
+|`terminal-intake-ui.ts`|Animation timing constants|
+|`terminal-intake.css`|Typography, prompt styling|
+|`terminal-intake-commands.ts`|New file for CLI commands (Phase 3)|
 
 ---
 

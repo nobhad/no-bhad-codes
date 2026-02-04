@@ -13,18 +13,18 @@ The Lead Management System provides enterprise-grade lead scoring, pipeline mana
 
 Simplified pipeline stages for tracking leads through the sales funnel:
 
-| Status | Description |
+|Status|Description|
 |--------|-------------|
-| `new` | Freshly submitted lead, not yet reviewed |
-| `contacted` | Initial contact has been made |
-| `qualified` | Lead has been vetted and is a good fit |
-| `in-progress` | Actively in discussions/negotiations |
-| `converted` | Lead became a client with a project |
-| `lost` | Lead declined or went elsewhere |
-| `on-hold` | Temporarily paused |
-| `cancelled` | Lead withdrawn by either party |
+|`new`|Freshly submitted lead, not yet reviewed|
+|`contacted`|Initial contact has been made|
+|`qualified`|Lead has been vetted and is a good fit|
+|`in-progress`|Actively in discussions/negotiations|
+|`converted`|Lead became a client with a project|
+|`lost`|Lead declined or went elsewhere|
+|`on-hold`|Temporarily paused|
+|`cancelled`|Lead withdrawn by either party|
 
-**Typical Flow:**
+### Typical Flow:
 
 ```text
 new → contacted → qualified → in-progress → converted
@@ -38,7 +38,7 @@ new → contacted → qualified → in-progress → converted
 
 Automatic lead scoring based on configurable rules:
 
-**Rule Operators:**
+#### Rule Operators:
 
 - `equals` - Exact match
 - `contains` - Partial match
@@ -47,37 +47,37 @@ Automatic lead scoring based on configurable rules:
 - `in` - Match any in comma-separated list
 - `not_empty` - Field has value
 
-**Default Scoring Rules:**
+#### Default Scoring Rules:
 
-| Rule | Field | Points |
+|Rule|Field|Points|
 |------|-------|--------|
-| High Budget | budget_range in $10k+,$25k+ | +25 |
-| Medium Budget | budget_range in $5k-$10k | +15 |
-| Low Budget | budget_range in Under $2k,$2k-$5k | +5 |
-| E-commerce | project_type = e-commerce | +20 |
-| Custom App | project_type = custom | +25 |
-| Business Website | project_type = business | +10 |
-| Urgent Timeline | timeline in asap,1-2_weeks | +15 |
-| Has Description | description not empty | +10 |
-| Returning Client | client_type = returning | +20 |
+|High Budget|budget_range in $10k+,$25k+|+25|
+|Medium Budget|budget_range in $5k-$10k|+15|
+|Low Budget|budget_range in Under $2k,$2k-$5k|+5|
+|E-commerce|project_type = e-commerce|+20|
+|Custom App|project_type = custom|+25|
+|Business Website|project_type = business|+10|
+|Urgent Timeline|timeline in asap,1-2_weeks|+15|
+|Has Description|description not empty|+10|
+|Returning Client|client_type = returning|+20|
 
 ### 2. Pipeline Management
 
 Visual pipeline with drag-and-drop stages:
 
-**Default Stages:**
+#### Default Stages:
 
-| Stage | Win Probability | Color |
+|Stage|Win Probability|Color|
 |-------|----------------|-------|
-| New Lead | 10% | Gray |
-| Contacted | 20% | Blue |
-| Qualified | 40% | Purple |
-| Proposal Sent | 60% | Orange |
-| Negotiation | 80% | Red |
-| Won | 100% | Green |
-| Lost | 0% | Red |
+|New Lead|10%|Gray|
+|Contacted|20%|Blue|
+|Qualified|40%|Purple|
+|Proposal Sent|60%|Orange|
+|Negotiation|80%|Red|
+|Won|100%|Green|
+|Lost|0%|Red|
 
-**Features:**
+#### Features:
 
 - Kanban board view with leads per stage
 - Total pipeline value and weighted value
@@ -89,7 +89,7 @@ Visual pipeline with drag-and-drop stages:
 
 Follow-up tasks and reminders for each lead:
 
-**Task Types:**
+#### Task Types:
 
 - `follow_up` - General follow-up
 - `call` - Phone call
@@ -99,7 +99,7 @@ Follow-up tasks and reminders for each lead:
 - `demo` - Product demo
 - `other` - Other task
 
-**Task Features:**
+#### Task Features:
 
 - Due date and time
 - Priority (low, medium, high, urgent)
@@ -122,7 +122,7 @@ Rich notes system for each lead:
 
 Track where leads come from:
 
-**Default Sources:**
+#### Default Sources:
 
 - Website
 - Referral
@@ -142,7 +142,7 @@ Automatic duplicate detection based on:
 - Company name similarity (30% weight)
 - Contact name similarity (20% weight)
 
-**Features:**
+#### Features:
 
 - Similarity score calculation
 - Match field identification
@@ -278,77 +278,77 @@ ALTER TABLE projects ADD COLUMN next_follow_up_at DATETIME;
 
 ### Lead Scoring
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/admin/leads/scoring-rules` | Get all scoring rules |
-| POST | `/api/admin/leads/scoring-rules` | Create scoring rule |
-| PUT | `/api/admin/leads/scoring-rules/:id` | Update scoring rule |
-| DELETE | `/api/admin/leads/scoring-rules/:id` | Delete scoring rule |
-| POST | `/api/admin/leads/:id/calculate-score` | Calculate score for lead |
-| POST | `/api/admin/leads/recalculate-all` | Recalculate all scores |
+|GET|`/api/admin/leads/scoring-rules`|Get all scoring rules|
+|POST|`/api/admin/leads/scoring-rules`|Create scoring rule|
+|PUT|`/api/admin/leads/scoring-rules/:id`|Update scoring rule|
+|DELETE|`/api/admin/leads/scoring-rules/:id`|Delete scoring rule|
+|POST|`/api/admin/leads/:id/calculate-score`|Calculate score for lead|
+|POST|`/api/admin/leads/recalculate-all`|Recalculate all scores|
 
 ### Pipeline
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/admin/leads/pipeline/stages` | Get pipeline stages |
-| GET | `/api/admin/leads/pipeline` | Get pipeline view (kanban) |
-| GET | `/api/admin/leads/pipeline/stats` | Get pipeline statistics |
-| POST | `/api/admin/leads/:id/move-stage` | Move lead to stage |
+|GET|`/api/admin/leads/pipeline/stages`|Get pipeline stages|
+|GET|`/api/admin/leads/pipeline`|Get pipeline view (kanban)|
+|GET|`/api/admin/leads/pipeline/stats`|Get pipeline statistics|
+|POST|`/api/admin/leads/:id/move-stage`|Move lead to stage|
 
 ### Tasks
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/admin/leads/:id/tasks` | Get tasks for lead |
-| POST | `/api/admin/leads/:id/tasks` | Create task |
-| PUT | `/api/admin/leads/tasks/:taskId` | Update task |
-| POST | `/api/admin/leads/tasks/:taskId/complete` | Complete task |
-| GET | `/api/admin/leads/tasks/overdue` | Get overdue tasks |
-| GET | `/api/admin/leads/tasks/upcoming` | Get upcoming tasks |
+|GET|`/api/admin/leads/:id/tasks`|Get tasks for lead|
+|POST|`/api/admin/leads/:id/tasks`|Create task|
+|PUT|`/api/admin/leads/tasks/:taskId`|Update task|
+|POST|`/api/admin/leads/tasks/:taskId/complete`|Complete task|
+|GET|`/api/admin/leads/tasks/overdue`|Get overdue tasks|
+|GET|`/api/admin/leads/tasks/upcoming`|Get upcoming tasks|
 
 ### Notes
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/admin/leads/:id/notes` | Get notes for lead |
-| POST | `/api/admin/leads/:id/notes` | Add note |
-| POST | `/api/admin/leads/notes/:noteId/toggle-pin` | Pin/unpin note |
-| DELETE | `/api/admin/leads/notes/:noteId` | Delete note |
+|GET|`/api/admin/leads/:id/notes`|Get notes for lead|
+|POST|`/api/admin/leads/:id/notes`|Add note|
+|POST|`/api/admin/leads/notes/:noteId/toggle-pin`|Pin/unpin note|
+|DELETE|`/api/admin/leads/notes/:noteId`|Delete note|
 
 ### Sources & Assignment
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/admin/leads/sources` | Get lead sources |
-| POST | `/api/admin/leads/:id/source` | Set lead source |
-| POST | `/api/admin/leads/:id/assign` | Assign lead |
-| GET | `/api/admin/leads/my-leads` | Get my assigned leads |
-| GET | `/api/admin/leads/unassigned` | Get unassigned leads |
+|GET|`/api/admin/leads/sources`|Get lead sources|
+|POST|`/api/admin/leads/:id/source`|Set lead source|
+|POST|`/api/admin/leads/:id/assign`|Assign lead|
+|GET|`/api/admin/leads/my-leads`|Get my assigned leads|
+|GET|`/api/admin/leads/unassigned`|Get unassigned leads|
 
 ### Duplicates
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/admin/leads/:id/duplicates` | Find duplicates for lead |
-| GET | `/api/admin/leads/duplicates` | Get all pending duplicates |
-| POST | `/api/admin/leads/duplicates/:id/resolve` | Resolve duplicate |
+|GET|`/api/admin/leads/:id/duplicates`|Find duplicates for lead|
+|GET|`/api/admin/leads/duplicates`|Get all pending duplicates|
+|POST|`/api/admin/leads/duplicates/:id/resolve`|Resolve duplicate|
 
 ### Bulk Operations
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| POST | `/api/admin/leads/bulk/status` | Bulk update status |
-| POST | `/api/admin/leads/bulk/assign` | Bulk assign |
-| POST | `/api/admin/leads/bulk/move-stage` | Bulk move to stage |
+|POST|`/api/admin/leads/bulk/status`|Bulk update status|
+|POST|`/api/admin/leads/bulk/assign`|Bulk assign|
+|POST|`/api/admin/leads/bulk/move-stage`|Bulk move to stage|
 
 ### Analytics
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/admin/leads/analytics` | Get lead analytics |
-| GET | `/api/admin/leads/conversion-funnel` | Get conversion funnel |
-| GET | `/api/admin/leads/source-performance` | Get source performance |
+|GET|`/api/admin/leads/analytics`|Get lead analytics|
+|GET|`/api/admin/leads/conversion-funnel`|Get conversion funnel|
+|GET|`/api/admin/leads/source-performance`|Get source performance|
 
 ## Service Methods
 
@@ -497,7 +497,7 @@ Three-tab interface:
 - Enable/disable rules
 - Delete rules
 
-### Files
+### Related Files
 
 - `src/features/admin/modules/admin-leads.ts` - Lead management module
 - `src/styles/admin/leads-pipeline.css` - Lead pipeline and analytics styles

@@ -6,57 +6,57 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 
 ### Client Portal Features
 
-| Document | Description |
+|Document|Description|
 |----------|-------------|
-| **[Client Portal](./features/CLIENT_PORTAL.md)** | Main dashboard, project cards, quick stats, activity log |
-| **[Messages](./features/MESSAGES.md)** | Messaging system, emoji picker, keyboard shortcuts |
-| **[Files](./features/FILES.md)** | File upload, drag & drop, file management |
-| **[Invoices](./features/INVOICES.md)** | Invoice history, status tracking, PDF download |
-| **[Settings](./features/SETTINGS.md)** | Account, notifications, billing information |
-| **[New Project](./features/NEW_PROJECT.md)** | Project request form, validation |
-| **[Terminal Intake](./features/TERMINAL_INTAKE.md)** | Terminal-style project intake form with conversational UI |
+|**[Client Portal](./features/CLIENT_PORTAL.md)**|Main dashboard, project cards, quick stats, activity log|
+|**[Messages](./features/MESSAGES.md)**|Messaging system, emoji picker, keyboard shortcuts|
+|**[Files](./features/FILES.md)**|File upload, drag & drop, file management|
+|**[Invoices](./features/INVOICES.md)**|Invoice history, status tracking, PDF download|
+|**[Settings](./features/SETTINGS.md)**|Account, notifications, billing information|
+|**[New Project](./features/NEW_PROJECT.md)**|Project request form, validation|
+|**[Terminal Intake](./features/TERMINAL_INTAKE.md)**|Terminal-style project intake form with conversational UI|
 
 ### Admin Dashboard
 
-| Document | Description |
+|Document|Description|
 |----------|-------------|
-| **[Admin Dashboard](./features/ADMIN_DASHBOARD.md)** | Leads, projects, clients, messaging, analytics |
+|**[Admin Dashboard](./features/ADMIN_DASHBOARD.md)**|Leads, projects, clients, messaging, analytics|
 
 ### Backend Features (Phase 1-7)
 
-| Document | Description |
+|Document|Description|
 |----------|-------------|
-| **[Analytics](./features/ANALYTICS.md)** | Business intelligence, dashboards, KPIs, visitor tracking |
-| **[Clients](./features/CLIENTS.md)** | CRM contacts, activities, custom fields, tags, health scoring |
-| **[Leads](./features/LEADS.md)** | Lead scoring, pipeline, tasks, notes, duplicate detection |
-| **[Messaging](./features/MESSAGING.md)** | Mentions, reactions, subscriptions, read receipts, pinned messages |
-| **[Projects](./features/PROJECTS.md)** | Tasks, time tracking, templates, dependencies, project health |
-| **[Proposals](./features/PROPOSALS.md)** | Templates, versioning, signatures, comments, activities |
-| **[PDF Generation](./features/PDF_GENERATION.md)** | Invoice and proposal PDF generation with pdf-lib |
-| **[SEO](./features/SEO.md)** | Meta tags, JSON-LD structured data, robots.txt, sitemap |
+|**[Analytics](./features/ANALYTICS.md)**|Business intelligence, dashboards, KPIs, visitor tracking|
+|**[Clients](./features/CLIENTS.md)**|CRM contacts, activities, custom fields, tags, health scoring|
+|**[Leads](./features/LEADS.md)**|Lead scoring, pipeline, tasks, notes, duplicate detection|
+|**[Messaging](./features/MESSAGING.md)**|Mentions, reactions, subscriptions, read receipts, pinned messages|
+|**[Projects](./features/PROJECTS.md)**|Tasks, time tracking, templates, dependencies, project health|
+|**[Proposals](./features/PROPOSALS.md)**|Templates, versioning, signatures, comments, activities|
+|**[PDF Generation](./features/PDF_GENERATION.md)**|Invoice and proposal PDF generation with pdf-lib|
+|**[SEO](./features/SEO.md)**|Meta tags, JSON-LD structured data, robots.txt, sitemap|
 
 **API-only features** (full reference in [API Documentation](./API_DOCUMENTATION.md)):
 
-| API Prefix | Description |
+|API Prefix|Description|
 |------------|-------------|
-| `/api/approvals` | Approval workflows (definitions, instances, approve/reject) |
-| `/api/triggers` | Workflow triggers (event/action, logs, test-emit) |
-| `/api/document-requests` | Document requests and templates (client + admin) |
-| `/api/kb` | Knowledge base (categories, articles, search, feedback) |
+|`/api/approvals`|Approval workflows (definitions, instances, approve/reject)|
+|`/api/triggers`|Workflow triggers (event/action, logs, test-emit)|
+|`/api/document-requests`|Document requests and templates (client + admin)|
+|`/api/kb`|Knowledge base (categories, articles, search, feedback)|
 
 ### Animation Modules
 
-| Document | Description |
+|Document|Description|
 |----------|-------------|
-| **[Intro Animation](./features/INTRO_ANIMATION.md)** | Coyote paw intro animation (desktop/mobile) |
+|**[Intro Animation](./features/INTRO_ANIMATION.md)**|Coyote paw intro animation (desktop/mobile)|
 
 ### Design System
 
-| Document | Description |
+|Document|Description|
 |----------|-------------|
-| **[CSS Architecture](./design/CSS_ARCHITECTURE.md)** | Variables, themes, naming conventions |
-| **[UX Guidelines](./design/UX_GUIDELINES.md)** | Typography, icons, buttons, forms |
-| **[Animations](./design/ANIMATIONS.md)** | GSAP usage, animation tokens, performance |
+|**[CSS Architecture](./design/CSS_ARCHITECTURE.md)**|Variables, themes, naming conventions|
+|**[UX Guidelines](./design/UX_GUIDELINES.md)**|Typography, icons, buttons, forms|
+|**[Animations](./design/ANIMATIONS.md)**|GSAP usage, animation tokens, performance|
 
 ### Architecture & Development
 
@@ -65,16 +65,14 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 - **[Developer Guide](./DEVELOPER_GUIDE.md)** - Development practices, module patterns, service layer, and component system
 - **[Configuration Guide](./CONFIGURATION.md)** - Environment variables, frontend config files, TypeScript and Vite configuration
 - **[Performance & Bundle Optimization](./OPTIMIZATION.md)** - Bundle optimization strategies, performance monitoring, Core Web Vitals tracking, and development best practices
-- **[Visitor Tracking System](./VISITOR-TRACKING.md)** - Privacy-compliant analytics, consent management, and engagement metrics
+ - **[Visitor Tracking System](./features/VISITOR-TRACKING.md)** - Privacy-compliant analytics, consent management, and engagement metrics
 - **[API Documentation](./API_DOCUMENTATION.md)** - Complete API reference with request/response examples
 - **[Code Protection Guide](./code-protection-guide.md)** - Code obfuscation, source map protection, and security practices
 
 ### Development & Maintenance
 
 - **[Current Work](./current_work.md)** - Active development tracking and TODO list
-- **[Codebase Review](./CODEBASE_REVIEW.md)** - Code review findings, dead code cleanup, and improvements
 - **[Test Coverage](./COVERAGE.md)** - Automated testing coverage guide and requirements
-- **[Documentation Analysis](./DOCUMENTATION_ANALYSIS.md)** - Documentation review and organization analysis
 
 ### Archive
 
@@ -85,7 +83,7 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 ### Quick Links
 
 - [Getting Started](#getting-started)
-- [Project Structure](#project-structure) 
+- [Project Structure](#project-structure)
 - [Development Commands](#development-commands)
 - [Architecture Overview](#architecture-overview)
 - [Component System](#component-system)
@@ -134,7 +132,7 @@ npm run optimize         # Full optimization pipeline
 
 ## Project Structure
 
-```
+```text
 src/
 ├── core/                    # Core application systems
 │   ├── app.ts              # Main application controller
@@ -210,7 +208,7 @@ class MyComponent extends BaseComponent<Props, State> {
 
 ### Navigation System
 
-**Current Navigation Structure (Updated January 2026):**
+#### Current Navigation Structure (Updated January 2026):
 
 - **Home** (00) - Main landing page with business card
 - **About** (01) - About section with hero animation
@@ -225,7 +223,7 @@ class MyComponent extends BaseComponent<Props, State> {
 - File management
 - Invoices
 
-**Navigation Features:**
+#### Navigation Features:
 
 - Hash-based routing (`#/`, `#/about`, `#/contact`, `#/projects`)
 - Virtual page transitions with blur-in/blur-out animations
@@ -258,6 +256,7 @@ const button = await createButton({
 ### Core Web Vitals Monitoring
 
 Real-time tracking of:
+
 - **LCP (Largest Contentful Paint)**: < 2.5s target
 - **FID (First Input Delay)**: < 100ms target
 - **CLS (Cumulative Layout Shift)**: < 0.1 target

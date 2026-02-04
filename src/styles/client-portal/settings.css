@@ -108,7 +108,7 @@
 
 .settings-form label {
   font-weight: 600;
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-light);
   font-size: 0.95rem;
 }
 
@@ -186,7 +186,7 @@
 
 .form-group label {
   font-weight: 600;
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-light);
   font-size: 0.9rem;
 }
 

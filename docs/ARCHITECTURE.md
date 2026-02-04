@@ -1,6 +1,6 @@
 # 🏗️ NO BHAD CODES - ARCHITECTURE GUIDE
 
-**Enterprise-Level Client Management System with Portfolio**
+Enterprise-Level Client Management System with Portfolio
 
 ---
 
@@ -41,7 +41,7 @@
 
 ## 📁 PROJECT STRUCTURE
 
-```
+```text
 no-bhad-codes/
 ├── 📄 HTML PAGES (Feature-Based)
 │   ├── index.html                    # Main portfolio landing
@@ -184,7 +184,7 @@ no-bhad-codes/
 
 ### 1. Application Bootstrap (`src/main.ts`)
 
-**Single entry point for the entire application**
+#### Single entry point for the entire application
 
 ```typescript
 // All HTML pages load this single file
@@ -196,7 +196,7 @@ import { app } from './core/app';
 
 ### 2. Dependency Injection Container (`src/core/container.ts`)
 
-**Enterprise-level service management**
+#### Enterprise-level service management
 
 ```typescript
 // Singleton pattern for service instances
@@ -213,7 +213,7 @@ container.register('ContactService', contactServiceFactory, {
 
 ### 3. Module System (`src/modules/`)
 
-**Page-aware, lifecycle-managed UI modules**
+#### Page-aware, lifecycle-managed UI modules
 
 ```typescript
 export class MyModule extends BaseModule {
@@ -231,9 +231,10 @@ export class MyModule extends BaseModule {
 
 ### 📄 Adding a New Page
 
-**Example: Adding an Invoicing System**
+#### Example: Adding an Invoicing System
 
 #### Step 1: Create HTML File
+
 ```bash
 # Create feature directory
 mkdir invoicing
@@ -260,6 +261,7 @@ touch invoicing/index.html
 ```
 
 #### Step 2: Update Vite Config
+
 ```javascript
 // vite.config.js
 export default defineConfig({
@@ -276,6 +278,7 @@ export default defineConfig({
 ```
 
 #### Step 3: Create Feature Module
+
 ```bash
 # Create feature directory
 mkdir src/features/invoicing
@@ -310,6 +313,7 @@ export class InvoicingModule extends BaseModule {
 ```
 
 #### Step 4: Register Module in Core App
+
 ```typescript
 // src/core/app.ts - Add to setupModules()
 {
@@ -327,6 +331,7 @@ export class InvoicingModule extends BaseModule {
 ```
 
 #### Step 5: Create Types
+
 ```typescript
 // src/types/invoice.ts
 export interface Invoice {
@@ -347,6 +352,7 @@ export interface InvoiceItem {
 ```
 
 #### Step 6: Create Services (if needed)
+
 ```typescript
 // src/services/invoice-service.ts
 export class InvoiceService extends BaseService {
@@ -361,6 +367,7 @@ export class InvoiceService extends BaseService {
 ```
 
 #### Step 7: Add Styles
+
 ```css
 /* src/styles/invoicing.css */
 .invoice-container {
@@ -374,7 +381,7 @@ export class InvoiceService extends BaseService {
 
 ### Creating a New Module
 
-**Modules are self-contained UI components with lifecycle management**
+#### Modules are self-contained UI components with lifecycle management
 
 ```typescript
 // src/modules/my-new-module.ts
@@ -504,7 +511,7 @@ export class MyNewModule extends BaseModule {
 
 ### Creating a New Service
 
-**Services handle business logic and data operations**
+#### Services handle business logic and data operations
 
 ```typescript
 // src/services/notification-service.ts
@@ -757,7 +764,7 @@ export class AdminUsersModule extends BaseModule {
 
 ### CSS Organization
 
-**Modular Architecture (Updated February 2026)**
+#### Modular Architecture (Updated February 2026)
 
 ```text
 src/styles/
@@ -807,7 +814,8 @@ src/styles/
         └── z-index.css         # 305 lines - Stacking context
 ```
 
-**Key Improvements:**
+#### Key Improvements:
+
 - **Font Loading**: `fonts.css` imported first for proper font availability
 - **Navigation Split**: `navigation.css` split into 4 focused files
 - **Form Split**: Forms split into fields, buttons, validation
@@ -818,6 +826,7 @@ src/styles/
 ### Adding New Styles
 
 #### 1. Design Token Pattern
+
 ```css
 /* src/design-system/tokens/colors.css */
 :root {
@@ -847,6 +856,7 @@ src/styles/
 ```
 
 #### 2. Feature-Specific Styles
+
 ```css
 /* src/styles/invoicing.css */
 @import '../design-system/index.css';
@@ -889,6 +899,7 @@ src/styles/
 ```
 
 #### 3. Component Styles
+
 ```css
 /* src/components/data-table.css */
 .data-table {
@@ -1353,6 +1364,7 @@ VITE_ADMIN_PASSWORD_HASH=<sha256-hash-of-admin-password>
 ## 📚 RESOURCES
 
 ### Key Files to Understand
+
 - `src/main.ts` - Application entry point
 - `src/core/app.ts` - Application controller
 - `src/core/container.ts` - Dependency injection
@@ -1360,6 +1372,7 @@ VITE_ADMIN_PASSWORD_HASH=<sha256-hash-of-admin-password>
 - `vite.config.js` - Build configuration
 
 ### Useful Commands
+
 ```bash
 # Development
 npm run dev                 # Start dev server
@@ -1380,35 +1393,35 @@ npm run audit              # Security audit
 
 ## 🔍 CODEBASE HEALTH
 
-**Last Code Review: February 2, 2026**
+#### Last Code Review: February 2, 2026
 
 ### Critical Issues
 
-| File | Issue | Status |
+|File|Issue|Status|
 |------|-------|--------|
-| `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | FIXED |
-| Dead code cleanup | app.ts.backup, unused entry points | FIXED (Jan 15, 2026) |
-| Console logging | ~80+ console.log statements in production code | FIXED (Jan 15, 2026 - refactored to debug logger) |
-| `src/modules/animation/intro-animation.ts` | 400+ lines, hardcoded SVG paths | FIXED (refactored Dec 19, SVG paths in config) |
-| `src/services/code-protection-service.ts` | Event listener cleanup issues | FIXED |
-| `src/features/admin/admin-security.ts` | localStorage for auth data | FIXED (all modules migrated to HttpOnly cookies) |
-| Animation CSS conflicts | CSS transitions conflicting with GSAP | FIXED (Dec 22) |
-| Font loading issues | Acme font not displaying | FIXED (Dec 22, fonts.css imported first) |
+|`src/modules/navigation.ts`|15+ console.log calls, untracked event listeners|FIXED|
+|Dead code cleanup|app.ts.backup, unused entry points|FIXED (Jan 15, 2026)|
+|Console logging|~80+ console.log statements in production code|FIXED (Jan 15, 2026 - refactored to debug logger)|
+|`src/modules/animation/intro-animation.ts`|400+ lines, hardcoded SVG paths|FIXED (refactored Dec 19, SVG paths in config)|
+|`src/services/code-protection-service.ts`|Event listener cleanup issues|FIXED|
+|`src/features/admin/admin-security.ts`|localStorage for auth data|FIXED (all modules migrated to HttpOnly cookies)|
+|Animation CSS conflicts|CSS transitions conflicting with GSAP|FIXED (Dec 22)|
+|Font loading issues|Acme font not displaying|FIXED (Dec 22, fonts.css imported first)|
 
 ### Files Exceeding Size Guidelines (300 lines)
 
-| File | Lines | Status |
+|File|Lines|Status|
 |------|-------|--------|
-| `src/core/app.ts` | 452 | FIXED - Split Dec 19 (was 992 lines, now 4 files) |
-| `src/core/state/` | 4 files | FIXED - Split Dec 19 (was 824 lines in state.ts) |
-| `src/services/visitor-tracking.ts` | 730 | Pending - Split by tracking concern |
-| `src/features/admin/admin-dashboard.ts` | ~200 | FIXED - Split Jan 20, 2026 (was 1886 lines) |
-| `src/features/admin/modules/` | 14 files | FIXED - Extracted from admin-dashboard.ts |
-| `src/styles/components/nav-*.css` | 4 files | FIXED - Split Dec 19 (was 1792 lines) |
-| `src/styles/client-portal/` | 10 files | FIXED - Split into modular directory |
-| `src/modules/animation/intro-animation.ts` | 1569 | Large but organized |
+|`src/core/app.ts`|452|FIXED - Split Dec 19 (was 992 lines, now 4 files)|
+|`src/core/state/`|4 files|FIXED - Split Dec 19 (was 824 lines in state.ts)|
+|`src/services/visitor-tracking.ts`|730|Pending - Split by tracking concern|
+|`src/features/admin/admin-dashboard.ts`|~200|FIXED - Split Jan 20, 2026 (was 1886 lines)|
+|`src/features/admin/modules/`|14 files|FIXED - Extracted from admin-dashboard.ts|
+|`src/styles/components/nav-*.css`|4 files|FIXED - Split Dec 19 (was 1792 lines)|
+|`src/styles/client-portal/`|10 files|FIXED - Split into modular directory|
+|`src/modules/animation/intro-animation.ts`|1569|Large but organized|
 
-**December 22, 2025 Animation Improvements:**
+#### December 22, 2025 Animation Improvements:
 
 - Removed CSS transitions conflicting with GSAP animations
 - Fixed intro nav links to use GSAP fade instead of CSS keyframes
@@ -1416,13 +1429,13 @@ npm run audit              # Security audit
 - Added coyote paw entry animation for home page navigation
 - Created `fonts.css` for proper font loading order
 
-**December 19, 2025 Refactoring Summary:**
+#### December 19, 2025 Refactoring Summary:
 
 - `app.ts` (992 lines) → `app.ts` (452), `services-config.ts` (125), `modules-config.ts` (326), `debug.ts` (155)
 - `state.ts` (824 lines) → `state/types.ts` (67), `state/state-manager.ts` (491), `state/app-state.ts` (172), `state/index.ts` (22)
 - `navigation.css` (1792 lines) → `nav-base.css`, `nav-animations.css`, `nav-responsive.css`, `nav-portal.css`
 
-**January 20, 2026 Refactoring Summary:**
+#### January 20, 2026 Refactoring Summary:
 
 Major refactoring completed for admin dashboard and shared infrastructure:
 
@@ -1453,7 +1466,7 @@ The server code (`/server/`) is **production-ready** with excellent architecture
 
 The system uses **HttpOnly cookies** for secure JWT token storage:
 
-```
+```text
 ┌─────────────┐     POST /api/auth/login      ┌─────────────┐
 │   Client    │ ──────────────────────────────▶│   Server    │
 │   Browser   │                                │             │
@@ -1468,23 +1481,23 @@ The system uses **HttpOnly cookies** for secure JWT token storage:
 └─────────────┘                               └─────────────┘
 ```
 
-**Key Files:**
+#### Key Files:
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `server/utils/auth-constants.ts` | Cookie configuration (COOKIE_CONFIG) |
-| `server/middleware/auth.ts` | Token verification from cookie or header |
-| `server/routes/auth.ts` | Login/logout endpoints set/clear cookies |
-| `src/services/auth-service.ts` | Client-side auth state (no token access) |
+|`server/utils/auth-constants.ts`|Cookie configuration (COOKIE_CONFIG)|
+|`server/middleware/auth.ts`|Token verification from cookie or header|
+|`server/routes/auth.ts`|Login/logout endpoints set/clear cookies|
+|`src/services/auth-service.ts`|Client-side auth state (no token access)|
 
-**Security Features:**
+#### Security Features:
 
 - `httpOnly: true` - JavaScript cannot access the token
 - `secure: true` (production) - Only sent over HTTPS
 - `sameSite: 'strict'` - CSRF protection
 - Shorter expiry for admin tokens (1 hour vs 7 days)
 
-**Remaining Work:**
+#### Remaining Work:
 
 - Admin dashboard modules still use Authorization headers (lower priority)
 
@@ -1505,4 +1518,4 @@ Token system is excellent and now consistently used:
 
 ---
 
-**This architecture supports enterprise-level client management while maintaining developer productivity and code quality. Each pattern and practice has been battle-tested in production environments.**
+This architecture supports enterprise-level client management while maintaining developer productivity and code quality. Each pattern and practice has been battle-tested in production environments.

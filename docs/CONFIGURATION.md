@@ -18,13 +18,14 @@ Copy `.env.example` to `.env` (or create `.env` from the variables below if no t
 
 ### Server Configuration
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `NODE_ENV` | Yes | `development` | Environment mode (`development`, `staging`, `production`, `test`) |
-| `PORT` | Yes | `4001` | Backend API server port |
-| `FRONTEND_URL` | Yes | `http://localhost:4000` | Frontend Vite dev server URL |
+|`NODE_ENV`|Yes|`development`|Environment mode (`development`, `staging`, `production`, `test`)|
+|`PORT`|Yes|`4001`|Backend API server port|
+|`FRONTEND_URL`|Yes|`http://localhost:4000`|Frontend Vite dev server URL|
 
-**Environments:**
+#### Environments:
+
 - `development` — Local dev, verbose logging, relaxed security
 - `staging` — Pre-production testing; use production-like config with test data
 - `production` — Live environment; ensure `ADMIN_PASSWORD_HASH`, strong `JWT_SECRET`, `EMAIL_ENABLED=true`
@@ -32,81 +33,81 @@ Copy `.env.example` to `.env` (or create `.env` from the variables below if no t
 
 ### Database Configuration
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `DATABASE_PATH` | No | `./data/client_portal.db` | SQLite database file path |
+|`DATABASE_PATH`|No|`./data/client_portal.db`|SQLite database file path|
 
 ### Authentication
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `JWT_SECRET` | Yes | - | Secret key for JWT signing (min 32 characters) |
-| `JWT_EXPIRES_IN` | No | `7d` | JWT token expiration time |
-| `ADMIN_EMAIL` | Yes | - | Admin account email address |
-| `ADMIN_PASSWORD` | Yes | - | Admin account password (development only) |
-| `ADMIN_PASSWORD_HASH` | No | - | Bcrypt hashed password (production) |
+|`JWT_SECRET`|Yes|-|Secret key for JWT signing (min 32 characters)|
+|`JWT_EXPIRES_IN`|No|`7d`|JWT token expiration time|
+|`ADMIN_EMAIL`|Yes|-|Admin account email address|
+|`ADMIN_PASSWORD`|Yes|-|Admin account password (development only)|
+|`ADMIN_PASSWORD_HASH`|No|-|Bcrypt hashed password (production)|
 
 ### Business Information (Invoices)
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `BUSINESS_NAME` | No | - | Business name displayed on invoices |
-| `BUSINESS_CONTACT` | No | - | Business contact name displayed on invoices |
-| `BUSINESS_EMAIL` | No | - | Business email displayed on invoices |
-| `BUSINESS_WEBSITE` | No | - | Business website URL displayed on invoices |
-| `VENMO_HANDLE` | No | - | Venmo payment handle displayed on invoices |
-| `PAYPAL_EMAIL` | No | - | PayPal payment email displayed on invoices |
+|`BUSINESS_NAME`|No|-|Business name displayed on invoices|
+|`BUSINESS_CONTACT`|No|-|Business contact name displayed on invoices|
+|`BUSINESS_EMAIL`|No|-|Business email displayed on invoices|
+|`BUSINESS_WEBSITE`|No|-|Business website URL displayed on invoices|
+|`VENMO_HANDLE`|No|-|Venmo payment handle displayed on invoices|
+|`PAYPAL_EMAIL`|No|-|PayPal payment email displayed on invoices|
 
 ### Client Portal URLs
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `CLIENT_PORTAL_URL` | No | `http://localhost:4000/client/portal` | Client portal URL |
-| `WEBSITE_URL` | No | `http://localhost:4000` | Main website URL |
+|`CLIENT_PORTAL_URL`|No|`http://localhost:4000/client/portal`|Client portal URL|
+|`WEBSITE_URL`|No|`http://localhost:4000`|Main website URL|
 
 ### Email Configuration
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `EMAIL_ENABLED` | No | `false` | Enable/disable email sending |
-| `SMTP_HOST` | No | `smtp.gmail.com` | SMTP server hostname |
-| `SMTP_PORT` | No | `587` | SMTP server port |
-| `SMTP_SECURE` | No | `false` | Use TLS for SMTP |
-| `SMTP_USER` | No | - | SMTP authentication username |
-| `SMTP_PASS` | No | - | SMTP authentication password/app password |
-| `SMTP_FROM` | No | - | Default "From" email address (used by app when sending email) |
-| `SMTP_REPLY_TO` | No | - | Reply-to email address |
-| `SUPPORT_EMAIL` | No | - | Support email recipient |
-| `FROM_EMAIL` | No | - | Used by server config validation when `EMAIL_ENABLED=true`; set this or ensure SMTP_FROM is set for sending |
+|`EMAIL_ENABLED`|No|`false`|Enable/disable email sending|
+|`SMTP_HOST`|No|`smtp.gmail.com`|SMTP server hostname|
+|`SMTP_PORT`|No|`587`|SMTP server port|
+|`SMTP_SECURE`|No|`false`|Use TLS for SMTP|
+|`SMTP_USER`|No|-|SMTP authentication username|
+|`SMTP_PASS`|No|-|SMTP authentication password/app password|
+|`SMTP_FROM`|No|-|Default "From" email address (used by app when sending email)|
+|`SMTP_REPLY_TO`|No|-|Reply-to email address|
+|`SUPPORT_EMAIL`|No|-|Support email recipient|
+|`FROM_EMAIL`|No|-|Used by server config validation when `EMAIL_ENABLED=true`; set this or ensure SMTP_FROM is set for sending|
 
 ### Frontend Configuration (Vite)
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `VITE_CONTACT_EMAIL` | No | `nobhaduri@gmail.com` | Contact/support email displayed in frontend |
-| `VITE_ADMIN_EMAIL` | No | `nobhaduri@gmail.com` | Admin email for frontend login validation |
+|`VITE_CONTACT_EMAIL`|No|`<<nobhaduri@gmail.com>>`|Contact/support email displayed in frontend|
+|`VITE_ADMIN_EMAIL`|No|`<<nobhaduri@gmail.com>>`|Admin email for frontend login validation|
 
 ### Third-Party Services
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `VITE_FORMSPREE_FORM_ID` | No | - | Formspree form ID for contact form |
-| `VITE_EMAILJS_SERVICE_ID` | No | - | EmailJS service ID |
-| `VITE_EMAILJS_TEMPLATE_ID` | No | - | EmailJS template ID |
-| `VITE_EMAILJS_PUBLIC_KEY` | No | - | EmailJS public key |
-| `SENTRY_DSN` | No | - | Sentry error tracking DSN |
-| `SENTRY_ENVIRONMENT` | No | `development` | Sentry environment name |
+|`VITE_FORMSPREE_FORM_ID`|No|-|Formspree form ID for contact form|
+|`VITE_EMAILJS_SERVICE_ID`|No|-|EmailJS service ID|
+|`VITE_EMAILJS_TEMPLATE_ID`|No|-|EmailJS template ID|
+|`VITE_EMAILJS_PUBLIC_KEY`|No|-|EmailJS public key|
+|`SENTRY_DSN`|No|-|Sentry error tracking DSN|
+|`SENTRY_ENVIRONMENT`|No|`development`|Sentry environment name|
 
 ### Redis Cache (Optional)
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `REDIS_ENABLED` | No | `false` | Enable/disable Redis caching. Set to `true` to enable. |
-| `REDIS_HOST` | No | `localhost` | Redis server hostname |
-| `REDIS_PORT` | No | `6379` | Redis server port |
-| `REDIS_PASSWORD` | No | - | Redis authentication password |
-| `REDIS_DB` | No | `0` | Redis database number |
-| `REDIS_KEY_PREFIX` | No | `nbc:` | Redis key prefix |
+|`REDIS_ENABLED`|No|`false`|Enable/disable Redis caching. Set to `true` to enable.|
+|`REDIS_HOST`|No|`localhost`|Redis server hostname|
+|`REDIS_PORT`|No|`6379`|Redis server port|
+|`REDIS_PASSWORD`|No|-|Redis authentication password|
+|`REDIS_DB`|No|`0`|Redis database number|
+|`REDIS_KEY_PREFIX`|No|`nbc:`|Redis key prefix|
 
 **Note:** The server validates environment variables in `server/config/environment.ts`; that file defines the full schema (including optional vars such as `DATABASE_BACKUP_PATH`, `RATE_LIMIT_*`, `ENABLE_PASSWORD_RESET`, `LOG_*`, `CORS_*`, etc.). This section covers the most commonly set variables.
 
@@ -118,24 +119,24 @@ Copy `.env.example` to `.env` (or create `.env` from the variables below if no t
 
 ### Database Backups
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `BACKUP_DIR` | No | `./data/backups` | Backup output directory |
-| `BACKUP_RETENTION_DAILY` | No | `7` | Number of daily backups to keep |
-| `BACKUP_RETENTION_WEEKLY` | No | `4` | Number of weekly backups to keep |
+|`BACKUP_DIR`|No|`./data/backups`|Backup output directory|
+|`BACKUP_RETENTION_DAILY`|No|`7`|Number of daily backups to keep|
+|`BACKUP_RETENTION_WEEKLY`|No|`4`|Number of weekly backups to keep|
 
 Run manually: `npm run db:backup`. For automated backups, add a cron job (e.g. daily at 2am): `0 2 * * * cd /path/to/project && npm run db:backup`.
 
 ### File Storage
 
-| Variable | Required | Default | Description |
+|Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-| `UPLOAD_DIR` | No | `./uploads` | Local file upload directory (used by server env schema) |
-| `UPLOADS_DIR` | No | (derived) | Override for uploads base path; used by `server/config/uploads.ts`. If unset, uses `./uploads` or `/app/data/uploads` on Railway when `DATABASE_PATH` starts with `/app/data`. |
-| `MAX_FILE_SIZE` | No | `10485760` | Maximum file size in bytes (10MB) |
-| `SUPABASE_URL` | No | - | Supabase project URL (production) |
-| `SUPABASE_ANON_KEY` | No | - | Supabase anonymous key |
-| `SUPABASE_SERVICE_KEY` | No | - | Supabase service role key |
+|`UPLOAD_DIR`|No|`./uploads`|Local file upload directory (used by server env schema)|
+|`UPLOADS_DIR`|No|(derived)|Override for uploads base path; used by `server/config/uploads.ts`. If unset, uses `./uploads` or `/app/data/uploads` on Railway when `DATABASE_PATH` starts with `/app/data`.|
+|`MAX_FILE_SIZE`|No|`10485760`|Maximum file size in bytes (10MB)|
+|`SUPABASE_URL`|No|-|Supabase project URL (production)|
+|`SUPABASE_ANON_KEY`|No|-|Supabase anonymous key|
+|`SUPABASE_SERVICE_KEY`|No|-|Supabase service role key|
 
 ---
 

@@ -1,15 +1,64 @@
-# Messaging System Enhancement
+# Messaging System
 
 **Status:** Complete
-**Last Updated:** February 1, 2026
+**Last Updated:** February 3, 2026
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Features Summary](#features-summary)
+3. [UI Implementation](#ui-implementation)
+4. [Backend Features](#backend-features)
+5. [TypeScript Implementation](#typescript-implementation)
+6. [API Endpoints](#api-endpoints)
+7. [Database Schema](#database-schema)
+8. [Admin Messaging](#admin-messaging)
+9. [File Locations](#file-locations)
+10. [Change Log](#change-log)
+
+---
 
 ## Overview
 
-The Messaging System provides professional-grade communication features including threads, mentions, reactions, read receipts, pinned messages, internal notes, and comprehensive search capabilities comparable to Slack, Microsoft Teams, and other industry leaders.
+The messaging system provides real-time communication between clients and developers within the Client Portal. It includes professional-grade features comparable to Slack and Microsoft Teams: threads, mentions, reactions, read receipts, pinned messages, internal notes, and comprehensive search.
 
-## Thread Status
+**Access:** Client Portal > Messages tab (`tab-messages`)
 
-Threads have the following status values:
+---
+
+## Features Summary
+
+### Client-Facing Features
+
+| Feature | Description |
+|---------|-------------|
+| Thread View | Chronological message display |
+| Emoji Picker | Native emoji keyboard via `emoji-picker-element` (desktop only) |
+| Enter to Send | Quick message sending with keyboard |
+| Shift+Enter | Insert newline without sending |
+| Sender Identification | Visual distinction between sent/received |
+| Timestamps | Date and time for each message |
+| Avatar Display | Profile images for sender identification |
+| Click-outside Close | Emoji picker closes when clicking outside |
+| Demo Mode Messaging | Users can send messages in demo mode (resets on refresh) |
+| Mobile Responsive | Optimized layout for mobile devices |
+
+### Backend Features
+
+| Feature | Description |
+|---------|-------------|
+| Message Mentions | @user, @team, @all notifications |
+| Message Reactions | Emoji reactions with counts |
+| Subscriptions | Per-project notification preferences |
+| Read Receipts | Track message read status per user |
+| Pinned Messages | Pin important messages within threads |
+| Message Editing | Edit message content with timestamp tracking |
+| Soft Delete | Delete messages while preserving records |
+| Internal Messages | Admin-only messages not visible to clients |
+| Thread Archiving | Archive completed threads |
+| Message Search | Full-text search across all messages |
+
+### Thread Status Values
 
 | Status | Description |
 |--------|-------------|
@@ -17,7 +66,242 @@ Threads have the following status values:
 | `closed` | Thread has been closed (no new messages) |
 | `archived` | Thread has been archived for historical reference |
 
-## Features
+---
+
+## UI Implementation
+
+### HTML Structure
+
+#### Complete Messages Tab
+
+```html
+<!-- templates/pages/client-portal.ejs:128-181 -->
+<div class="tab-content" id="tab-messages">
+    <div class="page-header">
+        <h2>Messages</h2>
+    </div>
+
+    <!-- Messages Thread -->
+    <div class="messages-container cp-shadow">
+        <div class="messages-thread" id="messages-thread">
+            <!-- Message items rendered here -->
+        </div>
+
+        <!-- Compose Message -->
+        <div class="message-compose">
+            <div class="message-input-wrapper">
+                <textarea id="message-input" class="form-textarea"
+                          placeholder="Type your message..."></textarea>
+                <button type="button" class="emoji-toggle-btn" id="emoji-toggle"
+                        aria-label="Open emoji picker">
+                    <!-- Smiley face SVG icon -->
+                </button>
+            </div>
+            <div class="emoji-picker-wrapper hidden" id="emoji-picker-wrapper">
+                <emoji-picker id="emoji-picker"></emoji-picker>
+            </div>
+            <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
+        </div>
+    </div>
+</div>
+```
+
+### Message Components
+
+#### Received Message Structure
+
+```html
+<div class="message message-received">
+    <div class="message-avatar">
+        <img src="/images/avatar.svg" alt="Noelle" class="avatar-img">
+    </div>
+    <div class="message-content">
+        <div class="message-header">
+            <span class="message-sender">Noelle</span>
+            <span class="message-time">Nov 30, 2025 at 10:30 AM</span>
+        </div>
+        <div class="message-body">
+            Welcome to your project portal!
+        </div>
+    </div>
+</div>
+```
+
+#### Sent Message Structure
+
+```html
+<div class="message message-sent">
+    <div class="message-content">
+        <div class="message-header">
+            <span class="message-sender">You</span>
+            <span class="message-time">Nov 30, 2025 at 11:15 AM</span>
+        </div>
+        <div class="message-body">
+            Thanks! Looking forward to seeing the initial designs.
+        </div>
+    </div>
+    <div class="message-avatar">
+        <div class="avatar-placeholder">YOU</div>
+    </div>
+</div>
+```
+
+### Emoji Picker
+
+**Package:** `emoji-picker-element` (vanilla JS/TS web component)
+
+```typescript
+// src/features/client/client-portal.ts:15
+import 'emoji-picker-element';
+```
+
+#### Event Handling
+
+```typescript
+const emojiPicker = document.querySelector('emoji-picker');
+if (emojiPicker && messageInput) {
+  emojiPicker.addEventListener('emoji-click', ((e: CustomEvent) => {
+    const emoji = e.detail?.unicode;
+    if (emoji) {
+      const start = messageInput.selectionStart;
+      const end = messageInput.selectionEnd;
+      const text = messageInput.value;
+      messageInput.value = text.substring(0, start) + emoji + text.substring(end);
+      messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
+      messageInput.focus();
+    }
+  }) as EventListener);
+}
+```
+
+#### CSS Theming
+
+```css
+.emoji-picker-wrapper emoji-picker {
+  width: 100%;
+  max-width: 400px;
+  --background: var(--color-neutral-100);
+  --border-color: #000000;
+  --indicator-color: var(--color-primary);
+  --input-border-color: var(--color-dark);
+  --button-active-background: var(--color-primary);
+  --button-hover-background: var(--color-neutral-200);
+}
+```
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Enter` | Send message |
+| `Shift + Enter` | New line in message |
+| `Tab` | Move focus from textarea to send button |
+
+### Mobile Responsiveness
+
+On mobile devices (< 768px):
+
+- Emoji picker hidden (difficult on touch)
+- Chat container takes most of screen height
+- Messages thread scrollable within container
+- Send button always visible
+- Message bubbles extend to edges
+- Avatar positioning optimized for touch
+
+```css
+@media (max-width: 768px) {
+  .emoji-picker-container {
+    display: none !important;
+  }
+
+  .messages-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 100px);
+  }
+
+  .messages-thread {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+  }
+}
+```
+
+### Styling
+
+#### Messages Container
+
+```css
+.messages-container {
+  background: var(--color-neutral-300);
+  border: 4px solid #000000;
+  padding: 1.5rem;
+}
+
+.messages-thread {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+}
+```
+
+#### Message Layout
+
+```css
+.message {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.message-received { flex-direction: row; }
+.message-sent { flex-direction: row-reverse; }
+
+.message-content {
+  max-width: 70%;
+  padding: 1rem;
+}
+
+.message-received .message-content {
+  background: var(--color-neutral-100);
+  border-radius: 0 12px 12px 12px;
+}
+
+.message-sent .message-content {
+  background: var(--color-primary);
+  color: var(--color-dark);
+  border-radius: 12px 0 12px 12px;
+}
+```
+
+#### Avatar Styles
+
+```css
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-neutral-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.75rem;
+}
+```
+
+---
+
+## Backend Features
 
 ### 1. Message Mentions
 
@@ -27,7 +311,7 @@ Track and notify users when mentioned in messages.
 
 | Type | Pattern | Description |
 |------|---------|-------------|
-| user | @email@domain.com | Mention specific user |
+| user | @<<email@domain.com>> | Mention specific user |
 | team | @team_name | Mention a team (future) |
 | all | @all | Mention all participants |
 
@@ -53,8 +337,6 @@ Emoji and text reactions on messages.
 ### 3. Message Subscriptions
 
 Per-project notification preferences.
-
-**Notification Options:**
 
 | Option | Description |
 |--------|-------------|
@@ -130,8 +412,6 @@ Archive completed or old threads.
 
 Search across all messages.
 
-**Search Options:**
-
 | Option | Description |
 |--------|-------------|
 | project_id | Limit to specific project |
@@ -139,105 +419,199 @@ Search across all messages.
 | limit | Max results (default 50) |
 | include_internal | Include internal messages (admin) |
 
-**Features:**
+---
 
-- Full-text search in message content
-- Thread subject in results
-- Sender information
-- Date filtering
+## TypeScript Implementation
 
-## Database Schema
+### API Base URL
 
-### New Tables
-
-```sql
--- Message mentions
-CREATE TABLE IF NOT EXISTS message_mentions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  message_id INTEGER NOT NULL,
-  mentioned_type TEXT NOT NULL,    -- 'user', 'team', 'all'
-  mentioned_id TEXT,               -- User email or team name
-  notified BOOLEAN DEFAULT FALSE,
-  notified_at DATETIME,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE
-);
-
--- Message reactions
-CREATE TABLE IF NOT EXISTS message_reactions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  message_id INTEGER NOT NULL,
-  user_email TEXT NOT NULL,
-  user_type TEXT NOT NULL,
-  reaction TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE,
-  UNIQUE(message_id, user_email, reaction)
-);
-
--- Message subscriptions
-CREATE TABLE IF NOT EXISTS message_subscriptions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  project_id INTEGER NOT NULL,
-  user_email TEXT NOT NULL,
-  user_type TEXT NOT NULL,
-  notify_all BOOLEAN DEFAULT TRUE,
-  notify_mentions BOOLEAN DEFAULT TRUE,
-  notify_replies BOOLEAN DEFAULT TRUE,
-  muted_until DATETIME,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-  UNIQUE(project_id, user_email)
-);
-
--- Read receipts
-CREATE TABLE IF NOT EXISTS message_read_receipts (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  message_id INTEGER NOT NULL,
-  user_email TEXT NOT NULL,
-  user_type TEXT NOT NULL,
-  read_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE,
-  UNIQUE(message_id, user_email)
-);
-
--- Pinned messages
-CREATE TABLE IF NOT EXISTS pinned_messages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  thread_id INTEGER NOT NULL,
-  message_id INTEGER NOT NULL,
-  pinned_by TEXT NOT NULL,
-  pinned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (thread_id) REFERENCES message_threads(id) ON DELETE CASCADE,
-  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE,
-  UNIQUE(thread_id, message_id)
-);
+```typescript
+const MESSAGES_API_BASE = '/api/messages';
 ```
 
-### general_messages Table Additions
+### Message Data Interface
 
-```sql
-ALTER TABLE general_messages ADD COLUMN parent_message_id INTEGER REFERENCES general_messages(id);
-ALTER TABLE general_messages ADD COLUMN is_internal BOOLEAN DEFAULT FALSE;
-ALTER TABLE general_messages ADD COLUMN edited_at DATETIME;
-ALTER TABLE general_messages ADD COLUMN deleted_at DATETIME;
-ALTER TABLE general_messages ADD COLUMN deleted_by TEXT;
-ALTER TABLE general_messages ADD COLUMN reaction_count INTEGER DEFAULT 0;
-ALTER TABLE general_messages ADD COLUMN reply_count INTEGER DEFAULT 0;
-ALTER TABLE general_messages ADD COLUMN mention_count INTEGER DEFAULT 0;
+```typescript
+interface PortalMessage {
+  id: number;
+  thread_id: number;
+  sender_id: number;
+  sender_name: string;
+  sender_type: 'client' | 'admin' | 'system';
+  message: string;
+  created_at: string;
+  read_at: string | null;
+}
 ```
 
-### message_threads Table Additions
+### Loading Messages from API
 
-```sql
-ALTER TABLE message_threads ADD COLUMN pinned_count INTEGER DEFAULT 0;
-ALTER TABLE message_threads ADD COLUMN participant_count INTEGER DEFAULT 1;
-ALTER TABLE message_threads ADD COLUMN archived_at DATETIME;
-ALTER TABLE message_threads ADD COLUMN archived_by TEXT;
+```typescript
+export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<void> {
+  const messagesContainer = document.getElementById('messages-thread');
+  if (!messagesContainer) return;
+
+  if (ctx.isDemo()) {
+    renderDemoMessages(messagesContainer, ctx);
+    return;
+  }
+
+  try {
+    const threadsResponse = await fetch(`${MESSAGES_API_BASE}/threads`, {
+      credentials: 'include'
+    });
+
+    if (!threadsResponse.ok) {
+      throw new Error('Failed to load message threads');
+    }
+
+    const threadsData = await threadsResponse.json();
+    const threads = threadsData.threads || [];
+
+    if (threads.length === 0) {
+      messagesContainer.innerHTML = `
+        <div class="no-messages">
+          <p>No messages yet. Start a conversation!</p>
+        </div>
+      `;
+      return;
+    }
+
+    const thread = threads[0];
+    currentThreadId = thread.id;
+
+    const messagesResponse = await fetch(
+      `${MESSAGES_API_BASE}/threads/${thread.id}/messages`,
+      { credentials: 'include' }
+    );
+
+    if (!messagesResponse.ok) {
+      throw new Error('Failed to load messages');
+    }
+
+    const messagesData = await messagesResponse.json();
+    renderMessages(messagesContainer, messagesData.messages || [], ctx);
+
+    await fetch(`${MESSAGES_API_BASE}/threads/${thread.id}/read`, {
+      method: 'PUT',
+      credentials: 'include'
+    });
+  } catch (error) {
+    console.error('Error loading messages:', error);
+    renderDemoMessages(messagesContainer, ctx);
+  }
+}
 ```
+
+### Sending Messages
+
+```typescript
+export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
+  const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
+  if (!messageInput) return;
+
+  const message = messageInput.value.trim();
+  if (!message) return;
+
+  if (ctx.isDemo()) {
+    addDemoMessage(message, ctx);
+    messageInput.value = '';
+    return;
+  }
+
+  try {
+    let url: string;
+    let body: { message: string; subject?: string };
+
+    if (currentThreadId) {
+      url = `${MESSAGES_API_BASE}/threads/${currentThreadId}/messages`;
+      body = { message };
+    } else {
+      url = `${MESSAGES_API_BASE}/inquiry`;
+      body = { subject: 'General Inquiry', message };
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to send message');
+    }
+
+    const data = await response.json();
+    if (data.threadId) {
+      currentThreadId = data.threadId;
+    }
+
+    messageInput.value = '';
+    await loadMessagesFromAPI(ctx);
+  } catch (error) {
+    console.error('Error sending message:', error);
+    alert(error instanceof Error ? error.message : 'Failed to send message.');
+  }
+}
+```
+
+### Demo Mode Messages
+
+```typescript
+function addDemoMessage(message: string, ctx: ClientPortalContext): void {
+  const messagesThread = document.getElementById('messages-thread');
+  if (!messagesThread) return;
+
+  const now = new Date();
+  const timeString = `${now.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })} at ${now.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })}`;
+
+  const messageHTML = `
+    <div class="message message-sent">
+      <div class="message-content">
+        <div class="message-header">
+          <span class="message-sender">You</span>
+          <span class="message-time">${timeString}</span>
+        </div>
+        <div class="message-body">${ctx.escapeHtml(message)}</div>
+      </div>
+      <div class="message-avatar" data-name="You">
+        <div class="avatar-placeholder">YOU</div>
+      </div>
+    </div>
+  `;
+
+  messagesThread.insertAdjacentHTML('beforeend', messageHTML);
+  messagesThread.scrollTop = messagesThread.scrollHeight;
+}
+```
+
+---
 
 ## API Endpoints
+
+### Core Messaging
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/messages/threads` | Load message threads |
+| POST | `/api/messages/threads` | Create new thread |
+| GET | `/api/messages/threads/:id/messages` | Get messages in thread |
+| POST | `/api/messages/threads/:id/messages` | Send message in thread |
+| PUT | `/api/messages/threads/:id/read` | Mark thread messages as read |
+| POST | `/api/messages/inquiry` | Create quick inquiry (creates thread + message) |
+| GET | `/api/messages/preferences` | Get notification preferences |
+| PUT | `/api/messages/preferences` | Update notification preferences |
+| GET | `/api/messages/analytics` | Get message analytics (admin only) |
 
 ### Mentions
 
@@ -296,155 +670,278 @@ ALTER TABLE message_threads ADD COLUMN archived_by TEXT;
 | POST | `/api/messages/threads/:threadId/unarchive` | Unarchive thread (admin) |
 | GET | `/api/messages/threads/archived` | Get archived threads (admin) |
 
-### Search
+### Search & Internal
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/messages/search` | Search messages |
-
-### Internal Messages
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
 | POST | `/api/messages/threads/:threadId/internal` | Send internal message (admin) |
 | GET | `/api/messages/threads/:threadId/internal` | Get internal messages (admin) |
 
-## Service Methods
+---
 
-The `message-service.ts` provides the following methods:
+## Database Schema
 
-### Mention Methods
+### Core Tables
 
-- `processMentions(messageId, content)` - Parse and save mentions
-- `getMentions(messageId)` - Get message mentions
-- `getMyMentions(userEmail, unreadOnly)` - Get user's mentions
+#### general_messages
 
-### Reaction Methods
-
-- `addReaction(messageId, userEmail, userType, reaction)` - Add reaction
-- `removeReaction(messageId, userEmail, reaction)` - Remove reaction
-- `getReactions(messageId)` - Get message reactions
-- `getGroupedReactions(messageId, currentUserEmail)` - Get grouped summary
-
-### Subscription Methods
-
-- `getSubscription(projectId, userEmail)` - Get subscription
-- `updateSubscription(projectId, userEmail, prefs)` - Update
-- `muteProject(projectId, userEmail, userType, until)` - Mute
-- `unmuteProject(projectId, userEmail)` - Unmute
-
-### Read Receipt Methods
-
-- `markAsRead(messageId, userEmail, userType)` - Mark read
-- `markMultipleAsRead(messageIds, userEmail, userType)` - Bulk mark
-- `getReadReceipts(messageId)` - Get receipts
-- `getUnreadCount(userEmail, userType)` - Get unread count
-- `getThreadUnreadCount(threadId, userEmail)` - Get thread unread
-
-### Pinned Message Methods
-
-- `pinMessage(threadId, messageId, pinnedBy)` - Pin message
-- `unpinMessage(threadId, messageId)` - Unpin message
-- `getPinnedMessages(threadId)` - Get pinned messages
-
-### Message Edit/Delete Methods
-
-- `editMessage(messageId, content, userEmail, userType)` - Edit
-- `deleteMessage(messageId, userEmail, userType)` - Delete
-
-### Thread Archive Methods
-
-- `archiveThread(threadId, archivedBy)` - Archive
-- `unarchiveThread(threadId)` - Unarchive
-- `getArchivedThreads()` - Get archived threads
-
-### Search Methods
-
-- `searchMessages(query, options)` - Search messages
-
-## Usage Examples
-
-### Add Reaction
-
-```typescript
-await fetch('/api/messages/messages/123/reactions', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    reaction: '👍'
-  })
-});
-```
-
-### Update Subscription
-
-```typescript
-await fetch('/api/messages/projects/456/subscription', {
-  method: 'PUT',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    notify_all: false,
-    notify_mentions: true,
-    notify_replies: true
-  })
-});
-```
-
-### Mute Project for 24 Hours
-
-```typescript
-const muteUntil = new Date();
-muteUntil.setHours(muteUntil.getHours() + 24);
-
-await fetch('/api/messages/projects/456/mute', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    until: muteUntil.toISOString()
-  })
-});
-```
-
-### Search Messages
-
-```typescript
-const response = await fetch(
-  '/api/messages/search?q=invoice&project_id=456&limit=20'
+```sql
+CREATE TABLE general_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  client_id INTEGER NOT NULL,
+  sender_type TEXT NOT NULL CHECK (sender_type IN ('client', 'admin', 'system')),
+  sender_name TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  message_type TEXT DEFAULT 'inquiry' CHECK (message_type IN ('inquiry', 'quote_request', 'support', 'feedback', 'system')),
+  priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+  status TEXT DEFAULT 'new' CHECK (status IN ('new', 'read', 'replied', 'closed')),
+  reply_to INTEGER DEFAULT NULL REFERENCES general_messages(id) ON DELETE SET NULL,
+  attachments TEXT DEFAULT NULL,
+  is_read BOOLEAN DEFAULT FALSE,
+  read_at DATETIME DEFAULT NULL,
+  thread_id INTEGER DEFAULT NULL,
+  parent_message_id INTEGER REFERENCES general_messages(id),
+  is_internal BOOLEAN DEFAULT FALSE,
+  edited_at DATETIME,
+  deleted_at DATETIME,
+  deleted_by TEXT,
+  reaction_count INTEGER DEFAULT 0,
+  reply_count INTEGER DEFAULT 0,
+  mention_count INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+  FOREIGN KEY (thread_id) REFERENCES message_threads(id) ON DELETE SET NULL
 );
-const { results, count } = await response.json();
 ```
 
-### Pin a Message
+#### message_threads
+
+```sql
+CREATE TABLE message_threads (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER DEFAULT NULL,
+  client_id INTEGER NOT NULL,
+  subject TEXT NOT NULL,
+  thread_type TEXT DEFAULT 'general' CHECK (thread_type IN ('general', 'project', 'support', 'quote')),
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'closed', 'archived')),
+  priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+  last_message_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  last_message_by TEXT DEFAULT NULL,
+  participant_count INTEGER DEFAULT 2,
+  pinned_count INTEGER DEFAULT 0,
+  archived_at DATETIME,
+  archived_by TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+);
+```
+
+### Enhancement Tables
+
+#### message_mentions
+
+```sql
+CREATE TABLE IF NOT EXISTS message_mentions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  message_id INTEGER NOT NULL,
+  mentioned_type TEXT NOT NULL,
+  mentioned_id TEXT,
+  notified BOOLEAN DEFAULT FALSE,
+  notified_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE
+);
+```
+
+#### message_reactions
+
+```sql
+CREATE TABLE IF NOT EXISTS message_reactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  message_id INTEGER NOT NULL,
+  user_email TEXT NOT NULL,
+  user_type TEXT NOT NULL,
+  reaction TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE,
+  UNIQUE(message_id, user_email, reaction)
+);
+```
+
+#### message_subscriptions
+
+```sql
+CREATE TABLE IF NOT EXISTS message_subscriptions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL,
+  user_email TEXT NOT NULL,
+  user_type TEXT NOT NULL,
+  notify_all BOOLEAN DEFAULT TRUE,
+  notify_mentions BOOLEAN DEFAULT TRUE,
+  notify_replies BOOLEAN DEFAULT TRUE,
+  muted_until DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+  UNIQUE(project_id, user_email)
+);
+```
+
+#### message_read_receipts
+
+```sql
+CREATE TABLE IF NOT EXISTS message_read_receipts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  message_id INTEGER NOT NULL,
+  user_email TEXT NOT NULL,
+  user_type TEXT NOT NULL,
+  read_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE,
+  UNIQUE(message_id, user_email)
+);
+```
+
+#### pinned_messages
+
+```sql
+CREATE TABLE IF NOT EXISTS pinned_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  thread_id INTEGER NOT NULL,
+  message_id INTEGER NOT NULL,
+  pinned_by TEXT NOT NULL,
+  pinned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (thread_id) REFERENCES message_threads(id) ON DELETE CASCADE,
+  FOREIGN KEY (message_id) REFERENCES general_messages(id) ON DELETE CASCADE,
+  UNIQUE(thread_id, message_id)
+);
+```
+
+---
+
+## Admin Messaging
+
+### Custom Client Dropdown
+
+The admin Messages tab uses a custom dropdown for better styling control:
+
+```html
+<div class="custom-dropdown" id="admin-client-dropdown">
+  <button class="custom-dropdown-trigger" id="admin-client-trigger">
+    <span class="custom-dropdown-text">Select a client...</span>
+    <span class="custom-dropdown-caret"></span>
+  </button>
+  <ul class="custom-dropdown-menu" id="admin-client-menu">
+    <!-- Client items populated dynamically -->
+  </ul>
+</div>
+```
+
+### Unread Message Counts
 
 ```typescript
-await fetch('/api/messages/messages/789/pin', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    thread_id: 123
-  })
+if (client.unread_count > 0) {
+  const countSpan = document.createElement('span');
+  countSpan.className = 'dropdown-item-count has-unread';
+  countSpan.textContent = String(client.unread_count);
+}
+```
+
+### Cache Busting
+
+After sending a message, fetch with cache-busting:
+
+```typescript
+const url = bustCache
+  ? `/api/messages/threads/${threadId}/messages?_=${Date.now()}`
+  : `/api/messages/threads/${threadId}/messages`;
+```
+
+### Admin Avatar
+
+```css
+.messages-thread .message-avatar .avatar-img {
+  filter: invert(1);
+}
+```
+
+### Module Architecture
+
+**Module** (`src/features/admin/modules/admin-messaging.ts`):
+
+- State management for selected client/thread
+- API calls for messaging operations
+
+**Renderer** (`src/features/admin/renderers/admin-messaging.renderer.ts`):
+
+- `renderThreadsList(threads)` - Renders thread list sidebar
+- `renderMessages(messages)` - Renders messages in thread view
+- `appendMessage(message)` - Optimistic UI update
+- `clearMessageInput()` - Clears compose textarea
+- `updateUnreadBadge(count)` - Updates sidebar badge
+
+### Email Notifications
+
+```typescript
+await emailService.sendMessageNotification(clientEmail, {
+  recipientName: 'John Doe',
+  senderName: 'Admin',
+  subject: 'New Message',
+  message: messageContent,
+  threadId: threadId,
+  portalUrl: 'https://portal.nobhad.codes',
+  hasAttachments: false
 });
 ```
 
-## Files
+---
 
-### Created
+## File Locations
 
-- `server/database/migrations/034_messaging_enhancements.sql` - Database migration
-- `server/services/message-service.ts` - Message service
-- `docs/features/MESSAGING.md` - This documentation
+| File | Purpose |
+|------|---------|
+| `client/portal.html` | Messages HTML (tab-messages section) |
+| `src/features/client/modules/portal-messages.ts` | Client message module (~270 lines) |
+| `src/features/admin/modules/admin-messaging.ts` | Admin message module (~400 lines) |
+| `src/features/admin/renderers/admin-messaging.renderer.ts` | Admin messaging UI renderer |
+| `src/styles/client-portal/messages.css` | Client message styling |
+| `src/styles/admin/project-detail.css` | Admin message styling |
+| `server/routes/messages.ts` | API endpoints |
+| `server/services/message-service.ts` | Message service (backend logic) |
+| `server/services/email-service.ts` | Email notifications |
+| `server/database/migrations/034_messaging_enhancements.sql` | Database migration |
 
-### Modified
-
-- `server/routes/messages.ts` - Added 25+ new endpoints
-- `src/types/api.ts` - Added TypeScript interfaces
+---
 
 ## Change Log
 
-### February 1, 2026 - Initial Implementation
+### February 3, 2026 - Documentation Consolidation
+
+- Merged MESSAGES.md (UI documentation) and MESSAGING.md (backend features) into single comprehensive document
+
+### February 1, 2026 - Backend Enhancements
 
 - Created database migration for messaging enhancement tables
 - Implemented message-service.ts with all methods
 - Added 25+ API endpoints to messages.ts
 - Added TypeScript interfaces for all types
-- Created feature documentation
+
+### January 20, 2026 - Initial UI Implementation
+
+- Implemented client portal messaging UI
+- Added emoji picker integration
+- Added keyboard shortcuts (Enter to send, Shift+Enter for newline)
+- Implemented mobile responsiveness
+- Added demo mode messaging
+
+---
+
+## Related Documentation
+
+- [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
+- [Settings](./SETTINGS.md) - Notification preferences
+- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system

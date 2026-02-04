@@ -103,7 +103,7 @@
   margin-bottom: var(--portal-spacing-xs);
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-light);
 }
 
 [data-page="client-portal"] .documents-file-input {

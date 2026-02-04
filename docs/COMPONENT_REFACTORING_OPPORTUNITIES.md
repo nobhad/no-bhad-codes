@@ -6,14 +6,14 @@ This document identifies places in the codebase where reusable components should
 
 ## Summary
 
-| Component Type | Current Usage | Should Use | Status |
+|Component Type|Current Usage|Should Use|Status|
 |----------------|---------------|------------|--------|
-| **Alert Dialogs** | `alert()` (native) | `alertDialog()` utility | ✅ COMPLETE |
-| **Prompt Dialogs** | `prompt()` (native) | `multiPromptDialog()` utility | ✅ COMPLETE |
-| **Focus Trap** | Missing on detail modal | `manageFocusTrap()` utility | ✅ COMPLETE |
-| **Buttons** | `createElement('button')` | `ButtonComponent` | ⏸️ DEFERRED |
-| **Modals** | Manual DOM manipulation | `ModalComponent` | ⏸️ DEFERRED |
-| **Toast Notifications** | `alert()` or custom DOM | `showToast()` utility | ✅ COMPLETE |
+|**Alert Dialogs**|`alert()` (native)|`alertDialog()` utility|✅ COMPLETE|
+|**Prompt Dialogs**|`prompt()` (native)|`multiPromptDialog()` utility|✅ COMPLETE|
+|**Focus Trap**|Missing on detail modal|`manageFocusTrap()` utility|✅ COMPLETE|
+|**Buttons**|`createElement('button')`|`ButtonComponent`|⏸️ DEFERRED|
+|**Modals**|Manual DOM manipulation|`ModalComponent`|⏸️ DEFERRED|
+|**Toast Notifications**|`alert()` or custom DOM|`showToast()` utility|✅ COMPLETE|
 
 ### Deferred Items Rationale
 
@@ -26,7 +26,9 @@ This document identifies places in the codebase where reusable components should
 ## 1. Alert Dialogs → Use `alertDialog()` Utility
 
 ### Available Utility
+
 **File:** `src/utils/confirm-dialog.ts`
+
 - `alertDialog(options)` - Custom styled alert dialog
 - `alertError(message, title)` - Error alerts
 - `alertSuccess(message, title)` - Success alerts
@@ -36,9 +38,11 @@ This document identifies places in the codebase where reusable components should
 ### Files to Refactor
 
 #### `src/features/client/client-portal.ts`
+
 **Status:** Refactored. Client portal now uses `alertDialog`/`alertError`/`alertSuccess`/`showToast`; no remaining native `alert()` in this file. Line numbers below are historical.
 
-**Historical locations (pre-refactor):**
+#### Historical locations (pre-refactor):
+
 - Line 426: `alert('Please log in to submit a project request.')`
 - Line 437: `alert('Please fill in all required fields')`
 - Line 463: `alert(data.message || 'Project request submitted successfully!')`
@@ -61,7 +65,8 @@ This document identifies places in the codebase where reusable components should
 - Line 709: `alert('Billing information saved!')`
 - Line 712: `alert(...)` - Error message
 
-**Refactor to:**
+#### Refactor to:
+
 ```typescript
 import { alertError, alertSuccess, alertInfo } from '../../utils/confirm-dialog';
 
@@ -84,29 +89,35 @@ await alertInfo('Please log in to save settings.');
 **Note:** There's also a `showSuccessMessage()` method (line 1407) that creates custom DOM elements - this should also use `showToast()` instead.
 
 #### `src/features/client/modules/portal-messages.ts`
+
 **Status:** Refactored; uses `alertError` (or equivalent). Line numbers historical.
 **Historical:** Line 210 - `alert(...)` for send message error.
 
-**Refactor to:**
+#### Refactor to:
+
 ```typescript
 import { alertError } from '../../../utils/confirm-dialog';
 await alertError(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
 ```
 
 #### `src/features/client/modules/portal-invoices.ts`
+
 **Status:** Refactored; uses `alertError` (or equivalent). Line numbers historical.
 **Historical:** Line 222 - `alert('Failed to download invoice...')`.
 
-**Refactor to:**
+#### Refactor to:
+
 ```typescript
 import { alertError } from '../../../utils/confirm-dialog';
 await alertError('Failed to download invoice. Please try again.');
 ```
 
 #### `src/services/code-protection-service.ts`
+
 **Current:** Line 489 - `alert('Developer tools detected. Some features may be limited.')`
 
-**Refactor to:**
+#### Refactor to:
+
 ```typescript
 import { alertWarning } from '../utils/confirm-dialog';
 await alertWarning('Developer tools detected. Some features may be limited.');
@@ -117,23 +128,28 @@ await alertWarning('Developer tools detected. Some features may be limited.');
 ## 2. Prompt Dialogs → Use `ModalComponent` with Form Inputs
 
 ### Available Component
+
 **File:** `src/components/modal-component.ts`
+
 - `ModalComponent` - Full-featured modal with form support
 - Factory: `createModal(props, mountTarget)`
 
 ### Files to Refactor
 
 #### `src/features/admin/modules/admin-projects.ts`
+
 **Current:** Using native `prompt()` (3 instances)
 
-**Locations:**
+#### Locations:
+
 - Line 1315: `prompt('Enter line item description:', 'Web Development Services')`
 - Line 1318: `prompt('Enter amount ($):', '1000')`
 - Line 1379: `prompt('Enter milestone title:')`
 - Line 1382: `prompt('Enter milestone description (optional):', '')`
 - Line 1383: `prompt('Enter due date (YYYY-MM-DD):', ...)`
 
-**Refactor to:**
+#### Refactor to:
+
 ```typescript
 import { createModal } from '../../../components';
 import { ButtonComponent } from '../../../components/button-component';
@@ -173,9 +189,11 @@ modal.on('submit', () => {
 ```
 
 #### `src/features/admin/admin-project-details.ts`
+
 **Current:** Using native `prompt()` (2 instances)
 
-**Locations:**
+#### Locations:
+
 - Line 1103: `prompt('Enter milestone title:')`
 - Line 1106: `prompt('Enter milestone description (optional):')`
 - Line 1107: `prompt('Enter due date (YYYY-MM-DD, optional):')`
@@ -189,13 +207,16 @@ modal.on('submit', () => {
 ## 3. Buttons → Use `ButtonComponent`
 
 ### Available Component
+
 **File:** `src/components/button-component.ts`
+
 - `ButtonComponent` - Reusable button with variants, states, accessibility
 - Factory: `createButton(props, mountTarget)`
 
 ### Files to Refactor
 
 #### `src/utils/modal-dropdown.ts`
+
 **Current:** Line 150 - Manual button creation
 
 ```typescript
@@ -204,7 +225,8 @@ trigger.type = 'button';
 trigger.className = 'custom-dropdown-trigger';
 ```
 
-**Refactor to:**
+#### Refactor to:
+
 ```typescript
 import { createButton } from '../components';
 
@@ -217,11 +239,13 @@ const trigger = await createButton({
 ```
 
 #### `src/utils/table-dropdown.ts`
+
 **Current:** Line 50 - Manual button creation
 
 **Refactor to:** Same pattern as above.
 
 #### `src/features/client/terminal-intake.ts`
+
 **Current:** Lines 260-273 - Manual button creation for resume/restart options
 
 ```typescript
@@ -230,7 +254,8 @@ btn1.className = 'chat-option';
 btn1.textContent = '[1] Resume where I left off';
 ```
 
-**Refactor to:**
+#### Refactor to:
+
 ```typescript
 import { createButton } from '../../components';
 
@@ -243,11 +268,13 @@ const btn1 = await createButton({
 ```
 
 #### `src/features/client/modules/portal-navigation.ts`
+
 **Current:** Line 364 - Manual button creation for navigation links
 
 **Refactor to:** Use `ButtonComponent` with appropriate variant.
 
 #### `src/features/client/terminal-intake-ui.ts`
+
 **Current:** Lines 256, 273, 368, 384 - Multiple manual button creations
 
 **Refactor to:** Use `ButtonComponent` for all button instances.
@@ -257,13 +284,16 @@ const btn1 = await createButton({
 ## 4. Modals → Use `ModalComponent`
 
 ### Available Component
+
 **File:** `src/components/modal-component.ts`
+
 - `ModalComponent` - Full-featured modal with lifecycle management
 - Factory: `createModal(props, mountTarget)`
 
 ### Files to Refactor
 
 #### `src/features/admin/admin-dashboard.ts`
+
 **Current:** Lines 557-581 - Manual modal handlers with `style.display` manipulation
 
 ```typescript
@@ -276,7 +306,8 @@ private setupModalHandlers(): void {
 }
 ```
 
-**Refactor to:**
+#### Refactor to:
+
 ```typescript
 import { createModal } from '../../components';
 
@@ -296,6 +327,7 @@ detailModal.on('close', () => { /* cleanup */ });
 ```
 
 #### `src/features/admin/renderers/admin-contacts.renderer.ts`
+
 **Current:** Line 174 - Manual modal display manipulation
 
 **Refactor to:** Use `ModalComponent` instead of manual DOM manipulation.
@@ -305,7 +337,9 @@ detailModal.on('close', () => { /* cleanup */ });
 ## 5. Toast Notifications → Use `showToast()` Utility
 
 ### Available Utility
+
 **File:** `src/utils/toast-notifications.ts`
+
 - `showToast(message, type, options)` - Non-intrusive toast notifications
 - `showToastSuccess(message, options)` - Success toasts
 - `showToastError(message, options)` - Error toasts
@@ -315,6 +349,7 @@ detailModal.on('close', () => { /* cleanup */ });
 ### Files to Refactor
 
 #### `src/features/client/client-portal.ts`
+
 **Current:** Line 1407 - Custom `showSuccessMessage()` method that creates DOM elements
 
 ```typescript
@@ -328,7 +363,8 @@ private showSuccessMessage(message: string): void {
 }
 ```
 
-**Refactor to:**
+#### Refactor to:
+
 ```typescript
 import { showToastSuccess } from '../../utils/toast-notifications';
 
@@ -345,6 +381,7 @@ showToastSuccess(message);
 **Status:** Already using `confirmDialog()` utility correctly in most places.
 
 **File:** `src/utils/confirm-dialog.ts`
+
 - `confirmDialog(options)` - Custom styled confirm dialog
 - `confirmDanger(message, confirmText, title)` - Danger confirmations
 
@@ -355,29 +392,32 @@ showToastSuccess(message);
 ## Implementation Priority
 
 ### High Priority (User-Facing)
+
 1. **Alert dialogs** - Replace all `alert()` calls with `alertDialog()` utilities
    - Improves UX consistency
    - Better accessibility
    - Styled to match portal theme
 
-2. **Prompt dialogs** - Replace `prompt()` with `ModalComponent`
+1. **Prompt dialogs** - Replace `prompt()` with `ModalComponent`
    - Better form validation
    - Consistent styling
    - Better mobile support
 
 ### Medium Priority (Code Quality)
-3. **Button components** - Replace manual button creation
+
+1. **Button components** - Replace manual button creation
    - Consistent button styling
    - Built-in accessibility
    - Easier maintenance
 
-4. **Modal components** - Replace manual modal handling
+1. **Modal components** - Replace manual modal handling
    - Lifecycle management
    - Built-in accessibility features
    - Consistent behavior
 
 ### Low Priority (Polish)
-5. **Toast notifications** - Replace custom success message DOM creation
+
+1. **Toast notifications** - Replace custom success message DOM creation
    - Non-intrusive UX
    - Consistent styling
    - Better positioning

@@ -23,24 +23,24 @@ This file contains completed work from December 2025. Items are moved here from 
 **Before**: 992 lines
 **After**: 4 files
 
-| File | Lines | Purpose |
+|File|Lines|Purpose|
 |------|-------|---------|
-| `src/core/app.ts` | 452 | Core Application class |
-| `src/core/services-config.ts` | 125 | Service registrations |
-| `src/core/modules-config.ts` | 326 | Module definitions |
-| `src/core/debug.ts` | 155 | Development helpers |
+|`src/core/app.ts`|452|Core Application class|
+|`src/core/services-config.ts`|125|Service registrations|
+|`src/core/modules-config.ts`|326|Module definitions|
+|`src/core/debug.ts`|155|Development helpers|
 
 ### state.ts Split
 
 **Before**: 824 lines
 **After**: 4 files in `src/core/state/`
 
-| File | Lines | Purpose |
+|File|Lines|Purpose|
 |------|-------|---------|
-| `state/types.ts` | 67 | Type definitions |
-| `state/state-manager.ts` | 491 | Generic StateManager class |
-| `state/app-state.ts` | 172 | App instance, middleware, reducers |
-| `state/index.ts` | 22 | Re-exports for backward compatibility |
+|`state/types.ts`|67|Type definitions|
+|`state/state-manager.ts`|491|Generic StateManager class|
+|`state/app-state.ts`|172|App instance, middleware, reducers|
+|`state/index.ts`|22|Re-exports for backward compatibility|
 
 ### navigation.css Split
 
@@ -240,21 +240,21 @@ Full codebase review completed across all TypeScript and CSS files.
 
 ### Critical Issues - ALL FIXED
 
-| File | Issue | Status |
+|File|Issue|Status|
 |------|-------|--------|
-| `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | FIXED |
-| `src/modules/animation/intro-animation.ts` | 400+ lines, hardcoded SVG paths | FIXED (refactored, SVG paths in config) |
-| `src/services/code-protection-service.ts` | Event listener cleanup issues | FIXED |
-| `src/features/admin/admin-security.ts` | localStorage for auth data | FIXED (all modules migrated to HttpOnly cookies) |
+|`src/modules/navigation.ts`|15+ console.log calls, untracked event listeners|FIXED|
+|`src/modules/animation/intro-animation.ts`|400+ lines, hardcoded SVG paths|FIXED (refactored, SVG paths in config)|
+|`src/services/code-protection-service.ts`|Event listener cleanup issues|FIXED|
+|`src/features/admin/admin-security.ts`|localStorage for auth data|FIXED (all modules migrated to HttpOnly cookies)|
 
 ### Files Split (December 19)
 
-| Original File | Lines | Result |
+|Original File|Lines|Result|
 |---------------|-------|--------|
-| `src/core/app.ts` | 992 | Split into 4 files |
-| `src/core/state.ts` | 824 | Split into 4 files |
-| `src/styles/components/navigation.css` | 1792 | Split into 4 files |
-| `src/styles/components/form.css` | 374 | Split into 3 files |
+|`src/core/app.ts`|992|Split into 4 files|
+|`src/core/state.ts`|824|Split into 4 files|
+|`src/styles/components/navigation.css`|1792|Split into 4 files|
+|`src/styles/components/form.css`|374|Split into 3 files|
 
 ### CSS Architecture
 
@@ -281,28 +281,28 @@ Excellent - production-ready with HttpOnly cookie authentication.
 
 **Server Changes**:
 
-| File | Change |
+|File|Change|
 |------|--------|
-| `server/app.ts` | Added `cookie-parser` middleware |
-| `server/utils/auth-constants.ts` | Added `COOKIE_CONFIG` with secure cookie options |
-| `server/routes/auth.ts` | Set HttpOnly cookies on login, clear on logout |
-| `server/middleware/auth.ts` | Read from cookies OR Authorization header |
+|`server/app.ts`|Added `cookie-parser` middleware|
+|`server/utils/auth-constants.ts`|Added `COOKIE_CONFIG` with secure cookie options|
+|`server/routes/auth.ts`|Set HttpOnly cookies on login, clear on logout|
+|`server/middleware/auth.ts`|Read from cookies OR Authorization header|
 
 **Client Changes**:
 
-| File | Change |
+|File|Change|
 |------|--------|
-| `src/services/auth-service.ts` | Removed token storage, added `credentials: 'include'` |
-| `src/features/client/client-portal.ts` | Changed to `client_auth_mode` (demo/authenticated), credentials: include |
-| `src/features/client/modules/portal-files.ts` | Updated fetch calls with credentials: include |
-| `src/features/client/modules/portal-messages.ts` | Updated fetch calls with credentials: include |
-| `src/features/client/modules/portal-invoices.ts` | Updated fetch calls with credentials: include |
-| `src/features/admin/admin-dashboard.ts` | Replaced token checks with authMode, credentials: include |
-| `src/features/admin/admin-types.ts` | Added `isDemo()` method to AdminDashboardContext |
-| `src/features/admin/modules/admin-projects.ts` | Changed to ctx.isDemo() checks, credentials: include |
-| `src/features/admin/modules/admin-messaging.ts` | Changed to ctx.isDemo() checks, credentials: include |
-| `src/features/admin/modules/admin-contacts.ts` | Changed to ctx.isDemo() checks, credentials: include |
-| `src/features/admin/modules/admin-leads.ts` | Changed to ctx.isDemo() checks, credentials: include |
+|`src/services/auth-service.ts`|Removed token storage, added `credentials: 'include'`|
+|`src/features/client/client-portal.ts`|Changed to `client_auth_mode` (demo/authenticated), credentials: include|
+|`src/features/client/modules/portal-files.ts`|Updated fetch calls with credentials: include|
+|`src/features/client/modules/portal-messages.ts`|Updated fetch calls with credentials: include|
+|`src/features/client/modules/portal-invoices.ts`|Updated fetch calls with credentials: include|
+|`src/features/admin/admin-dashboard.ts`|Replaced token checks with authMode, credentials: include|
+|`src/features/admin/admin-types.ts`|Added `isDemo()` method to AdminDashboardContext|
+|`src/features/admin/modules/admin-projects.ts`|Changed to ctx.isDemo() checks, credentials: include|
+|`src/features/admin/modules/admin-messaging.ts`|Changed to ctx.isDemo() checks, credentials: include|
+|`src/features/admin/modules/admin-contacts.ts`|Changed to ctx.isDemo() checks, credentials: include|
+|`src/features/admin/modules/admin-leads.ts`|Changed to ctx.isDemo() checks, credentials: include|
 
 **Cookie Configuration**: httpOnly, sameSite: strict, secure in production. User tokens: 7 days, Admin tokens: 1 hour.
 
@@ -323,15 +323,15 @@ Excellent - production-ready with HttpOnly cookie authentication.
 
 **Server-Side (`server/routes/analytics.ts`)**:
 
-| Endpoint | Method | Auth | Description |
+|Endpoint|Method|Auth|Description|
 |----------|--------|------|-------------|
-| `/api/analytics/track` | POST | Public | Receive tracking events |
-| `/api/analytics/summary` | GET | Admin | Dashboard metrics |
-| `/api/analytics/realtime` | GET | Admin | Live visitor data |
-| `/api/analytics/sessions` | GET | Admin | List sessions (paginated) |
-| `/api/analytics/sessions/:id` | GET | Admin | Session details |
-| `/api/analytics/export` | GET | Admin | Export data as JSON |
-| `/api/analytics/data` | DELETE | Admin | Clear old data |
+|`/api/analytics/track`|POST|Public|Receive tracking events|
+|`/api/analytics/summary`|GET|Admin|Dashboard metrics|
+|`/api/analytics/realtime`|GET|Admin|Live visitor data|
+|`/api/analytics/sessions`|GET|Admin|List sessions (paginated)|
+|`/api/analytics/sessions/:id`|GET|Admin|Session details|
+|`/api/analytics/export`|GET|Admin|Export data as JSON|
+|`/api/analytics/data`|DELETE|Admin|Clear old data|
 
 **Database Tables**: `visitor_sessions`, `page_views`, `interaction_events`, `analytics_daily_summary`
 
@@ -403,11 +403,11 @@ Excellent - production-ready with HttpOnly cookie authentication.
 
 **New Modules Created**:
 
-| Module | Lines | Purpose |
+|Module|Lines|Purpose|
 |--------|-------|---------|
-| `admin-overview.ts` | 239 | Real visitor tracking data from localStorage |
-| `admin-performance.ts` | 388 | Real Core Web Vitals from browser Performance API |
-| `admin-system-status.ts` | 341 | Real service/module health checks |
+|`admin-overview.ts`|239|Real visitor tracking data from localStorage|
+|`admin-performance.ts`|388|Real Core Web Vitals from browser Performance API|
+|`admin-system-status.ts`|341|Real service/module health checks|
 
 **Build Results**: `admin-dashboard.js`: 93.03 KB (down from 95.02 KB)
 
@@ -417,11 +417,11 @@ Excellent - production-ready with HttpOnly cookie authentication.
 
 Fixed 3 issues that could crash the application:
 
-| Issue | File | Fix |
+|Issue|File|Fix|
 |-------|------|-----|
-| Contact service throws error | `contact-service.ts:141` | Graceful error return |
-| StateManager redo() not implemented | `state.ts:553-580` | Full redo stack implementation |
-| Admin export unknown type | `admin-dashboard.ts:2917` | Graceful notification |
+|Contact service throws error|`contact-service.ts:141`|Graceful error return|
+|StateManager redo() not implemented|`state.ts:553-580`|Full redo stack implementation|
+|Admin export unknown type|`admin-dashboard.ts:2917`|Graceful notification|
 
 ---
 
@@ -431,12 +431,12 @@ Fixed 3 issues that could crash the application:
 
 Completed 4 code quality and security tasks.
 
-| Task | Result |
+|Task|Result|
 |------|--------|
-| Split `client-portal.ts` | Reduced from 3,084 to 2,381 lines (23%) |
-| Lazy load CodeProtectionService | Only loads when protection is enabled |
-| Add HTTPS enforcement | Auto-redirects HTTP to HTTPS in production |
-| Configure Redis caching | Installed and running via Homebrew |
+|Split `client-portal.ts`|Reduced from 3,084 to 2,381 lines (23%)|
+|Lazy load CodeProtectionService|Only loads when protection is enabled|
+|Add HTTPS enforcement|Auto-redirects HTTP to HTTPS in production|
+|Configure Redis caching|Installed and running via Homebrew|
 
 ### client-portal.ts Module Extraction
 
@@ -536,14 +536,14 @@ All 3 critical issues from the deep dive have been fixed:
    - `sendSuccess()`, `sendBadRequest()`, `sendUnauthorized()`, `sendForbidden()`, `sendNotFound()`, `sendServerError()`
    - `ErrorCodes` enum for consistent error identification
 
-2. **Centralized Auth Configuration** - Created `server/utils/auth-constants.ts`
+1. **Centralized Auth Configuration** - Created `server/utils/auth-constants.ts`
    - `PASSWORD_CONFIG` - Salt rounds (12), min length (12), complexity requirements
    - `JWT_CONFIG` - User token expiry (7d), admin token expiry (1h)
    - `TIME_MS` - Time constants (MINUTE, FIFTEEN_MINUTES, HOUR, DAY, WEEK, MONTH)
    - `RATE_LIMIT_CONFIG` - Centralized rate limiting for all endpoints
    - `validatePassword()` - Centralized password validation
 
-3. **Refactored auth.ts** - Updated all endpoints to use new utilities
+1. **Refactored auth.ts** - Updated all endpoints to use new utilities
 
 **Files Created:**
 
@@ -565,7 +565,7 @@ Fixed all 4 remaining hardcoded values:
 
 ## Domain & Email Corrections - RESOLVED (December 12, 2025)
 
-Fixed incorrect domain `nobhadcodes.com` to `nobhad.codes` and standardized all emails to `nobhaduri@gmail.com`.
+Fixed incorrect domain `nobhadcodes.com` to `nobhad.codes` and standardized all emails to `<<nobhaduri@gmail.com>>`.
 
 **Files Modified:** Config files, server files, client files, and documentation (bulk sed replacement).
 
@@ -887,7 +887,7 @@ Removed: JSON, AJAX, XML, Bootstrap Vue
 - New Client card links to `/client/intake`
 - Existing Client card with inline login form
 - Login form with email/password, visibility toggle, loading state, error messages
-- Demo mode fallback (demo@example.com / demo123)
+- Demo mode fallback (<<demo@example.com>> / demo123)
 
 ---
 

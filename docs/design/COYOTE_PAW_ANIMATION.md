@@ -65,17 +65,17 @@ The paw fully exits off-screen with no fade - just pure movement. The actual bus
 
 ## Timing Summary
 
-| Phase | Duration | Description |
+|Phase|Duration|Description|
 |-------|----------|-------------|
-| Entry | 0.8s | Paw enters from top-left |
-| Clutch hold | 0.8s | Paw holds card motionless |
-| Finger release (1→2) | 0.5s | All fingers morph together |
-| Pause before retract | 0.02s | Brief pause |
-| Retraction | 1.6s | Paw exits diagonally |
-| Finger A (2→3) | 0.08s | During retraction |
-| Finger B (2→3) | 0.08s | During retraction |
-| Finger C (2→3) | 0.2s | During retraction |
-| **Total** | ~3.7s | Full animation |
+|Entry|0.8s|Paw enters from top-left|
+|Clutch hold|0.8s|Paw holds card motionless|
+|Finger release (1→2)|0.5s|All fingers morph together|
+|Pause before retract|0.02s|Brief pause|
+|Retraction|1.6s|Paw exits diagonally|
+|Finger A (2→3)|0.08s|During retraction|
+|Finger B (2→3)|0.08s|During retraction|
+|Finger C (2→3)|0.2s|During retraction|
+|**Total**|~3.7s|Full animation|
 
 ## SVG Structure
 
@@ -83,13 +83,13 @@ The paw fully exits off-screen with no fade - just pure movement. The actual bus
 
 ### Element IDs
 
-| ID | Description | Animation Role |
+|ID|Description|Animation Role|
 |----|-------------|----------------|
-| `Arm_Base` | Arm path | Behind card, retracts |
-| `Position_1` | Fingers A, B, C (clutching) | Morph source, above card |
-| `Position_2` | Thumb + Fingers A, B, C (releasing) | Morph target |
-| `Position_3` | Thumb + Fingers A, B, C (fully open) | Morph target |
-| `Card` | Business card rect + text | Static, stays in place |
+|`Arm_Base`|Arm path|Behind card, retracts|
+|`Position_1`|Fingers A, B, C (clutching)|Morph source, above card|
+|`Position_2`|Thumb + Fingers A, B, C (releasing)|Morph target|
+|`Position_3`|Thumb + Fingers A, B, C (fully open)|Morph target|
+|`Card`|Business card rect + text|Static, stays in place|
 
 ### Finger Path IDs
 
@@ -115,11 +115,11 @@ The paw fully exits off-screen with no fade - just pure movement. The actual bus
 
 ### CSS Classes in SVG
 
-| Class | Usage |
+|Class|Usage|
 |-------|-------|
-| `.cls-1` | Card rectangle (white fill, dark stroke) |
-| `.cls-2` | Paw elements (black stroke) |
-| `.cls-3` | Text fill (#231f20) |
+|`.cls-1`|Card rectangle (white fill, dark stroke)|
+|`.cls-2`|Paw elements (black stroke)|
+|`.cls-3`|Text fill (#231f20)|
 
 ## Layer Order
 
@@ -128,9 +128,7 @@ The animation assembles layers in this order (bottom to top):
 1. **Behind Card Group** (retracts)
    - Arm Base
    - Thumb (from Position 2, appears when releasing)
-
 2. **SVG Card** (stays in place during animation)
-
 3. **Above Card Group** (retracts)
    - Fingers from Position 1 (morph during animation)
 
@@ -159,11 +157,11 @@ const translateY = actualCardRect.top - (SVG_CARD_Y * scale);
 
 ## Entry and Retraction Coordinates
 
-| Position | X | Y | Description |
+|Position|X|Y|Description|
 |----------|---|---|-------------|
-| Start (off-screen) | -800 | -600 | Top-left, off viewport |
-| Center (aligned) | 0 | 0 | Aligned with business card |
-| Exit (off-screen) | -1500 | -1200 | Far top-left, fully off viewport |
+|Start (off-screen)|-800|-600|Top-left, off viewport|
+|Center (aligned)|0|0|Aligned with business card|
+|Exit (off-screen)|-1500|-1200|Far top-left, fully off viewport|
 
 ## GSAP Dependencies
 
@@ -185,10 +183,10 @@ The implementation file contains extensive documentation including:
 
 ## Behavior by Device
 
-| Device | Animation |
+|Device|Animation|
 |--------|-----------|
-| Desktop | Full paw morph + entry + retraction |
-| Mobile | Simple card flip (no paw overlay) |
+|Desktop|Full paw morph + entry + retraction|
+|Mobile|Simple card flip (no paw overlay)|
 
 ## Skip Conditions
 

@@ -51,10 +51,14 @@ const trackingRateLimit = rateLimit({
   message: 'Too many tracking requests'
 });
 
-// Stricter rate limit for admin endpoints
+// Stricter rate limit for admin endpoints. Make configurable via env vars
+const adminWindowMs = Number(process.env.ANALYTICS_ADMIN_RATE_WINDOW_MS) || 60 * 1000;
+const adminMaxRequests = Number(process.env.ANALYTICS_ADMIN_MAX_REQUESTS) || 30;
 const adminRateLimit = rateLimit({
-  windowMs: 60 * 1000,
-  maxRequests: 30,
+  windowMs: adminWindowMs,
+  maxRequests: adminMaxRequests,
+  // In development, skip strict admin limits to avoid local 429s
+  skipIf: () => process.env.NODE_ENV === 'development',
   message: 'Too many requests'
 });
 

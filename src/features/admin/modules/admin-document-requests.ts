@@ -15,12 +15,18 @@ import { parseJsonResponse } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { confirmDanger, alertError, alertSuccess } from '../../../utils/confirm-dialog';
 import { manageFocusTrap } from '../../../utils/focus-trap';
-import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
-import { createTableDropdown } from '../../../components/table-dropdown';
+import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { createSearchBar } from '../../../components/search-bar';
 import { exportToCsv, DOCUMENT_REQUESTS_EXPORT_CONFIG } from '../../../utils/table-export';
+import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
+import {
+  createFilterUI,
+  applyFilters,
+  loadFilterState,
+  DOCUMENT_REQUESTS_FILTER_CONFIG,
+  type FilterState
+} from '../../../utils/table-filter';
 import {
   createRowCheckbox,
   createBulkActionToolbar,
@@ -133,15 +139,14 @@ function statusLabel(status: RequestStatus): string {
 
 let requestsCache: DocumentRequest[] = [];
 let drListenersSetup = false;
-let drFilterWrapper: HTMLElement | null = null;
-let drCreateClientSelectInstance: FilterSelectInstance | null = null;
-let drTemplatesClientSelectInstance: FilterSelectInstance | null = null;
+let drFilterUIContainer: HTMLElement | null = null;
+let drFilterState: FilterState = loadFilterState(DOCUMENT_REQUESTS_FILTER_CONFIG.storageKey);
+let drCreateClientDropdownInit = false;
+let drTemplatesClientDropdownInit = false;
 let drCreateModalFocusCleanup: (() => void) | null = null;
-let drTemplatesModalFocusCleanup: (() => void) | null = null;
 let drDetailModalFocusCleanup: (() => void) | null = null;
-let drSearchQuery: string = '';
-const currentDrFilter: 'all' | 'pending' | 'for-review' | 'overdue' = 'all';
 let storedDrContext: AdminDashboardContext | null = null;
+let drActiveTab: 'single' | 'templates' = 'single';
 
 // Bulk action configuration for document requests
 const DR_BULK_CONFIG: BulkActionConfig = {
@@ -203,39 +208,24 @@ const DR_BULK_CONFIG: BulkActionConfig = {
   ]
 };
 
-const DR_FILTER_OPTIONS = [
-  { value: 'all', label: 'All' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'for-review', label: 'For review' },
-  { value: 'overdue', label: 'Overdue' }
-] as const;
 
 // ---------------------------------------------------------------------------
 // Load data
 // ---------------------------------------------------------------------------
 
-async function loadRequests(
-  filter: 'all' | 'pending' | 'for-review' | 'overdue'
-): Promise<DocumentRequest[]> {
-  if (filter === 'all') {
-    const [pendingRes, forReviewRes, overdueRes] = await Promise.all([
-      apiFetch(`${DR_API}/pending`),
-      apiFetch(`${DR_API}/for-review`),
-      apiFetch(`${DR_API}/overdue`)
-    ]);
-    const pending = pendingRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(pendingRes).then((d) => d.requests || []) : [];
-    const forReview = forReviewRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(forReviewRes).then((d) => d.requests || []) : [];
-    const overdue = overdueRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(overdueRes).then((d) => d.requests || []) : [];
-    const byId = new Map<number, DocumentRequest>();
-    [...pending, ...forReview, ...overdue].forEach((r) => byId.set(r.id, r));
-    return Array.from(byId.values()).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
-  }
-  const path =
-    filter === 'pending' ? '/pending' : filter === 'for-review' ? '/for-review' : '/overdue';
-  const res = await apiFetch(`${DR_API}${path}`);
-  if (!res.ok) return [];
-  const data = await parseJsonResponse<{ requests: DocumentRequest[] }>(res);
-  return data.requests || [];
+async function loadAllRequests(): Promise<DocumentRequest[]> {
+  // Load from all endpoints and merge to get complete list
+  const [pendingRes, forReviewRes, overdueRes] = await Promise.all([
+    apiFetch(`${DR_API}/pending`),
+    apiFetch(`${DR_API}/for-review`),
+    apiFetch(`${DR_API}/overdue`)
+  ]);
+  const pending = pendingRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(pendingRes).then((d) => d.requests || []) : [];
+  const forReview = forReviewRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(forReviewRes).then((d) => d.requests || []) : [];
+  const overdue = overdueRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(overdueRes).then((d) => d.requests || []) : [];
+  const byId = new Map<number, DocumentRequest>();
+  [...pending, ...forReview, ...overdue].forEach((r) => byId.set(r.id, r));
+  return Array.from(byId.values()).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
 }
 
 async function loadClients(): Promise<ClientOption[]> {
@@ -309,91 +299,126 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
 }
 
 // ---------------------------------------------------------------------------
-// Create modal
+// Create modal (combined single request + from templates tabs)
 // ---------------------------------------------------------------------------
 
 function openCreateModal(_ctx: AdminDashboardContext): void {
   const modal = el('dr-create-modal');
   if (!modal) return;
 
-  if (drCreateClientSelectInstance) {
-    drCreateClientSelectInstance.setOptions([{ value: '', label: 'Loading...' }], '');
-  }
-  modal.style.display = 'flex';
+  // Show modal
+  modal.classList.remove('hidden');
   drCreateModalFocusCleanup = manageFocusTrap(modal, {});
 
+  // Reset to single tab
+  drActiveTab = 'single';
+  updateTabUI();
+
+  // Load clients first, then initialize dropdowns
   loadClients().then((clients) => {
-    if (drCreateClientSelectInstance) {
-      drCreateClientSelectInstance.setOptions(
-        clients.map((c) => ({
-          value: String(c.id),
-          label: c.company_name || c.contact_name || c.email || String(c.id)
-        })),
-        ''
-      );
-    }
+    // Populate native selects first
+    populateNativeSelect('dr-create-client', clients);
+    populateNativeSelect('dr-templates-client', clients);
+
+    // Then initialize modal dropdowns (converts to custom dropdown)
+    initClientDropdowns();
   });
+
+  // Load templates for templates tab
+  const listEl = el('dr-templates-list');
+  if (listEl) {
+    listEl.innerHTML = '<p class="loading-message">Loading templates...</p>';
+    loadTemplates().then((templates) => {
+      if (templates.length === 0) {
+        listEl.innerHTML = '<p class="empty-message">No templates available. Use Single Request tab.</p>';
+        return;
+      }
+      listEl.innerHTML = templates
+        .map(
+          (t) => `
+        <label class="dr-template-option">
+          ${getPortalCheckboxHTML({
+    name: 'dr-template-id',
+    value: String(t.id),
+    ariaLabel: t.title
+  })}
+          <span class="dr-template-label">${escapeHtml(t.title)}${t.name ? ` (${escapeHtml(t.name)})` : ''}</span>
+        </label>
+      `
+        )
+        .join('');
+    });
+  }
 }
 
 function closeCreateModal(): void {
   const modal = el('dr-create-modal');
   if (modal) {
-    modal.style.display = 'none';
+    modal.classList.add('hidden');
     drCreateModalFocusCleanup?.();
     drCreateModalFocusCleanup = null;
   }
 }
 
-// ---------------------------------------------------------------------------
-// From-templates modal
-// ---------------------------------------------------------------------------
+/**
+ * Populate native select with client options (call before initModalDropdown)
+ */
+function populateNativeSelect(selectId: string, clients: ClientOption[]): void {
+  const select = document.getElementById(selectId) as HTMLSelectElement;
+  if (!select) return;
 
-function openFromTemplatesModal(_ctx: AdminDashboardContext): void {
-  const modal = el('dr-from-templates-modal');
-  const listEl = el('dr-templates-list');
-  if (!modal || !listEl) return;
-
-  if (drTemplatesClientSelectInstance) {
-    drTemplatesClientSelectInstance.setOptions([{ value: '', label: 'Loading...' }], '');
-  }
-  listEl.innerHTML = '<p class="loading-message">Loading templates...</p>';
-  modal.style.display = 'flex';
-  drTemplatesModalFocusCleanup = manageFocusTrap(modal, {});
-
-  Promise.all([loadClients(), loadTemplates()]).then(([clients, templates]) => {
-    if (drTemplatesClientSelectInstance) {
-      drTemplatesClientSelectInstance.setOptions(
-        clients.map((c) => ({
-          value: String(c.id),
-          label: c.company_name || c.contact_name || c.email || String(c.id)
-        })),
-        ''
-      );
-    }
-
-    if (templates.length === 0) {
-      listEl.innerHTML = '<p>No templates. Create templates first (or add a single request).</p>';
-      return;
-    }
-    listEl.innerHTML = templates
-      .map(
-        (t) => `
-      <label class="dr-template-option">
-        <input type="checkbox" name="dr-template-id" value="${t.id}" />
-        <span>${escapeHtml(t.title)}${t.name ? ` (${escapeHtml(t.name)})` : ''}</span>
-      </label>
-    `
-      )
-      .join('');
+  // Clear and repopulate
+  select.innerHTML = '<option value="">Select client</option>';
+  clients.forEach((c) => {
+    const option = document.createElement('option');
+    option.value = String(c.id);
+    option.textContent = c.company_name || c.contact_name || c.email || String(c.id);
+    select.appendChild(option);
   });
 }
 
-function closeFromTemplatesModal(): void {
-  const modal = el('dr-from-templates-modal');
-  if (modal) {
-    modal.style.display = 'none';
-    drTemplatesModalFocusCleanup?.();
-    drTemplatesModalFocusCleanup = null;
+/**
+ * Initialize modal dropdowns (converts native selects to custom dropdowns)
+ */
+function initClientDropdowns(): void {
+  // Initialize single request client dropdown
+  if (!drCreateClientDropdownInit) {
+    const createClientSelect = document.getElementById('dr-create-client') as HTMLSelectElement;
+    if (createClientSelect && !createClientSelect.dataset.dropdownInit) {
+      initModalDropdown(createClientSelect);
+      drCreateClientDropdownInit = true;
+    }
+  }
+
+  // Initialize templates client dropdown
+  if (!drTemplatesClientDropdownInit) {
+    const templatesClientSelect = document.getElementById('dr-templates-client') as HTMLSelectElement;
+    if (templatesClientSelect && !templatesClientSelect.dataset.dropdownInit) {
+      initModalDropdown(templatesClientSelect);
+      drTemplatesClientDropdownInit = true;
+    }
+  }
+}
+
+function updateTabUI(): void {
+  const modal = el('dr-create-modal');
+  if (!modal) return;
+
+  // Update tab buttons
+  modal.querySelectorAll('.admin-modal-tab').forEach((tab) => {
+    const tabName = tab.getAttribute('data-dr-tab');
+    tab.classList.toggle('active', tabName === drActiveTab);
+  });
+
+  // Update tab content visibility
+  const singleForm = document.getElementById('dr-create-form');
+  const templatesForm = document.getElementById('dr-from-templates-form');
+
+  if (singleForm) {
+    singleForm.style.display = drActiveTab === 'single' ? '' : 'none';
+  }
+  if (templatesForm) {
+    templatesForm.style.display = drActiveTab === 'templates' ? '' : 'none';
   }
 }
 
@@ -411,7 +436,7 @@ function openDetailModal(requestId: number, ctx: AdminDashboardContext): void {
   titleEl.textContent = 'Document Request';
   bodyEl.innerHTML = '<p class="loading-message">Loading...</p>';
   footerEl.innerHTML = '';
-  modal.style.display = 'flex';
+  modal.classList.remove('hidden');
   drDetailModalFocusCleanup = manageFocusTrap(modal, {});
 
   loadRequestDetail(requestId).then((data) => {
@@ -463,7 +488,7 @@ function openDetailModal(requestId: number, ctx: AdminDashboardContext): void {
 function closeDetailModal(): void {
   const modal = el('dr-detail-modal');
   if (modal) {
-    modal.style.display = 'none';
+    modal.classList.add('hidden');
     drDetailModalFocusCleanup?.();
     drDetailModalFocusCleanup = null;
   }
@@ -501,14 +526,14 @@ async function runDetailAction(
 // ---------------------------------------------------------------------------
 
 async function refreshDocumentRequests(ctx: AdminDashboardContext): Promise<void> {
-  const filterValue = (drFilterWrapper?.dataset?.status ?? (document.getElementById('dr-filter') as HTMLSelectElement | null)?.value) ?? 'all';
-  const filter = filterValue as 'all' | 'pending' | 'for-review' | 'overdue';
   const tbody = el('dr-tbody');
   if (tbody) showTableLoading(tbody, DR_TABLE_COLSPAN, 'Loading requests...');
 
   try {
-    requestsCache = await loadRequests(filter);
-    renderRequestsTable(requestsCache, ctx);
+    requestsCache = await loadAllRequests();
+    // Apply client-side filters and render
+    const filtered = applyFilters(requestsCache, drFilterState, DOCUMENT_REQUESTS_FILTER_CONFIG);
+    renderRequestsTable(filtered, ctx);
   } catch (err) {
     if (tbody) showTableEmpty(tbody, DR_TABLE_COLSPAN, 'Failed to load requests.');
     alertError((err as Error).message);
@@ -519,17 +544,40 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
   if (drListenersSetup) return;
   drListenersSetup = true;
 
+  // Create modal open/close
   el('dr-add-request')?.addEventListener('click', () => openCreateModal(ctx));
   el('dr-create-modal-close')?.addEventListener('click', closeCreateModal);
   el('dr-create-cancel')?.addEventListener('click', closeCreateModal);
+  el('dr-templates-cancel')?.addEventListener('click', closeCreateModal);
 
+  // Tab switching
+  const modal = el('dr-create-modal');
+  modal?.querySelectorAll('.admin-modal-tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.getAttribute('data-dr-tab') as 'single' | 'templates';
+      if (tabName) {
+        drActiveTab = tabName;
+        updateTabUI();
+      }
+    });
+  });
+
+  // Close modal on backdrop click
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) closeCreateModal();
+  });
+
+  // Single request form submit
   document.getElementById('dr-create-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const clientSelect = document.getElementById('dr-create-client') as HTMLSelectElement | null;
     const titleInput = document.getElementById('dr-create-title') as HTMLInputElement | null;
     const descInput = document.getElementById('dr-create-description') as HTMLTextAreaElement | null;
     const dueInput = document.getElementById('dr-create-due') as HTMLInputElement | null;
-    if (!clientSelect?.value || !titleInput?.value.trim()) return;
+    if (!clientSelect?.value || !titleInput?.value.trim()) {
+      alertError('Please select a client and enter a title.');
+      return;
+    }
     try {
       await apiPost(DR_API, {
         client_id: parseInt(clientSelect.value, 10),
@@ -539,6 +587,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
       });
       alertSuccess('Document request created.');
       closeCreateModal();
+      // Reset form
       titleInput.value = '';
       if (descInput) descInput.value = '';
       if (dueInput) dueInput.value = '';
@@ -548,10 +597,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
     }
   });
 
-  el('dr-from-templates')?.addEventListener('click', () => openFromTemplatesModal(ctx));
-  el('dr-templates-modal-close')?.addEventListener('click', closeFromTemplatesModal);
-  el('dr-templates-cancel')?.addEventListener('click', closeFromTemplatesModal);
-
+  // Templates form submit
   document.getElementById('dr-from-templates-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const clientSelect = document.getElementById('dr-templates-client') as HTMLSelectElement | null;
@@ -566,7 +612,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
         template_ids: Array.from(checked).map((c) => parseInt(c.value, 10))
       });
       alertSuccess(`${checked.length} document request(s) created.`);
-      closeFromTemplatesModal();
+      closeCreateModal();
       await refreshDocumentRequests(ctx);
     } catch (err) {
       alertError((err as Error).message);
@@ -575,33 +621,25 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
 
   el('dr-refresh')?.addEventListener('click', () => refreshDocumentRequests(ctx));
 
-  const drFilterMount = el('dr-filter-mount');
-  if (drFilterMount && !drFilterWrapper) {
-    const options = DR_FILTER_OPTIONS.map((o) => ({ value: o.value, label: o.label }));
-    drFilterWrapper = createTableDropdown({
-      options,
-      currentValue: 'all',
-      showStatusDot: false,
-      ariaLabelPrefix: 'Filter requests',
-      showAllWithCheckmark: true,
-      onChange: () => refreshDocumentRequests(ctx)
-    });
-    drFilterWrapper.id = 'dr-filter';
-    drFilterMount.appendChild(drFilterWrapper);
-  }
-
-  // Setup search bar
-  const searchMount = el('dr-search-mount');
-  if (searchMount && !searchMount.querySelector('.search-bar')) {
-    const { wrapper } = createSearchBar({
-      placeholder: 'Search requests...',
-      ariaLabel: 'Search document requests',
-      onInput: (value) => {
-        drSearchQuery = value.toLowerCase();
+  // Setup filter UI (search, status checkboxes, date range)
+  const filterContainer = el('dr-filter-container');
+  if (filterContainer && !drFilterUIContainer) {
+    drFilterUIContainer = createFilterUI(
+      DOCUMENT_REQUESTS_FILTER_CONFIG,
+      drFilterState,
+      (newState) => {
+        drFilterState = newState;
         refreshFilteredTable(ctx);
       }
-    });
-    searchMount.appendChild(wrapper);
+    );
+
+    // Insert filter UI before export button
+    const exportBtn = filterContainer.querySelector('#dr-export');
+    if (exportBtn) {
+      filterContainer.insertBefore(drFilterUIContainer, exportBtn);
+    } else {
+      filterContainer.prepend(drFilterUIContainer);
+    }
   }
 
   // Setup export button
@@ -631,35 +669,14 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
     bulkToolbarContainer.replaceWith(toolbar);
   }
 
-  const createClientMount = el('dr-create-client-mount');
-  if (createClientMount && !drCreateClientSelectInstance) {
-    drCreateClientSelectInstance = createFilterSelect({
-      id: 'dr-create-client',
-      ariaLabel: 'Client',
-      emptyOption: 'Select client',
-      options: [],
-      value: '',
-      className: 'form-input',
-      required: true
-    });
-    createClientMount.appendChild(drCreateClientSelectInstance.element);
-  }
-
-  const templatesClientMount = el('dr-templates-client-mount');
-  if (templatesClientMount && !drTemplatesClientSelectInstance) {
-    drTemplatesClientSelectInstance = createFilterSelect({
-      id: 'dr-templates-client',
-      ariaLabel: 'Client',
-      emptyOption: 'Select client',
-      options: [],
-      value: '',
-      className: 'form-input',
-      required: true
-    });
-    templatesClientMount.appendChild(drTemplatesClientSelectInstance.element);
-  }
-
+  // Detail modal close
   el('dr-detail-modal-close')?.addEventListener('click', closeDetailModal);
+
+  // Close detail modal on backdrop click
+  const detailModal = el('dr-detail-modal');
+  detailModal?.addEventListener('click', (e) => {
+    if (e.target === detailModal) closeDetailModal();
+  });
 
   el('dr-tbody')?.addEventListener('click', async (e) => {
     const target = e.target as HTMLElement;
@@ -749,29 +766,10 @@ export async function loadDocumentRequests(ctx: AdminDashboardContext): Promise<
 }
 
 /**
- * Get document requests filtered by current filter and search query
+ * Get document requests filtered by current filter state
  */
 function getFilteredRequests(): DocumentRequest[] {
-  let filtered = requestsCache;
-
-  // Apply search filter
-  if (drSearchQuery) {
-    filtered = filtered.filter(r => {
-      const clientName = r.client_name?.toLowerCase() || '';
-      const title = r.title?.toLowerCase() || '';
-      const status = r.status?.toLowerCase() || '';
-      const type = r.document_type?.toLowerCase() || '';
-
-      return (
-        clientName.includes(drSearchQuery) ||
-        title.includes(drSearchQuery) ||
-        status.includes(drSearchQuery) ||
-        type.includes(drSearchQuery)
-      );
-    });
-  }
-
-  return filtered;
+  return applyFilters(requestsCache, drFilterState, DOCUMENT_REQUESTS_FILTER_CONFIG);
 }
 
 /**

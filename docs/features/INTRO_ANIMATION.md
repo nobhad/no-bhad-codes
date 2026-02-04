@@ -53,19 +53,19 @@ public/images/coyote_paw.svg
 
 ### SVG Specifications
 
-| Property | Value |
+|Property|Value|
 |----------|-------|
-| viewBox | `0 0 2316.99 1801.19` |
-| Width | 2316.99 |
-| Height | 1801.19 |
+|viewBox|`0 0 2316.99 1801.19`|
+|Width|2316.99|
+|Height|1801.19|
 
 ### CSS Classes
 
-| Class | Fill | Stroke | Stroke Width | Usage |
+|Class|Fill|Stroke|Stroke Width|Usage|
 |-------|------|--------|--------------|-------|
-| `.cls-1` | `#fff` (white) | `#231f20` (dark) | 9px | Card outline |
-| `.cls-2` | none | `#000` (black) | 5px | Paw paths, morph targets |
-| `.cls-3` | `#231f20` (dark) | none | - | Card text |
+|`.cls-1`|`#fff` (white)|`#231f20` (dark)|9px|Card outline|
+|`.cls-2`|none|`#000` (black)|5px|Paw paths, morph targets|
+|`.cls-3`|`#231f20` (dark)|none|-|Card text|
 
 ### Layer Structure
 
@@ -256,19 +256,19 @@ this.timeline
 
 ### Source Files
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `src/modules/animation/intro-animation.ts` | Main animation module (refactored Dec 19, 2025) |
-| `src/styles/components/intro-morph.css` | Overlay and morph styles |
-| `public/images/coyote_paw.svg` | SVG asset with all paw variations |
-| `index.html` | HTML structure for overlay |
+|`src/modules/animation/intro-animation.ts`|Main animation module (refactored Dec 19, 2025)|
+|`src/styles/components/intro-morph.css`|Overlay and morph styles|
+|`public/images/coyote_paw.svg`|SVG asset with all paw variations|
+|`index.html`|HTML structure for overlay|
 
 ### Dependencies
 
-| Package | Version | Purpose |
+|Package|Version|Purpose|
 |---------|---------|---------|
-| `gsap` | ^3.x | Animation engine |
-| `gsap/MorphSVGPlugin` | ^3.x | SVG path morphing (Club GreenSock) |
+|`gsap`|^3.x|Animation engine|
+|`gsap/MorphSVGPlugin`|^3.x|SVG path morphing (Club GreenSock)|
 
 ### Import Chain
 
@@ -296,11 +296,11 @@ sessionStorage.setItem('introShown', 'true');
 
 ### CSS Classes on Document
 
-| Class | When Applied | Purpose |
+|Class|When Applied|Purpose|
 |-------|--------------|---------|
-| `intro-loading` | Animation starting | Hide content, show overlay |
-| `intro-complete` | Animation finished | Show content, hide overlay |
-| `intro-finished` | After transition | Prevent future transitions |
+|`intro-loading`|Animation starting|Hide content, show overlay|
+|`intro-complete`|Animation finished|Show content, hide overlay|
+|`intro-finished`|After transition|Prevent future transitions|
 
 ### App State Integration
 
@@ -317,11 +317,11 @@ if (window.NBW_STATE) {
 
 ### Breakpoints
 
-| Breakpoint | Animation Type | Overlay |
+|Breakpoint|Animation Type|Overlay|
 |------------|----------------|---------|
-| Desktop (>767px) | Morph animation | Visible |
-| Mobile (<=767px) | Card flip only | Hidden |
-| Reduced Motion | Skip animation | Hidden |
+|Desktop (>767px)|Morph animation|Visible|
+|Mobile (<=767px)|Card flip only|Hidden|
+|Reduced Motion|Skip animation|Hidden|
 
 ### Mobile CSS
 

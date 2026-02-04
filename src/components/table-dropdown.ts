@@ -17,6 +17,7 @@ interface TableDropdownWrapper extends HTMLElement {
   _options?: TableDropdownOption[];
   _onChange?: (value: string) => void;
   _showAllWithCheckmark?: boolean;
+  _showStatusDot?: boolean;
   setOptions?: (options: TableDropdownOption[], selectedValue?: string) => void;
 }
 
@@ -117,14 +118,26 @@ export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
       menu.appendChild(li);
     });
   } else {
-    // Add options (excluding current)
+    // Add options (excluding current) with status dots
     options.forEach(opt => {
       if (opt.value === normalizedValue) return;
 
       const li = document.createElement('li');
       li.className = 'custom-dropdown-item';
       li.dataset.value = opt.value;
-      li.textContent = opt.label;
+      li.dataset.status = opt.value; // For status dot color styling
+
+      // Add status dot if showStatusDot is true
+      if (useStatusDot) {
+        const statusDot = document.createElement('span');
+        statusDot.className = 'status-dot';
+        li.appendChild(statusDot);
+      }
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'dropdown-item-name';
+      textSpan.textContent = opt.label;
+      li.appendChild(textSpan);
 
       li.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -154,6 +167,9 @@ export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
   if (ariaLabelPrefix !== undefined) {
     (wrapper as TableDropdownWrapper)._ariaLabelPrefix = ariaLabelPrefix;
   }
+
+  // Store showStatusDot for selectOption menu rebuilds
+  (wrapper as TableDropdownWrapper)._showStatusDot = useStatusDot;
 
   // When showAllWithCheckmark, store options/onChange for setOptions and attach setOptions
   if (showAllWithCheckmark) {
@@ -309,13 +325,26 @@ function selectOption(
     });
   } else if (menu) {
     menu.innerHTML = '';
+    const showDot = (wrapper as TableDropdownWrapper)._showStatusDot;
     allOptions.forEach(opt => {
       if (opt.value === value) return;
 
       const li = document.createElement('li');
       li.className = 'custom-dropdown-item';
       li.dataset.value = opt.value;
-      li.textContent = opt.label;
+      li.dataset.status = opt.value; // For status dot color styling
+
+      // Add status dot if enabled
+      if (showDot) {
+        const statusDot = document.createElement('span');
+        statusDot.className = 'status-dot';
+        li.appendChild(statusDot);
+      }
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'dropdown-item-name';
+      textSpan.textContent = opt.label;
+      li.appendChild(textSpan);
 
       li.addEventListener('click', (e) => {
         e.stopPropagation();

@@ -1053,7 +1053,20 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
     const activities = await clientService.getRecentActivities(limit);
-    res.json({ success: true, activities });
+    // Transform to snake_case for API response
+    const apiActivities = activities.map(a => ({
+      id: a.id,
+      client_id: a.clientId,
+      activity_type: a.activityType,
+      title: a.title,
+      description: a.description,
+      metadata: a.metadata,
+      created_by: a.createdBy,
+      created_at: a.createdAt,
+      client_name: a.clientName,
+      company_name: a.companyName
+    }));
+    res.json({ success: true, activities: apiActivities });
   })
 );
 

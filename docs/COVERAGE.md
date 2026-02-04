@@ -28,15 +28,15 @@ coverage: {
 
 ### ✅ NPM Scripts Available
 
-| Script | Purpose |
+|Script|Purpose|
 |--------|---------|
-| `npm run test:coverage` | Generate full coverage report |
-| `npm run test:coverage:watch` | Interactive coverage monitoring |
-| `npm run test:coverage:report` | Generate and open HTML report |
-| `npm run test:coverage:ci` | CI-optimized coverage with multiple formats |
-| `npm run test:coverage:threshold` | Update thresholds automatically |
-| `npm run coverage:check` | Validate coverage meets thresholds |
-| `npm run coverage:badge` | Generate coverage badge data |
+|`npm run test:coverage`|Generate full coverage report|
+|`npm run test:coverage:watch`|Interactive coverage monitoring|
+|`npm run test:coverage:report`|Generate and open HTML report|
+|`npm run test:coverage:ci`|CI-optimized coverage with multiple formats|
+|`npm run test:coverage:threshold`|Update thresholds automatically|
+|`npm run coverage:check`|Validate coverage meets thresholds|
+|`npm run coverage:badge`|Generate coverage badge data|
 
 ## 🔧 GitHub Actions Automation
 
@@ -49,22 +49,22 @@ coverage: {
    - ✅ Archives coverage artifacts
    - ✅ Enforces 70% minimum threshold
 
-2. **`.github/workflows/coverage-comment.yml`**
+1. **`.github/workflows/coverage-comment.yml`**
    - ✅ Automatically comments PR with coverage details
    - ✅ Shows coverage table with pass/fail status
    - ✅ Links to detailed HTML report
 
 ### 🎯 Coverage Thresholds
 
-| Module Type      | Lines | Functions | Branches | Statements |
+|Module Type|Lines|Functions|Branches|Statements|
 |------------------|-------|-----------|----------|------------|
-| **Global**       | 70%   | 70%       | 70%      | 70%        |
-| **Core Modules** | 85%   | 85%       | 85%      | 85%        |
-| **Services**     | 80%   | 80%       | 80%      | 80%        |
+|**Global**|70%|70%|70%|70%|
+|**Core Modules**|85%|85%|85%|85%|
+|**Services**|80%|80%|80%|80%|
 
 ## 📈 Current Coverage Status
 
-**Latest Run Results:**
+### Latest Run Results:
 
 - ✅ Coverage collection: **WORKING**
 - ✅ HTML reports: **Generated** at `/coverage/index.html`
@@ -158,7 +158,7 @@ coverage/
 
 ## 🏆 Success Metrics
 
-**✅ COMPLETED:**
+### ✅ COMPLETED:
 
 - Automated coverage collection with Vitest + V8
 - Comprehensive reporting in multiple formats  

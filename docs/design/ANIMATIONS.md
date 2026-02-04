@@ -39,16 +39,16 @@ This document defines animation standards for the project. All animations must f
 
 ### When to Use Each
 
-| Use GSAP | Use CSS Transitions |
+|Use GSAP|Use CSS Transitions|
 |----------|---------------------|
-| Page transitions | Hover color changes |
-| Modal enter/exit | Focus states |
-| Scroll animations | Simple opacity changes |
-| Complex sequences | Button hover effects |
-| Staggered animations | Link underlines |
-| SVG animations | Input focus |
-| Carousel/slider | Checkbox/toggle |
-| Loading animations | Tooltip show/hide |
+|Page transitions|Hover color changes|
+|Modal enter/exit|Focus states|
+|Scroll animations|Simple opacity changes|
+|Complex sequences|Button hover effects|
+|Staggered animations|Link underlines|
+|SVG animations|Input focus|
+|Carousel/slider|Checkbox/toggle|
+|Loading animations|Tooltip show/hide|
 
 ---
 

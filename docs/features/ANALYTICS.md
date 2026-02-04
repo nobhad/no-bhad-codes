@@ -33,25 +33,25 @@ The visitor tracking system monitors website traffic and user behavior.
 
 ### Visitor Tracking API Endpoints
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| POST | `/api/analytics/track` | Receive tracking events (public) |
-| GET | `/api/analytics/summary` | Get analytics summary |
-| GET | `/api/analytics/realtime` | Get real-time visitor data |
-| GET | `/api/analytics/sessions` | List visitor sessions |
-| GET | `/api/analytics/sessions/:sessionId` | Get session details |
-| GET | `/api/analytics/export` | Export analytics data |
-| DELETE | `/api/analytics/data` | Clear old tracking data |
+|POST|`/api/analytics/track`|Receive tracking events (public)|
+|GET|`/api/analytics/summary`|Get analytics summary|
+|GET|`/api/analytics/realtime`|Get real-time visitor data|
+|GET|`/api/analytics/sessions`|List visitor sessions|
+|GET|`/api/analytics/sessions/:sessionId`|Get session details|
+|GET|`/api/analytics/export`|Export analytics data|
+|DELETE|`/api/analytics/data`|Clear old tracking data|
 
 ### Visitor Tracking Tables
 
 These tables store visitor tracking data (separate from BI analytics tables):
 
-| Table | Description |
+|Table|Description|
 |-------|-------------|
-| `visitor_sessions` | Individual visitor sessions with metadata |
-| `page_views` | Page view records per session |
-| `interaction_events` | User interaction events (clicks, scrolls, etc.) |
+|`visitor_sessions`|Individual visitor sessions with metadata|
+|`page_views`|Page view records per session|
+|`interaction_events`|User interaction events (clicks, scrolls, etc.)|
 
 ### Tracking Data Collected
 
@@ -69,15 +69,15 @@ These tables store visitor tracking data (separate from BI analytics tables):
 
 **Migration:** `036_analytics_enhancements.sql`
 
-| Table | Description |
+|Table|Description|
 |-------|-------------|
-| `saved_reports` | Reusable report configurations with filters, columns, and chart types |
-| `report_schedules` | Automated report generation schedules with email delivery |
-| `dashboard_widgets` | User-customizable dashboard widget configurations |
-| `kpi_snapshots` | Historical KPI values for trend analysis |
-| `report_runs` | Report execution history and status tracking |
-| `dashboard_presets` | Pre-configured dashboard layouts (Executive, Sales, PM) |
-| `metric_alerts` | Threshold-based alerts for KPI monitoring |
+|`saved_reports`|Reusable report configurations with filters, columns, and chart types|
+|`report_schedules`|Automated report generation schedules with email delivery|
+|`dashboard_widgets`|User-customizable dashboard widget configurations|
+|`kpi_snapshots`|Historical KPI values for trend analysis|
+|`report_runs`|Report execution history and status tracking|
+|`dashboard_presets`|Pre-configured dashboard layouts (Executive, Sales, PM)|
+|`metric_alerts`|Threshold-based alerts for KPI monitoring|
 
 ### Service
 
@@ -141,66 +141,66 @@ getReportRuns(reportId?: number, limit?: number): Promise<ReportRun[]>
 
 ### Saved Reports
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/analytics/reports` | List all saved reports (optional `?type=` and `?favorites=true`) |
-| POST | `/api/analytics/reports` | Create a new saved report |
-| GET | `/api/analytics/reports/:id` | Get a specific report |
-| PUT | `/api/analytics/reports/:id` | Update a report |
-| DELETE | `/api/analytics/reports/:id` | Delete a report |
-| POST | `/api/analytics/reports/:id/favorite` | Toggle report favorite status |
-| POST | `/api/analytics/reports/:id/run` | Execute a report and get results |
+|GET|`/api/analytics/reports`|List all saved reports (optional `?type=` and `?favorites=true`)|
+|POST|`/api/analytics/reports`|Create a new saved report|
+|GET|`/api/analytics/reports/:id`|Get a specific report|
+|PUT|`/api/analytics/reports/:id`|Update a report|
+|DELETE|`/api/analytics/reports/:id`|Delete a report|
+|POST|`/api/analytics/reports/:id/favorite`|Toggle report favorite status|
+|POST|`/api/analytics/reports/:id/run`|Execute a report and get results|
 
 ### Report Schedules
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/analytics/reports/:reportId/schedules` | Get schedules for a report |
-| POST | `/api/analytics/reports/:reportId/schedules` | Create a schedule |
-| PUT | `/api/analytics/schedules/:id` | Update a schedule |
-| DELETE | `/api/analytics/schedules/:id` | Delete a schedule |
-| POST | `/api/analytics/schedules/process` | Process all due schedules |
+|GET|`/api/analytics/reports/:reportId/schedules`|Get schedules for a report|
+|POST|`/api/analytics/reports/:reportId/schedules`|Create a schedule|
+|PUT|`/api/analytics/schedules/:id`|Update a schedule|
+|DELETE|`/api/analytics/schedules/:id`|Delete a schedule|
+|POST|`/api/analytics/schedules/process`|Process all due schedules|
 
 ### Dashboard Widgets
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/analytics/widgets` | Get user's dashboard widgets |
-| POST | `/api/analytics/widgets` | Create a widget |
-| PUT | `/api/analytics/widgets/:id` | Update a widget |
-| DELETE | `/api/analytics/widgets/:id` | Delete a widget |
-| PUT | `/api/analytics/widgets/layout` | Update widget layout (positions/sizes) |
-| GET | `/api/analytics/widgets/presets` | Get available dashboard presets |
-| POST | `/api/analytics/widgets/presets/:id/apply` | Apply a dashboard preset |
+|GET|`/api/analytics/widgets`|Get user's dashboard widgets|
+|POST|`/api/analytics/widgets`|Create a widget|
+|PUT|`/api/analytics/widgets/:id`|Update a widget|
+|DELETE|`/api/analytics/widgets/:id`|Delete a widget|
+|PUT|`/api/analytics/widgets/layout`|Update widget layout (positions/sizes)|
+|GET|`/api/analytics/widgets/presets`|Get available dashboard presets|
+|POST|`/api/analytics/widgets/presets/:id/apply`|Apply a dashboard preset|
 
 ### KPI Snapshots
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| POST | `/api/analytics/kpis/snapshot` | Capture a KPI snapshot |
-| GET | `/api/analytics/kpis/latest` | Get latest KPI values |
-| GET | `/api/analytics/kpis/:type/trend` | Get KPI trend over time |
+|POST|`/api/analytics/kpis/snapshot`|Capture a KPI snapshot|
+|GET|`/api/analytics/kpis/latest`|Get latest KPI values|
+|GET|`/api/analytics/kpis/:type/trend`|Get KPI trend over time|
 
 ### Metric Alerts
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/analytics/alerts` | Get all metric alerts |
-| POST | `/api/analytics/alerts` | Create an alert |
-| PUT | `/api/analytics/alerts/:id` | Update an alert |
-| DELETE | `/api/analytics/alerts/:id` | Delete an alert |
-| POST | `/api/analytics/alerts/check` | Check all alerts for triggers |
+|GET|`/api/analytics/alerts`|Get all metric alerts|
+|POST|`/api/analytics/alerts`|Create an alert|
+|PUT|`/api/analytics/alerts/:id`|Update an alert|
+|DELETE|`/api/analytics/alerts/:id`|Delete an alert|
+|POST|`/api/analytics/alerts/check`|Check all alerts for triggers|
 
 ### Quick Analytics
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/analytics/quick/revenue` | Revenue analytics |
-| GET | `/api/analytics/quick/pipeline` | Pipeline analytics |
-| GET | `/api/analytics/quick/projects` | Project analytics |
-| GET | `/api/analytics/quick/clients` | Client analytics |
-| GET | `/api/analytics/quick/team` | Team performance analytics |
-| GET | `/api/analytics/report-runs` | Report run history |
+|GET|`/api/analytics/quick/revenue`|Revenue analytics|
+|GET|`/api/analytics/quick/pipeline`|Pipeline analytics|
+|GET|`/api/analytics/quick/projects`|Project analytics|
+|GET|`/api/analytics/quick/clients`|Client analytics|
+|GET|`/api/analytics/quick/team`|Team performance analytics|
+|GET|`/api/analytics/report-runs`|Report run history|
 
 ## Data Flow
 
@@ -293,28 +293,28 @@ Widgets: Active Projects, Due This Week, Overdue Tasks, Hours This Week, Project
 
 ## KPI Types
 
-| KPI | Description |
+|KPI|Description|
 |-----|-------------|
-| `revenue` | Total invoiced amount |
-| `pipeline_value` | Total value of open leads |
-| `client_count` | Active client count |
-| `project_count` | Active project count |
-| `conversion_rate` | Lead to client conversion |
-| `avg_project_value` | Average project value |
-| `outstanding_invoices` | Unpaid invoice total |
-| `paid_invoices` | Paid invoice total |
-| `active_leads` | Open lead count |
-| `closed_leads` | Won leads this period |
+|`revenue`|Total invoiced amount|
+|`pipeline_value`|Total value of open leads|
+|`client_count`|Active client count|
+|`project_count`|Active project count|
+|`conversion_rate`|Lead to client conversion|
+|`avg_project_value`|Average project value|
+|`outstanding_invoices`|Unpaid invoice total|
+|`paid_invoices`|Paid invoice total|
+|`active_leads`|Open lead count|
+|`closed_leads`|Won leads this period|
 
 ## Metric Alert Conditions
 
-| Condition | Description |
+|Condition|Description|
 |-----------|-------------|
-| `above` | Trigger when value exceeds threshold |
-| `below` | Trigger when value falls below threshold |
-| `equals` | Trigger when value equals threshold |
-| `change_above` | Trigger when change % exceeds threshold |
-| `change_below` | Trigger when change % falls below threshold |
+|`above`|Trigger when value exceeds threshold|
+|`below`|Trigger when value falls below threshold|
+|`equals`|Trigger when value equals threshold|
+|`change_above`|Trigger when change % exceeds threshold|
+|`change_below`|Trigger when change % falls below threshold|
 
 ## Implementation Details
 

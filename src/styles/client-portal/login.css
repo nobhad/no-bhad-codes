@@ -92,7 +92,7 @@
   display: block;
   margin-bottom: 0;
   font-weight: 600;
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-light);
   font-size: clamp(0.875rem, 2.5vw, 1rem);
 }
 
@@ -142,7 +142,7 @@ html[data-theme="dark"] .login-form {
 }
 
 html[data-theme="dark"] .login-form label {
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-light);
 }
 
 /* Responsive */

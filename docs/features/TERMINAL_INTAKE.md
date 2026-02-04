@@ -103,7 +103,7 @@ Questions can depend on previous answers:
 
 ### Submit Intake
 
-```
+```text
 POST /api/intake
 Content-Type: application/json
 Authorization: Bearer <token> (optional)

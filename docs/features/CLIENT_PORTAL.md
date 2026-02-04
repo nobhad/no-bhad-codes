@@ -63,14 +63,14 @@ The Client Portal is a dedicated dashboard for clients to manage their projects,
 
 ### Technology Stack
 
-| Component | Technology |
+|Component|Technology|
 |-----------|------------|
-| Template Engine | EJS (Embedded JavaScript) |
-| Frontend | Vanilla TypeScript |
-| Styling | CSS with CSS Variables |
-| Animations | GSAP |
-| Build Tool | Vite |
-| Emoji Picker | `emoji-picker-element` web component |
+|Template Engine|EJS (Embedded JavaScript)|
+|Frontend|Vanilla TypeScript|
+|Styling|CSS with CSS Variables|
+|Animations|GSAP|
+|Build Tool|Vite|
+|Emoji Picker|`emoji-picker-element` web component|
 
 ### Module Structure
 
@@ -165,22 +165,22 @@ export class ClientPortalModule extends BaseModule {
 
 ### Lifecycle Methods
 
-| Method | Purpose |
+|Method|Purpose|
 |--------|---------|
-| `onInit()` | Cache DOM elements, setup event listeners |
-| `onDestroy()` | Cleanup event listeners and animations |
-| `cacheElements()` | Query and store DOM element references |
-| `setupEventListeners()` | Attach all event handlers |
-| `setupDashboardEventListeners()` | Setup dashboard-specific handlers |
+|`onInit()`|Cache DOM elements, setup event listeners|
+|`onDestroy()`|Cleanup event listeners and animations|
+|`cacheElements()`|Query and store DOM element references|
+|`setupEventListeners()`|Attach all event handlers|
+|`setupDashboardEventListeners()`|Setup dashboard-specific handlers|
 
 ### State Management
 
-| Property | Type | Purpose |
+|Property|Type|Purpose|
 |----------|------|---------|
-| `isLoggedIn` | `boolean` | Track authentication state |
-| `currentProject` | `ClientProject \| null` | Currently selected project |
-| `currentUser` | `string \| null` | Current user's email |
-| `dashboardListenersSetup` | `boolean` | Prevent duplicate listener setup |
+|`isLoggedIn`|`boolean`|Track authentication state|
+|`currentProject`|`ClientProject \|null`|Currently selected project|
+|`currentUser`|`string \|null`|Current user's email|
+|`dashboardListenersSetup`|`boolean`|Prevent duplicate listener setup|
 
 ---
 
@@ -190,11 +190,11 @@ export class ClientPortalModule extends BaseModule {
 
 Three stat cards at the top of the dashboard, each clickable to navigate to the relevant section:
 
-| Card | Data | Navigates To |
+|Card|Data|Navigates To|
 |------|------|--------------|
-| Active Projects | Count of in-progress projects | Dashboard |
-| Pending Invoices | Count of unpaid invoices | Invoices tab |
-| Unread Messages | Count of new messages | Messages tab |
+|Active Projects|Count of in-progress projects|Dashboard|
+|Pending Invoices|Count of unpaid invoices|Invoices tab|
+|Unread Messages|Count of new messages|Messages tab|
 
 **HTML Implementation:**
 
@@ -245,6 +245,7 @@ if (statCards.length > 0) {
 ### 2. Project Cards
 
 Displays current project status with:
+
 - Project name
 - Status badge (In Progress, Completed, On Hold)
 - Progress percentage
@@ -271,6 +272,7 @@ Displays current project status with:
 ### 3. Recent Activity
 
 Chronological log of project events:
+
 - Project intake received
 - Account activation
 - Status changes
@@ -296,15 +298,15 @@ Chronological log of project events:
 
 Collapsible sidebar with tab buttons:
 
-| Button | Tab ID | Element ID | Description |
+|Button|Tab ID|Element ID|Description|
 |--------|--------|------------|-------------|
-| DASHBOARD | `dashboard` | `btn-dashboard` | Main overview |
-| FILES | `files` | `btn-files` | File management |
-| MESSAGES | `messages` | `btn-messages` | Client communication |
-| INVOICES | `invoices` | `btn-invoices` | Payment history |
-| SETTINGS | `settings` | `btn-settings` | Account settings |
-| + NEW PROJECT | `new-project` | `btn-new-project` | Project request form |
-| PROJECT PREVIEW | `preview` | `btn-preview` | Live site preview (hidden by default) |
+|DASHBOARD|`dashboard`|`btn-dashboard`|Main overview|
+|FILES|`files`|`btn-files`|File management|
+|MESSAGES|`messages`|`btn-messages`|Client communication|
+|INVOICES|`invoices`|`btn-invoices`|Payment history|
+|SETTINGS|`settings`|`btn-settings`|Account settings|
+|+ NEW PROJECT|`new-project`|`btn-new-project`|Project request form|
+|PROJECT PREVIEW|`preview`|`btn-preview`|Live site preview (hidden by default)|
 
 **HTML Implementation:**
 
@@ -324,6 +326,7 @@ Collapsible sidebar with tab buttons:
 ### Sidebar Toggle
 
 Collapsible sidebar with toggle button:
+
 - Collapsed state: Icons only
 - Expanded state: Full button text
 - Persists preference in localStorage
@@ -376,15 +379,15 @@ private switchTab(tabName: string): void {
 
 ### Tab Content IDs
 
-| Tab | Content Element ID |
+|Tab|Content Element ID|
 |-----|-------------------|
-| Dashboard | `tab-dashboard` |
-| Files | `tab-files` |
-| Messages | `tab-messages` |
-| Invoices | `tab-invoices` |
-| Settings | `tab-settings` |
-| New Project | `tab-new-project` |
-| Preview | `tab-preview` |
+|Dashboard|`tab-dashboard`|
+|Files|`tab-files`|
+|Messages|`tab-messages`|
+|Invoices|`tab-invoices`|
+|Settings|`tab-settings`|
+|New Project|`tab-new-project`|
+|Preview|`tab-preview`|
 
 ---
 
@@ -615,28 +618,28 @@ if (passwordToggle && passwordInput) {
 
 The Client Portal includes a complete file management system. For detailed documentation, see [FILES.md](./FILES.md).
 
-### Key Features
+### Upload Key Features
 
-| Feature | Description |
+|Feature|Description|
 |---------|-------------|
-| Drag & Drop Upload | Upload files by dragging them to the dropzone |
-| Browse Files | Traditional file picker button |
-| File List from API | Dynamic file list from backend with demo fallback |
-| File Preview | Open images and PDFs in new browser tab |
-| File Download | Download files with original filename |
-| Access Control | Clients can only access their own project files |
+|Drag & Drop Upload|Upload files by dragging them to the dropzone|
+|Browse Files|Traditional file picker button|
+|File List from API|Dynamic file list from backend with demo fallback|
+|File Preview|Open images and PDFs in new browser tab|
+|File Download|Download files with original filename|
+|Access Control|Clients can only access their own project files|
 
-### API Endpoints
+### Upload API Endpoints
 
-| Endpoint | Method | Description |
+|Endpoint|Method|Description|
 |----------|--------|-------------|
-| `/api/uploads/client` | GET | Get all files for authenticated client |
-| `/api/uploads/project/:projectId` | GET | Get files for specific project |
-| `/api/uploads/file/:fileId` | GET | Download/preview a file |
-| `/api/uploads/file/:fileId` | DELETE | Delete a file |
-| `/api/uploads/multiple` | POST | Upload multiple files |
+|`/api/uploads/client`|GET|Get all files for authenticated client|
+|`/api/uploads/project/:projectId`|GET|Get files for specific project|
+|`/api/uploads/file/:fileId`|GET|Download/preview a file|
+|`/api/uploads/file/:fileId`|DELETE|Delete a file|
+|`/api/uploads/multiple`|POST|Upload multiple files|
 
-### TypeScript Methods
+### Upload TypeScript Methods
 
 ```typescript
 // Key file management methods in client-portal.ts
@@ -653,25 +656,25 @@ downloadFile(fileId, name)   // Trigger file download
 
 The Client Portal includes a complete invoice management system. For detailed documentation, see [INVOICES.md](./INVOICES.md).
 
-### Key Features
+### Invoice Key Features
 
-| Feature | Description |
+|Feature|Description|
 |---------|-------------|
-| Summary Cards | Total outstanding and total paid amounts |
-| Invoice List from API | Dynamic list from backend with demo fallback |
-| Status Badges | Visual status indicators (Pending, Paid, Overdue, etc.) |
-| Invoice Preview | Open invoice details in new tab |
-| Invoice PDF Download | Download invoice as PDF via PDFKit |
+|Summary Cards|Total outstanding and total paid amounts|
+|Invoice List from API|Dynamic list from backend with demo fallback|
+|Status Badges|Visual status indicators (Pending, Paid, Overdue, etc.)|
+|Invoice Preview|Open invoice details in new tab|
+|Invoice PDF Download|Download invoice as PDF via PDFKit|
 
-### API Endpoints
+### Invoice API Endpoints
 
-| Endpoint | Method | Description |
+|Endpoint|Method|Description|
 |----------|--------|-------------|
-| `/api/invoices/me` | GET | Get all invoices for authenticated client with summary |
-| `/api/invoices/:id` | GET | Get specific invoice details |
-| `/api/invoices/:id/pdf` | GET | Download invoice as PDF |
+|`/api/invoices/me`|GET|Get all invoices for authenticated client with summary|
+|`/api/invoices/:id`|GET|Get specific invoice details|
+|`/api/invoices/:id/pdf`|GET|Download invoice as PDF|
 
-### TypeScript Methods
+### Invoice TypeScript Methods
 
 ```typescript
 // Key invoice management methods in client-portal.ts
@@ -798,17 +801,17 @@ private hideAllViews(): void {
 
 ### View Methods
 
-| Method | Purpose |
+|Method|Purpose|
 |--------|---------|
-| `showDashboard()` | Display main dashboard |
-| `showSettings()` | Display settings view |
-| `showBillingView()` | Display billing settings |
-| `showContactView()` | Display contact settings |
-| `showNotificationsView()` | Display notification preferences |
-| `showFilesView()` | Display files management |
-| `showMessagesView()` | Display messaging interface |
-| `showWelcomeView()` | Display welcome/home view |
-| `showProjectDetailView()` | Display project details |
+|`showDashboard()`|Display main dashboard|
+|`showSettings()`|Display settings view|
+|`showBillingView()`|Display billing settings|
+|`showContactView()`|Display contact settings|
+|`showNotificationsView()`|Display notification preferences|
+|`showFilesView()`|Display files management|
+|`showMessagesView()`|Display messaging interface|
+|`showWelcomeView()`|Display welcome/home view|
+|`showProjectDetailView()`|Display project details|
 
 ---
 
@@ -816,23 +819,23 @@ private hideAllViews(): void {
 
 Settings are now persisted to the backend API. For detailed documentation, see [SETTINGS.md](./SETTINGS.md).
 
-### API Endpoints
+### Settings API Endpoints
 
-| Endpoint | Method | Purpose |
+|Endpoint|Method|Purpose|
 |----------|--------|---------|
-| `/api/clients/me` | GET | Get current client profile |
-| `/api/clients/me` | PUT | Update profile (name, company, phone) |
-| `/api/clients/me/password` | PUT | Change password |
-| `/api/clients/me/notifications` | PUT | Update notification preferences |
-| `/api/clients/me/billing` | PUT | Update billing information |
+|`/api/clients/me`|GET|Get current client profile|
+|`/api/clients/me`|PUT|Update profile (name, company, phone)|
+|`/api/clients/me/password`|PUT|Change password|
+|`/api/clients/me/notifications`|PUT|Update notification preferences|
+|`/api/clients/me/billing`|PUT|Update billing information|
 
 ### Form Save Methods
 
-| Method | API Endpoint | Purpose |
+|Method|API Endpoint|Purpose|
 |--------|--------------|---------|
-| `saveProfileSettings()` | `/api/clients/me` + `/me/password` | Save profile and password |
-| `saveNotificationSettings()` | `/api/clients/me/notifications` | Save notification preferences |
-| `saveBillingSettings()` | `/api/clients/me/billing` | Save billing information |
+|`saveProfileSettings()`|`/api/clients/me` + `/me/password`|Save profile and password|
+|`saveNotificationSettings()`|`/api/clients/me/notifications`|Save notification preferences|
+|`saveBillingSettings()`|`/api/clients/me/billing`|Save billing information|
 
 ### Success Message
 
@@ -882,13 +885,13 @@ All cards and sections use the `.portal-shadow` utility class for consistent sty
 
 ### Color Variables Used
 
-| Variable | Purpose |
+|Variable|Purpose|
 |----------|---------|
-| `--color-neutral-100` | Card backgrounds |
-| `--color-neutral-300` | Secondary backgrounds |
-| `--color-dark` | Text color |
-| `--color-primary` | Accent color (green) |
-| `#000000` | Borders (actual black) |
+|`--color-neutral-100`|Card backgrounds|
+|`--color-neutral-300`|Secondary backgrounds|
+|`--color-dark`|Text color|
+|`--color-primary`|Accent color (green)|
+|`#000000`|Borders (actual black)|
 
 ### Responsive Design
 
@@ -918,18 +921,18 @@ Settings grid adapts to viewport:
 
 ## File Locations
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `client/portal.html` | Entry point HTML |
-| `src/features/client/client-portal.ts` | Main TypeScript module (~2000 lines) |
-| `src/features/client/modules/` | Extracted portal modules (7 files) |
-| `src/styles/client-portal/` | Portal-specific styles (8 CSS files) |
-| `src/portal.ts` | Entry point script (used by client/portal.html) |
-| `server/routes/uploads.ts` | File upload API endpoints |
-| `server/routes/clients.ts` | Client profile/settings API |
-| `server/routes/projects.ts` | Project management API |
-| `server/routes/invoices.ts` | Invoice API with PDF generation |
-| `server/routes/messages.ts` | Messaging API |
+|`client/portal.html`|Entry point HTML|
+|`src/features/client/client-portal.ts`|Main TypeScript module (~2000 lines)|
+|`src/features/client/modules/`|Extracted portal modules (7 files)|
+|`src/styles/client-portal/`|Portal-specific styles (8 CSS files)|
+|`src/portal.ts`|Entry point script (used by client/portal.html)|
+|`server/routes/uploads.ts`|File upload API endpoints|
+|`server/routes/clients.ts`|Client profile/settings API|
+|`server/routes/projects.ts`|Project management API|
+|`server/routes/invoices.ts`|Invoice API with PDF generation|
+|`server/routes/messages.ts`|Messaging API|
 
 ---
 

@@ -26,15 +26,15 @@ The New Project Request form allows existing clients to submit requests for addi
 
 ## Features
 
-| Feature | Description |
+|Feature|Description|
 |---------|-------------|
-| Project Name | Custom name for the project |
-| Project Type | Dropdown selection of project categories |
-| Budget Range | Predefined budget options |
-| Timeline | Desired completion timeline |
-| Description | Free-form project requirements |
-| Required Fields | All fields required for submission |
-| Form Reset | Form clears after successful submission |
+|Project Name|Custom name for the project|
+|Project Type|Dropdown selection of project categories|
+|Budget Range|Predefined budget options|
+|Timeline|Desired completion timeline|
+|Description|Free-form project requirements|
+|Required Fields|All fields required for submission|
+|Form Reset|Form clears after successful submission|
 
 ---
 
@@ -120,25 +120,25 @@ The New Project Request form allows existing clients to submit requests for addi
 </div>
 ```
 
-| Property | Value |
+|Property|Value|
 |----------|-------|
-| ID | `project-name` |
-| Type | `text` |
-| Required | Yes |
-| Placeholder | "e.g., Company Website Redesign" |
+|ID|`project-name`|
+|Type|`text`|
+|Required|Yes|
+|Placeholder|"e.g., Company Website Redesign"|
 
 ### Project Type
 
 Dropdown selection for project category:
 
-| Value | Label |
+|Value|Label|
 |-------|-------|
-| `website` | New Website |
-| `redesign` | Website Redesign |
-| `webapp` | Web Application |
-| `ecommerce` | E-Commerce Site |
-| `maintenance` | Maintenance & Updates |
-| `other` | Other |
+|`website`|New Website|
+|`redesign`|Website Redesign|
+|`webapp`|Web Application|
+|`ecommerce`|E-Commerce Site|
+|`maintenance`|Maintenance & Updates|
+|`other`|Other|
 
 ```html
 <div class="form-group">
@@ -159,13 +159,13 @@ Dropdown selection for project category:
 
 Budget range selection:
 
-| Value | Label |
+|Value|Label|
 |-------|-------|
-| `1k-2.5k` | $1,000 - $2,500 |
-| `2.5k-5k` | $2,500 - $5,000 |
-| `5k-10k` | $5,000 - $10,000 |
-| `10k-25k` | $10,000 - $25,000 |
-| `25k+` | $25,000+ |
+|`1k-2.5k`|$1,000 - $2,500|
+|`2.5k-5k`|$2,500 - $5,000|
+|`5k-10k`|$5,000 - $10,000|
+|`10k-25k`|$10,000 - $25,000|
+|`25k+`|$25,000+|
 
 ```html
 <div class="form-group">
@@ -185,12 +185,12 @@ Budget range selection:
 
 Timeline preference selection:
 
-| Value | Label |
+|Value|Label|
 |-------|-------|
-| `asap` | As soon as possible |
-| `1-2months` | 1-2 months |
-| `3-6months` | 3-6 months |
-| `flexible` | Flexible |
+|`asap`|As soon as possible|
+|`1-2months`|1-2 months|
+|`3-6months`|3-6 months|
+|`flexible`|Flexible|
 
 ```html
 <div class="form-group">
@@ -218,12 +218,12 @@ Free-form text area for detailed requirements:
 </div>
 ```
 
-| Property | Value |
+|Property|Value|
 |----------|-------|
-| ID | `project-description` |
-| Rows | 5 |
-| Required | Yes |
-| Placeholder | Detailed prompt for requirements |
+|ID|`project-description`|
+|Rows|5|
+|Required|Yes|
+|Placeholder|Detailed prompt for requirements|
 
 ---
 
@@ -335,9 +335,9 @@ private async submitProjectRequest(): Promise<void> {
 
 ### API Endpoint
 
-| Endpoint | Method | Description |
+|Endpoint|Method|Description|
 |----------|--------|-------------|
-| `/api/projects/request` | POST | Submit project request (clients only) |
+|`/api/projects/request`|POST|Submit project request (clients only)|
 
 ### Request Payload
 
@@ -379,6 +379,7 @@ ALTER TABLE projects ADD COLUMN preview_url TEXT;
 ```
 
 Projects created via the request form have these characteristics:
+
 - `status` = 'pending'
 - `priority` = 'medium'
 - `project_type`, `budget_range`, `timeline` populated from form
@@ -388,6 +389,7 @@ Projects created via the request form have these characteristics:
 When a project request is submitted:
 
 **To Client:**
+
 ```typescript
 await emailService.sendProjectRequestConfirmation(clientEmail, {
   clientName: 'John Doe',
@@ -398,6 +400,7 @@ await emailService.sendProjectRequestConfirmation(clientEmail, {
 ```
 
 **To Admin:**
+
 ```typescript
 await emailService.sendAdminNotification({
   type: 'new_project_request',
@@ -513,14 +516,14 @@ await emailService.sendAdminNotification({
 
 ## File Locations
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `client/portal.html` | New Project form HTML (tab-new-project section) |
-| `src/features/client/client-portal.ts` | submitProjectRequest() method |
-| `src/features/client/modules/portal-projects.ts` | Project loading and display (~500 lines) |
-| `src/styles/client-portal/views.css` | Form styling |
-| `server/routes/projects.ts` | Project request API |
-| `server/services/email-service.ts` | Email notifications |
+|`client/portal.html`|New Project form HTML (tab-new-project section)|
+|`src/features/client/client-portal.ts`|submitProjectRequest() method|
+|`src/features/client/modules/portal-projects.ts`|Project loading and display (~500 lines)|
+|`src/styles/client-portal/views.css`|Form styling|
+|`server/routes/projects.ts`|Project request API|
+|`server/services/email-service.ts`|Email notifications|
 
 ---
 

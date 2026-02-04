@@ -27,40 +27,40 @@ The Invoice System provides clients with a complete view of their payment histor
 
 ## Features
 
-| Feature | Status | Description |
+|Feature|Status|Description|
 |---------|--------|-------------|
-| Summary Cards | Complete | Total outstanding and total paid amounts |
-| Invoice List from API | Complete | Dynamic list from backend with demo fallback |
-| Status Badges | Complete | Visual status indicators (Pending, Paid, Overdue, etc.) |
-| Preview | Complete | View invoice details in new tab |
-| Download | Complete | Download invoice as PDF |
-| PDF Generation | Complete | Full PDF generation with pdf-lib (see [PDF_GENERATION.md](./PDF_GENERATION.md)) |
-| Project Association | Complete | Link invoices to specific projects |
-| Demo Mode | Complete | Fallback demo data when backend unavailable |
-| Deposit Invoices | Complete | Create deposit invoices with percentage tracking |
-| Credit Application | Complete | Apply paid deposits as credits to standard invoices |
-| Edit Draft Invoices | Complete | Modify invoice line items and notes before sending |
-| Payment Plan Templates | Complete | Reusable payment structures (50/50, 30/30/40, etc.) |
-| Milestone-Linked Invoices | Complete | Link invoices to project milestones |
-| Invoice Scheduling | Complete | Schedule future invoice generation |
-| Recurring Invoices | Complete | Automated recurring invoices (weekly/monthly/quarterly) |
-| Payment Reminders | Complete | Automated reminder emails based on due date |
-| Scheduler Service | Complete | Background job processing for automation |
-| Delete/Void Invoice | Complete | Delete drafts or void sent invoices |
-| Duplicate Invoice | Complete | Clone existing invoice as new draft |
-| Record Payment | Complete | Record partial or full payments with method tracking |
-| Invoice Search | Complete | Search with filters, date range, pagination |
-| Auto-Mark Overdue | Complete | Scheduler automatically marks past-due invoices |
-| Manual Reminder | Complete | Send payment reminder on demand |
-| **Tax Support** | Complete | Invoice-level and line-item tax rates with calculation |
-| **Discounts** | Complete | Percentage or fixed discounts at invoice or line level |
-| **Late Fees** | Complete | Automatic late fee calculation (flat, percentage, daily) |
-| **Payment Terms Presets** | Complete | Net 15, Net 30, Net 60, Due on Receipt, custom terms |
-| **Payment History** | Complete | Full payment history tracking per invoice |
-| **A/R Aging Report** | Complete | Accounts receivable aging by bucket (current, 1-30, 31-60, 61-90, 90+) |
-| **Internal Notes** | Complete | Admin-only notes not visible to clients |
-| **Custom Invoice Numbers** | Complete | Custom prefix and sequential numbering |
-| **Comprehensive Stats** | Complete | Revenue, outstanding, averages, status breakdown, monthly trends |
+|Summary Cards|Complete|Total outstanding and total paid amounts|
+|Invoice List from API|Complete|Dynamic list from backend with demo fallback|
+|Status Badges|Complete|Visual status indicators (Pending, Paid, Overdue, etc.)|
+|Preview|Complete|View invoice details in new tab|
+|Download|Complete|Download invoice as PDF|
+|PDF Generation|Complete|Full PDF generation with pdf-lib (see [PDF_GENERATION.md](./PDF_GENERATION.md))|
+|Project Association|Complete|Link invoices to specific projects|
+|Demo Mode|Complete|Fallback demo data when backend unavailable|
+|Deposit Invoices|Complete|Create deposit invoices with percentage tracking|
+|Credit Application|Complete|Apply paid deposits as credits to standard invoices|
+|Edit Draft Invoices|Complete|Modify invoice line items and notes before sending|
+|Payment Plan Templates|Complete|Reusable payment structures (50/50, 30/30/40, etc.)|
+|Milestone-Linked Invoices|Complete|Link invoices to project milestones|
+|Invoice Scheduling|Complete|Schedule future invoice generation|
+|Recurring Invoices|Complete|Automated recurring invoices (weekly/monthly/quarterly)|
+|Payment Reminders|Complete|Automated reminder emails based on due date|
+|Scheduler Service|Complete|Background job processing for automation|
+|Delete/Void Invoice|Complete|Delete drafts or void sent invoices|
+|Duplicate Invoice|Complete|Clone existing invoice as new draft|
+|Record Payment|Complete|Record partial or full payments with method tracking|
+|Invoice Search|Complete|Search with filters, date range, pagination|
+|Auto-Mark Overdue|Complete|Scheduler automatically marks past-due invoices|
+|Manual Reminder|Complete|Send payment reminder on demand|
+|**Tax Support**|Complete|Invoice-level and line-item tax rates with calculation|
+|**Discounts**|Complete|Percentage or fixed discounts at invoice or line level|
+|**Late Fees**|Complete|Automatic late fee calculation (flat, percentage, daily)|
+|**Payment Terms Presets**|Complete|Net 15, Net 30, Net 60, Due on Receipt, custom terms|
+|**Payment History**|Complete|Full payment history tracking per invoice|
+|**A/R Aging Report**|Complete|Accounts receivable aging by bucket (current, 1-30, 31-60, 61-90, 90+)|
+|**Internal Notes**|Complete|Admin-only notes not visible to clients|
+|**Custom Invoice Numbers**|Complete|Custom prefix and sequential numbering|
+|**Comprehensive Stats**|Complete|Revenue, outstanding, averages, status breakdown, monthly trends|
 
 ---
 
@@ -68,13 +68,13 @@ The Invoice System provides clients with a complete view of their payment histor
 
 ### Technology Stack
 
-| Component | Technology |
+|Component|Technology|
 |-----------|------------|
-| Backend | Express.js with TypeScript |
-| Database | SQLite with async wrapper |
-| Authentication | HttpOnly cookies (JWT); Bearer fallback |
-| Frontend | Vanilla TypeScript |
-| API Communication | Fetch API |
+|Backend|Express.js with TypeScript|
+|Database|SQLite with async wrapper|
+|Authentication|HttpOnly cookies (JWT); Bearer fallback|
+|Frontend|Vanilla TypeScript|
+|API Communication|Fetch API|
 
 ### Data Flow
 
@@ -110,6 +110,7 @@ Get all invoices for the authenticated client with summary statistics.
 **Authentication:** Required (JWT Bearer token)
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -144,6 +145,7 @@ Get a specific invoice by ID.
 **Authentication:** Required
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -176,6 +178,7 @@ Create a new invoice.
 
 **Authentication:** Required
 **Request:**
+
 ```json
 {
   "projectId": 1,
@@ -200,6 +203,7 @@ Create a new invoice.
 Update invoice status.
 
 **Request:**
+
 ```json
 {
   "status": "paid",
@@ -536,14 +540,14 @@ Get all scheduled reminders for an invoice.
 
 **Reminder Types:**
 
-| Type | When |
+|Type|When|
 |------|------|
-| `upcoming` | 3 days before due |
-| `due` | On due date |
-| `overdue_3` | 3 days overdue |
-| `overdue_7` | 7 days overdue |
-| `overdue_14` | 14 days overdue |
-| `overdue_30` | 30 days overdue |
+|`upcoming`|3 days before due|
+|`due`|On due date|
+|`overdue_3`|3 days overdue|
+|`overdue_7`|7 days overdue|
+|`overdue_14`|14 days overdue|
+|`overdue_30`|30 days overdue|
 
 #### POST `/api/invoices/reminders/:id/skip`
 
@@ -555,69 +559,69 @@ Skip a scheduled reminder.
 
 #### Tax & Discount
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| PUT | `/api/invoices/:id/tax-discount` | Update tax rate and discount |
+|PUT|`/api/invoices/:id/tax-discount`|Update tax rate and discount|
 
 #### Late Fees
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/invoices/:id/late-fee` | Get late fee information |
-| POST | `/api/invoices/:id/apply-late-fee` | Apply late fee to invoice |
-| POST | `/api/invoices/process-late-fees` | Process late fees for all overdue invoices |
+|GET|`/api/invoices/:id/late-fee`|Get late fee information|
+|POST|`/api/invoices/:id/apply-late-fee`|Apply late fee to invoice|
+|POST|`/api/invoices/process-late-fees`|Process late fees for all overdue invoices|
 
 #### Payment History
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/invoices/:id/payments` | Get payment history for invoice |
-| POST | `/api/invoices/:id/record-payment` | Record a payment |
-| POST | `/api/invoices/:id/record-payment-with-history` | Record payment with full history tracking |
-| GET | `/api/invoices/all-payments` | Get all payments across invoices |
+|GET|`/api/invoices/:id/payments`|Get payment history for invoice|
+|POST|`/api/invoices/:id/record-payment`|Record a payment|
+|POST|`/api/invoices/:id/record-payment-with-history`|Record payment with full history tracking|
+|GET|`/api/invoices/all-payments`|Get all payments across invoices|
 
 #### Payment Terms
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/invoices/payment-terms` | Get all payment term presets |
-| POST | `/api/invoices/payment-terms` | Create a payment term preset |
-| POST | `/api/invoices/:id/apply-terms` | Apply payment terms to invoice |
+|GET|`/api/invoices/payment-terms`|Get all payment term presets|
+|POST|`/api/invoices/payment-terms`|Create a payment term preset|
+|POST|`/api/invoices/:id/apply-terms`|Apply payment terms to invoice|
 
 #### A/R Aging Report
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/invoices/aging-report` | Get accounts receivable aging report |
+|GET|`/api/invoices/aging-report`|Get accounts receivable aging report|
 
 #### Internal Notes
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| PUT | `/api/invoices/:id/internal-notes` | Update internal notes (admin only) |
+|PUT|`/api/invoices/:id/internal-notes`|Update internal notes (admin only)|
 
 #### Custom Invoice Numbers
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| POST | `/api/invoices/with-custom-number` | Create invoice with custom number |
-| GET | `/api/invoices/number/:invoiceNumber` | Get invoice by invoice number |
+|POST|`/api/invoices/with-custom-number`|Create invoice with custom number|
+|GET|`/api/invoices/number/:invoiceNumber`|Get invoice by invoice number|
 
 #### Statistics
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/invoices/comprehensive-stats` | Get comprehensive invoice statistics |
+|GET|`/api/invoices/comprehensive-stats`|Get comprehensive invoice statistics|
 
 #### Other Operations
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| POST | `/api/invoices/:id/duplicate` | Duplicate an invoice as draft |
-| POST | `/api/invoices/search` | Search invoices with filters |
-| POST | `/api/invoices/check-overdue` | Check and mark overdue invoices |
-| POST | `/api/invoices/:id/send-reminder` | Send manual payment reminder |
-| POST | `/api/invoices/:id/generate/intake/:intakeId` | Generate invoice from intake form |
+|POST|`/api/invoices/:id/duplicate`|Duplicate an invoice as draft|
+|POST|`/api/invoices/search`|Search invoices with filters|
+|POST|`/api/invoices/check-overdue`|Check and mark overdue invoices|
+|POST|`/api/invoices/:id/send-reminder`|Send manual payment reminder|
+|POST|`/api/invoices/:id/generate/intake/:intakeId`|Generate invoice from intake form|
 
 ---
 
@@ -886,15 +890,15 @@ export function formatCurrency(amount: number): string {
 
 ### Status Types
 
-| Status | Class | Color | Description |
+|Status|Class|Color|Description|
 |--------|-------|-------|-------------|
-| Draft | `status-draft` | Gray | Not yet sent |
-| Pending | `status-pending` | Yellow | Awaiting payment |
-| Viewed | `status-pending` | Yellow | Client viewed invoice |
-| Partial | `status-partial` | Blue | Partially paid |
-| Paid | `status-paid` | Green | Fully paid |
-| Overdue | `status-overdue` | Red | Past due date |
-| Cancelled | `status-cancelled` | Gray | Invoice cancelled |
+|Draft|`status-draft`|Gray|Not yet sent|
+|Pending|`status-pending`|Yellow|Awaiting payment|
+|Viewed|`status-pending`|Yellow|Client viewed invoice|
+|Partial|`status-partial`|Blue|Partially paid|
+|Paid|`status-paid`|Green|Fully paid|
+|Overdue|`status-overdue`|Red|Past due date|
+|Cancelled|`status-cancelled`|Gray|Invoice cancelled|
 
 ---
 
@@ -902,10 +906,10 @@ export function formatCurrency(amount: number): string {
 
 ### Invoice Types
 
-| Type | Description |
+|Type|Description|
 |------|-------------|
-| `standard` | Regular invoice for services |
-| `deposit` | Upfront deposit payment (tracked separately) |
+|`standard`|Regular invoice for services|
+|`deposit`|Upfront deposit payment (tracked separately)|
 
 ### Creating a Deposit Invoice
 
@@ -1028,13 +1032,13 @@ DEPOSIT CREDITS APPLIED:
 
 ## File Locations
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `server/routes/invoices.ts` | Invoice API endpoints + PDF generation |
-| `server/services/invoice-service.ts` | Invoice business logic |
-| `src/features/client/modules/portal-invoices.ts` | Frontend invoice handling (~250 lines) |
-| `src/styles/client-portal/invoices.css` | Invoice styling |
-| `client/portal.html` | Invoices tab HTML (tab-invoices section) |
+|`server/routes/invoices.ts`|Invoice API endpoints + PDF generation|
+|`server/services/invoice-service.ts`|Invoice business logic|
+|`src/features/client/modules/portal-invoices.ts`|Frontend invoice handling (~250 lines)|
+|`src/styles/client-portal/invoices.css`|Invoice styling|
+|`client/portal.html`|Invoices tab HTML (tab-invoices section)|
 
 ---
 
@@ -1044,19 +1048,19 @@ The scheduler service (`server/services/scheduler-service.ts`) handles automated
 
 ### Configuration
 
-| Environment Variable | Default | Description |
+|Environment Variable|Default|Description|
 |---------------------|---------|-------------|
-| `SCHEDULER_ENABLED` | `true` | Enable/disable scheduler |
-| `SCHEDULER_REMINDERS` | `true` | Enable payment reminders |
-| `SCHEDULER_SCHEDULED` | `true` | Enable scheduled invoice generation |
-| `SCHEDULER_RECURRING` | `true` | Enable recurring invoice generation |
+|`SCHEDULER_ENABLED`|`true`|Enable/disable scheduler|
+|`SCHEDULER_REMINDERS`|`true`|Enable payment reminders|
+|`SCHEDULER_SCHEDULED`|`true`|Enable scheduled invoice generation|
+|`SCHEDULER_RECURRING`|`true`|Enable recurring invoice generation|
 
 ### Scheduled Jobs
 
-| Job | Schedule | Description |
+|Job|Schedule|Description|
 |-----|----------|-------------|
-| Reminder Check | Every hour at :00 | Processes due payment reminders |
-| Invoice Generation | Daily at 1:00 AM | Generates scheduled and recurring invoices |
+|Reminder Check|Every hour at :00|Processes due payment reminders|
+|Invoice Generation|Daily at 1:00 AM|Generates scheduled and recurring invoices|
 
 ### Reminder Email Sequence
 
@@ -1077,84 +1081,84 @@ When an invoice is sent, reminders are automatically scheduled:
 
 #### payment_plan_templates
 
-| Column | Type | Description |
+|Column|Type|Description|
 |--------|------|-------------|
-| `id` | INTEGER | Primary key |
-| `name` | TEXT | Template name |
-| `description` | TEXT | Template description |
-| `payments` | JSON | Array of payment definitions |
-| `is_default` | BOOLEAN | Default template flag |
-| `created_at` | DATETIME | Creation timestamp |
+|`id`|INTEGER|Primary key|
+|`name`|TEXT|Template name|
+|`description`|TEXT|Template description|
+|`payments`|JSON|Array of payment definitions|
+|`is_default`|BOOLEAN|Default template flag|
+|`created_at`|DATETIME|Creation timestamp|
 
 #### invoice_reminders
 
-| Column | Type | Description |
+|Column|Type|Description|
 |--------|------|-------------|
-| `id` | INTEGER | Primary key |
-| `invoice_id` | INTEGER | FK to invoices |
-| `reminder_type` | TEXT | Type (upcoming, due, overdue_*) |
-| `scheduled_date` | DATE | When to send |
-| `sent_at` | DATETIME | When sent (null if pending) |
-| `status` | TEXT | pending, sent, skipped, failed |
-| `created_at` | DATETIME | Creation timestamp |
+|`id`|INTEGER|Primary key|
+|`invoice_id`|INTEGER|FK to invoices|
+|`reminder_type`|TEXT|Type (upcoming, due, overdue_*)|
+|`scheduled_date`|DATE|When to send|
+|`sent_at`|DATETIME|When sent (null if pending)|
+|`status`|TEXT|pending, sent, skipped, failed|
+|`created_at`|DATETIME|Creation timestamp|
 
 #### scheduled_invoices
 
-| Column | Type | Description |
+|Column|Type|Description|
 |--------|------|-------------|
-| `id` | INTEGER | Primary key |
-| `project_id` | INTEGER | FK to projects |
-| `client_id` | INTEGER | FK to clients |
-| `scheduled_date` | DATE | Generation date |
-| `trigger_type` | TEXT | date or milestone_complete |
-| `trigger_milestone_id` | INTEGER | FK to milestones (optional) |
-| `line_items` | JSON | Invoice line items |
-| `notes` | TEXT | Invoice notes |
-| `terms` | TEXT | Invoice terms |
-| `status` | TEXT | pending, generated, cancelled |
-| `generated_invoice_id` | INTEGER | FK to generated invoice |
-| `created_at` | DATETIME | Creation timestamp |
+|`id`|INTEGER|Primary key|
+|`project_id`|INTEGER|FK to projects|
+|`client_id`|INTEGER|FK to clients|
+|`scheduled_date`|DATE|Generation date|
+|`trigger_type`|TEXT|date or milestone_complete|
+|`trigger_milestone_id`|INTEGER|FK to milestones (optional)|
+|`line_items`|JSON|Invoice line items|
+|`notes`|TEXT|Invoice notes|
+|`terms`|TEXT|Invoice terms|
+|`status`|TEXT|pending, generated, cancelled|
+|`generated_invoice_id`|INTEGER|FK to generated invoice|
+|`created_at`|DATETIME|Creation timestamp|
 
 #### recurring_invoices
 
-| Column | Type | Description |
+|Column|Type|Description|
 |--------|------|-------------|
-| `id` | INTEGER | Primary key |
-| `project_id` | INTEGER | FK to projects |
-| `client_id` | INTEGER | FK to clients |
-| `frequency` | TEXT | weekly, monthly, quarterly |
-| `day_of_month` | INTEGER | 1-28 for monthly |
-| `day_of_week` | INTEGER | 0-6 for weekly |
-| `line_items` | JSON | Invoice line items |
-| `notes` | TEXT | Invoice notes |
-| `terms` | TEXT | Invoice terms |
-| `start_date` | DATE | Start date |
-| `end_date` | DATE | End date (optional) |
-| `next_generation_date` | DATE | Next generation date |
-| `last_generated_at` | DATETIME | Last generation timestamp |
-| `is_active` | BOOLEAN | Active status |
-| `created_at` | DATETIME | Creation timestamp |
+|`id`|INTEGER|Primary key|
+|`project_id`|INTEGER|FK to projects|
+|`client_id`|INTEGER|FK to clients|
+|`frequency`|TEXT|weekly, monthly, quarterly|
+|`day_of_month`|INTEGER|1-28 for monthly|
+|`day_of_week`|INTEGER|0-6 for weekly|
+|`line_items`|JSON|Invoice line items|
+|`notes`|TEXT|Invoice notes|
+|`terms`|TEXT|Invoice terms|
+|`start_date`|DATE|Start date|
+|`end_date`|DATE|End date (optional)|
+|`next_generation_date`|DATE|Next generation date|
+|`last_generated_at`|DATETIME|Last generation timestamp|
+|`is_active`|BOOLEAN|Active status|
+|`created_at`|DATETIME|Creation timestamp|
 
 ### Schema Updates to invoices Table
 
-| Column | Type | Description |
+|Column|Type|Description|
 |--------|------|-------------|
-| `milestone_id` | INTEGER | FK to milestones (optional) |
-| `payment_plan_id` | INTEGER | FK to payment_plan_templates (optional) |
+|`milestone_id`|INTEGER|FK to milestones (optional)|
+|`payment_plan_id`|INTEGER|FK to payment_plan_templates (optional)|
 
 ---
 
 ## All Implementation Files
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `server/routes/invoices.ts` | Invoice API endpoints + PDF generation |
-| `server/services/invoice-service.ts` | Invoice business logic (~800 lines) |
-| `server/services/scheduler-service.ts` | Automated task scheduling |
-| `server/database/migrations/028_invoice_enhancements.sql` | New tables migration |
-| `src/features/client/modules/portal-invoices.ts` | Frontend invoice handling (~250 lines) |
-| `src/styles/client-portal/invoices.css` | Invoice styling |
-| `client/portal.html` | Invoices tab HTML (tab-invoices section) |
+|`server/routes/invoices.ts`|Invoice API endpoints + PDF generation|
+|`server/services/invoice-service.ts`|Invoice business logic (~800 lines)|
+|`server/services/scheduler-service.ts`|Automated task scheduling|
+|`server/database/migrations/028_invoice_enhancements.sql`|New tables migration|
+|`src/features/client/modules/portal-invoices.ts`|Frontend invoice handling (~250 lines)|
+|`src/styles/client-portal/invoices.css`|Invoice styling|
+|`client/portal.html`|Invoices tab HTML (tab-invoices section)|
 
 ---
 

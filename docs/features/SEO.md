@@ -147,11 +147,11 @@ Located at `/public/sitemap.xml`. Lists all crawlable pages.
 
 ## Files Modified/Created
 
-| File | Action | Description |
+|File|Action|Description|
 |------|--------|-------------|
-| `/index.html` | Modified | Added canonical, og:url, og:locale, Twitter Card, JSON-LD |
-| `/public/robots.txt` | Created | Crawler access rules |
-| `/public/sitemap.xml` | Created | Site map for search engines |
+|`/index.html`|Modified|Added canonical, og:url, og:locale, Twitter Card, JSON-LD|
+|`/public/robots.txt`|Created|Crawler access rules|
+|`/public/sitemap.xml`|Created|Site map for search engines|
 
 ## Pending: OG Image
 

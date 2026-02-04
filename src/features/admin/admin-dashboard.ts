@@ -1454,9 +1454,16 @@ class AdminDashboard {
     this.showLoading(true);
 
     try {
-      // Load analytics module for initial dashboard data
-      const analyticsModule = await loadAnalyticsModule();
+      // Load both overview module (stats) and analytics module (charts)
+      const [overviewModule, analyticsModule] = await Promise.all([
+        loadOverviewModule(),
+        loadAnalyticsModule()
+      ]);
+
       await Promise.all([
+        // Overview stats (Active Projects, Clients, Revenue MTD, Recent Activity)
+        overviewModule.loadOverviewData(this.moduleContext),
+        // Analytics charts and KPIs
         analyticsModule.loadOverviewData(this.moduleContext),
         analyticsModule.loadPerformanceData(this.moduleContext),
         analyticsModule.loadAnalyticsData(this.moduleContext),
@@ -1476,8 +1483,13 @@ class AdminDashboard {
     try {
       switch (tabName) {
       case 'overview':
-        // Use analytics module for overview data
+        // Load both overview stats AND analytics charts
         {
+          // Load overview stats (Active Projects, Clients, Revenue MTD, etc.)
+          const overviewModule = await loadOverviewModule();
+          await overviewModule.loadOverviewData(this.moduleContext);
+
+          // Load analytics charts (Revenue chart, Project status, etc.)
           const analyticsModule = await loadAnalyticsModule();
           await analyticsModule.loadOverviewData(this.moduleContext);
         }

@@ -30,12 +30,12 @@ All PDF documents in the system are generated using **pdf-lib**, a pure JavaScri
 
 ## Technology Stack
 
-| Component | Technology | Purpose |
+|Component|Technology|Purpose|
 |-----------|------------|---------|
-| PDF Library | pdf-lib | Pure JS PDF generation |
-| Fonts | StandardFonts (Helvetica) | Embedded PDF fonts |
-| Image Format | PNG | Logo embedding |
-| Server | Express.js | API endpoints |
+|PDF Library|pdf-lib|Pure JS PDF generation|
+|Fonts|StandardFonts (Helvetica)|Embedded PDF fonts|
+|Image Format|PNG|Logo embedding|
+|Server|Express.js|API endpoints|
 
 **Why pdf-lib over PDFKit:**
 
@@ -48,12 +48,12 @@ All PDF documents in the system are generated using **pdf-lib**, a pure JavaScri
 
 ## Document Types
 
-| Document | Route | Endpoint | Title |
+|Document|Route|Endpoint|Title|
 |----------|-------|----------|-------|
-| Invoice | `server/routes/invoices.ts` | `GET /api/invoices/:id/pdf` | INVOICE |
-| Contract | `server/routes/projects.ts` | `GET /api/projects/:id/contract/pdf` | CONTRACT |
-| Intake | `server/routes/projects.ts` | `GET /api/projects/:id/intake/pdf` | INTAKE |
-| Proposal | `server/routes/proposals.ts` | `GET /api/proposals/:id/pdf` | PROPOSAL |
+|Invoice|`server/routes/invoices.ts`|`GET /api/invoices/:id/pdf`|INVOICE|
+|Contract|`server/routes/projects.ts`|`GET /api/projects/:id/contract/pdf`|CONTRACT|
+|Intake|`server/routes/projects.ts`|`GET /api/projects/:id/intake/pdf`|INTAKE|
+|Proposal|`server/routes/proposals.ts`|`GET /api/proposals/:id/pdf`|PROPOSAL|
 
 ---
 
@@ -81,15 +81,15 @@ All PDFs use a consistent header template:
 
 All elements are top-aligned using cap-height offsets:
 
-| Element | Size | Font | Color (RGB) | Y-Offset | Notes |
+|Element|Size|Font|Color (RGB)|Y-Offset|Notes|
 |---------|------|------|-------------|----------|-------|
-| Logo | 100pt height | - | - | 0 (top) | Aspect ratio preserved |
-| Business Name | 15pt | Helvetica-Bold | (0.1, 0.1, 0.1) | -11pt | Cap height offset for top alignment |
-| Owner Name | 10pt | Helvetica | (0.2, 0.2, 0.2) | -34pt | |
-| Tagline | 9pt | Helvetica | (0.4, 0.4, 0.4) | -54pt | |
-| Email | 9pt | Helvetica | (0.4, 0.4, 0.4) | -70pt | |
-| Website | 9pt | Helvetica | (0.4, 0.4, 0.4) | -86pt | |
-| Document Title | 28pt | Helvetica-Bold | (0.15, 0.15, 0.15) | -20pt | Cap height offset for top alignment |
+|Logo|100pt height|-|-|0 (top)|Aspect ratio preserved|
+|Business Name|15pt|Helvetica-Bold|(0.1, 0.1, 0.1)|-11pt|Cap height offset for top alignment|
+|Owner Name|10pt|Helvetica|(0.2, 0.2, 0.2)|-34pt||
+|Tagline|9pt|Helvetica|(0.4, 0.4, 0.4)|-54pt||
+|Email|9pt|Helvetica|(0.4, 0.4, 0.4)|-70pt||
+|Website|9pt|Helvetica|(0.4, 0.4, 0.4)|-86pt||
+|Document Title|28pt|Helvetica-Bold|(0.15, 0.15, 0.15)|-20pt|Cap height offset for top alignment|
 
 ### Layout Constants
 
@@ -128,12 +128,12 @@ if (existsSync(logoPath)) {
 
 ## File Locations
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `server/routes/invoices.ts` | Invoice PDF generation |
-| `server/routes/projects.ts` | Contract and Intake PDF generation |
-| `server/routes/proposals.ts` | Proposal PDF generation |
-| `public/images/avatar_pdf.png` | Business logo for PDFs |
+|`server/routes/invoices.ts`|Invoice PDF generation|
+|`server/routes/projects.ts`|Contract and Intake PDF generation|
+|`server/routes/proposals.ts`|Proposal PDF generation|
+|`public/images/avatar_pdf.png`|Business logo for PDFs|
 
 ---
 
@@ -314,25 +314,25 @@ res.send(Buffer.from(pdfBytes));
 
 ### Color Palette
 
-| Purpose | RGB | Hex (approx) |
+|Purpose|RGB|Hex (approx)|
 |---------|-----|--------------|
-| Primary text | (0.1, 0.1, 0.1) | #1a1a1a |
-| Secondary text | (0.2, 0.2, 0.2) | #333333 |
-| Muted text | (0.4, 0.4, 0.4) | #666666 |
-| Title text | (0.15, 0.15, 0.15) | #262626 |
-| Line color | (0.7, 0.7, 0.7) | #b3b3b3 |
-| Section headers | (0, 0.4, 0.8) | #0066cc |
+|Primary text|(0.1, 0.1, 0.1)|#1a1a1a|
+|Secondary text|(0.2, 0.2, 0.2)|#333333|
+|Muted text|(0.4, 0.4, 0.4)|#666666|
+|Title text|(0.15, 0.15, 0.15)|#262626|
+|Line color|(0.7, 0.7, 0.7)|#b3b3b3|
+|Section headers|(0, 0.4, 0.8)|#0066cc|
 
 ### Typography
 
-| Element | Font | Size |
+|Element|Font|Size|
 |---------|------|------|
-| Document title | Helvetica-Bold | 28pt |
-| Section headers | Helvetica-Bold | 14pt |
-| Subsection headers | Helvetica-Bold | 12pt |
-| Body text | Helvetica | 10pt |
-| Small text | Helvetica | 9pt |
-| Footer text | Helvetica | 9pt |
+|Document title|Helvetica-Bold|28pt|
+|Section headers|Helvetica-Bold|14pt|
+|Subsection headers|Helvetica-Bold|12pt|
+|Body text|Helvetica|10pt|
+|Small text|Helvetica|9pt|
+|Footer text|Helvetica|9pt|
 
 ---
 
