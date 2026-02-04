@@ -33,18 +33,20 @@ interface JWTPayload {
 The API uses HttpOnly cookies for secure token storage. Tokens are automatically sent with requests:
 
 ```http
+
 Cookie: auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
 ```
 
 **Cookie Properties:**
 
-| Property | Value | Purpose |
+|Property|Value|Purpose|
 |----------|-------|---------|
-| `httpOnly` | `true` | Prevents JavaScript access (XSS protection) |
-| `secure` | `true` (production) | Only sent over HTTPS |
-| `sameSite` | `strict` | CSRF protection |
-| `path` | `/` | Cookie sent to all same-origin requests |
-| `maxAge` | 1h (admin) / 7d (client) | Token expiration |
+|`httpOnly`|`true`|Prevents JavaScript access (XSS protection)|
+|`secure`|`true` (production)|Only sent over HTTPS|
+|`sameSite`|`strict`|CSRF protection|
+|`path`|`/`|Cookie sent to all same-origin requests|
+|`maxAge`|1h (admin) / 7d (client)|Token expiration|
 
 ### Authorization Header (Fallback)
 
@@ -69,6 +71,7 @@ interface ErrorResponse {
 ```
 
 ### Common HTTP Status Codes
+
 - `200` - Success
 - `201` - Created
 - `400` - Bad Request (validation errors)
@@ -79,6 +82,7 @@ interface ErrorResponse {
 - `500` - Internal Server Error
 
 ### Error Codes
+
 - `NO_TOKEN` - Authorization header missing
 - `TOKEN_EXPIRED` - JWT token has expired
 - `INVALID_TOKEN` - JWT token is malformed or invalid
@@ -179,9 +183,11 @@ Refresh JWT token before expiration. Returns a new token in the response body (c
 ```
 
 ### POST `/auth/magic-link`
+
 Request a magic link for passwordless login.
 
 **Request:**
+
 ```json
 {
   "email": "client@example.com"
@@ -189,6 +195,7 @@ Request a magic link for passwordless login.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -197,7 +204,61 @@ Request a magic link for passwordless login.
 ```
 
 **Notes:**
+
 - Always returns success for security (doesn't reveal if email exists)
+
+## Invoices
+
+### GET `/invoices`
+
+Admin endpoint. Returns a JSON array of invoices. Requires authentication as an admin user (HttpOnly cookie or `Authorization: Bearer`).
+
+Query parameters (optional):
+
+- `status` - single status or comma-separated statuses (draft,sent,viewed,partial,paid,overdue,cancelled)
+- `clientId` - integer client id to filter
+- `projectId` - integer project id to filter
+- `search` - text search against invoice number and notes
+- `dateFrom`, `dateTo` - ISO date strings to filter issued date
+- `dueDateFrom`, `dueDateTo` - ISO date strings to filter due date
+- `minAmount`, `maxAmount` - numeric range filter
+- `invoiceType` - `standard` or `deposit`
+- `limit` - number of results (default 100)
+- `offset` - pagination offset (default 0)
+
+Response: Array of invoice objects in snake_case (fields include `id`, `invoice_number`, `client_id`, `project_id`, `amount_total`, `amount_paid`, `status`, `due_date`, `issued_date`, `line_items`, `notes`, `created_at`, `updated_at`, etc.)
+
+Example:
+
+```http
+GET /api/invoices?status=pending,overdue&limit=50
+Authorization: Bearer <admin-token>
+```
+
+```json
+[{
+  "id": 123,
+  "invoice_number": "INV-000123",
+  "client_id": 45,
+  "project_id": 12,
+  "amount_total": 2500,
+  "amount_paid": 0,
+  "status": "overdue",
+  "due_date": "2025-12-01",
+  "issued_date": "2025-11-01",
+  "line_items": [
+    { "description": "Website build", "quantity": 1, "rate": 2500, "amount": 2500 }
+  ],
+  "notes": "Payment overdue",
+  "created_at": "2025-11-01T12:34:56Z",
+  "updated_at": "2025-12-02T10:11:12Z"
+}]
+```
+
+Notes:
+
+- This endpoint is now available at both `/api/invoices` and `/api/v1/invoices` (mounted by the server).
+- If filters are omitted the endpoint returns the latest invoices paginated by `limit`/`offset`.
 - Magic link expires in 15 minutes
 - Rate limited: 3 requests per 15 minutes per IP
 
@@ -248,9 +309,11 @@ Set-Cookie: auth_token=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Secure; SameSite=Stric
 - `401` - Account inactive
 
 ### POST `/auth/verify-invitation`
+
 Verify a client invitation token before password setup.
 
 **Request:**
+
 ```json
 {
   "token": "abc123def456..."
@@ -258,6 +321,7 @@ Verify a client invitation token before password setup.
 ```
 
 **Response (Success):**
+
 ```json
 {
   "success": true,
@@ -272,13 +336,16 @@ Verify a client invitation token before password setup.
 **Response (Invalid/Expired Token):** Returns error response with `success: false`, `error` message, and `code` (e.g. `INVALID_TOKEN`, `TOKEN_EXPIRED`).
 
 **Error Responses:**
+
 - `400` - Missing token
 - `401` - Invalid or expired token
 
 ### POST `/auth/set-password`
+
 Set password for a new client account using invitation token.
 
 **Request:**
+
 ```json
 {
   "token": "abc123def456...",
@@ -287,6 +354,7 @@ Set password for a new client account using invitation token.
 ```
 
 **Response (Success):**
+
 ```json
 {
   "success": true,
@@ -298,6 +366,7 @@ Set password for a new client account using invitation token.
 ```
 
 **Error Responses:**
+
 - `400` - Missing token or password
 - `400` - Password validation failed (minimum 12 characters; must include uppercase, lowercase, number, and special character)
 - `401` - Invalid or expired invitation token
@@ -305,22 +374,25 @@ Set password for a new client account using invitation token.
 ## Admin Endpoints
 
 ### GET `/admin/audit-log`
+
 Export audit logs with filters and pagination (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **Query Parameters:**
-| Parameter | Type | Description |
+
+|Parameter|Type|Description|
 |-----------|------|-------------|
-| `action` | string | Filter by action (create, update, delete, login, etc.) |
-| `entityType` | string | Filter by entity type (client, project, invoice, etc.) |
-| `userEmail` | string | Filter by user email |
-| `startDate` | string | Start date (ISO 8601) |
-| `endDate` | string | End date (ISO 8601) |
-| `limit` | number | Max records (default 100, max 500) |
-| `offset` | number | Pagination offset (default 0) |
+|`action`|string|Filter by action (create, update, delete, login, etc.)|
+|`entityType`|string|Filter by entity type (client, project, invoice, etc.)|
+|`userEmail`|string|Filter by user email|
+|`startDate`|string|Start date (ISO 8601)|
+|`endDate`|string|End date (ISO 8601)|
+|`limit`|number|Max records (default 100, max 500)|
+|`offset`|number|Pagination offset (default 0)|
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -343,14 +415,17 @@ Export audit logs with filters and pagination (admin only).
 ```
 
 ### POST `/admin/leads/:id/invite`
+
 Invite a lead to create a client portal account.
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **URL Parameters:**
+
 - `id` - Lead ID to invite
 
 **Response (Success):**
+
 ```json
 {
   "success": true,
@@ -360,6 +435,7 @@ Invite a lead to create a client portal account.
 ```
 
 **Process:**
+
 1. Generates secure 64-character invitation token
 2. Creates client account with hashed token
 3. Sets token expiration (7 days)
@@ -367,6 +443,7 @@ Invite a lead to create a client portal account.
 5. Sends invitation email with magic link
 
 **Error Responses:**
+
 - `400` - Lead already invited
 - `404` - Lead not found
 - `500` - Failed to send invitation
@@ -376,11 +453,13 @@ Invite a lead to create a client portal account.
 ### Client Settings API
 
 #### GET `/clients/me`
+
 Get current authenticated client's profile.
 
 **Authentication:** Required (Client only)
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -405,11 +484,13 @@ Get current authenticated client's profile.
 ```
 
 #### PUT `/clients/me`
+
 Update current client's profile information.
 
 **Authentication:** Required (Client only)
 
 **Request Body:**
+
 ```json
 {
   "name": "John Doe",
@@ -419,6 +500,7 @@ Update current client's profile information.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -427,11 +509,13 @@ Update current client's profile information.
 ```
 
 #### PUT `/clients/me/password`
+
 Change client's password.
 
 **Authentication:** Required (Client only)
 
 **Request Body:**
+
 ```json
 {
   "currentPassword": "oldPassword123",
@@ -440,6 +524,7 @@ Change client's password.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -448,6 +533,7 @@ Change client's password.
 ```
 
 **Error (400 Bad Request):**
+
 ```json
 {
   "error": "Current password is incorrect"
@@ -455,11 +541,13 @@ Change client's password.
 ```
 
 #### PUT `/clients/me/notifications`
+
 Update notification preferences.
 
 **Authentication:** Required (Client only)
 
 **Request Body:**
+
 ```json
 {
   "messages": true,
@@ -470,6 +558,7 @@ Update notification preferences.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -478,11 +567,13 @@ Update notification preferences.
 ```
 
 #### PUT `/clients/me/billing`
+
 Update billing information.
 
 **Authentication:** Required (Client only)
 
 **Request Body:**
+
 ```json
 {
   "company": "Acme Corp",
@@ -495,6 +586,7 @@ Update billing information.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -505,16 +597,19 @@ Update billing information.
 ### Admin Client Management
 
 #### GET `/clients`
+
 Retrieve all clients (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **Query Parameters:**
+
 - `status` (optional): Filter by client status (`active`, `inactive`, `pending`)
 - `limit` (optional): Limit number of results (default: 50)
 - `offset` (optional): Skip number of results (default: 0)
 
 **Response:**
+
 ```json
 {
   "clients": [
@@ -540,12 +635,14 @@ Retrieve all clients (admin only).
 ```
 
 ### GET `/clients/:id`
+
 Get specific client details.
 
 **Headers:** `Authorization: Bearer <token>`  
 **Access:** Admin can view any client; clients can only view their own profile
 
 **Response:**
+
 ```json
 {
   "client": {
@@ -573,11 +670,13 @@ Get specific client details.
 ```
 
 ### POST `/clients`
+
 Create new client account (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **Request:**
+
 ```json
 {
   "email": "newclient@example.com",
@@ -589,6 +688,7 @@ Create new client account (admin only).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Client created successfully",
@@ -605,6 +705,7 @@ Create new client account (admin only).
 ```
 
 **Validation Rules:**
+
 - `email`: Valid email format, unique
 - `password`: Minimum 8 characters, must include uppercase, lowercase, number, special character
 - `company_name`: Optional, max 255 characters
@@ -612,12 +713,14 @@ Create new client account (admin only).
 - `phone`: Optional, valid phone number format
 
 ### PUT `/clients/:id`
+
 Update client information.
 
 **Headers:** `Authorization: Bearer <token>`  
 **Access:** Admin can update any client; clients can update their own profile (except status)
 
 **Request:**
+
 ```json
 {
   "company_name": "Updated Company Name",
@@ -628,6 +731,7 @@ Update client information.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Client updated successfully",
@@ -644,11 +748,13 @@ Update client information.
 ```
 
 ### DELETE `/clients/:id`
+
 Delete client account (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **Response:**
+
 ```json
 {
   "message": "Client deleted successfully"
@@ -658,17 +764,20 @@ Delete client account (admin only).
 ## Project Management Endpoints
 
 ### GET `/projects`
+
 List projects for authenticated user.
 
 **Headers:** `Authorization: Bearer <token>`  
 **Access:** Admin sees all projects; clients see only their projects
 
 **Query Parameters:**
+
 - `status` (optional): Filter by status (`pending`, `in-progress`, `in-review`, `completed`, `on-hold`)
 - `priority` (optional): Filter by priority (`low`, `medium`, `high`, `urgent`)
 - `client_id` (optional, admin only): Filter by client ID
 
 **Response:**
+
 ```json
 {
   "projects": [
@@ -697,12 +806,14 @@ List projects for authenticated user.
 ```
 
 ### GET `/projects/:id`
+
 Get detailed project information.
 
 **Headers:** `Authorization: Bearer <token>`  
 **Access:** Admin can view any project; clients can view their own projects
 
 **Response:**
+
 ```json
 {
   "project": {
@@ -754,11 +865,13 @@ Get detailed project information.
 ```
 
 ### POST `/projects`
+
 Create new project (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **Request:**
+
 ```json
 {
   "client_id": 1,
@@ -772,6 +885,7 @@ Create new project (admin only).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Project created successfully",
@@ -792,12 +906,14 @@ Create new project (admin only).
 ```
 
 ### PUT `/projects/:id`
+
 Update project details.
 
 **Headers:** `Authorization: Bearer <token>`  
 **Access:** Admin can update any field; clients can only update description
 
 **Request (Admin):**
+
 ```json
 {
   "name": "Updated Project Name",
@@ -809,6 +925,7 @@ Update project details.
 ```
 
 **Request (Client):**
+
 ```json
 {
   "description": "Updated project requirements and specifications"
@@ -816,6 +933,7 @@ Update project details.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Project updated successfully",
@@ -830,11 +948,13 @@ Update project details.
 ```
 
 ### DELETE `/projects/:id`
+
 Delete project (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **Response:**
+
 ```json
 {
   "message": "Project deleted successfully"
@@ -844,11 +964,13 @@ Delete project (admin only).
 ## Milestone Management Endpoints
 
 ### GET `/projects/:id/milestones`
+
 Get all milestones for a project.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Response:**
+
 ```json
 {
   "milestones": [
@@ -883,11 +1005,13 @@ Get all milestones for a project.
 ```
 
 ### POST `/projects/:id/milestones`
+
 Create new milestone (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **Request:**
+
 ```json
 {
   "title": "Backend API Development",
@@ -901,6 +1025,7 @@ Create new milestone (admin only).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Milestone created successfully",
@@ -921,11 +1046,13 @@ Create new milestone (admin only).
 ```
 
 ### PUT `/projects/:id/milestones/:milestoneId`
+
 Update milestone (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **Request:**
+
 ```json
 {
   "title": "Updated Milestone Title",
@@ -940,6 +1067,7 @@ Update milestone (admin only).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Milestone updated successfully",
@@ -960,11 +1088,13 @@ Update milestone (admin only).
 ```
 
 ### DELETE `/projects/:id/milestones/:milestoneId`
+
 Delete milestone (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **Response:**
+
 ```json
 {
   "message": "Milestone deleted successfully"
@@ -974,11 +1104,13 @@ Delete milestone (admin only).
 ## Project Dashboard Endpoint
 
 ### GET `/projects/:id/dashboard`
+
 Get comprehensive project dashboard data.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Response:**
+
 ```json
 {
   "project": {
@@ -1033,26 +1165,33 @@ Get comprehensive project dashboard data.
 ### Upload Endpoints
 
 #### POST `/api/uploads/single`
+
 Upload a single file.
 
 **Headers:**
+
 - `Authorization: Bearer <token>`
 - `Content-Type: multipart/form-data`
 
 **Form Data:**
+
 - `file` (file) - The file to upload
 
 #### POST `/api/uploads/multiple`
+
 Upload multiple files (max 5).
 
 **Headers:**
+
 - `Authorization: Bearer <token>`
 - `Content-Type: multipart/form-data`
 
 **Form Data:**
+
 - `files` (file[]) - Array of files to upload
 
 **Response (201 Created):**
+
 ```json
 {
   "success": true,
@@ -1070,6 +1209,7 @@ Upload multiple files (max 5).
 ```
 
 **File Upload Limits:**
+
 - Maximum file size: 10MB per file
 - Maximum files per request: 5
 - Allowed file types: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG, GIF, WEBP, ZIP
@@ -1077,11 +1217,13 @@ Upload multiple files (max 5).
 ### File Retrieval Endpoints
 
 #### GET `/api/uploads/client`
+
 Get all files for authenticated client (across all projects).
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -1103,14 +1245,17 @@ Get all files for authenticated client (across all projects).
 ```
 
 #### GET `/api/uploads/project/:projectId`
+
 Get all files for a specific project.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Parameters:**
+
 - `projectId` (integer) - Project ID
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -1120,27 +1265,33 @@ Get all files for a specific project.
 ```
 
 #### GET `/api/uploads/file/:fileId`
+
 Download or preview a specific file.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Parameters:**
+
 - `fileId` (integer) - File ID
 
 **Query Parameters:**
+
 - `download` (boolean, optional) - If `true`, forces download; otherwise inline preview
 
 **Response:** File stream with appropriate headers
 
 #### DELETE `/api/uploads/file/:fileId`
+
 Delete a specific file.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Parameters:**
+
 - `fileId` (integer) - File ID
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -1151,18 +1302,22 @@ Delete a specific file.
 ### Legacy Project File Endpoints
 
 #### POST `/projects/:id/files`
+
 Upload files to a specific project.
 
 **Headers:**
+
 - `Authorization: Bearer <token>`
 - `Content-Type: multipart/form-data`
 
 #### GET `/projects/:id/files`
+
 List project files.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Response:**
+
 ```json
 {
   "files": [
@@ -1182,15 +1337,18 @@ List project files.
 ## Messaging Endpoints
 
 ### GET `/projects/:id/messages`
+
 Get project messages.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Query Parameters:**
+
 - `limit` (optional): Number of messages (default: 50)
 - `offset` (optional): Skip messages for pagination
 
 **Response:**
+
 ```json
 {
   "messages": [
@@ -1215,11 +1373,13 @@ Get project messages.
 ```
 
 ### POST `/projects/:id/messages`
+
 Send message to project thread.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Request:**
+
 ```json
 {
   "message": "Thank you for the update. The revised designs look perfect!"
@@ -1227,6 +1387,7 @@ Send message to project thread.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Message sent successfully",
@@ -1242,11 +1403,13 @@ Send message to project thread.
 ```
 
 ### PUT `/projects/:id/messages/read`
+
 Mark messages as read.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Response:**
+
 ```json
 {
   "message": "Messages marked as read"
@@ -1256,11 +1419,13 @@ Mark messages as read.
 ## Project Updates Endpoint
 
 ### POST `/projects/:id/updates`
+
 Add project timeline update (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
 **Request:**
+
 ```json
 {
   "title": "Development Phase Started",
@@ -1271,6 +1436,7 @@ Add project timeline update (admin only).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Project update added successfully",
@@ -1286,6 +1452,7 @@ Add project timeline update (admin only).
 ```
 
 **Update Types:**
+
 - `progress` - General progress updates
 - `milestone` - Milestone completions
 - `issue` - Problems or blockers
@@ -1297,9 +1464,11 @@ Add project timeline update (admin only).
 **Base path:** `/intake` (mounted at `/api/intake`)
 
 ### POST `/intake`
+
 Submit client intake form (public endpoint).
 
 **Request:**
+
 ```json
 {
   "client_name": "John Smith",
@@ -1319,6 +1488,7 @@ Submit client intake form (public endpoint).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Intake form submitted successfully",
@@ -1328,6 +1498,7 @@ Submit client intake form (public endpoint).
 ```
 
 **Validation Rules:**
+
 - `client_name`: Required, max 255 characters
 - `email`: Required, valid email format
 - `project_type`: Required, must be one of predefined types
@@ -1338,6 +1509,7 @@ Submit client intake form (public endpoint).
 - `maintenance_needed`: Boolean
 
 ### GET `/intake/status/:projectId`
+
 Get intake status for a project (public or authenticated).
 
 **URL Parameters:** `projectId` - Project ID
@@ -1354,27 +1526,27 @@ Workflow definitions and approval instances for proposals, invoices, contracts, 
 
 ### Workflow Definitions
 
-| Method | Path | Description | Auth |
+|Method|Path|Description|Auth|
 |--------|------|-------------|------|
-| GET | `/approvals/workflows` | List workflow definitions (optional `entityType` query) | Admin |
-| GET | `/approvals/workflows/:id` | Get workflow with steps | Admin |
-| POST | `/approvals/workflows` | Create workflow (name, entity_type, workflow_type, etc.) | Admin |
-| POST | `/approvals/workflows/:id/steps` | Add step to workflow | Admin |
+|GET|`/approvals/workflows`|List workflow definitions (optional `entityType` query)|Admin|
+|GET|`/approvals/workflows/:id`|Get workflow with steps|Admin|
+|POST|`/approvals/workflows`|Create workflow (name, entity_type, workflow_type, etc.)|Admin|
+|POST|`/approvals/workflows/:id/steps`|Add step to workflow|Admin|
 
 **Entity types:** `proposal`, `invoice`, `contract`, `deliverable`, `project`  
 **Workflow types:** `sequential`, `parallel`, `any_one`
 
 ### Workflow Instances
 
-| Method | Path | Description | Auth |
+|Method|Path|Description|Auth|
 |--------|------|-------------|------|
-| POST | `/approvals/start` | Start approval workflow (entity_type, entity_id, workflow_definition_id?, notes?) | Any |
-| GET | `/approvals/active` | List active workflows | Admin |
-| GET | `/approvals/pending` | Pending approvals for current user | Any |
-| GET | `/approvals/entity/:entityType/:entityId` | Workflow for an entity | Any |
-| GET | `/approvals/instance/:id` | Workflow instance by ID | Any |
-| POST | `/approvals/instance/:id/approve` | Approve step | Any |
-| POST | `/approvals/instance/:id/reject` | Reject step | Any |
+|POST|`/approvals/start`|Start approval workflow (entity_type, entity_id, workflow_definition_id?, notes?)|Any|
+|GET|`/approvals/active`|List active workflows|Admin|
+|GET|`/approvals/pending`|Pending approvals for current user|Any|
+|GET|`/approvals/entity/:entityType/:entityId`|Workflow for an entity|Any|
+|GET|`/approvals/instance/:id`|Workflow instance by ID|Any|
+|POST|`/approvals/instance/:id/approve`|Approve step|Any|
+|POST|`/approvals/instance/:id/reject`|Reject step|Any|
 
 ---
 
@@ -1384,18 +1556,18 @@ Workflow definitions and approval instances for proposals, invoices, contracts, 
 
 Event-driven workflow triggers (admin only for CRUD).
 
-| Method | Path | Description |
+|Method|Path|Description|
 |--------|------|-------------|
-| GET | `/triggers` | List triggers (optional `eventType` query) |
-| GET | `/triggers/options` | Get event types and action types |
-| GET | `/triggers/:id` | Get trigger by ID |
-| POST | `/triggers` | Create trigger (name, event_type, action_type, action_config, etc.) |
-| PUT | `/triggers/:id` | Update trigger |
-| DELETE | `/triggers/:id` | Delete trigger |
-| POST | `/triggers/:id/toggle` | Toggle active state |
-| GET | `/triggers/logs/executions` | Execution logs (optional `triggerId`, `limit`) |
-| GET | `/triggers/logs/events` | System events (optional `eventType`, `limit`) |
-| POST | `/triggers/test-emit` | Emit test event (event_type, context) |
+|GET|`/triggers`|List triggers (optional `eventType` query)|
+|GET|`/triggers/options`|Get event types and action types|
+|GET|`/triggers/:id`|Get trigger by ID|
+|POST|`/triggers`|Create trigger (name, event_type, action_type, action_config, etc.)|
+|PUT|`/triggers/:id`|Update trigger|
+|DELETE|`/triggers/:id`|Delete trigger|
+|POST|`/triggers/:id/toggle`|Toggle active state|
+|GET|`/triggers/logs/executions`|Execution logs (optional `triggerId`, `limit`)|
+|GET|`/triggers/logs/events`|System events (optional `eventType`, `limit`)|
+|POST|`/triggers/test-emit`|Emit test event (event_type, context)|
 
 **Authentication:** All trigger management endpoints require Admin.
 
@@ -1409,32 +1581,32 @@ Request and collect documents from clients; admin review and templates.
 
 ### Client
 
-| Method | Path | Description |
+|Method|Path|Description|
 |--------|------|-------------|
-| GET | `/document-requests/my-requests` | Client's requests and stats (optional `status` query) |
-| POST | `/document-requests/:id/view` | Mark request as viewed |
-| POST | `/document-requests/:id/upload` | Attach file (body: `fileId`) |
+|GET|`/document-requests/my-requests`|Client's requests and stats (optional `status` query)|
+|POST|`/document-requests/:id/view`|Mark request as viewed|
+|POST|`/document-requests/:id/upload`|Attach file (body: `fileId`)|
 
-### Admin
+### Admin (Document Requests)
 
-| Method | Path | Description |
+|Method|Path|Description|
 |--------|------|-------------|
-| GET | `/document-requests/pending` | Pending requests |
-| GET | `/document-requests/for-review` | Requests needing review |
-| GET | `/document-requests/overdue` | Overdue requests |
-| GET | `/document-requests/client/:clientId` | Requests for a client |
-| GET | `/document-requests/:id` | Single request with history |
-| POST | `/document-requests` | Create request |
-| POST | `/document-requests/from-templates` | Create from templates |
-| POST | `/document-requests/:id/start-review` | Start review |
-| POST | `/document-requests/:id/approve` | Approve |
-| POST | `/document-requests/:id/reject` | Reject |
-| POST | `/document-requests/:id/remind` | Send reminder |
-| DELETE | `/document-requests/:id` | Delete request |
-| GET | `/document-requests/templates/list` | List templates |
-| POST | `/document-requests/templates` | Create template |
-| PUT | `/document-requests/templates/:id` | Update template |
-| DELETE | `/document-requests/templates/:id` | Delete template |
+|GET|`/document-requests/pending`|Pending requests|
+|GET|`/document-requests/for-review`|Requests needing review|
+|GET|`/document-requests/overdue`|Overdue requests|
+|GET|`/document-requests/client/:clientId`|Requests for a client|
+|GET|`/document-requests/:id`|Single request with history|
+|POST|`/document-requests`|Create request|
+|POST|`/document-requests/from-templates`|Create from templates|
+|POST|`/document-requests/:id/start-review`|Start review|
+|POST|`/document-requests/:id/approve`|Approve|
+|POST|`/document-requests/:id/reject`|Reject|
+|POST|`/document-requests/:id/remind`|Send reminder|
+|DELETE|`/document-requests/:id`|Delete request|
+|GET|`/document-requests/templates/list`|List templates|
+|POST|`/document-requests/templates`|Create template|
+|PUT|`/document-requests/templates/:id`|Update template|
+|DELETE|`/document-requests/templates/:id`|Delete template|
 
 ---
 
@@ -1446,29 +1618,29 @@ Public and admin endpoints for help articles and categories.
 
 ### Public (no auth or optional auth)
 
-| Method | Path | Description |
+|Method|Path|Description|
 |--------|------|-------------|
-| GET | `/kb/categories` | Active categories with article counts |
-| GET | `/kb/categories/:slug` | Category and its articles |
-| GET | `/kb/featured` | Featured articles (optional `limit` query) |
-| GET | `/kb/search` | Search articles (query `q`, optional `limit`) |
-| GET | `/kb/articles/:categorySlug/:articleSlug` | Get article (increments view count) |
-| POST | `/kb/articles/:id/feedback` | Submit feedback (body: `isHelpful`, `comment?`) |
+|GET|`/kb/categories`|Active categories with article counts|
+|GET|`/kb/categories/:slug`|Category and its articles|
+|GET|`/kb/featured`|Featured articles (optional `limit` query)|
+|GET|`/kb/search`|Search articles (query `q`, optional `limit`)|
+|GET|`/kb/articles/:categorySlug/:articleSlug`|Get article (increments view count)|
+|POST|`/kb/articles/:id/feedback`|Submit feedback (body: `isHelpful`, `comment?`)|
 
-### Admin
+### Admin (Knowledge Base)
 
-| Method | Path | Description |
+|Method|Path|Description|
 |--------|------|-------------|
-| GET | `/kb/admin/categories` | All categories (including inactive) |
-| POST | `/kb/admin/categories` | Create category (name, slug, description?, icon?, color?, sort_order?) |
-| PUT | `/kb/admin/categories/:id` | Update category |
-| DELETE | `/kb/admin/categories/:id` | Delete category |
-| GET | `/kb/admin/articles` | All articles (optional `category` query) |
-| GET | `/kb/admin/articles/:id` | Single article by ID |
-| POST | `/kb/admin/articles` | Create article (category_id, title, slug, summary?, content, keywords?, is_featured?, is_published?) |
-| PUT | `/kb/admin/articles/:id` | Update article |
-| DELETE | `/kb/admin/articles/:id` | Delete article |
-| GET | `/kb/admin/stats` | Knowledge base statistics |
+|GET|`/kb/admin/categories`|All categories (including inactive)|
+|POST|`/kb/admin/categories`|Create category (name, slug, description?, icon?, color?, sort_order?)|
+|PUT|`/kb/admin/categories/:id`|Update category|
+|DELETE|`/kb/admin/categories/:id`|Delete category|
+|GET|`/kb/admin/articles`|All articles (optional `category` query)|
+|GET|`/kb/admin/articles/:id`|Single article by ID|
+|POST|`/kb/admin/articles`|Create article (category_id, title, slug, summary?, content, keywords?, is_featured?, is_published?)|
+|PUT|`/kb/admin/articles/:id`|Update article|
+|DELETE|`/kb/admin/articles/:id`|Delete article|
+|GET|`/kb/admin/stats`|Knowledge base statistics|
 
 ---
 
@@ -1477,11 +1649,13 @@ Public and admin endpoints for help articles and categories.
 All API endpoints are subject to rate limiting:
 
 **Limits:**
+
 - **Authentication endpoints:** 5 requests per 15 minutes per IP
 - **General API endpoints:** 100 requests per 15 minutes per authenticated user
 - **File upload endpoints:** 10 requests per hour per authenticated user
 
 **Rate limit headers:**
+
 ```http
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 87
@@ -1489,6 +1663,7 @@ X-RateLimit-Reset: 1643746800
 ```
 
 **Rate limit exceeded response:**
+
 ```json
 {
   "error": "Rate limit exceeded",
@@ -1506,6 +1681,7 @@ X-RateLimit-Reset: 1643746800
 Webhook endpoints for real-time notifications:
 
 ### Available Events
+
 - `client.created` - New client registration
 - `project.status_changed` - Project status updates
 - `milestone.completed` - Milestone completions
@@ -1513,6 +1689,7 @@ Webhook endpoints for real-time notifications:
 - `file.uploaded` - File uploads
 
 ### Webhook Payload Example
+
 ```json
 {
   "event": "project.status_changed",
@@ -1530,6 +1707,7 @@ Webhook endpoints for real-time notifications:
 ## SDK Examples
 
 ### JavaScript/Node.js
+
 ```javascript
 const client = new NoBhadCodesAPI({
   baseURL: 'https://nobhad.codes/api',
@@ -1550,6 +1728,7 @@ const files = await client.files.upload(projectId, fileArray);
 ```
 
 ### cURL Examples
+
 ```bash
 # Login
 curl -X POST https://nobhad.codes/api/auth/login \
@@ -1572,12 +1751,14 @@ curl -X POST https://nobhad.codes/api/projects/101/milestones \
 ### Message Threads
 
 #### Get Message Threads
+
 ```bash
 GET /api/messages/threads
 Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "threads": [
@@ -1598,6 +1779,7 @@ Authorization: Bearer <token>
 ```
 
 #### Create Message Thread
+
 ```bash
 curl -X POST https://nobhad.codes/api/messages/threads \
   -H "Authorization: Bearer your-token" \
@@ -1613,6 +1795,7 @@ curl -X POST https://nobhad.codes/api/messages/threads \
 ### Messages
 
 #### Send Message with Attachments
+
 ```bash
 curl -X POST https://nobhad.codes/api/messages/threads/1/messages \
   -H "Authorization: Bearer your-token" \
@@ -1623,6 +1806,7 @@ curl -X POST https://nobhad.codes/api/messages/threads/1/messages \
 ```
 
 #### Mark Messages as Read
+
 ```bash
 curl -X PUT https://nobhad.codes/api/messages/threads/1/read \
   -H "Authorization: Bearer your-token"
@@ -1631,6 +1815,7 @@ curl -X PUT https://nobhad.codes/api/messages/threads/1/read \
 ### Quick Inquiries
 
 #### Send Quick Inquiry
+
 ```bash
 curl -X POST https://nobhad.codes/api/messages/inquiry \
   -H "Authorization: Bearer your-token" \
@@ -1644,6 +1829,7 @@ curl -X POST https://nobhad.codes/api/messages/inquiry \
 ### Notification Preferences
 
 #### Update Notification Settings
+
 ```bash
 curl -X PUT https://nobhad.codes/api/messages/preferences \
   -H "Authorization: Bearer your-token" \
@@ -1660,12 +1846,14 @@ curl -X PUT https://nobhad.codes/api/messages/preferences \
 ### Admin Analytics
 
 #### Get Messaging Analytics (Admin Only)
+
 ```bash
 curl https://nobhad.codes/api/messages/analytics \
   -H "Authorization: Bearer your-admin-token"
 ```
 
 **Response:**
+
 ```json
 {
   "analytics": {
@@ -1692,22 +1880,22 @@ The Invoice system handles billing, payments, deposits, and credits.
 
 ### Invoice Types
 
-| Type | Description |
+|Type|Description|
 |------|-------------|
-| `standard` | Regular invoice for services |
-| `deposit` | Upfront deposit payment |
+|`standard`|Regular invoice for services|
+|`deposit`|Upfront deposit payment|
 
 ### Invoice Statuses
 
-| Status | Description |
+|Status|Description|
 |--------|-------------|
-| `draft` | Not yet sent to client |
-| `sent` | Sent to client, awaiting payment |
-| `viewed` | Client has viewed the invoice |
-| `partial` | Partially paid |
-| `paid` | Fully paid |
-| `overdue` | Past due date |
-| `cancelled` | Invoice cancelled |
+|`draft`|Not yet sent to client|
+|`sent`|Sent to client, awaiting payment|
+|`viewed`|Client has viewed the invoice|
+|`partial`|Partially paid|
+|`paid`|Fully paid|
+|`overdue`|Past due date|
+|`cancelled`|Invoice cancelled|
 
 ### GET `/api/invoices/me`
 
@@ -2320,14 +2508,14 @@ Get all scheduled reminders for an invoice.
 
 **Reminder Types:**
 
-| Type | Description |
+|Type|Description|
 |------|-------------|
-| `upcoming` | 3 days before due date |
-| `due` | On due date |
-| `overdue_3` | 3 days overdue |
-| `overdue_7` | 7 days overdue |
-| `overdue_14` | 14 days overdue |
-| `overdue_30` | 30 days overdue |
+|`upcoming`|3 days before due date|
+|`due`|On due date|
+|`overdue_3`|3 days overdue|
+|`overdue_7`|7 days overdue|
+|`overdue_14`|14 days overdue|
+|`overdue_30`|30 days overdue|
 
 ### POST `/api/invoices/reminders/:id/skip`
 
@@ -2438,21 +2626,21 @@ Search invoices with filters and pagination.
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
+|Parameter|Type|Description|
 |-----------|------|-------------|
-| `clientId` | number | Filter by client |
-| `projectId` | number | Filter by project |
-| `status` | string | Filter by status (comma-separated for multiple) |
-| `invoiceType` | string | `standard` or `deposit` |
-| `search` | string | Search in invoice number and notes |
-| `dateFrom` | date | Filter by issue date (from) |
-| `dateTo` | date | Filter by issue date (to) |
-| `dueDateFrom` | date | Filter by due date (from) |
-| `dueDateTo` | date | Filter by due date (to) |
-| `minAmount` | number | Minimum amount |
-| `maxAmount` | number | Maximum amount |
-| `limit` | number | Results per page (default: 50) |
-| `offset` | number | Pagination offset |
+|`clientId`|number|Filter by client|
+|`projectId`|number|Filter by project|
+|`status`|string|Filter by status (comma-separated for multiple)|
+|`invoiceType`|string|`standard` or `deposit`|
+|`search`|string|Search in invoice number and notes|
+|`dateFrom`|date|Filter by issue date (from)|
+|`dateTo`|date|Filter by issue date (to)|
+|`dueDateFrom`|date|Filter by due date (from)|
+|`dueDateTo`|date|Filter by due date (to)|
+|`minAmount`|number|Minimum amount|
+|`maxAmount`|number|Maximum amount|
+|`limit`|number|Results per page (default: 50)|
+|`offset`|number|Pagination offset|
 
 **Response (200 OK):**
 
@@ -2826,12 +3014,12 @@ The scheduler service runs automated tasks for invoice reminders and recurring i
 
 **Configuration (Environment Variables):**
 
-| Variable | Default | Description |
+|Variable|Default|Description|
 |----------|---------|-------------|
-| `SCHEDULER_ENABLED` | `true` | Enable/disable scheduler |
-| `SCHEDULER_REMINDERS` | `true` | Enable payment reminders |
-| `SCHEDULER_SCHEDULED` | `true` | Enable scheduled invoice generation |
-| `SCHEDULER_RECURRING` | `true` | Enable recurring invoice generation |
+|`SCHEDULER_ENABLED`|`true`|Enable/disable scheduler|
+|`SCHEDULER_REMINDERS`|`true`|Enable payment reminders|
+|`SCHEDULER_SCHEDULED`|`true`|Enable scheduled invoice generation|
+|`SCHEDULER_RECURRING`|`true`|Enable recurring invoice generation|
 
 **Schedule:**
 
@@ -3554,10 +3742,12 @@ Get clients needing follow-up.
 ## API Versioning
 
 The API uses URL-based versioning:
+
 - Current version: `v1` (implied, no version prefix required)
 - Future versions: `https://nobhad.codes/api/v2/...`
 
 **Version compatibility:**
+
 - Major version changes may include breaking changes
 - Minor version changes are backward compatible
 - Version deprecation notices will be provided 6 months in advance
@@ -3565,6 +3755,7 @@ The API uses URL-based versioning:
 ## Support
 
 For API support and questions:
+
 - **Documentation:** [nobhad.codes/docs](https://nobhad.codes/docs)
-- **Email:** api-nobhaduri@gmail.com
+- **Email:** <<<api-nobhaduri@gmail.com>>>
 - **Response Time:** 24-48 hours for technical inquiries

@@ -2,7 +2,7 @@
 
 **Created:** February 3, 2026
 **Status:** Ready for implementation
-**Source:** [UX_EXPERT_INSIGHTS.md](./UX_EXPERT_INSIGHTS.md), [current_work.md](../current_work.md)
+**Source:** [current_work.md](../current_work.md)
 
 This plan consolidates all UX/UI audit findings into actionable phases, prioritized by impact, dependency, and effort. Each phase can be executed independently, though earlier phases should complete first where noted.
 
@@ -12,13 +12,13 @@ This plan consolidates all UX/UI audit findings into actionable phases, prioriti
 
 The audit identified work across 5 major areas:
 
-| Area | Items | Priority |
+|Area|Items|Priority|
 |------|-------|----------|
-| **Accessibility (WCAG 2.1 AA)** | Skip links, focus states, contrast, landmarks | P0 - Critical |
-| **Information Architecture** | H1 structure, breadcrumbs, visual hierarchy | P1 - High |
-| **Consistency** | Headings, spacing, empty states, modals | P1 - High |
-| **Component Redesign** | Messages split-view, sidebar order, panels | P2 - Medium |
-| **Polish** | Badges, disabled states, toggles, columns | P3 - Low |
+|**Accessibility (WCAG 2.1 AA)**|Skip links, focus states, contrast, landmarks|P0 - Critical|
+|**Information Architecture**|H1 structure, breadcrumbs, visual hierarchy|P1 - High|
+|**Consistency**|Headings, spacing, empty states, modals|P1 - High|
+|**Component Redesign**|Messages split-view, sidebar order, panels|P2 - Medium|
+|**Polish**|Badges, disabled states, toggles, columns|P3 - Low|
 
 **Estimated total effort:** 8-12 days (2-3 sprints)
 
@@ -176,7 +176,7 @@ The audit identified work across 5 major areas:
 - [ ] Audit `.page-title` padding/margin across admin and portal tabs
 - [ ] Verify all content areas use `--space-*` tokens (not hardcoded px)
 - [ ] Verify all text uses `--font-size-*` tokens
-- [ ] Document any exceptions in `STYLE_CONSISTENCY_REPORT.md`
+- [ ] Document any exceptions in CSS_ARCHITECTURE.md
 
 **Files:** Various CSS files
 
@@ -236,7 +236,7 @@ The audit identified work across 5 major areas:
 - `src/styles/shared/portal-messages.css` (layout changes)
 - `src/styles/admin/index.css` (admin-specific overrides)
 
-**Reference:** Part II §5.2-5.3 in UX_EXPERT_INSIGHTS.md
+**Reference:** See Messages tab in current_work.md
 
 ### 3.2 Sidebar Button Order
 
@@ -278,13 +278,13 @@ Dashboard | Projects(?) | Messages | Files | Invoices | Documents | Help | Setti
 
 **Proposed pattern:**
 
-| Panel Type | Primary Action | Secondary Actions | Overflow |
+|Panel Type|Primary Action|Secondary Actions|Overflow|
 |------------|----------------|-------------------|----------|
-| Detail slide-out (lead, contact) | Header right (icon-btn) | Header right (icon-btn group) | `...` menu if >3 |
-| Detail tab (client, project) | Header right (icon-btn) | Card footer or inline | N/A |
-| Modal (create/edit) | Footer right (btn-primary) | Footer left (btn-secondary) | N/A |
-| Confirm dialog | Footer right (btn-primary/danger) | Footer left (btn-secondary) | N/A |
-| Card with actions (Account Actions) | Move to header or keep in card | N/A | N/A |
+|Detail slide-out (lead, contact)|Header right (icon-btn)|Header right (icon-btn group)|`...` menu if >3|
+|Detail tab (client, project)|Header right (icon-btn)|Card footer or inline|N/A|
+|Modal (create/edit)|Footer right (btn-primary)|Footer left (btn-secondary)|N/A|
+|Confirm dialog|Footer right (btn-primary/danger)|Footer left (btn-secondary)|N/A|
+|Card with actions (Account Actions)|Move to header or keep in card|N/A|N/A|
 
 **Tasks:**
 
@@ -309,17 +309,17 @@ Dashboard | Projects(?) | Messages | Files | Invoices | Documents | Help | Setti
 
 From current_work "Portal styling (user feedback)":
 
-| Item | Status | Priority |
+|Item|Status|Priority|
 |------|--------|----------|
-| Message input disabled state | Open | Medium |
-| "Knowledge" name (was "KB") | Open | Low |
-| Toggle better design | Open | Medium |
-| Client table: email under name + company | Open | Medium |
-| Name/company/email one column | Open | Medium |
-| Account Actions placement | Open | High (Phase 3.3) |
-| Modal icon + H3 same line | Open | High (Phase 2.1) |
-| Modal forms: reusable dropdown | Open | Medium |
-| Analytics: reusable components | Open | Medium |
+|Message input disabled state|Open|Medium|
+|"Knowledge" name (was "KB")|Open|Low|
+|Toggle better design|Open|Medium|
+|Client table: email under name + company|Open|Medium|
+|Name/company/email one column|Open|Medium|
+|Account Actions placement|Open|High (Phase 3.3)|
+|Modal icon + H3 same line|Open|High (Phase 2.1)|
+|Modal forms: reusable dropdown|Open|Medium|
+|Analytics: reusable components|Open|Medium|
 
 **Tasks:**
 
@@ -409,25 +409,22 @@ From current_work "Portal styling (user feedback)":
 - [ ] Update `CSS_ARCHITECTURE.md` with:
   - New empty-state component
   - Any new shared classes
-- [ ] Update `UX_EXPERT_INSIGHTS.md` with:
-  - Mark completed audit items
-  - Add implementation notes
 - [ ] Archive completed items from `current_work.md` to `ARCHIVED_WORK_2026-02.md`
 
-**Files:** `docs/design/UX_GUIDELINES.md`, `docs/design/CSS_ARCHITECTURE.md`, `docs/design/UX_EXPERT_INSIGHTS.md`, `docs/current_work.md`, `docs/archive/ARCHIVED_WORK_2026-02.md`
+**Files:** `docs/design/UX_GUIDELINES.md`, `docs/design/CSS_ARCHITECTURE.md`, `docs/current_work.md`, `docs/archive/ARCHIVED_WORK_2026-02.md`
 
 ---
 
 ## Implementation Schedule
 
-| Phase | Duration | Effort | Blocked By |
+|Phase|Duration|Effort|Blocked By|
 |-------|----------|--------|------------|
-| Phase 0 (A11y Foundation) | 1-2 days | 1 dev | — |
-| Phase 1 (IA & Hierarchy) | 2-3 days | 1 dev | Phase 0.2 |
-| Phase 2 (Consistency) | 2-3 days | 1 dev | Phase 1 |
-| Phase 3 (Component Redesign) | 3-4 days | 1-2 devs | Phase 2 |
-| Phase 4 (Polish) | 2 days | 1 dev | Phase 3 |
-| Phase 5 (Verification) | 1 day | 1 dev | Phases 0-4 |
+|Phase 0 (A11y Foundation)|1-2 days|1 dev|—|
+|Phase 1 (IA & Hierarchy)|2-3 days|1 dev|Phase 0.2|
+|Phase 2 (Consistency)|2-3 days|1 dev|Phase 1|
+|Phase 3 (Component Redesign)|3-4 days|1-2 devs|Phase 2|
+|Phase 4 (Polish)|2 days|1 dev|Phase 3|
+|Phase 5 (Verification)|1 day|1 dev|Phases 0-4|
 
 **Total:** 11-15 days (with some parallelization possible in Phases 3-4)
 
@@ -459,32 +456,30 @@ Before implementation, get stakeholder/user input on:
 
 ## Risk Assessment
 
-| Risk | Mitigation |
+|Risk|Mitigation|
 |------|------------|
-| Heading changes break existing styles | Use same classes; only change semantic element |
-| Sidebar reorder confuses existing users | Consider user notification or gentle transition |
-| Split-view adds complexity | Start with static layout; add resize later |
-| Badge redesign conflicts with existing status colors | Audit all badge uses first; create migration plan |
+|Heading changes break existing styles|Use same classes; only change semantic element|
+|Sidebar reorder confuses existing users|Consider user notification or gentle transition|
+|Split-view adds complexity|Start with static layout; add resize later|
+|Badge redesign conflicts with existing status colors|Audit all badge uses first; create migration plan|
 
 ---
 
 ## Success Metrics
 
-| Metric | Target | Measurement |
+|Metric|Target|Measurement|
 |--------|--------|-------------|
-| Lighthouse Accessibility score | 95+ | Run on all pages |
-| Heading skip violations | 0 | axe-core audit |
-| Modal title inconsistencies | 0 | Manual audit |
-| Empty state variations | 1 shared component | Code audit |
-| User-reported confusion | Decreased | Feedback tracking |
+|Lighthouse Accessibility score|95+|Run on all pages|
+|Heading skip violations|0|axe-core audit|
+|Modal title inconsistencies|0|Manual audit|
+|Empty state variations|1 shared component|Code audit|
+|User-reported confusion|Decreased|Feedback tracking|
 
 ---
 
 ## Related Documents
 
-- [UX_EXPERT_INSIGHTS.md](./UX_EXPERT_INSIGHTS.md) — Audit source
 - [current_work.md](../current_work.md) — Active work tracking
 - [UX_GUIDELINES.md](./UX_GUIDELINES.md) — UX standards
 - [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md) — Design system
 - [PORTAL_CSS_DESIGN.md](./PORTAL_CSS_DESIGN.md) — Portal-specific CSS
-- [STATUS_SYSTEM.md](./STATUS_SYSTEM.md) — Badge/status colors

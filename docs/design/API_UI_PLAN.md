@@ -2,39 +2,39 @@
 
 **Last Updated:** February 2, 2026
 
-This document plans how the four API-only route groups (approvals, triggers, document-requests, knowledge base) get frontend UI that **fits the current design**. It follows [UX_GUIDELINES.md](./UX_GUIDELINES.md), [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md), [PORTAL_CSS_DESIGN.md](./PORTAL_CSS_DESIGN.md), [STYLE_CONSISTENCY_REPORT.md](./STYLE_CONSISTENCY_REPORT.md), and [REUSABLE_COMPONENTS_AUDIT.md](./REUSABLE_COMPONENTS_AUDIT.md).
+This document plans how the four API-only route groups (approvals, triggers, document-requests, knowledge base) get frontend UI that **fits the current design**. It follows [UX_GUIDELINES.md](./UX_GUIDELINES.md), [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md), [PORTAL_CSS_DESIGN.md](./PORTAL_CSS_DESIGN.md), and [REUSABLE_COMPONENTS_AUDIT.md](./REUSABLE_COMPONENTS_AUDIT.md).
 
 ---
 
 ## Design Alignment Summary
 
-| Principle | Application |
+|Principle|Application|
 |-----------|-------------|
-| **Portal theme** | All new UI uses `[data-page="admin"]` or `[data-page="client-portal"]` and `--portal-*` tokens (text, bg, border, spacing). |
-| **Layout** | Admin: sidebar tab + `.page-header` + `.admin-table-card` (or section cards). Client: sidebar tab + same header/card patterns from portal layout. |
-| **Reusable components** | **Must** use shared components from `src/components/` and `src/utils/` (see table below). No inline native `<select>`, custom modal markup, or one-off dropdown logic. |
-| **Icons** | Lucide only; no emojis. Use icon-before-text on buttons (see STYLE_CONSISTENCY_REPORT §3.5). Toolbar actions: icon-only buttons via `createIconButton` (or `.icon-btn` with Lucide SVG) and `aria-label` / `title`. |
-| **Tables** | `.admin-table`, `.admin-table-header` (title + Add/Export/Refresh), loading/empty via `showTableLoading` / `showTableEmpty` from `src/utils/loading-utils.ts`. |
-| **Empty states** | Use `createEmptyState` from `src/components/empty-state.ts` where applicable; otherwise centered, large icon (32px+), short message, primary action button. |
-| **Modals** | Use `createPortalModal` from `src/components/portal-modal.ts` for form modals (shell: overlay, header, body, footer). Mount form markup into `.body`, buttons into `.footer`. Close via instance `.hide()` and optional focus trap. |
-| **Dropdowns** | **Two components:** (1) **Tables:** use `createTableDropdown` from `src/components/table-dropdown.ts` for table cells (status, actions) and table header filters (e.g. per page). (2) **Forms:** use `createFormSelect` from `src/components/form-select.ts` for form fields in modals and inline forms (client, category, type, status). Mount in a div (e.g. `id="-mount"`); call `setOptions()` when data loads. No static `<select>` in HTML. |
-| **View toggles** | Use `createViewToggle` from `src/components/view-toggle.ts` for Table/Pipeline or List/Cards switches. |
-| **Status badges** | Use `createStatusBadge` or `getStatusBadgeHTML` from `src/components/status-badge.ts`; shared CSS in `portal-badges.css`. |
-| **Buttons** | `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-outline`, `.btn-danger`, `.icon-btn`; UPPERCASE text labels; order Add → Export → Refresh in toolbars. |
+|**Portal theme**|All new UI uses `[data-page="admin"]` or `[data-page="client-portal"]` and `--portal-*` tokens (text, bg, border, spacing).|
+|**Layout**|Admin: sidebar tab + `.page-header` + `.admin-table-card` (or section cards). Client: sidebar tab + same header/card patterns from portal layout.|
+|**Reusable components**|**Must** use shared components from `src/components/` and `src/utils/` (see table below). No inline native `<select>`, custom modal markup, or one-off dropdown logic.|
+|**Icons**|Lucide only; no emojis. Use icon-before-text on buttons. Toolbar actions: icon-only buttons via `createIconButton` (or `.icon-btn` with Lucide SVG) and `aria-label` / `title`.|
+|**Tables**|`.admin-table`, `.admin-table-header` (title + Add/Export/Refresh), loading/empty via `showTableLoading` / `showTableEmpty` from `src/utils/loading-utils.ts`.|
+|**Empty states**|Use `createEmptyState` from `src/components/empty-state.ts` where applicable; otherwise centered, large icon (32px+), short message, primary action button.|
+|**Modals**|Use `createPortalModal` from `src/components/portal-modal.ts` for form modals (shell: overlay, header, body, footer). Mount form markup into `.body`, buttons into `.footer`. Close via instance `.hide()` and optional focus trap.|
+|**Dropdowns**|**Two components:** (1) **Tables:** use `createTableDropdown` from `src/components/table-dropdown.ts` for table cells (status, actions) and table header filters (e.g. per page). (2) **Forms:** use `createFormSelect` from `src/components/form-select.ts` for form fields in modals and inline forms (client, category, type, status). Mount in a div (e.g. `id="-mount"`); call `setOptions()` when data loads. No static `<select>` in HTML.|
+|**View toggles**|Use `createViewToggle` from `src/components/view-toggle.ts` for Table/Pipeline or List/Cards switches.|
+|**Status badges**|Use `createStatusBadge` or `getStatusBadgeHTML` from `src/components/status-badge.ts`; shared CSS in `portal-badges.css`.|
+|**Buttons**|`.btn`, `.btn-primary`, `.btn-secondary`, `.btn-outline`, `.btn-danger`, `.icon-btn`; UPPERCASE text labels; order Add → Export → Refresh in toolbars.|
 
 ### Reusable components quick reference
 
-| Use case | Component / util | Location |
+|Use case|Component / util|Location|
 |----------|------------------|----------|
-| **Table dropdown** (cells, header filter, per page) | `createTableDropdown` | `src/components/table-dropdown.ts` |
-| **Form dropdown** (modals, inline forms) | `createFormSelect` | `src/components/form-select.ts` |
-| Form modal (add/edit) | `createPortalModal` | `src/components/portal-modal.ts` |
-| Toolbar icon-only button | `createIconButton` or `.icon-btn` + Lucide SVG | `src/components/icon-button.ts` |
-| Table row status / pipeline stage | `createStatusBadge`, `getStatusBadgeHTML` | `src/components/status-badge.ts` |
-| Table vs pipeline / list vs cards toggle | `createViewToggle` | `src/components/view-toggle.ts` |
-| Modal form select (wrap existing select) | `initModalDropdown` | `src/utils/modal-dropdown.ts` |
-| Loading / empty table state | `showTableLoading`, `showTableEmpty` | `src/utils/loading-utils.ts` |
-| Focus trap in modal | `manageFocusTrap` | `src/utils/focus-trap.ts` |
+|**Table dropdown** (cells, header filter, per page)|`createTableDropdown`|`src/components/table-dropdown.ts`|
+|**Form dropdown** (modals, inline forms)|`createFormSelect`|`src/components/form-select.ts`|
+|Form modal (add/edit)|`createPortalModal`|`src/components/portal-modal.ts`|
+|Toolbar icon-only button|`createIconButton` or `.icon-btn` + Lucide SVG|`src/components/icon-button.ts`|
+|Table row status / pipeline stage|`createStatusBadge`, `getStatusBadgeHTML`|`src/components/status-badge.ts`|
+|Table vs pipeline / list vs cards toggle|`createViewToggle`|`src/components/view-toggle.ts`|
+|Modal form select (wrap existing select)|`initModalDropdown`|`src/utils/modal-dropdown.ts`|
+|Loading / empty table state|`showTableLoading`, `showTableEmpty`|`src/utils/loading-utils.ts`|
+|Focus trap in modal|`manageFocusTrap`|`src/utils/focus-trap.ts`|
 
 ---
 
@@ -110,7 +110,7 @@ This document plans how the four API-only route groups (approvals, triggers, doc
 
 ### 3.2 Client portal UI
 
-- **Placement:** New sidebar tab **Documents** (or **Requests**) — aligns with CLIENT_PORTAL_DEEP_DIVE Tier 3.1/3.2.
+- **Placement:** New sidebar tab **Documents** (or **Requests**).
 - **Reusable components:** Status badges via `createStatusBadge` / `getStatusBadgeHTML`; form dropdowns via `createFormSelect`; shared portal card and button classes. No static `<select>` in HTML.
 - **Structure:**
   - **Page header:** "Document requests" (or "Documents we need").
@@ -140,7 +140,7 @@ This document plans how the four API-only route groups (approvals, triggers, doc
 
 ### 4.2 Client portal UI (Help / FAQ)
 
-- **Placement:** New sidebar tab **Help** (or **FAQ**). Matches CLIENT_PORTAL_DEEP_DIVE Tier 2.5.
+- **Placement:** New sidebar tab **Help** (or **FAQ**).
 - **Reusable components:** Search bar via shared component if available (`search-bar.ts`); otherwise consistent input + Lucide Search icon. Cards use shared portal card classes; no one-off markup. Category/article lists use same list/card patterns as rest of portal.
 - **Structure:**
   - **Page header:** "Help" (or "FAQ").
@@ -155,25 +155,25 @@ This document plans how the four API-only route groups (approvals, triggers, doc
 
 ## Implementation Order (Suggested)
 
-| Order | Feature | Surface | Status |
+|Order|Feature|Surface|Status|
 |-------|---------|---------|--------|
-| 1 | Knowledge base (client) | Client portal – Help tab | **Done** |
-| 2 | Knowledge base (admin) | Admin – KB tab | **Done** |
-| 3 | Document requests (client) | Client portal – Documents tab | **Done** |
-| 4 | Document requests (admin) | Admin – Document requests tab | **Done** |
-| 5 | Approvals + Triggers | Admin – Workflows tab | Pending |
+|1|Knowledge base (client)|Client portal – Help tab|**Done**|
+|2|Knowledge base (admin)|Admin – KB tab|**Done**|
+|3|Document requests (client)|Client portal – Documents tab|**Done**|
+|4|Document requests (admin)|Admin – Document requests tab|**Done**|
+|5|Approvals + Triggers|Admin – Workflows tab|Pending|
 
 ---
 
 ## Files to Add / Touch
 
-| Area | New files | Touch |
+|Area|New files|Touch|
 |------|-----------|--------|
-| **Admin – Workflows** | `src/features/admin/modules/admin-workflows.ts` (or `admin-approvals.ts` + `admin-triggers.ts`), `src/styles/admin/workflows.css` | `admin/index.html` (sidebar button + tab content), `src/features/admin/admin-dashboard.ts` (register tab, load data), `src/styles/bundles/admin.css` (import workflows.css) |
-| **Admin – Document requests** | `src/features/admin/modules/admin-document-requests.ts`, `src/styles/admin/document-requests.css` | `admin/index.html`, `admin-dashboard.ts`, admin bundle |
-| **Admin – Knowledge base** | `src/features/admin/modules/admin-knowledge-base.ts`, `src/styles/admin/knowledge-base.css` | `admin/index.html`, `admin-dashboard.ts`, admin bundle |
-| **Client – Documents** | `src/features/client/modules/portal-document-requests.ts`, `src/styles/client-portal/documents.css` | `client/portal.html`, portal navigation, portal bundle |
-| **Client – Help** | `src/features/client/modules/portal-help.ts` (or `portal-knowledge-base.ts`), `src/styles/client-portal/help.css` | `client/portal.html`, portal navigation, portal bundle |
+|**Admin – Workflows**|`src/features/admin/modules/admin-workflows.ts` (or `admin-approvals.ts` + `admin-triggers.ts`), `src/styles/admin/workflows.css`|`admin/index.html` (sidebar button + tab content), `src/features/admin/admin-dashboard.ts` (register tab, load data), `src/styles/bundles/admin.css` (import workflows.css)|
+|**Admin – Document requests**|`src/features/admin/modules/admin-document-requests.ts`, `src/styles/admin/document-requests.css`|`admin/index.html`, `admin-dashboard.ts`, admin bundle|
+|**Admin – Knowledge base**|`src/features/admin/modules/admin-knowledge-base.ts`, `src/styles/admin/knowledge-base.css`|`admin/index.html`, `admin-dashboard.ts`, admin bundle|
+|**Client – Documents**|`src/features/client/modules/portal-document-requests.ts`, `src/styles/client-portal/documents.css`|`client/portal.html`, portal navigation, portal bundle|
+|**Client – Help**|`src/features/client/modules/portal-help.ts` (or `portal-knowledge-base.ts`), `src/styles/client-portal/help.css`|`client/portal.html`, portal navigation, portal bundle|
 
 ---
 
@@ -181,9 +181,7 @@ This document plans how the four API-only route groups (approvals, triggers, doc
 
 - [UX_GUIDELINES.md](./UX_GUIDELINES.md) — Icons, buttons, forms, spacing.
 - [PORTAL_CSS_DESIGN.md](./PORTAL_CSS_DESIGN.md) — Portal bundles and theme variables.
-- [STYLE_CONSISTENCY_REPORT.md](./STYLE_CONSISTENCY_REPORT.md) — Table patterns, empty/loading states, icon order.
 - [REUSABLE_COMPONENTS_AUDIT.md](./REUSABLE_COMPONENTS_AUDIT.md) — What should use shared components; migration status for dropdowns, modals, status badges.
 - [WIREFRAME_AND_COMPONENTS.md](./WIREFRAME_AND_COMPONENTS.md) — Wireframe mode, sidebar/layout reuse, component system overview.
-- [CLIENT_PORTAL_DEEP_DIVE.md](../CLIENT_PORTAL_DEEP_DIVE.md) — Tier 2.5 (KB), Tier 3.1/3.2 (document requests).
 - [current_work.md](../current_work.md) — API Endpoints Without Frontend UI (Gap) and tier priorities.
 - **Components:** `src/components/` (filter-select, portal-modal, icon-button, status-badge, view-toggle, empty-state, etc.); `src/utils/` (table-dropdown, modal-dropdown, loading-utils, focus-trap).

@@ -262,6 +262,7 @@ All the following were fixed:
 ## Archived from Current Work (January 28, 2026)
 
 ### REDESIGN ALL PORTAL BUTTONS
+
 **Status:** COMPLETE
 **Completed:** January 26, 2026
 
@@ -270,12 +271,14 @@ Full button redesign across admin and client portals. Shared portal button style
 ---
 
 ### File Upload - Files Appear After Upload
+
 **Status:** VERIFIED (no issue)
 **Verified:** January 28, 2026
 
 File upload success refreshes Files section; new files appear immediately without page reload.
 
 **Verification steps:**
+
 - Go to project details > Files tab
 - Upload a file
 - Verify file appears immediately (no page refresh needed)
@@ -283,48 +286,56 @@ File upload success refreshes Files section; new files appear immediately withou
 ---
 
 ### File Download
+
 **Status:** VERIFIED (no issue)
 **Verified:** January 28, 2026
 
 Download button on project files works; file downloads with correct filename.
 
 **Verification steps:**
+
 - Click Download on any project file
 - File should download with correct filename
 
 ---
 
 ### Target End Date Display
+
 **Status:** VERIFIED (no issue)
 **Verified:** January 28, 2026
 
 Target end dates display correctly (no timezone offset); e.g. March 1 shows as March 1.
 
 **Verification steps:**
+
 - Set a target end date (e.g., March 1)
 - Save and verify it displays as March 1 (not February 28)
 
 ---
 
 ### Empty Values Display
+
 **Status:** VERIFIED (no issue)
 **Verified:** January 28, 2026
 
 Unpopulated fields show blank instead of "-" in project details.
 
 **Verification steps:**
+
 - View a project with some fields unpopulated
 - Empty fields should show blank, not "-"
 
 ---
 
 ### Admin Proposals Notes Save
+
 **Status:** VERIFIED (no issue)
 **Verified:** January 28, 2026
 
 Admin notes on proposals save and refresh in the details panel immediately.
 
 **Verification steps:**
+
 - Open a proposal in admin panel
 - Add or modify admin notes
 - Save and verify notes display updates immediately
@@ -332,18 +343,21 @@ Admin notes on proposals save and refresh in the details panel immediately.
 ---
 
 ### Dialogue Box Shadows - Consistency
+
 **Status:** COMPLETE
 **Observed:** January 27, 2026
 
 Dialogue boxes (modals, confirm dialogs) now use consistent shadow styling with `--shadow-modal` token throughout the application.
 
 **Changes made:**
+
 - Updated modal component to use `--shadow-modal`
 - Updated admin modals to use `--shadow-modal` instead of `--shadow-panel`
 - Updated confirm dialog to use `--shadow-modal`
 - Updated button shadows in confirm dialog to use `--shadow-button-*` tokens
 
 **Files modified:**
+
 - `src/components/modal-component.ts`
 - `src/styles/admin/modals.css`
 - `src/styles/shared/confirm-dialog.css`
@@ -351,12 +365,14 @@ Dialogue boxes (modals, confirm dialogs) now use consistent shadow styling with 
 ---
 
 ### Toast Notifications for Status Changes
+
 **Status:** COMPLETE
 **Observed:** January 27, 2026
 
 Replaced excessive success dialogue boxes with non-intrusive toast notifications for status change confirmations.
 
 **Changes made:**
+
 - Created toast notification system (`src/utils/toast-notifications.ts`)
 - Added toast CSS styles (`src/styles/shared/toast-notifications.css`)
 - Updated admin dashboard to use toasts for success/info messages
@@ -364,10 +380,12 @@ Replaced excessive success dialogue boxes with non-intrusive toast notifications
 - Error messages still use dialogs for important errors
 
 **Files created:**
+
 - `src/utils/toast-notifications.ts`
 - `src/styles/shared/toast-notifications.css`
 
 **Files modified:**
+
 - `src/features/admin/admin-dashboard.ts`
 - `src/features/client/client-portal.ts`
 - `src/styles/bundles/shared.css` (added toast import)
@@ -375,12 +393,14 @@ Replaced excessive success dialogue boxes with non-intrusive toast notifications
 ---
 
 ### Badge Styling Improvements
+
 **Status:** COMPLETE
 **Observed:** January 27, 2026
 
 Replaced full colored badge pills with minimal status dots in table dropdowns.
 
 **Changes made:**
+
 - Added colored status dots (8px circle) before status text
 - Removed colored backgrounds and borders from dropdown triggers
 - Removed "X New" badge from table headers (status visible via dots in rows)
@@ -389,12 +409,14 @@ Replaced full colored badge pills with minimal status dots in table dropdowns.
 - Details panel dropdowns have transparent borders
 
 **Files modified:**
+
 - `src/styles/pages/admin.css` - Status dot styling, fixed row heights
 - `src/utils/table-dropdown.ts` - Added status dot element to trigger
 
 ---
 
 ### Unable to Add New Client
+
 **Status:** FIXED
 **Observed:** January 27, 2026
 **Fixed:** January 28, 2026
@@ -402,16 +424,19 @@ Replaced full colored badge pills with minimal status dots in table dropdowns.
 Unable to add new client in the admin dashboard. The "Add New Client" functionality was not working due to form submit handler using `{ once: true }` which caused the handler to be removed after first validation failure.
 
 **Fix applied:**
+
 - Removed `{ once: true }` from form submit handler
 - Added proper cleanup of event listener when modal closes
 - Form now allows multiple submission attempts after validation errors
 
 **Files modified:**
+
 - `src/features/admin/modules/admin-clients.ts` - Fixed event listener lifecycle
 
 ---
 
 ### Add New Client in Project Feature - Missing Fields
+
 **Status:** FIXED
 **Observed:** January 27, 2026
 **Fixed:** January 28, 2026
@@ -419,6 +444,7 @@ Unable to add new client in the admin dashboard. The "Add New Client" functional
 When adding a new project, the "Add New Client" option wasn't showing the client fields because the custom dropdown was initialized before the change event listener was added, then the select was cloned/replaced which broke the reference.
 
 **Fixes applied:**
+
 - Removed clone/replace pattern that broke dropdown reference
 - Added `onChange` callback to `initModalDropdown` for client dropdown
 - Fields now appear when "+ Create New Client" is selected
@@ -427,18 +453,21 @@ When adding a new project, the "Add New Client" option wasn't showing the client
 - Fixed uneven spacing in modal by adding flex/gap to `#new-client-fields` container
 
 **Files modified:**
+
 - `src/features/admin/modules/admin-projects.ts` - Dropdown onChange callback
 - `src/utils/modal-dropdown.ts` - Fixed HTML encoding in trigger display
 - `src/styles/admin/modals.css` - Added flex/gap for new-client-fields
 - `admin/index.html` - Changed textarea class to form-textarea
 
 **Files investigated:**
+
 - `src/features/admin/modules/admin-projects.ts` - Project creation with client selection
 - `src/features/admin/admin-project-details.ts` - Project details and client management
 
 ---
 
 ### HTML Entity Encoding in Project Description
+
 **Status:** WORKAROUND APPLIED
 **Observed:** January 28, 2026
 **Fixed:** January 28, 2026
@@ -448,16 +477,19 @@ Project descriptions show HTML entities like `&#x2F;` instead of `/`. The entiti
 **Root cause:** Unknown - possibly from data import or intake form. The admin project creation form doesn't appear to encode.
 
 **Workaround applied:**
+
 - Added `decodeHtmlEntities()` method to `SanitizationUtils`
 - Description display now decodes entities before showing
 
 **Files modified:**
+
 - `src/utils/sanitization-utils.ts` - Added decodeHtmlEntities method
 - `src/features/admin/modules/admin-projects.ts` - Description uses decode function
 
 ---
 
 ### Messages Dropdown - Double Selection Display
+
 **Status:** COMPLETE
 **Observed:** January 26, 2026
 **Fixed:** January 28, 2026
@@ -465,20 +497,24 @@ Project descriptions show HTML entities like `&#x2F;` instead of `/`. The entiti
 The Messages dropdown was showing the currently selected item twice - once in the trigger and again as the first item in the dropdown menu list.
 
 **Issue:**
+
 - Current selection appeared in both trigger and dropdown menu
 - Dropdown menu should show other available options (not the current selection)
 
 **Fix applied:**
+
 - Updated dropdown rendering logic to exclude current selection from menu items
 - Current selection now appears ONLY in the trigger
 - Dropdown menu shows other available options
 
 **Files modified:**
+
 - Messages dropdown implementation (location identified and fixed)
 
 ---
 
 ### Project Details Tabs Styling - Seamless Shadow
+
 **Status:** COMPLETE
 **Observed:** January 26, 2026
 **Fixed:** January 28, 2026
@@ -503,12 +539,14 @@ Active tab + main content div appear as ONE seamless unit with continuous shadow
 ---
 
 ### Table Dropdown Styling Inconsistency
+
 **Status:** COMPLETE
 **Observed:** January 26, 2026
 
 Table dropdowns now follow Messages dropdown pattern with consistent styling.
 
 **Changes made:**
+
 - Fixed row heights (48px) to prevent changes when dropdown opens/closes
 - Consistent font sizing between trigger and menu items
 - Border states: transparent (default), red on hover/focus/open
@@ -516,6 +554,7 @@ Table dropdowns now follow Messages dropdown pattern with consistent styling.
 - Cleaned up CSS - removed all `!important` overrides, proper cascade order
 
 **Files modified:**
+
 - `src/styles/pages/admin.css` - Table dropdown and status dropdown styles
 
 ---
@@ -753,13 +792,13 @@ Replaced native browser `confirm()` and `alert()` dialogs with custom styled mod
 
 ### Issues Resolved
 
-| Element | Resolution |
+|Element|Resolution|
 |---------|------------|
-| Login Input | Admin now uses portal tokens (12px radius, 60px height, black bg) |
-| Login Button | Admin now uses portal button style (12px radius, transparent bg) |
-| Form Inputs | Admin auth inputs match portal design system |
-| Footer Year | Dynamic year in `client/portal.html` and `client/intake.html` |
-| Mobile Breakpoints | Added `--compact-mobile` custom media query (600px) |
+|Login Input|Admin now uses portal tokens (12px radius, 60px height, black bg)|
+|Login Button|Admin now uses portal button style (12px radius, transparent bg)|
+|Form Inputs|Admin auth inputs match portal design system|
+|Footer Year|Dynamic year in `client/portal.html` and `client/intake.html`|
+|Mobile Breakpoints|Added `--compact-mobile` custom media query (600px)|
 
 ### Files Created
 
@@ -827,14 +866,14 @@ Replaced native browser `confirm()` and `alert()` dialogs with custom styled mod
 
 ### Critical Issues - All Resolved
 
-| Issue | Location | Severity | Status |
+|Issue|Location|Severity|Status|
 |-------|----------|----------|--------|
-| ~~innerHTML XSS risks~~ | ~~182 instances across codebase~~ | ~~Critical~~ | **FIXED** - Added escapeHtml/sanitizeHtml to shared/validation |
-| ~~`any` types~~ | ~~90+ remaining (down from 552)~~ | ~~High~~ | **FIXED** - Fixed in invoice-service.ts, validation.ts, admin-dashboard.ts |
-| ~~Hardcoded values~~ | ~~invoices.ts, email.ts~~ | ~~High~~ | **FIXED** - Moved to BUSINESS_* env variables |
-| ~~Large files~~ | ~~admin-dashboard.ts (1,886 lines)~~ | ~~High~~ | **FIXED** - Split into services/renderers |
-| ~~Scattered auth storage~~ | ~~14+ localStorage/sessionStorage keys~~ | ~~Medium~~ | **FIXED** - Centralized in /src/auth/ |
-| ~~Multiple logging systems~~ | ~~4 separate implementations~~ | ~~Medium~~ | **FIXED** - Unified in /shared/logging/ |
+|~~innerHTML XSS risks~~|~~182 instances across codebase~~|~~Critical~~|**FIXED** - Added escapeHtml/sanitizeHtml to shared/validation|
+|~~`any` types~~|~~90+ remaining (down from 552)~~|~~High~~|**FIXED** - Fixed in invoice-service.ts, validation.ts, admin-dashboard.ts|
+|~~Hardcoded values~~|~~invoices.ts, email.ts~~|~~High~~|**FIXED** - Moved to BUSINESS_* env variables|
+|~~Large files~~|~~admin-dashboard.ts (1,886 lines)~~|~~High~~|**FIXED** - Split into services/renderers|
+|~~Scattered auth storage~~|~~14+ localStorage/sessionStorage keys~~|~~Medium~~|**FIXED** - Centralized in /src/auth/|
+|~~Multiple logging systems~~|~~4 separate implementations~~|~~Medium~~|**FIXED** - Unified in /shared/logging/|
 
 ### Architecture Improvements
 
@@ -1004,17 +1043,17 @@ Fixed broken project editing functionality in admin dashboard.
    - Added CSS custom properties for terminal font settings
    - Consistent styling across all terminal instances
 
-2. **Removed green glow from terminal**
+1. **Removed green glow from terminal**
    - Removed `box-shadow` glow effects from `.terminal-window`
    - Removed glow from `.progress-fill`
    - Terminal now has clean drop shadow only
 
-3. **Fixed terminal width on open**
+1. **Fixed terminal width on open**
    - Terminal now appears at full 900px width immediately
    - Added `min-width: 100%` to prevent content-based sizing
    - No more "skinny" initial state
 
-4. **Added shadows to client portal**
+1. **Added shadows to client portal**
    - Added `box-shadow: var(--shadow-card)` to match admin portal
    - Components updated: `.portal-card`, `.portal-project-card`, `.stat-card`, `.overview-card`, `.recent-activity`, `.progress-bar`, `.update-item`, `.timeline-content`, `.content-section`, `.content-item`, `.new-project-form`
 
@@ -1053,14 +1092,14 @@ Fixed client portal to fetch real project data from API instead of using hardcod
 
 **Bidirectional Data Flow Now Working:**
 
-| Direction | Data Type | API Endpoint |
+|Direction|Data Type|API Endpoint|
 |-----------|-----------|--------------|
-| Admin → Client | Projects | `/api/projects` |
-| Admin → Client | Milestones | `/api/projects/:id/milestones` |
-| Admin → Client | Files | `/api/uploads/client` |
-| Admin → Client | Messages | `/api/messages/threads` |
-| Admin → Client | Invoices | `/api/invoices/me` |
-| Client → Admin | Updates/Messages | Via project details view |
+|Admin → Client|Projects|`/api/projects`|
+|Admin → Client|Milestones|`/api/projects/:id/milestones`|
+|Admin → Client|Files|`/api/uploads/client`|
+|Admin → Client|Messages|`/api/messages/threads`|
+|Admin → Client|Invoices|`/api/invoices/me`|
+|Client → Admin|Updates/Messages|Via project details view|
 
 ---
 
@@ -1076,14 +1115,14 @@ Fixed broken API endpoints in admin project details page.
 
 **All Buttons Verified Working:**
 
-| Button | API Endpoint | Status |
+|Button|API Endpoint|Status|
 |--------|--------------|--------|
-| Save Settings | `PUT /api/projects/:id` | Works |
-| Send Message | `POST /api/messages/threads/...` | Fixed |
-| Add Milestone | `POST /api/projects/:id/milestones` | Works |
-| Toggle/Delete Milestone | `PUT/DELETE /api/projects/:id/milestones/:id` | Works |
-| Create/Send Invoice | `POST /api/invoices`, `POST /api/invoices/:id/send` | Works |
-| Upload/Download Files | `POST /api/projects/:id/files`, `GET /api/uploads/file/:id` | Fixed |
+|Save Settings|`PUT /api/projects/:id`|Works|
+|Send Message|`POST /api/messages/threads/...`|Fixed|
+|Add Milestone|`POST /api/projects/:id/milestones`|Works|
+|Toggle/Delete Milestone|`PUT/DELETE /api/projects/:id/milestones/:id`|Works|
+|Create/Send Invoice|`POST /api/invoices`, `POST /api/invoices/:id/send`|Works|
+|Upload/Download Files|`POST /api/projects/:id/files`, `GET /api/uploads/file/:id`|Fixed|
 
 **Files Modified:**
 
@@ -1103,7 +1142,7 @@ Replaced hardcoded colors and shadows with CSS variables across the codebase.
    - `client-portal/dashboard.css` - Replaced `#2a2a2a` with `var(--portal-bg-readonly)`
    - `client-portal/components.css` - Replaced `#333333`, `#f5f5f5` with portal variables
 
-2. **Shadow System Standardized**
+1. **Shadow System Standardized**
    - Added new shadow variables to `variables.css`:
      - `--shadow-elevated-sm`: `0 4px 12px rgba(0, 0, 0, 0.15)`
      - `--shadow-elevated-md`: `0 8px 32px rgba(0, 0, 0, 0.1)`
@@ -1111,7 +1150,7 @@ Replaced hardcoded colors and shadows with CSS variables across the codebase.
      - `--shadow-elevated-xl`: `0 12px 40px rgba(0, 0, 0, 0.15)`
      - `--shadow-dropdown`: `4px 0 12px rgba(0,0,0,0.3), -4px 0 12px rgba(0,0,0,0.3), 0 -4px 12px rgba(0,0,0,0.3)`
 
-3. **Hardcoded Shadows Replaced (52 instances)**
+1. **Hardcoded Shadows Replaced (52 instances)**
    - `admin.css` - 5 shadows replaced
    - `contact.css` - 2 shadows replaced
    - `projects.css` - 2 shadows replaced
@@ -1140,12 +1179,12 @@ Replaced business card with avatar blurb and unified contact section animations.
    - Removed 3D tilt effect on mouse move/leave
    - Reduced file from ~850 to 705 lines
 
-2. **Added Avatar Blurb Animation**
+1. **Added Avatar Blurb Animation**
    - Avatar blurb scales up from 0.8 with blur clear effect
    - Synced with form fields cascade
    - Uses `back.out(1.4)` ease for subtle pop effect
 
-3. **Unified Animation Timing**
+1. **Unified Animation Timing**
    - Form fields, submit button, and avatar blurb all animate together
    - Cohesive reveal: blur-in phase then synced scale+fade for all content
 
@@ -1341,11 +1380,11 @@ Files updated to use jwt-utils:
 
 **CSS File Optimization (-499 lines total):**
 
-| File | Before | After | Reduction |
+|File|Before|After|Reduction|
 |------|--------|-------|-----------|
-| client.css | 1716 | 1403 | -313 lines (18%) - Removed unused LEGACY portal styles |
-| contact.css | 1000 | 902 | -98 lines (10%) - Trimmed excessive header docs |
-| business-card.css | 743 | 655 | -88 lines (12%) - Extracted intro-nav to separate module |
+|client.css|1716|1403|-313 lines (18%) - Removed unused LEGACY portal styles|
+|contact.css|1000|902|-98 lines (10%) - Trimmed excessive header docs|
+|business-card.css|743|655|-88 lines (12%) - Extracted intro-nav to separate module|
 
 **Files Created:**
 
@@ -1371,12 +1410,14 @@ Merged `src/styles/components/terminal.css` into `src/styles/pages/terminal-inta
 **Admin CSS (2899 → 1846 lines, -1053 lines, 36% reduction):**
 
 Phase 1 - Consolidated duplicate table styles to use `.admin-table` base class:
+
 - Created `.admin-table-container` for common container styles
 - Extended `.admin-table` with all common table styles (th, td, hover, links)
 - Removed duplicate `.leads-table`, `.visitors-table`, `.clients-table`, `.contacts-table`, `.projects-table` definitions
 - Simplified status dropdown selectors from ~110 lines to ~90 lines
 
 Phase 2 - Split into modules:
+
 - Created `src/styles/admin/auth.css` (266 lines) - Auth gate, login form, password toggle
 - Created `src/styles/admin/modals.css` (251 lines) - Modal overlay, body, footer, dropdowns
 - Created `src/styles/admin/analytics.css` (231 lines) - Charts, vitals, performance metrics
@@ -1449,14 +1490,14 @@ Phase 2 - Split into modules:
 
 **Large Files Status:**
 
-| File | Lines | Priority | Status |
+|File|Lines|Priority|Status|
 |------|-------|----------|--------|
-| `client-portal.ts` | 1,405 | High | DONE - login, auth, animations consolidated to modules |
-| `admin-dashboard.ts` | 1,917 | Medium | Already has 9 extracted modules |
-| `intro-animation.ts` | 1,815 | Medium | Animation logic |
-| `terminal-intake.ts` | 1,685 | Medium | Terminal UI logic |
-| `page-transition.ts` | 580 | Low | Recently simplified |
-| `admin-project-details.ts` | 1,250+ | Low | Recently extended with new fields |
+|`client-portal.ts`|1,405|High|DONE - login, auth, animations consolidated to modules|
+|`admin-dashboard.ts`|1,917|Medium|Already has 9 extracted modules|
+|`intro-animation.ts`|1,815|Medium|Animation logic|
+|`terminal-intake.ts`|1,685|Medium|Terminal UI logic|
+|`page-transition.ts`|580|Low|Recently simplified|
+|`admin-project-details.ts`|1,250+|Low|Recently extended with new fields|
 
 **Client Portal Refactor Progress:**
 
@@ -1482,22 +1523,22 @@ Main file reduced from 2,293 to 1,405 lines (~888 lines removed/extracted).
 
 **Progress:**
 
-| File | Before | After | Status |
+|File|Before|After|Status|
 |------|--------|-------|--------|
-| mobile/contact.css | 85 | 0 | DONE |
-| mobile/layout.css | 61 | 3 | DONE |
-| client-portal/sidebar.css | 47 | 0 | DONE |
-| admin/project-detail.css | 45 | 0 | DONE |
-| page-transitions.css | 44 | 2 | DONE (accessibility rules kept) |
-| admin.css | 29 | 4 | DONE |
-| terminal-intake.css | 41 | 0 | DONE |
-| client.css | 32 | 0 | DONE |
-| client-portal-section.css | 30 | 1 | DONE (reduced motion kept) |
-| contact.css | 24 | 7 | DONE (autofill, high contrast, reduced motion kept) |
-| business-card.css | 20 | 3 | DONE (reduced motion, print kept) |
-| projects.css | 13 | 0 | DONE |
-| nav-portal.css | 13 | 0 | DONE |
-| reset.css | 10 | 10 | DONE (all accessibility/print - kept) |
+|mobile/contact.css|85|0|DONE|
+|mobile/layout.css|61|3|DONE|
+|client-portal/sidebar.css|47|0|DONE|
+|admin/project-detail.css|45|0|DONE|
+|page-transitions.css|44|2|DONE (accessibility rules kept)|
+|admin.css|29|4|DONE|
+|terminal-intake.css|41|0|DONE|
+|client.css|32|0|DONE|
+|client-portal-section.css|30|1|DONE (reduced motion kept)|
+|contact.css|24|7|DONE (autofill, high contrast, reduced motion kept)|
+|business-card.css|20|3|DONE (reduced motion, print kept)|
+|projects.css|13|0|DONE|
+|nav-portal.css|13|0|DONE|
+|reset.css|10|10|DONE (all accessibility/print - kept)|
 
 **Architectural Solutions Implemented:**
 
@@ -1526,7 +1567,7 @@ Main file reduced from 2,293 to 1,405 lines (~888 lines removed/extracted).
    - `DOCUMENTATION_ANALYSIS.md` → `docs/DOCUMENTATION_ANALYSIS.md`
    - `ARCHIVED_WORK_2025-12.md` → `docs/archive/ARCHIVED_WORK_2025-12.md`
    - `ARCHIVED_WORK_2026-01.md` → `docs/archive/ARCHIVED_WORK_2026-01.md`
-4. **Design Analysis Cleanup** - Deleted external design reference docs:
+1. **Design Analysis Cleanup** - Deleted external design reference docs:
    - `docs/design/CHRISTINA_KOSIK_DESIGN_ANALYSIS.md` (deleted)
    - `docs/design/SALONI_GARG_DESIGN_ANALYSIS.md` (deleted)
 
@@ -1736,13 +1777,13 @@ Projects now track start and end dates properly:
 
 **Issues identified and fixed:**
 
-| Issue | Severity | Fix Applied |
+|Issue|Severity|Fix Applied|
 |-------|----------|-------------|
-| Project status `in_progress` vs `in-progress` | HIGH | Changed all code to use hyphen format |
-| Lead stats query using wrong status values | HIGH | Updated to include `'active', 'in-progress', 'in-review'` |
-| validStatuses array incomplete | HIGH | Updated to: `['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled']` |
-| Invoice API returned camelCase, frontend expected snake_case | MEDIUM | Added `toSnakeCaseInvoice()` transformation function |
-| database.ts types didn't match DB schema | MEDIUM | Updated LeadStatus and ProjectStatus types |
+|Project status `in_progress` vs `in-progress`|HIGH|Changed all code to use hyphen format|
+|Lead stats query using wrong status values|HIGH|Updated to include `'active', 'in-progress', 'in-review'`|
+|validStatuses array incomplete|HIGH|Updated to: `['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled']`|
+|Invoice API returned camelCase, frontend expected snake_case|MEDIUM|Added `toSnakeCaseInvoice()` transformation function|
+|database.ts types didn't match DB schema|MEDIUM|Updated LeadStatus and ProjectStatus types|
 
 **Files modified:**
 
@@ -1825,15 +1866,15 @@ Created shared portal CSS files for single source of truth:
 
 ### Codebase Health Metrics
 
-| Metric | Count | Status |
+|Metric|Count|Status|
 |--------|-------|--------|
-| TODO/FIXME comments | 2 | Low (projects.ts detail page TODO) |
-| Console logs | 225 | High (many intentional logging with safeguards: logger utility checks debug mode, app-state middleware only logs in development) |
-| `any` types (frontend) | 41 | Reduced from 71 to 41 (30 fixed, 41 intentional) |
-| `any` types (server) | 0 | COMPLETE - All 97 fixed, 0 TypeScript errors |
-| ESLint disables | 4 | Low (all intentional: 4 console.log in logger/dev middleware, 4 any types for flexible validation) |
-| Hardcoded media queries | 0 | Complete - All migrated to custom media queries |
-| Inline rgba box-shadows | 0 | Complete - All replaced with shadow tokens |
+|TODO/FIXME comments|2|Low (projects.ts detail page TODO)|
+|Console logs|225|High (many intentional logging with safeguards: logger utility checks debug mode, app-state middleware only logs in development)|
+|`any` types (frontend)|41|Reduced from 71 to 41 (30 fixed, 41 intentional)|
+|`any` types (server)|0|COMPLETE - All 97 fixed, 0 TypeScript errors|
+|ESLint disables|4|Low (all intentional: 4 console.log in logger/dev middleware, 4 any types for flexible validation)|
+|Hardcoded media queries|0|Complete - All migrated to custom media queries|
+|Inline rgba box-shadows|0|Complete - All replaced with shadow tokens|
 
 **Summary:** Most code quality metrics are in good shape. Console logs remain high but many are intentional for debugging. Frontend type safety significantly improved (30 `any` types fixed). Server code is 100% type-safe.
 
@@ -1864,6 +1905,7 @@ Created shared portal CSS files for single source of truth:
 - Added indexes for efficient credit queries
 
 ---
+
 ## Completed - January 30, 2026
 
 ### Deposit Invoice & Credit System
@@ -1975,15 +2017,15 @@ Migrated all PDF generation from PDFKit to pdf-lib for consistency and better co
 
 **Header Template (all PDFs):**
 
-| Element | Size | Y-Offset |
+|Element|Size|Y-Offset|
 |---------|------|----------|
-| Logo | 75pt height | 0 (preserves aspect ratio) |
-| Business Name | 16pt bold | 0 |
-| Owner | 10pt | -20pt |
-| Tagline | 9pt | -36pt |
-| Email | 9pt | -50pt |
-| Website | 9pt | -64pt |
-| Title | 28pt bold | -25pt (right-aligned) |
+|Logo|75pt height|0 (preserves aspect ratio)|
+|Business Name|16pt bold|0|
+|Owner|10pt|-20pt|
+|Tagline|9pt|-36pt|
+|Email|9pt|-50pt|
+|Website|9pt|-64pt|
+|Title|28pt bold|-25pt (right-aligned)|
 
 **Files Modified:**
 

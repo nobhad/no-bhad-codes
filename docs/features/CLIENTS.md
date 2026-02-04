@@ -244,61 +244,61 @@ ALTER TABLE clients ADD COLUMN preferred_contact_method TEXT;
 
 ### Contact Management
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/clients/:id/contacts` | Get all contacts for a client |
-| POST | `/api/clients/:id/contacts` | Create a new contact |
-| PUT | `/api/clients/contacts/:contactId` | Update a contact |
-| DELETE | `/api/clients/contacts/:contactId` | Delete a contact |
-| POST | `/api/clients/:id/contacts/:contactId/set-primary` | Set primary contact |
+|GET|`/api/clients/:id/contacts`|Get all contacts for a client|
+|POST|`/api/clients/:id/contacts`|Create a new contact|
+|PUT|`/api/clients/contacts/:contactId`|Update a contact|
+|DELETE|`/api/clients/contacts/:contactId`|Delete a contact|
+|POST|`/api/clients/:id/contacts/:contactId/set-primary`|Set primary contact|
 
 ### Activity Timeline
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/clients/:id/activities` | Get activity timeline |
-| POST | `/api/clients/:id/activities` | Log an activity |
-| GET | `/api/clients/activities/recent` | Get recent activities (all clients) |
+|GET|`/api/clients/:id/activities`|Get activity timeline|
+|POST|`/api/clients/:id/activities`|Log an activity|
+|GET|`/api/clients/activities/recent`|Get recent activities (all clients)|
 
 ### Custom Fields
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/clients/custom-fields` | Get all field definitions |
-| POST | `/api/clients/custom-fields` | Create a field definition |
-| PUT | `/api/clients/custom-fields/:fieldId` | Update a field definition |
-| DELETE | `/api/clients/custom-fields/:fieldId` | Deactivate a field |
-| GET | `/api/clients/:id/custom-fields` | Get field values for client |
-| PUT | `/api/clients/:id/custom-fields` | Set field values for client |
+|GET|`/api/clients/custom-fields`|Get all field definitions|
+|POST|`/api/clients/custom-fields`|Create a field definition|
+|PUT|`/api/clients/custom-fields/:fieldId`|Update a field definition|
+|DELETE|`/api/clients/custom-fields/:fieldId`|Deactivate a field|
+|GET|`/api/clients/:id/custom-fields`|Get field values for client|
+|PUT|`/api/clients/:id/custom-fields`|Set field values for client|
 
 ### Tags
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/clients/tags` | Get all tags |
-| POST | `/api/clients/tags` | Create a tag |
-| PUT | `/api/clients/tags/:tagId` | Update a tag |
-| DELETE | `/api/clients/tags/:tagId` | Delete a tag |
-| GET | `/api/clients/:id/tags` | Get tags for a client |
-| POST | `/api/clients/:id/tags/:tagId` | Add tag to client |
-| DELETE | `/api/clients/:id/tags/:tagId` | Remove tag from client |
-| GET | `/api/clients/by-tag/:tagId` | Get clients by tag |
+|GET|`/api/clients/tags`|Get all tags|
+|POST|`/api/clients/tags`|Create a tag|
+|PUT|`/api/clients/tags/:tagId`|Update a tag|
+|DELETE|`/api/clients/tags/:tagId`|Delete a tag|
+|GET|`/api/clients/:id/tags`|Get tags for a client|
+|POST|`/api/clients/:id/tags/:tagId`|Add tag to client|
+|DELETE|`/api/clients/:id/tags/:tagId`|Remove tag from client|
+|GET|`/api/clients/by-tag/:tagId`|Get clients by tag|
 
 ### Health Scoring
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/clients/:id/health` | Get health score |
-| POST | `/api/clients/:id/health/recalculate` | Recalculate health score |
-| GET | `/api/clients/at-risk` | Get at-risk clients |
-| GET | `/api/clients/:id/stats` | Get comprehensive stats |
+|GET|`/api/clients/:id/health`|Get health score|
+|POST|`/api/clients/:id/health/recalculate`|Recalculate health score|
+|GET|`/api/clients/at-risk`|Get at-risk clients|
+|GET|`/api/clients/:id/stats`|Get comprehensive stats|
 
 ### CRM Fields
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| PUT | `/api/clients/:id/crm` | Update CRM fields |
-| GET | `/api/clients/follow-up` | Get clients due for follow-up |
+|PUT|`/api/clients/:id/crm`|Update CRM fields|
+|GET|`/api/clients/follow-up`|Get clients due for follow-up|
 
 ## Service Methods
 

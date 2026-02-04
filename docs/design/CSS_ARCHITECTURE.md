@@ -48,16 +48,16 @@ The design system provides the foundational tokens for the entire application.
 
 ### Token Architecture
 
-| Token File | Lines | Purpose |
+|Token File|Lines|Purpose|
 |------------|-------|---------|
-| `tokens/colors.css` | 381 | Complete color system with semantic tokens |
-| `tokens/typography.css` | 283 | Type scale with fluid `clamp()` values |
-| `tokens/spacing.css` | 437 | Spacing scale and utility classes |
-| `tokens/animations.css` | 455 | Duration, easing, and keyframes |
-| `tokens/shadows.css` | 218 | Elevation system with component shadows |
-| `tokens/borders.css` | 200 | Border radius values |
-| `tokens/breakpoints.css` | 536 | Responsive breakpoints |
-| `tokens/z-index.css` | 305 | Stacking context tokens |
+|`tokens/colors.css`|381|Complete color system with semantic tokens|
+|`tokens/typography.css`|283|Type scale with fluid `clamp()` values|
+|`tokens/spacing.css`|437|Spacing scale and utility classes|
+|`tokens/animations.css`|455|Duration, easing, and keyframes|
+|`tokens/shadows.css`|218|Elevation system with component shadows|
+|`tokens/borders.css`|200|Border radius values|
+|`tokens/breakpoints.css`|536|Responsive breakpoints|
+|`tokens/z-index.css`|305|Stacking context tokens|
 
 ### Color Token System
 
@@ -263,54 +263,54 @@ Quick stats display:
 
 #### Layout
 
-| Variable | Purpose | Default |
+|Variable|Purpose|Default|
 |----------|---------|---------|
-| `--size-container` | Max container width | `min(1200px, 100vw - 2rem)` |
-| `--container-padding` | Container padding | `clamp(1rem, 4vw, 2rem)` |
-| `--gap` | Default spacing | `clamp(0.75rem, 3vw, 1.5rem)` |
-| `--section-padding` | Section padding | `clamp(1rem, 5vw, 2rem)` |
-| `--header-height` | Header height | `60px` |
-| `--footer-height` | Footer height | `40px` |
+|`--size-container`|Max container width|`min(1200px, 100vw - 2rem)`|
+|`--container-padding`|Container padding|`clamp(1rem, 4vw, 2rem)`|
+|`--gap`|Default spacing|`clamp(0.75rem, 3vw, 1.5rem)`|
+|`--section-padding`|Section padding|`clamp(1rem, 5vw, 2rem)`|
+|`--header-height`|Header height|`60px`|
+|`--footer-height`|Footer height|`40px`|
 
 #### Typography
 
-| Variable | Purpose | Default |
+|Variable|Purpose|Default|
 |----------|---------|---------|
-| `--font-size-xs` | Extra small text | `clamp(0.75rem, 2vw, 0.875rem)` |
-| `--font-size-sm` | Small text | `clamp(0.875rem, 2.5vw, 1rem)` |
-| `--font-size-base` | Base text | `clamp(1rem, 3vw, 1.125rem)` |
-| `--font-size-lg` | Large text | `clamp(1.125rem, 3.5vw, 1.25rem)` |
-| `--font-size-xl` | Extra large text | `clamp(1.25rem, 4vw, 1.5rem)` |
-| `--font-size-2xl` | 2x large text | `clamp(1.5rem, 5vw, 2rem)` |
-| `--font-size-3xl` | 3x large text | `clamp(2rem, 6vw, 3rem)` |
+|`--font-size-xs`|Extra small text|`clamp(0.75rem, 2vw, 0.875rem)`|
+|`--font-size-sm`|Small text|`clamp(0.875rem, 2.5vw, 1rem)`|
+|`--font-size-base`|Base text|`clamp(1rem, 3vw, 1.125rem)`|
+|`--font-size-lg`|Large text|`clamp(1.125rem, 3.5vw, 1.25rem)`|
+|`--font-size-xl`|Extra large text|`clamp(1.25rem, 4vw, 1.5rem)`|
+|`--font-size-2xl`|2x large text|`clamp(1.5rem, 5vw, 2rem)`|
+|`--font-size-3xl`|3x large text|`clamp(2rem, 6vw, 3rem)`|
 
 #### Spacing
 
-| Variable | Purpose | Default |
+|Variable|Purpose|Default|
 |----------|---------|---------|
-| `--space-xs` | Extra small space | `clamp(0.25rem, 1vw, 0.5rem)` |
-| `--space-sm` | Small space | `clamp(0.5rem, 2vw, 1rem)` |
-| `--space-md` | Medium space | `clamp(1rem, 3vw, 1.5rem)` |
-| `--space-lg` | Large space | `clamp(1.5rem, 4vw, 2rem)` |
-| `--space-xl` | Extra large space | `clamp(2rem, 5vw, 3rem)` |
-| `--space-2xl` | 2x large space | `clamp(3rem, 6vw, 4rem)` |
+|`--space-xs`|Extra small space|`clamp(0.25rem, 1vw, 0.5rem)`|
+|`--space-sm`|Small space|`clamp(0.5rem, 2vw, 1rem)`|
+|`--space-md`|Medium space|`clamp(1rem, 3vw, 1.5rem)`|
+|`--space-lg`|Large space|`clamp(1.5rem, 4vw, 2rem)`|
+|`--space-xl`|Extra large space|`clamp(2rem, 5vw, 3rem)`|
+|`--space-2xl`|2x large space|`clamp(3rem, 6vw, 4rem)`|
 
 #### Animations
 
-| Variable | Purpose | Default |
+|Variable|Purpose|Default|
 |----------|---------|---------|
-| `--cubic-default` | Default easing | `cubic-bezier(0.4, 0, 0.2, 1)` |
-| `--transition-fast` | Fast transition | `0.2s ease` |
-| `--transition-medium` | Medium transition | `0.3s ease` |
-| `--transition-slow` | Slow transition | `0.6s ease` |
+|`--cubic-default`|Default easing|`cubic-bezier(0.4, 0, 0.2, 1)`|
+|`--transition-fast`|Fast transition|`0.2s ease`|
+|`--transition-medium`|Medium transition|`0.3s ease`|
+|`--transition-slow`|Slow transition|`0.6s ease`|
 
 #### Z-Index
 
-| Variable | Purpose | Default |
+|Variable|Purpose|Default|
 |----------|---------|---------|
-| `--z-header` | Header z-index | `10` |
-| `--z-nav` | Navigation z-index | `100` |
-| `--z-modal` | Modal z-index | `1000` |
+|`--z-header`|Header z-index|`10`|
+|`--z-nav`|Navigation z-index|`100`|
+|`--z-modal`|Modal z-index|`1000`|
 
 ---
 
@@ -397,57 +397,60 @@ function loadTheme(): void {
 
 The project uses distinct prefixes for different portal-related features:
 
-**Client Portal Components (`portal-` prefix):**
+#### Client Portal Components (`portal-` prefix)
+
 Classes for the authenticated client portal use the `portal-` prefix. Located in `src/styles/client-portal/components.css`.
 
-**Navigation Portal (`portal-` prefix with nav scope):**
+#### Navigation Portal (`portal-` prefix with nav scope)
+
 Classes for the header portal dropdown (login/register toggle) are scoped within navigation. Located in `src/styles/components/nav-portal.css`.
 
-**Intake Modal (`intake-` prefix):**
+#### Intake Modal (`intake-` prefix)
+
 Classes for the terminal intake modal use the `intake-` prefix. Also in `nav-portal.css`.
 
 ### Client Portal Component Classes (`portal-`)
 
-| Class | Purpose |
+|Class|Purpose|
 |-------|---------|
-| `.portal-shadow` | Intense multi-layer shadow utility |
-| `.portal-panel` | Content panel container |
-| `.portal-card` | Content container card |
-| `.portal-card-header` | Section title in card |
-| `.portal-input` | Form input field |
-| `.portal-form-group` | Form field wrapper |
-| `.portal-form-row` | Horizontal form layout |
-| `.portal-password-wrapper` | Password field with toggle |
-| `.portal-password-toggle` | Password visibility button |
-| `.portal-list-item` | List item container |
-| `.portal-item-actions` | Action buttons for list items |
-| `.portal-badge` | Status badge |
-| `.portal-badge-pending` | Pending status variant |
-| `.portal-badge-success` | Success status variant |
-| `.portal-stat` | Stat card |
-| `.portal-stat-number` | Stat value display |
-| `.portal-stat-label` | Stat description |
-| `.portal-empty-message` | Empty state message |
+|`.portal-shadow`|Intense multi-layer shadow utility|
+|`.portal-panel`|Content panel container|
+|`.portal-card`|Content container card|
+|`.portal-card-header`|Section title in card|
+|`.portal-input`|Form input field|
+|`.portal-form-group`|Form field wrapper|
+|`.portal-form-row`|Horizontal form layout|
+|`.portal-password-wrapper`|Password field with toggle|
+|`.portal-password-toggle`|Password visibility button|
+|`.portal-list-item`|List item container|
+|`.portal-item-actions`|Action buttons for list items|
+|`.portal-badge`|Status badge|
+|`.portal-badge-pending`|Pending status variant|
+|`.portal-badge-success`|Success status variant|
+|`.portal-stat`|Stat card|
+|`.portal-stat-number`|Stat value display|
+|`.portal-stat-label`|Stat description|
+|`.portal-empty-message`|Empty state message|
 
 ### Navigation Portal Classes (`portal-`)
 
-| Class | Purpose |
+|Class|Purpose|
 |-------|---------|
-| `.portal-button` | Header portal trigger button |
-| `.portal-backdrop` | Semi-transparent overlay behind dropdown |
-| `.portal-dropdown` | Login/register dropdown panel |
-| `.portal-dropdown-header` | Dropdown title area |
-| `.portal-toggle-btn` | Login/register tab toggle |
-| `.portal-dropdown-form` | Form container in dropdown |
+|`.portal-button`|Header portal trigger button|
+|`.portal-backdrop`|Semi-transparent overlay behind dropdown|
+|`.portal-dropdown`|Login/register dropdown panel|
+|`.portal-dropdown-header`|Dropdown title area|
+|`.portal-toggle-btn`|Login/register tab toggle|
+|`.portal-dropdown-form`|Form container in dropdown|
 
 ### Intake Modal Classes (`intake-`)
 
-| Class | Purpose |
+|Class|Purpose|
 |-------|---------|
-| `.intake-modal-backdrop` | Full-screen modal overlay |
-| `.intake-modal` | Terminal intake modal container |
-| `.intake-modal-close` | Modal close button |
-| `.intake-modal-container` | Inner content wrapper |
+|`.intake-modal-backdrop`|Full-screen modal overlay|
+|`.intake-modal`|Terminal intake modal container|
+|`.intake-modal-close`|Modal close button|
+|`.intake-modal-container`|Inner content wrapper|
 
 ### Shadow Utility Class
 
@@ -528,55 +531,55 @@ Project cards in the client portal use scoped classes to avoid conflicts with `.
 
 ### Button Classes
 
-| Class | Usage |
+|Class|Usage|
 |-------|-------|
-| `.btn` | Base button styles |
-| `.btn-primary` | Primary actions |
-| `.btn-secondary` | Secondary actions |
-| `.btn-outline` | Outlined buttons |
-| `.btn-sm` | Small button size |
+|`.btn`|Base button styles|
+|`.btn-primary`|Primary actions|
+|`.btn-secondary`|Secondary actions|
+|`.btn-outline`|Outlined buttons|
+|`.btn-sm`|Small button size|
 
 ### Form Classes
 
-| Class | Usage |
+|Class|Usage|
 |-------|-------|
-| `.form-input` | Text inputs |
-| `.form-select` | Dropdown selects |
-| `.form-textarea` | Text areas |
-| `.form-group` | Form field wrapper |
-| `.form-label` | Field labels |
+|`.form-input`|Text inputs|
+|`.form-select`|Dropdown selects|
+|`.form-textarea`|Text areas|
+|`.form-group`|Form field wrapper|
+|`.form-label`|Field labels|
 
 ### Layout Classes
 
-| Class | Usage |
+|Class|Usage|
 |-------|-------|
-| `.container` | Max-width centered container |
-| `.container-fluid` | Full-width container |
-| `.grid` | CSS Grid container |
-| `.flex` | Flexbox container |
+|`.container`|Max-width centered container|
+|`.container-fluid`|Full-width container|
+|`.grid`|CSS Grid container|
+|`.flex`|Flexbox container|
 
 ### Status Classes
 
-| Class | Usage | Colors |
+|Class|Usage|Colors|
 |-------|-------|--------|
-| `.status-badge` | Status indicator base | - |
-| `.status-pending` | Yellow pending status | `#fef3c7` / `#92400e` |
-| `.status-paid` | Green paid status | `#d1fae5` / `#065f46` |
-| `.status-overdue` | Red overdue status | `#fee2e2` / `#991b1b` |
-| `.status-draft` | Gray draft status | neutral-200 |
+|`.status-badge`|Status indicator base|-|
+|`.status-pending`|Yellow pending status|`#fef3c7` / `#92400e`|
+|`.status-paid`|Green paid status|`#d1fae5` / `#065f46`|
+|`.status-overdue`|Red overdue status|`#fee2e2` / `#991b1b`|
+|`.status-draft`|Gray draft status|neutral-200|
 
 ### Table Filter Components
 
-| Class | Usage |
+|Class|Usage|
 |-------|-------|
-| `.table-filter-controls` | Container for filter controls |
-| `.filter-search` | Search input wrapper |
-| `.filter-search-icon` | Search icon inside dropdown (positioned absolute left) |
-| `.filter-search-input` | Search input field (padding-left for icon) |
-| `.filter-dropdown-menu` | Dropdown menu for filter options |
-| `.filter-date-group` | Date range filter wrapper |
+|`.table-filter-controls`|Container for filter controls|
+|`.filter-search`|Search input wrapper|
+|`.filter-search-icon`|Search icon inside dropdown (positioned absolute left)|
+|`.filter-search-input`|Search input field (padding-left for icon)|
+|`.filter-dropdown-menu`|Dropdown menu for filter options|
+|`.filter-date-group`|Date range filter wrapper|
 
-**Filter Search with Icon Pattern:**
+#### Filter Search with Icon Pattern
 
 ```css
 .filter-search-icon {
@@ -598,14 +601,14 @@ Project cards in the client portal use scoped classes to avoid conflicts with `.
 
 ### Breakpoint Variables
 
-| Variable | Value |
+|Variable|Value|
 |----------|-------|
-| `--bp-xs` | `320px` |
-| `--bp-sm` | `576px` |
-| `--bp-md` | `768px` |
-| `--bp-lg` | `992px` |
-| `--bp-xl` | `1200px` |
-| `--bp-2xl` | `1400px` |
+|`--bp-xs`|`320px`|
+|`--bp-sm`|`576px`|
+|`--bp-md`|`768px`|
+|`--bp-lg`|`992px`|
+|`--bp-xl`|`1200px`|
+|`--bp-2xl`|`1400px`|
 
 ### Settings Grid (3 → 2 → 1 columns)
 
@@ -878,13 +881,13 @@ box-shadow:
 
 ## File Locations
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `src/styles/variables.css` | CSS variables and themes |
-| `src/styles/main.css` | Main site styles |
-| `src/styles/client-portal/` | Client Portal modular styles (10 files) |
-| `src/styles/shared/*.css` | Shared portal components |
-| `src/styles/components/*.css` | Reusable components |
+|`src/styles/variables.css`|CSS variables and themes|
+|`src/styles/main.css`|Main site styles|
+|`src/styles/client-portal/`|Client Portal modular styles (10 files)|
+|`src/styles/shared/*.css`|Shared portal components|
+|`src/styles/components/*.css`|Reusable components|
 
 ---
 
@@ -902,70 +905,70 @@ The following categories of `!important` are **intentional and necessary**:
 
 Users who prefer reduced motion must have animations disabled regardless of other CSS rules.
 
-| File | Lines | Rules |
+|File|Lines|Rules|
 |------|-------|-------|
-| `design-system/tokens/shadows.css` | 207 | `transition: box-shadow 0.01ms` |
-| `design-system/tokens/animations.css` | 450-453 | animation-duration, iteration-count, transition-duration, scroll-behavior |
-| `base/reset.css` | 245-248 | animation-duration, iteration-count, transition-duration, scroll-behavior |
-| `variables.css` | 507-510 | animation-duration, iteration-count, transition-duration, scroll-behavior |
-| `components/page-transitions.css` | 321-322 | `transition: none`, `animation: none` |
-| `components/business-card.css` | 575, 581, 623 | `transition: none`, `transform: none` (2x) |
-| `components/portfolio-carousel.css` | 298 | `transition: none` |
-| `components/nav-animations.css` | 121-122 | `transform: none`, `transition: none` |
-| `components/nav-base.css` | 770-773 | animation-duration, iteration-count, scroll-behavior |
-| `pages/contact.css` | 983-984 | `transition: none`, `animation: none` |
-| `pages/client-portal-section.css` | 311 | `transition: none` |
+|`design-system/tokens/shadows.css`|207|`transition: box-shadow 0.01ms`|
+|`design-system/tokens/animations.css`|450-453|animation-duration, iteration-count, transition-duration, scroll-behavior|
+|`base/reset.css`|245-248|animation-duration, iteration-count, transition-duration, scroll-behavior|
+|`variables.css`|507-510|animation-duration, iteration-count, transition-duration, scroll-behavior|
+|`components/page-transitions.css`|321-322|`transition: none`, `animation: none`|
+|`components/business-card.css`|575, 581, 623|`transition: none`, `transform: none` (2x)|
+|`components/portfolio-carousel.css`|298|`transition: none`|
+|`components/nav-animations.css`|121-122|`transform: none`, `transition: none`|
+|`components/nav-base.css`|770-773|animation-duration, iteration-count, scroll-behavior|
+|`pages/contact.css`|983-984|`transition: none`, `animation: none`|
+|`pages/client-portal-section.css`|311|`transition: none`|
 
 #### 2. Print Styles (15 instances)
 
 Print media requires overriding all screen styles for clean output.
 
-| File | Lines | Rules |
+|File|Lines|Rules|
 |------|-------|-------|
-| `design-system/tokens/breakpoints.css` | 491-494, 522 | background, color, box-shadow, text-shadow, max-width |
-| `base/reset.css` | 268-271, 280 | background, color, box-shadow, text-shadow, `.no-print` display |
-| `variables.css` | 524-527, 536 | background, color, box-shadow, text-shadow, `.no-print` display |
+|`design-system/tokens/breakpoints.css`|491-494, 522|background, color, box-shadow, text-shadow, max-width|
+|`base/reset.css`|268-271, 280|background, color, box-shadow, text-shadow, `.no-print` display|
+|`variables.css`|524-527, 536|background, color, box-shadow, text-shadow, `.no-print` display|
 
 #### 3. Accessibility - Focus Visibility (1 instance)
 
 Keyboard focus must be visible regardless of component styling.
 
-| File | Line | Rule |
+|File|Line|Rule|
 |------|------|------|
-| `base/reset.css` | 228 | `:focus-visible { box-shadow: 0 0 0 2px inset var(--color-brand-primary) }` |
+|`base/reset.css`|228|`:focus-visible { box-shadow: 0 0 0 2px inset var(--color-brand-primary) }`|
 
 #### 4. Accessibility - High Contrast (1 instance)
 
 High contrast mode requires enhanced visual boundaries.
 
-| File | Line | Rule |
+|File|Line|Rule|
 |------|------|------|
-| `pages/contact.css` | 969 | `border-width: 3px` (in `@media (prefers-contrast: high)`) |
+|`pages/contact.css`|969|`border-width: 3px` (in `@media (prefers-contrast: high)`)|
 
 #### 5. Browser Autofill Override (4 instances)
 
 Browsers apply inline styles for autofilled inputs that can only be overridden with `!important`.
 
-| File | Lines | Rules |
+|File|Lines|Rules|
 |------|-------|-------|
-| `pages/contact.css` | 626-629 | color, -webkit-text-fill-color, box-shadow, -webkit-box-shadow |
+|`pages/contact.css`|626-629|color, -webkit-text-fill-color, box-shadow, -webkit-box-shadow|
 
 #### 6. Utility Classes (8 instances)
 
 Global utility classes must win over any component styles.
 
-| File | Lines | Class | Rules |
+|File|Lines|Class|Rules|
 |------|-------|-------|-------|
-| `main.css` | 203-206 | `.hidden` | display, visibility, opacity, pointer-events |
-| `components/form-fields.css` | 17, 22-24 | `.honeypot-field` | display, opacity, position, z-index |
+|`main.css`|203-206|`.hidden`|display, visibility, opacity, pointer-events|
+|`components/form-fields.css`|17, 22-24|`.honeypot-field`|display, opacity, position, z-index|
 
 #### 7. Animation State Lock (2 instances)
 
 GSAP animation requires initial state to be locked during intro.
 
-| File | Lines | Rules |
+|File|Lines|Rules|
 |------|-------|-------|
-| `components/footer.css` | 6 | `.intro-loading footer { display: none }` |
+|`components/footer.css`|6|`.intro-loading footer { display: none }`|
 
 ### Remaining Legitimate Uses (Not Technical Debt)
 
@@ -973,29 +976,29 @@ The following `!important` declarations are **intentional** and should remain:
 
 #### Utility Classes (6 instances)
 
-| File | Lines | Class | Reason |
+|File|Lines|Class|Reason|
 |------|-------|-------|--------|
-| `components/nav-base.css` | 758 | `.no-transition` | Utility class must override all transitions |
-| `components/nav-base.css` | 762 | `.force-transition` | Utility class must force transitions |
-| `pages/admin.css` | 2144 | `.hidden` | Utility class must hide elements |
+|`components/nav-base.css`|758|`.no-transition`|Utility class must override all transitions|
+|`components/nav-base.css`|762|`.force-transition`|Utility class must force transitions|
+|`pages/admin.css`|2144|`.hidden`|Utility class must hide elements|
 
 #### Modal Scroll Lock (1 instance)
 
-| File | Line | Reason |
+|File|Line|Reason|
 |------|------|--------|
-| `pages/admin.css` | 720 | `body.modal-open { overflow: hidden }` - Prevents scroll behind modals |
+|`pages/admin.css`|720|`body.modal-open { overflow: hidden }` - Prevents scroll behind modals|
 
 #### Chart.js Inline Style Overrides (2 instances)
 
-| File | Lines | Reason |
+|File|Lines|Reason|
 |------|-------|--------|
-| `pages/admin.css` | 2272, 2279 | Chart.js sets inline styles on legend elements |
+|`pages/admin.css`|2272, 2279|Chart.js sets inline styles on legend elements|
 
 #### Print Styles (1 instance)
 
-| File | Line | Reason |
+|File|Line|Reason|
 |------|------|--------|
-| `components/nav-responsive.css` | 272 | Print media hides navigation |
+|`components/nav-responsive.css`|272|Print media hides navigation|
 
 ### Specificity Solutions Reference
 
@@ -1010,37 +1013,37 @@ When removing `!important`, use these techniques:
 
 ### Progress Tracking
 
-| Date | Total | Removed | Notes |
+|Date|Total|Removed|Notes|
 |------|-------|---------|-------|
-| Start | 650+ | - | Initial audit |
-| Jan 14 | 313 | 337 | First cleanup pass |
-| Jan 15 | 58 | 255 | Specificity refactoring complete |
+|Start|650+|-|Initial audit|
+|Jan 14|313|337|First cleanup pass|
+|Jan 15|58|255|Specificity refactoring complete|
 
-**Files Cleaned (Before → After):**
+#### Files Cleaned (Before → After)
 
-| File | Before | After | Status |
+|File|Before|After|Status|
 |------|--------|-------|--------|
-| mobile/contact.css | 85 | 0 | DONE |
-| mobile/layout.css | 61 | 3 | DONE |
-| client-portal/sidebar.css | 47 | 0 | DONE |
-| admin/project-detail.css | 45 | 0 | DONE |
-| page-transitions.css | 44 | 2 | DONE (accessibility kept) |
-| terminal-intake.css | 41 | 0 | DONE |
-| client.css | 32 | 0 | DONE |
-| client-portal-section.css | 30 | 1 | DONE (reduced motion kept) |
-| admin.css | 29 | 4 | DONE (modal scroll, utility, Chart.js kept) |
-| contact.css | 24 | 7 | DONE (autofill, accessibility kept) |
-| business-card.css | 20 | 3 | DONE (reduced motion, print kept) |
-| projects.css | 13 | 0 | DONE |
-| nav-portal.css | 13 | 0 | DONE |
-| reset.css | 10 | 10 | DONE (all accessibility/print - kept) |
-| client-portal/invoices.css | 2 | 0 | DONE |
-| client-portal/settings.css | 2 | 0 | DONE |
-| client-portal/dashboard.css | 8 | 0 | DONE |
-| nav-animations.css | 4 | 0 | DONE |
-| nav-responsive.css | 4 | 1 | DONE (print kept) |
-| nav-base.css | 7 | 6 | DONE (utility classes, accessibility kept) |
-| about.css | 1 | 0 | DONE |
+|mobile/contact.css|85|0|DONE|
+|mobile/layout.css|61|3|DONE|
+|client-portal/sidebar.css|47|0|DONE|
+|admin/project-detail.css|45|0|DONE|
+|page-transitions.css|44|2|DONE (accessibility kept)|
+|terminal-intake.css|41|0|DONE|
+|client.css|32|0|DONE|
+|client-portal-section.css|30|1|DONE (reduced motion kept)|
+|admin.css|29|4|DONE (modal scroll, utility, Chart.js kept)|
+|contact.css|24|7|DONE (autofill, accessibility kept)|
+|business-card.css|20|3|DONE (reduced motion, print kept)|
+|projects.css|13|0|DONE|
+|nav-portal.css|13|0|DONE|
+|reset.css|10|10|DONE (all accessibility/print - kept)|
+|client-portal/invoices.css|2|0|DONE|
+|client-portal/settings.css|2|0|DONE|
+|client-portal/dashboard.css|8|0|DONE|
+|nav-animations.css|4|0|DONE|
+|nav-responsive.css|4|1|DONE (print kept)|
+|nav-base.css|7|6|DONE (utility classes, accessibility kept)|
+|about.css|1|0|DONE|
 
 ---
 
@@ -1148,19 +1151,19 @@ The client selector uses a custom dropdown component with unread message counts:
 
 ## Known Issues
 
-**Updated February 2, 2026**
+### Updated February 2, 2026
 
 ### Resolved Issues (December 2025 - January 2026)
 
 The following issues from the December 17 code review have been addressed:
 
-| Issue | Status | Resolution |
+|Issue|Status|Resolution|
 |-------|--------|------------|
-| Navigation CSS oversized (900+ lines) | FIXED | Split into `nav-base.css`, `nav-animations.css`, `nav-responsive.css`, `nav-portal.css` |
-| Form CSS oversized (374 lines) | FIXED | Split into `form-fields.css`, `form-buttons.css`, `form-validation.css` |
-| Legacy `--fg`/`--bg` variables | FIXED | Migrated 65+ instances to semantic tokens |
-| Hardcoded `#000` values | FIXED | Migrated 27 instances to `var(--color-black)` |
-| Font loading issues | FIXED | Created `fonts.css` with `@font-face` definitions (imported first) |
+|Navigation CSS oversized (900+ lines)|FIXED|Split into `nav-base.css`, `nav-animations.css`, `nav-responsive.css`, `nav-portal.css`|
+|Form CSS oversized (374 lines)|FIXED|Split into `form-fields.css`, `form-buttons.css`, `form-validation.css`|
+|Legacy `--fg`/`--bg` variables|FIXED|Migrated 65+ instances to semantic tokens|
+|Hardcoded `#000` values|FIXED|Migrated 27 instances to `var(--color-black)`|
+|Font loading issues|FIXED|Created `fonts.css` with `@font-face` definitions (imported first)|
 
 ### Remaining Issues
 
@@ -1169,15 +1172,15 @@ The following issues from the December 17 code review have been addressed:
 **Audit Date:** January 29, 2026
 **Resolved:** January 29, 2026
 
-**RESOLVED ISSUES:**
+#### RESOLVED ISSUES
 
-| Issue | Resolution |
+|Issue|Resolution|
 |-------|------------|
-| `.stat-card` duplicate in `pages/admin.css` | FIXED - Removed duplicate, now uses `shared/portal-cards.css` |
-| `.icon-btn` defined twice in `pages/admin.css` | FIXED - Removed unscoped version at lines 1419-1438 |
-| `.status-badge` duplicates across files | FIXED - Created `shared/portal-badges.css` with consolidated badge styles |
+|`.stat-card` duplicate in `pages/admin.css`|FIXED - Removed duplicate, now uses `shared/portal-cards.css`|
+|`.icon-btn` defined twice in `pages/admin.css`|FIXED - Removed unscoped version at lines 1419-1438|
+|`.status-badge` duplicates across files|FIXED - Created `shared/portal-badges.css` with consolidated badge styles|
 
-**NEW SHARED COMPONENT: `shared/portal-badges.css`**
+#### NEW SHARED COMPONENT: `shared/portal-badges.css`
 
 Created a shared badge component with:
 
@@ -1186,11 +1189,11 @@ Created a shared badge component with:
 - System status badges (healthy, warning, error, unknown)
 - Imported in both `admin/index.css` and `client-portal/index.css`
 
-**REMAINING ISSUE:**
+#### REMAINING ISSUE
 
-| File | Lines | Issue | Status |
+|File|Lines|Issue|Status|
 |------|-------|-------|--------|
-| `pages/admin.css` | ~1410-1475 | `.set-password-form` uses custom styles | Intentional - unauthenticated page styling |
+|`pages/admin.css`|~1410-1475|`.set-password-form` uses custom styles|Intentional - unauthenticated page styling|
 
 The `.set-password-form` uses different styling (smaller border-radius, different padding) which is intentional for the unauthenticated password reset page that doesn't use the portal theme.
 
@@ -1198,11 +1201,11 @@ The `.set-password-form` uses different styling (smaller border-radius, differen
 
 The following patterns look like duplicates but are intentionally different designs:
 
-| File | Component | Reason |
+|File|Component|Reason|
 |------|-----------|--------|
-| `client-portal/dashboard.css` | `.status-badge` override | Client portal uses text-only badges in project cards (scoped to `.project-status .status-badge`) |
-| `admin/project-detail.css:360-422` | Form input overrides | Adds admin-specific `background-color: var(--color-black)` and thicker focus borders on top of shared base styles |
-| `client-portal/dashboard.css:46` vs `shared/progress.css` | `.progress-bar` | Context-specific sizing and styling for different uses |
+|`client-portal/dashboard.css`|`.status-badge` override|Client portal uses text-only badges in project cards (scoped to `.project-status .status-badge`)|
+|`admin/project-detail.css:360-422`|Form input overrides|Adds admin-specific `background-color: var(--color-black)` and thicker focus borders on top of shared base styles|
+|`client-portal/dashboard.css:46` vs `shared/progress.css`|`.progress-bar`|Context-specific sizing and styling for different uses|
 
 These are legitimate scoped overrides and should NOT be consolidated.
 
@@ -1210,10 +1213,10 @@ These are legitimate scoped overrides and should NOT be consolidated.
 
 Some files still contain hardcoded color values that could be tokenized:
 
-| File | Issue |
+|File|Issue|
 |------|-------|
-| `pages/contact.css` | Some hex values for specific styling |
-| `pages/admin.css` | Admin-specific color overrides |
+|`pages/contact.css`|Some hex values for specific styling|
+|`pages/admin.css`|Admin-specific color overrides|
 
 #### Legacy Variables Still in Use
 
@@ -1233,27 +1236,27 @@ This is intentional to maintain Client Portal styling consistency.
 
 ### File Size Status
 
-| File | Lines | Status |
+|File|Lines|Status|
 |------|-------|--------|
-| `pages/admin.css` | 1820+ | Could be split by section (low priority) |
-| `client-portal/` | ~2000 | Split into 10 modular files (all <300 lines) |
+|`pages/admin.css`|1820+|Could be split by section (low priority)|
+|`client-portal/`|~2000|Split into 10 modular files (all <300 lines)|
 
 All navigation, form, and client portal CSS files are now properly sized (<300 lines each).
 
-**Client Portal Modular Structure (January 2026):**
+#### Client Portal Modular Structure (January 2026)
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `index.css` | Import orchestrator |
-| `components.css` | cp- prefixed reusable components |
-| `layout.css` | Dashboard layout, containers |
-| `sidebar.css` | Sidebar navigation |
-| `login.css` | Login form |
-| `dashboard.css` | Stats, activity, project cards |
-| `files.css` | File upload/management |
-| `invoices.css` | Invoice display |
-| `settings.css` | Settings, account views |
-| `projects.css` | Project navigation, details |
+|`index.css`|Import orchestrator|
+|`components.css`|cp- prefixed reusable components|
+|`layout.css`|Dashboard layout, containers|
+|`sidebar.css`|Sidebar navigation|
+|`login.css`|Login form|
+|`dashboard.css`|Stats, activity, project cards|
+|`files.css`|File upload/management|
+|`invoices.css`|Invoice display|
+|`settings.css`|Settings, account views|
+|`projects.css`|Project navigation, details|
 
 ---
 

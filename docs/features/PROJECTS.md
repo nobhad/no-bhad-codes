@@ -11,13 +11,13 @@ The Project Management System provides enterprise-grade project management with 
 
 Projects have the following status values:
 
-| Status | Description |
+|Status|Description|
 |--------|-------------|
-| `planning` | Project is in planning phase, not yet started |
-| `in-progress` | Project is actively being worked on |
-| `review` | Project is under review/awaiting approval |
-| `completed` | Project has been completed |
-| `on-hold` | Project is temporarily paused |
+|`planning`|Project is in planning phase, not yet started|
+|`in-progress`|Project is actively being worked on|
+|`review`|Project is under review/awaiting approval|
+|`completed`|Project has been completed|
+|`on-hold`|Project is temporarily paused|
 
 ## Features
 
@@ -109,11 +109,11 @@ Reusable project templates:
 
 **Default Templates:**
 
-| Template | Type | Duration | Description |
+|Template|Type|Duration|Description|
 |----------|------|----------|-------------|
-| Simple Website | simple-site | 17 days | Basic informational website with 3-5 pages |
-| Business Website | business-site | 38 days | Professional business website with 8-12 pages |
-| E-commerce Store | e-commerce | 59 days | Full e-commerce website with product catalog and checkout |
+|Simple Website|simple-site|17 days|Basic informational website with 3-5 pages|
+|Business Website|business-site|38 days|Professional business website with 8-12 pages|
+|E-commerce Store|e-commerce|59 days|Full e-commerce website with product catalog and checkout|
 
 **Template Features:**
 
@@ -135,12 +135,12 @@ Automatic project health calculation:
 
 **Health Factors:**
 
-| Factor | Weight | Description |
+|Factor|Weight|Description|
 |--------|--------|-------------|
-| Schedule Health | 30% | Days remaining vs deadline |
-| Budget Health | 20% | Actual vs estimated hours |
-| Task Completion | 25% | Completed tasks percentage |
-| Milestone Progress | 25% | Completed milestones percentage |
+|Schedule Health|30%|Days remaining vs deadline|
+|Budget Health|20%|Actual vs estimated hours|
+|Task Completion|25%|Completed tasks percentage|
+|Milestone Progress|25%|Completed milestones percentage|
 
 ### 8. Burndown Charts
 
@@ -165,16 +165,16 @@ Tag projects for organization:
 
 **Default Tags:**
 
-| Tag | Color | Description |
+|Tag|Color|Description|
 |-----|-------|-------------|
-| Rush | Red | Fast turnaround project |
-| Maintenance | Orange | Ongoing maintenance project |
-| Redesign | Purple | Website or app redesign |
-| New Build | Green | New project from scratch |
-| Complex | Pink | High complexity project |
-| Simple | Cyan | Simple, straightforward project |
-| Fixed Price | Blue | Fixed price contract |
-| Hourly | Lime | Hourly billing |
+|Rush|Red|Fast turnaround project|
+|Maintenance|Orange|Ongoing maintenance project|
+|Redesign|Purple|Website or app redesign|
+|New Build|Green|New project from scratch|
+|Complex|Pink|High complexity project|
+|Simple|Cyan|Simple, straightforward project|
+|Fixed Price|Blue|Fixed price contract|
+|Hourly|Lime|Hourly billing|
 
 ### 11. Project Archiving
 
@@ -303,92 +303,92 @@ ALTER TABLE milestones ADD COLUMN status TEXT DEFAULT 'pending';
 
 ### Project CRUD
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/projects` | Get all projects |
-| GET | `/api/projects/:id` | Get single project |
-| POST | `/api/projects` | Create project |
-| PUT | `/api/projects/:id` | Update project |
-| DELETE | `/api/projects/:id` | Delete project (admin only) |
+|GET|`/api/projects`|Get all projects|
+|GET|`/api/projects/:id`|Get single project|
+|POST|`/api/projects`|Create project|
+|PUT|`/api/projects/:id`|Update project|
+|DELETE|`/api/projects/:id`|Delete project (admin only)|
 
 ### Task Management
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/projects/:id/tasks` | Get tasks for project |
-| POST | `/api/projects/:id/tasks` | Create task |
-| GET | `/api/projects/tasks/:taskId` | Get single task |
-| PUT | `/api/projects/tasks/:taskId` | Update task |
-| DELETE | `/api/projects/tasks/:taskId` | Delete task |
-| POST | `/api/projects/tasks/:taskId/complete` | Complete task |
-| POST | `/api/projects/tasks/:taskId/move` | Move task position |
+|GET|`/api/projects/:id/tasks`|Get tasks for project|
+|POST|`/api/projects/:id/tasks`|Create task|
+|GET|`/api/projects/tasks/:taskId`|Get single task|
+|PUT|`/api/projects/tasks/:taskId`|Update task|
+|DELETE|`/api/projects/tasks/:taskId`|Delete task|
+|POST|`/api/projects/tasks/:taskId/complete`|Complete task|
+|POST|`/api/projects/tasks/:taskId/move`|Move task position|
 
 ### Task Dependencies
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| POST | `/api/projects/tasks/:taskId/dependencies` | Add dependency |
-| DELETE | `/api/projects/tasks/:taskId/dependencies/:dependsOnTaskId` | Remove dependency |
-| GET | `/api/projects/:id/tasks/blocked` | Get blocked tasks |
+|POST|`/api/projects/tasks/:taskId/dependencies`|Add dependency|
+|DELETE|`/api/projects/tasks/:taskId/dependencies/:dependsOnTaskId`|Remove dependency|
+|GET|`/api/projects/:id/tasks/blocked`|Get blocked tasks|
 
 ### Task Comments
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/projects/tasks/:taskId/comments` | Get comments |
-| POST | `/api/projects/tasks/:taskId/comments` | Add comment |
-| DELETE | `/api/projects/tasks/comments/:commentId` | Delete comment |
+|GET|`/api/projects/tasks/:taskId/comments`|Get comments|
+|POST|`/api/projects/tasks/:taskId/comments`|Add comment|
+|DELETE|`/api/projects/tasks/comments/:commentId`|Delete comment|
 
 ### Task Checklists
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| POST | `/api/projects/tasks/:taskId/checklist` | Add checklist item |
-| POST | `/api/projects/tasks/checklist/:itemId/toggle` | Toggle item |
-| DELETE | `/api/projects/tasks/checklist/:itemId` | Delete item |
+|POST|`/api/projects/tasks/:taskId/checklist`|Add checklist item|
+|POST|`/api/projects/tasks/checklist/:itemId/toggle`|Toggle item|
+|DELETE|`/api/projects/tasks/checklist/:itemId`|Delete item|
 
 ### Time Tracking
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/projects/:id/time-entries` | Get time entries |
-| POST | `/api/projects/:id/time-entries` | Log time |
-| PUT | `/api/projects/time-entries/:entryId` | Update entry |
-| DELETE | `/api/projects/time-entries/:entryId` | Delete entry |
-| GET | `/api/projects/:id/time-stats` | Get time statistics |
-| GET | `/api/projects/reports/team-time` | Get team time report |
+|GET|`/api/projects/:id/time-entries`|Get time entries|
+|POST|`/api/projects/:id/time-entries`|Log time|
+|PUT|`/api/projects/time-entries/:entryId`|Update entry|
+|DELETE|`/api/projects/time-entries/:entryId`|Delete entry|
+|GET|`/api/projects/:id/time-stats`|Get time statistics|
+|GET|`/api/projects/reports/team-time`|Get team time report|
 
 ### Templates
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/projects/templates` | Get all templates |
-| GET | `/api/projects/templates/:templateId` | Get single template |
-| POST | `/api/projects/templates` | Create template |
-| POST | `/api/projects/from-template` | Create project from template |
+|GET|`/api/projects/templates`|Get all templates|
+|GET|`/api/projects/templates/:templateId`|Get single template|
+|POST|`/api/projects/templates`|Create template|
+|POST|`/api/projects/from-template`|Create project from template|
 
 ### Project Health
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/projects/:id/health` | Get project health |
-| GET | `/api/projects/:id/burndown` | Get burndown data |
-| GET | `/api/projects/:id/velocity` | Get velocity data |
+|GET|`/api/projects/:id/health`|Get project health|
+|GET|`/api/projects/:id/burndown`|Get burndown data|
+|GET|`/api/projects/:id/velocity`|Get velocity data|
 
 ### Project Tags
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/projects/:id/tags` | Get project tags |
-| POST | `/api/projects/:id/tags/:tagId` | Add tag to project |
-| DELETE | `/api/projects/:id/tags/:tagId` | Remove tag from project |
+|GET|`/api/projects/:id/tags`|Get project tags|
+|POST|`/api/projects/:id/tags/:tagId`|Add tag to project|
+|DELETE|`/api/projects/:id/tags/:tagId`|Remove tag from project|
 
 ### Project Archive
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| POST | `/api/projects/:id/archive` | Archive project |
-| POST | `/api/projects/:id/unarchive` | Unarchive project |
+|POST|`/api/projects/:id/archive`|Archive project|
+|POST|`/api/projects/:id/unarchive`|Unarchive project|
 
 ## Service Methods
 

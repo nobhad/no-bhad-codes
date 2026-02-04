@@ -118,13 +118,24 @@ async function loadBusinessKPIs(): Promise<void> {
     ]);
 
     // Process revenue KPI
+    // Backend returns: { data: [...], summary: { total_revenue, total_invoices, avg_invoice } }
     if (revenueRes.ok) {
       const revenueData = await revenueRes.json();
-      updateElement('kpi-revenue-value', formatCurrency(revenueData.currentMonth || 0));
+      const totalRevenue = revenueData.summary?.total_revenue || 0;
+      updateElement('kpi-revenue-value', formatCurrency(totalRevenue));
 
       const changeEl = document.getElementById('kpi-revenue-change');
       if (changeEl) {
-        const change = revenueData.monthOverMonth || 0;
+        // Calculate month-over-month if we have monthly data
+        const monthlyData = revenueData.data || [];
+        let change = 0;
+        if (monthlyData.length >= 2) {
+          const currentMonth = monthlyData[monthlyData.length - 1]?.total_revenue || 0;
+          const previousMonth = monthlyData[monthlyData.length - 2]?.total_revenue || 0;
+          if (previousMonth > 0) {
+            change = ((currentMonth - previousMonth) / previousMonth) * 100;
+          }
+        }
         const changeValue = changeEl.querySelector('.change-value');
         if (changeValue) {
           changeValue.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
@@ -134,41 +145,52 @@ async function loadBusinessKPIs(): Promise<void> {
     }
 
     // Process pipeline KPI
+    // Backend returns: { data: [...], summary: { total_leads, total_pipeline_value, won_count } }
     if (pipelineRes.ok) {
       const pipelineData = await pipelineRes.json();
-      updateElement('kpi-pipeline-value', formatCurrency(pipelineData.totalValue || 0));
+      const totalValue = pipelineData.summary?.total_pipeline_value || 0;
+      const totalLeads = pipelineData.summary?.total_leads || 0;
+      updateElement('kpi-pipeline-value', formatCurrency(totalValue));
 
       const countEl = document.getElementById('kpi-pipeline-count');
       if (countEl) {
         const countValue = countEl.querySelector('.change-value');
         if (countValue) {
-          countValue.textContent = String(pipelineData.activeLeads || 0);
+          countValue.textContent = String(totalLeads);
         }
       }
     }
 
     // Process projects KPI
+    // Backend returns: { data: [...], summary: { total_projects, active_projects, completed_projects, total_hours } }
     if (projectsRes.ok) {
       const projectsData = await projectsRes.json();
-      updateElement('kpi-projects-value', String(projectsData.activeProjects || 0));
+      const activeProjects = projectsData.summary?.active_projects || 0;
+      const totalProjects = projectsData.summary?.total_projects || 0;
+      const completedProjects = projectsData.summary?.completed_projects || 0;
+      updateElement('kpi-projects-value', String(activeProjects));
 
       const completionEl = document.getElementById('kpi-projects-completion');
       if (completionEl) {
         const completionValue = completionEl.querySelector('.change-value');
         if (completionValue) {
-          completionValue.textContent = `${projectsData.avgCompletion || 0}%`;
+          // Calculate completion rate as completed / total * 100
+          const completionRate = totalProjects > 0 ? Math.round((completedProjects / totalProjects) * 100) : 0;
+          completionValue.textContent = `${completionRate}%`;
         }
       }
     }
 
     // Load outstanding invoices from invoices endpoint
+    // Backend returns: { success, invoices: [{ amount_total, ... }], total, limit, offset }
     try {
-      const invoicesRes = await apiFetch('/api/invoices?status=pending,overdue');
+      const invoicesRes = await apiFetch('/api/invoices/search?status=sent,overdue');
       if (invoicesRes.ok) {
         const invoicesData = await invoicesRes.json();
         const invoices = invoicesData.invoices || [];
-        const outstandingTotal = invoices.reduce((sum: number, inv: { total?: number }) =>
-          sum + (inv.total || 0), 0);
+        // Use amount_total (snake_case from backend)
+        const outstandingTotal = invoices.reduce((sum: number, inv: { amount_total?: number }) =>
+          sum + (inv.amount_total || 0), 0);
         updateElement('kpi-invoices-value', formatCurrency(outstandingTotal));
 
         const countEl = document.getElementById('kpi-invoices-count');
@@ -217,14 +239,15 @@ async function loadRevenueChart(): Promise<void> {
     const response = await apiFetch('/api/analytics/quick/revenue?days=180');
     if (response.ok) {
       const result = await response.json();
-      if (result.monthly && result.monthly.length > 0) {
+      // Backend returns { data: [{ month, invoice_count, total_revenue, avg_invoice }], summary }
+      if (result.data && result.data.length > 0) {
         // Take last 6 months
-        const monthlyData = result.monthly.slice(-6);
+        const monthlyData = result.data.slice(-6);
         labels = monthlyData.map((m: { month: string }) => {
           const date = new Date(`${m.month}-01`);
           return date.toLocaleDateString('en-US', { month: 'short' });
         });
-        data = monthlyData.map((m: { revenue?: number }) => m.revenue || 0);
+        data = monthlyData.map((m: { total_revenue?: number }) => m.total_revenue || 0);
       }
     }
   } catch (error) {
@@ -322,11 +345,16 @@ async function loadProjectStatusChart(): Promise<void> {
     const response = await apiFetch('/api/analytics/quick/projects');
     if (response.ok) {
       const result = await response.json();
-      if (result.byStatus) {
-        labels = Object.keys(result.byStatus).map(s =>
-          s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' ')
-        );
-        data = Object.values(result.byStatus) as number[];
+      // Backend returns { data: [...], summary: { total_projects, active_projects, completed_projects, total_hours } }
+      if (result.summary) {
+        const summary = result.summary;
+        const active = summary.active_projects || 0;
+        const completed = summary.completed_projects || 0;
+        const total = summary.total_projects || 0;
+        // Calculate other statuses from data if available, or derive from total
+        const other = Math.max(0, total - active - completed);
+        labels = ['Active', 'Completed', 'Other'];
+        data = [active, completed, other];
       }
     }
   } catch (error) {

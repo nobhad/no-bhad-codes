@@ -197,13 +197,32 @@ app.get('/health', async (_req, res) => {
     uptime: process.uptime()
   };
 
+  // Check database
   try {
     const db = getDatabase();
     await db.get('SELECT 1');
-    (health as Record<string, unknown>).database = { status: 'connected' };
+    health.database = { status: 'connected' };
   } catch (err) {
-    (health as Record<string, unknown>).status = 'degraded';
-    (health as Record<string, unknown>).database = { status: 'error', error: (err as Error).message };
+    health.status = 'degraded';
+    health.database = { status: 'error', error: (err as Error).message };
+  }
+
+  // Check email service
+  try {
+    const emailStatus = emailService.getStatus();
+    health.email = emailStatus.initialized ? 'configured' : 'not_configured';
+    health.services = { email: emailStatus.initialized };
+  } catch {
+    health.email = 'unknown';
+  }
+
+  // Check scheduler service
+  try {
+    const scheduler = getSchedulerService();
+    const schedulerStatus = scheduler.getStatus();
+    health.scheduler = schedulerStatus.isRunning ? 'Running' : 'Stopped';
+  } catch {
+    health.scheduler = 'unknown';
   }
 
   const statusCode = (health.status as string) === 'healthy' ? 200 : 503;

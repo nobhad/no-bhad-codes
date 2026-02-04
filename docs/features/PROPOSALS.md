@@ -15,11 +15,11 @@ Reusable templates for different project types:
 
 **Default Templates:**
 
-| Template | Type | Validity | Description |
+|Template|Type|Validity|Description|
 |----------|------|----------|-------------|
-| Simple Website | simple-site | 30 days | Standard proposal for 3-5 page websites |
-| Business Website | business-site | 30 days | Comprehensive proposal for 8-12 page sites |
-| E-commerce Store | e-commerce | 30 days | Full e-commerce proposal with checkout |
+|Simple Website|simple-site|30 days|Standard proposal for 3-5 page websites|
+|Business Website|business-site|30 days|Comprehensive proposal for 8-12 page sites|
+|E-commerce Store|e-commerce|30 days|Full e-commerce proposal with checkout|
 
 **Template Features:**
 
@@ -74,21 +74,21 @@ Comprehensive activity log:
 
 **Activity Types:**
 
-| Type | Description |
+|Type|Description|
 |------|-------------|
-| viewed | Proposal was viewed |
-| downloaded | PDF was downloaded |
-| commented | Comment was added |
-| signed | Signature was captured |
-| status_changed | Status was updated |
-| version_created | New version created |
-| version_restored | Version was restored |
-| sent | Proposal was sent |
-| reminder_sent | Reminder was sent |
-| signature_requested | Signature was requested |
-| signature_declined | Signature was declined |
-| discount_applied | Discount was applied |
-| discount_removed | Discount was removed |
+|viewed|Proposal was viewed|
+|downloaded|PDF was downloaded|
+|commented|Comment was added|
+|signed|Signature was captured|
+|status_changed|Status was updated|
+|version_created|New version created|
+|version_restored|Version was restored|
+|sent|Proposal was sent|
+|reminder_sent|Reminder was sent|
+|signature_requested|Signature was requested|
+|signature_declined|Signature was declined|
+|discount_applied|Discount was applied|
+|discount_removed|Discount was removed|
 
 ### 6. Custom Line Items
 
@@ -285,75 +285,75 @@ ALTER TABLE proposal_requests ADD COLUMN access_token TEXT;
 
 ### Templates
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/proposals/templates` | Get all templates |
-| GET | `/api/proposals/templates/:templateId` | Get single template |
-| POST | `/api/proposals/templates` | Create template |
-| PUT | `/api/proposals/templates/:templateId` | Update template |
-| DELETE | `/api/proposals/templates/:templateId` | Delete template |
+|GET|`/api/proposals/templates`|Get all templates|
+|GET|`/api/proposals/templates/:templateId`|Get single template|
+|POST|`/api/proposals/templates`|Create template|
+|PUT|`/api/proposals/templates/:templateId`|Update template|
+|DELETE|`/api/proposals/templates/:templateId`|Delete template|
 
 ### Versioning
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/proposals/:id/versions` | Get versions |
-| POST | `/api/proposals/:id/versions` | Create version |
-| POST | `/api/proposals/:id/versions/:versionId/restore` | Restore version |
-| GET | `/api/proposals/versions/compare` | Compare versions |
+|GET|`/api/proposals/:id/versions`|Get versions|
+|POST|`/api/proposals/:id/versions`|Create version|
+|POST|`/api/proposals/:id/versions/:versionId/restore`|Restore version|
+|GET|`/api/proposals/versions/compare`|Compare versions|
 
 ### E-Signatures
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| POST | `/api/proposals/:id/request-signature` | Request signature |
-| POST | `/api/proposals/:id/sign` | Record signature |
-| GET | `/api/proposals/:id/signature-status` | Get signature status |
-| GET | `/api/proposals/sign/:token` | Get by signing token |
-| POST | `/api/proposals/sign/:token/decline` | Decline signature |
+|POST|`/api/proposals/:id/request-signature`|Request signature|
+|POST|`/api/proposals/:id/sign`|Record signature|
+|GET|`/api/proposals/:id/signature-status`|Get signature status|
+|GET|`/api/proposals/sign/:token`|Get by signing token|
+|POST|`/api/proposals/sign/:token/decline`|Decline signature|
 
 ### Comments
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/proposals/:id/comments` | Get comments |
-| POST | `/api/proposals/:id/comments` | Add comment |
-| DELETE | `/api/proposals/comments/:commentId` | Delete comment |
+|GET|`/api/proposals/:id/comments`|Get comments|
+|POST|`/api/proposals/:id/comments`|Add comment|
+|DELETE|`/api/proposals/comments/:commentId`|Delete comment|
 
 ### Activities
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/proposals/:id/activities` | Get activities |
-| POST | `/api/proposals/:id/track-view` | Track view |
+|GET|`/api/proposals/:id/activities`|Get activities|
+|POST|`/api/proposals/:id/track-view`|Track view|
 
 ### Custom Items
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/proposals/:id/custom-items` | Get custom items |
-| POST | `/api/proposals/:id/custom-items` | Add custom item |
-| PUT | `/api/proposals/custom-items/:itemId` | Update item |
-| DELETE | `/api/proposals/custom-items/:itemId` | Delete item |
+|GET|`/api/proposals/:id/custom-items`|Get custom items|
+|POST|`/api/proposals/:id/custom-items`|Add custom item|
+|PUT|`/api/proposals/custom-items/:itemId`|Update item|
+|DELETE|`/api/proposals/custom-items/:itemId`|Delete item|
 
 ### Discounts
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| POST | `/api/proposals/:id/discount` | Apply discount |
-| DELETE | `/api/proposals/:id/discount` | Remove discount |
+|POST|`/api/proposals/:id/discount`|Apply discount|
+|DELETE|`/api/proposals/:id/discount`|Remove discount|
 
 ### Expiration & Send
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| PUT | `/api/proposals/:id/expiration` | Set expiration |
-| POST | `/api/proposals/:id/send` | Mark as sent |
-| POST | `/api/proposals/:id/access-token` | Generate access token |
-| GET | `/api/proposals/view/:token` | Get by access token |
-| POST | `/api/proposals/process-expired` | Process expired |
-| GET | `/api/proposals/due-for-reminder` | Get due for reminder |
-| POST | `/api/proposals/:id/reminder-sent` | Mark reminder sent |
+|PUT|`/api/proposals/:id/expiration`|Set expiration|
+|POST|`/api/proposals/:id/send`|Mark as sent|
+|POST|`/api/proposals/:id/access-token`|Generate access token|
+|GET|`/api/proposals/view/:token`|Get by access token|
+|POST|`/api/proposals/process-expired`|Process expired|
+|GET|`/api/proposals/due-for-reminder`|Get due for reminder|
+|POST|`/api/proposals/:id/reminder-sent`|Mark reminder sent|
 
 ## Service Methods
 
@@ -526,7 +526,7 @@ await fetch('/api/proposals/123/discount', {
 - Template fields: name, description, project type, tier, base price, default toggle
 - Use/edit/delete template actions
 
-### Files
+### Related Files
 
 - `src/features/admin/modules/admin-proposals.ts` - Proposal management module
 - `src/styles/admin/proposals.css` - Proposal styles

@@ -22,7 +22,7 @@ This document reviews the current typography implementation, analyzes the design
    - Proper letter-spacing and line-height scales
    - Utility classes available
 
-2. **Base Typography** (`src/styles/base/typography.css`)
+1. **Base Typography** (`src/styles/base/typography.css`)
    - Acme font properly loaded
    - Responsive heading hierarchy
    - Good use of `clamp()` for fluid scaling
@@ -34,12 +34,12 @@ This document reviews the current typography implementation, analyzes the design
    - Headings don't use `--text-heading-*` composed tokens
    - Hardcoded values in multiple places
 
-2. **Missing Integration**
+1. **Missing Integration**
    - Design system tokens exist but aren't fully utilized
    - Two parallel typography systems (base vs design-system)
    - Legacy variables still in use
 
-3. **Typography Inspiration Not Documented**
+1. **Typography Inspiration Not Documented**
    - 30+ inspiration images in `docs/design/typography/` folder
    - No documentation of design principles extracted
    - No connection between inspiration and implementation
@@ -53,6 +53,7 @@ This document reviews the current typography implementation, analyzes the design
 **Golden Ratio (φ):** 1.618033988749...
 
 The golden ratio creates harmonious proportions that are naturally pleasing to the eye. Applied to typography, it provides:
+
 - **Type Scale:** Each size × 1.618 = next size
 - **Line Heights:** Base × 1.618 = optimal reading line-height
 - **Spacing:** Proportional relationships between elements
@@ -62,41 +63,41 @@ The golden ratio creates harmonious proportions that are naturally pleasing to t
 
 **Base:** 16px (1rem)
 
-| Level | Calculation | Size (px) | Size (rem) | Use Case |
+|Level|Calculation|Size (px)|Size (rem)|Use Case|
 |-------|-------------|-----------|------------|----------|
-| xs | 16 ÷ 1.618² | 6.1px | 0.38rem | Too small, skip |
-| sm | 16 ÷ 1.618 | 9.9px | 0.62rem | Captions |
-| base | 16 × 1.618⁰ | 16px | 1rem | Body text |
-| md | 16 × 1.618 | 25.9px | 1.62rem | Large body |
-| lg | 16 × 1.618² | 41.9px | 2.62rem | h4 |
-| xl | 16 × 1.618³ | 67.8px | 4.24rem | h3 |
-| 2xl | 16 × 1.618⁴ | 109.7px | 6.85rem | h2 |
-| 3xl | 16 × 1.618⁵ | 177.5px | 11.1rem | h1 |
+|xs|16 ÷ 1.618²|6.1px|0.38rem|Too small, skip|
+|sm|16 ÷ 1.618|9.9px|0.62rem|Captions|
+|base|16 × 1.618⁰|16px|1rem|Body text|
+|md|16 × 1.618|25.9px|1.62rem|Large body|
+|lg|16 × 1.618²|41.9px|2.62rem|h4|
+|xl|16 × 1.618³|67.8px|4.24rem|h3|
+|2xl|16 × 1.618⁴|109.7px|6.85rem|h2|
+|3xl|16 × 1.618⁵|177.5px|11.1rem|h1|
 
 **Practical Scale (Rounded for Usability):**
 
-| Token | Golden Ratio | Rounded | Fluid Clamp |
+|Token|Golden Ratio|Rounded|Fluid Clamp|
 |-------|--------------|---------|------------|
-| `--font-size-xs` | 9.9px | 10px | `clamp(0.625rem, 0.5rem + 0.5vw, 0.75rem)` |
-| `--font-size-sm` | 12.4px | 12px | `clamp(0.75rem, 0.7rem + 0.3vw, 0.875rem)` |
-| `--font-size-base` | 16px | 16px | `clamp(1rem, 0.95rem + 0.25vw, 1.125rem)` |
-| `--font-size-md` | 25.9px | 26px | `clamp(1.625rem, 1.4rem + 1.1vw, 2rem)` |
-| `--font-size-lg` | 41.9px | 42px | `clamp(2.625rem, 2rem + 3.1vw, 3.5rem)` |
-| `--font-size-xl` | 67.8px | 68px | `clamp(4.25rem, 3rem + 6.25vw, 5.5rem)` |
-| `--font-size-2xl` | 109.7px | 110px | `clamp(6.875rem, 4.5rem + 12vw, 9rem)` |
-| `--font-size-3xl` | 177.5px | 178px | `clamp(11.125rem, 7rem + 20vw, 14rem)` |
+|`--font-size-xs`|9.9px|10px|`clamp(0.625rem, 0.5rem + 0.5vw, 0.75rem)`|
+|`--font-size-sm`|12.4px|12px|`clamp(0.75rem, 0.7rem + 0.3vw, 0.875rem)`|
+|`--font-size-base`|16px|16px|`clamp(1rem, 0.95rem + 0.25vw, 1.125rem)`|
+|`--font-size-md`|25.9px|26px|`clamp(1.625rem, 1.4rem + 1.1vw, 2rem)`|
+|`--font-size-lg`|41.9px|42px|`clamp(2.625rem, 2rem + 3.1vw, 3.5rem)`|
+|`--font-size-xl`|67.8px|68px|`clamp(4.25rem, 3rem + 6.25vw, 5.5rem)`|
+|`--font-size-2xl`|109.7px|110px|`clamp(6.875rem, 4.5rem + 12vw, 9rem)`|
+|`--font-size-3xl`|177.5px|178px|`clamp(11.125rem, 7rem + 20vw, 14rem)`|
 
 ### Golden Ratio Line Heights
 
 **Base line-height:** 1.618 (golden ratio)
 
-| Token | Calculation | Value | Use Case |
+|Token|Calculation|Value|Use Case|
 |-------|-------------|-------|----------|
-| `--line-height-tight` | 1.618 × 0.75 | 1.214 | Headings |
-| `--line-height-snug` | 1.618 × 0.85 | 1.375 | Subheadings |
-| `--line-height-normal` | 1.618 × 1.0 | 1.618 | Body text |
-| `--line-height-relaxed` | 1.618 × 1.25 | 2.023 | Large body |
-| `--line-height-loose` | 1.618 × 1.5 | 2.427 | Poetry/display |
+|`--line-height-tight`|1.618 × 0.75|1.214|Headings|
+|`--line-height-snug`|1.618 × 0.85|1.375|Subheadings|
+|`--line-height-normal`|1.618 × 1.0|1.618|Body text|
+|`--line-height-relaxed`|1.618 × 1.25|2.023|Large body|
+|`--line-height-loose`|1.618 × 1.5|2.427|Poetry/display|
 
 ### Golden Ratio Spacing
 
@@ -104,15 +105,15 @@ The golden ratio creates harmonious proportions that are naturally pleasing to t
 
 Apply golden ratio to spacing scale:
 
-| Token | Golden Ratio | Rounded | Value |
+|Token|Golden Ratio|Rounded|Value|
 |-------|--------------|---------|-------|
-| `--space-0-5` | 8 ÷ 1.618 | 4.9px | 4px |
-| `--space-1` | 8 × 1.618⁰ | 8px | 8px |
-| `--space-2` | 8 × 1.618 | 12.9px | 13px |
-| `--space-3` | 8 × 1.618² | 20.9px | 21px |
-| `--space-4` | 8 × 1.618³ | 33.9px | 34px |
-| `--space-6` | 8 × 1.618⁴ | 54.9px | 55px |
-| `--space-8` | 8 × 1.618⁵ | 88.9px | 89px |
+|`--space-0-5`|8 ÷ 1.618|4.9px|4px|
+|`--space-1`|8 × 1.618⁰|8px|8px|
+|`--space-2`|8 × 1.618|12.9px|13px|
+|`--space-3`|8 × 1.618²|20.9px|21px|
+|`--space-4`|8 × 1.618³|33.9px|34px|
+|`--space-6`|8 × 1.618⁴|54.9px|55px|
+|`--space-8`|8 × 1.618⁵|88.9px|89px|
 
 ### Implementation Strategy
 
@@ -134,22 +135,22 @@ Based on the image filenames and design principles:
    - Alignment and structure
    - Consistent spacing
 
-2. **Swiss/Bauhaus Design** (`bauhaus.jpg`, `a3_international.jpg`, `japanese_design_museum_denmark.jpg`)
+1. **Swiss/Bauhaus Design** (`bauhaus.jpg`, `a3_international.jpg`, `japanese_design_museum_denmark.jpg`)
    - Minimal, functional
    - Clear hierarchy
    - Sans-serif emphasis
 
-3. **Type Culture** (`type_culture_now.jpg`, `type_culture_now_2.jpg`, `figuring_out_type.jpg`)
+1. **Type Culture** (`type_culture_now.jpg`, `type_culture_now_2.jpg`, `figuring_out_type.jpg`)
    - Modern typography practices
    - Readability focus
    - Cultural context
 
-4. **Layout Principles** (`a_good_layout.jpg`, `hello_margins.jpg`, `balance circles.jpg`)
+1. **Layout Principles** (`a_good_layout.jpg`, `hello_margins.jpg`, `balance circles.jpg`)
    - White space importance
    - Visual balance
    - Margins and spacing
 
-5. **Line & Spacing** (`line_spacing_text.jpg`, `read_this.jpg`)
+1. **Line & Spacing** (`line_spacing_text.jpg`, `read_this.jpg`)
    - Line-height optimization
    - Readability
    - Text flow
@@ -184,12 +185,14 @@ Based on the image filenames and design principles:
 **File:** `src/design-system/tokens/typography.css`
 
 **Changes:**
+
 - Replace current font-size scale with golden ratio calculations
 - Update line-heights to use golden ratio (1.618 base)
 - Add golden ratio spacing tokens
 - Maintain fluid `clamp()` values based on golden ratio
 
 **New Token Structure:**
+
 ```css
 :root {
   /* Golden Ratio constant */
@@ -223,6 +226,7 @@ Based on the image filenames and design principles:
 **File:** `src/design-system/tokens/spacing.css`
 
 **Changes:**
+
 - Apply golden ratio to spacing scale
 - Maintain 8px base grid
 - Use golden ratio multiples for larger spaces
@@ -236,12 +240,14 @@ Based on the image filenames and design principles:
 **File:** `src/styles/base/typography.css`
 
 **Changes:**
+
 - Replace custom `clamp()` values with design system tokens
 - Use `--text-heading-*` composed tokens for headings
 - Use `--text-body-*` tokens for body text
 - Remove duplicate font-size definitions
 
 **Before:**
+
 ```css
 h2, .h2 {
   font-size: clamp(1.5rem, 4vw, 3rem);
@@ -249,6 +255,7 @@ h2, .h2 {
 ```
 
 **After:**
+
 ```css
 h2, .h2 {
   font: var(--text-heading-2);
@@ -262,6 +269,7 @@ h2, .h2 {
 **File:** `docs/design/typography/INSPIRATION.md` (NEW)
 
 **Content:**
+
 - Catalog all inspiration images
 - Extract design principles
 - Map principles to implementation decisions
@@ -272,6 +280,7 @@ h2, .h2 {
 **File:** `docs/design/typography/USAGE_GUIDE.md` (NEW)
 
 **Content:**
+
 - When to use each heading level
 - Body text guidelines
 - Link styling standards
@@ -287,6 +296,7 @@ h2, .h2 {
 #### 2.1 Update All Components
 
 **Files to Update:**
+
 - `components/business-card.css` ✅ (already using H2 styles)
 - `components/nav-base.css`
 - `components/nav-responsive.css`
@@ -295,6 +305,7 @@ h2, .h2 {
 - All other component files
 
 **Changes:**
+
 - Replace hardcoded font sizes with tokens
 - Use composed tokens where possible
 - Standardize letter-spacing using `--letter-spacing-*`
@@ -303,10 +314,12 @@ h2, .h2 {
 #### 2.2 Remove Legacy Variables
 
 **Files:**
+
 - `src/styles/variables.css`
 - All component files using `--font-size-*` (legacy)
 
 **Action:**
+
 - Migrate to design system tokens
 - Remove deprecated variables
 - Update documentation
@@ -323,6 +336,7 @@ h2, .h2 {
 **Proposed:** Evaluate if all 6 are needed
 
 **Decision Points:**
+
 - Are h4, h5, h6 actually used?
 - Can we consolidate to 3-4 levels?
 - Maintain hierarchy with size + weight
@@ -332,6 +346,7 @@ h2, .h2 {
 **Current:** All headings have `text-shadow: 0 2px 4px var(--color-shadow)`
 
 **Proposed:**
+
 - Evaluate necessity per heading level
 - Consider removing from smaller headings
 - Keep only where it adds value
@@ -341,6 +356,7 @@ h2, .h2 {
 **Current:** No letter-spacing on headings (default)
 
 **Proposed:**
+
 - Add subtle letter-spacing for uppercase text
 - Use `--letter-spacing-wide` (0.025em) for headings
 - Maintain readability
@@ -350,6 +366,7 @@ h2, .h2 {
 **Current:** `line-height: 1.2` for all headings
 
 **Proposed:**
+
 - Use design system tokens (`--line-height-tight`, `--line-height-snug`)
 - Adjust per heading level
 - Optimize for readability
@@ -365,6 +382,7 @@ h2, .h2 {
 **File:** `docs/design/typography/SYSTEM.md` (NEW)
 
 **Sections:**
+
 1. Design Philosophy (Dieter Rams)
 2. Type Scale & Hierarchy
 3. Font Families
@@ -378,6 +396,7 @@ h2, .h2 {
 **File:** `docs/design/typography/COMPONENTS.md` (NEW)
 
 **Content:**
+
 - Navigation typography
 - Card typography
 - Form typography
@@ -389,6 +408,7 @@ h2, .h2 {
 **File:** `docs/design/typography/MIGRATION.md` (NEW)
 
 **Content:**
+
 - Step-by-step migration from legacy to tokens
 - Code examples
 - Common pitfalls
@@ -402,14 +422,16 @@ h2, .h2 {
 
 **Current Status:** ✅ Already styled like H2 tags, green removed
 
-**Recommendation:**
+#### Recommendation
+
 - Keep current implementation
 - Consider using `--text-heading-2` token for consistency
 - Document as reference pattern
 
 ### 2. Heading Hierarchy
 
-**Recommendation:**
+#### Recommendation
+
 ```css
 /* Use composed tokens */
 h1 { font: var(--text-heading-1); }
@@ -426,7 +448,8 @@ h1, h2, h3 {
 
 ### 3. Body Text
 
-**Recommendation:**
+#### Recommendation
+
 ```css
 p {
   font: var(--text-body-medium);
@@ -441,7 +464,8 @@ p {
 
 ### 4. Links
 
-**Recommendation:**
+#### Recommendation
+
 - Remove green hover (✅ done)
 - Use opacity change for subtle feedback
 - Maintain underline on paragraph links
@@ -452,6 +476,7 @@ p {
 ## Implementation Priority
 
 ### High Priority (Do First)
+
 1. ✅ Remove green hover from navigation links
 2. **Implement golden ratio type scale in design tokens**
 3. **Update spacing tokens with golden ratio**
@@ -460,12 +485,14 @@ p {
 6. Create usage guide
 
 ### Medium Priority
+
 1. Update all components to use tokens
 2. Remove legacy variables
 3. Optimize heading system
 4. Refine spacing
 
 ### Low Priority (Polish)
+
 1. Complete documentation
 2. Create migration guide
 3. Accessibility audit
@@ -476,18 +503,21 @@ p {
 ## Success Metrics
 
 ### Technical
+
 - [ ] 100% of typography uses design tokens
 - [ ] Zero hardcoded font sizes
 - [ ] All components follow typography guidelines
 - [ ] Documentation complete
 
 ### Design
+
 - [ ] Typography feels cohesive across site
 - [ ] Hierarchy is clear and functional
 - [ ] Follows Dieter Rams principles
 - [ ] Responsive behavior is smooth
 
 ### Code Quality
+
 - [ ] No duplicate typography definitions
 - [ ] Consistent naming conventions
 - [ ] Well-documented system
@@ -516,4 +546,3 @@ p {
 ---
 
 **Questions or Feedback?** Review this plan and let's discuss before implementation.
-

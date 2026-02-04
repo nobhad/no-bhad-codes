@@ -68,7 +68,7 @@ Each section is wrapped in a card with consistent styling:
 
 Combined Profile and Password management in one section.
 
-### HTML Implementation
+### Account HTML Implementation
 
 ```html
 <!-- templates/pages/client-portal.ejs:228-271 -->
@@ -132,20 +132,20 @@ Combined Profile and Password management in one section.
 
 ### Profile Fields
 
-| Field | ID | Type | Purpose |
+|Field|ID|Type|Purpose|
 |-------|-----|------|---------|
-| Full Name | `settings-name` | text | Display name |
-| Email | `settings-email` | email | Login and notifications |
-| Company | `settings-company` | text | Company/organization name |
-| Phone | `settings-phone` | tel | Contact number |
+|Full Name|`settings-name`|text|Display name|
+|Email|`settings-email`|email|Login and notifications|
+|Company|`settings-company`|text|Company/organization name|
+|Phone|`settings-phone`|tel|Contact number|
 
 ### Password Fields
 
-| Field | ID | Type | Purpose |
+|Field|ID|Type|Purpose|
 |-------|-----|------|---------|
-| Current Password | `current-password` | password | Verify identity |
-| New Password | `new-password` | password | New password |
-| Confirm Password | `confirm-password` | password | Verify new password |
+|Current Password|`current-password`|password|Verify identity|
+|New Password|`new-password`|password|New password|
+|Confirm Password|`confirm-password`|password|Verify new password|
 
 ---
 
@@ -153,7 +153,7 @@ Combined Profile and Password management in one section.
 
 Email notification settings with checkbox options.
 
-### HTML Implementation
+### Notification HTML Implementation
 
 ```html
 <!-- templates/pages/client-portal.ejs:273-297 -->
@@ -185,12 +185,12 @@ Email notification settings with checkbox options.
 
 ### Notification Options
 
-| Option | Default | Description |
+|Option|Default|Description|
 |--------|---------|-------------|
-| New message | Checked | When receiving a new message |
-| Project status change | Checked | When project status updates |
-| New invoice | Checked | When invoice is generated |
-| Weekly summary | Unchecked | Weekly project progress email |
+|New message|Checked|When receiving a new message|
+|Project status change|Checked|When project status updates|
+|New invoice|Checked|When invoice is generated|
+|Weekly summary|Unchecked|Weekly project progress email|
 
 ---
 
@@ -198,7 +198,7 @@ Email notification settings with checkbox options.
 
 Company and address information for invoicing.
 
-### HTML Implementation
+### Billing HTML Implementation
 
 ```html
 <!-- templates/pages/client-portal.ejs:299-333 -->
@@ -240,15 +240,15 @@ Company and address information for invoicing.
 
 ### Billing Fields
 
-| Field | ID | Purpose |
+|Field|ID|Purpose|
 |-------|-----|---------|
-| Company Name | `billing-company` | Business name for invoices |
-| Street Address | `billing-address` | Primary address line |
-| Address Line 2 | `billing-address2` | Apt, Suite, etc. |
-| City | `billing-city` | City name |
-| State / Province | `billing-state` | State or province |
-| ZIP / Postal Code | `billing-zip` | Postal code |
-| Country | `billing-country` | Country name |
+|Company Name|`billing-company`|Business name for invoices|
+|Street Address|`billing-address`|Primary address line|
+|Address Line 2|`billing-address2`|Apt, Suite, etc.|
+|City|`billing-city`|City name|
+|State / Province|`billing-state`|State or province|
+|ZIP / Postal Code|`billing-zip`|Postal code|
+|Country|`billing-country`|Country name|
 
 ---
 
@@ -273,7 +273,7 @@ Eye icon buttons to show/hide password fields.
 </div>
 ```
 
-### TypeScript Implementation
+### Password Toggle TypeScript Implementation
 
 ```typescript
 // src/features/client/client-portal.ts:172-193
@@ -407,19 +407,19 @@ interface ClientPortalContext {
 
 ---
 
-## Storage Keys
+## LocalStorage Keys
 
 The settings module uses `sessionStorage` for client-side data persistence (cleared on browser close).
 
-| Key | Storage | Purpose | Data Structure |
+|Key|Storage|Purpose|Data Structure|
 |-----|---------|---------|----------------|
-| `clientEmail` | sessionStorage | Current user email | `string` |
-| `client_contact_info` | sessionStorage | Contact details | `{ name, email, company, phone }` |
-| `client_billing_address` | sessionStorage | Billing address | `{ address1, address2, city, state, zip, country }` |
-| `client_notification_prefs` | sessionStorage | Notification settings | `{ projectUpdates, invoices, messages, milestones }` |
-| `client_billing_view_address` | sessionStorage | Billing view data | `{ ... }` |
-| `client_tax_info` | sessionStorage | Tax information | `{ taxId, businessName }` |
-| `client_notification_frequency` | sessionStorage | Frequency settings | `{ frequency, quietStart, quietEnd }` |
+|`clientEmail`|sessionStorage|Current user email|`string`|
+|`client_contact_info`|sessionStorage|Contact details|`{ name, email, company, phone }`|
+|`client_billing_address`|sessionStorage|Billing address|`{ address1, address2, city, state, zip, country }`|
+|`client_notification_prefs`|sessionStorage|Notification settings|`{ projectUpdates, invoices, messages, milestones }`|
+|`client_billing_view_address`|sessionStorage|Billing view data|`{ ... }`|
+|`client_tax_info`|sessionStorage|Tax information|`{ taxId, businessName }`|
+|`client_notification_frequency`|sessionStorage|Frequency settings|`{ frequency, quietStart, quietEnd }`|
 
 ---
 
@@ -431,13 +431,13 @@ All settings forms now save to the backend API via the `/api/clients/me` endpoin
 
 ### API Endpoints
 
-| Endpoint | Method | Description |
+|Endpoint|Method|Description|
 |----------|--------|-------------|
-| `/api/clients/me` | GET | Get current client's profile |
-| `/api/clients/me` | PUT | Update profile (name, company, phone) |
-| `/api/clients/me/password` | PUT | Change password |
-| `/api/clients/me/notifications` | PUT | Update notification preferences |
-| `/api/clients/me/billing` | PUT | Update billing information |
+|`/api/clients/me`|GET|Get current client's profile|
+|`/api/clients/me`|PUT|Update profile (name, company, phone)|
+|`/api/clients/me/password`|PUT|Change password|
+|`/api/clients/me/notifications`|PUT|Update notification preferences|
+|`/api/clients/me/billing`|PUT|Update billing information|
 
 ### Frontend Save Methods
 
@@ -635,13 +635,13 @@ billing_country TEXT
 
 ## File Locations
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `client/portal.html` | Settings tab HTML (tab-settings section) |
-| `src/features/client/modules/portal-settings.ts` | Settings module (~260 lines) |
-| `src/styles/client-portal/settings.css` | Settings styling |
-| `server/routes/clients.ts` | Client profile API endpoints |
-| `server/routes/auth.ts` | Password change endpoint |
+|`client/portal.html`|Settings tab HTML (tab-settings section)|
+|`src/features/client/modules/portal-settings.ts`|Settings module (~260 lines)|
+|`src/styles/client-portal/settings.css`|Settings styling|
+|`server/routes/clients.ts`|Client profile API endpoints|
+|`server/routes/auth.ts`|Password change endpoint|
 
 ---
 

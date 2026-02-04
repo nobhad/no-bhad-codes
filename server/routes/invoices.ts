@@ -12,6 +12,13 @@ import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
 import { join } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
+
+/**
+ * GET /api/invoices
+ * Admin invoice listing. Returns an array of invoices (snake_case fields).
+ * Supports optional filters via query params (status, clientId, projectId, search, dateFrom, dateTo, minAmount, maxAmount, invoiceType, limit, offset)
+ */
+// Admin invoice listing added later after router initialization
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import {
   InvoiceService,
@@ -45,6 +52,59 @@ const BUSINESS_INFO = {
 };
 
 const router = express.Router();
+
+// GET /api/invoices
+// Admin invoice listing. Returns an array of invoices (snake_case fields).
+// Supports optional filters via query params (status, clientId, projectId, search, dateFrom, dateTo, minAmount, maxAmount, invoiceType, limit, offset)
+router.get(
+  '/',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 100;
+    const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
+
+    try {
+      // If filters provided, delegate to searchInvoices for advanced filtering
+      const hasFilters = !!(
+        req.query.status ||
+        req.query.clientId ||
+        req.query.projectId ||
+        req.query.search ||
+        req.query.dateFrom ||
+        req.query.dateTo ||
+        req.query.minAmount ||
+        req.query.maxAmount ||
+        req.query.invoiceType
+      );
+
+      if (hasFilters) {
+        const filters: any = {
+          clientId: req.query.clientId ? parseInt(req.query.clientId as string, 10) : undefined,
+          projectId: req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined,
+          status: req.query.status as string | undefined,
+          invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
+          search: req.query.search as string | undefined,
+          dateFrom: req.query.dateFrom as string | undefined,
+          dateTo: req.query.dateTo as string | undefined,
+          minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
+          maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
+          limit,
+          offset
+        };
+
+        const result = await getInvoiceService().searchInvoices(filters);
+        // Return plain array (frontend expects direct array)
+        return res.json(result.invoices.map(toSnakeCaseInvoice));
+      }
+
+      const invoices = await getInvoiceService().getAllInvoices(limit, offset);
+      res.json(invoices.map(toSnakeCaseInvoice));
+    } catch (error: unknown) {
+      res.status(500).json({ error: 'Failed to retrieve invoices', code: 'RETRIEVAL_FAILED', message: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  })
+);
 
 // Lazy-load invoice service after database is initialized
 function getInvoiceService() {
@@ -924,6 +984,106 @@ router.post(
     } catch (error) {
       console.error('[Invoices] Preview PDF generation error:', error);
       res.status(500).json({ error: 'Failed to generate preview', code: 'PDF_GENERATION_FAILED' });
+    }
+  })
+);
+
+// ============================================
+// INVOICE SEARCH
+// ============================================
+// NOTE: This route MUST be defined before /:id to avoid /:id matching "search" as an ID
+
+/**
+ * @swagger
+ * /api/invoices/search:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Search invoices with filters
+ *     description: Search and filter invoices with pagination
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Single status or comma-separated statuses (draft, sent, viewed, partial, paid, overdue, cancelled)
+ *       - in: query
+ *         name: clientId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *     responses:
+ *       200:
+ *         description: Search results
+ */
+router.get(
+  '/search',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    // Define valid statuses for type checking
+    type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
+    const validStatuses: InvoiceStatus[] = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
+
+    // Parse status - can be single value or comma-separated
+    let status: InvoiceStatus | InvoiceStatus[] | undefined;
+    if (req.query.status) {
+      const statusStr = req.query.status as string;
+      if (statusStr.includes(',')) {
+        const statuses = statusStr.split(',').filter(s => validStatuses.includes(s as InvoiceStatus)) as InvoiceStatus[];
+        status = statuses.length > 0 ? statuses : undefined;
+      } else if (validStatuses.includes(statusStr as InvoiceStatus)) {
+        status = statusStr as InvoiceStatus;
+      }
+    }
+
+    const filters = {
+      clientId: req.query.clientId ? parseInt(req.query.clientId as string) : undefined,
+      projectId: req.query.projectId ? parseInt(req.query.projectId as string) : undefined,
+      status,
+      invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
+      search: req.query.search as string | undefined,
+      dateFrom: req.query.dateFrom as string | undefined,
+      dateTo: req.query.dateTo as string | undefined,
+      dueDateFrom: req.query.dueDateFrom as string | undefined,
+      dueDateTo: req.query.dueDateTo as string | undefined,
+      minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
+      maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
+      offset: req.query.offset ? parseInt(req.query.offset as string) : 0
+    };
+
+    try {
+      const result = await getInvoiceService().searchInvoices(filters);
+
+      res.json({
+        success: true,
+        invoices: result.invoices.map(toSnakeCaseInvoice),
+        total: result.total,
+        limit: filters.limit,
+        offset: filters.offset
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to search invoices',
+        code: 'SEARCH_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   })
 );
@@ -3078,133 +3238,6 @@ router.post(
         error: 'Failed to record payment',
         code: 'PAYMENT_FAILED',
         message
-      });
-    }
-  })
-);
-
-// ============================================
-// INVOICE SEARCH
-// ============================================
-
-/**
- * @swagger
- * /api/invoices/search:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Search invoices with filters
- *     description: Search and filter invoices with pagination
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: query
- *         name: clientId
- *         schema:
- *           type: integer
- *       - in: query
- *         name: projectId
- *         schema:
- *           type: integer
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [draft, sent, viewed, partial, paid, overdue, cancelled]
- *       - in: query
- *         name: invoiceType
- *         schema:
- *           type: string
- *           enum: [standard, deposit]
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Search in invoice number and notes
- *       - in: query
- *         name: dateFrom
- *         schema:
- *           type: string
- *           format: date
- *       - in: query
- *         name: dateTo
- *         schema:
- *           type: string
- *           format: date
- *       - in: query
- *         name: minAmount
- *         schema:
- *           type: number
- *       - in: query
- *         name: maxAmount
- *         schema:
- *           type: number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 50
- *       - in: query
- *         name: offset
- *         schema:
- *           type: integer
- *           default: 0
- *     responses:
- *       200:
- *         description: Search results
- */
-router.get(
-  '/search',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    // Define valid statuses for type checking
-    type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
-    const validStatuses: InvoiceStatus[] = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
-
-    // Parse status - can be single value or comma-separated
-    let status: InvoiceStatus | InvoiceStatus[] | undefined;
-    if (req.query.status) {
-      const statusStr = req.query.status as string;
-      if (statusStr.includes(',')) {
-        const statuses = statusStr.split(',').filter(s => validStatuses.includes(s as InvoiceStatus)) as InvoiceStatus[];
-        status = statuses.length > 0 ? statuses : undefined;
-      } else if (validStatuses.includes(statusStr as InvoiceStatus)) {
-        status = statusStr as InvoiceStatus;
-      }
-    }
-
-    const filters = {
-      clientId: req.query.clientId ? parseInt(req.query.clientId as string) : undefined,
-      projectId: req.query.projectId ? parseInt(req.query.projectId as string) : undefined,
-      status,
-      invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
-      search: req.query.search as string | undefined,
-      dateFrom: req.query.dateFrom as string | undefined,
-      dateTo: req.query.dateTo as string | undefined,
-      dueDateFrom: req.query.dueDateFrom as string | undefined,
-      dueDateTo: req.query.dueDateTo as string | undefined,
-      minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
-      maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string) : 0
-    };
-
-    try {
-      const result = await getInvoiceService().searchInvoices(filters);
-
-      res.json({
-        success: true,
-        invoices: result.invoices.map(toSnakeCaseInvoice),
-        total: result.total,
-        limit: filters.limit,
-        offset: filters.offset
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to search invoices',
-        code: 'SEARCH_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })

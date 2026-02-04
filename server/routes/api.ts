@@ -75,10 +75,14 @@ router.use(
 );
 
 // General rate limiting for all API routes
+// Configurable global API rate limit. Can be relaxed in development via env vars.
+const apiWindowMs = Number(process.env.API_RATE_WINDOW_MS) || 15 * 60 * 1000; // 15 minutes
+const apiMaxRequests = Number(process.env.API_RATE_MAX_REQUESTS) || 100;
 router.use(
   rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 100,
+    windowMs: apiWindowMs,
+    maxRequests: apiMaxRequests,
+    skipIf: () => process.env.NODE_ENV === 'development',
     message: 'Too many API requests'
   })
 );

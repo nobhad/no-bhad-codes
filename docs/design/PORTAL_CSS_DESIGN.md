@@ -38,10 +38,10 @@ Portals share a **dark UI** and a common set of `--portal-*` variables. They do 
 
 ## Entry Points (Bundles)
 
-| Bundle | Served On | Contents |
+|Bundle|Served On|Contents|
 |--------|-----------|----------|
-| `src/styles/bundles/admin.css` | Admin dashboard (`admin/index.html`) | Shared base + nav + admin pages + admin modules |
-| `src/styles/bundles/portal.css` | Client portal (`client/portal.html`, set-password) | Shared base + nav-portal only + client-portal modules |
+|`src/styles/bundles/admin.css`|Admin dashboard (`admin/index.html`)|Shared base + nav + admin pages + admin modules|
+|`src/styles/bundles/portal.css`|Client portal (`client/portal.html`, set-password)|Shared base + nav-portal only + client-portal modules|
 
 Both bundles:
 
@@ -69,15 +69,15 @@ The HTML for admin and client portal pages must set `data-page="admin"` or `data
 
 ### Shared by both portals
 
-| Category | Variables |
+|Category|Variables|
 |----------|-----------|
-| **Base overrides** | `--color-neutral-100` … `--color-neutral-400`, `--color-dark`, `--color-text-primary`, `--color-border` |
-| **Portal text** | `--portal-text-light`, `--portal-text-secondary`, `--portal-text-muted`, `--portal-text-dark` |
-| **Portal backgrounds** | `--portal-bg-darker`, `--portal-bg-dark`, `--portal-bg-medium`, `--portal-bg-light`, `--portal-bg-hover`, `--portal-bg-readonly` |
-| **Portal borders** | `--portal-border-dark`, `--portal-border-medium`, `--portal-border-light`, `--portal-border`, `--portal-border-light-style` |
-| **Border radius** | `--portal-radius-xs` (4px), `--portal-radius-sm` (6px), `--portal-radius-md` (8px), `--portal-radius-lg` (12px), `--portal-radius-pill` (50px); `--border-radius-card` → `--portal-radius-md` |
-| **Spacing** | `--portal-spacing-xs` … `--portal-spacing-2xl` (0.25rem … 2rem) |
-| **Labels** | `--label-font-size`, `--label-color`, `--label-font-weight`, `--label-text-transform`, `--label-letter-spacing` |
+|**Base overrides**|`--color-neutral-100` … `--color-neutral-400`, `--color-dark`, `--color-text-primary`, `--color-border`|
+|**Portal text**|`--portal-text-light`, `--portal-text-secondary`, `--portal-text-muted`, `--portal-text-dark`|
+|**Portal backgrounds**|`--portal-bg-darker`, `--portal-bg-dark`, `--portal-bg-medium`, `--portal-bg-light`, `--portal-bg-hover`, `--portal-bg-readonly`|
+|**Portal borders**|`--portal-border-dark`, `--portal-border-medium`, `--portal-border-light`, `--portal-border`, `--portal-border-light-style`|
+|**Border radius**|`--portal-radius-xs` (4px), `--portal-radius-sm` (6px), `--portal-radius-md` (8px), `--portal-radius-lg` (12px), `--portal-radius-pill` (50px); `--border-radius-card` → `--portal-radius-md`|
+|**Spacing**|`--portal-spacing-xs` … `--portal-spacing-2xl` (0.25rem … 2rem)|
+|**Labels**|`--label-font-size`, `--label-color`, `--label-font-weight`, `--label-text-transform`, `--label-letter-spacing`|
 
 ### Admin-only overrides
 
@@ -110,54 +110,54 @@ Overlay/backdrop tokens are defined **only** in `design-system/tokens/colors.css
 
 ### Client Portal (`src/styles/client-portal/`)
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `index.css` | Orchestrator: shared portal CSS + base components + layout + views |
-| `components.css` | `.portal-*` reusable components (cards, inputs, badges, stats, etc.) |
-| `layout.css` | Dashboard layout, containers |
-| `sidebar.css` | Sidebar navigation (shared with admin) |
-| `login.css` | Login form |
-| `dashboard.css` | Stats, activity, project cards |
-| `files.css` | File upload/management |
-| `invoices.css` | Invoice display |
-| `settings.css` | Settings, account views |
-| `projects.css` | Project navigation, details |
+|`index.css`|Orchestrator: shared portal CSS + base components + layout + views|
+|`components.css`|`.portal-*` reusable components (cards, inputs, badges, stats, etc.)|
+|`layout.css`|Dashboard layout, containers|
+|`sidebar.css`|Sidebar navigation (shared with admin)|
+|`login.css`|Login form|
+|`dashboard.css`|Stats, activity, project cards|
+|`files.css`|File upload/management|
+|`invoices.css`|Invoice display|
+|`settings.css`|Settings, account views|
+|`projects.css`|Project navigation, details|
 
 ### Admin (`src/styles/admin/`)
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `index.css` | Orchestrator: shared portal CSS + client-portal layout/sidebar + admin modules |
-| `auth.css` | Admin authentication |
-| `modals.css` | Admin modals |
-| `analytics.css` | Analytics dashboard |
-| `project-detail.css` | Project detail (including messaging UI) |
-| `client-detail.css` | Client detail views |
-| `tasks.css` | Task list / project tasks |
-| `leads-pipeline.css` | Leads pipeline |
-| `files.css` | Admin file management |
-| `proposals.css` | Proposals |
-| `table-features.css` | Table filters, dropdowns, etc. |
+|`index.css`|Orchestrator: shared portal CSS + client-portal layout/sidebar + admin modules|
+|`auth.css`|Admin authentication|
+|`modals.css`|Admin modals|
+|`analytics.css`|Analytics dashboard|
+|`project-detail.css`|Project detail (including messaging UI)|
+|`client-detail.css`|Client detail views|
+|`tasks.css`|Task list / project tasks|
+|`leads-pipeline.css`|Leads pipeline|
+|`files.css`|Admin file management|
+|`proposals.css`|Proposals|
+|`table-features.css`|Table filters, dropdowns, etc.|
 
 ### Shared portal styles (`src/styles/shared/`)
 
 Used by both admin and client portal:
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `portal-layout.css` | Portal layout utilities |
-| `portal-buttons.css` | Button hierarchy (sidebar link-style, primary, secondary, icon-only, destructive) |
-| `portal-messages.css` | Messaging UI |
-| `search-bar.css` | Search bar component |
-| `portal-cards.css` | Card / stat card styles |
-| `portal-forms.css` | Form styles |
-| `portal-files.css` | File upload components |
-| `portal-dropdown.css` | Dropdown menus |
-| `portal-badges.css` | Status badges |
-| `portal-tabs.css` | Tabs (admin only import) |
-| `portal-components.css` | Extra shared components (admin only import) |
-| `confirm-dialog.css` | Confirmation dialogs |
-| `wireframe.css` | Wireframe mode (greyscale) |
+|`portal-layout.css`|Portal layout utilities|
+|`portal-buttons.css`|Button hierarchy (sidebar link-style, primary, secondary, icon-only, destructive)|
+|`portal-messages.css`|Messaging UI|
+|`search-bar.css`|Search bar component|
+|`portal-cards.css`|Card / stat card styles|
+|`portal-forms.css`|Form styles|
+|`portal-files.css`|File upload components|
+|`portal-dropdown.css`|Dropdown menus|
+|`portal-badges.css`|Status badges|
+|`portal-tabs.css`|Tabs (admin only import)|
+|`portal-components.css`|Extra shared components (admin only import)|
+|`confirm-dialog.css`|Confirmation dialogs|
+|`wireframe.css`|Wireframe mode (greyscale)|
 
 ---
 
@@ -224,13 +224,13 @@ Defines where buttons should look different in the admin and client portals. Sid
 
 ### 6. Where each is used (summary)
 
-| Context              | Style        | Example                          |
+|Context|Style|Example|
 |----------------------|-------------|-----------------------------------|
-| Sidebar nav          | Link-style  | Dashboard, Leads, Projects, Sign out |
-| Page/section CTA     | Primary     | Save settings, Create project    |
-| Cancel / back / other| Secondary   | Cancel, Back, View details       |
-| Table header / tools | Icon-only   | Filter, Search, Export           |
-| Delete / remove      | Destructive | Delete project, Remove item     |
+|Sidebar nav|Link-style|Dashboard, Leads, Projects, Sign out|
+|Page/section CTA|Primary|Save settings, Create project|
+|Cancel / back / other|Secondary|Cancel, Back, View details|
+|Table header / tools|Icon-only|Filter, Search, Export|
+|Delete / remove|Destructive|Delete project, Remove item|
 
 ### Button implementation notes
 
@@ -243,4 +243,3 @@ Defines where buttons should look different in the admin and client portals. Sid
 ## Related Docs
 
 - **[CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md)** — Full CSS architecture, main site, design system, utilities, and best practices.
-- **[STYLE_CONSISTENCY_REPORT.md](./STYLE_CONSISTENCY_REPORT.md)** — Audit of color, shadow, spacing, and token consistency (including portal fixes).

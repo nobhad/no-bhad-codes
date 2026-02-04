@@ -176,19 +176,19 @@ Below is a scan of **admin and client portals** for patterns that **should be re
 
 The following are now **reusable** and available for admin and client portals. Wireframes (greyscale view) use the same structure, so these apply there too.
 
-| Area            | Implementation | Usage |
+|Area|Implementation|Usage|
 |-----------------|----------------|-------|
-| **Breadcrumbs** | `src/components/breadcrumbs.ts`: `renderBreadcrumbs(container, items)`, `BreadcrumbItem` | Client portal: `portal-navigation.ts` uses it. Admin: `admin-dashboard.ts` uses it in `updateAdminBreadcrumbs()` for section + project name. |
-| **Tab switching** | `src/components/tab-router.ts`: `setupTabRouter(config)` with `buttonSelector`, `contentIdPrefix`, `onChange` | Available for admin and client; portals can call it to share tab DOM logic. |
-| **Stat cards** | `src/components/quick-stats.ts`: `createQuickStats(items)`, `QuickStatItem` | Factory for `.quick-stats` grid; use when building tabs dynamically. |
-| **Recent activity** | `src/components/recent-activity.ts`: `createRecentActivity(items, title?, listId?)`, `RecentActivityItem` | Factory for `.recent-activity` block; use when building tabs dynamically. |
-| **Page header** | `src/components/page-header.ts`: `createPageHeader(config)` with `title`, `showToggle`, `toggleAriaLabel` | Factory for `.page-header`; use when building tabs dynamically. |
-| **Search bar** | `src/components/search-bar.ts`: `createSearchBar(config)`; `src/styles/shared/search-bar.css`: `.search-bar`, `.search-bar-icon`, `.search-bar-input`, `.search-bar-clear` | Reusable inline search: icon + input + optional clear. Shared padding so placeholder/text do not overlap the icon. Used by table filter dropdown and messages search. |
-| **Empty state** | `src/components/empty-state.ts`: `createEmptyState(message, options?)`, `renderEmptyState(container, message, options?)` | Admin: `admin-project-details.ts` uses it for messages/files empty and error states. Use for any "No X yet" or loading/error message. |
-| **Status badge** | `src/components/status-badge.ts`: `createStatusBadge(label, variant)`, `getStatusBadgeHTML(label, variant)` | Admin: `admin-clients.ts` uses `getStatusBadgeHTML` for client table status cells. Use for status pills (active, pending, healthy, etc.). |
-| **Icon button** | `src/components/icon-button.ts`: `createIconButton(config)` with `iconSvg`, `label`, `onClick`, `className` | Admin: `admin-project-details.ts` uses it for the project overview "Send invitation" button. Use for edit, close, invite, etc. |
-| **Page title** | `src/components/page-title.ts`: `createPageTitle(config)` with `title`, optional `badge`, `badgeVariant` | Factory for `.page-title` and `.page-title-with-badge`; use when building tab titles with optional status badge. |
-| **Table empty** | `src/utils/loading-utils.ts`: `showTableEmpty(tableBody, colspan, message)` | Admin: `admin-clients.ts` uses it for "No clients found" and "No clients match the current filters". Use with `showTableLoading` and `showTableError` (error-utils) for full table states. |
+|**Breadcrumbs**|`src/components/breadcrumbs.ts`: `renderBreadcrumbs(container, items)`, `BreadcrumbItem`|Client portal: `portal-navigation.ts` uses it. Admin: `admin-dashboard.ts` uses it in `updateAdminBreadcrumbs()` for section + project name.|
+|**Tab switching**|`src/components/tab-router.ts`: `setupTabRouter(config)` with `buttonSelector`, `contentIdPrefix`, `onChange`|Available for admin and client; portals can call it to share tab DOM logic.|
+|**Stat cards**|`src/components/quick-stats.ts`: `createQuickStats(items)`, `QuickStatItem`|Factory for `.quick-stats` grid; use when building tabs dynamically.|
+|**Recent activity**|`src/components/recent-activity.ts`: `createRecentActivity(items, title?, listId?)`, `RecentActivityItem`|Factory for `.recent-activity` block; use when building tabs dynamically.|
+|**Page header**|`src/components/page-header.ts`: `createPageHeader(config)` with `title`, `showToggle`, `toggleAriaLabel`|Factory for `.page-header`; use when building tabs dynamically.|
+|**Search bar**|`src/components/search-bar.ts`: `createSearchBar(config)`; `src/styles/shared/search-bar.css`: `.search-bar`, `.search-bar-icon`, `.search-bar-input`, `.search-bar-clear`|Reusable inline search: icon + input + optional clear. Shared padding so placeholder/text do not overlap the icon. Used by table filter dropdown and messages search.|
+|**Empty state**|`src/components/empty-state.ts`: `createEmptyState(message, options?)`, `renderEmptyState(container, message, options?)`|Admin: `admin-project-details.ts` uses it for messages/files empty and error states. Use for any "No X yet" or loading/error message.|
+|**Status badge**|`src/components/status-badge.ts`: `createStatusBadge(label, variant)`, `getStatusBadgeHTML(label, variant)`|Admin: `admin-clients.ts` uses `getStatusBadgeHTML` for client table status cells. Use for status pills (active, pending, healthy, etc.).|
+|**Icon button**|`src/components/icon-button.ts`: `createIconButton(config)` with `iconSvg`, `label`, `onClick`, `className`|Admin: `admin-project-details.ts` uses it for the project overview "Send invitation" button. Use for edit, close, invite, etc.|
+|**Page title**|`src/components/page-title.ts`: `createPageTitle(config)` with `title`, optional `badge`, `badgeVariant`|Factory for `.page-title` and `.page-title-with-badge`; use when building tab titles with optional status badge.|
+|**Table empty**|`src/utils/loading-utils.ts`: `showTableEmpty(tableBody, colspan, message)`|Admin: `admin-clients.ts` uses it for "No clients found" and "No clients match the current filters". Use with `showTableLoading` and `showTableError` (error-utils) for full table states.|
 
 All are exported from `src/components/index.ts` (or loading-utils/error-utils). Existing static HTML in admin/client can stay; new or refactored views can use these so the main site stays consistent.
 
@@ -196,28 +196,28 @@ All are exported from `src/components/index.ts` (or loading-utils/error-utils). 
 
 ## Summary
 
-| Area                | Should be reusable | Status |
+|Area|Should be reusable|Status|
 |---------------------|--------------------|--------|
-| Breadcrumbs         | Breadcrumbs component | **Done:** `breadcrumbs.ts`; client + admin use it. |
-| Tab switching       | TabRouter / shared module | **Done:** `tab-router.ts`; available for both portals. |
-| Stat cards          | QuickStats factory | **Done:** `quick-stats.ts`; use for dynamic tabs. |
-| Recent activity     | RecentActivity factory | **Done:** `recent-activity.ts`; use for dynamic tabs. |
-| Page header         | PageHeader factory | **Done:** `page-header.ts`; use for dynamic tabs. |
-| Search bar          | SearchBar factory + shared CSS | **Done:** `search-bar.ts` + `search-bar.css`; table filter and messages use it. |
-| Sidebar             | Sidebar component  | Inline HTML in each portal; shared CSS only. |
-| Primary header row  | PrimaryHeader (toggle + breadcrumbs) | Inline HTML in admin + client; shared CSS only. |
-| Admin tables        | TableCard / DataTable | Per-feature HTML; table-filter/table-dropdown are utils only. |
-| Empty states        | EmptyState component | **Done:** `empty-state.ts`; admin-project-details uses it for messages/files. |
-| Status badges       | StatusBadge component | **Done:** `status-badge.ts`; admin-clients uses `getStatusBadgeHTML`. |
-| Detail / meta cards | DetailCard / MetaGrid | Per-feature HTML; no shared component. |
-| Form modals         | FormModal / ModalComponent | Exists but not used; ad-hoc modal HTML in many features. |
-| Icon buttons        | IconButton component | **Done:** `icon-button.ts`; admin-project-details uses it for invite button. |
-| Table loading/empty/error | loading-utils + error-utils | **Done:** `showTableLoading`, `showTableEmpty` (loading-utils), `showTableError` (error-utils); admin-clients uses showTableEmpty. |
-| Confirm/alert       | confirm-dialog.ts   | **Done:** used widely; could later use ModalComponent. |
-| Secondary tab strips | TabRouter for detail views | Shared CSS; per-module JS; TabRouter not used here. |
-| Page title + badge  | PageTitle factory   | **Done:** `page-title.ts`; use when building tab titles with optional badge. |
-| Modals (generic)    | ModalComponent      | Exists but not used; ad-hoc modal HTML in features. |
-| Buttons             | ButtonComponent     | Exists but not used; raw buttons everywhere. |
-| Message bubbles     | MessageBubble / ThreadMessage | Built in multiple admin/client modules. |
+|Breadcrumbs|Breadcrumbs component|**Done:** `breadcrumbs.ts`; client + admin use it.|
+|Tab switching|TabRouter / shared module|**Done:** `tab-router.ts`; available for both portals.|
+|Stat cards|QuickStats factory|**Done:** `quick-stats.ts`; use for dynamic tabs.|
+|Recent activity|RecentActivity factory|**Done:** `recent-activity.ts`; use for dynamic tabs.|
+|Page header|PageHeader factory|**Done:** `page-header.ts`; use for dynamic tabs.|
+|Search bar|SearchBar factory + shared CSS|**Done:** `search-bar.ts` + `search-bar.css`; table filter and messages use it.|
+|Sidebar|Sidebar component|Inline HTML in each portal; shared CSS only.|
+|Primary header row|PrimaryHeader (toggle + breadcrumbs)|Inline HTML in admin + client; shared CSS only.|
+|Admin tables|TableCard / DataTable|Per-feature HTML; table-filter/table-dropdown are utils only.|
+|Empty states|EmptyState component|**Done:** `empty-state.ts`; admin-project-details uses it for messages/files.|
+|Status badges|StatusBadge component|**Done:** `status-badge.ts`; admin-clients uses `getStatusBadgeHTML`.|
+|Detail / meta cards|DetailCard / MetaGrid|Per-feature HTML; no shared component.|
+|Form modals|FormModal / ModalComponent|Exists but not used; ad-hoc modal HTML in many features.|
+|Icon buttons|IconButton component|**Done:** `icon-button.ts`; admin-project-details uses it for invite button.|
+|Table loading/empty/error|loading-utils + error-utils|**Done:** `showTableLoading`, `showTableEmpty` (loading-utils), `showTableError` (error-utils); admin-clients uses showTableEmpty.|
+|Confirm/alert|confirm-dialog.ts|**Done:** used widely; could later use ModalComponent.|
+|Secondary tab strips|TabRouter for detail views|Shared CSS; per-module JS; TabRouter not used here.|
+|Page title + badge|PageTitle factory|**Done:** `page-title.ts`; use when building tab titles with optional badge.|
+|Modals (generic)|ModalComponent|Exists but not used; ad-hoc modal HTML in features.|
+|Buttons|ButtonComponent|Exists but not used; raw buttons everywhere.|
+|Message bubbles|MessageBubble / ThreadMessage|Built in multiple admin/client modules.|
 
 Using the implemented components (and adopting them where tabs/headers are built in JS) keeps the main site consistent and makes future changes easier.

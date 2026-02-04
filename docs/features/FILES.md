@@ -27,24 +27,24 @@ The File Management system allows clients to upload, view, preview, and download
 
 ## Features
 
-| Feature | Status | Description |
+|Feature|Status|Description|
 |---------|--------|-------------|
-| Drag & Drop Upload | Complete | Intuitive file upload via drag and drop (desktop only) |
-| Browse Files | Complete | Traditional file picker button |
-| Multi-file Upload | Complete | Upload up to 5 files at once |
-| File List from API | Complete | Dynamic file list from backend |
-| Demo Mode | Complete | Fallback demo files when backend unavailable |
-| File Preview | Complete | Open images/PDFs in new browser tab |
-| File Download | Complete | Download files with original filename |
-| File Delete | Complete | Delete files with confirmation (client files only) |
-| File Icons | Complete | Visual file type identification |
-| File Size Display | Complete | Human-readable file sizes |
-| Upload Progress | Complete | Visual feedback during upload |
-| Success Messages | Complete | Confirmation after successful upload |
-| Access Control | Complete | Clients can only access their own files |
-| Admin File Protection | Complete | Clients cannot delete admin-uploaded files |
-| Mobile Responsive | Complete | Optimized layout for mobile devices |
-| Project Filtering | Complete | Filter by project, file type, category, date range (GET /api/uploads/client query params) |
+|Drag & Drop Upload|Complete|Intuitive file upload via drag and drop (desktop only)|
+|Browse Files|Complete|Traditional file picker button|
+|Multi-file Upload|Complete|Upload up to 5 files at once|
+|File List from API|Complete|Dynamic file list from backend|
+|Demo Mode|Complete|Fallback demo files when backend unavailable|
+|File Preview|Complete|Open images/PDFs in new browser tab|
+|File Download|Complete|Download files with original filename|
+|File Delete|Complete|Delete files with confirmation (client files only)|
+|File Icons|Complete|Visual file type identification|
+|File Size Display|Complete|Human-readable file sizes|
+|Upload Progress|Complete|Visual feedback during upload|
+|Success Messages|Complete|Confirmation after successful upload|
+|Access Control|Complete|Clients can only access their own files|
+|Admin File Protection|Complete|Clients cannot delete admin-uploaded files|
+|Mobile Responsive|Complete|Optimized layout for mobile devices|
+|Project Filtering|Complete|Filter by project, file type, category, date range (GET /api/uploads/client query params)|
 
 ---
 
@@ -52,13 +52,13 @@ The File Management system allows clients to upload, view, preview, and download
 
 ### Technology Stack
 
-| Component | Technology |
+|Component|Technology|
 |-----------|------------|
-| Backend | Express.js with TypeScript |
-| File Storage | Multer middleware, local filesystem |
-| Authentication | HttpOnly cookies (session-based) |
-| Frontend | Vanilla TypeScript |
-| API Communication | Fetch API with credentials: 'include' |
+|Backend|Express.js with TypeScript|
+|File Storage|Multer middleware, local filesystem|
+|Authentication|HttpOnly cookies (session-based)|
+|Frontend|Vanilla TypeScript|
+|API Communication|Fetch API with credentials: 'include'|
 
 ### Data Flow
 
@@ -94,6 +94,7 @@ Get all files for the authenticated client (across all their projects).
 **Authentication:** Required (HttpOnly cookie session)
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -122,9 +123,11 @@ Get all files for a specific project.
 
 **Authentication:** Required
 **Parameters:**
+
 - `projectId` (integer) - Project ID
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -134,6 +137,7 @@ Get all files for a specific project.
 ```
 
 **Error (403 Forbidden):**
+
 ```json
 {
   "error": "Access denied to this project"
@@ -148,9 +152,11 @@ Download or preview a specific file.
 
 **Authentication:** Required
 **Parameters:**
+
 - `fileId` (integer) - File ID
 
 **Query Parameters:**
+
 - `download` (boolean, optional) - If `true`, forces download; otherwise inline preview
 
 **Response:** File stream with appropriate Content-Type and Content-Disposition headers
@@ -165,9 +171,11 @@ Delete a specific file.
 
 **Authentication:** Required
 **Parameters:**
+
 - `fileId` (integer) - File ID
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -176,6 +184,7 @@ Delete a specific file.
 ```
 
 **Error (403 Forbidden):**
+
 ```json
 {
   "error": "Access denied - you do not own this file"
@@ -192,6 +201,7 @@ Upload a single file.
 **Content-Type:** `multipart/form-data`
 
 **Form Data:**
+
 - `file` (file) - The file to upload
 - `category` (string, optional) - File category
 
@@ -205,9 +215,11 @@ Upload multiple files (max 5).
 **Content-Type:** `multipart/form-data`
 
 **Form Data:**
+
 - `files` (file[]) - Array of files to upload
 
 **Response (201 Created):**
+
 ```json
 {
   "success": true,
@@ -811,12 +823,12 @@ const deleteIcon = canDelete
 
 ## File Locations
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `server/routes/uploads.ts` | Backend API endpoints |
-| `src/features/client/modules/portal-files.ts` | Frontend file handling (~501 lines) |
-| `src/styles/client-portal/files.css` | File section styling |
-| `client/portal.html` | Files tab HTML (tab-files section) |
+|`server/routes/uploads.ts`|Backend API endpoints|
+|`src/features/client/modules/portal-files.ts`|Frontend file handling (~501 lines)|
+|`src/styles/client-portal/files.css`|File section styling|
+|`client/portal.html`|Files tab HTML (tab-files section)|
 
 ---
 
@@ -957,38 +969,38 @@ CREATE TABLE IF NOT EXISTS file_comments (
 
 ### New API Endpoints
 
-| Method | Endpoint | Description |
+|Method|Endpoint|Description|
 |--------|----------|-------------|
-| GET | `/api/projects/files/:fileId/versions` | Get file versions |
-| POST | `/api/projects/files/:fileId/versions` | Upload new version |
-| POST | `/api/projects/files/:fileId/versions/:versionId/restore` | Restore version |
-| GET | `/api/projects/:id/folders` | Get project folders |
-| POST | `/api/projects/:id/folders` | Create folder |
-| PUT | `/api/projects/folders/:folderId` | Update folder |
-| DELETE | `/api/projects/folders/:folderId` | Delete folder |
-| POST | `/api/projects/files/:fileId/move` | Move file to folder |
-| POST | `/api/projects/folders/:folderId/move` | Move folder |
-| GET | `/api/projects/files/:fileId/tags` | Get file tags |
-| POST | `/api/projects/files/:fileId/tags/:tagId` | Add tag |
-| DELETE | `/api/projects/files/:fileId/tags/:tagId` | Remove tag |
-| POST | `/api/projects/files/:fileId/access` | Log file access |
-| GET | `/api/projects/files/:fileId/access-log` | Get access log |
-| GET | `/api/projects/files/:fileId/access-stats` | Get access stats |
-| GET | `/api/projects/files/:fileId/comments` | Get comments |
-| POST | `/api/projects/files/:fileId/comments` | Add comment |
-| DELETE | `/api/projects/files/comments/:commentId` | Delete comment |
-| POST | `/api/projects/files/:fileId/archive` | Archive file |
-| POST | `/api/projects/files/:fileId/restore` | Restore file |
-| GET | `/api/projects/:id/files/archived` | Get archived files |
-| PUT | `/api/projects/files/:fileId/expiration` | Set expiration |
-| GET | `/api/projects/files/expiring-soon` | Get expiring files |
-| POST | `/api/projects/files/process-expired` | Process expired |
-| POST | `/api/projects/files/:fileId/lock` | Lock file |
-| POST | `/api/projects/files/:fileId/unlock` | Unlock file |
-| PUT | `/api/projects/files/:fileId/category` | Set category |
-| GET | `/api/projects/:id/files/by-category/:category` | Get by category |
-| GET | `/api/projects/:id/files/stats` | Get file stats |
-| GET | `/api/projects/:id/files/search` | Search files |
+|GET|`/api/projects/files/:fileId/versions`|Get file versions|
+|POST|`/api/projects/files/:fileId/versions`|Upload new version|
+|POST|`/api/projects/files/:fileId/versions/:versionId/restore`|Restore version|
+|GET|`/api/projects/:id/folders`|Get project folders|
+|POST|`/api/projects/:id/folders`|Create folder|
+|PUT|`/api/projects/folders/:folderId`|Update folder|
+|DELETE|`/api/projects/folders/:folderId`|Delete folder|
+|POST|`/api/projects/files/:fileId/move`|Move file to folder|
+|POST|`/api/projects/folders/:folderId/move`|Move folder|
+|GET|`/api/projects/files/:fileId/tags`|Get file tags|
+|POST|`/api/projects/files/:fileId/tags/:tagId`|Add tag|
+|DELETE|`/api/projects/files/:fileId/tags/:tagId`|Remove tag|
+|POST|`/api/projects/files/:fileId/access`|Log file access|
+|GET|`/api/projects/files/:fileId/access-log`|Get access log|
+|GET|`/api/projects/files/:fileId/access-stats`|Get access stats|
+|GET|`/api/projects/files/:fileId/comments`|Get comments|
+|POST|`/api/projects/files/:fileId/comments`|Add comment|
+|DELETE|`/api/projects/files/comments/:commentId`|Delete comment|
+|POST|`/api/projects/files/:fileId/archive`|Archive file|
+|POST|`/api/projects/files/:fileId/restore`|Restore file|
+|GET|`/api/projects/:id/files/archived`|Get archived files|
+|PUT|`/api/projects/files/:fileId/expiration`|Set expiration|
+|GET|`/api/projects/files/expiring-soon`|Get expiring files|
+|POST|`/api/projects/files/process-expired`|Process expired|
+|POST|`/api/projects/files/:fileId/lock`|Lock file|
+|POST|`/api/projects/files/:fileId/unlock`|Unlock file|
+|PUT|`/api/projects/files/:fileId/category`|Set category|
+|GET|`/api/projects/:id/files/by-category/:category`|Get by category|
+|GET|`/api/projects/:id/files/stats`|Get file stats|
+|GET|`/api/projects/:id/files/search`|Search files|
 
 ### Files Created
 

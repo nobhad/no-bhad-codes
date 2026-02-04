@@ -82,12 +82,15 @@ async function loadDashboardData(): Promise<DashboardData> {
     apiFetch('/api/analytics/quick/revenue?days=30').catch(() => null)
   ]);
 
-  // Parse responses
+  // Parse responses - handle nested response objects
   const invoices = invoicesRes?.ok ? await invoicesRes.json() : [];
-  const projects = projectsRes?.ok ? await projectsRes.json() : [];
-  const clients = clientsRes?.ok ? await clientsRes.json() : [];
-  const leads = leadsRes?.ok ? await leadsRes.json() : [];
-  const messagesData = messagesRes?.ok ? await messagesRes.json() : { count: 0 };
+  const projectsData = projectsRes?.ok ? await projectsRes.json() : { projects: [] };
+  const projects = projectsData.projects || projectsData || [];
+  const clientsData = clientsRes?.ok ? await clientsRes.json() : { clients: [] };
+  const clients = clientsData.clients || clientsData || [];
+  const leadsData = leadsRes?.ok ? await leadsRes.json() : { leads: [] };
+  const leads = leadsData.leads || [];
+  const messagesData = messagesRes?.ok ? await messagesRes.json() : { unread_count: 0 };
   const metricsData = metricsRes?.ok ? await metricsRes.json() : { summary: {}, revenueMTD: 0 };
 
   // Calculate overdue invoices (due_date < today and status not paid)
@@ -120,12 +123,12 @@ async function loadDashboardData(): Promise<DashboardData> {
     : 0;
 
   // Unread messages count
-  const unreadMessages = messagesData.count || 0;
+  const unreadMessages = messagesData.unread_count || 0;
 
-  // Active projects count
+  // Active projects count (status uses hyphen: 'in-progress')
   const activeProjects = Array.isArray(projects)
     ? projects.filter((p: { status?: string }) =>
-      p.status === 'active' || p.status === 'in_progress'
+      p.status === 'active' || p.status === 'in-progress'
     ).length
     : 0;
 
@@ -175,44 +178,37 @@ interface ActivityItem {
 
 /**
  * Load recent activity from the API
+ * Shows recent leads as the primary activity feed for the dashboard
  */
 async function loadRecentActivity(): Promise<void> {
   const listEl = document.getElementById('recent-activity-list');
   if (!listEl) return;
 
   try {
-    const response = await apiFetch('/api/clients/activities/recent?limit=10');
+    // Fetch recent leads - the primary activity for the dashboard
+    const response = await apiFetch('/api/admin/leads');
 
     if (!response.ok) {
       throw new Error('Failed to fetch recent activity');
     }
 
     const data = await response.json();
-    const activities: ActivityItem[] = data.activities || [];
+    const leads = data.leads || [];
 
-    if (activities.length === 0) {
+    // Show the 5 most recent leads
+    const recentLeads = leads.slice(0, 5);
+
+    if (recentLeads.length === 0) {
       listEl.innerHTML = '<li class="activity-item empty">No recent activity</li>';
       return;
     }
 
-    listEl.innerHTML = activities.map((activity) => {
-      const safeTitle = SanitizationUtils.escapeHtml(activity.title || 'Activity');
-      const safeClient = activity.client_name
-        ? SanitizationUtils.escapeHtml(activity.client_name)
-        : null;
-      const formattedDate = formatDateTime(activity.created_at);
-      const icon = getActivityIcon(activity.activity_type);
+    listEl.innerHTML = recentLeads.map((lead: { created_at?: string; contact_name?: string }) => {
+      const date = lead.created_at ? formatDateTime(lead.created_at).split(',')[0] : '';
+      const decoded = SanitizationUtils.decodeHtmlEntities(lead.contact_name || 'Unknown');
+      const safeName = SanitizationUtils.escapeHtml(decoded);
 
-      return `
-        <li class="activity-item">
-          <span class="activity-icon">${icon}</span>
-          <div class="activity-content">
-            <span class="activity-title">${safeTitle}</span>
-            ${safeClient ? `<span class="activity-client">${safeClient}</span>` : ''}
-          </div>
-          <span class="activity-time">${formattedDate}</span>
-        </li>
-      `;
+      return `<li class="activity-item">${date} - New Lead: ${safeName}</li>`;
     }).join('');
 
   } catch (error) {

@@ -133,32 +133,45 @@ npm run migrate:create   # Create new migration
 ### Development Workflow
 
 1. **Start Development Servers**
-   ```bash
+
+]\
+
    npm run dev:full
-   ```
-   - Frontend: http://localhost:4000
+
+   ```<http://localhost:4000>
+   - Frontend: htt<http://localhost:4001>
    - Backend API: http://localhost:4001
 
 2. **Make Changes**
+
    - Frontend changes trigger hot module reload (Vite HMR)
    - Backend: restart dev server manually after changes (`npm run dev:server`); no nodemon by default
 
+
 3. **Run Tests**
+
    ```bash
+
    npm run test           # Unit tests (Vitest)
    npx playwright test    # E2E tests (Playwright)
-   ```
+
+```text
+
 
 4. **Check Code Quality**
+
    ```bash
+
    npm run lint           # ESLint check
    npm run typecheck      # TypeScript check
    npm run format:check   # Prettier check
-   ```
+
+```text
 
 ### File Structure Overview
 
-```
+```text
+
 no-bhad-codes/
 ├── src/                    # Frontend TypeScript source
 │   ├── core/              # Application framework
@@ -175,7 +188,8 @@ no-bhad-codes/
 ├── tests/                # Test files
 ├── docs/                 # Documentation
 └── client/               # Client portal HTML pages
-```
+
+```text
 
 ## Architecture Deep Dive
 
@@ -186,6 +200,7 @@ The frontend uses a sophisticated module-based architecture with dependency inje
 #### Dependency Injection Container
 
 ```typescript
+
 // Register services
 container.register('dataService', () => new DataService(), { singleton: true });
 container.register('apiClient', () => new ApiClient('/api'), { singleton: true });
@@ -199,13 +214,15 @@ container.register('navigationModule', (dataService, apiClient) =>
 // Resolve and initialize
 const navModule = await container.resolve('navigationModule');
 await navModule.init();
-```
+
+```text
 
 #### Module System
 
 All modules extend `BaseModule` for consistent lifecycle management:
 
 ```typescript
+
 export class MyCustomModule extends BaseModule {
   private apiClient: ApiClient;
   
@@ -242,13 +259,15 @@ export class MyCustomModule extends BaseModule {
     }
   }
 }
-```
+
+```text
 
 #### Service Layer
 
 Services provide business logic and API communication:
 
 ```typescript
+
 export class DataService {
   private cache: Map<string, CachedData> = new Map();
   private apiClient: ApiClient;
@@ -283,7 +302,8 @@ export class DataService {
     return Date.now() - cached.timestamp > cached.ttl;
   }
 }
-```
+
+```text
 
 ### Backend Architecture
 
@@ -292,6 +312,7 @@ The backend uses Express.js with a layered architecture:
 #### Route Structure
 
 ```typescript
+
 // routes/projects.ts
 import express from 'express';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
@@ -321,11 +342,13 @@ router.post('/',
 );
 
 export { router as projectsRouter };
-```
+
+```text
 
 #### Middleware Stack
 
 ```typescript
+
 // Authentication middleware
 export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -382,14 +405,18 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
       : err.message
   });
 };
-```
+
+```text
 
 ## Frontend Development
 
 ### Creating New Modules
 
+
 1. **Create Module Class**
+
    ```typescript
+
    // src/modules/my-new-module.ts
    import { BaseModule } from './base.js';
    
@@ -406,19 +433,26 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
        this.cleanupEventListeners();
      }
    }
-   ```
+
+```text
+
 
 2. **Register with Container**
+
    ```typescript
+
    // src/core/app.ts
    container.register('myNewModule', () => {
      const element = document.querySelector('.my-new-module');
      return element ? new MyNewModule(element) : null;
    });
-   ```
+
+```text
 
 3. **Initialize in App**
+
    ```typescript
+
    // src/core/app.ts
    async initializeModules(): Promise<void> {
      const modules = [
@@ -434,12 +468,15 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
        }
      }
    }
-   ```
+
+```text
 
 ### Adding New Services
 
 1. **Create Service Class**
+
    ```typescript
+
    // src/services/my-service.ts
    export class MyService {
      private apiClient: ApiClient;
@@ -452,22 +489,27 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
        return await this.apiClient.get('/my-endpoint');
      }
    }
-   ```
+
+```text
 
 2. **Register Service**
+
    ```typescript
+
    // src/core/app.ts
    container.register('myService', (apiClient) => 
      new MyService(apiClient),
      { dependencies: ['apiClient'] }
    );
-   ```
+
+```text
 
 ### State Management
 
 The application uses a centralized state manager:
 
 ```typescript
+
 import { createLogger } from '../utils/logger';
 
 const logger = createLogger('MyModule');
@@ -486,13 +528,15 @@ const currentUser = StateManager.getState('user');
 
 // Cleanup subscription
 unsubscribe();
-```
+
+```text
 
 ### CSS Architecture
 
 The project uses a modular CSS architecture:
 
 ```scss
+
 // src/styles/main.css - Entry point
 @import './base/reset.css';
 @import './base/typography.css';
@@ -508,7 +552,8 @@ The project uses a modular CSS architecture:
   border-radius: var(--border-radius-md);
   padding: var(--space-lg);
 }
-```
+
+```text
 
 ## Communication & Messaging System
 
@@ -525,7 +570,9 @@ The application includes a comprehensive messaging system for client-developer c
    - `notification_preferences`: Client notification settings
 
 2. **API Routes** (`server/routes/messages.ts`)
+
    ```typescript
+
    // Thread management
    router.get('/threads', authenticateToken, loadThreads);
    router.post('/threads', authenticateToken, createThread);
@@ -540,10 +587,13 @@ The application includes a comprehensive messaging system for client-developer c
    // Notification preferences
    router.get('/preferences', authenticateToken, getPreferences);
    router.put('/preferences', authenticateToken, updatePreferences);
-   ```
+
+```text
 
 3. **Email Integration**
+
    ```typescript
+
    // server/services/email-service.ts
    await emailService.sendMessageNotification(clientEmail, {
      recipientName: 'John Doe',
@@ -554,12 +604,15 @@ The application includes a comprehensive messaging system for client-developer c
      portalUrl: 'https://portal.nobhad.codes',
      hasAttachments: false
    });
-   ```
+
+```text
 
 #### Frontend Components
 
 1. **Messaging Module** (`src/modules/messaging.ts`)
+
    ```typescript
+
    export class MessagingModule extends BaseModule {
      // Thread management
      async loadMessageThreads(): Promise<void> {
@@ -580,7 +633,8 @@ The application includes a comprehensive messaging system for client-developer c
        });
      }
    }
-   ```
+
+```text
 
 2. **CSS Styling** (styles included in `src/styles/main.css`)
    - Responsive design with mobile support
@@ -592,6 +646,7 @@ The application includes a comprehensive messaging system for client-developer c
 ### Integration Example: Adding Messaging to New Features
 
 ```typescript
+
 // In your feature module
 import { MessagingModule } from '@/modules/messaging.js';
 
@@ -629,14 +684,17 @@ class ProjectModule extends BaseModule {
     await this.messaging.selectThread(thread.id);
   }
 }
-```
+
+```text
 
 ## Backend Development
 
 ### Creating New Routes
 
 1. **Define Route Handler**
+
    ```typescript
+
    // server/routes/my-routes.ts
    import express from 'express';
    import { authenticateToken } from '../middleware/auth.js';
@@ -653,21 +711,26 @@ class ProjectModule extends BaseModule {
    );
    
    export { router as myRouter };
-   ```
+
+```text
 
 2. **Register Routes**
+
    ```typescript
+
    // server/app.ts
    import { myRouter } from './routes/my-routes.js';
    
    app.use('/api/my-endpoint', myRouter);
-   ```
+
+```text
 
 ### Database Operations
 
 Use the database connection with proper error handling:
 
 ```typescript
+
 // server/services/my-service.ts
 import { getDatabase } from '../database/init.js';
 
@@ -706,13 +769,15 @@ export class MyService {
     }
   }
 }
-```
+
+```text
 
 ### Email Service Integration
 
 Use the email service for notifications:
 
 ```typescript
+
 import { emailService } from '../services/email-service.js';
 
 // Send template-based email
@@ -727,19 +792,22 @@ await emailService.sendProjectUpdateEmail(client.email, {
 
 // Send custom email
 await emailService.sendEmail({
-  to: 'client@example.com',
+  to: '<<client@example.com>>',
   subject: 'Custom Subject',
   html: '<h1>Custom HTML Content</h1>',
   priority: 'high'
 });
-```
+
+```text
 
 ## Database Management
 
 ### Creating Migrations
 
 1. **Create Migration File**
+
    ```sql
+
    -- server/database/migrations/003_add_new_table.sql
    -- UP
    CREATE TABLE IF NOT EXISTS my_new_table (
@@ -756,12 +824,16 @@ await emailService.sendEmail({
    -- DOWN
    DROP INDEX IF EXISTS idx_my_new_table_user_id;
    DROP TABLE IF EXISTS my_new_table;
-   ```
+
+```text
 
 2. **Run Migration**
+
    ```bash
+
    npm run migrate
-   ```
+
+```text
 
 ### Database Best Practices
 
@@ -773,18 +845,21 @@ await emailService.sendEmail({
 - Use CHECK constraints for data validation
 
 ```typescript
+
 // Good: Parameterized query
 const users = await db.all('SELECT * FROM users WHERE status = ?', ['active']);
 
 // Bad: String concatenation (vulnerable to SQL injection)
 const users = await db.all(`SELECT * FROM users WHERE status = '${status}'`);
-```
+
+```text
 
 ### Type-Safe Database Row Access
 
 **New in January 2026:** All database row accesses use type-safe helper utilities from `server/database/row-helpers.ts`:
 
 ```typescript
+
 import { getString, getNumber, getBoolean, getDate } from '../database/row-helpers.js';
 
 // Get a row from database
@@ -801,9 +876,11 @@ const createdAt = getDate(client, 'created_at');
 // - Null safety: Handles undefined/missing values gracefully
 // - Consistent: Same pattern across all route files
 // - Maintainable: Centralized type extraction logic
-```
 
-**Available Helpers:**
+```text
+
+
+#### Available Helpers:
 - `getString(row, 'key')` - Extract string values (returns empty string if not found)
 - `getStringOrNull(row, 'key')` - Extract string or null
 - `getNumber(row, 'key')` - Extract number values (returns 0 if not found)
@@ -820,6 +897,7 @@ const createdAt = getDate(client, 'created_at');
 Write unit tests for all services and utilities:
 
 ```typescript
+
 // src/services/data-service.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DataService } from './data-service.js';
@@ -864,7 +942,8 @@ describe('DataService', () => {
     expect(projects).toEqual(mockProjects);
   });
 });
-```
+
+```text
 
 ### End-to-End Testing
 
@@ -873,20 +952,25 @@ E2E tests use Playwright. The webServer runs `npm run dev:full` (frontend + back
 **Admin flow tests** (`tests/e2e/admin-flow.spec.ts`): Login and view projects. Requires `E2E_ADMIN_PASSWORD` to match `ADMIN_PASSWORD` in `.env`:
 
 ```bash
+
 E2E_ADMIN_PASSWORD=your_admin_password npx playwright test admin-flow
-```
+
+```text
 
 **Portal flow tests** (`tests/e2e/portal-flow.spec.ts`): Login via API and view dashboard. Uses demo user by default (`demo@example.com` / `demo123`). Override with `E2E_CLIENT_EMAIL` and `E2E_CLIENT_PASSWORD`:
 
 ```bash
+
 npx playwright test portal-flow
-```
+
+```text
 
 If `E2E_ADMIN_PASSWORD` is not set, admin flow tests are skipped. Install browsers first: `npx playwright install`.
 
 Write E2E tests for critical user flows:
 
 ```typescript
+
 // tests/e2e/project-management.spec.ts
 import { test, expect } from '@playwright/test';
 
@@ -894,7 +978,7 @@ test.describe('Project Management', () => {
   test('admin can create and update projects', async ({ page }) => {
     // Login as admin
     await page.goto('/admin');
-    await page.fill('[data-testid="email"]', 'admin@example.com');
+    await page.fill('[data-testid="email"]', '<<admin@example.com>>');
     await page.fill('[data-testid="password"]', 'admin123');
     await page.click('[data-testid="login-button"]');
     
@@ -912,7 +996,8 @@ test.describe('Project Management', () => {
     await expect(page.locator('[data-testid="project-list"]')).toContainText('Test Project');
   });
 });
-```
+
+```text
 
 ### Testing Best Practices
 
@@ -928,15 +1013,16 @@ test.describe('Project Management', () => {
 ### Quick Reference - Production URLs
 
 | Service | URL |
-|---------|-----|
-| **Backend (Railway)** | https://no-bhad-codes-production.up.railway.app |
-| **Frontend (Vercel)** | https://nobhad.codes (or Vercel preview URL) |
-| **API Health Check** | https://no-bhad-codes-production.up.railway.app/health |
+|---------|-----|<https://no-bhad-codes-production.up.railway.app>
+| **Backend (Railway)** | <https://nobhad.codes>s-production.up.railway.app |
+| **Frontend (Vercel)** |<https://no-bhad-codes-production.up.railway.app/health>
+| **API Health Check** | ht<https://no-bhad-codes-production.up.railway.app/api-docs>
 | **API Docs (Swagger)** | https://no-bhad-codes-production.up.railway.app/api-docs |
 
 ### Environment Variables Reference
 
-**Railway (Backend):**
+
+#### Railway (Backend):
 | Variable | Description |
 |----------|-------------|
 | `NODE_ENV` | `production` |
@@ -952,7 +1038,8 @@ test.describe('Project Management', () => {
 | `SMTP_PASS` | Gmail App Password (16 chars) |
 | `SENTRY_DSN` | Sentry error tracking DSN |
 
-**Vercel (Frontend):**
+
+#### Vercel (Frontend):
 | Variable | Description |
 |----------|-------------|
 | `VITE_API_URL` | `https://no-bhad-codes-production.up.railway.app` |
@@ -962,39 +1049,58 @@ test.describe('Project Management', () => {
 ### Production Build
 
 1. **Environment Setup**
+
    ```bash
+
    # Set production environment variables
+
    export NODE_ENV=production
    export JWT_SECRET="your-production-secret"
    export DATABASE_URL="file:./data/production.db"
-   ```
+
+```text
 
 2. **Build Application**
+
    ```bash
+
    # Install production dependencies
+
    npm ci --omit=dev
    
    # Build frontend and backend
+
    npm run build
    
    # Run database migrations
+
    npm run migrate
-   ```
+
+```text
 
 3. **Start Production Server**
+
    ```bash
+
    npm run start
-   ```
+
+```text
 
 ### Docker Deployment
 
 1. **Build Docker Image**
+
    ```bash
+
    docker build -t no-bhad-codes .
-   ```
+
+```text
+
 
 2. **Run Container**
+
    ```bash
+
    docker run -d \
      --name no-bhad-codes-app \
      -p 3001:3001 \
@@ -1002,17 +1108,19 @@ test.describe('Project Management', () => {
      -e JWT_SECRET="your-secret" \
      -v $(pwd)/data:/app/data \
      no-bhad-codes
-   ```
+
+```text
 
 ### Nginx Configuration
 
 ```nginx
+
 server {
     listen 80;
     server_name nobhad.codes;
     
     # Redirect HTTP to HTTPS
-    return 301 https://$server_name$request_uri;
+    return 301 <https://$server_name$request_uri;>
 }
 
 server {
@@ -1030,21 +1138,24 @@ server {
     
     # Proxy API requests
     location /api/ {
-        proxy_pass http://localhost:4001;
+        proxy_pass <http://localhost:4001;>
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-```
+
+```text
 
 ## Code Style Guide
 
 ### TypeScript Guidelines
 
 1. **Use Strict Mode**
+
    ```typescript
+
    // tsconfig.json
    {
      "compilerOptions": {
@@ -1054,10 +1165,13 @@ server {
        "noUnusedLocals": true
      }
    }
-   ```
+
+```text
 
 2. **Type Definitions**
+
    ```typescript
+
    // Define interfaces for data structures
    interface Project {
      id: number;
@@ -1079,10 +1193,13 @@ server {
      status: number;
      message?: string;
    }
-   ```
+
+```text
 
 3. **Function Signatures**
+
    ```typescript
+
    // Always specify return types
    async function fetchProjects(): Promise<Project[]> {
      // Implementation
@@ -1093,11 +1210,13 @@ server {
      readonly apiUrl: string;
      readonly timeout: number;
    }
-   ```
+
+```text
 
 ### ESLint Configuration
 
 ```javascript
+
 // .eslintrc.js
 module.exports = {
   extends: [
@@ -1112,7 +1231,8 @@ module.exports = {
     'no-console': 'warn'
   }
 };
-```
+
+```text
 
 ### Naming Conventions
 
@@ -1125,6 +1245,7 @@ module.exports = {
 ### Error Handling
 
 ```typescript
+
 // Use custom error classes
 export class ValidationError extends Error {
   constructor(message: string, public field: string) {
@@ -1159,7 +1280,8 @@ export class DataService {
     console.error(`[DataService] ${message}:`, error);
   }
 }
-```
+
+```text
 
 ## Troubleshooting
 
@@ -1168,18 +1290,24 @@ export class DataService {
 #### TypeScript Compilation Errors
 
 ```bash
+
 # Clear TypeScript cache
+
 rm -rf node_modules/.cache
 npm run typecheck
 
 # Check for type conflicts
+
 npx tsc --listFiles | grep duplicate
-```
+
+```text
 
 #### Module Resolution Issues
 
 ```bash
+
 # Check path mapping in tsconfig.json
+
 {
   "compilerOptions": {
     "baseUrl": ".",
@@ -1191,41 +1319,53 @@ npx tsc --listFiles | grep duplicate
 }
 
 # Verify import paths
+
 import { MyService } from '@/services/my-service'; // Correct
 import { MyService } from '../../../services/my-service'; // Avoid
-```
+
+```text
 
 #### Database Connection Issues
 
 ```bash
+
 # Check database file permissions
+
 ls -la data/
 chmod 644 data/development.db
 
 # Reset database
+
 npm run db:reset
 npm run migrate
-```
+
+```text
 
 #### Port Conflicts
 
 ```bash
+
 # Find processes using ports
+
 lsof -i :3000
 lsof -i :3001
 
 # Kill processes
+
 kill -9 <PID>
 
 # Or use different ports
+
 PORT=3002 npm run dev:server
-```
+
+```text
 
 ### Performance Issues
 
 #### Frontend Performance
 
 ```typescript
+
 // Use lazy loading for heavy modules
 const HeavyModule = lazy(() => import('./heavy-module'));
 
@@ -1242,11 +1382,13 @@ const observer = new IntersectionObserver((entries) => {
     }
   });
 });
-```
+
+```text
 
 #### Backend Performance
 
 ```typescript
+
 // Use connection pooling
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -1267,7 +1409,8 @@ function getCachedData(key: string) {
 // Use indexes for frequent queries
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_projects_status_client ON projects(status, client_id);
-```
+
+```text
 
 ### Debugging Tips
 
@@ -1277,9 +1420,10 @@ CREATE INDEX idx_projects_status_client ON projects(status, client_id);
    - Application tab for localStorage/sessionStorage
 
 2. **Debug Logging**
-   The codebase uses a centralized debug logger that automatically respects debug mode:
-   
+The codebase uses a centralized debug logger that automatically respects debug mode:
+
    ```typescript
+
    import { createLogger } from '../utils/logger';
    
    // Create a logger with a prefix
@@ -1293,36 +1437,53 @@ CREATE INDEX idx_projects_status_client ON projects(status, client_id);
    // Warnings and errors (always shown)
    logger.warn('Warning message');
    logger.error('Error message');
-   ```
-   
+
+```text
+
    All debug logs are automatically excluded in production builds. Use `logger.log()` instead of `console.log()` for debug messages.
+
 
 3. **Server Debugging**
    ```bash
+
    # Enable debug logging
+
    DEBUG=* npm run dev:server
    
    # Use Node.js debugger
+
    node --inspect server/app.js
-   ```
+
+```text
 
 3. **Database Debugging**
+
    ```bash
+
    # Open SQLite CLI
+
    sqlite3 data/development.db
 
    # Explain query plans
+
    EXPLAIN QUERY PLAN SELECT * FROM projects WHERE client_id = 1;
 
    # DB Browser for SQLite (GUI)
+
    # Install: brew install db-browser-for-sqlite
+
    open -a "DB Browser for SQLite"
+
    # Or open with database directly:
+
    open -a "DB Browser for SQLite" ./data/client_portal.db
-   ```
+
+```text
 
 4. **VS Code Debugging**
+
    ```json
+
    // .vscode/launch.json
    {
      "type": "node",
@@ -1333,23 +1494,28 @@ CREATE INDEX idx_projects_status_client ON projects(status, client_id);
        "NODE_ENV": "development"
      }
    }
-   ```
+
+```text
 
 ### Getting Help
 
 - **Documentation**: Check `docs/` directory
 - **Code Examples**: Look at existing implementations
 - **Issues**: Search GitHub issues for similar problems
-- **Community**: Join discussions in GitHub Discussions
+- **Community**: Join<nobhaduri@gmail.com>Hub Discussions
 - **Support**: Email nobhaduri@gmail.com
 
 ## Contributing Workflow
 
 1. **Fork Repository**
+
 2. **Create Feature Branch**
+
    ```bash
+
    git checkout -b feature/my-feature
-   ```
+
+```text
 
 3. **Make Changes**
    - Follow code style guidelines
@@ -1357,21 +1523,30 @@ CREATE INDEX idx_projects_status_client ON projects(status, client_id);
    - Update documentation
 
 4. **Test Changes**
+
    ```bash
+
    npm run test
    npm run test:e2e
    npm run lint
    npm run typecheck
-   ```
+
+```text
 
 5. **Commit Changes**
+
    ```bash
+
    git commit -m "feat: add new feature"
-   ```
+
+```text
 
 6. **Push and Create PR**
+
    ```bash
+
    git push origin feature/my-feature
-   ```
+
+```text
 
 Remember to keep the code clean, well-documented, and thoroughly tested. Happy coding! 🚀

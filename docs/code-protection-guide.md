@@ -9,6 +9,7 @@ The protection system is intentionally disabled to allow normal development. Whe
 ## 📋 Features
 
 ### Runtime Protection
+
 - **DevTools Blocking**: Detects and blocks developer tools (F12, Ctrl+Shift+I, etc.)
 - **Source Obfuscation**: Minifies and obfuscates HTML source code
 - **Right-Click Blocking**: Disables context menu and text selection
@@ -19,6 +20,7 @@ The protection system is intentionally disabled to allow normal development. Whe
 - **Code Integrity**: Checks for tampering with critical functions
 
 ### Build-Time Protection
+
 - **JavaScript Obfuscation**: Renames functions and variables
 - **CSS Obfuscation**: Obfuscates class names
 - **String Encryption**: Encrypts sensitive strings in code
@@ -96,21 +98,25 @@ export default defineConfig({
 ## 🎛️ Protection Levels
 
 ### Basic
+
 - Light protection with minimal performance impact
 - Suitable for public demos or educational content
 - Blocks basic inspection but allows debugging
 
 ### Standard (Recommended)
+
 - Balanced protection with moderate security
 - Good for most production applications
 - Blocks common inspection methods
 
 ### Advanced
+
 - Strong protection that may impact user experience
 - Suitable for sensitive applications
 - Aggressive blocking of development tools
 
 ### Maximum
+
 - Extreme protection with the most security features
 - May significantly impact performance and usability
 - Only for highly sensitive applications
@@ -162,21 +168,25 @@ NBW_DEBUG.updateProtectionConfig({
 ## ⚠️ Important Considerations
 
 ### Accessibility
+
 - Right-click and keyboard blocking may affect accessibility
 - Consider disabling these features for public-facing sites
 - Test with screen readers and accessibility tools
 
 ### User Experience
+
 - Maximum protection level can be intrusive
 - Consider using "demo" preset for portfolio sites
 - Test thoroughly with your target audience
 
 ### Development
+
 - Always disable protection during development
 - Use environment-based configuration
 - Keep a way to disable protection for debugging
 
 ### Legal and Ethical
+
 - Code protection is not foolproof
 - Determined attackers can still reverse engineer
 - Consider this as deterrent, not absolute security

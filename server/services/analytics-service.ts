@@ -6,6 +6,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { logger } from '../services/logger.js';
 
 // ============================================
 // Types
@@ -1080,40 +1081,44 @@ class AnalyticsService {
 
   private async generateRevenueReport(filters: ReportFilters): Promise<{ data: any[]; summary: Record<string, any> }> {
     const db = getDatabase();
-
-    let query = `
-      SELECT
-        strftime('%Y-%m', paid_at) as month,
-        COUNT(*) as invoice_count,
-        SUM(total_amount) as total_revenue,
-        AVG(total_amount) as avg_invoice
-      FROM invoices
-      WHERE status = 'paid'
-    `;
+    try {
+      let query = `
+        SELECT
+          strftime('%Y-%m', paid_date) as month,
+          COUNT(*) as invoice_count,
+          SUM(amount_total) as total_revenue,
+          AVG(amount_total) as avg_invoice
+        FROM invoices
+        WHERE status = 'paid'
+      `;
     const params: string[] = [];
 
     if (filters.dateRange?.start) {
-      query += ' AND paid_at >= ?';
+      query += ' AND paid_date >= ?';
       params.push(filters.dateRange.start);
     }
     if (filters.dateRange?.end) {
-      query += ' AND paid_at <= ?';
+      query += ' AND paid_date <= ?';
       params.push(filters.dateRange.end);
     }
 
     query += ' GROUP BY month ORDER BY month';
 
-    const data = await db.all(query, params);
+      const data = await db.all(query, params);
 
-    const summary = await db.get(`
-      SELECT
-        SUM(total_amount) as total_revenue,
-        COUNT(*) as total_invoices,
-        AVG(total_amount) as avg_invoice
-      FROM invoices WHERE status = 'paid'
-    `);
+      const summary = await db.get(`
+        SELECT
+          SUM(amount_total) as total_revenue,
+          COUNT(*) as total_invoices,
+          AVG(amount_total) as avg_invoice
+        FROM invoices WHERE status = 'paid'
+      `);
 
-    return { data, summary: summary ?? {} };
+      return { data, summary: summary ?? {} };
+    } catch (err) {
+      logger.error('Error generating revenue report', { category: 'analytics', metadata: { error: err, filters } });
+      throw err;
+    }
   }
 
   private async generatePipelineReport(_filters: ReportFilters): Promise<{ data: any[]; summary: Record<string, any> }> {
@@ -1173,9 +1178,9 @@ class AnalyticsService {
     const summary = await db.get(`
       SELECT
         COUNT(*) as total_projects,
-        COUNT(CASE WHEN status = 'in_progress' THEN 1 END) as active_projects,
+        COUNT(CASE WHEN status IN ('active', 'in-progress') THEN 1 END) as active_projects,
         COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_projects,
-        SUM(actual_hours) as total_hours
+        COALESCE(SUM(actual_hours), 0) as total_hours
       FROM projects
     `);
 
@@ -1436,7 +1441,12 @@ class AnalyticsService {
   // Quick Analytics
   async getRevenueAnalytics(days?: number): Promise<{ data: any[]; summary: Record<string, any> }> {
     const dateRange = this.daysToDateRange(days);
-    return this.generateReportData('revenue', { dateRange });
+    try {
+      return await this.generateReportData('revenue', { dateRange });
+    } catch (err) {
+      logger.error('Failed to generate revenue analytics', { category: 'analytics', metadata: { error: err, dateRange } });
+      throw new Error('Revenue analytics generation failed');
+    }
   }
 
   async getPipelineAnalytics(): Promise<{ data: any[]; summary: Record<string, any> }> {

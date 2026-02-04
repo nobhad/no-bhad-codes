@@ -16,12 +16,12 @@ Both award-winning portfolios share core design principles that create memorable
 
 ### What They Do
 
-| Site | "Black" | "White" | Why |
+|Site|"Black"|"White"|Why|
 |------|---------|---------|-----|
-| Sal Costa | `#191919` | `#fffbee` | Warm cream adds sophistication |
-| Christina Kosik | `#151515` | `#ffffff` | Near-black is softer on eyes |
+|Sal Costa|`#191919`|`#fffbee`|Warm cream adds sophistication|
+|Christina Kosik|`#151515`|`#ffffff`|Near-black is softer on eyes|
 
-**Neither uses `#000000` or `#ffffff` as their base.**
+Neither uses `#000000` or `#ffffff` as their base.
 
 ### Why It Works
 
@@ -48,12 +48,12 @@ Both award-winning portfolios share core design principles that create memorable
 
 ### What They Do
 
-| Site | Font | Weights Used |
+|Site|Font|Weights Used|
 |------|------|--------------|
-| Sal Costa | Plus Jakarta Sans | 600 only |
-| Christina Kosik | Uncut Sans | 300, 400 |
+|Sal Costa|Plus Jakarta Sans|600 only|
+|Christina Kosik|Uncut Sans|300, 400|
 
-**Both use ONE font family for everything.**
+Both use ONE font family for everything.
 
 ### Why It Works
 
@@ -100,13 +100,13 @@ h1, h2, h3 {
 
 ### Common Animation Patterns
 
-| Pattern | Sal Costa | Christina Kosik |
+|Pattern|Sal Costa|Christina Kosik|
 |---------|-----------|-----------------|
-| Scroll-triggered | Yes | Yes |
-| Staggered delays | Yes (100ms) | Yes (overlapping) |
-| Custom easing | `cubic-bezier(.3,.9,.3,.9)` | SVG path easing |
-| Entrance animations | blur-in, drop-in | fade, yPercent |
-| Exit animations | blur-out, drop-out | reverse() |
+|Scroll-triggered|Yes|Yes|
+|Staggered delays|Yes (100ms)|Yes (overlapping)|
+|Custom easing|`cubic-bezier(.3,.9,.3,.9)`|SVG path easing|
+|Entrance animations|blur-in, drop-in|fade, yPercent|
+|Exit animations|blur-out, drop-out|reverse()|
 
 ### Why It Works
 
@@ -154,10 +154,10 @@ gsap.from(".card", {
 
 ### What They Do
 
-| Site | Hero Size | Technique |
+|Site|Hero Size|Technique|
 |------|-----------|-----------|
-| Sal Costa | Block SVG letters | Animated drop-in |
-| Christina Kosik | `15.9vw` | Parallax split on scroll |
+|Sal Costa|Block SVG letters|Animated drop-in|
+|Christina Kosik|`15.9vw`|Parallax split on scroll|
 
 ### Why It Works
 
@@ -191,10 +191,10 @@ Or use SVG text for more control:
 
 ### What They Do
 
-| Site | Method |
+|Site|Method|
 |------|--------|
-| Sal Costa | Custom (likely native + JS) |
-| Christina Kosik | Lenis library |
+|Sal Costa|Custom (likely native + JS)|
+|Christina Kosik|Lenis library|
 
 ### Christina's Lenis Config
 
@@ -246,10 +246,10 @@ html {
 
 ### What They Do
 
-| Site | Duration | Feature |
+|Site|Duration|Feature|
 |------|----------|---------|
-| Sal Costa | Fixed | Progress bar + logo |
-| Christina Kosik | 8s first / 2s return | Session-aware, giant counter |
+|Sal Costa|Fixed|Progress bar + logo|
+|Christina Kosik|8s first / 2s return|Session-aware, giant counter|
 
 ### Session-Aware Pattern (Christina)
 
@@ -299,10 +299,10 @@ gsap.timeline({
 
 ### What They Do
 
-| Site | Colors | Accent Strategy |
+|Site|Colors|Accent Strategy|
 |------|--------|-----------------|
-| Sal Costa | 3 (bg, text, accent) | Warm coral light / Cool purple dark |
-| Christina Kosik | 2 (bg, text) | Opacity variations only |
+|Sal Costa|3 (bg, text, accent)|Warm coral light / Cool purple dark|
+|Christina Kosik|2 (bg, text)|Opacity variations only|
 
 ### Sal Costa's Dual Accent
 
@@ -352,10 +352,10 @@ a:hover {
 
 ### What They Do
 
-| Site | Hover Effect | Click Action |
+|Site|Hover Effect|Click Action|
 |------|--------------|--------------|
-| Sal Costa | Image tooltip at cursor | Navigate to detail page |
-| Christina Kosik | None | FLIP animation to overlay |
+|Sal Costa|Image tooltip at cursor|Navigate to detail page|
+|Christina Kosik|None|FLIP animation to overlay|
 
 ### Sal Costa's Tooltip
 
@@ -435,10 +435,10 @@ document.querySelectorAll('.project-card').forEach(card => {
 
 ### What They Do
 
-| Site | Element | Pattern |
+|Site|Element|Pattern|
 |------|---------|---------|
-| Sal Costa | Border radius | `4px 0 4px 4px` (flat top-right) |
-| Christina Kosik | Grid columns | 2-3-3-2 (varying spans) |
+|Sal Costa|Border radius|`4px 0 4px 4px` (flat top-right)|
+|Christina Kosik|Grid columns|2-3-3-2 (varying spans)|
 
 ### Sal Costa's Border Radius
 
@@ -681,31 +681,31 @@ a:hover {
 
 ### High Impact, Low Effort
 
-| Pattern | Effort | Impact |
+|Pattern|Effort|Impact|
 |---------|--------|--------|
-| Near-black instead of #000 | 5 min | Medium |
-| Single typeface | 10 min | High |
-| Timing CSS variables | 15 min | Medium |
-| Link hover underlines | 20 min | Medium |
-| Project card hover (scale + shadow) | 15 min | Medium |
+|Near-black instead of #000|5 min|Medium|
+|Single typeface|10 min|High|
+|Timing CSS variables|15 min|Medium|
+|Link hover underlines|20 min|Medium|
+|Project card hover (scale + shadow)|15 min|Medium|
 
 ### Medium Effort, High Impact
 
-| Pattern | Effort | Impact |
+|Pattern|Effort|Impact|
 |---------|--------|--------|
-| Fixed hero with scroll-over | 1 hour | High |
-| GSAP scroll animations | 2 hours | High |
-| Page loader | 1 hour | Medium |
-| Smooth scroll (Lenis) | 30 min | Medium |
+|Fixed hero with scroll-over|1 hour|High|
+|GSAP scroll animations|2 hours|High|
+|Page loader|1 hour|Medium|
+|Smooth scroll (Lenis)|30 min|Medium|
 
 ### High Effort, Signature Impact
 
-| Pattern | Effort | Impact |
+|Pattern|Effort|Impact|
 |---------|--------|--------|
-| Asymmetric grid layout | 3 hours | High |
-| FLIP animations for modals | 4 hours | High |
-| Custom cursor | 2 hours | Medium |
-| Image tooltip on hover | 2 hours | High |
+|Asymmetric grid layout|3 hours|High|
+|FLIP animations for modals|4 hours|High|
+|Custom cursor|2 hours|Medium|
+|Image tooltip on hover|2 hours|High|
 
 ---
 
@@ -716,22 +716,22 @@ a:hover {
    - Choose and implement single typeface
    - Set up timing variables
 
-2. **Motion Base (Day 2)**
+1. **Motion Base (Day 2)**
    - Install GSAP + ScrollTrigger
    - Add basic scroll-triggered fades
    - Implement smooth scroll
 
-3. **Hero Section (Day 3)**
+1. **Hero Section (Day 3)**
    - Large typography treatment
    - Fixed position with scroll-over content
    - Entrance animation
 
-4. **Project Cards (Day 4)**
+1. **Project Cards (Day 4)**
    - Hover effects (scale, shadow)
    - Staggered entrance animations
    - Optional: image preview tooltip
 
-5. **Polish (Day 5)**
+1. **Polish (Day 5)**
    - Page loader
    - Link hover underlines
    - Consistent border-radius pattern
@@ -741,7 +741,7 @@ a:hover {
 
 ## Files Reference
 
-| Analysis | Location |
+|Analysis|Location|
 |----------|----------|
-| Sal Costa Deep Dive | `docs/design/salcosta/SALCOSTA_DESIGN_ANALYSIS.md` |
-| This Document | `docs/design/PORTFOLIO_DESIGN_PATTERNS.md` |
+|Sal Costa Deep Dive|`docs/design/salcosta/SALCOSTA_DESIGN_ANALYSIS.md`|
+|This Document|`docs/design/PORTFOLIO_DESIGN_PATTERNS.md`|

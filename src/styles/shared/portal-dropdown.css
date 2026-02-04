@@ -245,7 +245,7 @@
   position: absolute;
   top: 100%;
   right: 0;
-  min-width: 180px;
+  min-width: 120px; /* Reduced from 180px - sized to content */
   max-height: 300px;
   overflow-y: auto;
   background-color: var(--dropdown-bg, var(--color-surface-primary));
@@ -266,8 +266,9 @@
 :is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-menu .custom-dropdown-item {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  gap: var(--space-1-5); /* Tighter gap to match trigger */
+  padding: var(--space-2) var(--space-2);
+  padding-left: var(--space-1-5); /* Match trigger left padding so status dots align */
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   cursor: pointer;

@@ -101,39 +101,39 @@ business-card-interactions.ts
 
 ### Core
 
-| Module | Purpose | Dependencies |
+|Module|Purpose|Dependencies|
 |--------|---------|--------------|
-| `base.ts` | Abstract base class with lifecycle methods | types/modules |
+|`base.ts`|Abstract base class with lifecycle methods|types/modules|
 
 ### UI Modules
 
-| Module | Purpose | Dependencies |
+|Module|Purpose|Dependencies|
 |--------|---------|--------------|
-| `navigation.ts` | Header nav, mobile menu, portal dropdown | BaseModule, GSAP, appState, RouterService, DataService, SubmenuModule |
-| `submenu.ts` | Dropdown submenu handler | BaseModule |
-| `footer.ts` | Footer visibility/animations | BaseModule |
-| `contact-form.ts` | Form validation & submission | BaseModule, ContactService, SanitizationUtils |
-| `business-card-renderer.ts` | SVG card rendering | BaseModule |
-| `business-card-interactions.ts` | Card flip/tilt effects | BaseModule, GSAP, BusinessCardRenderer |
+|`navigation.ts`|Header nav, mobile menu, portal dropdown|BaseModule, GSAP, appState, RouterService, DataService, SubmenuModule|
+|`submenu.ts`|Dropdown submenu handler|BaseModule|
+|`footer.ts`|Footer visibility/animations|BaseModule|
+|`contact-form.ts`|Form validation & submission|BaseModule, ContactService, SanitizationUtils|
+|`business-card-renderer.ts`|SVG card rendering|BaseModule|
+|`business-card-interactions.ts`|Card flip/tilt effects|BaseModule, GSAP, BusinessCardRenderer|
 
 ### Animation Modules
 
-| Module | Purpose | Dependencies |
+|Module|Purpose|Dependencies|
 |--------|---------|--------------|
-| `intro-animation.ts` | Desktop paw morph intro | BaseModule, GSAP, MorphSVGPlugin, intro/ submodules |
-| `intro-animation-mobile.ts` | Mobile card flip intro | BaseModule, GSAP, MorphSVGPlugin |
-| `about-hero.ts` | About section hero animation | BaseModule, GSAP |
-| `base-hero-animation.ts` | Base class for hero animations | BaseModule, GSAP |
-| `page-hero.ts` | Page hero section animations | BaseModule, GSAP |
-| `contact-animation.ts` | Contact section animations | BaseModule, GSAP, ScrollTrigger |
-| `page-transition.ts` | Virtual page transitions | BaseModule, GSAP |
-| `text-animation.ts` | Scroll-triggered text effects | BaseModule, GSAP, ScrollTrigger |
+|`intro-animation.ts`|Desktop paw morph intro|BaseModule, GSAP, MorphSVGPlugin, intro/ submodules|
+|`intro-animation-mobile.ts`|Mobile card flip intro|BaseModule, GSAP, MorphSVGPlugin|
+|`about-hero.ts`|About section hero animation|BaseModule, GSAP|
+|`base-hero-animation.ts`|Base class for hero animations|BaseModule, GSAP|
+|`page-hero.ts`|Page hero section animations|BaseModule, GSAP|
+|`contact-animation.ts`|Contact section animations|BaseModule, GSAP, ScrollTrigger|
+|`page-transition.ts`|Virtual page transitions|BaseModule, GSAP|
+|`text-animation.ts`|Scroll-triggered text effects|BaseModule, GSAP, ScrollTrigger|
 
 ### Utility Modules
 
-| Module | Purpose | Dependencies |
+|Module|Purpose|Dependencies|
 |--------|---------|--------------|
-| `theme.ts` | Dark/light theme switching | BaseModule, appState |
+|`theme.ts`|Dark/light theme switching|BaseModule, appState|
 
 ## Admin Feature Services
 
@@ -141,18 +141,18 @@ The admin dashboard uses extracted services and renderers (January 2026 refactor
 
 ### Admin Services
 
-| Service | Purpose | Dependencies |
+|Service|Purpose|Dependencies|
 |---------|---------|--------------|
-| `admin-data.service.ts` | Data fetching and caching with TTL | Fetch API, types |
-| `admin-chart.service.ts` | Chart.js integration and rendering | Chart.js, admin-data.service |
-| `admin-export.service.ts` | CSV/data export functionality | admin-data.service |
+|`admin-data.service.ts`|Data fetching and caching with TTL|Fetch API, types|
+|`admin-chart.service.ts`|Chart.js integration and rendering|Chart.js, admin-data.service|
+|`admin-export.service.ts`|CSV/data export functionality|admin-data.service|
 
 ### Admin Renderers
 
-| Renderer | Purpose | Dependencies |
+|Renderer|Purpose|Dependencies|
 |----------|---------|--------------|
-| `admin-contacts.renderer.ts` | Contact table and modal rendering | SanitizationUtils, admin-data.service, logging |
-| `admin-messaging.renderer.ts` | Messaging UI and thread rendering | SanitizationUtils, admin-data.service, logging |
+|`admin-contacts.renderer.ts`|Contact table and modal rendering|SanitizationUtils, admin-data.service, logging|
+|`admin-messaging.renderer.ts`|Messaging UI and thread rendering|SanitizationUtils, admin-data.service, logging|
 
 ### Admin Service Dependencies
 
@@ -179,14 +179,14 @@ admin-dashboard.ts (coordinator)
 
 Some modules have platform-specific behavior:
 
-| Module | Desktop | Mobile |
+|Module|Desktop|Mobile|
 |--------|---------|--------|
-| `intro-animation.ts` | Full morph animation | Skipped (uses mobile version) |
-| `intro-animation-mobile.ts` | Skipped | Card flip animation |
-| `about-hero.ts` | Active | Active |
-| `page-hero.ts` | Active | Active |
-| `page-transition.ts` | Virtual page transitions | Disabled |
-| `contact-animation.ts` | Active | Skipped |
+|`intro-animation.ts`|Full morph animation|Skipped (uses mobile version)|
+|`intro-animation-mobile.ts`|Skipped|Card flip animation|
+|`about-hero.ts`|Active|Active|
+|`page-hero.ts`|Active|Active|
+|`page-transition.ts`|Virtual page transitions|Disabled|
+|`contact-animation.ts`|Active|Skipped|
 
 ## Indirect Dependencies
 

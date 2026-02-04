@@ -14,12 +14,18 @@ import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { confirmDanger, alertError, alertSuccess } from '../../../utils/confirm-dialog';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
-import { createTableDropdown } from '../../../components/table-dropdown';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { createSearchBar } from '../../../components/search-bar';
 import { exportToCsv, KNOWLEDGE_BASE_EXPORT_CONFIG } from '../../../utils/table-export';
+import {
+  createFilterUI,
+  applyFilters,
+  loadFilterState,
+  updateFilterStatusOptions,
+  KNOWLEDGE_BASE_FILTER_CONFIG,
+  type FilterState
+} from '../../../utils/table-filter';
 
 const KB_API = '/api/kb';
 
@@ -167,13 +173,13 @@ function escapeHtml(text: string): string {
 let categoriesCache: KBCategory[] = [];
 let articlesCache: KBArticle[] = [];
 let kbListenersSetup = false;
-let kbArticlesFilterWrapper: HTMLElement & { setOptions?: (opts: { value: string; label: string }[], selectedValue?: string) => void } | null = null;
 let kbArticleCategorySelectInstance: FilterSelectInstance | null = null;
 let kbCategoryModalInstance: PortalModalInstance | null = null;
 let kbArticleModalInstance: PortalModalInstance | null = null;
 let kbCategoryModalFocusCleanup: (() => void) | null = null;
 let kbArticleModalFocusCleanup: (() => void) | null = null;
-let kbSearchQuery: string = '';
+let kbFilterState: FilterState = loadFilterState(KNOWLEDGE_BASE_FILTER_CONFIG.storageKey);
+let kbFilterUIContainer: HTMLElement | null = null;
 let storedKbContext: AdminDashboardContext | null = null;
 
 // ---------------------------------------------------------------------------
@@ -425,32 +431,25 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
 
   el('kb-add-article')?.addEventListener('click', () => openArticleModal(categoriesCache));
 
-  const filterMount = el('kb-articles-filter-mount');
-  if (filterMount && !kbArticlesFilterWrapper) {
-    kbArticlesFilterWrapper = createTableDropdown({
-      options: [{ value: '', label: 'All categories' }],
-      currentValue: '',
-      showStatusDot: false,
-      ariaLabelPrefix: 'Filter by category',
-      showAllWithCheckmark: true,
-      onChange: () => loadKnowledgeBase(ctx)
-    }) as HTMLElement & { setOptions?: (opts: { value: string; label: string }[], selectedValue?: string) => void };
-    kbArticlesFilterWrapper.id = 'kb-articles-filter';
-    filterMount.appendChild(kbArticlesFilterWrapper);
-  }
-
-  // Setup search bar
-  const searchMount = el('kb-search-mount');
-  if (searchMount && !searchMount.querySelector('.search-bar')) {
-    const { wrapper } = createSearchBar({
-      placeholder: 'Search articles...',
-      ariaLabel: 'Search knowledge base articles',
-      onInput: (value) => {
-        kbSearchQuery = value.toLowerCase();
+  // Setup filter UI (search, category checkboxes, date range) - insert before export button
+  const filterContainer = el('kb-articles-filter-container');
+  if (filterContainer && !kbFilterUIContainer) {
+    kbFilterUIContainer = createFilterUI(
+      KNOWLEDGE_BASE_FILTER_CONFIG,
+      kbFilterState,
+      (newState) => {
+        kbFilterState = newState;
         refreshFilteredArticles(ctx);
       }
-    });
-    searchMount.appendChild(wrapper);
+    );
+
+    // Insert filter UI before export button
+    const exportBtn = filterContainer.querySelector('#kb-export');
+    if (exportBtn) {
+      filterContainer.insertBefore(kbFilterUIContainer, exportBtn);
+    } else {
+      filterContainer.prepend(kbFilterUIContainer);
+    }
   }
 
   // Setup export button
@@ -558,8 +557,6 @@ export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<voi
 
   const categoriesTbody = el('kb-categories-tbody');
   const articlesTbody = el('kb-articles-tbody');
-  const filterEl = el('kb-articles-filter');
-  const filterValueFromWrapper = (filterEl && 'dataset' in filterEl && filterEl.dataset?.status) ?? '';
 
   if (categoriesTbody) showTableLoading(categoriesTbody, CATEGORIES_COLSPAN, 'Loading categories...');
   if (articlesTbody) showTableLoading(articlesTbody, ARTICLES_COLSPAN, 'Loading articles...');
@@ -569,13 +566,29 @@ export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<voi
     categoriesCache = categories;
     renderCategoriesTable(categories, ctx);
 
-    const filterSlug = filterValueFromWrapper || '';
-    const articles = await loadArticles(ctx, filterSlug || undefined);
+    // Load all articles (filter handles category filtering)
+    const articles = await loadArticles(ctx);
     articlesCache = articles;
-    renderArticlesTable(articles, ctx);
 
-    const options = [{ value: '', label: 'All categories' }, ...categories.map((c) => ({ value: c.slug, label: c.name }))];
-    kbArticlesFilterWrapper?.setOptions?.(options, filterSlug || '');
+    // Update filter with category options
+    if (kbFilterUIContainer) {
+      const categoryOptions = categories.map(c => ({ value: c.name, label: c.name }));
+      updateFilterStatusOptions(
+        kbFilterUIContainer,
+        categoryOptions,
+        'Category',
+        kbFilterState,
+        KNOWLEDGE_BASE_FILTER_CONFIG,
+        (newState) => {
+          kbFilterState = newState;
+          refreshFilteredArticles(ctx);
+        }
+      );
+    }
+
+    // Apply filters and render
+    const filtered = applyFilters(articlesCache, kbFilterState, KNOWLEDGE_BASE_FILTER_CONFIG);
+    renderArticlesTable(filtered, ctx);
   } catch (err) {
     if (categoriesTbody) showTableEmpty(categoriesTbody, CATEGORIES_COLSPAN, 'Failed to load categories.');
     if (articlesTbody) showTableEmpty(articlesTbody, ARTICLES_COLSPAN, 'Failed to load articles.');
@@ -584,30 +597,14 @@ export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<voi
 }
 
 /**
- * Get articles filtered by search query
+ * Get articles filtered by current filter state
  */
 function getFilteredArticles(): KBArticle[] {
-  if (!kbSearchQuery) {
-    return articlesCache;
-  }
-
-  return articlesCache.filter(a => {
-    const title = a.title?.toLowerCase() || '';
-    const category = a.category_name?.toLowerCase() || '';
-    const slug = a.slug?.toLowerCase() || '';
-    const summary = a.summary?.toLowerCase() || '';
-
-    return (
-      title.includes(kbSearchQuery) ||
-      category.includes(kbSearchQuery) ||
-      slug.includes(kbSearchQuery) ||
-      summary.includes(kbSearchQuery)
-    );
-  });
+  return applyFilters(articlesCache, kbFilterState, KNOWLEDGE_BASE_FILTER_CONFIG);
 }
 
 /**
- * Refresh the articles table with search applied
+ * Refresh the articles table with filters applied
  */
 function refreshFilteredArticles(ctx: AdminDashboardContext): void {
   const filtered = getFilteredArticles();

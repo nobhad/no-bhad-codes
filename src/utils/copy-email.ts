@@ -24,7 +24,7 @@ const COPY_EMAIL_ATTR = 'data-copy-email';
  */
 export function getCopyEmailButtonHtml(email: string): string {
   const safe = SanitizationUtils.escapeHtml(email || '');
-  return `<button type="button" class="${COPY_EMAIL_BTN_CLASS}" ${COPY_EMAIL_ATTR}="${safe}" title="Copy email" aria-label="Copy email address">${ICONS.COPY}</button>`;
+  return `<button type="button" class="icon-btn ${COPY_EMAIL_BTN_CLASS}" ${COPY_EMAIL_ATTR}="${safe}" title="Copy email" aria-label="Copy email address">${ICONS.COPY}</button>`;
 }
 
 /**

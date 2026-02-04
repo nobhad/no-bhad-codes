@@ -41,13 +41,13 @@ The Proposal Builder is a tiered pricing system that allows clients to customize
 
 ### Technology Stack
 
-| Component | Technology |
+|Component|Technology|
 |-----------|------------|
-| Frontend | Vanilla TypeScript |
-| Styling | CSS with CSS Variables |
-| Animations | GSAP |
-| PDF Generation | PDFKit |
-| Build Tool | Vite |
+|Frontend|Vanilla TypeScript|
+|Styling|CSS with CSS Variables|
+|Animations|GSAP|
+|PDF Generation|PDFKit|
+|Build Tool|Vite|
 
 ### Module Structure
 
@@ -79,11 +79,11 @@ src/styles/pages/
 
 User selects one of three pricing tiers:
 
-| Tier | Name | Description |
+|Tier|Name|Description|
 |------|------|-------------|
-| `good` | Foundation | Essential features for simple projects |
-| `better` | Professional | Recommended - balanced features and value |
-| `best` | Premium | Full-featured with all capabilities |
+|`good`|Foundation|Essential features for simple projects|
+|`better`|Professional|Recommended - balanced features and value|
+|`best`|Premium|Full-featured with all capabilities|
 
 Each tier displays:
 
@@ -105,12 +105,12 @@ User can add optional features as add-ons:
 
 User selects an ongoing maintenance plan:
 
-| Option | Name | Description |
+|Option|Name|Description|
 |--------|------|-------------|
-| `diy` | DIY | Self-managed, no support |
-| `essential` | Essential | Basic updates and security |
-| `standard` | Standard | Regular updates and support |
-| `premium` | Premium | Priority support and enhancements |
+|`diy`|DIY|Self-managed, no support|
+|`essential`|Essential|Basic updates and security|
+|`standard`|Standard|Regular updates and support|
+|`premium`|Premium|Priority support and enhancements|
 
 ### Step 4: Summary & Submit
 
@@ -173,12 +173,12 @@ Supported project types:
 
 ### Feature Categories
 
-| Category | Description |
+|Category|Description|
 |----------|-------------|
-| `design` | Visual design and UI features |
-| `development` | Technical functionality |
-| `support` | Support and maintenance features |
-| `marketing` | SEO and marketing features |
+|`design`|Visual design and UI features|
+|`development`|Technical functionality|
+|`support`|Support and maintenance features|
+|`marketing`|SEO and marketing features|
 
 ### Feature Definition
 
@@ -239,12 +239,12 @@ export interface MaintenanceOption {
 
 ### Standard Options
 
-| ID | Name | Price | Features |
+|ID|Name|Price|Features|
 |----|------|-------|----------|
-| `diy` | DIY | $0/mo | Self-managed |
-| `essential` | Essential | $50/mo | Security updates, backups |
-| `standard` | Standard | $150/mo | + Content updates, support |
-| `premium` | Premium | $300/mo | + Priority support, enhancements |
+|`diy`|DIY|$0/mo|Self-managed|
+|`essential`|Essential|$50/mo|Security updates, backups|
+|`standard`|Standard|$150/mo|+ Content updates, support|
+|`premium`|Premium|$300/mo|+ Priority support, enhancements|
 
 ---
 
@@ -273,14 +273,14 @@ pending → reviewed → accepted → converted (to invoice)
 
 ### Actions
 
-| Action | Endpoint | Description |
+|Action|Endpoint|Description|
 |--------|----------|-------------|
-| View | GET `/proposals/:id` | View proposal details |
-| Update Status | PUT `/proposals/admin/:id` | Update status/notes |
-| Accept | PUT `/proposals/admin/:id` | Set status to `accepted` |
-| Reject | PUT `/proposals/admin/:id` | Set status to `rejected` |
-| Convert | POST `/proposals/admin/:id/convert` | Create invoice from proposal |
-| Download PDF | GET `/proposals/:id/pdf` | Generate branded PDF |
+|View|GET `/proposals/:id`|View proposal details|
+|Update Status|PUT `/proposals/admin/:id`|Update status/notes|
+|Accept|PUT `/proposals/admin/:id`|Set status to `accepted`|
+|Reject|PUT `/proposals/admin/:id`|Set status to `rejected`|
+|Convert|POST `/proposals/admin/:id/convert`|Create invoice from proposal|
+|Download PDF|GET `/proposals/:id/pdf`|Generate branded PDF|
 
 ---
 
@@ -290,14 +290,14 @@ See [API Documentation](../API_DOCUMENTATION.md#proposal-builder-endpoints) for 
 
 ### Key Endpoints
 
-| Endpoint | Method | Description |
+|Endpoint|Method|Description|
 |----------|--------|-------------|
-| `/proposals` | POST | Create new proposal |
-| `/proposals/:id` | GET | Get proposal details |
-| `/proposals/:id/pdf` | GET | Download PDF |
-| `/proposals/admin/list` | GET | List all (admin) |
-| `/proposals/admin/:id` | PUT | Update status (admin) |
-| `/proposals/admin/:id/convert` | POST | Convert to invoice (admin) |
+|`/proposals`|POST|Create new proposal|
+|`/proposals/:id`|GET|Get proposal details|
+|`/proposals/:id/pdf`|GET|Download PDF|
+|`/proposals/admin/list`|GET|List all (admin)|
+|`/proposals/admin/:id`|PUT|Update status (admin)|
+|`/proposals/admin/:id/convert`|POST|Convert to invoice (admin)|
 
 ---
 
@@ -307,50 +307,50 @@ See [API Documentation](../API_DOCUMENTATION.md#proposal-builder-endpoints) for 
 
 **proposal_requests:**
 
-| Column | Type | Description |
+|Column|Type|Description|
 |--------|------|-------------|
-| `id` | INTEGER | Primary key |
-| `project_id` | INTEGER | FK to projects |
-| `client_id` | INTEGER | FK to clients |
-| `project_type` | TEXT | Project type identifier |
-| `selected_tier` | TEXT | good/better/best |
-| `base_price` | REAL | Tier base price |
-| `final_price` | REAL | Total calculated price |
-| `maintenance_option` | TEXT | Maintenance plan ID |
-| `status` | TEXT | pending/reviewed/accepted/rejected/converted |
-| `client_notes` | TEXT | Client comments |
-| `admin_notes` | TEXT | Admin notes |
-| `created_at` | DATETIME | Creation timestamp |
-| `reviewed_at` | DATETIME | Review timestamp |
-| `reviewed_by` | TEXT | Admin email |
+|`id`|INTEGER|Primary key|
+|`project_id`|INTEGER|FK to projects|
+|`client_id`|INTEGER|FK to clients|
+|`project_type`|TEXT|Project type identifier|
+|`selected_tier`|TEXT|good/better/best|
+|`base_price`|REAL|Tier base price|
+|`final_price`|REAL|Total calculated price|
+|`maintenance_option`|TEXT|Maintenance plan ID|
+|`status`|TEXT|pending/reviewed/accepted/rejected/converted|
+|`client_notes`|TEXT|Client comments|
+|`admin_notes`|TEXT|Admin notes|
+|`created_at`|DATETIME|Creation timestamp|
+|`reviewed_at`|DATETIME|Review timestamp|
+|`reviewed_by`|TEXT|Admin email|
 
 **proposal_feature_selections:**
 
-| Column | Type | Description |
+|Column|Type|Description|
 |--------|------|-------------|
-| `id` | INTEGER | Primary key |
-| `proposal_request_id` | INTEGER | FK to proposal_requests |
-| `feature_id` | TEXT | Feature identifier |
-| `feature_name` | TEXT | Display name |
-| `feature_price` | REAL | Price for this feature |
-| `feature_category` | TEXT | design/development/support/marketing |
-| `is_included_in_tier` | INTEGER | 1 if included in selected tier |
-| `is_addon` | INTEGER | 1 if added as extra |
+|`id`|INTEGER|Primary key|
+|`proposal_request_id`|INTEGER|FK to proposal_requests|
+|`feature_id`|TEXT|Feature identifier|
+|`feature_name`|TEXT|Display name|
+|`feature_price`|REAL|Price for this feature|
+|`feature_category`|TEXT|design/development/support/marketing|
+|`is_included_in_tier`|INTEGER|1 if included in selected tier|
+|`is_addon`|INTEGER|1 if added as extra|
 
 ---
 
 ## File Locations
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `src/features/client/proposal-builder.ts` | Main module class |
-| `src/features/client/proposal-builder-ui.ts` | UI rendering |
-| `src/features/client/proposal-builder-data.ts` | Tier configurations |
-| `src/features/client/proposal-builder-types.ts` | TypeScript types |
-| `src/features/admin/modules/admin-proposals.ts` | Admin management |
-| `server/routes/proposals.ts` | API endpoints |
-| `server/database/migrations/025_proposal_requests.sql` | DB schema |
-| `src/styles/pages/proposal-builder.css` | Styles |
+|`src/features/client/proposal-builder.ts`|Main module class|
+|`src/features/client/proposal-builder-ui.ts`|UI rendering|
+|`src/features/client/proposal-builder-data.ts`|Tier configurations|
+|`src/features/client/proposal-builder-types.ts`|TypeScript types|
+|`src/features/admin/modules/admin-proposals.ts`|Admin management|
+|`server/routes/proposals.ts`|API endpoints|
+|`server/database/migrations/025_proposal_requests.sql`|DB schema|
+|`src/styles/pages/proposal-builder.css`|Styles|
 
 ---
 

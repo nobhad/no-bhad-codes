@@ -40,17 +40,17 @@ The Admin Dashboard provides comprehensive administrative capabilities for manag
 
 ### Technology Stack
 
-| Component | Technology |
+|Component|Technology|
 |-----------|------------|
-| Frontend | Vanilla TypeScript |
-| Styling | CSS with CSS Variables |
-| Charts | Chart.js |
-| Build Tool | Vite |
-| Authentication | HttpOnly cookies with bcrypt |
+|Frontend|Vanilla TypeScript|
+|Styling|CSS with CSS Variables|
+|Charts|Chart.js|
+|Build Tool|Vite|
+|Authentication|HttpOnly cookies with bcrypt|
 
 ### Module Structure
 
-```
+```text
 admin/
 └── index.html                    # Admin HTML entry point
 
@@ -120,15 +120,15 @@ server/database/migrations/       # 001_initial_schema through 045_knowledge_bas
 
 The admin dashboard uses a sidebar navigation system with the following tabs:
 
-| Tab | Button ID | Content ID | Description |
+|Tab|Button ID|Content ID|Description|
 |-----|-----------|------------|-------------|
-| Overview | `btn-overview` | `tab-overview` | Quick stats and recent leads |
-| Leads | `btn-leads` | `tab-leads` | Lead and contact management |
-| Projects | `btn-projects` | `tab-projects` | Active projects management |
-| Messages | `btn-messages` | `tab-messages` | Client communication |
-| Analytics | `btn-analytics` | `tab-analytics` | Visitor and page analytics |
-| System | `btn-system` | `tab-system` | System information |
-| Project Detail | - | `tab-project-detail` | Individual project view (hidden from sidebar) |
+|Overview|`btn-overview`|`tab-overview`|Quick stats and recent leads|
+|Leads|`btn-leads`|`tab-leads`|Lead and contact management|
+|Projects|`btn-projects`|`tab-projects`|Active projects management|
+|Messages|`btn-messages`|`tab-messages`|Client communication|
+|Analytics|`btn-analytics`|`tab-analytics`|Visitor and page analytics|
+|System|`btn-system`|`tab-system`|System information|
+|Project Detail|-|`tab-project-detail`|Individual project view (hidden from sidebar)|
 
 ### Tab Switching
 
@@ -159,42 +159,43 @@ private switchTab(tabName: string): void {
 
 The Leads tab displays all intake form submissions with the following columns:
 
-| Column | Description |
+|Column|Description|
 |--------|-------------|
-| Date | Submission timestamp |
-| Name | Contact name |
-| Company | Company name |
-| Email | Contact email |
-| Project Type | Type of project requested |
-| Budget | Budget range selected |
-| Status | Current lead status |
+|Date|Submission timestamp|
+|Name|Contact name|
+|Company|Company name|
+|Email|Contact email|
+|Project Type|Type of project requested|
+|Budget|Budget range selected|
+|Status|Current lead status|
 
 ### Lead Status Values
 
-| Status | Description | Badge Color |
+|Status|Description|Badge Color|
 |--------|-------------|-------------|
-| `pending` | New lead, not yet reviewed | Yellow |
-| `active` | Lead converted to project | Blue |
-| `in_progress` | Project work started | Blue |
-| `completed` | Project delivered | Green |
-| `cancelled` | Lead/project cancelled | Red |
+|`pending`|New lead, not yet reviewed|Yellow|
+|`active`|Lead converted to project|Blue|
+|`in_progress`|Project work started|Blue|
+|`completed`|Project delivered|Green|
+|`cancelled`|Lead/project cancelled|Red|
 
 ### Contact Form Submissions
 
 A separate table shows contact form submissions from the website:
 
-| Column | Description |
+|Column|Description|
 |--------|-------------|
-| Date | Submission timestamp |
-| Name | Sender name |
-| Email | Sender email |
-| Subject | Message subject |
-| Message | Message preview (truncated) |
-| Status | Read/unread status |
+|Date|Submission timestamp|
+|Name|Sender name|
+|Email|Sender email|
+|Subject|Message subject|
+|Message|Message preview (truncated)|
+|Status|Read/unread status|
 
 ### Clicking Lead Rows
 
 Clicking a lead row opens a detail modal showing:
+
 - Full lead information
 - Project description
 - Features requested
@@ -209,15 +210,15 @@ Clicking a lead row opens a detail modal showing:
 
 The Projects tab shows all leads that have been converted to active projects:
 
-| Column | Description |
+|Column|Description|
 |--------|-------------|
-| Project Name | Name or description excerpt |
-| Client | Contact name and company |
-| Type | Project type |
-| Budget | Budget range |
-| Timeline | Expected timeline |
-| Status | Project status dropdown |
-| Actions | View button |
+|Project Name|Name or description excerpt|
+|Client|Contact name and company|
+|Type|Project type|
+|Budget|Budget range|
+|Timeline|Expected timeline|
+|Status|Project status dropdown|
+|Actions|View button|
 
 ### Project Status Dropdown
 
@@ -249,13 +250,13 @@ private async updateProjectStatus(id: number, status: string): Promise<void> {
 
 ### Project Detail Sub-Tabs
 
-| Sub-Tab | Content |
+|Sub-Tab|Content|
 |---------|---------|
-| Overview | Progress, milestones, notes, activity |
-| Files | Upload/manage project files |
-| Messages | Communicate with client |
-| Invoices | Create/manage invoices |
-| Settings | Project settings and client account |
+|Overview|Progress, milestones, notes, activity|
+|Files|Upload/manage project files|
+|Messages|Communicate with client|
+|Invoices|Create/manage invoices|
+|Settings|Project settings and client account|
 
 ### Overview Sub-Tab
 
@@ -287,32 +288,38 @@ private async updateProjectStatus(id: number, status: string): Promise<void> {
 The edit button opens a modal with all project fields:
 
 **Basic Info:**
+
 - Project name
 - Project type
 - Status dropdown
 - Budget and Price
 
 **Dates:**
+
 - Start date
 - Target end date (estimated_end_date)
 - Timeline
 
 **URLs:**
+
 - Preview URL
 - Repository URL
 - Staging URL
 - Production URL
 
 **Financial/Contract:**
+
 - Deposit amount
 - Contract signed date
 
 **Internal:**
+
 - Admin notes (not visible to clients)
 
 ### Settings Sub-Tab
 
 **Client Account:**
+
 - Client email
 - Account status (Active/Not Invited)
 - Last login timestamp
@@ -406,6 +413,7 @@ router.post('/leads/:id/invite', authenticateAdmin, async (req, res) => {
 ### API Endpoints: Password Setup
 
 **Verify Invitation Token:**
+
 ```typescript
 // POST /api/auth/verify-invitation
 {
@@ -415,6 +423,7 @@ router.post('/leads/:id/invite', authenticateAdmin, async (req, res) => {
 ```
 
 **Set Password:**
+
 ```typescript
 // POST /api/auth/set-password
 {
@@ -497,11 +506,11 @@ Admin messages display an SVG avatar with inverted colors:
 
 ### Keyboard Navigation
 
-| Shortcut | Action |
+|Shortcut|Action|
 |----------|--------|
-| Tab | Move focus from textarea to send button |
-| Enter | Send message |
-| Shift+Enter | New line in message |
+|Tab|Move focus from textarea to send button|
+|Enter|Send message|
+|Shift+Enter|New line in message|
 
 ### Module Architecture
 
@@ -523,21 +532,21 @@ The main dashboard delegates to this module's `setupMessagingListeners()` for pr
 
 ## File Locations
 
-| File | Purpose |
+|File|Purpose|
 |------|---------|
-| `admin/index.html` | Admin dashboard HTML |
-| `src/features/admin/admin-dashboard.ts` | Main coordinator |
-| `src/features/admin/admin-security.ts` | Rate limiting |
-| `src/features/admin/services/admin-data.service.ts` | Data fetching and caching |
-| `src/features/admin/services/admin-chart.service.ts` | Chart.js integration |
-| `src/features/admin/services/admin-export.service.ts` | Data export functionality |
-| `src/features/admin/renderers/admin-contacts.renderer.ts` | Contact table rendering |
-| `src/features/admin/renderers/admin-messaging.renderer.ts` | Messaging UI rendering |
-| `src/styles/pages/admin.css` | Admin styles |
-| `client/set-password.html` | Password setup page |
-| `server/routes/admin.ts` | Admin API endpoints |
-| `server/routes/auth.ts` | Auth including set-password |
-| `server/database/migrations/010_client_invitation.sql` | Invitation schema |
+|`admin/index.html`|Admin dashboard HTML|
+|`src/features/admin/admin-dashboard.ts`|Main coordinator|
+|`src/features/admin/admin-security.ts`|Rate limiting|
+|`src/features/admin/services/admin-data.service.ts`|Data fetching and caching|
+|`src/features/admin/services/admin-chart.service.ts`|Chart.js integration|
+|`src/features/admin/services/admin-export.service.ts`|Data export functionality|
+|`src/features/admin/renderers/admin-contacts.renderer.ts`|Contact table rendering|
+|`src/features/admin/renderers/admin-messaging.renderer.ts`|Messaging UI rendering|
+|`src/styles/pages/admin.css`|Admin styles|
+|`client/set-password.html`|Password setup page|
+|`server/routes/admin.ts`|Admin API endpoints|
+|`server/routes/auth.ts`|Auth including set-password|
+|`server/database/migrations/010_client_invitation.sql`|Invitation schema|
 
 ---
 

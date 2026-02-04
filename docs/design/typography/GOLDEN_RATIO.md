@@ -16,16 +16,16 @@ The golden ratio creates naturally harmonious proportions that have been used in
 
 ### Complete Scale
 
-| Level | Calculation | Exact (px) | Rounded (px) | Rounded (rem) | Use Case |
+|Level|Calculation|Exact (px)|Rounded (px)|Rounded (rem)|Use Case|
 |-------|-------------|------------|--------------|---------------|----------|
-| **xs** | 16 ÷ 1.618² | 6.11px | 10px | 0.625rem | Captions, labels |
-| **sm** | 16 ÷ 1.618 | 9.89px | 12px | 0.75rem | Small text |
-| **base** | 16 × 1.618⁰ | 16px | 16px | 1rem | Body text |
-| **md** | 16 × 1.618¹ | 25.89px | 26px | 1.625rem | Large body, h4 |
-| **lg** | 16 × 1.618² | 41.89px | 42px | 2.625rem | h3 |
-| **xl** | 16 × 1.618³ | 67.78px | 68px | 4.25rem | h2 |
-| **2xl** | 16 × 1.618⁴ | 109.67px | 110px | 6.875rem | h1 |
-| **3xl** | 16 × 1.618⁵ | 177.45px | 178px | 11.125rem | Display |
+|**xs**|16 ÷ 1.618²|6.11px|10px|0.625rem|Captions, labels|
+|**sm**|16 ÷ 1.618|9.89px|12px|0.75rem|Small text|
+|**base**|16 × 1.618⁰|16px|16px|1rem|Body text|
+|**md**|16 × 1.618¹|25.89px|26px|1.625rem|Large body, h4|
+|**lg**|16 × 1.618²|41.89px|42px|2.625rem|h3|
+|**xl**|16 × 1.618³|67.78px|68px|4.25rem|h2|
+|**2xl**|16 × 1.618⁴|109.67px|110px|6.875rem|h1|
+|**3xl**|16 × 1.618⁵|177.45px|178px|11.125rem|Display|
 
 ### Fluid Typography with Golden Ratio
 
@@ -57,13 +57,13 @@ Using `clamp()` for responsive scaling while maintaining golden ratio relationsh
 
 **Base:** 1.618 (the golden ratio itself)
 
-| Token | Calculation | Value | Use Case |
+|Token|Calculation|Value|Use Case|
 |-------|-------------|-------|----------|
-| `--line-height-tight` | 1.618 × 0.75 | 1.214 | Headings, tight spacing |
-| `--line-height-snug` | 1.618 × 0.85 | 1.375 | Subheadings |
-| `--line-height-normal` | 1.618 × 1.0 | **1.618** | Body text (optimal reading) |
-| `--line-height-relaxed` | 1.618 × 1.25 | 2.023 | Large body text |
-| `--line-height-loose` | 1.618 × 1.5 | 2.427 | Poetry, display text |
+|`--line-height-tight`|1.618 × 0.75|1.214|Headings, tight spacing|
+|`--line-height-snug`|1.618 × 0.85|1.375|Subheadings|
+|`--line-height-normal`|1.618 × 1.0|**1.618**|Body text (optimal reading)|
+|`--line-height-relaxed`|1.618 × 1.25|2.023|Large body text|
+|`--line-height-loose`|1.618 × 1.5|2.427|Poetry, display text|
 
 ### Why 1.618 for Body Text?
 
@@ -81,31 +81,31 @@ Research shows line-heights between 1.5-1.7 provide optimal readability. The gol
 
 ### Spacing Scale
 
-| Token | Calculation | Exact (px) | Rounded (px) | Rounded (rem) |
+|Token|Calculation|Exact (px)|Rounded (px)|Rounded (rem)|
 |-------|-------------|------------|--------------|---------------|
-| `--space-0-5` | 8 ÷ 1.618 | 4.94px | 5px | 0.3125rem |
-| `--space-1` | 8 × 1.618⁰ | 8px | 8px | 0.5rem |
-| `--space-2` | 8 × 1.618¹ | 12.94px | 13px | 0.8125rem |
-| `--space-3` | 8 × 1.618² | 20.94px | 21px | 1.3125rem |
-| `--space-4` | 8 × 1.618³ | 33.94px | 34px | 2.125rem |
-| `--space-5` | 8 × 1.618⁴ | 54.94px | 55px | 3.4375rem |
-| `--space-6` | 8 × 1.618⁵ | 88.94px | 89px | 5.5625rem |
-| `--space-8` | 8 × 1.618⁶ | 143.94px | 144px | 9rem |
+|`--space-0-5`|8 ÷ 1.618|4.94px|5px|0.3125rem|
+|`--space-1`|8 × 1.618⁰|8px|8px|0.5rem|
+|`--space-2`|8 × 1.618¹|12.94px|13px|0.8125rem|
+|`--space-3`|8 × 1.618²|20.94px|21px|1.3125rem|
+|`--space-4`|8 × 1.618³|33.94px|34px|2.125rem|
+|`--space-5`|8 × 1.618⁴|54.94px|55px|3.4375rem|
+|`--space-6`|8 × 1.618⁵|88.94px|89px|5.5625rem|
+|`--space-8`|8 × 1.618⁶|143.94px|144px|9rem|
 
 ### Practical Spacing Values
 
 For easier use, we can round to nearest 4px or 8px:
 
-| Token | Golden Ratio | Rounded (4px grid) | Rounded (8px grid) |
+|Token|Golden Ratio|Rounded (4px grid)|Rounded (8px grid)|
 |-------|--------------|-------------------|-------------------|
-| `--space-0-5` | 4.94px | 4px | 4px |
-| `--space-1` | 8px | 8px | 8px |
-| `--space-2` | 12.94px | 12px | 16px |
-| `--space-3` | 20.94px | 20px | 24px |
-| `--space-4` | 33.94px | 32px | 32px |
-| `--space-5` | 54.94px | 52px | 56px |
-| `--space-6` | 88.94px | 88px | 88px |
-| `--space-8` | 143.94px | 144px | 144px |
+|`--space-0-5`|4.94px|4px|4px|
+|`--space-1`|8px|8px|8px|
+|`--space-2`|12.94px|12px|16px|
+|`--space-3`|20.94px|20px|24px|
+|`--space-4`|33.94px|32px|32px|
+|`--space-5`|54.94px|52px|56px|
+|`--space-6`|88.94px|88px|88px|
+|`--space-8`|143.94px|144px|144px|
 
 ---
 
@@ -207,4 +207,3 @@ p {
 ---
 
 **Next Steps:** See `TYPOGRAPHY_PLAN.md` for implementation roadmap.
-

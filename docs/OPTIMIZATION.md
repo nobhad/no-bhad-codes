@@ -8,7 +8,7 @@ This document outlines the optimization strategies implemented in the no-bhad-co
 
 The application uses intelligent chunk splitting to optimize caching and loading performance:
 
-```
+```text
 ├── main.js           # Entry point and routing logic
 ├── core.js           # Core application systems (state, container, app)
 ├── components.js     # Reusable component system

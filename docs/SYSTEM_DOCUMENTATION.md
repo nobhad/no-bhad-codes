@@ -18,7 +18,7 @@
 
 The No Bhad Codes system is a comprehensive client management and project tracking platform built for web development services. It features automated invoice generation, secure file uploads, client portal functionality, and project management tools.
 
-### Key Features
+### System Key Features
 
 - **Client Intake Management**: Automated client onboarding with form processing
 - **Project Management**: Track projects from intake to completion
@@ -47,6 +47,7 @@ The No Bhad Codes system is a comprehensive client management and project tracki
 **Purpose**: Automated invoice creation, management, and payment tracking for web development projects.
 
 **Key Achievements**:
+
 - ✅ Complete CRUD operations for invoice management
 - ✅ Automated invoice generation from client intake forms
 - ✅ Smart line item creation based on project type and budget
@@ -55,6 +56,7 @@ The No Bhad Codes system is a comprehensive client management and project tracki
 - ✅ Integration with existing client and project data
 
 **Technical Implementation**:
+
 - **Service Layer**: `InvoiceService` with singleton pattern
 - **Database Integration**: SQLite with custom async wrapper
 - **API Endpoints**: 11 comprehensive REST endpoints
@@ -66,6 +68,7 @@ The No Bhad Codes system is a comprehensive client management and project tracki
 **Purpose**: Secure file handling for avatars, project files, documents, and attachments.
 
 **Key Achievements**:
+
 - ✅ Multi-format file upload support (images, documents, archives, etc.)
 - ✅ Organized storage with automatic directory creation
 - ✅ File type validation and security filtering
@@ -74,6 +77,7 @@ The No Bhad Codes system is a comprehensive client management and project tracki
 - ✅ Specialized endpoints for different file types
 
 **Technical Implementation**:
+
 - **File Processing**: Multer with custom storage configuration
 - **Security**: MIME type validation, size limits, authentication
 - **Storage**: Organized directory structure by file purpose
@@ -85,6 +89,7 @@ The No Bhad Codes system is a comprehensive client management and project tracki
 **Purpose**: Complete file management interface for clients in the Client Portal.
 
 **Key Achievements**:
+
 - ✅ Drag & drop file upload with visual feedback
 - ✅ File list rendering from backend API
 - ✅ Demo mode fallback when backend unavailable
@@ -96,6 +101,7 @@ The No Bhad Codes system is a comprehensive client management and project tracki
 - ✅ XSS protection via HTML escaping
 
 **Technical Implementation**:
+
 - **Frontend**: Vanilla TypeScript with Fetch API
 - **Backend**: Express.js with Multer middleware
 - **Authentication**: JWT token-based access control
@@ -104,18 +110,21 @@ The No Bhad Codes system is a comprehensive client management and project tracki
 ### 📈 Business Value
 
 **Automated Operations**:
+
 - Time Savings: Automated invoice generation reduces manual work
 - Consistency: Standardized line items and pricing structure
 - Accuracy: Automated calculations prevent human error
 - Scalability: System handles growing client base
 
 **Client Experience**:
+
 - File Management: Secure upload and storage system
 - Professional Invoicing: Consistent, branded invoice format
 - Payment Tracking: Clear status updates and payment history
 - Project Organization: Files linked to specific projects
 
 **Administrative Efficiency**:
+
 - Centralized Management: Single system for all invoice operations
 - Status Tracking: Real-time visibility into payment status
 - Automated Workflows: From intake to invoice generation
@@ -125,7 +134,7 @@ The No Bhad Codes system is a comprehensive client management and project tracki
 
 ### Core Components
 
-```
+```text
 server/
 ├── app.ts                 # Main Express application
 ├── database/
@@ -164,11 +173,11 @@ server/
 
 ## Invoice Generation System
 
-### Overview
+### Invoice Overview
 
 The invoice system provides comprehensive invoice management with automated generation from client intakes, flexible line item management, and payment tracking.
 
-### Key Features
+### Invoice Key Features
 
 - **Automated Generation**: Create invoices directly from client intake forms
 - **Flexible Line Items**: Support for multiple services and pricing structures
@@ -236,7 +245,7 @@ interface InvoiceLineItem {
 }
 ```
 
-### API Endpoints
+### Invoice API Endpoints
 
 #### Invoice Management
 
@@ -309,11 +318,11 @@ const baseAmount = calculateAverageFromRange(budgetMatch);
 
 ## File Upload System
 
-### Overview
+### Upload Overview
 
 Comprehensive file upload system with security validation, organized storage, and multi-format support for client portal functionality.
 
-### Key Features
+### Upload Key Features
 
 - **Multi-Type Uploads**: Single files, multiple files, avatars, project-specific
 - **Security Validation**: File type filtering, size limits, authentication
@@ -322,7 +331,7 @@ Comprehensive file upload system with security validation, organized storage, an
 
 ### Upload Service Configuration
 
-#### Multer Configuration
+#### Multer Configuration (Service)
 
 ```typescript
 const storage = multer.diskStorage({
@@ -404,7 +413,7 @@ interface UploadedFile {
 
 ### Directory Structure
 
-```
+```text
 uploads/
 ├── avatars/          # User profile images
 ├── projects/         # Project-related files
@@ -585,7 +594,7 @@ private generateLineItemsFromIntake(intake: any): InvoiceLineItem[] {
 
 ### File Upload Implementation
 
-#### Multer Configuration
+#### Multer Configuration (Implementation)
 
 ```typescript
 const storage = multer.diskStorage({
@@ -669,7 +678,7 @@ class DatabaseWrapper implements Database {
 
 ### Authentication Endpoints
 
-```
+```text
 POST /api/auth/login          # User login (client or admin)
 GET  /api/auth/profile        # Current user profile
 POST /api/auth/refresh        # Token refresh
@@ -688,7 +697,7 @@ POST /api/auth/admin/login    # Admin login
 
 ### Client Management
 
-```
+```text
 GET  /api/clients             # List all clients
 POST /api/clients             # Create new client
 GET  /api/clients/:id         # Get client details
@@ -698,7 +707,7 @@ DELETE /api/clients/:id       # Delete client
 
 ### Project Management
 
-```
+```text
 GET  /api/projects            # List all projects
 POST /api/projects            # Create new project
 GET  /api/projects/:id        # Get project details
@@ -709,7 +718,7 @@ GET  /api/projects/client/:clientId  # Get client projects
 
 ### Invoice System
 
-```
+```text
 GET  /api/invoices/test                     # System health check
 POST /api/invoices                          # Create invoice
 GET  /api/invoices/:id                      # Get invoice by ID
@@ -723,9 +732,9 @@ GET  /api/invoices/stats                   # Get statistics
 POST /api/invoices/generate/intake/:intakeId  # Generate from intake
 ```
 
-### File Upload System
+### File Upload API
 
-```
+```text
 GET  /api/uploads/test                    # System health check
 POST /api/uploads/single                  # Upload single file
 POST /api/uploads/multiple                # Upload multiple files
@@ -737,21 +746,21 @@ POST /api/uploads/project/:projectId      # Upload project file
 
 Full reference: [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
 
-| Prefix | Description |
+|Prefix|Description|
 |--------|-------------|
-| `/api/intake` | Client intake form (POST), status by project (GET `/status/:projectId`) |
-| `/api/messages` | Threads, messages, inquiry, preferences, analytics |
-| `/api/proposals` | Proposal CRUD, admin list/update/convert, PDF, config |
-| `/api/analytics` | Track, summary, realtime, sessions, reports, widgets, KPIs, alerts, quick stats |
-| `/api/approvals` | Workflow definitions, start workflow, pending, approve/reject |
-| `/api/triggers` | Workflow trigger CRUD, options, logs, test-emit |
-| `/api/document-requests` | Client my-requests/view/upload; admin CRUD, templates, review |
-| `/api/kb` | Knowledge base: categories, articles, search, featured, feedback; admin CRUD |
-| `/api/contact` | Public contact form (POST) |
+|`/api/intake`|Client intake form (POST), status by project (GET `/status/:projectId`)|
+|`/api/messages`|Threads, messages, inquiry, preferences, analytics|
+|`/api/proposals`|Proposal CRUD, admin list/update/convert, PDF, config|
+|`/api/analytics`|Track, summary, realtime, sessions, reports, widgets, KPIs, alerts, quick stats|
+|`/api/approvals`|Workflow definitions, start workflow, pending, approve/reject|
+|`/api/triggers`|Workflow trigger CRUD, options, logs, test-emit|
+|`/api/document-requests`|Client my-requests/view/upload; admin CRUD, templates, review|
+|`/api/kb`|Knowledge base: categories, articles, search, featured, feedback; admin CRUD|
+|`/api/contact`|Public contact form (POST)|
 
 ### System Endpoints
 
-```
+```text
 GET  /                       # API information and available endpoints
 GET  /health                 # System health check
 GET  /uploads/:filename      # Static file serving (via /uploads)
@@ -807,19 +816,22 @@ const { token, user } = await response.json();
 
 Comprehensive audit logging tracks all user actions:
 
-**Automatic Logging (via middleware):**
+#### Automatic Logging (via middleware)
+
 - All POST, PUT, PATCH, DELETE requests
 - User info, IP address, user agent
 - Request path and body
 - Response status
 
-**Manual Logging (via service):**
+#### Manual Logging (via service)
+
 - Login/logout events
 - Failed login attempts
 - Password resets
 - Status changes
 
-**Audit Log Schema:**
+#### Audit Log Schema
+
 ```sql
 CREATE TABLE audit_logs (
   id INTEGER PRIMARY KEY,
@@ -839,7 +851,8 @@ CREATE TABLE audit_logs (
 );
 ```
 
-**Query Audit Logs:**
+#### Query Audit Logs
+
 ```typescript
 import { auditLogger } from './services/audit-logger.js';
 
@@ -932,7 +945,7 @@ npm run format           # Format code with Prettier
 
 ### Project Structure
 
-```
+```text
 no_bhad_codes/
 ├── server/              # Backend Express application
 ├── src/                # Frontend TypeScript application  
