@@ -23,6 +23,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .details-card,
 :is([data-page="admin"], [data-page="client-portal"]) .system-details {
   cursor: pointer;
+  border-radius: var(--portal-radius-lg, 12px);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .details-card summary,
