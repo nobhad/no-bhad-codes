@@ -1395,16 +1395,33 @@ function renderConversionFunnel(container: HTMLElement, funnel: FunnelStage[]): 
   }
 
   const maxCount = Math.max(...safeFunnel.map(s => s.count), 1);
+  const stageCount = safeFunnel.length;
+  const allZero = safeFunnel.every(s => s.count === 0);
+  const TAPER_FLOOR = 15;
+  const TAPER_RANGE = 85;
 
-  container.innerHTML = safeFunnel.map(stage => {
-    const width = Math.max((stage.count / maxCount) * 100, 10);
+  container.innerHTML = safeFunnel.map((stage, index) => {
+    let barWidth: number;
+    let barClass = 'funnel-bar';
+    if (allZero) {
+      // Visual funnel taper even with no data
+      barWidth = stageCount > 1
+        ? 100 - (index * (TAPER_RANGE / (stageCount - 1)))
+        : 100;
+      barClass = 'funnel-bar funnel-bar-empty';
+    } else {
+      barWidth = Math.max((stage.count / maxCount) * 100, 8);
+    }
     return `
       <div class="funnel-stage">
-        <div class="funnel-bar" style="width: ${width}%">
-          <span class="funnel-label">${SanitizationUtils.escapeHtml(stage.stage)}</span>
-          <span class="funnel-count">${stage.count}</span>
+        <div class="funnel-stage-label">${SanitizationUtils.escapeHtml(stage.stage)}</div>
+        <div class="funnel-bar-wrapper">
+          <div class="${barClass}" style="width: ${barWidth}%"></div>
         </div>
-        <span class="funnel-percentage">${stage.percentage.toFixed(0)}%</span>
+        <div class="funnel-stage-stats">
+          <span class="funnel-count">${stage.count}</span>
+          <span class="funnel-percentage">${stage.percentage.toFixed(0)}%</span>
+        </div>
       </div>
     `;
   }).join('');
@@ -1417,8 +1434,17 @@ async function loadSourcePerformance(): Promise<void> {
   try {
     const response = await apiFetch('/api/admin/leads/source-performance');
     if (response.ok) {
-      const data: { sources: SourcePerformance[] } = await response.json();
-      renderSourcePerformance(container, data.sources || []);
+      const data = await response.json();
+      const rawSources = data.sources || [];
+      const sources: SourcePerformance[] = rawSources
+        .map((s: Record<string, unknown>) => ({
+          source: String(s.sourceName ?? s.source ?? '').trim(),
+          total: Number(s.leadCount ?? s.total ?? 0),
+          converted: Number(s.wonCount ?? s.converted ?? 0),
+          conversionRate: Number(s.conversionRate ?? 0),
+        }))
+        .filter((s: SourcePerformance) => s.source.length > 0);
+      renderSourcePerformance(container, sources);
     } else {
       container.innerHTML = '<div class="empty-state">Unable to load source data</div>';
     }

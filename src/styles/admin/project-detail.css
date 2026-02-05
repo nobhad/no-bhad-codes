@@ -896,10 +896,13 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 [data-page="admin"] .files-table th,
-[data-page="admin"] .invoices-table th {
+[data-page="admin"] .invoices-table th,
+#tab-project-detail .files-table th,
+#tab-project-detail .invoices-table th,
+#tab-client-detail .invoices-table th {
   padding: 0.75rem 1rem;
   text-align: left;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--portal-text-secondary);
   font-size: 0.75rem;
   text-transform: uppercase;

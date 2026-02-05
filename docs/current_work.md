@@ -1,8 +1,14 @@
 # Current Work
 
-**Last Updated:** February 3, 2026
+**Last Updated:** February 5, 2026
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-02.md`.
+
+## Recently Completed
+
+- [x] **Table Audit Documentation (Feb 5, 2026)**: Created and updated comprehensive `docs/design/TABLE_AUDIT.md` with all 18 tables. Added UI display names (e.g., "Intake Submissions", "Client Accounts", "Contact Form Submissions"), exact `<th>` header text, HTML source locations, TypeScript module paths, nav tab identifiers. Added 3 previously missing tables: Visitors (Analytics), Project Detail Files sub-table, Project Detail Invoices sub-table. Fixed column discrepancies in Proposals and Document Requests. Added Display Name Reference quick-lookup section and Table Header Quick Reference.
+
+---
 
 ## Open Issues (active)
 
@@ -1070,6 +1076,7 @@ Message input when disabled | Analytics section headers | Messages search bar | 
 - [ ] **Analytics page label inconsistency** — Section headings on Analytics page are inconsistently styled. "SAVED REPORTS", "SCHEDULED REPORTS", "METRIC ALERTS" use bold heading style, but "CORE WEB VITALS" and "BUNDLE ANALYSIS" use smaller field-label style. All section headings should use consistent typography.
 - [ ] **Non-passive event listeners** — Console shows "[Violation] Added non-passive event listener to a scroll-blocking event". Event listeners for `touchstart`, `touchmove`, `wheel` etc. should use `{ passive: true }` option when they don't call `preventDefault()`. Improves scroll performance. Need to audit: GSAP animations, carousel, dropdown handlers, modal scroll handlers.
 - [ ] **Analytics Business tab: Conversion Funnel + Lead Sources + Lead Scoring Rules broken** — Multiple components have data and layout issues. **Conversion Funnel:** bars are tiny (10% width), stacked vertically with labels crammed inside small red bars, counts overlapping. Layout is strange — should be proper horizontal bars that decrease in width top-to-bottom like an actual funnel, not small centered blocks. All show 0 counts and 100% (placeholder data). **Lead Sources:** shows "undefined leads", "undefined won", 0%, and empty source names — data binding is completely broken. **Lead Scoring Rules:** layout and styling need improvement. All three need: fix data binding, proper empty states, and a complete layout rethink.
+- [x] **Table column headings should use field-label styling** — **Fixed (Feb 5, 2026):** Updated `.admin-table th` in `admin.css` to use `0.75rem` font-size, `var(--portal-text-secondary)` color, and `font-weight: 500` (matching field-label pattern). Removed mobile `font-size` override that was resetting the value. Updated project-detail files/invoices `th` font-weight from `600` to `500` for consistency.
 - [x] **Table headers get cut off** — In some admin tables (e.g. contacts table `.admin-table.contacts-table`), the thead/th content (column labels and sort icons) gets cut off. **Fixed:** admin.css — `.admin-table-container` set to `overflow: visible`; new inner `.admin-table-scroll-wrapper` with `overflow-x: auto` and `overflow-y: visible` so horizontal scroll doesn’t create a scroll container that clips the header. Added `min-height: 48px` and `vertical-align: middle` on `.admin-table thead th`, and `min-height: 48px` on `.admin-table thead tr`. All 8 admin table containers in admin/index.html now wrap the table in `.admin-table-scroll-wrapper`. `.visitors-table-container` overflow changed from `hidden` to `visible`. Mobile scroll-indicator styles updated to target the scroll wrapper.
 
 ### Tables — predictable column patterns

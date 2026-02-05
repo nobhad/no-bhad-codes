@@ -554,12 +554,14 @@
     display: flex;
   }
 
-  /* Collapsed on mobile = completely hidden */
+  /* Collapsed on mobile = completely hidden
+     Must use !important to override the 1300px auto-collapse query */
   [data-page="client-portal"] .sidebar.collapsed,
   [data-page="admin"] .sidebar.collapsed {
     transform: translateX(-100%);
-    width: 0;
-    min-width: 0;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
     overflow: hidden;
   }
 

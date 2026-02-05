@@ -474,9 +474,9 @@ body[data-page="admin"] .bundle-item {
 }
 
 .admin-table th {
-  color: var(--portal-text-light);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+  font-weight: 500;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
@@ -2895,7 +2895,6 @@ body.modal-open .dashboard-content {
   .admin-table th,
   .admin-table td {
     padding: var(--space-2) var(--space-3);
-    font-size: var(--font-size-sm);
   }
 
   /* Scroll indicator on the scroll wrapper (horizontal scroll lives there) */

@@ -66,6 +66,18 @@
  * UNLAYERED STYLES (global overrides)
  * ============================================ */
 
+/* Admin dashboard background - must be unlayered to override
+   the inline <style> in admin/index.html (which is also unlayered).
+   Layered styles cannot beat unlayered styles regardless of specificity. */
+body.admin-logged-in[data-page="admin"] {
+  background-color: var(--portal-bg-medium);
+}
+
+/* html background needs fallback since portal variables are scoped to body */
+html:has(body.admin-logged-in[data-page="admin"]) {
+  background-color: var(--portal-bg-dark, #333333);
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
