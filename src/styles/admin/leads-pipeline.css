@@ -324,115 +324,172 @@
 }
 
 /* ============================================
-   Lead Analytics Section
+   Lead Analytics Section (collapsible single card)
+   Single admin-table-card with <details> for
+   native collapse. 3 columns inside separated
+   by vertical dividers.
    ============================================ */
 
+/* Uses portal-project-card + system-details for collapse behavior.
+   See details-card.css for toggle/caret/focus styles. */
+
 .leads-analytics-section {
-  margin-bottom: var(--portal-spacing-lg);
-}
-
-.leads-analytics-section .analytics-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--portal-spacing-md);
-}
-
-.leads-analytics-section .analytics-card {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--border-radius-card);
-  padding: var(--portal-spacing-md);
-  box-shadow: var(--shadow-panel);
-}
-
-.leads-analytics-section .analytics-card h4 {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--portal-text-light);
   margin-bottom: var(--portal-spacing-md);
+}
+
+/* 3-column grid inside the card */
+.analytics-columns {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 2fr;
+  gap: var(--portal-spacing-sm);
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.analytics-column {
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-3) var(--space-3) var(--space-3);
+  min-width: 0;
+}
+
+.analytics-column-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--portal-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-bottom: var(--portal-spacing-sm);
 }
 
-.leads-analytics-section .analytics-card .empty-state {
+.analytics-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--portal-spacing-sm);
+}
+
+.analytics-column-header .analytics-column-title {
+  margin-bottom: 0;
+}
+
+.leads-analytics-section .empty-state {
   color: var(--portal-text-light);
+  padding: var(--portal-spacing-sm) 0;
 }
 
-/* Conversion Funnel (Leads page only - bar-style funnel) */
+/* ---- Conversion Funnel ----
+   Override analytics.css base .funnel-* styles which are
+   designed for a horizontal step-chart (column layout, centered). */
+
 .leads-analytics-section .funnel-container {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+  overflow: visible;
 }
 
 .leads-analytics-section .funnel-stage {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: var(--portal-spacing-sm);
+  gap: var(--portal-spacing-xs);
+  padding: 3px 0;
+  background: none;
+  border-radius: 0;
+  min-width: 0;
+  text-align: left;
+}
+
+.leads-analytics-section .funnel-stage-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--portal-text-light);
+  min-width: 85px;
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+.leads-analytics-section .funnel-bar-wrapper {
+  flex: 1;
+  min-width: 0;
+  height: 16px;
+  background: var(--portal-bg-dark);
+  border-radius: 3px;
+  overflow: hidden;
 }
 
 .leads-analytics-section .funnel-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--portal-spacing-xs) var(--portal-spacing-sm);
-  background: linear-gradient(90deg, var(--color-primary) 0%, var(--portal-bg-darker) 100%);
-  border-radius: var(--portal-radius-sm);
-  min-width: 60px;
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 3px;
+  min-width: 4px;
   transition: width 0.3s ease;
 }
 
-.leads-analytics-section .funnel-label {
-  font-size: 0.75rem;
-  color: var(--color-white);
-  font-weight: 500;
+.leads-analytics-section .funnel-bar.funnel-bar-empty {
+  background: var(--portal-border);
+  opacity: 0.5;
+}
+
+.leads-analytics-section .funnel-stage-stats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 56px;
+  flex-shrink: 0;
+  justify-content: flex-end;
 }
 
 .leads-analytics-section .funnel-count {
   font-size: 0.75rem;
-  color: var(--color-white);
+  color: var(--portal-text-light);
   font-weight: 600;
 }
 
 .leads-analytics-section .funnel-percentage {
-  font-size: 0.75rem;
-  color: var(--portal-text-light);
-  min-width: 40px;
-  text-align: right;
+  font-size: 0.6875rem;
+  color: var(--portal-text-secondary);
 }
 
-/* Source Performance */
-.source-list {
+/* ---- Source Performance ---- */
+
+.leads-analytics-section .source-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: 0;
+  padding: 0;
 }
 
-.source-item {
+.leads-analytics-section .source-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--portal-spacing-xs) 0;
+  padding: 4px 0;
   border-bottom: 1px solid var(--portal-border-light);
+  border-radius: 0;
 }
 
-.source-item:last-child {
+.leads-analytics-section .source-item:last-child {
   border-bottom: none;
 }
 
 .source-name {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--portal-text-light);
 }
 
 .source-stats {
   display: flex;
-  gap: var(--portal-spacing-md);
-  font-size: 0.75rem;
+  gap: var(--portal-spacing-sm);
+  align-items: center;
+  font-size: 0.6875rem;
 }
 
 .source-total {
-  color: var(--portal-text-light);
+  color: var(--portal-text-secondary);
 }
 
 .source-converted {
@@ -441,7 +498,9 @@
 
 .source-rate {
   color: var(--portal-text-light);
-  font-weight: 500;
+  font-weight: 600;
+  min-width: 24px;
+  text-align: right;
 }
 
 .source-rate.rate-good {
@@ -452,25 +511,28 @@
    Scoring Rules Section
    ============================================ */
 
-#scoring-rules-card {
-  margin-bottom: var(--portal-spacing-lg);
-}
+/* ---- Scoring Rules (inside analytics column) ---- */
 
 .scoring-rules-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
-  padding: var(--portal-spacing-md);
+  gap: 0;
+  padding: 0;
 }
 
 .scoring-rule-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-md);
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
+  gap: var(--portal-spacing-xs);
+  padding: 4px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--portal-border);
+  border-radius: 0;
+}
+
+.scoring-rule-item:last-child {
+  border-bottom: none;
 }
 
 .scoring-rule-item.rule-inactive {
@@ -479,37 +541,41 @@
 
 .rule-info {
   flex: 1;
+  min-width: 0;
 }
 
 .rule-name {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  color: var(--portal-text-primary);
-  margin-bottom: 2px;
+  color: var(--portal-text-light);
+  line-height: 1.3;
 }
 
 .rule-condition {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--portal-text-secondary);
+  line-height: 1.3;
 }
 
 .rule-condition code {
   background: var(--portal-bg-medium);
-  padding: 1px 4px;
-  border-radius: 3px;
+  padding: 1px 3px;
+  border-radius: 2px;
   font-family: monospace;
+  font-size: 0.625rem;
 }
 
 .rule-operator {
-  margin: 0 4px;
+  margin: 0 2px;
   color: var(--portal-text-muted);
 }
 
 .rule-points {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  min-width: 60px;
-  text-align: center;
+  min-width: 40px;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .rule-points.points-positive {
@@ -838,8 +904,14 @@
     padding: var(--portal-spacing-xs) var(--portal-spacing-sm);
   }
 
-  .leads-analytics-section .analytics-row {
+  .analytics-columns {
     grid-template-columns: 1fr;
+  }
+
+  .analytics-column:not(:last-child) {
+    border-right: none;
+    border-bottom: 1px solid var(--portal-border);
+    padding-bottom: var(--portal-spacing-md);
   }
 
   .scoring-rule-item {
