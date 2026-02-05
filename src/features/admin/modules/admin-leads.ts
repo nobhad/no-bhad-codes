@@ -1441,7 +1441,7 @@ async function loadSourcePerformance(): Promise<void> {
           source: String(s.sourceName ?? s.source ?? '').trim(),
           total: Number(s.leadCount ?? s.total ?? 0),
           converted: Number(s.wonCount ?? s.converted ?? 0),
-          conversionRate: Number(s.conversionRate ?? 0),
+          conversionRate: Number(s.conversionRate ?? 0)
         }))
         .filter((s: SourcePerformance) => s.source.length > 0);
       renderSourcePerformance(container, sources);
