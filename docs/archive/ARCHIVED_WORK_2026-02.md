@@ -214,8 +214,6 @@ Phase 3 - Proposals:
 
 ---
 
-## Completed - February 1, 2026
-
 ### Phase 1: Client Management Enhancement - COMPLETE
 
 Implemented CRM-grade client management with contacts, activities, custom fields, tags, and health scoring.
@@ -1771,5 +1769,170 @@ Completed remaining audit tasks.
 - `shared/validation/index.ts`
 - `server/services/proposal-service.ts`
 - `docs/design/DATABASE_AUDIT.md`
+
+---
+
+### Admin UI for Deleted Items
+
+**Status:** COMPLETE
+
+Created admin UI module for viewing and managing soft-deleted items.
+
+**Files Created:**
+
+- `src/features/admin/modules/admin-deleted-items.ts` - Admin module for deleted items management
+
+**Files Modified:**
+
+- `src/features/admin/modules/index.ts` - Added module loader
+- `server/routes/admin.ts` - Added API endpoints for deleted items
+
+**API Endpoints Added:**
+
+- `GET /api/admin/deleted-items` - List all soft-deleted items (optional type filter)
+- `GET /api/admin/deleted-items/stats` - Get counts by entity type
+- `POST /api/admin/deleted-items/:type/:id/restore` - Restore a soft-deleted item
+- `DELETE /api/admin/deleted-items/:type/:id/permanent` - Permanently delete an item
+
+**Features:**
+
+- Table view of all deleted items
+- Filter by entity type (client, project, invoice, lead, proposal)
+- Days until permanent deletion column with urgency indicators
+- Restore button per row
+- Permanent delete with confirmation dialog
+
+---
+
+### PDF Multi-Page Support
+
+**Status:** COMPLETE
+
+Added multi-page overflow handling to invoice and proposal PDF generation.
+
+**Files Modified:**
+
+- `server/routes/invoices.ts` - Integrated PdfPageContext for page break detection
+- `server/routes/proposals.ts` - Integrated PdfPageContext for page break detection
+
+**Features:**
+
+- Automatic page breaks when content exceeds page height
+- Continuation headers on subsequent pages
+- Page numbers for multi-page documents
+- Maintained existing PDF layout and styling
+
+---
+
+### Form Error Display Unification
+
+**Status:** COMPLETE
+
+Unified contact form error display to use inline errors instead of popup errors.
+
+**Files Modified:**
+
+- `src/modules/ui/contact-form.ts` - Changed from showTemporaryFieldError (popups) to showFieldError (inline)
+
+**Features:**
+
+- Inline error messages with ARIA attributes for accessibility
+- Focus management on first error field
+- Consistent error pattern across all forms
+
+---
+
+### Status Color Differentiation
+
+**Status:** COMPLETE
+
+Fixed NEW vs ON-HOLD/PENDING using same color.
+
+**Files Modified:**
+
+- `src/design-system/tokens/colors.css` - Added `--status-new: #06b6d4` (cyan)
+- `src/styles/shared/portal-badges.css` - Separated NEW badge styling
+
+**Result:**
+
+- NEW badges are now cyan
+- PENDING/ON-HOLD badges remain yellow
+
+---
+
+### PDF Batch Export
+
+**Status:** COMPLETE
+
+Added bulk PDF export for invoices as ZIP file.
+
+**Files Created:**
+
+- None (feature added to existing files)
+
+**Files Modified:**
+
+- `server/routes/invoices.ts` - Added `POST /api/invoices/export-batch` endpoint
+- `src/features/admin/modules/admin-invoices.ts` - Added "Download PDFs" bulk action
+- `package.json` - Added `archiver` dependency
+
+**Features:**
+
+- Select multiple invoices via checkboxes
+- Click "Download PDFs" bulk action
+- Generates ZIP file with all selected invoice PDFs
+- Includes manifest.json with export summary
+- Maximum 100 invoices per export
+
+**API Endpoint:**
+
+- `POST /api/invoices/export-batch` - Body: `{ invoiceIds: number[] }`
+
+---
+
+### Audit Documentation Cleanup
+
+**Status:** COMPLETE
+
+Cleaned up all audit files to reflect current state only (no fix logs).
+
+**Files Modified:**
+
+- `docs/design/FORMS_AUDIT.md` - Added validation layer usage guide, removed resolved issues
+- `docs/design/ACCESSIBILITY_AUDIT.md` - Moved completed items to "Completed Enhancements"
+- `docs/design/DATABASE_AUDIT.md` - Removed resolved issues log, consolidated open issues
+- `docs/design/PDF_AUDIT.md` - Removed completed batch export from improvements
+
+---
+
+### Lint Fix: admin-deleted-items.ts
+
+**Status:** COMPLETE
+
+Removed unused `storedContext` variable that was declared but never read.
+
+**Files Modified:**
+
+- `src/features/admin/modules/admin-deleted-items.ts` - Removed unused variable and its assignments
+
+**Changes:**
+
+- Removed `storedContext` module-level variable
+- Updated `setDeletedItemsContext()` to be a no-op (context passed directly to functions)
+- Removed assignment from `cleanupDeletedItems()`
+
+---
+
+### Analytics Label Consistency Verification
+
+**Status:** VERIFIED - No Issue
+
+Verified that analytics page headings are consistent (was listed as potential issue).
+
+**Finding:**
+
+- Section titles correctly use `tab-section-heading` class
+- Card titles correctly use plain `h3` elements
+- No inconsistency exists - removed from current_work.md
 
 ---
