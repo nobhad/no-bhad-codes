@@ -128,9 +128,6 @@ class AdminDashboard {
   // Focus trap cleanup function for detail modal
   private focusTrapCleanup: (() => void) | null = null;
 
-  // Modal guard observer (pre-auth)
-  private modalGuardObserver: MutationObserver | null = null;
-
   // Delegate currentProjectId to project details handler
   private get currentProjectId(): number | null {
     return this.projectDetails.getCurrentProjectId();
@@ -230,7 +227,6 @@ class AdminDashboard {
 
     // Safety: ensure no admin modals are blocking the login gate
     this.hideAllAdminModals();
-    this.setupModalGuard();
 
     // Check authentication first
     const isAuthenticated = await this.checkAuthentication();
@@ -244,7 +240,6 @@ class AdminDashboard {
 
     // User is authenticated - mark as authenticated via API
     AdminAuth.setApiAuthenticated(true);
-    this.teardownModalGuard();
 
     // User is authenticated - show dashboard
     this.showDashboard();
@@ -281,44 +276,6 @@ class AdminDashboard {
       overlay.removeAttribute('aria-modal');
       overlay.removeAttribute('role');
     });
-  }
-
-  /**
-   * Guard against modals opening before authentication.
-   * Keeps overlays hidden until the user is authenticated.
-   */
-  private setupModalGuard(): void {
-    if (this.modalGuardObserver) return;
-
-    let isEnforcing = false;
-
-    const enforceGuard = () => {
-      // Prevent infinite loop from our own DOM changes
-      if (isEnforcing) return;
-      if (AdminAuth.isAuthenticated()) return;
-
-      isEnforcing = true;
-      this.hideAllAdminModals();
-      isEnforcing = false;
-    };
-
-    // Initial enforcement
-    enforceGuard();
-
-    this.modalGuardObserver = new MutationObserver(() => {
-      enforceGuard();
-    });
-
-    // Only observe childList to detect new modals being added, not attribute changes
-    this.modalGuardObserver.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  }
-
-  private teardownModalGuard(): void {
-    this.modalGuardObserver?.disconnect();
-    this.modalGuardObserver = null;
   }
 
   /**

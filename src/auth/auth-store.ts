@@ -389,7 +389,10 @@ function createAuthStore(): AuthStore {
           await fetch(logoutEndpoint, {
             method: 'POST',
             credentials: 'include'
-          }).catch(() => {});
+          }).catch((error) => {
+            // Logout API failure is non-critical - local cleanup continues
+            console.warn('[AuthStore] Logout API call failed:', error);
+          });
         }
       } finally {
         clearSession();
