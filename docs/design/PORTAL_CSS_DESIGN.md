@@ -76,7 +76,7 @@ The HTML for admin and client portal pages must set `data-page="admin"` or `data
 |**Portal backgrounds**|`--portal-bg-darker`, `--portal-bg-dark`, `--portal-bg-medium`, `--portal-bg-light`, `--portal-bg-hover`, `--portal-bg-readonly`|
 |**Portal borders**|`--portal-border-dark`, `--portal-border-medium`, `--portal-border-light`, `--portal-border`, `--portal-border-light-style`|
 |**Border radius**|`--portal-radius-xs` (4px), `--portal-radius-sm` (6px), `--portal-radius-md` (8px), `--portal-radius-lg` (12px), `--portal-radius-pill` (50px); `--border-radius-card` → `--portal-radius-md`|
-|**Spacing**|`--portal-spacing-xs` … `--portal-spacing-2xl` (0.25rem … 2rem)|
+|**Spacing**|Use design-system tokens: `--space-0-5` (4px) … `--space-4` (32px) from `tokens/spacing.css`|
 |**Labels**|`--label-font-size`, `--label-color`, `--label-font-weight`, `--label-text-transform`, `--label-letter-spacing`|
 
 ### Admin-only overrides
@@ -99,7 +99,7 @@ Portals load the full design system via `shared.css` → `design-system/index.cs
 
 - **Colors:** Portal theme variables above; for status/semantic use tokens from `src/design-system/tokens/colors.css` (e.g. `--color-success-500`, `--color-error-500`) where appropriate.
 - **Shadows:** `var(--shadow-md)`, `var(--shadow-lg)` from `tokens/shadows.css` — avoid raw `box-shadow` values.
-- **Spacing (fixed scale):** From `tokens/spacing.css` use `--space-0` … `--space-*` for the 8px-based scale when you want fixed spacing; use `--portal-spacing-*` for portal-specific spacing.
+- **Spacing (fixed scale):** From `tokens/spacing.css` use `--space-0-5`, `--space-1`, `--space-1-5`, `--space-2`, `--space-3`, `--space-4`, etc. for the 8px-based scale. Portal-specific spacing vars have been migrated to these tokens.
 - **Z-index:** `tokens/z-index.css` for modals, overlays, nav.
 
 Overlay/backdrop tokens are defined **only** in `design-system/tokens/colors.css`; do not redefine them in `variables.css`.

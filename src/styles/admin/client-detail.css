@@ -449,7 +449,7 @@
   gap: var(--space-4);
 }
 
-@media (max-width: 900px) {
+@media (--tablet-landscape) {
   .cd-overview-grid {
     grid-template-columns: 1fr;
   }
@@ -574,11 +574,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
@@ -704,11 +704,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   transition: background 0.2s ease;
 }
 

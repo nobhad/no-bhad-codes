@@ -22,8 +22,8 @@
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-md);
-  padding: var(--portal-spacing-xl);
-  margin-bottom: var(--portal-spacing-xl);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
   box-shadow: var(--shadow-card);
 }
 
@@ -36,10 +36,10 @@
   font-family: var(--font-family-acme);
   font-size: 1.1rem;
   color: var(--portal-text-light);
-  margin: 0 0 var(--portal-spacing-lg) 0;
+  margin: 0 0 var(--space-2) 0;
   text-transform: uppercase;
   border-bottom: 1px solid var(--portal-border-medium);
-  padding-bottom: var(--portal-spacing-sm);
+  padding-bottom: var(--space-1);
 }
 
 /* ----- COMPONENT: Buttons ----- */
@@ -51,9 +51,9 @@
 
 .portal-input {
   width: 100%;
-  padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
+  padding: var(--space-2) var(--space-3);
   padding-top: 1.5rem;
-  padding-bottom: var(--portal-spacing-sm);
+  padding-bottom: var(--space-1);
   border: none;
   border-radius: var(--portal-radius-lg);
   font-size: 1rem;
@@ -103,8 +103,8 @@
 
 .portal-form-group label {
   position: absolute;
-  top: var(--portal-spacing-sm);
-  left: var(--portal-spacing-xl);
+  top: var(--space-1);
+  left: var(--space-3);
   z-index: 1;
   font-weight: 500;
   color: var(--portal-text-secondary);
@@ -117,14 +117,14 @@
 
 .portal-form-group .portal-input {
   padding-top: 1.5rem;
-  padding-bottom: var(--portal-spacing-sm);
+  padding-bottom: var(--space-1);
 }
 
 /* ----- COMPONENT: Form Row ----- */
 .portal-form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--portal-spacing-lg);
+  gap: var(--space-2);
 }
 
 /* ----- COMPONENT: Password Input with Toggle ----- */
@@ -141,13 +141,13 @@
 
 .portal-password-toggle {
   position: absolute;
-  right: var(--portal-spacing-md);
+  right: var(--space-1-5);
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
   color: var(--color-neutral-500);
-  padding: var(--portal-spacing-xs);
+  padding: var(--space-0-5);
   transition: color 0.2s ease;
 }
 
@@ -159,12 +159,12 @@
 .portal-list-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-lg);
-  padding: var(--portal-spacing-lg);
+  gap: var(--space-2);
+  padding: var(--space-2);
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-sm);
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   transition: border-color 0.2s ease;
   box-shadow: var(--shadow-card);
 }
@@ -180,13 +180,13 @@
 /* ----- COMPONENT: Item Actions ----- */
 .portal-item-actions {
   display: flex;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   flex-shrink: 0;
 }
 
 /* ----- COMPONENT: Status Badge ----- */
 .portal-badge {
-  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
+  padding: var(--space-0-5) var(--space-1-5);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -208,7 +208,7 @@
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-md);
-  padding: var(--portal-spacing-xl);
+  padding: var(--space-3);
   text-align: center;
   box-shadow: var(--shadow-card);
 }
@@ -226,7 +226,7 @@
   display: block;
   font-size: 0.85rem;
   color: var(--color-neutral-600);
-  margin-top: var(--portal-spacing-sm);
+  margin-top: var(--space-1);
   text-transform: uppercase;
 }
 
@@ -235,13 +235,13 @@
   color: var(--color-neutral-600);
   font-style: italic;
   text-align: center;
-  padding: var(--portal-spacing-2xl);
+  padding: var(--space-4);
 }
 
 /* ----- COMPONENT: Project Cards ----- */
 .portal-project-cards {
   display: block;
-  margin-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--space-2);
 }
 
 /* Base styles in shared/portal-cards.css - only client-specific overrides here */
@@ -259,7 +259,7 @@
   font-family: var(--font-family-acme);
   font-size: 1.2rem;
   color: var(--portal-text-light);
-  margin: 0 0 var(--portal-spacing-lg) 0;
+  margin: 0 0 var(--space-2) 0;
   text-transform: uppercase;
   padding-right: 120px;
   white-space: nowrap;
@@ -267,8 +267,8 @@
 
 .portal-project-card .project-status {
   position: absolute;
-  top: var(--portal-spacing-xl);
-  right: var(--portal-spacing-xl);
+  top: var(--space-3);
+  right: var(--space-3);
   margin: 0;
   padding: 0;
   font-size: 0;
@@ -276,13 +276,13 @@
   background: transparent;
 }
 
-/* Status badge in project cards - red Acme font, matches h3 title size */
-.portal-project-card .project-status .status-badge,
+/* Status badge in project cards - red Acme font, matches h3 title size
+   Uses [data-page] for specificity to override shared badge styles without !important */
 [data-page="client-portal"] .portal-project-card .project-status .status-badge {
   font-family: var(--font-family-acme);
   font-size: 1.2rem;
-  color: var(--color-primary) !important;
-  background: transparent !important;
+  color: var(--color-primary);
+  background: transparent;
   padding: 0;
   margin: 0;
   text-transform: uppercase;
@@ -293,7 +293,7 @@
 
 .portal-project-card .project-progress {
   color: var(--portal-text-secondary);
-  margin: 0 0 var(--portal-spacing-sm) 0;
+  margin: 0 0 var(--space-1) 0;
 }
 
 .portal-project-card .progress-bar {

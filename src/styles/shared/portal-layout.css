@@ -42,7 +42,7 @@ body:has([data-page="client-portal"]) {
 :is([data-page="admin"], [data-page="client-portal"]) .admin-table-card,
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card,
 :is([data-page="admin"], [data-page="client-portal"]) .content-section {
-  margin-bottom: var(--portal-spacing-xl);
+  margin-bottom: var(--space-3);
 }
 
 /* Remove bottom margin from last child to prevent double spacing */

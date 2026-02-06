@@ -371,7 +371,7 @@
    Auto-collapse sidebar when viewport is constrained (zoom or narrow screens)
    1300px triggers at ~150% zoom on 1920px screens (1920/1.5 = 1280px)
    ===================================================== */
-@media (max-width: 1300px) {
+@media (--wide-down) {
   [data-page="client-portal"] .sidebar,
   [data-page="admin"] .sidebar {
     width: 56px !important;

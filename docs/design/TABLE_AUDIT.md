@@ -2390,14 +2390,16 @@ Invoice # | Amount | Due Date | Status | Actions
 - `--color-primary` - Brand color (accents, active states)
 - `--color-error-500` - Error/hover link color
 
-#### Spacing
+#### Spacing (8px base grid)
 
-- `--space-1` - 4px
-- `--space-2` - 8px
-- `--space-3` - 12px
-- `--space-4` - 16px
-- `--space-8` - 32px
-- `--portal-spacing-sm` / `--portal-spacing-md` / `--portal-spacing-lg` / `--portal-spacing-xl`
+- `--space-0-5` - 4px
+- `--space-1` - 8px
+- `--space-1-5` - 12px
+- `--space-2` - 16px
+- `--space-3` - 24px
+- `--space-4` - 32px
+- `--space-6` - 48px
+- `--space-8` - 64px
 
 #### Border Radius
 

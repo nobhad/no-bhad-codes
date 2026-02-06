@@ -328,7 +328,7 @@ body[data-page="client"] .project-details {
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--portal-spacing-xl);
+  gap: var(--space-3);
 }
 
 .overview-item {
@@ -1234,22 +1234,7 @@ body[data-page="client-landing"] .dynamic-content .contact-form {
   display: block;
 }
 
-/* Password toggle */
-.password-input-wrapper {
-  position: relative;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-  font-size: 1rem;
-}
+/* Password toggle - see earlier .password-input-wrapper definition in this file */
 
 /* Responsive adjustments */
 @media (--mobile) {

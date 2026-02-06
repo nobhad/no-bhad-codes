@@ -14,11 +14,11 @@
 :is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--portal-spacing-md);
-  margin-bottom: var(--portal-spacing-xl);
+  gap: var(--space-1-5);
+  margin-bottom: var(--space-3);
 }
 
-@media (max-width: 900px) {
+@media (--tablet-landscape) {
   :is([data-page="admin"], [data-page="client-portal"]) .quick-stats,
   :is([data-page="admin"], [data-page="client-portal"]) .attention-grid,
   :is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 {
@@ -81,7 +81,7 @@
   display: block;
   font-size: 0.85rem;
   color: var(--portal-text-secondary);
-  margin-top: var(--portal-spacing-sm);
+  margin-top: var(--space-1);
   text-transform: uppercase;
 }
 
@@ -99,7 +99,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .overview-card h3 {
   color: var(--portal-text-light);
-  margin-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--space-2);
 }
 
 /* =====================================================
@@ -110,7 +110,7 @@
   border: none;
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
-  margin-bottom: var(--portal-spacing-xl);
+  margin-bottom: var(--space-3);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
 }
@@ -120,7 +120,7 @@
   font-family: var(--font-family-acme);
   font-size: 1.1rem;
   color: var(--portal-text-light);
-  margin: 0 0 var(--portal-spacing-lg) 0;
+  margin: 0 0 var(--space-2) 0;
   text-transform: uppercase;
 }
 
@@ -136,7 +136,7 @@
   background: var(--portal-bg-medium);
   border-radius: var(--border-radius-card);
   border: none;
-  margin-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-0-5);
   font-size: 0.9rem;
   color: var(--portal-text-light);
   box-shadow: var(--shadow-card);
@@ -222,9 +222,9 @@
   background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--portal-radius-lg, 12px);
-  padding: var(--portal-spacing-xl, 1.5rem);
+  padding: var(--space-3);
   color: var(--portal-text-light);
-  margin-bottom: var(--portal-spacing-xl);
+  margin-bottom: var(--space-3);
   box-shadow: var(--shadow-panel);
 }
 
@@ -281,7 +281,7 @@
   display: block;
   font-size: 0.9rem;
   color: var(--portal-text-secondary);
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   text-transform: uppercase;
 }
 
@@ -301,7 +301,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action h3,
@@ -332,7 +332,7 @@
   font-family: var(--font-family-acme);
   font-size: 1.1rem;
   color: var(--portal-text-light);
-  margin: 0 0 var(--portal-spacing-lg) 0;
+  margin: 0 0 var(--space-2) 0;
   text-transform: uppercase;
 }
 
@@ -345,7 +345,7 @@
   background: var(--portal-bg-light);
   border: none;
   border-radius: var(--portal-radius-md);
-  margin: var(--portal-spacing-lg) 0;
+  margin: var(--space-2) 0;
   overflow: hidden;
 }
 
@@ -410,7 +410,7 @@
    DASHBOARD SECTIONS
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .dashboard-section {
-  margin-bottom: var(--portal-spacing-xl);
+  margin-bottom: var(--space-3);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .dashboard-section:last-child {
@@ -424,7 +424,7 @@
   color: var(--portal-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin: 0 0 var(--portal-spacing-md) 0;
+  margin: 0 0 var(--space-1-5) 0;
 }
 
 /* =====================================================
@@ -434,7 +434,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .attention-card {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
   padding: var(--space-4);
   min-height: 88px;
   background: var(--portal-bg-dark);

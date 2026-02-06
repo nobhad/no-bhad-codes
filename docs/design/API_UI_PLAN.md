@@ -61,7 +61,7 @@ This document plans how the four API-only route groups (approvals, triggers, doc
 
 ### 1.2 Tokens and styles
 
-- Reuse `--portal-bg-dark`, `--portal-text-light`, `--portal-border-*`, `--portal-spacing-*`.
+- Reuse `--portal-bg-dark`, `--portal-text-light`, `--portal-border-*`, and design-system spacing tokens (`--space-*`).
 - Table: same as Leads/Clients/Projects (`.admin-table`, header with `--portal-text-light`).
 - New file: `src/styles/admin/workflows.css` (or under `admin/` with a name that covers approvals + triggers). Import in `admin/index.css` / bundle.
 

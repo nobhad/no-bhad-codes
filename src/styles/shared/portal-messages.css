@@ -23,7 +23,7 @@
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .messages-global-search {
   grid-column: 1 / -1;
-  padding: var(--portal-spacing-lg);
+  padding: var(--space-2);
   background: var(--color-neutral-200);
   border-bottom: 2px solid var(--color-neutral-400);
   position: relative;
@@ -91,7 +91,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .thread-list-header {
-  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  padding: var(--space-1-5) var(--space-2);
   font-weight: 600;
   font-size: var(--font-size-sm);
   color: var(--color-neutral-900);
@@ -108,7 +108,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  padding: var(--space-1-5) var(--space-2);
   border-bottom: 1px solid var(--portal-border);
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -215,8 +215,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--portal-spacing-lg);
-  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-2);
   font-weight: 600;
   font-size: var(--font-size-sm);
   color: var(--color-neutral-900);
@@ -247,10 +247,10 @@
   flex: 1;
   min-height: 300px;
   overflow-y: auto;
-  padding: var(--portal-spacing-xl);
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
   color: var(--color-neutral-900);
   border-bottom: 2px solid var(--color-neutral-400);
   position: relative;
@@ -267,7 +267,7 @@
 [data-page="admin"] .messages-container .messages-thread > p {
   text-align: center;
   font-style: italic;
-  padding: var(--portal-spacing-xl);
+  padding: var(--space-3);
   margin: 0;
 }
 
@@ -278,7 +278,7 @@
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
   max-width: 100%;
   width: 100%;
   cursor: default;
@@ -311,7 +311,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
   flex-shrink: 0;
 }
 
@@ -354,7 +354,7 @@
   background: var(--color-surface-primary);
   border: var(--portal-border);
   border-radius: 18px;
-  padding: var(--portal-spacing-lg) 1.25rem;
+  padding: var(--space-2) 1.25rem;
   line-height: 1.5;
   color: var(--color-neutral-900);
   flex: 1;
@@ -377,9 +377,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   font-size: var(--font-size-sm);
-  gap: var(--portal-spacing-lg);
+  gap: var(--space-2);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-sender {
@@ -404,8 +404,8 @@
 :is([data-page="admin"], [data-page="client-portal"]) .message-compose {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-lg);
-  padding: var(--portal-spacing-lg);
+  gap: var(--space-2);
+  padding: var(--space-2);
   position: relative;
   background: transparent;
   border: none;
@@ -433,7 +433,7 @@
   border: none;
   border-radius: var(--portal-radius-lg);
   min-height: 100px;
-  padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
+  padding: var(--space-2) var(--space-3);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 1rem;
   font-weight: 400;
@@ -490,7 +490,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
   border-bottom: 1px solid var(--portal-border);
   background: var(--color-neutral-200);
 }
@@ -707,7 +707,7 @@
    PINNED MESSAGES SECTION
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .pinned-messages {
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   border-bottom: 1px solid var(--portal-border);
   background: rgba(0, 175, 240, 0.05);
 }
@@ -754,7 +754,7 @@
    ===================================================== */
 
 /* Thread list collapses on tablet */
-@media (max-width: 900px) {
+@media (--tablet-landscape) {
   :is([data-page="admin"], [data-page="client-portal"]) .messages-layout {
     grid-template-columns: 200px 1fr;
   }
@@ -842,7 +842,7 @@
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .message-content {
-    padding: var(--portal-spacing-md);
+    padding: var(--space-1-5);
     max-width: 100%;
   }
 

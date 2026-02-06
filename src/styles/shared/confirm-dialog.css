@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10100; /* Above all modals and overlays */
+  z-index: var(--z-index-portal-confirm); /* Above all modals and overlays */
   padding: var(--space-4);
   animation: confirmFadeIn 0.15s ease;
   -webkit-backdrop-filter: blur(4px);
@@ -139,7 +139,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--portal-spacing-md, 0.75rem) var(--portal-spacing-xl, 1.5rem);
+  padding: var(--space-1-5) var(--space-3);
   font-family: var(--font-family-acme, inherit);
   font-size: 0.9rem;
   font-weight: 600;

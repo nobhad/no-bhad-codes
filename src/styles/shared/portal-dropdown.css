@@ -72,7 +72,7 @@
   border-color: var(--color-primary);
   border-bottom: none;
   border-radius: var(--dropdown-radius) var(--dropdown-radius) 0 0;
-  z-index: 10001;
+  z-index: var(--z-index-portal-dropdown);
   position: relative;
   background-color: var(--dropdown-bg);
 }
@@ -115,7 +115,7 @@
   border: var(--dropdown-border-width) solid var(--color-primary);
   border-top: none;
   border-radius: 0 0 var(--dropdown-radius) var(--dropdown-radius);
-  z-index: 10000;
+  z-index: var(--z-index-portal-dropdown);
   list-style: none;
   margin: 0;
   margin-top: calc(var(--dropdown-border-width) * -1);
@@ -252,7 +252,7 @@
   background-color: var(--dropdown-bg, var(--color-surface-primary));
   border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-md);
-  z-index: 10000;
+  z-index: var(--z-index-portal-dropdown);
   list-style: none;
   margin: 4px 0 0 0;
   padding: var(--space-1) 0;

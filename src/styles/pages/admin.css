@@ -28,14 +28,14 @@ html[data-theme="dark"] body[data-page="admin"] {
    Login page header MUST match main site styling exactly.
    ================================================ */
 
-/* Show header on admin login page - above auth-gate (z-index: 9999) */
+/* Show header on admin login page - above auth-gate */
 [data-page="admin"] .admin-header {
   display: flex;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10000;
+  z-index: var(--z-index-portal-modal);
   background: transparent;
   height: var(--header-height, 60px);
 }
@@ -264,7 +264,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 }
 
 /* Intermediate: 2x2 when sidebar collapses (zoom-friendly) */
-@media (max-width: 1024px) {
+@media (--laptop) {
   [data-page="admin"] #tab-overview .quick-stats,
   [data-page="admin"] #tab-overview .attention-grid,
   [data-page="admin"] #tab-leads .quick-stats,
@@ -754,20 +754,20 @@ body.modal-open .dashboard-content {
 
 /* Spacing between tab content children (replaces flex gap) */
 .tab-content.active > * + * {
-  margin-top: var(--portal-spacing-xl);
+  margin-top: var(--space-3);
 }
 
 /* Less space below Leads heading */
 #tab-leads .page-title + .quick-stats {
-  margin-top: var(--portal-spacing-md);
+  margin-top: var(--space-1-5);
 }
 
 /* Overview Tab */
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--portal-spacing-xl);
-  margin-bottom: var(--portal-spacing-xl);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 
 .metric-card {
@@ -816,8 +816,8 @@ body.modal-open .dashboard-content {
 .visitors-dashboard {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-lg);
-  margin-top: var(--portal-spacing-lg);
+  gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .visitors-controls {
@@ -1722,9 +1722,7 @@ body.modal-open .dashboard-content {
 }
 
 /* Utility Classes */
-.hidden {
-  display: none !important;
-}
+/* NOTE: .hidden is defined in base/layout.css - do not duplicate here */
 
 .text-success {
   color: var(--color-success);
@@ -1990,7 +1988,7 @@ body.modal-open .dashboard-content {
 }
 
 /* Intermediate breakpoint - badge at top-right of button so it's never clipped */
-@media (max-width: 1024px) {
+@media (--laptop) {
   [data-page="admin"] .sidebar .sidebar-buttons .btn .sidebar-badge {
     position: absolute;
     top: 2px;
@@ -2083,7 +2081,7 @@ body.modal-open .dashboard-content {
   border-color: var(--color-primary);
   border-bottom-color: transparent;
   border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
-  z-index: 10000;
+  z-index: var(--z-index-portal-dropdown);
   position: relative;
   background-color: var(--portal-bg-darker, rgba(0, 0, 0, 0.25));
 }
@@ -2128,7 +2126,7 @@ body.modal-open .dashboard-content {
   border: 2px solid var(--color-primary);
   border-top: none;
   border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
-  z-index: 10001;
+  z-index: var(--z-index-portal-dropdown);
   display: none;
   box-shadow: none;
   clip-path: none;
@@ -2412,7 +2410,7 @@ body.modal-open .dashboard-content {
   text-align: left;
   border-radius: 4px;
   box-shadow: var(--shadow-elevated-sm);
-  z-index: 10000;
+  z-index: var(--z-index-portal-dropdown);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
@@ -2434,7 +2432,7 @@ body.modal-open .dashboard-content {
   transform: translateX(-50%);
   border: 6px solid transparent;
   border-top-color: var(--portal-bg-darker, #2a2a2a);
-  z-index: 10001;
+  z-index: var(--z-index-portal-dropdown);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;

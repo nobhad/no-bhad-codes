@@ -396,7 +396,7 @@
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--portal-spacing-xl);
+  gap: var(--space-3);
 }
 
 .overview-card {

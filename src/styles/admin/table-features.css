@@ -62,7 +62,7 @@
 
 [data-page="admin"] .pagination-page-size-dropdown .table-dropdown .custom-dropdown-menu {
   background-color: var(--portal-bg-dark);
-  z-index: 10001;
+  z-index: var(--z-index-portal-dropdown);
 }
 
 [data-page="admin"] .pagination-page-size-dropdown .table-dropdown .custom-dropdown-item {
@@ -363,7 +363,7 @@
    RESPONSIVE ADJUSTMENTS
    =============================================== */
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .table-pagination .pagination-inner {
     flex-direction: column;
     align-items: flex-start;

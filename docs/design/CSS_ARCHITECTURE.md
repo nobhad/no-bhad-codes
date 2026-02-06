@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** February 2, 2026
+**Last Updated:** February 6, 2026
 
 ## Table of Contents
 
@@ -286,14 +286,20 @@ Quick stats display:
 
 #### Spacing
 
-|Variable|Purpose|Default|
+Design tokens from `src/design-system/tokens/spacing.css` (8px base grid):
+
+|Variable|Value|Pixels|
 |----------|---------|---------|
-|`--space-xs`|Extra small space|`clamp(0.25rem, 1vw, 0.5rem)`|
-|`--space-sm`|Small space|`clamp(0.5rem, 2vw, 1rem)`|
-|`--space-md`|Medium space|`clamp(1rem, 3vw, 1.5rem)`|
-|`--space-lg`|Large space|`clamp(1.5rem, 4vw, 2rem)`|
-|`--space-xl`|Extra large space|`clamp(2rem, 5vw, 3rem)`|
-|`--space-2xl`|2x large space|`clamp(3rem, 6vw, 4rem)`|
+|`--space-0-5`|`calc(var(--space-base) * 0.5)`|4px|
+|`--space-1`|`var(--space-base)`|8px|
+|`--space-1-5`|`calc(var(--space-base) * 1.5)`|12px|
+|`--space-2`|`calc(var(--space-base) * 2)`|16px|
+|`--space-3`|`calc(var(--space-base) * 3)`|24px|
+|`--space-4`|`calc(var(--space-base) * 4)`|32px|
+|`--space-6`|`calc(var(--space-base) * 6)`|48px|
+|`--space-8`|`calc(var(--space-base) * 8)`|64px|
+
+Fluid variants available: `--space-fluid-xs` through `--space-fluid-2xl` with `clamp()` values.
 
 #### Animations
 
@@ -895,7 +901,7 @@ box-shadow:
 
 **Last Updated:** January 15, 2026
 
-This section documents all legitimate `!important` declarations in the codebase. As of January 15, 2026, we have reduced from 313 to 58 instances through specificity refactoring.
+This section documents all legitimate `!important` declarations in the codebase. Current count: ~100 instances, all legitimate (accessibility, print, GSAP overrides, utility classes).
 
 ### Legitimate Uses (Do Not Remove)
 
@@ -1076,7 +1082,7 @@ The admin messaging component uses a light background with dark text, styled as 
 [data-page="admin"] .messages-thread {
   max-height: 400px;
   overflow-y: auto;
-  padding: var(--portal-spacing-lg);
+  padding: var(--space-2);
   background: var(--color-neutral-200);
   border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
 }
@@ -1151,11 +1157,11 @@ The client selector uses a custom dropdown component with unread message counts:
 
 ## Known Issues
 
-### Updated February 2, 2026
+### Updated February 6, 2026
 
-### Resolved Issues (December 2025 - January 2026)
+### Resolved Issues (December 2025 - February 2026)
 
-The following issues from the December 17 code review have been addressed:
+The following issues from code reviews have been addressed:
 
 |Issue|Status|Resolution|
 |-------|--------|------------|
@@ -1164,6 +1170,9 @@ The following issues from the December 17 code review have been addressed:
 |Legacy `--fg`/`--bg` variables|FIXED|Migrated 65+ instances to semantic tokens|
 |Hardcoded `#000` values|FIXED|Migrated 27 instances to `var(--color-black)`|
 |Font loading issues|FIXED|Created `fonts.css` with `@font-face` definitions (imported first)|
+|Dual spacing conventions|FIXED|Migrated 607 `--portal-spacing-*` usages to design-system `--space-*` tokens|
+|Hardcoded breakpoints|FIXED|All breakpoints now use `@custom-media` variables|
+|Duplicate `!important` in badges|FIXED|Removed via specificity fix in `client-portal/components.css`|
 
 ### Remaining Issues
 

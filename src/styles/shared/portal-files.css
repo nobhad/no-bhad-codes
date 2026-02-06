@@ -13,7 +13,7 @@
   border: none;
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
-  margin-bottom: var(--portal-spacing-2xl);
+  margin-bottom: var(--space-4);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
 }
@@ -21,7 +21,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .files-upload-section h3 {
   font-family: var(--font-family-acme);
   font-size: 1.1rem;
-  margin: 0 0 var(--portal-spacing-lg) 0;
+  margin: 0 0 var(--space-2) 0;
   text-transform: uppercase;
   color: var(--portal-text-light);
 }
@@ -33,7 +33,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone {
   border: 2px dashed var(--portal-text-light);
   border-radius: var(--portal-radius-md);
-  padding: var(--portal-spacing-2xl);
+  padding: var(--space-4);
   text-align: center;
   background: var(--portal-bg-medium);
   color: var(--portal-text-light);
@@ -48,7 +48,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone p {
-  margin: 0 0 var(--portal-spacing-lg) 0;
+  margin: 0 0 var(--space-2) 0;
   color: var(--portal-text-light);
 }
 
@@ -83,14 +83,14 @@
   color: var(--portal-text-light);
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
   box-shadow: var(--shadow-panel);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-list-section h3 {
   font-family: var(--font-family-acme);
   font-size: 1.1rem;
-  margin: 0 0 var(--portal-spacing-lg) 0;
+  margin: 0 0 var(--space-2) 0;
   text-transform: uppercase;
   color: var(--portal-text-light);
 }
@@ -102,23 +102,23 @@
 :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-md);
-  margin-bottom: var(--portal-spacing-lg);
-  padding-bottom: var(--portal-spacing-lg);
+  gap: var(--space-1-5);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--portal-border);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-filter-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
   align-items: flex-end;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .filter-group {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
   min-width: 140px;
 }
 
@@ -137,7 +137,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-select,
 :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-input {
   font-size: 0.875rem;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-sm);
@@ -158,13 +158,13 @@
 
 @media (--mobile) {
   :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .filter-group {
-    flex: 1 1 calc(50% - var(--portal-spacing-md));
+    flex: 1 1 calc(50% - var(--space-1-5));
     min-width: 100px;
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar #files-clear-filters {
     width: 100%;
-    margin-top: var(--portal-spacing-sm);
+    margin-top: var(--space-1);
   }
 }
 
@@ -175,7 +175,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .files-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 /* =====================================================
@@ -185,8 +185,8 @@
 :is([data-page="admin"], [data-page="client-portal"]) .file-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-lg);
-  padding: var(--portal-spacing-lg);
+  gap: var(--space-2);
+  padding: var(--space-2);
   padding-right: 3rem;
   background: var(--portal-bg-medium);
   border: none;
@@ -207,7 +207,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .file-info {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
   flex: 1;
   min-width: 0;
 }
@@ -238,7 +238,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .file-actions {
   display: flex;
   flex-direction: row;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -263,7 +263,7 @@
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .file-delete-icon {
   position: absolute;
-  right: var(--portal-spacing-lg);
+  right: var(--space-2);
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
@@ -289,7 +289,7 @@
   color: var(--color-primary);
   text-decoration: none;
   font-weight: 600;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
+  padding: var(--space-1) var(--space-2);
   border: 1px solid var(--color-primary);
   border-radius: var(--portal-radius-xs);
   transition: all var(--transition-fast);
@@ -306,7 +306,7 @@
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .no-files {
   text-align: center;
-  padding: var(--portal-spacing-2xl);
+  padding: var(--space-4);
   color: var(--portal-text-secondary);
   font-style: italic;
 }
@@ -331,13 +331,13 @@
 @media (--mobile) {
   :is([data-page="admin"], [data-page="client-portal"]) .file-item {
     flex-wrap: wrap;
-    padding-right: var(--portal-spacing-lg);
+    padding-right: var(--space-2);
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .file-actions {
     width: 100%;
     margin-left: 0;
-    margin-top: var(--portal-spacing-sm);
+    margin-top: var(--space-1);
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview:not(.icon-btn),

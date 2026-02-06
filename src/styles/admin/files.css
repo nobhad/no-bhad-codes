@@ -38,7 +38,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   border-bottom: 1px solid var(--portal-border);
 }
 
@@ -52,7 +52,7 @@
 .folder-tree {
   flex: 1;
   overflow-y: auto;
-  padding: var(--portal-spacing-sm);
+  padding: var(--space-1);
 }
 
 .folder-item {
@@ -120,7 +120,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   border-bottom: 1px solid var(--portal-border);
   background: var(--portal-bg-dark);
 }
@@ -140,27 +140,27 @@
 .files-list {
   flex: 1;
   overflow-y: auto;
-  padding: var(--portal-spacing-sm);
+  padding: var(--space-1);
 }
 
 .files-list.grid-view {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 /* File Item */
 .file-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-sm);
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.15s ease;
-  margin-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-0-5);
 }
 
 .file-item:hover {
@@ -258,7 +258,7 @@
 /* Grid View File Item */
 .files-list.grid-view .file-item {
   flex-direction: column;
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
   text-align: center;
   margin-bottom: 0;
 }
@@ -266,7 +266,7 @@
 .files-list.grid-view .file-icon {
   width: 48px;
   height: 48px;
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
 }
 
 .files-list.grid-view .file-info {
@@ -275,7 +275,7 @@
 
 .files-list.grid-view .file-badges {
   justify-content: center;
-  margin-top: var(--portal-spacing-xs);
+  margin-top: var(--space-0-5);
 }
 
 /* ============================================
@@ -293,7 +293,7 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: var(--portal-spacing-lg);
+  padding: var(--space-2);
 }
 
 .file-detail-modal.hidden {
@@ -314,7 +314,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
   border-bottom: 1px solid var(--portal-border);
 }
 
@@ -331,7 +331,7 @@
 .file-detail-tabs {
   display: flex;
   gap: 4px;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   border-bottom: 1px solid var(--portal-border);
 }
 
@@ -358,7 +358,7 @@
 
 .file-detail-tab-content {
   display: none;
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
   flex: 1;
   overflow-y: auto;
 }
@@ -371,7 +371,7 @@
 .file-info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
 }
 
 .file-info-item {
@@ -396,14 +396,14 @@
 .file-versions-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .version-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
   border: 1px solid var(--portal-border);
@@ -443,21 +443,21 @@
 
 .version-actions {
   display: flex;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
 }
 
 /* Comments List */
 .file-comments-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
-  margin-bottom: var(--portal-spacing-md);
+  gap: var(--space-1);
+  margin-bottom: var(--space-1-5);
   max-height: 250px;
   overflow-y: auto;
 }
 
 .comment-item {
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
   border: 1px solid var(--portal-border);
@@ -490,14 +490,14 @@
 .file-comment-form {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .file-comment-form textarea {
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-sm);
-  padding: var(--portal-spacing-sm);
+  padding: var(--space-1);
   color: var(--portal-text-primary);
   font-size: 0.875rem;
   resize: vertical;
@@ -516,14 +516,14 @@
 .file-access-log {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
 }
 
 .access-log-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-sm);
-  padding: var(--portal-spacing-xs) var(--portal-spacing-sm);
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
   font-size: 0.813rem;
@@ -545,8 +545,8 @@
 /* File Detail Actions */
 .file-detail-actions {
   display: flex;
-  gap: var(--portal-spacing-sm);
-  padding: var(--portal-spacing-md);
+  gap: var(--space-1);
+  padding: var(--space-1-5);
   border-top: 1px solid var(--portal-border);
 }
 
@@ -560,7 +560,7 @@
    Responsive
    ============================================ */
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .files-browser {
     grid-template-columns: 1fr;
   }
@@ -574,7 +574,7 @@
   }
 
   .file-detail-modal {
-    padding: var(--portal-spacing-sm);
+    padding: var(--space-1);
   }
 
   .file-detail-content {

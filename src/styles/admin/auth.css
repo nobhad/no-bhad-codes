@@ -19,7 +19,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 9999;
+  z-index: var(--z-index-portal-overlay);
   transition: background-color 0.2s ease;
 }
 
@@ -172,7 +172,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
 [data-page="admin"] .auth-gate .password-input-wrapper input,
 .auth-gate .password-input-wrapper input {
   width: 100%;
-  padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
+  padding: var(--space-2) var(--space-3);
   padding-right: 3rem;
   border: none;
   border-radius: var(--portal-radius-lg);
@@ -203,13 +203,13 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
 
 .auth-gate .password-toggle {
   position: absolute;
-  right: var(--portal-spacing-lg);
+  right: var(--space-2);
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--portal-spacing-xs);
+  padding: var(--space-0-5);
   transition: color 0.2s ease;
   color: var(--portal-text-secondary);
 }
@@ -221,7 +221,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
 /* Auth submit button - matches portal button styling */
 .auth-submit {
   width: 100%;
-  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
+  padding: var(--space-1-5) var(--space-3);
   border: 2px solid var(--portal-border-light);
   border-radius: var(--portal-radius-lg);
   font-size: 0.9rem;
@@ -233,7 +233,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   text-transform: uppercase;
   background-color: transparent;
   color: var(--portal-text-light);
-  margin-top: var(--portal-spacing-lg);
+  margin-top: var(--space-2);
 }
 
 .auth-submit:hover {
