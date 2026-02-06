@@ -17,9 +17,9 @@
 
 .kanban-board {
   display: flex;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
   overflow-x: auto;
-  padding: var(--portal-spacing-md) 0;
+  padding: var(--space-1-5) 0;
   min-height: 400px;
 }
 
@@ -33,7 +33,7 @@
 }
 
 .kanban-column-header {
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   border-top: 3px solid var(--color-primary);
   border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
   display: flex;
@@ -60,10 +60,10 @@
 .kanban-column-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--portal-spacing-sm);
+  padding: var(--space-1);
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   min-height: 100px;
 }
 
@@ -74,7 +74,7 @@
 .kanban-card {
   background: var(--portal-bg-light);
   border-radius: var(--portal-radius-sm);
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   cursor: grab;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   border: 1px solid transparent;
@@ -122,10 +122,10 @@
   color: var(--portal-text-secondary);
   font-size: 0.875rem;
   text-align: center;
-  padding: var(--portal-spacing-lg);
+  padding: var(--space-2);
 }
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .kanban-board {
     flex-direction: column;
   }
@@ -267,7 +267,7 @@
    ============================================ */
 
 .timeline-container {
-  padding: var(--portal-spacing-md) 0;
+  padding: var(--space-1-5) 0;
 }
 
 .timeline-events {
@@ -287,9 +287,9 @@
 
 .timeline-event {
   position: relative;
-  padding-bottom: var(--portal-spacing-md);
+  padding-bottom: var(--space-1-5);
   display: flex;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .timeline-event:last-child {
@@ -314,7 +314,7 @@
   flex: 1;
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-sm);
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   border: 1px solid var(--portal-border);
 }
 
@@ -322,7 +322,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   margin-bottom: 4px;
 }
 
@@ -352,17 +352,17 @@
 
 .timeline-empty {
   text-align: center;
-  padding: var(--portal-spacing-xl);
+  padding: var(--space-3);
   color: var(--portal-text-secondary);
   font-size: 0.875rem;
 }
 
 .timeline-load-more {
   text-align: center;
-  margin-top: var(--portal-spacing-md);
+  margin-top: var(--space-1-5);
 }
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .timeline-events {
     padding-left: 24px;
   }
@@ -378,7 +378,7 @@
 
 /* Bar Chart */
 .bar-chart-item {
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
 }
 
 .bar-chart-label {
@@ -390,7 +390,7 @@
 .bar-chart-bar-wrapper {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .bar-chart-bar {
@@ -409,7 +409,7 @@
 .pie-chart-wrapper {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-lg);
+  gap: var(--space-2);
 }
 
 .pie-chart-svg {
@@ -419,13 +419,13 @@
 .pie-chart-legend {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
 }
 
 .pie-chart-legend-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .pie-chart-legend-color {
@@ -450,7 +450,7 @@
 .pie-chart-empty {
   text-align: center;
   color: var(--portal-text-secondary);
-  padding: var(--portal-spacing-lg);
+  padding: var(--space-2);
 }
 
 /* Sparkline */
@@ -462,8 +462,8 @@
 .kpi-card {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-md);
-  padding: var(--portal-spacing-md);
+  gap: var(--space-1-5);
+  padding: var(--space-1-5);
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   border-top: 3px solid var(--color-primary);
@@ -515,7 +515,7 @@
   font-weight: 400;
 }
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .pie-chart-wrapper {
     flex-direction: column;
     align-items: flex-start;

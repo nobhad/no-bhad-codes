@@ -27,7 +27,7 @@
 #tab-project-detail .page-title.page-title-with-badge {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-lg);
+  gap: var(--space-2);
 }
 
 #tab-project-detail .page-title.page-title-with-badge .status-badge {
@@ -37,7 +37,7 @@
 /* Shared page title for both detail views (client + project) */
 #tab-project-detail .page-title,
 #tab-client-detail .page-title {
-  margin-bottom: var(--portal-spacing-xl);
+  margin-bottom: var(--space-3);
 }
 
 #tab-project-detail .page-title h2,
@@ -53,12 +53,12 @@
   background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--portal-radius-lg);
-  padding: var(--portal-spacing-xl);
-  margin-bottom: var(--portal-spacing-xl);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
   color: var(--portal-text-light);
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-xl);
+  gap: var(--space-3);
 }
 
 .project-detail-overview .overview-header {
@@ -166,7 +166,7 @@
 .project-detail-client-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--portal-spacing-xl);
+  gap: var(--space-3);
 }
 
 /* Invite icon button inline with client name in project detail */
@@ -185,7 +185,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   row-gap: var(--field-group-gap);
-  column-gap: var(--portal-spacing-xl);
+  column-gap: var(--space-3);
 }
 
 /* ==============================================
@@ -227,7 +227,7 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 /* High specificity with body element selector */
 body[data-page="admin"] [id^="pd-tab-"] .invoice-summary {
   display: flex;
-  gap: var(--portal-spacing-xl);
+  gap: var(--space-3);
   margin: 0;
   background: transparent;
   box-shadow: none;
@@ -237,11 +237,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
-  padding: var(--portal-spacing-xl);
+  padding: var(--space-3);
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   box-shadow: var(--shadow-card);
   flex: 1;
 }
@@ -286,13 +286,13 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   color: var(--portal-text-light);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin: 0 0 var(--portal-spacing-lg) 0;
+  margin: 0 0 var(--space-2) 0;
 }
 
 /* Invoice summary within tab - keep flex layout */
 [id^="pd-tab-"] .invoice-summary {
   display: flex;
-  gap: var(--portal-spacing-xl);
+  gap: var(--space-3);
   margin: 0;
 }
 
@@ -332,9 +332,9 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 [data-page="admin"] .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--portal-spacing-lg);
+  gap: var(--space-2);
   background: transparent;
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 [data-page="admin"] .form-row .form-group {
@@ -346,7 +346,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   text-align: left;
   padding-left: 0;
   display: block;
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   position: relative;
 }
 
@@ -354,8 +354,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 [data-page="admin"] .form-value-readonly {
   display: block;
   background: transparent;
-  padding: var(--portal-spacing-md) 0;
-  margin-top: var(--portal-spacing-md);
+  padding: var(--space-1-5) 0;
+  margin-top: var(--space-1-5);
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--portal-text-light);
@@ -381,7 +381,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Custom status dropdown for settings form - matches text fields */
 [data-page="admin"] #pd-setting-status {
   width: 100%;
-  padding: 1.75rem var(--portal-spacing-xl) var(--portal-spacing-sm) var(--portal-spacing-xl);
+  padding: 1.75rem var(--space-3) var(--space-1) var(--space-3);
   border: none;
   border-radius: var(--portal-radius-lg);
   font-size: 1.2rem;
@@ -449,7 +449,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 #pd-tab-settings .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
   position: relative;
   margin-bottom: 1rem;
 }
@@ -478,7 +478,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 #pd-tab-settings .form-row .form-group {
   margin-bottom: 0;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 /* Readonly form values - match meta-value styling */
@@ -498,8 +498,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Project status dropdown - match input field styling */
 #pd-status-dropdown .custom-dropdown-trigger {
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
-  padding-left: var(--portal-spacing-lg);
+  padding: var(--space-1) var(--space-1-5);
+  padding-left: var(--space-2);
   font-size: 0.95rem;
   font-weight: 400;
   min-height: auto;
@@ -522,7 +522,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 #pd-status-dropdown .custom-dropdown-option {
   display: block;
   width: 100%;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   background: transparent;
   border: none;
   color: var(--portal-text-light);
@@ -583,7 +583,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--space-2);
 }
 
 .card-header-with-action h3 {
@@ -599,7 +599,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .project-progress-display {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-lg);
+  gap: var(--space-2);
 }
 
 .progress-percentage {
@@ -628,15 +628,15 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .milestones-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
 }
 
 .milestone-item,
 [data-page="admin"] .milestone-item {
   display: flex;
   align-items: flex-start;
-  gap: var(--portal-spacing-md);
-  padding: var(--portal-spacing-lg);
+  gap: var(--space-1-5);
+  padding: var(--space-2);
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
@@ -695,7 +695,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 [data-page="admin"] .milestone-title {
   font-weight: 600;
   color: var(--portal-text-light);
-  margin: 0 0 var(--portal-spacing-sm) 0;
+  margin: 0 0 var(--space-1) 0;
   font-family: var(--font-family-acme);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -710,7 +710,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 [data-page="admin"] .milestone-description {
   color: var(--portal-text-light);
   font-size: 0.9rem;
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
 }
 
 .milestone-due,
@@ -721,15 +721,15 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .milestone-actions {
   display: flex;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 /* Project Description Row - description and preview URL on same line */
 .project-description-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--portal-spacing-xl);
-  margin-top: var(--portal-spacing-lg);
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 .project-description-row .description-item {
@@ -749,7 +749,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Features container appended to description row */
 .project-description-row .features-container {
   flex-basis: 100%;
-  margin-top: var(--portal-spacing-md);
+  margin-top: var(--space-1-5);
 }
 
 /* Project Notes - inside overview card */
@@ -764,7 +764,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   color: var(--portal-text-light);
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-xl);
+  gap: var(--space-3);
 }
 
 .project-detail-overview .project-notes:empty {
@@ -779,7 +779,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Project Notes - standalone */
 .project-notes {
   background: var(--portal-bg-medium);
-  padding: var(--portal-spacing-lg);
+  padding: var(--space-2);
   border-radius: var(--portal-radius-md);
   border: 1px solid var(--portal-border-medium);
   min-height: 100px;
@@ -788,7 +788,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 .project-notes p {
-  margin: 0 0 var(--portal-spacing-md) 0;
+  margin: 0 0 var(--space-1-5) 0;
 }
 
 /* High specificity with body and ID selectors */
@@ -800,14 +800,14 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   letter-spacing: 0.05em;
   font-weight: 500;
   font-family: inherit;
-  margin: var(--portal-spacing-lg) 0 var(--portal-spacing-sm) 0;
+  margin: var(--space-2) 0 var(--space-1) 0;
 }
 
 .project-notes .features-list,
 .features-container .features-list {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -817,7 +817,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .features-container .feature-tag {
   background: var(--portal-bg-medium);
   color: var(--portal-text-light);
-  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
+  padding: var(--space-0-5) var(--space-1-5);
   border-radius: var(--portal-radius-sm);
   font-size: 0.85rem;
   display: inline-block;
@@ -828,7 +828,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .empty-state {
   text-align: center;
   color: var(--portal-text-secondary);
-  padding: var(--portal-spacing-xl);
+  padding: var(--space-3);
   font-style: italic;
 }
 
@@ -840,12 +840,12 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 #pd-files-list .file-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-md);
-  padding: var(--portal-spacing-md);
+  gap: var(--space-1-5);
+  padding: var(--space-1-5);
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   box-shadow: var(--shadow-card);
 }
 
@@ -875,7 +875,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 #pd-files-list .file-actions {
   display: flex;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 /* Project Detail Tables (Files, Invoices) - High specificity to override defaults */
@@ -952,7 +952,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 [data-page="admin"] #pd-tab-invoices .portal-project-card {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
 }
 
 /* Card header spacing in invoices tab - match files section h3 */
@@ -977,19 +977,19 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 /* Client Account Info */
 .client-account-info {
-  margin-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--space-2);
   color: var(--portal-text-light);
 }
 
 .client-account-info p {
-  margin: var(--portal-spacing-sm) 0;
+  margin: var(--space-1) 0;
 }
 
 .client-account-actions {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
-  margin-top: var(--portal-spacing-md);
+  gap: var(--space-1);
+  margin-top: var(--space-1-5);
 }
 
 .client-account-actions .btn {
@@ -1010,12 +1010,12 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .invoice-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-md);
-  padding: var(--portal-spacing-md);
+  gap: var(--space-1-5);
+  padding: var(--space-1-5);
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   box-shadow: var(--shadow-card);
 }
 
@@ -1049,7 +1049,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   border-radius: var(--portal-radius-sm);
   background: var(--color-info);
   color: var(--color-white);
-  margin-left: var(--portal-spacing-xs);
+  margin-left: var(--space-0-5);
   vertical-align: middle;
 }
 
@@ -1062,7 +1062,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .invoice-actions {
   display: flex;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   flex-wrap: wrap;
 }
 
@@ -1074,16 +1074,16 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .invoice-modal-form {
   text-align: left;
-  margin: var(--portal-spacing-lg) 0;
+  margin: var(--space-2) 0;
 }
 
 .invoice-modal-form .form-group {
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 .invoice-modal-form .form-label {
   display: block;
-  margin-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-0-5);
   font-weight: 500;
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
@@ -1091,7 +1091,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .invoice-modal-form .form-input {
   width: 100%;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-md);
   background: var(--portal-bg-medium);
@@ -1110,14 +1110,14 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 /* Line Items */
 .line-items-container {
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
 }
 
 .line-item-row {
   display: flex;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   align-items: center;
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
 }
 
 .line-item-row .line-item-desc {
@@ -1143,7 +1143,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   color: var(--color-danger);
   font-size: 1.25rem;
   cursor: pointer;
-  padding: 0 var(--portal-spacing-xs);
+  padding: 0 var(--space-0-5);
   line-height: 1;
 }
 
@@ -1153,9 +1153,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .invoice-total {
   text-align: right;
-  padding-top: var(--portal-spacing-md);
+  padding-top: var(--space-1-5);
   border-top: 1px solid var(--portal-border-color);
-  margin-top: var(--portal-spacing-md);
+  margin-top: var(--space-1-5);
   font-size: 1.1rem;
 }
 
@@ -1166,26 +1166,26 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* Invoice totals section with deposit credit */
 .invoice-totals-section {
   text-align: right;
-  padding-top: var(--portal-spacing-md);
+  padding-top: var(--space-1-5);
   border-top: 1px solid var(--portal-border-color);
-  margin-top: var(--portal-spacing-md);
+  margin-top: var(--space-1-5);
 }
 
 .invoice-subtotal {
   font-size: 0.9rem;
   color: var(--portal-text-secondary);
-  margin-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-0-5);
 }
 
 .invoice-credit {
   font-size: 0.9rem;
   color: var(--color-success);
-  margin-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-0-5);
 }
 
 .invoice-totals-section .invoice-total {
   border-top: none;
-  padding-top: var(--portal-spacing-sm);
+  padding-top: var(--space-1);
   margin-top: 0;
   font-size: 1.1rem;
 }
@@ -1194,8 +1194,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .deposit-credit-section {
   background: var(--portal-bg-darker);
   border-radius: var(--portal-radius-md);
-  padding: var(--portal-spacing-md);
-  margin-top: var(--portal-spacing-sm);
+  padding: var(--space-1-5);
+  margin-top: var(--space-1);
 }
 
 .deposit-credit-section .form-label {
@@ -1204,7 +1204,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .deposit-credit-section .form-hint {
   display: block;
-  margin-top: var(--portal-spacing-xs);
+  margin-top: var(--space-0-5);
   font-size: 0.75rem;
   color: var(--portal-text-secondary);
 }
@@ -1234,21 +1234,21 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .milestone-due-date {
   font-size: 0.75rem;
   color: var(--portal-text-secondary);
   background: var(--portal-bg-dark);
-  padding: 2px var(--portal-spacing-xs);
+  padding: 2px var(--space-0-5);
   border-radius: var(--portal-radius-sm);
 }
 
 .milestone-description {
   font-size: 0.85rem;
   color: var(--portal-text-secondary);
-  margin: var(--portal-spacing-sm) 0;
+  margin: var(--space-1) 0;
 }
 
 .milestone-deliverables {
@@ -1391,7 +1391,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   border: none;
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
-  margin-top: var(--portal-spacing-lg);
+  margin-top: var(--space-2);
 }
 
 .analytics-overview h3 {
@@ -1404,7 +1404,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* Recent activity - Base styles in shared/portal-cards.css */
 /* Admin-specific margin overrides */
 [data-page="admin"] .recent-activity {
-  margin-top: var(--portal-spacing-lg);
+  margin-top: var(--space-2);
   margin-bottom: 0;
 }
 
@@ -1451,7 +1451,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   flex-direction: column;
   gap: var(--space-2);
   padding: 0;
-  margin-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--space-2);
   background: transparent;
   box-shadow: none;
 }
@@ -1778,7 +1778,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  padding: var(--space-1-5) var(--space-2);
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--border-radius-md);
@@ -1874,7 +1874,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* Tab strip/panel mobile styles are in shared/portal-tabs.css (.portal-tabs, .portal-tab-panel) */
 
 /* Project Detail Tables - Responsive layout */
-@media (max-width: 768px) {
+@media (--mobile) {
   [data-page="admin"] .files-table,
   [data-page="admin"] .invoices-table {
     display: block;
@@ -1891,17 +1891,17 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   [data-page="admin"] .invoices-table tbody {
     display: flex;
     flex-direction: column;
-    gap: var(--portal-spacing-sm);
+    gap: var(--space-1);
   }
 
   [data-page="admin"] .files-table tr,
   [data-page="admin"] .invoices-table tr {
     display: flex;
     flex-direction: column;
-    padding: var(--portal-spacing-md);
+    padding: var(--space-1-5);
     background: var(--portal-bg-medium);
     border-radius: var(--portal-radius-md);
-    gap: var(--portal-spacing-sm);
+    gap: var(--space-1);
   }
 
   [data-page="admin"] .files-table td,
@@ -1909,7 +1909,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--portal-spacing-xs) 0;
+    padding: var(--space-0-5) 0;
     border: none;
   }
 
@@ -1941,7 +1941,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 /* Project Overview Card - Stack on mobile */
-@media (max-width: 768px) {
+@media (--mobile) {
   .project-detail-client-row,
   .project-detail-meta {
     grid-template-columns: repeat(2, 1fr);
@@ -1952,7 +1952,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   }
 }
 
-@media (max-width: 480px) {
+@media (--small-mobile) {
   .project-detail-client-row,
   .project-detail-meta {
     grid-template-columns: 1fr;
@@ -1988,16 +1988,16 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .contract-tab-content {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-lg);
+  gap: var(--space-2);
 }
 
 .contract-status-display {
-  padding: var(--portal-spacing-md) 0;
+  padding: var(--space-1-5) 0;
 }
 
 .contract-status-info {
   display: flex;
-  gap: var(--portal-spacing-xl);
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
@@ -2005,7 +2005,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .contract-status-info .status-item {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
   background: transparent;
   padding: 0;
   border-radius: 0;
@@ -2030,21 +2030,21 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .contract-description {
   color: var(--portal-text-secondary);
-  margin-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--space-2);
 }
 
 .contract-actions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
 }
 
 .contract-action-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--portal-spacing-sm);
-  padding: var(--portal-spacing-lg);
+  gap: var(--space-1);
+  padding: var(--space-2);
   background: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-md);
@@ -2085,13 +2085,13 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .signature-details {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
 }
 
 .signature-info-row {
   display: flex;
   justify-content: space-between;
-  padding: var(--portal-spacing-sm) 0;
+  padding: var(--space-1) 0;
   border-bottom: 1px solid var(--portal-border-color);
 }
 

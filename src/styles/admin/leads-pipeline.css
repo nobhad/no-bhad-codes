@@ -14,7 +14,7 @@
    ============================================ */
 
 .leads-pipeline-container {
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
 }
 
 .leads-pipeline-container.hidden {
@@ -73,8 +73,8 @@
 .lead-card-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--portal-spacing-xs);
-  margin-top: var(--portal-spacing-sm);
+  gap: var(--space-0-5);
+  margin-top: var(--space-1);
 }
 
 .lead-card-company {
@@ -120,12 +120,12 @@
   display: flex;
   gap: 4px;
   border-bottom: 1px solid var(--portal-border);
-  margin-bottom: var(--portal-spacing-md);
-  padding-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-1-5);
+  padding-bottom: var(--space-0-5);
 }
 
 .lead-detail-tabs button {
-  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
+  padding: var(--space-0-5) var(--space-1-5);
   background: transparent;
   border: none;
   color: var(--portal-text-secondary);
@@ -157,15 +157,15 @@
 .lead-score-section {
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
-  padding: var(--portal-spacing-md);
-  margin-bottom: var(--portal-spacing-md);
+  padding: var(--space-1-5);
+  margin-bottom: var(--space-1-5);
 }
 
 .lead-score-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 .lead-score-value {
@@ -185,7 +185,7 @@
 .lead-score-factors {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .lead-score-factor {
@@ -216,11 +216,11 @@
 .lead-task-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-sm);
-  padding: var(--portal-spacing-sm);
+  gap: var(--space-1);
+  padding: var(--space-1);
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-sm);
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   border: 1px solid var(--portal-border);
 }
 
@@ -257,8 +257,8 @@
 .lead-note-item {
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-sm);
-  padding: var(--portal-spacing-md);
-  margin-bottom: var(--portal-spacing-sm);
+  padding: var(--space-1-5);
+  margin-bottom: var(--space-1);
   border: 1px solid var(--portal-border);
   position: relative;
 }
@@ -271,7 +271,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-0-5);
 }
 
 .lead-note-meta {
@@ -307,7 +307,7 @@
   justify-content: center;
   gap: 6px;
   width: 100%;
-  padding: var(--portal-spacing-sm);
+  padding: var(--space-1);
   background: var(--portal-bg-dark);
   border: 1px dashed var(--portal-border);
   border-radius: var(--portal-radius-sm);
@@ -338,7 +338,7 @@
 .analytics-columns {
   display: grid;
   grid-template-columns: 2fr 1.5fr 2fr;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   align-items: start;
 }
 
@@ -346,9 +346,9 @@
 .analytics-columns-2col {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
   align-items: start;
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 /* Full-width column for Scoring Rules */
@@ -360,17 +360,17 @@
 .analytics-column-full {
   background: var(--portal-bg-light);
   border-radius: var(--portal-radius-md);
-  padding: var(--portal-spacing-sm) var(--space-3) var(--space-3);
+  padding: var(--space-1) var(--space-3) var(--space-3);
   min-width: 0;
-  color: #ffffff;
+  color: var(--portal-text-light);
 }
 
 /* Make section headers bright white for good contrast */
 .analytics-column .field-label,
 .analytics-column-full .field-label {
-  color: #ffffff !important;
+  color: var(--portal-text-light);
   font-weight: 600;
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
 }
 
 .analytics-column-header {
@@ -385,7 +385,7 @@
 
 .leads-analytics-section .empty-state {
   color: var(--portal-text-light);
-  padding: var(--portal-spacing-sm) 0;
+  padding: var(--space-1) 0;
 }
 
 /* ---- Conversion Funnel ----
@@ -406,7 +406,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
   padding: 2px 0;
   background: none;
   border-radius: 0;
@@ -417,7 +417,7 @@
 .leads-analytics-section .funnel-stage-label {
   font-size: 0.6875rem;
   font-weight: 500;
-  color: #ffffff;
+  color: var(--portal-text-light);
   min-width: 78px;
   flex-shrink: 0;
   margin-top: 0;
@@ -456,13 +456,13 @@
 
 .leads-analytics-section .funnel-count {
   font-size: 0.75rem;
-  color: #ffffff;
+  color: var(--portal-text-light);
   font-weight: 600;
 }
 
 .leads-analytics-section .funnel-percentage {
   font-size: 0.6875rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--portal-text-secondary);
 }
 
 /* ---- Source Performance ---- */
@@ -489,18 +489,18 @@
 
 .source-name {
   font-size: 0.75rem;
-  color: #ffffff;
+  color: var(--portal-text-light);
 }
 
 .source-stats {
   display: flex;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   align-items: center;
   font-size: 0.6875rem;
 }
 
 .source-total {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--portal-text-secondary);
 }
 
 .source-converted {
@@ -508,7 +508,7 @@
 }
 
 .source-rate {
-  color: #ffffff;
+  color: var(--portal-text-light);
   font-weight: 600;
   min-width: 24px;
   text-align: right;
@@ -535,18 +535,18 @@
 .analytics-column-full .scoring-rules-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0 var(--portal-spacing-lg);
+  gap: 0 var(--space-2);
 }
 
 /* Border handled in mobile media query */
 
-@media (max-width: 1024px) {
+@media (--laptop) {
   .analytics-column-full .scoring-rules-list {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .analytics-column-full .scoring-rules-list {
     grid-template-columns: 1fr;
   }
@@ -555,7 +555,7 @@
 .scoring-rule-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
   padding: 3px 0;
   background: transparent;
   border: none;
@@ -563,7 +563,7 @@
 }
 
 /* Only show border on mobile (single column) */
-@media (max-width: 768px) {
+@media (--mobile) {
   .scoring-rule-item {
     border-bottom: 1px solid var(--portal-border-light);
   }
@@ -588,7 +588,7 @@
 .leads-analytics-section .rule-name {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #ffffff !important;
+  color: var(--portal-text-light);
   line-height: 1.3;
 }
 
@@ -597,7 +597,7 @@
 .analytics-column-full .rule-condition,
 .leads-analytics-section .rule-condition {
   font-size: 0.6875rem;
-  color: rgba(255, 255, 255, 0.8) !important;
+  color: var(--portal-text-secondary);
   line-height: 1.3;
 }
 
@@ -623,7 +623,7 @@
   min-width: 40px;
   text-align: right;
   flex-shrink: 0;
-  color: #ffffff !important;
+  color: var(--portal-text-light);
 }
 
 .rule-points.points-positive {
@@ -636,7 +636,7 @@
 
 .rule-actions {
   display: flex;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
 }
 
 /* ============================================
@@ -647,13 +647,13 @@
   display: flex;
   gap: 4px;
   border-bottom: 1px solid var(--portal-border);
-  margin-bottom: var(--portal-spacing-md);
-  padding-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-1-5);
+  padding-bottom: var(--space-0-5);
 }
 
 .lead-tab {
   position: relative;
-  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
+  padding: var(--space-0-5) var(--space-1-5);
   background: var(--portal-bg-light);
   border: none;
   color: var(--portal-text-secondary);
@@ -727,7 +727,7 @@
   display: grid;
   grid-template-columns: 1fr;
   row-gap: var(--field-group-gap);
-  column-gap: var(--portal-spacing-md);
+  column-gap: var(--space-1-5);
 }
 
 #lead-details-panel .meta-item {
@@ -757,7 +757,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   margin-left: auto;
-  margin-right: var(--portal-spacing-md);
+  margin-right: var(--space-1-5);
   border: 1px solid transparent;
 }
 
@@ -783,15 +783,15 @@
 .lead-tab-section {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
 }
 
 .lead-tab-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--portal-spacing-sm);
-  margin-bottom: var(--portal-spacing-xs);
+  gap: var(--space-1);
+  margin-bottom: var(--space-0-5);
 }
 
 .lead-tab-section-title {
@@ -808,17 +808,17 @@
 
 /* Lead Tasks List */
 .lead-tasks-list {
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 .lead-task-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-sm);
-  padding: var(--portal-spacing-sm);
+  gap: var(--space-1);
+  padding: var(--space-1);
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-sm);
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   border: 1px solid var(--portal-border);
 }
 
@@ -882,14 +882,14 @@
 
 /* Lead Notes List */
 .lead-notes-list {
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 .lead-note-item {
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-sm);
-  padding: var(--portal-spacing-md);
-  margin-bottom: var(--portal-spacing-sm);
+  padding: var(--space-1-5);
+  margin-bottom: var(--space-1);
   border: 1px solid var(--portal-border);
 }
 
@@ -901,7 +901,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-0-5);
 }
 
 .note-author {
@@ -913,7 +913,7 @@
 .note-date {
   font-size: 0.7rem;
   color: var(--portal-text-muted);
-  margin-left: var(--portal-spacing-sm);
+  margin-left: var(--space-1);
 }
 
 .note-content {
@@ -924,7 +924,7 @@
 
 /* Empty State */
 .empty-state-small {
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
   text-align: center;
   color: var(--portal-text-muted);
   font-size: 0.875rem;
@@ -934,22 +934,22 @@
    Responsive
    ============================================ */
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .view-toggle {
-    margin-bottom: var(--portal-spacing-sm);
+    margin-bottom: var(--space-1);
   }
 
   .lead-details-tabs,
   .lead-detail-tabs {
     overflow-x: auto;
-    padding-bottom: var(--portal-spacing-sm);
+    padding-bottom: var(--space-1);
   }
 
   .lead-tab,
   .lead-detail-tabs button {
     white-space: nowrap;
     font-size: 0.813rem;
-    padding: var(--portal-spacing-xs) var(--portal-spacing-sm);
+    padding: var(--space-0-5) var(--space-1);
   }
 
   .analytics-columns,

@@ -6,7 +6,7 @@
 
 /* Files Filter - client portal specific */
 .files-filter {
-  margin-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--space-2);
 }
 
 .files-filter .form-select {
@@ -15,26 +15,26 @@
 
 /* Files View (alternate layout) - client portal specific */
 .files-view {
-  padding: var(--portal-spacing-2xl);
+  padding: var(--space-4);
   overflow-y: auto;
 }
 
 .files-header {
-  margin-bottom: var(--portal-spacing-2xl);
-  padding-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .files-header h1 {
   font-size: 2rem;
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--space-1);
   color: var(--portal-text-light);
 }
 
 .files-container {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-2xl);
+  gap: var(--space-4);
 }
 
 /* File Section - client portal specific alternate layout */
@@ -47,7 +47,7 @@
 }
 
 .file-section-header {
-  padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
+  padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-darker);
   border-bottom: 1px solid var(--portal-border-medium);
 }
@@ -63,7 +63,7 @@
 }
 
 .file-list .file-item {
-  padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
+  padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--portal-border-medium);
   transition: background-color 0.2s ease;
   color: var(--portal-text-light);

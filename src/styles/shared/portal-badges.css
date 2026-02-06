@@ -165,7 +165,7 @@
 }
 
 /* Mobile/compact view - same as collapsed */
-@media (max-width: 1300px) {
+@media (--wide-down) {
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge {
     top: -2px;
     right: -2px;

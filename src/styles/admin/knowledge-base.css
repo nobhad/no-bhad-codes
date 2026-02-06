@@ -4,7 +4,7 @@
    ===================================================== */
 
 [data-page="admin"] #tab-knowledge-base .admin-table-card + .admin-table-card {
-  margin-top: var(--portal-spacing-xl);
+  margin-top: var(--space-3);
 }
 
 [data-page="admin"] .modal-content.kb-article-modal-content {
@@ -23,8 +23,8 @@
 [data-page="admin"] .kb-article-modal-content .form-group-inline {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-sm);
-  margin-bottom: var(--portal-spacing-md);
+  gap: var(--space-1);
+  margin-bottom: var(--space-1-5);
 }
 
 [data-page="admin"] .kb-article-modal-content .form-group-inline label {

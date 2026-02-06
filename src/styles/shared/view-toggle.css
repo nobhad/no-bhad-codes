@@ -10,12 +10,12 @@
 
 .view-toggle {
   display: inline-flex;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
   border-bottom: 1px solid var(--portal-border);
 }
 
 .view-toggle button {
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   border: none;
   background: transparent;
   color: var(--portal-text-muted);

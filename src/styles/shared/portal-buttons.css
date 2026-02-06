@@ -25,8 +25,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--portal-spacing-sm, 0.5rem);
-  padding: var(--portal-spacing-md, 0.75rem) var(--portal-spacing-xl, 1.5rem);
+  gap: var(--space-1);
+  padding: var(--space-1-5) var(--space-3);
   font-family: var(--font-family-acme, inherit);
   font-size: 0.9rem;
   font-weight: 600;
@@ -50,7 +50,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--portal-spacing-sm, 0.5rem);
+  gap: var(--space-1);
 }
 
 /* Icon before text: consistent order for ALL icon buttons (not just .btn) */
@@ -154,7 +154,7 @@
  */
 
 :is([data-page="admin"], [data-page="client-portal"]) .btn-sm {
-  padding: var(--portal-spacing-sm, 0.5rem) var(--portal-spacing-lg, 1rem);
+  padding: var(--space-1) var(--space-2);
   font-size: 0.8rem;
 }
 
@@ -452,7 +452,7 @@
  * 1300px triggers at ~150% zoom on 1920px screens.
  */
 
-@media (max-width: 1300px) {
+@media (--wide-down) {
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons {
     gap: 0.5rem;
   }

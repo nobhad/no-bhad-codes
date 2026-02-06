@@ -17,8 +17,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--portal-spacing-lg);
-  margin-bottom: var(--portal-spacing-xl);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
   overflow: visible;
   position: relative;
   z-index: 10;
@@ -27,7 +27,7 @@
 .detail-title-group {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
   min-width: 0;
   flex: 1;
 }
@@ -45,7 +45,7 @@
 .detail-actions {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   flex-shrink: 0;
   overflow: visible;
   position: relative;
@@ -110,7 +110,7 @@
   margin: 0;
   padding: var(--space-1) 0;
   border-radius: var(--portal-radius-md);
-  padding: var(--portal-spacing-xs) 0;
+  padding: var(--space-0-5) 0;
   list-style: none;
   margin: 0;
   box-shadow: var(--shadow-dropdown);
@@ -164,7 +164,7 @@
 [data-page="admin"] .detail-more-menu.table-dropdown .dropdown-divider {
   height: 1px;
   background: var(--portal-border-dark);
-  margin: var(--portal-spacing-xs) 0;
+  margin: var(--space-0-5) 0;
   padding: 0;
 }
 
@@ -172,11 +172,11 @@
    RESPONSIVE STYLES
    =============================================== */
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .detail-title-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--portal-spacing-md);
+    gap: var(--space-1-5);
   }
 
   .detail-title-group {
@@ -195,12 +195,12 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (--small-mobile) {
   .detail-actions .btn span {
     display: none;
   }
 
   .detail-actions .btn {
-    padding: var(--portal-spacing-sm);
+    padding: var(--space-1);
   }
 }

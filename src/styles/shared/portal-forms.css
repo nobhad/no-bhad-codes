@@ -114,7 +114,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--space-2);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .form-group:last-child {
@@ -310,4 +310,58 @@
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+/* =====================================================
+   PASSWORD INPUT WRAPPER & TOGGLE
+   Base styles for password fields with visibility toggle.
+   Context-specific overrides can be added in component files.
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .password-input-wrapper input {
+  padding-right: 3rem; /* Space for toggle button */
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--portal-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .password-toggle:hover {
+  color: var(--color-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .password-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Toggle icon visibility states */
+:is([data-page="admin"], [data-page="client-portal"]) .password-toggle .password-icon-hide {
+  display: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .password-toggle.showing .password-icon-show {
+  display: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .password-toggle.showing .password-icon-hide {
+  display: block;
 }

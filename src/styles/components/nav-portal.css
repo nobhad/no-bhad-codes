@@ -88,7 +88,7 @@
   width: 100vw;
   height: 100vh;
   background: var(--color-overlay-light);
-  z-index: 10000;
+  z-index: var(--z-index-portal-overlay);
   pointer-events: auto;
   isolation: isolate;
 }
@@ -106,7 +106,7 @@
   background: var(--color-neutral-300);
   border: 3px solid var(--color-border);
   padding: 1.5rem;
-  z-index: 10001;
+  z-index: var(--z-index-portal-dropdown);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);

@@ -63,11 +63,14 @@ This CSS file defines global variables and font-face rules for consistent stylin
 @custom-media --mobile (max-width: 767px);
 @custom-media --tablet (min-width: 768px);
 @custom-media --tablet-only (min-width: 768px) and (max-width: 991px);
+@custom-media --tablet-landscape (max-width: 900px); /* Tablet in landscape orientation */
 @custom-media --tablet-down (max-width: 991px); /* Everything below desktop */
 @custom-media --desktop (min-width: 992px);
 @custom-media --desktop-down (max-width: 1023px); /* Everything below desktop */
+@custom-media --laptop (max-width: 1024px); /* Small laptops */
 @custom-media --tablet-to-desktop (min-width: 600px) and (max-width: 1100px); /* Medium viewport range */
 @custom-media --wide (min-width: 1200px);
+@custom-media --wide-down (max-width: 1300px); /* Below wide screens */
 @custom-media --ultra-wide (min-width: 1400px);
 @custom-media --ultra-wide-down (max-width: 1399px); /* Everything below ultra-wide */
 
@@ -227,13 +230,9 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --portal-radius-lg: 12px;
   --portal-radius-pill: 50px;
 
-  /* Spacing */
-  --portal-spacing-xs: 0.25rem;
-  --portal-spacing-sm: 0.5rem;
-  --portal-spacing-md: 0.75rem;
-  --portal-spacing-lg: 1rem;
-  --portal-spacing-xl: 1.5rem;
-  --portal-spacing-2xl: 2rem;
+  /* Spacing: Use design-system tokens from src/design-system/tokens/spacing.css
+     --space-0-5 (4px), --space-1 (8px), --space-1-5 (12px), --space-2 (16px),
+     --space-3 (24px), --space-4 (32px), etc. */
 
   /* Field label/value spacing - centralized: value slightly closer to its label than to next label */
   --field-label-value-gap: 0.125rem;
@@ -402,28 +401,7 @@ section,
   justify-content: space-between;
 }
 
-/* Responsive Text Utilities */
-.text-xs {
-  font-size: var(--font-size-xs);
-}
-.text-sm {
-  font-size: var(--font-size-sm);
-}
-.text-base {
-  font-size: var(--font-size-base);
-}
-.text-lg {
-  font-size: var(--font-size-lg);
-}
-.text-xl {
-  font-size: var(--font-size-xl);
-}
-.text-2xl {
-  font-size: var(--font-size-2xl);
-}
-.text-3xl {
-  font-size: var(--font-size-3xl);
-}
+/* Responsive Text Utilities - defined in base/typography.css */
 
 .text-uppercase {
   text-transform: uppercase;
@@ -463,9 +441,7 @@ section,
 }
 
 /* Responsive Visibility */
-.hidden {
-  display: none;
-}
+/* NOTE: Base .hidden is defined in base/layout.css - do not duplicate here */
 
 @media (--mobile) {
   .md\:hidden {

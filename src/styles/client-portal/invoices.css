@@ -7,8 +7,8 @@
 .invoice-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--portal-spacing-lg);
-  margin-bottom: var(--portal-spacing-xl);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 /* Summary Card - Base styles in shared/portal-cards.css */
@@ -22,16 +22,16 @@
 [data-page="client-portal"] .invoices-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
 }
 
 /* Invoice Item */
 .invoice-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-lg);
-  padding: var(--portal-spacing-lg);
-  padding-right: var(--portal-spacing-lg);
+  gap: var(--space-2);
+  padding: var(--space-2);
+  padding-right: var(--space-2);
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
@@ -48,7 +48,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
 }
 
 .invoice-number {
@@ -71,7 +71,7 @@
 
 /* Invoice Status */
 .invoice-status {
-  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
+  padding: var(--space-0-5) var(--space-1-5);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -101,7 +101,7 @@
 /* Invoice Actions */
 .invoice-actions {
   display: flex;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
   margin-left: auto;
 }
 
@@ -121,7 +121,7 @@
   color: var(--portal-text-secondary);
   font-style: italic;
   text-align: left;
-  padding: var(--portal-spacing-lg) 0;
+  padding: var(--space-2) 0;
 }
 
 /* Responsive */
@@ -135,7 +135,7 @@
   .invoice-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--portal-spacing-md);
+    gap: var(--space-1-5);
   }
 
   .invoice-actions {

@@ -37,7 +37,7 @@
 
 /* Project Status */
 .project-status {
-  margin: 0 0 var(--portal-spacing-sm) 0;
+  margin: 0 0 var(--space-1) 0;
   font-size: 0.9rem;
 }
 
@@ -47,7 +47,7 @@
 [data-page="client-portal"] .project-status .status-badge {
   font-family: var(--font-family-acme);
   padding: 0;
-  margin-left: var(--portal-spacing-sm);
+  margin-left: var(--space-1);
   font-weight: 400;
   font-size: 1rem;
   letter-spacing: 0.5px;
@@ -71,7 +71,7 @@
 
 /* Project Progress */
 .project-progress {
-  margin: 0 0 var(--portal-spacing-sm) 0;
+  margin: 0 0 var(--space-1) 0;
   font-size: 0.9rem;
 }
 

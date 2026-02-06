@@ -13,14 +13,14 @@
 
 .analytics-subtabs {
   display: flex;
-  gap: var(--portal-spacing-sm);
-  margin-bottom: var(--portal-spacing-lg);
-  padding-bottom: var(--portal-spacing-md);
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-1-5);
   border-bottom: 1px solid var(--portal-border);
 }
 
 .analytics-subtab {
-  padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
+  padding: var(--space-1) var(--space-2);
   background: transparent;
   border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-md);
@@ -60,7 +60,7 @@
 .analytics-subtab-content > .analytics-card-grid,
 .analytics-subtab-content > .portal-project-card,
 .analytics-subtab-content > .visitors-dashboard {
-  margin-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--space-2);
 }
 
 .analytics-subtab-content > *:last-child {
@@ -81,17 +81,17 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--portal-text-light);
-  margin: 0 0 var(--portal-spacing-md) 0;
+  margin: 0 0 var(--space-1-5) 0;
 }
 
 /* Unified 2-column grid for analytics cards */
 .analytics-card-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--portal-spacing-lg);
+  gap: var(--space-2);
 }
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .analytics-card-grid {
     grid-template-columns: 1fr;
   }
@@ -120,7 +120,7 @@
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: var(--portal-spacing-lg);
+  gap: var(--space-2);
 }
 
 .chart-container {
@@ -170,7 +170,7 @@
   border: none;
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
-  margin-top: var(--portal-spacing-lg);
+  margin-top: var(--space-2);
 }
 
 .metric-group h3 {
@@ -191,7 +191,7 @@
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--border-radius-md);
-  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  padding: var(--space-1-5) var(--space-2);
   text-align: center;
   position: relative;
 }
@@ -309,8 +309,8 @@
 .analytics-breakdown {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--portal-spacing-xl);
-  margin-bottom: var(--portal-spacing-xl);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 
 /* Match portal card styling (overview-card, portal-project-card) */
@@ -328,7 +328,7 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--portal-text-light);
-  margin: 0 0 var(--portal-spacing-lg) 0;
+  margin: 0 0 var(--space-2) 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -347,8 +347,8 @@
 .analytics-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(260px, 1fr));
-  gap: var(--portal-spacing-lg);
-  margin-top: var(--portal-spacing-lg);
+  gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .analytics-section {
@@ -408,8 +408,8 @@
 .kpi-cards-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--portal-spacing-xl);
-  margin-bottom: var(--portal-spacing-xl);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 
 /* Same styling as .stat-card (portal-cards.css) */
@@ -460,7 +460,7 @@
   display: block;
   font-size: 0.85rem;
   color: var(--portal-text-secondary);
-  margin-top: var(--portal-spacing-sm);
+  margin-top: var(--space-1);
   text-transform: uppercase;
 }
 
@@ -495,8 +495,8 @@
    ============================================ */
 
 .analytics-section-header {
-  margin: var(--portal-spacing-lg) 0 var(--portal-spacing-md) 0;
-  padding-bottom: var(--portal-spacing-sm);
+  margin: var(--space-2) 0 var(--space-1-5) 0;
+  padding-bottom: var(--space-1);
   border-bottom: 1px solid var(--portal-border);
 }
 
@@ -514,8 +514,8 @@
 .business-charts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: var(--portal-spacing-lg);
-  margin-bottom: var(--portal-spacing-lg);
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 /* ============================================
@@ -526,7 +526,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--portal-spacing-md) 0;
+  padding: var(--space-1-5) 0;
   overflow-x: auto;
 }
 
@@ -534,7 +534,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
   min-width: 100px;
@@ -565,7 +565,7 @@
 .funnel-arrow {
   color: var(--portal-text-muted);
   flex-shrink: 0;
-  padding: 0 var(--portal-spacing-xs);
+  padding: 0 var(--space-0-5);
 }
 
 .funnel-arrow svg {
@@ -575,10 +575,10 @@
 
 .funnel-stats {
   display: flex;
-  gap: var(--portal-spacing-lg);
-  padding-top: var(--portal-spacing-md);
+  gap: var(--space-2);
+  padding-top: var(--space-1-5);
   border-top: 1px solid var(--portal-border);
-  margin-top: var(--portal-spacing-md);
+  margin-top: var(--space-1-5);
 }
 
 .funnel-stat {
@@ -594,7 +594,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 .section-header-with-actions h3 {
@@ -607,14 +607,14 @@
 .reports-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .report-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
   border: 1px solid var(--portal-border);
@@ -643,7 +643,7 @@
 
 .report-actions {
   display: flex;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
 }
 
 .report-actions button {
@@ -653,7 +653,7 @@
 
 .report-empty {
   text-align: center;
-  padding: var(--portal-spacing-lg);
+  padding: var(--space-2);
   color: var(--portal-text-secondary);
   font-size: 0.875rem;
 }
@@ -665,7 +665,7 @@
 .alerts-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .alert-item .badge-muted {
@@ -684,7 +684,7 @@
 /* Report/Alert action buttons spacing */
 .report-actions {
   display: flex;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
   align-items: center;
 }
 
@@ -706,7 +706,7 @@
    Responsive
    ============================================ */
 
-@media (max-width: 768px) {
+@media (--mobile) {
   /* Stack KPI cards in single column (do not split into groups of 2) */
   .kpi-cards-row {
     grid-template-columns: 1fr;
@@ -722,7 +722,7 @@
 
   .funnel-container {
     flex-wrap: wrap;
-    gap: var(--portal-spacing-sm);
+    gap: var(--space-1);
     justify-content: center;
   }
 
@@ -731,16 +731,16 @@
   }
 
   .funnel-stage {
-    min-width: calc(50% - var(--portal-spacing-sm));
+    min-width: calc(50% - var(--space-1));
   }
 
   .funnel-stats {
     flex-direction: column;
-    gap: var(--portal-spacing-sm);
+    gap: var(--space-1);
   }
 }
 
-@media (max-width: 480px) {
+@media (--small-mobile) {
   .kpi-cards-row {
     grid-template-columns: 1fr;
   }
@@ -748,7 +748,7 @@
   .section-header-with-actions {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--portal-spacing-sm);
+    gap: var(--space-1);
   }
 }
 
@@ -760,14 +760,14 @@
 .health-check-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
 }
 
 .health-item {
   display: flex;
   align-items: center;
-  gap: var(--portal-spacing-sm);
-  padding: var(--portal-spacing-md);
+  gap: var(--space-1);
+  padding: var(--space-1-5);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
 }
@@ -817,13 +817,13 @@
 .quick-actions-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--portal-spacing-md);
+  gap: var(--space-1-5);
 }
 
 .quick-actions-grid .btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .quick-actions-grid .btn svg {
@@ -835,14 +835,14 @@
 .recent-errors-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 .error-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   background: rgba(var(--color-error-rgb), 0.1);
   border: 1px solid rgba(var(--color-error-rgb), 0.2);
   border-radius: var(--portal-radius-sm);
@@ -861,7 +861,7 @@
 
 .empty-state-text {
   text-align: center;
-  padding: var(--portal-spacing-lg);
+  padding: var(--space-2);
   color: var(--portal-text-secondary);
   font-size: 0.875rem;
   margin: 0;
@@ -876,7 +876,7 @@
   white-space: nowrap;
 }
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .health-check-grid {
     grid-template-columns: 1fr;
   }

@@ -228,7 +228,7 @@ section.contact-section .contact-hero-desktop {
   /* Star glow - white fill with glow that overflows slightly */
   .avatar-blurb-svg .star-glow,
   .avatar-blurb-svg #STAR_GLOW {
-    fill: #ffffff;
+    fill: var(--color-white, #ffffff);
     stroke: none;
     filter: url(#star-glow);
     transform-origin: center center;

@@ -5,14 +5,14 @@
 
 [data-page="client-portal"] .help-search-wrap {
   display: flex;
-  gap: var(--portal-spacing-sm);
-  margin-bottom: var(--portal-spacing-lg);
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
   max-width: 32rem;
 }
 
 [data-page="client-portal"] .help-search-input {
   flex: 1;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   border: 2px solid var(--portal-border-dark);
   border-radius: var(--portal-radius-sm);
   background: var(--portal-bg-dark);
@@ -32,19 +32,19 @@
 [data-page="client-portal"] .help-search-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
 }
 
 [data-page="client-portal"] .help-browse {
   display: grid;
-  gap: var(--portal-spacing-xl);
+  gap: var(--space-3);
 }
 
 [data-page="client-portal"] .help-featured,
 [data-page="client-portal"] .help-categories,
 [data-page="client-portal"] .help-search-results,
 [data-page="client-portal"] .help-article-view {
-  padding: var(--portal-spacing-lg);
+  padding: var(--space-2);
   background: var(--portal-bg-dark);
   border-radius: var(--border-radius-card);
 }
@@ -52,7 +52,7 @@
 [data-page="client-portal"] .help-featured h3,
 [data-page="client-portal"] .help-categories h3,
 [data-page="client-portal"] .help-search-results h3 {
-  margin: 0 0 var(--portal-spacing-md) 0;
+  margin: 0 0 var(--space-1-5) 0;
   font-family: var(--font-family-acme);
   font-size: 1.2rem;
   text-transform: uppercase;
@@ -64,12 +64,12 @@
 [data-page="client-portal"] .help-categories-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 [data-page="client-portal"] .help-card {
   display: block;
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
   color: var(--portal-text-light);
@@ -83,7 +83,7 @@
 }
 
 [data-page="client-portal"] .help-card-summary {
-  margin: var(--portal-spacing-xs) 0 0 0;
+  margin: var(--space-0-5) 0 0 0;
   font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
 }
@@ -92,7 +92,7 @@
 [data-page="client-portal"] .help-category-article-link {
   display: block;
   width: 100%;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding: var(--space-1) var(--space-1-5);
   text-align: left;
   background: var(--portal-bg-medium);
   border: 2px solid transparent;
@@ -109,11 +109,11 @@
 }
 
 [data-page="client-portal"] .help-category-back {
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 [data-page="client-portal"] .help-category-heading {
-  margin: 0 0 var(--portal-spacing-sm) 0;
+  margin: 0 0 var(--space-1) 0;
   font-family: var(--font-family-acme);
   font-size: 1.1rem;
   color: var(--portal-text-light);
@@ -121,7 +121,7 @@
 
 [data-page="client-portal"] .help-result-link {
   display: block;
-  padding: var(--portal-spacing-sm) 0;
+  padding: var(--space-1) 0;
   color: var(--portal-text-light);
   text-decoration: none;
   border-bottom: 1px solid var(--portal-border-light);
@@ -132,11 +132,11 @@
 }
 
 [data-page="client-portal"] .help-article-back {
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 [data-page="client-portal"] .help-article-view article h1 {
-  margin: 0 0 var(--portal-spacing-md) 0;
+  margin: 0 0 var(--space-1-5) 0;
   font-family: var(--font-family-acme);
   font-size: var(--font-size-xl);
   color: var(--portal-text-light);
@@ -148,7 +148,7 @@
 }
 
 [data-page="client-portal"] .help-article-body p {
-  margin: 0 0 var(--portal-spacing-sm) 0;
+  margin: 0 0 var(--space-1) 0;
 }
 
 [data-page="client-portal"] .help-empty,

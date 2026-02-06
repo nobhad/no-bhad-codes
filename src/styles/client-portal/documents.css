@@ -4,14 +4,14 @@
    ===================================================== */
 
 [data-page="client-portal"] .documents-intro {
-  margin: 0 0 var(--portal-spacing-lg) 0;
+  margin: 0 0 var(--space-2) 0;
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
 }
 
 [data-page="client-portal"] .documents-list-wrap,
 [data-page="client-portal"] .documents-detail-wrap {
-  padding: var(--portal-spacing-lg);
+  padding: var(--space-2);
   background: var(--portal-bg-dark);
   border-radius: var(--border-radius-card);
 }
@@ -19,13 +19,13 @@
 [data-page="client-portal"] .documents-list {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
+  gap: var(--space-1);
 }
 
 [data-page="client-portal"] .documents-card {
   display: block;
   width: 100%;
-  padding: var(--portal-spacing-md);
+  padding: var(--space-1-5);
   text-align: left;
   background: var(--portal-bg-medium);
   border: 2px solid transparent;
@@ -43,7 +43,7 @@
 [data-page="client-portal"] .documents-card-title {
   display: block;
   font-weight: 600;
-  margin-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-0-5);
 }
 
 [data-page="client-portal"] .documents-card-status,
@@ -75,11 +75,11 @@
 }
 
 [data-page="client-portal"] .documents-detail-back {
-  margin-bottom: var(--portal-spacing-md);
+  margin-bottom: var(--space-1-5);
 }
 
 [data-page="client-portal"] .documents-detail-wrap h3 {
-  margin: 0 0 var(--portal-spacing-sm) 0;
+  margin: 0 0 var(--space-1) 0;
   font-family: var(--font-family-acme);
   font-size: var(--font-size-lg);
   color: var(--portal-text-light);
@@ -87,32 +87,32 @@
 
 [data-page="client-portal"] .documents-detail-description,
 [data-page="client-portal"] .documents-detail-meta {
-  margin: 0 0 var(--portal-spacing-md) 0;
+  margin: 0 0 var(--space-1-5) 0;
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
 }
 
 [data-page="client-portal"] .documents-detail-upload {
-  margin-top: var(--portal-spacing-lg);
-  padding-top: var(--portal-spacing-md);
+  margin-top: var(--space-2);
+  padding-top: var(--space-1-5);
   border-top: 1px solid var(--portal-border-light);
 }
 
 [data-page="client-portal"] .documents-upload-label {
   display: block;
-  margin-bottom: var(--portal-spacing-xs);
+  margin-bottom: var(--space-0-5);
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--portal-text-light);
 }
 
 [data-page="client-portal"] .documents-file-input {
-  margin-right: var(--portal-spacing-sm);
-  margin-bottom: var(--portal-spacing-sm);
+  margin-right: var(--space-1);
+  margin-bottom: var(--space-1);
 }
 
 [data-page="client-portal"] .documents-upload-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--portal-spacing-xs);
+  gap: var(--space-0-5);
 }
