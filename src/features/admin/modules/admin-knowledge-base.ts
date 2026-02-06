@@ -11,7 +11,8 @@
 import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch, apiPost, apiPut, apiDelete, parseJsonResponse } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
-import { confirmDanger, alertError, alertSuccess } from '../../../utils/confirm-dialog';
+import { confirmDanger } from '../../../utils/confirm-dialog';
+import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
@@ -26,6 +27,15 @@ import {
   KNOWLEDGE_BASE_FILTER_CONFIG,
   type FilterState
 } from '../../../utils/table-filter';
+import {
+  createPaginationUI,
+  applyPagination,
+  getDefaultPaginationState,
+  loadPaginationState,
+  savePaginationState,
+  type PaginationState,
+  type PaginationConfig
+} from '../../../utils/table-pagination';
 
 const KB_API = '/api/kb';
 
@@ -93,11 +103,11 @@ async function loadArticles(ctx: AdminDashboardContext, categorySlug?: string): 
 const CATEGORIES_COLSPAN = 5;
 
 function renderCategoriesTable(categories: KBCategory[], _ctx: AdminDashboardContext): void {
-  const tbody = el('kb-categories-tbody');
+  const tbody = el('kb-categories-table-body');
   if (!tbody) return;
 
   if (categories.length === 0) {
-    showTableEmpty(tbody, CATEGORIES_COLSPAN, 'No categories yet. Add one to get started.');
+    showTableEmpty(tbody, CATEGORIES_COLSPAN, 'No categories yet.');
     return;
   }
 
@@ -130,11 +140,11 @@ function renderCategoriesTable(categories: KBCategory[], _ctx: AdminDashboardCon
 const ARTICLES_COLSPAN = 7;
 
 function renderArticlesTable(articles: KBArticle[], _ctx: AdminDashboardContext): void {
-  const tbody = el('kb-articles-tbody');
+  const tbody = el('kb-articles-table-body');
   if (!tbody) return;
 
   if (articles.length === 0) {
-    showTableEmpty(tbody, ARTICLES_COLSPAN, 'No articles yet. Add one to get started.');
+    showTableEmpty(tbody, ARTICLES_COLSPAN, 'No articles yet.');
     return;
   }
 
@@ -162,12 +172,8 @@ function renderArticlesTable(articles: KBArticle[], _ctx: AdminDashboardContext)
     .join('');
 }
 
-function escapeHtml(text: string): string {
-  return SanitizationUtils.escapeHtml(text);
-}
-
 // ---------------------------------------------------------------------------
-// Module-level state
+// Module-level state (moved before functions that use them)
 // ---------------------------------------------------------------------------
 
 let categoriesCache: KBCategory[] = [];
@@ -178,9 +184,55 @@ let kbCategoryModalInstance: PortalModalInstance | null = null;
 let kbArticleModalInstance: PortalModalInstance | null = null;
 let kbCategoryModalFocusCleanup: (() => void) | null = null;
 let kbArticleModalFocusCleanup: (() => void) | null = null;
-let kbFilterState: FilterState = loadFilterState(KNOWLEDGE_BASE_FILTER_CONFIG.storageKey);
-let kbFilterUIContainer: HTMLElement | null = null;
+let filterState: FilterState = loadFilterState(KNOWLEDGE_BASE_FILTER_CONFIG.storageKey);
+let filterUIContainer: HTMLElement | null = null;
 let storedKbContext: AdminDashboardContext | null = null;
+
+// Pagination configuration and state for KB articles
+const KB_ARTICLES_PAGINATION_CONFIG: PaginationConfig = {
+  tableId: 'kb-articles',
+  pageSizeOptions: [10, 25, 50, 100],
+  defaultPageSize: 25,
+  storageKey: 'admin_kb_articles_pagination'
+};
+
+let paginationState: PaginationState = {
+  ...getDefaultPaginationState(KB_ARTICLES_PAGINATION_CONFIG),
+  ...loadPaginationState(KB_ARTICLES_PAGINATION_CONFIG.storageKey!)
+};
+
+/**
+ * Render pagination UI for KB articles table
+ */
+function renderKBArticlesPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
+  const container = el('kb-articles-pagination');
+  if (!container) return;
+
+  // Update state
+  paginationState.totalItems = totalItems;
+
+  // Create pagination UI
+  const paginationUI = createPaginationUI(
+    KB_ARTICLES_PAGINATION_CONFIG,
+    paginationState,
+    (newState) => {
+      paginationState = newState;
+      savePaginationState(KB_ARTICLES_PAGINATION_CONFIG.storageKey!, paginationState);
+      // Re-render table with new pagination
+      if (articlesCache.length > 0) {
+        refreshFilteredArticles(ctx);
+      }
+    }
+  );
+
+  // Replace container content
+  container.innerHTML = '';
+  container.appendChild(paginationUI);
+}
+
+function escapeHtml(text: string): string {
+  return SanitizationUtils.escapeHtml(text);
+}
 
 // ---------------------------------------------------------------------------
 // Category modal
@@ -387,7 +439,7 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
           description: descInput?.value.trim() || undefined,
           sort_order: parseInt(sortInput?.value || '0', 10)
         });
-        alertSuccess('Category updated.');
+        showToast('Category updated', 'success');
       } else {
         await apiPost(`${KB_API}/admin/categories`, {
           name: nameInput.value.trim(),
@@ -395,16 +447,16 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
           description: descInput?.value.trim() || undefined,
           sort_order: parseInt(sortInput?.value || '0', 10)
         });
-        alertSuccess('Category created.');
+        showToast('Category created', 'success');
       }
       closeCategoryModal();
       await loadKnowledgeBase(ctx);
     } catch (err) {
-      alertError((err as Error).message);
+      showToast((err as Error).message, 'error');
     }
   });
 
-  el('kb-categories-tbody')?.addEventListener('click', async (e) => {
+  el('kb-categories-table-body')?.addEventListener('click', async (e) => {
     const editBtn = (e.target as HTMLElement).closest('.kb-edit-category');
     const deleteBtn = (e.target as HTMLElement).closest('.kb-delete-category');
     if (editBtn) {
@@ -419,10 +471,10 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
       if (!ok) return;
       try {
         await apiDelete(`${KB_API}/admin/categories/${id}`);
-        alertSuccess('Category deleted.');
+        showToast('Category deleted', 'success');
         await loadKnowledgeBase(ctx);
       } catch (err) {
-        alertError((err as Error).message);
+        showToast((err as Error).message, 'error');
       }
     }
   });
@@ -433,12 +485,12 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
 
   // Setup filter UI (search, category checkboxes, date range) - insert before export button
   const filterContainer = el('kb-articles-filter-container');
-  if (filterContainer && !kbFilterUIContainer) {
-    kbFilterUIContainer = createFilterUI(
+  if (filterContainer && !filterUIContainer) {
+    filterUIContainer = createFilterUI(
       KNOWLEDGE_BASE_FILTER_CONFIG,
-      kbFilterState,
+      filterState,
       (newState) => {
-        kbFilterState = newState;
+        filterState = newState;
         refreshFilteredArticles(ctx);
       }
     );
@@ -446,9 +498,9 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
     // Insert filter UI before export button
     const exportBtn = filterContainer.querySelector('#kb-export');
     if (exportBtn) {
-      filterContainer.insertBefore(kbFilterUIContainer, exportBtn);
+      filterContainer.insertBefore(filterUIContainer, exportBtn);
     } else {
-      filterContainer.prepend(kbFilterUIContainer);
+      filterContainer.prepend(filterUIContainer);
     }
   }
 
@@ -459,11 +511,11 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
     exportBtn.addEventListener('click', () => {
       const filtered = getFilteredArticles();
       if (filtered.length === 0) {
-        alertError('No articles to export');
+        showToast('No articles to export', 'warning');
         return;
       }
       exportToCsv(filtered as unknown as Record<string, unknown>[], KNOWLEDGE_BASE_EXPORT_CONFIG);
-      alertSuccess(`Exported ${filtered.length} articles to CSV`);
+      showToast(`Exported ${filtered.length} articles to CSV`, 'success');
     });
   }
 
@@ -509,19 +561,19 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
     try {
       if (idInput?.value) {
         await apiPut(`${KB_API}/admin/articles/${idInput.value}`, payload);
-        alertSuccess('Article updated.');
+        showToast('Article updated', 'success');
       } else {
         await apiPost(`${KB_API}/admin/articles`, payload);
-        alertSuccess('Article created.');
+        showToast('Article created', 'success');
       }
       closeArticleModal();
       await loadKnowledgeBase(ctx);
     } catch (err) {
-      alertError((err as Error).message);
+      showToast((err as Error).message, 'error');
     }
   });
 
-  el('kb-articles-tbody')?.addEventListener('click', async (e) => {
+  el('kb-articles-table-body')?.addEventListener('click', async (e) => {
     const editBtn = (e.target as HTMLElement).closest('.kb-edit-article');
     const deleteBtn = (e.target as HTMLElement).closest('.kb-delete-article');
     if (editBtn) {
@@ -532,7 +584,7 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
         const data = await parseJsonResponse<{ article: KBArticle }>(res);
         openArticleModal(categoriesCache, data.article);
       } catch (err) {
-        ctx.showNotification((err as Error).message, 'error');
+        showToast((err as Error).message, 'error');
       }
     }
     if (deleteBtn) {
@@ -542,10 +594,10 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
       if (!ok) return;
       try {
         await apiDelete(`${KB_API}/admin/articles/${id}`);
-        alertSuccess('Article deleted.');
+        showToast('Article deleted', 'success');
         await loadKnowledgeBase(ctx);
       } catch (err) {
-        alertError((err as Error).message);
+        showToast((err as Error).message, 'error');
       }
     }
   });
@@ -555,8 +607,8 @@ export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<voi
   storedKbContext = ctx;
   setupKBListeners(ctx);
 
-  const categoriesTbody = el('kb-categories-tbody');
-  const articlesTbody = el('kb-articles-tbody');
+  const categoriesTbody = el('kb-categories-table-body');
+  const articlesTbody = el('kb-articles-table-body');
 
   if (categoriesTbody) showTableLoading(categoriesTbody, CATEGORIES_COLSPAN, 'Loading categories...');
   if (articlesTbody) showTableLoading(articlesTbody, ARTICLES_COLSPAN, 'Loading articles...');
@@ -571,28 +623,31 @@ export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<voi
     articlesCache = articles;
 
     // Update filter with category options
-    if (kbFilterUIContainer) {
+    if (filterUIContainer) {
       const categoryOptions = categories.map(c => ({ value: c.name, label: c.name }));
       updateFilterStatusOptions(
-        kbFilterUIContainer,
+        filterUIContainer,
         categoryOptions,
         'Category',
-        kbFilterState,
+        filterState,
         KNOWLEDGE_BASE_FILTER_CONFIG,
         (newState) => {
-          kbFilterState = newState;
+          filterState = newState;
           refreshFilteredArticles(ctx);
         }
       );
     }
 
-    // Apply filters and render
-    const filtered = applyFilters(articlesCache, kbFilterState, KNOWLEDGE_BASE_FILTER_CONFIG);
-    renderArticlesTable(filtered, ctx);
+    // Apply filters and pagination, then render
+    const filtered = applyFilters(articlesCache, filterState, KNOWLEDGE_BASE_FILTER_CONFIG);
+    paginationState.totalItems = filtered.length;
+    const paginated = applyPagination(filtered, paginationState);
+    renderArticlesTable(paginated, ctx);
+    renderKBArticlesPaginationUI(filtered.length, ctx);
   } catch (err) {
     if (categoriesTbody) showTableEmpty(categoriesTbody, CATEGORIES_COLSPAN, 'Failed to load categories.');
     if (articlesTbody) showTableEmpty(articlesTbody, ARTICLES_COLSPAN, 'Failed to load articles.');
-    ctx.showNotification((err as Error).message, 'error');
+    showToast((err as Error).message, 'error');
   }
 }
 
@@ -600,7 +655,7 @@ export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<voi
  * Get articles filtered by current filter state
  */
 function getFilteredArticles(): KBArticle[] {
-  return applyFilters(articlesCache, kbFilterState, KNOWLEDGE_BASE_FILTER_CONFIG);
+  return applyFilters(articlesCache, filterState, KNOWLEDGE_BASE_FILTER_CONFIG);
 }
 
 /**
@@ -608,5 +663,8 @@ function getFilteredArticles(): KBArticle[] {
  */
 function refreshFilteredArticles(ctx: AdminDashboardContext): void {
   const filtered = getFilteredArticles();
-  renderArticlesTable(filtered, ctx);
+  paginationState.totalItems = filtered.length;
+  const paginated = applyPagination(filtered, paginationState);
+  renderArticlesTable(paginated, ctx);
+  renderKBArticlesPaginationUI(filtered.length, ctx);
 }

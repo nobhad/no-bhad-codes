@@ -324,40 +324,52 @@
 }
 
 /* ============================================
-   Lead Analytics Section (collapsible single card)
-   Single admin-table-card with <details> for
-   native collapse. 3 columns inside separated
-   by vertical dividers.
+   Lead Analytics Section
+   3-column grid: Conversion Funnel, Lead Sources,
+   Scoring Rules. Lives on Analytics > Business tab.
    ============================================ */
 
-/* Uses portal-project-card + system-details for collapse behavior.
-   See details-card.css for toggle/caret/focus styles. */
-
+/* When leads-analytics-section is wrapped in portal-project-card, no extra margin needed */
 .leads-analytics-section {
-  margin-bottom: var(--portal-spacing-md);
+  /* margin handled by parent card */
 }
 
-/* 3-column grid inside the card */
+/* 3-column grid (legacy) */
 .analytics-columns {
   display: grid;
   grid-template-columns: 2fr 1.5fr 2fr;
   gap: var(--portal-spacing-sm);
-  padding: 0 var(--space-4) var(--space-4);
+  align-items: start;
 }
 
-.analytics-column {
-  background: var(--portal-bg-medium);
+/* 2-column grid for Lead Analytics */
+.analytics-columns-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--portal-spacing-md);
+  align-items: start;
+  margin-bottom: var(--portal-spacing-md);
+}
+
+/* Full-width column for Scoring Rules */
+.analytics-column-full {
+  width: 100%;
+}
+
+.analytics-column,
+.analytics-column-full {
+  background: var(--portal-bg-light);
   border-radius: var(--portal-radius-md);
-  padding: var(--space-3) var(--space-3) var(--space-3);
+  padding: var(--portal-spacing-sm) var(--space-3) var(--space-3);
   min-width: 0;
+  color: #ffffff;
 }
 
-.analytics-column-title {
-  font-size: 0.75rem;
+/* Make section headers bright white for good contrast */
+.analytics-column .field-label,
+.analytics-column-full .field-label {
+  color: #ffffff !important;
   font-weight: 600;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
   margin-bottom: var(--portal-spacing-sm);
 }
 
@@ -365,10 +377,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--portal-spacing-sm);
 }
 
-.analytics-column-header .analytics-column-title {
+.analytics-column-header .field-label {
   margin-bottom: 0;
 }
 
@@ -396,7 +407,7 @@
   flex-direction: row;
   align-items: center;
   gap: var(--portal-spacing-xs);
-  padding: 3px 0;
+  padding: 2px 0;
   background: none;
   border-radius: 0;
   min-width: 0;
@@ -404,10 +415,10 @@
 }
 
 .leads-analytics-section .funnel-stage-label {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 500;
-  color: var(--portal-text-light);
-  min-width: 85px;
+  color: #ffffff;
+  min-width: 78px;
   flex-shrink: 0;
   margin-top: 0;
 }
@@ -415,7 +426,7 @@
 .leads-analytics-section .funnel-bar-wrapper {
   flex: 1;
   min-width: 0;
-  height: 16px;
+  height: 14px;
   background: var(--portal-bg-dark);
   border-radius: 3px;
   overflow: hidden;
@@ -445,13 +456,13 @@
 
 .leads-analytics-section .funnel-count {
   font-size: 0.75rem;
-  color: var(--portal-text-light);
+  color: #ffffff;
   font-weight: 600;
 }
 
 .leads-analytics-section .funnel-percentage {
   font-size: 0.6875rem;
-  color: var(--portal-text-secondary);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* ---- Source Performance ---- */
@@ -467,7 +478,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 0;
+  padding: 3px 0;
   border-bottom: 1px solid var(--portal-border-light);
   border-radius: 0;
 }
@@ -478,7 +489,7 @@
 
 .source-name {
   font-size: 0.75rem;
-  color: var(--portal-text-light);
+  color: #ffffff;
 }
 
 .source-stats {
@@ -489,7 +500,7 @@
 }
 
 .source-total {
-  color: var(--portal-text-secondary);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .source-converted {
@@ -497,7 +508,7 @@
 }
 
 .source-rate {
-  color: var(--portal-text-light);
+  color: #ffffff;
   font-weight: 600;
   min-width: 24px;
   text-align: right;
@@ -520,19 +531,46 @@
   padding: 0;
 }
 
+/* When full-width, display scoring rules in a 3-column grid */
+.analytics-column-full .scoring-rules-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 var(--portal-spacing-lg);
+}
+
+/* Border handled in mobile media query */
+
+@media (max-width: 1024px) {
+  .analytics-column-full .scoring-rules-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-column-full .scoring-rules-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 .scoring-rule-item {
   display: flex;
   align-items: center;
   gap: var(--portal-spacing-xs);
-  padding: 4px 0;
+  padding: 3px 0;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--portal-border-light);
   border-radius: 0;
 }
 
-.scoring-rule-item:last-child {
-  border-bottom: none;
+/* Only show border on mobile (single column) */
+@media (max-width: 768px) {
+  .scoring-rule-item {
+    border-bottom: 1px solid var(--portal-border-light);
+  }
+
+  .scoring-rule-item:last-child {
+    border-bottom: none;
+  }
 }
 
 .scoring-rule-item.rule-inactive {
@@ -544,16 +582,22 @@
   min-width: 0;
 }
 
-.rule-name {
+.rule-name,
+.analytics-column .rule-name,
+.analytics-column-full .rule-name,
+.leads-analytics-section .rule-name {
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--portal-text-light);
+  color: #ffffff !important;
   line-height: 1.3;
 }
 
-.rule-condition {
+.rule-condition,
+.analytics-column .rule-condition,
+.analytics-column-full .rule-condition,
+.leads-analytics-section .rule-condition {
   font-size: 0.6875rem;
-  color: var(--portal-text-secondary);
+  color: rgba(255, 255, 255, 0.8) !important;
   line-height: 1.3;
 }
 
@@ -570,12 +614,16 @@
   color: var(--portal-text-muted);
 }
 
-.rule-points {
+.rule-points,
+.analytics-column .rule-points,
+.analytics-column-full .rule-points,
+.leads-analytics-section .rule-points {
   font-size: 0.75rem;
   font-weight: 600;
   min-width: 40px;
   text-align: right;
   flex-shrink: 0;
+  color: #ffffff !important;
 }
 
 .rule-points.points-positive {
@@ -904,7 +952,8 @@
     padding: var(--portal-spacing-xs) var(--portal-spacing-sm);
   }
 
-  .analytics-columns {
+  .analytics-columns,
+  .analytics-columns-2col {
     grid-template-columns: 1fr;
   }
 
