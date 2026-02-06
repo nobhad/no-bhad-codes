@@ -24,6 +24,14 @@ if (import.meta.env?.PROD) {
 // Import and initialize application
 import { app } from './core/app';
 
+// Import password toggle component
+import { initAllPasswordToggles } from './components/password-toggle';
+
+// Initialize password toggles when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  initAllPasswordToggles();
+});
+
 // Export for debugging
 export { app };
 
