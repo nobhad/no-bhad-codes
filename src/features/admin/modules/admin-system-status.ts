@@ -83,7 +83,8 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
         sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
 
         ctx.showNotification('Cache cleared successfully', 'success');
-      } catch (_error) {
+      } catch (error) {
+        console.error('[AdminSystem] Failed to clear cache:', error);
         ctx.showNotification('Failed to clear cache', 'error');
       } finally {
         clearCacheBtn.disabled = false;
@@ -104,7 +105,8 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
           const data = await res.json().catch(() => ({}));
           ctx.showNotification(data.error || 'Failed to send test email', 'error');
         }
-      } catch (_error) {
+      } catch (error) {
+        console.error('[AdminSystem] Failed to send test email:', error);
         ctx.showNotification('Failed to send test email', 'error');
       } finally {
         testEmailBtn.disabled = false;
@@ -126,7 +128,8 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
           const data = await res.json().catch(() => ({}));
           ctx.showNotification(data.error || 'Failed to run scheduler', 'error');
         }
-      } catch (_error) {
+      } catch (error) {
+        console.error('[AdminSystem] Failed to run scheduler:', error);
         ctx.showNotification('Failed to run scheduler', 'error');
       } finally {
         runSchedulerBtn.disabled = false;
@@ -396,7 +399,8 @@ async function checkApiHealth(): Promise<StatusItem> {
       status: 'warning',
       message: `Status: ${response.status}`
     };
-  } catch (_error) {
+  } catch (error) {
+    console.error('[AdminSystem] Health check failed, trying root endpoint:', error);
     clearTimeout(timeoutId);
     // API might not have a /health endpoint, try root
     const rootController = new AbortControllerClass();

@@ -445,7 +445,8 @@ function renderHealthScore(): void {
           renderHealthScore();
           storedContext?.showNotification('Health score calculated', 'success');
         }
-      } catch (_error) {
+      } catch (error) {
+        console.error('[ClientDetails] Failed to calculate health:', error);
         storedContext?.showNotification('Failed to calculate health', 'error');
       }
     });
@@ -557,7 +558,8 @@ function renderHeaderTags(): void {
           return newTag;
         }
         return null;
-      } catch (_error) {
+      } catch (error) {
+        console.error('[ClientDetails] Failed to create tag:', error);
         storedContext?.showNotification('Failed to create tag', 'error');
         return null;
       }
@@ -1138,7 +1140,8 @@ async function addContact(): Promise<void> {
       renderContactsTab();
       storedContext?.showNotification('Contact added', 'success');
     }
-  } catch (_error) {
+  } catch (error) {
+    console.error('[ClientDetails] Failed to add contact:', error);
     storedContext?.showNotification('Failed to add contact', 'error');
   }
 }
@@ -1193,7 +1196,8 @@ async function editContact(contactId: number): Promise<void> {
       renderContactsTab();
       storedContext?.showNotification('Contact updated', 'success');
     }
-  } catch (_error) {
+  } catch (error) {
+    console.error('[ClientDetails] Failed to update contact:', error);
     storedContext?.showNotification('Failed to update contact', 'error');
   }
 }
@@ -1215,7 +1219,8 @@ async function deleteContact(contactId: number): Promise<void> {
       renderContactsTab();
       storedContext?.showNotification('Contact deleted', 'success');
     }
-  } catch (_error) {
+  } catch (error) {
+    console.error('[ClientDetails] Failed to delete contact:', error);
     storedContext?.showNotification('Failed to delete contact', 'error');
   }
 }
@@ -1245,7 +1250,8 @@ async function setContactPrimary(contactId: number): Promise<void> {
       renderContactsTab();
       storedContext?.showNotification('Primary contact updated', 'success');
     }
-  } catch (_error) {
+  } catch (error) {
+    console.error('[ClientDetails] Failed to update primary contact:', error);
     storedContext?.showNotification('Failed to update primary contact', 'error');
   }
 }
@@ -1363,7 +1369,8 @@ async function logActivity(): Promise<void> {
       filterActivities('all');
       storedContext?.showNotification('Activity logged', 'success');
     }
-  } catch (_error) {
+  } catch (error) {
+    console.error('[ClientDetails] Failed to log activity:', error);
     storedContext?.showNotification('Failed to log activity', 'error');
   }
 }
@@ -1443,7 +1450,8 @@ function setupNoteEventListeners(): void {
         renderNotesTab();
         storedContext?.showNotification('Note added', 'success');
       }
-    } catch (_error) {
+    } catch (error) {
+      console.error('[ClientDetails] Failed to add note:', error);
       storedContext?.showNotification('Failed to add note', 'error');
     }
   });
@@ -1480,7 +1488,8 @@ async function toggleNotePin(noteId: number): Promise<void> {
       renderNotesTab();
       storedContext?.showNotification(note.is_pinned ? 'Note pinned' : 'Note unpinned', 'success');
     }
-  } catch (_error) {
+  } catch (error) {
+    console.error('[ClientDetails] Failed to update note:', error);
     storedContext?.showNotification('Failed to update note', 'error');
   }
 }
@@ -1496,7 +1505,8 @@ async function deleteNote(noteId: number): Promise<void> {
       renderNotesTab();
       storedContext?.showNotification('Note deleted', 'success');
     }
-  } catch (_error) {
+  } catch (error) {
+    console.error('[ClientDetails] Failed to delete note:', error);
     storedContext?.showNotification('Failed to delete note', 'error');
   }
 }
