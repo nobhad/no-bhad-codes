@@ -8,16 +8,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
-
-// Business info from environment variables
-const BUSINESS_INFO = {
-  name: process.env.BUSINESS_NAME || '',
-  contact: process.env.BUSINESS_CONTACT || '',
-  email: process.env.BUSINESS_EMAIL || '',
-  website: process.env.BUSINESS_WEBSITE || '',
-  venmoHandle: process.env.VENMO_HANDLE || '',
-  paypalEmail: process.env.PAYPAL_EMAIL || ''
-};
+import { BUSINESS_INFO } from '../config/business.js';
 
 // Type definitions for database operations
 type SqlValue = string | number | boolean | null;

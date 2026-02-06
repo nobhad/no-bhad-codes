@@ -20,21 +20,9 @@ import { getString, getNumber } from '../database/row-helpers.js';
 import { projectService } from '../services/project-service.js';
 import { fileService } from '../services/file-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
+import { BUSINESS_INFO, getPdfLogoBytes, CONTRACT_TERMS } from '../config/business.js';
 
 const router = express.Router();
-
-// Business info from environment variables
-const BUSINESS_INFO = {
-  name: process.env.BUSINESS_NAME || 'No Bhad Codes',
-  owner: process.env.BUSINESS_OWNER || 'Noelle Bhaduri',
-  contact: process.env.BUSINESS_CONTACT || 'Noelle Bhaduri',
-  tagline: process.env.BUSINESS_TAGLINE || 'Web Development & Design',
-  email: process.env.BUSINESS_EMAIL || 'nobhaduri@gmail.com',
-  website: process.env.BUSINESS_WEBSITE || 'nobhad.codes'
-};
-
-// Debug log for business info (remove after verification)
-console.log('[Projects Route] BUSINESS_INFO loaded:', BUSINESS_INFO);
 
 // Configure multer for file uploads using centralized config
 const storage = multer.diskStorage({
@@ -1390,7 +1378,6 @@ router.get(
     let y = height - 43;
 
     // === HEADER - Title on left, logo and business info on right ===
-    const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
     const logoHeight = 100; // ~1.4 inch for prominent branding
 
     // CONTRACT title on left: 28pt
@@ -1401,8 +1388,8 @@ router.get(
 
     // Logo and business info on right (logo left of text, text left-aligned)
     let textStartX = rightMargin - 180;
-    if (existsSync(logoPath)) {
-      const logoBytes = readFileSync(logoPath);
+    const logoBytes = getPdfLogoBytes();
+    if (logoBytes) {
       const logoImage = await pdfDoc.embedPng(logoBytes);
       const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
       const logoX = rightMargin - logoWidth - 150;
@@ -1549,15 +1536,7 @@ router.get(
     page.drawText('4. Terms and Conditions', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
     y -= 18;
 
-    const terms = [
-      '1. All work will be performed in a professional manner and according to industry standards.',
-      '2. Client agrees to provide timely feedback and necessary materials to avoid project delays.',
-      '3. Changes to the scope of work may require additional time and cost adjustments.',
-      '4. Client retains ownership of all final deliverables upon full payment.',
-      '5. Service Provider retains the right to showcase the completed project in their portfolio.'
-    ];
-
-    for (const term of terms) {
+    for (const term of CONTRACT_TERMS) {
       page.drawText(term, { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
       y -= 15;
     }
@@ -2206,7 +2185,6 @@ router.get(
 
     // === HEADER - Title on left, logo and business info on right ===
     const logoHeight = 100;
-    const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
 
     // INTAKE title on left: 28pt
     const titleText = 'INTAKE';
@@ -2220,9 +2198,9 @@ router.get(
 
     // Logo and business info on right (logo left of text, text left-aligned)
     let textStartX = rightMargin - 180;
-    if (existsSync(logoPath)) {
-      const logoBytes = readFileSync(logoPath);
-      const logoImage = await pdfDoc.embedPng(logoBytes);
+    const intakeLogoBytes = getPdfLogoBytes();
+    if (intakeLogoBytes) {
+      const logoImage = await pdfDoc.embedPng(intakeLogoBytes);
       const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
       const logoX = rightMargin - logoWidth - 150;
       page.drawImage(logoImage, {

@@ -734,7 +734,7 @@ export const CONTACTS_FILTER_CONFIG: TableFilterConfig = {
 
 export const PROJECTS_FILTER_CONFIG: TableFilterConfig = {
   tableId: 'projects',
-  searchFields: ['project_name', 'contact_name', 'project_type'],
+  searchFields: ['project_name', 'contact_name', 'email', 'project_type'],
   statusField: 'status',
   statusOptions: [
     { value: 'active', label: 'Active' },
@@ -759,7 +759,7 @@ export const PROJECTS_FILTER_CONFIG: TableFilterConfig = {
 
 export const CLIENTS_FILTER_CONFIG: TableFilterConfig = {
   tableId: 'clients',
-  searchFields: ['name', 'email', 'company_name'],
+  searchFields: ['name', 'email', 'company_name', 'contact_name'],
   statusField: 'status',
   statusOptions: [
     { value: 'active', label: 'Active' },
@@ -802,13 +802,63 @@ export const DOCUMENT_REQUESTS_FILTER_CONFIG: TableFilterConfig = {
 export const KNOWLEDGE_BASE_FILTER_CONFIG: TableFilterConfig = {
   tableId: 'kb-articles',
   searchFields: ['title', 'category_name', 'slug', 'summary'],
-  statusField: 'category_name', // Filter by category name
+  // statusField uses category_name intentionally — KB filters by category, not status
+  statusField: 'category_name',
   statusOptions: [], // Populated dynamically with categories
+  // dateField uses updated_at intentionally — KB articles show "last updated" as primary date
   dateField: 'updated_at',
   sortableColumns: [
     { key: 'title', label: 'Title', type: 'string' },
     { key: 'category_name', label: 'Category', type: 'string' },
     { key: 'updated_at', label: 'Updated', type: 'date' }
   ],
-  storageKey: 'admin_kb_filter'
+  storageKey: 'admin_knowledge_base_filter'
+};
+
+export const INVOICES_FILTER_CONFIG: TableFilterConfig = {
+  tableId: 'invoices',
+  searchFields: ['invoice_number', 'client_name', 'project_name'],
+  statusField: 'status',
+  statusOptions: [
+    { value: 'draft', label: 'Draft' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'sent', label: 'Sent' },
+    { value: 'paid', label: 'Paid' },
+    { value: 'overdue', label: 'Overdue' }
+  ],
+  dateField: 'due_date',
+  sortableColumns: [
+    { key: 'invoice_number', label: 'Invoice #', type: 'string' },
+    { key: 'client_name', label: 'Client', type: 'string' },
+    { key: 'project_name', label: 'Project', type: 'string' },
+    { key: 'amount_total', label: 'Amount', type: 'number' },
+    { key: 'status', label: 'Status', type: 'string' },
+    { key: 'due_date', label: 'Due Date', type: 'date' }
+  ],
+  storageKey: 'admin_invoices_filter'
+};
+
+export const PROPOSALS_FILTER_CONFIG: TableFilterConfig = {
+  tableId: 'proposals',
+  // Uses camelCase fields intentionally — API returns camelCase for proposals
+  searchFields: ['client.name', 'client.email', 'client.company', 'project.name'],
+  statusField: 'status',
+  statusOptions: [
+    { value: 'pending', label: 'Pending' },
+    { value: 'reviewed', label: 'Reviewed' },
+    { value: 'accepted', label: 'Accepted' },
+    { value: 'rejected', label: 'Rejected' },
+    { value: 'converted', label: 'Converted' }
+  ],
+  dateField: 'createdAt',
+  sortableColumns: [
+    { key: 'client.name', label: 'Client', type: 'string' },
+    { key: 'project.name', label: 'Project', type: 'string' },
+    { key: 'projectType', label: 'Type', type: 'string' },
+    { key: 'selectedTier', label: 'Tier', type: 'string' },
+    { key: 'finalPrice', label: 'Price', type: 'number' },
+    { key: 'status', label: 'Status', type: 'string' },
+    { key: 'createdAt', label: 'Created', type: 'date' }
+  ],
+  storageKey: 'admin_proposals_filter'
 };

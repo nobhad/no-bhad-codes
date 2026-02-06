@@ -6,6 +6,148 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ## Recently Completed
 
+- [x] **Admin UI Fixes (Feb 5, 2026)**: Fixed dropdown alignment and sidebar order issues.
+
+  - **Dropdown alignment**: Table dropdowns now align left with trigger (`left: 0; right: auto; min-width: 100%`)
+  - **Dropdown overflow**: Changed `.admin-table-container` from `overflow: hidden` to `overflow: visible` so dropdowns overlay table
+  - **Sidebar order**: Reordered to logical grouping: DASHBOARD, LEADS, PROJECTS, CLIENTS, INVOICES, MESSAGES, DOCUMENTS, KNOWLEDGE, ANALYTICS, SYSTEM
+
+  **Files Modified:**
+  - `src/styles/shared/portal-dropdown.css` - Dropdown menu positioning
+  - `src/styles/pages/admin.css` - Dropdown positioning and table overflow
+  - `admin/index.html` - Sidebar button order
+
+- [x] **PDF Generation Audit & High Priority Fixes (Feb 5, 2026)**: Completed comprehensive PDF_AUDIT.md documentation and resolved all high priority issues.
+
+  **Added Missing Documentation:**
+  - Contract PDF endpoint (`GET /api/projects/:id/contract/pdf`) - was completely undocumented
+  - Contract signature request system (token generation, email notification, audit logging)
+  - PDF metadata settings (`setTitle`, `setAuthor`, `setSubject`, `setCreator`)
+  - IntakeDocument interface and helper functions with exact mapping values
+  - Line items table structure and column positions for Invoice PDF
+  - Page constants and font sizes for markdown-to-pdf script
+  - Code line counts for all PDF-generating files
+
+  **High Priority Fixes Applied:**
+  - **Consolidated BUSINESS_INFO**: Created `server/config/business.ts` as single source of truth
+  - **Removed unused pdfkit**: Removed `pdfkit` and `@types/pdfkit` from package.json (only pdf-lib used)
+  - **Fixed inconsistent website default**: All files now use `nobhad.codes`
+  - **Updated environment.ts**: Added missing fields (BUSINESS_OWNER, BUSINESS_TAGLINE, ZELLE_EMAIL)
+  - Deposit invoice title: Changed from "DEPOSIT INVOICE" to "INVOICE"
+
+  **Medium Priority Fixes Applied:**
+  - **Line item word wrapping**: Invoice bullet point details now wrap within column bounds
+  - **Centralized logo loading**: Added `getPdfLogoBytes()` with fallback paths to business.ts
+  - **Contract terms configurable**: Moved to `CONTRACT_TERMS` in business.ts (env override: `CONTRACT_TERMS`)
+
+  **Files Modified:**
+  - `server/config/business.ts` - Centralized business info, logo helper, contract terms
+  - `server/config/environment.ts` - Added missing business fields to schema
+  - `server/routes/invoices.ts` - Word-wrapped details, centralized logo, shared config
+  - `server/routes/proposals.ts` - Centralized logo, shared config
+  - `server/routes/projects.ts` - Centralized logo, contract terms from config
+  - `server/services/invoice-service.ts` - Import from shared config
+  - `scripts/markdown-to-pdf.ts` - Updated defaults to match shared config
+  - `package.json` - Removed pdfkit and @types/pdfkit
+  - `docs/design/PDF_AUDIT.md` - Comprehensive documentation update
+
+- [x] **Cross-Table Consistency Fix (Feb 5, 2026)**: Implemented comprehensive standardization across all admin dashboard tables based on TABLE_AUDIT.md findings.
+
+  **Phase 1 - Fixed Dead/Orphaned UI:**
+  - Wired Leads export button to `exportToCsv()` with LEADS_EXPORT_CONFIG
+  - Wired Invoices bulk actions (Mark Paid, Send, Delete) with checkbox selection
+
+  **Phase 2-4 - Shared Infrastructure:**
+  - Invoices: Added filter UI (`createFilterUI`), pagination, replaced custom export with shared utility
+  - Proposals: Replaced custom filter buttons with `createFilterUI()`, added sortable headers
+  - Time Tracking: Replaced custom CSV export with shared `exportToCsv()` utility
+
+  **Phase 5 - HTML Structure Normalization:**
+  - Renamed tbody IDs: `dr-tbody` → `document-requests-table-body`, `kb-categories-tbody` → `kb-categories-table-body`, `kb-articles-tbody` → `kb-articles-table-body`
+  - Fixed KB localStorage key: `admin_kb_filter` → `admin_knowledge_base_filter`
+  - Added loading placeholder rows to Document Requests, KB Categories, KB Articles
+
+  **Phase 6 - Toolbar Standardization:**
+  - Reordered buttons: Search → Filter → View Toggle → Export → Refresh → Add (last)
+  - Standardized labels: "Create Invoice" → "Add Invoice", "New request" → "Add Request"
+  - Wrapped SVGs in `<span class="icon-btn-svg">` for consistency
+
+  **Phase 8-9 - State Standardization:**
+  - Empty state messages: "No {entity} yet." (zero data) / "No {entity} match the current filters." (filtered empty)
+  - Loading states: Added `showTableLoading()` to admin-leads.ts and admin-contacts.ts
+
+  **Phase 10 - Added Pagination:**
+  - Document Requests: Added pagination with `createPaginationUI()`
+  - KB Articles: Added pagination with `createPaginationUI()`
+
+  **Phase 11 - Filter Config Consistency:**
+  - Added `email` to Projects filter searchFields
+  - Added `contact_name` to Clients filter searchFields
+  - Documented intentional camelCase in Proposals config (API returns camelCase)
+
+  **Files Modified:**
+  - `admin/index.html`
+  - `src/features/admin/modules/admin-leads.ts`
+  - `src/features/admin/modules/admin-contacts.ts`
+  - `src/features/admin/modules/admin-projects.ts`
+  - `src/features/admin/modules/admin-clients.ts`
+  - `src/features/admin/modules/admin-invoices.ts`
+  - `src/features/admin/modules/admin-proposals.ts`
+  - `src/features/admin/modules/admin-time-tracking.ts`
+  - `src/features/admin/modules/admin-document-requests.ts`
+  - `src/features/admin/modules/admin-knowledge-base.ts`
+  - `src/utils/table-filter.ts`
+  - `src/utils/table-export.ts`
+  - `docs/design/TABLE_AUDIT.md`
+
+  **Deferred:**
+  - DOM caching pattern unification (Map vs createDOMCache vs el() helper): Current patterns all work correctly; this is a code style optimization only
+  - Stat cards for Contacts/Document Requests: Filter dropdowns provide equivalent functionality
+
+  **Final Fixes (Feb 5, 2026):**
+  - Proposals: Added pagination (`createPaginationUI`, pagination state, container)
+  - Document Requests: Added sortable headers (`createSortableHeaders`)
+  - Projects: Wired export button to `exportToCsv()`
+  - Empty values: Updated `formatDisplayValue()` to return `-` instead of blank
+  - Proposals: Changed `btn-icon` to `icon-btn` class, added row click navigation
+  - Leads: Changed 14px icons to 16px for consistency
+
+  **All 20 Tiers Complete** - TABLE_AUDIT.md reduced from 3,305 to 2,631 lines
+
+- [x] **Table Column Order Analysis (Feb 5, 2026)**: Comprehensive analysis of all 14 admin tables verifying column headers match data sources.
+
+  **Created:** `docs/design/TABLE_COLUMN_ANALYSIS.md` - Full analysis document
+
+  **Discrepancies Fixed in TABLE_AUDIT.md:**
+  - **Tasks List View**: Removed non-existent Checklist column (6→5 cols), fixed header "Title"→"Task", corrected column order (Due Date before Assignee)
+  - **Project Files**: Fixed Actions from "Download + Delete" to "Preview (conditional) + Download"
+  - **Project Invoices**: Fixed Actions from "View + Edit" to full list of 5 conditional buttons
+
+  **Naming Inconsistency Documented:**
+  - Document Requests uses "Due" while all other tables use "Due Date"
+
+  **Verified All Tables Match:** Leads, Clients, Contacts, Projects, Invoices, Proposals, Time Tracking, Document Requests, KB Categories, KB Articles, Visitors
+
+- [x] **Cross-Module Consistency Standardization (Feb 5, 2026)**: Standardized notification and variable naming patterns across all admin modules for consistency.
+
+  **Notifications Standardized to `showToast()`:**
+  - `admin-document-requests.ts`: Replaced all `alertSuccess()`/`alertError()` with `showToast()`
+  - `admin-knowledge-base.ts`: Replaced all `alertSuccess()`/`alertError()`/`ctx.showNotification()` with `showToast()`
+  - `admin-contacts.ts`: Replaced all `ctx.showNotification()`/`storedContext.showNotification()` with `showToast()`
+  - `admin-clients.ts`: Replaced all `ctx.showNotification()`/`storedContext?.showNotification()` with `showToast()`
+
+  **Variable Naming Standardized (removed prefixes):**
+  - `admin-document-requests.ts`: `drFilterState` → `filterState`, `drPaginationState` → `paginationState`, `drFilterUIContainer` → `filterUIContainer`
+  - `admin-knowledge-base.ts`: `kbFilterState` → `filterState`, `kbArticlesPaginationState` → `paginationState`, `kbFilterUIContainer` → `filterUIContainer`
+
+  **Files Modified:**
+  - `src/features/admin/modules/admin-document-requests.ts`
+  - `src/features/admin/modules/admin-knowledge-base.ts`
+  - `src/features/admin/modules/admin-contacts.ts`
+  - `src/features/admin/modules/admin-clients.ts`
+
+- [x] **Table Audit Column Order Reference (Feb 5, 2026)**: Added comprehensive "Column Order Reference (All Tables)" section to TABLE_AUDIT.md with numbered columns for all 14 tables showing exact left-to-right display order, header names, and data sources. Replaces the previous condensed text format with clear numbered tables for each: Leads, Clients, Contacts, Projects, Invoices, Proposals, Time Tracking, Document Requests, KB Categories, KB Articles, Visitors, Project Files, Project Invoices, and Tasks List View.
+
 - [x] **Table Audit Documentation (Feb 5, 2026)**: Created and updated comprehensive `docs/design/TABLE_AUDIT.md` with all 18 tables. Added UI display names (e.g., "Intake Submissions", "Client Accounts", "Contact Form Submissions"), exact `<th>` header text, HTML source locations, TypeScript module paths, nav tab identifiers. Added 3 previously missing tables: Visitors (Analytics), Project Detail Files sub-table, Project Detail Invoices sub-table. Fixed column discrepancies in Proposals and Document Requests. Added Display Name Reference quick-lookup section and Table Header Quick Reference.
 
 ---
@@ -84,7 +226,7 @@ The items below are active and require immediate attention or follow-up testing.
 
 - **Sidebar counts (auth/500/403)**: `GET /api/admin/sidebar-counts` returned errors in the dashboard — verify admin auth/permission checks (`authenticateToken` / `requireAdmin`) and that DB queries (`visitor_sessions`, `general_messages`) handle empty or missing data gracefully.
 
-- **Sidebar page order not intuitive (Feb 3, 2026)**: The current sidebar navigation order may not reflect a logical workflow. Current order: Dashboard | Leads | Projects | Clients | Invoices | Messages | Analytics | Knowledge | Documents | System. Consider reorganizing based on usage frequency or logical grouping (e.g., grouping client-related items together, or putting most-used items at top).
+- **Sidebar page order not intuitive (Feb 3, 2026)**: ✅ **FIXED (Feb 5, 2026)** — Reordered to logical grouping: DASHBOARD, LEADS, PROJECTS, CLIENTS, INVOICES, MESSAGES, DOCUMENTS, KNOWLEDGE, ANALYTICS, SYSTEM. Documents now above Analytics, Knowledge after Documents.
 
 - **Reproduce & collect logs (developer steps)**:
   1. Start backend (`npm run dev:server`) and frontend (`npm run dev`).
@@ -419,232 +561,6 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 ---
 
-## Recently Completed (Feb 3, 2026)
-
-### Lead Panel UX Improvements
-
-- **Status position** — Status badge and label moved above tabs in lead details panel; spacing tightened with `.panel-status-row` in `leads-pipeline.css`.
-- **Project name clickable** — Project name in lead panel and table row now links to project details page when lead status is `in-progress` or `converted` (not just `converted`). Updated condition in `admin-leads.ts`.
-- **Removed "View Project" button** — Project name link is sufficient; removed redundant button from lead details template.
-
-### Table Icon Buttons
-
-Converted all table action columns from text buttons to icon buttons for consistency:
-
-- **Time Tracking** (`admin-time-tracking.ts`) — Edit/Delete buttons → icon buttons
-- **Knowledge Base** (`admin-knowledge-base.ts`) — Edit/Delete buttons for categories and articles → icon buttons
-- **Document Requests** (`admin-document-requests.ts`) — View/Start review/Approve/Reject/Remind/Delete → icon buttons
-
-Added CSS variants in `admin.css`:
-
-- `.icon-btn.icon-btn-danger:hover` — red hover state for destructive actions
-- `.icon-btn.icon-btn-success:hover` — green hover state for approve actions
-
-### Card Grid Consistency Fix
-
-Fixed inconsistent card grid behavior where 4-card grids (`.quick-stats`, `.attention-grid`) would sometimes display as 3+1 instead of 4 across → 2×2 → 1 column.
-
-- **Root cause:** `.attention-grid` was missing from responsive media query overrides in `admin.css`
-- **Fix:** Added `.attention-grid` to all three responsive breakpoints (1200px, 1024px, 768px) alongside `.quick-stats`
-- All 4-card grids now behave identically across the portal
-
-### Dropdown Overflow Fix
-
-Added overflow handling for project/client detail header dropdowns:
-
-- `detail-header.css` — Added `overflow: visible; position: relative; z-index: 10;` to `.detail-title-row`
-- `detail-header.css` — Added `overflow: visible; position: relative;` to `.detail-actions`
-
-This addresses potential clipping issues with the More menu dropdown in detail view headers.
-
-### Field Label Color Consistency
-
-Updated all field labels on dark backgrounds to use `--portal-text-secondary` variable for consistent styling:
-
-- **Root fix** — Changed `--label-color` in `variables.css` from `var(--color-gray-400)` to `var(--portal-text-secondary)`
-- **Removed light theme rule** — Deleted unused `[data-theme="light"] .field-label` rule from `form-fields.css`
-- **High specificity overrides** — Added `[data-page="admin"]` and `[data-page="client-portal"]` prefixes to field label rules in `project-detail.css` to override inherited colors from parent containers
-- **Span exclusion** — Updated broad `#tab-project-detail span` color rule to exclude `.field-label` and `.meta-label` classes
-
-**Files Modified:**
-
-- `src/styles/variables.css` — Root `--label-color` variable
-- `src/styles/components/form-fields.css` — Removed light theme rule, simplified portal rule
-- `src/styles/admin/project-detail.css` — High specificity field label rules, span exclusion
-- `src/styles/admin/client-detail.css` — Updated 5 label classes to use `--portal-text-secondary`
-
-### Message Reactions Verification
-
-Added verification items to checklist for message reactions feature (awaiting rate limit reset for testing):
-
-- Message reactions: clicking emoji adds reaction, reaction displays on message
-- Pin message: clicking pin icon pins/unpins message
-
-### Table Alignment & Consistency Fixes
-
-**Checkbox column alignment:**
-
-- Increased `.bulk-select-cell` width from 44px to 56px
-- Changed left padding to match text columns: `var(--space-4)` (32px)
-- Updated bulk toolbar grid from 44px to 56px to match
-
-**Invoices table checkbox column:**
-
-- Added checkbox column header to invoices table HTML
-- Updated `admin-invoices.ts` to render checkboxes in each row using `getPortalCheckboxHTML`
-- Updated colspan from 7 to 8
-
-**Table header alignment:**
-
-- Changed `.admin-table-header` padding from `var(--space-2) var(--space-5)` to `var(--space-3) var(--space-4)` to align with table cell padding
-
-**Table border radius (root fix):**
-
-- Added `border-bottom-radius` and `overflow: hidden` to `.admin-table-container` by default
-- When pagination follows, border-radius is removed via `:has(.table-pagination)` selector
-- This applies to all tables automatically - empty states, error states, and data rows all clip correctly
-
-### Files Modified
-
-- `src/features/admin/modules/admin-leads.ts` — Project name link, status position
-- `src/features/admin/modules/admin-time-tracking.ts` — Icon buttons
-- `src/features/admin/modules/admin-knowledge-base.ts` — Icon buttons
-- `src/features/admin/modules/admin-document-requests.ts` — Icon buttons
-- `src/features/admin/modules/admin-invoices.ts` — Checkbox column, colspan updates
-- `src/styles/admin/leads-pipeline.css` — Status row styling
-- `src/styles/pages/admin.css` — Icon button variants, card grid fixes, table alignment, border radius
-- `src/styles/admin/detail-header.css` — Dropdown overflow fixes
-- `src/styles/admin/table-features.css` — Bulk toolbar grid width
-- `src/styles/variables.css` — Label color variable
-- `src/styles/components/form-fields.css` — Field label rules
-- `src/styles/admin/project-detail.css` — Field label specificity fixes
-- `src/styles/admin/client-detail.css` — Field label color updates
-- `admin/index.html` — Invoices table checkbox header
-- `docs/current_work.md` — Verification items for reactions
-
----
-
-## Recently Completed (Feb 2, 2026)
-
-### Database Backups
-
-- **scripts/backup-database.ts:** Copies DB to data/backups/daily (and weekly on Sundays). Retention: 7 daily, 4 weekly. Env: BACKUP_DIR, BACKUP_RETENTION_DAILY, BACKUP_RETENTION_WEEKLY.
-- **package.json:** `npm run db:backup`
-- **CONFIGURATION.md:** Backup env vars and cron example.
-
-### E2E Portal Flow
-
-- **tests/e2e/portal-flow.spec.ts:** Client login via API, view dashboard. Uses <<<demo@example.com>>> / demo123 by default.
-- **DEVELOPER_GUIDE.md:** Portal E2E instructions.
-
-### E2E Admin Flow
-
-- **tests/e2e/admin-flow.spec.ts:** Admin login → view projects flow.
-- **playwright.config.ts:** baseURL 4000, webServer uses `dev:full` (frontend + backend), globalSetup path fix.
-- **DEVELOPER_GUIDE.md:** Admin E2E test instructions (E2E_ADMIN_PASSWORD, `npx playwright install`).
-
-### System Gaps (Non-Breaking Fixes)
-
-Addressed system gaps that do not create breaking changes:
-
-- **Health depth** — `/health` now pings DB; returns 503 and `status: degraded` if DB unhealthy
-- **Request ID** — Middleware adds `X-Request-ID` (from header or generated UUID); documented in API_DOCUMENTATION
-- **Graceful shutdown** — `closeDatabase()` called on SIGTERM/SIGINT before process exit
-- **Audit export API** — `GET /api/admin/audit-log` with filters (action, entityType, userEmail, startDate, endDate) and pagination
-- **Staging env** — CONFIGURATION.md documents `development`, `staging`, `production`, `test`
-- **Rate limit headers** — Already present in rateLimit middleware
-
-### Documentation Accuracy (API + Features)
-
-- **API_DOCUMENTATION.md:** Intake path corrected from `/intake-form` to `/intake`; added GET `/intake/status/:projectId`. Added full sections for Approvals, Workflow Triggers, Document Requests, and Knowledge Base APIs with accurate paths and methods.
-- **SYSTEM_DOCUMENTATION.md:** Auth endpoints updated (removed non-existent `/api/auth/register`; added profile, validate, forgot-password, reset-password, magic-link, verify-invitation, set-password, admin/login). Added "Additional API Route Groups" table with reference to API_DOCUMENTATION.md.
-- **server/app.ts:** Root `/` response now lists all API route prefixes (auth, admin, clients, projects, messages, invoices, uploads, intake, proposals, analytics, approvals, triggers, document-requests, kb, contact).
-- **docs/README.md:** Added API-only features table (approvals, triggers, document-requests, kb) with link to API Documentation.
-
-### Documentation Sweep (All Docs) — Feb 2, 2026
-
-- **ARCHITECTURE.md:** Project structure corrected: client HTML (intake.html, set-password.html; removed landing.html); core/env.ts added; features/client expanded (terminal-intake, proposal-builder, modules); features/main-site noted; modules described under src/modules/ (core, ui, animation, utilities); services list (bundle-analyzer, code-protection-service); components list; server moved to repo root with database/, middleware/, config/, templates/; added approval, document-request, knowledge-base, workflow-trigger, timeline, notification-preferences services.
-- **DEVELOPER_GUIDE.md:** Database scripts (db:setup, migrate:rollback, migrate:create; removed db:reset); backend restart note (no nodemon by default); ENABLE_REGISTRATION note (clients via invitation only); init step uses db:setup.
-- **docs/README.md:** Admin modules count 10 → 14; build:analyze description clarified.
-- **architecture/MODULE_DEPENDENCIES.md:** Removed non-existent section-transitions.ts from GSAP ScrollTrigger list; Last Updated set to Feb 2, 2026.
-- **CONFIGURATION.md:** Env setup note allows creating .env from doc if .env.example missing.
-- **README.md (root):** Env note added: if .env.example missing, see docs/CONFIGURATION.md.
-- **DEVELOPER_GUIDE.md, CONTRIBUTING.md:** E2E test command corrected: `npm run test:e2e` → `npx playwright test` (no test:e2e script in package.json).
-
-### Targeted Documentation Audit (Feature, Design, Deep Dives) — Feb 2, 2026
-
-- **ADMIN_DASHBOARD.md:** Last Updated Feb 2; server routes corrected (no leads.ts — leads in admin.ts; added messages, uploads, analytics, proposals, intake, approvals, triggers, document-requests, knowledge-base); migrations list fixed (001–045, sample filenames); removed line-count claims from HTML.
-- **CLIENT_PORTAL.md:** Last Updated Feb 2; client-portal styles list fixed to match src/styles/client-portal/ (index, components, dashboard, files, invoices, layout, login, projects, settings, sidebar — removed non-existent mobile.css, responsive.css, views.css); server routes added intake.ts, proposals.ts.
-- **FILES.md:** Last Updated Feb 2; duplicate "Last Updated" removed; Project Filtering marked Complete (GET /api/uploads/client supports projectId, fileType, category, dateFrom, dateTo).
-- **INVOICES.md:** Last Updated Feb 2; Authentication corrected to "HttpOnly cookies (JWT); Bearer fallback".
-- **NEW_PROJECT.md:** Last Updated Feb 2.
-- **Auth documentation:** Login auth note corrected to "HttpOnly cookies (JWT); demo mode fallback" (removed "JWT in localStorage").
-- **CRM/CMS features:** Documented implemented features (scheduler, triggers, approvals, document requests, notification prefs, timeline, KB, payment reminders, deposit/recurring invoices, A/R aging, metrics, health score, pipeline, Kanban); remaining gaps: Stripe, expense/time tracking, webhooks.
-- **UX_GUIDELINES.md:** Last Updated Feb 2.
-
-### Deep Dive + Tables/Component Docs (Feb 2, 2026)
-
-- **Tables audit:** Proposals filter (Rejected/Converted) done. Project delete (UI) done via `#btn-delete-project` in admin-project-details.ts with confirm.
-- **COMPONENT_REFACTORING_OPPORTUNITIES.md:** Last Updated Feb 2. Intro note: completed items (alert/prompt/toast/confirm) done; client-portal, portal-messages, portal-invoices marked refactored; line numbers kept as historical.
-
-### CSS Inconsistencies Audit + Resolutions (Feb 2, 2026)
-
-- **Single source colors:** design-system colors.css is canonical; removed divergent fallbacks and hardcoded hex in admin, proposals, client-detail, project-detail, contact, progress, proposal-builder, confirm-dialog, loading, portal-buttons, dashboard, nav-portal, portal-messages; business-card uses `var(--color-black)`.
-- **Overlay:** tokens only in design-system/tokens/colors.css; removed duplicates from variables.css.
-- **Shadows:** raw box-shadow replaced with `--shadow-sm`/`--shadow-md`/`--shadow-lg` in portal-messages, proposals, portal-components.
-- **Font-size:** portal-messages uses `--font-size-xs`/`--font-size-sm`.
-- **Spacing:** responsive scale renamed to `--space-fluid-*` in variables.css; design-system `--space-0`…`--space-*` is single source.
-
-### Tier 1-3 Completion
-
-- **Workflow Triggers** — Event-driven automation system with actions (send_email, create_task, update_status, webhook, notify)
-- **Thread List / Thread Switcher** — Message thread sidebar with switching
-- **Dynamic File Filter** — Filter files by project, type, category, date range
-- **Document Requests** — Admin can request docs from clients with status tracking
-- **Notification Preferences** — Clients can configure email frequency and event notifications
-- **Client-Facing Timeline** — Aggregate project activities chronologically
-- **Knowledge Base** — FAQ/KB system with categories, articles, search
-
-### Backend Features with Frontend UI
-
-- Analytics Advanced Features UI (reports, schedules, alerts)
-- Lead Pipeline Advanced Features UI (scoring rules, tasks, notes, funnel, sources)
-- Proposal Advanced Features UI (custom items, discounts, comments, activity log)
-- Contract Reminders (automatic reminders at 0, 3, 7, 14 days)
-- Project Delete in UI
-- Contact Restore button
-- Proposals Rejected/Converted filters
-- Welcome Sequences (automated onboarding emails for new clients)
-- Dashboard from API (real client portal data)
-- Activity Feed (aggregate client activities)
-- Unread Badges (sidebar notification counts)
-- Deliverable Tracking (Draft → Review → Approve workflow)
-- Approval Workflows (sequential/parallel/any-one approval patterns)
-
-### SEO Optimization
-
-- Canonical URL
-- Complete Open Graph tags (og:url, og:locale)
-- Twitter Card meta tags
-- JSON-LD structured data (WebSite, Person, ProfessionalService schemas)
-- robots.txt (blocks /admin, /client, /api)
-- sitemap.xml
-- **Doc:** [SEO.md](./features/SEO.md)
-
-### Tier Completion Status
-
-|Tier|Status|Notes|
-|------|--------|-------|
-|Tier 1|5/5 done|COMPLETE|
-|Tier 2|7/7 done|COMPLETE|
-|Tier 3|4/4 done|COMPLETE (WebSockets deferred - polling works)|
-|Tier 4|3/4 done|Stripe deferred (cost)|
-|Tier 5|3/3 done|COMPLETE|
-|Tier 6|6/6 done|COMPLETE|
-|Tier 7|4/4 done|COMPLETE|
-
----
-
 ## Front-End Concerns
 
 ### UX/UI Implementation Plan
@@ -675,7 +591,7 @@ Addressed system gaps that do not create breaking changes:
 
 #### Priority 5: Expert Decisions Required
 
-- [ ] **Sidebar button order** — Need recommended reordering for admin and portal sidebars
+- [x] **Sidebar button order** — ✅ FIXED: Admin sidebar reordered to DASHBOARD, LEADS, PROJECTS, CLIENTS, INVOICES, MESSAGES, DOCUMENTS, KNOWLEDGE, ANALYTICS, SYSTEM
 - [ ] **Panel button placement** — Need "Panel button placement" guideline document
 - [ ] **Badge redesign** — Need new visual system (not just color-dependent for WCAG 1.4.1)
 - [ ] **Lead funnel styling** — Current styling looks off; needs redesign
@@ -1071,10 +987,69 @@ Message input when disabled | Analytics section headers | Messages search bar | 
 - [x] **Analytics page layout** — Better way to present and organize analytics. **Fixed:** Sub-tabs Overview | Business | Visitors | Reports & Alerts (see Analytics section below).
 - [x] **All modals: icon and H3 on same line** — **Fixed (Feb 3, 2026):** `confirm-dialog-header` already has `display: flex; align-items: center;`. Fixed `multiPromptDialog` in `confirm-dialog.ts` which was missing the `.confirm-dialog-header` wrapper around icon and title.
 - [ ] **All modal forms: use reusable dropdown component** — Every modal form that has a select/dropdown (e.g. Metric, Condition, status picks) should use the shared reusable dropdown component (e.g. portal dropdown / table-dropdown pattern or form-select) instead of native `<select>` or ad-hoc markup, for consistent look and behavior across modals.
-- [ ] **Dropdown focus state (modal + details panel)** — When dropdowns are open (modal dropdowns like Document Requests client select, AND details panel dropdowns like Contact Form Submission status), the focus ring doubles up at the top of the trigger instead of wrapping seamlessly around the entire dropdown (trigger + menu as one box). Need to match the expandable details-card pattern which uses `:focus-within` with `box-shadow: 0 0 0 2px var(--color-primary)` — but dropdown menus are positioned outside wrapper bounds, preventing this approach. May need JS-based solution to apply focus class to both trigger and menu simultaneously, or restructure dropdown to keep menu inside wrapper bounds. Affects: modal dropdowns, table dropdowns in details panels.
+- [x] **Dropdown focus state — standardized** — **Fixed (Feb 5, 2026):** All dropdowns now use the same focus pattern as `<details>` cards: `outline: 2px solid var(--color-primary); outline-offset: -2px;`. Inner triggers have their focus rings suppressed (same pattern as summary focus suppression). Updated in `reset.css`: `.custom-dropdown.open:focus-within`, `.table-dropdown.open:focus-within`, `.export-dropdown.open:focus-within`. Consistent with `details-card.css` focus pattern.
+- [ ] **Dropdown focus visual limitation** — When dropdowns are open, the focus ring wraps the trigger element via `:focus-within`, but dropdown menus are positioned outside wrapper bounds (fixed/absolute positioning). This means the focus ring can't visually wrap trigger + menu as one unified box. Current implementation is consistent and accessible — the focus ring on the trigger is visible when any element inside the dropdown has focus. May revisit if a visual design change is requested (would require restructuring dropdown to keep menu inside wrapper bounds, or JS to apply focus class to both elements).
 - [ ] **Analytics tab: use reusable components** — The Analytics tab (Overview, Business, Visitors, Reports & Alerts) should use shared reusable components (e.g. cards, buttons, dropdowns, sub-tabs, KPI/stat cards, charts wrapper) instead of analytics-only markup and styles, so the tab matches the rest of the portal and stays maintainable.
 - [ ] **Analytics page label inconsistency** — Section headings on Analytics page are inconsistently styled. "SAVED REPORTS", "SCHEDULED REPORTS", "METRIC ALERTS" use bold heading style, but "CORE WEB VITALS" and "BUNDLE ANALYSIS" use smaller field-label style. All section headings should use consistent typography.
 - [ ] **Non-passive event listeners** — Console shows "[Violation] Added non-passive event listener to a scroll-blocking event". Event listeners for `touchstart`, `touchmove`, `wheel` etc. should use `{ passive: true }` option when they don't call `preventDefault()`. Improves scroll performance. Need to audit: GSAP animations, carousel, dropdown handlers, modal scroll handlers.
+
+### Details/Summary focus state — deep dive & implementation plan
+
+**Reference pattern:** `<details class="portal-project-card portal-shadow system-details">` (System tab Build Information card).
+
+#### How focus currently works
+
+The focus system has three layers:
+
+1. **Global (`reset.css:203-240`):** `:focus { outline: none }` removes all default outlines. `:focus-visible { box-shadow: 0 0 0 2px var(--color-primary) }` adds a 2px ring on keyboard focus. `details:focus-within` wraps the entire `<details>` element in the ring. `details > summary:focus-visible { box-shadow: none }` suppresses the summary's own ring so only the outer card ring shows.
+
+2. **Details-card (`details-card.css:109-121`):** Same `:focus-within` / `:focus-visible` pattern scoped to `[data-page="admin"]` / `[data-page="client-portal"]` for `.details-card` and `.system-details`. Also covers `details.portal-project-card > summary:focus-visible`.
+
+3. **No JavaScript:** Toggle behavior is fully native `<details>`. Caret rotation uses CSS `[open] summary::before { transform: rotate(90deg) }`. No JS event listeners for focus or toggle.
+
+#### Bugs found and fixed
+
+1. **Focus ring replaces card shadow** — When `:focus-within` fired with `box-shadow`, it REPLACED the card's existing `box-shadow: var(--shadow-panel)`. CSS `box-shadow` is a single property — a later declaration wins, it does not stack. **Fixed (Feb 5, 2026):** Changed from `box-shadow` to `outline: 2px solid var(--color-primary); outline-offset: -2px;`. Outline doesn't interfere with box-shadow at all — card keeps depth shadow AND shows focus ring.
+
+2. **Redundant rules between reset.css and details-card.css** — The global `details:focus-within` in reset.css and the scoped `.system-details:focus-within` in details-card.css now both use outline. The scoped version is more specific for portal pages. Global rule remains for any non-portal pages that might use `<details>`.
+
+#### Current `<details>` usage (3 instances, all admin)
+
+| Location | Line | Classes | Summary heading |
+|---|---|---|---|
+| `admin/index.html` | 527 | `portal-project-card portal-shadow system-details leads-analytics-section` | Lead Analytics & Scoring |
+| `admin/index.html` | 1728 | `portal-project-card portal-shadow system-details` | Build Information |
+| `admin/index.html` | 1747 | `portal-project-card portal-shadow system-details` | Browser Information |
+
+**Not using `<details>` but could:** No client portal pages use `<details>`. System tab has 3 non-collapsible `portal-project-card` divs (Health Check, Quick Actions, Recent Errors) that could be candidates if collapsible behavior is desired.
+
+#### Implementation plan
+
+- [x] **Phase 1: Fix shadow stacking bug** — **Complete (Feb 5, 2026)**
+
+  - Changed from `box-shadow` to `outline: 2px solid var(--color-primary); outline-offset: -2px;`
+  - Updated `src/styles/shared/details-card.css` `:focus-within` rules
+  - Updated `src/styles/base/reset.css` global `details:focus-within`
+  - Outline doesn't interfere with box-shadow — card keeps depth shadow AND shows focus ring
+  - **Also applied to all dropdowns:** `.custom-dropdown`, `.table-dropdown`, `.export-dropdown` in reset.css
+
+- [ ] **Phase 2: Deduplicate focus rules**
+
+  - Evaluate removing global `details:focus-within` from reset.css if only portal pages use `<details>`
+  - If kept, both global and scoped rules use the same outline value (already consistent)
+  - Document the relationship between reset.css and details-card.css focus rules
+
+- [ ] **Phase 3: Audit portal for `<details>` expansion candidates**
+
+  - Review non-collapsible `portal-project-card` sections that would benefit from collapse
+  - Candidates: System tab Health Check, Quick Actions, Recent Errors; any long content cards
+  - Conversion pattern: change `<div class="portal-project-card">` to `<details class="portal-project-card portal-shadow system-details">`, wrap heading in `<summary>`, wrap content in grid div
+  - Client portal: evaluate if any sections should be collapsible
+
+- [ ] **Phase 4: Verify keyboard navigation flow**
+
+  - Tab through all `<details>` elements, verify: focus ring wraps card (not summary), card shadow persists, caret rotates on Enter/Space, content expands, focus moves to inner interactive elements
+  - Test with screen reader (VoiceOver): verify details state announced ("collapsed"/"expanded")
 - [ ] **Analytics Business tab: Conversion Funnel + Lead Sources + Lead Scoring Rules broken** — Multiple components have data and layout issues. **Conversion Funnel:** bars are tiny (10% width), stacked vertically with labels crammed inside small red bars, counts overlapping. Layout is strange — should be proper horizontal bars that decrease in width top-to-bottom like an actual funnel, not small centered blocks. All show 0 counts and 100% (placeholder data). **Lead Sources:** shows "undefined leads", "undefined won", 0%, and empty source names — data binding is completely broken. **Lead Scoring Rules:** layout and styling need improvement. All three need: fix data binding, proper empty states, and a complete layout rethink.
 - [x] **Table column headings should use field-label styling** — **Fixed (Feb 5, 2026):** Updated `.admin-table th` in `admin.css` to use `0.75rem` font-size, `var(--portal-text-secondary)` color, and `font-weight: 500` (matching field-label pattern). Removed mobile `font-size` override that was resetting the value. Updated project-detail files/invoices `th` font-weight from `600` to `500` for consistency.
 - [x] **Table headers get cut off** — In some admin tables (e.g. contacts table `.admin-table.contacts-table`), the thead/th content (column labels and sort icons) gets cut off. **Fixed:** admin.css — `.admin-table-container` set to `overflow: visible`; new inner `.admin-table-scroll-wrapper` with `overflow-x: auto` and `overflow-y: visible` so horizontal scroll doesn’t create a scroll container that clips the header. Added `min-height: 48px` and `vertical-align: middle` on `.admin-table thead th`, and `min-height: 48px` on `.admin-table thead tr`. All 8 admin table containers in admin/index.html now wrap the table in `.admin-table-scroll-wrapper`. `.visitors-table-container` overflow changed from `hidden` to `visible`. Mobile scroll-indicator styles updated to target the scroll wrapper.

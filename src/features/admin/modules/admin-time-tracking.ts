@@ -12,6 +12,8 @@ import { confirmDanger, alertSuccess, alertError, multiPromptDialog } from '../.
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createBarChart } from '../../../components/chart-simple';
+import { exportToCsv, TIME_ENTRIES_EXPORT_CONFIG } from '../../../utils/table-export';
+import { showToast } from '../../../utils/toast-notifications';
 
 // Time entry interfaces
 interface TimeEntry {
@@ -201,7 +203,7 @@ function renderEntriesTable(): void {
   if (!container) return;
 
   if (currentEntries.length === 0) {
-    container.innerHTML = '<div class="time-entries-empty">No time entries yet. Log your first entry above.</div>';
+    container.innerHTML = '<div class="time-entries-empty">No time entries yet.</div>';
     return;
   }
 
@@ -425,7 +427,7 @@ async function deleteTimeEntry(entryId: number): Promise<void> {
 }
 
 /**
- * Export time entries to CSV
+ * Export time entries to CSV using shared utility
  */
 function exportTimeEntries(): void {
   if (currentEntries.length === 0) {
@@ -433,32 +435,14 @@ function exportTimeEntries(): void {
     return;
   }
 
-  const headers = ['Date', 'Description', 'Task', 'Duration (hours)', 'Billable', 'Hourly Rate', 'Amount'];
-  const rows = currentEntries.map(entry => [
-    entry.date.split('T')[0],
-    `"${entry.description.replace(/"/g, '""')}"`,
-    entry.task_title || '',
-    (entry.duration_minutes / 60).toFixed(2),
-    entry.is_billable ? 'Yes' : 'No',
-    entry.hourly_rate?.toString() || '',
-    entry.is_billable && entry.hourly_rate
-      ? ((entry.duration_minutes / 60) * entry.hourly_rate).toFixed(2)
-      : ''
-  ]);
+  // Create custom config with project-specific filename
+  const config = {
+    ...TIME_ENTRIES_EXPORT_CONFIG,
+    filename: `time_entries_project_${currentProjectId}`
+  };
 
-  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `time-entries-project-${currentProjectId}-${new Date().toISOString().split('T')[0]}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  alertSuccess('Time entries exported!');
+  exportToCsv(currentEntries as unknown as Record<string, unknown>[], config);
+  showToast('Time entries exported!', 'success');
 }
 
 /**

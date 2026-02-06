@@ -12,11 +12,32 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
 import type { InvoiceResponse } from '../../../types/api';
 import { formatCurrency, formatDate } from '../../../utils/format-utils';
-import { apiFetch } from '../../../utils/api-client';
+import { apiFetch, apiPut, apiDelete } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
+import { exportToCsv, INVOICES_EXPORT_CONFIG } from '../../../utils/table-export';
+import { createBulkActionToolbar, setupBulkSelectionHandlers, type BulkActionConfig } from '../../../utils/table-bulk-actions';
+import { showToast } from '../../../utils/toast-notifications';
+import {
+  createFilterUI,
+  createSortableHeaders,
+  applyFilters,
+  loadFilterState,
+  saveFilterState,
+  INVOICES_FILTER_CONFIG,
+  type FilterState
+} from '../../../utils/table-filter';
+import {
+  createPaginationUI,
+  applyPagination,
+  getDefaultPaginationState,
+  loadPaginationState,
+  savePaginationState,
+  type PaginationState,
+  type PaginationConfig
+} from '../../../utils/table-pagination';
 
 // ============================================
 // TYPES
@@ -40,6 +61,70 @@ interface InvoiceWithDetails extends InvoiceResponse {
 // ============================================
 
 let cachedInvoices: InvoiceWithDetails[] = [];
+let storedContext: AdminDashboardContext | null = null;
+let filterUIInitialized = false;
+
+// Filter state
+let filterState: FilterState = loadFilterState(INVOICES_FILTER_CONFIG.storageKey);
+
+// Pagination configuration and state
+const INVOICES_PAGINATION_CONFIG: PaginationConfig = {
+  tableId: 'invoices',
+  pageSizeOptions: [10, 25, 50, 100],
+  defaultPageSize: 25,
+  storageKey: 'admin_invoices_pagination'
+};
+
+let paginationState: PaginationState = {
+  ...getDefaultPaginationState(INVOICES_PAGINATION_CONFIG),
+  ...loadPaginationState(INVOICES_PAGINATION_CONFIG.storageKey!)
+};
+
+// Bulk action configuration for invoices table
+const INVOICES_BULK_CONFIG: BulkActionConfig = {
+  tableId: 'invoices',
+  actions: [
+    {
+      id: 'mark-paid',
+      label: 'Mark Paid',
+      variant: 'default',
+      handler: async (ids: number[]) => {
+        for (const id of ids) {
+          await apiPut(`/api/invoices/${id}`, { status: 'paid' });
+        }
+        showToast(`${ids.length} invoice(s) marked as paid`, 'success');
+        if (storedContext) loadInvoicesData(storedContext);
+      },
+      confirmMessage: 'Mark selected invoices as paid?'
+    },
+    {
+      id: 'send',
+      label: 'Send',
+      variant: 'default',
+      handler: async (ids: number[]) => {
+        for (const id of ids) {
+          await apiPut(`/api/invoices/${id}`, { status: 'sent' });
+        }
+        showToast(`${ids.length} invoice(s) sent`, 'success');
+        if (storedContext) loadInvoicesData(storedContext);
+      },
+      confirmMessage: 'Send selected invoices?'
+    },
+    {
+      id: 'delete',
+      label: 'Delete',
+      variant: 'danger',
+      handler: async (ids: number[]) => {
+        for (const id of ids) {
+          await apiDelete(`/api/invoices/${id}`);
+        }
+        showToast(`${ids.length} invoice(s) deleted`, 'success');
+        if (storedContext) loadInvoicesData(storedContext);
+      },
+      confirmMessage: 'Delete selected invoices? This cannot be undone.'
+    }
+  ]
+};
 
 // ============================================
 // MAIN FUNCTIONS
@@ -49,8 +134,16 @@ let cachedInvoices: InvoiceWithDetails[] = [];
  * Load invoices data
  */
 export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void> {
+  storedContext = ctx;
+
   const tableBody = document.getElementById('invoices-table-body');
   if (!tableBody) return;
+
+  // Initialize filter UI once
+  if (!filterUIInitialized) {
+    initializeFilterUI(ctx);
+    filterUIInitialized = true;
+  }
 
   showTableLoading(tableBody, 8, 'Loading invoices...');
 
@@ -66,8 +159,8 @@ export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void
     // Update stats
     updateInvoiceStats(invoices);
 
-    // Render table
-    renderInvoicesTable(invoices, tableBody);
+    // Render table with filters and pagination
+    renderInvoicesTable(ctx);
 
     // Set up event handlers
     setupInvoiceHandlers(ctx);
@@ -75,6 +168,69 @@ export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void
   } catch (error) {
     console.error('[AdminInvoices] Error loading invoices:', error);
     showTableError(tableBody, 8, 'Failed to load invoices');
+  }
+}
+
+/**
+ * Initialize filter UI for invoices table
+ */
+function initializeFilterUI(ctx: AdminDashboardContext): void {
+  const container = document.getElementById('invoices-filter-container');
+  if (!container) return;
+
+  // Create filter UI
+  const filterUI = createFilterUI(
+    INVOICES_FILTER_CONFIG,
+    filterState,
+    (newState) => {
+      filterState = newState;
+      paginationState.currentPage = 1; // Reset to page 1 on filter change
+      renderInvoicesTable(ctx);
+    }
+  );
+
+  // Insert before the first button (Create Invoice)
+  const firstBtn = container.querySelector('button');
+  if (firstBtn) {
+    container.insertBefore(filterUI, firstBtn);
+  } else {
+    container.appendChild(filterUI);
+  }
+
+  // Setup sortable headers after table is rendered
+  setTimeout(() => {
+    createSortableHeaders(INVOICES_FILTER_CONFIG, filterState, (column, direction) => {
+      filterState = { ...filterState, sortColumn: column, sortDirection: direction };
+      saveFilterState(INVOICES_FILTER_CONFIG.storageKey, filterState);
+      renderInvoicesTable(ctx);
+    });
+  }, 100);
+
+  // Initialize bulk action toolbar
+  const bulkToolbarEl = document.getElementById('invoices-bulk-toolbar');
+  if (bulkToolbarEl) {
+    const toolbar = createBulkActionToolbar({
+      ...INVOICES_BULK_CONFIG,
+      onSelectionChange: () => {}
+    });
+    bulkToolbarEl.replaceWith(toolbar);
+  }
+
+  // Refresh button
+  const refreshBtn = document.getElementById('refresh-invoices-btn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      loadInvoicesData(ctx);
+    });
+  }
+
+  // Export button — use shared utility with filtered data
+  const exportBtn = document.getElementById('export-invoices-btn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const filtered = applyFilters(cachedInvoices, filterState, INVOICES_FILTER_CONFIG);
+      exportToCsv(filtered as unknown as Record<string, unknown>[], INVOICES_EXPORT_CONFIG);
+    });
   }
 }
 
@@ -133,18 +289,32 @@ function getAmount(invoice: InvoiceWithDetails): number {
 }
 
 /**
- * Render invoices table
+ * Render invoices table with filters and pagination
  */
-function renderInvoicesTable(invoices: InvoiceWithDetails[], tableBody: HTMLElement): void {
-  if (invoices.length === 0) {
-    showTableEmpty(tableBody, 8, 'No invoices found');
+function renderInvoicesTable(ctx: AdminDashboardContext): void {
+  const tableBody = document.getElementById('invoices-table-body');
+  if (!tableBody) return;
+
+  // Apply filters
+  const filteredInvoices = applyFilters(cachedInvoices, filterState, INVOICES_FILTER_CONFIG);
+
+  if (filteredInvoices.length === 0) {
+    const message = cachedInvoices.length === 0
+      ? 'No invoices yet.'
+      : 'No invoices match the current filters.';
+    showTableEmpty(tableBody, 8, message);
+    renderPaginationUI(0, ctx);
     return;
   }
+
+  // Apply pagination
+  paginationState.totalItems = filteredInvoices.length;
+  const paginatedInvoices = applyPagination(filteredInvoices, paginationState);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  tableBody.innerHTML = invoices.map((invoice) => {
+  tableBody.innerHTML = paginatedInvoices.map((invoice) => {
     const safeInvoiceNumber = SanitizationUtils.escapeHtml(invoice.invoice_number || `INV-${invoice.id}`);
     const safeClientName = SanitizationUtils.escapeHtml(invoice.client_name || 'Unknown Client');
     const safeProjectName = SanitizationUtils.escapeHtml(invoice.project_name || '-');
@@ -185,14 +355,52 @@ function renderInvoicesTable(invoices: InvoiceWithDetails[], tableBody: HTMLElem
       </tr>
     `;
   }).join('');
+
+  // Wire bulk selection handlers for current rows
+  const allRowIds = paginatedInvoices.map(inv => inv.id);
+  const bulkConfig: BulkActionConfig = { tableId: 'invoices', actions: [] };
+  setupBulkSelectionHandlers(bulkConfig, allRowIds);
+
+  // Render pagination
+  renderPaginationUI(filteredInvoices.length, ctx);
 }
 
 /**
- * Set up invoice action handlers
+ * Render pagination UI
+ */
+function renderPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
+  const container = document.getElementById('invoices-pagination');
+  if (!container) return;
+
+  if (totalItems === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  paginationState.totalItems = totalItems;
+
+  const paginationUI = createPaginationUI(
+    INVOICES_PAGINATION_CONFIG,
+    paginationState,
+    (newState) => {
+      paginationState = newState;
+      savePaginationState(INVOICES_PAGINATION_CONFIG.storageKey!, newState);
+      renderInvoicesTable(ctx);
+    }
+  );
+
+  container.innerHTML = '';
+  container.appendChild(paginationUI);
+}
+
+/**
+ * Set up invoice action handlers (table body delegation)
  */
 function setupInvoiceHandlers(ctx: AdminDashboardContext): void {
   const tableBody = document.getElementById('invoices-table-body');
-  if (!tableBody) return;
+  if (!tableBody || tableBody.dataset.handlersAttached) return;
+
+  tableBody.dataset.handlersAttached = 'true';
 
   // Delegate click events for action buttons
   tableBody.addEventListener('click', (e) => {
@@ -211,53 +419,4 @@ function setupInvoiceHandlers(ctx: AdminDashboardContext): void {
       ctx.showNotification('Edit invoice coming soon', 'info');
     }
   });
-
-  // Refresh button
-  const refreshBtn = document.getElementById('refresh-invoices-btn');
-  if (refreshBtn) {
-    refreshBtn.addEventListener('click', () => {
-      loadInvoicesData(ctx);
-    });
-  }
-
-  // Export button
-  const exportBtn = document.getElementById('export-invoices-btn');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', () => {
-      exportInvoicesToCsv();
-    });
-  }
-}
-
-/**
- * Export invoices to CSV
- */
-function exportInvoicesToCsv(): void {
-  if (cachedInvoices.length === 0) {
-    return;
-  }
-
-  const headers = ['Invoice #', 'Client', 'Project', 'Amount', 'Status', 'Due Date', 'Created'];
-  const rows = cachedInvoices.map((inv) => [
-    inv.invoice_number || `INV-${inv.id}`,
-    inv.client_name || '',
-    inv.project_name || '',
-    getAmount(inv).toString(),
-    inv.status || '',
-    inv.due_date || '',
-    inv.created_at || ''
-  ]);
-
-  const csvContent = [
-    headers.join(','),
-    ...rows.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
-  ].join('\n');
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `invoices-${new Date().toISOString().split('T')[0]}.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
 }

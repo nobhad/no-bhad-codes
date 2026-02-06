@@ -244,8 +244,9 @@
   display: none;
   position: absolute;
   top: 100%;
-  right: 0;
-  min-width: 120px; /* Reduced from 180px - sized to content */
+  left: 0;
+  right: auto;
+  min-width: 100%; /* Match trigger width at minimum */
   max-height: 300px;
   overflow-y: auto;
   background-color: var(--dropdown-bg, var(--color-surface-primary));

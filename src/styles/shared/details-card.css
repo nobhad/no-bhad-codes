@@ -104,12 +104,11 @@
   font-weight: 500;
 }
 
-/* Focus styles: border-radius matches card, focus wraps entire element when open */
-/* Use box-shadow instead of outline to avoid double border effect */
+/* Focus styles: border wraps entire card on keyboard focus */
 :is([data-page="admin"], [data-page="client-portal"]) .details-card:focus-within,
 :is([data-page="admin"], [data-page="client-portal"]) .system-details:focus-within {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 /* Remove default focus from summary since parent handles it */

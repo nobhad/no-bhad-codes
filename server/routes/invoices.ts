@@ -38,18 +38,7 @@ import {
 import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
 import { getString } from '../database/row-helpers.js';
-
-// Business info from environment variables
-const BUSINESS_INFO = {
-  name: process.env.BUSINESS_NAME || 'No Bhad Codes',
-  owner: process.env.BUSINESS_OWNER || 'Noelle Bhaduri',
-  contact: process.env.BUSINESS_CONTACT || 'Noelle Bhaduri',
-  tagline: process.env.BUSINESS_TAGLINE || 'Web Development & Design',
-  email: process.env.BUSINESS_EMAIL || 'nobhaduri@gmail.com',
-  website: process.env.BUSINESS_WEBSITE || 'nobhad.codes',
-  venmoHandle: process.env.VENMO_HANDLE || '@nobhaduri',
-  zelleEmail: process.env.ZELLE_EMAIL || 'nobhaduri@gmail.com'
-};
+import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
 
 const router = express.Router();
 
@@ -569,23 +558,22 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   let y = height - 43;
 
   // === HEADER - Title on left, logo and business info on right ===
-  const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
   const logoHeight = 100; // ~1.4 inch for prominent branding
 
-  // INVOICE title on left: 28pt (or DEPOSIT INVOICE for deposits)
-  const titleText = data.isDeposit ? 'DEPOSIT INVOICE' : 'INVOICE';
+  // INVOICE title on left: 28pt (same for all invoice types)
+  const titleText = 'INVOICE';
   page.drawText(titleText, {
     x: leftMargin,
     y: y - 20,
-    size: data.isDeposit ? 22 : 28,
+    size: 28,
     font: helveticaBold,
     color: rgb(0.15, 0.15, 0.15)
   });
 
   // Logo and business info on right (logo left of text, text left-aligned)
   let textStartX = rightMargin - 180; // Default position for text
-  if (existsSync(logoPath)) {
-    const logoBytes = readFileSync(logoPath);
+  const logoBytes = getPdfLogoBytes();
+  if (logoBytes) {
     const logoImage = await pdfDoc.embedPng(logoBytes);
     const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
     const logoX = rightMargin - logoWidth - 150; // Logo position
@@ -751,11 +739,37 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
 
     y -= 14;
 
-    // Details (bullet points) - indented from description
+    // Details (bullet points) - indented from description, with word wrapping
     if (item.details && item.details.length > 0) {
+      const detailStartX = leftMargin + 18;
+      const detailMaxWidth = (rightMargin - 154) - detailStartX; // Stay within description column
+      const detailLineHeight = 11;
+
       for (const detail of item.details) {
-        page.drawText(`• ${detail}`, { x: leftMargin + 18, y: y, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-        y -= 11;
+        // Word wrap each detail line
+        const words = detail.split(' ');
+        let line = '• ';
+        let isFirstLine = true;
+
+        for (const word of words) {
+          const testLine = line + (line === '• ' ? '' : ' ') + word;
+          const testWidth = helvetica.widthOfTextAtSize(testLine, 9);
+
+          if (testWidth > detailMaxWidth && line !== '• ') {
+            page.drawText(line, { x: detailStartX, y: y, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+            y -= detailLineHeight;
+            // Continuation lines indent slightly more (no bullet)
+            line = isFirstLine ? '  ' + word : '  ' + word;
+            isFirstLine = false;
+          } else {
+            line = testLine;
+          }
+        }
+        // Draw remaining text
+        if (line && line !== '• ') {
+          page.drawText(line, { x: detailStartX, y: y, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+          y -= detailLineHeight;
+        }
       }
       y -= 7;
     }

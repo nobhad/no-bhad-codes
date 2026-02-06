@@ -17,16 +17,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { proposalService } from '../services/proposal-service.js';
-
-// Business info from environment variables
-const BUSINESS_INFO = {
-  name: process.env.BUSINESS_NAME || 'No Bhad Codes',
-  owner: process.env.BUSINESS_OWNER || 'Noelle Bhaduri',
-  contact: process.env.BUSINESS_CONTACT || 'Noelle Bhaduri',
-  tagline: process.env.BUSINESS_TAGLINE || 'Web Development & Design',
-  email: process.env.BUSINESS_EMAIL || 'nobhaduri@gmail.com',
-  website: process.env.BUSINESS_WEBSITE || 'nobhad.codes'
-};
+import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
 
 const router = express.Router();
 
@@ -687,7 +678,6 @@ router.get(
     let y = height - 43;
 
     // === HEADER - Title on left, logo and business info on right ===
-    const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
     const logoHeight = 100; // ~1.4 inch for prominent branding
 
     // PROPOSAL title on left: 28pt
@@ -696,8 +686,8 @@ router.get(
 
     // Logo and business info on right (logo left of text, text left-aligned)
     let textStartX = rightMargin - 180;
-    if (existsSync(logoPath)) {
-      const logoBytes = readFileSync(logoPath);
+    const logoBytes = getPdfLogoBytes();
+    if (logoBytes) {
       const logoImage = await pdfDoc.embedPng(logoBytes);
       const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
       const logoX = rightMargin - logoWidth - 150;

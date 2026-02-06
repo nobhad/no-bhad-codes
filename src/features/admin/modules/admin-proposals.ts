@@ -26,8 +26,25 @@ import {
   resetSelection,
   type BulkActionConfig
 } from '../../../utils/table-bulk-actions';
-import { createSearchBar } from '../../../components/search-bar';
 import { exportToCsv, PROPOSALS_EXPORT_CONFIG } from '../../../utils/table-export';
+import {
+  createFilterUI,
+  createSortableHeaders,
+  applyFilters,
+  loadFilterState,
+  saveFilterState,
+  PROPOSALS_FILTER_CONFIG,
+  type FilterState
+} from '../../../utils/table-filter';
+import {
+  createPaginationUI,
+  applyPagination,
+  getDefaultPaginationState,
+  loadPaginationState,
+  savePaginationState,
+  type PaginationState,
+  type PaginationConfig
+} from '../../../utils/table-pagination';
 
 // ============================================================================
 // TYPES
@@ -142,11 +159,26 @@ const PROPOSAL_STATUS_OPTIONS = [
 
 let proposalsData: Proposal[] = [];
 let _storedContext: AdminDashboardContext | null = null;
-let currentFilter: string = 'all';
 let templatesData: ProposalTemplate[] = [];
 let currentProposalVersions: ProposalVersion[] = [];
 let _currentView: 'proposals' | 'templates' = 'proposals';
-let searchQuery: string = '';
+let filterUIInitialized = false;
+
+// Filter state (replaces currentFilter and searchQuery)
+let filterState: FilterState = loadFilterState(PROPOSALS_FILTER_CONFIG.storageKey);
+
+// Pagination configuration and state
+const PROPOSALS_PAGINATION_CONFIG: PaginationConfig = {
+  tableId: 'proposals',
+  pageSizeOptions: [10, 25, 50, 100],
+  defaultPageSize: 25,
+  storageKey: 'admin_proposals_pagination'
+};
+
+let paginationState: PaginationState = {
+  ...getDefaultPaginationState(PROPOSALS_PAGINATION_CONFIG),
+  ...loadPaginationState(PROPOSALS_PAGINATION_CONFIG.storageKey!)
+};
 
 // Bulk action configuration for proposals table
 const PROPOSALS_BULK_CONFIG: BulkActionConfig = {
@@ -247,9 +279,6 @@ export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
   // Setup view toggle
   setupViewToggle(ctx);
 
-  // Setup filter buttons
-  setupFilterButtons(ctx);
-
   // Setup bulk action toolbar
   const bulkToolbarContainer = document.getElementById('proposals-bulk-toolbar');
   if (bulkToolbarContainer) {
@@ -262,20 +291,10 @@ export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
     bulkToolbarContainer.replaceWith(toolbar);
   }
 
-  // Setup search bar
-  const searchMount = document.getElementById('proposals-search-mount');
-  if (searchMount) {
-    const { wrapper } = createSearchBar({
-      placeholder: 'Search proposals...',
-      ariaLabel: 'Search proposals',
-      onInput: (value) => {
-        searchQuery = value.toLowerCase();
-        if (proposalsData.length > 0) {
-          renderFilteredProposals(ctx);
-        }
-      }
-    });
-    searchMount.appendChild(wrapper);
+  // Setup filter UI (replaces custom filter buttons and search bar)
+  if (!filterUIInitialized) {
+    filterUIInitialized = true;
+    initializeProposalsFilterUI(ctx);
   }
 
   // Setup export button
@@ -306,13 +325,13 @@ async function refreshProposals(ctx: AdminDashboardContext): Promise<void> {
   }
 
   try {
-    const statusParam = currentFilter !== 'all' ? `?status=${currentFilter}` : '';
-    const response = await apiFetch(`/api/proposals/admin/list${statusParam}`);
+    // Fetch all proposals — filtering is now done client-side via applyFilters
+    const response = await apiFetch('/api/proposals/admin/list');
 
     if (response.ok) {
       const data: { success: boolean; data: ProposalsData } = await response.json();
       proposalsData = data.data.proposals || [];
-      renderProposalsTable(proposalsData, ctx);
+      renderFilteredProposals(ctx);
       updateStats(proposalsData);
     } else if (response.status !== 401) {
       console.error('[AdminProposals] API error:', response.status);
@@ -339,17 +358,8 @@ function renderProposalsLayout(): string {
     <div class="proposals-panel" id="proposals-list-panel">
       <div class="proposals-header">
         <h2>Proposal Requests</h2>
-        <div class="proposals-actions">
-          <div class="filter-buttons" id="proposal-filters">
-            <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="pending">Pending</button>
-            <button class="filter-btn" data-filter="reviewed">Reviewed</button>
-            <button class="filter-btn" data-filter="accepted">Accepted</button>
-            <button class="filter-btn" data-filter="rejected">Rejected</button>
-            <button class="filter-btn" data-filter="converted">Converted</button>
-          </div>
-          <div id="proposals-search-mount"></div>
-          <button class="btn btn-icon" id="export-proposals-btn" title="Export to CSV" aria-label="Export proposals to CSV">
+        <div class="proposals-actions" id="proposals-filter-container">
+          <button class="icon-btn" id="export-proposals-btn" title="Export to CSV" aria-label="Export proposals to CSV">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
@@ -406,6 +416,7 @@ function renderProposalsLayout(): string {
           </tbody>
         </table>
       </div>
+      <div id="proposals-pagination" class="table-pagination"></div>
     </div>
 
     <div class="proposal-details-panel" id="proposal-details-panel" style="display: none;">
@@ -485,7 +496,10 @@ function renderProposalsTable(proposals: Proposal[], ctx: AdminDashboardContext)
   if (!tableBody) return;
 
   if (proposals.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="8" class="empty-row">No proposals found</td></tr>';
+    const message = proposalsData.length === 0
+      ? 'No proposals yet.'
+      : 'No proposals match the current filters.';
+    tableBody.innerHTML = `<tr><td colspan="8" class="empty-row">${message}</td></tr>`;
     return;
   }
 
@@ -535,11 +549,11 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
       </td>
       <td class="date-cell">${formattedDate}</td>
       <td class="actions-cell">
-        <button class="btn-icon btn-view" data-proposal-id="${proposal.id}" title="View Details" aria-label="View proposal details">
+        <button class="icon-btn btn-view" data-proposal-id="${proposal.id}" title="View Details" aria-label="View proposal details">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
         ${proposal.status === 'accepted' ? `
-          <button class="btn-icon btn-convert" data-proposal-id="${proposal.id}" title="Convert to Invoice" aria-label="Convert to invoice">
+          <button class="icon-btn btn-convert" data-proposal-id="${proposal.id}" title="Convert to Invoice" aria-label="Convert to invoice">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           </button>
         ` : ''}
@@ -549,36 +563,10 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
 }
 
 /**
- * Get proposals filtered by current filter and search query
+ * Get proposals filtered using shared filter infrastructure
  */
 function getFilteredProposals(): Proposal[] {
-  let filtered = proposalsData;
-
-  // Apply status filter
-  if (currentFilter !== 'all') {
-    filtered = filtered.filter(p => p.status === currentFilter);
-  }
-
-  // Apply search filter
-  if (searchQuery) {
-    filtered = filtered.filter(p => {
-      const clientName = p.client.name?.toLowerCase() || '';
-      const clientCompany = p.client.company?.toLowerCase() || '';
-      const projectName = p.project.name?.toLowerCase() || '';
-      const tier = p.selectedTier?.toLowerCase() || '';
-      const status = p.status?.toLowerCase() || '';
-
-      return (
-        clientName.includes(searchQuery) ||
-        clientCompany.includes(searchQuery) ||
-        projectName.includes(searchQuery) ||
-        tier.includes(searchQuery) ||
-        status.includes(searchQuery)
-      );
-    });
-  }
-
-  return filtered;
+  return applyFilters(proposalsData, filterState, PROPOSALS_FILTER_CONFIG);
 }
 
 /**
@@ -586,10 +574,67 @@ function getFilteredProposals(): Proposal[] {
  */
 function renderFilteredProposals(ctx: AdminDashboardContext): void {
   const filtered = getFilteredProposals();
-  renderProposalsTable(filtered, ctx);
+
+  // Update pagination state with total items
+  paginationState.totalItems = filtered.length;
+
+  // Apply pagination
+  const paginatedProposals = applyPagination(filtered, paginationState);
+
+  renderProposalsTable(paginatedProposals, ctx);
+  renderProposalsPaginationUI(filtered.length, ctx);
+}
+
+/**
+ * Render pagination UI for proposals
+ */
+function renderProposalsPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
+  const container = document.getElementById('proposals-pagination');
+  if (!container) return;
+
+  if (totalItems === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = '';
+  const paginationUI = createPaginationUI(
+    PROPOSALS_PAGINATION_CONFIG,
+    paginationState,
+    (newState: PaginationState) => {
+      paginationState = newState;
+      savePaginationState(PROPOSALS_PAGINATION_CONFIG.storageKey!, paginationState);
+      renderFilteredProposals(ctx);
+    }
+  );
+  container.appendChild(paginationUI);
 }
 
 function setupRowEventListeners(proposals: Proposal[], ctx: AdminDashboardContext): void {
+  // Row click navigation - open details on row click (except interactive elements)
+  document.querySelectorAll('#proposals-table-body tr[data-proposal-id]').forEach(row => {
+    row.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      // Skip if clicking on interactive elements
+      if (
+        target.closest('button') ||
+        target.closest('input') ||
+        target.closest('.status-dropdown-container') ||
+        target.closest('.table-dropdown') ||
+        target.closest('.bulk-select-cell')
+      ) {
+        return;
+      }
+      const id = parseInt((row as HTMLElement).dataset.proposalId || '0', 10);
+      const proposal = proposals.find(p => p.id === id);
+      if (proposal) {
+        showProposalDetails(proposal, ctx);
+      }
+    });
+    // Add cursor pointer style for clickable rows
+    (row as HTMLElement).style.cursor = 'pointer';
+  });
+
   // Setup status dropdowns
   proposals.forEach(proposal => {
     const container = document.querySelector(`.status-dropdown-container[data-proposal-id="${proposal.id}"]`);
@@ -638,24 +683,39 @@ function setupRowEventListeners(proposals: Proposal[], ctx: AdminDashboardContex
   }
 }
 
-function setupFilterButtons(ctx: AdminDashboardContext): void {
-  const filterContainer = document.getElementById('proposal-filters');
-  if (!filterContainer) return;
+/**
+ * Initialize shared filter UI for proposals
+ */
+function initializeProposalsFilterUI(ctx: AdminDashboardContext): void {
+  const container = document.getElementById('proposals-filter-container');
+  if (!container) return;
 
-  filterContainer.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest('.filter-btn');
-    if (!btn) return;
+  // Create filter UI using shared infrastructure
+  const filterUI = createFilterUI(
+    PROPOSALS_FILTER_CONFIG,
+    filterState,
+    (newState) => {
+      filterState = newState;
+      renderFilteredProposals(ctx);
+    }
+  );
 
-    const filter = (btn as HTMLElement).dataset.filter || 'all';
+  // Insert filter UI at the beginning of the container (before export button)
+  const firstBtn = container.querySelector('button');
+  if (firstBtn) {
+    container.insertBefore(filterUI, firstBtn);
+  } else {
+    container.appendChild(filterUI);
+  }
 
-    // Update active state
-    filterContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    // Update filter and refresh
-    currentFilter = filter;
-    refreshProposals(ctx);
-  });
+  // Setup sortable headers
+  setTimeout(() => {
+    createSortableHeaders(PROPOSALS_FILTER_CONFIG, filterState, (column, direction) => {
+      filterState = { ...filterState, sortColumn: column, sortDirection: direction };
+      saveFilterState(PROPOSALS_FILTER_CONFIG.storageKey, filterState);
+      renderFilteredProposals(ctx);
+    });
+  }, 100);
 }
 
 function setupViewToggle(ctx: AdminDashboardContext): void {
@@ -747,10 +807,10 @@ function renderTemplatesList(ctx: AdminDashboardContext): void {
             <button class="btn btn-secondary btn-sm use-template-btn" data-template-id="${template.id}">
               Use Template
             </button>
-            <button class="btn-icon edit-template-btn" data-template-id="${template.id}" title="Edit" aria-label="Edit template">
+            <button class="icon-btn edit-template-btn" data-template-id="${template.id}" title="Edit" aria-label="Edit template">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
-            <button class="btn-icon delete-template-btn" data-template-id="${template.id}" title="Delete" aria-label="Delete template">
+            <button class="icon-btn delete-template-btn" data-template-id="${template.id}" title="Delete" aria-label="Delete template">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </div>

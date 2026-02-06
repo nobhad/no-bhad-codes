@@ -435,13 +435,13 @@ body[data-page="admin"] .bundle-item {
    ================================================ */
 
 /* Container - wraps all admin tables */
-/* Default: rounded bottom corners with overflow hidden to clip table content */
+/* overflow: visible allows dropdowns to overlay outside table bounds */
 .admin-table-container {
   background: var(--portal-bg-dark);
   border: none;
   border-bottom-left-radius: var(--portal-radius-md);
   border-bottom-right-radius: var(--portal-radius-md);
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* When pagination follows, remove bottom border-radius from container */
@@ -2119,8 +2119,8 @@ body.modal-open .dashboard-content {
   top: 100%;
   left: 0;
   right: auto;
-  width: fit-content;
-  min-width: fit-content;
+  width: auto;
+  min-width: 100%;
   margin: 0;
   padding: 0;
   list-style: none;

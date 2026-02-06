@@ -342,3 +342,47 @@ export const KNOWLEDGE_BASE_EXPORT_CONFIG: ExportConfig = {
     { key: 'updated_at', label: 'Updated Date', formatter: formatDate }
   ]
 };
+
+/**
+ * Export configuration for time entries
+ */
+export const TIME_ENTRIES_EXPORT_CONFIG: ExportConfig = {
+  filename: 'time_entries',
+  columns: [
+    { key: 'date', label: 'Date', formatter: formatDate },
+    { key: 'description', label: 'Description' },
+    { key: 'task_title', label: 'Task' },
+    { key: 'duration_minutes', label: 'Duration (hours)', formatter: formatDurationHours },
+    { key: 'is_billable', label: 'Billable' },
+    { key: 'hourly_rate', label: 'Hourly Rate' },
+    { key: 'amount', label: 'Amount', formatter: formatBillableAmount }
+  ]
+};
+
+/**
+ * Format duration in minutes to hours
+ */
+function formatDurationHours(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  const minutes = typeof value === 'string' ? parseFloat(value) : Number(value);
+  if (isNaN(minutes)) return '';
+  return (minutes / 60).toFixed(2);
+}
+
+/**
+ * Format billable amount based on row data
+ */
+function formatBillableAmount(_value: unknown, row: Record<string, unknown>): string {
+  const isBillable = row.is_billable;
+  const hourlyRate = row.hourly_rate;
+  const durationMinutes = row.duration_minutes;
+
+  if (!isBillable || !hourlyRate || !durationMinutes) return '';
+
+  const rate = typeof hourlyRate === 'string' ? parseFloat(hourlyRate) : Number(hourlyRate);
+  const minutes = typeof durationMinutes === 'string' ? parseFloat(durationMinutes) : Number(durationMinutes);
+
+  if (isNaN(rate) || isNaN(minutes)) return '';
+
+  return ((minutes / 60) * rate).toFixed(2);
+}

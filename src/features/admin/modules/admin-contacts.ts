@@ -35,8 +35,9 @@ import {
   type PaginationState,
   type PaginationConfig
 } from '../../../utils/table-pagination';
-import { showTableEmpty } from '../../../utils/loading-utils';
+import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../../utils/copy-email';
+import { showToast } from '../../../utils/toast-notifications';
 
 interface ContactsData {
   submissions: ContactSubmission[];
@@ -93,6 +94,10 @@ export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
     filterUIInitialized = true;
   }
 
+  // Show loading state
+  const tableBody = getElement('contacts-table-body');
+  if (tableBody) showTableLoading(tableBody, 4, 'Loading contacts...');
+
   try {
     const response = await apiFetch('/api/admin/contact-submissions');
 
@@ -127,10 +132,10 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
     }
   );
 
-  // Insert filter UI before refresh button so order is: Export → Filter → Refresh
-  const refreshBtn = container.querySelector('#refresh-contacts-btn');
-  if (refreshBtn) {
-    container.insertBefore(filterUI, refreshBtn);
+  // Insert before export button (Search → Filter → Export → Refresh order)
+  const exportBtnRef = container.querySelector('#export-contacts-btn');
+  if (exportBtnRef) {
+    container.insertBefore(filterUI, exportBtnRef);
   } else {
     container.insertBefore(filterUI, container.firstChild);
   }
@@ -142,7 +147,7 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
     exportBtn.addEventListener('click', () => {
       const filtered = applyFilters(contactsData, filterState, CONTACTS_FILTER_CONFIG);
       exportToCsv(filtered as unknown as Record<string, unknown>[], CONTACTS_EXPORT_CONFIG);
-      ctx.showNotification(`Exported ${filtered.length} contact submissions to CSV`, 'success');
+      showToast(`Exported ${filtered.length} contact submissions to CSV`, 'success');
     });
   }
 
@@ -177,7 +182,7 @@ function renderContactsTable(
   if (!tableBody) return;
 
   if (!submissions || submissions.length === 0) {
-    showTableEmpty(tableBody, 4, 'No contact form submissions yet.');
+    showTableEmpty(tableBody, 4, 'No contacts yet.');
     renderContactsPaginationUI(0, ctx);
     return;
   }
@@ -186,7 +191,7 @@ function renderContactsTable(
   const filteredSubmissions = applyFilters(submissions, filterState, CONTACTS_FILTER_CONFIG);
 
   if (filteredSubmissions.length === 0) {
-    showTableEmpty(tableBody, 4, 'No contact form submissions match the current filters. Try adjusting your filters.');
+    showTableEmpty(tableBody, 4, 'No contacts match the current filters.');
     renderContactsPaginationUI(0, ctx);
     return;
   }
@@ -465,7 +470,7 @@ export function showContactDetails(contactId: number): void {
             newArchiveBtn.remove();
           }
         });
-        storedContext.showNotification('Contact restored', 'success');
+        showToast('Contact restored', 'success');
       }
     });
   }
@@ -503,7 +508,7 @@ export function showContactDetails(contactId: number): void {
 
         if (response.ok) {
           const data = await response.json();
-          storedContext.showNotification(
+          showToast(
             data.isExisting
               ? 'Contact linked to existing client'
               : sendInvitation
@@ -544,11 +549,11 @@ export function showContactDetails(contactId: number): void {
           }
         } else {
           const errorData = await response.json();
-          storedContext.showNotification(errorData.error || 'Failed to convert contact', 'error');
+          showToast(errorData.error || 'Failed to convert contact', 'error');
         }
       } catch (error) {
         console.error('Error converting contact to client:', error);
-        storedContext.showNotification('Failed to convert contact to client', 'error');
+        showToast('Failed to convert contact to client', 'error');
       }
     });
   }
@@ -581,17 +586,17 @@ export async function updateContactStatus(
     const response = await apiPut(`/api/admin/contact-submissions/${id}/status`, { status });
 
     if (response.ok) {
-      ctx.showNotification('Status updated', 'success');
+      showToast('Status updated', 'success');
       // Update local data
       const contact = contactsData.find((c) => c.id === id);
       if (contact) {
         contact.status = status as ContactSubmission['status'];
       }
     } else if (response.status !== 401) {
-      ctx.showNotification('Failed to update status. Please try again.', 'error');
+      showToast('Failed to update status. Please try again.', 'error');
     }
   } catch (error) {
     console.error('[AdminContacts] Failed to update status:', error);
-    ctx.showNotification('Failed to update status. Please try again.', 'error');
+    showToast('Failed to update status. Please try again.', 'error');
   }
 }
