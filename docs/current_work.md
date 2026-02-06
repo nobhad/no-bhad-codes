@@ -45,10 +45,12 @@ Create admin UI module for viewing and managing deleted items (trash).
 
   **Changes:**
 
-  - Added modal guard to hide overlays until authentication succeeds
+  - Call `hideAllAdminModals()` once on page load to clear any open modals
   - Forced `.hidden` to win over modal display rules
   - Ensured preview modal starts hidden by default
   - Fixed `/api/admin/leads` 500 by removing non-existent `projects.features` column
+
+  **Note:** Removed MutationObserver-based modal guard - it caused infinite loops and page crashes.
 
   **Files Modified:**
 
