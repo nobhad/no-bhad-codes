@@ -49,10 +49,11 @@ import { showTableError } from '../../../utils/error-utils';
 import { createDOMCache, batchUpdateText, getElement } from '../../../utils/dom-cache';
 import { withButtonLoading } from '../../../utils/button-loading';
 import { manageFocusTrap } from '../../../utils/focus-trap';
+import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { validateEmail } from '../../../../shared/validation/validators';
 import { getHealthBadgeHtml } from './admin-client-details';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
-import { getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../../utils/copy-email';
+import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
 
 // ============================================
@@ -1066,8 +1067,7 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
   if (statusSelect) statusSelect.value = client.status || 'pending';
 
   // Show modal and lock body scroll
-  modal.classList.remove('hidden');
-  document.body.classList.add('modal-open');
+  openModalOverlay(modal);
 
   // Store cleanup function - assigned after manageFocusTrap call
   let cleanupFocusTrap: (() => void) | null = null;
@@ -1075,8 +1075,7 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
   // Close handlers - defined before manageFocusTrap so it can be referenced
   const closeModal = () => {
     cleanupFocusTrap?.();
-    modal.classList.add('hidden');
-    document.body.classList.remove('modal-open');
+    closeModalOverlay(modal);
   };
 
   // Setup focus trap
@@ -1187,8 +1186,7 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
   if (countryInput) countryInput.value = client.billing_country || '';
 
   // Show modal and lock body scroll
-  modal.classList.remove('hidden');
-  document.body.classList.add('modal-open');
+  openModalOverlay(modal);
 
   // Store cleanup function - assigned after manageFocusTrap call
   let cleanupFocusTrap: (() => void) | null = null;
@@ -1196,8 +1194,7 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
   // Close handlers - defined before manageFocusTrap so it can be referenced
   const closeModal = () => {
     cleanupFocusTrap?.();
-    modal.classList.add('hidden');
-    document.body.classList.remove('modal-open');
+    closeModalOverlay(modal);
   };
 
   // Setup focus trap
@@ -1338,8 +1335,7 @@ function addClient(ctx: AdminDashboardContext): void {
   form.reset();
 
   // Show modal and lock body scroll
-  modal.classList.remove('hidden');
-  document.body.classList.add('modal-open');
+  openModalOverlay(modal);
 
   // Track if form was submitted successfully to avoid double cleanup
   let submitted = false;
@@ -1353,8 +1349,7 @@ function addClient(ctx: AdminDashboardContext): void {
       form.removeEventListener('submit', handleSubmit);
     }
     cleanupFocusTrap?.();
-    modal.classList.add('hidden');
-    document.body.classList.remove('modal-open');
+    closeModalOverlay(modal);
     form.reset();
   }
 

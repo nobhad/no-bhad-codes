@@ -142,7 +142,8 @@ export const COOKIE_CONFIG = {
   USER_OPTIONS: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict' as const,
+    // Use 'lax' in development so auth cookies work through dev proxies
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' as const : 'lax' as const,
     maxAge: TIME_MS.WEEK, // 7 days
     path: '/'
   },
@@ -151,7 +152,7 @@ export const COOKIE_CONFIG = {
   ADMIN_OPTIONS: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict' as const,
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' as const : 'lax' as const,
     maxAge: TIME_MS.HOUR, // 1 hour
     path: '/'
   }

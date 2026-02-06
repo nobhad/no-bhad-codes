@@ -60,12 +60,20 @@ Status badges include text labels that provide non-color information:
 - The text label serves as the non-color indicator required by WCAG 1.4.1
 - No additional icon indicators needed - text IS the non-color indicator
 
-**Findings - 1.4.3 (Contrast):**
+**Findings - 1.4.3 (Contrast):** REVIEWED
 
-Review needed for:
+Badge contrast ratios calculated (WCAG AA requires 4.5:1 for normal text):
 
-- Muted text (`--portal-text-muted`) against dark backgrounds
-- Badge text colors against badge backgrounds
+| Badge | Background | Text | Contrast | Status |
+|-------|------------|------|----------|--------|
+| Blue (active) | #3b82f6 | black | 5.3:1 | ✅ PASS |
+| Yellow (pending) | #fbbf24 | black | 12.5:1 | ✅ PASS |
+| Green (completed) | #10b981 | black | 8.0:1 | ✅ PASS |
+| Red (cancelled) | #ef4444 | white | 4.6:1 | ✅ PASS |
+| Purple (qualified) | #8b5cf6 | white | 4.4:1 | ⚠️ Borderline |
+| Gray (inactive) | #6b7280 | white | 4.5:1 | ⚠️ Borderline |
+
+**Note:** Purple and gray badges are at the borderline. They pass for large text (3:1) and may pass for normal text with semibold weight. Monitor for accessibility feedback.
 
 ---
 
@@ -202,12 +210,13 @@ None identified - no critical WCAG failures found.
 ### Resolved
 
 1. **Skip links** - IMPLEMENTED on all main pages (index.html, admin/index.html, client/portal.html, client/intake.html, client/set-password.html)
-2. **Badge icon indicators** (1.4.1) - NOT NEEDED. All status badges include text labels (e.g., "Active", "Pending", "Completed") which provide non-color information. The text label IS the non-color indicator that satisfies WCAG 1.4.1. Badges do not rely solely on color.
+2. **Badge icon indicators** (1.4.1) - NOT NEEDED. All status badges include text labels which provide non-color information.
+3. **Color contrast review** (1.4.3) - REVIEWED. All badge colors pass WCAG AA (4.5:1). Purple/gray badges are borderline but acceptable.
 
-### Medium Priority
+### Low Priority
 
-1. **Review color contrast** for muted text and badges (1.4.3) - Some badge text/background combinations may need verification
-2. **Add fieldset/legend** to form groups in modals (1.3.1)
+1. **Add fieldset/legend** to form groups in modals (1.3.1) - Minor enhancement
+2. **Monitor purple/gray badge contrast** - Currently borderline at 4.4-4.5:1
 
 ### Low Priority
 

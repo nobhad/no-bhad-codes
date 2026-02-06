@@ -10,6 +10,7 @@
 
 import { ICONS } from '../constants/icons';
 import { createIconButton } from './icon-button';
+import { closeModalOverlay, openModalOverlay } from '../utils/modal-utils';
 
 export interface PortalModalConfig {
   /** Overlay id (e.g. for getElementById) */
@@ -43,11 +44,10 @@ export function createPortalModal(config: PortalModalConfig): PortalModalInstanc
 
   const overlay = document.createElement('div');
   overlay.id = id;
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay hidden';
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-labelledby', titleId);
-  overlay.style.display = 'none';
 
   const content = document.createElement('div');
   content.className = ['modal-content', 'portal-shadow', contentClassName].filter(Boolean).join(' ');
@@ -94,10 +94,10 @@ export function createPortalModal(config: PortalModalConfig): PortalModalInstanc
       titleEl.textContent = t;
     },
     show: () => {
-      overlay.style.display = 'flex';
+      openModalOverlay(overlay, { allowStack: true });
     },
     hide: () => {
-      overlay.style.display = 'none';
+      closeModalOverlay(overlay, { unlockBody: true });
     }
   };
 }

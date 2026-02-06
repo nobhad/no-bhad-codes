@@ -300,16 +300,17 @@
       <!-- Password Form -->
       <form class="portal-dropdown-form form-active" id="portal-password-form" autocomplete="off">
         <label for="portal-email" class="sr-only">Email or Username</label>
-        <input type="text" id="portal-email" name="email" class="dropdown-input" placeholder="Email or Username" required autocomplete="username" />
+        <input type="text" id="portal-email" name="email" class="dropdown-input" placeholder="Email or Username" required aria-required="true" autocomplete="username" />
         <div class="password-field">
           <label for="portal-password" class="sr-only">Password</label>
-          <input type="password" id="portal-password" name="password" class="dropdown-input" placeholder="Password" required autocomplete="current-password" />
+          <input type="password" id="portal-password" name="password" class="dropdown-input" placeholder="Password" required aria-required="true" autocomplete="current-password" />
           <!-- NOTE: These icons should match ICONS.EYE and ICONS.EYE_OFF in src/constants/icons.ts -->
-          <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+          <button type="button" class="password-toggle" data-password-toggle aria-label="Toggle password visibility">
             <svg class="password-icon-show" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             <svg class="password-icon-hide" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
           </button>
         </div>
+        <p class="field-error" id="portal-login-error" role="alert" aria-live="polite"></p>
         <button type="submit" class="dropdown-submit">Sign In</button>
         <button type="button" class="dropdown-link" id="forgot-password-link">Forgot password?</button>
       </form>
@@ -318,7 +319,8 @@
       <form class="portal-dropdown-form" id="portal-forgot-form" autocomplete="off">
         <p class="forgot-info">Enter your email to receive a password reset link.</p>
         <label for="portal-forgot-email" class="sr-only">Email or Username</label>
-        <input type="text" id="portal-forgot-email" name="email" class="dropdown-input" placeholder="Email or Username" required autocomplete="username" />
+        <input type="text" id="portal-forgot-email" name="email" class="dropdown-input" placeholder="Email or Username" required aria-required="true" autocomplete="username" />
+        <p class="field-error" id="portal-forgot-error" role="alert" aria-live="polite"></p>
         <button type="submit" class="dropdown-submit">Send Reset Link</button>
         <button type="button" class="dropdown-link" id="back-to-login">Back to login</button>
       </form>
@@ -339,7 +341,8 @@
       <!-- Magic Link Form -->
       <form class="portal-dropdown-form" id="portal-magic-form" autocomplete="off">
         <label for="portal-magic-email" class="sr-only">Email or Username</label>
-        <input type="text" id="portal-magic-email" name="email" class="dropdown-input" placeholder="Email or Username" required autocomplete="username" />
+        <input type="text" id="portal-magic-email" name="email" class="dropdown-input" placeholder="Email or Username" required aria-required="true" autocomplete="username" />
+        <p class="field-error" id="portal-magic-error" role="alert" aria-live="polite"></p>
         <button type="submit" class="dropdown-submit">Send Link</button>
         <p class="magic-info">A secure login link will be sent to your email.</p>
       </form>
@@ -714,18 +717,19 @@
                         id="name"
                         placeholder="..."
                         required
+                        aria-required="true"
+                        aria-describedby="contact-name-error"
                         autocomplete="name"
-                                                type="text"
+                        type="text"
                         name="Name"
                         maxlength="256"
                         aria-label="Name"
-                        aria-required="true"
-                        data-required="true"
                         data-1p-ignore
                         data-lpignore="true"
                         data-bwignore
                       />
                       <label class="text-small" for="name">Name</label>
+                      <p class="field-error" id="contact-name-error" role="alert" aria-live="polite"></p>
                     </div>
                   </div>
 
@@ -735,7 +739,7 @@
                         id="company"
                         placeholder="..."
                         autocomplete="organization"
-                                                type="text"
+                        type="text"
                         name="Company-Name"
                         maxlength="256"
                         aria-label="Company (optional)"
@@ -753,18 +757,19 @@
                         id="email"
                         placeholder="..."
                         required
+                        aria-required="true"
+                        aria-describedby="contact-email-error"
                         autocomplete="email"
-                                                type="email"
+                        type="email"
                         name="Email"
                         maxlength="256"
                         aria-label="Email"
-                        aria-required="true"
-                        data-required="true"
                         data-1p-ignore
                         data-lpignore="true"
                         data-bwignore
                       />
                       <label class="text-small" for="email">Email</label>
+                      <p class="field-error" id="contact-email-error" role="alert" aria-live="polite"></p>
                     </div>
                   </div>
                 </div>
@@ -799,16 +804,17 @@
                       name="Message"
                       placeholder="..."
                       required
-                      rows="4"
-                                            maxlength="1000"
-                      aria-label="Message"
                       aria-required="true"
-                      data-required="true"
+                      aria-describedby="contact-message-error"
+                      rows="4"
+                      maxlength="1000"
+                      aria-label="Message"
                       data-1p-ignore
                       data-lpignore="true"
                       data-bwignore
                     ></textarea>
                     <label class="text-small" for="message">Message</label>
+                    <p class="field-error" id="contact-message-error" role="alert" aria-live="polite"></p>
                   </div>
                 </div>
               </div>
@@ -898,9 +904,11 @@
                     name="password"
                     placeholder="Admin Password"
                     required
+                    aria-required="true"
+                    aria-describedby="auth-error"
                     autocomplete="current-password"
                   />
-                  <button type="button" class="password-toggle" id="password-toggle" aria-label="Toggle password visibility">
+                  <button type="button" class="password-toggle" data-password-toggle id="password-toggle" aria-label="Toggle password visibility">
                     <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                       <circle cx="12" cy="12" r="3"></circle>
@@ -908,7 +916,7 @@
                   </button>
                 </div>
               </div>
-              <div class="auth-error" id="auth-error"></div>
+              <div class="auth-error" id="auth-error" role="alert" aria-live="polite"></div>
               <button type="submit" class="btn btn-primary auth-submit">
                 <span class="btn-text">Sign In</span>
                 <span class="btn-loading" style="display: none;">Signing in...</span>
@@ -941,6 +949,15 @@
         const forgotLink = document.getElementById('forgot-password-link');
         const backToLogin = document.getElementById('back-to-login');
         const backToLogin2 = document.getElementById('back-to-login-2');
+        const loginError = document.getElementById('portal-login-error');
+        const magicError = document.getElementById('portal-magic-error');
+        const forgotError = document.getElementById('portal-forgot-error');
+
+        function setInlineError(el, message) {
+          if (!el) return;
+          el.textContent = message || '';
+          el.style.display = message ? 'block' : 'none';
+        }
 
         function positionCaret() {
           const buttonRect = trigger.getBoundingClientRect();
@@ -970,7 +987,7 @@
         });
 
         document.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape') {
+          if (e.key === 'Escape' && dropdown && dropdown.classList.contains('open')) {
             dropdown.classList.remove('open');
             backdrop.classList.remove('open');
           }
@@ -993,6 +1010,7 @@
           authToggle.style.display = 'flex';
           authToggle.querySelector('[data-form="password"]').classList.add('active');
           authToggle.querySelector('[data-form="magic"]').classList.remove('active');
+          setInlineError(loginError, '');
         }
 
         authToggle.addEventListener('click', function(e) {
@@ -1048,6 +1066,7 @@
           hideAllForms();
           forgotForm.classList.add('form-active');
           authToggle.style.display = 'none';
+          setInlineError(forgotError, '');
         });
 
         backToLogin.addEventListener('click', function(e) {
@@ -1145,9 +1164,11 @@
 
           const email = emailInput.value.trim();
           if (!isValidEmail(email)) {
+            setInlineError(magicError, 'Please enter a valid email address.');
             return;
           }
 
+          setInlineError(magicError, '');
           submitBtn.disabled = true;
           submitBtn.textContent = 'Sending...';
 
@@ -1170,6 +1191,7 @@
               submitBtn.textContent = 'Send Link';
               submitBtn.classList.remove('sent');
               submitBtn.classList.remove('valid');
+              setInlineError(magicError, '');
             }, 3000);
 
           } catch (error) {
@@ -1183,6 +1205,7 @@
               submitBtn.textContent = 'Send Link';
               submitBtn.classList.remove('sent');
               submitBtn.classList.remove('valid');
+              setInlineError(magicError, '');
             }, 3000);
           }
         });
@@ -1215,10 +1238,13 @@
           }
 
           if (isValidEmail(emailInput.value.trim())) {
+            setInlineError(forgotError, '');
             hideAllForms();
             resetSent.classList.add('form-active');
             emailInput.value = '';
             submitBtn.classList.remove('valid');
+          } else {
+            setInlineError(forgotError, 'Please enter a valid email address.');
           }
         });
 
@@ -1230,7 +1256,7 @@
 
           if (!emailInput || !passwordInput || !submitBtn) {
             console.error('Login form elements not found');
-            alert('Form error: Please refresh the page and try again.');
+            setInlineError(loginError, 'Form error. Please refresh and try again.');
             return;
           }
 
@@ -1238,9 +1264,11 @@
           const password = passwordInput.value;
 
           if (!email || !password) {
+            setInlineError(loginError, 'Please enter your email and password.');
             return; /* Validation will handle this */
           }
 
+          setInlineError(loginError, '');
           submitBtn.disabled = true;
           submitBtn.textContent = 'Signing in...';
 
@@ -1298,7 +1326,7 @@
                 }
               }
 
-              alert(errorMessage);
+              setInlineError(loginError, errorMessage);
               submitBtn.disabled = false;
               submitBtn.textContent = 'Sign In';
             }
@@ -1317,13 +1345,12 @@
               backdrop.classList.remove('open');
               window.location.href = '/client/portal';
             } else {
-              alert('An unexpected error occurred. Please try again.');
+              setInlineError(loginError, 'An unexpected error occurred. Please try again.');
               submitBtn.disabled = false;
               submitBtn.textContent = 'Sign In';
             }
           }
         });
-
       })();
 
     </script>

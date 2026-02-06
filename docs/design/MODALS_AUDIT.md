@@ -8,11 +8,12 @@
 - [Modal Implementations](#modal-implementations)
   - [ModalComponent](#1-modalcomponent)
   - [PortalModal](#2-portalmodal)
-  - [ConfirmDialog](#3-confirmdialog)
-  - [FocusTrap Utilities](#4-focustrap-utilities)
-  - [ModalDropdown](#5-modaldropdown)
-  - [Invoice Modals](#6-invoice-modals)
-  - [Admin Module Modals](#7-admin-module-modals)
+  - [Modal Utilities](#3-modal-utilities)
+  - [ConfirmDialog](#4-confirmdialog)
+  - [FocusTrap Utilities](#5-focustrap-utilities)
+  - [ModalDropdown](#6-modaldropdown)
+  - [Invoice Modals](#7-invoice-modals)
+  - [Admin Module Modals](#8-admin-module-modals)
 - [CSS Architecture](#css-architecture)
 - [Accessibility](#accessibility)
 - [Trigger Patterns](#trigger-patterns)
@@ -25,18 +26,18 @@
 ## Summary
 
 | Metric | Value |
-|--------|-------|
-| Modal Implementation Types | 7 |
+| ------ | ----- |
+| Modal Implementation Types | 7 (+ shared modal utilities) |
 | Files with Modal Code | 47+ |
 | Confirm/Alert Dialogs | 20+ instances |
 | Form Modals | 15+ instances |
 | CSS Files for Modals | 2 primary |
-| Z-Index Layers | 3 (9999, 10002, 10100) |
+| Z-Index Layers | Portal tokens (overlay/modal/dropdown/confirm) + debug layer |
 
 ### Modal Types Overview
 
 | Type | Count | Primary Use |
-|------|-------|-------------|
+| ------ | ----- | ----------- |
 | Styled Confirm | 20+ | Delete confirmations, action verification |
 | Alert Dialogs | 10+ | Error/success messages |
 | Form Modals | 15+ | Create/edit operations |
@@ -44,6 +45,9 @@
 | Prompt Dialogs | 5+ | Single/multi-field input |
 | Dropdown Modals | Many | Select elements within forms |
 | Component Modals | 1 | Reusable base implementation |
+| Modal Utilities | 1 | Overlay lifecycle + body scroll lock |
+
+**Current State:** Modal overlays, sizes, and close animations are standardized across admin + portal. No open modal audit issues.
 
 ---
 
@@ -78,7 +82,7 @@ interface ModalProps {
 #### Size Variants
 
 | Size | Max Width |
-|------|-----------|
+| ------ | --------- |
 | `small` | 400px |
 | `medium` | 600px |
 | `large` | 800px |
@@ -95,7 +99,7 @@ interface ModalProps {
 #### Methods
 
 | Method | Purpose |
-|--------|---------|
+| -------- | --------- |
 | `open()` | Store focus, show modal, start focus trap |
 | `close()` | Restore focus, hide modal |
 | `toggle()` | Switch state |
@@ -159,12 +163,14 @@ interface PortalModalInstance {
 }
 ```
 
-#### Features
+#### PortalModal Features
 
 - Creates DOM structure: overlay, header (title + close), body slot, footer slot
 - `role="dialog"` and `aria-modal="true"`
 - Close button uses ICONS.CLOSE SVG
 - Backdrop click to close
+- Uses `openModalOverlay()` / `closeModalOverlay()` for consistent overlay lifecycle
+- Overlays start hidden by default
 
 #### CSS Classes
 
@@ -180,13 +186,45 @@ interface PortalModalInstance {
 
 ---
 
-### 3. ConfirmDialog
+### 3. Modal Utilities
+
+**File:** `src/utils/modal-utils.ts`
+**Lines:** 1-86
+**Type:** Shared overlay lifecycle helpers
+
+#### Functions
+
+| Function | Purpose |
+| ---------- | --------- |
+| `openModalOverlay(overlay, options)` | Open overlay, optional stacking, lock body scroll |
+| `closeModalOverlay(overlay, options)` | Close overlay with `.closing` animation and delay |
+| `closeAllModalOverlays(options)` | Force-close all overlays and reset body state |
+
+#### Modal Utilities Features
+
+- Centralized overlay open/close logic
+- `.closing` class drives close animation timing
+- Body scroll lock via `body.modal-open`
+- Optional stacking for multi-modal flows
+
+#### Modal Utilities Usage
+
+```typescript
+openModalOverlay(overlay);
+closeModalOverlay(overlay, { delayMs: 150 });
+```
+
+---
+
+### 4. ConfirmDialog
 
 **File:** `src/utils/confirm-dialog.ts`
 **Lines:** 1-708
 **Type:** Promise-based dialog utilities
 
-#### 3a. confirmDialog()
+**Accessibility:** Unique `aria-labelledby` and `aria-describedby` IDs are generated per dialog instance to associate titles and message text.
+
+#### 4a. confirmDialog()
 
 ```typescript
 const confirmed = await confirmDialog({
@@ -206,7 +244,7 @@ const confirmed = await confirmDialog({
 const confirmed = await confirmDanger('Delete this item?', 'Delete', 'Confirm Delete');
 ```
 
-#### 3b. alertDialog()
+#### 4b. alertDialog()
 
 ```typescript
 await alertDialog({
@@ -227,7 +265,7 @@ await alertInfo('FYI...', 'Information');
 await alertWarning('Be careful!', 'Warning');
 ```
 
-#### 3c. promptDialog()
+#### 4c. promptDialog()
 
 ```typescript
 const value = await promptDialog({
@@ -243,7 +281,7 @@ const value = await promptDialog({
 // Returns: Promise<string | null>
 ```
 
-#### 3d. multiPromptDialog()
+#### 4d. multiPromptDialog()
 
 ```typescript
 const values = await multiPromptDialog({
@@ -260,7 +298,7 @@ const values = await multiPromptDialog({
 // Returns: Promise<Record<string, string> | null>
 ```
 
-#### CSS Classes
+#### ConfirmDialog CSS Classes
 
 ```css
 .confirm-dialog-overlay
@@ -285,19 +323,19 @@ const values = await multiPromptDialog({
 
 #### Z-Index
 
-`10100` (above all other modals)
+`var(--z-index-portal-confirm)` (above all other portal modals)
 
 ---
 
-### 4. FocusTrap Utilities
+### 5. FocusTrap Utilities
 
 **File:** `src/utils/focus-trap.ts`
 **Lines:** 1-189
 
-#### Functions
+#### FocusTrap Functions
 
 | Function | Purpose |
-|----------|---------|
+| ---------- | --------- |
 | `createFocusTrap(container, options)` | Trap Tab/Shift+Tab within container |
 | `removeFocusTrap(container)` | Clean up and restore previous focus |
 | `hasFocusTrap(container)` | Check if trap is active |
@@ -326,22 +364,22 @@ textarea:not([disabled]),
 
 ---
 
-### 5. ModalDropdown
+### 6. ModalDropdown
 
 **File:** `src/utils/modal-dropdown.ts`
 **Lines:** 1-393
 **Type:** Select-to-custom-dropdown converter for modals
 
-#### Functions
+#### ModalDropdown Functions
 
 | Function | Purpose |
-|----------|---------|
+| ---------- | --------- |
 | `initModalDropdown(select, options)` | Convert native select to custom dropdown |
 | `initModalDropdowns(modal)` | Initialize all selects in modal |
 | `getModalDropdownValue(wrapper)` | Get current value |
 | `setModalDropdownValue(wrapper, value)` | Set value programmatically |
 
-#### Features
+#### ModalDropdown Features
 
 - Fixed positioning to escape modal overflow
 - Automatic flip-above detection when near modal bottom
@@ -349,7 +387,7 @@ textarea:not([disabled]),
 - Hides currently selected option from menu
 - Hidden input for form submission
 
-#### CSS Classes
+#### ModalDropdown CSS Classes
 
 ```css
 .custom-dropdown
@@ -363,13 +401,13 @@ textarea:not([disabled]),
 .flip-above
 ```
 
-#### Z-Index
+#### ModalDropdown Z-Index
 
-`10002` (above modal content)
+`var(--z-index-portal-dropdown)` (above modal content)
 
 ---
 
-### 6. Invoice Modals
+### 7. Invoice Modals
 
 **File:** `src/features/admin/project-details/invoice-modals.ts`
 **Lines:** 1-343
@@ -408,12 +446,12 @@ const invoiceData = await showCreateInvoicePrompt(projectId);
 
 ---
 
-### 7. Admin Module Modals
+### 8. Admin Module Modals
 
 Various admin modules create modals dynamically:
 
 | Module | Modal Types |
-|--------|-------------|
+| ------ | ----------- |
 | `admin-knowledge-base.ts` | Category modal, Article modal |
 | `admin-clients.ts` | Add client, Edit info, Edit billing |
 | `admin-proposals.ts` | Proposal creation/editing with tabs |
@@ -442,12 +480,15 @@ Various admin modules create modals dynamically:
 **Key Classes:**
 
 | Class | Purpose |
-|-------|---------|
-| `.modal-overlay` | Fixed overlay, z-index: 9999, centered flex |
-| `.modal-content` | Main container, max-width: 560px |
-| `.admin-modal-overlay` | Alternative overlay implementation |
+| ------- | --------- |
+| `.modal-overlay` | Fixed overlay, centered flex, z-index via `--z-index-portal-modal` |
+| `.modal-overlay.closing` | Close animation state (opacity fade) |
+| `.modal-overlay.hidden` | Forced hidden state (pre-auth + close) |
+| `.modal-content` | Main container, max-width via `--modal-width-md` |
+| `.admin-modal-overlay` | Admin overlay implementation (same z-index token) |
+| `.admin-modal-overlay.closing` | Close animation state |
 | `.admin-modal` | Alternative modal container |
-| `.admin-modal--wide` | Wide variant (max-width: 860px) |
+| `.admin-modal--wide` | Wide variant (max-width via `--modal-width-lg`) |
 | `.admin-modal-header` | Title & close button area |
 | `.admin-modal-title` | Header with optional icon |
 | `.admin-modal-close` | Close button styling |
@@ -464,15 +505,16 @@ Various admin modules create modals dynamically:
 ```css
 @keyframes fadeIn { opacity: 0 → 1 (0.2s) }
 @keyframes slideUp { opacity: 0, translateY(20px) → opacity: 1, translateY(0) (0.2s) }
+/* Close animation uses .closing + opacity transition (0.15s) */
 ```
 
 #### 2. `src/styles/shared/confirm-dialog.css`
 
 | Class | Purpose |
-|-------|---------|
-| `.confirm-dialog-overlay` | Backdrop, z-index: 10100 |
+| ------- | --------- |
+| `.confirm-dialog-overlay` | Backdrop, z-index via `--z-index-portal-confirm` |
 | `.confirm-dialog-overlay.closing` | Closing animation state |
-| `.confirm-dialog` | Dialog content, max-width: 400px |
+| `.confirm-dialog` | Dialog content, max-width via `--modal-width-sm` |
 | `.confirm-dialog-header` | Icon + title flex row |
 | `.confirm-dialog-icon` | 32px icon with type-specific colors |
 | `.confirm-dialog-title` | Bold, uppercase title |
@@ -503,16 +545,19 @@ Various admin modules create modals dynamically:
 ### CSS Variables Used
 
 | Variable | Purpose |
-|----------|---------|
+| ---------- | --------- |
 | `--space-2` to `--space-6` | Spacing |
 | `--color-primary`, `--color-danger`, `--color-white` | Colors |
+| `--color-overlay-muted` | Confirm dialog backdrop |
 | `--color-text-primary`, `--color-text-secondary` | Text colors |
 | `--portal-bg-darker`, `--portal-bg-dark` | Backgrounds |
 | `--portal-border-dark`, `--portal-border-medium` | Borders |
 | `--portal-text-light`, `--portal-text-secondary` | Portal text |
 | `--font-family-acme` | Typography |
 | `--portal-radius-lg`, `--portal-radius-md` | Border radius |
+| `--modal-width-sm`, `--modal-width-md`, `--modal-width-lg` | Modal sizing |
 | `--shadow-modal`, `--shadow-panel` | Shadows |
+| `--z-index-portal-modal`, `--z-index-portal-dropdown`, `--z-index-portal-confirm` | Portal z-index layers |
 
 ---
 
@@ -521,10 +566,11 @@ Various admin modules create modals dynamically:
 ### WCAG Compliance Features
 
 | Feature | Implementation |
-|---------|----------------|
+| --------- | ---------------- |
 | Semantic Roles | `role="dialog"` on all modal containers |
 | Modal State | `aria-modal="true"` on all modals |
 | Labeling | `aria-labelledby` linking to title element |
+| Descriptions | `aria-describedby` for dialog message content |
 | Focus Management | Focus trap (Tab/Shift+Tab cycling) |
 | Focus Restoration | Previous focused element restored on close |
 | Keyboard Navigation | Escape to close, Tab to navigate |
@@ -558,6 +604,13 @@ const modal = createPortalModal({...});
 modal.show();
 ```
 
+### Shared Overlay Helpers
+
+```typescript
+openModalOverlay(overlay);
+closeModalOverlay(overlay);
+```
+
 ### Async Function
 
 ```typescript
@@ -580,25 +633,25 @@ initModalDropdown(selectElement);
 All modals support multiple close mechanisms:
 
 | Mechanism | Implementation |
-|-----------|----------------|
+| ----------- | ---------------- |
 | Close Button (X) | All styled modals |
 | Cancel Button | Confirm/Prompt dialogs |
 | Backdrop Click | Overlay click (configurable) |
 | Escape Key | Global keydown handler (configurable) |
 | Confirm/OK Button | Dialog completion |
-| Programmatic | `modal.hide()` or `modal.close()` |
+| Programmatic | `modal.hide()` / `modal.close()` / `closeModalOverlay()` |
 
 ---
 
 ## Animation Patterns
 
 | Animation | Duration | Purpose |
-|-----------|----------|---------|
-| Fade In | 0.15-0.3s | Overlay appearance |
-| Slide Up | 0.15-0.3s | Content entrance |
+| ----------- | ---------- | --------- |
+| Fade In | 0.2s | Overlay appearance |
+| Slide Up | 0.2s | Content entrance |
 | Scale | 0.3s | Content size change |
-| Fade Out | 0.15s | Closing overlay |
-| Slide Down | 0.15s | Closing content |
+| Fade Out | 0.15s | Closing overlay (`.closing`) |
+| Slide Down | 0.15s | Closing content (`.closing`) |
 
 ### Transitions
 
@@ -614,25 +667,11 @@ transition: background-color 0.2s ease;
 
 ### Issues Found
 
-| # | Issue | Severity | Details |
-|---|-------|----------|---------|
-| 1 | Hardcoded Z-Index | Medium | 3 different values (9999, 10002, 10100) not centralized |
-| 2 | Mixed Modal Patterns | Medium | Some use factory, some use inline HTML |
-| 3 | Inconsistent Close Animation | Low | Some use `.closing` class, others use display |
-| 4 | Dropdown Positioning | Low | Fixed positioning can break with complex overflow |
-| 5 | Missing aria-describedby | Low | No link to message content in some dialogs |
-| 6 | Inconsistent Modal Sizing | Low | Various max-widths (400px, 560px, 860px) |
+None.
 
 ### Recommendations
 
-| # | Recommendation | Priority |
-|---|----------------|----------|
-| 1 | Centralize z-index to CSS variables | High |
-| 2 | Standardize on `createPortalModal()` for admin | Medium |
-| 3 | Create unified close animation pattern | Medium |
-| 4 | Add modal registry to prevent stacking | Low |
-| 5 | Standardize modal sizes globally | Low |
-| 6 | Add aria-describedby for message content | Low |
+None.
 
 ### Best Practices Observed
 

@@ -11,13 +11,11 @@
 import { SanitizationUtils } from '../../utils/sanitization-utils';
 import { getEmailWithCopyHtml } from '../../utils/copy-email';
 import {
-  formatDisplayValue,
   formatTextWithLineBreaks,
   formatDate,
   formatDateTime,
   formatCurrency
 } from '../../utils/format-utils';
-import { AdminAuth } from './admin-auth';
 import { alertWarning } from '../../utils/confirm-dialog';
 
 // Import from sub-modules

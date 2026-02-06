@@ -13,6 +13,7 @@ import { apiFetch, apiPost, apiDelete } from '../../../utils/api-client';
 import { formatFileSize, formatDate, formatDateTime } from '../../../utils/format-utils';
 import { confirmDialog, alertSuccess, alertError } from '../../../utils/confirm-dialog';
 import { createViewToggle } from '../../../components/view-toggle';
+import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 
 interface Folder {
   id: number;
@@ -358,7 +359,7 @@ async function openFileDetail(fileId: number): Promise<void> {
   const modal = document.getElementById('file-detail-modal');
   if (!modal) return;
 
-  modal.classList.remove('hidden');
+  openModalOverlay(modal);
 
   // Load file info
   await loadFileInfo(fileId);
@@ -373,7 +374,7 @@ async function openFileDetail(fileId: number): Promise<void> {
 function closeFileDetailModal(): void {
   const modal = document.getElementById('file-detail-modal');
   if (modal) {
-    modal.classList.add('hidden');
+    closeModalOverlay(modal);
   }
   currentFileId = null;
 }

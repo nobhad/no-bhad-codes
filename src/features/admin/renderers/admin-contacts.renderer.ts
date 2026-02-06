@@ -15,7 +15,7 @@ import { createTableDropdown } from '../../../utils/table-dropdown';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { adminDataService, type Contact, type ContactStats } from '../services/admin-data.service';
 import { APP_CONSTANTS } from '../../../config/constants';
-import { getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../../utils/copy-email';
+import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 
 /** Contact status options for renderer (API uses 'replied', not 'responded') */
 const RENDERER_CONTACT_STATUS_OPTIONS = [

@@ -83,7 +83,7 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
         sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
 
         ctx.showNotification('Cache cleared successfully', 'success');
-      } catch (error) {
+      } catch (_error) {
         ctx.showNotification('Failed to clear cache', 'error');
       } finally {
         clearCacheBtn.disabled = false;
@@ -104,7 +104,7 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
           const data = await res.json().catch(() => ({}));
           ctx.showNotification(data.error || 'Failed to send test email', 'error');
         }
-      } catch (error) {
+      } catch (_error) {
         ctx.showNotification('Failed to send test email', 'error');
       } finally {
         testEmailBtn.disabled = false;
@@ -126,7 +126,7 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
           const data = await res.json().catch(() => ({}));
           ctx.showNotification(data.error || 'Failed to run scheduler', 'error');
         }
-      } catch (error) {
+      } catch (_error) {
         ctx.showNotification('Failed to run scheduler', 'error');
       } finally {
         runSchedulerBtn.disabled = false;

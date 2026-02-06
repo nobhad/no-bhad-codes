@@ -527,7 +527,6 @@ router.get(
           p.project_type,
           p.budget_range,
           p.timeline,
-          p.features,
           p.created_at,
           p.start_date,
           p.estimated_end_date as end_date,

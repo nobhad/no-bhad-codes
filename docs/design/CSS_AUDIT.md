@@ -5,7 +5,7 @@
 ## Current State
 
 | Metric | Value |
-|--------|-------|
+| ------ | ----- |
 | Total CSS Files | 83 |
 | Total Lines | 33,555 |
 | Largest File | admin.css (2,922 lines) |
@@ -28,7 +28,7 @@
 ### Large Files (Splitting Candidates)
 
 | File | Lines | Recommendation |
-|------|-------|----------------|
+| ---- | ----- | -------------- |
 | `pages/admin.css` | 2,922 | Split by component (tables, sidebar, modals) |
 | `admin/project-detail.css` | 2,127 | Split by tab (files, messages, tasks, invoices) |
 | `pages/projects.css` | 1,662 | Split by section |
@@ -89,4 +89,3 @@ src/styles/
 ├── pages/           # Page-specific (10 files)
 ├── shared/          # Shared portal (16 files)
 └── variables.css    # CSS variables
-```

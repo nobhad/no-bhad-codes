@@ -34,6 +34,7 @@ import { renderBreadcrumbs, type BreadcrumbItem } from '../../components/breadcr
 import { createTableDropdown } from '../../utils/table-dropdown';
 import { getStatusBadgeHTML } from '../../components/status-badge';
 import { initCopyEmailDelegation, getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../utils/copy-email';
+import { closeAllModalOverlays } from '../../utils/modal-utils';
 
 // DOM element keys for caching
 type DashboardDOMKeys = Record<string, string>;
@@ -126,6 +127,9 @@ class AdminDashboard {
 
   // Focus trap cleanup function for detail modal
   private focusTrapCleanup: (() => void) | null = null;
+
+  // Modal guard observer (pre-auth)
+  private modalGuardObserver: MutationObserver | null = null;
 
   // Delegate currentProjectId to project details handler
   private get currentProjectId(): number | null {
@@ -224,6 +228,10 @@ class AdminDashboard {
     // Initialize security measures first
     AdminSecurity.init();
 
+    // Safety: ensure no admin modals are blocking the login gate
+    this.hideAllAdminModals();
+    this.setupModalGuard();
+
     // Check authentication first
     const isAuthenticated = await this.checkAuthentication();
 
@@ -236,6 +244,7 @@ class AdminDashboard {
 
     // User is authenticated - mark as authenticated via API
     AdminAuth.setApiAuthenticated(true);
+    this.teardownModalGuard();
 
     // User is authenticated - show dashboard
     this.showDashboard();
@@ -252,6 +261,59 @@ class AdminDashboard {
     this.setupTruncatedTextTooltips();
     this.updateSidebarBadges();
     this.startAutoRefresh();
+  }
+
+  /**
+   * Hide any open admin modals so the auth gate is accessible.
+   */
+  private hideAllAdminModals(): void {
+    closeAllModalOverlays({ unlockBody: true });
+    document.body.classList.remove('modal-open');
+
+    const overlays = document.querySelectorAll<HTMLElement>(
+      '.admin-modal-overlay, .modal-overlay'
+    );
+
+    overlays.forEach((overlay) => {
+      overlay.classList.add('hidden');
+      overlay.classList.remove('open');
+      overlay.removeAttribute('aria-labelledby');
+      overlay.removeAttribute('aria-modal');
+      overlay.removeAttribute('role');
+    });
+  }
+
+  /**
+   * Guard against modals opening before authentication.
+   * Keeps overlays hidden until the user is authenticated.
+   */
+  private setupModalGuard(): void {
+    if (this.modalGuardObserver) return;
+
+    const enforceGuard = () => {
+      if (!AdminAuth.isAuthenticated()) {
+        this.hideAllAdminModals();
+      }
+    };
+
+    // Initial enforcement
+    enforceGuard();
+
+    this.modalGuardObserver = new MutationObserver(() => {
+      enforceGuard();
+    });
+
+    this.modalGuardObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'aria-modal', 'role']
+    });
+  }
+
+  private teardownModalGuard(): void {
+    this.modalGuardObserver?.disconnect();
+    this.modalGuardObserver = null;
   }
 
   /**

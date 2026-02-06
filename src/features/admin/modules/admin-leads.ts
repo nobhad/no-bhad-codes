@@ -26,6 +26,7 @@ import {
 import type { Lead, AdminDashboardContext } from '../admin-types';
 import { loadProjects, showProjectDetails } from './admin-projects';
 import { confirmDialog, multiPromptDialog } from '../../../utils/confirm-dialog';
+import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { getCopyEmailButtonHtml } from '../../../utils/copy-email';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
@@ -183,16 +184,16 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
       // Don't show error for 401 - handled by apiFetch
       const errorText = await response.text();
       console.error('[AdminLeads] API error:', response.status, errorText);
-      const tableBody = getElement('leads-table-body');
-      if (tableBody) {
-        tableBody.innerHTML = `<tr><td colspan="8" class="loading-row">Error loading leads: ${response.status}</td></tr>`;
+      const errorTableBody = getElement('leads-table-body');
+      if (errorTableBody) {
+        errorTableBody.innerHTML = `<tr><td colspan="8" class="loading-row">Error loading leads: ${response.status}</td></tr>`;
       }
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to load leads:', error);
-    const tableBody = getElement('leads-table-body');
-    if (tableBody) {
-      tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Network error loading leads</td></tr>';
+    const catchTableBody = getElement('leads-table-body');
+    if (catchTableBody) {
+      catchTableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Network error loading leads</td></tr>';
     }
   }
 }
@@ -1250,7 +1251,7 @@ export async function showLeadDetails(leadId: number): Promise<void> {
   });
 
   // Show overlay and panel
-  if (overlay) overlay.classList.remove('hidden');
+  if (overlay) openModalOverlay(overlay);
   detailsPanel.classList.remove('hidden');
 }
 
@@ -1276,7 +1277,7 @@ window.closeDetailsPanel = function (): void {
   if (contactDetailsPanel) contactDetailsPanel.classList.add('hidden');
   // Close overlay
   const overlay = getElement('details-overlay');
-  if (overlay) overlay.classList.add('hidden');
+  if (overlay) closeModalOverlay(overlay);
 };
 
 window.activateLeadFromPanel = function (leadId: number): void {
@@ -1406,7 +1407,7 @@ function renderConversionFunnel(container: HTMLElement, funnel: FunnelStage[]): 
   const maxCount = Math.max(...safeFunnel.map(s => s.count), 1);
   const stageCount = safeFunnel.length;
   const allZero = safeFunnel.every(s => s.count === 0);
-  const TAPER_FLOOR = 15;
+  const _TAPER_FLOOR = 15; // Reserved for future use
   const TAPER_RANGE = 85;
 
   container.innerHTML = safeFunnel.map((stage, index) => {

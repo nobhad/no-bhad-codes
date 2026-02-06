@@ -25,6 +25,7 @@ import {
 } from '../../../utils/table-filter';
 import { exportToCsv, CONTACTS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { confirmDialog } from '../../../utils/confirm-dialog';
+import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import type { ContactSubmission, AdminDashboardContext } from '../admin-types';
 import {
   createPaginationUI,
@@ -36,7 +37,7 @@ import {
   type PaginationConfig
 } from '../../../utils/table-pagination';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
-import { getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../../utils/copy-email';
+import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 
@@ -560,7 +561,7 @@ export function showContactDetails(contactId: number): void {
   }
 
   // Show overlay and panel
-  if (overlay) overlay.classList.remove('hidden');
+  if (overlay) openModalOverlay(overlay);
   detailsPanel.classList.remove('hidden');
 }
 
@@ -575,13 +576,13 @@ window.closeContactDetailsPanel = function (): void {
   const detailsPanel = getElement('contact-details-panel');
   const overlay = getElement('details-overlay');
   if (detailsPanel) detailsPanel.classList.add('hidden');
-  if (overlay) overlay.classList.add('hidden');
+  if (overlay) closeModalOverlay(overlay);
 };
 
 export async function updateContactStatus(
   id: number,
   status: string,
-  ctx: AdminDashboardContext
+  _ctx: AdminDashboardContext
 ): Promise<void> {
   try {
     const response = await apiPut(`/api/admin/contact-submissions/${id}/status`, { status });

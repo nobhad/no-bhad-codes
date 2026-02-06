@@ -17,6 +17,7 @@ import { createTableDropdown } from '../../../utils/table-dropdown';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 import type { AdminDashboardContext } from '../admin-types';
 import { confirmDialog, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
+import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { createViewToggle } from '../../../components/view-toggle';
 import {
@@ -440,8 +441,7 @@ function renderProposalsLayout(): string {
       </div>
     </div>
 
-    <div class="template-editor-modal" id="template-editor-modal" style="display: none;">
-      <div class="modal-overlay"></div>
+    <div class="template-editor-modal modal-overlay hidden" id="template-editor-modal">
       <div class="modal-content">
         <div class="modal-header">
           <h3 id="template-modal-title">New Template</h3>
@@ -914,21 +914,23 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
   }
 
   // Show modal
-  modal.style.display = 'flex';
+  openModalOverlay(modal);
 
   // Setup close handlers
   const closeBtn = document.getElementById('close-template-modal');
   const cancelBtn = document.getElementById('cancel-template-btn');
   const saveBtn = document.getElementById('save-template-btn');
-  const overlay = modal.querySelector('.modal-overlay');
+  const overlay = modal;
 
   const closeModal = () => {
-    modal.style.display = 'none';
+    closeModalOverlay(modal);
   };
 
   if (closeBtn) closeBtn.onclick = closeModal;
   if (cancelBtn) cancelBtn.onclick = closeModal;
-  if (overlay) (overlay as HTMLElement).onclick = closeModal;
+  if (overlay) (overlay as HTMLElement).onclick = (e) => {
+    if (e.target === overlay) closeModal();
+  };
 
   if (saveBtn) {
     saveBtn.onclick = async () => {
@@ -973,7 +975,7 @@ async function saveTemplate(templateId: number | null, ctx: AdminDashboardContex
     if (response.ok) {
       alertSuccess(templateId ? 'Template updated' : 'Template created');
       const modal = document.getElementById('template-editor-modal');
-      if (modal) modal.style.display = 'none';
+      if (modal) closeModalOverlay(modal);
       await loadTemplates(ctx);
     } else {
       const error = await response.text();
