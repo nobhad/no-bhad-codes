@@ -297,7 +297,7 @@
           <!-- Overview Tab (Default) -->
           <div class="tab-content active" id="tab-overview">
             <div class="page-title">
-              <h2>Dashboard</h2>
+              <h1>Dashboard</h1>
             </div>
 
             <!-- NEEDS ATTENTION (Urgent/Actionable Items) -->
@@ -414,7 +414,7 @@
           <!-- Leads Tab -->
           <div class="tab-content" id="tab-leads">
             <div class="page-title">
-              <h2>Leads</h2>
+              <h1>Leads</h1>
             </div>
 
             <!-- Leads Stats -->
@@ -529,7 +529,7 @@
           <!-- Projects Tab -->
           <div class="tab-content" id="tab-projects">
             <div class="page-title">
-              <h2>Projects</h2>
+              <h1>Projects</h1>
             </div>
 
             <!-- Projects Stats -->
@@ -604,7 +604,7 @@
           <!-- Clients Tab -->
           <div class="tab-content" id="tab-clients">
             <div class="page-title">
-              <h2>Clients</h2>
+              <h1>Clients</h1>
             </div>
 
             <!-- Clients Stats -->
@@ -679,7 +679,7 @@
           <!-- Invoices Tab -->
           <div class="tab-content" id="tab-invoices">
             <div class="page-title">
-              <h2>Invoices</h2>
+              <h1>Invoices</h1>
             </div>
 
             <!-- Invoice Stats -->
@@ -1034,7 +1034,7 @@
           <!-- Messages Tab -->
           <div class="tab-content" id="tab-messages">
             <div class="page-title">
-              <h2>Messages</h2>
+              <h1>Messages</h1>
             </div>
 
             <!-- Messages Layout - Split View -->
@@ -1099,7 +1099,7 @@
           <!-- Analytics Tab -->
           <div class="tab-content" id="tab-analytics">
             <div class="page-title">
-              <h2>Analytics</h2>
+              <h1>Analytics</h1>
             </div>
 
             <!-- Analytics Sub-Tabs -->
@@ -1474,7 +1474,7 @@
           <!-- Document Requests Tab -->
           <div class="tab-content" id="tab-document-requests">
             <div class="page-title">
-              <h2>Document Requests</h2>
+              <h1>Document Requests</h1>
             </div>
             <div class="admin-table-card portal-shadow">
               <div class="admin-table-header">
@@ -1599,7 +1599,7 @@
           <!-- Knowledge Base Tab -->
           <div class="tab-content" id="tab-knowledge-base">
             <div class="page-title">
-              <h2>Knowledge Base</h2>
+              <h1>Knowledge Base</h1>
             </div>
             <div class="admin-table-card portal-shadow">
               <div class="admin-table-header">
@@ -1679,7 +1679,7 @@
           <!-- System Status Tab -->
           <div class="tab-content" id="tab-system">
             <div class="page-title">
-              <h2>System Status</h2>
+              <h1>System Status</h1>
             </div>
 
             <!-- Health Check -->
@@ -2333,22 +2333,25 @@
         </div>
         <form id="add-client-form">
           <div class="admin-modal-body">
-            <div class="form-group">
-              <label class="field-label" for="new-client-email">Email *</label>
-              <input type="email" id="new-client-email" class="form-input" placeholder="client@example.com" required />
-            </div>
-            <div class="form-group">
-              <label class="field-label" for="new-client-name">Contact Name</label>
-              <input type="text" id="new-client-name" class="form-input" placeholder="John Smith" />
-            </div>
-            <div class="form-group">
-              <label class="field-label" for="new-client-company">Company Name</label>
-              <input type="text" id="new-client-company" class="form-input" placeholder="Acme Inc." />
-            </div>
-            <div class="form-group">
-              <label class="field-label" for="new-client-phone">Phone</label>
-              <input type="tel" id="new-client-phone" class="form-input" placeholder="(555) 123-4567" />
-            </div>
+            <fieldset>
+              <legend>Contact Information</legend>
+              <div class="form-group">
+                <label class="field-label" for="new-client-email">Email *</label>
+                <input type="email" id="new-client-email" class="form-input" placeholder="client@example.com" required />
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="new-client-name">Contact Name</label>
+                <input type="text" id="new-client-name" class="form-input" placeholder="John Smith" />
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="new-client-company">Company Name</label>
+                <input type="text" id="new-client-company" class="form-input" placeholder="Acme Inc." />
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="new-client-phone">Phone</label>
+                <input type="tel" id="new-client-phone" class="form-input" placeholder="(555) 123-4567" />
+              </div>
+            </fieldset>
           </div>
           <div class="admin-modal-footer">
             <button type="button" class="btn btn-secondary" id="add-client-cancel">Cancel</button>
@@ -2379,7 +2382,8 @@
             </div>
 
             <!-- New Client Fields (hidden by default) -->
-            <div id="new-client-fields" class="hidden">
+            <fieldset id="new-client-fields" class="hidden">
+              <legend>New Client Details</legend>
               <div class="form-group">
                 <label class="field-label" for="new-project-client-name">Contact Name *</label>
                 <input type="text" id="new-project-client-name" class="form-input" placeholder="John Smith" />
@@ -2396,7 +2400,7 @@
                 <label class="field-label" for="new-project-client-phone">Phone</label>
                 <input type="tel" id="new-project-client-phone" class="form-input" placeholder="(555) 123-4567" />
               </div>
-            </div>
+            </fieldset>
 
             <!-- Project Fields -->
             <div class="form-group">

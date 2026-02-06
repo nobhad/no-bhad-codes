@@ -139,9 +139,11 @@ function renderThreadList(container: HTMLElement, threads: MessageThread[], ctx:
     const hasUnread = thread.unread_count > 0;
     const lastMessageDate = new Date(thread.last_message_at);
     const timeStr = formatRelativeTime(lastMessageDate);
+    const itemId = `portal-thread-item-${thread.id}`;
 
     return `
       <div class="thread-item ${isActive ? 'active' : ''} ${hasUnread ? 'unread' : ''}"
+           id="${itemId}"
            data-thread-id="${thread.id}"
            role="option"
            aria-selected="${isActive}"
@@ -157,6 +159,12 @@ function renderThreadList(container: HTMLElement, threads: MessageThread[], ctx:
       </div>
     `;
   }).join('');
+
+  // Set initial aria-activedescendant if there's an active thread
+  const activeThread = container.querySelector('.thread-item.active') as HTMLElement;
+  if (activeThread && activeThread.id) {
+    container.setAttribute('aria-activedescendant', activeThread.id);
+  }
 
   // Add click handlers to threads
   container.querySelectorAll('.thread-item').forEach(item => {
@@ -190,9 +198,15 @@ async function selectThread(threadId: number, ctx: ClientPortalContext): Promise
   const threadList = domCache.get('threadList');
   if (threadList) {
     threadList.querySelectorAll('.thread-item').forEach(item => {
-      const itemId = parseInt(item.getAttribute('data-thread-id') || '0');
-      item.classList.toggle('active', itemId === threadId);
-      item.setAttribute('aria-selected', String(itemId === threadId));
+      const itemThreadId = parseInt(item.getAttribute('data-thread-id') || '0');
+      const isSelected = itemThreadId === threadId;
+      item.classList.toggle('active', isSelected);
+      item.setAttribute('aria-selected', String(isSelected));
+
+      // Update aria-activedescendant for screen readers
+      if (isSelected && (item as HTMLElement).id) {
+        threadList.setAttribute('aria-activedescendant', (item as HTMLElement).id);
+      }
     });
   }
 

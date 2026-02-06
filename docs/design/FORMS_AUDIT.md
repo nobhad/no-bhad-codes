@@ -195,6 +195,22 @@ interface ValidationResult {
 }
 ```
 
+### When to Use Each Validation Layer
+
+| Layer | When to Use | Example |
+|-------|-------------|---------|
+| **HTML5 (`required`, `type="email"`)** | Always - provides immediate browser feedback | All form fields |
+| **Client-Side (`form-validation.ts`)** | Real-time UX feedback, debounced validation | Form completion tracking, submit button state |
+| **Shared Schemas (`shared/validation/`)** | Complex validation rules shared between client and server | Contact form, intake form, registration |
+| **Server-Side (`validation.ts`)** | Final validation before database operations | All API endpoints |
+
+**Rule of Thumb:**
+
+1. Use HTML5 attributes for basic constraints (required, email, minlength)
+2. Use client-side validation for UX (button states, real-time feedback)
+3. Use shared schemas when same rules apply client and server
+4. Always validate on server - never trust client data
+
 ---
 
 ## Error Handling
@@ -236,10 +252,10 @@ interface ValidationResult {
 
 **File:** `src/modules/ui/contact-form.ts`
 
-- Custom error popup positioning (fixed position)
-- Temporary field errors with 3-second auto-dismiss
-- Arrow pointing to first invalid field
-- CSS class: `field-error-popup`
+- Inline error display using shared `showFieldError()` utility
+- Errors appear below the corresponding field
+- Uses ARIA attributes for accessibility (`aria-invalid`, `aria-describedby`)
+- Focus management: first error field receives focus on submit
 - XSS detection with `SanitizationUtils.detectXss()`
 - Input length limits (max 5000 characters for message field)
 
@@ -296,7 +312,8 @@ interface ValidationResult {
 
 - Form completion tracking (arrow points to empty field)
 - Real-time validation on input
-- Custom error popups
+- Inline error display with ARIA accessibility
+- Focus management on validation errors
 - GSAP arrow fly animation on success
 - Formspree/Netlify Forms backend support
 - XSS detection
@@ -433,33 +450,21 @@ interface ValidationResult {
 
 ---
 
-## Issues & Recommendations
+## Current State
 
-### Resolved Issues
+### Compliant Areas
 
-| # | Issue | Resolution |
-| --- | --- | --- |
-| 1 | Password toggle inconsistency | FIXED - Shared component `src/components/password-toggle.ts` used in admin login, client portal, and set-password pages. Uses `data-password-toggle` attribute. |
+| Area | Status | Implementation |
+|------|--------|----------------|
+| Password toggles | PASS | Shared component `src/components/password-toggle.ts` with `data-password-toggle` attribute |
+| Label associations | PASS | All form inputs have associated labels (explicit or aria-label) |
+| ARIA attributes | PASS | Error messages use `role="alert"`, `aria-live` |
+| Validation | PASS | Three-layer validation (HTML5, client-side, server-side) |
+| Required attributes | PASS | Standardized on HTML5 `required` + `aria-required="true"` |
 
-### Remaining Issues
+### Open Issues
 
-| # | Issue | Severity | Details |
-| --- | --- | --- | --- |
-| 1 | Mixed required attributes | Low | Some use `data-required`, others use `required` |
-| 2 | Error display patterns differ | Medium | Contact form uses popups, portal uses inline |
-| 3 | Multiple validation systems | Low | Three layers (HTML5, utils/, shared/) |
-| 4 | Some missing label associations | Medium | Not all form groups have proper label-for |
-| 5 | Large admin form count | Info | 82 form-group instances in admin/index.html |
-
-### Recommendations
-
-| # | Recommendation | Priority |
-| --- | --- | --- |
-| 1 | Use consistent required attribute (`required` + `aria-required`) | Medium |
-| 2 | Unify error display pattern (prefer inline with ARIA) | Medium |
-| 3 | Document which validation layer to use when | Low |
-| 4 | Audit and fix missing label associations | High |
-| 5 | Consider splitting large admin form sections | Low |
+None. All forms follow established patterns.
 
 ### Best Practices Observed
 

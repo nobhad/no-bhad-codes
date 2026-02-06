@@ -12,7 +12,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
 import type { InvoiceResponse } from '../../../types/api';
 import { formatCurrency, formatDate } from '../../../utils/format-utils';
-import { apiFetch, apiPut, apiDelete } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
@@ -84,6 +84,36 @@ let paginationState: PaginationState = {
 const INVOICES_BULK_CONFIG: BulkActionConfig = {
   tableId: 'invoices',
   actions: [
+    {
+      id: 'download-pdfs',
+      label: 'Download PDFs',
+      variant: 'default',
+      handler: async (ids: number[]) => {
+        showToast(`Generating ${ids.length} PDF(s)...`, 'info');
+        try {
+          const response = await apiPost('/api/invoices/export-batch', { invoiceIds: ids });
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `invoices-${Date.now()}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(`${ids.length} invoice(s) downloaded`, 'success');
+          } else {
+            const error = await response.json();
+            showToast(error.error || 'Failed to export invoices', 'error');
+          }
+        } catch (error) {
+          console.error('[AdminInvoices] Export error:', error);
+          showToast('Failed to export invoices', 'error');
+        }
+      },
+      confirmMessage: 'Download selected invoices as PDF?'
+    },
     {
       id: 'mark-paid',
       label: 'Mark Paid',

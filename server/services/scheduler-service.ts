@@ -25,9 +25,12 @@ interface SchedulerConfig {
   enableScheduledInvoices: boolean;
   enableRecurringInvoices: boolean;
   enableSoftDeleteCleanup: boolean;
+  enableAnalyticsCleanup: boolean;
   reminderCheckInterval: string; // cron expression
   invoiceGenerationTime: string; // cron expression
   softDeleteCleanupTime: string; // cron expression
+  analyticsCleanupTime: string; // cron expression
+  analyticsRetentionDays: number; // days to keep analytics data
 }
 
 const DEFAULT_CONFIG: SchedulerConfig = {
@@ -37,9 +40,12 @@ const DEFAULT_CONFIG: SchedulerConfig = {
   enableScheduledInvoices: true,
   enableRecurringInvoices: true,
   enableSoftDeleteCleanup: true,
+  enableAnalyticsCleanup: true,
   reminderCheckInterval: '0 * * * *', // Every hour at :00
   invoiceGenerationTime: '0 1 * * *', // Daily at 1:00 AM
-  softDeleteCleanupTime: '0 2 * * *' // Daily at 2:00 AM
+  softDeleteCleanupTime: '0 2 * * *', // Daily at 2:00 AM
+  analyticsCleanupTime: '0 3 * * *', // Daily at 3:00 AM
+  analyticsRetentionDays: 365 // Keep analytics data for 1 year
 };
 
 interface WelcomeEmail {
@@ -69,6 +75,7 @@ export class SchedulerService {
   private reminderJob: ScheduledTask | null = null;
   private invoiceGenerationJob: ScheduledTask | null = null;
   private softDeleteCleanupJob: ScheduledTask | null = null;
+  private analyticsCleanupJob: ScheduledTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -113,6 +120,11 @@ export class SchedulerService {
       this.scheduleSoftDeleteCleanup();
     }
 
+    // Schedule analytics data cleanup (delete old page_views and interaction_events)
+    if (this.config.enableAnalyticsCleanup) {
+      this.scheduleAnalyticsCleanup();
+    }
+
     this.isRunning = true;
     console.log('[Scheduler] Scheduler service started');
   }
@@ -136,6 +148,11 @@ export class SchedulerService {
     if (this.softDeleteCleanupJob) {
       this.softDeleteCleanupJob.stop();
       this.softDeleteCleanupJob = null;
+    }
+
+    if (this.analyticsCleanupJob) {
+      this.analyticsCleanupJob.stop();
+      this.analyticsCleanupJob = null;
     }
 
     this.isRunning = false;
@@ -203,6 +220,55 @@ export class SchedulerService {
         console.error('[Scheduler] Error during soft delete cleanup:', error);
       }
     });
+  }
+
+  /**
+   * Schedule analytics data cleanup (runs daily at 3 AM by default)
+   * Deletes page_views and interaction_events older than retention period
+   */
+  private scheduleAnalyticsCleanup(): void {
+    console.log(`[Scheduler] Scheduling analytics cleanup: ${this.config.analyticsCleanupTime}`);
+
+    this.analyticsCleanupJob = cron.schedule(this.config.analyticsCleanupTime, async () => {
+      try {
+        console.log('[Scheduler] Running analytics data cleanup...');
+        const deleted = await this.cleanupAnalyticsData();
+
+        if (deleted.pageViews > 0 || deleted.interactionEvents > 0) {
+          console.log(`[Scheduler] Cleaned up analytics data: ${deleted.pageViews} page views, ${deleted.interactionEvents} interaction events`);
+        }
+      } catch (error) {
+        console.error('[Scheduler] Error during analytics cleanup:', error);
+      }
+    });
+  }
+
+  /**
+   * Clean up old analytics data
+   * Deletes page_views and interaction_events older than retention period
+   */
+  async cleanupAnalyticsData(): Promise<{ pageViews: number; interactionEvents: number }> {
+    const retentionDays = this.config.analyticsRetentionDays;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+    const cutoffISO = cutoffDate.toISOString();
+
+    // Delete old page views
+    const pageViewsResult = await this.db.run(
+      'DELETE FROM page_views WHERE created_at < ?',
+      [cutoffISO]
+    );
+
+    // Delete old interaction events
+    const interactionEventsResult = await this.db.run(
+      'DELETE FROM interaction_events WHERE created_at < ?',
+      [cutoffISO]
+    );
+
+    return {
+      pageViews: pageViewsResult?.changes || 0,
+      interactionEvents: interactionEventsResult?.changes || 0
+    };
   }
 
   /**

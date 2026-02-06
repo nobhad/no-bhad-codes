@@ -48,14 +48,16 @@ The audit identified work across 5 major areas:
 
 **Audit finding:** Some pages use H2 as the primary heading; client portal breadcrumbs stay "Dashboard" on tab switch.
 
+**Status:** COMPLETED (Feb 6, 2026)
+
 **Tasks:**
 
-- [ ] Admin: Convert `.page-title h2` to H1 for each main tab (Overview, Leads, Projects, etc.)
-- [ ] Admin detail views: Keep h2 for client/project name but ensure it's the primary heading (or convert to H1)
-- [ ] Client portal: Convert `.page-title h2` to H1 for each tab
-- [ ] Ensure no H1 → H3 jumps; use H2 for sub-sections
+- [x] Admin: Convert `.page-title h2` to H1 for each main tab (Overview, Leads, Projects, etc.)
+- [x] Admin detail views: Keep h2 for client/project name but ensure it's the primary heading (or convert to H1)
+- [x] Client portal: Convert `.page-title h2` to H1 for each tab
+- [x] Ensure no H1 → H3 jumps; use H2 for sub-sections
 
-**Files:** `admin/index.html`, `client/portal.html`, `src/features/admin/admin-dashboard.ts`, `src/features/client/client-portal.ts`
+**Files Modified:** `admin/index.html`, `client/portal.html`, `src/styles/admin/project-detail.css`, `src/styles/client-portal/layout.css`
 
 ### 0.3 Breadcrumb Updates (Portal)
 

@@ -6,7 +6,7 @@
 ## Executive Summary
 
 | Metric | Frontend | Server | Total |
-|--------|----------|--------|-------|
+| -------- | ---------- | -------- | ------- |
 | Try/Catch Blocks | 403 | 238 | 641 |
 | Throw Statements | ~50 | 130 | ~180 |
 | asyncHandler Usage | N/A | 464 | 464 |
@@ -36,9 +36,9 @@
 ## Architecture Overview
 
 ```text
-┌─────────────────────────────────────────────────────────────────┐
+┌───────────────────────────────────────────────────────-──────────┐
 │                        ERROR FLOW                                │
-├─────────────────────────────────────────────────────────────────┤
+├─────────────────────────────────────────────────────-────────────┤
 │                                                                  │
 │  Frontend                          Server                        │
 │  ────────                          ──────                        │
@@ -57,7 +57,7 @@
 │                                          ▼                       │
 │                                    JSON error response           │
 │                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────-──────────────┘
 ```
 
 ---
@@ -107,7 +107,7 @@ router.get('/endpoint', asyncHandler(async (req, res) => {
 ### HTTP Status Code Usage
 
 | Status Code | Usage Count | Purpose |
-|-------------|-------------|---------|
+| ----------- | ----------- | ------- |
 | 400 | ~150 | Bad Request (validation, missing params) |
 | 401 | ~25 | Unauthorized (no/invalid token) |
 | 403 | ~20 | Forbidden (insufficient permissions) |
@@ -144,7 +144,7 @@ try {
 ### Error Notification Methods
 
 | Method | Location | Use Case |
-|--------|----------|----------|
+| --- | --- | --- |
 | `showToast(msg, 'error')` | Global utility | Quick notifications |
 | `ctx.showNotification(msg, 'error')` | Admin context | Dashboard notifications |
 | `alertError(title, message)` | Confirm dialog | Modal error alerts |
@@ -153,7 +153,7 @@ try {
 ### Module-Specific Coverage
 
 | Module | Try/Catch | User Notifications | Status |
-|--------|-----------|-------------------|--------|
+| ------ | --------- | ------------------ | ------ |
 | admin-projects.ts | 30+ | 25+ | OK |
 | admin-leads.ts | 20+ | 18+ | OK |
 | admin-analytics.ts | 25+ | 20+ | OK |
@@ -190,7 +190,7 @@ try {
 ### Standard Error Codes
 
 | Code | HTTP Status | Description |
-|------|-------------|-------------|
+| ---- | ----------- | ----------- |
 | `VALIDATION_ERROR` | 400 | Input validation failed |
 | `INVALID_FORMAT` | 400 | Data format incorrect |
 | `UNAUTHORIZED` | 401 | Authentication required |
@@ -304,7 +304,7 @@ if (!validateEmail(email)) {
 ### SQLite Error Mapping
 
 | SQLite Error | HTTP Status | User Message |
-|--------------|-------------|--------------|
+| ------------ | ----------- | ------------ |
 | `UNIQUE constraint failed` | 409 | Resource already exists |
 | `FOREIGN KEY constraint failed` | 400 | Invalid reference |
 | `SQLITE_BUSY` | 503 | Database busy, retry |
@@ -383,72 +383,49 @@ try {
 
 ---
 
-## Issues Found & Fixed
+## Current State
 
-### 1. Silent Error Suppression (FIXED)
+### Error Logging Standards
 
-**File:** `src/features/admin/admin-auth.ts:146`
+All catch blocks follow these patterns:
 
-**Before:**
-
-```typescript
-} catch (_error) {
-  return false;
-}
-```
-
-**After:**
+**Warning-level catches (expected failures):**
 
 ```typescript
 } catch (error) {
-  console.warn('[AdminAuth] Legacy session validation failed:', error);
-  return false;
+  console.warn('[ModuleName] Expected failure case:', error);
+  return fallbackValue;
 }
 ```
 
-### 2. Silent Logout Catch (FIXED)
-
-**File:** `src/auth/auth-store.ts:392`
-
-**Before:**
+**Error-level catches (unexpected failures):**
 
 ```typescript
-.catch(() => {});
-```
-
-**After:**
-
-```typescript
-.catch((error) => {
-  console.warn('[AuthStore] Logout API call failed:', error);
-});
-```
-
-### 3. Missing Error Context (FIXED)
-
-Multiple files had catch blocks without module context:
-
-```typescript
-// Before
 } catch (error) {
-  console.error('Failed:', error);
-}
-
-// After
-} catch (error) {
-  console.error('[ModuleName] Failed to load data:', error);
+  console.error('[ModuleName] Operation failed:', error);
+  showToast('User-friendly message', 'error');
 }
 ```
+
+### Module Context
+
+All error logs include module context prefix `[ModuleName]` for debugging.
 
 ---
 
 ## Intentionally Silent Catches (Acceptable)
 
 | Location | Pattern | Reason |
-|----------|---------|--------|
+| -------- | ------- | ------ |
 | `admin-overview.ts:77-82` | `apiFetch().catch(() => null)` | Dashboard partial load |
 | `*.ts` JSON parse | `.json().catch(() => ({}))` | Empty response body |
 | Bulk operations | `.catch(() => ({ success: false }))` | Continue on partial failure |
+
+---
+
+## Issues Found & Fixed
+
+_No outstanding issues._
 
 ---
 

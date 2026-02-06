@@ -79,3 +79,7 @@ export async function loadDocumentRequestsModule() {
 export async function loadInvoicesModule() {
   return import('./admin-invoices');
 }
+
+export async function loadDeletedItemsModule() {
+  return import('./admin-deleted-items');
+}

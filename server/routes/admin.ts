@@ -2345,5 +2345,156 @@ router.post(
   })
 );
 
+// =====================================================
+// DELETED ITEMS MANAGEMENT
+// =====================================================
+
+/**
+ * GET /api/admin/deleted-items - List all soft-deleted items
+ * Optional query param: type (client, project, invoice, lead, proposal)
+ */
+router.get(
+  '/deleted-items',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const typeParam = req.query.type as string | undefined;
+    const entityType = typeParam as SoftDeleteEntityType | undefined;
+
+    // Validate entity type if provided
+    const validTypes: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
+    if (entityType && !validTypes.includes(entityType)) {
+      return res.status(400).json({
+        error: 'Invalid entity type',
+        code: 'INVALID_TYPE',
+        validTypes
+      });
+    }
+
+    const [items, stats] = await Promise.all([
+      softDeleteService.getDeletedItems(entityType),
+      softDeleteService.getDeletedItemStats()
+    ]);
+
+    // Transform to match frontend expected format
+    const transformedItems = items.map(item => ({
+      id: item.id,
+      type: item.entityType,
+      name: item.name,
+      deleted_at: item.deletedAt,
+      deleted_by: item.deletedBy,
+      days_until_permanent: item.daysUntilPermanent
+    }));
+
+    res.json({
+      items: transformedItems,
+      stats
+    });
+  })
+);
+
+/**
+ * GET /api/admin/deleted-items/stats - Get counts by entity type
+ */
+router.get(
+  '/deleted-items/stats',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const stats = await softDeleteService.getDeletedItemStats();
+    res.json(stats);
+  })
+);
+
+/**
+ * POST /api/admin/deleted-items/:type/:id/restore - Restore a soft-deleted item
+ */
+router.post(
+  '/deleted-items/:type/:id/restore',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { type, id } = req.params;
+    const entityId = parseInt(id, 10);
+
+    // Validate entity type
+    const validTypes: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
+    if (!validTypes.includes(type as SoftDeleteEntityType)) {
+      return res.status(400).json({
+        error: 'Invalid entity type',
+        code: 'INVALID_TYPE',
+        validTypes
+      });
+    }
+
+    if (isNaN(entityId) || entityId <= 0) {
+      return res.status(400).json({
+        error: 'Invalid entity ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    const result = await softDeleteService.restore(type as SoftDeleteEntityType, entityId);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: result.message
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.message,
+        code: 'RESTORE_FAILED'
+      });
+    }
+  })
+);
+
+/**
+ * DELETE /api/admin/deleted-items/:type/:id/permanent - Permanently delete an item
+ */
+router.delete(
+  '/deleted-items/:type/:id/permanent',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { type, id } = req.params;
+    const entityId = parseInt(id, 10);
+
+    // Validate entity type
+    const validTypes: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
+    if (!validTypes.includes(type as SoftDeleteEntityType)) {
+      return res.status(400).json({
+        error: 'Invalid entity type',
+        code: 'INVALID_TYPE',
+        validTypes
+      });
+    }
+
+    if (isNaN(entityId) || entityId <= 0) {
+      return res.status(400).json({
+        error: 'Invalid entity ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    const result = await softDeleteService.forceDelete(type as SoftDeleteEntityType, entityId);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: result.message
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.message,
+        code: 'DELETE_FAILED'
+      });
+    }
+  })
+);
+
 export { router as adminRouter };
 export default router;

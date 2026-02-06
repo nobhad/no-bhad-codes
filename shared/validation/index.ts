@@ -56,7 +56,22 @@ export {
 
   // Composite validators
   validateAll,
-  validateField
+  validateField,
+
+  // JSON Schema validators
+  type JsonPropertyDef,
+  type JsonSchema,
+  validateJsonSchema,
+  parseAndValidateJson,
+  validateFeaturesData,
+  validateLineItems,
+
+  // Pre-defined JSON schemas
+  tierDataSchema,
+  featuresDataItemSchema,
+  pricingDataSchema,
+  tierStructureSchema,
+  lineItemSchema
 } from './validators';
 
 // Export schemas and schema utilities

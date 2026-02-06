@@ -370,105 +370,42 @@ files
 
 ## Issues & Recommendations
 
-### Critical Issues (Migrations Ready - Pending Deployment)
-
-| # | Issue | Severity | Migration | Status |
-|---|-------|----------|-----------|--------|
-| 1 | Dual User Management | Critical | `048_drop_deprecated_users_table.sql` | Ready |
-| 2 | Project Status Constraint | Critical | `049_fix_project_status_constraint.sql` | Ready |
-| 3 | Soft Delete System | High | `050_soft_delete_system.sql` | Ready + Service implemented |
-| 4 | Boolean Inconsistency | Medium | N/A | Handled in application layer |
-
-### High Priority Issues
+### Open Issues
 
 | # | Issue | Severity | Details |
 |---|-------|----------|---------|
-| 5 | Text-Based Foreign Keys | High | `assigned_to`, `user_name` stored as TEXT without referential integrity |
-| 6 | JSON Without Validation | High | Complex JSON fields (tier_data, features_data) lack schema validation |
-| 7 | Missing Composite Indexes | Medium | Common multi-column queries lack optimized indexes |
-| 8 | No Row-Level Security | Medium | No tenant_id or permission enforcement at database level |
-
-### Medium Priority Issues
-
-| # | Issue | Severity | Details |
-|---|-------|----------|---------|
-| 9 | Timestamp Inconsistency | Medium | Some tables use TEXT, others use DATETIME for timestamps |
-| 10 | Payment Terms History | Medium | Updating payment_terms_presets loses invoice history |
-| 11 | Analytics Retention | Medium | No archival/cleanup strategy for page_views, interaction_events |
-| 12 | Lead/Intake Overlap | Medium | Multiple tables track similar intake/lead data |
+| 1 | Text-Based Foreign Keys | Medium | `assigned_to`, `user_name` stored as TEXT without referential integrity |
+| 2 | No Row-Level Security | Low | No tenant_id or permission enforcement at database level |
+| 3 | Timestamp Inconsistency | Medium | Some tables use TEXT, others use DATETIME for timestamps |
+| 4 | Payment Terms History | Medium | Updating payment_terms_presets loses invoice history |
+| 5 | Lead/Intake Overlap | Medium | Multiple tables track similar intake/lead data |
 
 ### Low Priority Issues
 
 | # | Issue | Severity | Details |
 |---|-------|----------|---------|
-| 13 | Redundant Fields | Low | is_read + read_at both store same information |
-| 14 | Hardcoded Defaults | Low | Business info defaults in invoices should be config |
-| 15 | Missing Audit Triggers | Low | No automatic timestamp triggers, relies on application |
+| 1 | Redundant Fields | Low | is_read + read_at both store same information |
+| 2 | Missing Audit Triggers | Low | No automatic timestamp triggers, relies on application |
 
 ### Recommendations
 
-#### Immediate Actions
+#### Short-Term
 
-1. **Clarify User Management**
-   - Choose authoritative table: `clients` or `users`
-   - Consolidate authentication logic
-   - Remove or archive unused table
-
-2. **Fix Project Status**
-
-   ```sql
-   -- Update CHECK constraint to include all used statuses
-   ALTER TABLE projects
-   DROP CONSTRAINT IF EXISTS status_check;
-
-   ALTER TABLE projects
-   ADD CONSTRAINT status_check CHECK (
-     status IN ('pending', 'active', 'in-progress', 'in-review',
-                'completed', 'on-hold', 'cancelled')
-   );
-   ```
-
-3. **Add Missing Indexes**
-
-   ```sql
-   CREATE INDEX idx_projects_assigned_status ON projects(assigned_to, status);
-   CREATE INDEX idx_time_entries_project_date ON time_entries(project_id, date);
-   CREATE INDEX idx_client_activities_timeline ON client_activities(client_id, created_at);
-   CREATE INDEX idx_audit_entity_search ON audit_logs(entity_type, entity_id, created_at);
-   ```
-
-#### Short-Term Improvements
-
-4. **Replace Text Foreign Keys**
+1. **Replace Text Foreign Keys**
    - Convert `assigned_to` fields to proper user_id references
    - Add `users` or `team_members` table for staff
 
-5. **Add JSON Schema Validation**
-   - Validate JSON fields before insert/update
-   - Consider dedicated columns for critical JSON properties
+#### Long-Term
 
-6. **Implement Data Retention**
-
-   ```sql
-   -- Example: Archive old analytics data
-   DELETE FROM page_views
-   WHERE created_at < date('now', '-12 months');
-
-   DELETE FROM interaction_events
-   WHERE created_at < date('now', '-12 months');
-   ```
-
-#### Long-Term Improvements
-
-7. **Consolidate Lead/Intake Concepts**
+1. **Consolidate Lead/Intake Concepts**
    - Merge `client_intakes` functionality into `projects` (leads)
    - Single source of truth for prospect data
 
-8. **Add Event Sourcing**
+2. **Add Event Sourcing**
    - For financial records requiring audit trail
    - Immutable event log for compliance
 
-9. **Consider Migration to PostgreSQL**
+3. **Consider Migration to PostgreSQL**
    - Better JSON support with JSONB
    - Native boolean type
    - Row-level security

@@ -179,8 +179,10 @@ function renderThreadList(container: HTMLElement, clients: ClientWithThread[], c
     const secondaryName = safeCompany && safeContact ? safeContact : '';
     const timeStr = client.last_message_at ? formatRelativeTime(new Date(client.last_message_at)) : '';
 
+    const itemId = `thread-item-${client.client_id}`;
     return `
       <div class="thread-item ${isActive ? 'active' : ''} ${hasUnread ? 'unread' : ''}"
+           id="${itemId}"
            data-client-id="${client.client_id}"
            data-thread-id="${client.thread_id || 'new'}"
            role="option"
@@ -225,6 +227,12 @@ function setupThreadListHandlers(container: HTMLElement, ctx: AdminDashboardCont
       });
       item.classList.add('active');
       item.setAttribute('aria-selected', 'true');
+
+      // Update aria-activedescendant on listbox for screen readers
+      const itemId = (item as HTMLElement).id;
+      if (itemId) {
+        container.setAttribute('aria-activedescendant', itemId);
+      }
 
       // Update header title
       const threadHeader = getElement('admin-thread-header');

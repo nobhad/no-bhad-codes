@@ -61,6 +61,7 @@ The Invoice System provides clients with a complete view of their payment histor
 |**Internal Notes**|Complete|Admin-only notes not visible to clients|
 |**Custom Invoice Numbers**|Complete|Custom prefix and sequential numbering|
 |**Comprehensive Stats**|Complete|Revenue, outstanding, averages, status breakdown, monthly trends|
+|**Batch PDF Export**|Complete|Export multiple invoices as ZIP file via bulk action|
 
 ---
 
@@ -622,6 +623,7 @@ Skip a scheduled reminder.
 |POST|`/api/invoices/check-overdue`|Check and mark overdue invoices|
 |POST|`/api/invoices/:id/send-reminder`|Send manual payment reminder|
 |POST|`/api/invoices/:id/generate/intake/:intakeId`|Generate invoice from intake form|
+|POST|`/api/invoices/export-batch`|Export multiple invoices as ZIP (body: `{ invoiceIds: number[] }`)|
 
 ---
 

@@ -40,7 +40,9 @@
   margin-bottom: var(--space-3);
 }
 
+#tab-project-detail .page-title h1,
 #tab-project-detail .page-title h2,
+#tab-client-detail .page-title h1,
 #tab-client-detail .page-title h2 {
   font-family: var(--font-family-acme);
   font-size: clamp(1.5rem, 4vw, 2rem);
