@@ -4,46 +4,18 @@
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-02.md`.
 
-## Recently Completed
-
-### Status Color Differentiation (Feb 6, 2026)
-
-Fixed NEW vs ON-HOLD/PENDING using same color.
-
-- Added `--status-new: #06b6d4` (cyan) to `design-system/tokens/colors.css`
-- Separated NEW badge from PENDING/ON-HOLD in `portal-badges.css`
-- NEW is now cyan, PENDING/ON-HOLD remains yellow
-
-### Admin UI for Deleted Items (Feb 6, 2026)
-
-Created admin UI module for viewing and managing soft-deleted items.
-
-- `src/features/admin/modules/admin-deleted-items.ts`
-- Table view with filter by entity type
-- Days until permanent deletion with urgency indicators
-- Restore and permanent delete actions
-
-### PDF Multi-Page Support (Feb 6, 2026)
-
-Added multi-page overflow handling to invoice and proposal PDF generation.
-
-### Form Error Display Unification (Feb 6, 2026)
-
-Unified contact form error display to use inline errors instead of popup errors.
-
 ---
 
-## Verified as Already Implemented
+## Post-Task Documentation Checklist
 
-Based on code audit (Feb 6, 2026), these items were listed as TODO but are already done:
+After completing any task:
 
-- [x] **Rate limiting** — Already implemented in `server/middleware/security.ts`, applied to auth and analytics routes
-- [x] **Tab responsiveness** — Already implemented with scroll + fade indicators in `portal-tabs.css`
-- [x] **Modal dropdowns** — 35 usages of `initModalDropdown` across codebase
-- [x] **Non-passive event listeners** — 16 files already use `{ passive: true }`
-- [x] **Empty state component** — Exists in `src/components/empty-state.ts`
-- [x] **Loading states** — 82 usages of loading utilities across codebase
-- [x] **Account Actions in header** — Already in detail header with icon buttons (line 768)
+- [ ] Move completed item from current_work to archive
+- [ ] Add entry to `ARCHIVED_WORK_2026-02.md`
+- [ ] Update feature docs (`docs/features/*.md`) if API/features changed
+- [ ] Update `API_DOCUMENTATION.md` if endpoints changed
+- [ ] Update relevant audit file (current state only, no fix logs)
+- [ ] Verify no markdown violations
 
 ---
 
@@ -54,14 +26,6 @@ Based on code audit (Feb 6, 2026), these items were listed as TODO but are alrea
 - **Analytics Page KPI Cards (Feb 3)**: Fixed but awaiting user testing to confirm KPI cards display correctly.
 
 - **Sidebar counts**: `GET /api/admin/sidebar-counts` — endpoint exists and looks correct, needs verification it works without errors.
-
-### Already Fixed (can be archived)
-
-- ✅ **Admin Dashboard Overview Stats** — FIXED, User Confirmed Working
-- ✅ **Recent Activity** — FIXED, User Confirmed Working
-- ✅ **Invoices search (400)** — FIXED, User Confirmed Working
-- ✅ **Sidebar page order** — FIXED (Feb 5, 2026)
-- ✅ **NEW vs ON-HOLD same color** — FIXED (Feb 6, 2026)
 
 ---
 
@@ -93,7 +57,6 @@ The portfolio section code is complete but needs images:
 - [ ] Time-sensitive tasks view on dashboard
 - [ ] Lead funnel styling improvements
 - [ ] Analytics tab: use reusable components instead of analytics-only markup
-- [ ] Analytics page label inconsistency — Section headings inconsistently styled
 
 ### 4. Client + Project Details Reorganization
 
@@ -110,6 +73,53 @@ The portfolio section code is complete but needs images:
 **Issues:** Mixed card wrappers, inconsistent titles, nested shadows, multiple grid patterns.
 
 **Plan file:** `/Users/noellebhaduri/.claude/plans/hashed-fluttering-sprout.md`
+
+---
+
+## Audit Tasks (from design audits)
+
+### Medium Priority
+
+| Task | Source | Effort | Notes |
+|------|--------|--------|-------|
+| Text-based foreign keys | DATABASE_AUDIT | High | Replace `assigned_to`, `user_name` TEXT with proper FK references |
+| Timestamp inconsistency | DATABASE_AUDIT | Medium | Standardize TEXT vs DATETIME across tables |
+| Payment terms history | DATABASE_AUDIT | Medium | Preserve history when updating presets |
+| Lead/Intake overlap | DATABASE_AUDIT | High | Consolidate duplicate intake/lead tracking |
+
+### Low Priority - PDF Enhancements
+
+| Task | Notes |
+|------|-------|
+| Draft watermark | Visual indicator for unpaid/draft invoices |
+| PDF/A compliance | Requires XMP metadata library |
+| Password protection | For sensitive documents |
+| Thumbnails/previews | Show preview before download |
+| Digital signatures | For legally binding contracts |
+
+### Low Priority - Database
+
+| Task | Notes |
+|------|-------|
+| Redundant fields | Remove `is_read` where `read_at` exists |
+| Audit triggers | Add automatic timestamp triggers |
+| Row-level security | Add tenant_id enforcement |
+
+### Low Priority - Accessibility
+
+| Task | Notes |
+|------|-------|
+| High contrast focus | Enhanced focus indicators for high contrast mode |
+
+### Do Last - CSS Refactoring
+
+| File | Lines | Action |
+|------|-------|--------|
+| `pages/admin.css` | 2,922 | Split by component |
+| `admin/project-detail.css` | 2,127 | Split by tab |
+| `pages/projects.css` | 1,662 | Split by section |
+| `pages/client.css` | 1,403 | Split by feature |
+| `admin/client-detail.css` | 1,283 | Split by section |
 
 ---
 
