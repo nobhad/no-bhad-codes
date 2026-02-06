@@ -237,6 +237,55 @@ Each table's columns listed in exact left-to-right display order.
 | 4 | Due Date | `due_date` + overdue indicator |
 | 5 | Assignee | `assignee_name` or "-" |
 
+### Column Verification Summary
+
+**Status:** All tables verified and aligned.
+
+| Table | Header/Data Match | Notes |
+|-------|:-----------------:|-------|
+| Leads | MATCH | 8 columns |
+| Clients | MATCH | 7 columns |
+| Contacts | MATCH | 4 columns (no Actions - row click) |
+| Projects | MATCH | 7 columns (no Actions - row click) |
+| Invoices | MATCH | 8 columns |
+| Proposals | MATCH | 8 columns |
+| Time Tracking | MATCH | 6 columns |
+| Document Requests | MATCH | 7 columns |
+| KB Categories | MATCH | 5 columns |
+| KB Articles | MATCH | 7 columns |
+| Visitors | MATCH | 6 columns (no Actions - read-only) |
+| Project Files | MATCH | 4 columns |
+| Project Invoices | MATCH | 5 columns with contextual actions |
+| Tasks List | MATCH | 5 columns |
+
+### Column Count Quick Reference
+
+| Table | Total Cols | Has Checkbox | Has Actions |
+|-------|:----------:|:------------:|:-----------:|
+| Leads | 8 | Yes | Yes |
+| Clients | 7 | Yes | Yes |
+| Contacts | 4 | No | No |
+| Projects | 7 | Yes | No |
+| Invoices | 8 | Yes | Yes |
+| Proposals | 8 | Yes | Yes |
+| Time Tracking | 6 | No | Yes |
+| Document Requests | 7 | Yes | Yes |
+| KB Categories | 5 | No | Yes |
+| KB Articles | 7 | No | Yes |
+| Visitors | 6 | No | No |
+| Project Files | 4 | No | Yes |
+| Project Invoices | 5 | No | Yes |
+| Tasks List | 5 | No | No |
+
+### Naming Conventions
+
+| Pattern | Examples |
+|---------|----------|
+| Date columns | "Date", "Created", "Updated", "Start", "Due Date" |
+| Status columns | Always use dropdown or badge |
+| Identity cells | Name + email + company in single cell |
+| Action columns | Icon buttons (view, edit, delete) |
+
 ---
 
 ## Architecture Overview
