@@ -32,8 +32,11 @@
    =====================================================
    All status badges use these colors:
 
+   CYAN (#06b6d4) - New:
+     new
+
    YELLOW (#fbbf24) - Awaiting Action:
-     pending, new, on_hold, on-hold
+     pending, on_hold, on-hold
 
    BLUE (#3b82f6) - In Progress:
      active, in_progress, in-progress, contacted
@@ -60,9 +63,14 @@
   color: var(--color-black);
 }
 
+/* Cyan/New status badge */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-new {
+  background: var(--status-new);
+  color: var(--color-black);
+}
+
 /* Yellow/Pending status badges */
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-pending,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-new,
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-on_hold,
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-on-hold {
   background: var(--status-pending);

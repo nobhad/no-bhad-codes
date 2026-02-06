@@ -298,8 +298,12 @@ html[data-theme="light"] {
   --status-inactive-rgb: 107, 114, 128;
   --status-inactive-bg: rgba(107, 114, 128, 0.15);
 
+  --status-new: #06b6d4;                 /* Cyan - New (distinct from pending) */
+  --status-new-rgb: 6, 182, 212;
+  --status-new-bg: rgba(6, 182, 212, 0.15);
+
   /* Legacy status dot/indicator colors - mapped to primary */
-  --color-status-new: var(--status-pending);
+  --color-status-new: var(--status-new);
   --color-status-pending: var(--status-pending);
   --color-status-read: var(--status-qualified);
   --color-status-responded: var(--status-completed);
