@@ -18,7 +18,7 @@ import {
   formatCurrency,
   formatProjectType
 } from '../../../utils/format-utils';
-import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
+import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
 import { createTableDropdown, PROJECT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';

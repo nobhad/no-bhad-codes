@@ -928,9 +928,11 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
 
   if (closeBtn) closeBtn.onclick = closeModal;
   if (cancelBtn) cancelBtn.onclick = closeModal;
-  if (overlay) (overlay as HTMLElement).onclick = (e) => {
-    if (e.target === overlay) closeModal();
-  };
+  if (overlay) {
+    (overlay as HTMLElement).onclick = (e) => {
+      if (e.target === overlay) closeModal();
+    };
+  }
 
   if (saveBtn) {
     saveBtn.onclick = async () => {
