@@ -290,10 +290,16 @@ class AdminDashboard {
   private setupModalGuard(): void {
     if (this.modalGuardObserver) return;
 
+    let isEnforcing = false;
+
     const enforceGuard = () => {
-      if (!AdminAuth.isAuthenticated()) {
-        this.hideAllAdminModals();
-      }
+      // Prevent infinite loop from our own DOM changes
+      if (isEnforcing) return;
+      if (AdminAuth.isAuthenticated()) return;
+
+      isEnforcing = true;
+      this.hideAllAdminModals();
+      isEnforcing = false;
     };
 
     // Initial enforcement
@@ -303,11 +309,10 @@ class AdminDashboard {
       enforceGuard();
     });
 
+    // Only observe childList to detect new modals being added, not attribute changes
     this.modalGuardObserver.observe(document.body, {
       childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style', 'aria-modal', 'role']
+      subtree: true
     });
   }
 
