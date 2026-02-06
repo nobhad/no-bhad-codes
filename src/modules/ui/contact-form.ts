@@ -94,7 +94,7 @@ export class ContactFormModule extends BaseModule {
 
     const validateForm = () => {
       const requiredFields = this.form!.querySelectorAll(
-        'input[data-required], select[data-required], textarea[data-required]'
+        'input[required], select[required], textarea[required]'
       );
 
       let firstInvalidField: HTMLElement | null = null;
@@ -186,7 +186,7 @@ export class ContactFormModule extends BaseModule {
     const value = inputField.value.trim();
     let isValid = true;
     let errorMessage = '';
-    const isRequired = inputField.hasAttribute('data-required');
+    const isRequired = inputField.hasAttribute('required');
 
     // Get the parent form-group
     const formGroup = field.closest('.form-group');
@@ -361,10 +361,13 @@ export class ContactFormModule extends BaseModule {
   }
 
   /**
-   * Show validation errors as temporary inline messages on fields
+   * Show validation errors as inline messages on fields
+   * Uses the same pattern as portal forms for consistency
    */
   private showValidationErrors(errors: string[]) {
     this.clearAllErrors();
+
+    let firstErrorField: Element | null = null;
 
     errors.forEach((error) => {
       this.log('Validation error:', error);
@@ -380,61 +383,41 @@ export class ContactFormModule extends BaseModule {
       }
 
       if (fieldSelector) {
-        const field = this.form?.querySelector(fieldSelector) as HTMLElement;
+        const field = this.form?.querySelector(fieldSelector);
         if (field) {
-          this.showTemporaryFieldError(field, error);
+          this.showFieldError(field, error);
+          if (!firstErrorField) {
+            firstErrorField = field;
+          }
         }
       }
     });
-  }
 
-  /**
-   * Show a temporary popup error on a field
-   */
-  private showTemporaryFieldError(field: HTMLElement, message: string) {
-    // Add error class for red outline
-    field.classList.add('field-has-error');
-
-    // Get field position for popup placement
-    const rect = field.getBoundingClientRect();
-
-    // Create popup element - fixed position, outside layout
-    const popup = document.createElement('div');
-    popup.className = 'field-error-popup';
-    popup.textContent = message;
-
-    // Position popup at right end of field (fixed positioning)
-    popup.style.position = 'fixed';
-    popup.style.top = `${rect.top + rect.height / 2}px`;
-    popup.style.left = `${rect.right - 16}px`;
-    popup.style.transform = 'translate(-100%, -50%)';
-
-    // Append to body, not form (completely outside layout)
-    document.body.appendChild(popup);
-
-    // Remove after 3 seconds
-    setTimeout(() => {
-      field.classList.remove('field-has-error');
-      popup.classList.add('fade-out');
-      setTimeout(() => popup.remove(), 300);
-    }, 3000);
+    // Focus on the first field with an error for accessibility
+    if (firstErrorField) {
+      (firstErrorField as HTMLElement).focus();
+    }
   }
 
   /**
    * Clear all field errors and ARIA attributes
    */
   private clearAllErrors() {
+    // Remove inline error messages
     const errorMessages = this.form?.querySelectorAll('.field-error');
     errorMessages?.forEach((error) => error.remove());
 
+    // Remove error class from form groups and fields
     const errorFields = this.form?.querySelectorAll('.error');
     errorFields?.forEach((field) => field.classList.remove('error'));
 
+    // Clear ARIA attributes from all form fields
     this.form?.querySelectorAll('input, select, textarea').forEach((el) => {
       el.removeAttribute('aria-invalid');
       el.removeAttribute('aria-describedby');
     });
 
+    // Hide any pre-existing error message spans
     const errorMessageSpans = this.form?.querySelectorAll('.error-message');
     errorMessageSpans?.forEach((span) => {
       (span as HTMLElement).style.display = 'none';
@@ -445,7 +428,7 @@ export class ContactFormModule extends BaseModule {
 
   validateForm(): boolean {
     const inputs = this.form!.querySelectorAll(
-      'input[data-required], select[data-required], textarea[data-required]'
+      'input[required], select[required], textarea[required]'
     );
     let allValid = true;
 

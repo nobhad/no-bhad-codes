@@ -207,7 +207,7 @@ body[data-page="client-portal"] {
   min-width: 0;
 }
 
-/* Page title (h2) below primary header row */
+/* Page title (h1 preferred, h2 fallback) below primary header row */
 .page-title {
   margin-bottom: 1.5rem;
 }

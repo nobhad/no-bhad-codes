@@ -629,6 +629,318 @@ export function sanitizeUrl(url: string): string {
 }
 
 // ============================================
+// JSON Schema Validators
+// ============================================
+
+/**
+ * Property definition for JSON object validation
+ */
+export interface JsonPropertyDef {
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  enum?: readonly unknown[];
+  items?: JsonPropertyDef;
+  properties?: Record<string, JsonPropertyDef>;
+}
+
+/**
+ * Schema definition for JSON objects
+ */
+export interface JsonSchema {
+  properties: Record<string, JsonPropertyDef>;
+  allowAdditional?: boolean;
+}
+
+/**
+ * Validate a value against a JSON property definition
+ */
+function validateJsonProperty(
+  value: unknown,
+  propDef: JsonPropertyDef,
+  path: string
+): ValidationResult {
+  // Check type
+  switch (propDef.type) {
+    case 'string':
+      if (typeof value !== 'string') {
+        return { isValid: false, error: `${path} must be a string` };
+      }
+      if (propDef.minLength !== undefined && value.length < propDef.minLength) {
+        return { isValid: false, error: `${path} must be at least ${propDef.minLength} characters` };
+      }
+      if (propDef.maxLength !== undefined && value.length > propDef.maxLength) {
+        return { isValid: false, error: `${path} must be at most ${propDef.maxLength} characters` };
+      }
+      break;
+
+    case 'number':
+      if (typeof value !== 'number' || isNaN(value)) {
+        return { isValid: false, error: `${path} must be a number` };
+      }
+      if (propDef.min !== undefined && value < propDef.min) {
+        return { isValid: false, error: `${path} must be at least ${propDef.min}` };
+      }
+      if (propDef.max !== undefined && value > propDef.max) {
+        return { isValid: false, error: `${path} must be at most ${propDef.max}` };
+      }
+      break;
+
+    case 'boolean':
+      if (typeof value !== 'boolean') {
+        return { isValid: false, error: `${path} must be a boolean` };
+      }
+      break;
+
+    case 'array':
+      if (!Array.isArray(value)) {
+        return { isValid: false, error: `${path} must be an array` };
+      }
+      if (propDef.minLength !== undefined && value.length < propDef.minLength) {
+        return { isValid: false, error: `${path} must have at least ${propDef.minLength} items` };
+      }
+      if (propDef.maxLength !== undefined && value.length > propDef.maxLength) {
+        return { isValid: false, error: `${path} must have at most ${propDef.maxLength} items` };
+      }
+      // Validate items if schema provided
+      if (propDef.items) {
+        for (let i = 0; i < value.length; i++) {
+          const itemResult = validateJsonProperty(value[i], propDef.items, `${path}[${i}]`);
+          if (!itemResult.isValid) {
+            return itemResult;
+          }
+        }
+      }
+      break;
+
+    case 'object':
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        return { isValid: false, error: `${path} must be an object` };
+      }
+      // Validate nested properties if schema provided
+      if (propDef.properties) {
+        for (const [key, nestedDef] of Object.entries(propDef.properties)) {
+          const nestedValue = (value as Record<string, unknown>)[key];
+          if (nestedValue === undefined) {
+            if (nestedDef.required) {
+              return { isValid: false, error: `${path}.${key} is required` };
+            }
+            continue;
+          }
+          const nestedResult = validateJsonProperty(nestedValue, nestedDef, `${path}.${key}`);
+          if (!nestedResult.isValid) {
+            return nestedResult;
+          }
+        }
+      }
+      break;
+  }
+
+  // Check enum values
+  if (propDef.enum && !propDef.enum.includes(value)) {
+    return { isValid: false, error: `${path} must be one of: ${propDef.enum.join(', ')}` };
+  }
+
+  return { isValid: true, sanitizedValue: value };
+}
+
+/**
+ * Validate a JSON object against a schema
+ */
+export function validateJsonSchema(
+  value: unknown,
+  schema: JsonSchema,
+  fieldName: string = 'Data'
+): ValidationResult {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return { isValid: false, error: `${fieldName} must be an object` };
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  // Check required properties
+  for (const [propName, propDef] of Object.entries(schema.properties)) {
+    if (propDef.required && (obj[propName] === undefined || obj[propName] === null)) {
+      return { isValid: false, error: `${fieldName}.${propName} is required` };
+    }
+  }
+
+  // Validate each property
+  for (const [propName, propValue] of Object.entries(obj)) {
+    const propDef = schema.properties[propName];
+
+    if (!propDef) {
+      if (!schema.allowAdditional) {
+        return { isValid: false, error: `${fieldName} has unexpected property: ${propName}` };
+      }
+      continue;
+    }
+
+    const result = validateJsonProperty(propValue, propDef, `${fieldName}.${propName}`);
+    if (!result.isValid) {
+      return result;
+    }
+  }
+
+  return { isValid: true, sanitizedValue: value };
+}
+
+/**
+ * Parse and validate JSON string
+ */
+export function parseAndValidateJson(
+  jsonString: string,
+  schema: JsonSchema,
+  fieldName: string = 'Data'
+): ValidationResult {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonString);
+  } catch {
+    return { isValid: false, error: `${fieldName} is not valid JSON` };
+  }
+
+  return validateJsonSchema(parsed, schema, fieldName);
+}
+
+// ============================================
+// Pre-defined JSON Schemas for Database Fields
+// ============================================
+
+/**
+ * Schema for proposal tier data
+ */
+export const tierDataSchema: JsonSchema = {
+  properties: {
+    tier: { type: 'string', required: true, minLength: 1, maxLength: 50 },
+    name: { type: 'string', required: true, minLength: 1, maxLength: 100 },
+    price: { type: 'number', required: true, min: 0 },
+    description: { type: 'string', maxLength: 1000 },
+    features: {
+      type: 'array',
+      items: { type: 'string', maxLength: 200 }
+    }
+  },
+  allowAdditional: true
+};
+
+/**
+ * Schema for proposal features data (array of feature objects)
+ */
+export const featuresDataItemSchema: JsonPropertyDef = {
+  type: 'object',
+  properties: {
+    id: { type: 'string', maxLength: 50 },
+    name: { type: 'string', required: true, minLength: 1, maxLength: 100 },
+    description: { type: 'string', maxLength: 500 },
+    included: { type: 'boolean' },
+    price: { type: 'number', min: 0 },
+    category: { type: 'string', maxLength: 50 }
+  }
+};
+
+/**
+ * Schema for pricing data
+ */
+export const pricingDataSchema: JsonSchema = {
+  properties: {
+    subtotal: { type: 'number', required: true, min: 0 },
+    discount: { type: 'number', min: 0 },
+    discountType: { type: 'string', enum: ['percentage', 'fixed'] as const },
+    tax: { type: 'number', min: 0 },
+    taxRate: { type: 'number', min: 0, max: 100 },
+    total: { type: 'number', required: true, min: 0 },
+    currency: { type: 'string', maxLength: 3 }
+  },
+  allowAdditional: true
+};
+
+/**
+ * Schema for template tier structure
+ */
+export const tierStructureSchema: JsonSchema = {
+  properties: {
+    tiers: {
+      type: 'array',
+      minLength: 1,
+      maxLength: 10,
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', required: true, maxLength: 50 },
+          name: { type: 'string', required: true, minLength: 1, maxLength: 100 },
+          basePrice: { type: 'number', min: 0 }
+        }
+      }
+    }
+  },
+  allowAdditional: true
+};
+
+/**
+ * Schema for default line items
+ */
+export const lineItemSchema: JsonPropertyDef = {
+  type: 'object',
+  properties: {
+    description: { type: 'string', required: true, minLength: 1, maxLength: 500 },
+    quantity: { type: 'number', min: 0 },
+    unitPrice: { type: 'number', required: true, min: 0 },
+    unitLabel: { type: 'string', maxLength: 50 },
+    category: { type: 'string', maxLength: 50 },
+    isTaxable: { type: 'boolean' },
+    isOptional: { type: 'boolean' }
+  }
+};
+
+/**
+ * Validate features data array
+ */
+export function validateFeaturesData(value: unknown, fieldName: string = 'Features'): ValidationResult {
+  if (!Array.isArray(value)) {
+    return { isValid: false, error: `${fieldName} must be an array` };
+  }
+
+  if (value.length > 100) {
+    return { isValid: false, error: `${fieldName} cannot have more than 100 items` };
+  }
+
+  for (let i = 0; i < value.length; i++) {
+    const result = validateJsonProperty(value[i], featuresDataItemSchema, `${fieldName}[${i}]`);
+    if (!result.isValid) {
+      return result;
+    }
+  }
+
+  return { isValid: true, sanitizedValue: value };
+}
+
+/**
+ * Validate line items array
+ */
+export function validateLineItems(value: unknown, fieldName: string = 'Line items'): ValidationResult {
+  if (!Array.isArray(value)) {
+    return { isValid: false, error: `${fieldName} must be an array` };
+  }
+
+  if (value.length > 50) {
+    return { isValid: false, error: `${fieldName} cannot have more than 50 items` };
+  }
+
+  for (let i = 0; i < value.length; i++) {
+    const result = validateJsonProperty(value[i], lineItemSchema, `${fieldName}[${i}]`);
+    if (!result.isValid) {
+      return result;
+    }
+  }
+
+  return { isValid: true, sanitizedValue: value };
+}
+
+// ============================================
 // Composite Validators
 // ============================================
 

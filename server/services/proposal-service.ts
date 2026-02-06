@@ -18,6 +18,14 @@
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import crypto from 'crypto';
+import {
+  validateJsonSchema,
+  validateFeaturesData,
+  validateLineItems,
+  tierDataSchema,
+  pricingDataSchema,
+  tierStructureSchema
+} from '../../shared/validation/validators.js';
 
 // =====================================================
 // TYPES
@@ -294,6 +302,21 @@ class ProposalService {
    */
   async createTemplate(data: TemplateCreateData): Promise<ProposalTemplate> {
     const db = getDatabase();
+
+    // Validate JSON fields
+    if (data.tierStructure) {
+      const tierResult = validateJsonSchema(data.tierStructure, tierStructureSchema, 'Tier structure');
+      if (!tierResult.isValid) {
+        throw new Error(tierResult.error);
+      }
+    }
+
+    if (data.defaultLineItems) {
+      const lineItemsResult = validateLineItems(data.defaultLineItems, 'Default line items');
+      if (!lineItemsResult.isValid) {
+        throw new Error(lineItemsResult.error);
+      }
+    }
 
     // If setting as default, unset other defaults
     if (data.isDefault) {

@@ -53,6 +53,56 @@
 - [Shared vs Custom Components](#shared-vs-custom-components)
 - [Cross-Table Consistency Analysis](#cross-table-consistency-analysis) (All resolved)
 
+<!-- TOC anchors -->
+<a id="display-name-reference"></a>
+<a id="column-order-reference-all-tables"></a>
+<a id="architecture-overview"></a>
+<a id="component-deep-dive"></a>
+<a id="1-portal-checkbox"></a>
+<a id="2-table-dropdown"></a>
+<a id="3-status-badge"></a>
+<a id="4-filter-system-search--status--date"></a>
+<a id="5-pagination-system"></a>
+<a id="6-bulk-actions-system"></a>
+<a id="7-export-system"></a>
+<a id="8-view-toggle"></a>
+<a id="9-filter-select"></a>
+<a id="10-kanban-board"></a>
+<a id="11-copy-email-button"></a>
+<a id="12-loading--empty--error-states"></a>
+<a id="13-confirm-dialog"></a>
+<a id="component-usage-map-by-table"></a>
+<a id="admin-tables"></a>
+<a id="1-leads-table"></a>
+<a id="2-clients-table"></a>
+<a id="3-contacts-table"></a>
+<a id="4-projects-table"></a>
+<a id="5-invoices-table"></a>
+<a id="6-proposals-table"></a>
+<a id="7-time-tracking-table"></a>
+<a id="8-document-requests-table"></a>
+<a id="9-knowledge-base-tables"></a>
+<a id="10-tasks-kanban--list"></a>
+<a id="11-visitors-table-analytics"></a>
+<a id="12-project-detail---files-sub-table"></a>
+<a id="13-project-detail---invoices-sub-table"></a>
+<a id="client-portal-tables"></a>
+<a id="14-portal-invoices"></a>
+<a id="15-portal-projects"></a>
+<a id="16-portal-files"></a>
+<a id="17-portal-document-requests"></a>
+<a id="18-proposal-comparison-table"></a>
+<a id="styling-and-responsiveness"></a>
+<a id="css-variables-used-for-tables"></a>
+<a id="table-cell-styling"></a>
+<a id="responsive-breakpoints"></a>
+<a id="column-hiding-per-table-mobile-480px"></a>
+<a id="mobile-specific-behavior"></a>
+<a id="css-file-locations"></a>
+<a id="comparison-matrix"></a>
+<a id="shared-vs-custom-components"></a>
+<a id="cross-table-consistency-analysis"></a>
+
 ---
 
 ## Display Name Reference
@@ -60,7 +110,7 @@
 All tables with their UI display names, source locations, and header columns.
 
 | # | Display Name (UI) | Internal Name | HTML Source | Module File |
-|---|-------------------|---------------|-------------|-------------|
+| --- | --- | --- | --- | --- |
 | 1 | Intake Submissions | Leads | `admin/index.html:462` | `admin-leads.ts` |
 | 2 | Client Accounts | Clients | `admin/index.html:683` | `admin-clients.ts` |
 | 3 | Contact Form Submissions | Contacts | `admin/index.html:539` | `admin-contacts.ts` |
@@ -69,7 +119,7 @@ All tables with their UI display names, source locations, and header columns.
 | 6 | Proposal Requests | Proposals | `admin-proposals.ts:388` | `admin-proposals.ts` |
 | 7 | Time Entries | Time Tracking | `admin-time-tracking.ts:215` | `admin-time-tracking.ts` |
 | 8 | Requests | Document Requests | `admin/index.html:1499` | `admin-document-requests.ts` |
-| 9a | Categories | KB Categories | `admin/index.html:1614` | `admin-knowledge-base.ts` |
+| 9a | Categories | KB Categories | `admin/index.html:1614` | `admin-k-k-base.ts` |
 | 9b | Articles | KB Articles | `admin/index.html:1646` | `admin-knowledge-base.ts` |
 | 10 | Tasks | Tasks | Dynamic (Kanban) | `admin-tasks.ts` |
 | 11 | (no heading) | Visitors | `admin/index.html:1365` | `admin-analytics.ts` |
@@ -83,12 +133,12 @@ Each table's columns listed in exact left-to-right display order.
 #### Leads Table
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | ☐ (checkbox) | Bulk select |
 | 2 | Project | `project_type` or "Website" |
 | 3 | Lead | `company_name` OR `contact_name` + `email` |
 | 4 | Type | `project_type` (formatted) |
-| 5 | Budget | `budget_range` (formatted) |
+| 5 | Budget | `budgetbudget` (formatted) |
 | 6 | Status | `status` (dropdown) |
 | 7 | Date | `created_at` |
 | 8 | Actions | Convert button (conditional) |
@@ -96,7 +146,7 @@ Each table's columns listed in exact left-to-right display order.
 #### Clients Table
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | ☐ (checkbox) | Bulk select |
 | 2 | Client | `company_name` OR `name` + `email` |
 | 3 | Type | `client_type` ("Personal" / "Business") |
@@ -108,7 +158,7 @@ Each table's columns listed in exact left-to-right display order.
 #### Contacts Table
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | Contact | `name` + `company` + `email` |
 | 2 | Message | `message` (truncated) |
 | 3 | Status | `status` (dropdown) |
@@ -117,7 +167,7 @@ Each table's columns listed in exact left-to-right display order.
 #### Projects Table
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | ☐ (checkbox) | Bulk select |
 | 2 | Project | `project_name` + `contact_name` + `company_name` |
 | 3 | Type | `project_type` (formatted) |
@@ -129,7 +179,7 @@ Each table's columns listed in exact left-to-right display order.
 #### Invoices Table
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | ☐ (checkbox) | Bulk select |
 | 2 | Invoice # | `invoice_number` or "INV-{id}" |
 | 3 | Client | `client_name` |
@@ -142,7 +192,7 @@ Each table's columns listed in exact left-to-right display order.
 #### Proposals Table
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | ☐ (checkbox) | Bulk select |
 | 2 | Client | `client_name` or `company_name` |
 | 3 | Project | `project_name` |
@@ -155,7 +205,7 @@ Each table's columns listed in exact left-to-right display order.
 #### Time Tracking Table
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | Date | `entry_date` |
 | 2 | Description | `description` |
 | 3 | Task | `task_title` or "-" |
@@ -166,11 +216,11 @@ Each table's columns listed in exact left-to-right display order.
 #### Document Requests Table
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | ☐ (checkbox) | Bulk select |
 | 2 | Title | `title` |
 | 3 | Client | `client_name` |
-| 4 | Type | `document_type` |
+| 4 | Type | `documenttype` |
 | 5 | Status | `status` (badge) |
 | 6 | Due | `due_date` |
 | 7 | Actions | Contextual (View, Review, Approve, etc.) |
@@ -178,7 +228,7 @@ Each table's columns listed in exact left-to-right display order.
 #### KB Categories Table
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | Name | `name` |
 | 2 | Slug | `slug` |
 | 3 | Articles | Article count |
@@ -188,7 +238,7 @@ Each table's columns listed in exact left-to-right display order.
 #### KB Articles Table
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | Title | `title` |
 | 2 | Category | `category_name` |
 | 3 | Slug | `slug` |
@@ -200,7 +250,7 @@ Each table's columns listed in exact left-to-right display order.
 #### Visitors Table (Analytics)
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | Session ID | Session identifier |
 | 2 | Started | Session start time |
 | 3 | Duration | Session duration |
@@ -211,7 +261,7 @@ Each table's columns listed in exact left-to-right display order.
 #### Project Files Table (Sub-table)
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | File | `original_filename` + icon |
 | 2 | Size | `file_size` (formatted) |
 | 3 | Uploaded | Upload timestamp |
@@ -220,7 +270,7 @@ Each table's columns listed in exact left-to-right display order.
 #### Project Invoices Table (Sub-table)
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | Invoice # | `invoice_number` |
 | 2 | Amount | `amount_total` (formatted) |
 | 3 | Due Date | `due_date` |
@@ -230,7 +280,7 @@ Each table's columns listed in exact left-to-right display order.
 #### Tasks List View (Sub-table)
 
 | # | Header | Data Source |
-|---|--------|-------------|
+| --- | --- | --- |
 | 1 | Task | `title` + `description` (truncated) |
 | 2 | Priority | `priority` (badge) |
 | 3 | Status | `status` (badge) |
@@ -242,10 +292,10 @@ Each table's columns listed in exact left-to-right display order.
 **Status:** All tables verified and aligned.
 
 | Table | Header/Data Match | Notes |
-|-------|:-----------------:|-------|
+| ----- | :-----------------:| ------- |
 | Leads | MATCH | 8 columns |
 | Clients | MATCH | 7 columns |
-| Contacts | MATCH | 4 columns (no Actions - row click) |
+| Contacts | MATCH | 4 columns ( no Actions - row click) |
 | Projects | MATCH | 7 columns (no Actions - row click) |
 | Invoices | MATCH | 8 columns |
 | Proposals | MATCH | 8 columns |
@@ -261,7 +311,7 @@ Each table's columns listed in exact left-to-right display order.
 ### Column Count Quick Reference
 
 | Table | Total Cols | Has Checkbox | Has Actions |
-|-------|:----------:|:------------:|:-----------:|
+| --- | :---: | :---: | :---: |
 | Leads | 8 | Yes | Yes |
 | Clients | 7 | Yes | Yes |
 | Contacts | 4 | No | No |
@@ -280,7 +330,7 @@ Each table's columns listed in exact left-to-right display order.
 ### Naming Conventions
 
 | Pattern | Examples |
-|---------|----------|
+| --------- | ---------- |
 | Date columns | "Date", "Created", "Updated", "Start", "Due Date" |
 | Status columns | Always use dropdown or badge |
 | Identity cells | Name + email + company in single cell |
@@ -316,7 +366,7 @@ src/
  ├── .admin-table-header            ← Title, toolbar buttons, filter controls
  ├── .bulk-action-toolbar           ← Appears when rows checked (conditional)
  ├── .admin-table-container
- │   └── .admin-table-scroll-wrapper    ← Horizontal scroll on mobile
+ │   └── .admin-table-table-wrapper    ← Horizontal scroll on mobile
  │       └── table.admin-table          ← <table> element
  │           ├── <thead>                ← Sortable headers
  │           └── <tbody>               ← Data rows
@@ -362,7 +412,7 @@ Every interactive element in the tables is built from shared, reusable component
 
 **Scope:** Shared across all admin and client portal tables
 
-**Function:** `getPortalCheckboxHTML(config)` - Returns an HTML string
+**Function:** `getPortalCheckboxHTML)` - Returns an HTML string
 
 #### Interface
 
@@ -375,7 +425,7 @@ PortalCheckboxConfig {
   inputClassName?: string  // CSS class on input (e.g. "bulk-select-all")
   wrapperClassName?: string // CSS class on wrapper div
   value?: string           // Input value (for filter options)
-  dataAttributes?: Record  // data-* attributes (e.g. { rowId: "123" })
+  dataAttributes?: Record  // data-* attributes ( e.g. { rowId: "123" })
 }
 ```
 
@@ -408,7 +458,7 @@ PortalCheckboxConfig {
 | Clients | Header select-all + per-row | `bulk-select-all` / `clients-row-select` |
 | Projects | Header select-all + per-row | `bulk-select-all` / `projects-row-select` |
 | Invoices | Header select-all + per-row | `bulk-select-all` / `invoices-row-select` |
-| Proposals | Header select-all + per-row | `bulk-select-all` / `proposals-row-select` |
+| Proposals | Header select-all + per-row | `bulk-select-all` / ` proposals-row-select` |
 | Document Requests | Header select-all + per-row | `bulk-select-all` / `document-requests-row-select` |
 | Filter Dropdown | Status filter checkboxes | (none) |
 | Contacts | Not used (no checkboxes) | - |
@@ -476,7 +526,7 @@ div.table-dropdown.custom-dropdown [data-status="{value}"]
 
 **LEAD_STATUS_OPTIONS:**
 
-| Value | Label |
+| Value | label |
 |-------|-------|
 | new | New |
 | contacted | Contacted |
@@ -553,7 +603,7 @@ div.table-dropdown.custom-dropdown [data-status="{value}"]
 | `active` | `.status-active` | Active clients/items |
 | `pending` | `.status-pending` | Default, awaiting action |
 | `in-progress` | `.status-in-progress` | Work underway |
-| `on_hold` | `.status-on-hold` | Paused (normalized) |
+| `onon` | `.status-on-hold` | Paused (normalized) |
 | `completed` | `.status-completed` | Done |
 | `healthy` | `.status-healthy` | Client health score |
 | `at-risk` | `.status-at-risk` | Client health score |
@@ -582,7 +632,7 @@ div.table-dropdown.custom-dropdown [data-status="{value}"]
 
 ### 4. Filter System (Search + Status + Date)
 
-**File:** `src/utils/table-filter.ts`
+**File:** `srcsrc/table-filter.ts`
 
 **Scope:** Shared across 6 tables with pre-configured configs
 
@@ -618,7 +668,7 @@ div.table-filter-controls
  ├── div.filter-search-wrapper
  │    ├── button.icon-btn.filter-search-trigger [.has-value]
  │    │    └── svg (search icon)
- │    └── div.filter-search-dropdown.search-bar
+ │    └── div.filter-search-dropdown.search search
  │         ├── span.filter-search-icon.search-bar-icon
  │         │    └── svg (small search icon)
  │         ├── input.filter-search-input.search-bar-input [type=text]
@@ -706,11 +756,11 @@ div.table-filter-controls
 
 #### Pre-Configured Filter Configs
 
-| Config | Table | searchFields | statusOptions | dateField | Sortable Columns | storageKey |
-|--------|-------|-------------|---------------|-----------|-----------------|------------|
+| Config | Table | searchFields | status status | dateField | Sortable Columns | storageKey |
+| -------- | ------- | ------------- | --------------- | ----------- | ----------------- | ------------ |
 | `LEADS_FILTER_CONFIG` | Leads | contact_name, email, company_name, project_type | 8 statuses (new -> cancelled) | created_at | 6 columns | `admin_leads_filter` |
 | `CONTACTS_FILTER_CONFIG` | Contacts | name, email, company, message | 4 (new, read, responded, archived) | created_at | 5 columns | `admin_contacts_filter` |
-| `PROJECTS_FILTER_CONFIG` | Projects | project_name, contact_name, project_type | 5 (active -> cancelled) | created_at | 8 columns | `admin_projects_filter` |
+| `PROJECTS_FILTER_CONFIG` | Projects | project_name,contact_name, project_type | 5 (active -> cancelled) | created_at | 8 columns | `admin_projects_filter` |
 | `CLIENTS_FILTER_CONFIG` | Clients | name, email, company_name | 2 (active, inactive) | created_at | 5 columns | `admin_clients_filter` |
 | `DOCUMENT_REQUESTS_FILTER_CONFIG` | Doc Requests | title, client_name, document_type, description | 6 (requested -> rejected) | created_at | 5 columns | `admin_document_requests_filter` |
 | `KNOWLEDGE_BASE_FILTER_CONFIG` | KB | title, category_name, slug, summary | Dynamic (loaded from API) | updated_at | 3 columns | `admin_kb_filter` |
@@ -718,7 +768,7 @@ div.table-filter-controls
 #### Used In
 
 | Table | Uses createFilterUI | Uses createSortableHeaders | Uses applyFilters |
-|-------|:-------------------:|:--------------------------:|:-----------------:|
+| -------- | :-------------------: | :--------------------------: | :-----------------: |
 | Leads | Yes | Yes | Yes |
 | Clients | Yes | Yes | Yes |
 | Contacts | Yes | Yes | Yes |
@@ -767,7 +817,7 @@ div.pagination-inner
  └── div.pagination-controls
       ├── div.pagination-size
       │    ├── label "Per page:"
-      │    └── div.pagination-page-size-dropdown
+      │    └── div div-page-size-dropdown
       │         └── [TableDropdown - filter mode, no status dot]
       └── div.pagination-nav
            ├── button.pagination-btn.pagination-first  (chevrons left)
@@ -790,7 +840,7 @@ div.pagination-inner
 
 #### Data Slicing Functions
 
-- `getTotalPages(state)` - `Math.ceil(totalItems / pageSize)`
+- `getTotalPages(state)` - `Math.ceil(total(total / pageSize)`
 - `getPageSlice(state)` - `{ start, end }` indices
 - `applyPagination(data, state)` - Returns `data.slice(start, end)`
 - `getVisiblePages(currentPage, totalPages)` - Page numbers with `-1` for ellipsis (shows 2 pages on each side of current)
@@ -803,17 +853,17 @@ div.pagination-inner
 
 #### Live Update
 
-`updatePaginationUI(containerId, state)` - Updates existing pagination DOM in-place (range text, button disabled states, page buttons) without recreating.
+`updatePaginationUI(containerId, state)` - Updates existing instance DOM in-place (range text, button disabled states, page buttons) without recreating.
 
 #### Used In
 
 | Table | Config |
-|-------|--------|
+| ------- | -------- |
 | Leads | `tableId: 'leads'`, default 25, storage `admin_leads_pagination` |
 | Clients | `tableId: 'clients'`, default 25, storage `admin_clients_pagination` |
 | Contacts | `tableId: 'contacts'`, default 25, storage `admin_contacts_pagination` |
 | Projects | `tableId: 'projects'`, default 25, storage `admin_projects_pagination` |
-| Invoices | Not used |
+| In Ground | Not used |
 | Proposals | Not used |
 | Time Tracking | Not used |
 | Document Requests | Not used |
@@ -866,7 +916,7 @@ div.bulk-action-toolbar.hidden [id="{tableId}-bulk-toolbar"]
  │    │    ├── strong [id="{tableId}-selected-count"] "0"
  │    │    └── " selected"
  │    └── button.btn-link.bulk-clear-selection "Clear"
- └── div.bulk-toolbar-actions
+ └── div div-toolbar-actions
       ├── button.btn.btn-sm.{btn-variant} [data-action="{id}"]
       │    ├── {icon svg}
       │    └── span "{label}"
@@ -912,17 +962,17 @@ div.bulk-action-toolbar.hidden [id="{tableId}-bulk-toolbar"]
 1. User clicks action button
 2. If confirmMessage exists -> show confirmDanger dialog
 3. If confirmed (or no confirm needed) -> call handler(selectedIds)
-4. On success -> resetSelection(tableId)
+4. On success -> reset selection(tableId)
 5. On error -> console.error, selection preserved
 ```
 
 #### Pre-Built Action Factories
 
 | Factory | id | variant | confirmMessage | HTTP Method |
-|---------|-----|---------|---------------|-------------|
+| -------- | ----- | --------- | --------------- | ------------- |
 | `createArchiveAction(url, onSuccess)` | `'archive'` | `warning` | "Archive {count} selected items? They can be restored later." | POST |
 | `createDeleteAction(url, onSuccess)` | `'delete'` | `danger` | "Permanently delete {count} selected items? This cannot be undone." | DELETE |
-| `createStatusUpdateAction(label, status, url, onSuccess)` | `'status-{status}'` | `default` | none | POST |
+| `createStatusUpdateUpdate(label, status, url, onSuccess)` | `'status-{status}'` | `default` | none | POST |
 
 #### State Management
 
@@ -933,7 +983,7 @@ div.bulk-action-toolbar.hidden [id="{tableId}-bulk-toolbar"]
 #### Used In
 
 | Table | Actions | Custom or Pre-built |
-|-------|---------|-------------------|
+| ------- | --------- | ------------------- |
 | Leads | Update Status, Assign, Move Stage | Custom handlers with `multiPromptDialog` |
 | Clients | Archive, Delete | Pre-built `createArchiveAction` + `createDeleteAction` |
 | Projects | (Framework configured, no active actions) | - |
@@ -987,7 +1037,7 @@ ExportConfig {
 #### Pre-Configured Export Configs
 
 | Config | Table | Columns |
-|--------|-------|---------|
+| -------- | ------- | --------- |
 | `CLIENTS_EXPORT_CONFIG` | Clients | ID, Contact Name, Email, Company, Type, Phone, Status, Projects, Health Score, Created Date, Billing Email, Billing Address, City, State, ZIP, Country |
 | `LEADS_EXPORT_CONFIG` | Leads | ID, Contact Name, Email, Company, Project Type, Budget Range, Timeline, Status, Source, Phone, Description, Features, Lead Score, Created Date |
 | `PROJECTS_EXPORT_CONFIG` | Projects | ID, Project Name, Client Name, Company, Project Type, Status, Budget, Timeline, Start Date, End Date, Created Date |
@@ -1000,1854 +1050,3 @@ ExportConfig {
 #### Used In
 
 | Table | Export Config | Triggered By |
-|-------|-------------|-------------|
-| Leads | `LEADS_EXPORT_CONFIG` | Export toolbar button |
-| Clients | `CLIENTS_EXPORT_CONFIG` | Export toolbar button |
-| Contacts | `CONTACTS_EXPORT_CONFIG` | Export toolbar button |
-| Projects | `PROJECTS_EXPORT_CONFIG` | Export toolbar button |
-| Invoices | `INVOICES_EXPORT_CONFIG` | Export toolbar button |
-| Proposals | `PROPOSALS_EXPORT_CONFIG` | Export toolbar button |
-| Document Requests | `DOCUMENT_REQUESTS_EXPORT_CONFIG` | Export toolbar button |
-| Knowledge Base | `KNOWLEDGE_BASE_EXPORT_CONFIG` | Export toolbar button |
-| Time Tracking | Not used | - |
-| Tasks | Not used | - |
-
----
-
-### 8. View Toggle
-
-**File:** `src/components/view-toggle.ts`
-
-**Scope:** Shared - used by Leads, Tasks, Files, Proposals
-
-**Function:** `createViewToggle(config)` - Returns HTMLDivElement
-
-#### Interface
-
-```text
-ViewToggleOption {
-  value: string        // Passed to onChange
-  label: string        // Visible text
-  title?: string       // Tooltip
-  ariaLabel?: string   // Accessibility label
-  iconSvg?: string     // Optional SVG icon markup
-}
-
-ViewToggleConfig {
-  options: ViewToggleOption[]
-  value: string                   // Currently selected
-  onChange: (value: string) => void
-  id?: string
-  className?: string
-  ariaLabel?: string              // Group label
-}
-```
-
-#### DOM Structure
-
-```text
-div.view-toggle [role="group"] [aria-label]
- ├── button [data-value] [.active]
- │    ├── span.view-toggle-icon (if iconSvg)
- │    │    └── {svg}
- │    └── span "{label}"
- ├── button [data-value]
- │    └── span "{label}"
- └── ...
-```
-
-#### Behavior
-
-1. One button active at a time (segmented control pattern)
-2. Click non-active button -> removes `.active` from all, adds to clicked, calls `onChange(value)`
-3. Click active button -> no-op (stays active)
-
-#### Styling
-
-- Inactive buttons: darker background
-- Active button: primary color
-- CSS in admin styles
-
-#### Used In
-
-| Table | Options |
-|-------|---------|
-| Leads | "Table" / "Pipeline" (Kanban) |
-| Tasks | "Board" (Kanban) / "List" |
-| Files | View mode toggle |
-| Proposals | View mode toggle |
-
----
-
-### 9. Filter Select
-
-**File:** `src/components/filter-select.ts`
-
-**Scope:** Shared - native `<select>` dropdown for filter bars and forms
-
-**Function:** `createFilterSelect(config)` - Returns `{ element: HTMLSelectElement, setOptions }`
-
-#### Interface
-
-```text
-FilterSelectConfig {
-  id?: string
-  ariaLabel: string               // REQUIRED
-  emptyOption?: string            // First option label (e.g. "All categories")
-  options: FilterSelectOption[]   // { value, label }
-  value: string                   // Currently selected
-  onChange?: (value: string) => void
-  className?: string              // Default: "admin-filter-select"
-  required?: boolean
-  name?: string                   // For form submission
-}
-```
-
-#### DOM Output
-
-```html
-<select class="admin-filter-select" id="{id}" aria-label="{ariaLabel}">
-  <option value="">{emptyOption}</option>
-  <option value="{value}">{label}</option>
-  ...
-</select>
-```
-
-#### Dynamic Update
-
-`setOptions(options, selectedValue?)` - Rebuilds `<option>` elements. Used when data loads from API (e.g. KB categories, project clients).
-
-#### Used In
-
-| Table | What For |
-|-------|---------|
-| Clients | Client type filter in detail view |
-| Projects | Client filter, type filter in modals |
-| Knowledge Base | Category filter (dynamic options from API) |
-
----
-
-### 10. Kanban Board
-
-**File:** `src/components/kanban-board.ts`
-
-**Scope:** Shared - used by Leads (Pipeline view) and Tasks (Board view)
-
-**Function:** `createKanbanBoard(config)` - Returns `{ refresh, destroy }`
-
-#### Interface
-
-```text
-KanbanColumn {
-  id: string
-  title: string
-  color?: string
-  items: KanbanItem[]
-}
-
-KanbanItem {
-  id: string | number
-  title: string
-  subtitle?: string
-  badges?: KanbanBadge[]
-  metadata?: Record<string, unknown>
-}
-
-KanbanBadge {
-  text: string
-  color?: string
-  icon?: string
-}
-
-KanbanConfig {
-  containerId: string
-  columns: KanbanColumn[]
-  onItemMove?: (itemId, fromColumn, toColumn) => Promise<void>
-  onItemClick?: (item: KanbanItem) => void
-  renderItem?: (item: KanbanItem) => string
-  emptyColumnText?: string
-}
-```
-
-#### DOM Structure
-
-```text
-div#containerId
- └── div.kanban-board
-      ├── div.kanban-column [data-column-id]
-      │    ├── div.kanban-column-header
-      │    │    ├── span.kanban-column-title "{title}"
-      │    │    └── span.kanban-column-count "{items.length}"
-      │    └── div.kanban-column-body [droppable]
-      │         ├── div.kanban-card [draggable] [data-item-id]
-      │         │    ├── div.kanban-card-title
-      │         │    ├── div.kanban-card-subtitle
-      │         │    └── div.kanban-card-badges
-      │         │         └── span.kanban-badge
-      │         └── ...
-      └── ...
-```
-
-#### Behavior
-
-1. **Drag and drop** between columns using native HTML drag events
-2. **onItemMove** callback for API updates on column change
-3. **onItemClick** callback for opening details
-4. **Custom renderer** via `renderItem` for table-specific card content
-5. **refresh(columns)** - Re-renders with new data
-6. **destroy()** - Cleanup
-
-#### Used In
-
-| Table | Columns |
-|-------|---------|
-| Leads (Pipeline view) | Pipeline stages (New, Contacted, Qualified, etc.) |
-| Tasks (Board view) | Task statuses (To Do, In Progress, Done, etc.) |
-
----
-
-### 11. Copy Email Button
-
-**File:** `src/utils/copy-email.ts`
-
-**Scope:** Shared across tables displaying email addresses
-
-**Functions:**
-
-- `getCopyEmailButtonHtml(email)` - Returns button HTML string
-- `getEmailWithCopyHtml(email, displayEmail?)` - Returns email text + copy button HTML
-- `initCopyEmailDelegation(root?)` - Call once at app init, sets up delegated click handler
-
-#### DOM Output
-
-```html
-<!-- getCopyEmailButtonHtml -->
-<button type="button" class="icon-btn copy-email-btn"
-        data-copy-email="{escaped email}"
-        title="Copy email" aria-label="Copy email address">
-  {copy icon svg}
-</button>
-
-<!-- getEmailWithCopyHtml -->
-<span class="meta-value-with-copy">
-  {display email}
-  <button ...copy button.../>
-</span>
-```
-
-#### Behavior
-
-1. **Delegated listener** on document (set up once via `initCopyEmailDelegation`)
-2. Click `.copy-email-btn` -> reads `data-copy-email` attribute
-3. Copies to clipboard via `navigator.clipboard.writeText()`
-4. Shows `showToast('Email copied to clipboard', 'success')` on success
-5. Shows `showToast('Failed to copy email', 'error')` on failure
-6. `e.stopPropagation()` prevents row click navigation
-
-#### Used In
-
-| Table | Placement |
-|-------|-----------|
-| Leads | Identity cell (email display) |
-| Clients | Identity cell (email display) + detail panel |
-| Contacts | Identity cell (email display) |
-| Projects | Detail view (client email) |
-| Proposals | Detail view (client email) |
-| Client Details | Email fields in meta section |
-
----
-
-### 12. Loading / Empty / Error States
-
-**File:** `src/utils/loading-utils.ts`
-
-**Scope:** Shared across all tables
-
-**Functions:**
-
-| Function | Returns | DOM Output |
-|----------|---------|-----------|
-| `getTableLoadingRow(colspan, message?)` | HTML string | `<tr><td class="loading-row loading-state">` with spinner + message |
-| `getTableEmptyRow(colspan, message)` | HTML string | `<tr><td class="loading-row empty-state">` with message |
-| `showTableLoading(tableBody, colspan, message?)` | void | Sets `innerHTML` of tbody |
-| `showTableEmpty(tableBody, colspan, message)` | void | Sets `innerHTML` of tbody |
-| `showContainerLoading(container, message?)` | void | Sets `innerHTML` with spinner |
-| `getInlineLoadingHTML()` | HTML string | `<span class="loading-spinner loading-spinner--small">` |
-| `getListSkeletonHTML(count?)` | HTML string | Skeleton loader items |
-| `getCardSkeletonHTML(count?)` | HTML string | Skeleton card placeholders |
-| `getChartSkeletonHTML()` | HTML string | Skeleton bar chart |
-| `withLoading(container, loadingHTML, asyncFn)` | Promise | Wraps async with loading state |
-
-#### CSS Classes
-
-- `.loading-row` - Table row container for loading/empty states
-- `.loading-state` - Loading variant (with spinner)
-- `.empty-state` - Empty variant (just message)
-- `.loading-spinner` - CSS animated spinner
-- `.loading-spinner--small` - Inline size variant
-- `.loading-spinner--large` - Full container size variant
-- `.loading-container` - Container variant with `role="status"` + `aria-live="polite"`
-- `.skeleton-item`, `.skeleton-card`, `.skeleton-chart` - Skeleton loader variants
-
-#### Used In
-
-| Table | Loading | Empty | Error |
-|-------|:-------:|:-----:|:-----:|
-| Leads | Yes | Yes | - |
-| Clients | Yes | Yes | Yes (via error-utils) |
-| Contacts | - | Yes | - |
-| Projects | Yes | Yes | Yes (via error-utils) |
-| Invoices | Yes | Yes | Yes (via error-utils) |
-| Document Requests | Yes | Yes | - |
-| Knowledge Base | Yes | Yes | - |
-| Analytics | Yes (chart skeleton) | - | Yes (via error-utils) |
-| Tasks | - | - | - |
-| Time Tracking | - | - | - |
-| Proposals | - | - | - |
-
----
-
-### 13. Confirm Dialog
-
-**File:** `src/utils/confirm-dialog.ts`
-
-**Scope:** Shared across all tables and features
-
-**Functions:**
-
-| Function | Returns | Purpose |
-|----------|---------|---------|
-| `confirmDialog(options)` | `Promise<boolean>` | Two-button confirm (Cancel/Confirm) |
-| `confirmDanger(message, confirmText?, title?)` | `Promise<boolean>` | Shorthand for destructive confirms (red button) |
-| `alertDialog(options)` | `Promise<void>` | Single-button alert |
-| `alertError(message, title?)` | `Promise<void>` | Error alert shorthand |
-| `alertSuccess(message, title?)` | `Promise<void>` | Success alert shorthand |
-| `alertInfo(message, title?)` | `Promise<void>` | Info alert shorthand |
-| `alertWarning(message, title?)` | `Promise<void>` | Warning alert shorthand |
-| `promptDialog(options)` | `Promise<string\|null>` | Single input prompt |
-| `multiPromptDialog(options)` | `Promise<Record\|null>` | Multi-field form dialog |
-
-#### Confirm Dialog DOM
-
-```text
-div.confirm-dialog-overlay [role="dialog"] [aria-modal="true"]
- └── div.confirm-dialog
-      ├── div.confirm-dialog-header
-      │    ├── div.confirm-dialog-icon.{type}  (SVG icon)
-      │    └── h3.confirm-dialog-title
-      ├── p.confirm-dialog-message
-      └── div.confirm-dialog-actions
-           ├── button.confirm-dialog-btn.confirm-dialog-cancel
-           └── button.confirm-dialog-btn.confirm-dialog-confirm [.danger]
-```
-
-#### Multi-Prompt Dialog DOM (used for bulk status updates)
-
-```text
-div.confirm-dialog-overlay
- └── div.confirm-dialog.prompt-dialog.multi-prompt-dialog
-      ├── div.confirm-dialog-header
-      ├── form.multi-prompt-form
-      │    ├── div.prompt-dialog-field
-      │    │    ├── label.prompt-dialog-label
-      │    │    └── input/textarea/select.prompt-dialog-input.form-input
-      │    └── div.confirm-dialog-actions
-      └── ...
-```
-
-#### Behavior
-
-1. **Modal overlay** covers viewport
-2. **Focus trap** - Tab cycles between Cancel and Confirm only
-3. **Escape key** closes (resolves false/null)
-4. **Outside click** (on overlay) closes
-5. **Closing animation** - `.closing` class added, 150ms delay before removal
-6. **Focus restore** - Returns focus to previously active element
-7. **Multi-prompt validation** - Required fields show `.field--invalid` class
-
-#### Icon Types
-
-| Icon | Usage |
-|------|-------|
-| `danger` (trash) | Delete confirmations |
-| `warning` (triangle) | Archive, risky actions |
-| `success` (checkmark circle) | Success alerts |
-| `info` (info circle) | Information alerts |
-| `question` / `folder-plus` | Default / project conversion |
-
-#### Used In
-
-- **Bulk actions** (all tables with bulk) -> `confirmDanger` for delete/archive
-- **Leads** -> `multiPromptDialog` for bulk status update, `confirmDialog` for convert
-- **Clients** -> `confirmDanger` for delete, `confirmDialog` for edit
-- **Contacts** -> `confirmDialog` for archive/convert
-- **Projects** -> `alertWarning`, `multiPromptDialog` for milestones
-- **Time Tracking** -> `confirmDanger` for delete, `multiPromptDialog` for edit/create
-- **Tasks** -> `confirmDanger` for delete, `multiPromptDialog` for edit/create
-- **Document Requests** -> `confirmDanger` for delete, `alertSuccess`/`alertError` for actions
-- **Knowledge Base** -> `confirmDanger` for delete category/article
-- **Analytics** -> `confirmDialog`, `alertDialog` for scoring rules
-
----
-
-### Component Usage Map (by Table)
-
-```text
-                          Checkbox  Dropdown  Badge  Filter  Pagination  Bulk    Export  ViewToggle  FilterSelect  Kanban  CopyEmail  Loading  Confirm
-                          ────────  ────────  ─────  ──────  ──────────  ────    ──────  ──────────  ────────────  ──────  ─────────  ───────  ───────
-Leads                        X         X              X         X         X        X        X                       X        X          X        X
-Clients                      X                  X     X         X         X        X                    X                    X          X        X
-Contacts                               X              X         X                  X                                         X          X        X
-Projects                     X         X              X         X         X        X                    X                    X          X        X
-Invoices                     X                  X                                   X                                                    X
-Proposals                    X         X                                  X        X        X                                X                   X
-Time Tracking                                                                                                                                    X
-Document Requests            X                        X                   X        X                                                    X        X
-Knowledge Base                                        X                            X                    X                               X        X
-Tasks                                           X                                          X                       X                            X
-Files                                                                                      X
-Analytics                                                                                                                               X        X
-```
-
-#### Exact Import Sources per Table
-
-| Table Module | Imports From |
-|-------------|-------------|
-| **admin-leads.ts** | table-dropdown (`createTableDropdown`, `LEAD_STATUS_OPTIONS`), table-bulk-actions (`createRowCheckbox`, `createBulkActionToolbar`, `setupBulkSelectionHandlers`, `resetSelection`), table-filter (via separate config), table-pagination (via separate config), table-export (`exportToCsv`, `LEADS_EXPORT_CONFIG`), loading-utils (`showTableEmpty`), copy-email (`getCopyEmailButtonHtml`), kanban-board (`createKanbanBoard`), view-toggle (`createViewToggle`), confirm-dialog (`confirmDialog`, `multiPromptDialog`), toast-notifications, modal-dropdown |
-| **admin-clients.ts** | filter-select (`createFilterSelect`), table-export (`exportToCsv`, `CLIENTS_EXPORT_CONFIG`), loading-utils (`showTableLoading`, `showTableEmpty`), confirm-dialog (`confirmDialog`, `confirmDanger`), error-utils (`showTableError`), dom-cache (`createDOMCache`, `batchUpdateText`, `getElement`), button-loading (`withButtonLoading`), focus-trap, status-badge (`getStatusBadgeHTML`), copy-email (`getCopyEmailButtonHtml`, `getEmailWithCopyHtml`) |
-| **admin-contacts.ts** | table-dropdown (`createTableDropdown`, `CONTACT_STATUS_OPTIONS`), table-filter (via separate config), table-pagination (via separate config), table-export (`exportToCsv`, `CONTACTS_EXPORT_CONFIG`), loading-utils (`showTableEmpty`), copy-email (`getCopyEmailButtonHtml`, `getEmailWithCopyHtml`), confirm-dialog (`confirmDialog`) |
-| **admin-projects.ts** | table-dropdown (`createTableDropdown`, `PROJECT_STATUS_OPTIONS`), table-bulk-actions (`createRowCheckbox`, `createBulkActionToolbar`, `setupBulkSelectionHandlers`, `resetSelection`), filter-select (`createFilterSelect`), loading-utils (`showTableLoading`, `showTableEmpty`), error-utils (`showTableError`), dom-cache (`createDOMCache`, `batchUpdateText`), copy-email (`getEmailWithCopyHtml`), confirm-dialog (`alertWarning`, `multiPromptDialog`), focus-trap, modal-dropdown, toast-notifications |
-| **admin-invoices.ts** | loading-utils (`showTableLoading`, `showTableEmpty`), error-utils (`showTableError`), status-badge (`getStatusBadgeHTML`), portal-checkbox (`getPortalCheckboxHTML`) |
-| **admin-proposals.ts** | table-dropdown (`createTableDropdown`), table-export (`exportToCsv`, `PROPOSALS_EXPORT_CONFIG`), view-toggle (`createViewToggle`), search-bar (`createSearchBar`), copy-email (`getEmailWithCopyHtml`), confirm-dialog (`confirmDialog`, `alertSuccess`, `alertError`, `multiPromptDialog`), modal-dropdown, toast-notifications |
-| **admin-time-tracking.ts** | confirm-dialog (`confirmDanger`, `alertSuccess`, `alertError`, `multiPromptDialog`), chart-simple (`createBarChart`) |
-| **admin-document-requests.ts** | loading-utils (`showTableLoading`, `showTableEmpty`), table-export (`exportToCsv`, `DOCUMENT_REQUESTS_EXPORT_CONFIG`), portal-checkbox (`getPortalCheckboxHTML`), confirm-dialog (`confirmDanger`, `alertError`, `alertSuccess`), focus-trap, modal-dropdown |
-| **admin-knowledge-base.ts** | loading-utils (`showTableLoading`, `showTableEmpty`), table-export (`exportToCsv`, `KNOWLEDGE_BASE_EXPORT_CONFIG`), filter-select (`createFilterSelect`), portal-modal (`createPortalModal`), confirm-dialog (`confirmDanger`, `alertError`, `alertSuccess`), focus-trap |
-| **admin-tasks.ts** | kanban-board (`createKanbanBoard`), view-toggle (`createViewToggle`), status-badge (`getStatusBadgeHTML`), confirm-dialog (`confirmDanger`, `alertSuccess`, `alertError`, `multiPromptDialog`) |
-| **admin-files.ts** | view-toggle (`createViewToggle`), confirm-dialog (`confirmDialog`, `alertSuccess`, `alertError`) |
-| **admin-analytics.ts** | loading-utils (`showTableLoading`, `getChartSkeletonHTML`), error-utils (`showTableError`), confirm-dialog (`multiPromptDialog`, `alertDialog`, `confirmDialog`), toast-notifications |
-
----
-
-## Admin Tables
-
-### 1. Leads Table
-
-**Display Name:** "Intake Submissions" (mobile: "Leads")
-
-**Module:** `src/features/admin/modules/admin-leads.ts`
-
-**HTML Source:** `admin/index.html:462-477` (static `<thead>`)
-
-**CSS Class:** `.admin-table .leads-table`
-
-**Nav Tab:** `data-tab="leads"` (sidebar button `#btn-leads`)
-
-**Components Used:** All shared utilities
-
-**Dual View:** Table view + Pipeline (Kanban) view via `createKanbanBoard()`
-
-#### Table Headers (`<th>` in order)
-
-```text
-☐ (checkbox) | Project | Lead | Type | Budget | Status | Date | Actions
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Checkbox | `<input type="checkbox">` | Bulk select |
-| 2 | Project | Text / Link | Blue link when in-progress or converted |
-| 3 | Lead | Identity cell (company OR name, email) | Primary: company_name fallback contact_name |
-| 4 | Type | Text | Capitalized project_type |
-| 5 | Budget | Text | Formatted budget_range |
-| 6 | Status | Dropdown | Custom `createTableDropdown()` |
-| 7 | Date | Formatted date | created_at |
-| 8 | Actions | Icon button | Convert to Project (conditional) |
-
-#### Toolbar Buttons (above table)
-
-- **Add Lead** (+) - Opens create modal
-- **Export** (download icon) - CSV export via `LEADS_EXPORT_CONFIG`
-- **View Toggle** - Table / Pipeline segmented control
-- **Search** (magnifying glass) - Expandable search input, debounced 200ms
-- **Status Filter** (funnel icon) - Multi-select checkboxes with count badge
-- **Date Range Filter** - Start/end date inputs
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** Yes (header select-all + per-row)
-- **Indeterminate state:** Yes (partial selection)
-- **Bulk toolbar actions when checked:**
-
-| Action | Variant | Backend | Payload |
-|--------|---------|---------|---------|
-| Update Status | default | `POST /api/admin/leads/bulk/status` | `{ ids, status }` |
-| Bulk Assign | default | `POST /api/admin/leads/bulk/assign` | `{ ids, assignee }` |
-| Bulk Move Stage | default | `POST /api/admin/leads/bulk/move-stage` | `{ ids, stage }` |
-
-#### Row-Level Actions
-
-| Action | Icon | Selector | Condition | Backend |
-|--------|------|----------|-----------|---------|
-| Convert Lead | blue icon | `btn-convert-lead` | Only for convertible statuses | `POST /api/leads/{id}/convert-to-project` |
-| Status Change | dropdown | In status cell | Always | `PUT /api/leads/{id}` with `{ status }` |
-
-#### Dropdowns
-
-| Location | Type | Options |
-|----------|------|---------|
-| Status column (each row) | Status dropdown with colored dot | new, contacted, qualified, in-progress, converted, lost, on-hold, cancelled |
-| Filter bar | Multi-select checkbox dropdown | Same statuses as above |
-| Pagination | Per-page dropdown | 10, 25, 50, 100 |
-
-#### Pagination
-
-- **Has pagination:** Yes
-- **Type:** Client-side numbered pages
-- **Config:** `tableId: 'leads'`, default 25, options `[10, 25, 50, 100]`
-- **Storage:** `localStorage: 'admin_leads_pagination'`
-- **Controls:** First / Prev / Page numbers (with ellipsis) / Next / Last + "Showing X-Y of Z"
-
-#### Filter Config
-
-- **Search fields:** contact_name, email, company_name, project_type
-- **Status field:** status
-- **Date field:** created_at
-- **Sortable columns:** created_at, contact_name, company_name, project_type, budget_range, status
-- **Storage:** `localStorage: 'admin_leads_filter'`
-
-#### Backend Endpoints
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/admin/leads` | Load all leads |
-| PUT | `/api/leads/{id}` | Update single lead |
-| POST | `/api/admin/leads/bulk/status` | Bulk status update |
-| POST | `/api/admin/leads/bulk/assign` | Bulk assign |
-| POST | `/api/admin/leads/bulk/move-stage` | Bulk move stage |
-| POST | `/api/leads/{id}/convert-to-project` | Convert to project |
-| GET | `/api/admin/leads/analytics` | Lead analytics |
-| GET | `/api/admin/leads/pipeline` | Pipeline data |
-| GET | `/api/admin/leads/pipeline/stats` | Pipeline statistics |
-| POST | `/api/admin/leads/:id/tasks` | Add task to lead |
-| GET | `/api/admin/leads/:id/tasks` | Get lead tasks |
-| POST | `/api/admin/leads/:id/notes` | Add note to lead |
-| GET | `/api/admin/leads/:id/notes` | Get lead notes |
-
-#### Responsiveness
-
-- **Desktop:** All columns visible, min-width 800px
-- **Mobile (<480px):** Hides Company (col 3) and Email (col 4) via `:nth-child()` display:none
-- **Horizontal scroll:** Yes via `.admin-table-scroll-wrapper`
-- **Bulk select column:** Hidden on small mobile
-
----
-
-### 2. Clients Table
-
-**Display Name:** "Client Accounts" (mobile: "Clients")
-
-**Module:** `src/features/admin/modules/admin-clients.ts`
-
-**HTML Source:** `admin/index.html:683-696` (static `<thead>`)
-
-**CSS Class:** `.admin-table .clients-table`
-
-**Nav Tab:** `data-tab="clients"` (sidebar button `#btn-clients`)
-
-**Components Used:** All shared utilities + `createDOMCache()` optimization
-
-#### Table Headers (`<th>` in order)
-
-```text
-☐ (checkbox) | Client | Type | Projects | Status | Created | Actions
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Checkbox | `<input type="checkbox">` | Bulk select |
-| 2 | Client | Identity cell (name, secondary info, email) | Company for business, contact for personal |
-| 3 | Type | Text label | "Personal" / "Business" |
-| 4 | Projects | Number | Project count |
-| 5 | Status | Badge + optional invite button | active/pending/inactive |
-| 6 | Created | Formatted date | created_at |
-| 7 | Actions | Icon button | View (eye icon) |
-
-#### Toolbar Buttons
-
-- **Add Client** (+) - Opens create modal
-- **Export** (download icon) - CSV via `CLIENTS_EXPORT_CONFIG`
-- **Refresh** (refresh icon) - Reloads from API
-- **Search** (magnifying glass) - Expandable
-- **Status Filter** (funnel) - Multi-select
-- **Date Range Filter** - Start/end
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** Yes
-- **Bulk toolbar actions:**
-
-| Action | Variant | Confirmation | Backend |
-|--------|---------|--------------|---------|
-| Archive | warning | "Archive {count} selected clients? They can be restored later." | `POST /api/admin/clients/bulk/archive` with `{ ids }` |
-| Delete | danger | "Permanently delete {count} selected clients? This cannot be undone." | `DELETE /api/admin/clients/bulk/delete` with `{ ids }` |
-
-#### Row-Level Actions
-
-| Action | Icon | Selector | Condition | Backend |
-|--------|------|----------|-----------|---------|
-| Invite | envelope | `icon-btn-invite` | Only when status is "Not Invited" | `POST /api/admin/clients/{id}/send-invitation` |
-| View Client | eye | `btn-view-client` | Always | Opens client detail panel |
-| Row click | - | - | Except checkbox and invite | Navigates to client details |
-
-#### Dropdowns
-
-| Location | Type | Options |
-|----------|------|---------|
-| Filter bar | Multi-select checkbox | active, inactive |
-| Pagination | Per-page | 10, 25, 50, 100 |
-
-#### Pagination
-
-- **Has pagination:** Yes
-- **Config:** `tableId: 'clients'`, default 25
-- **Storage:** `localStorage: 'admin_clients_pagination'`
-
-#### Filter Config
-
-- **Search fields:** name, email, company_name
-- **Status options:** active, inactive
-- **Sortable columns:** name, client_type, email, status, created_at
-- **Storage:** `localStorage: 'admin_clients_filter'`
-
-#### Backend Endpoints
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/clients` | Load all clients |
-| POST | `/api/clients` | Create client |
-| PUT | `/api/clients/{id}` | Update client |
-| DELETE | `/api/clients/{id}` | Delete client |
-| POST | `/api/admin/clients/{id}/send-invitation` | Send invite |
-| POST | `/api/admin/clients/bulk/archive` | Bulk archive |
-| DELETE | `/api/admin/clients/bulk/delete` | Bulk delete |
-| GET | `/api/clients/{id}/projects` | Get client projects |
-| GET | `/api/clients/{id}/invoices` | Get client invoices |
-| PUT | `/api/admin/clients/{id}/billing` | Update billing info |
-
-#### Responsiveness
-
-- **Desktop:** All columns visible, min-width 800px
-- **Mobile (<480px):** Hides Email (col 4) and Created (col 8)
-- **Bulk select column:** Hidden on small mobile
-
----
-
-### 3. Contacts Table
-
-**Display Name:** "Contact Form Submissions" (mobile: "Contacts")
-
-**Module:** `src/features/admin/modules/admin-contacts.ts`
-
-**HTML Source:** `admin/index.html:539-545` (static `<thead>`)
-
-**CSS Class:** `.admin-table .contacts-table`
-
-**Nav Tab:** `data-tab="leads"` (within Leads section, below Intake Submissions)
-
-**Components Used:** Shared filter, pagination, dropdown
-
-#### Table Headers (`<th>` in order)
-
-```text
-Contact | Message | Status | Date
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Contact | Identity cell (name, company, email) | Capitalized |
-| 2 | Message | Truncated text | max-width 200px, ellipsis, title tooltip |
-| 3 | Status | Dropdown | Custom `createTableDropdown()` |
-| 4 | Date | Formatted date | created_at |
-
-#### Toolbar Buttons
-
-- **Export** (download icon) - CSV via `CONTACTS_EXPORT_CONFIG`
-- **Search** (magnifying glass)
-- **Status Filter** (funnel)
-- **Date Range Filter**
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** No
-- **No bulk toolbar**
-
-#### Row-Level Actions (in detail panel, not inline)
-
-| Action | Icon | Selector | Backend |
-|--------|------|----------|---------|
-| Convert to Client | user-plus | `convert-to-client-btn` | `POST /api/admin/convert-contact-to-client` with `{ email, name }` |
-| Archive | archive | `archive-contact-btn` | `PUT /api/admin/contact-submissions/{id}` with `{ status: 'archived' }` |
-| Restore | rotate | `restore-contact-btn` | `PUT /api/admin/contact-submissions/{id}` with `{ status: 'new' }` |
-
-#### Dropdowns
-
-| Location | Type | Options |
-|----------|------|---------|
-| Status column (each row) | Status dropdown | new, read, responded, archived |
-| Filter bar | Multi-select checkbox | Same statuses |
-| Pagination | Per-page | 10, 25, 50, 100 |
-
-#### Pagination
-
-- **Has pagination:** Yes
-- **Config:** `tableId: 'contacts'`, default 25
-- **Storage:** `localStorage: 'admin_contacts_pagination'`
-
-#### Filter Config
-
-- **Search fields:** name, email, company, message
-- **Status options:** new, read, responded, archived
-- **Sortable columns:** created_at, name, email, company, status
-- **Storage:** `localStorage: 'admin_contacts_filter'`
-
-#### Backend Endpoints
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/admin/contact-submissions` | Load contacts |
-| PUT | `/api/admin/contact-submissions/{id}` | Update status |
-| POST | `/api/admin/convert-contact-to-client` | Convert to client |
-
-#### Responsiveness
-
-- **Desktop:** All columns visible
-- **Mobile (<480px):** Hides Company (col 4)
-- **Message cell:** 200px max-width with ellipsis at all sizes
-
----
-
-### 4. Projects Table
-
-**Display Name:** "Projects"
-
-**Module:** `src/features/admin/modules/admin-projects.ts`
-
-**HTML Source:** `admin/index.html:608-621` (static `<thead>`)
-
-**CSS Class:** `.admin-table .projects-table`
-
-**Nav Tab:** `data-tab="projects"` (sidebar button `#btn-projects`)
-
-**Components Used:** All shared utilities
-
-**Note:** Also has two nested sub-tables in project detail view (see below)
-
-#### Table Headers (`<th>` in order)
-
-```text
-☐ (checkbox) | Project | Type | Budget | Timeline | Status | Start
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Checkbox | `<input type="checkbox">` | Bulk select |
-| 2 | Project | Identity cell (project name, contact, company) | Multi-line |
-| 3 | Type | Text | Formatted project type |
-| 4 | Budget | Text | Formatted budget_range |
-| 5 | Timeline | Text | Formatted timeline |
-| 6 | Status | Dropdown | Custom `createTableDropdown()` |
-| 7 | Start Date | Formatted date | start_date |
-
-#### Toolbar Buttons
-
-- **Add Project** (+) - Opens create modal
-- **Export** (download icon) - CSV via `PROJECTS_EXPORT_CONFIG`
-- **Search** (magnifying glass)
-- **Status Filter** (funnel)
-- **Date Range Filter**
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** Yes
-- **Bulk actions:** Framework configured but no specific bulk operations currently active
-
-#### Row-Level Actions
-
-| Action | Icon | Selector | Backend |
-|--------|------|----------|---------|
-| Status Change | dropdown | In status cell | `PUT /api/projects/{id}` with `{ status }` |
-| Row click | - | - | Navigates to project details |
-
-#### Dropdowns
-
-| Location | Type | Options |
-|----------|------|---------|
-| Status column (each row) | Status dropdown | pending, active, in-progress, on-hold, completed, cancelled |
-| Filter bar | Multi-select checkbox | active, in-progress, on-hold, completed, cancelled |
-| Pagination | Per-page | 10, 25, 50, 100 |
-
-#### Pagination
-
-- **Has pagination:** Yes
-- **Config:** `tableId: 'projects'`, default 25
-- **Storage:** `localStorage: 'admin_projects_pagination'`
-
-#### Filter Config
-
-- **Search fields:** project_name, contact_name, project_type
-- **Status options:** active, in-progress, on-hold, completed, cancelled
-- **Sortable columns:** project_name, contact_name, project_type, budget_range, timeline, start_date, end_date, status
-- **Storage:** `localStorage: 'admin_projects_filter'`
-
-#### Backend Endpoints
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/admin/projects` | Load projects |
-| POST | `/api/admin/projects` | Create project |
-| GET | `/api/admin/projects/{id}` | Get single project |
-| PUT | `/api/projects/{id}` | Update project |
-| DELETE | `/api/projects/{id}` | Delete project |
-| POST | `/api/projects/{id}/milestones` | Add milestone |
-| DELETE | `/api/projects/{id}/files/{fileId}` | Delete file |
-
-#### Responsiveness
-
-- **Desktop:** All columns visible, min-width 800px
-- **Mobile (<480px):** Hides Type (col 3), Timeline (col 5), Start Date (col 6), End Date (col 7)
-- **Effectively mobile shows:** Checkbox, Project, Budget, Status only
-
----
-
-### 5. Invoices Table
-
-**Display Name:** "All Invoices" (mobile: "Invoices")
-
-**Module:** `src/features/admin/modules/admin-invoices.ts`
-
-**HTML Source:** `admin/index.html:757-770` (static `<thead>`)
-
-**CSS Class:** `.admin-table .invoices-table`
-
-**Nav Tab:** `data-tab="invoices"` (sidebar button `#btn-invoices`)
-
-**Components Used:** Partial shared utilities
-
-#### Table Headers (`<th>` in order)
-
-```text
-☐ (checkbox) | Invoice # | Client | Project | Amount | Status | Due Date | Actions
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Checkbox | `<input type="checkbox">` | Bulk select |
-| 2 | Invoice # | Strong text | invoice_number or INV-{id} |
-| 3 | Client | Text | client_name |
-| 4 | Project | Text | project_name or "-" |
-| 5 | Amount | Currency | Formatted with `formatCurrency()` |
-| 6 | Status | Badge | paid/pending/overdue (computed) |
-| 7 | Due Date | Formatted date or "-" | due_date |
-| 8 | Actions | Icon buttons | View (eye) + Edit (pencil) |
-
-#### Toolbar Buttons
-
-- **Add Invoice** (+) - Opens create modal
-- **Export** (download icon) - CSV via `INVOICES_EXPORT_CONFIG`
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** Yes
-- **Bulk actions:** Selection available, no specific bulk operations implemented
-
-#### Row-Level Actions
-
-| Action | Icon | Selector | Backend |
-|--------|------|----------|---------|
-| View | eye | `data-action="view"` | Shows invoice details |
-| Edit | pencil | `data-action="edit"` | Opens edit modal |
-
-#### Dropdowns
-
-- None in table cells
-
-#### Pagination
-
-- **Has pagination:** No
-- All invoices rendered at once
-
-#### Special Logic
-
-- Overdue status computed: if status !== 'paid' AND due_date < today, badge shows "overdue"
-
-#### Backend Endpoints
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/invoices` | Load invoices |
-| POST | `/api/invoices` | Create invoice |
-| GET | `/api/invoices/{id}` | View single |
-| PUT | `/api/invoices/{id}` | Update invoice |
-| DELETE | `/api/invoices/{id}` | Delete invoice |
-
-#### Responsiveness
-
-- No column hiding configured
-- Horizontal scroll on mobile via wrapper
-
----
-
-### 6. Proposals Table
-
-**Display Name:** "Proposal Requests"
-
-**Module:** `src/features/admin/modules/admin-proposals.ts`
-
-**HTML Source:** `admin-proposals.ts:388-403` (dynamically rendered via `renderProposalsLayout()`)
-
-**CSS Class:** `.admin-table .proposals-table`
-
-**Nav Tab:** `proposals` (no sidebar button; navigated to programmatically)
-
-**Note:** Unlike other tables, the entire HTML including `<thead>` is generated dynamically by the TypeScript module, not defined in `admin/index.html`.
-
-#### Table Headers (`<th>` in order)
-
-```text
-☐ (checkbox) | Client | Project | Tier | Price | Status | Date | Actions
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Checkbox | `<input type="checkbox">` | Bulk select |
-| 2 | Client | Text | client name or company |
-| 3 | Project | Text | project_name |
-| 4 | Tier | Text | good/better/best |
-| 5 | Price | Currency | finalPrice formatted |
-| 6 | Status | Dropdown | Proposal status |
-| 7 | Date | Formatted date | Created/reviewed |
-| 8 | Actions | Icon buttons | View, Edit, Delete |
-
-#### Toolbar Buttons
-
-- **Search bar** - Text input
-- **Filter buttons** - Segmented: all, pending, reviewed, accepted, rejected, converted
-- **Export** - CSV via `PROPOSALS_EXPORT_CONFIG`
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** Yes
-- **Bulk action:** Update Status
-
-#### Row-Level Actions
-
-| Action | Icon | Backend |
-|--------|------|---------|
-| View | eye | Opens detail view |
-| Edit | pencil | Opens edit modal |
-| Delete | trash | `DELETE /api/proposals/{id}` |
-
-#### Pagination
-
-- **Has pagination:** No
-
-#### Backend Endpoints
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/proposals` | Load proposals |
-| PUT | `/api/proposals/{id}` | Update proposal |
-| DELETE | `/api/proposals/{id}` | Delete proposal |
-
-#### Responsiveness
-
-- No column hiding configured
-- Horizontal scroll on mobile via wrapper
-
----
-
-### 7. Time Tracking Table
-
-**Display Name:** "Time Entries"
-
-**Module:** `src/features/admin/modules/admin-time-tracking.ts`
-
-**HTML Source:** `admin-time-tracking.ts:215-224` (dynamically rendered in project detail view)
-
-**CSS Class:** `.time-entries-table`
-
-**Location:** Project Detail view > Time Tracking sub-tab
-
-**Note:** This table renders inside the project detail panel, not as a standalone admin section.
-
-#### Table Headers (`<th>` in order)
-
-```text
-Date | Description | Task | Duration | Billable | Actions
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Date | Formatted date | entry date |
-| 2 | Description | Escaped text | description |
-| 3 | Task | Text or "-" | task title |
-| 4 | Duration | Formatted time | "2h 30m" from duration_minutes |
-| 5 | Billable | Badge | "Yes" / "No" |
-| 6 | Actions | Icon buttons | Edit (pencil) + Delete (trash) |
-
-#### Toolbar Buttons
-
-- Summary cards above table: Total Hours, This Week, Billable Hours, Billable Amount
-- Weekly chart visualization above table
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** No
-- **No bulk toolbar**
-
-#### Row-Level Actions
-
-| Action | Icon | Backend |
-|--------|------|---------|
-| Edit | pencil | Opens edit modal |
-| Delete | trash | Confirmation dialog then delete |
-
-#### Dropdowns
-
-- None
-
-#### Pagination
-
-- **Has pagination:** No
-
-#### Responsiveness
-
-- No column hiding configured
-- Horizontal scroll on mobile via wrapper
-
----
-
-### 8. Document Requests Table
-
-**Display Name:** "Requests"
-
-**Module:** `src/features/admin/modules/admin-document-requests.ts`
-
-**HTML Source:** `admin/index.html:1499-1511` (static `<thead>`)
-
-**CSS Class:** `.admin-table` (with `aria-label="Document requests"`)
-
-**Nav Tab:** `data-tab="document-requests"` (sidebar button `#btn-document-requests`)
-
-#### Table Headers (`<th>` in order)
-
-```text
-☐ (checkbox) | Title | Client | Type | Status | Due | Actions
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Checkbox | `<input type="checkbox">` | Bulk select |
-| 2 | Title | Text | Document title |
-| 3 | Client | Text | client_name |
-| 4 | Type | Text | document_type |
-| 5 | Status | Badge | Multi-status |
-| 6 | Due | Formatted date | due_date |
-| 7 | Actions | Icon buttons | Contextual based on status |
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** Yes
-- **Bulk actions:**
-
-| Action | Backend |
-|--------|---------|
-| Send Reminders | `POST /api/document-requests/bulk/remind` |
-| Delete | Bulk delete |
-
-#### Row-Level Actions (contextual based on status)
-
-| Action | Icon | Selector | Backend |
-|--------|------|----------|---------|
-| View | eye | `dr-view` | Opens detail |
-| Start Review | checkmark | `dr-start-review` | `POST /api/document-requests/{id}/review` |
-| Approve | success | `dr-approve` | `PUT /api/document-requests/{id}` with `{ status: 'approved', review_notes }` |
-| Reject | danger | `dr-reject` | `PUT /api/document-requests/{id}` with `{ status: 'rejected', rejection_reason }` |
-| Send Reminder | bell | `dr-remind` | `POST /api/document-requests/{id}/remind` |
-| Delete | trash | `dr-delete` | `DELETE /api/document-requests/{id}` |
-
-#### Dropdowns
-
-| Location | Type | Options |
-|----------|------|---------|
-| Filter bar | Status filter | requested, viewed, uploaded, under_review, approved, rejected |
-
-#### Pagination
-
-- **Has pagination:** No
-
-#### Filter Config
-
-- **Search fields:** title, client_name, document_type, description
-- **Status options:** requested, viewed, uploaded, under_review, approved, rejected
-- **Sortable columns:** title, client_name, status, due_date, created_at
-
-#### Backend Endpoints
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/document-requests` | Load requests |
-| POST | `/api/document-requests/{id}/review` | Start review |
-| PUT | `/api/document-requests/{id}` | Update (status, notes) |
-| POST | `/api/document-requests/{id}/remind` | Send reminder |
-| DELETE | `/api/document-requests/{id}` | Delete request |
-| POST | `/api/document-requests/bulk/remind` | Send bulk reminders |
-
-#### Responsiveness
-
-- No column hiding configured
-- Horizontal scroll on mobile via wrapper
-
----
-
-### 9. Knowledge Base Tables
-
-**Display Name:** "Categories" and "Articles" (two separate tables in one section)
-
-**Module:** `src/features/admin/modules/admin-knowledge-base.ts`
-
-**HTML Source (Categories):** `admin/index.html:1614-1621` (static `<thead>`)
-
-**HTML Source (Articles):** `admin/index.html:1646-1655` (static `<thead>`)
-
-**CSS Class:** `.admin-table` (with `aria-label="Knowledge base categories"` / `aria-label="Knowledge base articles"`)
-
-**Nav Tab:** `data-tab="knowledge-base"` (sidebar button `#btn-knowledge-base`)
-
-#### Categories Table Headers (`<th>` in order)
-
-```text
-Name | Slug | Articles | Active | Actions
-```
-
-#### Categories Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Name | Text | Category name |
-| 2 | Slug | Text | URL slug |
-| 3 | Articles | Number | Article count |
-| 4 | Active | Badge | Yes/No |
-| 5 | Actions | Icon buttons | Edit, Delete |
-
-#### Articles Table Headers (`<th>` in order)
-
-```text
-Title | Category | Slug | Featured | Published | Updated | Actions
-```
-
-#### Articles Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Title | Text | Article title |
-| 2 | Category | Text | category_name |
-| 3 | Slug | Text | URL slug |
-| 4 | Featured | Badge | Yes/No |
-| 5 | Published | Badge | Yes/No |
-| 6 | Updated | Formatted date | updated_at |
-| 7 | Actions | Icon buttons | Edit, Delete |
-
-#### Row-Level Actions
-
-| Action | Icon | Selector | Backend |
-|--------|------|----------|---------|
-| Edit Category | pencil | `kb-edit-category` | Opens edit modal |
-| Delete Category | trash | `kb-delete-category` | `DELETE /api/kb-categories/{id}` |
-| Edit Article | pencil | `kb-edit-article` | Opens edit modal |
-| Delete Article | trash | `kb-delete-article` | `DELETE /api/kb-articles/{id}` |
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** No
-- **No bulk toolbar**
-
-#### Filter Config
-
-- **Search fields:** title, category_name, slug, summary
-- **Sortable columns:** title, category_name, updated_at
-
-#### Pagination
-
-- **Has pagination:** No
-
-#### Backend Endpoints
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/kb-categories` | Load categories |
-| GET | `/api/kb-articles` | Load articles |
-| PUT | `/api/kb-categories/{id}` | Update category |
-| DELETE | `/api/kb-categories/{id}` | Delete category |
-| PUT | `/api/kb-articles/{id}` | Update article |
-| DELETE | `/api/kb-articles/{id}` | Delete article |
-
-#### Responsiveness
-
-- No column hiding configured
-- Horizontal scroll on mobile via wrapper
-
----
-
-### 10. Tasks (Kanban + List)
-
-**Display Name:** "Tasks"
-
-**Module:** `src/features/admin/modules/admin-tasks.ts`
-
-**Location:** Project Detail view > Tasks sub-tab
-
-**Primary View:** Kanban board via `createKanbanBoard()`
-
-**Secondary View:** List view
-
-#### List View Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Task | Text | title + description (truncated) |
-| 2 | Priority | Badge | low/medium/high/urgent (task-priority-* class) |
-| 3 | Status | Badge | task status |
-| 4 | Due Date | Formatted date | "overdue" class if past due |
-| 5 | Assignee | Text | assignee_name or "-" |
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** No
-- **No bulk toolbar**
-
-#### Pagination
-
-- **Has pagination:** No
-
-#### Responsiveness
-
-- Kanban view collapses columns on mobile
-- List view uses horizontal scroll
-
----
-
-### 11. Visitors Table (Analytics)
-
-**Display Name:** No heading (appears within Analytics > Visitors sub-tab)
-
-**Module:** `src/features/admin/modules/admin-analytics.ts`
-
-**HTML Source:** `admin/index.html:1365-1373` (static `<thead>`)
-
-**CSS Class:** `.admin-table .visitors-table`
-
-**Location:** Analytics tab > Visitors sub-tab (`#analytics-subtab-visitors`)
-
-#### Table Headers (`<th>` in order)
-
-```text
-Session ID | Started | Duration | Pages | Device | Location
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Session ID | Text | Visitor session identifier |
-| 2 | Started | Formatted date/time | Session start time |
-| 3 | Duration | Formatted time | Session duration |
-| 4 | Pages | Number | Pages viewed in session |
-| 5 | Device | Text | Device type (desktop/mobile/tablet) |
-| 6 | Location | Text | Geographic location |
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** No
-- **No bulk toolbar**
-
-#### Pagination
-
-- **Has pagination:** No
-
-#### Dropdowns
-
-- None
-
-#### Responsiveness
-
-- No column hiding configured
-- Horizontal scroll on mobile via wrapper
-
----
-
-### 12. Project Detail - Files Sub-Table
-
-**Display Name:** "Files" (within Upload Files for Client section)
-
-**Module:** `src/features/admin/modules/admin-projects.ts`
-
-**HTML Source:** `admin-projects.ts:1143-1149` (dynamically rendered in project detail)
-
-**CSS Class:** `.files-table`
-
-**Location:** Project Detail view > Files sub-tab
-
-#### Table Headers (`<th>` in order)
-
-```text
-File | Size | Uploaded | Actions
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | File | Text + icon | original_filename with file type icon |
-| 2 | Size | Formatted size | `formatFileSize()` output |
-| 3 | Uploaded | Formatted date | upload timestamp |
-| 4 | Actions | Icon buttons | Preview (conditional), Download |
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** No
-- **No bulk toolbar**
-
-#### Pagination
-
-- **Has pagination:** No
-
----
-
-### 13. Project Detail - Invoices Sub-Table
-
-**Display Name:** "Invoices" (within project detail)
-
-**Module:** `src/features/admin/modules/admin-projects.ts`
-
-**HTML Source:** `admin-projects.ts:1592-1600` (dynamically rendered in project detail)
-
-**CSS Class:** `.invoices-table` (nested in project detail)
-
-**Location:** Project Detail view > Invoices sub-tab
-
-#### Table Headers (`<th>` in order)
-
-```text
-Invoice # | Amount | Due Date | Status | Actions
-```
-
-#### Columns (in order)
-
-| # | Column | Data Type | Notes |
-|---|--------|-----------|-------|
-| 1 | Invoice # | Text | invoice_number |
-| 2 | Amount | Currency | `Intl.NumberFormat` formatted |
-| 3 | Due Date | Formatted date | due_date |
-| 4 | Status | Badge | paid/pending/overdue |
-| 5 | Actions | Icon buttons | Send (draft), Edit (draft), Mark Paid (sent/viewed/partial/overdue), Preview, Download |
-
-#### Checkboxes and Bulk Actions
-
-- **Has checkboxes:** No
-- **No bulk toolbar**
-
-#### Pagination
-
-- **Has pagination:** No
-
----
-
-## Client Portal Tables
-
-### 14. Portal Invoices
-
-**File:** `src/features/client/modules/portal-invoices.ts`
-
-- Client-facing invoice list (read-only view of their invoices)
-- Simplified columns, no bulk actions, no checkboxes
-
-### 15. Portal Projects
-
-**File:** `src/features/client/modules/portal-projects.ts`
-
-- Client-facing project list (status, progress)
-- No bulk actions, no checkboxes
-
-### 16. Portal Files
-
-**File:** `src/features/client/modules/portal-files.ts`
-
-- Client-facing file list (download, view)
-- No bulk actions, no checkboxes
-
-### 17. Portal Document Requests
-
-**File:** `src/features/client/modules/portal-document-requests.ts`
-
-- Client-facing document requests (upload, view status)
-- No bulk actions, no checkboxes
-
-### 18. Proposal Comparison Table
-
-**File:** `src/features/client/proposal-builder-ui.ts`
-
-**CSS Class:** `.comparison-table`
-
-- Static HTML table comparing proposal tiers (good/better/best)
-- Feature comparison rows with pricing
-- No interactivity (read-only)
-- No checkboxes, no pagination, no filters
-
----
-
-## Styling and Responsiveness
-
-### CSS Variables Used for Tables
-
-#### Colors
-
-- `--portal-bg-dark` - Dark background for table/header
-- `--portal-bg-medium` - Medium shade background
-- `--portal-bg-darker` - Darkest shade for controls
-- `--portal-text-light` - Light text (primary content)
-- `--portal-text-secondary` - Secondary text (headers, labels)
-- `--portal-text-muted` - Muted text (tertiary content)
-- `--portal-border-medium` - Medium border color
-- `--portal-border-dark` - Dark border color
-- `--color-primary` - Brand color (accents, active states)
-- `--color-error-500` - Error/hover link color
-
-#### Spacing (8px base grid)
-
-- `--space-0-5` - 4px
-- `--space-1` - 8px
-- `--space-1-5` - 12px
-- `--space-2` - 16px
-- `--space-3` - 24px
-- `--space-4` - 32px
-- `--space-6` - 48px
-- `--space-8` - 64px
-
-#### Border Radius
-
-- `--portal-radius-sm` - 4px
-- `--portal-radius-md` - 8px
-- `--portal-radius-lg` - 12px
-- `--border-radius-card` - 4px
-
-### Table Cell Styling
-
-| Property | Desktop | Mobile (<480px) |
-|----------|---------|-----------------|
-| Cell Padding | `var(--space-3) var(--space-4)` (12px 16px) | `var(--space-2) var(--space-3)` (8px 12px) |
-| Row Height | 48px min | 48px min |
-| Header Font | 0.75rem uppercase, 500 weight, 0.05em spacing | Same |
-| Body Font | `var(--font-size-sm)` (~14px) | Same |
-| Header Background | `var(--portal-bg-dark)` | Same |
-| Row Hover | `rgba(255, 255, 255, 0.08)` | Same |
-| Row Active | `rgba(255, 255, 255, 0.1)` | Same |
-| Borders | 1px solid `var(--portal-border-medium)` header only | Same |
-| Card Shadow | `var(--shadow-panel)` | Same |
-| Checkbox Column Width | 56px | Hidden on small mobile |
-| Identity Cell Min-Width | 180px | Auto |
-| Message Cell Max-Width | 200px (with ellipsis) | Same |
-
-### Responsive Breakpoints
-
-```text
-BREAKPOINT MAP
--------------------------------------------------------------
-  320    480    640    768    992    1024   1200   1400   1536
-   |      |      |      |      |      |      |      |      |
-   |  xs  |  sm  |  md  |      |  lg  |      |  xl  | 2xl  |
-   |      |      |      |      |      |      |      |      |
-   |------|      |      |      |      |      |      |      |
-   |small |      |      |      |      |      |      |      |
-   |mobile|      |      |      |      |      |      |      |
-   |      |------|      |      |      |      |      |      |
-   |      |compact      |      |      |      |      |      |
-   |      |mobile|      |      |      |      |      |      |
-   |      |      |------|      |      |      |      |      |
-   |      |      |mobile|      |      |      |      |      |
-   |      |      |      |------+------|      |      |      |
-   |      |      |      |tablet|tablet|      |      |      |
-   |      |      |      |      | down |      |      |      |
-   |      |      |      |      |      |------+------+------|
-   |      |      |      |      |      |     desktop         |
-```
-
-#### Custom Media Queries Used
-
-- `--small-mobile` - max-width: 479px
-- `--compact-mobile` - max-width: 600px
-- `--mobile` - max-width: 767px
-- `--tablet` - min-width: 768px
-- `--tablet-only` - 768px to 991px
-- `--tablet-down` - max-width: 991px
-- `--desktop` - min-width: 992px
-- `--desktop-down` - max-width: 1023px
-
-### Column Hiding per Table (Mobile <480px)
-
-| Table | Hidden Columns | Visible Columns |
-|-------|---------------|-----------------|
-| Leads | Company (3), Email (4) | Checkbox, Project, Lead(name), Type, Budget, Status, Date, Actions |
-| Clients | Email (4), Created (8) | Checkbox, Client, Type, Projects, Status, Actions |
-| Contacts | Company (4) | Contact, Message, Status, Date |
-| Projects | Type (3), Timeline (5), Start (6), End (7) | Checkbox, Project, Budget, Status |
-| Invoices | None configured | All columns (horizontal scroll) |
-| Proposals | None configured | All columns (horizontal scroll) |
-| Time Tracking | None configured | All columns (horizontal scroll) |
-| Document Requests | None configured | All columns (horizontal scroll) |
-| Knowledge Base | None configured | All columns (horizontal scroll) |
-| Visitors | None configured | All columns (horizontal scroll) |
-| Project Files | None configured | All columns (horizontal scroll) |
-| Project Invoices | None configured | All columns (horizontal scroll) |
-
-### Mobile-Specific Behavior
-
-- **No card/list transformation** - Tables remain as tables; columns hide instead
-- **Horizontal scroll** enabled via `.admin-table-scroll-wrapper` with `overflow-x: auto`
-- **iOS momentum scrolling** via `-webkit-overflow-scrolling: touch`
-- **Scroll gradient indicator** on right edge (fades when not scrollable)
-- **Min-width:** 800px desktop, 400px mobile
-- **Pagination hides:** Page size selector and page number buttons on mobile (<768px)
-- **Bulk toolbar:** Changes from grid to flex-column layout on mobile
-- **Title variants:** `.title-full` hidden / `.title-mobile` shown on mobile
-- **Checkbox column:** Hidden on small mobile
-- **Filter controls:** Wrap to full width, search expands to fill row
-
-### CSS File Locations
-
-| File | Purpose | Approx Lines |
-|------|---------|-------------|
-| `src/styles/pages/admin.css` | Main table + admin page styles | ~2922 |
-| `src/styles/admin/table-features.css` | Pagination, bulk actions, export | ~410 |
-| `src/styles/shared/portal-cards.css` | Card/stat grid layouts | - |
-| `src/styles/shared/portal-layout.css` | Layout and spacing | - |
-| `src/styles/shared/portal-components.css` | Shared components | - |
-| `src/styles/shared/portal-dropdown.css` | Portal dropdown styles | - |
-| `src/styles/variables.css` | CSS variables + breakpoints | - |
-| `src/design-system/tokens/breakpoints.css` | Responsive utility classes | - |
-| `src/design-system/tokens/colors.css` | Color system | - |
-
----
-
-## Comparison Matrix
-
-### Feature Support by Table
-
-| Feature | Leads | Clients | Contacts | Projects | Invoices | Proposals | Time | Doc Requests | KB Arts | Visitors |
-|---------|:-----:|:-------:|:--------:|:--------:|:--------:|:---------:|:----:|:------------:|:-------:|:--------:|
-| Checkboxes | ✓ | ✓ | - | ✓ | ✓ | ✓ | - | ✓ | - | - |
-| Bulk Actions | ✓ (3) | ✓ (2) | - | ✓ (3) | ✓ (3) | ✓ (2) | - | ✓ (2) | - | - |
-| Pagination | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | ✓ | - |
-| Search | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | ✓ | - |
-| Status Filter | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | - | - |
-| Date Filter | ✓ | ✓ | ✓ | ✓ | ✓ | - | - | ✓ | - | - |
-| Sortable Cols | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - |
-| Status Dropdown | ✓ | - | ✓ | ✓ | - | - | - | - | - | - |
-| CSV Export | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - |
-| Row Click Nav | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | - | - |
-| Dual View | ✓ (Kanban) | - | - | - | - | - | - | - | - | - |
-| Identity Cell | ✓ | ✓ | ✓ | ✓ | - | - | - | - | - | - |
-| Email Copy | ✓ | ✓ | ✓ | - | - | - | - | - | - | - |
-| Column Hiding | ✓ | ✓ | ✓ | ✓ | - | - | - | - | - | - |
-
-### Pagination Details
-
-| Table | Has Pagination | Default Size | Size Options | Storage Key |
-|-------|:--------------:|:------------:|:------------:|-------------|
-| Leads | ✓ | 25 | 10, 25, 50, 100 | `admin_leads_pagination` |
-| Clients | ✓ | 25 | 10, 25, 50, 100 | `admin_clients_pagination` |
-| Contacts | ✓ | 25 | 10, 25, 50, 100 | `admin_contacts_pagination` |
-| Projects | ✓ | 25 | 10, 25, 50, 100 | `admin_projects_pagination` |
-| Invoices | ✓ | 25 | 10, 25, 50, 100 | `admin_invoices_pagination` |
-| Proposals | ✓ | 25 | 10, 25, 50, 100 | `admin_proposals_pagination` |
-| Time Tracking | - | - | - | - |
-| Doc Requests | ✓ | 25 | 10, 25, 50, 100 | `admin_document_requests_pagination` |
-| KB Articles | ✓ | 25 | 10, 25, 50, 100 | `admin_kb_articles_pagination` |
-
-### All Backend API Endpoints
-
-#### Leads
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/admin/leads` | Load all leads with stats |
-| PUT | `/api/leads/{id}` | Update single lead |
-| POST | `/api/admin/leads/:id/status` | Update single lead status |
-| POST | `/api/admin/leads/:id/assign` | Assign lead to user |
-| POST | `/api/admin/leads/:id/move-stage` | Move lead to pipeline stage |
-| POST | `/api/admin/leads/bulk/status` | Bulk update status |
-| POST | `/api/admin/leads/bulk/assign` | Bulk assign leads |
-| POST | `/api/admin/leads/bulk/move-stage` | Bulk move to stage |
-| POST | `/api/leads/{id}/convert-to-project` | Convert to project |
-| GET | `/api/admin/leads/:id/duplicates` | Find duplicate leads |
-| GET | `/api/admin/leads/duplicates` | Get all pending duplicates |
-| POST | `/api/admin/leads/duplicates/:id/resolve` | Resolve duplicate |
-| GET | `/api/admin/leads/analytics` | Get lead analytics |
-| GET | `/api/admin/leads/conversion-funnel` | Get conversion funnel |
-| GET | `/api/admin/leads/source-performance` | Get source performance |
-| GET | `/api/admin/leads/scoring-rules` | Get scoring rules |
-| POST | `/api/admin/leads/scoring-rules` | Create scoring rule |
-| PUT | `/api/admin/leads/scoring-rules/:id` | Update scoring rule |
-| DELETE | `/api/admin/leads/scoring-rules/:id` | Delete scoring rule |
-| POST | `/api/admin/leads/:id/calculate-score` | Calculate lead score |
-| POST | `/api/admin/leads/recalculate-all` | Recalculate all scores |
-| GET | `/api/admin/leads/pipeline/stages` | Get pipeline stages |
-| GET | `/api/admin/leads/pipeline` | Get pipeline data |
-| GET | `/api/admin/leads/pipeline/stats` | Get pipeline statistics |
-| GET | `/api/admin/leads/my-leads` | Get assigned leads |
-| GET | `/api/admin/leads/unassigned` | Get unassigned leads |
-| POST | `/api/admin/leads/:id/tasks` | Add task |
-| GET | `/api/admin/leads/:id/tasks` | Get tasks |
-| POST | `/api/admin/leads/:id/notes` | Add note |
-| GET | `/api/admin/leads/:id/notes` | Get notes |
-
-#### Contacts
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/admin/contact-submissions` | Get all contact submissions |
-| PUT | `/api/admin/contact-submissions/{id}` | Update contact status |
-| POST | `/api/admin/convert-contact-to-client` | Convert contact to client |
-
-#### Clients
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/clients` | Get all clients |
-| GET | `/api/clients/{id}` | Get single client |
-| POST | `/api/clients` | Create client |
-| PUT | `/api/clients/{id}` | Update client |
-| DELETE | `/api/clients/{id}` | Delete client |
-| GET | `/api/clients/{id}/projects` | Get client projects |
-| GET | `/api/clients/{id}/invoices` | Get client invoices |
-| PUT | `/api/admin/clients/{id}/billing` | Update billing info |
-| POST | `/api/admin/clients/{id}/send-invitation` | Send invitation |
-| POST | `/api/admin/clients/bulk/archive` | Bulk archive |
-| DELETE | `/api/admin/clients/bulk/delete` | Bulk delete |
-
-#### Projects
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/admin/projects` | Get all projects |
-| POST | `/api/admin/projects` | Create project |
-| GET | `/api/admin/projects/{id}` | Get single project |
-| PUT | `/api/projects/{id}` | Update project |
-| DELETE | `/api/projects/{id}` | Delete project |
-| POST | `/api/projects/{id}/milestones` | Add milestone |
-| DELETE | `/api/projects/{id}/files/{fileId}` | Delete file |
-
-#### Invoices
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/invoices` | Get all invoices |
-| POST | `/api/invoices` | Create invoice |
-| GET | `/api/invoices/{id}` | Get single invoice |
-| PUT | `/api/invoices/{id}` | Update invoice |
-| DELETE | `/api/invoices/{id}` | Delete invoice |
-
-#### Proposals
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/proposals` | Load proposals |
-| PUT | `/api/proposals/{id}` | Update proposal |
-| DELETE | `/api/proposals/{id}` | Delete proposal |
-
-#### Document Requests
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/document-requests` | Load requests |
-| POST | `/api/document-requests/{id}/review` | Start review |
-| PUT | `/api/document-requests/{id}` | Update (status, notes) |
-| POST | `/api/document-requests/{id}/remind` | Send reminder |
-| DELETE | `/api/document-requests/{id}` | Delete request |
-| POST | `/api/document-requests/bulk/remind` | Send bulk reminders |
-
-#### Knowledge Base
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/kb-categories` | Load categories |
-| GET | `/api/kb-articles` | Load articles |
-| PUT | `/api/kb-categories/{id}` | Update category |
-| DELETE | `/api/kb-categories/{id}` | Delete category |
-| PUT | `/api/kb-articles/{id}` | Update article |
-| DELETE | `/api/kb-articles/{id}` | Delete article |
-
----
-
-## Shared vs Custom Components
-
-### Fully Shared (reusable utilities)
-
-- `createFilterUI()` - Search, status filter, date range
-- `createPaginationUI()` - Page controls + per-page dropdown
-- `createBulkActionToolbar()` - Selection + action buttons
-- `createTableDropdown()` - Status dropdown in cells
-- `createSortableHeaders()` - Column header sort behavior
-- `exportToCsv()` / `exportToJson()` - Data export
-- `getStatusBadgeHTML()` - Status badge rendering
-- `getPortalCheckboxHTML()` - Custom checkbox
-- `getEmailWithCopyHtml()` - Email with copy button
-- `showTableLoading()` / `showTableEmpty()` / `showTableError()` - State displays
-- `confirmDialog()` / `confirmDanger()` / `multiPromptDialog()` - Confirmation dialogs
-
-### Custom Per Table
-
-- **HTML table structure** (columns, row rendering) - Each module builds its own
-- **Column definitions** - Hardcoded in each module's render function
-- **Row click handlers** - Custom per module
-- **Action button configurations** - Custom per module
-- **Filter/Pagination/Bulk config objects** - Custom per module but use shared interfaces
-
-### Pre-Configured Export Configs
-
-| Config Constant | Module | Exported Columns |
-|----------------|--------|-----------------|
-| `CLIENTS_EXPORT_CONFIG` | Clients | ID, Contact Name, Email, Company, Type, Phone, Status, Projects, Health Score, Created, Billing fields |
-| `LEADS_EXPORT_CONFIG` | Leads | ID, Contact Name, Email, Company, Project Type, Budget, Timeline, Status, Source, Phone, Description, Features, Lead Score, Created |
-| `PROJECTS_EXPORT_CONFIG` | Projects | ID, Name, Client, Company, Type, Status, Budget, Timeline, Start, End, Created |
-| `CONTACTS_EXPORT_CONFIG` | Contacts | ID, Name, Email, Company, Phone, Status, Message, Created |
-| `INVOICES_EXPORT_CONFIG` | Invoices | ID, Invoice Number, Client, Project, Status, Total Amount, Due Date, Paid Date, Created |
-| `PROPOSALS_EXPORT_CONFIG` | Proposals | ID, Client Name, Company, Email, Project Name, Type, Tier, Final Price, Status, Maintenance, Created |
-| `DOCUMENT_REQUESTS_EXPORT_CONFIG` | Doc Requests | ID, Title, Client, Type, Status, Due Date, Created |
-| `KNOWLEDGE_BASE_EXPORT_CONFIG` | Knowledge Base | ID, Title, Category, Slug, Featured, Published, Updated |
-
-### State Management Pattern
-
-All tables follow the same state pattern:
-
-- **Data:** Module-level variable (e.g., `leadsData`, `clientsData`)
-- **Filter state:** `FilterState` object persisted to localStorage
-- **Pagination state:** `PaginationState` object, pageSize persisted to localStorage
-- **Selection state:** In-memory via `getSelectionState(tableId)`
-- **View preference:** localStorage (leads only - table vs pipeline)
-
-### Loading / Empty / Error States
-
-- `showTableLoading(container, colCount, message)` - Spinner while fetching
-- `showTableEmpty(container, colCount, message)` - "No items found" message
-- `showTableError(container, colCount, message)` - Error message display
-- Loading row: centered, italic, 32px padding
-- Pagination buttons disabled at boundaries
-- Action buttons disabled during async operations
-
-### Accessibility
-
-- Checkboxes: `aria-label="Select all rows"`, `aria-label="Select row"`
-- Dropdowns: `aria-label="Change status, current: {value}"`
-- Buttons: `aria-label="View"`, `aria-label="Edit"`, etc.
-- Pagination: `aria-label="Page X"`, `aria-label="Go to first page"`, etc.
-- Escape key closes dropdowns and modals
-- Enter key on search closes search dropdown
-- Tab navigation through pagination and action buttons
-
-### Server-Side vs Client-Side
-
-- **All pagination:** Client-side only (backend returns all data at once)
-- **All filtering:** Client-side only
-- **All sorting:** Client-side only
-- **Bulk operations:** Server-side endpoints exist for status updates, archive, delete
-- **No server-side pagination, filtering, or sorting**
-
----
-
-## Cross-Table Consistency Analysis
-
-**Status:** All major consistency issues have been resolved as of February 2026.
-
-### Completed Fixes
-
-| Tier | Issue | Status |
-|------|-------|--------|
-| 1 | Shared infrastructure adoption (Invoices, Proposals, Time Tracking) | ✓ Complete |
-| 2 | Toolbar button order standardized | ✓ Complete |
-| 3 | Dead UI wired (Leads export, Invoices bulk actions) | ✓ Complete |
-| 4 | Feature parity (pagination, search, sort added to all tables) | ✓ Complete |
-| 5 | HTML structure (tbody IDs, card IDs, loading rows) | ✓ Complete |
-| 6 | Empty state messages standardized | ✓ Complete |
-| 7 | Loading states use `showTableLoading()` | ✓ Complete |
-| 8 | Notifications standardized to `showToast()` | ✓ Complete |
-| 9 | Export configs documented | ✓ Complete |
-| 10 | Filter configs (added missing search fields) | ✓ Complete |
-| 13 | localStorage key naming (`admin_knowledge_base_filter`) | ✓ Complete |
-| 14 | Empty value display (`-` instead of blank) | ✓ Complete |
-| 15 | Action button classes (`icon-btn` standardized) | ✓ Complete |
-| 16 | Row click navigation added to Proposals | ✓ Complete |
-| 17 | Icon sizes standardized to 16px | ✓ Complete |
-
-### Deferred Items (Low Priority)
-
-| Item | Reason Deferred |
-|------|-----------------|
-| Stat cards for Contacts/Document Requests | Filter dropdowns provide equivalent functionality |
-| `.admin-table-card` wrapper for Visitors table | Low priority styling consistency |
-| DOM caching pattern unification | Current patterns (createDOMCache, Map, el()) all work correctly |
-| Detail view pattern standardization | Intentional variation (side panel, tab, modal) based on context |
-
-### Intentional Differences (Not Inconsistencies)
-
-| Item | Reason |
-|------|--------|
-| KB uses `updated_at` for date filter | Articles care about last update, not creation |
-| Proposals uses camelCase in export | API returns camelCase data |
-| Time Tracking has no bulk actions | Per-project entries, bulk operations not meaningful |
-| Contacts has no checkboxes | Form submissions don't need bulk operations |
-| KB Categories has no export | Too few rows to warrant export |
-
-### Standard Patterns Reference
-
-**Toolbar Button Order:**
-
-```text
-Search → Filter → View Toggle → Export → Refresh → Add (last)
-```
-
-**Empty State Messages:**
-
-- Zero data: "No {entity} yet."
-- Filtered empty: "No {entity} match the current filters."
-
-**Notification Pattern:**
-
-```typescript
-showToast('Success message', 'success');
-showToast('Error message', 'error');
-showToast('Warning message', 'warning');
-```
-
-**Variable Naming:**
-
-```typescript
-let filterState: FilterState = loadFilterState(CONFIG.storageKey);
-let paginationState: PaginationState = { ...getDefaultPaginationState(CONFIG), ...loadPaginationState(CONFIG.storageKey!) };
-```

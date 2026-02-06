@@ -2809,6 +2809,47 @@ Manually trigger the overdue invoice check (also runs automatically via schedule
 }
 ```
 
+### POST `/api/invoices/export-batch`
+
+Export multiple invoices as a ZIP file containing PDFs.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "invoiceIds": [1, 2, 3, 4, 5]
+}
+```
+
+**Response:** Binary ZIP file stream
+
+**Response Headers:**
+
+```http
+Content-Type: application/zip
+Content-Disposition: attachment; filename="invoices-1707234567890.zip"
+```
+
+**ZIP Contents:**
+
+- Individual PDF files named by invoice number (e.g., `INV-000001.pdf`)
+- `manifest.json` with export summary
+
+**Limits:**
+
+- Maximum 100 invoices per request
+
+**Error Response (400):**
+
+```json
+{
+  "error": "invoiceIds must be a non-empty array",
+  "code": "INVALID_INPUT"
+}
+```
+
 ---
 
 ## Advanced Invoice Features

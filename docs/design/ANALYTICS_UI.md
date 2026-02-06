@@ -11,7 +11,7 @@
 
 The current Analytics page is a long single-scroll layout with two floating section headers ("Business Metrics" and "Visitor Analytics") that appear as standalone text divs without clear visual connection to their content blocks.
 
-#### Current Structure (top to bottom):
+#### Current Structure (top to bottom)
 
 1. KPI Cards (Revenue, Pipeline, Projects, Invoices)
 2. **"Business Metrics"** header ← floating text
@@ -26,7 +26,7 @@ The current Analytics page is a long single-scroll layout with two floating sect
 11. Analytics Data Grid (Popular Pages, Device, Geo, Engagement)
 12. Core Web Vitals
 
-#### Issues:
+#### Issues
 
 - Section headers are disconnected from their content
 - Long scroll with no navigation
@@ -42,7 +42,7 @@ The System tab currently shows:
 - Build Information (version, environment, build date)
 - Browser Information (user agent, screen, viewport)
 
-#### Issues:
+#### Issues
 
 - Purpose unclear to end users
 - Mix of developer debug info and system health
@@ -68,7 +68,7 @@ Split content into logical sub-tabs within the Analytics page.
 └─────────────────────────────────────────────────────────────┘
 ```
 
-#### Tab Contents:
+#### Tab Contents
 
 |Tab|Content|
 |-----|---------|
@@ -77,14 +77,14 @@ Split content into logical sub-tabs within the Analytics page.
 |**Visitors**|Site breakdown, Visitors Over Time, Traffic Sources, Popular Pages, Device, Geo, Engagement|
 |**Reports & Alerts**|Saved Reports, Scheduled Reports, Metric Alerts, Core Web Vitals|
 
-##### Pros:
+##### Pros
 
 - Clear organization
 - Quick navigation to specific info
 - Reuses existing tab component
 - Each tab is focused and scannable
 
-##### Cons:
+##### Cons
 
 - Requires clicking to see all data
 - Overview may duplicate some info
@@ -116,13 +116,13 @@ Keep single page but wrap each major section in a collapsible accordion.
 └─────────────────────────────────────────────────────────────┘
 ```
 
-##### Pros:
+#### Pros
 
 - Everything on one page
 - User controls what they see
 - Sections clearly grouped
 
-##### Cons:
+#### Cons
 
 - Still a single long page when all expanded
 - Extra clicks to expand each section
@@ -182,7 +182,7 @@ Reorganize into a dashboard-style grid where related items sit together visually
 
 ### Recommendation: Option A (Sub-Tabs)
 
-#### Rationale:
+#### Rationale
 
 1. Consistent with existing portal patterns (tabs used throughout)
 2. Each tab can be focused and complete
@@ -232,13 +232,13 @@ Keep the tab but add actionable admin items:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-##### Pros
+#### Pros
 
 - Gives admins useful info
 - Health checks are actionable
 - Quick actions provide value
 
-##### Cons
+#### Cons
 
 - Requires backend endpoints for health/actions
 
@@ -252,13 +252,13 @@ Move system info to a "Settings" or "Account" area accessible via user menu, not
 User Menu → Settings → System Info
 ```
 
-##### Pros
+#### Pros
 
 - Declutters main navigation
 - System info is "settings-adjacent"
 - Main tabs focused on daily work
 
-##### Cons
+#### Cons
 
 - Less discoverable
 - May still need quick access to health status

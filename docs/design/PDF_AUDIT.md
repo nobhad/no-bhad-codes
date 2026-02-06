@@ -27,7 +27,7 @@
 - [Security & Authorization](#security--authorization)
 - [Error Handling](#error-handling)
 - [File Download Mechanisms](#file-download-mechanisms)
-- [Concerns & Improvements](#concerns--improvements)
+- [Current State](#current-state)
 
 ---
 
@@ -289,7 +289,7 @@ Content-Disposition: inline; filename="INV-2026-001.pdf"
 
 | Table | Fields Used |
 |-------|-------------|
-| `invoices` | id, invoice_number, issued_date, due_date, project_id, amount, tax, discount, status, notes, terms, line_items (JSON), is_deposit, deposit_percentage |
+| `invoices` | id, invoice_number, issued_date, due_date, project_id, client_id, amount_total, tax, discount, status, notes, terms, line_items (JSON), is_deposit, deposit_percentage |
 | `projects` | id, client_id |
 | `clients` | id, name, email, company, address, city, state, zip, phone |
 
@@ -846,7 +846,7 @@ const LINE_HEIGHT_SMALL = 9;
 | `  - nested` | Nested bullet (indented up to 30px) |
 | `- [x] item` | Checked checkbox (interactive form field) |
 | `- [ ] item` | Unchecked checkbox (interactive form field) |
-| `| table |` | Table with borders and styled cells |
+| `\| table \|` | Table with borders and styled cells |
 | `**Signature:** ____` | Signature line (drawn line, no form field) |
 | `**Printed Name:** ____` | Text field with invisible border over underline |
 | `**Date:** ____` | Date field with invisible border over underline |
@@ -1154,10 +1154,10 @@ page.drawImage(logoImage, { x, y, width: logoWidth, height: logoHeight });
 | `BUSINESS_OWNER` | 'Noelle Bhaduri' | All PDFs |
 | `BUSINESS_CONTACT` | 'Noelle Bhaduri' | All PDFs |
 | `BUSINESS_TAGLINE` | 'Web Development & Design' | All PDFs |
-| `BUSINESS_EMAIL` | 'nobhaduri@gmail.com' | All PDFs |
+| `BUSINESS_EMAIL` | `'nobhaduri@gmail.com'` | All PDFs |
 | `BUSINESS_WEBSITE` | 'nobhad.codes' | All PDFs |
 | `VENMO_HANDLE` | '@nobhaduri' | Invoice PDF |
-| `ZELLE_EMAIL` | 'nobhaduri@gmail.com' | Invoice PDF |
+| `ZELLE_EMAIL` | `'nobhaduri@gmail.com'` | Invoice PDF |
 | `PAYPAL_EMAIL` | '' (empty) | Invoice PDF (optional) |
 
 ### Usage in Code
@@ -1250,7 +1250,7 @@ res.setHeader('X-PDF-Cache', 'MISS');
 
 ### Multi-Page Support Utilities
 
-Helpers for automatic page breaks and content flow.
+Helpers for automatic page breaks and content flow. **Now integrated into `invoices.ts` and `proposals.ts` (Feb 2026).**
 
 **Page Dimensions:**
 
@@ -1425,41 +1425,36 @@ res.setHeader('Content-Disposition', `${disposition}; filename="${filename}"`);
 
 ---
 
-## Concerns & Improvements
+## Current State
 
-### Resolved Issues (Feb 2026)
+### Architecture
 
-| # | Issue | Resolution |
-|---|-------|------------|
-| 1 | pdfkit installed but unused | Removed from package.json |
-| 2 | BUSINESS_INFO defined separately in each file | Consolidated to `server/config/business.ts` |
-| 3 | Website default inconsistent | Fixed: all files now use `nobhad.codes` |
-| 4 | Logo fallback paths hardcoded | Centralized to `getPdfLogoBytes()` in business.ts |
-| 5 | Line item details not word-wrapped | Added word wrapping in invoices.ts |
-| 6 | Contract terms hardcoded | Moved to `CONTRACT_TERMS` in business.ts (env configurable) |
-| 7 | No PDF caching | Added in-memory caching via `server/utils/pdf-utils.ts` (TTL-based, LRU eviction) |
-| 8 | No multi-page support utilities | Added helpers in `pdf-utils.ts` (createPdfContext, ensureSpace, drawWrappedText) |
-| 9 | No PDF/A metadata utilities | Added `setPdfMetadata()` helper in `pdf-utils.ts` |
+| Area | Implementation |
+|------|----------------|
+| PDF Library | pdf-lib (pure JS, no pdfkit) |
+| Business Info | Centralized in `server/config/business.ts` |
+| Logo Loading | `getPdfLogoBytes()` helper with fallback paths |
+| Line Item Wrapping | Word wrapping implemented in invoices.ts |
+| Contract Terms | Configurable via `CONTRACT_TERMS` in business.ts |
+| Caching | TTL-based in-memory cache via `server/utils/pdf-utils.ts` |
+| Multi-page Support | Integrated: invoices.ts and proposals.ts use `PdfPageContext`, `ensureSpace()`, `addPageNumbers()` |
+| Metadata | `setPdfMetadata()` helper for PDF/A compliance |
 
-### Current Issues
+### Open Issues
 
 | # | Issue | Severity | Location |
 |---|-------|----------|----------|
-| 1 | Multi-page support not integrated | Low | Helpers exist but not wired into all PDFs |
-| 2 | Full PDF/A-1b compliance | Low | Would require XMP metadata library |
+| 1 | Full PDF/A-1b compliance | Low | Would require XMP metadata library |
 
 ### Potential Improvements
 
 | # | Improvement | Priority | Notes |
 |---|-------------|----------|-------|
-| 1 | Integrate multi-page helpers into PDFs | Low | Use ensureSpace() for long invoices/contracts |
-| 2 | Add page overflow handling | Medium | Auto-add pages for long content |
-| 3 | Batch PDF generation for bulk export | Medium | Export multiple invoices as ZIP |
-| 4 | Add watermark for draft/preview PDFs | Low | Visual indicator for unpaid invoices |
-| 5 | Implement PDF/A for long-term archival | Low | May be overkill for current use case |
-| 6 | Add PDF password protection option | Low | For sensitive documents |
-| 7 | Add PDF thumbnails/previews | Low | Show preview before download |
-| 8 | Add digital signature support | Low | For legally binding contracts |
+| 1 | Add watermark for draft/preview PDFs | Low | Visual indicator for unpaid invoices |
+| 2 | Implement PDF/A for long-term archival | Low | May be overkill for current use case |
+| 3 | Add PDF password protection option | Low | For sensitive documents |
+| 4 | Add PDF thumbnails/previews | Low | Show preview before download |
+| 5 | Add digital signature support | Low | For legally binding contracts |
 
 ### Testing Endpoints
 
@@ -1479,7 +1474,7 @@ res.setHeader('Content-Disposition', `${disposition}; filename="${filename}"`);
 | `server/routes/proposals.ts` | ~250 (lines 605-851) | ~1316 |
 | `server/routes/projects.ts` | ~700 (lines 1327-1599, 2055-2468) | ~2500+ |
 | `scripts/markdown-to-pdf.ts` | 635 (entire file) | 635 |
-| **Total PDF Code** | **~2085 lines** | - |
+| **Total PDF Code** | **~2,085 lines** | - |
 
 ---
 

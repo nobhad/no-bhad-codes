@@ -11,6 +11,7 @@ import express from 'express';
 import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
 import { join } from 'path';
 import { existsSync, readFileSync } from 'fs';
+import archiver from 'archiver';
 import { asyncHandler } from '../middleware/errorHandler.js';
 
 /**
@@ -39,7 +40,16 @@ import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
 import { getString } from '../database/row-helpers.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
-import { getPdfCacheKey, getCachedPdf, cachePdf, setPdfMetadata } from '../utils/pdf-utils.js';
+import {
+  getPdfCacheKey,
+  getCachedPdf,
+  cachePdf,
+  setPdfMetadata,
+  PdfPageContext,
+  ensureSpace,
+  addPageNumbers,
+  PAGE_MARGINS
+} from '../utils/pdf-utils.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
 
@@ -535,7 +545,7 @@ interface InvoicePdfData {
 }
 
 /**
- * Generate invoice PDF using pdf-lib (matches template format)
+ * Generate invoice PDF using pdf-lib with multi-page support
  */
 async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   const pdfDoc = await PDFLibDocument.create();
@@ -546,28 +556,59 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   pdfDoc.setSubject('Invoice');
   pdfDoc.setCreator('NoBhadCodes');
 
-  const page = pdfDoc.addPage([612, 792]); // LETTER size
-  const { width, height } = page.getSize();
-
-  // Embed fonts
+  // Embed fonts first (needed for context)
   const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  // Layout constants (0.75 inch margins)
-  const leftMargin = 54;
-  const rightMargin = width - 54;
+  // Create multi-page context for overflow handling
+  const pageWidth = 612;
+  const pageHeight = 792;
+  const currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
+  const { width, height } = currentPage.getSize();
 
-  // Start from top - template uses 0.6 inch from top = 43.2pt
-  let y = height - 43;
+  // Build context object for ensureSpace helper
+  const ctx: PdfPageContext = {
+    pdfDoc,
+    currentPage,
+    pageNumber: 1,
+    y: height - 43, // Start position
+    width: pageWidth,
+    height: pageHeight,
+    leftMargin: PAGE_MARGINS.left,
+    rightMargin: pageWidth - PAGE_MARGINS.right,
+    topMargin: PAGE_MARGINS.top,
+    bottomMargin: PAGE_MARGINS.bottom,
+    contentWidth: pageWidth - PAGE_MARGINS.left - PAGE_MARGINS.right,
+    fonts: { regular: helvetica, bold: helveticaBold }
+  };
+
+  // Helper to get current page (may change on page break)
+  const page = () => ctx.currentPage;
+
+  // Helper to draw continuation header on new pages
+  const drawContinuationHeader = (context: PdfPageContext) => {
+    context.currentPage.drawText(`Invoice ${data.invoiceNumber} (continued)`, {
+      x: ctx.leftMargin,
+      y: context.y,
+      size: 10,
+      font: helvetica,
+      color: rgb(0.4, 0.4, 0.4)
+    });
+    context.y -= 20;
+  };
+
+  // Use context values for layout
+  const leftMargin = ctx.leftMargin;
+  const rightMargin = ctx.rightMargin;
 
   // === HEADER - Title on left, logo and business info on right ===
   const logoHeight = 100; // ~1.4 inch for prominent branding
 
   // INVOICE title on left: 28pt (same for all invoice types)
   const titleText = 'INVOICE';
-  page.drawText(titleText, {
+  page().drawText(titleText, {
     x: leftMargin,
-    y: y - 20,
+    y: ctx.y - 20,
     size: 28,
     font: helveticaBold,
     color: rgb(0.15, 0.15, 0.15)
@@ -580,9 +621,9 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
     const logoImage = await pdfDoc.embedPng(logoBytes);
     const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
     const logoX = rightMargin - logoWidth - 150; // Logo position
-    page.drawImage(logoImage, {
+    page().drawImage(logoImage, {
       x: logoX,
-      y: y - logoHeight + 10,
+      y: ctx.y - logoHeight + 10,
       width: logoWidth,
       height: logoHeight
     });
@@ -590,47 +631,47 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   }
 
   // Business info (left-aligned, to right of logo)
-  page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y - 11, size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
-  page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 34, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
-  page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 54, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-  page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 70, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-  page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 86, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+  page().drawText(BUSINESS_INFO.name, { x: textStartX, y: ctx.y - 11, size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+  page().drawText(BUSINESS_INFO.owner, { x: textStartX, y: ctx.y - 34, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
+  page().drawText(BUSINESS_INFO.tagline, { x: textStartX, y: ctx.y - 54, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+  page().drawText(BUSINESS_INFO.email, { x: textStartX, y: ctx.y - 70, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+  page().drawText(BUSINESS_INFO.website, { x: textStartX, y: ctx.y - 86, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
 
-  y -= 120; // Account for 100pt logo height
+  ctx.y -= 120; // Account for 100pt logo height
 
   // === DIVIDER LINE ===
-  page.drawLine({
-    start: { x: leftMargin, y: y },
-    end: { x: rightMargin, y: y },
+  page().drawLine({
+    start: { x: leftMargin, y: ctx.y },
+    end: { x: rightMargin, y: ctx.y },
     thickness: 1,
     color: rgb(0.7, 0.7, 0.7)
   });
-  y -= 21;
+  ctx.y -= 21;
 
   // === BILL TO (left) and INVOICE DETAILS (right) ===
   const detailsX = width / 2 + 36;
 
   // Left side - BILL TO:
-  page.drawText('BILL TO:', {
+  page().drawText('BILL TO:', {
     x: leftMargin,
-    y: y,
+    y: ctx.y,
     size: 11,
     font: helveticaBold,
     color: rgb(0.2, 0.2, 0.2)
   });
 
   // Client name (bold)
-  page.drawText(data.clientName, {
+  page().drawText(data.clientName, {
     x: leftMargin,
-    y: y - 14,
+    y: ctx.y - 14,
     size: 10,
     font: helveticaBold,
     color: rgb(0, 0, 0)
   });
 
-  let clientLineY = y - 25;
+  let clientLineY = ctx.y - 25;
   if (data.clientCompany) {
-    page.drawText(data.clientCompany, {
+    page().drawText(data.clientCompany, {
       x: leftMargin,
       y: clientLineY,
       size: 10,
@@ -641,7 +682,7 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   }
 
   if (data.clientAddress) {
-    page.drawText(data.clientAddress, {
+    page().drawText(data.clientAddress, {
       x: leftMargin,
       y: clientLineY,
       size: 10,
@@ -652,7 +693,7 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   }
 
   if (data.clientCityStateZip) {
-    page.drawText(data.clientCityStateZip, {
+    page().drawText(data.clientCityStateZip, {
       x: leftMargin,
       y: clientLineY,
       size: 10,
@@ -662,7 +703,7 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
     clientLineY -= 11;
   }
 
-  page.drawText(data.clientEmail, {
+  page().drawText(data.clientEmail, {
     x: leftMargin,
     y: clientLineY,
     size: 10,
@@ -672,7 +713,7 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   clientLineY -= 11;
 
   if (data.clientPhone) {
-    page.drawText(data.clientPhone, {
+    page().drawText(data.clientPhone, {
       x: leftMargin,
       y: clientLineY,
       size: 10,
@@ -684,63 +725,67 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   // Right side - Invoice details
   const drawRightAligned = (text: string, yPos: number, font: typeof helvetica, size: number) => {
     const w = font.widthOfTextAtSize(text, size);
-    page.drawText(text, { x: rightMargin - w, y: yPos, size, font, color: rgb(0, 0, 0) });
+    page().drawText(text, { x: rightMargin - w, y: yPos, size, font, color: rgb(0, 0, 0) });
   };
 
-  page.drawText('INVOICE #:', { x: detailsX, y: y, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
-  drawRightAligned(data.invoiceNumber, y, helvetica, 9);
+  page().drawText('INVOICE #:', { x: detailsX, y: ctx.y, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+  drawRightAligned(data.invoiceNumber, ctx.y, helvetica, 9);
 
-  page.drawText('INVOICE DATE:', { x: detailsX, y: y - 14, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
-  drawRightAligned(data.issuedDate, y - 14, helvetica, 9);
+  page().drawText('INVOICE DATE:', { x: detailsX, y: ctx.y - 14, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+  drawRightAligned(data.issuedDate, ctx.y - 14, helvetica, 9);
 
-  page.drawText('DUE DATE:', { x: detailsX, y: y - 28, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
-  drawRightAligned(data.dueDate || 'Upon Receipt', y - 28, helvetica, 9);
+  page().drawText('DUE DATE:', { x: detailsX, y: ctx.y - 28, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+  drawRightAligned(data.dueDate || 'Upon Receipt', ctx.y - 28, helvetica, 9);
 
   if (data.projectId) {
-    page.drawText('PROJECT #:', { x: detailsX, y: y - 42, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
-    drawRightAligned(`#${data.projectId}`, y - 42, helvetica, 9);
+    page().drawText('PROJECT #:', { x: detailsX, y: ctx.y - 42, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+    drawRightAligned(`#${data.projectId}`, ctx.y - 42, helvetica, 9);
   }
 
-  y -= 90;
+  ctx.y -= 90;
 
   // === LINE ITEMS TABLE ===
   // Header background
-  page.drawRectangle({
+  page().drawRectangle({
     x: leftMargin,
-    y: y - 2,
+    y: ctx.y - 2,
     width: rightMargin - leftMargin,
     height: 18,
     color: rgb(0.25, 0.25, 0.25)
   });
 
   // Header text (white)
-  page.drawText('DESCRIPTION', { x: leftMargin + 7, y: y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
-  page.drawText('QTY', { x: rightMargin - 144, y: y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
-  page.drawText('RATE', { x: rightMargin - 94, y: y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
+  page().drawText('DESCRIPTION', { x: leftMargin + 7, y: ctx.y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
+  page().drawText('QTY', { x: rightMargin - 144, y: ctx.y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
+  page().drawText('RATE', { x: rightMargin - 94, y: ctx.y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
   const amountLabel = 'AMOUNT';
   const amountLabelW = helveticaBold.widthOfTextAtSize(amountLabel, 10);
-  page.drawText(amountLabel, { x: rightMargin - 7 - amountLabelW, y: y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
+  page().drawText(amountLabel, { x: rightMargin - 7 - amountLabelW, y: ctx.y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
 
-  y -= 22;
+  ctx.y -= 22;
 
-  // Line items
+  // Line items - with page break detection
   for (const item of data.lineItems) {
+    // Check for page break before each line item (need ~60pt for item + details)
+    const estimatedItemHeight = 14 + (item.details?.length || 0) * 11 + 7;
+    ensureSpace(ctx, estimatedItemHeight, drawContinuationHeader);
+
     // Description (bold) - 7pt padding to align with header
-    page.drawText(item.description, { x: leftMargin + 7, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    page().drawText(item.description, { x: leftMargin + 7, y: ctx.y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
 
     // Quantity
-    page.drawText(String(item.quantity), { x: rightMargin - 144, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page().drawText(String(item.quantity), { x: rightMargin - 144, y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
 
     // Rate
     const rateText = `$${item.rate.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-    page.drawText(rateText, { x: rightMargin - 94, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page().drawText(rateText, { x: rightMargin - 94, y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
 
     // Amount (right-aligned, bold)
     const amountText = `$${item.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     const amountW = helveticaBold.widthOfTextAtSize(amountText, 10);
-    page.drawText(amountText, { x: rightMargin - amountW, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    page().drawText(amountText, { x: rightMargin - amountW, y: ctx.y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
 
-    y -= 14;
+    ctx.y -= 14;
 
     // Details (bullet points) - indented from description, with word wrapping
     if (item.details && item.details.length > 0) {
@@ -759,10 +804,12 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
           const testWidth = helvetica.widthOfTextAtSize(testLine, 9);
 
           if (testWidth > detailMaxWidth && line !== '• ') {
-            page.drawText(line, { x: detailStartX, y: y, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-            y -= detailLineHeight;
+            // Check for page break before drawing detail line
+            ensureSpace(ctx, detailLineHeight, drawContinuationHeader);
+            page().drawText(line, { x: detailStartX, y: ctx.y, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+            ctx.y -= detailLineHeight;
             // Continuation lines indent slightly more (no bullet)
-            line = isFirstLine ? '  ' + word : '  ' + word;
+            line = isFirstLine ? `  ${  word}` : `  ${  word}`;
             isFirstLine = false;
           } else {
             line = testLine;
@@ -770,76 +817,80 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
         }
         // Draw remaining text
         if (line && line !== '• ') {
-          page.drawText(line, { x: detailStartX, y: y, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-          y -= detailLineHeight;
+          ensureSpace(ctx, detailLineHeight, drawContinuationHeader);
+          page().drawText(line, { x: detailStartX, y: ctx.y, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+          ctx.y -= detailLineHeight;
         }
       }
-      y -= 7;
+      ctx.y -= 7;
     }
   }
 
   // === TOTALS SECTION ===
+  // Check for page break before totals (need ~150pt for complete totals section)
+  ensureSpace(ctx, 150, drawContinuationHeader);
+
   const totalsX = rightMargin - 144;
 
-  y -= 24; // Space above subtotal section
+  ctx.y -= 24; // Space above subtotal section
 
   // Line above subtotal (well above text)
-  page.drawLine({
-    start: { x: totalsX - 14, y: y + 18 },
-    end: { x: rightMargin, y: y + 18 },
+  page().drawLine({
+    start: { x: totalsX - 14, y: ctx.y + 18 },
+    end: { x: rightMargin, y: ctx.y + 18 },
     thickness: 0.5,
     color: rgb(0.7, 0.7, 0.7)
   });
 
   // Subtotal
-  page.drawText('Subtotal:', { x: totalsX, y: y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+  page().drawText('Subtotal:', { x: totalsX, y: ctx.y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
   const subtotalText = `$${data.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   const subtotalW = helvetica.widthOfTextAtSize(subtotalText, 10);
-  page.drawText(subtotalText, { x: rightMargin - subtotalW, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+  page().drawText(subtotalText, { x: rightMargin - subtotalW, y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
 
   // Discount (if any)
   if (data.discount && data.discount > 0) {
-    y -= 16;
-    page.drawText('Discount:', { x: totalsX, y: y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+    ctx.y -= 16;
+    page().drawText('Discount:', { x: totalsX, y: ctx.y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
     const discountText = `-$${data.discount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     const discountW = helvetica.widthOfTextAtSize(discountText, 10);
-    page.drawText(discountText, { x: rightMargin - discountW, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page().drawText(discountText, { x: rightMargin - discountW, y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
   }
 
   // Tax (if any)
   if (data.tax && data.tax > 0) {
-    y -= 16;
-    page.drawText('Tax:', { x: totalsX, y: y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+    ctx.y -= 16;
+    page().drawText('Tax:', { x: totalsX, y: ctx.y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
     const taxText = `$${data.tax.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     const taxW = helvetica.widthOfTextAtSize(taxText, 10);
-    page.drawText(taxText, { x: rightMargin - taxW, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page().drawText(taxText, { x: rightMargin - taxW, y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
   }
 
   // Credits applied (if any)
   if (data.credits && data.credits.length > 0) {
-    y -= 24;
+    ctx.y -= 24;
 
     // Credits section header
-    page.drawText('DEPOSIT CREDITS APPLIED:', { x: totalsX - 40, y: y, size: 9, font: helveticaBold, color: rgb(0.2, 0.5, 0.2) });
-    y -= 14;
+    page().drawText('DEPOSIT CREDITS APPLIED:', { x: totalsX - 40, y: ctx.y, size: 9, font: helveticaBold, color: rgb(0.2, 0.5, 0.2) });
+    ctx.y -= 14;
 
     // List each credit
     for (const credit of data.credits) {
       const creditLabel = `Deposit ${credit.depositInvoiceNumber}`;
-      page.drawText(creditLabel, { x: totalsX, y: y, size: 9, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+      page().drawText(creditLabel, { x: totalsX, y: ctx.y, size: 9, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
       const creditText = `-$${credit.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
       const creditW = helvetica.widthOfTextAtSize(creditText, 9);
-      page.drawText(creditText, { x: rightMargin - creditW, y: y, size: 9, font: helvetica, color: rgb(0.2, 0.5, 0.2) });
-      y -= 12;
+      page().drawText(creditText, { x: rightMargin - creditW, y: ctx.y, size: 9, font: helvetica, color: rgb(0.2, 0.5, 0.2) });
+      ctx.y -= 12;
     }
   }
 
-  y -= 32; // Space above total section
+  ctx.y -= 32; // Space above total section
 
   // Line above total (matching subtotal spacing: 18pt below line to text)
-  page.drawLine({
-    start: { x: totalsX - 14, y: y + 18 },
-    end: { x: rightMargin, y: y + 18 },
+  page().drawLine({
+    start: { x: totalsX - 14, y: ctx.y + 18 },
+    end: { x: rightMargin, y: ctx.y + 18 },
     thickness: 2,
     color: rgb(0.2, 0.2, 0.2)
   });
@@ -849,27 +900,30 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
 
   // TOTAL (or AMOUNT DUE if credits were applied)
   const totalLabel = data.totalCredits && data.totalCredits > 0 ? 'AMOUNT DUE:' : 'TOTAL:';
-  page.drawText(totalLabel, { x: totalsX, y: y, size: 14, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+  page().drawText(totalLabel, { x: totalsX, y: ctx.y, size: 14, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
   const totalText = `$${finalTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   const totalW = helveticaBold.widthOfTextAtSize(totalText, 16);
-  page.drawText(totalText, { x: rightMargin - totalW, y: y, size: 16, font: helveticaBold, color: rgb(0, 0, 0) });
+  page().drawText(totalText, { x: rightMargin - totalW, y: ctx.y, size: 16, font: helveticaBold, color: rgb(0, 0, 0) });
 
   // Amount Due label
   const amtDueText = 'Amount Due (USD)';
   const amtDueW = helvetica.widthOfTextAtSize(amtDueText, 9);
-  page.drawText(amtDueText, { x: rightMargin - amtDueW, y: y - 16, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+  page().drawText(amtDueText, { x: rightMargin - amtDueW, y: ctx.y - 16, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
 
-  y -= 50;
+  ctx.y -= 50;
 
   // === PAYMENT INSTRUCTIONS ===
-  page.drawText('PAYMENT INSTRUCTIONS', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
-  page.drawLine({
-    start: { x: leftMargin, y: y - 4 },
-    end: { x: leftMargin + 144, y: y - 4 },
+  // Check for page break before payment instructions
+  ensureSpace(ctx, 80, drawContinuationHeader);
+
+  page().drawText('PAYMENT INSTRUCTIONS', { x: leftMargin, y: ctx.y, size: 10, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
+  page().drawLine({
+    start: { x: leftMargin, y: ctx.y - 4 },
+    end: { x: leftMargin + 144, y: ctx.y - 4 },
     thickness: 0.5,
     color: rgb(0.7, 0.7, 0.7)
   });
-  y -= 18;
+  ctx.y -= 18;
 
   const paymentInstructions = [
     '• Payment due within 30 days of invoice date',
@@ -879,13 +933,13 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   ];
 
   for (const line of paymentInstructions) {
-    page.drawText(line, { x: leftMargin, y: y, size: 9, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
-    y -= 11;
+    page().drawText(line, { x: leftMargin, y: ctx.y, size: 9, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+    ctx.y -= 11;
   }
 
-  // === FOOTER ===
+  // === FOOTER (on last page only) ===
   // Footer separator line
-  page.drawLine({
+  page().drawLine({
     start: { x: leftMargin, y: 72 },
     end: { x: rightMargin, y: 72 },
     thickness: 0.5,
@@ -895,7 +949,7 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   // Thank you message
   const thankYouText = 'Thank you for your business!';
   const thankYouW = helvetica.widthOfTextAtSize(thankYouText, 10);
-  page.drawText(thankYouText, {
+  page().drawText(thankYouText, {
     x: (width - thankYouW) / 2,
     y: 54,
     size: 10,
@@ -906,13 +960,22 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   // Footer contact info
   const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
   const footerW = helvetica.widthOfTextAtSize(footerText, 7);
-  page.drawText(footerText, {
+  page().drawText(footerText, {
     x: (width - footerW) / 2,
     y: 36,
     size: 7,
     font: helvetica,
     color: rgb(0.5, 0.5, 0.5)
   });
+
+  // Add page numbers if multiple pages
+  if (ctx.pageNumber > 1) {
+    await addPageNumbers(pdfDoc, {
+      format: (p, t) => `Page ${p} of ${t}`,
+      fontSize: 8,
+      marginBottom: 20
+    });
+  }
 
   return await pdfDoc.save();
 }
@@ -4184,6 +4247,137 @@ router.post(
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
+  })
+);
+
+/**
+ * POST /api/invoices/export-batch
+ * Export multiple invoices as a ZIP file
+ * Body: { invoiceIds: number[] }
+ */
+router.post(
+  '/export-batch',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { invoiceIds } = req.body;
+
+    if (!Array.isArray(invoiceIds) || invoiceIds.length === 0) {
+      return res.status(400).json({
+        error: 'invoiceIds must be a non-empty array',
+        code: 'INVALID_INPUT'
+      });
+    }
+
+    if (invoiceIds.length > 100) {
+      return res.status(400).json({
+        error: 'Maximum 100 invoices can be exported at once',
+        code: 'TOO_MANY_INVOICES'
+      });
+    }
+
+    const db = getDatabase();
+    const invoiceService = getInvoiceService();
+
+    // Helper function to format date
+    const formatDate = (dateStr: string | undefined): string => {
+      if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    };
+
+    // Set up ZIP response
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="invoices-${Date.now()}.zip"`);
+
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    archive.on('error', (err) => {
+      console.error('[Invoices] ZIP archive error:', err);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Failed to create ZIP archive' });
+      }
+    });
+
+    archive.pipe(res);
+
+    let successCount = 0;
+    let errorCount = 0;
+    const errors: { id: number; error: string }[] = [];
+
+    for (const invoiceId of invoiceIds) {
+      try {
+        const invoice = await invoiceService.getInvoiceById(invoiceId);
+
+        // Get client info
+        const client = await db.get(
+          'SELECT contact_name, company_name, email, client_type FROM clients WHERE id = ?',
+          [invoice.clientId]
+        );
+
+        // Build line items
+        const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
+          ? invoice.lineItems.map((item: InvoiceLineItem) => ({
+            description: item.description || '',
+            quantity: item.quantity || 1,
+            rate: item.rate || item.amount || 0,
+            amount: item.amount || 0
+          }))
+          : [];
+
+        // Get credits
+        const invoiceCredits = await invoiceService.getInvoiceCredits(invoiceId);
+        const totalCredits = await invoiceService.getTotalCredits(invoiceId);
+
+        // Build PDF data
+        const pdfData: InvoicePdfData = {
+          invoiceNumber: invoice.invoiceNumber,
+          issuedDate: formatDate(invoice.issuedDate || invoice.createdAt),
+          dueDate: 'Within 14 days',
+          clientName: invoice.billToName || (client ? getString(client, 'contact_name') : '') || 'Client',
+          clientCompany: client ? getString(client, 'company_name') : '',
+          clientEmail: invoice.billToEmail || (client ? getString(client, 'email') : '') || '',
+          projectId: invoice.projectId,
+          lineItems,
+          subtotal: invoice.amountTotal || 0,
+          total: invoice.amountTotal || 0,
+          notes: invoice.notes,
+          terms: invoice.terms,
+          isDeposit: invoice.invoiceType === 'deposit',
+          depositPercentage: invoice.depositPercentage,
+          credits: invoiceCredits.map((c) => ({
+            depositInvoiceNumber: c.depositInvoiceNumber || `INV-${c.depositInvoiceId}`,
+            amount: c.amount
+          })),
+          totalCredits
+        };
+
+        // Generate PDF
+        const pdfBytes = await generateInvoicePdf(pdfData);
+
+        // Add to ZIP
+        archive.append(Buffer.from(pdfBytes), { name: `${invoice.invoiceNumber}.pdf` });
+        successCount++;
+      } catch (error) {
+        console.error(`[Invoices] Failed to generate PDF for invoice ${invoiceId}:`, error);
+        errorCount++;
+        errors.push({
+          id: invoiceId,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    }
+
+    // Add manifest file with export summary
+    const manifest = {
+      exportedAt: new Date().toISOString(),
+      totalRequested: invoiceIds.length,
+      successCount,
+      errorCount,
+      errors: errors.length > 0 ? errors : undefined
+    };
+    archive.append(JSON.stringify(manifest, null, 2), { name: 'manifest.json' });
+
+    await archive.finalize();
   })
 );
 
