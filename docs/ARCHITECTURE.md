@@ -145,7 +145,8 @@ no-bhad-codes/
 │   │   ├── message-service.ts        # Messaging, threads, subscriptions
 │   │   ├── project-service.ts        # Project management, tasks
 │   │   ├── proposal-service.ts       # Proposal templates, versioning
-│   │   ├── scheduler-service.ts      # Invoice reminders, recurring
+│   │   ├── scheduler-service.ts      # Invoice reminders, recurring, soft delete cleanup
+│   │   ├── soft-delete-service.ts    # 30-day soft delete recovery system
 │   │   ├── email-service.ts          # Email delivery
 │   │   ├── cache-service.ts          # Redis caching
 │   │   ├── approval-service.ts       # Approval workflows
@@ -155,7 +156,7 @@ no-bhad-codes/
 │   │   ├── timeline-service.ts
 │   │   ├── notification-preferences-service.ts
 │   │   └── logger.ts                 # Logging infrastructure
-│   ├── database/                     # SQLite, migrations, init
+│   ├── database/                     # SQLite, migrations, init, query-helpers.ts
 │   ├── middleware/                   # auth, sanitization, audit, etc.
 │   ├── config/                       # Swagger, environment
 │   └── templates/                    # Email templates
@@ -1393,7 +1394,7 @@ npm run audit              # Security audit
 
 ## 🔍 CODEBASE HEALTH
 
-#### Last Code Review: February 2, 2026
+#### Last Code Review: February 6, 2026
 
 ### Critical Issues
 
@@ -1461,6 +1462,7 @@ The server code (`/server/`) is **production-ready** with excellent architecture
 - Redis caching support
 - Sentry error tracking integration
 - **HttpOnly cookie authentication** (XSS-protected token storage)
+- **Soft delete system** with 30-day recovery window (February 6, 2026)
 
 ### Authentication Architecture (Updated December 17, 2025)
 

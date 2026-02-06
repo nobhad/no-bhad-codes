@@ -35,6 +35,7 @@ import {
 import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { createDOMCache, batchUpdateText } from '../../../utils/dom-cache';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { alertWarning, multiPromptDialog } from '../../../utils/confirm-dialog';
@@ -1618,7 +1619,6 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
         currency: 'USD'
       }).format(invoice.amount_total);
       const dueDate = formatDate(invoice.due_date);
-      const statusClass = `status-${invoice.status}`;
       const isDraft = invoice.status === 'draft';
       const showSendBtn = isDraft;
       const showMarkPaidBtn = ['sent', 'viewed', 'partial', 'overdue'].includes(invoice.status);
@@ -1639,7 +1639,7 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
                 <td>${invoice.invoice_number}</td>
                 <td>${amount}</td>
                 <td>${dueDate}</td>
-                <td><span class="status-badge ${statusClass}">${invoice.status}</span></td>
+                <td>${getStatusBadgeHTML(invoice.status, invoice.status)}</td>
                 <td class="actions-cell">
                   ${sendBtn}
                   ${editBtn}

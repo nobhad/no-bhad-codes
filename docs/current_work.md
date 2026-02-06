@@ -27,6 +27,33 @@ Create admin UI module for viewing and managing deleted items (trash).
 
 ## Recently Completed
 
+- [x] **Audit Re-do: Accessibility & Reusable Components (Feb 6, 2026)**: Re-audited and fixed remaining issues.
+
+  **Accessibility (WCAG 1.4.1 - Use of Color):**
+
+  - Confirmed status badges are COMPLIANT - all badges include text labels (e.g., "Active", "Pending")
+  - Text label serves as non-color indicator, no additional icon indicators needed
+  - Updated ACCESSIBILITY_AUDIT.md to mark 1.4.1 as PASS
+
+  **Reusable Components - Status Badges:**
+
+  - Migrated inline badge markup to `getStatusBadgeHTML()` in:
+    - `admin-contacts.ts` - "Converted to Client" badge
+    - `admin-projects.ts` - Invoice status badges
+    - `project-details/invoices.ts` - Invoice status badges
+  - Added invoice-specific status CSS to `portal-badges.css`:
+    - draft (gray), sent/viewed (blue), partial (yellow), paid (green), overdue (red)
+  - Updated REUSABLE_COMPONENTS_AUDIT.md - badges section now COMPLETE
+
+  **Files Modified:**
+
+  - `src/features/admin/modules/admin-contacts.ts`
+  - `src/features/admin/modules/admin-projects.ts`
+  - `src/features/admin/project-details/invoices.ts`
+  - `src/styles/shared/portal-badges.css`
+  - `docs/design/ACCESSIBILITY_AUDIT.md`
+  - `docs/design/REUSABLE_COMPONENTS_AUDIT.md`
+
 - [x] **30-Day Soft Delete Recovery System (Feb 6, 2026)**: Implemented soft delete with 30-day recovery.
 
   **Core Pattern:**
@@ -68,7 +95,20 @@ Create admin UI module for viewing and managing deleted items (trash).
 
   **Status:** Complete. Migration applied. Backend fully functional.
 
+- [x] **Soft Delete Documentation Update (Feb 6, 2026)**: Updated all documentation to reflect soft delete system.
 
+  **Documentation Updated:**
+
+  - `docs/API_DOCUMENTATION.md` - Added Soft Delete & Recovery System section with 5 new endpoints
+  - `docs/ARCHITECTURE.md` - Added soft-delete-service.ts and query-helpers.ts to file listings
+  - `docs/features/CLIENTS.md` - Added soft delete behavior section and change log entry
+  - `docs/features/PROJECTS.md` - Added soft delete behavior section and change log entry
+  - `docs/features/INVOICES.md` - Added soft delete behavior section (paid invoice protection)
+  - `docs/features/PROPOSALS.md` - Added soft delete behavior section and DELETE endpoint documentation
+  - `docs/features/LEADS.md` - Added soft delete behavior section
+  - `docs/design/DATABASE_AUDIT.md` - Added migrations 048, 049, 050
+
+  **Status:** Complete. All documentation accurate and up to date.
 
 - [x] **Audit Critical & High Priority Fixes (Feb 6, 2026)**: Implemented fixes for all critical and high priority issues from the database, forms, and modals audits.
 

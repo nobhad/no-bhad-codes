@@ -1,7 +1,7 @@
 # Proposal System Enhancement
 
 **Status:** Complete
-**Last Updated:** February 1, 2026
+**Last Updated:** February 6, 2026
 
 ## Overview
 
@@ -533,7 +533,28 @@ await fetch('/api/proposals/123/discount', {
 
 ---
 
+## Soft Delete Behavior
+
+When a proposal is deleted via `DELETE /api/proposals/:id`:
+
+- Proposal is soft-deleted (marked with `deleted_at` timestamp)
+- Proposal can be restored within 30 days via admin panel
+- After 30 days, permanent deletion occurs automatically
+
+**Related API Endpoints:**
+
+- `DELETE /api/proposals/:id` - Soft delete a proposal (NEW endpoint)
+- `GET /api/admin/deleted-items?type=proposal` - List deleted proposals
+- `POST /api/admin/deleted-items/proposal/:id/restore` - Restore a proposal
+
 ## Change Log
+
+### February 6, 2026 - Soft Delete System
+
+- Added DELETE endpoint for proposals (`DELETE /api/proposals/:id`)
+- Implemented soft delete with 30-day recovery window
+- Added `deleted_at` and `deleted_by` columns
+- All queries now filter out soft-deleted proposals
 
 ### February 2, 2026 - Frontend Advanced Features
 

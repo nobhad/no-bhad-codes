@@ -1,6 +1,6 @@
 # WCAG Accessibility Audit - Phase 1
 
-**Date:** February 3, 2026
+**Date:** February 6, 2026
 **Standard:** WCAG 2.1 Level AA
 **Pages Audited:** All major pages
 
@@ -48,20 +48,17 @@ This audit covers accessibility compliance across the no-bhad-codes application.
 |Issue|Severity|Location|Status|
 |-------|----------|----------|--------|
 |Color contrast|Medium|Status badges|Review needed|
-|Color alone for meaning|Medium|Status badges|REVIEW (1.4.1)|
+|Color alone for meaning|N/A|Status badges|PASS (1.4.1)|
 |Text resize|N/A|All pages|PASS (using rem/em)|
 |Focus visible|N/A|Interactive elements|PASS|
 
-**Findings - 1.4.1 (Use of Color):**
+**Findings - 1.4.1 (Use of Color):** RESOLVED
 
-Status badges currently rely on color to convey meaning:
+Status badges include text labels that provide non-color information:
 
-- `status-active` (green)
-- `status-pending` (amber)
-- `status-completed` (blue)
-- `status-cancelled` (gray)
-
-**Recommendation:** Add visual indicator (icon prefix) to badges. See Phase 4 (Badge Redesign) in implementation plan.
+- All badges display readable text (e.g., "Active", "Pending", "Completed", "Cancelled")
+- The text label serves as the non-color indicator required by WCAG 1.4.1
+- No additional icon indicators needed - text IS the non-color indicator
 
 **Findings - 1.4.3 (Contrast):**
 
@@ -205,14 +202,11 @@ None identified - no critical WCAG failures found.
 ### Resolved
 
 1. **Skip links** - IMPLEMENTED on all main pages (index.html, admin/index.html, client/portal.html, client/intake.html, client/set-password.html)
-
-### High Priority
-
-1. **Badge icon indicators** for status (1.4.1) - Pending design decision
+2. **Badge icon indicators** (1.4.1) - NOT NEEDED. All status badges include text labels (e.g., "Active", "Pending", "Completed") which provide non-color information. The text label IS the non-color indicator that satisfies WCAG 1.4.1. Badges do not rely solely on color.
 
 ### Medium Priority
 
-1. **Review color contrast** for muted text and badges (1.4.3)
+1. **Review color contrast** for muted text and badges (1.4.3) - Some badge text/background combinations may need verification
 2. **Add fieldset/legend** to form groups in modals (1.3.1)
 
 ### Low Priority

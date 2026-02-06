@@ -448,6 +448,145 @@ Invite a lead to create a client portal account.
 - `404` - Lead not found
 - `500` - Failed to send invitation
 
+### Soft Delete & Recovery System
+
+The system implements soft delete with a 30-day recovery window. Deleted items are marked with `deleted_at` timestamp rather than being permanently removed.
+
+#### GET `/admin/deleted-items`
+
+List all soft-deleted items with optional filtering.
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Query Parameters:**
+
+|Parameter|Type|Description|
+|-----------|------|-------------|
+|`type`|string|Filter by entity type: `client`, `project`, `invoice`, `lead`, `proposal`|
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "items": [
+    {
+      "type": "client",
+      "id": 42,
+      "name": "Acme Corp",
+      "deleted_at": "2026-02-01T10:00:00Z",
+      "deleted_by": "admin@example.com",
+      "days_until_permanent": 25,
+      "expires_at": "2026-03-03T10:00:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+#### GET `/admin/deleted-items/stats`
+
+Get counts of deleted items by entity type.
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "stats": {
+    "client": 2,
+    "project": 5,
+    "invoice": 1,
+    "lead": 3,
+    "proposal": 0
+  },
+  "total": 11
+}
+```
+
+#### POST `/admin/deleted-items/:type/:id/restore`
+
+Restore a soft-deleted item.
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**URL Parameters:**
+
+- `type` - Entity type: `client`, `project`, `invoice`, `lead`, `proposal`
+- `id` - Entity ID
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "client restored successfully"
+}
+```
+
+**Notes:**
+
+- Restoring a parent does NOT automatically restore children (cascade deletes are permanent until restored individually)
+- Paid invoices cannot be restored if they were voided
+
+#### DELETE `/admin/deleted-items/:type/:id/permanent`
+
+Permanently delete an item (bypasses 30-day recovery window).
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**URL Parameters:**
+
+- `type` - Entity type: `client`, `project`, `invoice`, `lead`, `proposal`
+- `id` - Entity ID
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "client permanently deleted"
+}
+```
+
+**Warning:** This action is irreversible.
+
+#### POST `/admin/deleted-items/cleanup`
+
+Manually trigger cleanup of expired soft-deleted items (items older than 30 days).
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Cleanup completed",
+  "deleted": 5,
+  "errors": 0
+}
+```
+
+**Notes:**
+
+- Cleanup runs automatically daily at 2 AM
+- Use this endpoint to force immediate cleanup
+
+### Soft Delete Cascade Behavior
+
+When deleting entities, the following cascade behavior applies:
+
+|Deleted Entity|Cascade Behavior|
+|--------------|----------------|
+|Client|Projects soft-deleted, proposals soft-deleted, unpaid invoices voided (paid invoices preserved)|
+|Project|Proposals soft-deleted (invoices preserved)|
+|Invoice|Paid invoices blocked from deletion; others voided|
+|Lead|Standalone deletion (no cascade)|
+|Proposal|Standalone deletion (no cascade)|
+
 ## Client Management Endpoints
 
 ### Client Settings API

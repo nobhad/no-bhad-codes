@@ -1,6 +1,6 @@
 # Invoice System
 
-**Last Updated:** February 2, 2026
+**Last Updated:** February 6, 2026
 
 ## Table of Contents
 
@@ -1159,6 +1159,30 @@ When an invoice is sent, reminders are automatically scheduled:
 |`src/features/client/modules/portal-invoices.ts`|Frontend invoice handling (~250 lines)|
 |`src/styles/client-portal/invoices.css`|Invoice styling|
 |`client/portal.html`|Invoices tab HTML (tab-invoices section)|
+
+---
+
+## Soft Delete Behavior
+
+When an invoice is deleted via `DELETE /api/invoices/:id`:
+
+- **Paid invoices cannot be deleted** - Returns 400 error to protect financial records
+- Unpaid invoices are soft-deleted (marked with `deleted_at` timestamp)
+- Invoice can be restored within 30 days via admin panel
+- After 30 days, permanent deletion occurs automatically
+
+**Related API Endpoints:**
+
+- `DELETE /api/invoices/:id` - Soft delete an invoice (unpaid only)
+- `GET /api/admin/deleted-items?type=invoice` - List deleted invoices
+- `POST /api/admin/deleted-items/invoice/:id/restore` - Restore an invoice
+
+**Change Log Entry (February 6, 2026):**
+
+- Converted hard delete to soft delete with 30-day recovery window
+- Paid invoices now blocked from deletion
+- Added `deleted_at` and `deleted_by` columns
+- All queries now filter out soft-deleted invoices
 
 ---
 

@@ -19,10 +19,10 @@
 |--------|-------|
 | Database Type | SQLite |
 | Total Tables | 44+ |
-| Total Columns | 600+ |
-| Total Indexes | 180+ |
+| Total Columns | 610+ |
+| Total Indexes | 185+ |
 | Foreign Key Relationships | 60+ |
-| Migrations | 47 (001-047) |
+| Migrations | 50 (001-050) |
 
 ### Largest Tables (by Column Count)
 
@@ -37,7 +37,7 @@
 
 ## Migration Inventory
 
-### Complete Migration List (001-047)
+### Complete Migration List (001-050)
 
 | # | File | Purpose |
 |---|------|---------|
@@ -87,6 +87,9 @@
 | 045 | `knowledge_base.sql` | kb_categories, kb_articles, kb_article_feedback |
 | 046 | `client_notes.sql` | Client notes functionality |
 | 047 | `proposal_requests.sql` | Proposal request enhancements |
+| 048 | `drop_deprecated_users_table.sql` | Drop deprecated users table and related code |
+| 049 | `fix_project_status_constraint.sql` | Add 'active' and 'cancelled' to project status constraint |
+| 050 | `soft_delete_system.sql` | Soft delete columns (deleted_at, deleted_by) and indexes for 5 core tables |
 
 ---
 
@@ -367,14 +370,14 @@ files
 
 ## Issues & Recommendations
 
-### Critical Issues (Migrations Ready)
+### Critical Issues (Migrations Ready - Pending Deployment)
 
-| # | Issue | Severity | Migration | Details |
-|---|-------|----------|-----------|---------|
-| 1 | Dual User Management | Critical | `048_drop_deprecated_users_table.sql` | Drops unused `users` table; all auth uses `clients` |
-| 2 | Project Status Constraint | Critical | `049_fix_project_status_constraint.sql` | Adds 'active' and 'cancelled' to CHECK constraint |
-| 3 | Soft Delete System | High | `050_soft_delete_system.sql` | Adds soft delete to prevent cascading data loss |
-| 4 | Boolean Inconsistency | Medium | N/A | SQLite uses INTEGER (0/1) - handled in application layer |
+| # | Issue | Severity | Migration | Status |
+|---|-------|----------|-----------|--------|
+| 1 | Dual User Management | Critical | `048_drop_deprecated_users_table.sql` | Ready |
+| 2 | Project Status Constraint | Critical | `049_fix_project_status_constraint.sql` | Ready |
+| 3 | Soft Delete System | High | `050_soft_delete_system.sql` | Ready + Service implemented |
+| 4 | Boolean Inconsistency | Medium | N/A | Handled in application layer |
 
 ### High Priority Issues
 
