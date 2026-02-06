@@ -367,14 +367,14 @@ files
 
 ## Issues & Recommendations
 
-### Critical Issues
+### Critical Issues (Migrations Ready)
 
-| # | Issue | Severity | Details |
-|---|-------|----------|---------|
-| 1 | Dual User Management | Critical | Both `clients` and `users` tables exist (migration 017) with overlapping functionality |
-| 2 | Project Status Constraint | Critical | CHECK constraint excludes 'active' and 'cancelled' which are used by API |
-| 3 | Boolean Inconsistency | High | SQLite uses INTEGER (0/1) but TypeScript expects boolean |
-| 4 | Cascading Deletes | High | Deleting a project cascades to all related data (files, tasks, invoices) |
+| # | Issue | Severity | Migration | Details |
+|---|-------|----------|-----------|---------|
+| 1 | Dual User Management | Critical | `048_drop_deprecated_users_table.sql` | Drops unused `users` table; all auth uses `clients` |
+| 2 | Project Status Constraint | Critical | `049_fix_project_status_constraint.sql` | Adds 'active' and 'cancelled' to CHECK constraint |
+| 3 | Soft Delete System | High | `050_soft_delete_system.sql` | Adds soft delete to prevent cascading data loss |
+| 4 | Boolean Inconsistency | Medium | N/A | SQLite uses INTEGER (0/1) - handled in application layer |
 
 ### High Priority Issues
 

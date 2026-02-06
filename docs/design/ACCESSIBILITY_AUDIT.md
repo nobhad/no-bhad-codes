@@ -202,10 +202,13 @@ Good ARIA implementation found:
 
 None identified - no critical WCAG failures found.
 
+### Resolved
+
+1. **Skip links** - IMPLEMENTED on all main pages (index.html, admin/index.html, client/portal.html, client/intake.html, client/set-password.html)
+
 ### High Priority
 
-1. **Add skip links** to main pages (2.4.1)
-2. **Badge icon indicators** for status (1.4.1) - Pending design decision
+1. **Badge icon indicators** for status (1.4.1) - Pending design decision
 
 ### Medium Priority
 

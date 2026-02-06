@@ -435,27 +435,31 @@ interface ValidationResult {
 
 ## Issues & Recommendations
 
-### Issues Found
+### Resolved Issues
+
+| # | Issue | Resolution |
+|---|-------|------------|
+| 1 | Password toggle inconsistency | FIXED - Shared component `src/components/password-toggle.ts` used in admin login, client portal, and set-password pages. Uses `data-password-toggle` attribute. |
+
+### Remaining Issues
 
 | # | Issue | Severity | Details |
 |---|-------|----------|---------|
-| 1 | Inconsistent password toggle | Medium | Admin login vs client portal have different implementations |
-| 2 | Mixed required attributes | Low | Some use `data-required`, others use `required` |
-| 3 | Error display patterns differ | Medium | Contact form uses popups, portal uses inline |
-| 4 | Multiple validation systems | Low | Three layers (HTML5, utils/, shared/) |
-| 5 | Some missing label associations | Medium | Not all form groups have proper label-for |
-| 6 | Large admin form count | Info | 82 form-group instances in admin/index.html |
+| 1 | Mixed required attributes | Low | Some use `data-required`, others use `required` |
+| 2 | Error display patterns differ | Medium | Contact form uses popups, portal uses inline |
+| 3 | Multiple validation systems | Low | Three layers (HTML5, utils/, shared/) |
+| 4 | Some missing label associations | Medium | Not all form groups have proper label-for |
+| 5 | Large admin form count | Info | 82 form-group instances in admin/index.html |
 
 ### Recommendations
 
 | # | Recommendation | Priority |
 |---|----------------|----------|
-| 1 | Standardize password toggle component | High |
-| 2 | Use consistent required attribute (`required` + `aria-required`) | Medium |
-| 3 | Unify error display pattern (prefer inline with ARIA) | Medium |
-| 4 | Document which validation layer to use when | Low |
-| 5 | Audit and fix missing label associations | High |
-| 6 | Consider splitting large admin form sections | Low |
+| 1 | Use consistent required attribute (`required` + `aria-required`) | Medium |
+| 2 | Unify error display pattern (prefer inline with ARIA) | Medium |
+| 3 | Document which validation layer to use when | Low |
+| 4 | Audit and fix missing label associations | High |
+| 5 | Consider splitting large admin form sections | Low |
 
 ### Best Practices Observed
 
