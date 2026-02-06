@@ -9,11 +9,11 @@
  */
 
 import { apiPost } from '../../utils/api-client';
+import { initPasswordToggle } from '../../components/password-toggle';
 
 export class AdminLoginOnMainSite {
   private loginForm: HTMLFormElement | null = null;
   private passwordInput: HTMLInputElement | null = null;
-  private passwordToggle: HTMLButtonElement | null = null;
   private authError: HTMLElement | null = null;
 
   async init(): Promise<void> {
@@ -25,7 +25,6 @@ export class AdminLoginOnMainSite {
 
     this.loginForm = document.getElementById('admin-login-form') as HTMLFormElement;
     this.passwordInput = document.getElementById('admin-password') as HTMLInputElement;
-    this.passwordToggle = document.getElementById('password-toggle') as HTMLButtonElement;
     this.authError = document.getElementById('auth-error');
 
     if (!this.loginForm || !this.passwordInput) {
@@ -38,11 +37,10 @@ export class AdminLoginOnMainSite {
   }
 
   private setupPasswordToggle(): void {
-    if (!this.passwordToggle || !this.passwordInput) return;
-
-    this.passwordToggle.addEventListener('click', () => {
-      const isPassword = this.passwordInput!.type === 'password';
-      this.passwordInput!.type = isPassword ? 'text' : 'password';
+    // Use centralized password toggle component
+    initPasswordToggle({
+      input: 'admin-password',
+      toggle: 'password-toggle'
     });
   }
 

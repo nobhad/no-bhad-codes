@@ -591,16 +591,6 @@ export type PartialWithId<T extends BaseEntity> = Partial<Omit<T, 'id'>> & { id:
  */
 export type InsertFields<T extends BaseEntity> = Omit<T, 'id' | 'created_at' | 'updated_at'>;
 
-/**
- * SQLite boolean to JS boolean converter
- */
-export function sqliteBoolToJs(value: number | null): boolean {
-  return value === 1;
-}
-
-/**
- * JS boolean to SQLite boolean converter
- */
-export function jsBoolToSqlite(value: boolean): number {
-  return value ? 1 : 0;
-}
+// NOTE: SQLite boolean handling is done via row-helpers.ts
+// Use getBoolean() or getBooleanOrNull() from server/database/row-helpers.ts
+// These functions handle SQLite's 0/1 representation automatically

@@ -1,10 +1,226 @@
 # Current Work
 
-**Last Updated:** February 5, 2026
+**Last Updated:** February 6, 2026
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-02.md`.
 
+## Planned Enhancements
+
+### 30-Day Soft Delete Recovery System
+
+**Priority:** High
+**Status:** Planned (detailed plan in `.claude/plans/mossy-fluttering-lemon.md`)
+
+Implement soft delete with 30-day recovery for all main entities.
+
+**Core Pattern:**
+
+- Add `deleted_at` and `deleted_by` columns to: clients, projects, invoices, client_intakes, proposal_requests
+- Convert DELETE endpoints to UPDATE with `deleted_at = datetime('now')`
+- Add `WHERE deleted_at IS NULL` to all SELECT queries
+- Add admin UI to view/restore deleted items
+- Add scheduled cleanup job (daily at 2 AM) to permanently delete items older than 30 days
+
+**Cascade Behavior:**
+
+- Deleting client cascades to: projects, proposals, voids unpaid invoices (keeps paid)
+- Deleting project cascades to: proposals (keeps invoices)
+- Paid invoices cannot be deleted
+
+**Files to Create:**
+
+- `server/database/migrations/050_soft_delete_system.sql`
+- `server/services/soft-delete-service.ts`
+- `server/database/query-helpers.ts`
+- `src/features/admin/modules/admin-deleted-items.ts`
+
+**Files to Modify:**
+
+- `server/routes/clients.ts`, `projects.ts`, `invoices.ts`, `proposals.ts`, `admin.ts`
+- `server/services/scheduler-service.ts`
+- `server/types/database.ts`
+
 ## Recently Completed
+
+- [x] **Audit Critical & High Priority Fixes (Feb 6, 2026)**: Implemented fixes for all critical and high priority issues from the database, forms, and modals audits.
+
+  **Phase 1 - Database Critical Fixes:**
+
+  - Removed deprecated `users` table and dead code
+    - Deleted unused `/auth/register` endpoint from `api.ts`
+    - Fixed avatar upload to use `clients` table instead of `users`
+    - Fixed status metrics endpoint to query `clients` instead of `users`
+    - Deleted unused `server/models/User.ts`
+    - Created migration `048_drop_deprecated_users_table.sql`
+  - Fixed project status CHECK constraint
+    - Created migration `049_fix_project_status_constraint.sql`
+    - Added 'active' and 'cancelled' to allowed status values
+
+  **Phase 2 - Database High Priority Fixes:**
+
+  - Fixed boolean handling in `row-helpers.ts`
+    - Updated `getBoolean()` and `getBooleanOrNull()` to handle SQLite's 0/1 representation
+    - Removed unused `sqliteBoolToJs/jsBoolToSqlite` from `database.ts`
+
+  **Phase 3 - Forms High Priority Fixes:**
+
+  - Created reusable password toggle component
+    - New file: `src/components/password-toggle.ts`
+    - Features: icon updates (eye/eye-off), ARIA labels, `initPasswordToggle()` and `initAllPasswordToggles()`
+    - Updated `admin-login.ts` to use new component
+    - Updated `client/set-password.html` with toggle buttons and component import
+    - Exported from `src/components/index.ts`
+
+  **Files Modified:**
+
+  - `server/routes/api.ts` - Removed dead registration code, fixed status metrics
+  - `server/routes/uploads.ts` - Fixed avatar upload table reference
+  - `server/database/row-helpers.ts` - Fixed boolean handling
+  - `server/types/database.ts` - Removed unused boolean helpers
+  - `src/features/main-site/admin-login.ts` - Use password toggle component
+  - `client/set-password.html` - Added toggle buttons, use component
+  - `src/components/index.ts` - Export password toggle
+
+  **Files Created:**
+
+  - `server/database/migrations/048_drop_deprecated_users_table.sql`
+  - `server/database/migrations/049_fix_project_status_constraint.sql`
+  - `src/components/password-toggle.ts`
+
+  **Files Deleted:**
+
+  - `server/models/User.ts`
+
+  **Status:** Complete. Migrations applied.
+
+- [x] **Form Label Associations Fix (Feb 6, 2026)**: Fixed accessibility issue from Forms Audit.
+
+  - Fixed missing label association in `admin/index.html` line 2067
+  - Added `<label for="file-comment-input" class="sr-only">` and `aria-label` to file comment textarea
+  - All other forms in `index.html`, `client/portal.html`, and `admin/index.html` already had proper associations
+
+  **Status:** Complete. All audit tasks finished.
+
+- [x] **Database Schema Audit (Feb 6, 2026)**: Comprehensive audit of database tables, relationships, and indexes.
+
+  **Created:** `docs/design/DATABASE_AUDIT.md`
+
+  **Statistics:**
+  - 44+ tables across 47 migrations
+  - 600+ columns total
+  - 180+ indexes
+  - 60+ foreign key relationships
+
+  **Critical Issues Found:**
+  - Dual user management (`clients` and `users` tables)
+  - Project status CHECK constraint excludes 'active' and 'cancelled'
+  - Boolean inconsistency (INTEGER vs BOOLEAN)
+  - Cascading deletes could cause accidental data loss
+
+  **High Priority Issues:**
+  - Text-based foreign keys (`assigned_to`, `user_name`) lack referential integrity
+  - JSON columns without schema validation
+  - Missing composite indexes for common queries
+  - No row-level security
+
+  **Status:** Audit complete, fixes pending
+
+- [x] **Forms Audit (Feb 6, 2026)**: Comprehensive audit of all forms, validation patterns, and accessibility.
+
+  **Created:** `docs/design/FORMS_AUDIT.md`
+
+  **Findings:**
+  - 9 major HTML forms across the codebase
+  - 11 field types (text, email, password, tel, number, date, url, checkbox, radio, textarea, select)
+  - 30+ validation functions in 3 layers (HTML5, client-side, server-side)
+  - 10 pre-defined validation schemas
+  - 7 CSS files dedicated to form styling
+
+  **Issues Found:**
+  - Inconsistent password toggle implementations
+  - Mixed required attribute patterns (`data-required` vs `required`)
+  - Different error display patterns (popups vs inline)
+  - Some missing label-for associations
+
+  **Status:** Audit complete, fixes pending
+
+- [x] **Modals & Dialogs Audit (Feb 6, 2026)**: Comprehensive audit of all modals, dialogs, and overlay components.
+
+  **Created:** `docs/design/MODALS_AUDIT.md`
+
+  **Findings:**
+  - 7 modal implementation types
+  - 47+ files with modal code
+  - 20+ confirm/alert dialog instances
+  - 15+ form modal instances
+  - 3 z-index layers (9999, 10002, 10100)
+
+  **Modal Types:**
+  - ModalComponent (base class)
+  - PortalModal (lightweight factory)
+  - ConfirmDialog (Promise-based utilities)
+  - FocusTrap (accessibility utilities)
+  - ModalDropdown (select converter)
+  - Invoice modals (feature-specific)
+  - Admin module modals (dynamic)
+
+  **Issues Found:**
+  - Hardcoded z-index values not centralized
+  - Mixed modal creation patterns
+  - Inconsistent close animation timing
+  - Some missing aria-describedby attributes
+
+  **Status:** Audit complete, fixes pending
+
+- [x] **CSS Architecture Audit (Feb 6, 2026)**: Comprehensive audit of 83 CSS files (33,555 lines).
+
+  **Created:** `docs/design/CSS_AUDIT.md`
+
+  **Current State:**
+
+  | Metric | Status |
+  |--------|--------|
+  | Hardcoded colors | 0 critical (3 acceptable fallbacks) |
+  | Z-index values | All portal files use `--z-index-portal-*` tokens |
+  | Standard breakpoints | All use `@custom-media` (`--mobile`, `--small-mobile`) |
+  | `.hidden` selector | Single source in `base/layout.css` |
+  | `.password-toggle` | Base styles in `shared/portal-forms.css` |
+  | `!important` declarations | 51 instances (most legitimate for GSAP/print) |
+
+  **Remaining (lower priority):**
+  - Non-standard breakpoints (900px, 1024px, 1300px) need evaluation
+  - Large files: `admin.css` (2,922 lines), `project-detail.css` (2,127 lines)
+  - Duplicate utility classes (`.text-*`, `.overview-grid`)
+
+  **Status:** Critical and high priority complete
+
+- [x] **PDF Caching & Utilities (Feb 6, 2026)**: Added in-memory PDF caching and utility functions for all PDF endpoints.
+
+  **New File Created:**
+  - `server/utils/pdf-utils.ts` — Shared utilities for PDF generation
+
+  **Caching Implementation:**
+  - TTL-based in-memory cache (default 5 minutes, configurable via `PDF_CACHE_TTL_MS`)
+  - LRU eviction when max entries reached (default 100, configurable via `PDF_CACHE_MAX_ENTRIES`)
+  - Cache key format: `{type}:{id}:{updatedAt}` — auto-invalidates when source data changes
+  - Response header `X-PDF-Cache: HIT|MISS` for debugging
+
+  **Utility Functions Added:**
+  - `getPdfCacheKey()`, `getCachedPdf()`, `cachePdf()`, `invalidatePdfCache()`, `clearPdfCache()`
+  - Multi-page helpers: `createPdfContext()`, `ensureSpace()`, `drawWrappedText()`, `addPageNumbers()`
+  - PDF/A metadata: `setPdfMetadata()` with title, author, subject, keywords, dates
+
+  **Endpoints Updated:**
+  - `GET /api/invoices/:id/pdf` — Invoice PDF with caching
+  - `GET /api/proposals/:id/pdf` — Proposal PDF with caching
+  - `GET /api/projects/:id/contract/pdf` — Contract PDF with caching
+  - `GET /api/projects/:id/intake/pdf` — Intake PDF with caching
+
+  **Files Modified:**
+  - `server/routes/invoices.ts` — Added pdf-utils import and caching
+  - `server/routes/proposals.ts` — Added pdf-utils import and caching
+  - `server/routes/projects.ts` — Added pdf-utils import and caching
+  - `docs/design/PDF_AUDIT.md` — Updated with PDF Utilities section, marked issues resolved
 
 - [x] **Admin UI Fixes (Feb 5, 2026)**: Fixed dropdown alignment and sidebar order issues.
 
