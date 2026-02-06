@@ -143,7 +143,8 @@ export class AdminAuth {
       }
 
       return isValid;
-    } catch (_error) {
+    } catch (error) {
+      console.warn('[AdminAuth] Legacy session validation failed:', error);
       return false;
     }
   }
