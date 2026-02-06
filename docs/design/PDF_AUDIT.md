@@ -1,6 +1,6 @@
 # Complete PDF Generation Audit
 
-**Last Updated:** 2026-02-05
+**Last Updated:** 2026-02-06
 
 ## Table of Contents
 
@@ -116,6 +116,8 @@ server/
 │   │                     # Lines 911-989: Invoice preview endpoint
 │   └── projects.ts       # Lines 1327-1599: Contract PDF generation
 │                         # Lines 2055-2468: Intake form PDF generation
+├── utils/
+│   └── pdf-utils.ts      # Shared PDF utilities: caching, multi-page, PDF/A helpers
 └── services/
     └── invoice-service.ts  # Uses BUSINESS_INFO for invoice operations
 
@@ -1193,6 +1195,129 @@ import { BUSINESS_INFO } from '../config/business.js';
 
 ---
 
+## PDF Utilities
+
+**File:** `server/utils/pdf-utils.ts`
+
+Shared utilities for PDF generation including caching, multi-page support, and PDF/A compliance helpers.
+
+### PDF Caching
+
+In-memory TTL-based cache with LRU eviction to reduce repeated PDF generation.
+
+**Configuration (Environment Variables):**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PDF_CACHE_TTL_MS` | 300000 (5 min) | Cache entry time-to-live |
+| `PDF_CACHE_MAX_ENTRIES` | 100 | Maximum cached PDFs (LRU eviction) |
+
+**Cache Key Format:** `{type}:{id}:{updatedAt}`
+
+**Usage:**
+
+```typescript
+import { getPdfCacheKey, getCachedPdf, cachePdf } from '../utils/pdf-utils.js';
+
+// Check cache first
+const cacheKey = getPdfCacheKey('invoice', invoiceId, invoice.updatedAt);
+const cachedPdf = getCachedPdf(cacheKey);
+if (cachedPdf) {
+  res.setHeader('X-PDF-Cache', 'HIT');
+  return res.send(Buffer.from(cachedPdf));
+}
+
+// Generate PDF...
+const pdfBytes = await generatePdf(data);
+
+// Cache the result
+cachePdf(cacheKey, pdfBytes, invoice.updatedAt);
+res.setHeader('X-PDF-Cache', 'MISS');
+```
+
+**Cache Response Header:** All PDF endpoints now include `X-PDF-Cache: HIT` or `X-PDF-Cache: MISS`.
+
+**Cache Functions:**
+
+| Function | Purpose |
+|----------|---------|
+| `getPdfCacheKey(type, id, updatedAt)` | Generate cache key |
+| `getCachedPdf(cacheKey)` | Retrieve cached PDF (null if expired/missing) |
+| `cachePdf(cacheKey, data, updatedAt)` | Store PDF in cache |
+| `invalidatePdfCache(type, id?)` | Invalidate cache entries |
+| `clearPdfCache()` | Clear entire cache |
+| `getPdfCacheStats()` | Get cache size/max/TTL |
+
+### Multi-Page Support Utilities
+
+Helpers for automatic page breaks and content flow.
+
+**Page Dimensions:**
+
+```typescript
+export const PAGE_DIMENSIONS = {
+  LETTER: { width: 612, height: 792 },
+  A4: { width: 595, height: 842 }
+};
+
+export const PAGE_MARGINS = {
+  top: 54, bottom: 54, left: 54, right: 54
+};
+```
+
+**Multi-Page Context:**
+
+```typescript
+interface PdfPageContext {
+  pdfDoc: PDFDocument;
+  currentPage: PDFPage;
+  pageNumber: number;
+  y: number;  // Current vertical position
+  fonts: { regular: PDFFont; bold: PDFFont };
+  // ... dimensions and margins
+}
+```
+
+**Helper Functions:**
+
+| Function | Purpose |
+|----------|---------|
+| `createPdfContext(pdfDoc, options?)` | Initialize context with standard layout |
+| `ensureSpace(ctx, requiredSpace, onNewPage?)` | Check/create new page if needed |
+| `drawWrappedText(ctx, text, options)` | Draw text with word wrap and page breaks |
+| `addPageNumbers(pdfDoc, options?)` | Add "Page X of Y" to all pages |
+
+### PDF/A Compliance Helpers
+
+**Metadata Function:**
+
+```typescript
+setPdfMetadata(pdfDoc, {
+  title: 'Invoice INV-2026-001',
+  author: 'No Bhad Codes',
+  subject: 'Invoice',
+  creator: 'NoBhadCodes PDF Generator',
+  keywords: ['invoice', 'payment'],
+  creationDate: new Date(),
+  modificationDate: new Date()
+});
+```
+
+**PDF/A Compliance Status:**
+
+| Requirement | Status |
+|-------------|--------|
+| Fonts embedded | Yes (pdf-lib automatic) |
+| No JavaScript | Yes |
+| No external references | Yes |
+| Color space defined | Yes (RGB) |
+| XMP metadata stream | No (requires additional library) |
+| PDF version 1.4+ | Yes (pdf-lib uses 1.7) |
+
+Current implementation achieves "PDF/A-like" compliance suitable for most archival purposes.
+
+---
+
 ## Security & Authorization
 
 ### Authentication
@@ -1312,20 +1437,22 @@ res.setHeader('Content-Disposition', `${disposition}; filename="${filename}"`);
 | 4 | Logo fallback paths hardcoded | Centralized to `getPdfLogoBytes()` in business.ts |
 | 5 | Line item details not word-wrapped | Added word wrapping in invoices.ts |
 | 6 | Contract terms hardcoded | Moved to `CONTRACT_TERMS` in business.ts (env configurable) |
+| 7 | No PDF caching | Added in-memory caching via `server/utils/pdf-utils.ts` (TTL-based, LRU eviction) |
+| 8 | No multi-page support utilities | Added helpers in `pdf-utils.ts` (createPdfContext, ensureSpace, drawWrappedText) |
+| 9 | No PDF/A metadata utilities | Added `setPdfMetadata()` helper in `pdf-utils.ts` |
 
 ### Current Issues
 
 | # | Issue | Severity | Location |
 |---|-------|----------|----------|
-| 1 | No PDF caching | Medium | All endpoints |
-| 2 | No multi-page support in most PDFs | Medium | Long content may overflow |
-| 3 | No PDF/A compliance for archival | Low | All PDFs |
+| 1 | Multi-page support not integrated | Low | Helpers exist but not wired into all PDFs |
+| 2 | Full PDF/A-1b compliance | Low | Would require XMP metadata library |
 
 ### Potential Improvements
 
 | # | Improvement | Priority | Notes |
 |---|-------------|----------|-------|
-| 1 | Add PDF caching with Redis | Medium | Reduce generation time for repeated requests |
+| 1 | Integrate multi-page helpers into PDFs | Low | Use ensureSpace() for long invoices/contracts |
 | 2 | Add page overflow handling | Medium | Auto-add pages for long content |
 | 3 | Batch PDF generation for bulk export | Medium | Export multiple invoices as ZIP |
 | 4 | Add watermark for draft/preview PDFs | Low | Visual indicator for unpaid invoices |

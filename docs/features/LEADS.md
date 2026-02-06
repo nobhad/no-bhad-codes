@@ -1,7 +1,7 @@
 # Lead Management System
 
 **Status:** Complete
-**Last Updated:** February 1, 2026
+**Last Updated:** February 6, 2026
 
 ## Overview
 
@@ -505,7 +505,27 @@ Three-tab interface:
 
 ---
 
+## Soft Delete Behavior
+
+When a lead is deleted:
+
+- Lead is soft-deleted (marked with `deleted_at` timestamp)
+- No cascade behavior (leads are standalone entities)
+- Lead can be restored within 30 days via admin panel
+- After 30 days, permanent deletion occurs automatically
+
+**Related API Endpoints:**
+
+- `GET /api/admin/deleted-items?type=lead` - List deleted leads
+- `POST /api/admin/deleted-items/lead/:id/restore` - Restore a lead
+
 ## Change Log
+
+### February 6, 2026 - Soft Delete System
+
+- Added soft delete support with 30-day recovery window
+- Added `deleted_at` and `deleted_by` columns to `client_intakes` table
+- All queries now filter out soft-deleted leads
 
 ### February 2, 2026 - Frontend Advanced Features
 

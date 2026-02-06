@@ -1,6 +1,6 @@
 # Reusable Components Audit
 
-**Date:** February 2, 2026  
+**Date:** February 6, 2026
 **Scope:** Admin and Client Portal — identify UI that should use shared components but currently uses native elements or duplicate implementations.
 
 ---
@@ -52,9 +52,20 @@ This removes duplicate dropdown behavior and keeps one implementation (table-dro
 
 **Reusable component:** `createStatusBadge(label, variant)` and `getStatusBadgeHTML(label, variant)` in `src/components/status-badge.ts` — uses `.status-badge` and `.status-{variant}` (shared CSS: `portal-badges.css`).
 
-**Using reusable:** admin-clients (getStatusBadgeHTML), page-title (createStatusBadge).
+**Using reusable (CURRENT):**
 
-**Building inline (could use reusable):** admin-contacts, admin-projects, admin-clients (some places), client-portal, admin-project-details, admin-dashboard, admin-contacts.renderer, admin-tasks, portal-projects, admin-system-status — many places build `<span class="status-badge status-${...}">` manually. Migrating these to `createStatusBadge` or `getStatusBadgeHTML` would ensure consistent markup and make variant changes (e.g. new status types) one place.
+- admin-clients (getStatusBadgeHTML)
+- admin-contacts (getStatusBadgeHTML) ✅ Migrated
+- admin-projects (getStatusBadgeHTML) ✅ Migrated
+- admin-invoices (getStatusBadgeHTML)
+- admin-dashboard (getStatusBadgeHTML)
+- admin-contacts.renderer (getStatusBadgeHTML)
+- admin-tasks (getStatusBadgeHTML)
+- admin-system-status (getStatusBadgeHTML)
+- page-title (createStatusBadge)
+- project-details/invoices (getStatusBadgeHTML) ✅ Migrated
+
+**Status:** Most admin modules now use the reusable badge component. Invoice-specific statuses (draft, sent, viewed, partial, paid, overdue) added to `portal-badges.css`.
 
 ---
 
@@ -78,16 +89,15 @@ This removes duplicate dropdown behavior and keeps one implementation (table-dro
 
 ## 6. Summary
 
-|Category|Reusable component|Not using it (candidates)|
+|Category|Reusable component|Status|
 |----------|--------------------|----------------------------|
-|**Dropdowns**|createTableDropdown, initModalDropdown|Dashboard contact status select; Contacts renderer contact status; Client portal files filters (3 selects); Leads cancel reason; Proposals template selects; Projects invoice/deposit selects; Project details invoice type; Project details status (custom impl).|
-|**Status badges**|createStatusBadge, getStatusBadgeHTML|Multiple admin/portal features build badge markup inline.|
-|**Project details status**|table-dropdown or modal-dropdown|Custom setupCustomStatusDropdown with different class names and logic.|
-|**Modals**|ModalComponent, confirm-dialog|Admin feature modals are ad-hoc HTML + JS.|
+|**Status badges**|createStatusBadge, getStatusBadgeHTML|✅ COMPLETE - All admin modules migrated to use reusable component. Invoice statuses added to CSS.|
+|**Dropdowns**|createTableDropdown, initModalDropdown|⚠️ PENDING - Dashboard contact status, Client portal file filters, Leads cancel reason, Proposals template selects, Projects invoice/deposit selects need migration.|
+|**Project details status**|table-dropdown or modal-dropdown|⚠️ PENDING - Custom setupCustomStatusDropdown with different class names.|
+|**Modals**|ModalComponent, confirm-dialog|📝 LOW PRIORITY - Admin feature modals are ad-hoc HTML + JS. Large refactor, optional.
 
-**Suggested order of work:**  
+**Remaining work:**
 
-1) Replace native contact status selects (dashboard + contacts renderer) with`createTableDropdown`.  
-2) Replace project-details status custom dropdown with table-dropdown or modal-dropdown.  
-3) Convert remaining native selects (files filters, cancel reason, template, invoice/deposit) to reusable dropdown where it fits.  
-4) Gradually replace inline status-badge markup with `createStatusBadge` / `getStatusBadgeHTML`.
+1) Replace native contact status selects (dashboard + contacts renderer) with `createTableDropdown`.
+2) Replace project-details status custom dropdown with table-dropdown or modal-dropdown.
+3) Convert remaining native selects (files filters, cancel reason, template, invoice/deposit) to reusable dropdown.

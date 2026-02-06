@@ -124,6 +124,41 @@
 }
 
 /* =====================================================
+   INVOICE STATUS BADGES
+   Status badges specific to invoices
+   ===================================================== */
+/* Draft - gray (not sent yet) */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-draft {
+  background: var(--status-inactive);
+  color: var(--color-white);
+}
+
+/* Sent/Viewed - blue (in progress) */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-sent,
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-viewed {
+  background: var(--status-active);
+  color: var(--color-black);
+}
+
+/* Partial - yellow (partially paid) */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-partial {
+  background: var(--status-pending);
+  color: var(--color-black);
+}
+
+/* Paid - green (fully paid) */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-paid {
+  background: var(--status-completed);
+  color: var(--color-black);
+}
+
+/* Overdue - red (past due) */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-overdue {
+  background: var(--status-cancelled);
+  color: var(--color-white);
+}
+
+/* =====================================================
    SIDEBAR NOTIFICATION BADGES
    Small counter badges for sidebar nav items
    ===================================================== */

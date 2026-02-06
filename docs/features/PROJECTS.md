@@ -1,7 +1,7 @@
 # Project Management System
 
 **Status:** Complete
-**Last Updated:** February 2, 2026
+**Last Updated:** February 6, 2026
 
 ## Overview
 
@@ -534,7 +534,30 @@ const { health } = await response.json();
 - `server/routes/projects.ts` - Added 30+ new endpoints
 - `src/types/api.ts` - Added TypeScript interfaces
 
+## Soft Delete Behavior
+
+When a project is deleted via `DELETE /api/projects/:id`:
+
+- Project is soft-deleted (marked with `deleted_at` timestamp)
+- All associated proposals are cascade soft-deleted
+- Invoices are preserved (not deleted, but project association cleared for financial records)
+- Project can be restored within 30 days via admin panel
+- After 30 days, permanent deletion occurs automatically
+
+**Related API Endpoints:**
+
+- `DELETE /api/projects/:id` - Soft delete a project
+- `GET /api/admin/deleted-items?type=project` - List deleted projects
+- `POST /api/admin/deleted-items/project/:id/restore` - Restore a project
+
 ## Change Log
+
+### February 6, 2026 - Soft Delete System
+
+- Converted hard delete to soft delete with 30-day recovery window
+- Cascade behavior: proposals soft-deleted; invoices preserved
+- Added `deleted_at` and `deleted_by` columns
+- All queries now filter out soft-deleted projects
 
 ### February 2, 2026 - Contract Reminders & Project Delete
 

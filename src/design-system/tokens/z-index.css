@@ -53,6 +53,18 @@
   --z-index-loading: 999;
   --z-index-intro: 998;
 
+  /* Portal/Admin overlay layers (above main site, below debug)
+   * These are intentionally higher than the main site z-index scale
+   * to ensure portal overlays appear above any main site content */
+  --z-index-portal-base: 9000;
+  --z-index-portal-header: 9100;
+  --z-index-portal-sidebar: 9200;
+  --z-index-portal-overlay: 9500;
+  --z-index-portal-modal: 9600;
+  --z-index-portal-dropdown: 9700;
+  --z-index-portal-toast: 9800;
+  --z-index-portal-confirm: 9900;
+
   /* Performance dashboard */
   --z-index-debug: 10000;
 }

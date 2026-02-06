@@ -1,7 +1,7 @@
 # Client Management System
 
 **Status:** Complete
-**Last Updated:** February 1, 2026
+**Last Updated:** February 6, 2026
 
 ## Overview
 
@@ -413,7 +413,32 @@ const { health } = await response.json();
 // { score: 85, status: 'healthy', factors: {...} }
 ```
 
+## Soft Delete Behavior
+
+When a client is deleted via `DELETE /api/clients/:id`:
+
+- Client is soft-deleted (marked with `deleted_at` timestamp)
+- All associated projects are cascade soft-deleted
+- All associated proposals are cascade soft-deleted
+- Unpaid invoices are voided
+- Paid invoices are preserved (financial records retained)
+- Client can be restored within 30 days via admin panel
+- After 30 days, permanent deletion occurs automatically
+
+**Related API Endpoints:**
+
+- `DELETE /api/clients/:id` - Soft delete a client
+- `GET /api/admin/deleted-items?type=client` - List deleted clients
+- `POST /api/admin/deleted-items/client/:id/restore` - Restore a client
+
 ## Change Log
+
+### February 6, 2026 - Soft Delete System
+
+- Added soft delete support with 30-day recovery window
+- Cascade behavior: projects, proposals soft-deleted; unpaid invoices voided
+- Paid invoices preserved for financial records
+- Added `deleted_at` and `deleted_by` columns
 
 ### February 1, 2026 - Initial Implementation
 

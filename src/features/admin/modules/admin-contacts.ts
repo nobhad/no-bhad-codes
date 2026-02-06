@@ -38,6 +38,7 @@ import {
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
 
 interface ContactsData {
   submissions: ContactSubmission[];
@@ -318,7 +319,7 @@ export function showContactDetails(contactId: number): void {
     <div class="contact-details-created">Created ${date}</div>
     <div class="details-actions">
       ${contact.client_id
-    ? '<span class="status-badge status-active">Converted to Client</span>'
+    ? getStatusBadgeHTML('Converted to Client', 'active')
     : `<button type="button" class="icon-btn" id="convert-to-client-btn" data-id="${contact.id}" data-email="${safeEmail}" data-name="${safeName}" title="Convert to Client" aria-label="Convert to Client">${ICONS.USER_PLUS}</button>`
 }
       ${contact.status !== 'archived' ? `<button type="button" class="icon-btn" id="archive-contact-btn" data-id="${contact.id}" title="Archive" aria-label="Archive contact">${ICONS.ARCHIVE}</button>` : ''}
