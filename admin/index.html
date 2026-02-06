@@ -253,17 +253,17 @@
               <span class="btn-text">MESSAGES</span>
               <span class="sidebar-badge" id="messages-badge" style="display: none;"></span>
             </button>
-            <button class="btn btn-secondary" id="btn-analytics" data-tab="analytics" aria-label="Analytics">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-              <span class="btn-text">ANALYTICS</span>
+            <button class="btn btn-secondary" id="btn-document-requests" data-tab="document-requests" aria-label="Document requests">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+              <span class="btn-text">DOCUMENTS</span>
             </button>
             <button class="btn btn-secondary" id="btn-knowledge-base" data-tab="knowledge-base" aria-label="Knowledge base">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8"/><path d="M8 11h8"/></svg>
-              <span class="btn-text">Knowledge</span>
+              <span class="btn-text">KNOWLEDGE</span>
             </button>
-            <button class="btn btn-secondary" id="btn-document-requests" data-tab="document-requests" aria-label="Document requests">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
-              <span class="btn-text">Documents</span>
+            <button class="btn btn-secondary" id="btn-analytics" data-tab="analytics" aria-label="Analytics">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <span class="btn-text">ANALYTICS</span>
             </button>
             <button class="btn btn-secondary" id="btn-system" data-tab="system" aria-label="System Status">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10"/><path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/><path d="M1 12h6m6 0h10"/><path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
@@ -523,35 +523,6 @@
               <div id="contacts-pagination" class="table-pagination"></div>
             </div>
 
-            <!-- Lead Analytics & Scoring (collapsible - uses system-details pattern) -->
-            <details class="portal-project-card portal-shadow system-details leads-analytics-section" id="leads-analytics-section">
-              <summary><h3>Lead Analytics &amp; Scoring</h3></summary>
-              <div class="analytics-columns">
-                <div class="analytics-column" id="conversion-funnel-card">
-                  <h4 class="analytics-column-title">Conversion Funnel</h4>
-                  <div class="funnel-container" id="leads-conversion-funnel">
-                    <div class="loading-text">Loading funnel data...</div>
-                  </div>
-                </div>
-                <div class="analytics-column" id="source-performance-card">
-                  <h4 class="analytics-column-title">Lead Sources</h4>
-                  <div class="source-list" id="leads-source-performance">
-                    <div class="loading-text">Loading source data...</div>
-                  </div>
-                </div>
-                <div class="analytics-column" id="scoring-rules-card">
-                  <div class="analytics-column-header">
-                    <h4 class="analytics-column-title">Scoring Rules</h4>
-                    <button type="button" class="icon-btn" id="add-scoring-rule-btn" title="Add rule" aria-label="Add scoring rule">
-                      <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
-                    </button>
-                  </div>
-                  <div class="scoring-rules-list" id="scoring-rules-list">
-                    <div class="loading-text">Loading scoring rules...</div>
-                  </div>
-                </div>
-              </div>
-            </details>
 
           </div>
 
@@ -736,17 +707,19 @@
               <div class="admin-table-header">
                 <h3><span class="title-full">All Invoices</span><span class="title-mobile">Invoices</span></h3>
                 <div class="admin-table-actions" id="invoices-filter-container">
-                  <button class="icon-btn" id="create-invoice-btn" title="Create Invoice" aria-label="Create new invoice">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                  </button>
                   <button class="icon-btn" id="export-invoices-btn" title="Export to CSV" aria-label="Export invoices to CSV">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
                   </button>
                   <button class="icon-btn" id="refresh-invoices-btn" title="Refresh" aria-label="Refresh invoices">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></span>
+                  </button>
+                  <button class="icon-btn" id="create-invoice-btn" title="Add Invoice" aria-label="Add new invoice">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
                   </button>
                 </div>
               </div>
+              <!-- Bulk Action Toolbar (hidden initially) -->
+              <div id="invoices-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
               <div class="admin-table-container invoices-table-container">
                 <div class="admin-table-scroll-wrapper">
                   <table class="admin-table invoices-table">
@@ -1197,7 +1170,7 @@
             </div>
 
             <!-- Lead Funnel -->
-            <div class="analytics-section portal-shadow" id="lead-funnel-section">
+            <div class="portal-project-card portal-shadow" id="lead-funnel-section">
               <h3>Lead Conversion Funnel</h3>
               <div class="funnel-container" id="lead-funnel">
                 <div class="funnel-stage" data-stage="new">
@@ -1243,17 +1216,47 @@
             <!-- Business Sub-Tab -->
             <div class="analytics-subtab-content" id="analytics-subtab-business">
               <h3 class="tab-section-heading">Business</h3>
-              <div class="business-charts-grid">
-                <div class="chart-container portal-shadow">
+              <div class="analytics-card-grid">
+                <div class="portal-project-card portal-shadow">
                   <h3>Revenue by Month</h3>
-                  <div class="chart" id="revenue-chart-container">
+                  <div class="chart-canvas-wrapper" id="revenue-chart-container">
                     <canvas id="revenue-chart"></canvas>
                   </div>
                 </div>
-                <div class="chart-container portal-shadow">
+                <div class="portal-project-card portal-shadow">
                   <h3>Project Status</h3>
-                  <div class="chart" id="project-status-chart-container">
+                  <div class="chart-canvas-wrapper" id="project-status-chart-container">
                     <canvas id="project-status-chart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lead Analytics & Scoring -->
+              <div class="portal-project-card portal-shadow leads-analytics-section" id="leads-analytics-section">
+                <h3>Lead Analytics</h3>
+                <div class="analytics-columns-2col">
+                  <div class="analytics-column" id="conversion-funnel-card">
+                    <span class="field-label">Conversion Funnel</span>
+                    <div class="funnel-container" id="leads-conversion-funnel">
+                      <div class="loading-text">Loading funnel data...</div>
+                    </div>
+                  </div>
+                  <div class="analytics-column" id="source-performance-card">
+                    <span class="field-label">Lead Sources</span>
+                    <div class="source-list" id="leads-source-performance">
+                      <div class="loading-text">Loading source data...</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="analytics-column analytics-column-full" id="scoring-rules-card">
+                  <div class="analytics-column-header">
+                    <span class="field-label">Scoring Rules</span>
+                    <button type="button" class="icon-btn" id="add-scoring-rule-btn" title="Add rule" aria-label="Add scoring rule">
+                      <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                    </button>
+                  </div>
+                  <div class="scoring-rules-list" id="scoring-rules-list">
+                    <div class="loading-text">Loading scoring rules...</div>
                   </div>
                 </div>
               </div>
@@ -1263,36 +1266,36 @@
             <div class="analytics-subtab-content" id="analytics-subtab-visitors">
               <h3 class="tab-section-heading">Visitors</h3>
               <!-- Site Breakdown -->
-              <div class="analytics-breakdown">
-                <div class="analytics-breakdown-block">
-                  <h4 class="analytics-breakdown-title">Main portfolio site</h4>
+              <div class="analytics-card-grid">
+                <div class="portal-project-card portal-shadow">
+                  <h3>Main Portfolio Site</h3>
                   <div class="quick-stats analytics-breakdown-stats">
-                    <div class="stat-card portal-shadow">
+                    <div class="stat-card">
                       <span class="stat-number" id="analytics-portfolio-visitors">-</span>
                       <span class="stat-label">Total Visitors</span>
                     </div>
-                    <div class="stat-card portal-shadow">
+                    <div class="stat-card">
                       <span class="stat-number" id="analytics-portfolio-pageviews">-</span>
                       <span class="stat-label">Page Views</span>
                     </div>
-                    <div class="stat-card portal-shadow">
+                    <div class="stat-card">
                       <span class="stat-number" id="analytics-portfolio-sessions">-</span>
                       <span class="stat-label">Avg. Session</span>
                     </div>
                   </div>
                 </div>
-                <div class="analytics-breakdown-block">
-                  <h4 class="analytics-breakdown-title">THE BACKEND (client portal)</h4>
+                <div class="portal-project-card portal-shadow">
+                  <h3>The Backend (Client Portal)</h3>
                   <div class="quick-stats analytics-breakdown-stats">
-                    <div class="stat-card portal-shadow">
+                    <div class="stat-card">
                       <span class="stat-number" id="analytics-backend-visitors">-</span>
                       <span class="stat-label">Total Visitors</span>
                     </div>
-                    <div class="stat-card portal-shadow">
+                    <div class="stat-card">
                       <span class="stat-number" id="analytics-backend-pageviews">-</span>
                       <span class="stat-label">Page Views</span>
                     </div>
-                    <div class="stat-card portal-shadow">
+                    <div class="stat-card">
                       <span class="stat-number" id="analytics-backend-sessions">-</span>
                       <span class="stat-label">Avg. Session</span>
                     </div>
@@ -1307,42 +1310,42 @@
               </div>
 
               <!-- Visitor Charts -->
-              <div class="charts-grid">
-                <div class="chart-container portal-shadow">
+              <div class="analytics-card-grid">
+                <div class="portal-project-card portal-shadow">
                   <h3>Visitors Over Time</h3>
-                  <div class="chart">
+                  <div class="chart-canvas-wrapper">
                     <canvas id="visitors-chart"></canvas>
                   </div>
                 </div>
-                <div class="chart-container portal-shadow">
+                <div class="portal-project-card portal-shadow">
                   <h3>Traffic Sources</h3>
-                  <div class="chart">
+                  <div class="chart-canvas-wrapper">
                     <canvas id="sources-chart"></canvas>
                   </div>
                 </div>
               </div>
 
               <!-- Analytics Data Grid -->
-              <div class="analytics-grid">
-                <div class="analytics-section portal-shadow">
+              <div class="analytics-card-grid">
+                <div class="portal-project-card portal-shadow">
                   <h3>Popular Pages</h3>
                   <div class="data-list" id="popular-pages">
                     <div class="data-item"><span class="data-label">Loading...</span></div>
                   </div>
                 </div>
-                <div class="analytics-section portal-shadow">
+                <div class="portal-project-card portal-shadow">
                   <h3>Device Breakdown</h3>
                   <div class="data-list" id="device-breakdown">
                     <div class="data-item"><span class="data-label">Loading...</span></div>
                   </div>
                 </div>
-                <div class="analytics-section portal-shadow">
+                <div class="portal-project-card portal-shadow">
                   <h3>Geographic Distribution</h3>
                   <div class="data-list" id="geo-distribution">
                     <div class="data-item"><span class="data-label">Loading...</span></div>
                   </div>
                 </div>
-                <div class="analytics-section portal-shadow">
+                <div class="portal-project-card portal-shadow">
                   <h3>Engagement Events</h3>
                   <div class="data-list" id="engagement-events">
                     <div class="data-item"><span class="data-label">Loading...</span></div>
@@ -1380,7 +1383,7 @@
             <div class="analytics-subtab-content" id="analytics-subtab-reports">
               <h3 class="tab-section-heading">Reports & Alerts</h3>
               <!-- Saved Reports Section -->
-              <div class="analytics-section portal-shadow" id="saved-reports-section">
+              <div class="portal-project-card portal-shadow" id="saved-reports-section">
                 <div class="section-header-with-actions">
                   <h3>Saved Reports</h3>
                   <button type="button" class="icon-btn" id="create-report-btn" title="New report" aria-label="Create new report">
@@ -1393,7 +1396,7 @@
               </div>
 
               <!-- Scheduled Reports Section -->
-              <div class="analytics-section portal-shadow" id="scheduled-reports-section">
+              <div class="portal-project-card portal-shadow" id="scheduled-reports-section">
                 <div class="section-header-with-actions">
                   <h3>Scheduled Reports</h3>
                 </div>
@@ -1403,7 +1406,7 @@
               </div>
 
               <!-- Metric Alerts Section -->
-              <div class="analytics-section portal-shadow" id="metric-alerts-section">
+              <div class="portal-project-card portal-shadow" id="metric-alerts-section">
                 <div class="section-header-with-actions">
                   <h3>Metric Alerts</h3>
                   <button type="button" class="icon-btn" id="create-alert-btn" title="New alert" aria-label="Create new metric alert">
@@ -1416,7 +1419,7 @@
               </div>
 
               <!-- Performance Metrics -->
-              <div class="metric-group portal-shadow">
+              <div class="portal-project-card portal-shadow">
                 <h3>Core Web Vitals</h3>
                 <div class="vitals-grid">
                   <div class="vital-card">
@@ -1443,7 +1446,7 @@
               </div>
 
               <!-- Bundle Analysis -->
-              <div class="metric-group portal-shadow">
+              <div class="portal-project-card portal-shadow">
                 <h3>Bundle Analysis</h3>
                 <div class="bundle-info">
                   <div class="bundle-item">
@@ -1480,11 +1483,11 @@
                   <button type="button" class="icon-btn" id="dr-export" title="Export to CSV" aria-label="Export to CSV">
                     <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
                   </button>
-                  <button type="button" class="icon-btn" id="dr-add-request" title="New request" aria-label="New request">
-                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
-                  </button>
                   <button type="button" class="icon-btn" id="dr-refresh" title="Refresh" aria-label="Refresh">
                     <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                  </button>
+                  <button type="button" class="icon-btn" id="dr-add-request" title="Add Request" aria-label="Add Request">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
                   </button>
                 </div>
               </div>
@@ -1507,8 +1510,13 @@
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="dr-tbody"></tbody>
+                  <tbody id="document-requests-table-body">
+                    <tr>
+                      <td colspan="6" class="loading-row">Loading requests...</td>
+                    </tr>
+                  </tbody>
                 </table>
+                <div id="document-requests-pagination" class="table-pagination"></div>
                 </div>
               </div>
             </div>
@@ -1597,11 +1605,11 @@
               <div class="admin-table-header">
                 <h3>Categories</h3>
                 <div class="admin-table-actions">
-                  <button type="button" class="icon-btn" id="kb-add-category" title="Add category" aria-label="Add category">
-                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
-                  </button>
-                  <button type="button" class="icon-btn" id="kb-refresh-categories" title="Refresh categories" aria-label="Refresh categories">
+                  <button type="button" class="icon-btn" id="kb-refresh-categories" title="Refresh" aria-label="Refresh categories">
                     <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                  </button>
+                  <button type="button" class="icon-btn" id="kb-add-category" title="Add Category" aria-label="Add Category">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
                   </button>
                 </div>
               </div>
@@ -1617,7 +1625,11 @@
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="kb-categories-tbody"></tbody>
+                  <tbody id="kb-categories-table-body">
+                    <tr>
+                      <td colspan="4" class="loading-row">Loading categories...</td>
+                    </tr>
+                  </tbody>
                 </table>
                 </div>
               </div>
@@ -1629,11 +1641,11 @@
                   <button type="button" class="icon-btn" id="kb-export" title="Export to CSV" aria-label="Export articles to CSV">
                     <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
                   </button>
-                  <button type="button" class="icon-btn" id="kb-add-article" title="Add article" aria-label="Add article">
-                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
-                  </button>
-                  <button type="button" class="icon-btn" id="kb-refresh-articles" title="Refresh articles" aria-label="Refresh articles">
+                  <button type="button" class="icon-btn" id="kb-refresh-articles" title="Refresh" aria-label="Refresh articles">
                     <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                  </button>
+                  <button type="button" class="icon-btn" id="kb-add-article" title="Add Article" aria-label="Add Article">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
                   </button>
                 </div>
               </div>
@@ -1651,8 +1663,13 @@
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="kb-articles-tbody"></tbody>
+                  <tbody id="kb-articles-table-body">
+                    <tr>
+                      <td colspan="5" class="loading-row">Loading articles...</td>
+                    </tr>
+                  </tbody>
                 </table>
+                <div id="kb-articles-pagination" class="table-pagination"></div>
                 </div>
               </div>
             </div>

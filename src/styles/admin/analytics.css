@@ -57,6 +57,8 @@
 .analytics-subtab-content > .analytics-breakdown,
 .analytics-subtab-content > .charts-grid,
 .analytics-subtab-content > .analytics-grid,
+.analytics-subtab-content > .analytics-card-grid,
+.analytics-subtab-content > .portal-project-card,
 .analytics-subtab-content > .visitors-dashboard {
   margin-bottom: var(--portal-spacing-lg);
 }
@@ -65,7 +67,56 @@
   margin-bottom: 0;
 }
 
-/* Charts */
+/* ============================================
+   Unified Analytics Card Styling
+   Match System tab pattern for consistency
+   ============================================ */
+
+/* Standardized heading for all analytics cards */
+[data-page="admin"] #tab-analytics .portal-project-card > h3:first-child,
+[data-page="admin"] #tab-analytics .portal-project-card > .section-header-with-actions h3 {
+  font-family: var(--font-family-acme);
+  font-size: 1.1rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--portal-text-light);
+  margin: 0 0 var(--portal-spacing-md) 0;
+}
+
+/* Unified 2-column grid for analytics cards */
+.analytics-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--portal-spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .analytics-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Charts - canvas wrapper (no shadow, just layout) */
+.chart-canvas-wrapper {
+  height: 320px;
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--portal-text-secondary);
+  font-style: italic;
+  padding: var(--space-2);
+  box-sizing: border-box;
+}
+
+.chart-canvas-wrapper canvas {
+  padding: var(--space-1);
+}
+
+/* Legacy .charts-grid - use .analytics-card-grid for new code */
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -86,12 +137,12 @@
   margin: 0 0 var(--space-3) 0;
 }
 
+/* Legacy .chart class - remove nested shadow when inside portal-project-card */
 .chart {
   height: 320px;
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,10 +337,10 @@
   margin-bottom: 0;
 }
 
-/* Breakdown stat cards: lighter bg and softer shadow than main block */
+/* Breakdown stat cards: medium bg, no shadow when inside portal-project-card */
 .analytics-breakdown-stats .stat-card {
   background: var(--portal-bg-medium);
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
 }
 
 /* Analytics data grid: 2x2 like other admin grids; fill content width; match portal card styling */
