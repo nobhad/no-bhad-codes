@@ -38,13 +38,14 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input {
   width: 100%;
-  background: var(--color-surface-primary);
+  background: var(--color-black);
   border: 1px solid var(--portal-border);
-  color: var(--color-neutral-900);
+  color: var(--portal-text-light);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input::placeholder {
-  color: var(--color-neutral-600);
+  color: var(--portal-text-light);
+  opacity: 0.6;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input:focus,
@@ -94,7 +95,7 @@
   padding: var(--space-1-5) var(--space-2);
   font-weight: 600;
   font-size: var(--font-size-sm);
-  color: var(--color-neutral-900);
+  color: var(--color-gray-900);
   border-bottom: 1px solid var(--portal-border);
   background: var(--color-neutral-200);
 }
@@ -134,7 +135,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .thread-item-title {
   font-weight: 500;
   font-size: var(--font-size-sm);
-  color: var(--color-neutral-900);
+  color: var(--color-gray-900);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -147,13 +148,13 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .thread-item-time {
   font-size: var(--font-size-xs);
-  color: var(--color-neutral-600);
+  color: var(--color-gray-600);
   white-space: nowrap;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .thread-item-preview {
   font-size: var(--font-size-sm);
-  color: var(--color-neutral-700);
+  color: var(--color-gray-700);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -161,7 +162,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .thread-item-contact {
   font-size: var(--font-size-sm);
-  color: var(--color-neutral-600);
+  color: var(--color-gray-600);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -175,7 +176,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .thread-item-project {
   font-size: var(--font-size-xs);
-  color: var(--color-neutral-600);
+  color: var(--color-gray-600);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -219,7 +220,7 @@
   padding: var(--space-1-5) var(--space-2);
   font-weight: 600;
   font-size: var(--font-size-sm);
-  color: var(--color-neutral-900);
+  color: var(--color-gray-900);
   border-bottom: 1px solid var(--portal-border);
   background: var(--color-neutral-200);
 }
@@ -251,7 +252,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1-5);
-  color: var(--color-neutral-900);
+  color: var(--color-gray-900);
   border-bottom: 2px solid var(--color-neutral-400);
   position: relative;
 }
@@ -356,7 +357,7 @@
   border-radius: 18px;
   padding: var(--space-2) 1.25rem;
   line-height: 1.5;
-  color: var(--color-neutral-900);
+  color: var(--color-gray-900);
   flex: 1;
   max-width: 80%;
 }
@@ -384,16 +385,16 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-sender {
   font-weight: 600;
-  color: var(--color-neutral-900);
+  color: var(--color-gray-900);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-time {
   font-size: var(--font-size-xs);
-  color: var(--color-neutral-600);
+  color: var(--color-gray-600);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-body {
-  color: var(--color-neutral-900);
+  color: var(--color-gray-900);
   line-height: 1.5;
   font-size: var(--font-size-sm);
 }
