@@ -18,6 +18,9 @@ import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { proposalService } from '../services/proposal-service.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
+import { getPdfCacheKey, getCachedPdf, cachePdf } from '../utils/pdf-utils.js';
+import { notDeleted } from '../database/query-helpers.js';
+import { softDeleteService } from '../services/soft-delete-service.js';
 
 const router = express.Router();
 
@@ -274,9 +277,9 @@ router.get(
     const proposal = await db.get(
       `SELECT pr.*, p.project_name, c.contact_name as client_name, c.email as client_email, c.company_name
        FROM proposal_requests pr
-       JOIN projects p ON pr.project_id = p.id
-       JOIN clients c ON pr.client_id = c.id
-       WHERE pr.id = ?`,
+       JOIN projects p ON pr.project_id = p.id AND ${notDeleted('p')}
+       JOIN clients c ON pr.client_id = c.id AND ${notDeleted('c')}
+       WHERE pr.id = ? AND ${notDeleted('pr')}`,
       [id]
     ) as ProposalRow | undefined;
 
@@ -347,6 +350,35 @@ router.get(
 );
 
 /**
+ * DELETE /api/proposals/:id
+ * Soft delete a proposal (admin only) - 30-day recovery period
+ */
+router.delete(
+  '/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const deletedBy = req.user?.email || 'admin';
+
+    const result = await softDeleteService.softDeleteProposal(proposalId, deletedBy);
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        message: result.message,
+        code: 'PROPOSAL_NOT_FOUND'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: result.message
+    });
+  })
+);
+
+/**
  * GET /api/admin/proposals
  * List all proposals (admin only)
  */
@@ -361,13 +393,14 @@ router.get(
     let query = `
       SELECT pr.*, p.project_name, c.contact_name as client_name, c.email as client_email, c.company_name
       FROM proposal_requests pr
-      JOIN projects p ON pr.project_id = p.id
-      JOIN clients c ON pr.client_id = c.id
+      JOIN projects p ON pr.project_id = p.id AND ${notDeleted('p')}
+      JOIN clients c ON pr.client_id = c.id AND ${notDeleted('c')}
+      WHERE ${notDeleted('pr')}
     `;
     const params: (string | number)[] = [];
 
     if (status && VALID_STATUSES.includes(status as string)) {
-      query += ' WHERE pr.status = ?';
+      query += ' AND pr.status = ?';
       params.push(status as string);
     }
 
@@ -376,11 +409,11 @@ router.get(
 
     const proposals = await db.all(query, params) as unknown as ProposalRow[];
 
-    // Get total count
-    let countQuery = 'SELECT COUNT(*) as count FROM proposal_requests';
+    // Get total count (excluding soft-deleted)
+    let countQuery = `SELECT COUNT(*) as count FROM proposal_requests WHERE ${notDeleted()}`;
     const countParams: string[] = [];
     if (status && VALID_STATUSES.includes(status as string)) {
-      countQuery += ' WHERE status = ?';
+      countQuery += ' AND status = ?';
       countParams.push(status as string);
     }
     const countResult = await db.get(countQuery, countParams) as { count: number };
@@ -621,6 +654,18 @@ router.get(
       });
     }
 
+    // Check cache first (proposals use created_at as they don't have updated_at)
+    const cacheKey = getPdfCacheKey('proposal', id, proposal.created_at);
+    const cachedPdf = getCachedPdf(cacheKey);
+    if (cachedPdf) {
+      const projectName = (proposal.project_name || 'proposal').toString().replace(/[^a-zA-Z0-9]/g, '-');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="proposal-${projectName}-${id}.pdf"`);
+      res.setHeader('Content-Length', cachedPdf.length);
+      res.setHeader('X-PDF-Cache', 'HIT');
+      return res.send(Buffer.from(cachedPdf));
+    }
+
     // Cast proposal for helper functions
     const p = proposal as unknown as Record<string, unknown>;
 
@@ -833,9 +878,13 @@ router.get(
     const pdfBytes = await pdfDoc.save();
     const projectName = getString(p, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
 
+    // Cache the generated PDF
+    cachePdf(cacheKey, pdfBytes, proposal.created_at);
+
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="proposal-${projectName}-${id}.pdf"`);
     res.setHeader('Content-Length', pdfBytes.length);
+    res.setHeader('X-PDF-Cache', 'MISS');
     res.send(Buffer.from(pdfBytes));
   })
 );
