@@ -11,12 +11,14 @@ import { PDFDocument, PDFFont, PDFPage, rgb, StandardFonts } from 'pdf-lib';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
-// Business info
+// Business info - matches server/config/business.ts defaults
 const BUSINESS_INFO = {
   name: process.env.BUSINESS_NAME || 'No Bhad Codes',
+  owner: process.env.BUSINESS_OWNER || 'Noelle Bhaduri',
   contact: process.env.BUSINESS_CONTACT || 'Noelle Bhaduri',
+  tagline: process.env.BUSINESS_TAGLINE || 'Web Development & Design',
   email: process.env.BUSINESS_EMAIL || 'nobhaduri@gmail.com',
-  website: process.env.BUSINESS_WEBSITE || 'nobhadcodes.com'
+  website: process.env.BUSINESS_WEBSITE || 'nobhad.codes'
 };
 
 // Page settings

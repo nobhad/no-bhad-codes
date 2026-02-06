@@ -53,6 +53,7 @@ import { validateEmail } from '../../../../shared/validation/validators';
 import { getHealthBadgeHtml } from './admin-client-details';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../../utils/copy-email';
+import { showToast } from '../../../utils/toast-notifications';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -332,10 +333,10 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
     }
   );
 
-  // Insert before the refresh button so order matches other tables: Add → Export → Filter → Refresh
-  const refreshBtn = domCache.get('refreshBtn');
-  if (refreshBtn) {
-    container.insertBefore(filterUI, refreshBtn);
+  // Insert before export button (Search → Filter → Export → Refresh → Add order)
+  const exportBtn = domCache.get('exportBtn');
+  if (exportBtn) {
+    container.insertBefore(filterUI, exportBtn);
   } else {
     container.appendChild(filterUI);
   }
@@ -359,7 +360,7 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
       // Export filtered data
       const filteredClients = applyFilters(clientsData, filterState, CLIENTS_FILTER_CONFIG);
       exportToCsv(filteredClients as unknown as Record<string, unknown>[], CLIENTS_EXPORT_CONFIG);
-      ctx.showNotification(`Exported ${filteredClients.length} clients to CSV`, 'success');
+      showToast(`Exported ${filteredClients.length} clients to CSV`, 'success');
     });
   }
 
@@ -944,13 +945,13 @@ async function resetClientPassword(clientId: number): Promise<void> {
     const response = await apiPost(`/api/clients/${clientId}/send-invite`);
 
     if (response.ok) {
-      storedContext?.showNotification('Password reset link sent to client', 'success');
+      showToast('Password reset link sent to client', 'success');
     } else {
-      storedContext?.showNotification('Failed to send password reset', 'error');
+      showToast('Failed to send password reset', 'error');
     }
   } catch (error) {
     console.error('[AdminClients] Error resetting password:', error);
-    storedContext?.showNotification('Error sending password reset', 'error');
+    showToast('Error sending password reset', 'error');
   }
 }
 
@@ -967,13 +968,13 @@ async function resendClientInvite(clientId: number): Promise<void> {
     const response = await apiPost(`/api/clients/${clientId}/send-invite`);
 
     if (response.ok) {
-      storedContext?.showNotification('Invitation resent successfully', 'success');
+      showToast('Invitation resent successfully', 'success');
     } else {
-      storedContext?.showNotification('Failed to resend invitation', 'error');
+      showToast('Failed to resend invitation', 'error');
     }
   } catch (error) {
     console.error('[AdminClients] Error resending invite:', error);
-    storedContext?.showNotification('Error resending invitation', 'error');
+    showToast('Error resending invitation', 'error');
   }
 }
 
@@ -984,7 +985,7 @@ async function resendClientInvite(clientId: number): Promise<void> {
 async function sendClientInvitation(clientId: number): Promise<void> {
   const client = clientsData.find(c => c.id === clientId);
   if (!client) {
-    storedContext?.showNotification('Client not found', 'error');
+    showToast('Client not found', 'error');
     return;
   }
 
@@ -1001,7 +1002,7 @@ async function sendClientInvitation(clientId: number): Promise<void> {
     const response = await apiPost(`/api/clients/${clientId}/send-invite`);
 
     if (response.ok) {
-      storedContext?.showNotification('Invitation sent successfully', 'success');
+      showToast('Invitation sent successfully', 'success');
       // Update local client data to reflect invitation sent
       const clientIndex = clientsData.findIndex(c => c.id === clientId);
       if (clientIndex !== -1) {
@@ -1012,11 +1013,11 @@ async function sendClientInvitation(clientId: number): Promise<void> {
         renderClientsTable(clientsData, storedContext);
       }
     } else {
-      storedContext?.showNotification('Failed to send invitation. Please try again.', 'error');
+      showToast('Failed to send invitation. Please try again.', 'error');
     }
   } catch (error) {
     console.error('[AdminClients] Error sending invite:', error);
-    storedContext?.showNotification('Failed to send invitation. Please try again.', 'error');
+    showToast('Failed to send invitation. Please try again.', 'error');
   }
 }
 
@@ -1109,7 +1110,7 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
     if (newEmail) {
       const emailValidation = validateEmail(newEmail, { allowDisposable: true });
       if (!emailValidation.isValid) {
-        ctx.showNotification(emailValidation.error || 'Invalid email format', 'error');
+        showToast(emailValidation.error || 'Invalid email format', 'error');
         return;
       }
     }
@@ -1126,7 +1127,7 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
       if (response.ok) {
         const result = await response.json();
         if (result.client) {
-          ctx.showNotification('Client info updated successfully', 'success');
+          showToast('Client info updated successfully', 'success');
           closeModal();
           // Update local client data with response (no need to reload all clients)
           const clientIndex = clientsData.findIndex(c => c.id === clientId);
@@ -1142,11 +1143,11 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
           }
           showClientDetails(clientId, ctx);
         } else {
-          ctx.showNotification(result.error || 'Failed to update client info', 'error');
+          showToast(result.error || 'Failed to update client info', 'error');
         }
       } else {
         const errorData = await response.json().catch(() => ({}));
-        ctx.showNotification(errorData.error || 'Failed to update client info', 'error');
+        showToast(errorData.error || 'Failed to update client info', 'error');
       }
     }, 'Saving...');
   };
@@ -1232,7 +1233,7 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
     if (newBillingEmail) {
       const emailValidation = validateEmail(newBillingEmail, { allowDisposable: true });
       if (!emailValidation.isValid) {
-        ctx.showNotification(emailValidation.error || 'Invalid billing email format', 'error');
+        showToast(emailValidation.error || 'Invalid billing email format', 'error');
         return;
       }
     }
@@ -1249,12 +1250,12 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
       });
 
       if (response.ok) {
-        ctx.showNotification('Billing details updated successfully', 'success');
+        showToast('Billing details updated successfully', 'success');
         closeModal();
         await loadClients(ctx);
         showClientDetails(clientId, ctx);
       } else {
-        ctx.showNotification('Failed to update billing details', 'error');
+        showToast('Failed to update billing details', 'error');
       }
     }, 'Saving...');
   };
@@ -1281,15 +1282,15 @@ async function archiveClient(clientId: number, ctx: AdminDashboardContext): Prom
     const response = await apiPut(`/api/clients/${clientId}`, { status: 'inactive' });
 
     if (response.ok) {
-      storedContext?.showNotification('Client archived', 'success');
+      showToast('Client archived', 'success');
       await loadClients(ctx);
       showClientDetails(clientId, ctx);
     } else {
-      storedContext?.showNotification('Failed to archive client', 'error');
+      showToast('Failed to archive client', 'error');
     }
   } catch (error) {
     console.error('[AdminClients] Error archiving client:', error);
-    storedContext?.showNotification('Error archiving client', 'error');
+    showToast('Error archiving client', 'error');
   }
 }
 
@@ -1310,14 +1311,14 @@ async function deleteClient(clientId: number): Promise<void> {
     const response = await apiDelete(`/api/clients/${clientId}`);
 
     if (response.ok) {
-      storedContext?.showNotification('Client deleted successfully', 'success');
+      showToast('Client deleted successfully', 'success');
       if (storedContext) loadClients(storedContext);
     } else {
-      storedContext?.showNotification('Failed to delete client', 'error');
+      showToast('Failed to delete client', 'error');
     }
   } catch (error) {
     console.error('[AdminClients] Error deleting client:', error);
-    storedContext?.showNotification('Error deleting client', 'error');
+    showToast('Error deleting client', 'error');
   }
 }
 
@@ -1375,14 +1376,14 @@ function addClient(ctx: AdminDashboardContext): void {
     const phone = phoneInput?.value.trim();
 
     if (!email) {
-      ctx.showNotification('Email is required', 'error');
+      showToast('Email is required', 'error');
       return;
     }
 
     // Validate email format
     const emailValidation = validateEmail(email, { allowDisposable: true });
     if (!emailValidation.isValid) {
-      ctx.showNotification(emailValidation.error || 'Invalid email format', 'error');
+      showToast(emailValidation.error || 'Invalid email format', 'error');
       return;
     }
 
@@ -1396,13 +1397,13 @@ function addClient(ctx: AdminDashboardContext): void {
       });
 
       if (response.ok) {
-        ctx.showNotification('Client added successfully', 'success');
+        showToast('Client added successfully', 'success');
         submitted = true;
         form.removeEventListener('submit', handleSubmit);
         closeModal();
         await loadClients(ctx);
       } else {
-        ctx.showNotification('Failed to add client. Please try again.', 'error');
+        showToast('Failed to add client. Please try again.', 'error');
       }
     }, 'Adding...');
   }
@@ -1474,18 +1475,18 @@ async function bulkArchiveClients(clientIds: number[]): Promise<void> {
     const failCount = results.filter(r => !r.success).length;
 
     if (successCount > 0) {
-      storedContext.showNotification(
+      showToast(
         `Archived ${successCount} client${successCount > 1 ? 's' : ''}${failCount > 0 ? ` (${failCount} failed)` : ''}`,
         failCount > 0 ? 'warning' : 'success'
       );
       // Reload clients
       await loadClients(storedContext);
     } else {
-      storedContext.showNotification('Failed to archive clients', 'error');
+      showToast('Failed to archive clients', 'error');
     }
   } catch (error) {
     console.error('[AdminClients] Bulk archive error:', error);
-    storedContext.showNotification('Error archiving clients', 'error');
+    showToast('Error archiving clients', 'error');
   }
 }
 
@@ -1509,17 +1510,17 @@ async function bulkDeleteClients(clientIds: number[]): Promise<void> {
     const failCount = results.filter(r => !r.success).length;
 
     if (successCount > 0) {
-      storedContext.showNotification(
+      showToast(
         `Deleted ${successCount} client${successCount > 1 ? 's' : ''}${failCount > 0 ? ` (${failCount} failed)` : ''}`,
         failCount > 0 ? 'warning' : 'success'
       );
       // Reload clients
       await loadClients(storedContext);
     } else {
-      storedContext.showNotification('Failed to delete clients', 'error');
+      showToast('Failed to delete clients', 'error');
     }
   } catch (error) {
     console.error('[AdminClients] Bulk delete error:', error);
-    storedContext.showNotification('Error deleting clients', 'error');
+    showToast('Error deleting clients', 'error');
   }
 }

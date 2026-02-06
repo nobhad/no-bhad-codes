@@ -41,7 +41,7 @@ export function formatCurrency(amount: number): string {
  * @returns Formatted display string
  */
 export function formatDisplayValue(value: string | undefined | null): string {
-  if (!value || value === '-') return '';
+  if (!value || value === '-') return '-';
 
   // Handle special cases first
   const lowerValue = value.toLowerCase();

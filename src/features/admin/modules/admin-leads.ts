@@ -39,7 +39,8 @@ import {
   type PaginationState,
   type PaginationConfig
 } from '../../../utils/table-pagination';
-import { showTableEmpty } from '../../../utils/loading-utils';
+import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
+import { exportToCsv, LEADS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { createViewToggle } from '../../../components/view-toggle';
 
 interface LeadsData {
@@ -166,6 +167,10 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
     filterUIInitialized = true;
   }
 
+  // Show loading state
+  const tableBody = getElement('leads-table-body');
+  if (tableBody) showTableLoading(tableBody, 8, 'Loading leads...');
+
   try {
     const response = await apiFetch('/api/admin/leads');
 
@@ -174,11 +179,6 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
       leadsData = data.leads || [];
       updateLeadsDisplay(data, ctx);
 
-      // Load analytics and scoring rules in parallel
-      Promise.all([
-        loadLeadAnalytics(),
-        loadScoringRules()
-      ]).catch(err => console.error('[AdminLeads] Failed to load extras:', err));
     } else if (response.status !== 401) {
       // Don't show error for 401 - handled by apiFetch
       const errorText = await response.text();
@@ -217,10 +217,10 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
     }
   );
 
-  // Insert before the refresh button
-  const refreshBtn = container.querySelector('#refresh-leads-btn');
-  if (refreshBtn) {
-    container.insertBefore(filterUI, refreshBtn);
+  // Insert before the export button (Search → Filter → Export → Refresh order)
+  const exportBtnRef = container.querySelector('#export-leads-btn');
+  if (exportBtnRef) {
+    container.insertBefore(filterUI, exportBtnRef);
   } else {
     container.appendChild(filterUI);
   }
@@ -248,12 +248,21 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
     });
     bulkToolbarEl.replaceWith(toolbar);
   }
+
+  // Wire export button
+  const exportBtn = container.querySelector('#export-leads-btn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const filtered = applyFilters(leadsData, filterState, LEADS_FILTER_CONFIG);
+      exportToCsv(filtered as unknown as Record<string, unknown>[], LEADS_EXPORT_CONFIG);
+    });
+  }
 }
 
 const LEADS_TABLE_ICON =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>';
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>';
 const LEADS_PIPELINE_ICON =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="15" y="5" width="6" height="16" rx="1"/></svg>';
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="15" y="5" width="6" height="16" rx="1"/></svg>';
 
 /**
  * Set up view toggle between table and pipeline (reusable view-toggle component)
@@ -571,7 +580,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   if (!tableBody) return;
 
   if (!leads || leads.length === 0) {
-    showTableEmpty(tableBody, 8, 'No leads yet. New form submissions will appear here.');
+    showTableEmpty(tableBody, 8, 'No leads yet.');
     renderLeadsPaginationUI(0, ctx);
     return;
   }
@@ -580,7 +589,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   const filteredLeads = applyFilters(leads, filterState, LEADS_FILTER_CONFIG);
 
   if (filteredLeads.length === 0) {
-    showTableEmpty(tableBody, 8, 'No leads match the current filters. Try adjusting your filters.');
+    showTableEmpty(tableBody, 8, 'No leads match the current filters.');
     renderLeadsPaginationUI(0, ctx);
     return;
   }
@@ -1544,7 +1553,7 @@ function renderScoringRules(container: HTMLElement, rules: ScoringRule[]): void 
       </div>
       <div class="rule-actions">
         <button class="icon-btn" title="${rule.is_active ? 'Disable' : 'Enable'}" data-action="toggle" aria-label="${rule.is_active ? 'Disable rule' : 'Enable rule'}">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             ${rule.is_active
     ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
     : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
@@ -1552,7 +1561,7 @@ function renderScoringRules(container: HTMLElement, rules: ScoringRule[]): void 
           </svg>
         </button>
         <button class="icon-btn icon-btn-danger" title="Delete" data-action="delete" aria-label="Delete rule">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
         </button>

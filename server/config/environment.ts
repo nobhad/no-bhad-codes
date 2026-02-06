@@ -59,12 +59,15 @@ export interface AppConfig {
   ADMIN_EMAIL: string;
   ADMIN_PASSWORD: string;
 
-  // Business Info (for invoices)
+  // Business Info (for invoices, PDFs, emails)
   BUSINESS_NAME: string;
+  BUSINESS_OWNER: string;
   BUSINESS_CONTACT: string;
+  BUSINESS_TAGLINE: string;
   BUSINESS_EMAIL: string;
   BUSINESS_WEBSITE: string;
   VENMO_HANDLE: string;
+  ZELLE_EMAIL: string;
   PAYPAL_EMAIL: string;
 
   // Email
@@ -155,12 +158,15 @@ const configSchema: ConfigSchema = {
   ADMIN_EMAIL: { required: true, type: 'email' },
   ADMIN_PASSWORD: { required: true, minLength: 8 },
 
-  // Business Info (for invoices) - REQUIRED: set these in .env
-  BUSINESS_NAME: { required: false, default: '' },
-  BUSINESS_CONTACT: { required: false, default: '' },
-  BUSINESS_EMAIL: { required: false, type: 'email' },
-  BUSINESS_WEBSITE: { required: false, default: '' },
-  VENMO_HANDLE: { required: false, default: '' },
+  // Business Info (for invoices, PDFs, emails) - set these in .env for customization
+  BUSINESS_NAME: { required: false, default: 'No Bhad Codes' },
+  BUSINESS_OWNER: { required: false, default: 'Noelle Bhaduri' },
+  BUSINESS_CONTACT: { required: false, default: 'Noelle Bhaduri' },
+  BUSINESS_TAGLINE: { required: false, default: 'Web Development & Design' },
+  BUSINESS_EMAIL: { required: false, default: 'nobhaduri@gmail.com', type: 'email' },
+  BUSINESS_WEBSITE: { required: false, default: 'nobhad.codes' },
+  VENMO_HANDLE: { required: false, default: '@nobhaduri' },
+  ZELLE_EMAIL: { required: false, default: 'nobhaduri@gmail.com', type: 'email' },
   PAYPAL_EMAIL: { required: false, type: 'email' },
 
   // Email

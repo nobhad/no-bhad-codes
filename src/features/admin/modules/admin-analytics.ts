@@ -22,6 +22,7 @@ import { showTableLoading, getChartSkeletonHTML } from '../../../utils/loading-u
 import { showTableError } from '../../../utils/error-utils';
 import { multiPromptDialog, alertDialog, confirmDialog } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
+import { loadLeadAnalytics, loadScoringRules } from './admin-leads';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -43,7 +44,9 @@ export async function loadOverviewData(_ctx: AdminDashboardContext): Promise<voi
     loadMetricAlerts(),
     loadVisitorsChart(),
     loadSourcesChart(),
-    loadAnalyticsSummary()
+    loadAnalyticsSummary(),
+    loadLeadAnalytics(),
+    loadScoringRules()
   ]);
 }
 

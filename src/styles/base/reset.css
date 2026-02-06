@@ -230,8 +230,8 @@ details {
 }
 
 details:focus-within {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 details > summary:focus-visible {
@@ -245,8 +245,8 @@ details > summary:focus-visible {
 }
 
 .custom-dropdown.open:focus-within {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .custom-dropdown.open .custom-dropdown-trigger:focus,
@@ -257,8 +257,8 @@ details > summary:focus-visible {
 
 /* Table dropdowns */
 .table-dropdown.open:focus-within {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .table-dropdown.open .custom-dropdown-trigger:focus,
@@ -269,8 +269,8 @@ details > summary:focus-visible {
 
 /* Export dropdowns */
 .export-dropdown.open:focus-within {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .export-dropdown.open button:focus,

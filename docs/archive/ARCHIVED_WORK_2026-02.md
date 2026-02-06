@@ -945,3 +945,90 @@ Advanced Endpoints (NEW):
 - `docs/API_DOCUMENTATION.md` - Added all new endpoints
 
 ---
+
+## Completed - February 3, 2026
+
+### Lead Panel UX Improvements
+
+- **Status position** — Status badge and label moved above tabs in lead details panel; spacing tightened with `.panel-status-row` in `leads-pipeline.css`.
+- **Project name clickable** — Project name in lead panel and table row now links to project details page when lead status is `in-progress` or `converted` (not just `converted`). Updated condition in `admin-leads.ts`.
+- **Removed "View Project" button** — Project name link is sufficient; removed redundant button from lead details template.
+
+### Table Icon Buttons
+
+Converted all table action columns from text buttons to icon buttons for consistency:
+
+- **Time Tracking** (`admin-time-tracking.ts`) — Edit/Delete buttons → icon buttons
+- **Knowledge Base** (`admin-knowledge-base.ts`) — Edit/Delete buttons for categories and articles → icon buttons
+- **Document Requests** (`admin-document-requests.ts`) — View/Start review/Approve/Reject/Remind/Delete → icon buttons
+
+Added CSS variants in `admin.css`:
+
+- `.icon-btn.icon-btn-danger:hover` — red hover state for destructive actions
+- `.icon-btn.icon-btn-success:hover` — green hover state for approve actions
+
+### Card Grid Consistency Fix
+
+Fixed inconsistent card grid behavior where 4-card grids (`.quick-stats`, `.attention-grid`) would sometimes display as 3+1 instead of 4 across → 2×2 → 1 column.
+
+- **Root cause:** `.attention-grid` was missing from responsive media query overrides in `admin.css`
+- **Fix:** Added `.attention-grid` to all three responsive breakpoints (1200px, 1024px, 768px) alongside `.quick-stats`
+- All 4-card grids now behave identically across the portal
+
+### Dropdown Overflow Fix
+
+Added overflow handling for project/client detail header dropdowns:
+
+- `detail-header.css` — Added `overflow: visible; position: relative; z-index: 10;` to `.detail-title-row`
+- `detail-header.css` — Added `overflow: visible; position: relative;` to `.detail-actions`
+
+### Field Label Color Consistency
+
+Updated all field labels on dark backgrounds to use `--portal-text-secondary` variable for consistent styling:
+
+- **Root fix** — Changed `--label-color` in `variables.css` from `var(--color-gray-400)` to `var(--portal-text-secondary)`
+- **Removed light theme rule** — Deleted unused `[data-theme="light"] .field-label` rule from `form-fields.css`
+- **High specificity overrides** — Added `[data-page="admin"]` and `[data-page="client-portal"]` prefixes to field label rules in `project-detail.css`
+- **Span exclusion** — Updated broad `#tab-project-detail span` color rule to exclude `.field-label` and `.meta-label` classes
+
+### Table Alignment & Consistency Fixes
+
+**Checkbox column alignment:**
+
+- Increased `.bulk-select-cell` width from 44px to 56px
+- Changed left padding to match text columns: `var(--space-4)` (32px)
+- Updated bulk toolbar grid from 44px to 56px to match
+
+**Invoices table checkbox column:**
+
+- Added checkbox column header to invoices table HTML
+- Updated `admin-invoices.ts` to render checkboxes in each row using `getPortalCheckboxHTML`
+- Updated colspan from 7 to 8
+
+**Table header alignment:**
+
+- Changed `.admin-table-header` padding from `var(--space-2) var(--space-5)` to `var(--space-3) var(--space-4)` to align with table cell padding
+
+**Table border radius (root fix):**
+
+- Added `border-bottom-radius` and `overflow: hidden` to `.admin-table-container` by default
+- When pagination follows, border-radius is removed via `:has(.table-pagination)` selector
+
+### Files Modified (Feb 3)
+
+- `src/features/admin/modules/admin-leads.ts` — Project name link, status position
+- `src/features/admin/modules/admin-time-tracking.ts` — Icon buttons
+- `src/features/admin/modules/admin-knowledge-base.ts` — Icon buttons
+- `src/features/admin/modules/admin-document-requests.ts` — Icon buttons
+- `src/features/admin/modules/admin-invoices.ts` — Checkbox column, colspan updates
+- `src/styles/admin/leads-pipeline.css` — Status row styling
+- `src/styles/pages/admin.css` — Icon button variants, card grid fixes, table alignment, border radius
+- `src/styles/admin/detail-header.css` — Dropdown overflow fixes
+- `src/styles/admin/table-features.css` — Bulk toolbar grid width
+- `src/styles/variables.css` — Label color variable
+- `src/styles/components/form-fields.css` — Field label rules
+- `src/styles/admin/project-detail.css` — Field label specificity fixes
+- `src/styles/admin/client-detail.css` — Field label color updates
+- `admin/index.html` — Invoices table checkbox header
+
+---

@@ -5,6 +5,7 @@
 ## Table of Contents
 
 - [Display Name Reference](#display-name-reference)
+  - [Column Order Reference](#column-order-reference-all-tables)
 - [Architecture Overview](#architecture-overview)
 - [Component Deep-Dive](#component-deep-dive)
   - [Portal Checkbox](#1-portal-checkbox)
@@ -50,21 +51,7 @@
   - [CSS File Locations](#css-file-locations)
 - [Comparison Matrix](#comparison-matrix)
 - [Shared vs Custom Components](#shared-vs-custom-components)
-- [Cross-Table Consistency Analysis](#cross-table-consistency-analysis)
-  - [Shared Infrastructure Adoption Gap](#tier-1-shared-infrastructure-adoption-gap)
-  - [Toolbar Button Order Inconsistency](#tier-2-toolbar-button-order-inconsistency)
-  - [Dead/Orphaned UI Elements](#tier-3-deadorphaned-ui-elements)
-  - [Feature Parity Gaps](#tier-4-feature-parity-gaps)
-  - [HTML Structure Inconsistencies](#tier-5-html-structure-inconsistencies)
-  - [Empty State Message Inconsistencies](#tier-6-empty-state-message-inconsistencies)
-  - [Loading State Inconsistencies](#tier-7-loading-state-inconsistencies)
-  - [DOM Caching Inconsistencies](#tier-8-dom-caching-inconsistencies)
-  - [Export Config Inconsistencies](#tier-9-export-config-inconsistencies)
-  - [Filter Config Inconsistencies](#tier-10-filter-config-inconsistencies)
-  - [Detail View Pattern Inconsistencies](#tier-11-detail-view-pattern-inconsistencies)
-  - [Stat Cards Inconsistency](#tier-12-stat-cards-inconsistency)
-  - [localStorage Key Naming](#tier-13-localstorage-key-naming)
-  - [Priority Order](#summary-priority-order)
+- [Cross-Table Consistency Analysis](#cross-table-consistency-analysis) (All resolved)
 
 ---
 
@@ -89,23 +76,166 @@ All tables with their UI display names, source locations, and header columns.
 | 12 | Files | Project Files | `admin-projects.ts:1143` | `admin-projects.ts` |
 | 13 | Invoices | Project Invoices | `admin-projects.ts:1592` | `admin-projects.ts` |
 
-### Table Header Quick Reference
+### Column Order Reference (All Tables)
 
-```text
-Leads:            ☐ | Project | Lead | Type | Budget | Status | Date | Actions
-Clients:          ☐ | Client | Type | Projects | Status | Created | Actions
-Contacts:         Contact | Message | Status | Date
-Projects:         ☐ | Project | Type | Budget | Timeline | Status | Start
-Invoices:         ☐ | Invoice # | Client | Project | Amount | Status | Due Date | Actions
-Proposals:        ☐ | Client | Project | Tier | Price | Status | Date | Actions
-Time Tracking:    Date | Description | Task | Duration | Billable | Actions
-Doc Requests:     ☐ | Title | Client | Type | Status | Due | Actions
-KB Categories:    Name | Slug | Articles | Active | Actions
-KB Articles:      Title | Category | Slug | Featured | Published | Updated | Actions
-Visitors:         Session ID | Started | Duration | Pages | Device | Location
-Project Files:    File | Size | Uploaded | Actions
-Project Invoices: Invoice # | Amount | Due Date | Status | Actions
-```
+Each table's columns listed in exact left-to-right display order.
+
+#### Leads Table
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | ☐ (checkbox) | Bulk select |
+| 2 | Project | `project_type` or "Website" |
+| 3 | Lead | `company_name` OR `contact_name` + `email` |
+| 4 | Type | `project_type` (formatted) |
+| 5 | Budget | `budget_range` (formatted) |
+| 6 | Status | `status` (dropdown) |
+| 7 | Date | `created_at` |
+| 8 | Actions | Convert button (conditional) |
+
+#### Clients Table
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | ☐ (checkbox) | Bulk select |
+| 2 | Client | `company_name` OR `name` + `email` |
+| 3 | Type | `client_type` ("Personal" / "Business") |
+| 4 | Projects | Project count |
+| 5 | Status | `status` (badge) |
+| 6 | Created | `created_at` |
+| 7 | Actions | View button |
+
+#### Contacts Table
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | Contact | `name` + `company` + `email` |
+| 2 | Message | `message` (truncated) |
+| 3 | Status | `status` (dropdown) |
+| 4 | Date | `created_at` |
+
+#### Projects Table
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | ☐ (checkbox) | Bulk select |
+| 2 | Project | `project_name` + `contact_name` + `company_name` |
+| 3 | Type | `project_type` (formatted) |
+| 4 | Budget | `budget_range` (formatted) |
+| 5 | Timeline | `timeline` (formatted) |
+| 6 | Status | `status` (dropdown) |
+| 7 | Start | `start_date` |
+
+#### Invoices Table
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | ☐ (checkbox) | Bulk select |
+| 2 | Invoice # | `invoice_number` or "INV-{id}" |
+| 3 | Client | `client_name` |
+| 4 | Project | `project_name` or "-" |
+| 5 | Amount | `amount` (formatted currency) |
+| 6 | Status | `status` (badge, computed overdue) |
+| 7 | Due Date | `due_date` or "-" |
+| 8 | Actions | View + Edit buttons |
+
+#### Proposals Table
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | ☐ (checkbox) | Bulk select |
+| 2 | Client | `client_name` or `company_name` |
+| 3 | Project | `project_name` |
+| 4 | Tier | `tier` (good/better/best) |
+| 5 | Price | `finalPrice` (formatted) |
+| 6 | Status | `status` (dropdown) |
+| 7 | Date | `created_at` |
+| 8 | Actions | View + Edit + Delete |
+
+#### Time Tracking Table
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | Date | `entry_date` |
+| 2 | Description | `description` |
+| 3 | Task | `task_title` or "-" |
+| 4 | Duration | `duration_minutes` (formatted "Xh Ym") |
+| 5 | Billable | `is_billable` (Yes/No badge) |
+| 6 | Actions | Edit + Delete buttons |
+
+#### Document Requests Table
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | ☐ (checkbox) | Bulk select |
+| 2 | Title | `title` |
+| 3 | Client | `client_name` |
+| 4 | Type | `document_type` |
+| 5 | Status | `status` (badge) |
+| 6 | Due | `due_date` |
+| 7 | Actions | Contextual (View, Review, Approve, etc.) |
+
+#### KB Categories Table
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | Name | `name` |
+| 2 | Slug | `slug` |
+| 3 | Articles | Article count |
+| 4 | Active | `is_active` (Yes/No) |
+| 5 | Actions | Edit + Delete |
+
+#### KB Articles Table
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | Title | `title` |
+| 2 | Category | `category_name` |
+| 3 | Slug | `slug` |
+| 4 | Featured | `is_featured` (Yes/No) |
+| 5 | Published | `is_published` (Yes/No) |
+| 6 | Updated | `updated_at` |
+| 7 | Actions | Edit + Delete |
+
+#### Visitors Table (Analytics)
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | Session ID | Session identifier |
+| 2 | Started | Session start time |
+| 3 | Duration | Session duration |
+| 4 | Pages | Pages viewed count |
+| 5 | Device | Device type |
+| 6 | Location | Geographic location |
+
+#### Project Files Table (Sub-table)
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | File | `original_filename` + icon |
+| 2 | Size | `file_size` (formatted) |
+| 3 | Uploaded | Upload timestamp |
+| 4 | Actions | Preview (conditional) + Download |
+
+#### Project Invoices Table (Sub-table)
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | Invoice # | `invoice_number` |
+| 2 | Amount | `amount_total` (formatted) |
+| 3 | Due Date | `due_date` |
+| 4 | Status | `status` (badge) |
+| 5 | Actions | Send (draft) + Edit (draft) + Mark Paid (sent/viewed/partial/overdue) + Preview + Download |
+
+#### Tasks List View (Sub-table)
+
+| # | Header | Data Source |
+|---|--------|-------------|
+| 1 | Task | `title` + `description` (truncated) |
+| 2 | Priority | `priority` (badge) |
+| 3 | Status | `status` (badge) |
+| 4 | Due Date | `due_date` + overdue indicator |
+| 5 | Assignee | `assignee_name` or "-" |
 
 ---
 
@@ -2052,12 +2182,11 @@ Title | Category | Slug | Featured | Published | Updated | Actions
 
 | # | Column | Data Type | Notes |
 |---|--------|-----------|-------|
-| 1 | Title | Text | task title |
+| 1 | Task | Text | title + description (truncated) |
 | 2 | Priority | Badge | low/medium/high/urgent (task-priority-* class) |
-| 3 | Status | Text | task status |
-| 4 | Assignee | Text | assigned user |
-| 5 | Due Date | Formatted date + icon | "overdue" class if past due |
-| 6 | Checklist | Progress | completed/total |
+| 3 | Status | Badge | task status |
+| 4 | Due Date | Formatted date | "overdue" class if past due |
+| 5 | Assignee | Text | assignee_name or "-" |
 
 #### Checkboxes and Bulk Actions
 
@@ -2149,7 +2278,7 @@ File | Size | Uploaded | Actions
 | 1 | File | Text + icon | original_filename with file type icon |
 | 2 | Size | Formatted size | `formatFileSize()` output |
 | 3 | Uploaded | Formatted date | upload timestamp |
-| 4 | Actions | Icon buttons | Download, Delete |
+| 4 | Actions | Icon buttons | Preview (conditional), Download |
 
 #### Checkboxes and Bulk Actions
 
@@ -2188,7 +2317,7 @@ Invoice # | Amount | Due Date | Status | Actions
 | 2 | Amount | Currency | `Intl.NumberFormat` formatted |
 | 3 | Due Date | Formatted date | due_date |
 | 4 | Status | Badge | paid/pending/overdue |
-| 5 | Actions | Icon buttons | View, Edit |
+| 5 | Actions | Icon buttons | Send (draft), Edit (draft), Mark Paid (sent/viewed/partial/overdue), Preview, Download |
 
 #### Checkboxes and Bulk Actions
 
@@ -2379,36 +2508,36 @@ BREAKPOINT MAP
 
 ### Feature Support by Table
 
-| Feature | Leads | Clients | Contacts | Projects | Invoices | Proposals | Time | Doc Requests | KB | Visitors |
-|---------|:-----:|:-------:|:--------:|:--------:|:--------:|:---------:|:----:|:------------:|:--:|:--------:|
-| Checkboxes | Yes | Yes | No | Yes | Yes | Yes | No | Yes | No | No |
-| Bulk Actions | Yes (3) | Yes (2) | No | Framework | No | Yes (1) | No | Yes (2) | No | No |
-| Pagination | Yes | Yes | Yes | Yes | No | No | No | No | No | No |
-| Search | Yes | Yes | Yes | Yes | No | Yes | No | Yes | Yes | No |
-| Status Filter | Yes | Yes | Yes | Yes | No | Yes | No | Yes | No | No |
-| Date Filter | Yes | Yes | Yes | Yes | No | No | No | No | No | No |
-| Sortable Cols | Yes | Yes | Yes | Yes | No | No | No | Yes | Yes | No |
-| Status Dropdown | Yes | No | Yes | Yes | No | Yes | No | No | No | No |
-| CSV Export | Yes | Yes | Yes | Yes | Yes | Yes | No | Yes | Yes | No |
-| Row Click Nav | Yes | Yes | Yes | Yes | No | No | No | No | No | No |
-| Dual View | Yes (Kanban) | No | No | No | No | No | No | No | No | No |
-| Identity Cell | Yes | Yes | Yes | Yes | No | No | No | No | No | No |
-| Email Copy | Yes | Yes | Yes | No | No | No | No | No | No | No |
-| Column Hiding | Yes | Yes | Yes | Yes | No | No | No | No | No | No |
+| Feature | Leads | Clients | Contacts | Projects | Invoices | Proposals | Time | Doc Requests | KB Arts | Visitors |
+|---------|:-----:|:-------:|:--------:|:--------:|:--------:|:---------:|:----:|:------------:|:-------:|:--------:|
+| Checkboxes | ✓ | ✓ | - | ✓ | ✓ | ✓ | - | ✓ | - | - |
+| Bulk Actions | ✓ (3) | ✓ (2) | - | ✓ (3) | ✓ (3) | ✓ (2) | - | ✓ (2) | - | - |
+| Pagination | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | ✓ | - |
+| Search | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | ✓ | - |
+| Status Filter | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | - | - |
+| Date Filter | ✓ | ✓ | ✓ | ✓ | ✓ | - | - | ✓ | - | - |
+| Sortable Cols | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - |
+| Status Dropdown | ✓ | - | ✓ | ✓ | - | - | - | - | - | - |
+| CSV Export | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - |
+| Row Click Nav | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | - | - |
+| Dual View | ✓ (Kanban) | - | - | - | - | - | - | - | - | - |
+| Identity Cell | ✓ | ✓ | ✓ | ✓ | - | - | - | - | - | - |
+| Email Copy | ✓ | ✓ | ✓ | - | - | - | - | - | - | - |
+| Column Hiding | ✓ | ✓ | ✓ | ✓ | - | - | - | - | - | - |
 
 ### Pagination Details
 
 | Table | Has Pagination | Default Size | Size Options | Storage Key |
 |-------|:--------------:|:------------:|:------------:|-------------|
-| Leads | Yes | 25 | 10, 25, 50, 100 | `admin_leads_pagination` |
-| Clients | Yes | 25 | 10, 25, 50, 100 | `admin_clients_pagination` |
-| Contacts | Yes | 25 | 10, 25, 50, 100 | `admin_contacts_pagination` |
-| Projects | Yes | 25 | 10, 25, 50, 100 | `admin_projects_pagination` |
-| Invoices | No | - | - | - |
-| Proposals | No | - | - | - |
-| Time Tracking | No | - | - | - |
-| Doc Requests | No | - | - | - |
-| Knowledge Base | No | - | - | - |
+| Leads | ✓ | 25 | 10, 25, 50, 100 | `admin_leads_pagination` |
+| Clients | ✓ | 25 | 10, 25, 50, 100 | `admin_clients_pagination` |
+| Contacts | ✓ | 25 | 10, 25, 50, 100 | `admin_contacts_pagination` |
+| Projects | ✓ | 25 | 10, 25, 50, 100 | `admin_projects_pagination` |
+| Invoices | ✓ | 25 | 10, 25, 50, 100 | `admin_invoices_pagination` |
+| Proposals | ✓ | 25 | 10, 25, 50, 100 | `admin_proposals_pagination` |
+| Time Tracking | - | - | - | - |
+| Doc Requests | ✓ | 25 | 10, 25, 50, 100 | `admin_document_requests_pagination` |
+| KB Articles | ✓ | 25 | 10, 25, 50, 100 | `admin_kb_articles_pagination` |
 
 ### All Backend API Endpoints
 
@@ -2603,481 +2732,71 @@ All tables follow the same state pattern:
 
 ## Cross-Table Consistency Analysis
 
-This section documents every inconsistency between tables and recommends changes to make the portal cohesive. Intentional differences (e.g., no checkboxes on Contacts because bulk actions aren't needed for form submissions) are noted as such and excluded from recommendations.
+**Status:** All major consistency issues have been resolved as of February 2026.
 
-### Tier 1: Shared Infrastructure Adoption Gap
+### Completed Fixes
 
-Three tables completely bypass all shared table utilities. This is the single biggest consistency problem.
+| Tier | Issue | Status |
+|------|-------|--------|
+| 1 | Shared infrastructure adoption (Invoices, Proposals, Time Tracking) | ✓ Complete |
+| 2 | Toolbar button order standardized | ✓ Complete |
+| 3 | Dead UI wired (Leads export, Invoices bulk actions) | ✓ Complete |
+| 4 | Feature parity (pagination, search, sort added to all tables) | ✓ Complete |
+| 5 | HTML structure (tbody IDs, card IDs, loading rows) | ✓ Complete |
+| 6 | Empty state messages standardized | ✓ Complete |
+| 7 | Loading states use `showTableLoading()` | ✓ Complete |
+| 8 | Notifications standardized to `showToast()` | ✓ Complete |
+| 9 | Export configs documented | ✓ Complete |
+| 10 | Filter configs (added missing search fields) | ✓ Complete |
+| 13 | localStorage key naming (`admin_knowledge_base_filter`) | ✓ Complete |
+| 14 | Empty value display (`-` instead of blank) | ✓ Complete |
+| 15 | Action button classes (`icon-btn` standardized) | ✓ Complete |
+| 16 | Row click navigation added to Proposals | ✓ Complete |
+| 17 | Icon sizes standardized to 16px | ✓ Complete |
 
-| Table | `table-filter.ts` | `table-pagination.ts` | `table-bulk-actions.ts` | `table-export.ts` | `createSortableHeaders` |
-|-------|:-:|:-:|:-:|:-:|:-:|
-| Leads | Yes | Yes | Yes | **No** (button exists, no handler) | Yes |
-| Clients | Yes | Yes | Yes | Yes | Yes |
-| Contacts | Yes | Yes | No (intentional) | Yes | Yes |
-| Projects | Yes | Yes | Yes | Yes | Yes |
-| **Invoices** | **No** | **No** | **No** (orphaned checkbox) | **No** (custom CSV) | **No** |
-| **Proposals** | **No** (custom buttons) | **No** | Yes (partial) | Yes | **No** |
-| **Time Tracking** | **No** | **No** | No (intentional) | **No** (custom CSV) | **No** |
-| Document Requests | Yes | No | Yes | Yes | Yes |
-| Knowledge Base | Yes | No | No (intentional) | Yes | Yes |
+### Deferred Items (Low Priority)
 
-**Concern:** Invoices, Proposals, and Time Tracking were built independently of the shared table system. They lack search, sortable headers, filter persistence, and standardized pagination that the other tables have.
+| Item | Reason Deferred |
+|------|-----------------|
+| Stat cards for Contacts/Document Requests | Filter dropdowns provide equivalent functionality |
+| `.admin-table-card` wrapper for Visitors table | Low priority styling consistency |
+| DOM caching pattern unification | Current patterns (createDOMCache, Map, el()) all work correctly |
+| Detail view pattern standardization | Intentional variation (side panel, tab, modal) based on context |
 
-**Recommendations:**
+### Intentional Differences (Not Inconsistencies)
 
-- [ ] **Invoices:** Adopt `table-filter.ts` (add `INVOICES_FILTER_CONFIG` with search by invoice_number, client_name, project_name; status filter for draft/sent/paid/overdue; date filter on due_date; sortable columns). Adopt `table-pagination.ts`. Wire the existing `export-invoices-btn` to use shared `exportToCsv()`. Remove orphaned checkbox or wire bulk toolbar.
-- [ ] **Proposals:** Replace custom segmented filter buttons with `createFilterUI()` for consistency, or at minimum add `createSortableHeaders()` for column sorting. Add `table-pagination.ts` if proposal count grows.
-- [ ] **Time Tracking:** Add `createSortableHeaders()` for column sorting (Date, Duration at minimum). Consider adding search.
+| Item | Reason |
+|------|--------|
+| KB uses `updated_at` for date filter | Articles care about last update, not creation |
+| Proposals uses camelCase in export | API returns camelCase data |
+| Time Tracking has no bulk actions | Per-project entries, bulk operations not meaningful |
+| Contacts has no checkboxes | Form submissions don't need bulk operations |
+| KB Categories has no export | Too few rows to warrant export |
 
----
+### Standard Patterns Reference
 
-### Tier 2: Toolbar Button Order Inconsistency
-
-Buttons in the `.admin-table-actions` toolbar appear in different orders across tables. Users should see buttons in the same predictable position on every table.
-
-#### Current Button Order (left to right, per table)
-
-```text
-Leads:          View Toggle → Export → Refresh
-Contacts:       Export → Refresh
-Projects:       Add → Export → Refresh
-Clients:        Add → Export → Refresh
-Invoices:       Create → Export → Refresh
-Doc Requests:   Export → Add → Refresh          ← Add is AFTER Export
-KB Categories:  Add → Refresh                   ← Missing Export
-KB Articles:    Export → Add → Refresh           ← Add is AFTER Export
-Proposals:      Filters → Search → Export → Refresh (entirely custom layout)
-```
-
-#### Issues
-
-| Issue | Tables Affected |
-|-------|----------------|
-| **Add/Create button position varies**: first in some, second in others | Doc Requests, KB Articles put Add AFTER Export |
-| **KB Categories missing Export** | KB Categories |
-| **Add button verb inconsistent**: "Add Project" vs "Create Invoice" vs "New request" vs "Add category" | All tables with Add button |
-| **Icon wrapper inconsistent**: some use `<span class="icon-btn-svg">`, others put SVG directly in button | Doc Requests, KB use wrapper; Leads, Clients, Projects, Invoices do not |
-| **Proposals uses entirely different toolbar pattern** | Proposals (filter buttons + text "Refresh" button instead of icon) |
-
-#### Standard Button Order (Approved)
-
-All tables follow this order when buttons are present. Omit buttons that don't apply, but never reorder:
+**Toolbar Button Order:**
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│  Search  │  Filter  │  View Toggle  │  Export  │  Refresh  │  Add/Create    │
-│  (find   │  (refine │  (if dual     │  (CSV    │  (always  │  (primary CTA, │
-│   data)  │   data)  │   view)       │   export)│   present)│   last/right)  │
-└──────────────────────────────────────────────────────────────────────────────┘
+Search → Filter → View Toggle → Export → Refresh → Add (last)
 ```
 
-Position order: **1. Search → 2. Filter → 3. View Toggle → 4. Export → 5. Refresh → 6. Add**
+**Empty State Messages:**
 
-Flow logic: **find → refine → view → act → create**
+- Zero data: "No {entity} yet."
+- Filtered empty: "No {entity} match the current filters."
 
-#### Changes Required
+**Notification Pattern:**
 
-| Table | Current Order | Change Needed |
-|-------|--------------|---------------|
-| Leads | View Toggle → Export → Refresh | **Move Search and Filter before View Toggle** (injected by JS — verify DOM order) |
-| Contacts | Export → Refresh | **No change** (no Add, no View Toggle) |
-| Projects | Add → Export → Refresh | **Move Add to LAST position** (after Refresh) |
-| Clients | Add → Export → Refresh | **Move Add to LAST position** (after Refresh) |
-| Invoices | Create → Export → Refresh | **Move Add to LAST position** + rename to "Add Invoice" |
-| Doc Requests | Export → Add → Refresh | **Move Add to LAST position** (after Refresh) |
-| KB Categories | Add → Refresh | **Move Add to LAST position** (after Refresh) |
-| KB Articles | Export → Add → Refresh | **Move Add to LAST position** (after Refresh) |
-| Proposals | Custom layout | Migrate to standard toolbar pattern, Add last |
-
-#### Add Button Verb Standardization
-
-All "create new item" buttons should use the same verb pattern: **"Add {entity}"**
-
-| Table | Current Title | Recommended Title |
-|-------|--------------|-------------------|
-| Projects | "Add Project" | No change |
-| Clients | "Add Client" | No change |
-| Invoices | "Create Invoice" | **"Add Invoice"** |
-| Doc Requests | "New request" | **"Add Request"** |
-| KB Categories | "Add category" | **"Add Category"** (capitalize) |
-| KB Articles | "Add article" | **"Add Article"** (capitalize) |
-
-#### Icon Wrapper Standardization
-
-All toolbar buttons should use the same inner structure. Currently two patterns exist:
-
-```html
-<!-- Pattern A (Leads, Clients, Projects, Invoices): SVG directly in button -->
-<button class="icon-btn" id="export-leads-btn" title="Export to CSV">
-  <svg ...></svg>
-</button>
-
-<!-- Pattern B (Doc Requests, KB): SVG wrapped in span -->
-<button type="button" class="icon-btn" id="dr-export" title="Export to CSV">
-  <span class="icon-btn-svg"><svg ...></svg></span>
-</button>
+```typescript
+showToast('Success message', 'success');
+showToast('Error message', 'error');
+showToast('Warning message', 'warning');
 ```
 
-**Recommendation:** Standardize on Pattern B (`icon-btn-svg` wrapper). It provides a consistent hook for icon styling and is already used by newer tables.
+**Variable Naming:**
 
----
-
-### Tier 3: Dead/Orphaned UI Elements
-
-These are buttons or features that exist in the HTML but have no functional handler.
-
-| Issue | Location | Details |
-|-------|----------|---------|
-| **Leads export button has no handler** | `admin/index.html:446` (`#export-leads-btn`) | Button renders but `admin-leads.ts` never imports `exportToCsv` or references the button ID. Despite `LEADS_EXPORT_CONFIG` existing in `table-export.ts`, it is never used. |
-| **Invoices checkbox column has no bulk toolbar** | `admin/index.html:758-761` | Checkbox `<th>` and per-row checkboxes render, but no bulk toolbar container exists and no bulk actions are wired. Selecting rows does nothing. |
-
-**Recommendations:**
-
-- [ ] **Leads:** Wire `#export-leads-btn` to `exportToCsv(filteredLeads, LEADS_EXPORT_CONFIG)` in `admin-leads.ts`, matching the pattern used in `admin-clients.ts:358-363`.
-- [ ] **Invoices:** Either remove the checkbox column from the HTML and CSS, or add a bulk toolbar with actions (e.g., Bulk Mark Paid, Bulk Send, Bulk Delete).
-
----
-
-### Tier 4: Feature Parity Gaps
-
-Features that some tables have and others reasonably should.
-
-#### Pagination
-
-| Table | Has Pagination | Row Count Likely to Need It |
-|-------|:-:|---|
-| Leads | Yes | Yes (can grow) |
-| Clients | Yes | Yes |
-| Contacts | Yes | Yes |
-| Projects | Yes | Yes |
-| Invoices | **No** | **Yes** (invoices accumulate over time) |
-| Proposals | **No** | Possibly (depends on volume) |
-| Document Requests | **No** | **Yes** (will accumulate) |
-| Knowledge Base | **No** | Lower priority |
-
-**Recommendations:**
-
-- [ ] **Invoices:** Add pagination. Invoices accumulate indefinitely; rendering all at once will degrade performance.
-- [ ] **Document Requests:** Add pagination for the same reason.
-
-#### Search and Sortable Headers
-
-| Table | Search | Sortable Headers | Should Have Both |
-|-------|:-:|:-:|---|
-| Leads | Yes | Yes | - |
-| Clients | Yes | Yes | - |
-| Contacts | Yes | Yes | - |
-| Projects | Yes | Yes | - |
-| Invoices | **No** | **No** | **Yes** - users need to find specific invoices by number, client, amount |
-| Proposals | Custom search | **No** | Sorting by price/date would be useful |
-| Time Tracking | **No** | **No** | Sorting by date/duration would be useful |
-| Document Requests | Yes | Yes | - |
-| Knowledge Base | Yes | Yes | - |
-
-**Recommendations:**
-
-- [ ] **Invoices:** Add search (by invoice number, client name, project name) and sortable headers (amount, due date, status).
-- [ ] **Proposals:** Add `createSortableHeaders()` for column sorting.
-- [ ] **Time Tracking:** Add sortable headers for Date and Duration columns.
-
-#### Date Range Filter
-
-| Table | Has Date Filter |
-|-------|:-:|
-| Leads | Yes |
-| Clients | Yes |
-| Contacts | Yes |
-| Projects | Yes |
-| Invoices | **No** |
-| Document Requests | **No** |
-
-**Recommendations:**
-
-- [ ] **Invoices:** Add date range filter (on `due_date`) - critical for filtering to specific billing periods.
-- [ ] **Document Requests:** Add date range filter (on `due_date` or `created_at`).
-
----
-
-### Tier 5: HTML Structure Inconsistencies
-
-These are naming and structural inconsistencies in `admin/index.html`.
-
-#### Tbody ID Naming
-
-Two patterns exist:
-
-```text
-CONSISTENT:   {entity}-table-body     (leads, contacts, projects, clients, invoices, visitors)
-INCONSISTENT: {prefix}-tbody          (dr-tbody, kb-categories-tbody, kb-articles-tbody)
+```typescript
+let filterState: FilterState = loadFilterState(CONFIG.storageKey);
+let paginationState: PaginationState = { ...getDefaultPaginationState(CONFIG), ...loadPaginationState(CONFIG.storageKey!) };
 ```
-
-**Recommendation:**
-
-- [ ] Rename `dr-tbody` to `document-requests-table-body`.
-- [ ] Rename `kb-categories-tbody` to `kb-categories-table-body`.
-- [ ] Rename `kb-articles-tbody` to `kb-articles-table-body`.
-- [ ] Update all TypeScript references to match.
-
-#### Card and Container ID Naming
-
-```text
-leads:              intake-submissions-card    (uses display name, not entity name)
-clients:            clients-table-card
-invoices:           invoices-table-card
-projects:           projects-card              (missing "-table" suffix)
-document requests:  (no card ID)
-KB:                 (no card ID)
-visitors:           (no card class at all)
-```
-
-**Recommendation:**
-
-- [ ] Standardize all card IDs to `{entity}-table-card`.
-- [ ] Add `.admin-table-card` class to Visitors table container.
-- [ ] Add card IDs to Document Requests and Knowledge Base.
-
-#### Missing Loading Rows
-
-Document Requests, KB Categories, and KB Articles have empty `<tbody>` elements with no initial loading row.
-
-**Recommendation:**
-
-- [ ] Add `<tr><td colspan="N" class="loading-row">Loading...</td></tr>` to Document Requests, KB Categories, and KB Articles tbody elements.
-
----
-
-### Tier 6: Empty State Message Inconsistencies
-
-Current messages vary in tone, specificity, and helpfulness:
-
-| Table | Empty State Message |
-|-------|-------------------|
-| Leads | "No leads yet. New form submissions will appear here." |
-| Clients | "No clients yet." |
-| Contacts | "No contact form submissions yet." |
-| Projects (none) | "No projects yet. Convert leads to start projects." |
-| Projects (filtered) | "No projects match the current filters. Try adjusting your filters." |
-| Invoices | "No invoices found" |
-| Proposals | "No proposals found" |
-| Time Tracking | "No time entries yet. Log your first entry above." |
-| Document Requests | "No document requests match the filter." |
-| KB Categories | "No categories yet. Add one to get started." |
-| KB Articles | "No articles yet. Add one to get started." |
-
-**Pattern recommendation:** All tables should follow the same two-state pattern:
-
-1. **No data at all:** "No {entity} yet." + optional guidance
-2. **No filtered results:** "No {entity} match the current filters."
-
-**Recommendations:**
-
-- [ ] Standardize "no data" messages: "No {entity} yet." with optional next-step guidance.
-- [ ] Standardize "no filter results" messages: "No {entity} match the current filters."
-- [ ] Add filtered-empty states to tables that only have a single empty message (Invoices, Proposals).
-
----
-
-### Tier 7: Loading State Inconsistencies
-
-| Table | Uses `showTableLoading()` | Uses `showTableEmpty()` |
-|-------|:-:|:-:|
-| Leads | **No** (manual HTML) | Yes |
-| Clients | Yes | Yes |
-| Contacts | **No** | Yes |
-| Projects | Yes | Yes |
-| Invoices | Yes | Yes |
-| Proposals | **No** (manual `loading-row` HTML) | **No** (manual HTML) |
-| Time Tracking | **No** | **No** |
-| Document Requests | Yes | Yes |
-| Knowledge Base | Yes | Yes |
-
-**Recommendations:**
-
-- [ ] **Leads:** Replace manual loading HTML with `showTableLoading()`.
-- [ ] **Contacts:** Add `showTableLoading()` before fetch.
-- [ ] **Proposals:** Replace manual `loading-row` HTML with `showTableLoading()`.
-- [ ] **Time Tracking:** Add `showTableLoading()` and `showTableEmpty()`.
-
----
-
-### Tier 8: DOM Caching Inconsistencies
-
-Only 2 of 9 modules use the shared `createDOMCache()` utility:
-
-| Table | Uses `createDOMCache()` | DOM Access Pattern |
-|-------|:-:|---|
-| Clients | Yes | `domCache.get('key')` |
-| Projects | Yes | `domCache.get('key')` with `batchUpdateText` |
-| Leads | No | Simple `Map<string, HTMLElement>` |
-| Contacts | No | Simple `Map` |
-| Proposals | No | `getElement()` helper (simple Map) |
-| Invoices | No | Direct `document.getElementById()` |
-| Time Tracking | No | Direct `document.getElementById()` |
-| Document Requests | No | `el()` helper function |
-| Knowledge Base | No | `el()` helper function |
-
-**Pattern:** Three different approaches exist (createDOMCache, custom Map wrappers, direct getElementById). The `el()` helper used by Document Requests and Knowledge Base is a third pattern.
-
-**Recommendation:**
-
-- [ ] Standardize on `createDOMCache()` for all modules, or at minimum use the same helper function pattern. Not blocking but improves maintainability.
-
----
-
-### Tier 9: Export Config Inconsistencies
-
-#### Data Key Naming Convention
-
-```text
-STANDARD (snake_case):  contact_name, company_name, project_type, created_at
-PROPOSALS (camelCase):  projectType, selectedTier, finalPrice, createdAt
-PROPOSALS (nested):     client.name, client.company, project.name
-```
-
-Proposals is the only module using camelCase data keys and nested object access in its export config. Every other module uses flat snake_case keys.
-
-#### Export Label Inconsistency
-
-The same concept is labeled differently across export configs:
-
-```text
-CLIENTS export:   "Contact Name" (from contact_name)
-PROJECTS export:  "Client Name"  (from contact_name)
-```
-
-**Recommendations:**
-
-- [ ] **Proposals:** Normalize export config data keys to snake_case to match all other modules. Use a data transformer before export if the API returns camelCase.
-- [ ] Standardize the label: pick either "Contact Name" or "Client Name" and use it everywhere.
-
----
-
-### Tier 10: Filter Config Inconsistencies
-
-#### Date Field
-
-All filter configs use `created_at` as the date field except Knowledge Base which uses `updated_at`.
-
-```text
-Leads:     dateField: 'created_at'
-Contacts:  dateField: 'created_at'
-Projects:  dateField: 'created_at'
-Clients:   dateField: 'created_at'
-DocReqs:   dateField: 'created_at'
-KB:        dateField: 'updated_at'  ← Different
-```
-
-This is likely intentional (KB articles are more about last update than creation). Document this as intentional.
-
-#### Search Field Naming
-
-Different field names for the same concept:
-
-```text
-Name field:    'name' (Contacts, Clients) vs 'contact_name' (Leads, Projects)
-Company field: 'company' (Contacts) vs 'company_name' (Leads, Clients)
-```
-
-**Recommendation:**
-
-- [ ] **Contacts:** Consider using `contact_name` and `company_name` to match the pattern used by Leads/Clients/Projects. This depends on the actual data key names in the API response.
-
-#### Missing Search Fields
-
-Projects filter config doesn't include `email` in `searchFields` despite having contact email data available. Clients doesn't include `contact_name`.
-
-**Recommendations:**
-
-- [ ] **Projects:** Add `email` or `contact_email` to searchFields.
-- [ ] **Clients:** Add `contact_name` to searchFields if the data contains it.
-
----
-
-### Tier 11: Detail View Pattern Inconsistencies
-
-Four different patterns are used to show row details:
-
-| Pattern | Tables | How It Works |
-|---------|--------|---|
-| **Side Panel** | Leads, Contacts | Overlay panel slides in from right |
-| **Full Tab Switch** | Clients | Switches to `tab-client-detail` (entirely different view) |
-| **In-Page Panel Toggle** | Proposals | Hides table, shows detail panel in same area |
-| **Modal Dialog** | Document Requests | Opens modal overlay |
-| **No Detail View** | Invoices, Time Tracking, KB | Row click does nothing or only action buttons |
-
-**Recommendation:**
-
-- [ ] Pick one primary pattern for detail views and migrate toward it. The side panel pattern (Leads, Contacts) is the most common and least disruptive to table context. Consider it for Document Requests (currently modal) and Proposals (currently in-page toggle).
-
----
-
-### Tier 12: Stat Cards Inconsistency
-
-Stat cards (clickable filter cards above tables) exist for some tables but not others:
-
-| Table | Has Stat Cards | Card Filters |
-|-------|:-:|---|
-| Leads | Yes | all, pending, in_progress, completed |
-| Projects | Yes | all, active, completed, on_hold |
-| Clients | Yes | all, active, pending, inactive |
-| Invoices | Yes | all, pending, paid, overdue |
-| Contacts | **No** | - |
-| Document Requests | **No** | - |
-| Knowledge Base | **No** | - |
-
-**Recommendations:**
-
-- [ ] **Contacts:** Add stat cards (All, New, Read, Responded, Archived).
-- [ ] **Document Requests:** Add stat cards (All, Requested, Uploaded, Under Review, Approved, Rejected).
-
----
-
-### Tier 13: localStorage Key Naming
-
-Two patterns exist for storage keys:
-
-```text
-STANDARD:      admin_{module}_filter, admin_{module}_pagination
-DOCUMENT REQS: admin_document_requests_filter (no pagination key)
-KB:            admin_kb_filter (abbreviated, no pagination key)
-```
-
-`admin_kb_filter` uses "kb" abbreviation while `admin_document_requests_filter` spells it out. Minor inconsistency.
-
-**Recommendation:**
-
-- [ ] Consider `admin_knowledge_base_filter` for consistency, or document the abbreviation as intentional.
-
----
-
-### Summary: Priority Order
-
-#### Must Fix (broken/misleading behavior)
-
-1. Wire Leads export button to `exportToCsv()` (dead button)
-2. Fix Invoices orphaned checkbox (shows selection UI that does nothing)
-
-#### Should Fix (feature parity gaps)
-
-3. Add search + sortable headers + pagination to Invoices
-4. Add sortable headers to Proposals
-5. Add pagination to Document Requests
-6. Add date range filter to Invoices
-7. Add stat cards to Contacts and Document Requests
-
-#### Should Standardize (consistency)
-
-8. Standardize tbody ID naming (`{entity}-table-body`)
-9. Standardize empty state messages (two-state pattern)
-10. Standardize loading states (use `showTableLoading()` everywhere)
-11. Standardize card/container ID naming
-12. Normalize Proposals export config to snake_case
-13. Add missing loading rows to Document Requests, KB Categories, KB Articles HTML
-14. Add `.admin-table-card` class to Visitors table
-
-#### Nice to Have (polish)
-
-15. Standardize DOM caching pattern across modules
-16. Add sortable headers to Time Tracking
-17. Standardize search field naming across filter configs
-18. Standardize detail view pattern (prefer side panel)

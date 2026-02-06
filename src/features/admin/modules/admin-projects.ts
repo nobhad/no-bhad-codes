@@ -49,6 +49,7 @@ import {
   type PaginationState,
   type PaginationConfig
 } from '../../../utils/table-pagination';
+import { exportToCsv, PROJECTS_EXPORT_CONFIG } from '../../../utils/table-export';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -301,9 +302,20 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
   );
 
   // Insert before the refresh button
-  const refreshBtn = container.querySelector('#refresh-projects-btn');
-  if (refreshBtn) {
-    container.insertBefore(filterUI, refreshBtn);
+  // Insert before export button (Search → Filter → Export → Refresh → Add order)
+  const exportBtn = container.querySelector('#export-projects-btn');
+  if (exportBtn) {
+    container.insertBefore(filterUI, exportBtn);
+    // Wire up export button click handler
+    exportBtn.addEventListener('click', () => {
+      const filteredData = applyFilters(projectsData, filterState, PROJECTS_FILTER_CONFIG);
+      if (filteredData.length === 0) {
+        showToast('No projects to export', 'warning');
+        return;
+      }
+      exportToCsv(filteredData as unknown as Record<string, unknown>[], PROJECTS_EXPORT_CONFIG);
+      showToast(`Exported ${filteredData.length} projects to CSV`, 'success');
+    });
   } else {
     container.appendChild(filterUI);
   }
@@ -364,7 +376,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
   if (!tableBody) return;
 
   if (projects.length === 0) {
-    showTableEmpty(tableBody, 8, 'No projects yet. Convert leads to start projects.');
+    showTableEmpty(tableBody, 8, 'No projects yet.');
     renderPaginationUI(0, ctx);
     return;
   }
@@ -373,7 +385,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
   const filteredProjects = applyFilters(projects, filterState, PROJECTS_FILTER_CONFIG);
 
   if (filteredProjects.length === 0) {
-    showTableEmpty(tableBody, 8, 'No projects match the current filters. Try adjusting your filters.');
+    showTableEmpty(tableBody, 8, 'No projects match the current filters.');
     renderPaginationUI(0, ctx);
     return;
   }

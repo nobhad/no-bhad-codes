@@ -13,7 +13,8 @@ import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch, apiPost, apiDelete } from '../../../utils/api-client';
 import { parseJsonResponse } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
-import { confirmDanger, alertError, alertSuccess } from '../../../utils/confirm-dialog';
+import { confirmDanger } from '../../../utils/confirm-dialog';
+import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
@@ -22,11 +23,22 @@ import { exportToCsv, DOCUMENT_REQUESTS_EXPORT_CONFIG } from '../../../utils/tab
 import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
 import {
   createFilterUI,
+  createSortableHeaders,
   applyFilters,
   loadFilterState,
+  saveFilterState,
   DOCUMENT_REQUESTS_FILTER_CONFIG,
   type FilterState
 } from '../../../utils/table-filter';
+import {
+  createPaginationUI,
+  applyPagination,
+  getDefaultPaginationState,
+  loadPaginationState,
+  savePaginationState,
+  type PaginationState,
+  type PaginationConfig
+} from '../../../utils/table-pagination';
 import {
   createRowCheckbox,
   createBulkActionToolbar,
@@ -139,8 +151,22 @@ function statusLabel(status: RequestStatus): string {
 
 let requestsCache: DocumentRequest[] = [];
 let drListenersSetup = false;
-let drFilterUIContainer: HTMLElement | null = null;
-let drFilterState: FilterState = loadFilterState(DOCUMENT_REQUESTS_FILTER_CONFIG.storageKey);
+let filterUIContainer: HTMLElement | null = null;
+let filterState: FilterState = loadFilterState(DOCUMENT_REQUESTS_FILTER_CONFIG.storageKey);
+
+// Pagination configuration and state
+const DR_PAGINATION_CONFIG: PaginationConfig = {
+  tableId: 'document-requests',
+  pageSizeOptions: [10, 25, 50, 100],
+  defaultPageSize: 25,
+  storageKey: 'admin_document_requests_pagination'
+};
+
+let paginationState: PaginationState = {
+  ...getDefaultPaginationState(DR_PAGINATION_CONFIG),
+  ...loadPaginationState(DR_PAGINATION_CONFIG.storageKey!)
+};
+
 let drCreateClientDropdownInit = false;
 let drTemplatesClientDropdownInit = false;
 let drCreateModalFocusCleanup: (() => void) | null = null;
@@ -169,12 +195,12 @@ const DR_BULK_CONFIG: BulkActionConfig = {
           );
           const successCount = results.filter(r => r.success).length;
           if (successCount > 0) {
-            await alertSuccess(`Sent ${successCount} reminder${successCount > 1 ? 's' : ''}`);
+            showToast(`Sent ${successCount} reminder${successCount > 1 ? 's' : ''}`, 'success');
             resetSelection('document-requests');
           }
         } catch (error) {
           console.error('[DocRequests] Bulk remind error:', error);
-          await alertError('Failed to send reminders');
+          showToast('Failed to send reminders', 'error');
         }
       }
     },
@@ -195,13 +221,13 @@ const DR_BULK_CONFIG: BulkActionConfig = {
           );
           const successCount = results.filter(r => r.success).length;
           if (successCount > 0) {
-            await alertSuccess(`Deleted ${successCount} request${successCount > 1 ? 's' : ''}`);
+            showToast(`Deleted ${successCount} request${successCount > 1 ? 's' : ''}`, 'success');
             resetSelection('document-requests');
             await refreshTable(storedDrContext);
           }
         } catch (error) {
           console.error('[DocRequests] Bulk delete error:', error);
-          await alertError('Failed to delete requests');
+          showToast('Failed to delete requests', 'error');
         }
       }
     }
@@ -255,11 +281,14 @@ async function loadRequestDetail(id: number): Promise<{ request: DocumentRequest
 const DR_TABLE_COLSPAN = 7;
 
 function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardContext): void {
-  const tbody = el('dr-tbody');
+  const tbody = el('document-requests-table-body');
   if (!tbody) return;
 
   if (requests.length === 0) {
-    showTableEmpty(tbody, DR_TABLE_COLSPAN, 'No document requests match the filter.');
+    const message = requestsCache.length === 0
+      ? 'No document requests yet.'
+      : 'No document requests match the current filters.';
+    showTableEmpty(tbody, DR_TABLE_COLSPAN, message);
     return;
   }
 
@@ -296,6 +325,35 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
   // Setup bulk selection handlers
   const allRowIds = requests.map(r => r.id);
   setupBulkSelectionHandlers(DR_BULK_CONFIG, allRowIds);
+}
+
+/**
+ * Render pagination UI for document requests table
+ */
+function renderDRPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
+  const container = el('document-requests-pagination');
+  if (!container) return;
+
+  // Update state
+  paginationState.totalItems = totalItems;
+
+  // Create pagination UI
+  const paginationUI = createPaginationUI(
+    DR_PAGINATION_CONFIG,
+    paginationState,
+    (newState) => {
+      paginationState = newState;
+      savePaginationState(DR_PAGINATION_CONFIG.storageKey!, paginationState);
+      // Re-render table with new pagination
+      if (requestsCache.length > 0) {
+        refreshFilteredTable(ctx);
+      }
+    }
+  );
+
+  // Replace container content
+  container.innerHTML = '';
+  container.appendChild(paginationUI);
 }
 
 // ---------------------------------------------------------------------------
@@ -502,22 +560,22 @@ async function runDetailAction(
   try {
     if (action === 'start-review') {
       await apiPost(`${DR_API}/${id}/start-review`, {});
-      alertSuccess('Review started.');
+      showToast('Review started', 'success');
     } else if (action === 'approve') {
       const notes = window.prompt('Review notes (optional):') ?? '';
       await apiPost(`${DR_API}/${id}/approve`, { notes });
-      alertSuccess('Request approved.');
+      showToast('Request approved', 'success');
     } else if (action === 'reject') {
       const reason = window.prompt('Rejection reason (required):');
       if (reason === null || !reason.trim()) return;
       await apiPost(`${DR_API}/${id}/reject`, { reason: reason.trim() });
-      alertSuccess('Request rejected.');
+      showToast('Request rejected', 'success');
     } else if (action === 'remind') {
       await apiPost(`${DR_API}/${id}/remind`, {});
-      alertSuccess('Reminder sent.');
+      showToast('Reminder sent', 'success');
     }
   } catch (err) {
-    alertError((err as Error).message);
+    showToast((err as Error).message, 'error');
   }
 }
 
@@ -526,17 +584,21 @@ async function runDetailAction(
 // ---------------------------------------------------------------------------
 
 async function refreshDocumentRequests(ctx: AdminDashboardContext): Promise<void> {
-  const tbody = el('dr-tbody');
+  const tbody = el('document-requests-table-body');
   if (tbody) showTableLoading(tbody, DR_TABLE_COLSPAN, 'Loading requests...');
 
   try {
     requestsCache = await loadAllRequests();
-    // Apply client-side filters and render
-    const filtered = applyFilters(requestsCache, drFilterState, DOCUMENT_REQUESTS_FILTER_CONFIG);
-    renderRequestsTable(filtered, ctx);
+    // Apply client-side filters
+    const filtered = applyFilters(requestsCache, filterState, DOCUMENT_REQUESTS_FILTER_CONFIG);
+    // Update pagination total and apply pagination
+    paginationState.totalItems = filtered.length;
+    const paginated = applyPagination(filtered, paginationState);
+    renderRequestsTable(paginated, ctx);
+    renderDRPaginationUI(filtered.length, ctx);
   } catch (err) {
     if (tbody) showTableEmpty(tbody, DR_TABLE_COLSPAN, 'Failed to load requests.');
-    alertError((err as Error).message);
+    showToast((err as Error).message, 'error');
   }
 }
 
@@ -575,7 +637,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
     const descInput = document.getElementById('dr-create-description') as HTMLTextAreaElement | null;
     const dueInput = document.getElementById('dr-create-due') as HTMLInputElement | null;
     if (!clientSelect?.value || !titleInput?.value.trim()) {
-      alertError('Please select a client and enter a title.');
+      showToast('Please select a client and enter a title', 'error');
       return;
     }
     try {
@@ -585,7 +647,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
         description: descInput?.value.trim() || undefined,
         due_date: dueInput?.value || undefined
       });
-      alertSuccess('Document request created.');
+      showToast('Document request created', 'success');
       closeCreateModal();
       // Reset form
       titleInput.value = '';
@@ -593,7 +655,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
       if (dueInput) dueInput.value = '';
       await refreshDocumentRequests(ctx);
     } catch (err) {
-      alertError((err as Error).message);
+      showToast((err as Error).message, 'error');
     }
   });
 
@@ -603,7 +665,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
     const clientSelect = document.getElementById('dr-templates-client') as HTMLSelectElement | null;
     const checked = document.querySelectorAll<HTMLInputElement>('input[name="dr-template-id"]:checked');
     if (!clientSelect?.value || checked.length === 0) {
-      alertError('Select a client and at least one template.');
+      showToast('Select a client and at least one template', 'error');
       return;
     }
     try {
@@ -611,11 +673,11 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
         client_id: parseInt(clientSelect.value, 10),
         template_ids: Array.from(checked).map((c) => parseInt(c.value, 10))
       });
-      alertSuccess(`${checked.length} document request(s) created.`);
+      showToast(`${checked.length} document request(s) created`, 'success');
       closeCreateModal();
       await refreshDocumentRequests(ctx);
     } catch (err) {
-      alertError((err as Error).message);
+      showToast((err as Error).message, 'error');
     }
   });
 
@@ -623,12 +685,12 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
 
   // Setup filter UI (search, status checkboxes, date range)
   const filterContainer = el('dr-filter-container');
-  if (filterContainer && !drFilterUIContainer) {
-    drFilterUIContainer = createFilterUI(
+  if (filterContainer && !filterUIContainer) {
+    filterUIContainer = createFilterUI(
       DOCUMENT_REQUESTS_FILTER_CONFIG,
-      drFilterState,
+      filterState,
       (newState) => {
-        drFilterState = newState;
+        filterState = newState;
         refreshFilteredTable(ctx);
       }
     );
@@ -636,10 +698,19 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
     // Insert filter UI before export button
     const exportBtn = filterContainer.querySelector('#dr-export');
     if (exportBtn) {
-      filterContainer.insertBefore(drFilterUIContainer, exportBtn);
+      filterContainer.insertBefore(filterUIContainer, exportBtn);
     } else {
-      filterContainer.prepend(drFilterUIContainer);
+      filterContainer.prepend(filterUIContainer);
     }
+
+    // Setup sortable headers after table is rendered
+    setTimeout(() => {
+      createSortableHeaders(DOCUMENT_REQUESTS_FILTER_CONFIG, filterState, (column, direction) => {
+        filterState = { ...filterState, sortColumn: column, sortDirection: direction };
+        saveFilterState(DOCUMENT_REQUESTS_FILTER_CONFIG.storageKey, filterState);
+        refreshFilteredTable(ctx);
+      });
+    }, 100);
   }
 
   // Setup export button
@@ -649,11 +720,11 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
     exportBtn.addEventListener('click', () => {
       const filtered = getFilteredRequests();
       if (filtered.length === 0) {
-        alertError('No document requests to export');
+        showToast('No document requests to export', 'warning');
         return;
       }
       exportToCsv(filtered as unknown as Record<string, unknown>[], DOCUMENT_REQUESTS_EXPORT_CONFIG);
-      alertSuccess(`Exported ${filtered.length} document requests to CSV`);
+      showToast(`Exported ${filtered.length} document requests to CSV`, 'success');
     });
   }
 
@@ -678,7 +749,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
     if (e.target === detailModal) closeDetailModal();
   });
 
-  el('dr-tbody')?.addEventListener('click', async (e) => {
+  el('document-requests-table-body')?.addEventListener('click', async (e) => {
     const target = e.target as HTMLElement;
     const viewBtn = target.closest('.dr-view');
     const startBtn = target.closest('.dr-start-review');
@@ -696,10 +767,10 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
       const id = parseInt(startBtn.getAttribute('data-id')!, 10);
       try {
         await apiPost(`${DR_API}/${id}/start-review`, {});
-        alertSuccess('Review started.');
+        showToast('Review started', 'success');
         await refreshDocumentRequests(ctx);
       } catch (err) {
-        alertError((err as Error).message);
+        showToast((err as Error).message, 'error');
       }
       return;
     }
@@ -708,10 +779,10 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
       const notes = window.prompt('Review notes (optional):') ?? '';
       try {
         await apiPost(`${DR_API}/${id}/approve`, { notes });
-        alertSuccess('Request approved.');
+        showToast('Request approved', 'success');
         await refreshDocumentRequests(ctx);
       } catch (err) {
-        alertError((err as Error).message);
+        showToast((err as Error).message, 'error');
       }
       return;
     }
@@ -721,10 +792,10 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
       if (reason === null || !reason.trim()) return;
       try {
         await apiPost(`${DR_API}/${id}/reject`, { reason: reason.trim() });
-        alertSuccess('Request rejected.');
+        showToast('Request rejected', 'success');
         await refreshDocumentRequests(ctx);
       } catch (err) {
-        alertError((err as Error).message);
+        showToast((err as Error).message, 'error');
       }
       return;
     }
@@ -732,10 +803,10 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
       const id = parseInt(remindBtn.getAttribute('data-id')!, 10);
       try {
         await apiPost(`${DR_API}/${id}/remind`, {});
-        alertSuccess('Reminder sent.');
+        showToast('Reminder sent', 'success');
         await refreshDocumentRequests(ctx);
       } catch (err) {
-        alertError((err as Error).message);
+        showToast((err as Error).message, 'error');
       }
       return;
     }
@@ -746,10 +817,10 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
       if (!ok) return;
       try {
         await apiDelete(`${DR_API}/${id}`);
-        alertSuccess('Request deleted.');
+        showToast('Request deleted', 'success');
         await refreshDocumentRequests(ctx);
       } catch (err) {
-        alertError((err as Error).message);
+        showToast((err as Error).message, 'error');
       }
     }
   });
@@ -769,7 +840,7 @@ export async function loadDocumentRequests(ctx: AdminDashboardContext): Promise<
  * Get document requests filtered by current filter state
  */
 function getFilteredRequests(): DocumentRequest[] {
-  return applyFilters(requestsCache, drFilterState, DOCUMENT_REQUESTS_FILTER_CONFIG);
+  return applyFilters(requestsCache, filterState, DOCUMENT_REQUESTS_FILTER_CONFIG);
 }
 
 /**
@@ -777,7 +848,11 @@ function getFilteredRequests(): DocumentRequest[] {
  */
 function refreshFilteredTable(ctx: AdminDashboardContext): void {
   const filtered = getFilteredRequests();
-  renderRequestsTable(filtered, ctx);
+  // Update pagination total and apply pagination
+  paginationState.totalItems = filtered.length;
+  const paginated = applyPagination(filtered, paginationState);
+  renderRequestsTable(paginated, ctx);
+  renderDRPaginationUI(filtered.length, ctx);
 }
 
 /**
