@@ -126,6 +126,7 @@ export { createPortalModal } from './portal-modal';
 export type { PortalModalConfig, PortalModalInstance } from './portal-modal';
 export { getPortalCheckboxHTML } from './portal-checkbox';
 export type { PortalCheckboxConfig } from './portal-checkbox';
+export { initPasswordToggle, initAllPasswordToggles } from './password-toggle';
 
 // Register built-in components
 componentStore.register({

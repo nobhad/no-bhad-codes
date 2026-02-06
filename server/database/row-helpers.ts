@@ -63,17 +63,28 @@ export function getNumberOrNull(row: DatabaseRow | undefined, key: string): numb
 
 /**
  * Safely extract a boolean value from a database row
+ * Handles SQLite's 0/1 representation of booleans
  */
 export function getBoolean(row: DatabaseRow | undefined, key: string): boolean {
   if (!row || !(key in row)) {
     return false;
   }
   const value = row[key];
+  // Handle native boolean
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  // Handle SQLite's 0/1 integer representation
+  if (typeof value === 'number') {
+    return value !== 0; // 0 = false, non-zero = true
+  }
+  // Fallback for truthy/falsy values
   return Boolean(value);
 }
 
 /**
  * Safely extract a boolean value from a database row, returning null if not present
+ * Handles SQLite's 0/1 representation of booleans
  */
 export function getBooleanOrNull(row: DatabaseRow | undefined, key: string): boolean | null {
   if (!row || !(key in row)) {
@@ -83,7 +94,15 @@ export function getBooleanOrNull(row: DatabaseRow | undefined, key: string): boo
   if (value === null || value === undefined) {
     return null;
   }
-  return typeof value === 'boolean' ? value : null;
+  // Handle native boolean
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  // Handle SQLite's 0/1 integer representation
+  if (typeof value === 'number') {
+    return value !== 0; // 0 = false, non-zero = true
+  }
+  return null;
 }
 
 /**

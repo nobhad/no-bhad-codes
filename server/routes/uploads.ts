@@ -269,12 +269,12 @@ router.post(
       uploadedAt: new Date().toISOString()
     };
 
-    // Update user avatar URL in database
+    // Update client avatar URL in database
     if (req.user?.id) {
       try {
         const db = await getDatabase();
         await db.run(
-          'UPDATE users SET avatar_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+          'UPDATE clients SET avatar_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
           [avatarInfo.url, req.user.id]
         );
       } catch (dbError) {

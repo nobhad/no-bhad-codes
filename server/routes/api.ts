@@ -8,8 +8,6 @@
  */
 
 import express, { Router } from 'express';
-import bcrypt from 'bcryptjs';
-import jwt, { SignOptions } from 'jsonwebtoken';
 import multer from 'multer';
 import { resolve, extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
@@ -450,105 +448,9 @@ router.get(
   }
 );
 
-/**
- * User registration endpoint
- */
-router.post(
-  '/auth/register',
-  // Registration rate limiting
-  rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    maxRequests: 5,
-    keyGenerator: (req) => req.ip || 'unknown',
-    message: 'Too many registration attempts'
-  }),
-
-  // Validate user registration data
-  validateRequest(ValidationSchemas.user, {
-    validateBody: true,
-    stripUnknownFields: true
-  }),
-
-  async (req, res) => {
-    try {
-      const { name, email, password } = req.body;
-      const requestId = (req.headers['x-request-id'] as string) || 'unknown';
-
-      await logger.info(`User registration attempt - email: ${email}, requestId: ${requestId}`);
-
-      // Check if user already exists
-      const db = getDatabase();
-      const existingUser = await db.get('SELECT id, email FROM users WHERE email = ?', [email]);
-
-      if (existingUser) {
-        await logger.warn(
-          `Registration attempt with existing email - email: ${email}, requestId: ${requestId}`
-        );
-        return res.status(409).json({
-          success: false,
-          error: 'User already exists',
-          code: 'USER_EXISTS'
-        });
-      }
-
-      // Hash password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-
-      // Save to database
-      const result = await db.run(
-        `INSERT INTO users (email, password, name, type, status, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-        [email, hashedPassword, name, 'client', 'active']
-      );
-
-      const userId = result.lastID!;
-
-      // Generate access token for client portal
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) {
-        throw new Error('JWT_SECRET not configured');
-      }
-
-      const accessToken = jwt.sign({ id: userId, email, type: 'client' }, jwtSecret, {
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-      } as SignOptions);
-
-      // Send welcome email
-      try {
-        await emailService.sendWelcomeEmail(email, name, accessToken);
-        await logger.info(
-          `Welcome email sent - email: ${email}, userId: ${userId}, requestId: ${requestId}`
-        );
-      } catch (emailError) {
-        // Log error but don't fail registration
-        await logger.error(
-          `Failed to send welcome email - email: ${email}, userId: ${userId}, error: ${emailError}, requestId: ${requestId}`
-        );
-      }
-
-      await logger.info(
-        `User registration successful - email: ${email}, userId: ${userId}, requestId: ${requestId}`
-      );
-
-      res.status(201).json({
-        success: true,
-        message: 'Registration successful',
-        userId,
-        token: accessToken
-      });
-    } catch (error) {
-      const err = error as Error;
-      await logger.error(`User registration error - error: ${err.message}`);
-
-      res.status(500).json({
-        success: false,
-        error: 'Registration failed',
-        code: 'REGISTRATION_ERROR'
-      });
-    }
-  }
-);
+// NOTE: User registration is handled via client invitations through /api/auth/set-password
+// The deprecated /auth/register endpoint has been removed as it used the abandoned 'users' table.
+// All user management now goes through the 'clients' table exclusively.
 
 /**
  * Data query endpoint with pagination
@@ -657,10 +559,10 @@ router.get(
         totalInvoices = 0;
 
       try {
-        const [usersRow, activeUsersRow, projectsRow, activeProjectsRow, invoicesRow] =
+        const [clientsRow, activeClientsRow, projectsRow, activeProjectsRow, invoicesRow] =
           await Promise.all([
-            db.get('SELECT COUNT(*) as count FROM users'),
-            db.get('SELECT COUNT(*) as count FROM users WHERE status = \'active\''),
+            db.get('SELECT COUNT(*) as count FROM clients'),
+            db.get('SELECT COUNT(*) as count FROM clients WHERE status = \'active\''),
             db.get('SELECT COUNT(*) as count FROM projects'),
             db.get(
               'SELECT COUNT(*) as count FROM projects WHERE status IN (\'in-progress\', \'pending\')'
@@ -668,8 +570,8 @@ router.get(
             db.get('SELECT COUNT(*) as count FROM invoices')
           ]);
 
-        totalUsers = typeof usersRow?.count === 'number' ? usersRow.count : 0;
-        activeUsers = typeof activeUsersRow?.count === 'number' ? activeUsersRow.count : 0;
+        totalUsers = typeof clientsRow?.count === 'number' ? clientsRow.count : 0;
+        activeUsers = typeof activeClientsRow?.count === 'number' ? activeClientsRow.count : 0;
         totalProjects = typeof projectsRow?.count === 'number' ? projectsRow.count : 0;
         activeProjects = typeof activeProjectsRow?.count === 'number' ? activeProjectsRow.count : 0;
         totalInvoices = typeof invoicesRow?.count === 'number' ? invoicesRow.count : 0;
