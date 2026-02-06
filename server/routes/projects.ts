@@ -21,6 +21,9 @@ import { projectService } from '../services/project-service.js';
 import { fileService } from '../services/file-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
 import { BUSINESS_INFO, getPdfLogoBytes, CONTRACT_TERMS } from '../config/business.js';
+import { getPdfCacheKey, getCachedPdf, cachePdf } from '../utils/pdf-utils.js';
+import { notDeleted } from '../database/query-helpers.js';
+import { softDeleteService } from '../services/soft-delete-service.js';
 
 const router = express.Router();
 
@@ -70,6 +73,7 @@ router.get(
 
     if (req.user!.type === 'admin') {
       // Admin can see all projects with stats in single query (fixes N+1)
+      // Filter out soft-deleted projects and clients
       query = `
       SELECT
         p.*,
@@ -80,7 +84,7 @@ router.get(
         COALESCE(m_stats.message_count, 0) as message_count,
         COALESCE(m_stats.unread_count, 0) as unread_count
       FROM projects p
-      JOIN clients c ON p.client_id = c.id
+      JOIN clients c ON p.client_id = c.id AND ${notDeleted('c')}
       LEFT JOIN (
         SELECT project_id, COUNT(*) as file_count
         FROM files
@@ -93,10 +97,12 @@ router.get(
         FROM messages
         GROUP BY project_id
       ) m_stats ON p.id = m_stats.project_id
+      WHERE ${notDeleted('p')}
       ORDER BY p.created_at DESC
     `;
     } else {
       // Client can only see their own projects with stats in single query (fixes N+1)
+      // Filter out soft-deleted projects
       query = `
       SELECT
         p.*,
@@ -116,7 +122,7 @@ router.get(
         FROM messages
         GROUP BY project_id
       ) m_stats ON p.id = m_stats.project_id
-      WHERE p.client_id = ?
+      WHERE p.client_id = ? AND ${notDeleted('p')}
       ORDER BY p.created_at DESC
     `;
       params = [req.user!.id];
@@ -155,16 +161,16 @@ router.get(
 
     if (req.user!.type === 'admin') {
       query = `
-      SELECT 
+      SELECT
         p.*, c.company_name, c.contact_name, c.email as client_email
       FROM projects p
-      JOIN clients c ON p.client_id = c.id
-      WHERE p.id = ?
+      JOIN clients c ON p.client_id = c.id AND ${notDeleted('c')}
+      WHERE p.id = ? AND ${notDeleted('p')}
     `;
     } else {
       query = `
       SELECT p.* FROM projects p
-      WHERE p.id = ? AND p.client_id = ?
+      WHERE p.id = ? AND p.client_id = ? AND ${notDeleted('p')}
     `;
       params = [projectId, req.user!.id];
     }
@@ -535,66 +541,30 @@ router.put(
   })
 );
 
-// Delete project (admin only)
+// Delete project (admin only) - soft delete with 30-day recovery
 router.delete(
   '/:id',
   authenticateToken,
   requireAdmin,
   invalidateCache(['projects']),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
-    const db = getDatabase();
+    const deletedBy = req.user?.email || 'admin';
 
-    // Check if project exists
-    const project = await db.get('SELECT id, project_name FROM projects WHERE id = ?', [projectId]);
-    if (!project) {
+    const result = await softDeleteService.softDeleteProject(projectId, deletedBy);
+
+    if (!result.success) {
       return res.status(404).json({
-        error: 'Project not found',
+        error: result.message,
         code: 'PROJECT_NOT_FOUND'
       });
     }
 
-    // Delete related records first (foreign key constraints)
-    // Delete project files
-    await db.run('DELETE FROM project_files WHERE project_id = ?', [projectId]);
-
-    // Delete milestones
-    await db.run('DELETE FROM milestones WHERE project_id = ?', [projectId]);
-
-    // Delete project updates
-    await db.run('DELETE FROM project_updates WHERE project_id = ?', [projectId]);
-
-    // Delete project tasks (checklist items first, then tasks)
-    const tasks = await db.all('SELECT id FROM project_tasks WHERE project_id = ?', [projectId]) as { id: number }[];
-    for (const task of tasks) {
-      await db.run('DELETE FROM task_checklist_items WHERE task_id = ?', [task.id]);
-      await db.run('DELETE FROM task_comments WHERE task_id = ?', [task.id]);
-    }
-    await db.run('DELETE FROM project_tasks WHERE project_id = ?', [projectId]);
-
-    // Delete time entries
-    await db.run('DELETE FROM time_entries WHERE project_id = ?', [projectId]);
-
-    // Delete project tags
-    await db.run('DELETE FROM project_tags WHERE project_id = ?', [projectId]);
-
-    // Delete message threads related to this project
-    const threads = await db.all('SELECT id FROM message_threads WHERE project_id = ?', [projectId]) as { id: number }[];
-    for (const thread of threads) {
-      await db.run('DELETE FROM messages WHERE thread_id = ?', [thread.id]);
-    }
-    await db.run('DELETE FROM message_threads WHERE project_id = ?', [projectId]);
-
-    // Note: Invoices are not deleted - they are kept for financial records
-    // Instead, we unlink them from the project
-    await db.run('UPDATE invoices SET project_id = NULL WHERE project_id = ?', [projectId]);
-
-    // Finally delete the project itself
-    await db.run('DELETE FROM projects WHERE id = ?', [projectId]);
-
     res.json({
-      message: 'Project deleted successfully',
-      projectId: projectId
+      success: true,
+      message: result.message,
+      projectId,
+      affectedItems: result.affectedItems
     });
   })
 );
@@ -1348,6 +1318,18 @@ router.get(
       });
     }
 
+    // Check cache first
+    const cacheKey = getPdfCacheKey('contract', projectId, getString(project, 'updated_at'));
+    const cachedPdf = getCachedPdf(cacheKey);
+    if (cachedPdf) {
+      const projectName = getString(project, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="contract-${projectName}-${projectId}.pdf"`);
+      res.setHeader('Content-Length', cachedPdf.length);
+      res.setHeader('X-PDF-Cache', 'HIT');
+      return res.send(Buffer.from(cachedPdf));
+    }
+
     // Cast project for helper functions
     const p = project as Record<string, unknown>;
 
@@ -1570,9 +1552,13 @@ router.get(
     const pdfBytes = await pdfDoc.save();
     const projectName = getString(p, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
 
+    // Cache the generated PDF
+    cachePdf(cacheKey, pdfBytes, getString(p, 'updated_at'));
+
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="contract-${projectName}-${projectId}.pdf"`);
     res.setHeader('Content-Length', pdfBytes.length);
+    res.setHeader('X-PDF-Cache', 'MISS');
     res.send(Buffer.from(pdfBytes));
   })
 );
@@ -2077,8 +2063,28 @@ router.get(
       return res.status(404).json({ error: 'Intake form not found for this project' });
     }
 
+    // Check cache first (use intake file's updated_at for freshness)
+    const intakeFileRecord = intakeFile as Record<string, unknown>;
+    const cacheKey = getPdfCacheKey('intake', projectId, getString(intakeFileRecord, 'updated_at') || getString(intakeFileRecord, 'created_at'));
+    const cachedPdf = getCachedPdf(cacheKey);
+    if (cachedPdf) {
+      const clientOrCompany = getString(p, 'company_name') || getString(p, 'client_name');
+      const safeClientName = clientOrCompany
+        .toLowerCase()
+        .replace(/\s+/g, '_')
+        .replace(/[^a-z0-9_-]/g, '')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '')
+        .substring(0, 50);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="nobhadcodes_intake_${safeClientName}.pdf"`);
+      res.setHeader('Content-Length', cachedPdf.length);
+      res.setHeader('X-PDF-Cache', 'HIT');
+      return res.send(Buffer.from(cachedPdf));
+    }
+
     // Read the intake JSON file
-    const filePath = join(process.cwd(), getString(intakeFile as Record<string, unknown>, 'file_path'));
+    const filePath = join(process.cwd(), getString(intakeFileRecord, 'file_path'));
     if (!existsSync(filePath)) {
       return res.status(404).json({ error: 'Intake file not found on disk' });
     }
@@ -2428,6 +2434,9 @@ router.get(
     // Generate PDF bytes and send response
     const pdfBytes = await pdfDoc.save();
 
+    // Cache the generated PDF
+    cachePdf(cacheKey, pdfBytes, getString(intakeFileRecord, 'updated_at') || getString(intakeFileRecord, 'created_at'));
+
     // Generate descriptive PDF filename with NoBhadCodes branding
     // Use company name if available, otherwise client name
     const clientOrCompany = getString(p, 'company_name') || getString(p, 'client_name');
@@ -2441,6 +2450,7 @@ router.get(
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="nobhadcodes_intake_${safeClientName}.pdf"`);
     res.setHeader('Content-Length', pdfBytes.length);
+    res.setHeader('X-PDF-Cache', 'MISS');
     res.send(Buffer.from(pdfBytes));
   })
 );

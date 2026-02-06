@@ -15,6 +15,8 @@ import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache, QueryCache } from '../middleware/cache.js';
 import { auditLogger } from '../services/audit-logger.js';
 import { getString, getNumber } from '../database/row-helpers.js';
+import { notDeleted } from '../database/query-helpers.js';
+import { softDeleteService } from '../services/soft-delete-service.js';
 
 const router = express.Router();
 
@@ -338,6 +340,7 @@ router.get(
       'clients:all:with_projects',
       async () => {
         // Get base client data with project count and health score
+        // Filter out soft-deleted clients and projects
         const clientRows = await db.all(`
           SELECT
             c.id, c.email, c.company_name, c.contact_name, c.phone,
@@ -346,7 +349,8 @@ router.get(
             c.health_score, c.health_status,
             COUNT(p.id) as project_count
           FROM clients c
-          LEFT JOIN projects p ON c.id = p.client_id
+          LEFT JOIN projects p ON c.id = p.client_id AND ${notDeleted('p')}
+          WHERE ${notDeleted('c')}
           GROUP BY c.id
           ORDER BY c.created_at DESC
         `);
@@ -424,7 +428,7 @@ router.get(
             c.id, c.email, c.company_name, c.contact_name, c.phone,
             c.status, c.client_type, c.created_at, c.updated_at
           FROM clients c
-          WHERE c.id = ?
+          WHERE c.id = ? AND ${notDeleted('c')}
         `,
           [clientId]
         );
@@ -442,7 +446,7 @@ router.get(
       });
     }
 
-    // Get client's projects
+    // Get client's projects (filter out soft-deleted)
     const projects = await QueryCache.getOrSet(
       `client:${clientId}:projects`,
       async () => {
@@ -453,7 +457,7 @@ router.get(
             estimated_end_date as due_date, actual_end_date as completed_at,
             budget_range as budget, created_at, updated_at
           FROM projects
-          WHERE client_id = ?
+          WHERE client_id = ? AND ${notDeleted()}
           ORDER BY created_at DESC
         `,
           [clientId]
@@ -715,7 +719,7 @@ router.get(
         id, project_name, description, status, priority, start_date,
         estimated_end_date, actual_end_date, budget_range, created_at, updated_at
       FROM projects
-      WHERE client_id = ?
+      WHERE client_id = ? AND ${notDeleted()}
       ORDER BY created_at DESC
       `,
       [clientId]
@@ -854,29 +858,29 @@ No Bhad Codes Team
 );
 
 
-// Delete client (admin only)
+// Delete client (admin only) - soft delete with 30-day recovery
 router.delete(
   '/:id',
   authenticateToken,
   requireAdmin,
   invalidateCache(['clients', 'projects']),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
-    const db = getDatabase();
+    const deletedBy = req.user?.email || 'admin';
 
-    const client = await db.get('SELECT id FROM clients WHERE id = ?', [clientId]);
+    const result = await softDeleteService.softDeleteClient(clientId, deletedBy);
 
-    if (!client) {
+    if (!result.success) {
       return res.status(404).json({
-        error: 'Client not found',
+        error: result.message,
         code: 'CLIENT_NOT_FOUND'
       });
     }
 
-    await db.run('DELETE FROM clients WHERE id = ?', [clientId]);
-
     res.json({
-      message: 'Client deleted successfully'
+      success: true,
+      message: result.message,
+      affectedItems: result.affectedItems
     });
   })
 );

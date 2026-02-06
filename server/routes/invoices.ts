@@ -39,6 +39,9 @@ import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
 import { getString } from '../database/row-helpers.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
+import { getPdfCacheKey, getCachedPdf, cachePdf, setPdfMetadata } from '../utils/pdf-utils.js';
+import { notDeleted } from '../database/query-helpers.js';
+import { softDeleteService } from '../services/soft-delete-service.js';
 
 const router = express.Router();
 
@@ -2858,6 +2861,20 @@ router.get(
 
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
+
+      // Check cache first
+      const cacheKey = getPdfCacheKey('invoice', invoiceId, invoice.updatedAt);
+      const cachedPdf = getCachedPdf(cacheKey);
+      if (cachedPdf) {
+        const isPreview = req.query.preview === 'true';
+        const disposition = isPreview ? 'inline' : 'attachment';
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `${disposition}; filename="${invoice.invoiceNumber}.pdf"`);
+        res.setHeader('Content-Length', cachedPdf.length);
+        res.setHeader('X-PDF-Cache', 'HIT');
+        return res.send(Buffer.from(cachedPdf));
+      }
+
       const db = getDatabase();
 
       // Get client info
@@ -2914,6 +2931,9 @@ router.get(
       // Generate PDF using pdf-lib (template-matching version)
       const pdfBytes = await generateInvoicePdf(pdfData);
 
+      // Cache the generated PDF
+      cachePdf(cacheKey, pdfBytes, invoice.updatedAt);
+
       // Check if preview mode (inline) or download mode (attachment)
       const isPreview = req.query.preview === 'true';
       const disposition = isPreview ? 'inline' : 'attachment';
@@ -2925,6 +2945,7 @@ router.get(
         `${disposition}; filename="${invoice.invoiceNumber}.pdf"`
       );
       res.setHeader('Content-Length', pdfBytes.length);
+      res.setHeader('X-PDF-Cache', 'MISS');
       res.send(Buffer.from(pdfBytes));
     } catch (error: unknown) {
       console.error('[Invoices] PDF generation error:', error);
@@ -3046,31 +3067,30 @@ router.delete(
     }
 
     try {
-      const result = await getInvoiceService().deleteOrVoidInvoice(invoiceId);
+      const deletedBy = req.user?.email || 'admin';
+      const result = await softDeleteService.softDeleteInvoice(invoiceId, deletedBy);
 
-      res.json({
-        success: true,
-        message: result.action === 'deleted'
-          ? 'Invoice deleted successfully'
-          : 'Invoice voided successfully',
-        action: result.action
-      });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-
-      if (message.includes('not found')) {
+      if (!result.success) {
+        // Check if it's a "cannot delete paid" error
+        if (result.message.includes('paid')) {
+          return res.status(400).json({
+            error: result.message,
+            code: 'CANNOT_DELETE_PAID'
+          });
+        }
         return res.status(404).json({
-          error: 'Invoice not found',
+          error: result.message,
           code: 'NOT_FOUND'
         });
       }
 
-      if (message.includes('Paid invoices')) {
-        return res.status(400).json({
-          error: message,
-          code: 'CANNOT_DELETE_PAID'
-        });
-      }
+      res.json({
+        success: true,
+        message: result.message,
+        action: 'soft_deleted'
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
 
       res.status(500).json({
         error: 'Failed to delete invoice',

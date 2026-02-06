@@ -6,41 +6,69 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ## Planned Enhancements
 
-### 30-Day Soft Delete Recovery System
+### Admin UI for Deleted Items
 
-**Priority:** High
-**Status:** Planned (detailed plan in `.claude/plans/mossy-fluttering-lemon.md`)
+**Priority:** Medium
+**Status:** Pending
 
-Implement soft delete with 30-day recovery for all main entities.
-
-**Core Pattern:**
-
-- Add `deleted_at` and `deleted_by` columns to: clients, projects, invoices, client_intakes, proposal_requests
-- Convert DELETE endpoints to UPDATE with `deleted_at = datetime('now')`
-- Add `WHERE deleted_at IS NULL` to all SELECT queries
-- Add admin UI to view/restore deleted items
-- Add scheduled cleanup job (daily at 2 AM) to permanently delete items older than 30 days
-
-**Cascade Behavior:**
-
-- Deleting client cascades to: projects, proposals, voids unpaid invoices (keeps paid)
-- Deleting project cascades to: proposals (keeps invoices)
-- Paid invoices cannot be deleted
+Create admin UI module for viewing and managing deleted items (trash).
 
 **Files to Create:**
 
-- `server/database/migrations/050_soft_delete_system.sql`
-- `server/services/soft-delete-service.ts`
-- `server/database/query-helpers.ts`
 - `src/features/admin/modules/admin-deleted-items.ts`
 
-**Files to Modify:**
+**Features:**
 
-- `server/routes/clients.ts`, `projects.ts`, `invoices.ts`, `proposals.ts`, `admin.ts`
-- `server/services/scheduler-service.ts`
-- `server/types/database.ts`
+- Table view of all deleted items
+- Filter by entity type (client, project, invoice, lead, proposal)
+- Days until permanent deletion column
+- Restore button per row
+- Permanent delete with confirmation
 
 ## Recently Completed
+
+- [x] **30-Day Soft Delete Recovery System (Feb 6, 2026)**: Implemented soft delete with 30-day recovery.
+
+  **Core Pattern:**
+
+  - Added `deleted_at` and `deleted_by` columns to: clients, projects, invoices, client_intakes, proposal_requests
+  - Converted DELETE endpoints to soft delete via `softDeleteService`
+  - Added `WHERE deleted_at IS NULL` to all SELECT queries using `notDeleted()` helper
+  - Added admin API endpoints for viewing/restoring deleted items
+  - Added scheduled cleanup job (daily at 2 AM) to permanently delete items older than 30 days
+
+  **Cascade Behavior:**
+
+  - Deleting client cascades to: projects, proposals, voids unpaid invoices (keeps paid)
+  - Deleting project cascades to: proposals (keeps invoices)
+  - Paid invoices cannot be deleted
+
+  **Files Created:**
+
+  - `server/database/migrations/050_soft_delete_system.sql`
+  - `server/services/soft-delete-service.ts`
+  - `server/database/query-helpers.ts`
+
+  **Files Modified:**
+
+  - `server/routes/clients.ts` - Soft delete endpoint, query updates
+  - `server/routes/projects.ts` - Soft delete endpoint, query updates
+  - `server/routes/invoices.ts` - Soft delete endpoint
+  - `server/routes/proposals.ts` - New DELETE endpoint, query updates
+  - `server/routes/admin.ts` - New deleted items management endpoints
+  - `server/services/scheduler-service.ts` - Daily cleanup job
+
+  **Admin API Endpoints:**
+
+  - `GET /api/admin/deleted-items` - List deleted items (optional ?type= filter)
+  - `GET /api/admin/deleted-items/stats` - Get counts by entity type
+  - `POST /api/admin/deleted-items/:type/:id/restore` - Restore a deleted item
+  - `DELETE /api/admin/deleted-items/:type/:id/permanent` - Force permanent delete
+  - `POST /api/admin/deleted-items/cleanup` - Manual cleanup trigger
+
+  **Status:** Complete. Migration applied. Backend fully functional.
+
+
 
 - [x] **Audit Critical & High Priority Fixes (Feb 6, 2026)**: Implemented fixes for all critical and high priority issues from the database, forms, and modals audits.
 

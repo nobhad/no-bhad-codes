@@ -12,6 +12,7 @@ import cron, { ScheduledTask } from 'node-cron';
 import { InvoiceService } from './invoice-service.js';
 import { emailService } from './email-service.js';
 import { getDatabase } from '../database/init.js';
+import { softDeleteService } from './soft-delete-service.js';
 
 // Database helper type
 
@@ -23,8 +24,10 @@ interface SchedulerConfig {
   enableWelcomeSequences: boolean;
   enableScheduledInvoices: boolean;
   enableRecurringInvoices: boolean;
+  enableSoftDeleteCleanup: boolean;
   reminderCheckInterval: string; // cron expression
   invoiceGenerationTime: string; // cron expression
+  softDeleteCleanupTime: string; // cron expression
 }
 
 const DEFAULT_CONFIG: SchedulerConfig = {
@@ -33,8 +36,10 @@ const DEFAULT_CONFIG: SchedulerConfig = {
   enableWelcomeSequences: true,
   enableScheduledInvoices: true,
   enableRecurringInvoices: true,
+  enableSoftDeleteCleanup: true,
   reminderCheckInterval: '0 * * * *', // Every hour at :00
-  invoiceGenerationTime: '0 1 * * *' // Daily at 1:00 AM
+  invoiceGenerationTime: '0 1 * * *', // Daily at 1:00 AM
+  softDeleteCleanupTime: '0 2 * * *' // Daily at 2:00 AM
 };
 
 interface WelcomeEmail {
@@ -63,6 +68,7 @@ export class SchedulerService {
   private config: SchedulerConfig;
   private reminderJob: ScheduledTask | null = null;
   private invoiceGenerationJob: ScheduledTask | null = null;
+  private softDeleteCleanupJob: ScheduledTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -102,6 +108,11 @@ export class SchedulerService {
       this.scheduleInvoiceGeneration();
     }
 
+    // Schedule soft delete cleanup (permanent deletion of items past 30-day retention)
+    if (this.config.enableSoftDeleteCleanup) {
+      this.scheduleSoftDeleteCleanup();
+    }
+
     this.isRunning = true;
     console.log('[Scheduler] Scheduler service started');
   }
@@ -120,6 +131,11 @@ export class SchedulerService {
     if (this.invoiceGenerationJob) {
       this.invoiceGenerationJob.stop();
       this.invoiceGenerationJob = null;
+    }
+
+    if (this.softDeleteCleanupJob) {
+      this.softDeleteCleanupJob.stop();
+      this.softDeleteCleanupJob = null;
     }
 
     this.isRunning = false;
@@ -160,6 +176,31 @@ export class SchedulerService {
         }
       } catch (error) {
         console.error('[Scheduler] Error generating invoices:', error);
+      }
+    });
+  }
+
+  /**
+   * Schedule soft delete cleanup (runs daily at 2 AM by default)
+   * Permanently deletes items that have been in the trash for more than 30 days
+   */
+  private scheduleSoftDeleteCleanup(): void {
+    console.log(`[Scheduler] Scheduling soft delete cleanup: ${this.config.softDeleteCleanupTime}`);
+
+    this.softDeleteCleanupJob = cron.schedule(this.config.softDeleteCleanupTime, async () => {
+      try {
+        console.log('[Scheduler] Running soft delete cleanup...');
+        const { deleted, errors } = await softDeleteService.permanentlyDeleteExpired();
+
+        if (deleted.total > 0) {
+          console.log(`[Scheduler] Permanently deleted ${deleted.total} items (clients: ${deleted.clients}, projects: ${deleted.projects}, invoices: ${deleted.invoices}, leads: ${deleted.leads}, proposals: ${deleted.proposals})`);
+        }
+
+        if (errors.length > 0) {
+          console.error('[Scheduler] Soft delete cleanup errors:', errors);
+        }
+      } catch (error) {
+        console.error('[Scheduler] Error during soft delete cleanup:', error);
       }
     });
   }

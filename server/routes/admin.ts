@@ -21,6 +21,7 @@ import { getDatabase } from '../database/init.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 import { auditLogger } from '../services/audit-logger.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
+import { softDeleteService, SoftDeleteEntityType } from '../services/soft-delete-service.js';
 
 const router = express.Router();
 
@@ -2189,6 +2190,159 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const sources = await leadService.getSourcePerformance();
     res.json({ success: true, sources });
+  })
+);
+
+// ============================================
+// DELETED ITEMS MANAGEMENT (30-DAY RECOVERY)
+// ============================================
+
+/**
+ * GET /api/admin/deleted-items - List all deleted items
+ * Optional query param: ?type=client|project|invoice|lead|proposal
+ */
+router.get(
+  '/deleted-items',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const entityType = req.query.type as SoftDeleteEntityType | undefined;
+
+    // Validate type if provided
+    if (entityType && !['client', 'project', 'invoice', 'lead', 'proposal'].includes(entityType)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid entity type',
+        code: 'INVALID_TYPE'
+      });
+    }
+
+    const items = await softDeleteService.getDeletedItems(entityType);
+    res.json({ success: true, items });
+  })
+);
+
+/**
+ * GET /api/admin/deleted-items/stats - Get counts of deleted items by type
+ */
+router.get(
+  '/deleted-items/stats',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const stats = await softDeleteService.getDeletedItemStats();
+    res.json({ success: true, stats });
+  })
+);
+
+/**
+ * POST /api/admin/deleted-items/:type/:id/restore - Restore a deleted item
+ */
+router.post(
+  '/deleted-items/:type/:id/restore',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const entityType = req.params.type as SoftDeleteEntityType;
+    const entityId = parseInt(req.params.id);
+
+    // Validate type
+    if (!['client', 'project', 'invoice', 'lead', 'proposal'].includes(entityType)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid entity type',
+        code: 'INVALID_TYPE'
+      });
+    }
+
+    if (isNaN(entityId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid entity ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    const result = await softDeleteService.restore(entityType, entityId);
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        error: result.message,
+        code: 'NOT_FOUND'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: result.message
+    });
+  })
+);
+
+/**
+ * DELETE /api/admin/deleted-items/:type/:id/permanent - Permanently delete an item
+ * This bypasses the 30-day recovery period
+ */
+router.delete(
+  '/deleted-items/:type/:id/permanent',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const entityType = req.params.type as SoftDeleteEntityType;
+    const entityId = parseInt(req.params.id);
+
+    // Validate type
+    if (!['client', 'project', 'invoice', 'lead', 'proposal'].includes(entityType)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid entity type',
+        code: 'INVALID_TYPE'
+      });
+    }
+
+    if (isNaN(entityId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid entity ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    const result = await softDeleteService.forceDelete(entityType, entityId);
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        error: result.message,
+        code: 'NOT_FOUND'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: result.message
+    });
+  })
+);
+
+/**
+ * POST /api/admin/deleted-items/cleanup - Manually trigger cleanup of expired items
+ * Items older than 30 days will be permanently deleted
+ */
+router.post(
+  '/deleted-items/cleanup',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { deleted, errors } = await softDeleteService.permanentlyDeleteExpired();
+
+    res.json({
+      success: errors.length === 0,
+      message: `Cleanup complete. Permanently deleted ${deleted.total} items.`,
+      deleted,
+      errors: errors.length > 0 ? errors : undefined
+    });
   })
 );
 
