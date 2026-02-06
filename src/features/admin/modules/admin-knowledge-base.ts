@@ -186,7 +186,7 @@ let kbCategoryModalFocusCleanup: (() => void) | null = null;
 let kbArticleModalFocusCleanup: (() => void) | null = null;
 let filterState: FilterState = loadFilterState(KNOWLEDGE_BASE_FILTER_CONFIG.storageKey);
 let filterUIContainer: HTMLElement | null = null;
-let storedKbContext: AdminDashboardContext | null = null;
+let _storedKbContext: AdminDashboardContext | null = null;
 
 // Pagination configuration and state for KB articles
 const KB_ARTICLES_PAGINATION_CONFIG: PaginationConfig = {
@@ -604,7 +604,7 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
 }
 
 export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<void> {
-  storedKbContext = ctx;
+  _storedKbContext = ctx;
   setupKBListeners(ctx);
 
   const categoriesTbody = el('kb-categories-table-body');

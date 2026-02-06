@@ -40,6 +40,7 @@ import { createDOMCache, batchUpdateText } from '../../../utils/dom-cache';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { alertWarning, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { manageFocusTrap } from '../../../utils/focus-trap';
+import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { createRowCheckbox, createBulkActionToolbar, setupBulkSelectionHandlers, resetSelection, type BulkActionConfig } from '../../../utils/table-bulk-actions';
 import {
   createPaginationUI,
@@ -750,8 +751,7 @@ function closeEditProjectModal(): void {
   modal.removeAttribute('aria-labelledby');
   modal.removeAttribute('role');
   modal.removeAttribute('aria-modal');
-  modal.classList.add('hidden');
-  document.body.classList.remove('modal-open');
+  closeModalOverlay(modal);
 }
 
 /**
@@ -798,15 +798,15 @@ function openEditProjectModal(project: LeadProject): void {
   // Admin notes field - decode entities
   if (notesInput) notesInput.value = SanitizationUtils.decodeHtmlEntities(projectData.notes || '');
 
-  // Initialize custom dropdowns for selects (only once)
+  // Setup close handlers and create dropdown elements (only once per modal lifecycle)
+  // Must be called BEFORE initProjectModalDropdowns so the select elements exist
+  setupEditProjectModalHandlers(modal);
+
+  // Initialize custom dropdowns with current project values
   initProjectModalDropdowns(project);
 
   // Show modal and lock body scroll
-  modal.classList.remove('hidden');
-  document.body.classList.add('modal-open');
-
-  // Setup close handlers (only once per modal lifecycle)
-  setupEditProjectModalHandlers(modal);
+  openModalOverlay(modal);
 
   // Focus trap and ARIA
   editModalFocusCleanup?.();
@@ -846,22 +846,15 @@ const EDIT_PROJECT_STATUS_OPTIONS = [
 
 /**
  * Initialize custom dropdowns for the edit project modal.
- * Type uses form select + modal dropdown; status uses same createTableDropdown as projects table.
+ * Type uses createFilterSelect (plain select); status uses createTableDropdown.
  */
-function initProjectModalDropdowns(project: LeadProject): void {
+export function initProjectModalDropdowns(project: LeadProject): void {
   const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
   const statusMount = document.getElementById('edit-project-status-mount');
 
-  // Type dropdown (form select, optionally wrapped by modal dropdown)
+  // Type dropdown: set value on the select created by createFilterSelect
   if (typeSelect) {
-    const typeWrapper = typeSelect.previousElementSibling as HTMLElement;
-    if (typeWrapper?.classList.contains('custom-dropdown')) {
-      setModalDropdownValue(typeWrapper, project.project_type || '');
-    } else if (!typeSelect.dataset.dropdownInit) {
-      typeSelect.value = project.project_type || '';
-      typeSelect.dataset.dropdownInit = 'true';
-      initModalDropdown(typeSelect, { placeholder: 'Select type...' });
-    }
+    typeSelect.value = project.project_type || '';
   }
 
   // Status dropdown: same reusable component as projects table (createTableDropdown)
@@ -883,7 +876,7 @@ function initProjectModalDropdowns(project: LeadProject): void {
  */
 let editProjectModalInitialized = false;
 
-function setupEditProjectModalHandlers(modal: HTMLElement): void {
+export function setupEditProjectModalHandlers(modal: HTMLElement): void {
   if (editProjectModalInitialized) return;
   editProjectModalInitialized = true;
 
@@ -1362,7 +1355,7 @@ function getOrCreatePreviewModal(): HTMLElement {
   if (!modal) {
     modal = document.createElement('div');
     modal.id = 'file-preview-modal';
-    modal.className = 'admin-modal-overlay';
+    modal.className = 'admin-modal-overlay hidden';
     document.body.appendChild(modal);
   }
 
@@ -1396,13 +1389,11 @@ function showPreviewModal(options: PreviewModalOptions): void {
     </div>
   `;
 
-  modal.classList.remove('hidden');
-  document.body.classList.add('modal-open');
+  openModalOverlay(modal);
 
   const closeModal = () => {
     onClose?.();
-    modal?.classList.add('hidden');
-    document.body.classList.remove('modal-open');
+    closeModalOverlay(modal);
   };
 
   document.getElementById('preview-modal-close')?.addEventListener('click', closeModal);
@@ -2500,8 +2491,7 @@ async function addProject(ctx: AdminDashboardContext): Promise<void> {
   await populateClientDropdown();
 
   // Show modal and lock body scroll
-  modal.classList.remove('hidden');
-  document.body.classList.add('modal-open');
+  openModalOverlay(modal);
 
   let addProjectFocusCleanup: (() => void) | null = null;
   const closeModal = () => {
@@ -2510,8 +2500,7 @@ async function addProject(ctx: AdminDashboardContext): Promise<void> {
     modal.removeAttribute('aria-labelledby');
     modal.removeAttribute('role');
     modal.removeAttribute('aria-modal');
-    modal.classList.add('hidden');
-    document.body.classList.remove('modal-open');
+    closeModalOverlay(modal);
     form.reset();
     resetAddProjectDropdowns();
   };

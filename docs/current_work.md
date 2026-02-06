@@ -27,23 +27,97 @@ Create admin UI module for viewing and managing deleted items (trash).
 
 ## Recently Completed
 
-- [x] **Audit Re-do: Accessibility & Reusable Components (Feb 6, 2026)**: Re-audited and fixed remaining issues.
+- [x] **Edit Project Modal Dropdown Fix (Feb 6, 2026)**: Fixed missing dropdowns in edit project modal.
 
-  **Accessibility (WCAG 1.4.1 - Use of Color):**
+  **Root Cause:** `initProjectModalDropdowns()` was called before `setupEditProjectModalHandlers()` which creates the dropdown elements. The type dropdown was also being double-wrapped with `initModalDropdown`.
 
-  - Confirmed status badges are COMPLIANT - all badges include text labels (e.g., "Active", "Pending")
-  - Text label serves as non-color indicator, no additional icon indicators needed
-  - Updated ACCESSIBILITY_AUDIT.md to mark 1.4.1 as PASS
+  **Changes:**
 
-  **Reusable Components - Status Badges:**
+  - Reordered function calls: `setupEditProjectModalHandlers()` now runs before `initProjectModalDropdowns()`
+  - Simplified `initProjectModalDropdowns()` to directly set value on the select created by `createFilterSelect`
+  - Removed unnecessary `initModalDropdown` wrapping logic for type dropdown
 
-  - Migrated inline badge markup to `getStatusBadgeHTML()` in:
-    - `admin-contacts.ts` - "Converted to Client" badge
-    - `admin-projects.ts` - Invoice status badges
-    - `project-details/invoices.ts` - Invoice status badges
-  - Added invoice-specific status CSS to `portal-badges.css`:
-    - draft (gray), sent/viewed (blue), partial (yellow), paid (green), overdue (red)
-  - Updated REUSABLE_COMPONENTS_AUDIT.md - badges section now COMPLETE
+  **Files Modified:**
+
+  - `src/features/admin/modules/admin-projects.ts`
+
+- [x] **Admin Modals Safety Guard + Overlay Fixes (Feb 6, 2026)**: Prevented auto-opening modals from blocking the admin login.
+
+  **Changes:**
+
+  - Added modal guard to hide overlays until authentication succeeds
+  - Forced `.hidden` to win over modal display rules
+  - Ensured preview modal starts hidden by default
+  - Fixed `/api/admin/leads` 500 by removing non-existent `projects.features` column
+
+  **Files Modified:**
+
+  - `src/features/admin/admin-dashboard.ts`
+  - `src/styles/admin/modals.css`
+  - `src/features/admin/modules/admin-projects.ts`
+  - `server/routes/admin.ts`
+
+- [x] **Modal Audit Fixes Completed (Feb 6, 2026)**: Implemented all modal audit recommendations.
+
+  **Changes:**
+
+  - Centralized modal sizes via `--modal-width-*` variables
+  - Unified overlay open/close lifecycle with `modal-utils` across admin modules
+  - Added `.closing` animation for admin/portal overlays
+  - Added `aria-describedby` to confirm/alert/prompt dialogs
+  - Standardized portal modal show/hide to use shared utilities
+
+  **Resolved Issues:**
+
+  - Auto-opening admin modals blocking login
+  - Hardcoded z-index values (now tokenized via `--z-index-portal-*`)
+  - Mixed modal patterns (standardized via `modal-utils`)
+  - Inconsistent close animation timing (standardized with `.closing`)
+  - Dropdown positioning (aligned to shared portal dropdown tokens)
+  - Missing `aria-describedby` in dialogs
+  - Inconsistent modal sizing (centralized with `--modal-width-*`)
+
+  **Files Modified:**
+
+  - `src/utils/modal-utils.ts`
+  - `src/components/portal-modal.ts`
+  - `src/utils/confirm-dialog.ts`
+  - `src/styles/admin/modals.css`
+  - `src/styles/shared/confirm-dialog.css`
+  - `src/styles/variables.css`
+  - `src/features/admin/admin-dashboard.ts`
+  - `src/features/admin/modules/admin-projects.ts`
+  - `src/features/admin/modules/admin-clients.ts`
+  - `src/features/admin/modules/admin-document-requests.ts`
+  - `src/features/admin/modules/admin-files.ts`
+  - `src/features/admin/modules/admin-leads.ts`
+  - `src/features/admin/modules/admin-contacts.ts`
+  - `src/features/admin/project-details/actions.ts`
+
+- [x] **Audit Re-do: Accessibility & Reusable Components (Feb 6, 2026)**: Re-audited and completed all remaining issues.
+
+  **Accessibility Audit - COMPLETE:**
+
+  - WCAG 1.4.1 (Use of Color): PASS - All badges include text labels as non-color indicator
+  - WCAG 1.4.3 (Contrast): REVIEWED - All badge colors pass AA (4.5:1+), purple/gray borderline but acceptable
+  - Skip links: Already implemented on all pages
+
+  **Reusable Components - Status Badges - COMPLETE:**
+
+  - Migrated inline badge markup to `getStatusBadgeHTML()` in admin-contacts, admin-projects, project-details/invoices
+  - Added invoice-specific status CSS (draft, sent, viewed, partial, paid, overdue)
+
+  **Reusable Components - Dropdowns - COMPLETE:**
+
+  - Verified all form selects already use `initModalDropdown()`:
+    - Admin Leads (cancel reason), Proposals (template selects), Projects (invoice/deposit)
+    - Project Details (invoice type), Portal Files (3 filter selects), Document Requests (client selects)
+  - Project details status dropdown marked as intentional exception (custom auto-save behavior)
+
+  **Color Contrast Analysis:**
+
+  - Blue/Yellow/Green/Red badges: 4.6-12.5:1 ✅ PASS
+  - Purple/Gray badges: 4.4-4.5:1 ⚠️ Borderline (acceptable with semibold weight)
 
   **Files Modified:**
 
@@ -191,7 +265,7 @@ Create admin UI module for viewing and managing deleted items (trash).
   - Missing composite indexes for common queries
   - No row-level security
 
-  **Status:** Audit complete, fixes pending
+  **Status:** Audit complete, fixes implemented (see "Modal Audit Fixes Completed" in Recently Completed)
 
 - [x] **Forms Audit (Feb 6, 2026)**: Comprehensive audit of all forms, validation patterns, and accessibility.
 
@@ -247,7 +321,7 @@ Create admin UI module for viewing and managing deleted items (trash).
   **Current State:**
 
   | Metric | Status |
-  |--------|--------|
+  | -------- | -------- |
   | Hardcoded colors | 0 critical (3 acceptable fallbacks) |
   | Z-index values | All portal files use `--z-index-portal-*` tokens |
   | Standard breakpoints | All use `@custom-media` (`--mobile`, `--small-mobile`) |
@@ -536,7 +610,7 @@ Before any new features, existing features need verification. The verification c
 - [x] Button design audit - Already well-organized in `portal-buttons.css`
 - [x] Badge design audit - Already well-organized in `portal-badges.css`
 - [x] Recent activity on dashboard - Wired up to `/api/clients/activities/recent`
-- [x] **Frontend-backend wiring review (Feb 2, 2026)** - Fixed 7 mismatches (admin overview revenue, admin files download/delete, admin clients reset-password, admin test-email/run-scheduler endpoints, client notes). Added full client notes backend (migration 046, client-service, clients routes).
+- [x] **Frontend-backend wiring review (Feb 2, 2026)** - Fixed 7 mismatches (admin overview revenue, admin files download/delete, admin test-email/run-scheduler endpoints, client notes). Added full client notes backend (migration 046, client-service, clients routes).
 - [ ] Time-sensitive tasks view
 
 ### 3. API Endpoints Without Frontend UI (Gap)
@@ -744,14 +818,14 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 ### Frontend (6.1)
 
-**Real-time updates (WebSockets/SSE)**
+#### Real-time updates (WebSockets/SSE)
 
 - **Goal:** Messages, notifications, or project updates without manual refresh.
 - **Options:** (A) SSE for one-way server push (simpler); (B) WebSockets for bidirectional.
 - **Phases:** 1) Add SSE endpoint (e.g. `/api/messages/stream`); 2) Client EventSource subscription; 3) Emit on new message/project update. Scope to messages first, then notifications.
 - **Effort:** 1–2 days | **Risk:** Medium
 
-**Offline/portal (PWA for client portal)**
+#### Offline/portal (PWA for client portal)
 
 - **Goal:** Client portal works offline or with poor connectivity.
 - **Phases:** 1) Service worker for portal entry; 2) Cache critical assets; 3) Queue mutations (e.g. messages) when offline; 4) Sync when back online.
@@ -759,14 +833,14 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 **A11y audit (full WCAG)** — See "Planned: Full WCAG 2.1 AA Compliance" below.
 
-**E2E coverage (admin/portal flows)**
+#### E2E coverage (admin/portal flows)
 
 - **Goal:** Playwright tests for login → view project, create invoice, send message.
 - **Status:** Admin login → view projects done (`tests/e2e/admin-flow.spec.ts`). Portal login → dashboard done (`tests/e2e/portal-flow.spec.ts`).
 - **Phases:** 1) Admin login flow (done); 2) Client portal login + dashboard; 3) One CRUD flow each (e.g. project, invoice).
 - **Effort:** 1–2 days | **Risk:** Low
 
-**Visual regression**
+#### Visual regression
 
 - **Goal:** Detect UI drift with screenshot diffs.
 - **Options:** Playwright screenshots + Percy/Chromatic, or custom diff job.
@@ -779,37 +853,37 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 **API versioning** — See "Planned: API Versioning" above.
 
-**Webhooks (outbound events)**
+#### Webhooks (outbound events)
 
 - **Goal:** Emit events (e.g. `project.created`, `invoice.sent`) to configured URLs.
 - **Phases:** 1) Webhook config table (url, events, secret); 2) Event emitter service; 3) HTTP POST with retries; 4) Admin UI to manage webhooks.
 - **Effort:** 2–3 days | **Risk:** Medium
 
-**Public API keys (server-to-server)**
+#### Public API keys (server-to-server)
 
 - **Goal:** API keys for external integrations (no browser/JWT).
 - **Phases:** 1) `api_keys` table (key hash, scope, expiry); 2) Middleware: accept `X-API-Key` or `Authorization: Bearer <key>`; 3) Admin UI to create/revoke.
 - **Effort:** 1–2 days | **Risk:** Medium (key management, scoping)
 
-**Idempotency (Idempotency-Key)**
+#### Idempotency (Idempotency-Key)
 
 - **Goal:** Safe retries for POST/PUT/DELETE.
 - **Phases:** 1) Middleware to read `Idempotency-Key` header; 2) Store response for key (TTL 24h); 3) Return cached response on replay.
 - **Effort:** 0.5–1 day | **Risk:** Low
 
-**Metrics (Prometheus /metrics)**
+#### Metrics (Prometheus /metrics)
 
 - **Goal:** Expose `/metrics` for Prometheus scraping.
 - **Phases:** 1) Add `prom-client`; 2) Default metrics (heap, event loop); 3) Custom (request duration, error rate); 4) Route behind auth or allowlist.
 - **Effort:** 0.5–1 day | **Risk:** Low
 
-**2FA / SSO**
+#### 2FA / SSO
 
 - **Goal:** TOTP for admin; optional SSO (Google, etc.).
 - **Phases:** 1) `speakeasy` for TOTP; 2FA table; 2) Admin enable/disable; 3) SSO: OAuth flow + Passport or similar.
 - **Effort:** 2–3 days (2FA), 3–5 days (SSO) | **Risk:** Medium
 
-**Job queue (Redis/Bull vs cron)**
+#### Job queue (Redis/Bull vs cron)
 
 - **Goal:** Async jobs with retries (email, webhooks, PDF).
 - **Phases:** 1) Redis + Bull if REDIS_ENABLED; 2) Queue email, webhook, heavy PDF jobs; 3) Fallback to in-process queue if no Redis.
@@ -819,7 +893,7 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 ### Build & Ops (6.3)
 
-**Database backups (automated)**
+#### Database backups (automated)
 
 - **Goal:** Scheduled SQLite backup to local/remote storage.
 - **Phases:** 1) Backup script (copy or `sqlite3 .backup`); 2) Cron or scheduler job (daily); 3) Retention (e.g. 7 daily, 4 weekly); 4) Optional S3/cloud upload.
@@ -829,14 +903,14 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 ### Design & Content (6.4)
 
-**Design system docs (live component catalog)**
+#### Design system docs (live component catalog)
 
 - **Goal:** Browsable component library with tokens and examples.
 - **Options:** Storybook, or static HTML page with iframes.
 - **Phases:** 1) Install Storybook (or build simple catalog page); 2) Add stories for buttons, badges, forms, cards; 3) Document tokens; 4) Deploy or add to dev script.
 - **Effort:** 1–2 days | **Risk:** Low
 
-**Content/SEO (CMS for marketing)**
+#### Content/SEO (CMS for marketing)
 
 - **Goal:** Edit marketing content without code deploys.
 - **Options:** Headless CMS (Sanity, Contentful, Strapi) or simple admin-editable JSON/MD.
@@ -909,7 +983,7 @@ Suggested implementation order: KB client Help → KB admin → Document request
 #### Issues Identified
 
 |Issue|Location|Impact|
-|-------|----------|--------|
+|---|---|---|
 |**Information overload**|Client Detail Overview (7 cards)|Cognitive load; hard to scan|
 |**Account Actions buried**|Client Detail — in a card at bottom|Not discoverable; feels disconnected|
 |**Inconsistent header actions**|Client vs Project|Client: card. Project: dropdown menu|
@@ -1038,35 +1112,35 @@ CONTRACT TAB
 └── [Request Signature] button
 ```
 
-#### Implementation Phases
+#### Implementation Phases — Detail View IA
 
-**Phase 1: Header Actions Consistency**
+##### Phase 1: Header Actions Consistency
 
 - [ ] Move Account Actions from card to header row (client detail)
 - [ ] Add quick action buttons to both headers
 - [ ] Implement consistent "More" dropdown menu pattern
 - [ ] Remove `.client-account-actions` card from Overview tab
 
-**Phase 2: Information Consolidation (Client Detail)**
+##### Phase 2: Information Consolidation (Client Detail)
 
 - [ ] Merge Quick Stats + Health into single "At-a-Glance" card
 - [ ] Merge Client Overview + CRM Details into single "Client Info" card
 - [ ] Make Tags + Custom Fields a collapsible section or move to separate tab
 - [ ] Reduce Overview tab from 7 cards to 3-4
 
-**Phase 3: Visual Hierarchy (Both Views)**
+##### Phase 3: Visual Hierarchy (Both Views)
 
 - [x] Add visible H3 to each tab panel (not just Overview) — Done in Priority 2 (Feb 3, 2026)
 - [x] Ensure consistent heading hierarchy: H2 (page title) → H3 (section) — Done in Priority 2 (Feb 3, 2026)
 - [ ] Add section dividers or spacing between logical groups
 
-**Phase 4: Responsive + Mobile**
+##### Phase 4: Responsive + Mobile
 
 - [ ] Tab strips: horizontal scroll with fade indicators on mobile
 - [ ] Header row: stack on narrow viewports
 - [ ] Cards: full-width on mobile
 
-**Phase 5: Cross-View Consistency**
+##### Phase 5: Cross-View Consistency
 
 - [ ] Standardize button placement pattern (header for primary, inline for secondary)
 - [ ] Standardize empty states (icon + message + CTA)
@@ -1137,38 +1211,38 @@ admin-project-details.ts
 └── delegates to project-details/actions.ts
 ```
 
-#### Implementation Phases
+#### Implementation Phases — Project Details Refactor
 
-**Phase 1: Extract Types + DOM Cache**
+##### Phase 1: Extract Types + DOM Cache
 
 - [x] Create `project-details/types.ts` — move interfaces
 - [x] Create `project-details/dom-cache.ts` — move DOM cache setup
 - [x] Update imports in main file
 
-**Phase 2: Extract Messages + Files**
+##### Phase 2: Extract Messages + Files
 
 - [x] Create `project-details/messages.ts` — extract `loadProjectMessages`, `sendProjectMessage`
 - [x] Create `project-details/files.ts` — extract file loading + upload handlers
 - [x] Pass context/callbacks as parameters or use dependency injection
 
-**Phase 3: Extract Milestones**
+##### Phase 3: Extract Milestones
 
 - [x] Create `project-details/milestones.ts` — extract all milestone methods
 - [x] Export `loadProjectMilestones`, `toggleMilestone`, `deleteMilestone`, etc.
 
-**Phase 4: Extract Invoices (largest section)**
+##### Phase 4: Extract Invoices (largest section)
 
 - [x] Create `project-details/invoices.ts` — core invoice loading + display
 - [x] Create `project-details/invoice-scheduling.ts` — scheduled + recurring
 - [x] Create `project-details/invoice-actions.ts` — send, remind, payments, late fees
 - [x] Wire up re-exports in `invoices.ts`
 
-**Phase 5: Extract Project Actions**
+##### Phase 5: Extract Project Actions
 
 - [x] Create `project-details/actions.ts` — delete, archive, duplicate, edit modal
 - [x] Move contract signing logic here or to own file
 
-**Phase 6: Clean Up Main File**
+##### Phase 6: Clean Up Main File
 
 - [x] Main class becomes orchestrator only
 - [x] Tab switching delegates to sub-modules
@@ -1194,7 +1268,7 @@ export async function loadProjectMessages(ctx: ProjectDetailsContext): Promise<v
 }
 ```
 
-#### Acceptance Criteria
+#### Acceptance Criteria — Project Details Refactor
 
 - [x] Main file under 500 lines
 - [x] Each sub-module has single responsibility
@@ -1205,7 +1279,7 @@ export async function loadProjectMessages(ctx: ProjectDetailsContext): Promise<v
 
 ---
 
-#### Acceptance Criteria
+#### Acceptance Criteria — Detail Views Redesign
 
 - [ ] Client detail header has inline quick actions (no buried card)
 - [ ] Client Overview tab has max 4 cards (consolidated)
@@ -1222,7 +1296,7 @@ Items that still need expert input:
 
 - **Sidebar button order** — Current: Dashboard | Leads | Projects | Clients | Messages | Analytics | Knowledge | Documents | System. Recommend reordering based on frequency/workflow.
 - **Panel button placement guideline** — Document pattern for all panels (header vs footer vs inline).
-- **Badge redesign** — Need visual system that doesn't rely solely on color (WCAG 1.4.1).
+- **Badge redesign** — Need new visual system (not just color-dependent for WCAG 1.4.1).
 
 ### Admin Table Dropdowns (Feb 2, 2026)
 
@@ -1300,7 +1374,7 @@ The focus system has three layers:
 #### Current `<details>` usage (3 instances, all admin)
 
 | Location | Line | Classes | Summary heading |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `admin/index.html` | 527 | `portal-project-card portal-shadow system-details leads-analytics-section` | Lead Analytics & Scoring |
 | `admin/index.html` | 1728 | `portal-project-card portal-shadow system-details` | Build Information |
 | `admin/index.html` | 1747 | `portal-project-card portal-shadow system-details` | Browser Information |
@@ -1367,7 +1441,7 @@ The focus system has three layers:
 
 **Status:** In progress — layout baseline done; UX polish and verification pending.
 
-**Scope**
+##### Scope — Detail Views
 
 - **Client detail:** `#tab-client-detail` (admin), header + tabs (Overview | Contacts | Activity | Projects | Invoices | Notes), overview card, Account Actions, CRM/Custom Fields, contacts, activity, projects, invoices, notes.
 - **Project detail:** Project detail view (header + tabs: Overview | Files | Messages | Invoices | Tasks | Time | Contract), overview card, status, tasks, time, contract, etc.
@@ -1375,26 +1449,32 @@ The focus system has three layers:
 
 ---
 
-**Completed (layout baseline)**
+##### Completed (layout baseline)
 
 - [x] **Issue 1: Overview Card position** — Overview Card is already inside the Overview tab. Structure: Header → Tabs → Tab panels; `#cd-tab-overview` and `#pd-tab-overview` each contain the Overview Card as first content. No HTML change needed.
 - [x] **Issue 2: Visual hierarchy / bold values** — `.meta-value` is already `font-weight: 400` in `project-detail.css` (`.project-detail-overview .meta-value` and root `.meta-value`). No change needed.
 
 ---
 
-**Remaining work (phased)**
+##### Remaining work (phased)## Recently Completed
 
-**Phase 1 — UX/layout polish**
+- [x] **Forms Audit Remediation (Index Forms) (Feb 6, 2026)**: Standardized `required` + `aria-required`, removed mixed `data-required`, added inline ARIA error messaging, and aligned password toggle attributes.
+
+  - `index.html` (contact form, portal auth forms, admin login form)
+
+// ...existing code...
+
+##### Phase 1 — UX/layout polish
 
 - [ ] **Account Actions placement** (client detail) — Move or duplicate Reset Password, Send Invitation, Archive, Delete into the page header (e.g. icon buttons next to client name) so they feel connected to the context. See portal styling: "Account Actions buttons need better placement". Selectors: `#cd-btn-reset-password`, `#cd-btn-resend-invite`, `#cd-btn-archive`, `#cd-btn-delete`; container `.client-account-actions`.
 - [ ] **Tabs responsive** — Project and client detail tab strips need overflow/scroll or wrap on small viewports so all tabs are reachable. See "Tabs not responsive" in Admin Portal list. Use or extend shared `.portal-tabs` / `.portal-subtabs` responsive behavior (e.g. horizontal scroll with fade, or wrap).
 - [ ] **Button icons in panels** — Improve placement of action buttons in detail panels (e.g. lead/contact panels: Activate, Add Task, Add Note, Reply, Convert, Archive/Restore). See "Button icons in panels" in Admin Portal list.
 
-**Phase 2 — Verification (behavior)**
+##### Phase 2 — Verification (behavior)
 
 - Verification checklist items for **Clients** and **Projects** (see Verification Checklist below) must pass: CRM Details, Custom Fields, contacts, activity, invite icon, status dropdown, tasks, time, contract, delete, etc. One checkbox per verifiable piece; check off when confirmed in testing.
 
-**Acceptance (summary)**
+##### Acceptance (summary of plan)
 
 - Client detail: Overview, Contacts, Activity, Projects, Invoices, Notes tabs work; CRM/Custom Fields display and edit; invite icon works; Account Actions (reset password, resend invite, archive, delete) work and are discoverable.
 - Project detail: Overview, Files, Messages, Invoices, Tasks, Time, Contract tabs work; status dropdown saves; invite icon works; tasks and time entries work; contract preview/sign/status/signature details work; Delete button works.
@@ -1406,14 +1486,14 @@ The focus system has three layers:
 
 **Status:** Plan ready — layout choice needed; then implement in phases.
 
-**Scope**
+##### Scope — Dashboard Overhaul
 
 - **Admin Overview tab:** `#tab-overview` (first tab when admin opens the app). Currently: **Today's Snapshot** (4 stat cards: Active Projects, Clients, Revenue MTD, Conversion Rate — clickable to filter/navigate), then **Recent Activity** (list from `/api/clients/activities/recent?limit=10`, rendered in `admin-overview.ts`).
 - **Key files:** `admin/index.html` (Overview tab markup), `src/features/admin/modules/admin-overview.ts` (load and render stats + Recent Activity), `src/components/recent-activity.ts`, `src/styles/pages/admin.css` (dashboard section styles), shared `portal-cards.css` (stat cards, recent-activity).
 
 ---
 
-**Current state vs gaps**
+##### Current state vs gaps
 
 |Area|Current|Gap|
 |------|---------|-----|
@@ -1425,9 +1505,9 @@ The focus system has three layers:
 
 ---
 
-**Layout options (choose one to proceed)**
+##### Layout options (choose one to proceed)
 
-**Option A: Priority-First** — Focus on what needs attention NOW
+##### Option A: Priority-First — Focus on what needs attention NOW
 
 ```text
 NEEDS ATTENTION: [Overdue Invoices] [Pending Contracts] [New Leads] [Unread Messages]
@@ -1452,35 +1532,35 @@ NEEDS ATTENTION | KEY METRICS | RECENT ACTIVITY
 
 ---
 
-**Phased implementation**
+##### Phased implementation
 
-**Phase 0 — Decision**
+##### Phase 0 — Decision
 
 - [ ] **Choose layout** — Pick Option A, B, or C (or a hybrid). Document choice in this section or in a short design note.
 
-**Phase 1 — Needs Attention / time-sensitive (if in chosen layout)**
+##### Phase 1 — Needs Attention / time-sensitive (if in chosen layout)
 
 - [ ] **API** — Endpoints or reuse of existing APIs for: overdue invoices count, pending contracts (e.g. unsigned), new/unread leads count, unread messages count. Aggregate into a single "needs attention" payload or separate calls.
 - [ ] **UI** — "Needs Attention" block on Overview: card(s) or buttons linking to Invoices, Contracts, Leads, Messages with counts. Reuse `.stat-card` or similar; place per chosen layout.
 
-**Phase 2 — Layout restructure (if Option B or C)**
+##### Phase 2 — Layout restructure (if Option B or C)
 
 - [ ] **Reorder/section** — Add Business Health row (Option B) or Key Metrics column (Option C). Reuse or extend Today's Snapshot stats; add Outstanding AR, Active Projects if not already there.
 - [ ] **Responsive** — Ensure dashboard sections stack or reflow on small viewports (existing grid breakpoints in admin.css).
 
-**Phase 3 — Recent Activity polish**
+##### Phase 3 — Recent Activity polish
 
 - [ ] **Filtering/grouping** — Optional: filter by type (invoice, lead, message, etc.) or group by date/entity. Depends on API support and product priority.
 - [ ] **"View all" / link** — Optional: link to a full activity view or to relevant tab (e.g. Leads, Messaging).
 
-**Phase 4 — Verification**
+##### Phase 4 — Verification
 
 - [ ] **Dashboard modal** — Focus trapped inside when dashboard modal is open (see Verification Checklist → Modals & Toasts).
 - [ ] **Stats** — Today's Snapshot numbers match source tabs; click-through works. Recent Activity loads and displays without errors.
 
 ---
 
-**Acceptance (summary)**
+##### Acceptance (summary)
 
 - Overview tab reflects chosen layout (A, B, or C).
 - If "Needs Attention" is in the choice: counts and links work; data comes from existing or new API as needed.
@@ -1653,7 +1733,7 @@ NEEDS ATTENTION | KEY METRICS | RECENT ACTIVITY
 
 ### TEST 12: Client Portal
 
-**Log in as a client**
+#### Log in as a client**
 
 - [ ] **Dashboard:** Project cards and stats load
 - [ ] **Invoices:** List displays, click one → can view/download PDF

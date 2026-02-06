@@ -16,6 +16,7 @@ import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { confirmDanger } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
+import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -365,7 +366,7 @@ function openCreateModal(_ctx: AdminDashboardContext): void {
   if (!modal) return;
 
   // Show modal
-  modal.classList.remove('hidden');
+  openModalOverlay(modal);
   drCreateModalFocusCleanup = manageFocusTrap(modal, {});
 
   // Reset to single tab
@@ -412,7 +413,7 @@ function openCreateModal(_ctx: AdminDashboardContext): void {
 function closeCreateModal(): void {
   const modal = el('dr-create-modal');
   if (modal) {
-    modal.classList.add('hidden');
+    closeModalOverlay(modal);
     drCreateModalFocusCleanup?.();
     drCreateModalFocusCleanup = null;
   }
@@ -494,7 +495,7 @@ function openDetailModal(requestId: number, ctx: AdminDashboardContext): void {
   titleEl.textContent = 'Document Request';
   bodyEl.innerHTML = '<p class="loading-message">Loading...</p>';
   footerEl.innerHTML = '';
-  modal.classList.remove('hidden');
+  openModalOverlay(modal);
   drDetailModalFocusCleanup = manageFocusTrap(modal, {});
 
   loadRequestDetail(requestId).then((data) => {
@@ -546,7 +547,7 @@ function openDetailModal(requestId: number, ctx: AdminDashboardContext): void {
 function closeDetailModal(): void {
   const modal = el('dr-detail-modal');
   if (modal) {
-    modal.classList.add('hidden');
+    closeModalOverlay(modal);
     drDetailModalFocusCleanup?.();
     drDetailModalFocusCleanup = null;
   }

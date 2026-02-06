@@ -17,6 +17,8 @@ import {
 import { domCache } from './dom-cache';
 import { formatDate } from '../../../utils/format-utils';
 import type { ProjectResponse } from '../../../types/api';
+import { initProjectModalDropdowns, setupEditProjectModalHandlers } from '../modules/admin-projects';
+import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 
 /**
  * Delete a project
@@ -168,6 +170,11 @@ export function openEditProjectModal(
     return;
   }
 
+  // Ensure modal handlers and dropdown elements are initialized before populating
+  // This prevents timing issues where selects are not created yet
+  setupEditProjectModalHandlers(modal);
+  initProjectModalDropdowns(project as any);
+
   // Populate form fields - query fresh since values change between openings
   const nameInput = getElement('edit-project-name') as HTMLInputElement;
   const typeSelect = getElement('edit-project-type') as HTMLSelectElement;
@@ -200,8 +207,7 @@ export function openEditProjectModal(
   if (notesInput) notesInput.value = project.notes || '';
 
   // Show modal and lock body scroll
-  modal.classList.remove('hidden');
-  document.body.classList.add('modal-open');
+  openModalOverlay(modal);
 
   // Setup close handlers (use cached refs)
   const closeBtn = domCache.get('editClose');
@@ -209,8 +215,7 @@ export function openEditProjectModal(
   const form = domCache.getAs<HTMLFormElement>('editForm');
 
   const closeModal = () => {
-    modal.classList.add('hidden');
-    document.body.classList.remove('modal-open');
+    closeModalOverlay(modal);
   };
 
   closeBtn?.addEventListener('click', closeModal, { once: true });

@@ -95,12 +95,15 @@ export default defineConfig({
         target: 'http://localhost:4001',
         changeOrigin: true,
         secure: false,
+        ws: true,
+        // rewrite cookie domain for dev
+        cookieDomainRewrite: '',
         // Suppress proxy errors when backend isn't ready yet (race condition on startup)
         configure: (proxy) => {
-          proxy.on('error', (_err, _req, res) => {
-            // Return a 503 Service Unavailable instead of crashing
-            // The frontend retry logic will handle this gracefully
-            // Type guard: res can be Socket or ServerResponse
+          proxy.on('error', (err, _req, res) => {
+            // Log the proxy error and return a friendly 503 when possible
+            // eslint-disable-next-line no-console
+            console.warn('[vite-proxy] proxy error:', err && (err as Error).message ? (err as Error).message : err);
             if (res && 'writeHead' in res && typeof res.writeHead === 'function') {
               const response = res as import('http').ServerResponse;
               if (!response.headersSent) {

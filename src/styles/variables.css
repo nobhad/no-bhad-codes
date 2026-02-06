@@ -121,6 +121,11 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --z-nav: 100;
   --z-modal: 1000;
 
+  /* Modal sizes */
+  --modal-width-sm: 400px;
+  --modal-width-md: 560px;
+  --modal-width-lg: 860px;
+
   /* Responsive Breakpoints */
   --bp-xs: 320px;
   --bp-sm: 576px;

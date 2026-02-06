@@ -23,7 +23,7 @@
 ## Summary
 
 | Metric | Value |
-|--------|-------|
+| --- | --- |
 | Total Major Forms | 9 |
 | Form Field Types | 11 (text, email, password, tel, number, date, url, checkbox, radio, textarea, select) |
 | Validation Functions | 30+ |
@@ -39,7 +39,7 @@
 ### HTML Forms (9 Total)
 
 | Location | Form Type | Purpose |
-|----------|-----------|---------|
+| --- | --- | --- |
 | `/index.html` | Login/Portal Forms | Client/Admin authentication + password reset + magic link |
 | `/admin/index.html` | Multiple Admin Forms | Document requests, client creation, project creation, proposal forms |
 | `/client/portal.html` | Client Portal Forms | Client dashboard and settings |
@@ -69,7 +69,7 @@ The admin dashboard (`admin/index.html`) contains **82 form-group instances** co
 ### Input Types
 
 | Type | Purpose | Example Fields |
-|------|---------|----------------|
+| --- | --- | --- |
 | `text` | Names, company names, text fields | Name, Company, Subject |
 | `email` | Email addresses (validated) | Email, Billing Email |
 | `password` | Admin/client passwords | Password, Confirm Password |
@@ -85,7 +85,7 @@ The admin dashboard (`admin/index.html`) contains **82 form-group instances** co
 ### Field Attributes
 
 | Attribute | Purpose |
-|-----------|---------|
+| --- | --- |
 | `required` | HTML5 required validation |
 | `data-required="true"` | Custom required marker (contact form) |
 | `aria-required="true"` | Accessibility attribute |
@@ -133,7 +133,7 @@ validators.currency(value)
 **File:** `shared/validation/schemas.ts`
 
 | Schema | Fields Validated |
-|--------|------------------|
+| --- | --- |
 | `contactFormSchema` | name, email, subject, message, company |
 | `clientIntakeSchema` | name, email, company, phone, project details |
 | `userRegistrationSchema` | email, password, password confirmation |
@@ -150,7 +150,7 @@ validators.currency(value)
 **File:** `shared/validation/validators.ts`
 
 | Validator | Purpose |
-|-----------|---------|
+| --- | --- |
 | `validateRequired()` | Checks for empty/null/whitespace |
 | `validateEmail()` | Email format (optional strict mode) |
 | `validatePhone()` | Phone (E.164, US, generic formats) |
@@ -204,7 +204,7 @@ interface ValidationResult {
 **File:** `src/utils/form-errors.ts`
 
 | Function | Purpose |
-|----------|---------|
+| --- | --- |
 | `showFieldError(field, message)` | Show error below field |
 | `clearFieldError(field)` | Clear field error |
 | `clearAllFieldErrors(form)` | Clear all errors in form |
@@ -224,7 +224,7 @@ interface ValidationResult {
 **File:** `src/styles/components/form-validation.css`
 
 | Class | Purpose |
-|-------|---------|
+| --- | --- |
 | `.field-error` | Error message container (hidden by default) |
 | `.field-error--visible` | Shows error |
 | `.field--invalid` | Invalid field styling (red border) |
@@ -286,7 +286,7 @@ interface ValidationResult {
 **Fields:**
 
 | Field | Type | Validation |
-|-------|------|------------|
+| --- | --- | --- |
 | Name | text | required, min 2 chars |
 | Email | email | required, email format |
 | Company | text | optional |
@@ -323,7 +323,7 @@ interface ValidationResult {
 ### ARIA Attributes Used
 
 | Attribute | Purpose | Location |
-|-----------|---------|----------|
+| --- | --- | --- |
 | `aria-label` | Label for icon buttons, dropzone | Contact form, admin modules |
 | `aria-required="true"` | Mark required fields | Contact form |
 | `aria-invalid="true"` | Mark invalid fields | form-errors.ts |
@@ -370,7 +370,7 @@ interface ValidationResult {
 **File:** `src/utils/sanitization.ts`
 
 | Function | Purpose |
-|----------|---------|
+| --- | --- |
 | `SanitizationUtils.sanitizeText()` | HTML/script removal |
 | `SanitizationUtils.sanitizeEmail()` | Email sanitization |
 | `SanitizationUtils.sanitizeMessage()` | Message sanitization |
@@ -396,7 +396,7 @@ interface ValidationResult {
 ### CSS Files for Forms
 
 | File | Purpose |
-|------|---------|
+| --- | --- |
 | `src/styles/components/form-fields.css` | Input/textarea/select styling |
 | `src/styles/components/form-validation.css` | Error states |
 | `src/styles/components/form-buttons.css` | Button styling |
@@ -410,7 +410,7 @@ interface ValidationResult {
 **Universal Classes:**
 
 | Class | Purpose |
-|-------|---------|
+| --- | --- |
 | `.form-container` | Form wrapper |
 | `.form-group` | Field wrapper |
 | `.form-input` | Text/email/tel inputs |
@@ -426,7 +426,7 @@ interface ValidationResult {
 **Portal Forms:**
 
 | Class | Purpose |
-|-------|---------|
+| --- | --- |
 | `.label-inside` | Labels inside inputs (opt-in) |
 | `.field-with-left-icon` | With left icon padding |
 | `.portal-checkbox` | Custom checkbox |
@@ -438,13 +438,13 @@ interface ValidationResult {
 ### Resolved Issues
 
 | # | Issue | Resolution |
-|---|-------|------------|
+| --- | --- | --- |
 | 1 | Password toggle inconsistency | FIXED - Shared component `src/components/password-toggle.ts` used in admin login, client portal, and set-password pages. Uses `data-password-toggle` attribute. |
 
 ### Remaining Issues
 
 | # | Issue | Severity | Details |
-|---|-------|----------|---------|
+| --- | --- | --- | --- |
 | 1 | Mixed required attributes | Low | Some use `data-required`, others use `required` |
 | 2 | Error display patterns differ | Medium | Contact form uses popups, portal uses inline |
 | 3 | Multiple validation systems | Low | Three layers (HTML5, utils/, shared/) |
@@ -454,7 +454,7 @@ interface ValidationResult {
 ### Recommendations
 
 | # | Recommendation | Priority |
-|---|----------------|----------|
+| --- | --- | --- |
 | 1 | Use consistent required attribute (`required` + `aria-required`) | Medium |
 | 2 | Unify error display pattern (prefer inline with ARIA) | Medium |
 | 3 | Document which validation layer to use when | Low |

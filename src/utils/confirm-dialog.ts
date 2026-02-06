@@ -23,6 +23,13 @@ export interface ConfirmDialogOptions {
   icon?: 'warning' | 'danger' | 'info' | 'question' | 'folder-plus';
 }
 
+let dialogIdCounter = 0;
+
+function nextDialogId(prefix: string): string {
+  dialogIdCounter += 1;
+  return `${prefix}-${dialogIdCounter}`;
+}
+
 /**
  * Shows a custom confirm dialog and returns a Promise
  * that resolves to true (confirmed) or false (cancelled)
@@ -54,7 +61,10 @@ export function confirmDialog(options: ConfirmDialogOptions): Promise<boolean> {
     overlay.className = 'confirm-dialog-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'confirm-dialog-title');
+    const titleId = nextDialogId('confirm-dialog-title');
+    const messageId = nextDialogId('confirm-dialog-message');
+    overlay.setAttribute('aria-labelledby', titleId);
+    overlay.setAttribute('aria-describedby', messageId);
 
     // Get icon SVG based on type
     const iconSvg = getIconSvg(icon);
@@ -64,9 +74,9 @@ export function confirmDialog(options: ConfirmDialogOptions): Promise<boolean> {
       <div class="confirm-dialog">
         <div class="confirm-dialog-header">
           <div class="confirm-dialog-icon ${icon}">${iconSvg}</div>
-          <h3 id="confirm-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+          <h3 id="${titleId}" class="confirm-dialog-title">${escapeHtml(title)}</h3>
         </div>
-        <p class="confirm-dialog-message">${escapeHtml(message)}</p>
+        <p id="${messageId}" class="confirm-dialog-message">${escapeHtml(message)}</p>
         <div class="confirm-dialog-actions">
           <button type="button" class="confirm-dialog-btn confirm-dialog-cancel">${escapeHtml(cancelText)}</button>
           <button type="button" class="confirm-dialog-btn confirm-dialog-confirm ${danger ? 'danger' : ''}">${escapeHtml(confirmText)}</button>
@@ -199,7 +209,10 @@ export function alertDialog(options: AlertDialogOptions): Promise<void> {
     overlay.className = 'confirm-dialog-overlay';
     overlay.setAttribute('role', 'alertdialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'alert-dialog-title');
+    const titleId = nextDialogId('alert-dialog-title');
+    const messageId = nextDialogId('alert-dialog-message');
+    overlay.setAttribute('aria-labelledby', titleId);
+    overlay.setAttribute('aria-describedby', messageId);
 
     // Get icon SVG
     const iconSvg = getIconSvg(iconMap[type] || 'info');
@@ -212,9 +225,9 @@ export function alertDialog(options: AlertDialogOptions): Promise<void> {
       <div class="confirm-dialog">
         <div class="confirm-dialog-header">
           <div class="confirm-dialog-icon ${iconMap[type]}">${iconSvg}</div>
-          <h3 id="alert-dialog-title" class="confirm-dialog-title">${escapeHtml(displayTitle)}</h3>
+          <h3 id="${titleId}" class="confirm-dialog-title">${escapeHtml(displayTitle)}</h3>
         </div>
-        <p class="confirm-dialog-message">${escapeHtml(message)}</p>
+        <p id="${messageId}" class="confirm-dialog-message">${escapeHtml(message)}</p>
         <div class="confirm-dialog-actions">
           <button type="button" class="confirm-dialog-btn confirm-dialog-confirm">${escapeHtml(buttonText)}</button>
         </div>
@@ -349,7 +362,10 @@ export function promptDialog(options: PromptDialogOptions): Promise<string | nul
     overlay.className = 'confirm-dialog-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'prompt-dialog-title');
+    const titleId = nextDialogId('prompt-dialog-title');
+    const descriptionId = nextDialogId('prompt-dialog-description');
+    overlay.setAttribute('aria-labelledby', titleId);
+    overlay.setAttribute('aria-describedby', descriptionId);
 
     // Get icon SVG (edit/pencil icon)
     const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
@@ -359,8 +375,9 @@ export function promptDialog(options: PromptDialogOptions): Promise<string | nul
       <div class="confirm-dialog prompt-dialog">
         <div class="confirm-dialog-header">
           <div class="confirm-dialog-icon info">${iconSvg}</div>
-          <h3 id="prompt-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+          <h3 id="${titleId}" class="confirm-dialog-title">${escapeHtml(title)}</h3>
         </div>
+        <p id="${descriptionId}" class="sr-only">${escapeHtml(label)}</p>
         <div class="prompt-dialog-field">
           <label for="prompt-dialog-input" class="prompt-dialog-label">${escapeHtml(label)}</label>
           <input
@@ -522,7 +539,10 @@ export function multiPromptDialog(
     overlay.className = 'confirm-dialog-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'multi-prompt-dialog-title');
+    const titleId = nextDialogId('multi-prompt-dialog-title');
+    const descriptionId = nextDialogId('multi-prompt-dialog-description');
+    overlay.setAttribute('aria-labelledby', titleId);
+    overlay.setAttribute('aria-describedby', descriptionId);
 
     // Get icon SVG
     const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
@@ -582,8 +602,9 @@ export function multiPromptDialog(
       <div class="confirm-dialog prompt-dialog multi-prompt-dialog">
         <div class="confirm-dialog-header">
           <div class="confirm-dialog-icon info">${iconSvg}</div>
-          <h3 id="multi-prompt-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+          <h3 id="${titleId}" class="confirm-dialog-title">${escapeHtml(title)}</h3>
         </div>
+        <p id="${descriptionId}" class="sr-only">Complete the fields below.</p>
         <form class="multi-prompt-form">
           ${fieldsHtml}
           <div class="confirm-dialog-actions">
