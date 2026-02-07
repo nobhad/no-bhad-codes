@@ -43,22 +43,13 @@ The portfolio section code is complete but needs images:
 
 **Location:** `public/images/portfolio/` (directory needs to be created)
 
-### 2. API Endpoints Without Frontend UI
-
-| Route prefix | Purpose | Status |
-|--------------|---------|--------|
-| `/api/approvals` | Approval workflow definitions | Backend only, no UI |
-| `/api/triggers` | Workflow trigger management | Backend only, no UI |
-
-**Decision needed:** Do you want UI for Approvals/Triggers workflows?
-
-### 3. Front-End Polish
+### 2. Front-End Polish
 
 - [ ] Time-sensitive tasks view on dashboard
 - [ ] Lead funnel styling improvements
 - [ ] Analytics tab: use reusable components instead of analytics-only markup
 
-### 4. Client + Project Details Reorganization
+### 3. Client + Project Details Reorganization
 
 **Status:** Planning — optional UX improvements
 
@@ -66,7 +57,7 @@ The portfolio section code is complete but needs images:
 - [ ] Merge Client Overview + CRM Details into single card
 - [ ] Reduce Overview tab from 7 cards to 3-4
 
-### 5. Analytics Design Cohesion
+### 4. Analytics Design Cohesion
 
 **Goal:** Make Analytics tab styling consistent with System tab.
 
@@ -226,6 +217,10 @@ Already mounts routers at both `/api/` and `/api/v1/`.
 ---
 
 ## New API Endpoints Reference
+
+### Global Tasks (`/api/admin/tasks`) - Feb 6
+
+- `GET /` — Get all tasks across all active projects (params: status, priority, limit)
 
 ### Deleted Items (`/api/admin/deleted-items`) - Feb 6
 
