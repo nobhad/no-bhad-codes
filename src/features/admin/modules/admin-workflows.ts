@@ -17,6 +17,7 @@ import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
 
 // ============================================
 // TYPES
@@ -223,16 +224,15 @@ function renderWorkflowsTable(): void {
   tbody.innerHTML = cachedWorkflows.map(w => {
     const entityLabel = ENTITY_TYPE_LABELS[w.entity_type] || w.entity_type;
     const typeLabel = WORKFLOW_TYPE_LABELS[w.workflow_type] || w.workflow_type;
-    const statusClass = w.is_active ? 'status-active' : 'status-inactive';
-    const statusText = w.is_active ? 'Active' : 'Inactive';
-    const defaultBadge = w.is_default ? '<span class="status-badge status-qualified">Default</span>' : '';
+    const statusBadge = getStatusBadgeHTML(w.is_active ? 'Active' : 'Inactive', w.is_active ? 'active' : 'inactive');
+    const defaultBadge = w.is_default ? ` ${getStatusBadgeHTML('Default', 'qualified')}` : '';
 
     return `
       <tr data-id="${w.id}">
         <td><strong>${escapeHtml(w.name)}</strong>${defaultBadge}</td>
         <td>${entityLabel}</td>
         <td>${typeLabel}</td>
-        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+        <td>${statusBadge}</td>
         <td>${formatDate(w.updated_at)}</td>
         <td class="actions-cell">
           <button type="button" class="icon-btn workflow-edit" data-id="${w.id}" title="Edit workflow" aria-label="Edit workflow">
@@ -278,6 +278,13 @@ function setupWorkflowHandlers(): void {
   if (createBtn && !createBtn.dataset.bound) {
     createBtn.dataset.bound = 'true';
     createBtn.addEventListener('click', () => openWorkflowModal());
+  }
+
+  // Refresh button
+  const refreshBtn = el('workflows-refresh');
+  if (refreshBtn && !refreshBtn.dataset.bound) {
+    refreshBtn.dataset.bound = 'true';
+    refreshBtn.addEventListener('click', () => loadApprovalWorkflows());
   }
 }
 
@@ -457,7 +464,7 @@ async function openStepsModal(workflowId: number): Promise<void> {
             <div class="step-details">
               <strong>${s.approver_type === 'user' ? 'User' : s.approver_type === 'role' ? 'Role' : 'Client'}:</strong>
               ${escapeHtml(s.approver_value)}
-              ${s.is_optional ? '<span class="status-badge status-pending">Optional</span>' : ''}
+              ${s.is_optional ? getStatusBadgeHTML('Optional', 'pending') : ''}
               ${s.auto_approve_after_hours ? `<span class="step-auto">Auto-approve after ${s.auto_approve_after_hours}h</span>` : ''}
             </div>
             <button type="button" class="icon-btn icon-btn-danger step-delete" data-id="${s.id}" title="Remove step">
@@ -608,15 +615,14 @@ function renderTriggersTable(): void {
 
   tbody.innerHTML = cachedTriggers.map(t => {
     const actionLabel = ACTION_TYPE_LABELS[t.action_type] || t.action_type;
-    const statusClass = t.is_active ? 'status-active' : 'status-inactive';
-    const statusText = t.is_active ? 'Active' : 'Inactive';
+    const statusBadge = getStatusBadgeHTML(t.is_active ? 'Active' : 'Inactive', t.is_active ? 'active' : 'inactive');
 
     return `
       <tr data-id="${t.id}">
         <td><strong>${escapeHtml(t.name)}</strong></td>
         <td><code>${escapeHtml(t.event_type)}</code></td>
         <td>${actionLabel}</td>
-        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+        <td>${statusBadge}</td>
         <td>${formatDate(t.updated_at)}</td>
         <td class="actions-cell">
           <button type="button" class="icon-btn trigger-toggle" data-id="${t.id}" title="${t.is_active ? 'Disable' : 'Enable'}" aria-label="${t.is_active ? 'Disable' : 'Enable'} trigger">
@@ -662,6 +668,13 @@ function setupTriggerHandlers(): void {
   if (createBtn && !createBtn.dataset.bound) {
     createBtn.dataset.bound = 'true';
     createBtn.addEventListener('click', () => openTriggerModal());
+  }
+
+  // Refresh button
+  const refreshBtn = el('triggers-refresh');
+  if (refreshBtn && !refreshBtn.dataset.bound) {
+    refreshBtn.dataset.bound = 'true';
+    refreshBtn.addEventListener('click', () => loadTriggers());
   }
 }
 
