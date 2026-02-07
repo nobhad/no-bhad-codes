@@ -1,6 +1,6 @@
 # Complete Table Audit - Portal
 
-**Last Updated:** 2026-02-06
+**Last Updated:** 2026-02-07
 
 ## Table of Contents
 
@@ -159,10 +159,11 @@ Each table's columns listed in exact left-to-right display order.
 
 | # | Header | Data Source |
 | --- | --- | --- |
-| 1 | Contact | `name` + `company` + `email` |
-| 2 | Message | `message` (truncated) |
-| 3 | Status | `status` (dropdown) |
-| 4 | Date | `created_at` |
+| 1 | Contact | `name` + `company` |
+| 2 | Email | `email` |
+| 3 | Message | `message` (truncated) |
+| 4 | Status | `status` (dropdown) |
+| 5 | Date | `created_at` |
 
 #### Projects Table
 
@@ -295,7 +296,7 @@ Each table's columns listed in exact left-to-right display order.
 | ----- | :-----------------:| ------- |
 | Leads | MATCH | 8 columns |
 | Clients | MATCH | 7 columns |
-| Contacts | MATCH | 4 columns ( no Actions - row click) |
+| Contacts | MATCH | 5 columns (no Actions - row click) |
 | Projects | MATCH | 7 columns (no Actions - row click) |
 | Invoices | MATCH | 8 columns |
 | Proposals | MATCH | 8 columns |
@@ -314,7 +315,7 @@ Each table's columns listed in exact left-to-right display order.
 | --- | :---: | :---: | :---: |
 | Leads | 8 | Yes | Yes |
 | Clients | 7 | Yes | Yes |
-| Contacts | 4 | No | No |
+| Contacts | 5 | No | No |
 | Projects | 7 | Yes | No |
 | Invoices | 8 | Yes | Yes |
 | Proposals | 8 | Yes | Yes |

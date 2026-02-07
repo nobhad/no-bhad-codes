@@ -274,9 +274,11 @@
   white-space: nowrap;
 }
 
-/* Logout icon color on hover */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout:hover .btn-icon {
-  color: var(--portal-bg-dark);
+/* Logout hover - match sidebar nav buttons (red color on hover) */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout:hover .btn-icon,
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout:hover .btn-text {
+  color: var(--color-primary);
 }
 
 /* ============================================

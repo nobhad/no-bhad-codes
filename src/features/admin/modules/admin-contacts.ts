@@ -39,7 +39,7 @@ import {
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
-import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getStatusDotHTML } from '../../../components/status-badge';
 
 interface ContactsData {
   submissions: ContactSubmission[];
@@ -98,7 +98,7 @@ export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
 
   // Show loading state
   const tableBody = getElement('contacts-table-body');
-  if (tableBody) showTableLoading(tableBody, 4, 'Loading contacts...');
+  if (tableBody) showTableLoading(tableBody, 6, 'Loading contacts...');
 
   try {
     const response = await apiFetch('/api/admin/contact-submissions');
@@ -184,7 +184,7 @@ function renderContactsTable(
   if (!tableBody) return;
 
   if (!submissions || submissions.length === 0) {
-    showTableEmpty(tableBody, 4, 'No contacts yet.');
+    showTableEmpty(tableBody, 6, 'No contacts yet.');
     renderContactsPaginationUI(0, ctx);
     return;
   }
@@ -193,7 +193,7 @@ function renderContactsTable(
   const filteredSubmissions = applyFilters(submissions, filterState, CONTACTS_FILTER_CONFIG);
 
   if (filteredSubmissions.length === 0) {
-    showTableEmpty(tableBody, 4, 'No contacts match the current filters.');
+    showTableEmpty(tableBody, 6, 'No contacts match the current filters.');
     renderContactsPaginationUI(0, ctx);
     return;
   }
@@ -225,16 +225,27 @@ function renderContactsTable(
     const row = document.createElement('tr');
     row.dataset.contactId = String(submission.id);
 
-    // Match header structure: Contact | Message | Status | Date
+    // Check if can convert to client
+    const canConvert = !submission.client_id;
+    const isArchived = status === 'archived';
+
+    // Match header structure: Contact | Email | Message | Status | Date | Actions
     row.innerHTML = `
-      <td class="identity-cell">
+      <td class="identity-cell contact-cell">
         <span class="identity-name">${safeName}</span>
         ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
-        <span class="identity-email">${safeEmail}</span>
       </td>
+      <td class="email-cell">${safeEmail}</td>
       <td class="message-cell" title="${safeTitleMessage}">${truncatedMessage}</td>
       <td class="status-cell"></td>
-      <td>${date}</td>
+      <td class="date-cell">${date}</td>
+      <td class="actions-cell">
+        <div class="table-actions">
+          ${canConvert ? `<button class="icon-btn btn-convert-contact" data-id="${submission.id}" data-email="${safeEmail}" data-name="${safeName}" title="Convert to Client" aria-label="Convert to Client">${ICONS.USER_PLUS}</button>` : ''}
+          ${!isArchived ? `<button class="icon-btn btn-archive-contact" data-id="${submission.id}" title="Archive" aria-label="Archive">${ICONS.ARCHIVE}</button>` : ''}
+          ${isArchived ? `<button class="icon-btn btn-restore-contact" data-id="${submission.id}" title="Restore" aria-label="Restore">${ICONS.ROTATE_CCW}</button>` : ''}
+        </div>
+      </td>
     `;
 
     // Create custom dropdown for status
@@ -251,12 +262,43 @@ function renderContactsTable(
       statusCell.appendChild(dropdown);
     }
 
-    // Add click handler for row (excluding status cell)
+    // Add click handler for row (excluding status cell and action buttons)
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown')) return;
+      if (target.closest('.table-dropdown') || target.closest('.table-actions') || target.closest('button')) return;
       showContactDetails(submission.id);
     });
+
+    // Action button handlers
+    const convertBtn = row.querySelector('.btn-convert-contact');
+    if (convertBtn) {
+      convertBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await handleConvertToClient(submission, row);
+      });
+    }
+
+    const archiveBtn = row.querySelector('.btn-archive-contact');
+    if (archiveBtn) {
+      archiveBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await updateContactStatus(submission.id, 'archived', ctx);
+        submission.status = 'archived';
+        // Refresh table to update button visibility
+        renderContactsTable(contactsData, ctx);
+      });
+    }
+
+    const restoreBtn = row.querySelector('.btn-restore-contact');
+    if (restoreBtn) {
+      restoreBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await updateContactStatus(submission.id, 'new', ctx);
+        submission.status = 'new';
+        // Refresh table to update button visibility
+        renderContactsTable(contactsData, ctx);
+      });
+    }
 
     tableBody.appendChild(row);
   });
@@ -320,7 +362,7 @@ export function showContactDetails(contactId: number): void {
     <div class="contact-details-created">Created ${date}</div>
     <div class="details-actions">
       ${contact.client_id
-    ? getStatusBadgeHTML('Converted to Client', 'active')
+    ? getStatusDotHTML('converted')
     : `<button type="button" class="icon-btn" id="convert-to-client-btn" data-id="${contact.id}" data-email="${safeEmail}" data-name="${safeName}" title="Convert to Client" aria-label="Convert to Client">${ICONS.USER_PLUS}</button>`
 }
       ${contact.status !== 'archived' ? `<button type="button" class="icon-btn" id="archive-contact-btn" data-id="${contact.id}" title="Archive" aria-label="Archive contact">${ICONS.ARCHIVE}</button>` : ''}
@@ -600,5 +642,57 @@ export async function updateContactStatus(
   } catch (error) {
     console.error('[AdminContacts] Failed to update status:', error);
     showToast('Failed to update status. Please try again.', 'error');
+  }
+}
+
+/**
+ * Handle convert to client action from table row
+ */
+async function handleConvertToClient(
+  contact: ContactSubmission,
+  row: HTMLElement
+): Promise<void> {
+  const decodedName = SanitizationUtils.decodeHtmlEntities(contact.name || '');
+  const safeName = SanitizationUtils.capitalizeName(decodedName);
+
+  // Confirm conversion
+  const confirmed = await confirmDialog({
+    title: 'Convert to Client',
+    message: `Convert "${safeName}" (${contact.email}) to a client account?\n\nThis will create a client record and send an invitation email.`,
+    confirmText: 'Convert & Invite',
+    cancelText: 'Cancel',
+    icon: 'folder-plus'
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const response = await apiPost(`/api/admin/contact-submissions/${contact.id}/convert-to-client`, {
+      sendInvitation: true
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      showToast(
+        data.isExisting
+          ? 'Contact linked to existing client'
+          : 'Client created and invitation sent',
+        'success'
+      );
+
+      // Update local data
+      contact.client_id = data.clientId;
+      contact.converted_at = new Date().toISOString();
+
+      // Remove convert button from row
+      const convertBtn = row.querySelector('.btn-convert-contact');
+      if (convertBtn) convertBtn.remove();
+    } else {
+      const errorData = await response.json();
+      showToast(errorData.error || 'Failed to convert contact', 'error');
+    }
+  } catch (error) {
+    console.error('Error converting contact to client:', error);
+    showToast('Failed to convert contact to client', 'error');
   }
 }

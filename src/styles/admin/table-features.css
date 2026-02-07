@@ -14,8 +14,13 @@
    PAGINATION
    =============================================== */
 
-.table-pagination {
+/* Pagination container - handles bottom corners of table card */
+[data-page="admin"] .table-pagination {
   margin-top: 0;
+  background: var(--portal-bg-dark);
+  border-bottom-left-radius: var(--border-radius-card, 8px);
+  border-bottom-right-radius: var(--border-radius-card, 8px);
+  overflow: hidden;
 }
 
 .table-pagination .pagination-inner {
@@ -25,7 +30,6 @@
   gap: var(--space-4);
   padding: var(--space-3) var(--space-4);
   background: var(--portal-bg-dark);
-  border-radius: 0 0 var(--portal-radius-md) var(--portal-radius-md);
 }
 
 .pagination-info {
@@ -126,6 +130,8 @@
 .pagination-btn svg {
   width: 16px;
   height: 16px;
+  stroke: currentColor;
+  fill: none;
 }
 
 .pagination-pages {
@@ -177,14 +183,14 @@
    BULK ACTIONS
    =============================================== */
 
-/* Grid aligns selection count with table checkbox column (first column = 56px) */
+/* Flexbox layout for bulk action toolbar */
 .bulk-action-toolbar {
-  display: grid;
-  grid-template-columns: 56px 1fr auto;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-2);
   min-height: 48px;
   box-sizing: border-box;
   background: var(--portal-bg-medium);
@@ -193,13 +199,9 @@
   animation: slideDown 0.2s ease-out;
 }
 
-/* Reserve space when hidden so table size does not change on check/uncheck */
+/* Collapse when hidden - no reserved space */
 .bulk-action-toolbar.hidden {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  margin-bottom: var(--space-3);
-  min-height: 48px;
+  display: none;
 }
 
 @keyframes slideDown {
@@ -214,22 +216,27 @@
 }
 
 .bulk-toolbar-left {
-  grid-column: 1;
-  min-width: 0;
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  overflow: visible;
+  gap: var(--space-3);
 }
 
 .bulk-selection-count {
   font-size: var(--font-size-sm);
   color: var(--portal-text-light);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .bulk-selection-count strong {
   font-weight: 600;
   color: var(--color-primary);
+  /* Align with checkbox column center */
+  display: inline-flex;
+  justify-content: center;
+  width: 24px;
+  text-align: center;
 }
 
 .bulk-clear-selection {
@@ -248,21 +255,96 @@
 }
 
 .bulk-toolbar-actions {
-  grid-column: 3;
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
 
-.bulk-toolbar-actions .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+/* Hide empty actions container */
+.bulk-toolbar-actions:empty {
+  display: none;
 }
 
-.bulk-toolbar-actions .btn svg {
-  width: 14px;
-  height: 14px;
+/* Bulk action icon buttons - match .icon-btn styling */
+.bulk-toolbar-actions .bulk-action-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--portal-radius-lg, 12px);
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.bulk-toolbar-actions .bulk-action-icon-btn:hover {
+  color: var(--color-primary-hover, var(--color-primary));
+}
+
+.bulk-toolbar-actions .bulk-action-icon-btn.icon-btn-danger {
+  color: var(--color-danger);
+}
+
+.bulk-toolbar-actions .bulk-action-icon-btn.icon-btn-warning {
+  color: var(--color-warning);
+}
+
+.bulk-toolbar-actions .bulk-action-icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Bulk action dropdown */
+.bulk-dropdown {
+  position: relative;
+}
+
+.bulk-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--portal-radius-lg, 12px);
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.bulk-dropdown-trigger:hover {
+  color: var(--color-primary-hover, var(--color-primary));
+}
+
+.bulk-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 140px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: var(--space-1) 0;
+  background: var(--portal-bg-darker);
+  border: 1px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-md);
+  box-shadow: var(--shadow-card);
+  z-index: var(--z-index-portal-dropdown, 100);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: all 0.15s ease;
+}
+
+.bulk-dropdown.open .bulk-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 /* Bulk select cell checkbox alignment */
@@ -365,15 +447,25 @@
 
 @media (--mobile) {
   .table-pagination .pagination-inner {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
     gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
   }
 
+  .pagination-info {
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .pagination-controls {
-    width: 100%;
-    justify-content: space-between;
+    flex-shrink: 0;
   }
 
   .pagination-size {
@@ -384,20 +476,23 @@
     display: none;
   }
 
+  .pagination-nav {
+    gap: 2px;
+  }
+
+  .pagination-btn {
+    width: 32px;
+    height: 32px;
+  }
+
   .bulk-action-toolbar {
-    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
   }
 
-  .bulk-toolbar-left {
-    grid-column: unset;
-  }
-
   .bulk-toolbar-actions {
-    grid-column: unset;
     width: 100%;
     flex-wrap: wrap;
   }
@@ -406,5 +501,25 @@
   .admin-table th.bulk-select-cell,
   .admin-table td.bulk-select-cell {
     display: none;
+  }
+}
+
+@media (--small-mobile) {
+  .table-pagination .pagination-inner {
+    padding: var(--space-1-5) var(--space-2);
+  }
+
+  .pagination-info {
+    font-size: 0.7rem;
+  }
+
+  .pagination-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .pagination-btn svg {
+    width: 14px;
+    height: 14px;
   }
 }

@@ -130,7 +130,37 @@
    ===================================================== */
 [data-page="admin"] #tab-workflows code {
   background: var(--portal-bg-medium);
-  padding: 2px 6px;
+  padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-xs);
+}
+
+/* =====================================================
+   TABLE OUTER COLUMN PADDING
+   ===================================================== */
+[data-page="admin"] #tab-workflows .admin-table th:first-child,
+[data-page="admin"] #tab-workflows .admin-table td:first-child {
+  padding-left: var(--space-4);
+}
+
+[data-page="admin"] #tab-workflows .admin-table th:last-child,
+[data-page="admin"] #tab-workflows .admin-table td:last-child {
+  padding-right: var(--space-4);
+}
+
+/* =====================================================
+   DEFAULT INDICATOR (purple star icon)
+   ===================================================== */
+[data-page="admin"] .default-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--space-1-5);
+  color: var(--color-admin-purple);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+[data-page="admin"] .default-indicator svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
 }

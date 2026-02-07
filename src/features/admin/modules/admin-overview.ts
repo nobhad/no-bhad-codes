@@ -15,7 +15,13 @@ import { formatDateTime, formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createViewToggle } from '../../../components/view-toggle';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
-import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getStatusDotHTML as _getStatusDotHTML } from '../../../components/status-badge';
+
+// View toggle icons
+const BOARD_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="15" y="5" width="6" height="16" rx="1"/></svg>';
+const LIST_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
 
 // Task interface for upcoming tasks
 interface UpcomingTask {
@@ -395,8 +401,8 @@ function setupDashboardTasksViewToggle(): void {
   const toggleEl = createViewToggle({
     id: 'dashboard-tasks-view-toggle',
     options: [
-      { value: 'kanban', label: 'Board', title: 'Board view', ariaLabel: 'Board view' },
-      { value: 'list', label: 'List', title: 'List view', ariaLabel: 'List view' }
+      { value: 'kanban', label: 'Board', title: 'Board view', ariaLabel: 'Board view', iconSvg: BOARD_ICON },
+      { value: 'list', label: 'List', title: 'List view', ariaLabel: 'List view', iconSvg: LIST_ICON }
     ],
     value: dashboardTasksView,
     onChange: (v) => {

@@ -51,7 +51,7 @@
 
 /* Status dropdowns: trigger text aligns with menu item text */
 [data-page="admin"] .table-dropdown .custom-dropdown-trigger:has(.status-dot) {
-  padding-left: calc(var(--space-3) - 8px - var(--space-0-5));
+  padding-left: calc(var(--space-3) - 8px - var(--space-1));
 }
 
 /* Hover state - red border */
@@ -84,7 +84,7 @@
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
-  margin-right: var(--space-0-5);
+  margin-right: var(--space-1);
   background-color: var(--portal-text-muted);
 }
 

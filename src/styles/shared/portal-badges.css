@@ -167,6 +167,92 @@
 }
 
 /* =====================================================
+   STATUS INDICATOR (DOT STYLE)
+   Minimal status display with colored dot + text
+   Use instead of badges for cleaner table displays
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-light);
+  white-space: nowrap;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--portal-text-muted);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator .status-text {
+  color: var(--portal-text-light);
+}
+
+/* Status indicator dot colors - same palette as badges */
+/* Cyan/New */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-new .status-dot {
+  background-color: var(--status-new);
+}
+
+/* Yellow/Pending */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-pending .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-on-hold .status-dot {
+  background-color: var(--status-pending);
+}
+
+/* Blue/Active */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-active .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-in-progress .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-contacted .status-dot {
+  background-color: var(--status-active);
+}
+
+/* Green/Completed */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-completed .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-converted .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-replied .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-paid .status-dot {
+  background-color: var(--status-completed);
+}
+
+/* Red/Cancelled */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-cancelled .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-lost .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-archived .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-overdue .status-dot {
+  background-color: var(--status-cancelled);
+}
+
+/* Purple/Qualified */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-qualified .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-in-review .status-dot {
+  background-color: var(--status-qualified);
+}
+
+/* Gray/Inactive */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-read .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-inactive .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-draft .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-not-invited .status-dot {
+  background-color: var(--status-inactive);
+}
+
+/* Invoice status dots - Sent/Viewed (blue) */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-sent .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-viewed .status-dot {
+  background-color: var(--status-active);
+}
+
+/* Invoice status dots - Partial (yellow) */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-partial .status-dot {
+  background-color: var(--status-pending);
+}
+
+/* =====================================================
    SIDEBAR NOTIFICATION BADGES
    Small counter badges for sidebar nav items
    ===================================================== */

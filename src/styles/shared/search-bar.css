@@ -15,7 +15,7 @@
 
 .search-bar-icon {
   position: absolute;
-  left: 12px;
+  left: var(--space-1-5);
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -27,8 +27,8 @@
 }
 
 .search-bar-icon svg {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
 }
 
 /* Search bar inputs: padding for icon comes from portal-forms.css (input with left icon).
@@ -55,32 +55,42 @@ input.search-bar-input {
 .search-bar-input:focus {
   outline: none;
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .search-bar-clear {
   position: absolute;
-  right: 6px;
+  right: var(--space-0-5);
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
   padding: 0;
   background: transparent;
   border: none;
   border-radius: var(--portal-radius-sm, 6px);
   color: var(--portal-text-muted, var(--color-neutral-500));
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .search-bar-clear:hover {
   color: var(--portal-text, var(--portal-text-primary));
 }
 
+.search-bar-clear:focus {
+  outline: none;
+}
+
+.search-bar-clear:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .search-bar-clear svg {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
 }

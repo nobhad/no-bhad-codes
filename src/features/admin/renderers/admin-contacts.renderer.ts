@@ -12,7 +12,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatDateTime } from '../../../utils/format-utils';
 import { createLogger } from '../../../utils/logging';
 import { createTableDropdown } from '../../../utils/table-dropdown';
-import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getStatusDotHTML } from '../../../components/status-badge';
 import { adminDataService, type Contact, type ContactStats } from '../services/admin-data.service';
 import { APP_CONSTANTS } from '../../../config/constants';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
@@ -206,7 +206,7 @@ class AdminContactsRenderer {
         </div>
         <div class="detail-row">
           <span class="detail-label">Status</span>
-          <span class="detail-value">${getStatusBadgeHTML(contact.status || 'new', contact.status || 'new')}</span>
+          <span class="detail-value">${getStatusDotHTML(contact.status || 'new')}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Message</span>

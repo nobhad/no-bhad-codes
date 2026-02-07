@@ -358,7 +358,7 @@
 
 .analytics-column,
 .analytics-column-full {
-  background: var(--portal-bg-light);
+  background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
   padding: var(--space-1) var(--space-3) var(--space-3);
   min-width: 0;
@@ -528,7 +528,9 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 0;
+  padding: var(--space-2);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
 }
 
 /* When full-width, display scoring rules in a 3-column grid */
@@ -737,6 +739,18 @@
 #lead-details-panel .meta-value {
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+/* Email with copy icon: match spacing of other meta-values */
+#lead-details-panel .meta-value.meta-value-with-copy {
+  display: inline;
+  line-height: inherit;
+}
+
+#lead-details-panel .meta-value.meta-value-with-copy .copy-email-btn {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 0.3em;
 }
 
 /* Panel links (name -> client, project -> project details): match text by default, red on hover */

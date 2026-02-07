@@ -101,8 +101,8 @@
 }
 
 .confirm-dialog-icon svg {
-  width: 32px;
-  height: 32px;
+  width: var(--icon-size-2xl);
+  height: var(--icon-size-2xl);
   stroke-width: 1.5;
 }
 
@@ -117,7 +117,7 @@
   font-family: var(--font-family-acme, inherit);
   font-size: var(--font-size-lg);
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: var(--letter-spacing-label);
   text-transform: uppercase;
 }
 
@@ -143,12 +143,12 @@
   font-family: var(--font-family-acme, inherit);
   font-size: 0.9rem;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: var(--letter-spacing-label);
   text-transform: uppercase;
   border: none;
   border-radius: var(--portal-radius-lg);
   cursor: pointer;
-  transition: all 150ms;
+  transition: all var(--transition-fast);
   box-shadow: var(--btn-portal-shadow, var(--shadow-panel));
   min-width: 100px;
 }

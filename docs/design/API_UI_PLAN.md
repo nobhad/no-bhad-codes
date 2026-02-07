@@ -2,7 +2,7 @@
 
 **Last Updated:** February 2, 2026
 
-This document plans how the four API-only route groups (approvals, triggers, document-requests, knowledge base) get frontend UI that **fits the current design**. It follows [UX_GUIDELINES.md](./UX_GUIDELINES.md), [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md), [PORTAL_CSS_DESIGN.md](./PORTAL_CSS_DESIGN.md), and [REUSABLE_COMPONENTS_AUDIT.md](./REUSABLE_COMPONENTS_AUDIT.md).
+This document plans how the four API-only route groups (approvals, triggers, document-requests, knowledge base) get frontend UI that **fits the current design**. It follows [UX_GUIDELINES.md](./UX_GUIDELINES.md), [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md), and [REUSABLE_COMPONENTS_AUDIT.md](./REUSABLE_COMPONENTS_AUDIT.md).
 
 ---
 
@@ -180,7 +180,7 @@ This document plans how the four API-only route groups (approvals, triggers, doc
 ## Related Documentation
 
 - [UX_GUIDELINES.md](./UX_GUIDELINES.md) — Icons, buttons, forms, spacing.
-- [PORTAL_CSS_DESIGN.md](./PORTAL_CSS_DESIGN.md) — Portal bundles and theme variables.
+- [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md) — Full CSS architecture including portal bundles and theme variables.
 - [REUSABLE_COMPONENTS_AUDIT.md](./REUSABLE_COMPONENTS_AUDIT.md) — What should use shared components; migration status for dropdowns, modals, status badges.
 - [WIREFRAME_AND_COMPONENTS.md](./WIREFRAME_AND_COMPONENTS.md) — Wireframe mode, sidebar/layout reuse, component system overview.
 - [current_work.md](../current_work.md) — API Endpoints Without Frontend UI (Gap) and tier priorities.

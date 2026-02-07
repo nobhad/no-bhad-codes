@@ -52,7 +52,7 @@ import { manageFocusTrap } from '../../../utils/focus-trap';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { validateEmail } from '../../../../shared/validation/validators';
 import { getHealthBadgeHtml } from './admin-client-details';
-import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getStatusDotHTML } from '../../../components/status-badge';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
 
@@ -487,18 +487,22 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
         showInviteBtn = true;
       }
 
-      // Status cell with optional invite button (icon-only, inline with status)
+      // Status cell (dot indicator only)
       const statusVariant = statusClass.replace('status-', '');
-      const statusCell = showInviteBtn
-        ? `<span class="status-cell-wrapper">
-             ${getStatusBadgeHTML(statusDisplay, statusVariant)}
-             <button class="icon-btn icon-btn-invite" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">
-               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                 <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-               </svg>
-             </button>
-           </span>`
-        : getStatusBadgeHTML(statusDisplay, statusVariant);
+      const statusCell = getStatusDotHTML(statusVariant, { label: statusDisplay });
+
+      // Last active date
+      const clientAny = client as { last_login_at?: string };
+      const lastActive = clientAny.last_login_at ? formatDate(clientAny.last_login_at) : 'Never';
+
+      // Invite button for actions column (if not yet invited)
+      const inviteBtn = showInviteBtn
+        ? `<button class="icon-btn icon-btn-invite" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+             </svg>
+           </button>`
+        : '';
 
       // Health badge (available for future use)
       const _healthBadge = getHealthBadgeHtml(client.health_score);
@@ -507,19 +511,23 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
       return `
         <tr data-client-id="${client.id}" class="clickable-row">
           ${createRowCheckbox('clients', client.id)}
-          <td class="identity-cell">
+          <td class="identity-cell contact-cell">
             <span class="identity-name">${safeName}</span>
             ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
             <span class="identity-email">${safeEmail}</span>
           </td>
-          <td>${typeLabel}</td>
-          <td>${projectCount}</td>
+          <td class="type-cell">${typeLabel}</td>
+          <td class="count-cell">${projectCount}</td>
           <td class="status-cell">${statusCell}</td>
-          <td>${date}</td>
+          <td class="date-cell">${date}</td>
+          <td class="date-cell">${lastActive}</td>
           <td class="actions-cell">
-            <button class="icon-btn btn-view-client" data-client-id="${client.id}" title="View Client" aria-label="View client details">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
+            <div class="table-actions">
+              ${inviteBtn}
+              <button class="icon-btn btn-view-client" data-client-id="${client.id}" title="View Client" aria-label="View client details">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
           </td>
         </tr>
       `;

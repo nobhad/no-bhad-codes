@@ -484,4 +484,4 @@ Before implementation, get stakeholder/user input on:
 - [current_work.md](../current_work.md) — Active work tracking
 - [UX_GUIDELINES.md](./UX_GUIDELINES.md) — UX standards
 - [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md) — Design system
-- [PORTAL_CSS_DESIGN.md](./PORTAL_CSS_DESIGN.md) — Portal-specific CSS
+- [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md) — Full CSS architecture including portal styles

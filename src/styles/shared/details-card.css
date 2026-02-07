@@ -118,3 +118,23 @@
   outline: none;
   box-shadow: none;
 }
+
+/* Mobile responsive - tighter padding */
+@media (--mobile) {
+  :is([data-page="admin"], [data-page="client-portal"]) .details-card summary,
+  :is([data-page="admin"], [data-page="client-portal"]) .system-details summary {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .details-card-grid,
+  :is([data-page="admin"], [data-page="client-portal"]) .system-info-grid {
+    padding: 0 var(--space-3) var(--space-2);
+    gap: var(--space-1);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .details-card-row,
+  :is([data-page="admin"], [data-page="client-portal"]) .system-info-row {
+    padding: var(--space-1-5) var(--space-2);
+  }
+}

@@ -206,7 +206,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .table-dropdown {
   position: relative;
   width: fit-content;
-  min-width: 100px;
+  min-width: 115px;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-trigger {
