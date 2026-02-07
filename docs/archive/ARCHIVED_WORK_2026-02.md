@@ -1936,3 +1936,110 @@ Verified that analytics page headings are consistent (was listed as potential is
 - No inconsistency exists - removed from current_work.md
 
 ---
+
+### Global Tasks Kanban Tab
+
+**Status:** COMPLETE
+
+Added dedicated Tasks tab to admin dashboard showing Kanban board of tasks across ALL projects.
+
+**Files Created:**
+
+- `src/features/admin/modules/admin-global-tasks.ts` - Global tasks module with Kanban/List views
+
+**Files Modified:**
+
+- `server/services/project-service.ts` - Added `getAllTasks()` method
+- `server/routes/admin.ts` - Added `GET /api/admin/tasks` endpoint
+- `src/features/admin/modules/index.ts` - Added `loadGlobalTasksModule()` loader
+- `src/features/admin/admin-dashboard.ts` - Added tasks tab case and breadcrumb
+- `admin/index.html` - Added sidebar button and tab content container
+
+**Features:**
+
+- Kanban board with columns: To Do, In Progress, Blocked, Done
+- List view alternative with sortable table
+- Tasks ordered by priority (urgent > high > medium > low) then due date
+- Drag-and-drop status updates
+- Click-to-view task detail modal with "View Project" navigation
+- Full accessibility: focus trap, keyboard nav, ARIA attributes
+
+**API Endpoint:**
+
+- `GET /api/admin/tasks` - Query params: status, priority, limit (default 100, max 500)
+
+---
+
+### Empty Cell Convention Standardization
+
+**Status:** COMPLETE
+
+Standardized all table cells to display empty for null/missing values instead of "-".
+
+**Files Modified:**
+
+- `src/utils/format-utils.ts` - Updated `formatDisplayValue()`, `formatDate()`, `formatDateTime()` to return `''`
+- `src/utils/sanitization-utils.ts` - Updated phone formatter fallback
+- `src/features/admin/modules/*.ts` - All admin modules updated (clients, contacts, projects, invoices, etc.)
+- `src/features/admin/admin-dashboard.ts` - Updated fallback patterns
+- `src/features/admin/admin-project-details.ts` - Updated display setters
+- `src/features/admin/renderers/admin-contacts.renderer.ts` - Updated row rendering
+
+**Standard:**
+
+- All `|| '-'` patterns replaced with `|| ''`
+- `formatDisplayValue()` returns `''` for empty values
+- `formatDate()`/`formatDateTime()` return `''` for null/invalid dates
+
+---
+
+### Workflows UI (Approvals + Triggers)
+
+**Status:** COMPLETE
+
+Added new Workflows tab to admin dashboard with UI for managing approval workflows and event triggers.
+
+**Features - Approvals:**
+
+- List all approval workflow definitions
+- Create/edit workflows with entity type (proposal, invoice, contract, deliverable, project)
+- Select workflow type (sequential, parallel, any-one)
+- Manage approval steps (add/remove approvers)
+- Support for optional steps and auto-approve timeouts
+
+**Features - Triggers:**
+
+- List all event triggers
+- Create/edit triggers with 31 event types
+- Configure 5 action types: send_email, create_task, update_status, webhook, notify
+- JSON configuration for action settings and conditions
+- Toggle triggers active/inactive
+- Priority ordering
+
+**Files Created:**
+
+- `src/features/admin/modules/admin-workflows.ts` - Complete module
+- `src/styles/admin/workflows.css` - Module styling
+
+**Files Modified:**
+
+- `admin/index.html` - Added Workflows sidebar button and tab content
+- `src/features/admin/admin-dashboard.ts` - Tab routing and breadcrumbs
+- `src/features/admin/modules/index.ts` - Export loader
+- `src/styles/admin/index.css` - Import workflows.css
+
+**API Endpoints Used:**
+
+- `GET /api/approvals/workflows` - List workflows
+- `POST /api/approvals/workflows` - Create workflow
+- `GET /api/approvals/workflows/:id` - Get workflow with steps
+- `POST /api/approvals/workflows/:id/steps` - Add step
+- `DELETE /api/approvals/workflows/:id` - Delete workflow
+- `GET /api/triggers` - List triggers
+- `GET /api/triggers/options` - Get event/action types
+- `POST /api/triggers` - Create trigger
+- `PUT /api/triggers/:id` - Update trigger
+- `POST /api/triggers/:id/toggle` - Toggle active
+- `DELETE /api/triggers/:id` - Delete trigger
+
+---
