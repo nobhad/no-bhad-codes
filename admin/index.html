@@ -248,6 +248,10 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
               <span class="btn-text">INVOICES</span>
             </button>
+            <button class="btn btn-secondary" id="btn-tasks" data-tab="tasks" aria-label="Tasks">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              <span class="btn-text">TASKS</span>
+            </button>
             <button class="btn btn-secondary" id="btn-messages" data-tab="messages">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
               <span class="btn-text">MESSAGES</span>
@@ -268,6 +272,10 @@
             <button class="btn btn-secondary" id="btn-system" data-tab="system" aria-label="System Status">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10"/><path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/><path d="M1 12h6m6 0h10"/><path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
               <span class="btn-text">System</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-workflows" data-tab="workflows" aria-label="Workflows">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+              <span class="btn-text">Workflows</span>
             </button>
           </div>
 
@@ -750,6 +758,18 @@
               <!-- Pagination -->
               <div id="invoices-pagination" class="table-pagination"></div>
             </div>
+          </div>
+
+          <!-- Tasks Tab (Global) -->
+          <div class="tab-content" id="tab-tasks">
+            <div class="page-header">
+              <div class="page-title">
+                <h1>Tasks</h1>
+              </div>
+              <div id="global-tasks-view-toggle-mount"></div>
+            </div>
+            <div id="global-tasks-kanban-container"></div>
+            <div id="global-tasks-list-container" style="display: none;"></div>
           </div>
 
           <!-- Client Detail View -->
@@ -2282,6 +2302,79 @@
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Workflows Tab (Approvals + Triggers) -->
+          <div class="tab-content" id="tab-workflows">
+            <div class="page-title">
+              <h1>Workflows</h1>
+            </div>
+
+            <!-- Subtab Navigation -->
+            <div class="analytics-subtabs" id="workflows-subtabs">
+              <button class="active" data-subtab="approvals">Approvals</button>
+              <button data-subtab="triggers">Triggers</button>
+            </div>
+
+            <!-- Approvals Content -->
+            <div id="workflows-approvals-content">
+              <div class="section-header">
+                <h2 class="tab-section-heading">Approval Workflows</h2>
+                <button type="button" class="btn btn-primary btn-sm" id="create-workflow-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                  CREATE WORKFLOW
+                </button>
+              </div>
+              <p class="section-description">Define approval workflows for proposals, invoices, contracts, and other entities. Configure sequential, parallel, or any-one approval patterns.</p>
+
+              <div class="admin-table-card portal-shadow">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Entity Type</th>
+                      <th>Workflow Type</th>
+                      <th>Status</th>
+                      <th>Updated</th>
+                      <th class="actions-cell">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="workflows-table-body">
+                    <tr><td colspan="6" class="loading-row">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Triggers Content -->
+            <div id="workflows-triggers-content" class="hidden">
+              <div class="section-header">
+                <h2 class="tab-section-heading">Event Triggers</h2>
+                <button type="button" class="btn btn-primary btn-sm" id="create-trigger-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                  CREATE TRIGGER
+                </button>
+              </div>
+              <p class="section-description">Automate actions when events occur. Send emails, create tasks, update statuses, or call webhooks based on system events.</p>
+
+              <div class="admin-table-card portal-shadow">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Event</th>
+                      <th>Action</th>
+                      <th>Status</th>
+                      <th>Updated</th>
+                      <th class="actions-cell">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="triggers-table-body">
+                    <tr><td colspan="6" class="loading-row">Loading...</td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

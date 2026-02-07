@@ -55,7 +55,9 @@ import {
   loadSystemStatusModule,
   loadProposalsModule,
   loadKnowledgeBaseModule,
-  loadDocumentRequestsModule
+  loadDocumentRequestsModule,
+  loadGlobalTasksModule,
+  loadWorkflowsModule
 } from './modules';
 
 // Chart.js is loaded dynamically to reduce initial bundle size
@@ -703,11 +705,11 @@ class AdminDashboard {
           .map((submission: ContactSubmission) => {
             const date = formatDate(submission.created_at);
             // Decode HTML entities then sanitize to prevent XSS
-            const decodedName = SanitizationUtils.decodeHtmlEntities(submission.name || '-');
-            const decodedMessage = SanitizationUtils.decodeHtmlEntities(submission.message || '-');
+            const decodedName = SanitizationUtils.decodeHtmlEntities(submission.name || '');
+            const decodedMessage = SanitizationUtils.decodeHtmlEntities(submission.message || '');
             const safeName = SanitizationUtils.escapeHtml(decodedName);
-            const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || '-'));
-            const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.subject || '-'));
+            const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || ''));
+            const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.subject || ''));
             const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);
             // Truncate message for display (after sanitization)
             const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
@@ -843,10 +845,10 @@ class AdminDashboard {
     const date = formatDateTime(contact.created_at);
 
     // Decode HTML entities then sanitize to prevent XSS
-    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.name || '-'));
-    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || '-'));
-    const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.subject || '-'));
-    const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.message || '-'));
+    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.name || ''));
+    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || ''));
+    const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.subject || ''));
+    const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.message || ''));
 
     modalBody.innerHTML = `
       <div class="detail-grid">
@@ -1319,6 +1321,10 @@ class AdminDashboard {
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Invoices', href: false });
       break;
+    case 'tasks':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Tasks', href: false });
+      break;
     case 'client-detail': {
       // Get client name from clients module
       const clientName = this.clientsModule?.getCurrentClientName?.() || 'Client';
@@ -1365,6 +1371,10 @@ class AdminDashboard {
     case 'system':
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'System', href: false });
+      break;
+    case 'workflows':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Workflows', href: false });
       break;
     default:
       items.push({ label: 'Dashboard', href: false });
@@ -1584,6 +1594,13 @@ class AdminDashboard {
           await invoicesModule.loadInvoicesData(this.moduleContext);
         }
         break;
+      case 'tasks':
+        // Use global tasks module
+        {
+          const globalTasksModule = await loadGlobalTasksModule();
+          await globalTasksModule.loadGlobalTasks(this.moduleContext);
+        }
+        break;
       case 'client-detail':
         // Client detail view - data loaded by showClientDetails in admin-clients module
         // Ensure clients module is loaded for breadcrumbs
@@ -1611,6 +1628,11 @@ class AdminDashboard {
       case 'system':
         await this.loadSystemData();
         break;
+      case 'workflows': {
+        const wfModule = await loadWorkflowsModule();
+        await wfModule.loadWorkflowsData(this.moduleContext);
+        break;
+      }
       }
     } catch (error) {
       console.error(`[AdminDashboard] Error loading ${tabName} data:`, error);
