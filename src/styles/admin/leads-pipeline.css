@@ -415,7 +415,7 @@
 }
 
 .leads-analytics-section .funnel-stage-label {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: var(--portal-text-light);
   min-width: 78px;
@@ -461,7 +461,7 @@
 }
 
 .leads-analytics-section .funnel-percentage {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   color: var(--portal-text-secondary);
 }
 
@@ -496,7 +496,7 @@
   display: flex;
   gap: var(--space-1);
   align-items: center;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
 }
 
 .source-total {
@@ -596,7 +596,7 @@
 .analytics-column .rule-condition,
 .analytics-column-full .rule-condition,
 .leads-analytics-section .rule-condition {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   color: var(--portal-text-secondary);
   line-height: 1.3;
 }
@@ -715,7 +715,7 @@
 }
 
 #lead-details-panel .panel-status-row .field-label {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;

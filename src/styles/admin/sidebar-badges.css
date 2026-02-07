@@ -1,0 +1,110 @@
+/**
+ * ===============================================
+ * ADMIN SIDEBAR NOTIFICATION BADGES
+ * ===============================================
+ * @file src/styles/admin/sidebar-badges.css
+ *
+ * Notification count badges for sidebar navigation buttons.
+ * Used for Leads (new intakes/contacts) and Messages (unread).
+ *
+ * Behavior:
+ * - Expanded: inline red pill aligned to right edge
+ * - Collapsed: small red circle at top-right of icon
+ */
+
+/* Ensure sidebar buttons have relative positioning for badge */
+[data-page="admin"] .sidebar-buttons .btn {
+  position: relative;
+  overflow: visible;
+}
+
+/* ================================================
+   SIDEBAR BADGE - SEPARATE COUNT
+   Badge is absolutely positioned so it never shifts layout.
+   ================================================ */
+
+/* Base: badge is a pill/circle */
+[data-page="admin"] .sidebar-badge {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.4rem;
+  border-radius: var(--border-radius-full, 9999px);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* No tail or notch from pseudo-elements */
+[data-page="admin"] .sidebar-badge::before,
+[data-page="admin"] .sidebar-badge::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Expanded sidebar: overlay on right edge of button, vertically centered */
+[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn .sidebar-badge {
+  top: 50%;
+  right: 0.5rem;
+  margin: 0;
+  transform: translateY(-50%);
+}
+
+/* Active button in expanded sidebar - badge stays red pill */
+[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn.active .sidebar-badge {
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+/* Collapsed sidebar: small circle at top-right with ring for visibility */
+[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn .sidebar-badge {
+  top: 2px;
+  right: 2px;
+  margin: 0;
+  min-width: 16px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  transform: none;
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--portal-bg-dark);
+}
+
+/* Collapsed - no scale on hover so badge stays inside button */
+[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn:hover .sidebar-badge {
+  transform: none;
+}
+
+/* Intermediate breakpoint - badge at top-right so it's never clipped */
+@media (--laptop) {
+  [data-page="admin"] .sidebar .sidebar-buttons .btn .sidebar-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    margin: 0;
+    min-width: 16px;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    font-size: 9px;
+    font-weight: 700;
+    background: var(--color-danger);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--portal-bg-dark);
+  }
+}

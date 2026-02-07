@@ -44,3 +44,17 @@
   width: 14px;
   height: 14px;
 }
+
+/* Mobile - compact view toggle */
+@media (max-width: 480px) {
+  .view-toggle button {
+    padding: var(--space-0-5) var(--space-1);
+    font-size: 0.75rem;
+  }
+
+  .view-toggle button svg,
+  .view-toggle .view-toggle-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+}

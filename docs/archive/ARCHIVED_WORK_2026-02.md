@@ -2043,3 +2043,85 @@ Added new Workflows tab to admin dashboard with UI for managing approval workflo
 - `DELETE /api/triggers/:id` - Delete trigger
 
 ---
+
+### CSS File Splitting - Admin Styles
+
+**Status:** COMPLETE
+
+Split large CSS files into focused modules for maintainability.
+
+**From `pages/admin.css` (2,920 → 2,064 lines):**
+
+- `admin/table-dropdowns.css` (350 lines) - Inline table status dropdowns with color-coded dots
+- `admin/tooltips.css` (118 lines) - CSS-only tooltips using data-tooltip attribute
+- `admin/table-filters.css` (314 lines) - Filter controls, sortable headers, mobile responsive
+- `admin/sidebar-badges.css` (110 lines) - Sidebar notification badges
+
+**From `admin/project-detail.css` (2,129 → 1,645 lines):**
+
+- `admin/pd-contract.css` (161 lines) - Contract tab styles
+- `admin/pd-invoices.css` (377 lines) - Invoice tab and modal styles
+
+**Files Created:**
+
+- `src/styles/admin/table-dropdowns.css`
+- `src/styles/admin/tooltips.css`
+- `src/styles/admin/table-filters.css`
+- `src/styles/admin/sidebar-badges.css`
+- `src/styles/admin/pd-contract.css`
+- `src/styles/admin/pd-invoices.css`
+
+**Files Modified:**
+
+- `src/styles/admin/index.css` - Added imports for 6 new files
+- `src/styles/pages/admin.css` - Removed extracted sections, added redirect comments
+- `src/styles/admin/project-detail.css` - Removed extracted sections, added redirect comments
+
+**Documentation Updated:**
+
+- `docs/design/CSS_AUDIT.md` - Updated metrics, marked files as split
+- `docs/design/CSS_ARCHITECTURE.md` - Updated file counts and structure
+- `docs/design/PORTAL_CSS_DESIGN.md` - Updated admin file count (15 → 21)
+
+---
+
+### CSS Consistency Fixes
+
+**Status:** COMPLETE
+
+Resolved all CSS inconsistencies documented in CSS_AUDIT.md.
+
+**Label Font Size (0.6875rem → 0.75rem):**
+
+- `admin/client-detail.css` - field-label, meta-label
+- `admin/pd-contract.css` - contract field-label
+- `admin/project-detail.css` - overview labels
+- `admin/leads-pipeline.css` - funnel labels, source stats, rule conditions, panel labels (5 instances)
+
+**Border Radius (--border-radius-card → --portal-radius-md):**
+
+- `admin/analytics.css` (5 occurrences)
+- `admin/modals.css` (3 occurrences)
+- `admin/project-detail.css` (1 occurrence)
+- `admin/table-filters.css` (1 occurrence)
+- `shared/portal-cards.css` (11 occurrences)
+- `shared/portal-files.css` (2 occurrences)
+- `shared/portal-messages.css` (2 occurrences)
+- `shared/search-bar.css` (1 occurrence)
+- `client-portal/components.css` (1 occurrence)
+- `client-portal/documents.css` (1 occurrence)
+- `client-portal/help.css` (2 occurrences)
+- `client-portal/settings.css` (2 occurrences)
+- `pages/admin.css` (8 occurrences)
+
+**Other Fixes:**
+
+- Filter dropdown padding: `1rem` → `var(--space-3)`
+- Search bar fallback chain simplified to `var(--portal-radius-lg)`
+
+**Documentation Updated:**
+
+- `docs/design/CSS_AUDIT.md` - Marked inconsistencies as resolved
+- `docs/current_work.md` - Updated CSS refactoring status
+
+---

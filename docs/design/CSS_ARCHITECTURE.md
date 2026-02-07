@@ -27,8 +27,8 @@
 
 The project uses a CSS variable-based architecture for consistent theming across light and dark modes. The Client Portal uses the `portal-` prefix for portal-specific classes to avoid conflicts with main site styles.
 
-**Design System:** `src/design-system/` (11 files, ~2,300 lines)
-**Styles Directory:** `src/styles/` (25 files, ~4,200 lines)
+**Design System:** `src/design-system/` (11 files, ~3,600 lines)
+**Styles Directory:** `src/styles/` (90 files, ~34,000 lines)
 
 ---
 
@@ -761,13 +761,21 @@ src/styles/
 │   ├── invoices.css           # Invoice display
 │   ├── settings.css           # Settings, account views
 │   └── projects.css           # Project navigation, details
-├── admin/                     # Admin Dashboard styles
+├── admin/                     # Admin Dashboard styles (21 files)
 │   ├── index.css              # Admin import orchestrator
 │   ├── auth.css               # Admin authentication
 │   ├── analytics.css          # Analytics dashboard
 │   ├── client-detail.css      # Client detail views
+│   ├── detail-header.css      # Shared detail page headers
 │   ├── modals.css             # Admin modals
-│   └── project-detail.css     # Project detail views
+│   ├── pd-contract.css        # Project detail: contract tab
+│   ├── pd-invoices.css        # Project detail: invoices tab
+│   ├── project-detail.css     # Project detail views
+│   ├── sidebar-badges.css     # Sidebar notification badges
+│   ├── table-dropdowns.css    # Inline table status dropdowns
+│   ├── table-filters.css      # Table filter controls
+│   ├── tooltips.css           # CSS-only tooltips
+│   └── ...                    # (+ tasks, leads, files, proposals, etc.)
 ├── shared/                    # Shared portal components
 │   ├── confirm-dialog.css     # Confirmation dialogs
 │   ├── portal-buttons.css     # Portal button styles
@@ -1247,7 +1255,7 @@ This is intentional to maintain Client Portal styling consistency.
 
 |File|Lines|Status|
 |------|-------|--------|
-|`pages/admin.css`|1820+|Could be split by section (low priority)|
+|`pages/admin.css`|2064|SPLIT Feb 2026: table-dropdowns, tooltips, table-filters, sidebar-badges|
 |`client-portal/`|~2000|Split into 10 modular files (all <300 lines)|
 
 All navigation, form, and client portal CSS files are now properly sized (<300 lines each).

@@ -124,17 +124,18 @@ The admin dashboard uses a sidebar navigation system with the following tabs:
 
 |Tab|Button ID|Content ID|Description|
 |-----|-----------|------------|-------------|
-|Overview|`btn-overview`|`tab-overview`|Quick stats and recent leads|
+|Overview|`btn-overview`|`tab-overview`|Quick stats, upcoming tasks, and recent leads|
+|Tasks|`btn-tasks`|`tab-tasks`|Global tasks Kanban across all projects|
 |Leads|`btn-leads`|`tab-leads`|Lead and contact management|
 |Projects|`btn-projects`|`tab-projects`|Active projects management|
 |Clients|`btn-clients`|`tab-clients`|Client management|
 |Invoices|`btn-invoices`|`tab-invoices`|Invoice management|
-|Tasks|`btn-tasks`|`tab-tasks`|Global tasks Kanban across all projects|
 |Messages|`btn-messages`|`tab-messages`|Client communication|
 |Documents|`btn-document-requests`|`tab-document-requests`|Document requests|
 |Knowledge|`btn-knowledge-base`|`tab-knowledge-base`|Knowledge base articles|
 |Analytics|`btn-analytics`|`tab-analytics`|Visitor and page analytics|
 |System|`btn-system`|`tab-system`|System information|
+|Workflows|`btn-workflows`|`tab-workflows`|Approvals and triggers|
 |Project Detail|-|`tab-project-detail`|Individual project view (hidden from sidebar)|
 |Client Detail|-|`tab-client-detail`|Individual client view (hidden from sidebar)|
 

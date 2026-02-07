@@ -5,23 +5,6 @@
    ===================================================== */
 
 /* =====================================================
-   SECTION LAYOUT
-   ===================================================== */
-[data-page="admin"] #tab-workflows .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-2);
-}
-
-[data-page="admin"] #tab-workflows .section-description {
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--space-4);
-  max-width: 600px;
-}
-
-/* =====================================================
    STEPS LIST (in modal)
    ===================================================== */
 [data-page="admin"] .steps-list {

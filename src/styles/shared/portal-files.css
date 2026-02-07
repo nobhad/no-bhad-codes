@@ -11,7 +11,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .files-upload-section {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   margin-bottom: var(--space-4);
   color: var(--portal-text-light);
@@ -78,7 +78,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .files-list-section {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   color: var(--portal-text-light);
   display: flex;

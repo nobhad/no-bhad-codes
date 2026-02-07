@@ -16,6 +16,14 @@
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-1-5);
   margin-bottom: var(--space-3);
+  max-width: 100%;
+}
+
+/* Ensure grid children don't overflow */
+:is([data-page="admin"], [data-page="client-portal"]) .quick-stats > *,
+:is([data-page="admin"], [data-page="client-portal"]) .attention-grid > *,
+:is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 > * {
+  min-width: 0;
 }
 
 @media (--tablet-landscape) {
@@ -40,7 +48,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .stat-card {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   min-height: 88px;
   display: flex;
@@ -91,8 +99,8 @@
 :is([data-page="admin"], [data-page="client-portal"]) .overview-card {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
-  padding: var(--space-4);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-3);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
 }
@@ -108,8 +116,8 @@
 :is([data-page="admin"], [data-page="client-portal"]) .recent-activity {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
-  padding: var(--space-4);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-3);
   margin-bottom: var(--space-3);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
@@ -134,7 +142,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .activity-list li {
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   border: none;
   margin-bottom: var(--space-0-5);
   font-size: 0.9rem;
@@ -215,6 +223,280 @@
 }
 
 /* =====================================================
+   UPCOMING TASKS WIDGET
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-inline h3 {
+  font-family: var(--font-family-acme);
+  font-size: 1.1rem;
+  color: var(--portal-text-light);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Dashboard Kanban View */
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban {
+  min-height: 200px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-board {
+  gap: var(--space-2);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-column {
+  min-width: 180px;
+  flex: 1;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-column-header {
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-card {
+  padding: var(--space-2);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--space-1);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-card-title {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--portal-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-card-project {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-priority {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-muted);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-priority.task-priority-urgent {
+  background: var(--status-cancelled);
+  color: var(--portal-text-light);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-priority.task-priority-high {
+  background: var(--status-on-hold);
+  color: var(--portal-text-dark);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-priority.task-priority-medium {
+  background: var(--app-color-primary);
+  color: var(--portal-text-dark);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-due-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-due-date.overdue {
+  color: var(--status-cancelled);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-list-empty {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--portal-text-muted);
+  font-style: italic;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
+  margin-bottom: var(--space-0-5);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item:hover {
+  background: var(--portal-bg-light);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item:last-child {
+  margin-bottom: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item.empty {
+  justify-content: center;
+  color: var(--portal-text-muted);
+  font-style: italic;
+  cursor: default;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item.empty:hover {
+  background: var(--portal-bg-medium);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-item .task-title {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-item .task-project {
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-item-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-item .task-due {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+  white-space: nowrap;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-item.task-overdue .task-due {
+  color: var(--status-cancelled);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-priority-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-muted);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-priority-badge.task-priority-urgent {
+  background: var(--status-cancelled);
+  color: var(--portal-text-light);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-priority-badge.task-priority-high {
+  background: var(--status-on-hold);
+  color: var(--portal-text-dark);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-priority-badge.task-priority-medium {
+  background: var(--app-color-primary);
+  color: var(--portal-text-dark);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .task-priority-badge.task-priority-low {
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-secondary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .loading-row {
+  padding: var(--space-2) var(--space-3);
+  color: var(--portal-text-muted);
+  font-style: italic;
+}
+
+/* Responsive for upcoming tasks */
+@media (max-width: 480px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks {
+    padding: 0.75rem;
+  }
+
+  /* Section header - allow wrapping on small screens */
+  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-inline {
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-inline h3 {
+    font-size: 1rem;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-actions {
+    gap: var(--space-1);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item {
+    flex-wrap: wrap;
+    padding: 0.5rem 0.75rem;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .task-item-meta {
+    width: 100%;
+    margin-top: var(--space-1);
+    justify-content: flex-end;
+  }
+}
+
+/* =====================================================
    PORTAL PROJECT CARD
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card {
@@ -244,6 +526,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .stat-card,
 :is([data-page="admin"], [data-page="client-portal"]) .overview-card,
 :is([data-page="admin"], [data-page="client-portal"]) .recent-activity,
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks,
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card,
 :is([data-page="admin"], [data-page="client-portal"]) .messages-container,
 :is([data-page="admin"], [data-page="client-portal"]) .summary-card,
@@ -271,8 +554,8 @@
 :is([data-page="admin"], [data-page="client-portal"]) .summary-card {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
-  padding: var(--space-4);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-3);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
 }
@@ -322,7 +605,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .invoices-list {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
@@ -395,6 +678,20 @@
   :is([data-page="admin"], [data-page="client-portal"]) .activity-list li {
     padding: 0.5rem 0.75rem;
   }
+
+  /* Kanban board - enable horizontal scroll on very small screens */
+  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-board {
+    min-width: max-content;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-column {
+    min-width: 140px;
+  }
 }
 
 /* =====================================================
@@ -402,7 +699,7 @@
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .dashboard-overview-card {
   padding: var(--space-6);
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   background: var(--portal-bg-medium);
 }
 
@@ -439,7 +736,7 @@
   min-height: 88px;
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   color: var(--portal-text-light);
   font-family: inherit;
   cursor: pointer;

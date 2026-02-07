@@ -11,6 +11,9 @@
  * - Edit modals
  */
 
+/* Split modules */
+@import './cd-crm.css';
+
 /* ===============================================
    CLIENT DETAIL VIEW
    Matches project detail: shared rules live in project-detail.css
@@ -71,7 +74,7 @@
 }
 
 .cd-account-label {
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: var(--portal-text-secondary);
   text-transform: uppercase;
@@ -165,7 +168,7 @@
 }
 
 .cd-contact-grid .field-label {
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--portal-text-secondary);
@@ -218,7 +221,7 @@
 }
 
 .cd-project-status {
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   padding: 2px 6px;
   border-radius: var(--border-radius-sm);
   text-transform: uppercase;
@@ -294,7 +297,7 @@
 }
 
 .cd-health-stats-card .health-factor-label {
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--portal-text-secondary);
@@ -338,7 +341,7 @@
 }
 
 .cd-stats-compact .cd-stat-label {
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--portal-text-secondary);
@@ -395,7 +398,7 @@
 }
 
 .cd-activity-time {
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   color: var(--portal-text-muted);
 }
 
@@ -464,12 +467,51 @@
   }
 }
 
+/* Mobile - prevent overflow and adjust card layouts */
+@media (--mobile) {
+  /* Health stats card - smaller badge on mobile */
+  .cd-health-stats-card .health-score-badge {
+    width: 80px;
+    height: 80px;
+  }
+
+  .cd-health-stats-card .health-score-value {
+    font-size: 1.5rem;
+  }
+
+  /* Compact stats - stack on very small screens */
+  .cd-stats-compact {
+    gap: var(--space-1);
+  }
+
+  .cd-stats-compact .cd-stat-item {
+    padding: var(--space-1-5);
+  }
+
+  .cd-stats-compact .cd-stat-value {
+    font-size: var(--font-size-sm);
+  }
+
+  /* Header card - reduce padding */
+  .cd-header-card {
+    padding: var(--space-3);
+  }
+
+  .cd-header-contact {
+    gap: var(--space-2);
+  }
+
+  .cd-header-account {
+    gap: var(--space-2);
+  }
+}
+
 /* Account Actions moved to header More Menu - styles deprecated */
 
 /* Cards in client detail: meta labels/values match project-detail-overview (shared overview uses same classes) */
 #tab-client-detail .portal-project-card .field-label,
 #tab-client-detail .portal-project-card .meta-label {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: var(--portal-text-secondary);
   text-transform: uppercase;
@@ -799,485 +841,4 @@
   margin-bottom: var(--space-2);
 }
 
-/* ===============================================
-   CLIENT CRM ENHANCEMENTS
-   =============================================== */
-
-/* Client Detail Tabs: strip and panel styles come from shared/portal-tabs.css
-   (.portal-tabs, .portal-tab-panel). Add class="portal-tabs" on the strip and
-   class="portal-tab-panel" on content divs so they match project detail tabs. */
-
-/* Health Score */
-.health-score-container {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.health-score-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-}
-
-.health-score-badge.healthy {
-  background: rgba(var(--color-success-rgb), 0.15);
-  color: var(--color-success);
-}
-
-.health-score-badge.at-risk {
-  background: rgba(var(--color-warning-rgb), 0.15);
-  color: var(--color-warning);
-}
-
-.health-score-badge.critical {
-  background: rgba(var(--color-error-rgb), 0.15);
-  color: var(--color-danger);
-}
-
-.health-score-value {
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-sm);
-}
-
-/* Health factors breakdown */
-.health-factors {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-}
-
-.health-factor {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.health-factor-label {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-}
-
-.health-factor-bar {
-  height: 6px;
-  background: var(--portal-bg-lighter);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.health-factor-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width var(--transition-normal);
-}
-
-.health-factor-fill.good { background: var(--color-success); }
-.health-factor-fill.warning { background: var(--color-warning); }
-.health-factor-fill.poor { background: var(--color-danger); }
-
-/* Tags Section */
-.client-tags-section {
-  margin-top: var(--space-3);
-}
-
-/* Tag input in client detail: fit overview card, match portal form look */
-#tab-client-detail #cd-tags-container .tag-input-wrapper {
-  background: var(--portal-bg-readonly);
-  border: 1px solid var(--portal-border);
-  border-radius: var(--border-radius-md);
-  min-height: 40px;
-  padding: var(--space-2) var(--space-3);
-  transition: border-color 0.15s ease;
-}
-
-#tab-client-detail #cd-tags-container .tag-input-wrapper:focus-within {
-  border-color: var(--color-primary);
-}
-
-#tab-client-detail #cd-tags-container .tag-input-field {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-}
-
-#tab-client-detail #cd-tags-container .tag-input-field::placeholder {
-  color: var(--portal-text-muted);
-}
-
-.client-tags-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-2);
-}
-
-.client-tags-header h4 {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-light);
-  margin: 0;
-}
-
-.client-tags-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-
-.client-tag-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-}
-
-.client-tag-remove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  opacity: 0.7;
-  transition: opacity var(--transition-fast);
-  margin-left: 2px;
-}
-
-.client-tag-remove:hover {
-  opacity: 1;
-}
-
-/* Contacts Tab */
-.contacts-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.contact-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: var(--space-4);
-  background: var(--portal-bg-lighter);
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--portal-border-dark);
-}
-
-.contact-card.primary {
-  border-color: var(--portal-accent);
-}
-
-.contact-info {
-  flex: 1;
-}
-
-.contact-name {
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-base);
-  color: var(--portal-text-light);
-  margin-bottom: 4px;
-}
-
-.contact-name .primary-badge {
-  font-size: 0.625rem;
-  font-weight: var(--font-weight-semibold);
-  background: var(--portal-accent);
-  color: var(--color-dark);
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-left: var(--space-1);
-  text-transform: uppercase;
-}
-
-.contact-title {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-  margin-bottom: var(--space-1);
-}
-
-.contact-details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-top: var(--space-1);
-}
-
-.contact-detail {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-}
-
-.contact-detail svg {
-  width: 14px;
-  height: 14px;
-}
-
-.contact-actions {
-  display: flex;
-  gap: var(--space-1);
-}
-
-.contact-role-badge {
-  font-size: 0.625rem;
-  font-weight: var(--font-weight-semibold);
-  padding: 2px 6px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  background: var(--color-neutral-500);
-  color: var(--color-white);
-}
-
-.contact-role-badge.decision_maker {
-  background: var(--color-admin-purple-dark);
-}
-
-.contact-role-badge.billing {
-  background: var(--color-info-600);
-}
-
-.contact-role-badge.technical {
-  background: var(--color-role-technical);
-}
-
-.add-contact-btn {
-  width: 100%;
-  margin-top: var(--space-2);
-}
-
-/* Activity Timeline */
-.activity-tab-content {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.activity-filters {
-  display: flex;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--portal-border-dark);
-}
-
-.activity-filter-btn {
-  padding: var(--space-1) var(--space-2);
-  background: transparent;
-  border: 1px solid var(--portal-border-dark);
-  border-radius: var(--border-radius-sm);
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.activity-filter-btn:hover {
-  border-color: var(--portal-accent);
-  color: var(--portal-accent);
-}
-
-.activity-filter-btn.active {
-  background: var(--portal-accent);
-  border-color: var(--portal-accent);
-  color: var(--color-dark);
-}
-
-/* Notes Tab */
-.notes-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.note-card {
-  padding: var(--space-4);
-  background: var(--portal-bg-lighter);
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--portal-border-dark);
-}
-
-.note-card.pinned {
-  border-color: var(--portal-accent);
-  background: var(--portal-bg-dark);
-}
-
-.note-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-2);
-}
-
-.note-meta {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-}
-
-.note-actions {
-  display: flex;
-  gap: var(--space-1);
-}
-
-.note-content {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
-  line-height: 1.6;
-  white-space: pre-wrap;
-}
-
-.note-pin-icon {
-  color: var(--portal-accent);
-}
-
-.add-note-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.add-note-form textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-.add-note-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-2);
-}
-
-/* Custom Fields */
-.custom-fields-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-}
-
-.custom-field-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.custom-field-label {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.custom-field-value {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
-}
-
-/* Client Stats Row */
-.client-stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-}
-
-.client-stat-item {
-  text-align: center;
-  padding: var(--space-2);
-  background: var(--portal-bg-lighter);
-  border-radius: var(--border-radius-sm);
-}
-
-.client-stat-value {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--portal-text-light);
-}
-
-.client-stat-label {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-  margin-top: var(--space-1);
-}
-
-/* Table Health Badge */
-.health-badge-mini {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  font-size: 0.625rem;
-  font-weight: var(--font-weight-bold);
-}
-
-.health-badge-mini.healthy {
-  background: var(--color-success);
-  color: var(--color-white);
-}
-
-.health-badge-mini.at-risk {
-  background: var(--color-warning);
-  color: var(--color-dark);
-}
-
-.health-badge-mini.critical {
-  background: var(--color-danger);
-  color: var(--color-white);
-}
-
-/* Table Tags */
-.table-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
-}
-
-.table-tag-mini {
-  font-size: 0.625rem;
-  padding: 2px 6px;
-  border-radius: 8px;
-}
-
-/* Responsive */
-@media (--mobile) {
-  /* Tab strip mobile behavior is in shared/portal-tabs.css (.portal-tabs) */
-
-  #tab-client-detail .client-detail-tab-content.portal-tab-panel {
-    padding: 2rem 1rem;
-  }
-
-  #tab-client-detail .client-detail-tab-content.portal-tab-panel.active {
-    gap: 2rem;
-  }
-
-  .contact-card {
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .contact-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .health-factors {
-    grid-template-columns: 1fr;
-  }
-
-  .client-stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+/* CRM styles moved to cd-crm.css */

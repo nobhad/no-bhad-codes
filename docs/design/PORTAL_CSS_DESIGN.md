@@ -1,6 +1,6 @@
 # Portal CSS Design (Admin & Client Portal)
 
-**Last Updated:** February 2, 2026
+**Last Updated:** February 6, 2026
 
 This document describes the **CSS design for the Admin and Client Portals only**. It is separate from the main marketing site. For overall CSS architecture and main-site styling, see [CSS_ARCHITECTURE.md](./CSS_ARCHITECTURE.md).
 
@@ -108,7 +108,7 @@ Overlay/backdrop tokens are defined **only** in `design-system/tokens/colors.css
 
 ## File Structure
 
-### Client Portal (`src/styles/client-portal/`)
+### Client Portal (`src/styles/client-portal/`) — 12 files
 
 |File|Purpose|
 |------|---------|
@@ -118,45 +118,63 @@ Overlay/backdrop tokens are defined **only** in `design-system/tokens/colors.css
 |`sidebar.css`|Sidebar navigation (shared with admin)|
 |`login.css`|Login form|
 |`dashboard.css`|Stats, activity, project cards|
+|`documents.css`|Document requests|
 |`files.css`|File upload/management|
+|`help.css`|Help/knowledge base articles|
 |`invoices.css`|Invoice display|
-|`settings.css`|Settings, account views|
 |`projects.css`|Project navigation, details|
+|`settings.css`|Settings, account views|
 
-### Admin (`src/styles/admin/`)
+### Admin (`src/styles/admin/`) — 21 files
 
 |File|Purpose|
 |------|---------|
 |`index.css`|Orchestrator: shared portal CSS + client-portal layout/sidebar + admin modules|
-|`auth.css`|Admin authentication|
-|`modals.css`|Admin modals|
 |`analytics.css`|Analytics dashboard|
-|`project-detail.css`|Project detail (including messaging UI)|
+|`auth.css`|Admin authentication|
 |`client-detail.css`|Client detail views|
-|`tasks.css`|Task list / project tasks|
-|`leads-pipeline.css`|Leads pipeline|
+|`detail-header.css`|Shared detail page headers|
+|`document-requests.css`|Document requests management|
 |`files.css`|Admin file management|
+|`knowledge-base.css`|Knowledge base management|
+|`leads-pipeline.css`|Leads pipeline|
+|`modals.css`|Admin modals|
+|`pd-contract.css`|Project detail: contract tab styles|
+|`pd-invoices.css`|Project detail: invoices tab styles|
+|`project-detail.css`|Project detail (including messaging UI)|
 |`proposals.css`|Proposals|
-|`table-features.css`|Table filters, dropdowns, etc.|
+|`sidebar-badges.css`|Sidebar notification badges|
+|`table-dropdowns.css`|Inline table status dropdowns|
+|`table-features.css`|Table row features (actions, selection)|
+|`table-filters.css`|Table filter controls + sortable headers|
+|`tasks.css`|Task list / project tasks|
+|`tooltips.css`|CSS-only tooltips using data-tooltip|
+|`workflows.css`|Approvals and triggers|
 
-### Shared portal styles (`src/styles/shared/`)
+### Shared portal styles (`src/styles/shared/`) — 19 files
 
 Used by both admin and client portal:
 
 |File|Purpose|
 |------|---------|
-|`portal-layout.css`|Portal layout utilities|
-|`portal-buttons.css`|Button hierarchy (sidebar link-style, primary, secondary, icon-only, destructive)|
-|`portal-messages.css`|Messaging UI|
-|`search-bar.css`|Search bar component|
-|`portal-cards.css`|Card / stat card styles|
-|`portal-forms.css`|Form styles|
-|`portal-files.css`|File upload components|
-|`portal-dropdown.css`|Dropdown menus|
-|`portal-badges.css`|Status badges|
-|`portal-tabs.css`|Tabs (admin only import)|
-|`portal-components.css`|Extra shared components (admin only import)|
 |`confirm-dialog.css`|Confirmation dialogs|
+|`copy-email.css`|Copy email button component|
+|`details-card.css`|Detail view card styles|
+|`field-label-spacing.css`|Form field label spacing|
+|`portal-badges.css`|Status badges|
+|`portal-buttons.css`|Button hierarchy (sidebar link-style, primary, secondary, icon-only, destructive)|
+|`portal-cards.css`|Card / stat card styles|
+|`portal-components.css`|Extra shared components|
+|`portal-dropdown.css`|Dropdown menus|
+|`portal-files.css`|File upload components|
+|`portal-forms.css`|Form styles|
+|`portal-layout.css`|Portal layout utilities|
+|`portal-messages.css`|Messaging UI|
+|`portal-tabs.css`|Tabs|
+|`progress.css`|Progress indicators|
+|`search-bar.css`|Search bar component|
+|`toast-notifications.css`|Toast notifications|
+|`view-toggle.css`|View toggle (Kanban/List)|
 |`wireframe.css`|Wireframe mode (greyscale)|
 
 ---
