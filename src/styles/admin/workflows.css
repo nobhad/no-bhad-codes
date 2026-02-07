@@ -1,0 +1,153 @@
+/* =====================================================
+   ADMIN WORKFLOWS STYLES
+   @file src/styles/admin/workflows.css
+   Styles for approval workflows and event triggers UI
+   ===================================================== */
+
+/* =====================================================
+   SECTION LAYOUT
+   ===================================================== */
+[data-page="admin"] #tab-workflows .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+[data-page="admin"] #tab-workflows .section-description {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+  max-width: 600px;
+}
+
+/* =====================================================
+   STEPS LIST (in modal)
+   ===================================================== */
+[data-page="admin"] .steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+[data-page="admin"] .step-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
+}
+
+[data-page="admin"] .step-order {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-radius: 50%;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+[data-page="admin"] .step-details {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+[data-page="admin"] .step-auto {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+[data-page="admin"] .step-item .icon-btn {
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   ADD STEP FORM
+   ===================================================== */
+[data-page="admin"] .add-step-form {
+  background: var(--portal-bg-medium);
+  padding: var(--space-3);
+  border-radius: var(--portal-radius-md);
+}
+
+[data-page="admin"] .add-step-form h4 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--font-size-base);
+  color: var(--portal-text-light);
+}
+
+/* =====================================================
+   FORM ROW (two columns)
+   ===================================================== */
+[data-page="admin"] .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+@media (max-width: 576px) {
+  [data-page="admin"] .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================
+   MODAL DIVIDER
+   ===================================================== */
+[data-page="admin"] .modal-divider {
+  border: none;
+  border-top: 1px solid var(--portal-border-dark);
+  margin: var(--space-3) 0;
+}
+
+/* =====================================================
+   MODAL WIDE CONTENT
+   ===================================================== */
+[data-page="admin"] .modal-content-wide {
+  min-width: min(600px, 90vw);
+}
+
+/* =====================================================
+   CODE INPUT (for JSON fields)
+   ===================================================== */
+[data-page="admin"] .code-input {
+  font-family: var(--font-family-mono, 'Courier New', monospace);
+  font-size: var(--font-size-sm);
+}
+
+/* =====================================================
+   EMPTY MESSAGE
+   ===================================================== */
+[data-page="admin"] .empty-message {
+  color: var(--portal-text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: var(--space-3);
+}
+
+/* =====================================================
+   STATUS BADGE ADJUSTMENTS
+   ===================================================== */
+[data-page="admin"] #tab-workflows .status-badge {
+  font-size: var(--font-size-xs);
+}
+
+/* =====================================================
+   TABLE CODE CELLS
+   ===================================================== */
+[data-page="admin"] #tab-workflows code {
+  background: var(--portal-bg-medium);
+  padding: 2px 6px;
+  border-radius: var(--portal-radius-sm);
+  font-size: var(--font-size-xs);
+}

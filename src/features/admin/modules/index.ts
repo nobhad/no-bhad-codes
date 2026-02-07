@@ -80,6 +80,14 @@ export async function loadInvoicesModule() {
   return import('./admin-invoices');
 }
 
+export async function loadGlobalTasksModule() {
+  return import('./admin-global-tasks');
+}
+
 export async function loadDeletedItemsModule() {
   return import('./admin-deleted-items');
+}
+
+export async function loadWorkflowsModule() {
+  return import('./admin-workflows');
 }
