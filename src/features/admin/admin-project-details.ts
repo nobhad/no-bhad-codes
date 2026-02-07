@@ -146,9 +146,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const clientEmail = domCache.get('clientEmail');
     const company = domCache.get('company');
 
-    if (clientName) clientName.textContent = project.client_name || project.contact_name || '-';
-    if (clientEmail) clientEmail.innerHTML = getEmailWithCopyHtml(project.email || '', SanitizationUtils.escapeHtml(project.email || '-'));
-    if (company) company.textContent = project.company_name || '-';
+    if (clientName) clientName.textContent = project.client_name || project.contact_name || '';
+    if (clientEmail) clientEmail.innerHTML = getEmailWithCopyHtml(project.email || '', SanitizationUtils.escapeHtml(project.email || ''));
+    if (company) company.textContent = project.company_name || '';
 
     // Project details
     const projectType = domCache.get('projectType');
@@ -163,13 +163,13 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (projectType) {
       projectType.textContent = this.formatProjectTypeFn
         ? this.formatProjectTypeFn(project.project_type || '')
-        : (project.project_type || '-');
+        : (project.project_type || '');
     }
     if (budget) budget.textContent = project.budget_range || (project.budget ? String(project.budget) : '-');
-    if (timeline) timeline.textContent = project.timeline || '-';
+    if (timeline) timeline.textContent = project.timeline || '';
     if (startDate) startDate.textContent = project.start_date ? formatDate(project.start_date) : '-';
     if (endDate) endDate.textContent = project.estimated_end_date ? formatDate(project.estimated_end_date) : '-';
-    if (description) description.textContent = project.description || '-';
+    if (description) description.textContent = project.description || '';
     if (price) price.textContent = project.price ? formatCurrency(project.price) : '-';
     if (deposit) deposit.textContent = project.deposit_amount ? formatCurrency(project.deposit_amount) : '-';
 
@@ -341,7 +341,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const clientAccountStatus = domCache.get('clientAccountStatus');
     const clientLastLogin = domCache.get('clientLastLogin');
 
-    if (clientAccountEmail) clientAccountEmail.innerHTML = getEmailWithCopyHtml(project.email || '', SanitizationUtils.escapeHtml(project.email || '-'));
+    if (clientAccountEmail) clientAccountEmail.innerHTML = getEmailWithCopyHtml(project.email || '', SanitizationUtils.escapeHtml(project.email || ''));
     if (clientAccountStatus) {
       const hasAccount = project.client_id || project.password_hash;
       const hasLoggedIn = project.last_login_at;

@@ -236,7 +236,7 @@ export class SanitizationUtils {
     }
 
     // Return original if not a standard format
-    return phone || '-';
+    return phone || '';
   }
 
   /**

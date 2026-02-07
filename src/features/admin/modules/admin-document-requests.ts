@@ -304,7 +304,7 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
       ${createRowCheckbox('document-requests', r.id)}
       <td>${escapeHtml(r.title)}</td>
       <td>${escapeHtml(r.client_name ?? String(r.client_id))}</td>
-      <td>${escapeHtml(r.document_type || '-')}</td>
+      <td>${escapeHtml(r.document_type || '')}</td>
       <td>${statusLabel(r.status)}</td>
       <td>${formatDate(r.due_date)}</td>
       <td class="actions-cell">
