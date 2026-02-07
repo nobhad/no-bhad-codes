@@ -225,9 +225,17 @@ Already mounts routers at both `/api/` and `/api/v1/`.
 
 ---
 
-## New API Endpoints Reference (Feb 2, 2026)
+## New API Endpoints Reference
 
-### Workflow Triggers (`/api/triggers`)
+### Deleted Items (`/api/admin/deleted-items`) - Feb 6
+
+- `GET /` — List all soft-deleted items with stats
+- `GET /stats` — Get counts by entity type
+- `POST /:type/:id/restore` — Restore a soft-deleted item
+- `DELETE /:type/:id/permanent` — Permanently delete an item
+- `POST /cleanup` — Run manual cleanup of expired items
+
+### Workflow Triggers (`/api/triggers`) - Feb 2
 
 - `GET /` — Get all triggers
 - `POST /` — Create a new trigger
@@ -235,13 +243,13 @@ Already mounts routers at both `/api/` and `/api/v1/`.
 - `DELETE /:id` — Delete a trigger
 - `POST /:id/toggle` — Toggle trigger active state
 
-### Document Requests (`/api/document-requests`)
+### Document Requests (`/api/document-requests`) - Feb 2
 
 - `GET /my-requests` — Get client's document requests
 - `POST /:id/upload` — Upload document for request
 - Admin endpoints for CRUD, review, approve, reject
 
-### Knowledge Base (`/api/kb`)
+### Knowledge Base (`/api/kb`) - Feb 2
 
 - `GET /categories` — Get all categories
 - `GET /featured` — Get featured articles
