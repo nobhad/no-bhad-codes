@@ -16,7 +16,7 @@
   display: inline-block;
   position: relative;
   vertical-align: middle;
-  margin-left: 4px;
+  margin-left: var(--space-0-5);
   cursor: default;
 }
 
@@ -24,7 +24,7 @@
   display: inline-block;
   vertical-align: middle;
   opacity: 0.6;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--transition-fast);
 }
 
 [data-page="admin"] .info-icon-wrapper:hover .info-icon {
@@ -34,7 +34,7 @@
 [data-page="admin"] .vital-card h4 {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-0-5);
 }
 
 /* ================================================
@@ -53,11 +53,11 @@
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  padding: 8px 12px;
+  padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-darker, #2a2a2a);
   color: var(--portal-text-light);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 12px;
+  font-family: var(--font-family-system, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+  font-size: 0.75rem;
   font-weight: 400;
   line-height: 1.4;
   text-transform: none;
@@ -66,13 +66,13 @@
   width: max-content;
   max-width: 280px;
   text-align: left;
-  border-radius: 4px;
+  border-radius: var(--portal-radius-sm);
   box-shadow: var(--shadow-elevated-sm);
   z-index: var(--z-index-portal-dropdown);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease, visibility 0.15s ease;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
 }
 
 /* Show tooltip on hover - instant appearance */
@@ -94,7 +94,7 @@
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease, visibility 0.15s ease;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
 }
 
 [data-page="admin"] [data-tooltip]:hover::before {

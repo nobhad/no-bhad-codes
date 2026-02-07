@@ -22,16 +22,25 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-0-5);
   position: relative;
   margin-bottom: -1px;
 }
 
 .view-toggle button:hover {
   color: var(--portal-text-primary);
+}
+
+.view-toggle button:focus {
+  outline: none;
+}
+
+.view-toggle button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .view-toggle button.active {
@@ -41,8 +50,8 @@
 
 .view-toggle button svg,
 .view-toggle .view-toggle-icon svg {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
 }
 
 /* Mobile - compact view toggle */
@@ -54,7 +63,7 @@
 
   .view-toggle button svg,
   .view-toggle .view-toggle-icon svg {
-    width: 12px;
-    height: 12px;
+    width: var(--icon-size-xs);
+    height: var(--icon-size-xs);
   }
 }

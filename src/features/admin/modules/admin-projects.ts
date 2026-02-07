@@ -35,7 +35,7 @@ import {
 import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
-import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getStatusDotHTML } from '../../../components/status-badge';
 import { createDOMCache, batchUpdateText } from '../../../utils/dom-cache';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { alertWarning, multiPromptDialog } from '../../../utils/confirm-dialog';
@@ -429,11 +429,11 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
         <span class="identity-name">${safeName}</span>
         ${(safeContact || safeCompany) ? `<span class="identity-contact">${safeContact}${safeCompany ? ` - ${safeCompany}` : ''}</span>` : ''}
       </td>
-      <td>${formatProjectType(project.project_type)}</td>
-      <td>${formatDisplayValue(project.budget_range)}</td>
-      <td>${formatDisplayValue(project.timeline)}</td>
+      <td class="type-cell">${formatProjectType(project.project_type)}</td>
+      <td class="budget-cell">${formatDisplayValue(project.budget_range)}</td>
+      <td class="timeline-cell">${formatDisplayValue(project.timeline)}</td>
       <td class="status-cell"></td>
-      <td>${formatDate(project.start_date)}</td>
+      <td class="date-cell">${formatDate(project.start_date)}</td>
     `;
 
     // Create status dropdown
@@ -1630,7 +1630,7 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
                 <td>${invoice.invoice_number}</td>
                 <td>${amount}</td>
                 <td>${dueDate}</td>
-                <td>${getStatusBadgeHTML(invoice.status, invoice.status)}</td>
+                <td>${getStatusDotHTML(invoice.status)}</td>
                 <td class="actions-cell">
                   ${sendBtn}
                   ${editBtn}

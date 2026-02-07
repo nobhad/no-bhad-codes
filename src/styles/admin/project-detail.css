@@ -880,9 +880,11 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   gap: var(--space-1);
 }
 
-/* Project Detail Tables (Files, Invoices) - High specificity to override defaults */
-[data-page="admin"] .files-table,
-[data-page="admin"] .invoices-table {
+/* Project Detail Tables (Files, Invoices) - Scoped to detail pages only */
+/* IMPORTANT: These styles are for sub-tables within project/client detail, NOT the main invoices tab */
+#tab-project-detail .files-table,
+#tab-project-detail .invoices-table,
+#tab-client-detail .invoices-table {
   width: 100%;
   border-collapse: collapse;
   background: var(--portal-bg-medium);
@@ -892,13 +894,12 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin-top: 0;
 }
 
-[data-page="admin"] .files-table thead,
-[data-page="admin"] .invoices-table thead {
+#tab-project-detail .files-table thead,
+#tab-project-detail .invoices-table thead,
+#tab-client-detail .invoices-table thead {
   background: var(--portal-bg-dark);
 }
 
-[data-page="admin"] .files-table th,
-[data-page="admin"] .invoices-table th,
 #tab-project-detail .files-table th,
 #tab-project-detail .invoices-table th,
 #tab-client-detail .invoices-table th {
@@ -914,8 +915,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   background: var(--portal-bg-dark);
 }
 
-[data-page="admin"] .files-table td,
-[data-page="admin"] .invoices-table td {
+#tab-project-detail .files-table td,
+#tab-project-detail .invoices-table td,
+#tab-client-detail .invoices-table td {
   padding: 0.75rem 1rem;
   color: var(--portal-text-light);
   border-top: 1px solid var(--portal-bg-dark);
@@ -923,13 +925,15 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   vertical-align: middle;
 }
 
-[data-page="admin"] .files-table tbody tr:hover,
-[data-page="admin"] .invoices-table tbody tr:hover {
+#tab-project-detail .files-table tbody tr:hover,
+#tab-project-detail .invoices-table tbody tr:hover,
+#tab-client-detail .invoices-table tbody tr:hover {
   background: var(--portal-bg-light);
 }
 
-[data-page="admin"] .files-table .file-actions,
-[data-page="admin"] .invoices-table .actions-cell {
+#tab-project-detail .files-table .file-actions,
+#tab-project-detail .invoices-table .actions-cell,
+#tab-client-detail .invoices-table .actions-cell {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -937,9 +941,10 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   justify-content: flex-end;
 }
 
-/* Compact action buttons for tables */
-[data-page="admin"] .files-table .btn,
-[data-page="admin"] .invoices-table .btn {
+/* Compact action buttons for detail tables */
+#tab-project-detail .files-table .btn,
+#tab-project-detail .invoices-table .btn,
+#tab-client-detail .invoices-table .btn {
   padding: 0.375rem 0.75rem;
   font-size: 0.75rem;
 }
@@ -1541,29 +1546,33 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 /* Tab strip/panel mobile styles are in shared/portal-tabs.css (.portal-tabs, .portal-tab-panel) */
 
-/* Project Detail Tables - Responsive layout */
+/* Project Detail Tables - Responsive layout (scoped to detail pages only) */
 @media (--mobile) {
-  [data-page="admin"] .files-table,
-  [data-page="admin"] .invoices-table {
+  #tab-project-detail .files-table,
+  #tab-project-detail .invoices-table,
+  #tab-client-detail .invoices-table {
     display: block;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
-  [data-page="admin"] .files-table thead,
-  [data-page="admin"] .invoices-table thead {
+  #tab-project-detail .files-table thead,
+  #tab-project-detail .invoices-table thead,
+  #tab-client-detail .invoices-table thead {
     display: none;
   }
 
-  [data-page="admin"] .files-table tbody,
-  [data-page="admin"] .invoices-table tbody {
+  #tab-project-detail .files-table tbody,
+  #tab-project-detail .invoices-table tbody,
+  #tab-client-detail .invoices-table tbody {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
   }
 
-  [data-page="admin"] .files-table tr,
-  [data-page="admin"] .invoices-table tr {
+  #tab-project-detail .files-table tr,
+  #tab-project-detail .invoices-table tr,
+  #tab-client-detail .invoices-table tr {
     display: flex;
     flex-direction: column;
     padding: var(--space-1-5);
@@ -1572,8 +1581,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
     gap: var(--space-1);
   }
 
-  [data-page="admin"] .files-table td,
-  [data-page="admin"] .invoices-table td {
+  #tab-project-detail .files-table td,
+  #tab-project-detail .invoices-table td,
+  #tab-client-detail .invoices-table td {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1581,8 +1591,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
     border: none;
   }
 
-  [data-page="admin"] .files-table td::before,
-  [data-page="admin"] .invoices-table td::before {
+  #tab-project-detail .files-table td::before,
+  #tab-project-detail .invoices-table td::before,
+  #tab-client-detail .invoices-table td::before {
     content: attr(data-label);
     font-weight: 500;
     color: var(--portal-text-secondary);
@@ -1591,18 +1602,21 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
     letter-spacing: 0.05em;
   }
 
-  [data-page="admin"] .files-table td:last-child,
-  [data-page="admin"] .invoices-table td:last-child {
+  #tab-project-detail .files-table td:last-child,
+  #tab-project-detail .invoices-table td:last-child,
+  #tab-client-detail .invoices-table td:last-child {
     justify-content: flex-end;
   }
 
-  [data-page="admin"] .files-table td:last-child::before,
-  [data-page="admin"] .invoices-table td:last-child::before {
+  #tab-project-detail .files-table td:last-child::before,
+  #tab-project-detail .invoices-table td:last-child::before,
+  #tab-client-detail .invoices-table td:last-child::before {
     display: none;
   }
 
-  [data-page="admin"] .files-table .file-actions,
-  [data-page="admin"] .invoices-table .actions-cell {
+  #tab-project-detail .files-table .file-actions,
+  #tab-project-detail .invoices-table .actions-cell,
+  #tab-client-detail .invoices-table .actions-cell {
     width: 100%;
     justify-content: flex-end;
   }

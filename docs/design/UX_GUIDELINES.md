@@ -20,7 +20,7 @@
 
 This document defines the user experience standards for the project. All UI implementations must follow these guidelines to ensure consistency and usability.
 
-**Last Updated:** February 2, 2026
+**Last Updated:** February 7, 2026
 
 ---
 
@@ -149,6 +149,37 @@ All icons must use the Lucide icon library. Never use emojis as visual elements 
 |Send|`Send`|
 |Eye (show)|`Eye`|
 |Eye (hide)|`EyeOff`|
+
+### Enable/Disable Toggle Pattern
+
+All enable/disable toggles use the eye/eye-off icon pattern:
+
+- **Eye icon** = Active/Enabled (click to disable)
+- **Eye-off icon** = Inactive/Disabled (click to enable)
+- Use `.icon-btn` class with proper `title` and `aria-label`
+- Do NOT use text buttons like "Pause/Resume"
+
+**Locations using this pattern:**
+
+- Leads: Scoring rules toggle
+- Workflows: Trigger toggle
+- Analytics: Schedule toggle, Alert toggle
+- Invoices: Recurring invoice toggle
+
+### View Toggle Pattern
+
+All view toggles must include SVG icons alongside text labels:
+
+| View Type | Icon | Description |
+|-----------|------|-------------|
+| Board/Kanban | Columns layout | 3 vertical rectangles of varying heights |
+| List | Horizontal lines | 3 lines with bullet points |
+| Table | Grid | Rectangle with dividing lines |
+| Grid | 4 squares | 2x2 grid layout |
+| Proposals | Document | File with lines |
+| Templates | Layout | Rectangle with dividing sections |
+
+**Implementation:** Use the `createViewToggle` component with `iconSvg` property.
 
 ---
 

@@ -389,12 +389,18 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
       ` : '';
 
       // Action buttons (pin, reaction picker)
+      // Use pin icon when NOT pinned (to pin), pin-off icon when IS pinned (to unpin)
+      const pinIcon = isPinned
+        ? `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 17v5"/><path d="M15 9.34V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H7.89"/><path d="m2 2 20 20"/><path d="M9 9v1.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h11"/>
+          </svg>`
+        : `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>
+          </svg>`;
       const actionsHtml = `
         <div class="message-actions">
           <button class="pin-message-btn ${isPinned ? 'pinned' : ''}" data-message-id="${msg.id}" title="${isPinned ? 'Unpin' : 'Pin'} message">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="${isPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-              <path d="M12 2L12 12M12 22L12 12M12 12L20 4M12 12L4 4"/>
-            </svg>
+            ${pinIcon}
           </button>
           <button class="add-reaction-btn" data-message-id="${msg.id}" title="Add reaction">+</button>
           <div class="reaction-picker hidden" data-message-id="${msg.id}">
@@ -660,9 +666,11 @@ async function togglePin(messageId: number, isPinned: boolean): Promise<void> {
   if (!selectedThreadId) return;
   try {
     if (isPinned) {
-      await apiDelete(`/api/messages/threads/${selectedThreadId}/messages/${messageId}/pin`);
+      // Unpin: DELETE with thread_id as query param
+      await apiDelete(`/api/messages/${messageId}/pin?thread_id=${selectedThreadId}`);
     } else {
-      await apiPost(`/api/messages/threads/${selectedThreadId}/messages/${messageId}/pin`, {});
+      // Pin: POST with thread_id in body
+      await apiPost(`/api/messages/${messageId}/pin`, { thread_id: selectedThreadId });
     }
     // Reload messages
     const container = getMessagesContainer();

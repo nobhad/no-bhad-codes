@@ -32,7 +32,7 @@ import { showToast } from '../../utils/toast-notifications';
 import { manageFocusTrap } from '../../utils/focus-trap';
 import { renderBreadcrumbs, type BreadcrumbItem } from '../../components/breadcrumbs';
 import { createTableDropdown } from '../../utils/table-dropdown';
-import { getStatusBadgeHTML } from '../../components/status-badge';
+import { getStatusDotHTML } from '../../components/status-badge';
 import { initCopyEmailDelegation, getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../utils/copy-email';
 import { closeAllModalOverlays } from '../../utils/modal-utils';
 
@@ -870,7 +870,7 @@ class AdminDashboard {
         </div>
         <div class="detail-row">
           <span class="detail-label">Status</span>
-          <span class="detail-value">${getStatusBadgeHTML(contact.status || 'new', contact.status || 'new')}</span>
+          <span class="detail-value">${getStatusDotHTML(contact.status || 'new')}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Message</span>

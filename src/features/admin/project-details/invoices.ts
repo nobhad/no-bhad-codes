@@ -10,7 +10,7 @@ import { AdminAuth } from '../admin-auth';
 import { apiFetch } from '../../../utils/api-client';
 import { domCache } from './dom-cache';
 import type { InvoiceResponse } from '../../../types/api';
-import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getStatusDotHTML } from '../../../components/status-badge';
 
 // Extended invoice type for deposit fields
 export type ExtendedInvoice = InvoiceResponse & { invoice_type?: string };
@@ -83,7 +83,7 @@ export async function loadProjectInvoices(projectId: number): Promise<void> {
                   <span class="invoice-date">${formatDate(inv.created_at)}</span>
                 </div>
                 <div class="invoice-amount">$${(typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0)).toFixed(2)}</div>
-                ${getStatusBadgeHTML(inv.status, inv.status)}
+                ${getStatusDotHTML(inv.status)}
                 <div class="invoice-actions">
                   <a href="/api/invoices/${inv.id}/pdf" class="btn btn-outline btn-sm" target="_blank">PDF</a>
                   ${showEditBtn ? `<button class="btn btn-outline btn-sm" onclick="window.adminDashboard?.editInvoice(${inv.id})">Edit</button>` : ''}

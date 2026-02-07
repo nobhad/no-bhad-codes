@@ -12,7 +12,7 @@
 import type { AdminDashboardContext, ApplicationStatus, StatusItem } from '../admin-types';
 import { APP_CONSTANTS } from '../../../config/constants';
 import { apiFetch } from '../../../utils/api-client';
-import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getStatusDotHTML } from '../../../components/status-badge';
 
 let systemListenersInitialized = false;
 
@@ -506,7 +506,7 @@ function renderStatusList(items: Record<string, StatusItem>, type: string): stri
       <div class="status-item ${statusClass}">
         <span class="status-icon">${statusIcon}</span>
         <span class="status-name">${formatName(name)}</span>
-        ${getStatusBadgeHTML(status, status)}
+        ${getStatusDotHTML(status)}
       </div>
     `;
   }).join('');

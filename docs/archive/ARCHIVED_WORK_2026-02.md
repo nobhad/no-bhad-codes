@@ -2125,3 +2125,54 @@ Resolved all CSS inconsistencies documented in CSS_AUDIT.md.
 - `docs/current_work.md` - Updated CSS refactoring status
 
 ---
+
+### CSS Audit - Smaller Files Consistency (Feb 7)
+
+**Status:** COMPLETE
+
+Audited smaller CSS files (<500 lines) for inconsistencies and applied fixes.
+
+**New Tokens Added to variables.css:**
+
+- `--icon-size-xs` through `--icon-size-2xl` (12px-32px)
+- `--letter-spacing-label` (0.05em), `--letter-spacing-title` (0.02em), `--letter-spacing-wide` (0.08em)
+
+**Focus States Added (Accessibility):**
+
+- `shared/view-toggle.css` - Added `:focus-visible` to toggle buttons
+- `shared/search-bar.css` - Added focus ring to input, `:focus-visible` to clear button
+
+**Font Sizes Fixed (Accessibility - minimum 0.75rem):**
+
+- `admin/table-filters.css` - filter count badge
+- `shared/portal-cards.css` - task priority badges
+- `admin/sidebar-badges.css` - collapsed badge font size
+
+**Icon Sizes Tokenized:**
+
+- `shared/view-toggle.css` - 14px/12px → `--icon-size-sm`/`--icon-size-xs`
+- `shared/search-bar.css` - 14px/24px → `--icon-size-sm`/`--icon-size-xl`
+- `admin/workflows.css` - 14px → `--icon-size-sm`
+- `admin/detail-header.css` - 18px/16px → `--icon-size-lg`/`--icon-size-md`
+- `shared/confirm-dialog.css` - 32px → `--icon-size-2xl`
+- `admin/sidebar-badges.css` - 16px → `--icon-size-md`
+
+**Hardcoded Values Replaced:**
+
+- Gap/margin `4px`/`6px` → `var(--space-0-5)`
+- Padding `8px 12px` → `var(--space-1) var(--space-1-5)`
+- Border-radius `4px` → `var(--portal-radius-sm)`
+- Letter-spacing `1px` → `var(--letter-spacing-label)`
+- Transitions `0.15s ease` → `var(--transition-fast)`
+
+**Duplicate Declarations Removed:**
+
+- `admin/detail-header.css` - Removed duplicate padding/list-style/margin
+
+**Documentation Updated:**
+
+- `docs/design/CSS_AUDIT.md` - Updated with fixes applied, current compliant state
+- `docs/design/CSS_ARCHITECTURE.md` - Added Icon Sizes and Letter Spacing sections
+- `docs/current_work.md` - Added CSS Audit completion entry
+
+---

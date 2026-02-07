@@ -15,7 +15,7 @@ import { formatCurrency, formatDate } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
-import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getStatusDotHTML } from '../../../components/status-badge';
 import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
 import { exportToCsv, INVOICES_EXPORT_CONFIG } from '../../../utils/table-export';
 import { createBulkActionToolbar, setupBulkSelectionHandlers, type BulkActionConfig } from '../../../utils/table-bulk-actions';
@@ -318,6 +318,41 @@ function getAmount(invoice: InvoiceWithDetails): number {
   return 0;
 }
 
+// Icon SVGs for action buttons
+const ICONS = {
+  VIEW: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  EDIT: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+  SEND: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>',
+  CHECK: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  DOWNLOAD: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>'
+};
+
+/**
+ * Build contextual action buttons based on invoice status
+ */
+function buildActionButtons(invoiceId: number, status: string): string {
+  const buttons: string[] = [];
+
+  // View button - always shown
+  buttons.push(`<button class="icon-btn" data-action="view" data-id="${invoiceId}" title="View Invoice" aria-label="View invoice">${ICONS.VIEW}</button>`);
+
+  // Status-specific buttons
+  if (status === 'draft') {
+    // Draft: Send, Edit
+    buttons.push(`<button class="icon-btn" data-action="send" data-id="${invoiceId}" title="Send Invoice" aria-label="Send invoice">${ICONS.SEND}</button>`);
+    buttons.push(`<button class="icon-btn" data-action="edit" data-id="${invoiceId}" title="Edit Invoice" aria-label="Edit invoice">${ICONS.EDIT}</button>`);
+  } else if (status === 'sent' || status === 'pending' || status === 'viewed' || status === 'overdue') {
+    // Sent/Pending/Viewed/Overdue: Mark Paid, Download
+    buttons.push(`<button class="icon-btn" data-action="mark-paid" data-id="${invoiceId}" title="Mark as Paid" aria-label="Mark as paid">${ICONS.CHECK}</button>`);
+    buttons.push(`<button class="icon-btn" data-action="download" data-id="${invoiceId}" title="Download PDF" aria-label="Download PDF">${ICONS.DOWNLOAD}</button>`);
+  } else if (status === 'paid') {
+    // Paid: Download only
+    buttons.push(`<button class="icon-btn" data-action="download" data-id="${invoiceId}" title="Download PDF" aria-label="Download PDF">${ICONS.DOWNLOAD}</button>`);
+  }
+
+  return buttons.join('');
+}
+
 /**
  * Render invoices table with filters and pagination
  */
@@ -360,26 +395,24 @@ function renderInvoicesTable(ctx: AdminDashboardContext): void {
       }
     }
 
-    const statusBadge = getStatusBadgeHTML(status);
+    const statusIndicator = getStatusDotHTML(status);
     const checkboxHTML = getPortalCheckboxHTML({ id: `invoice-${invoice.id}`, checked: false, ariaLabel: `Select invoice ${safeInvoiceNumber}` });
+
+    // Build contextual action buttons based on status
+    const actionButtons = buildActionButtons(invoice.id, status);
 
     return `
       <tr data-invoice-id="${invoice.id}">
         <td class="bulk-select-cell">${checkboxHTML}</td>
         <td><strong>${safeInvoiceNumber}</strong></td>
-        <td>${safeClientName}</td>
+        <td class="contact-cell">${safeClientName}</td>
         <td>${safeProjectName}</td>
-        <td>${amount}</td>
-        <td>${statusBadge}</td>
-        <td>${dueDate}</td>
-        <td>
+        <td class="budget-cell">${amount}</td>
+        <td class="status-cell">${statusIndicator}</td>
+        <td class="date-cell">${dueDate}</td>
+        <td class="actions-cell">
           <div class="table-actions">
-            <button class="icon-btn" data-action="view" data-id="${invoice.id}" title="View Invoice" aria-label="View invoice">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-            <button class="icon-btn" data-action="edit" data-id="${invoice.id}" title="Edit Invoice" aria-label="Edit invoice">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-            </button>
+            ${actionButtons}
           </div>
         </td>
       </tr>
@@ -441,12 +474,89 @@ function setupInvoiceHandlers(ctx: AdminDashboardContext): void {
     const action = button.dataset.action;
     const invoiceId = button.dataset.id;
 
-    if (action === 'view' && invoiceId) {
-      // TODO: Implement view invoice
+    if (!invoiceId) return;
+
+    switch (action) {
+    case 'view':
+      // TODO: Implement view invoice modal
       ctx.showNotification('View invoice coming soon', 'info');
-    } else if (action === 'edit' && invoiceId) {
-      // TODO: Implement edit invoice
+      break;
+    case 'edit':
+      // TODO: Implement edit invoice modal
       ctx.showNotification('Edit invoice coming soon', 'info');
+      break;
+    case 'send':
+      handleSendInvoice(parseInt(invoiceId), ctx);
+      break;
+    case 'mark-paid':
+      handleMarkPaid(parseInt(invoiceId), ctx);
+      break;
+    case 'download':
+      handleDownloadPdf(parseInt(invoiceId));
+      break;
     }
   });
+}
+
+/**
+ * Handle sending an invoice
+ */
+async function handleSendInvoice(invoiceId: number, ctx: AdminDashboardContext): Promise<void> {
+  try {
+    const response = await apiPut(`/api/invoices/${invoiceId}`, { status: 'sent' });
+    if (response.ok) {
+      showToast('Invoice sent successfully', 'success');
+      loadInvoicesData(ctx);
+    } else {
+      const error = await response.json();
+      showToast(error.error || 'Failed to send invoice', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminInvoices] Send error:', error);
+    showToast('Failed to send invoice', 'error');
+  }
+}
+
+/**
+ * Handle marking invoice as paid
+ */
+async function handleMarkPaid(invoiceId: number, ctx: AdminDashboardContext): Promise<void> {
+  try {
+    const response = await apiPut(`/api/invoices/${invoiceId}`, { status: 'paid' });
+    if (response.ok) {
+      showToast('Invoice marked as paid', 'success');
+      loadInvoicesData(ctx);
+    } else {
+      const error = await response.json();
+      showToast(error.error || 'Failed to update invoice', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminInvoices] Mark paid error:', error);
+    showToast('Failed to update invoice', 'error');
+  }
+}
+
+/**
+ * Handle downloading invoice PDF
+ */
+async function handleDownloadPdf(invoiceId: number): Promise<void> {
+  try {
+    const response = await apiFetch(`/api/invoices/${invoiceId}/pdf`);
+    if (response.ok) {
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${invoiceId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      showToast('Failed to download PDF', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminInvoices] Download error:', error);
+    showToast('Failed to download PDF', 'error');
+  }
 }

@@ -17,7 +17,7 @@ import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getStatusDotHTML } from '../../../components/status-badge';
 
 // ============================================
 // TYPES
@@ -224,26 +224,34 @@ function renderWorkflowsTable(): void {
   tbody.innerHTML = cachedWorkflows.map(w => {
     const entityLabel = ENTITY_TYPE_LABELS[w.entity_type] || w.entity_type;
     const typeLabel = WORKFLOW_TYPE_LABELS[w.workflow_type] || w.workflow_type;
-    const statusBadge = getStatusBadgeHTML(w.is_active ? 'Active' : 'Inactive', w.is_active ? 'active' : 'inactive');
-    const defaultBadge = w.is_default ? ` ${getStatusBadgeHTML('Default', 'qualified')}` : '';
+    const statusBadge = getStatusDotHTML(w.is_active ? 'active' : 'inactive');
+    // Purple star icon for default indicator
+    const defaultIcon = w.is_default ? `
+      <span class="default-indicator" title="Default workflow for ${entityLabel}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
+        </svg>
+      </span>` : '';
 
     return `
       <tr data-id="${w.id}">
-        <td><strong>${escapeHtml(w.name)}</strong>${defaultBadge}</td>
-        <td>${entityLabel}</td>
-        <td>${typeLabel}</td>
-        <td>${statusBadge}</td>
-        <td>${formatDate(w.updated_at)}</td>
+        <td class="name-cell">${escapeHtml(w.name)}${defaultIcon}</td>
+        <td class="type-cell">${entityLabel}</td>
+        <td class="type-cell">${typeLabel}</td>
+        <td class="status-cell">${statusBadge}</td>
+        <td class="date-cell">${formatDate(w.updated_at)}</td>
         <td class="actions-cell">
-          <button type="button" class="icon-btn workflow-edit" data-id="${w.id}" title="Edit workflow" aria-label="Edit workflow">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-          </button>
-          <button type="button" class="icon-btn workflow-steps" data-id="${w.id}" title="Manage steps" aria-label="Manage approval steps">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
-          </button>
-          <button type="button" class="icon-btn icon-btn-danger workflow-delete" data-id="${w.id}" data-name="${escapeHtml(w.name)}" title="Delete" aria-label="Delete workflow">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
+          <div class="table-actions">
+            <button type="button" class="icon-btn workflow-edit" data-id="${w.id}" title="Edit workflow" aria-label="Edit workflow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </button>
+            <button type="button" class="icon-btn workflow-steps" data-id="${w.id}" title="Manage steps" aria-label="Manage approval steps">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+            </button>
+            <button type="button" class="icon-btn icon-btn-danger workflow-delete" data-id="${w.id}" data-name="${escapeHtml(w.name)}" title="Delete" aria-label="Delete workflow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
         </td>
       </tr>
     `;
@@ -464,7 +472,7 @@ async function openStepsModal(workflowId: number): Promise<void> {
             <div class="step-details">
               <strong>${s.approver_type === 'user' ? 'User' : s.approver_type === 'role' ? 'Role' : 'Client'}:</strong>
               ${escapeHtml(s.approver_value)}
-              ${s.is_optional ? getStatusBadgeHTML('Optional', 'pending') : ''}
+              ${s.is_optional ? getStatusDotHTML('pending', { label: 'Optional' }) : ''}
               ${s.auto_approve_after_hours ? `<span class="step-auto">Auto-approve after ${s.auto_approve_after_hours}h</span>` : ''}
             </div>
             <button type="button" class="icon-btn icon-btn-danger step-delete" data-id="${s.id}" title="Remove step">
@@ -615,25 +623,32 @@ function renderTriggersTable(): void {
 
   tbody.innerHTML = cachedTriggers.map(t => {
     const actionLabel = ACTION_TYPE_LABELS[t.action_type] || t.action_type;
-    const statusBadge = getStatusBadgeHTML(t.is_active ? 'Active' : 'Inactive', t.is_active ? 'active' : 'inactive');
+    const statusBadge = getStatusDotHTML(t.is_active ? 'active' : 'inactive');
 
     return `
       <tr data-id="${t.id}">
-        <td><strong>${escapeHtml(t.name)}</strong></td>
-        <td><code>${escapeHtml(t.event_type)}</code></td>
-        <td>${actionLabel}</td>
-        <td>${statusBadge}</td>
-        <td>${formatDate(t.updated_at)}</td>
+        <td class="name-cell">${escapeHtml(t.name)}</td>
+        <td class="type-cell"><code>${escapeHtml(t.event_type)}</code></td>
+        <td class="type-cell">${actionLabel}</td>
+        <td class="status-cell">${statusBadge}</td>
+        <td class="date-cell">${formatDate(t.updated_at)}</td>
         <td class="actions-cell">
-          <button type="button" class="icon-btn trigger-toggle" data-id="${t.id}" title="${t.is_active ? 'Disable' : 'Enable'}" aria-label="${t.is_active ? 'Disable' : 'Enable'} trigger">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="${t.is_active ? 'M5 5l2.5 2.5' : 'M5 5l3 3'}"/><circle cx="12" cy="14" r="8"/></svg>
-          </button>
-          <button type="button" class="icon-btn trigger-edit" data-id="${t.id}" title="Edit trigger" aria-label="Edit trigger">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-          </button>
-          <button type="button" class="icon-btn icon-btn-danger trigger-delete" data-id="${t.id}" data-name="${escapeHtml(t.name)}" title="Delete" aria-label="Delete trigger">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
+          <div class="table-actions">
+            <button type="button" class="icon-btn trigger-toggle" data-id="${t.id}" title="${t.is_active ? 'Disable' : 'Enable'}" aria-label="${t.is_active ? 'Disable' : 'Enable'} trigger">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                ${t.is_active
+    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+    : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+}
+              </svg>
+            </button>
+            <button type="button" class="icon-btn trigger-edit" data-id="${t.id}" title="Edit trigger" aria-label="Edit trigger">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </button>
+            <button type="button" class="icon-btn icon-btn-danger trigger-delete" data-id="${t.id}" data-name="${escapeHtml(t.name)}" title="Delete" aria-label="Delete trigger">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
         </td>
       </tr>
     `;

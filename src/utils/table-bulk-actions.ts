@@ -20,9 +20,11 @@ export interface BulkAction {
   label: string;
   icon?: string;
   variant?: 'default' | 'danger' | 'warning';
-  handler: (selectedIds: number[]) => Promise<void> | void;
+  handler: (selectedIds: number[], selectedValue?: string) => Promise<void> | void;
   /** Optional confirmation message. If provided, shows confirm dialog before action */
   confirmMessage?: string;
+  /** If provided, renders a dropdown with these options instead of a button */
+  dropdownOptions?: { value: string; label: string }[];
 }
 
 export interface BulkActionConfig {
@@ -99,6 +101,10 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
   toolbar.className = 'bulk-action-toolbar hidden';
   toolbar.id = `${config.tableId}-bulk-toolbar`;
 
+  // Separate dropdown actions from button actions
+  const buttonActions = config.actions.filter(a => !a.dropdownOptions);
+  const dropdownActions = config.actions.filter(a => a.dropdownOptions);
+
   toolbar.innerHTML = `
     <div class="bulk-toolbar-left">
       <span class="bulk-selection-count">
@@ -109,14 +115,17 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
       </button>
     </div>
     <div class="bulk-toolbar-actions">
-      ${config.actions.map(action => `
+      ${buttonActions.map(action => `
         <button type="button"
-          class="btn btn-sm ${action.variant === 'danger' ? 'btn-danger' : action.variant === 'warning' ? 'btn-warning' : 'btn-secondary'}"
+          class="icon-btn bulk-action-icon-btn ${action.variant === 'danger' ? 'icon-btn-danger' : action.variant === 'warning' ? 'icon-btn-warning' : ''}"
           data-action="${action.id}"
-          title="${action.label}">
+          title="${action.label}"
+          aria-label="${action.label}">
           ${action.icon || ''}
-          <span>${action.label}</span>
         </button>
+      `).join('')}
+      ${dropdownActions.map(action => `
+        <div class="bulk-action-dropdown" data-action="${action.id}"></div>
       `).join('')}
     </div>
   `;
@@ -128,22 +137,20 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
     config.onSelectionChange?.([]);
   });
 
-  // Action button handlers
-  config.actions.forEach(action => {
-    const btn = toolbar.querySelector(`[data-action="${action.id}"]`);
+  // Button action handlers
+  buttonActions.forEach(action => {
+    const btn = toolbar.querySelector(`button[data-action="${action.id}"]`);
     btn?.addEventListener('click', async () => {
       const selectedIds = getSelectedIds(config.tableId);
       if (selectedIds.length === 0) return;
 
       if (action.confirmMessage) {
-        // Use confirm-dialog if available, otherwise native confirm
         const confirmed = await showBulkConfirm(action.confirmMessage, selectedIds.length);
         if (!confirmed) return;
       }
 
       try {
         await action.handler(selectedIds);
-        // Reset selection after successful action
         resetSelection(config.tableId);
         config.onSelectionChange?.([]);
       } catch (error) {
@@ -152,7 +159,107 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
     });
   });
 
+  // Dropdown action handlers
+  dropdownActions.forEach(action => {
+    const container = toolbar.querySelector(`div[data-action="${action.id}"]`);
+    if (container && action.dropdownOptions) {
+      const dropdown = createBulkActionDropdown({
+        options: action.dropdownOptions,
+        icon: action.icon || '',
+        label: action.label,
+        onSelect: async (value) => {
+          const selectedIds = getSelectedIds(config.tableId);
+          if (selectedIds.length === 0) return;
+
+          try {
+            await action.handler(selectedIds, value);
+            resetSelection(config.tableId);
+            config.onSelectionChange?.([]);
+          } catch (error) {
+            console.error(`[BulkActions] Action ${action.id} failed:`, error);
+          }
+        }
+      });
+      container.appendChild(dropdown);
+    }
+  });
+
   return toolbar;
+}
+
+/**
+ * Create a dropdown for bulk actions (e.g., status update)
+ */
+function createBulkActionDropdown(config: {
+  options: { value: string; label: string }[];
+  icon: string;
+  label: string;
+  onSelect: (value: string) => void;
+}): HTMLElement {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'bulk-dropdown table-dropdown custom-dropdown';
+
+  // Trigger button (icon only)
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'icon-btn bulk-action-icon-btn bulk-dropdown-trigger';
+  trigger.setAttribute('aria-label', config.label);
+  trigger.setAttribute('title', config.label);
+  trigger.innerHTML = config.icon;
+
+  // Dropdown menu
+  const menu = document.createElement('ul');
+  menu.className = 'custom-dropdown-menu bulk-dropdown-menu';
+
+  config.options.forEach(opt => {
+    const li = document.createElement('li');
+    li.className = 'custom-dropdown-item';
+    li.dataset.value = opt.value;
+    li.dataset.status = opt.value;
+
+    const dot = document.createElement('span');
+    dot.className = 'status-dot';
+    li.appendChild(dot);
+
+    const text = document.createElement('span');
+    text.className = 'dropdown-item-name';
+    text.textContent = opt.label;
+    li.appendChild(text);
+
+    li.addEventListener('click', (e) => {
+      e.stopPropagation();
+      wrapper.classList.remove('open');
+      config.onSelect(opt.value);
+    });
+
+    menu.appendChild(li);
+  });
+
+  wrapper.appendChild(trigger);
+  wrapper.appendChild(menu);
+
+  // Toggle on click
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    // Close other dropdowns
+    document.querySelectorAll('.bulk-dropdown.open').forEach(el => {
+      if (el !== wrapper) el.classList.remove('open');
+    });
+
+    wrapper.classList.toggle('open');
+  });
+
+  // Close on outside click
+  const closeHandler = (e: MouseEvent) => {
+    if (!wrapper.contains(e.target as Node)) {
+      wrapper.classList.remove('open');
+    }
+  };
+  document.addEventListener('click', closeHandler);
+
+  return wrapper;
 }
 
 /**

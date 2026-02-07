@@ -1,6 +1,6 @@
 # Reusable Components Audit
 
-**Date:** February 6, 2026
+**Date:** February 7, 2026
 **Scope:** Admin and Client Portal — identify UI that should use shared components but currently uses native elements or duplicate implementations.
 
 ---
@@ -77,7 +77,7 @@ Migrating would require significant refactoring for minimal benefit. The custom 
 
 ## 4. Buttons
 
-**Reusable:** Portal button classes in `src/styles/shared/portal-buttons.css` (`.btn`, `.btn-primary`, `.btn-secondary`, `.icon-btn`, etc.) and design doc in PORTAL_CSS_DESIGN.md.
+**Reusable:** Portal button classes in `src/styles/shared/portal-buttons.css` (`.btn`, `.btn-primary`, `.btn-secondary`, `.icon-btn`, etc.) and design doc in CSS_ARCHITECTURE.md.
 
 **Audit:** No full audit done here. Worth checking that all admin/portal actions use these classes (e.g. no one-off `.button` or inline styles) so hierarchy (primary/secondary/destructive/icon-only) stays consistent.
 
@@ -93,13 +93,46 @@ Migrating would require significant refactoring for minimal benefit. The custom 
 
 ---
 
-## 6. Summary
+## 6. View Toggles
+
+**Reusable component:** `createViewToggle(container, options)` in `src/components/view-toggle.ts` — for switching between view modes (Board/List, Table/Pipeline, Proposals/Templates).
+
+**Standard:** All view toggle options MUST include `iconSvg` property with an appropriate SVG icon. Text-only toggles are not allowed.
+
+**Using reusable (CURRENT):**
+
+| Module | Views | Status |
+|--------|-------|--------|
+| admin-leads | Table / Pipeline | ✅ Has icons |
+| admin-tasks | Board / List | ✅ Has icons |
+| admin-global-tasks | Board / List | ✅ Has icons |
+| admin-overview (tasks) | Board / List | ✅ Has icons |
+| admin-proposals | Proposals / Templates | ✅ Has icons |
+| admin-files | Grid / List | ✅ Has icons |
+
+**Icon Mapping:**
+
+| View Type | Icon Description |
+|-----------|------------------|
+| Board/Kanban | 3 vertical rectangles (varying heights) |
+| List | 3 horizontal lines with bullet points |
+| Table | Rectangle with grid lines |
+| Grid | 2x2 squares |
+| Proposals | Document with text lines |
+| Templates | Layout rectangle with sections |
+
+**Status:** ✅ COMPLETE - All view toggles have icons
+
+---
+
+## 7. Summary
 
 | Category | Reusable component | Status |
 |----------|-------------------|--------|
 | **Status badges** | createStatusBadge, getStatusBadgeHTML | ✅ COMPLETE - All admin modules use reusable component |
 | **Form dropdowns** | initModalDropdown | ✅ COMPLETE - All modal/form selects wrapped |
 | **Table dropdowns** | createTableDropdown | ✅ COMPLETE - All table status selects use shared component |
+| **View toggles** | createViewToggle | ✅ COMPLETE - All view toggles have icons |
 | **Project details status** | Custom implementation | ⚠️ EXCEPTION - Intentionally custom (auto-save behavior) |
 | **Modals** | ModalComponent, confirm-dialog | 📝 LOW PRIORITY - Admin modals are ad-hoc HTML + JS |
 

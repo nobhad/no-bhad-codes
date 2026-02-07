@@ -93,26 +93,13 @@ const LEADS_BULK_CONFIG: BulkActionConfig = {
       label: 'Update status',
       icon: ICONS.PENCIL,
       variant: 'default',
-      confirmMessage: '',
-      handler: async (ids: number[]) => {
-        const result = await multiPromptDialog({
-          title: 'Update lead status',
-          fields: [
-            {
-              name: 'status',
-              label: 'Status',
-              type: 'select',
-              required: true,
-              options: LEAD_STATUS_OPTIONS
-            }
-          ],
-          confirmText: 'Update'
-        });
-        if (!result || !storedContext) return;
+      dropdownOptions: LEAD_STATUS_OPTIONS,
+      handler: async (ids: number[], selectedStatus?: string) => {
+        if (!selectedStatus || !storedContext) return;
         try {
           const response = await apiPost('/api/admin/leads/bulk/status', {
             projectIds: ids,
-            status: result.status
+            status: selectedStatus
           });
           if (response.ok) {
             storedContext.showNotification(`Updated ${ids.length} lead${ids.length > 1 ? 's' : ''}`, 'success');
@@ -658,18 +645,20 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
         ${secondaryContent ? `<span class="identity-contact">${secondaryContent}</span>` : ''}
         <span class="identity-email">${safeEmail}</span>
       </td>
-      <td>${SanitizationUtils.escapeHtml(displayType)}</td>
-      <td>${SanitizationUtils.escapeHtml(displayBudget)}</td>
+      <td class="type-cell">${SanitizationUtils.escapeHtml(displayType)}</td>
+      <td class="budget-cell">${SanitizationUtils.escapeHtml(displayBudget)}</td>
       <td class="status-cell"></td>
-      <td>${date}</td>
+      <td class="date-cell">${date}</td>
       <td class="actions-cell">
-        ${showConvertBtn ? `<button class="icon-btn icon-btn-convert btn-convert-lead" data-lead-id="${lead.id}" title="Convert to Project" aria-label="Convert to Project">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            <line x1="12" y1="11" x2="12" y2="17"></line>
-            <line x1="9" y1="14" x2="15" y2="14"></line>
-          </svg>
-        </button>` : ''}
+        <div class="table-actions">
+          ${showConvertBtn ? `<button class="icon-btn btn-convert-lead" data-lead-id="${lead.id}" title="Convert to Project" aria-label="Convert to Project">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              <line x1="12" y1="11" x2="12" y2="17"></line>
+              <line x1="9" y1="14" x2="15" y2="14"></line>
+            </svg>
+          </button>` : ''}
+        </div>
       </td>
     `;
 

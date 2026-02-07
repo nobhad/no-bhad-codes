@@ -35,18 +35,4 @@ body:has([data-page="client-portal"]) {
    ===================================================== */
 
 /* Base spacing for content sections - uniform 1.5rem gap */
-:is([data-page="admin"], [data-page="client-portal"]) .quick-stats,
-:is([data-page="admin"], [data-page="client-portal"]) .overview-grid,
-:is([data-page="admin"], [data-page="client-portal"]) .analytics-overview,
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity,
-:is([data-page="admin"], [data-page="client-portal"]) .admin-table-card,
-:is([data-page="admin"], [data-page="client-portal"]) .portal-project-card,
-:is([data-page="admin"], [data-page="client-portal"]) .content-section {
-  margin-bottom: var(--space-3);
-}
-
-/* Remove bottom margin from last child to prevent double spacing */
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-content > *:last-child,
-:is([data-page="admin"], [data-page="client-portal"]) .tab-content > *:last-child {
-  margin-bottom: 0;
-}
+/* Spacing between containers is controlled by .tab-content.active > * + * in admin.css */

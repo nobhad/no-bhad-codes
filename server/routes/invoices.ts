@@ -136,6 +136,9 @@ function toSnakeCaseInvoice(invoice: Invoice): Record<string, unknown> {
     terms: invoice.terms,
     created_at: invoice.createdAt,
     updated_at: invoice.updatedAt,
+    // Joined client/project names for display
+    client_name: invoice.clientName,
+    project_name: invoice.projectName,
     // Additional fields for display
     business_name: invoice.businessName,
     business_email: invoice.businessEmail,

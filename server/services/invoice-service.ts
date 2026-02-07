@@ -350,6 +350,9 @@ export interface Invoice {
   terms?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Joined client/project display names
+  clientName?: string;
+  projectName?: string;
   // Custom business info fields
   businessName?: string;
   businessContact?: string;
@@ -995,6 +998,9 @@ export class InvoiceService {
       terms: row.terms,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      // Joined client/project display names (from JOINed queries)
+      clientName: row.company_name || row.contact_name,
+      projectName: row.project_name,
       // Custom business info
       businessName: row.business_name || BUSINESS_INFO.name,
       businessContact: row.business_contact || BUSINESS_INFO.contact,

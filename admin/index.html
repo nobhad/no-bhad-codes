@@ -312,7 +312,7 @@
             <h3 class="sr-only">Needs Attention</h3>
             <div class="attention-grid" aria-live="polite" aria-atomic="false">
               <button
-                class="attention-card portal-shadow"
+                class="attention-card"
                 data-tab="invoices"
                 data-filter="overdue"
                 type="button"
@@ -327,7 +327,7 @@
                 </div>
               </button>
               <button
-                class="attention-card portal-shadow"
+                class="attention-card"
                 data-tab="projects"
                 data-filter="pending_contract"
                 type="button"
@@ -342,7 +342,7 @@
                 </div>
               </button>
               <button
-                class="attention-card portal-shadow"
+                class="attention-card"
                 data-tab="leads"
                 data-filter="new_this_week"
                 type="button"
@@ -357,7 +357,7 @@
                 </div>
               </button>
               <button
-                class="attention-card portal-shadow"
+                class="attention-card"
                 data-tab="messages"
                 data-filter="unread"
                 type="button"
@@ -377,7 +377,7 @@
             <h3 class="sr-only">Today's Snapshot</h3>
             <div class="quick-stats" aria-live="polite" aria-atomic="false">
               <button
-                class="stat-card stat-card-clickable portal-shadow"
+                class="stat-card stat-card-clickable"
                 data-tab="projects"
                 type="button"
               >
@@ -385,7 +385,7 @@
                 <span class="stat-label">Active Projects</span>
               </button>
               <button
-                class="stat-card stat-card-clickable portal-shadow"
+                class="stat-card stat-card-clickable"
                 data-tab="clients"
                 type="button"
               >
@@ -393,7 +393,7 @@
                 <span class="stat-label">Clients</span>
               </button>
               <button
-                class="stat-card stat-card-clickable portal-shadow"
+                class="stat-card stat-card-clickable"
                 data-tab="invoices"
                 type="button"
               >
@@ -401,7 +401,7 @@
                 <span class="stat-label">Revenue MTD</span>
               </button>
               <button
-                class="stat-card stat-card-clickable portal-shadow"
+                class="stat-card stat-card-clickable"
                 data-tab="leads"
                 type="button"
               >
@@ -495,11 +495,11 @@
                       </th>
                       <th scope="col">Project</th>
                       <th scope="col">Lead</th>
-                      <th scope="col">Type</th>
-                      <th scope="col">Budget</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Date</th>
-                      <th scope="col">Actions</th>
+                      <th scope="col" class="type-col">Type</th>
+                      <th scope="col" class="budget-col">Budget</th>
+                      <th scope="col" class="status-col">Status</th>
+                      <th scope="col" class="date-col">Date</th>
+                      <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="leads-table-body">
@@ -532,15 +532,17 @@
                 <table class="admin-table contacts-table">
                   <thead>
                     <tr>
-                      <th scope="col">Contact</th>
+                      <th scope="col" class="contact-col">Contact</th>
+                      <th scope="col" class="email-col">Email</th>
                       <th scope="col">Message</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Date</th>
+                      <th scope="col" class="status-col">Status</th>
+                      <th scope="col" class="date-col">Date</th>
+                      <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="contacts-table-body">
                     <tr>
-                      <td colspan="4" class="loading-row">Loading contact submissions...</td>
+                      <td colspan="6" class="loading-row">Loading contact submissions...</td>
                     </tr>
                   </tbody>
                 </table>
@@ -584,14 +586,14 @@
               <div class="admin-table-header">
                 <h3>Projects</h3>
                 <div class="admin-table-actions" id="projects-filter-container">
-                  <button class="icon-btn" id="add-project-btn" title="Add Project" aria-label="Add project">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-                  </button>
                   <button class="icon-btn" id="export-projects-btn" title="Export to CSV" aria-label="Export projects to CSV">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                   </button>
                   <button class="icon-btn" id="refresh-projects-btn" title="Refresh" aria-label="Refresh projects">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                  </button>
+                  <button class="icon-btn" id="add-project-btn" title="Add Project" aria-label="Add project">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                   </button>
                 </div>
               </div>
@@ -608,11 +610,11 @@
                         </div>
                       </th>
                       <th scope="col">Project</th>
-                      <th scope="col">Type</th>
-                      <th scope="col">Budget</th>
-                      <th scope="col">Timeline</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Start</th>
+                      <th scope="col" class="type-col">Type</th>
+                      <th scope="col" class="budget-col">Budget</th>
+                      <th scope="col" class="timeline-col">Timeline</th>
+                      <th scope="col" class="status-col">Status</th>
+                      <th scope="col" class="date-col">Start</th>
                     </tr>
                   </thead>
                   <tbody id="projects-table-body">
@@ -659,14 +661,14 @@
               <div class="admin-table-header">
                 <h3><span class="title-full">Client Accounts</span><span class="title-mobile">Clients</span></h3>
                 <div class="admin-table-actions" id="clients-filter-container">
-                  <button class="icon-btn" id="add-client-btn" title="Add Client" aria-label="Add client">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
-                  </button>
                   <button class="icon-btn" id="export-clients-btn" title="Export to CSV" aria-label="Export clients to CSV">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                   </button>
                   <button class="icon-btn" id="refresh-clients-btn" title="Refresh" aria-label="Refresh clients">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                  </button>
+                  <button class="icon-btn" id="add-client-btn" title="Add Client" aria-label="Add client">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
                   </button>
                 </div>
               </div>
@@ -682,17 +684,18 @@
                           <input type="checkbox" id="clients-select-all" class="bulk-select-all" aria-label="Select all clients" />
                         </div>
                       </th>
-                      <th scope="col">Client</th>
-                      <th scope="col">Type</th>
-                      <th scope="col">Projects</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Created</th>
-                      <th scope="col">Actions</th>
+                      <th scope="col" class="contact-col">Client</th>
+                      <th scope="col" class="type-col">Type</th>
+                      <th scope="col" class="count-col" title="Projects">#</th>
+                      <th scope="col" class="status-col">Status</th>
+                      <th scope="col" class="date-col">Created</th>
+                      <th scope="col" class="date-col">Last Active</th>
+                      <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="clients-table-body">
                     <tr>
-                      <td colspan="7" class="loading-row">Loading clients...</td>
+                      <td colspan="8" class="loading-row">Loading clients...</td>
                     </tr>
                   </tbody>
                 </table>
@@ -758,12 +761,12 @@
                           </div>
                         </th>
                         <th scope="col">Invoice #</th>
-                        <th scope="col">Client</th>
+                        <th scope="col" class="contact-col">Client</th>
                         <th scope="col">Project</th>
-                        <th scope="col">Amount</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Due Date</th>
-                        <th scope="col">Actions</th>
+                        <th scope="col" class="budget-col">Amount</th>
+                        <th scope="col" class="status-col">Status</th>
+                        <th scope="col" class="date-col">Due Date</th>
+                        <th scope="col" class="actions-col">Actions</th>
                       </tr>
                     </thead>
                     <tbody id="invoices-table-body">
@@ -1394,25 +1397,30 @@
 
               <!-- Visitors Table -->
               <div class="visitors-dashboard">
-                <div class="admin-table-container visitors-table-container portal-shadow">
-                  <div class="admin-table-scroll-wrapper">
-                  <table class="admin-table visitors-table">
-                    <thead>
-                      <tr>
-                        <th scope="col">Session ID</th>
-                        <th scope="col">Started</th>
-                        <th scope="col">Duration</th>
-                        <th scope="col">Pages</th>
-                        <th scope="col">Device</th>
-                        <th scope="col">Location</th>
-                      </tr>
-                    </thead>
-                    <tbody id="visitors-table-body">
-                      <tr>
-                        <td colspan="6" class="loading-row">Loading visitor data...</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div class="admin-table-card portal-shadow">
+                  <div class="admin-table-header">
+                    <h3>Recent Sessions</h3>
+                  </div>
+                  <div class="admin-table-container">
+                    <div class="admin-table-scroll-wrapper">
+                      <table class="admin-table visitors-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">Session ID</th>
+                            <th scope="col">Started</th>
+                            <th scope="col">Duration</th>
+                            <th scope="col">Pages</th>
+                            <th scope="col">Device</th>
+                            <th scope="col">Location</th>
+                          </tr>
+                        </thead>
+                        <tbody id="visitors-table-body">
+                          <tr>
+                            <td colspan="6" class="loading-row">Loading visitor data...</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1542,11 +1550,11 @@
                         </div>
                       </th>
                       <th scope="col">Title</th>
-                      <th scope="col">Client</th>
-                      <th scope="col">Type</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Due</th>
-                      <th scope="col">Actions</th>
+                      <th scope="col" class="contact-col">Client</th>
+                      <th scope="col" class="type-col">Type</th>
+                      <th scope="col" class="status-col">Status</th>
+                      <th scope="col" class="date-col">Due</th>
+                      <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="document-requests-table-body">
@@ -1555,9 +1563,10 @@
                     </tr>
                   </tbody>
                 </table>
-                <div id="document-requests-pagination" class="table-pagination"></div>
                 </div>
               </div>
+              <!-- Pagination -->
+              <div id="document-requests-pagination" class="table-pagination"></div>
             </div>
             <div class="admin-modal-overlay hidden" id="dr-create-modal" role="dialog" aria-modal="true" aria-labelledby="dr-create-modal-title">
               <div class="admin-modal">
@@ -1659,9 +1668,9 @@
                     <tr>
                       <th scope="col">Name</th>
                       <th scope="col">Slug</th>
-                      <th scope="col">Articles</th>
-                      <th scope="col">Active</th>
-                      <th scope="col">Actions</th>
+                      <th scope="col" class="count-col">Articles</th>
+                      <th scope="col" class="status-col">Active</th>
+                      <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="kb-categories-table-body">
@@ -1694,12 +1703,12 @@
                   <thead>
                     <tr>
                       <th scope="col">Title</th>
-                      <th scope="col">Category</th>
+                      <th scope="col" class="type-col">Category</th>
                       <th scope="col">Slug</th>
-                      <th scope="col">Featured</th>
-                      <th scope="col">Published</th>
-                      <th scope="col">Updated</th>
-                      <th scope="col">Actions</th>
+                      <th scope="col" class="status-col">Featured</th>
+                      <th scope="col" class="status-col">Published</th>
+                      <th scope="col" class="date-col">Updated</th>
+                      <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="kb-articles-table-body">
@@ -1708,9 +1717,10 @@
                     </tr>
                   </tbody>
                 </table>
-                <div id="kb-articles-pagination" class="table-pagination"></div>
                 </div>
               </div>
+              <!-- Pagination -->
+              <div id="kb-articles-pagination" class="table-pagination"></div>
             </div>
             <!-- KB category and article modals are created by createPortalModal in admin-knowledge-base.ts -->
           </div>
@@ -2332,9 +2342,9 @@
             </div>
 
             <!-- Subtab Navigation -->
-            <div class="analytics-subtabs" id="workflows-subtabs">
-              <button class="active" data-subtab="approvals">Approvals</button>
-              <button data-subtab="triggers">Triggers</button>
+            <div class="portal-subtabs" id="workflows-subtabs">
+              <button class="portal-subtab active" data-subtab="approvals">Approvals</button>
+              <button class="portal-subtab" data-subtab="triggers">Triggers</button>
             </div>
 
             <!-- Approvals Content -->
@@ -2356,12 +2366,12 @@
                     <table class="admin-table" aria-label="Approval workflows">
                       <thead>
                         <tr>
-                          <th scope="col">Name</th>
-                          <th scope="col">Entity Type</th>
-                          <th scope="col">Workflow Type</th>
-                          <th scope="col">Status</th>
-                          <th scope="col">Updated</th>
-                          <th scope="col">Actions</th>
+                          <th scope="col" class="name-col">Name</th>
+                          <th scope="col" class="type-col">Entity Type</th>
+                          <th scope="col" class="type-col">Workflow Type</th>
+                          <th scope="col" class="status-col">Status</th>
+                          <th scope="col" class="date-col">Updated</th>
+                          <th scope="col" class="actions-col">Actions</th>
                         </tr>
                       </thead>
                       <tbody id="workflows-table-body">
@@ -2392,12 +2402,12 @@
                     <table class="admin-table" aria-label="Event triggers">
                       <thead>
                         <tr>
-                          <th scope="col">Name</th>
-                          <th scope="col">Event</th>
-                          <th scope="col">Action</th>
-                          <th scope="col">Status</th>
-                          <th scope="col">Updated</th>
-                          <th scope="col">Actions</th>
+                          <th scope="col" class="name-col">Name</th>
+                          <th scope="col" class="type-col">Event</th>
+                          <th scope="col" class="type-col">Action</th>
+                          <th scope="col" class="status-col">Status</th>
+                          <th scope="col" class="date-col">Updated</th>
+                          <th scope="col" class="actions-col">Actions</th>
                         </tr>
                       </thead>
                       <tbody id="triggers-table-body">

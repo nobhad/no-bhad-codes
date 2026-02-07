@@ -344,13 +344,15 @@ router.get(
     const messages = await db.all(
       `
     SELECT
-      id, sender_type, sender_name, message, priority, reply_to,
-      attachments, is_read, read_at, created_at, updated_at
-    FROM general_messages
-    WHERE thread_id = ?
-    ORDER BY created_at ASC
+      gm.id, gm.sender_type, gm.sender_name, gm.message, gm.priority, gm.reply_to,
+      gm.attachments, gm.is_read, gm.read_at, gm.created_at, gm.updated_at,
+      CASE WHEN pm.id IS NOT NULL THEN 1 ELSE 0 END as is_pinned
+    FROM general_messages gm
+    LEFT JOIN pinned_messages pm ON gm.id = pm.message_id AND pm.thread_id = ?
+    WHERE gm.thread_id = ?
+    ORDER BY gm.created_at ASC
   `,
-      [threadId]
+      [threadId, threadId]
     );
 
     // Parse attachments JSON and fetch reactions for each message

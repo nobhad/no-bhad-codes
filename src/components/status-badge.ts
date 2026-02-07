@@ -58,3 +58,57 @@ export function getStatusBadgeHTML(
   const cls = `status-badge status-${variantToClass(variant)}`;
   return `<span class="${escapeHtml(cls)}">${escapeHtml(label)}</span>`;
 }
+
+/**
+ * Format status text for display (capitalize, handle underscores/hyphens).
+ */
+function formatStatusLabel(status: string): string {
+  return status
+    .replace(/[_-]/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * Return HTML string for a status indicator with colored dot (minimal style).
+ * Use this instead of badges for cleaner table displays.
+ * @param status - Status value (used for CSS class and default label)
+ * @param options.label - Custom label text (optional, overrides auto-formatted label)
+ * @param options.uppercase - Display label in uppercase
+ */
+export function getStatusDotHTML(
+  status: string,
+  options?: { label?: string; uppercase?: boolean }
+): string {
+  const variant = variantToClass(status);
+  let label = options?.label ?? formatStatusLabel(status);
+  if (options?.uppercase) {
+    label = label.toUpperCase();
+  }
+  return `<span class="status-indicator status-${escapeHtml(variant)}"><span class="status-dot"></span><span class="status-text">${escapeHtml(label)}</span></span>`;
+}
+
+/**
+ * Create a status indicator element with colored dot.
+ */
+export function createStatusDot(
+  status: string,
+  options?: { label?: string; uppercase?: boolean }
+): HTMLElement {
+  const span = document.createElement('span');
+  span.className = `status-indicator status-${variantToClass(status)}`;
+
+  const dot = document.createElement('span');
+  dot.className = 'status-dot';
+
+  const text = document.createElement('span');
+  text.className = 'status-text';
+  let label = options?.label ?? formatStatusLabel(status);
+  if (options?.uppercase) {
+    label = label.toUpperCase();
+  }
+  text.textContent = label;
+
+  span.appendChild(dot);
+  span.appendChild(text);
+  return span;
+}

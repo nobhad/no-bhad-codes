@@ -52,19 +52,9 @@
 
 /* Consistent spacing between sections within sub-tabs */
 .analytics-subtab-content > .analytics-section,
-.analytics-subtab-content > .metric-group,
-.analytics-subtab-content > .business-charts-grid,
-.analytics-subtab-content > .analytics-breakdown,
-.analytics-subtab-content > .charts-grid,
-.analytics-subtab-content > .analytics-grid,
-.analytics-subtab-content > .analytics-card-grid,
-.analytics-subtab-content > .portal-project-card,
-.analytics-subtab-content > .visitors-dashboard {
-  margin-bottom: var(--space-2);
-}
-
-.analytics-subtab-content > *:last-child {
-  margin-bottom: 0;
+/* Spacing in analytics subtab content controlled by > * + * rule */
+.analytics-subtab-content > * + * {
+  margin-top: var(--space-3);
 }
 
 /* ============================================
@@ -97,8 +87,8 @@
   }
 }
 
-/* Charts - canvas wrapper (no shadow, just layout) */
-.chart-canvas-wrapper {
+/* Charts - canvas wrapper */
+:is([data-page="admin"], [data-page="client-portal"]) .chart-canvas-wrapper {
   height: 320px;
   background: var(--portal-bg-medium);
   border: none;
@@ -395,7 +385,7 @@
   background: var(--portal-bg-medium);
   border-radius: var(--border-radius-sm);
   border: none;
-  box-shadow: var(--shadow-panel);
+  /* No shadow - match other light grey cards in portal */
   color: var(--portal-text-light);
   font-size: var(--font-size-xs);
 }
@@ -409,7 +399,6 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-3);
-  margin-bottom: var(--space-3);
 }
 
 /* Same styling as .stat-card (portal-cards.css) */
@@ -602,6 +591,11 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   margin: 0;
+  line-height: 1;
+}
+
+.section-header-with-actions .icon-btn {
+  flex-shrink: 0;
 }
 
 .reports-list {
@@ -707,13 +701,23 @@
    ============================================ */
 
 @media (--mobile) {
-  /* Stack KPI cards in single column (do not split into groups of 2) */
+  /* Stack KPI cards in single column with consistent spacing */
   .kpi-cards-row {
     grid-template-columns: 1fr;
+    gap: var(--space-2);
   }
 
   .kpi-card-value {
     font-size: 1.25rem;
+  }
+
+  /* Consistent spacing between analytics sections - use margin-top like tab-content */
+  .analytics-subtab-content > * {
+    margin-bottom: 0;
+  }
+
+  .analytics-subtab-content > * + * {
+    margin-top: var(--space-2);
   }
 
   .business-charts-grid {
@@ -745,7 +749,8 @@
     grid-template-columns: 1fr;
   }
 
-  .section-header-with-actions {
+  /* Only stack header+actions in analytics tab */
+  #tab-analytics .section-header-with-actions {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-1);
