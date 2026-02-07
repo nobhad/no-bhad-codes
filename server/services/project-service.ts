@@ -1629,6 +1629,72 @@ class ProjectService {
       [projectId]
     );
   }
+
+  // ===================================================
+  // GLOBAL TASKS (ACROSS ALL PROJECTS)
+  // ===================================================
+
+  /**
+   * Get all tasks across all projects
+   * Returns tasks with project info, ordered by priority and due date
+   */
+  async getAllTasks(options?: {
+    status?: string;
+    priority?: string;
+    limit?: number;
+  }): Promise<(ProjectTask & { projectName: string; clientName?: string })[]> {
+    const db = getDatabase();
+
+    let query = `
+      SELECT
+        t.*,
+        p.project_name,
+        c.contact_name as client_name
+      FROM project_tasks t
+      JOIN projects p ON t.project_id = p.id
+      LEFT JOIN clients c ON p.client_id = c.id
+      WHERE p.archived_at IS NULL
+        AND p.status NOT IN ('cancelled', 'completed')
+    `;
+    const params: SqlValue[] = [];
+
+    if (options?.status) {
+      query += ' AND t.status = ?';
+      params.push(options.status);
+    }
+    if (options?.priority) {
+      query += ' AND t.priority = ?';
+      params.push(options.priority);
+    }
+
+    // Order by: urgent first, then by due date (nulls last), then by created date
+    query += `
+      ORDER BY
+        CASE t.priority
+          WHEN 'urgent' THEN 1
+          WHEN 'high' THEN 2
+          WHEN 'medium' THEN 3
+          WHEN 'low' THEN 4
+          ELSE 5
+        END ASC,
+        CASE WHEN t.due_date IS NULL THEN 1 ELSE 0 END ASC,
+        t.due_date ASC,
+        t.created_at DESC
+    `;
+
+    if (options?.limit) {
+      query += ' LIMIT ?';
+      params.push(options.limit);
+    }
+
+    const rows = await db.all(query, params);
+
+    return (rows as unknown as (TaskRow & { project_name: string; client_name?: string })[]).map(row => ({
+      ...toTask(row),
+      projectName: row.project_name,
+      clientName: row.client_name
+    }));
+  }
 }
 
 // Export singleton instance

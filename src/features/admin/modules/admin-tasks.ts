@@ -419,9 +419,9 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
         <h4>Details</h4>
         <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
           <div><strong>Status:</strong> ${STATUS_CONFIG[fullTask.status]?.label || fullTask.status}</div>
-          <div><strong>Due:</strong> ${fullTask.due_date ? formatDate(fullTask.due_date) : 'Not set'}</div>
-          <div><strong>Assignee:</strong> ${fullTask.assignee_name || 'Unassigned'}</div>
-          <div><strong>Est. Hours:</strong> ${fullTask.estimated_hours || '-'}</div>
+          <div><strong>Due:</strong> ${fullTask.due_date ? formatDate(fullTask.due_date) : ''}</div>
+          <div><strong>Assignee:</strong> ${fullTask.assignee_name || ''}</div>
+          <div><strong>Est. Hours:</strong> ${fullTask.estimated_hours || ''}</div>
         </div>
       </div>
 

@@ -410,7 +410,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       SanitizationUtils.decodeHtmlEntities(project.project_name || project.description?.substring(0, 30) || 'Untitled Project')
     );
     const safeContact = SanitizationUtils.escapeHtml(
-      SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.contact_name || '-'))
+      SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.contact_name || ''))
     );
     const safeCompany = project.company_name
       ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.company_name)))
@@ -569,7 +569,7 @@ function populateProjectDetailView(project: LeadProject): void {
 
   // Client email with copy button (innerHTML, not batchUpdateText)
   const pdClientEmailEl = document.getElementById('pd-client-email');
-  if (pdClientEmailEl) pdClientEmailEl.innerHTML = getEmailWithCopyHtml(project.email || '', SanitizationUtils.escapeHtml(project.email || '-'));
+  if (pdClientEmailEl) pdClientEmailEl.innerHTML = getEmailWithCopyHtml(project.email || '', SanitizationUtils.escapeHtml(project.email || ''));
 
   // Update URL links (preview, repo, production)
   const updateUrlLink = (linkId: string, url: string | null): void => {

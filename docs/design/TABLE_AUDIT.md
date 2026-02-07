@@ -1,6 +1,6 @@
 # Complete Table Audit - Portal
 
-**Last Updated:** 2026-02-05
+**Last Updated:** 2026-02-06
 
 ## Table of Contents
 
@@ -335,6 +335,26 @@ Each table's columns listed in exact left-to-right display order.
 | Status columns | Always use dropdown or badge |
 | Identity cells | Name + email + company in single cell |
 | Action columns | Icon buttons (view, edit, delete) |
+
+### Empty Cell Convention
+
+**Standard:** All empty/null values display as **empty cells** (not dashes or placeholder text).
+
+| Value State | Display |
+| ----------- | ------- |
+| `null`, `undefined`, `''` | Empty cell (no content) |
+| Valid value | Formatted value |
+
+**Implementation:**
+
+- `formatDisplayValue()` returns `''` for empty values
+- `formatDate()` and `formatDateTime()` return `''` for null/invalid dates
+- All `|| '-'` fallbacks have been replaced with `|| ''`
+
+**Files affected:**
+
+- `src/utils/format-utils.ts` - Core formatting functions
+- All admin module files in `src/features/admin/modules/`
 
 ---
 

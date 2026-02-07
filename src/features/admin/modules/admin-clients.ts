@@ -450,9 +450,9 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
       // For business clients with company, company is primary name; otherwise contact is primary
       const isBusinessWithCompany = clientType === 'business' && decodedCompany;
       const safeName = SanitizationUtils.escapeHtml(
-        isBusinessWithCompany ? decodedCompany : (decodedContact || '-')
+        isBusinessWithCompany ? decodedCompany : (decodedContact || '')
       );
-      const safeEmail = SanitizationUtils.escapeHtml(client.email || '-');
+      const safeEmail = SanitizationUtils.escapeHtml(client.email || '');
       // Secondary info: contact for business, company for personal
       const safeCompany = isBusinessWithCompany
         ? (decodedContact ? SanitizationUtils.escapeHtml(decodedContact) : '')
@@ -615,7 +615,7 @@ function populateClientDetailView(client: Client): void {
     ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact))
     : (decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '-');
 
-  const safeEmail = SanitizationUtils.escapeHtml(client.email || '-');
+  const safeEmail = SanitizationUtils.escapeHtml(client.email || '');
   const safePhone = SanitizationUtils.formatPhone(client.phone || '');
   const status = client.status || 'pending';
   const clientAny = client as { last_login_at?: string; invitation_sent_at?: string; password_hash?: string; invited_at?: string };
@@ -627,7 +627,7 @@ function populateClientDetailView(client: Client): void {
 
   // Prepare billing values
   const safeBillingName = decodedBillingName ? SanitizationUtils.escapeHtml(decodedBillingName) : '-';
-  const safeBillingEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_email || client.email || '')) || '-';
+  const safeBillingEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_email || client.email || '')) || '';
 
   // Batch update all client detail fields (except status and emails which need copy button)
   // For business clients: primary = company name, secondary = contact name
@@ -910,7 +910,7 @@ function renderClientInvoices(invoices: InvoiceResponse[], container: HTMLElemen
 
   container.innerHTML = invoices
     .map((invoice) => {
-      const invoiceNumber = SanitizationUtils.escapeHtml(invoice.invoice_number || '-');
+      const invoiceNumber = SanitizationUtils.escapeHtml(invoice.invoice_number || '');
       const amountValue = typeof invoice.amount_total === 'string' ? parseFloat(invoice.amount_total) : (invoice.amount_total || 0);
       const amount = formatCurrency(amountValue);
       const date = formatDate(invoice.created_at || invoice.due_date);

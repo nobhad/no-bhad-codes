@@ -1345,7 +1345,7 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
         const duration = formatDuration(session.total_time_on_site || 0);
         const location = session.city && session.country
           ? `${session.city}, ${session.country}`
-          : session.country || '-';
+          : session.country || '';
 
         return `
           <tr>

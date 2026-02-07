@@ -587,6 +587,55 @@ When deleting entities, the following cascade behavior applies:
 |Lead|Standalone deletion (no cascade)|
 |Proposal|Standalone deletion (no cascade)|
 
+### Global Tasks
+
+#### GET `/admin/tasks`
+
+Get all tasks across all active projects, ordered by priority and due date.
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Query Parameters:**
+
+|Parameter|Type|Required|Description|
+|---------|----|--------|-----------|
+|`status`|string|No|Filter by status: pending, in_progress, completed, blocked, cancelled|
+|`priority`|string|No|Filter by priority: low, medium, high, urgent|
+|`limit`|integer|No|Max results to return (default: 100, max: 500)|
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "tasks": [
+    {
+      "id": 1,
+      "projectId": 10,
+      "projectName": "Website Redesign",
+      "clientName": "Acme Corp",
+      "title": "Design homepage mockup",
+      "description": "Create initial wireframes",
+      "status": "in_progress",
+      "priority": "high",
+      "assignedTo": "Designer",
+      "dueDate": "2026-02-10",
+      "estimatedHours": 8,
+      "actualHours": 4,
+      "createdAt": "2026-02-01T10:00:00Z",
+      "updatedAt": "2026-02-06T15:30:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+**Notes:**
+
+- Returns tasks from all active projects (not archived, not cancelled/completed)
+- Tasks are ordered by: priority (urgent first), then due date (nulls last), then created date
+- Use per-project endpoint `GET /projects/:id/tasks` for project-specific tasks
+
 ## Client Management Endpoints
 
 ### Client Settings API

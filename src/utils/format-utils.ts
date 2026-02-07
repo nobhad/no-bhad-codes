@@ -41,7 +41,7 @@ export function formatCurrency(amount: number): string {
  * @returns Formatted display string
  */
 export function formatDisplayValue(value: string | undefined | null): string {
-  if (!value || value === '-') return '-';
+  if (!value || value === '-') return '';
 
   // Handle special cases first
   const lowerValue = value.toLowerCase();
@@ -109,7 +109,7 @@ function escapeHtml(text: string): string {
  * @returns HTML-safe string with <br> tags for line breaks
  */
 export function formatTextWithLineBreaks(text: string | undefined | null): string {
-  if (!text) return '-';
+  if (!text) return '';
   // Escape HTML first to prevent XSS, then convert newlines to <br>
   return escapeHtml(text).replace(/\n/g, '<br>');
 }
@@ -158,11 +158,11 @@ export function formatProjectType(type: string | undefined | null): string {
  * @returns Formatted date string (e.g., "01/28/2026")
  */
 export function formatDate(dateString: string | Date | undefined | null): string {
-  if (!dateString) return '-';
+  if (!dateString) return '';
 
   try {
     const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-    if (isNaN(date.getTime())) return '-';
+    if (isNaN(date.getTime())) return '';
 
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -170,7 +170,7 @@ export function formatDate(dateString: string | Date | undefined | null): string
 
     return `${month}/${day}/${year}`;
   } catch {
-    return '-';
+    return '';
   }
 }
 
@@ -180,11 +180,11 @@ export function formatDate(dateString: string | Date | undefined | null): string
  * @returns Formatted date and time string (e.g., "01/28/2026, 2:30 PM")
  */
 export function formatDateTime(dateString: string | Date | undefined | null): string {
-  if (!dateString) return '-';
+  if (!dateString) return '';
 
   try {
     const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-    if (isNaN(date.getTime())) return '-';
+    if (isNaN(date.getTime())) return '';
 
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -198,7 +198,7 @@ export function formatDateTime(dateString: string | Date | undefined | null): st
     });
     return `${datePart}, ${timePart}`;
   } catch {
-    return '-';
+    return '';
   }
 }
 
@@ -238,11 +238,11 @@ export function formatDateForInput(dateString: string | undefined | null): strin
  * @returns Relative time string
  */
 export function formatRelativeTime(dateString: string | Date | undefined | null): string {
-  if (!dateString) return '-';
+  if (!dateString) return '';
 
   try {
     const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-    if (isNaN(date.getTime())) return '-';
+    if (isNaN(date.getTime())) return '';
 
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -258,6 +258,6 @@ export function formatRelativeTime(dateString: string | Date | undefined | null)
     // More than a week, show actual date
     return formatDate(date);
   } catch {
-    return '-';
+    return '';
   }
 }

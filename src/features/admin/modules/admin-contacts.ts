@@ -209,11 +209,11 @@ function renderContactsTable(
 
   paginatedSubmissions.forEach((submission) => {
     const date = formatDate(submission.created_at);
-    const decodedName = SanitizationUtils.decodeHtmlEntities(submission.name || '-');
+    const decodedName = SanitizationUtils.decodeHtmlEntities(submission.name || '');
     const decodedCompany = SanitizationUtils.decodeHtmlEntities(submission.company || '');
-    const decodedMessage = SanitizationUtils.decodeHtmlEntities(submission.message || '-');
+    const decodedMessage = SanitizationUtils.decodeHtmlEntities(submission.message || '');
     const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedName));
-    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || '-'));
+    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || ''));
     const safeCompany = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
     const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);
     const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
@@ -302,11 +302,11 @@ export function showContactDetails(contactId: number): void {
   const overlay = getElement('details-overlay');
   if (!detailsPanel) return;
 
-  const decodedName = SanitizationUtils.decodeHtmlEntities(contact.name || '-');
+  const decodedName = SanitizationUtils.decodeHtmlEntities(contact.name || '');
   const decodedCompany = SanitizationUtils.decodeHtmlEntities(contact.company || '');
-  const decodedMessage = SanitizationUtils.decodeHtmlEntities(contact.message || '-');
+  const decodedMessage = SanitizationUtils.decodeHtmlEntities(contact.message || '');
   const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedName));
-  const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || '-'));
+  const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || ''));
   const safeCompany = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
   const safePhone = contact.phone ? SanitizationUtils.formatPhone(contact.phone) : '';
   const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);

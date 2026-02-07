@@ -22,6 +22,7 @@ import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/upload
 import { auditLogger } from '../services/audit-logger.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
 import { softDeleteService, SoftDeleteEntityType } from '../services/soft-delete-service.js';
+import { projectService } from '../services/project-service.js';
 
 const router = express.Router();
 
@@ -258,6 +259,70 @@ router.get(
       res.status(500).json({
         success: false,
         error: 'Failed to fetch sidebar counts'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/admin/tasks:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: Get all tasks across all projects
+ *     description: Returns tasks from all active projects, ordered by priority and due date
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, in_progress, completed, blocked, cancelled]
+ *         description: Filter by task status
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [low, medium, high, urgent]
+ *         description: Filter by priority
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *         description: Max number of tasks to return
+ *     responses:
+ *       200:
+ *         description: Tasks retrieved successfully
+ *       403:
+ *         description: Admin access required
+ */
+router.get(
+  '/tasks',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const { status, priority, limit } = req.query;
+
+      const tasks = await projectService.getAllTasks({
+        status: status ? String(status) : undefined,
+        priority: priority ? String(priority) : undefined,
+        limit: limit ? Math.min(parseInt(String(limit), 10) || 100, 500) : 100
+      });
+
+      res.json({
+        success: true,
+        tasks,
+        count: tasks.length
+      });
+    } catch (error) {
+      console.error('Error fetching global tasks:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch tasks'
       });
     }
   })

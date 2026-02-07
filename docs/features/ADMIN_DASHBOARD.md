@@ -1,6 +1,6 @@
 # Admin Dashboard
 
-**Last Updated:** February 2, 2026
+**Last Updated:** February 6, 2026
 
 ## Table of Contents
 
@@ -29,6 +29,7 @@ The Admin Dashboard provides comprehensive administrative capabilities for manag
 - [x] Client invitation flow with magic link password setup
 - [x] Full project detail view (mirrors client portal)
 - [x] Client messaging system
+- [x] Global tasks Kanban (tasks across all projects)
 - [x] Analytics and visitor tracking
 - [x] System information
 
@@ -76,6 +77,7 @@ src/features/admin/modules/       # Extracted modules
 ├── admin-contacts.ts             # Contact form submissions
 ├── admin-document-requests.ts    # Document requests
 ├── admin-files.ts                # File management
+├── admin-global-tasks.ts         # Global tasks Kanban (all projects)
 ├── admin-knowledge-base.ts       # Knowledge base (KB)
 ├── admin-leads.ts                # Leads management
 ├── admin-messaging.ts            # Messaging system
@@ -125,10 +127,16 @@ The admin dashboard uses a sidebar navigation system with the following tabs:
 |Overview|`btn-overview`|`tab-overview`|Quick stats and recent leads|
 |Leads|`btn-leads`|`tab-leads`|Lead and contact management|
 |Projects|`btn-projects`|`tab-projects`|Active projects management|
+|Clients|`btn-clients`|`tab-clients`|Client management|
+|Invoices|`btn-invoices`|`tab-invoices`|Invoice management|
+|Tasks|`btn-tasks`|`tab-tasks`|Global tasks Kanban across all projects|
 |Messages|`btn-messages`|`tab-messages`|Client communication|
+|Documents|`btn-document-requests`|`tab-document-requests`|Document requests|
+|Knowledge|`btn-knowledge-base`|`tab-knowledge-base`|Knowledge base articles|
 |Analytics|`btn-analytics`|`tab-analytics`|Visitor and page analytics|
 |System|`btn-system`|`tab-system`|System information|
 |Project Detail|-|`tab-project-detail`|Individual project view (hidden from sidebar)|
+|Client Detail|-|`tab-client-detail`|Individual client view (hidden from sidebar)|
 
 ### Tab Switching
 

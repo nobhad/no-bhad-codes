@@ -153,7 +153,7 @@ function renderArticlesTable(articles: KBArticle[], _ctx: AdminDashboardContext)
       (a) => `
     <tr>
       <td>${escapeHtml(a.title)}</td>
-      <td>${escapeHtml(a.category_name || '-')}</td>
+      <td>${escapeHtml(a.category_name || '')}</td>
       <td><code>${escapeHtml(a.slug)}</code></td>
       <td>${a.is_featured ? 'Yes' : 'No'}</td>
       <td>${a.is_published ? 'Yes' : 'No'}</td>

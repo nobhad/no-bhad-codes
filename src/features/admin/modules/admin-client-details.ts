@@ -734,7 +734,7 @@ function renderCRMDetails(): void {
   // Populate CRM field values
   const setValue = (id: string, value: string | null | undefined): void => {
     const el = document.getElementById(id);
-    if (el) el.textContent = value || '-';
+    if (el) el.textContent = value || '';
   };
 
   if (clientCRMData) {
