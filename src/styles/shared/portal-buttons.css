@@ -166,9 +166,11 @@
 /* ============================================
  * SIDEBAR NAV - LINK STYLE (NOT BUTTONS)
  * ============================================
- * Sidebar items are styled as links in both expanded and collapsed states:
- * no background, no shadow, no border. Icon + text; hover/active = primary color.
- * Keeps collapsed "clean" look when expanded.
+ * NOTE: Sidebar uses NON-STANDARD styling intentionally.
+ * Items are styled as links (no background, no shadow, no border).
+ * Icon + text; hover/active = primary color only.
+ * This differs from standard button styles - DO NOT STANDARDIZE.
+ * The compact padding and link-style appearance is by design.
  */
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn {

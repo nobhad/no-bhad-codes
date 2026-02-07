@@ -2,6 +2,11 @@
    SHARED PORTAL MESSAGES
    @file src/styles/shared/portal-messages.css
    Single source of truth for admin and client portals
+
+   NOTE: This component uses non-standard styling intentionally.
+   The Messages UI has a unique two-panel layout with light backgrounds
+   that differs from the standard portal dark theme. Do not standardize
+   to match other portal components - this design is intentional.
    ===================================================== */
 
 /* =====================================================
@@ -82,7 +87,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
   display: flex;
   flex-direction: column;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   background: var(--color-neutral-200);
   overflow: hidden;
 }
@@ -201,7 +206,7 @@
   display: flex;
   flex-direction: column;
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   background: var(--color-neutral-200);
   overflow: hidden;
   box-shadow: var(--shadow-panel);

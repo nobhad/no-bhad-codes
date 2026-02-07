@@ -43,7 +43,7 @@
   display: flex;
   flex-direction: column;
   background: var(--portal-bg-darker, var(--color-neutral-100, #fff));
-  border-radius: var(--border-radius-card, 8px);
+  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-modal, 0 8px 24px rgba(0, 0, 0, 0.4));
   animation: slideUp 0.2s ease;
 }
@@ -89,7 +89,7 @@
 .admin-modal {
   background: var(--portal-bg-darker);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-modal);
   width: 100%;
   max-width: var(--modal-width-md, 560px);

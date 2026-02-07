@@ -126,7 +126,7 @@
 .chart-container {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
 }
 
@@ -168,7 +168,7 @@
 .metric-group {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   margin-top: var(--space-2);
 }
@@ -317,7 +317,7 @@
 .analytics-breakdown-block {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
@@ -354,7 +354,7 @@
 .analytics-section {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   box-shadow: var(--shadow-panel);
 }
@@ -422,7 +422,7 @@
   padding: var(--space-4);
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-card);
   color: var(--portal-text-light);
   font-family: inherit;

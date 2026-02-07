@@ -71,7 +71,8 @@ export function createViewToggle(config: ViewToggleConfig): HTMLDivElement {
     }
 
     button.addEventListener('click', () => {
-      if (opt.value === value) return;
+      // Check if already active (don't use closure value - it's stale)
+      if (button.classList.contains('active')) return;
       root.querySelectorAll('button').forEach((btn) => btn.classList.remove('active'));
       button.classList.add('active');
       onChange(opt.value);

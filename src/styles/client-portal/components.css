@@ -13,7 +13,7 @@
 .portal-panel {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-panel);
 }
 

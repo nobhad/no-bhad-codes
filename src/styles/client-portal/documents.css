@@ -13,7 +13,7 @@
 [data-page="client-portal"] .documents-detail-wrap {
   padding: var(--space-2);
   background: var(--portal-bg-dark);
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
 }
 
 [data-page="client-portal"] .documents-list {

@@ -23,7 +23,7 @@
 [data-page="client-portal"] .settings-section {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
@@ -322,7 +322,7 @@
 .notifications-view-section {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);

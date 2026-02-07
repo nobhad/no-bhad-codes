@@ -345,17 +345,6 @@ Each table's columns listed in exact left-to-right display order.
 | `null`, `undefined`, `''` | Empty cell (no content) |
 | Valid value | Formatted value |
 
-**Implementation:**
-
-- `formatDisplayValue()` returns `''` for empty values
-- `formatDate()` and `formatDateTime()` return `''` for null/invalid dates
-- All `|| '-'` fallbacks have been replaced with `|| ''`
-
-**Files affected:**
-
-- `src/utils/format-utils.ts` - Core formatting functions
-- All admin module files in `src/features/admin/modules/`
-
 ---
 
 ## Architecture Overview

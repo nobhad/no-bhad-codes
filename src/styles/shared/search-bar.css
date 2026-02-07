@@ -39,7 +39,7 @@ input.search-bar-input {
   padding-right: 2rem;
   background: var(--portal-bg-dark, var(--color-neutral-200));
   border: 1px solid var(--portal-border-light, var(--portal-border, rgba(0,0,0,0.1)));
-  border-radius: var(--portal-radius-lg, var(--border-radius-card, 12px));
+  border-radius: var(--portal-radius-lg);
   color: var(--portal-text, var(--portal-text-primary, inherit));
   font-size: 0.875rem;
   height: 40px;
