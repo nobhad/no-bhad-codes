@@ -164,3 +164,26 @@
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
 }
+
+/* =====================================================
+   MOBILE RESPONSIVE
+   ===================================================== */
+@media (max-width: 479px) {
+  /* Reset edge padding on mobile for full-width cards */
+  [data-page="admin"] #tab-workflows .admin-table th:first-child,
+  [data-page="admin"] #tab-workflows .admin-table td:first-child,
+  [data-page="admin"] #tab-workflows .admin-table th:last-child,
+  [data-page="admin"] #tab-workflows .admin-table td:last-child {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Code cells - wrap naturally, take full width of container */
+  [data-page="admin"] #tab-workflows code {
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: normal;
+    white-space: normal;
+  }
+}
