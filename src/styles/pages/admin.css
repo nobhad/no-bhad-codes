@@ -2144,6 +2144,21 @@ body.modal-open .dashboard-content {
     padding: var(--space-0-5) 0;
   }
 
+  /* Combined type/budget cell - inline on mobile */
+  [data-page="admin"] .admin-table tbody td.type-budget-cell {
+    display: block;
+    width: auto;
+    padding: var(--space-0-5) 0;
+  }
+
+  [data-page="admin"] .admin-table tbody td.type-budget-cell .type-value {
+    font-size: 0.85rem;
+  }
+
+  [data-page="admin"] .admin-table tbody td.type-budget-cell .budget-value {
+    font-size: 0.8rem;
+  }
+
   /* Message cell (contacts table) - full width, wrap text */
   [data-page="admin"] .admin-table tbody td.message-cell {
     display: block;
@@ -2369,6 +2384,21 @@ body.modal-open .dashboard-content {
   width: 1%;
   white-space: nowrap;
   padding-right: var(--space-8);
+}
+
+/* Responsive stacked elements - hidden by default, shown at smaller breakpoints */
+.admin-table .budget-stacked,
+.admin-table .email-stacked,
+.admin-table .date-stacked {
+  display: none;
+}
+
+/* When stacked elements are shown, style them */
+.admin-table .budget-stacked,
+.admin-table .email-stacked,
+.admin-table .date-stacked {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
 }
 
 /* Count columns: centered */
@@ -3223,6 +3253,55 @@ body.modal-open .dashboard-content {
 }
 
 /* ================================================
+   TABLE COLUMN STACKING - Prevent horizontal scroll
+   Kicks in at 1280px before scroll becomes necessary
+   ================================================ */
+@media (max-width: 1280px) {
+  /* Leads table: hide Budget column, show stacked budget in Type cell */
+  .leads-table th.budget-col,
+  .leads-table td.budget-cell {
+    display: none;
+  }
+
+  .leads-table .type-cell .budget-stacked {
+    display: block;
+  }
+
+  /* Projects table: hide Budget column, show stacked budget in Type cell */
+  .projects-table th.budget-col,
+  .projects-table td.budget-cell {
+    display: none;
+  }
+
+  .projects-table .type-cell .budget-stacked {
+    display: block;
+  }
+
+  /* Contacts table: hide Email column, show stacked email in Contact cell */
+  .contacts-table th.email-col,
+  .contacts-table td.email-cell {
+    display: none;
+  }
+
+  .contacts-table .contact-cell .email-stacked {
+    display: block;
+  }
+}
+
+/* Additional column stacking at narrower widths */
+@media (max-width: 1100px) {
+  /* Leads table: hide Date column, show stacked date above Status */
+  .leads-table th.date-col,
+  .leads-table td.date-cell {
+    display: none;
+  }
+
+  .leads-table .status-cell .date-stacked {
+    display: block;
+  }
+}
+
+/* ================================================
    LAPTOP/TABLET TABLE RESPONSIVENESS
    Tighter spacing and hide less critical columns
    ================================================ */
@@ -3251,12 +3330,6 @@ body.modal-open .dashboard-content {
   /* Clients table: hide Last Active (7th) column */
   .clients-table th:nth-child(7),
   .clients-table td:nth-child(7) {
-    display: none;
-  }
-
-  /* Leads table: hide Email (4th) column */
-  .leads-table th:nth-child(4),
-  .leads-table td:nth-child(4) {
     display: none;
   }
 

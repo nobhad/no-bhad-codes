@@ -24,8 +24,9 @@ The No Bhad Codes system is a comprehensive client management and project tracki
 - **Project Management**: Track projects from intake to completion
 - **Invoice Generation**: Automated invoice creation from client intakes and project data
 - **File Upload System**: Secure file handling for avatars, project files, and attachments
-- **Client Portal**: Dedicated interface for client interactions
-- **Admin Dashboard**: Comprehensive management tools for business operations
+- **The Backend (Portal System)**:
+  - **Client Portal**: Dedicated interface for client interactions
+  - **Admin Dashboard**: Comprehensive management tools for business operations
 
 ### Technology Stack
 

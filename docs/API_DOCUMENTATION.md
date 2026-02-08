@@ -414,6 +414,53 @@ Export audit logs with filters and pagination (admin only).
 }
 ```
 
+### GET `/admin/tasks`
+
+Get all tasks across all active projects, ordered by priority and due date.
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `status` | string | Filter by status (pending, in_progress, completed, blocked, cancelled) |
+| `priority` | string | Filter by priority (low, medium, high, urgent) |
+| `limit` | number | Max tasks to return (default 100, max 500) |
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "tasks": [
+    {
+      "id": 1,
+      "projectId": 42,
+      "projectName": "Website Redesign",
+      "clientName": "Acme Corp",
+      "title": "Design homepage mockup",
+      "description": "Create initial homepage design",
+      "status": "in_progress",
+      "priority": "high",
+      "assignedTo": "admin",
+      "dueDate": "2026-02-15",
+      "estimatedHours": 8,
+      "actualHours": 4,
+      "createdAt": "2026-02-01T10:00:00Z",
+      "updatedAt": "2026-02-08T14:30:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+**Notes:**
+
+- Returns tasks from all active (non-archived) projects
+- Tasks are sorted by: priority (urgent first), then due date (earliest first)
+- Used by the Global Tasks Kanban board on the Admin Dashboard
+
 ### POST `/admin/leads/:id/invite`
 
 Invite a lead to create a client portal account.

@@ -1,6 +1,6 @@
 # Complete Table Audit - Portal
 
-**Last Updated:** 2026-02-07
+**Last Updated:** 2026-02-08
 
 ## Table of Contents
 
@@ -753,6 +753,7 @@ div.table-filter-controls
 - Click toggles direction: `desc` -> `asc` -> `desc`
 - Sort types: `string` (localeCompare), `number` (parseFloat), `date` (timestamp)
 - Status sorting uses `statusOptions` order for priority ranking
+- **State Storage:** Sort state stored in DOM data attributes (`thead.dataset.sortColumn`, `thead.dataset.sortDirection`) to avoid stale closure issues - click handlers read fresh values on each click
 
 #### State Persistence
 

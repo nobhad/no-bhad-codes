@@ -40,6 +40,40 @@ This file tracks active development work and TODOs. Completed items are moved to
   - Documented migration progress
   - Added verification commands
 
+### Backend Documentation Update
+
+- **"The Backend" Terminology Added** - COMPLETE
+  - "The Backend" now refers to the entire portal system (both Admin Dashboard AND Client Portal)
+  - Updated `docs/features/ADMIN_DASHBOARD.md` - Added "Part of The Backend" note
+  - Updated `docs/features/CLIENT_PORTAL.md` - Added "Part of The Backend" note
+  - Updated `docs/README.md` - Reorganized as "The Backend (Portal System)" section
+  - Updated `docs/ARCHITECTURE.md` - Grouped portals under "The Backend"
+  - Updated `docs/SYSTEM_DOCUMENTATION.md` - Grouped portals under "The Backend"
+
+### Global Tasks Kanban Feature
+
+- **Backend API** - COMPLETE
+  - `GET /api/admin/tasks` endpoint in `server/routes/admin.ts`
+  - `getAllTasks()` method in `server/services/project-service.ts`
+  - Returns tasks from all active projects, sorted by priority and due date
+
+- **Frontend Module** - COMPLETE
+  - `src/features/admin/modules/admin-global-tasks.ts`
+  - Kanban board with drag-and-drop status updates
+  - List view with sortable table
+  - View toggle between Kanban/List
+
+- **Dashboard Integration** - COMPLETE
+  - Sidebar button in `admin/index.html`
+  - Tab content container
+  - Module loader in `src/features/admin/modules/index.ts`
+  - Switch case in `admin-dashboard.ts`
+
+- **Documentation** - COMPLETE
+  - `docs/features/TASKS.md` created
+  - `docs/API_DOCUMENTATION.md` updated with endpoint
+  - Plan file archived (feature complete)
+
 ---
 
 ## ✅ Completed - February 7, 2026
@@ -294,6 +328,31 @@ This file tracks active development work and TODOs. Completed items are moved to
   - Fixed spacing for emails with copy icons in lead details panel
   - File: `src/styles/admin/leads-pipeline.css`
 
+### Responsive Table Column Stacking
+
+- **Column Stacking at Breakpoints** - COMPLETE
+  - Tables progressively stack columns at smaller viewports to prevent horizontal scroll
+  - Stacked data is duplicated in HTML (hidden by default, shown via CSS at breakpoints)
+  - Breakpoints:
+    - `1280px`: Leads/Projects hide Budget column, stack under Type
+    - `1280px`: Contacts hide Email column, stack under Contact
+    - `1100px`: Leads hide Date column, stack above Status
+  - Files: `admin.css`, `admin-leads.ts`, `admin-contacts.ts`, `admin-projects.ts`
+
+- **Sortable Column Labels Fixed** - COMPLETE
+  - Updated filter configs so sortable column labels match header text
+  - Leads: "Project Type" → "Type", "Contact" → "Lead"
+  - Contacts: "Name" → "Contact"
+  - Projects: "Project Name" → "Project", "Start Date" → "Start"
+  - Clients: "Name" → "Client"
+  - File: `src/utils/table-filter.ts`
+
+- **Table Sorting Infinite Click Fix** - COMPLETE
+  - Fixed bug where table sorting only worked once then stopped
+  - Root cause: Click handler captured stale `state` object in closure
+  - Solution: Store sort state in DOM data attributes on `thead`, read fresh values on each click
+  - File: `src/utils/table-filter.ts`
+
 ### Bulk Actions & Table Improvements
 
 - **Bulk Action Icon Buttons** - COMPLETE
@@ -379,22 +438,20 @@ After completing any task:
 #### Feature Docs (`docs/features/`)
 
 - [x] Audit existing feature docs for completeness (Feb 7)
-- [ ] Create missing feature docs
+- [x] Create missing feature docs (Feb 8) - All 6 missing docs created
 - [ ] Update outdated feature docs
 - [x] Cross-reference with actual implemented features (Feb 7)
 
-**Audit Findings (Feb 7):**
+**Status (Feb 8):** All 25 feature docs now complete.
 
-19 feature docs exist. The following modules have no feature documentation:
+**All feature docs now complete (Feb 8):**
 
-| Missing Doc | Module File | Notes |
-|-------------|-------------|-------|
-| TIME_TRACKING.md | `admin-time-tracking.ts` | Time entries for projects |
-| DOCUMENT_REQUESTS.md | `admin-document-requests.ts` | Client document collection |
-| KNOWLEDGE_BASE.md | `admin-knowledge-base.ts` | Help articles/KB system |
-| TASKS.md | `admin-tasks.ts`, `admin-global-tasks.ts` | Project and global tasks |
-| CONTACTS.md | `admin-contacts.ts` | Contact form submissions |
-| WORKFLOWS.md | `admin-workflows.ts` | Triggers and automations |
+- `TASKS.md` - Project and global tasks (Kanban + List views)
+- `TIME_TRACKING.md` - Time entries for projects
+- `DOCUMENT_REQUESTS.md` - Client document collection
+- `KNOWLEDGE_BASE.md` - Help articles/KB system
+- `CONTACTS.md` - Contact form submissions
+- `WORKFLOWS.md` - Approval workflows and event triggers
 
 **API Documentation:** Complete - all endpoints documented in `API_DOCUMENTATION.md`
 
@@ -563,7 +620,7 @@ Already mounts routers at both `/api/` and `/api/v1/`.
 - [ ] Overview stats display correctly
 - [ ] Upcoming tasks displays on dashboard
 - [ ] Recent activity shows leads
-- [ ] All sidebar tabs load (Tasks first after Dashboard)
+- [ ] All sidebar tabs load (including Global Tasks tab)
 - [ ] Project list displays
 - [ ] Project detail opens
 - [ ] Client list displays

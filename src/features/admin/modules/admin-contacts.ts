@@ -234,6 +234,7 @@ function renderContactsTable(
       <td class="identity-cell contact-cell">
         <span class="identity-name">${safeName}</span>
         ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
+        <span class="email-stacked">${safeEmail}</span>
       </td>
       <td class="email-cell">${safeEmail}</td>
       <td class="message-cell" title="${safeTitleMessage}">${truncatedMessage}</td>

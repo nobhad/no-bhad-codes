@@ -488,6 +488,10 @@ export function createSortableHeaders(
   const thead = table.querySelector('thead');
   if (!thead) return;
 
+  // Store current sort state on the thead element so click handlers can read fresh values
+  thead.dataset.sortColumn = state.sortColumn || '';
+  thead.dataset.sortDirection = state.sortDirection || 'desc';
+
   const headerCells = thead.querySelectorAll('th');
 
   headerCells.forEach((th, _index) => {
@@ -508,20 +512,33 @@ export function createSortableHeaders(
         th.appendChild(icon);
       }
 
-      // Click handler
+      // Click handler - reads fresh state from DOM data attributes
       th.addEventListener('click', () => {
-        const currentDirection = state.sortColumn === column.key ? state.sortDirection : 'desc';
+        // Read current state from DOM, not from closure
+        const currentSortColumn = thead.dataset.sortColumn || '';
+        const currentSortDirection = thead.dataset.sortDirection as 'asc' | 'desc' || 'desc';
+
+        const currentDirection = currentSortColumn === column.key ? currentSortDirection : 'desc';
         const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
 
+        // Update DOM state
+        thead.dataset.sortColumn = column.key;
+        thead.dataset.sortDirection = newDirection;
+
         // Update icons on all headers
+        const freshState: FilterState = {
+          searchTerm: '',
+          statusFilters: [],
+          dateStart: '',
+          dateEnd: '',
+          sortColumn: column.key,
+          sortDirection: newDirection
+        };
+
         headerCells.forEach(cell => {
           const sortIcon = cell.querySelector('.sort-icon');
           if (sortIcon) {
-            sortIcon.innerHTML = getSortIcon(cell.dataset.sort || '', {
-              ...state,
-              sortColumn: column.key,
-              sortDirection: newDirection
-            });
+            sortIcon.innerHTML = getSortIcon(cell.dataset.sort || '', freshState);
           }
         });
 
@@ -702,9 +719,9 @@ export const LEADS_FILTER_CONFIG: TableFilterConfig = {
   dateField: 'created_at',
   sortableColumns: [
     { key: 'created_at', label: 'Date', type: 'date' },
-    { key: 'contact_name', label: 'Contact', type: 'string' },
+    { key: 'contact_name', label: 'Lead', type: 'string' },
     { key: 'company_name', label: 'Company', type: 'string' },
-    { key: 'project_type', label: 'Project Type', type: 'string' },
+    { key: 'project_type', label: 'Type', type: 'string' },
     { key: 'budget_range', label: 'Budget', type: 'string' },
     { key: 'status', label: 'Status', type: 'string' }
   ],
@@ -724,7 +741,7 @@ export const CONTACTS_FILTER_CONFIG: TableFilterConfig = {
   dateField: 'created_at',
   sortableColumns: [
     { key: 'created_at', label: 'Date', type: 'date' },
-    { key: 'name', label: 'Name', type: 'string' },
+    { key: 'name', label: 'Contact', type: 'string' },
     { key: 'email', label: 'Email', type: 'string' },
     { key: 'company', label: 'Company', type: 'string' },
     { key: 'status', label: 'Status', type: 'string' }
@@ -745,12 +762,12 @@ export const PROJECTS_FILTER_CONFIG: TableFilterConfig = {
   ],
   dateField: 'created_at',
   sortableColumns: [
-    { key: 'project_name', label: 'Project Name', type: 'string' },
+    { key: 'project_name', label: 'Project', type: 'string' },
     { key: 'contact_name', label: 'Client', type: 'string' },
     { key: 'project_type', label: 'Type', type: 'string' },
     { key: 'budget_range', label: 'Budget', type: 'string' },
     { key: 'timeline', label: 'Timeline', type: 'string' },
-    { key: 'start_date', label: 'Start Date', type: 'date' },
+    { key: 'start_date', label: 'Start', type: 'date' },
     { key: 'end_date', label: 'End Date', type: 'date' },
     { key: 'status', label: 'Status', type: 'string' }
   ],
@@ -767,7 +784,7 @@ export const CLIENTS_FILTER_CONFIG: TableFilterConfig = {
   ],
   dateField: 'created_at',
   sortableColumns: [
-    { key: 'name', label: 'Name', type: 'string' },
+    { key: 'name', label: 'Client', type: 'string' },
     { key: 'client_type', label: 'Type', type: 'string' },
     { key: 'email', label: 'Email', type: 'string' },
     { key: 'status', label: 'Status', type: 'string' },

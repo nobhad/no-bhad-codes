@@ -429,7 +429,10 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
         <span class="identity-name">${safeName}</span>
         ${(safeContact || safeCompany) ? `<span class="identity-contact">${safeContact}${safeCompany ? ` - ${safeCompany}` : ''}</span>` : ''}
       </td>
-      <td class="type-cell">${formatProjectType(project.project_type)}</td>
+      <td class="type-cell">
+        <span class="type-value">${formatProjectType(project.project_type)}</span>
+        <span class="budget-stacked">${formatDisplayValue(project.budget_range)}</span>
+      </td>
       <td class="budget-cell">${formatDisplayValue(project.budget_range)}</td>
       <td class="timeline-cell">${formatDisplayValue(project.timeline)}</td>
       <td class="status-cell"></td>

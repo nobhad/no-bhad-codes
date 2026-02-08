@@ -24,8 +24,9 @@ Enterprise-Level Client Management System with Portfolio
 
 **No Bhad Codes** is a sophisticated client management system built with modern TypeScript, featuring:
 
-- **Client Portal** - Project tracking, file sharing, communication
-- **Admin Dashboard** - Client management, analytics, performance monitoring
+- **The Backend (Portal System):**
+  - **Client Portal** - Project tracking, file sharing, communication
+  - **Admin Dashboard** - Client management, analytics, performance monitoring
 - **Portfolio Showcase** - Project gallery with interactive business card
 - **Enterprise Architecture** - Dependency injection, modular design, scalable structure
 
