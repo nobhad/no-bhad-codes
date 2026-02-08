@@ -653,12 +653,13 @@ router.post(
     }
 
     const uploadedFiles = [];
+    const label = req.body.label || null;
 
     for (const file of files) {
       const result = await db.run(
         `
-      INSERT INTO files (project_id, filename, original_filename, file_path, file_size, mime_type, uploaded_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO files (project_id, filename, original_filename, file_path, file_size, mime_type, uploaded_by, description)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `,
         [
           projectId,
@@ -667,7 +668,8 @@ router.post(
           file.path,
           file.size,
           file.mimetype,
-          req.user!.type
+          req.user!.type,
+          label
         ]
       );
 
@@ -676,7 +678,8 @@ router.post(
         filename: file.filename,
         originalName: file.originalname,
         size: file.size,
-        mimeType: file.mimetype
+        mimeType: file.mimetype,
+        description: label
       });
     }
 

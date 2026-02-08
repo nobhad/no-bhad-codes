@@ -84,9 +84,12 @@
   border-color: var(--portal-border-light);
 }
 
-[data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+/* Focus state (closed) - border color change, no box-shadow for consistency with other dropdowns */
+[data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:focus,
+[data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:focus-visible {
+  outline: none !important;
+  border-color: var(--color-primary);
+  box-shadow: none !important;
 }
 
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger svg {

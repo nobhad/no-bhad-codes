@@ -14,6 +14,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { createViewToggle } from '../../../components/view-toggle';
+import { createModalDropdown } from '../../../components/modal-dropdown';
 
 // View toggle icons
 const BOARD_ICON =
@@ -493,57 +494,145 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
 }
 
 /**
- * Show create task modal
+ * Show create task modal with custom form components
  */
 export async function showCreateTaskModal(): Promise<void> {
-  const result = await multiPromptDialog({
-    title: 'Create Task',
-    fields: [
-      { name: 'title', label: 'Task Title', type: 'text', required: true, placeholder: 'Enter task title' },
-      { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Task description (optional)' },
-      {
-        name: 'priority',
-        label: 'Priority',
-        type: 'select',
-        required: true,
-        defaultValue: 'medium',
-        options: [
-          { value: 'low', label: 'Low' },
-          { value: 'medium', label: 'Medium' },
-          { value: 'high', label: 'High' },
-          { value: 'urgent', label: 'Urgent' }
-        ]
-      },
-      { name: 'dueDate', label: 'Due Date', type: 'date' },
-      { name: 'estimatedHours', label: 'Estimated Hours', type: 'number', placeholder: '0' }
-    ],
-    confirmText: 'Create Task',
-    cancelText: 'Cancel'
+  if (!currentProjectId) {
+    alertError('No project selected');
+    return;
+  }
+
+  // Create modal overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  overlay.id = 'create-task-modal';
+
+  // Priority options for custom dropdown
+  const priorityOptions = [
+    { value: 'low', label: 'Low' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'high', label: 'High' },
+    { value: 'urgent', label: 'Urgent' }
+  ];
+
+  const closeModal = (): void => {
+    overlay.classList.add('closing');
+    setTimeout(() => overlay.remove(), 150);
+  };
+
+  const submitTask = async (): Promise<void> => {
+    const titleInput = overlay.querySelector('#task-title') as HTMLInputElement;
+    const descriptionInput = overlay.querySelector('#task-description') as HTMLTextAreaElement;
+    const dueDateInput = overlay.querySelector('#task-due-date') as HTMLInputElement;
+    const estimatedHoursInput = overlay.querySelector('#task-estimated-hours') as HTMLInputElement;
+    const priorityMount = overlay.querySelector('#task-priority-mount');
+    const selectedPriority = priorityMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') || 'medium';
+
+    const title = titleInput?.value?.trim();
+    if (!title) {
+      alertError('Please enter a task title');
+      titleInput?.focus();
+      return;
+    }
+
+    closeModal();
+
+    try {
+      const response = await apiPost(`/api/projects/${currentProjectId}/tasks`, {
+        title,
+        description: descriptionInput?.value?.trim() || null,
+        priority: selectedPriority,
+        status: 'pending',
+        due_date: dueDateInput?.value || null,
+        estimated_hours: estimatedHoursInput?.value ? parseFloat(estimatedHoursInput.value) : null
+      });
+
+      if (response.ok) {
+        alertSuccess('Task created successfully!');
+        await loadTasks();
+        renderCurrentView();
+      } else {
+        alertError('Failed to create task');
+      }
+    } catch (error) {
+      console.error('[AdminTasks] Error creating task:', error);
+      alertError('Error creating task');
+    }
+  };
+
+  // Create modal HTML with mount point for priority dropdown
+  overlay.innerHTML = `
+    <div class="confirm-dialog">
+      <div class="confirm-dialog-header">
+        <h3>Create Task</h3>
+      </div>
+      <div class="confirm-dialog-body">
+        <div class="form-group">
+          <label class="form-label" for="task-title">Task Title <span class="required">*</span></label>
+          <input type="text" id="task-title" class="form-input" placeholder="Enter task title" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="task-description">Description</label>
+          <textarea id="task-description" class="form-input" rows="3" placeholder="Task description (optional)"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Priority <span class="required">*</span></label>
+            <div id="task-priority-mount"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="task-due-date">Due Date</label>
+            <input type="date" id="task-due-date" class="form-input">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="task-estimated-hours">Estimated Hours</label>
+          <input type="number" id="task-estimated-hours" class="form-input" placeholder="0" min="0" step="0.5">
+        </div>
+      </div>
+      <div class="confirm-dialog-footer">
+        <button type="button" class="btn btn-outline" id="task-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="task-submit-btn">Create Task</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Create priority dropdown using createModalDropdown (matches form field styling)
+  const priorityMount = overlay.querySelector('#task-priority-mount');
+  if (priorityMount) {
+    const priorityDropdown = createModalDropdown({
+      options: priorityOptions,
+      currentValue: 'medium',
+      ariaLabelPrefix: 'Priority'
+    });
+    priorityMount.appendChild(priorityDropdown);
+  }
+
+  // Set up button handlers
+  overlay.querySelector('#task-cancel-btn')?.addEventListener('click', closeModal);
+  overlay.querySelector('#task-submit-btn')?.addEventListener('click', submitTask);
+
+  // Close on overlay click
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
   });
 
-  if (!result) return;
-
-  try {
-    const response = await apiPost(`/api/projects/${currentProjectId}/tasks`, {
-      title: result.title,
-      description: result.description || null,
-      priority: result.priority,
-      status: 'pending',
-      due_date: result.dueDate || null,
-      estimated_hours: result.estimatedHours ? parseFloat(result.estimatedHours) : null
-    });
-
-    if (response.ok) {
-      alertSuccess('Task created successfully!');
-      await loadTasks();
-      renderCurrentView();
-    } else {
-      alertError('Failed to create task');
+  // Close on Escape
+  const escHandler = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', escHandler);
     }
-  } catch (error) {
-    console.error('[AdminTasks] Error creating task:', error);
-    alertError('Error creating task');
-  }
+  };
+  document.addEventListener('keydown', escHandler);
+
+  // Focus the title input
+  setTimeout(() => {
+    const titleInput = overlay.querySelector('#task-title') as HTMLInputElement;
+    titleInput?.focus();
+  }, 100);
 }
 
 /**

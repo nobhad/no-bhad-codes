@@ -557,6 +557,213 @@
 }
 
 /* ============================================
+   Files Panel Controls
+   ============================================ */
+
+.files-panel-controls {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+/* ============================================
+   Upload Link Request
+   ============================================ */
+
+.upload-link-request {
+  margin-top: var(--space-1-5);
+  padding-top: var(--space-1-5);
+  border-top: 1px solid var(--portal-border);
+}
+
+.upload-link-request label {
+  display: block;
+  font-size: 0.813rem;
+  color: var(--portal-text-secondary);
+  margin-bottom: var(--space-0-5);
+}
+
+.upload-link-request .form-select {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ============================================
+   Pending Requests List
+   ============================================ */
+
+.pending-requests-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-1);
+}
+
+.pending-requests-list.hidden {
+  display: none;
+}
+
+.pending-request-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-1-5);
+  padding: var(--space-1-5);
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-sm);
+  border: 1px solid var(--portal-border);
+  margin-bottom: var(--space-1);
+  transition: border-color 0.15s ease;
+}
+
+.pending-request-item:hover {
+  border-color: var(--color-primary);
+}
+
+.pending-request-item.priority-urgent {
+  border-left: 3px solid var(--status-cancelled);
+}
+
+.pending-request-item.priority-high {
+  border-left: 3px solid var(--color-warning-500);
+}
+
+.pending-request-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pending-request-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  margin-bottom: var(--space-0-5);
+  flex-wrap: wrap;
+}
+
+.pending-request-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--portal-text-primary);
+}
+
+.pending-request-badge {
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.pending-request-badge.status-requested {
+  background: rgba(0, 175, 240, 0.2);
+  color: var(--color-primary);
+}
+
+.pending-request-badge.status-viewed {
+  background: rgba(var(--color-warning-rgb), 0.2);
+  color: var(--color-warning-500);
+}
+
+.pending-request-badge.status-uploaded {
+  background: rgba(var(--color-success-rgb), 0.2);
+  color: var(--status-active);
+}
+
+.pending-request-badge.required {
+  background: rgba(var(--color-error-rgb), 0.2);
+  color: var(--status-cancelled);
+}
+
+.pending-request-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.75rem;
+  color: var(--portal-text-muted);
+  margin-bottom: var(--space-0-5);
+}
+
+.pending-request-type {
+  text-transform: capitalize;
+}
+
+.pending-request-due.overdue {
+  color: var(--status-cancelled);
+  font-weight: 500;
+}
+
+.pending-request-description {
+  font-size: 0.813rem;
+  color: var(--portal-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.pending-request-actions {
+  display: flex;
+  gap: var(--space-0-5);
+  flex-shrink: 0;
+}
+
+.pending-request-actions .btn {
+  padding: 6px;
+}
+
+.pending-request-actions .btn svg {
+  display: block;
+}
+
+/* ============================================
+   Upload Preview Modal
+   ============================================ */
+
+.upload-files-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: var(--space-1-5);
+}
+
+.upload-file-preview-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  border: 1px solid var(--portal-border);
+}
+
+.upload-file-preview-item .file-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-bg-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--portal-text-secondary);
+  flex-shrink: 0;
+}
+
+.upload-file-preview-item .file-name {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--portal-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-file-preview-item .file-size {
+  font-size: 0.75rem;
+  color: var(--portal-text-muted);
+  flex-shrink: 0;
+}
+
+/* ============================================
    Responsive
    ============================================ */
 
@@ -587,5 +794,21 @@
 
   .file-detail-actions {
     flex-wrap: wrap;
+  }
+
+  .files-panel-controls {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-0-5);
+  }
+
+  .pending-request-item {
+    flex-direction: column;
+  }
+
+  .pending-request-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: var(--space-1);
   }
 }

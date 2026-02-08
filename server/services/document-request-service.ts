@@ -487,6 +487,67 @@ class DocumentRequestService {
     return requests as unknown as DocumentRequest[];
   }
 
+  /**
+   * Get pending document requests for a specific project
+   * Returns requests that are not yet approved or rejected
+   */
+  async getProjectPendingRequests(projectId: number): Promise<DocumentRequest[]> {
+    const db = await getDatabase();
+
+    const requests = await db.all(
+      `SELECT dr.*,
+              COALESCE(c.company_name, c.contact_name) as client_name,
+              f.original_filename as file_name
+       FROM document_requests dr
+       LEFT JOIN clients c ON dr.client_id = c.id
+       LEFT JOIN files f ON dr.file_id = f.id
+       WHERE dr.project_id = ?
+         AND dr.status NOT IN ('approved', 'rejected')
+       ORDER BY
+         CASE dr.priority
+           WHEN 'urgent' THEN 1
+           WHEN 'high' THEN 2
+           WHEN 'normal' THEN 3
+           WHEN 'low' THEN 4
+         END,
+         CASE WHEN dr.due_date IS NULL THEN 1 ELSE 0 END,
+         dr.due_date ASC,
+         dr.created_at DESC`,
+      [projectId]
+    );
+
+    return requests as unknown as DocumentRequest[];
+  }
+
+  /**
+   * Get unfulfilled pending requests for a client (for upload selection)
+   * Returns requests with status 'requested' or 'viewed'
+   */
+  async getClientPendingRequests(clientId: number): Promise<DocumentRequest[]> {
+    const db = await getDatabase();
+
+    const requests = await db.all(
+      `SELECT dr.*,
+              p.project_name as project_name
+       FROM document_requests dr
+       LEFT JOIN projects p ON dr.project_id = p.id
+       WHERE dr.client_id = ?
+         AND dr.status IN ('requested', 'viewed')
+       ORDER BY
+         CASE dr.priority
+           WHEN 'urgent' THEN 1
+           WHEN 'high' THEN 2
+           WHEN 'normal' THEN 3
+           WHEN 'low' THEN 4
+         END,
+         CASE WHEN dr.due_date IS NULL THEN 1 ELSE 0 END,
+         dr.due_date ASC`,
+      [clientId]
+    );
+
+    return requests as unknown as DocumentRequest[];
+  }
+
   // =====================================================
   // TEMPLATES
   // =====================================================

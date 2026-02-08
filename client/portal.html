@@ -922,5 +922,40 @@
         </div>
       </div>
     </div>
+
+    <!-- Upload Request Selection Modal -->
+    <div class="upload-request-modal hidden" id="upload-request-modal" role="dialog" aria-modal="true" aria-labelledby="upload-request-modal-title">
+      <div class="upload-request-modal-content portal-shadow">
+        <div class="upload-request-modal-header">
+          <h3 id="upload-request-modal-title">What are you uploading?</h3>
+          <button type="button" class="btn-icon close-modal" id="upload-request-modal-close" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="upload-request-modal-body">
+          <p class="upload-request-modal-description">Select which document request you are fulfilling, or choose "Other" for general uploads.</p>
+          <div class="upload-request-options" id="upload-request-options" role="radiogroup" aria-label="Document request options">
+            <!-- Pending requests populated by JS -->
+          </div>
+          <div class="upload-request-other-wrap">
+            <label class="upload-request-option">
+              <input type="radio" name="upload-request-selection" value="other" checked />
+              <span class="upload-request-option-label">
+                <span class="upload-request-option-title">Other / General Upload</span>
+                <span class="upload-request-option-desc">Upload files not related to a specific request</span>
+              </span>
+            </label>
+            <div class="upload-other-description-wrap" id="upload-other-description-wrap">
+              <label for="upload-other-description" class="sr-only">Description (optional)</label>
+              <textarea id="upload-other-description" class="form-textarea" placeholder="Description (optional)" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="upload-request-modal-footer">
+          <button type="button" class="btn btn-secondary" id="upload-request-modal-cancel">Cancel</button>
+          <button type="button" class="btn btn-primary" id="upload-request-modal-confirm">Upload</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

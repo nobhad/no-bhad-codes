@@ -236,9 +236,15 @@ function renderWorkflowsTable(): void {
     return `
       <tr data-id="${w.id}">
         <td class="name-cell">${escapeHtml(w.name)}${defaultIcon}</td>
-        <td class="type-cell">${entityLabel}</td>
-        <td class="type-cell">${typeLabel}</td>
-        <td class="status-cell">${statusBadge}</td>
+        <td class="type-cell entity-type-cell">
+          ${entityLabel}
+          <span class="type-stacked">${typeLabel}</span>
+        </td>
+        <td class="type-cell workflow-type-cell">${typeLabel}</td>
+        <td class="status-cell">
+          ${statusBadge}
+          <span class="date-stacked">${formatDate(w.updated_at)}</span>
+        </td>
         <td class="date-cell">${formatDate(w.updated_at)}</td>
         <td class="actions-cell">
           <div class="table-actions">
@@ -630,7 +636,10 @@ function renderTriggersTable(): void {
         <td class="name-cell">${escapeHtml(t.name)}</td>
         <td class="type-cell"><code>${escapeHtml(t.event_type)}</code></td>
         <td class="type-cell">${actionLabel}</td>
-        <td class="status-cell">${statusBadge}</td>
+        <td class="status-cell">
+          ${statusBadge}
+          <span class="date-stacked">${formatDate(t.updated_at)}</span>
+        </td>
         <td class="date-cell">${formatDate(t.updated_at)}</td>
         <td class="actions-cell">
           <div class="table-actions">

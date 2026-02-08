@@ -14,6 +14,7 @@ import { formatFileSize, formatDate, formatDateTime } from '../../../utils/forma
 import { confirmDialog, alertSuccess, alertError } from '../../../utils/confirm-dialog';
 import { createViewToggle } from '../../../components/view-toggle';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
+import { showToast } from '../../../utils/toast-notifications';
 
 interface Folder {
   id: number;
@@ -66,10 +67,27 @@ interface AccessLogEntry {
   created_at: string;
 }
 
+interface PendingRequest {
+  id: number;
+  title: string;
+  description?: string;
+  document_type?: string;
+  priority?: string;
+  status: string;
+  due_date?: string;
+  is_required: boolean;
+  client_name?: string;
+  file_name?: string;
+}
+
+type SourceFilter = 'all' | 'admin' | 'client' | 'pending';
+
 let currentProjectId: number | null = null;
 let currentFolderId: number | string = 'root';
 let currentFileId: number | null = null;
 let _currentView: 'list' | 'grid' = 'list';
+let _currentSourceFilter: SourceFilter = 'all';
+let _pendingRequestsCache: PendingRequest[] = [];
 
 /**
  * Initialize the files module for a project
@@ -77,19 +95,38 @@ let _currentView: 'list' | 'grid' = 'list';
 export async function initFilesModule(projectId: number): Promise<void> {
   currentProjectId = projectId;
   currentFolderId = 'root';
+  _currentSourceFilter = 'all';
 
   setupEventListeners();
   await loadFolders();
   await loadFiles();
+  await loadPendingRequestsDropdown();
 }
 
 /**
  * Setup event listeners for file management
  */
 function setupEventListeners(): void {
+  // Source filter toggle (All | Admin | Client | Pending)
+  const sourceToggleMount = document.getElementById('files-source-toggle-mount');
+  if (sourceToggleMount && !sourceToggleMount.hasChildNodes()) {
+    const sourceToggle = createViewToggle({
+      id: 'files-source-toggle',
+      options: [
+        { value: 'all', label: 'All', title: 'All Files', ariaLabel: 'All files' },
+        { value: 'admin', label: 'Admin', title: 'Admin Uploads', ariaLabel: 'Admin uploads' },
+        { value: 'client', label: 'Client', title: 'Client Uploads', ariaLabel: 'Client uploads' },
+        { value: 'pending', label: 'Pending', title: 'Pending Requests', ariaLabel: 'Pending document requests' }
+      ],
+      value: _currentSourceFilter,
+      onChange: (v) => setSourceFilter(v as SourceFilter)
+    });
+    sourceToggleMount.appendChild(sourceToggle);
+  }
+
   // View toggle (reusable component)
   const viewToggleMount = document.getElementById('files-view-toggle-mount');
-  if (viewToggleMount) {
+  if (viewToggleMount && !viewToggleMount.hasChildNodes()) {
     const listIcon =
       '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
     const gridIcon =
@@ -175,6 +212,28 @@ function setView(view: 'list' | 'grid'): void {
 }
 
 /**
+ * Set the source filter and reload content
+ */
+async function setSourceFilter(source: SourceFilter): Promise<void> {
+  _currentSourceFilter = source;
+
+  const filesList = document.getElementById('pd-files-list');
+  const pendingList = document.getElementById('pd-pending-requests-list');
+
+  if (source === 'pending') {
+    // Show pending requests, hide files list
+    if (filesList) filesList.classList.add('hidden');
+    if (pendingList) pendingList.classList.remove('hidden');
+    await loadPendingRequests();
+  } else {
+    // Show files list, hide pending requests
+    if (filesList) filesList.classList.remove('hidden');
+    if (pendingList) pendingList.classList.add('hidden');
+    await loadFiles();
+  }
+}
+
+/**
  * Load folders for the current project
  */
 async function loadFolders(): Promise<void> {
@@ -190,20 +249,30 @@ async function loadFolders(): Promise<void> {
     const data = await response.json();
     const folders: Folder[] = data.folders || [];
 
-    // Build folder tree HTML
+    const folderIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
+
+    // Build folder tree HTML with default virtual folders
     let html = `
       <div class="folder-item root ${currentFolderId === 'root' ? 'active' : ''}" data-folder-id="root">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        ${folderIcon}
         <span>All Files</span>
+      </div>
+      <div class="folder-item ${currentFolderId === 'client' ? 'active' : ''}" data-folder-id="client">
+        ${folderIcon}
+        <span>Client Files</span>
+      </div>
+      <div class="folder-item ${currentFolderId === 'shared' ? 'active' : ''}" data-folder-id="shared">
+        ${folderIcon}
+        <span>Shared Files</span>
       </div>
     `;
 
-    // Add folders (nested structure would require recursive rendering)
+    // Add custom folders from database
     folders.forEach(folder => {
       const isNested = folder.parent_id !== null;
       html += `
         <div class="folder-item ${isNested ? 'nested' : ''} ${currentFolderId === folder.id ? 'active' : ''}" data-folder-id="${folder.id}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          ${folderIcon}
           <span>${escapeHtml(folder.name)}</span>
           ${folder.file_count ? `<span class="folder-count">(${folder.file_count})</span>` : ''}
         </div>
@@ -216,7 +285,14 @@ async function loadFolders(): Promise<void> {
     folderTree.querySelectorAll('.folder-item').forEach(item => {
       item.addEventListener('click', () => {
         const folderId = (item as HTMLElement).dataset.folderId;
-        if (folderId) selectFolder(folderId === 'root' ? 'root' : parseInt(folderId, 10));
+        if (folderId) {
+          // Handle virtual folders and numeric IDs
+          if (folderId === 'root' || folderId === 'client' || folderId === 'shared') {
+            selectFolder(folderId);
+          } else {
+            selectFolder(parseInt(folderId, 10));
+          }
+        }
       });
     });
 
@@ -240,9 +316,15 @@ async function selectFolder(folderId: number | string): Promise<void> {
   // Update path
   const pathEl = document.getElementById('pd-files-path');
   if (pathEl) {
-    pathEl.innerHTML = folderId === 'root'
-      ? '<span>All Files</span>'
-      : `<span>All Files</span> / <span>${folderId}</span>`;
+    const folderLabels: Record<string, string> = {
+      'root': 'All Files',
+      'client': 'Client Files',
+      'shared': 'Shared Files'
+    };
+    const label = typeof folderId === 'string' && folderLabels[folderId]
+      ? folderLabels[folderId]
+      : String(folderId);
+    pathEl.innerHTML = `<span>${label}</span>`;
   }
 
   await loadFiles();
@@ -261,7 +343,8 @@ async function loadFiles(): Promise<void> {
 
   try {
     let url = `/api/projects/${currentProjectId}/files`;
-    if (currentFolderId !== 'root') {
+    // Only add folder_id for numeric folder IDs (not virtual folders)
+    if (typeof currentFolderId === 'number') {
       url += `?folder_id=${currentFolderId}`;
     }
 
@@ -272,10 +355,37 @@ async function loadFiles(): Promise<void> {
     }
 
     const data = await response.json();
-    const files: FileItem[] = data.files || [];
+    let files: FileItem[] = data.files || [];
+
+    // Apply virtual folder filter
+    if (currentFolderId === 'client') {
+      // Filter for client-uploaded files
+      files = files.filter(f => f.uploaded_by && (f.uploaded_by.includes('client') || f.category === 'client_upload'));
+    } else if (currentFolderId === 'shared') {
+      // Filter for admin-shared files (uploaded by admin/non-client)
+      files = files.filter(f => f.uploaded_by && !f.uploaded_by.includes('client') && f.category !== 'client_upload');
+    }
+    // 'root' shows all files
+
+    // Apply source filter (from toggle)
+    if (_currentSourceFilter === 'admin') {
+      files = files.filter(f => f.uploaded_by && !f.uploaded_by.includes('client'));
+    } else if (_currentSourceFilter === 'client') {
+      files = files.filter(f => f.uploaded_by && f.uploaded_by.includes('client') || f.category === 'client_upload');
+    }
+    // 'all' shows everything, 'pending' handled separately
 
     if (files.length === 0) {
-      filesList.innerHTML = '<p class="empty-state">No files in this folder. Upload files above.</p>';
+      const folderLabels: Record<string, string> = {
+        'root': 'this folder',
+        'client': 'Client Files',
+        'shared': 'Shared Files'
+      };
+      const folderLabel = typeof currentFolderId === 'string' && folderLabels[currentFolderId]
+        ? folderLabels[currentFolderId]
+        : 'this folder';
+      const emptyMessage = `No files in ${folderLabel}. Upload files above.`;
+      filesList.innerHTML = `<p class="empty-state">${emptyMessage}</p>`;
       return;
     }
 
@@ -788,10 +898,226 @@ function escapeHtml(str: string): string {
 }
 
 /**
+ * Load pending document requests for the current project
+ */
+async function loadPendingRequests(): Promise<void> {
+  if (!currentProjectId) return;
+
+  const pendingList = document.getElementById('pd-pending-requests-list');
+  if (!pendingList) return;
+
+  pendingList.innerHTML = '<p class="loading-text">Loading pending requests...</p>';
+
+  try {
+    const response = await apiFetch(`/api/document-requests/project/${currentProjectId}/pending`);
+    if (!response.ok) {
+      pendingList.innerHTML = '<p class="empty-state">Error loading pending requests.</p>';
+      return;
+    }
+
+    const data = await response.json();
+    const requests: PendingRequest[] = data.requests || [];
+    _pendingRequestsCache = requests;
+
+    if (requests.length === 0) {
+      pendingList.innerHTML = '<p class="empty-state">No pending document requests for this project.</p>';
+      return;
+    }
+
+    pendingList.innerHTML = requests.map(req => renderPendingRequestItem(req)).join('');
+
+    // Add click handlers for actions
+    pendingList.querySelectorAll('.pending-request-action').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const action = (btn as HTMLElement).dataset.action;
+        const requestId = parseInt((btn as HTMLElement).dataset.requestId || '0', 10);
+        if (action && requestId) {
+          await handlePendingRequestAction(requestId, action);
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error('[AdminFiles] Error loading pending requests:', error);
+    pendingList.innerHTML = '<p class="empty-state">Error loading pending requests.</p>';
+  }
+}
+
+/**
+ * Render a pending request item
+ */
+function renderPendingRequestItem(request: PendingRequest): string {
+  const statusClass = `status-${request.status}`;
+  const priorityClass = request.priority ? `priority-${request.priority}` : '';
+  const dueDate = request.due_date ? formatDate(request.due_date) : 'No due date';
+  const isOverdue = request.due_date && new Date(request.due_date) < new Date();
+
+  return `
+    <div class="pending-request-item ${statusClass} ${priorityClass}" data-request-id="${request.id}">
+      <div class="pending-request-info">
+        <div class="pending-request-header">
+          <span class="pending-request-title">${escapeHtml(request.title)}</span>
+          <span class="pending-request-badge ${statusClass}">${escapeHtml(request.status)}</span>
+          ${request.is_required ? '<span class="pending-request-badge required">Required</span>' : ''}
+        </div>
+        <div class="pending-request-meta">
+          <span class="pending-request-type">${escapeHtml(request.document_type || 'general')}</span>
+          <span class="pending-request-due ${isOverdue ? 'overdue' : ''}">${dueDate}${isOverdue ? ' (Overdue)' : ''}</span>
+        </div>
+        ${request.description ? `<p class="pending-request-description">${escapeHtml(request.description)}</p>` : ''}
+      </div>
+      <div class="pending-request-actions">
+        <button type="button" class="btn btn-secondary btn-sm pending-request-action" data-action="view" data-request-id="${request.id}" title="View Details">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm pending-request-action" data-action="remind" data-request-id="${request.id}" title="Send Reminder">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button type="button" class="btn btn-danger btn-sm pending-request-action" data-action="delete" data-request-id="${request.id}" title="Delete Request">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Handle pending request actions
+ */
+async function handlePendingRequestAction(requestId: number, action: string): Promise<void> {
+  try {
+    if (action === 'view') {
+      // Navigate to document requests section or show details
+      window.location.hash = `#document-requests?id=${requestId}`;
+    } else if (action === 'remind') {
+      const response = await apiPost(`/api/document-requests/${requestId}/remind`, {});
+      if (response.ok) {
+        showToast('Reminder sent successfully', 'success');
+      } else {
+        alertError('Failed to send reminder');
+      }
+    } else if (action === 'delete') {
+      const confirmed = await confirmDialog({
+        title: 'Delete Document Request',
+        message: 'Are you sure you want to delete this document request? This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        danger: true
+      });
+
+      if (confirmed) {
+        const response = await apiDelete(`/api/document-requests/${requestId}`);
+        if (response.ok) {
+          alertSuccess('Document request deleted');
+          await loadPendingRequests();
+          await loadPendingRequestsDropdown();
+        } else {
+          alertError('Failed to delete request');
+        }
+      }
+    }
+  } catch (error) {
+    console.error('[AdminFiles] Error handling pending request action:', error);
+    alertError('An error occurred');
+  }
+}
+
+/**
+ * Load pending requests for the upload dropdown
+ */
+async function loadPendingRequestsDropdown(): Promise<void> {
+  if (!currentProjectId) return;
+
+  const select = document.getElementById('pd-upload-request-select') as HTMLSelectElement;
+  if (!select) return;
+
+  try {
+    const response = await apiFetch(`/api/document-requests/project/${currentProjectId}/pending`);
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const requests: PendingRequest[] = data.requests || [];
+    _pendingRequestsCache = requests;
+
+    // Clear and repopulate options
+    select.innerHTML = '<option value="">General upload</option>';
+
+    requests.forEach(req => {
+      const option = document.createElement('option');
+      option.value = String(req.id);
+      option.textContent = `${req.title}${req.is_required ? ' (Required)' : ''}`;
+      select.appendChild(option);
+    });
+
+    // Show/hide the dropdown based on whether there are pending requests
+    const container = document.getElementById('pd-upload-link-request');
+    if (container) {
+      container.style.display = requests.length > 0 ? 'block' : 'none';
+    }
+
+  } catch (error) {
+    console.error('[AdminFiles] Error loading pending requests dropdown:', error);
+  }
+}
+
+/**
+ * Link uploaded file to a document request
+ */
+async function linkFileToRequest(fileId: number, requestId: number): Promise<boolean> {
+  try {
+    const response = await apiPost(`/api/document-requests/${requestId}/upload`, { fileId });
+    if (response.ok) {
+      showToast('File linked to document request', 'success');
+      await loadPendingRequestsDropdown();
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('[AdminFiles] Error linking file to request:', error);
+    return false;
+  }
+}
+
+/**
+ * Get selected request ID from dropdown
+ */
+function getSelectedRequestId(): number | null {
+  const select = document.getElementById('pd-upload-request-select') as HTMLSelectElement;
+  if (!select || !select.value) return null;
+  return parseInt(select.value, 10);
+}
+
+/**
+ * Reset the upload dropdown after upload
+ */
+function resetUploadDropdown(): void {
+  const select = document.getElementById('pd-upload-request-select') as HTMLSelectElement;
+  if (select) {
+    select.value = '';
+  }
+}
+
+/**
+ * Handle file upload with optional request linking
+ * This function should be called after a successful file upload
+ */
+export async function handleFileUploadComplete(fileId: number): Promise<void> {
+  const selectedRequestId = getSelectedRequestId();
+  if (selectedRequestId) {
+    await linkFileToRequest(fileId, selectedRequestId);
+  }
+  resetUploadDropdown();
+  await loadFiles();
+}
+
+/**
  * Cleanup function
  */
 export function cleanup(): void {
   currentProjectId = null;
   currentFolderId = 'root';
   currentFileId = null;
+  _currentSourceFilter = 'all';
+  _pendingRequestsCache = [];
 }

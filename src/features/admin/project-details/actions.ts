@@ -20,15 +20,32 @@ import type { ProjectResponse } from '../../../types/api';
 import { initProjectModalDropdowns, setupEditProjectModalHandlers } from '../modules/admin-projects';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 
+/** Base project type for action functions - compatible with both LeadProject and ProjectResponse */
+interface ProjectBase {
+  id: number;
+  project_name?: string;
+  client_id?: number;
+  client_name?: string;
+  contact_name?: string;
+  company_name?: string;
+  email?: string;
+  project_type?: string;
+  budget_range?: string;
+  budget?: number;
+  timeline?: string;
+  description?: string;
+  notes?: string;
+}
+
 /**
  * Delete a project
  */
 export async function deleteProject(
   projectId: number,
-  projectsData: ProjectResponse[],
+  projectsData: ProjectBase[],
   onSuccess: () => void
 ): Promise<void> {
-  const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
+  const project = projectsData.find((p) => p.id === projectId);
   const projectName = project?.project_name || 'this project';
 
   const confirmed = await confirmDanger(
@@ -61,11 +78,11 @@ export async function deleteProject(
  */
 export async function archiveProject(
   projectId: number,
-  projectsData: ProjectResponse[],
+  projectsData: ProjectBase[],
   loadProjects: () => Promise<void>,
   showProjectDetail: (id: number) => void
 ): Promise<void> {
-  const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
+  const project = projectsData.find((p) => p.id === projectId);
   const projectName = project?.project_name || 'this project';
 
   const confirmed = await confirmDialog({
@@ -103,11 +120,11 @@ export async function archiveProject(
  */
 export async function duplicateProject(
   projectId: number,
-  projectsData: ProjectResponse[],
+  projectsData: ProjectBase[],
   loadProjects: () => Promise<void>,
   showProjectDetail: (id: number) => void
 ): Promise<void> {
-  const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
+  const project = projectsData.find((p) => p.id === projectId);
   if (!project) return;
 
   const confirmed = await confirmDialog({

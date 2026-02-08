@@ -132,10 +132,10 @@ Overlay/backdrop tokens are defined **only** in `design-system/tokens/colors.css
 
 | Metric | Value |
 | ------ | ----- |
-| Total CSS Files | 93 |
-| Total Lines | ~34,030 |
+| Total CSS Files | 94 |
+| Total Lines | ~34,200 |
 | Design System | `src/design-system/` (11 files, ~3,600 lines) |
-| Styles Directory | `src/styles/` (90 files, ~34,000 lines) |
+| Styles Directory | `src/styles/` (91 files, ~34,200 lines) |
 | Largest File | admin.css (2,064 lines) |
 
 ---
@@ -292,14 +292,33 @@ background: transparent;
 
 ### Dropdown Triggers
 
+**Table Dropdowns** (32px compact, for table cells):
+
 ```css
 display: flex;
 justify-content: space-between;
 padding: var(--space-2) var(--space-3);
-border: 2px solid var(--portal-border-dark);
+height: 32px;
+border: 2px solid transparent;
 border-radius: var(--portal-radius-lg);
-/* Open: top corners rounded, bottom flat */
+/* Hover/Focus/Open: border-color: var(--color-primary) */
 ```
+
+**Modal Dropdowns** (48px, matches form inputs):
+
+```css
+display: flex;
+justify-content: space-between;
+padding: 0 16px;
+height: 48px;
+background-color: var(--color-black);
+border: 1px solid transparent;
+border-radius: var(--portal-radius-lg);
+/* Hover/Focus/Open: border-color: var(--color-primary) */
+/* Open: top corners rounded, bottom flat, connects to menu */
+```
+
+**Key Difference:** Table dropdowns are compact (32px) with transparent background. Modal dropdowns are taller (48px) with black background to match form input styling.
 
 ### Section Headings (h3 in tabs)
 
@@ -1221,7 +1240,7 @@ src/styles/
 | `projects.css` | Project navigation, details |
 | `settings.css` | Settings, account views |
 
-### Admin Files (`src/styles/admin/`) — 21 files
+### Admin Files (`src/styles/admin/`) — 22 files
 
 | File | Purpose |
 | ---- | ------- |
@@ -1234,13 +1253,14 @@ src/styles/
 | `files.css` | Admin file management |
 | `knowledge-base.css` | Knowledge base management |
 | `leads-pipeline.css` | Leads pipeline |
+| `modal-dropdown.css` | Modal form dropdowns (48px height, matches form inputs) |
 | `modals.css` | Admin modals |
 | `pd-contract.css` | Project detail: contract tab styles |
 | `pd-invoices.css` | Project detail: invoices tab styles |
 | `project-detail.css` | Project detail (including messaging UI) |
 | `proposals.css` | Proposals |
 | `sidebar-badges.css` | Sidebar notification badges |
-| `table-dropdowns.css` | Inline table status dropdowns |
+| `table-dropdowns.css` | Inline table status dropdowns (32px compact) |
 | `table-features.css` | Table row features (actions, selection) |
 | `table-filters.css` | Table filter controls + sortable headers |
 | `tasks.css` | Task list / project tasks |

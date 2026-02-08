@@ -9,13 +9,34 @@
  */
 
 import type { PortalFile, ClientPortalContext } from '../portal-types';
-import { formatFileSize } from '../../../utils/format-utils';
+import { formatFileSize, formatDate } from '../../../utils/format-utils';
 import { ICONS } from '../../../constants/icons';
 import { showContainerError } from '../../../utils/error-utils';
 import { confirmDanger, alertError } from '../../../utils/confirm-dialog';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 
 const FILES_API_BASE = '/api/uploads';
+const DOC_REQUESTS_API = '/api/document-requests';
+
+// ============================================================================
+// PENDING REQUESTS STATE
+// ============================================================================
+
+interface PendingDocumentRequest {
+  id: number;
+  title: string;
+  description?: string;
+  document_type?: string;
+  priority?: string;
+  status: string;
+  due_date?: string;
+  is_required: boolean;
+  project_name?: string;
+}
+
+let pendingRequestsCache: PendingDocumentRequest[] = [];
+let pendingFilesToUpload: File[] = [];
+let uploadRequestModalContext: ClientPortalContext | null = null;
 
 // Allowed file types (matches server validation)
 const ALLOWED_EXTENSIONS = /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar)$/i;
@@ -506,6 +527,182 @@ function isAllowedFileType(file: File): boolean {
 }
 
 /**
+ * Fetch pending document requests for the client
+ */
+async function fetchPendingRequests(): Promise<PendingDocumentRequest[]> {
+  try {
+    const response = await fetch(`${DOC_REQUESTS_API}/my-pending`, {
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    return data.requests || [];
+  } catch (error) {
+    console.error('[PortalFiles] Error fetching pending requests:', error);
+    return [];
+  }
+}
+
+/**
+ * Link uploaded file to a document request
+ */
+async function linkFileToRequest(requestId: number, fileId: number): Promise<boolean> {
+  try {
+    const response = await fetch(`${DOC_REQUESTS_API}/${requestId}/upload`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileId })
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('[PortalFiles] Error linking file to request:', error);
+    return false;
+  }
+}
+
+/**
+ * Show the upload request selection modal
+ */
+function showUploadRequestModal(files: File[], ctx: ClientPortalContext): void {
+  pendingFilesToUpload = files;
+  uploadRequestModalContext = ctx;
+
+  const modal = getElement('upload-request-modal');
+  const optionsContainer = getElement('upload-request-options');
+
+  if (!modal || !optionsContainer) {
+    // No modal in DOM, proceed with direct upload
+    proceedWithUpload(files, null, ctx);
+    return;
+  }
+
+  // Populate pending requests options
+  optionsContainer.innerHTML = pendingRequestsCache
+    .map(req => {
+      const dueDate = req.due_date ? formatDate(req.due_date) : 'No due date';
+      const isOverdue = req.due_date && new Date(req.due_date) < new Date();
+
+      return `
+        <label class="upload-request-option">
+          <input type="radio" name="upload-request-selection" value="${req.id}" />
+          <span class="upload-request-option-label">
+            <span class="upload-request-option-title">
+              ${escapeHtml(req.title)}
+              ${req.is_required ? '<span class="upload-request-badge required">Required</span>' : ''}
+            </span>
+            <span class="upload-request-option-desc">
+              ${req.project_name ? `${escapeHtml(req.project_name)} • ` : ''}
+              ${req.document_type ? `${escapeHtml(req.document_type)} • ` : ''}
+              <span class="${isOverdue ? 'overdue' : ''}">${dueDate}${isOverdue ? ' (Overdue)' : ''}</span>
+            </span>
+          </span>
+        </label>
+      `;
+    })
+    .join('');
+
+  // Reset to "Other" selection
+  const otherRadio = modal.querySelector('input[name="upload-request-selection"][value="other"]') as HTMLInputElement;
+  if (otherRadio) {
+    otherRadio.checked = true;
+  }
+
+  // Show the modal
+  modal.classList.remove('hidden');
+  modal.classList.add('active');
+}
+
+/**
+ * Hide the upload request selection modal
+ */
+function hideUploadRequestModal(): void {
+  const modal = getElement('upload-request-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('active');
+  }
+  pendingFilesToUpload = [];
+  uploadRequestModalContext = null;
+}
+
+/**
+ * Get the selected request ID from the modal
+ */
+function getSelectedRequestId(): number | null {
+  const modal = getElement('upload-request-modal');
+  if (!modal) return null;
+
+  const selectedRadio = modal.querySelector('input[name="upload-request-selection"]:checked') as HTMLInputElement;
+  if (!selectedRadio || selectedRadio.value === 'other') {
+    return null;
+  }
+
+  return parseInt(selectedRadio.value, 10);
+}
+
+/**
+ * Setup modal event listeners
+ */
+function setupUploadRequestModalListeners(_ctx: ClientPortalContext): void {
+  const modal = getElement('upload-request-modal');
+  if (!modal || modal.dataset.listenersSetup === 'true') return;
+
+  modal.dataset.listenersSetup = 'true';
+
+  // Close button
+  const closeBtn = document.getElementById('upload-request-modal-close');
+  closeBtn?.addEventListener('click', hideUploadRequestModal);
+
+  // Cancel button
+  const cancelBtn = document.getElementById('upload-request-modal-cancel');
+  cancelBtn?.addEventListener('click', hideUploadRequestModal);
+
+  // Confirm button
+  const confirmBtn = document.getElementById('upload-request-modal-confirm');
+  confirmBtn?.addEventListener('click', async () => {
+    const selectedRequestId = getSelectedRequestId();
+    hideUploadRequestModal();
+
+    if (pendingFilesToUpload.length > 0 && uploadRequestModalContext) {
+      await proceedWithUpload(pendingFilesToUpload, selectedRequestId, uploadRequestModalContext);
+    }
+  });
+
+  // Close on backdrop click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      hideUploadRequestModal();
+    }
+  });
+
+  // Toggle "Other" description field visibility
+  modal.querySelectorAll('input[name="upload-request-selection"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const descWrap = document.getElementById('upload-other-description-wrap');
+      const selectedRadio = modal.querySelector('input[name="upload-request-selection"]:checked') as HTMLInputElement;
+      if (descWrap) {
+        descWrap.style.display = selectedRadio?.value === 'other' ? 'block' : 'none';
+      }
+    });
+  });
+}
+
+/**
+ * Escape HTML for safe rendering
+ */
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
  * Upload files to the server
  */
 async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<void> {
@@ -536,6 +733,28 @@ async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<voi
     return;
   }
 
+  // Check for pending document requests
+  pendingRequestsCache = await fetchPendingRequests();
+
+  if (pendingRequestsCache.length > 0) {
+    // Show modal to let user select which request they're fulfilling
+    setupUploadRequestModalListeners(ctx);
+    showUploadRequestModal(files, ctx);
+    return;
+  }
+
+  // No pending requests, proceed with direct upload
+  await proceedWithUpload(files, null, ctx);
+}
+
+/**
+ * Proceed with actual file upload
+ */
+async function proceedWithUpload(
+  files: File[],
+  requestId: number | null,
+  ctx: ClientPortalContext
+): Promise<void> {
   const dropzone = getElement('upload-dropzone');
   if (dropzone) {
     dropzone.innerHTML = `
@@ -554,7 +773,7 @@ async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<voi
 
     const response = await fetch(`${FILES_API_BASE}/multiple`, {
       method: 'POST',
-      credentials: 'include', // Include HttpOnly cookies
+      credentials: 'include',
       body: formData
     });
 
@@ -564,9 +783,22 @@ async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<voi
     }
 
     const result = await response.json();
+    const uploadedFiles = result.files || [];
+
+    // If a request was selected and we have uploaded files, link the first file to the request
+    if (requestId && uploadedFiles.length > 0) {
+      const firstFileId = uploadedFiles[0].id;
+      const linked = await linkFileToRequest(requestId, firstFileId);
+      if (linked) {
+        showUploadSuccess(uploadedFiles.length, 'Files uploaded and linked to document request');
+      } else {
+        showUploadSuccess(uploadedFiles.length, 'Files uploaded (failed to link to request)');
+      }
+    } else {
+      showUploadSuccess(uploadedFiles.length);
+    }
 
     resetDropzone();
-    showUploadSuccess(result.files?.length || files.length);
     await loadFiles(ctx);
   } catch (error) {
     console.error('Upload error:', error);
@@ -655,12 +887,13 @@ function resetDropzone(): void {
 /**
  * Show upload success message
  */
-function showUploadSuccess(count: number): void {
+function showUploadSuccess(count: number, customMessage?: string): void {
   const filesSection = getElement('tab-files');
   if (filesSection) {
+    const message = customMessage || `${count} file(s) uploaded successfully`;
     const successMsg = document.createElement('div');
     successMsg.className = 'upload-success-message';
-    successMsg.innerHTML = `<span>✓ ${count} file(s) uploaded successfully</span>`;
+    successMsg.innerHTML = `<span>${message}</span>`;
     filesSection.insertBefore(successMsg, filesSection.firstChild);
 
     setTimeout(() => {

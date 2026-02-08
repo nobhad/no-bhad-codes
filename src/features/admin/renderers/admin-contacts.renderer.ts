@@ -105,6 +105,7 @@ class AdminContactsRenderer {
         <td class="message-cell" title="${safeTitleMessage}">${truncatedMessage}</td>
         <td class="status-cell">
           <div class="contact-status-dropdown-container" data-contact-id="${submission.id}" data-status="${submission.status || 'new'}"></div>
+          <span class="date-stacked">${date}</span>
         </td>
         <td class="date-cell">${date}</td>
       </tr>

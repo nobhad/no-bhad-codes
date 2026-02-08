@@ -53,6 +53,111 @@
   color: var(--color-white);
 }
 
+/* Priority indicator for dropdowns */
+.priority-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.priority-indicator.priority-urgent {
+  background-color: var(--status-cancelled);
+}
+
+.priority-indicator.priority-high {
+  background-color: var(--color-warning-500);
+}
+
+.priority-indicator.priority-medium {
+  background-color: var(--color-primary);
+}
+
+.priority-indicator.priority-low {
+  background-color: var(--portal-text-secondary);
+}
+
+/* Form dropdown styling for task modal */
+.form-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.form-dropdown .custom-dropdown-trigger {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  text-align: left;
+}
+
+.form-dropdown .dropdown-caret {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.form-dropdown.open .dropdown-caret {
+  transform: rotate(180deg);
+}
+
+.form-dropdown .custom-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin-top: 4px;
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  box-shadow: var(--portal-shadow);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  list-style: none;
+  padding: 4px 0;
+  margin: 4px 0 0;
+}
+
+.form-dropdown.open .custom-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.form-dropdown .custom-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-1-5);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.form-dropdown .custom-dropdown-item:hover {
+  background: var(--portal-bg-medium);
+}
+
+.form-dropdown .custom-dropdown-item.selected {
+  background: var(--portal-bg-medium);
+  font-weight: 500;
+}
+
+/* Form row for side-by-side fields */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1-5);
+}
+
+@media (--mobile) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .task-meta {
   display: flex;
   align-items: center;

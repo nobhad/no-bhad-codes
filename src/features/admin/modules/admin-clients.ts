@@ -15,7 +15,7 @@ import type {
   InvoiceResponse
 } from '../../../types/api';
 import { formatCurrency, formatDate, formatDateTime } from '../../../utils/format-utils';
-import { createFilterSelect } from '../../../components/filter-select';
+import { createModalDropdown } from '../../../components/modal-dropdown';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import {
   createFilterUI,
@@ -1058,24 +1058,21 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
   if (companyInput) companyInput.value = client.company_name || '';
   if (phoneInput) phoneInput.value = client.phone || '';
 
-  // Reusable dropdown: ensure edit-client-status exists
+  // Status dropdown: modal dropdown (matches form field styling)
   const statusMount = getElement('edit-client-status-mount');
-  if (statusMount && !statusMount.querySelector('select')) {
-    const statusInstance = createFilterSelect({
-      id: 'edit-client-status',
-      ariaLabel: 'Status',
+  if (statusMount) {
+    statusMount.innerHTML = '';
+    const statusDropdown = createModalDropdown({
       options: [
         { value: 'active', label: 'Active' },
         { value: 'pending', label: 'Pending' },
         { value: 'inactive', label: 'Inactive' }
       ],
-      value: client.status || 'pending',
-      className: 'form-input'
+      currentValue: client.status || 'pending',
+      ariaLabelPrefix: 'Status'
     });
-    statusMount.appendChild(statusInstance.element);
+    statusMount.appendChild(statusDropdown);
   }
-  const statusSelect = getElement('edit-client-status') as HTMLSelectElement;
-  if (statusSelect) statusSelect.value = client.status || 'pending';
 
   // Show modal and lock body scroll
   openModalOverlay(modal);
@@ -1114,7 +1111,7 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
     const newName = nameInput?.value.trim();
     const newCompany = companyInput?.value.trim();
     const newPhone = phoneInput?.value.trim();
-    const newStatus = statusSelect?.value;
+    const newStatus = statusMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') ?? '';
 
     // Validate email format if provided
     if (newEmail) {

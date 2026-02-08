@@ -8,6 +8,78 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ## ✅ Completed - February 8, 2026
 
+### Document Requests Integration into Project Files
+
+- **Upload Confirmation Modal** - COMPLETE
+  - Files no longer upload immediately on selection
+  - Modal appears with file preview showing name and size
+  - User must click "Upload" button to confirm
+  - Files: `admin/index.html`, `src/features/admin/project-details/files.ts`
+
+- **File Type Labeling** - COMPLETE
+  - Added file type dropdown using reusable `createModalDropdown` component
+  - 11 predefined file types: Project Proposal, Contract, Intake Form, Invoice, Receipt, Wireframe, Design Mockup, Brand Asset, Content/Copy, Reference Material, Other
+  - File type label stored in `description` column on upload
+  - Files: `src/features/admin/project-details/files.ts`, `server/routes/projects.ts`
+
+- **Pending Request Linking** - COMPLETE
+  - Optional dropdown to link uploaded file to a pending document request
+  - Dropdown only shown when project has pending requests
+  - After upload, calls `/api/document-requests/:id/upload` to link file
+  - Request status updates to 'uploaded' when linked
+  - Files: `src/features/admin/project-details/files.ts`
+
+- **Backend API Additions** - COMPLETE
+  - `GET /api/document-requests/project/:projectId/pending` - Returns pending requests for a project
+  - Added `label` and `file_type` fields to file upload endpoint
+  - Files: `server/routes/document-requests.ts`, `server/routes/projects.ts`
+
+- **Reusable Components Used** - COMPLETE
+  - `createModalDropdown` from `src/components/modal-dropdown.ts` for both dropdowns
+  - `openModalOverlay`/`closeModalOverlay` from `src/utils/modal-utils.ts` for modal display
+  - `.field-label` class for proper form label styling
+
+**Files Modified:**
+
+- `admin/index.html` - Upload modal HTML structure
+- `src/features/admin/project-details/files.ts` - Upload modal logic, dropdown integration
+- `src/features/admin/modules/admin-projects.ts` - Removed duplicate upload handlers
+- `server/routes/projects.ts` - Added label/file_type to upload endpoint
+- `server/routes/document-requests.ts` - Added pending requests endpoint
+- `src/styles/admin/files.css` - Upload preview styling
+
+### Modal Dropdown Component
+
+- **Created Dedicated Modal Dropdown Component** - COMPLETE
+  - New component: `src/components/modal-dropdown.ts`
+  - New CSS: `src/styles/admin/modal-dropdown.css`
+  - Separate from table-dropdown for different use cases:
+    - Table dropdown: 32px compact height, for table cells
+    - Modal dropdown: 48px height, matches form input styling
+  - Features:
+    - Transparent border by default (blends with modal background)
+    - Primary color border on hover/focus/open
+    - 48px height matching form inputs
+    - Black background (`var(--color-black)`)
+    - Caret rotation on open
+    - Menu appears below with connected border styling
+
+- **Replaced Native Selects in Modals** - COMPLETE
+  - Edit Project modal: Project Type and Status dropdowns
+  - Edit Client Info modal: Status dropdown
+  - Create Task modal: Priority dropdown
+  - All now use `createModalDropdown()` instead of native `<select>`
+  - Files modified:
+    - `src/features/admin/modules/admin-projects.ts`
+    - `src/features/admin/modules/admin-clients.ts`
+    - `src/features/admin/modules/admin-tasks.ts`
+
+- **Fixed More Menu Focus State** - COMPLETE
+  - More menu (3-dot) dropdown in Project Details now has correct focus state
+  - Uses `border-color: var(--color-primary)` pattern matching table dropdowns
+  - Added keyboard support (Escape to close)
+  - File: `src/styles/admin/detail-header.css`
+
 ### Sidebar Spacing Consistency
 
 - **Even Spacing Throughout Sidebar** - COMPLETE

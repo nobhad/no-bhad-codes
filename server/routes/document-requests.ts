@@ -94,6 +94,24 @@ router.post(
   })
 );
 
+/**
+ * Get pending document requests for the authenticated client (unfulfilled)
+ */
+router.get(
+  '/my-pending',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = req.user?.id;
+
+    if (!clientId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const requests = await documentRequestService.getClientPendingRequests(clientId);
+    res.json({ requests });
+  })
+);
+
 // =====================================================
 // ADMIN ENDPOINTS
 // =====================================================
@@ -156,6 +174,25 @@ router.get(
     const stats = await documentRequestService.getClientStats(clientId);
 
     res.json({ requests, stats });
+  })
+);
+
+/**
+ * Get pending document requests for a specific project (admin)
+ */
+router.get(
+  '/project/:projectId/pending',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId);
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID' });
+    }
+
+    const requests = await documentRequestService.getProjectPendingRequests(projectId);
+    res.json({ requests });
   })
 );
 
