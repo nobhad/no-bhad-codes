@@ -130,40 +130,31 @@ All tables with their UI display names, source locations, and header columns.
 
 Each table's columns listed in exact left-to-right display order.
 
+**Unified Column Order Pattern:** ☐ → Identity → Type → Status → Details → Date(s) → Actions
+
 #### Leads Table
 
 | # | Header | Data Source |
 | --- | --- | --- |
 | 1 | ☐ (checkbox) | Bulk select |
-| 2 | Project | `project_type` or "Website" |
-| 3 | Lead | `company_name` OR `contact_name` + `email` |
-| 4 | Type | `project_type` (formatted) |
-| 5 | Budget | `budgetbudget` (formatted) |
-| 6 | Status | `status` (dropdown) |
-| 7 | Date | `created_at` |
-| 8 | Actions | Convert button (conditional) |
-
-#### Clients Table
-
-| # | Header | Data Source |
-| --- | --- | --- |
-| 1 | ☐ (checkbox) | Bulk select |
-| 2 | Client | `company_name` OR `name` + `email` |
-| 3 | Type | `client_type` ("Personal" / "Business") |
-| 4 | Projects | Project count |
-| 5 | Status | `status` (badge) |
-| 6 | Created | `created_at` |
-| 7 | Actions | View button |
+| 2 | Lead | `company_name` OR `contact_name` + `email` |
+| 3 | Type | `project_type` (formatted) |
+| 4 | Status | `status` (dropdown) |
+| 5 | Budget | `budget_range` (formatted) |
+| 6 | Date | `created_at` |
+| 7 | Actions | Convert button (conditional) |
 
 #### Contacts Table
 
 | # | Header | Data Source |
 | --- | --- | --- |
-| 1 | Contact | `name` + `company` |
-| 2 | Email | `email` |
-| 3 | Message | `message` (truncated) |
-| 4 | Status | `status` (dropdown) |
-| 5 | Date | `created_at` |
+| 1 | ☐ (checkbox) | Bulk select |
+| 2 | Contact | `name` + `company` |
+| 3 | Email | `email` |
+| 4 | Message | `message` (truncated) |
+| 5 | Status | `status` (dropdown) |
+| 6 | Date | `created_at` |
+| 7 | Actions | Convert, Archive, Restore buttons |
 
 #### Projects Table
 
@@ -172,10 +163,25 @@ Each table's columns listed in exact left-to-right display order.
 | 1 | ☐ (checkbox) | Bulk select |
 | 2 | Project | `project_name` + `contact_name` + `company_name` |
 | 3 | Type | `project_type` (formatted) |
-| 4 | Budget | `budget_range` (formatted) |
-| 5 | Timeline | `timeline` (formatted) |
-| 6 | Status | `status` (dropdown) |
+| 4 | Status | `status` (dropdown) |
+| 5 | Budget | `budget_range` (formatted) |
+| 6 | Timeline | `timeline` (formatted) |
 | 7 | Start | `start_date` |
+| 8 | Target | `end_date` |
+| 9 | Actions | View button |
+
+#### Clients Table
+
+| # | Header | Data Source |
+| --- | --- | --- |
+| 1 | ☐ (checkbox) | Bulk select |
+| 2 | Client | `company_name` OR `name` + `email` |
+| 3 | Type | `client_type` ("Personal" / "Business") |
+| 4 | Status | `status` (badge) |
+| 5 | # | Project count |
+| 6 | Created | `created_at` |
+| 7 | Last Active | `last_login_at` |
+| 8 | Actions | Invite, View buttons |
 
 #### Invoices Table
 
@@ -1061,3 +1067,211 @@ ExportConfig {
 #### Used In
 
 | Table | Export Config | Triggered By |
+| ----- | ------------- | ------------ |
+| Leads | `LEADS_EXPORT_CONFIG` | Export button in toolbar |
+| Clients | `CLIENTS_EXPORT_CONFIG` | Export button in toolbar |
+| Contacts | `CONTACTS_EXPORT_CONFIG` | Export button in toolbar |
+| Projects | `PROJECTS_EXPORT_CONFIG` | Export button in toolbar |
+| Invoices | `INVOICES_EXPORT_CONFIG` | Export button in toolbar |
+| Proposals | `PROPOSALS_EXPORT_CONFIG` | Export button in toolbar |
+| Document Requests | `DOCUMENT_REQUESTS_EXPORT_CONFIG` | Export button in toolbar |
+| Knowledge Base | `KNOWLEDGE_BASE_EXPORT_CONFIG` | Export button in toolbar |
+
+---
+
+## Styling and Responsiveness
+
+### CSS Variables Used for Tables
+
+```css
+/* Table Layout */
+--space-0-5: 0.125rem;
+--space-1: 0.25rem;
+--space-2: 0.5rem;
+--space-3: 0.75rem;
+--space-4: 1rem;
+
+/* Text Colors */
+--portal-text-light: #ffffff;
+--portal-text-secondary: #9ca3af;
+--portal-text-muted: #6b7280;
+
+/* Backgrounds */
+--portal-bg-medium: #2a2a2a;
+--portal-bg-darker: #1a1a1a;
+
+/* Font Sizes */
+--font-size-sm: 0.875rem;
+```
+
+### Table Cell Styling
+
+| Cell Class | Purpose | Desktop Width | Font Size |
+| ---------- | ------- | ------------- | --------- |
+| `.identity-cell` | Primary name/email/company | Auto | 1rem |
+| `.type-cell` | Category type | Fit-content | 0.875rem |
+| `.budget-cell` | Financial info | Fit-content | 0.875rem |
+| `.timeline-cell` | Timeline info | Fit-content | 0.875rem |
+| `.count-cell` | Numeric count | Fit-content | 0.875rem |
+| `.status-cell` | Status dropdown | Fit-content | 0.875rem |
+| `.date-cell` | Date values | Fit-content | 0.875rem |
+| `.email-cell` | Email addresses | Fit-content | 0.875rem |
+| `.message-cell` | Message content | Auto | 0.875rem |
+| `.actions-cell` | Action buttons | 140px | - |
+
+### Responsive Breakpoints
+
+| Breakpoint | Behavior |
+| ---------- | -------- |
+| 1760px | Target stacks under Start (Projects); Last Active stacks under Created (Clients) |
+| 1550px | Email stacks under Contact (Contacts) |
+| 1280px | Budget stacks under Type (Leads, Projects) |
+| 1100px | Date stacks above Status (Leads only) |
+| 480px (small-mobile) | Full mobile card layout - table rows become stacked cards |
+
+### Column Stacking at Breakpoints
+
+Desktop columns can stack to reduce horizontal scroll before mobile card layout kicks in.
+
+#### 1760px Breakpoint
+
+| Table | Stacking | Implementation |
+| ----- | -------- | -------------- |
+| Projects | Target stacks under Start | `.start-cell .target-stacked` shown, `th.target-col` + `.target-cell` hidden |
+| Clients | Last Active stacks under Created | `.created-cell .last-active-stacked` shown, `th.last-active-col` + `.last-active-cell` hidden |
+
+#### 1550px Breakpoint
+
+| Table | Stacking | Implementation |
+| ----- | -------- | -------------- |
+| Contacts | Email stacks under Contact | `.contact-cell .email-stacked` shown, `th.email-col` + `.email-cell` hidden |
+
+#### 1280px Breakpoint
+
+| Table | Stacking | Implementation |
+| ----- | -------- | -------------- |
+| Leads | Budget stacks under Type | `.type-cell .budget-stacked` shown, `th.budget-col` + `.budget-cell` hidden |
+| Projects | Budget stacks under Type | `.type-cell .budget-stacked` shown, `th.budget-col` + `.budget-cell` hidden |
+
+#### 1100px Breakpoint
+
+| Table | Stacking | Implementation |
+| ----- | -------- | -------------- |
+| Leads | Date stacks above Status | `.status-cell .date-stacked` shown, `th.date-col` + `.date-cell` hidden |
+
+**Important:** Stacked elements (`.budget-stacked`, `.email-stacked`, `.date-stacked`) are hidden on mobile card view to prevent duplicate data display.
+
+### Mobile Card Layout (480px and below)
+
+On mobile, table rows transform into stacked card blocks using CSS flexbox with `order` property for consistent cell ordering.
+
+#### Cell Order Values
+
+All tables use consistent CSS `order` values for mobile card display:
+
+| Order | Cell Type | Color | Size | Purpose |
+| :---: | --------- | ----- | ---- | ------- |
+| -2 | `.identity-cell`, `.contact-cell`, `.name-cell` | `--portal-text-light` | 1rem/600 | Primary identifier |
+| -1 | `.project-cell` | `--portal-text-light` | 0.9rem/500 | Project name |
+| 1 | `.type-cell` | `--portal-text-secondary` | 0.8rem | Category |
+| 2 | `.budget-cell`, `.count-cell` | `--portal-text-secondary` | 0.85rem/500 | Financial/count info |
+| 3 | `.timeline-cell`, `.email-cell` | `--portal-text-muted` | 0.8rem | Timeline/email |
+| 4 | `.message-cell` | `--portal-text-secondary` | 0.85rem | Message content |
+| 5 | `.status-cell` | - | - | Status dropdown |
+| 6 | `.date-cell` | `--portal-text-muted` | 0.8rem | Date values |
+| 10 | `.actions-cell` | - | - | Action buttons |
+
+#### Mobile Card Structure
+
+```text
+┌─────────────────────────────────────┐
+│ IDENTITY (name, company, email)     │ ← order: -2
+│ Type                                │ ← order: 1
+│ Budget / Count                      │ ← order: 2
+│ Timeline / Email                    │ ← order: 3
+│ Message                             │ ← order: 4
+│ [Status Dropdown]                   │ ← order: 5
+│ Date                                │ ← order: 6
+│ [Action Buttons]                    │ ← order: 10
+└─────────────────────────────────────┘
+```
+
+#### Mobile-Specific Behavior
+
+1. **Header hidden**: `<thead>` is `display: none` on mobile
+2. **Rows become cards**: Each `<tr>` is `display: block` with card styling
+3. **Cells become blocks**: Each `<td>` is `display: block` with consistent ordering
+4. **Checkbox hidden**: `.bulk-select-cell` is hidden on mobile
+5. **Full-width dropdowns**: Status dropdowns expand to 100% width
+6. **Stacked elements hidden**: `.budget-stacked`, `.email-stacked`, `.date-stacked` are hidden via `display: none !important` since all cells are visible as blocks
+
+#### Color Consistency Rules
+
+| Priority | Color Variable | Used For |
+| -------- | -------------- | -------- |
+| Primary | `--portal-text-light` | Identity name, primary content |
+| Secondary | `--portal-text-secondary` | Type, budget, message content |
+| Muted | `--portal-text-muted` | Dates, timeline, email, count |
+
+### CSS File Locations
+
+| File | Purpose |
+| ---- | ------- |
+| `src/styles/pages/admin.css` | Admin table styles, mobile card layout, responsive breakpoints |
+| `src/styles/shared/portal-forms.css` | Checkbox, input styling |
+| `src/styles/shared/portal-badges.css` | Status badge colors |
+| `src/styles/variables.css` | CSS custom properties |
+
+---
+
+## Comparison Matrix
+
+| Feature | Leads | Clients | Contacts | Projects | Invoices | Proposals |
+| ------- | :---: | :-----: | :------: | :------: | :------: | :-------: |
+| Checkbox | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ |
+| Search | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ |
+| Status Filter | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Date Filter | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Sortable | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Pagination | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Bulk Actions | ✓ | ✓ | ✗ | ✗ | ✗ | ✓ |
+| Export CSV | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Status Dropdown | ✓ | ✗ | ✓ | ✓ | ✗ | ✓ |
+| Mobile Cards | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+---
+
+## Shared vs Custom Components
+
+### Fully Shared (Used by 3+ tables)
+
+- Portal Checkbox
+- Table Dropdown
+- Status Badge
+- Filter System
+- Pagination
+- Export
+
+### Partially Shared
+
+- Bulk Actions (4 tables)
+- Copy Email (3 tables)
+
+### Table-Specific
+
+- View Toggle (Leads only - table/pipeline)
+- Kanban Board (Tasks/Leads)
+
+---
+
+## Cross-Table Consistency Analysis
+
+**Status:** All issues resolved as of 2026-02-08.
+
+### Resolved Issues
+
+1. **Column stacking inconsistency** - Fixed with explicit CSS order values for all cell types
+2. **Mobile duplicate data** - Fixed by hiding stacked elements on mobile card view
+3. **Color inconsistency** - Standardized to three-tier color system (light/secondary/muted)
+4. **Missing cell styling** - Added `timeline-cell` and `count-cell` mobile styles
+5. **Sort state closure** - Fixed by storing sort state in DOM data attributes

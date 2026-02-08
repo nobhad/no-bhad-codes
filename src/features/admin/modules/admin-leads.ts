@@ -626,7 +626,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
     // Secondary name: contact (only if company exists as primary)
     const secondaryContent = safeCompanyName && safeContactName ? wrapWithClientLink(safeContactName) : '';
 
-    // Column order: ☐ | Lead | Type | Budget | Status | Date | Actions
+    // Column order: ☐ | Lead | Type | Status | Budget | Date | Actions
     row.innerHTML = `
       ${createRowCheckbox('leads', lead.id)}
       <td class="identity-cell">
@@ -638,8 +638,8 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
         <span class="type-value">${SanitizationUtils.escapeHtml(displayType)}</span>
         <span class="budget-stacked">${SanitizationUtils.escapeHtml(displayBudget)}</span>
       </td>
-      <td class="budget-cell">${SanitizationUtils.escapeHtml(displayBudget)}</td>
       <td class="status-cell"><span class="date-stacked">${date}</span></td>
+      <td class="budget-cell">${SanitizationUtils.escapeHtml(displayBudget)}</td>
       <td class="date-cell">${date}</td>
       <td class="actions-cell">
         <div class="table-actions">

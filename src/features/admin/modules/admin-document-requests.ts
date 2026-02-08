@@ -47,6 +47,7 @@ import {
   resetSelection,
   type BulkActionConfig
 } from '../../../utils/table-bulk-actions';
+import { ICONS } from '../../../constants/icons';
 
 const DR_API = '/api/document-requests';
 
@@ -182,6 +183,7 @@ const DR_BULK_CONFIG: BulkActionConfig = {
     {
       id: 'send-reminder',
       label: 'Send Reminders',
+      icon: ICONS.BELL,
       variant: 'default',
       confirmMessage: 'Send reminders for {count} selected document requests?',
       handler: async (ids: number[]) => {
@@ -208,6 +210,7 @@ const DR_BULK_CONFIG: BulkActionConfig = {
     {
       id: 'delete',
       label: 'Delete',
+      icon: ICONS.TRASH,
       variant: 'danger',
       confirmMessage: 'Delete {count} selected document requests? This cannot be undone.',
       handler: async (ids: number[]) => {
@@ -247,9 +250,24 @@ async function loadAllRequests(): Promise<DocumentRequest[]> {
     apiFetch(`${DR_API}/for-review`),
     apiFetch(`${DR_API}/overdue`)
   ]);
+
+  // Log any errors
+  if (!pendingRes.ok) {
+    console.error('[DocRequests] Failed to load pending:', pendingRes.status);
+  }
+  if (!forReviewRes.ok) {
+    console.error('[DocRequests] Failed to load for-review:', forReviewRes.status);
+  }
+  if (!overdueRes.ok) {
+    console.error('[DocRequests] Failed to load overdue:', overdueRes.status);
+  }
+
   const pending = pendingRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(pendingRes).then((d) => d.requests || []) : [];
   const forReview = forReviewRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(forReviewRes).then((d) => d.requests || []) : [];
   const overdue = overdueRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(overdueRes).then((d) => d.requests || []) : [];
+
+  console.log('[DocRequests] Loaded:', { pending: pending.length, forReview: forReview.length, overdue: overdue.length });
+
   const byId = new Map<number, DocumentRequest>();
   [...pending, ...forReview, ...overdue].forEach((r) => byId.set(r.id, r));
   return Array.from(byId.values()).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
@@ -304,7 +322,7 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
       ${createRowCheckbox('document-requests', r.id)}
       <td>${escapeHtml(r.title)}</td>
       <td>${escapeHtml(r.client_name ?? String(r.client_id))}</td>
-      <td>${escapeHtml(r.document_type || '')}</td>
+      <td>${SanitizationUtils.capitalizeName(r.document_type || '')}</td>
       <td>${statusLabel(r.status)}</td>
       <td>${formatDate(r.due_date)}</td>
       <td class="actions-cell">
@@ -481,6 +499,55 @@ function updateTabUI(): void {
   }
 }
 
+/**
+ * Sync client selection between tabs when switching
+ */
+function syncClientSelection(fromTab: 'single' | 'templates', toTab: 'single' | 'templates'): void {
+  const sourceSelectId = fromTab === 'single' ? 'dr-create-client' : 'dr-templates-client';
+  const targetSelectId = toTab === 'single' ? 'dr-create-client' : 'dr-templates-client';
+
+  // Find the source value - check both hidden input (custom dropdown) and native select
+  let sourceValue = '';
+  let sourceLabel = '';
+
+  // Try custom dropdown first (hidden input with same id)
+  const sourceHiddenInput = document.querySelector(`input[type="hidden"][id="${sourceSelectId}"]`) as HTMLInputElement;
+  const sourceSelect = document.getElementById(sourceSelectId) as HTMLSelectElement | null;
+
+  if (sourceHiddenInput && sourceHiddenInput.value) {
+    sourceValue = sourceHiddenInput.value;
+    // Get label from the trigger text
+    const sourceWrapper = sourceHiddenInput.closest('.custom-dropdown');
+    const sourceText = sourceWrapper?.querySelector('.custom-dropdown-text');
+    sourceLabel = sourceText?.textContent || '';
+  } else if (sourceSelect && sourceSelect.value) {
+    sourceValue = sourceSelect.value;
+    sourceLabel = sourceSelect.options[sourceSelect.selectedIndex]?.textContent || '';
+  }
+
+  if (!sourceValue) return;
+
+  // Update target - check both hidden input (custom dropdown) and native select
+  const targetHiddenInput = document.querySelector(`input[type="hidden"][id="${targetSelectId}"]`) as HTMLInputElement;
+  const targetSelect = document.getElementById(targetSelectId) as HTMLSelectElement | null;
+
+  // Update hidden input for custom dropdown
+  if (targetHiddenInput) {
+    targetHiddenInput.value = sourceValue;
+    // Update the display text
+    const targetWrapper = targetHiddenInput.closest('.custom-dropdown');
+    const targetText = targetWrapper?.querySelector('.custom-dropdown-text');
+    if (targetText) {
+      targetText.textContent = sourceLabel;
+    }
+  }
+
+  // Update native select (for form compatibility)
+  if (targetSelect) {
+    targetSelect.value = sourceValue;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Detail modal
 // ---------------------------------------------------------------------------
@@ -613,12 +680,14 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
   el('dr-create-cancel')?.addEventListener('click', closeCreateModal);
   el('dr-templates-cancel')?.addEventListener('click', closeCreateModal);
 
-  // Tab switching
+  // Tab switching - sync client selection between tabs
   const modal = el('dr-create-modal');
   modal?.querySelectorAll('.admin-modal-tab').forEach((tab) => {
     tab.addEventListener('click', () => {
       const tabName = tab.getAttribute('data-dr-tab') as 'single' | 'templates';
       if (tabName) {
+        // Sync client selection before switching
+        syncClientSelection(drActiveTab, tabName);
         drActiveTab = tabName;
         updateTabUI();
       }
@@ -633,21 +702,35 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
   // Single request form submit
   document.getElementById('dr-create-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    // Get client value from hidden input (custom dropdown) or native select
+    const clientHiddenInput = document.querySelector('input[type="hidden"][id="dr-create-client"]') as HTMLInputElement | null;
     const clientSelect = document.getElementById('dr-create-client') as HTMLSelectElement | null;
+    const clientValue = clientHiddenInput?.value || clientSelect?.value || '';
+
     const titleInput = document.getElementById('dr-create-title') as HTMLInputElement | null;
     const descInput = document.getElementById('dr-create-description') as HTMLTextAreaElement | null;
     const dueInput = document.getElementById('dr-create-due') as HTMLInputElement | null;
-    if (!clientSelect?.value || !titleInput?.value.trim()) {
+
+    if (!clientValue || !titleInput?.value.trim()) {
       showToast('Please select a client and enter a title', 'error');
       return;
     }
     try {
-      await apiPost(DR_API, {
-        client_id: parseInt(clientSelect.value, 10),
+      const response = await apiPost(DR_API, {
+        client_id: parseInt(clientValue, 10),
         title: titleInput.value.trim(),
         description: descInput?.value.trim() || undefined,
         due_date: dueInput?.value || undefined
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('[DocRequests] Created request:', result);
+
       showToast('Document request created', 'success');
       closeCreateModal();
       // Reset form
@@ -656,6 +739,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
       if (dueInput) dueInput.value = '';
       await refreshDocumentRequests(ctx);
     } catch (err) {
+      console.error('[DocRequests] Create error:', err);
       showToast((err as Error).message, 'error');
     }
   });
@@ -663,15 +747,19 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
   // Templates form submit
   document.getElementById('dr-from-templates-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    // Get client value from hidden input (custom dropdown) or native select
+    const clientHiddenInput = document.querySelector('input[type="hidden"][id="dr-templates-client"]') as HTMLInputElement | null;
     const clientSelect = document.getElementById('dr-templates-client') as HTMLSelectElement | null;
+    const clientValue = clientHiddenInput?.value || clientSelect?.value || '';
+
     const checked = document.querySelectorAll<HTMLInputElement>('input[name="dr-template-id"]:checked');
-    if (!clientSelect?.value || checked.length === 0) {
+    if (!clientValue || checked.length === 0) {
       showToast('Select a client and at least one template', 'error');
       return;
     }
     try {
       await apiPost(`${DR_API}/from-templates`, {
-        client_id: parseInt(clientSelect.value, 10),
+        client_id: parseInt(clientValue, 10),
         template_ids: Array.from(checked).map((c) => parseInt(c.value, 10))
       });
       showToast(`${checked.length} document request(s) created`, 'success');

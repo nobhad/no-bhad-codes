@@ -36,6 +36,13 @@ import {
   type PaginationState,
   type PaginationConfig
 } from '../../../utils/table-pagination';
+import {
+  createBulkActionToolbar,
+  setupBulkSelectionHandlers,
+  resetSelection,
+  createRowCheckbox,
+  type BulkActionConfig
+} from '../../../utils/table-bulk-actions';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
@@ -67,6 +74,110 @@ const CONTACTS_PAGINATION_CONFIG: PaginationConfig = {
 let paginationState: PaginationState = {
   ...getDefaultPaginationState(CONTACTS_PAGINATION_CONFIG),
   ...loadPaginationState(CONTACTS_PAGINATION_CONFIG.storageKey!)
+};
+
+// ============================================================================
+// BULK ACTION FUNCTIONS (must be defined before CONTACTS_BULK_CONFIG)
+// ============================================================================
+
+/**
+ * Bulk update status for multiple contacts
+ */
+async function bulkUpdateStatus(ids: number[], status: string): Promise<void> {
+  try {
+    const promises = ids.map(id =>
+      apiPut(`/api/admin/contact-submissions/${id}/status`, { status })
+    );
+    await Promise.all(promises);
+
+    // Update local data
+    ids.forEach(id => {
+      const contact = contactsData.find(c => c.id === id);
+      if (contact) {
+        contact.status = status as ContactSubmission['status'];
+      }
+    });
+
+    showToast(`Updated ${ids.length} contacts to ${status}`, 'success');
+
+    // Re-render table
+    if (storedContext) {
+      renderContactsTable(contactsData, storedContext);
+    }
+  } catch (error) {
+    console.error('[AdminContacts] Bulk status update failed:', error);
+    showToast('Failed to update some contacts', 'error');
+  }
+}
+
+/**
+ * Bulk delete contacts
+ */
+async function bulkDeleteContacts(ids: number[]): Promise<void> {
+  try {
+    const promises = ids.map(id =>
+      apiFetch(`/api/admin/contact-submissions/${id}`, { method: 'DELETE' })
+    );
+    await Promise.all(promises);
+
+    // Remove from local data
+    contactsData = contactsData.filter(c => !ids.includes(c.id));
+
+    showToast(`Deleted ${ids.length} contacts`, 'success');
+
+    // Re-render table
+    if (storedContext) {
+      renderContactsTable(contactsData, storedContext);
+    }
+  } catch (error) {
+    console.error('[AdminContacts] Bulk delete failed:', error);
+    showToast('Failed to delete some contacts', 'error');
+  }
+}
+
+// Bulk action configuration
+const CONTACTS_BULK_CONFIG: BulkActionConfig = {
+  tableId: 'contacts',
+  actions: [
+    {
+      id: 'mark-read',
+      label: 'Read',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+      variant: 'default',
+      handler: async (ids) => {
+        await bulkUpdateStatus(ids, 'read');
+      }
+    },
+    {
+      id: 'mark-responded',
+      label: 'Responded',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>',
+      variant: 'default',
+      handler: async (ids) => {
+        await bulkUpdateStatus(ids, 'responded');
+      }
+    },
+    {
+      id: 'archive',
+      label: 'Archive',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>',
+      variant: 'warning',
+      confirmMessage: 'Archive {count} selected contacts?',
+      handler: async (ids) => {
+        await bulkUpdateStatus(ids, 'archived');
+      }
+    },
+    {
+      id: 'delete',
+      label: 'Delete',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+      variant: 'danger',
+      confirmMessage: 'Permanently delete {count} selected contacts? This cannot be undone.',
+      handler: async (ids) => {
+        await bulkDeleteContacts(ids);
+      }
+    }
+  ]
 };
 
 // ============================================================================
@@ -163,6 +274,18 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
       }
     });
   }, 100);
+
+  // Setup bulk action toolbar
+  const bulkToolbarContainer = document.getElementById('contacts-bulk-toolbar');
+  if (bulkToolbarContainer) {
+    const toolbar = createBulkActionToolbar({
+      ...CONTACTS_BULK_CONFIG,
+      onSelectionChange: () => {
+        // Selection change callback if needed
+      }
+    });
+    bulkToolbarContainer.replaceWith(toolbar);
+  }
 }
 
 function updateContactsDisplay(data: ContactsData, ctx: AdminDashboardContext): void {
@@ -184,7 +307,7 @@ function renderContactsTable(
   if (!tableBody) return;
 
   if (!submissions || submissions.length === 0) {
-    showTableEmpty(tableBody, 6, 'No contacts yet.');
+    showTableEmpty(tableBody, 7, 'No contacts yet.');
     renderContactsPaginationUI(0, ctx);
     return;
   }
@@ -229,8 +352,9 @@ function renderContactsTable(
     const canConvert = !submission.client_id;
     const isArchived = status === 'archived';
 
-    // Match header structure: Contact | Email | Message | Status | Date | Actions
+    // Column order: ☐ | Contact | Email | Message | Status | Date | Actions
     row.innerHTML = `
+      ${createRowCheckbox('contacts', submission.id)}
       <td class="identity-cell contact-cell">
         <span class="identity-name">${safeName}</span>
         ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
@@ -263,10 +387,10 @@ function renderContactsTable(
       statusCell.appendChild(dropdown);
     }
 
-    // Add click handler for row (excluding status cell and action buttons)
+    // Add click handler for row (excluding status cell, action buttons, and checkbox)
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown') || target.closest('.table-actions') || target.closest('button')) return;
+      if (target.closest('.table-dropdown') || target.closest('.table-actions') || target.closest('button') || target.closest('.bulk-select-cell') || target.tagName === 'INPUT') return;
       showContactDetails(submission.id);
     });
 
@@ -303,6 +427,13 @@ function renderContactsTable(
 
     tableBody.appendChild(row);
   });
+
+  // Reset bulk selection when data changes
+  resetSelection('contacts');
+
+  // Setup bulk selection handlers
+  const allRowIds = paginatedSubmissions.map(s => s.id);
+  setupBulkSelectionHandlers(CONTACTS_BULK_CONFIG, allRowIds);
 
   // Render pagination
   renderContactsPaginationUI(filteredSubmissions.length, ctx);

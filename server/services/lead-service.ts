@@ -872,7 +872,8 @@ class LeadService {
        WHERE project_id = ?
        ORDER BY
          CASE status WHEN 'pending' THEN 0 WHEN 'snoozed' THEN 1 ELSE 2 END,
-         due_date ASC NULLS LAST`,
+         CASE WHEN due_date IS NULL THEN 1 ELSE 0 END,
+         due_date ASC`,
       [projectId]
     ) as unknown as TaskRow[];
     return rows.map(toTask);

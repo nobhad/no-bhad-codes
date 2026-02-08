@@ -184,7 +184,7 @@ class DocumentRequestService {
     const request = await db.get(
       `SELECT dr.*,
               COALESCE(c.company_name, c.contact_name) as client_name,
-              p.name as project_name,
+              p.project_name as project_name,
               f.original_filename as file_name
        FROM document_requests dr
        LEFT JOIN clients c ON dr.client_id = c.id
@@ -208,7 +208,7 @@ class DocumentRequestService {
 
     let query = `
       SELECT dr.*,
-             p.name as project_name,
+             p.project_name as project_name,
              f.original_filename as file_name
       FROM document_requests dr
       LEFT JOIN projects p ON dr.project_id = p.id
@@ -222,7 +222,7 @@ class DocumentRequestService {
       params.push(status);
     }
 
-    query += ' ORDER BY dr.due_date ASC NULLS LAST, dr.created_at DESC';
+    query += ' ORDER BY CASE WHEN dr.due_date IS NULL THEN 1 ELSE 0 END, dr.due_date ASC, dr.created_at DESC';
 
     const requests = await db.all(query, params);
     return requests as unknown as DocumentRequest[];
@@ -237,7 +237,7 @@ class DocumentRequestService {
     const requests = await db.all(
       `SELECT dr.*,
               COALESCE(c.company_name, c.contact_name) as client_name,
-              p.name as project_name,
+              p.project_name as project_name,
               f.original_filename as file_name
        FROM document_requests dr
        LEFT JOIN clients c ON dr.client_id = c.id
@@ -251,7 +251,8 @@ class DocumentRequestService {
            WHEN 'normal' THEN 3
            WHEN 'low' THEN 4
          END,
-         dr.due_date ASC NULLS LAST,
+         CASE WHEN dr.due_date IS NULL THEN 1 ELSE 0 END,
+         dr.due_date ASC,
          dr.created_at DESC`
     );
 
@@ -267,7 +268,7 @@ class DocumentRequestService {
     const requests = await db.all(
       `SELECT dr.*,
               COALESCE(c.company_name, c.contact_name) as client_name,
-              p.name as project_name,
+              p.project_name as project_name,
               f.original_filename as file_name
        FROM document_requests dr
        LEFT JOIN clients c ON dr.client_id = c.id
@@ -474,7 +475,7 @@ class DocumentRequestService {
     const requests = await db.all(
       `SELECT dr.*,
               COALESCE(c.company_name, c.contact_name) as client_name,
-              p.name as project_name
+              p.project_name as project_name
        FROM document_requests dr
        LEFT JOIN clients c ON dr.client_id = c.id
        LEFT JOIN projects p ON dr.project_id = p.id

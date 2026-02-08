@@ -422,7 +422,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
     row.dataset.projectId = String(project.id);
     row.className = 'clickable-row';
 
-    // Standard column order: ☐ | Project (+Client) | Type | Budget | Timeline | Status | Start
+    // Standard column order: ☐ | Project (+Client) | Type | Status | Budget | Timeline | Start | Target | Actions
     row.innerHTML = `
       ${createRowCheckbox('projects', project.id)}
       <td class="identity-cell">
@@ -433,10 +433,21 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
         <span class="type-value">${formatProjectType(project.project_type)}</span>
         <span class="budget-stacked">${formatDisplayValue(project.budget_range)}</span>
       </td>
+      <td class="status-cell"></td>
       <td class="budget-cell">${formatDisplayValue(project.budget_range)}</td>
       <td class="timeline-cell">${formatDisplayValue(project.timeline)}</td>
-      <td class="status-cell"></td>
-      <td class="date-cell">${formatDate(project.start_date)}</td>
+      <td class="date-cell start-cell">
+        <span class="date-value">${formatDate(project.start_date)}</span>
+        <span class="target-stacked">${formatDate(project.end_date)}</span>
+      </td>
+      <td class="date-cell target-cell">${formatDate(project.end_date)}</td>
+      <td class="actions-cell">
+        <div class="table-actions">
+          <button class="icon-btn btn-view-project" data-project-id="${project.id}" title="View Project" aria-label="View project details">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </td>
     `;
 
     // Create status dropdown
@@ -453,12 +464,21 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       statusCell.appendChild(dropdown);
     }
 
-    // Add click handler for row (excluding status cell and checkbox)
+    // Add click handler for row (excluding status cell, checkbox, and actions)
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown') || target.closest('.bulk-select-cell') || target.tagName === 'INPUT') return;
+      if (target.closest('.table-dropdown') || target.closest('.bulk-select-cell') || target.closest('.actions-cell') || target.tagName === 'INPUT') return;
       showProjectDetails(project.id, ctx);
     });
+
+    // Add click handler for view button
+    const viewBtn = row.querySelector('.btn-view-project');
+    if (viewBtn) {
+      viewBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showProjectDetails(project.id, ctx);
+      });
+    }
 
     tableBody.appendChild(row);
   });

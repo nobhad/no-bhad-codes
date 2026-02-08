@@ -1042,10 +1042,39 @@ To prevent horizontal scroll on admin tables at smaller viewports, columns are p
 }
 ```
 
+**Mobile Override (479px and below):**
+
+On mobile, tables transform to card view showing all cells as blocks. Stacked elements must be hidden to prevent duplicates:
+
+```css
+@media (--small-mobile) {
+  [data-page="admin"] .admin-table .budget-stacked,
+  [data-page="admin"] .admin-table .email-stacked,
+  [data-page="admin"] .admin-table .date-stacked {
+    display: none !important;  /* Override 1280px/1100px rules */
+  }
+}
+```
+
+**Mobile Card Cell Ordering:**
+
+On mobile (479px and below), table rows transform into stacked cards using CSS flexbox with `order` property. Order matches desktop column layout for consistency.
+
+| Order | Cell Types | Color | Purpose |
+| :---: | ---------- | ----- | ------- |
+| -2 | `.identity-cell`, `.contact-cell`, `.name-cell` | `--portal-text-light` | Primary name |
+| 1 | `.type-cell` | `--portal-text-secondary` | Category |
+| 2 | `.status-cell` | - | Status dropdown |
+| 3 | `.budget-cell`, `.count-cell` | `--portal-text-secondary` | Financial/count |
+| 4 | `.timeline-cell`, `.message-cell` | `--portal-text-muted` / `--portal-text-secondary` | Details |
+| 5 | `.email-cell` | `--portal-text-muted` | Contact info |
+| 6 | `.date-cell` | `--portal-text-muted` | Dates |
+| 10 | `.actions-cell` | - | Action buttons |
+
 **Files:**
 
 - CSS: `src/styles/pages/admin.css`
-- TypeScript: `admin-leads.ts`, `admin-contacts.ts`, `admin-projects.ts`
+- TypeScript: `admin-leads.ts`, `admin-contacts.ts`, `admin-projects.ts`, `admin-clients.ts`
 
 ### Settings Grid (3 → 2 → 1 columns)
 

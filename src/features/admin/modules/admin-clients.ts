@@ -507,7 +507,7 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
       // Health badge (available for future use)
       const _healthBadge = getHealthBadgeHtml(client.health_score);
 
-      // Standard column order: ☐ | Client (name+email+company) | Type | Projects | Status | Created | Actions
+      // Standard column order: ☐ | Client (name+email+company) | Type | Status | Projects | Created | Last Active | Actions
       return `
         <tr data-client-id="${client.id}" class="clickable-row">
           ${createRowCheckbox('clients', client.id)}
@@ -517,10 +517,13 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
             <span class="identity-email">${safeEmail}</span>
           </td>
           <td class="type-cell">${typeLabel}</td>
-          <td class="count-cell">${projectCount}</td>
           <td class="status-cell">${statusCell}</td>
-          <td class="date-cell">${date}</td>
-          <td class="date-cell">${lastActive}</td>
+          <td class="count-cell">${projectCount}</td>
+          <td class="date-cell created-cell">
+            <span class="date-value">${date}</span>
+            <span class="last-active-stacked">${lastActive}</span>
+          </td>
+          <td class="date-cell last-active-cell">${lastActive}</td>
           <td class="actions-cell">
             <div class="table-actions">
               ${inviteBtn}
