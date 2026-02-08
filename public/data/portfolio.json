@@ -4,13 +4,13 @@
       "id": "nobhad-codes",
       "title": "nobhad.codes",
       "slug": "nobhad-codes",
-      "tagline": "Portfolio site",
-      "description": "A custom-built portfolio designed to showcase technical projects and professional expertise. Prioritizes performance, accessibility, and clean design over flashy gimmicks—demonstrating the same principles applied to client work.",
+      "tagline": "You're looking at it",
+      "description": "A custom-built portfolio designed to showcase technical projects and professional expertise. Prioritizes performance, accessibility, and clean design over flashy gimmicks—demonstrating the same principles applied to client work. Design inspired by a mischievous coyote cartoon character.",
       "category": "websites",
       "role": "Full Stack Developer",
-      "tools": ["React", "TypeScript", "Express.js", "GSAP", "SQLite", "Vite"],
+      "tools": ["TypeScript", "Node.js", "Express.js", "SQLite", "GSAP", "Vite", "EJS", "Vitest"],
       "year": 2026,
-      "technologies": ["React", "TypeScript", "Express.js", "GSAP", "SQLite", "Vite"],
+      "technologies": ["TypeScript", "Node.js", "Express.js", "SQLite", "GSAP", "Vite", "EJS", "Vitest"],
       "date": "2026-01-01",
       "status": "in-progress",
       "featured": true,
@@ -19,7 +19,23 @@
       "liveUrl": "https://nobhad.codes",
       "repoUrl": "https://github.com/nobhad",
       "isDocumented": true,
-      "titleCard": "/projects/nobhad-codes-title.png"
+      "titleCard": "/projects/nobhad-codes-title.png",
+      "duration": "Ongoing",
+      "challenge": "Most portfolio templates feel generic and fail to demonstrate actual development skills. I needed a site that would stand out while proving I could build production-ready applications—not just pretty mockups.",
+      "approach": "Built everything from scratch using vanilla TypeScript instead of React to demonstrate fundamental skills. Implemented a custom SPA router, GSAP-powered animations, and a full Express backend. The playful design draws inspiration from a mischievous coyote cartoon character—clever, resourceful, and a little unconventional. The interactive business card serves as both a memorable introduction and a showcase of animation capabilities.",
+      "results": [
+        "Sub-2-second load times with optimized asset delivery",
+        "100% Lighthouse accessibility score",
+        "Seamless page transitions without framework overhead",
+        "Integrated client portal and admin dashboard"
+      ],
+      "keyFeatures": [
+        "Interactive 3D business card with flip animation",
+        "CRT TV hover preview for project cards",
+        "Dark/light theme with system preference detection",
+        "Terminal-style client intake form",
+        "Full test coverage with Vitest"
+      ]
     },
     {
       "id": "the-backend",
@@ -29,9 +45,9 @@
       "description": "A full-stack dashboard and client portal for managing freelance projects. The developer side handles leads, project tracking, client invitations via magic links, messaging, file sharing, and invoice generation. The client side gives clients real-time project progress, file uploads, messaging, and invoice history—all without third-party platforms.",
       "category": "applications",
       "role": "Full Stack Developer",
-      "tools": ["React", "TypeScript", "Express.js", "SQLite", "JWT", "PDFKit", "Vite"],
+      "tools": ["TypeScript", "Node.js", "Express.js", "SQLite", "JWT", "bcryptjs", "pdf-lib", "Chart.js", "Multer", "nodemailer", "node-cron", "Vite"],
       "year": 2026,
-      "technologies": ["React", "TypeScript", "Express.js", "SQLite", "JWT", "PDFKit", "Vite"],
+      "technologies": ["TypeScript", "Node.js", "Express.js", "SQLite", "JWT", "bcryptjs", "pdf-lib", "Chart.js", "Multer", "nodemailer", "node-cron", "Vite"],
       "date": "2026-01-01",
       "status": "in-progress",
       "featured": true,
@@ -39,7 +55,26 @@
       "screenshots": [],
       "liveUrl": "https://nobhad.codes/admin",
       "isDocumented": true,
-      "titleCard": "/projects/the-backend-title.png"
+      "titleCard": "/projects/the-backend-title.png",
+      "duration": "Ongoing",
+      "challenge": "Managing freelance projects meant juggling emails, spreadsheets, Dropbox, and invoicing apps. Clients had no visibility into project progress, and context was constantly lost across disconnected tools. I needed a unified system that would professionalize the client experience while streamlining my workflow.",
+      "approach": "Designed a dual-portal architecture: an admin dashboard for project management and a client portal for transparency. Built secure authentication with magic link invitations, real-time messaging, automated PDF invoice generation, and a visual Kanban board. Used SQLite for simplicity and portability, with a migration system for schema evolution.",
+      "results": [
+        "Single platform replaces 4+ separate tools",
+        "Clients can self-serve project status, files, and invoices",
+        "Automated invoice generation saves hours per month",
+        "Complete audit trail of all client communications"
+      ],
+      "keyFeatures": [
+        "Magic link client invitations (no password setup required)",
+        "Real-time messaging with emoji support",
+        "Drag-and-drop file uploads with preview",
+        "PDF invoice generation with line items",
+        "Lead pipeline with Kanban view",
+        "Analytics dashboard with Chart.js visualizations",
+        "Scheduled tasks with node-cron",
+        "Multi-step approval workflows"
+      ]
     },
     {
       "id": "recycle-content",
@@ -58,7 +93,23 @@
       "heroImage": "",
       "screenshots": [],
       "isDocumented": false,
-      "titleCard": "/projects/recycle-content-title.png"
+      "titleCard": "/projects/recycle-content-title.png",
+      "duration": "In Development",
+      "challenge": "Content creators on subscription platforms struggle to maximize revenue from their back catalog. Manually tracking which subscribers have purchased which content is tedious and error-prone, leading to missed sales opportunities or awkward duplicate offers.",
+      "approach": "Building a SaaS platform with browser extension integration to automatically capture purchase data. The system tracks SKUs, maintains buyer exclusion lists, and enables targeted re-marketing to subscribers who haven't purchased specific content. Multi-tenant architecture supports agencies managing multiple creators.",
+      "results": [
+        "Currently in active development",
+        "Browser extension MVP complete",
+        "Multi-tenant database schema implemented"
+      ],
+      "keyFeatures": [
+        "Chrome extension for automatic data capture",
+        "SKU management with purchase history",
+        "Automatic buyer exclusion lists",
+        "Agency multi-tenant support",
+        "Bulk content scheduling",
+        "Analytics and revenue tracking"
+      ]
     },
     {
       "id": "linktrees",
@@ -77,7 +128,22 @@
       "heroImage": "",
       "screenshots": [],
       "isDocumented": false,
-      "titleCard": "/projects/linktrees-title.png"
+      "titleCard": "/projects/linktrees-title.png",
+      "duration": "2 weeks",
+      "challenge": "Standard Linktree pages look generic and don't reflect personal brand. Creators wanted unique link-in-bio pages that stood out from the sea of identical templates while remaining mobile-friendly and fast-loading.",
+      "approach": "Designed custom themed pages with GSAP-powered animated backgrounds. Each page is hand-crafted with unique color schemes, typography, and micro-interactions. Kept the codebase lightweight (no frameworks) for optimal mobile performance.",
+      "results": [
+        "Multiple custom linktree pages delivered",
+        "Sub-second load times on mobile",
+        "Positive client feedback on unique designs"
+      ],
+      "keyFeatures": [
+        "Animated gradient backgrounds",
+        "Custom theme per client",
+        "Mobile-first responsive design",
+        "Smooth hover animations",
+        "Lightweight vanilla JS implementation"
+      ]
     }
   ],
   "categories": [

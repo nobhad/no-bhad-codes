@@ -26,6 +26,12 @@ The Backend refers to the complete portal system with two interfaces:
 |----------|-------------|
 |**[Admin Dashboard](./features/ADMIN_DASHBOARD.md)**|Leads, projects, clients, messaging, analytics|
 
+### Main Site Features
+
+|Document|Description|
+|----------|-------------|
+|**[Portfolio Projects](./features/PORTFOLIO.md)**|Adding projects, JSON schema, case study fields, image requirements|
+
 ### Backend API Features (Phase 1-7)
 
 |Document|Description|

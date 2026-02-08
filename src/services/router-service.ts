@@ -70,17 +70,17 @@ export class RouterService extends BaseService {
 
   /**
    * Setup default routes for the application
-   * Uses salcosta-style hash routing: #/, #/about, #/contact
+   * Uses hash routing: #/, #/about, #/contact
    */
   private setupDefaultRoutes(): void {
-    // Register default routes - salcosta-style hash format
+    // Register default routes - hash format
     this.routes.set('/', {
       path: '/',
       section: 'intro',
       title: 'No Bhad Codes'
     });
 
-    // Salcosta-style hash routes
+    // Hash routes
     this.routes.set('#/', {
       path: '#/',
       section: 'intro',
@@ -324,7 +324,7 @@ export class RouterService extends BaseService {
       }
     }
 
-    // Update current route (use salcosta-style hash)
+    // Update current route
     this.currentRoute = `#/${sectionId}`;
 
     // Dispatch navigation event
@@ -341,7 +341,7 @@ export class RouterService extends BaseService {
 
   /**
    * Handle hash changes
-   * Supports salcosta-style hashes: #/, #/about, #/contact
+   * Supports hashes: #/, #/about, #/contact
    */
   private async handleHashChange(): Promise<void> {
     const { hash } = window.location;
@@ -356,7 +356,7 @@ export class RouterService extends BaseService {
         return;
       }
 
-      // Extract section ID from salcosta-style hash
+      // Extract section ID from hash
       // #/ -> intro, #/about -> about, #/contact -> contact
       let sectionId: string;
       if (hash === '#/' || hash === '#') {
@@ -440,7 +440,7 @@ export class RouterService extends BaseService {
 
   /**
    * Find route by path
-   * Supports salcosta-style hashes: #/, #/about, #/contact
+   * Supports hashes: #/, #/about, #/contact
    * Also supports legacy hashes: #about, #contact
    */
   private findRoute(path: string): Route | null {
@@ -463,19 +463,19 @@ export class RouterService extends BaseService {
       return null;
     }
 
-    // Direct match (try salcosta-style first)
+    // Direct match (try hash style first)
     if (this.routes.has(searchPath)) {
       this.log('Found direct match for:', searchPath);
       return this.routes.get(searchPath)!;
     }
 
-    // Convert legacy hash to salcosta-style and try again
+    // Convert legacy hash to modern style and try again
     // #about -> #/about
     if (searchPath.startsWith('#') && !searchPath.startsWith('#/')) {
-      const salcostaPath = `#/${searchPath.substring(1)}`;
-      if (this.routes.has(salcostaPath)) {
-        this.log('Found salcosta-style match for:', salcostaPath);
-        return this.routes.get(salcostaPath)!;
+      const modernPath = `#/${searchPath.substring(1)}`;
+      if (this.routes.has(modernPath)) {
+        this.log('Found hash-style match for:', modernPath);
+        return this.routes.get(modernPath)!;
       }
     }
 

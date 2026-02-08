@@ -44,7 +44,7 @@ The Client Portal is the client-facing side of "The Backend" portal system. It p
   - Invoice list from API with summary stats
   - Status badges (Pending, Paid, Overdue, etc.)
   - Invoice preview in new tab
-  - PDF download via PDFKit
+  - PDF download via pdf-lib
 - **Settings with Backend Persistence:**
   - Profile updates (name, company, phone)
   - Password change with verification
@@ -666,7 +666,7 @@ The Client Portal includes a complete invoice management system. For detailed do
 |Invoice List from API|Dynamic list from backend with demo fallback|
 |Status Badges|Visual status indicators (Pending, Paid, Overdue, etc.)|
 |Invoice Preview|Open invoice details in new tab|
-|Invoice PDF Download|Download invoice as PDF via PDFKit|
+|Invoice PDF Download|Download invoice as PDF via pdf-lib|
 
 ### Invoice API Endpoints
 
