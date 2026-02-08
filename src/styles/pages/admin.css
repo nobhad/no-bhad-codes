@@ -220,6 +220,8 @@ body[data-page="admin"]:not(.admin-logged-in) {
   padding: 0.5rem clamp(0.75rem, 2vw, 1.5rem) clamp(0.75rem, 2vw, 1.5rem);
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   background: var(--portal-bg-medium);
   color: var(--portal-text-light);
   height: 100vh;
@@ -1875,6 +1877,13 @@ body.modal-open .dashboard-content {
 
 /* Mobile - reduce padding on all dark grey cards */
 @media (--small-mobile) {
+  /* Ensure dashboard content scrolls on mobile */
+  [data-page="admin"] .dashboard-content {
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
   /* Cards: 0.75rem (12px) padding on mobile */
   [data-page="admin"] .portal-project-card,
   [data-page="admin"] .admin-table-card,
