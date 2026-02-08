@@ -157,7 +157,7 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
 
   // Show loading state
   const tableBody = getElement('leads-table-body');
-  if (tableBody) showTableLoading(tableBody, 8, 'Loading leads...');
+  if (tableBody) showTableLoading(tableBody, 7, 'Loading leads...');
 
   try {
     const response = await apiFetch('/api/admin/leads');
@@ -173,14 +173,14 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
       console.error('[AdminLeads] API error:', response.status, errorText);
       const errorTableBody = getElement('leads-table-body');
       if (errorTableBody) {
-        errorTableBody.innerHTML = `<tr><td colspan="8" class="loading-row">Error loading leads: ${response.status}</td></tr>`;
+        errorTableBody.innerHTML = `<tr><td colspan="7" class="loading-row">Error loading leads: ${response.status}</td></tr>`;
       }
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to load leads:', error);
     const catchTableBody = getElement('leads-table-body');
     if (catchTableBody) {
-      catchTableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Network error loading leads</td></tr>';
+      catchTableBody.innerHTML = '<tr><td colspan="7" class="loading-row">Network error loading leads</td></tr>';
     }
   }
 }
@@ -568,7 +568,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   if (!tableBody) return;
 
   if (!leads || leads.length === 0) {
-    showTableEmpty(tableBody, 8, 'No leads yet.');
+    showTableEmpty(tableBody, 7, 'No leads yet.');
     renderLeadsPaginationUI(0, ctx);
     return;
   }
@@ -577,7 +577,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   const filteredLeads = applyFilters(leads, filterState, LEADS_FILTER_CONFIG);
 
   if (filteredLeads.length === 0) {
-    showTableEmpty(tableBody, 8, 'No leads match the current filters.');
+    showTableEmpty(tableBody, 7, 'No leads match the current filters.');
     renderLeadsPaginationUI(0, ctx);
     return;
   }
@@ -636,10 +636,9 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
     // Secondary name: contact (only if company exists as primary)
     const secondaryContent = safeCompanyName && safeContactName ? wrapWithClientLink(safeContactName) : '';
 
-    // Column order: ☐ | Project | Lead | Type | ... (project before client when active)
+    // Column order: ☐ | Lead | Type | Budget | Status | Date | Actions
     row.innerHTML = `
       ${createRowCheckbox('leads', lead.id)}
-      <td class="project-cell">${projectContent}</td>
       <td class="identity-cell">
         ${primaryContent ? `<span class="identity-name">${primaryContent}</span>` : ''}
         ${secondaryContent ? `<span class="identity-contact">${secondaryContent}</span>` : ''}
