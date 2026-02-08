@@ -319,8 +319,8 @@
   color: var(--portal-text-light);
   cursor: pointer;
   padding: var(--space-2);
-  border-radius: 4px;
-  transition: color 0.2s ease;
+  border-radius: var(--portal-radius-xs);
+  transition: color var(--transition-fast);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -391,7 +391,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn .btn-icon svg {
   stroke-width: 2;
-  transition: stroke-width 0.15s ease;
+  transition: stroke-width var(--transition-faster);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn.active .btn-icon svg,
@@ -442,7 +442,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-logout .btn-icon svg {
   stroke-width: 2;
-  transition: stroke-width 0.15s ease;
+  transition: stroke-width var(--transition-faster);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-logout:hover .btn-icon svg {
@@ -466,7 +466,7 @@
     height: 40px;
     padding: 0;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: var(--portal-radius-md);
     border: none;
     background: transparent;
     position: relative;
@@ -502,7 +502,7 @@
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn .btn-icon svg {
     stroke-width: 2;
-    transition: stroke-width 0.15s ease;
+    transition: stroke-width var(--transition-faster);
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn.active .btn-icon svg,
@@ -516,7 +516,7 @@
     height: 40px;
     padding: 0;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: var(--portal-radius-md);
     margin: 0 auto;
     border: none;
     background: transparent;
@@ -536,7 +536,7 @@
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout .btn-icon svg {
     stroke-width: 2;
-    transition: stroke-width 0.15s ease;
+    transition: stroke-width var(--transition-faster);
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout:hover .btn-icon svg {
@@ -556,7 +556,7 @@
     height: 40px;
     padding: 0;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: var(--portal-radius-md);
     border: none;
     background: transparent;
     position: relative;
@@ -591,7 +591,7 @@
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn .btn-icon svg {
     stroke-width: 2;
-    transition: stroke-width 0.15s ease;
+    transition: stroke-width var(--transition-faster);
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn.active .btn-icon svg,
@@ -605,7 +605,7 @@
     height: 40px;
     padding: 0;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: var(--portal-radius-md);
     margin: 0 auto;
     border: none;
     background: transparent;
@@ -625,7 +625,7 @@
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout .btn-icon svg {
     stroke-width: 2;
-    transition: stroke-width 0.15s ease;
+    transition: stroke-width var(--transition-faster);
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout:hover .btn-icon svg {

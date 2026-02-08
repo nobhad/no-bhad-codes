@@ -344,19 +344,19 @@ function renderListItem(task: GlobalTask): string {
 
   return `
     <tr data-task-id="${task.id}" class="clickable-row" tabindex="0" role="button" aria-label="View task: ${SanitizationUtils.escapeHtml(task.title)}">
-      <td>
+      <td class="identity-cell">
         <div class="task-list-title">
-          <span>${SanitizationUtils.escapeHtml(task.title)}</span>
-          ${task.description ? `<small class="text-muted">${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</small>` : ''}
+          <span class="identity-name">${SanitizationUtils.escapeHtml(task.title)}</span>
+          ${task.description ? `<small class="identity-contact text-muted">${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</small>` : ''}
         </div>
       </td>
-      <td>
+      <td class="project-cell">
         <span class="project-link">${SanitizationUtils.escapeHtml(task.projectName)}</span>
       </td>
-      <td><span class="task-priority ${priorityClass}">${priorityLabel}</span></td>
-      <td>${getStatusDotHTML(task.status)}</td>
-      <td class="${isOverdue ? 'overdue' : ''}">${task.dueDate ? formatDate(task.dueDate) : ''}</td>
-      <td>${task.assignedTo ? SanitizationUtils.escapeHtml(task.assignedTo) : ''}</td>
+      <td class="type-cell"><span class="task-priority ${priorityClass}">${priorityLabel}</span></td>
+      <td class="status-cell">${getStatusDotHTML(task.status)}</td>
+      <td class="date-cell ${isOverdue ? 'overdue' : ''}">${task.dueDate ? formatDate(task.dueDate) : ''}</td>
+      <td class="type-cell">${task.assignedTo ? SanitizationUtils.escapeHtml(task.assignedTo) : ''}</td>
     </tr>
   `;
 }

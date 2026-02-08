@@ -125,14 +125,14 @@ class TimelineService {
           `SELECT
             'message_sent' as type,
             'message_' || m.id as id,
-            CASE WHEN m.sender_role = 'client' THEN 'Message Sent' ELSE 'Message Received' END as title,
+            CASE WHEN m.sender_type = 'client' THEN 'Message Sent' ELSE 'Message Received' END as title,
             SUBSTR(m.content, 1, 100) as description,
             p.name as project_name,
             m.project_id as project_id,
             m.id as entity_id,
             'message' as entity_type,
             m.created_at as created_at,
-            CASE WHEN m.sender_role = 'client' THEN 'client' ELSE 'admin' END as actor_type,
+            CASE WHEN m.sender_type = 'client' THEN 'client' ELSE 'admin' END as actor_type,
             m.sender_name as actor_name
           FROM messages m
           JOIN projects p ON m.project_id = p.id

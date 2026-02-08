@@ -183,7 +183,7 @@ class DocumentRequestService {
 
     const request = await db.get(
       `SELECT dr.*,
-              c.name as client_name,
+              COALESCE(c.company_name, c.contact_name) as client_name,
               p.name as project_name,
               f.original_filename as file_name
        FROM document_requests dr
@@ -236,7 +236,7 @@ class DocumentRequestService {
 
     const requests = await db.all(
       `SELECT dr.*,
-              c.name as client_name,
+              COALESCE(c.company_name, c.contact_name) as client_name,
               p.name as project_name,
               f.original_filename as file_name
        FROM document_requests dr
@@ -266,7 +266,7 @@ class DocumentRequestService {
 
     const requests = await db.all(
       `SELECT dr.*,
-              c.name as client_name,
+              COALESCE(c.company_name, c.contact_name) as client_name,
               p.name as project_name,
               f.original_filename as file_name
        FROM document_requests dr
@@ -473,7 +473,7 @@ class DocumentRequestService {
 
     const requests = await db.all(
       `SELECT dr.*,
-              c.name as client_name,
+              COALESCE(c.company_name, c.contact_name) as client_name,
               p.name as project_name
        FROM document_requests dr
        LEFT JOIN clients c ON dr.client_id = c.id
