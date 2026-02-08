@@ -50,6 +50,60 @@ This file tracks active development work and TODOs. Completed items are moved to
   - Updated `docs/ARCHITECTURE.md` - Grouped portals under "The Backend"
   - Updated `docs/SYSTEM_DOCUMENTATION.md` - Grouped portals under "The Backend"
 
+### Portfolio Tech Stack Audit
+
+- **Removed Incorrect "React" from nobhad.codes and The Backend** - COMPLETE
+  - Both projects use Vanilla TypeScript, NOT React
+  - Fixed `public/data/portfolio.json`
+
+- **Replaced "PDFKit" with "pdf-lib"** - COMPLETE
+  - The Backend uses pdf-lib, not PDFKit
+  - Fixed `public/data/portfolio.json`
+  - Fixed `docs/features/PROPOSAL_BUILDER.md`
+  - Fixed `docs/features/CLIENT_PORTAL.md` (2 occurrences)
+
+- **Expanded Tech Stacks** - COMPLETE
+  - nobhad.codes: TypeScript, Node.js, Express.js, SQLite, GSAP, Vite, EJS, Vitest
+  - The Backend: TypeScript, Node.js, Express.js, SQLite, JWT, bcryptjs, pdf-lib,
+    Chart.js, Multer, nodemailer, node-cron, Vite
+
+### Project Detail Page Enhancements
+
+- **Added Tagline Display** - COMPLETE
+  - Shows project tagline (e.g., "Portfolio site", "Client & project management system")
+  - Styled in italic with muted color
+  - Files: `index.html`, `projects.ts`, `projects-detail.css`
+
+- **Added Status Badge** - COMPLETE
+  - Shows "In Progress", "Completed", or "Planned" badge
+  - Color-coded: warning (in-progress), success (completed), info (planned)
+  - Files: `index.html`, `projects.ts`, `projects-detail.css`
+
+- **Added Next/Previous Navigation** - COMPLETE
+  - Navigate between documented projects at bottom of detail page
+  - Wraps around (last project links to first, first to last)
+  - Responsive: stacks vertically on mobile
+  - Files: `index.html`, `projects.ts`, `projects-detail.css`
+
+- **Fixed PDFKit → pdf-lib in About Section** - COMPLETE
+  - index.html tech stack list had outdated "PDFKit"
+  - Changed to "pdf-lib" to match actual dependency
+
+### Case Study Sections Added
+
+- **Challenge/Approach/Results/Features Sections** - COMPLETE
+  - Added full case study structure to project detail pages
+  - New fields in `portfolio.json`: challenge, approach, results[], keyFeatures[], duration
+  - New HTML sections with proper semantic markup
+  - Styled with accent bullets and checkmark icons for results
+  - Sections hide automatically if data not provided
+
+- **Content Written for All Projects** - COMPLETE
+  - nobhad.codes: Challenge (generic portfolios), Approach (vanilla TS, GSAP), Results (performance), Features (business card, CRT TV)
+  - The Backend: Challenge (tool fragmentation), Approach (dual-portal), Results (replaces 4+ tools), Features (magic links, PDF invoices)
+  - Recycle Content: Challenge (revenue optimization), Approach (SaaS + extension), Results (in development), Features (SKU management)
+  - Linktrees: Challenge (generic templates), Approach (custom GSAP), Results (fast loads), Features (animated backgrounds)
+
 ### Global Tasks Kanban Feature
 
 - **Backend API** - COMPLETE
@@ -339,6 +393,13 @@ This file tracks active development work and TODOs. Completed items are moved to
     - `1100px`: Leads hide Date column, stack above Status
   - Files: `admin.css`, `admin-leads.ts`, `admin-contacts.ts`, `admin-projects.ts`
 
+- **Mobile Card View Duplicate Data Fix** - COMPLETE
+  - Issue: On mobile (375px), stacked elements showed alongside original cells (duplicate budget)
+  - Cause: 1280px breakpoint rule applies to mobile (375px < 1280px), showing `budget-stacked`
+  - Mobile card view also shows `budget-cell` as block, creating duplicates
+  - Fix: Added `display: none !important` for stacked elements within `@media (--small-mobile)`
+  - File: `src/styles/pages/admin.css`
+
 - **Sortable Column Labels Fixed** - COMPLETE
   - Updated filter configs so sortable column labels match header text
   - Leads: "Project Type" → "Type", "Contact" → "Lead"
@@ -352,6 +413,22 @@ This file tracks active development work and TODOs. Completed items are moved to
   - Root cause: Click handler captured stale `state` object in closure
   - Solution: Store sort state in DOM data attributes on `thead`, read fresh values on each click
   - File: `src/utils/table-filter.ts`
+
+- **Mobile Card Layout Streamlining** - COMPLETE
+  - Deep dive audit of mobile table styling across all admin tables
+  - Added explicit CSS `order` values for consistent cell display order on mobile cards:
+    - Order -2: Identity cells (primary name/email/company)
+    - Order 1: Type cells
+    - Order 2: Budget/Count cells
+    - Order 3: Timeline/Email cells
+    - Order 4: Message cells
+    - Order 5: Status cells
+    - Order 6: Date cells
+    - Order 10: Actions cells
+  - Added missing mobile styling for `timeline-cell` and `count-cell`
+  - Standardized color scheme: light for primary, secondary for metadata, muted for dates/counts
+  - Updated TABLE_AUDIT.md with comprehensive mobile styling documentation
+  - File: `src/styles/pages/admin.css`
 
 ### Bulk Actions & Table Improvements
 
@@ -409,6 +486,10 @@ After completing any task:
 ---
 
 ## Open Issues (active)
+
+### Design Concerns
+
+- **Project Detail Page - Pill Label Styling**: The "ROLE", "YEAR", "DURATION", "TOOLS" labels use pill/rounded styling that looks awkward. Consider alternative styling (e.g., plain text labels, underlined labels, or smaller caps without background).
 
 ### Needs User Verification
 

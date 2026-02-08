@@ -605,7 +605,7 @@
                 Tailwind CSS • Bootstrap • Vuetify • GSAP • Node.js • Express.js • EJS • Handlebars •
                 PostgreSQL • MongoDB • Redis • Supabase • MySQL • SQLite • Mongoose • Git • Vite •
                 Webpack • npm/yarn • Jotai • Zod • JWT Auth • Vitest • Playwright •
-                Sentry • Vercel • Railway • Chart.js • PDFKit • Nodemailer • Chrome Extensions API •
+                Sentry • Vercel • Railway • Chart.js • pdf-lib • Nodemailer • Chrome Extensions API •
                 Claude Code CLI • Adobe Illustrator • Photoshop
               </p>
             </div>
@@ -654,7 +654,11 @@
 
           <!-- Intro section with metadata -->
           <div class="worksub-intro">
-            <h1 id="project-title"></h1>
+            <div class="title-row">
+              <h1 id="project-title"></h1>
+              <span id="project-status" class="project-status-badge"></span>
+            </div>
+            <p id="project-tagline" class="project-tagline"></p>
             <div class="intro-content">
               <!-- Left column: metadata -->
               <div class="intro-left">
@@ -662,19 +666,53 @@
                   <span class="round-label">Role</span>
                   <span id="project-role" class="text-medium"></span>
                 </div>
-                <div class="intro-left-group">
-                  <span class="round-label">Year</span>
-                  <span id="project-year" class="text-medium"></span>
-                </div>
-                <div class="intro-left-group">
-                  <span class="round-label">Tools</span>
-                  <div id="project-tools" class="intro-left-list"></div>
+                <div class="intro-left-row">
+                  <div class="intro-left-group">
+                    <span class="round-label">Year</span>
+                    <span id="project-year" class="text-medium"></span>
+                  </div>
+                  <div class="intro-left-group" id="project-duration-group">
+                    <span class="round-label">Duration</span>
+                    <span id="project-duration" class="text-medium"></span>
+                  </div>
                 </div>
               </div>
               <!-- Right column: description -->
               <p id="project-description" class="text-medium"></p>
             </div>
+            <!-- Tools section - full width -->
+            <div class="tools-section">
+              <span class="round-label">Tools</span>
+              <div id="project-tools" class="tools-list"></div>
+            </div>
             <hr class="worksub-divider" />
+          </div>
+
+          <!-- Case Study Sections -->
+          <div class="worksub-case-study">
+            <!-- Challenge Section -->
+            <section class="case-study-section" id="project-challenge-section">
+              <h2 class="case-study-heading">The Challenge</h2>
+              <p id="project-challenge" class="case-study-text"></p>
+            </section>
+
+            <!-- Approach Section -->
+            <section class="case-study-section" id="project-approach-section">
+              <h2 class="case-study-heading">The Approach</h2>
+              <p id="project-approach" class="case-study-text"></p>
+            </section>
+
+            <!-- Key Features Section -->
+            <section class="case-study-section" id="project-features-section">
+              <h2 class="case-study-heading">Key Features</h2>
+              <ul id="project-features" class="case-study-list"></ul>
+            </section>
+
+            <!-- Results Section -->
+            <section class="case-study-section" id="project-results-section">
+              <h2 class="case-study-heading">Results</h2>
+              <ul id="project-results" class="case-study-list results-list"></ul>
+            </section>
           </div>
 
           <!-- Info sections with screenshots -->
@@ -686,6 +724,26 @@
           <div class="worksub-links" id="project-links">
             <!-- Live/Repo links will be dynamically inserted here -->
           </div>
+
+          <!-- Next/Previous project navigation -->
+          <nav class="project-nav" id="project-nav" aria-label="Project navigation">
+            <a href="" class="project-nav-link project-nav-prev" id="project-prev">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5"/>
+                <path d="m12 19-7-7 7-7"/>
+              </svg>
+              <span class="project-nav-label">Previous</span>
+              <span class="project-nav-title" id="project-prev-title"></span>
+            </a>
+            <a href="" class="project-nav-link project-nav-next" id="project-next">
+              <span class="project-nav-label">Next</span>
+              <span class="project-nav-title" id="project-next-title"></span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </a>
+          </nav>
         </div>
       </section>
 

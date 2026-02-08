@@ -46,7 +46,7 @@ The Proposal Builder is a tiered pricing system that allows clients to customize
 |Frontend|Vanilla TypeScript|
 |Styling|CSS with CSS Variables|
 |Animations|GSAP|
-|PDF Generation|PDFKit|
+|PDF Generation|pdf-lib|
 |Build Tool|Vite|
 
 ### Module Structure

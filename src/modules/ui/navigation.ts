@@ -164,7 +164,7 @@ export class NavigationModule extends BaseModule {
                     this.routerService.navigate(href, { smooth: true });
                   } else {
                     // Fallback: scroll directly to element
-                    // Handle salcosta-style hashes: #/about -> about
+                    // Handle hashes: #/about -> about
                     const targetId = href.replace('#/', '').replace('#', '');
                     const targetElement =
                       document.getElementById(targetId) ||
@@ -376,7 +376,7 @@ export class NavigationModule extends BaseModule {
 
   /**
    * Setup routes with router service
-   * Uses salcosta-style hash routing: #/, #/about, #/contact
+   * Uses hash routing: #/, #/about, #/contact
    */
   private setupRoutes(): void {
     if (!this.routerService) return;
@@ -467,7 +467,7 @@ export class NavigationModule extends BaseModule {
       }
 
       // Ultimate fallback: use minimal hardcoded data (only if nothing else works)
-      // Using salcosta-style hash routing: #/, #/about, #/contact
+      // Using hash routing: #/, #/about, #/contact
       if (navigationItems.length === 0) {
         navigationItems = [
           { id: 'home', text: 'home', href: '#/', eyebrow: '00' },
@@ -639,11 +639,11 @@ export class NavigationModule extends BaseModule {
 
   /**
    * Programmatically navigate to section
-   * Uses salcosta-style hash routing: #/, #/about, #/contact
+   * Uses hash routing: #/, #/about, #/contact
    */
   navigateToSection(sectionId: string): void {
     if (this.routerService) {
-      // Use salcosta-style hash format
+      // Use hash format
       const hash = sectionId === 'intro' || sectionId === 'home' ? '#/' : `#/${sectionId}`;
       this.routerService.navigate(hash);
     }

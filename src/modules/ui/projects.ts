@@ -4,7 +4,7 @@
  * ===============================================
  * @file src/modules/ui/projects.ts
  *
- * Renders Sal Costa-style project cards in the projects section.
+ * Renders project cards in the projects section.
  * Shows WIP sign until at least 2 projects are fully documented.
  * Handles project detail page rendering and navigation.
  */
@@ -23,12 +23,18 @@ interface PortfolioProject {
   role: string;
   tools: string[];
   year: number;
+  status: 'in-progress' | 'completed' | 'planned';
   heroImage: string;
   screenshots: string[];
   liveUrl?: string;
   repoUrl?: string;
   isDocumented: boolean;
   titleCard?: string;
+  duration?: string;
+  challenge?: string;
+  approach?: string;
+  results?: string[];
+  keyFeatures?: string[];
 }
 
 interface PortfolioData {
@@ -39,7 +45,7 @@ interface PortfolioData {
 // Minimum documented projects required to show project list
 const MIN_DOCUMENTED_PROJECTS = 2;
 
-// Arrow SVG for project cards (Sal Costa style)
+// Arrow SVG for project cards
 const ARROW_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M5 12h14"/>
@@ -203,7 +209,7 @@ export class ProjectsModule extends BaseModule {
   }
 
   /**
-   * Render project cards in Sal Costa style
+   * Render project cards
    */
   private renderProjectCards(projects: PortfolioProject[]): void {
     if (!this.projectsContent) return;
@@ -480,6 +486,20 @@ export class ProjectsModule extends BaseModule {
       titleEl.textContent = project.title;
     }
 
+    // Update tagline
+    const taglineEl = this.projectDetailSection.querySelector('#project-tagline');
+    if (taglineEl) {
+      taglineEl.textContent = project.tagline || '';
+    }
+
+    // Update status badge
+    const statusEl = this.projectDetailSection.querySelector('#project-status');
+    if (statusEl) {
+      const statusText = this.formatStatus(project.status);
+      statusEl.textContent = statusText;
+      statusEl.className = `project-status-badge status-${project.status}`;
+    }
+
     // Update role
     const roleEl = this.projectDetailSection.querySelector('#project-role');
     if (roleEl) {
@@ -490,6 +510,18 @@ export class ProjectsModule extends BaseModule {
     const yearEl = this.projectDetailSection.querySelector('#project-year');
     if (yearEl) {
       yearEl.textContent = project.year.toString();
+    }
+
+    // Update duration
+    const durationEl = this.projectDetailSection.querySelector('#project-duration');
+    const durationGroup = this.projectDetailSection.querySelector('#project-duration-group');
+    if (durationEl && durationGroup) {
+      if (project.duration) {
+        durationEl.textContent = project.duration;
+        (durationGroup as HTMLElement).style.display = '';
+      } else {
+        (durationGroup as HTMLElement).style.display = 'none';
+      }
     }
 
     // Update tools
@@ -505,6 +537,9 @@ export class ProjectsModule extends BaseModule {
     if (descEl) {
       descEl.innerHTML = formatTextWithLineBreaks(project.description);
     }
+
+    // Update case study sections
+    this.renderCaseStudySections(project);
 
     // Update screenshots
     const infoEl = this.projectDetailSection.querySelector('#project-info');
@@ -548,8 +583,141 @@ export class ProjectsModule extends BaseModule {
       linksEl.innerHTML = links.join('');
     }
 
+    // Update next/prev navigation
+    this.renderProjectNavigation(project);
+
     // Reset animations by removing and re-adding classes
     this.resetDetailAnimations();
+  }
+
+  /**
+   * Format status for display
+   */
+  private formatStatus(status: string): string {
+    const statusMap: Record<string, string> = {
+      'in-progress': 'In Progress',
+      'completed': 'Completed',
+      'planned': 'Planned'
+    };
+    return statusMap[status] || status;
+  }
+
+  /**
+   * Render case study sections (challenge, approach, results, features)
+   */
+  private renderCaseStudySections(project: PortfolioProject): void {
+    if (!this.projectDetailSection) return;
+
+    // Challenge section
+    const challengeSection = this.projectDetailSection.querySelector('#project-challenge-section');
+    const challengeEl = this.projectDetailSection.querySelector('#project-challenge');
+    if (challengeSection && challengeEl) {
+      if (project.challenge) {
+        challengeEl.textContent = project.challenge;
+        (challengeSection as HTMLElement).style.display = '';
+      } else {
+        (challengeSection as HTMLElement).style.display = 'none';
+      }
+    }
+
+    // Approach section
+    const approachSection = this.projectDetailSection.querySelector('#project-approach-section');
+    const approachEl = this.projectDetailSection.querySelector('#project-approach');
+    if (approachSection && approachEl) {
+      if (project.approach) {
+        approachEl.textContent = project.approach;
+        (approachSection as HTMLElement).style.display = '';
+      } else {
+        (approachSection as HTMLElement).style.display = 'none';
+      }
+    }
+
+    // Key Features section
+    const featuresSection = this.projectDetailSection.querySelector('#project-features-section');
+    const featuresEl = this.projectDetailSection.querySelector('#project-features');
+    if (featuresSection && featuresEl) {
+      if (project.keyFeatures && project.keyFeatures.length > 0) {
+        featuresEl.innerHTML = project.keyFeatures
+          .map(feature => `<li>${feature}</li>`)
+          .join('');
+        (featuresSection as HTMLElement).style.display = '';
+      } else {
+        (featuresSection as HTMLElement).style.display = 'none';
+      }
+    }
+
+    // Results section
+    const resultsSection = this.projectDetailSection.querySelector('#project-results-section');
+    const resultsEl = this.projectDetailSection.querySelector('#project-results');
+    if (resultsSection && resultsEl) {
+      if (project.results && project.results.length > 0) {
+        resultsEl.innerHTML = project.results
+          .map(result => `<li>${result}</li>`)
+          .join('');
+        (resultsSection as HTMLElement).style.display = '';
+      } else {
+        (resultsSection as HTMLElement).style.display = 'none';
+      }
+    }
+  }
+
+  /**
+   * Render next/previous project navigation
+   */
+  private renderProjectNavigation(currentProject: PortfolioProject): void {
+    if (!this.projectDetailSection || !this.portfolioData) return;
+
+    const documentedProjects = this.portfolioData.projects.filter(p => p.isDocumented);
+    const currentIndex = documentedProjects.findIndex(p => p.id === currentProject.id);
+
+    const prevLink = this.projectDetailSection.querySelector('#project-prev') as HTMLAnchorElement;
+    const nextLink = this.projectDetailSection.querySelector('#project-next') as HTMLAnchorElement;
+    const prevTitle = this.projectDetailSection.querySelector('#project-prev-title');
+    const nextTitle = this.projectDetailSection.querySelector('#project-next-title');
+
+    // Previous project (wrap around to end if at beginning)
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : documentedProjects.length - 1;
+    const prevProject = documentedProjects[prevIndex];
+
+    if (prevLink && prevTitle && prevProject && prevProject.id !== currentProject.id) {
+      prevLink.href = `#/projects/${prevProject.slug}`;
+      prevTitle.textContent = prevProject.title;
+      prevLink.style.visibility = 'visible';
+
+      // Add click handler to navigate without page reload
+      prevLink.onclick = (e) => {
+        e.preventDefault();
+        window.history.pushState(null, '', `#/projects/${prevProject.slug}`);
+        this.renderProjectDetailForSlug(prevProject.slug);
+        // Scroll to top of project detail
+        this.projectDetailSection?.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+    } else if (prevLink) {
+      prevLink.style.visibility = 'hidden';
+      prevLink.onclick = null;
+    }
+
+    // Next project (wrap around to beginning if at end)
+    const nextIndex = currentIndex < documentedProjects.length - 1 ? currentIndex + 1 : 0;
+    const nextProject = documentedProjects[nextIndex];
+
+    if (nextLink && nextTitle && nextProject && nextProject.id !== currentProject.id) {
+      nextLink.href = `#/projects/${nextProject.slug}`;
+      nextTitle.textContent = nextProject.title;
+      nextLink.style.visibility = 'visible';
+
+      // Add click handler to navigate without page reload
+      nextLink.onclick = (e) => {
+        e.preventDefault();
+        window.history.pushState(null, '', `#/projects/${nextProject.slug}`);
+        this.renderProjectDetailForSlug(nextProject.slug);
+        // Scroll to top of project detail
+        this.projectDetailSection?.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+    } else if (nextLink) {
+      nextLink.style.visibility = 'hidden';
+      nextLink.onclick = null;
+    }
   }
 
   /**
