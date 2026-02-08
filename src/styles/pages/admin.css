@@ -152,20 +152,20 @@ body[data-page="admin"]:not(.admin-logged-in) {
 }
 
 /* Sidebar Content
-   NOTE: Uses tighter gap (1rem) than standard (2rem) to prevent button overflow.
+   NOTE: Uses tighter spacing to prevent button overflow.
    This is intentional - do not standardize. */
 [data-page="admin"] .sidebar-content {
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
-  gap: 1rem;
+  height: 100%;
 }
 
-/* Sidebar Logo */
+/* Sidebar Logo - symmetric spacing: margin-bottom matches padding-top (1.5rem) */
 [data-page="admin"] .sidebar-logo {
   display: flex;
   justify-content: center;
-  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 [data-page="admin"] .sidebar-logo-img {
@@ -182,7 +182,7 @@ body[data-page="admin"]:not(.admin-logged-in) {
 [data-page="admin"] .sidebar.collapsed .sidebar-collapsed-logo {
   display: flex;
   justify-content: center;
-  padding-top: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 [data-page="admin"] .sidebar-collapsed-logo-img {
@@ -206,12 +206,10 @@ body[data-page="admin"]:not(.admin-logged-in) {
 
 /* Sidebar button styles consolidated in buttons.css */
 
-/* Sidebar Footer */
+/* Sidebar Footer - uses same 0.5rem gap as nav buttons for consistent spacing */
 [data-page="admin"] .sidebar-footer {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  right: 1.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
 }
 
 /* Dashboard Content Area */
@@ -636,7 +634,13 @@ body[data-page="admin"] .project-detail-overview {
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   min-width: 0;
-  max-width: 250px;
+  max-width: 220px;
+}
+
+/* Projects table: slightly wider identity column to fit project + client names */
+.admin-table.projects-table td.identity-cell {
+  min-width: 180px;
+  max-width: 260px;
 }
 
 .admin-table .identity-name {
@@ -687,16 +691,17 @@ body[data-page="admin"] .project-detail-overview {
 }
 
 /* Table-specific: checkbox column (first column when bulk actions enabled) */
-/* Left padding matches text columns (--space-4) for alignment */
+/* Fixed width across all tables for consistency */
 .admin-table th.bulk-select-cell,
 .admin-table td.bulk-select-cell {
-  width: 56px;
-  min-width: 56px;
-  max-width: 56px;
-  text-align: left;
-  padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4) !important;
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  text-align: center;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3) !important;
   box-sizing: border-box;
 }
+
 
 /* Projects table: let columns auto-size, just set status to nowrap */
 .admin-table.projects-table td:last-child,
@@ -2124,9 +2129,51 @@ body.modal-open .dashboard-content {
     overflow-wrap: break-word;
   }
 
-  /* Meta cells (type, date) - stacked block layout, muted */
-  [data-page="admin"] .admin-table tbody td.type-cell,
-  [data-page="admin"] .admin-table tbody td.date-cell {
+  /* ================================================
+     MOBILE CARD CELL ORDERING
+     Consistent order across all tables (matches desktop):
+     -2: Identity/Name (primary)
+      1: Type (category)
+      2: Status (current state)
+      3: Budget/Count (metrics)
+      4: Timeline/Message (details)
+      5: Email (contact info)
+      6: Date(s) (timestamps)
+     10: Actions
+     ================================================ */
+
+  /* Type cell - order 1, category info */
+  [data-page="admin"] .admin-table tbody td.type-cell {
+    order: 1;
+    display: block;
+    width: auto;
+    font-size: 0.8rem;
+    color: var(--portal-text-secondary);
+    padding: var(--space-0-5) 0;
+  }
+
+  /* Status cell - order 2, current state (moved up to match desktop) */
+  [data-page="admin"] .admin-table tbody td.status-cell {
+    order: 2;
+    display: block;
+    padding: var(--space-2) 0;
+    width: 100%;
+  }
+
+  /* Budget cell - order 3, financial metrics */
+  [data-page="admin"] .admin-table tbody td.budget-cell {
+    order: 3;
+    display: block;
+    width: auto;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--portal-text-secondary);
+    padding: var(--space-0-5) 0;
+  }
+
+  /* Count cell (clients table - project count) - order 3, same as budget */
+  [data-page="admin"] .admin-table tbody td.count-cell {
+    order: 3;
     display: block;
     width: auto;
     font-size: 0.8rem;
@@ -2134,18 +2181,38 @@ body.modal-open .dashboard-content {
     padding: var(--space-0-5) 0;
   }
 
-  /* Budget cell - more prominent color */
-  [data-page="admin"] .admin-table tbody td.budget-cell {
+  /* Timeline cell (projects table) - order 4, details */
+  [data-page="admin"] .admin-table tbody td.timeline-cell {
+    order: 4;
     display: block;
     width: auto;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--portal-text-light);
+    font-size: 0.8rem;
+    color: var(--portal-text-muted);
     padding: var(--space-0-5) 0;
+  }
+
+  /* Date cells - order 6, timestamps */
+  [data-page="admin"] .admin-table tbody td.date-cell {
+    order: 6;
+    display: block;
+    width: auto;
+    font-size: 0.8rem;
+    color: var(--portal-text-muted);
+    padding: var(--space-0-5) 0;
+  }
+
+  /* Hide stacked elements on mobile - card view shows all cells as blocks anyway */
+  [data-page="admin"] .admin-table .budget-stacked,
+  [data-page="admin"] .admin-table .email-stacked,
+  [data-page="admin"] .admin-table .date-stacked,
+  [data-page="admin"] .admin-table .target-stacked,
+  [data-page="admin"] .admin-table .last-active-stacked {
+    display: none !important;
   }
 
   /* Combined type/budget cell - inline on mobile */
   [data-page="admin"] .admin-table tbody td.type-budget-cell {
+    order: 1;
     display: block;
     width: auto;
     padding: var(--space-0-5) 0;
@@ -2159,8 +2226,9 @@ body.modal-open .dashboard-content {
     font-size: 0.8rem;
   }
 
-  /* Message cell (contacts table) - full width, wrap text */
+  /* Message cell (contacts table) - order 4, full width, wrap text */
   [data-page="admin"] .admin-table tbody td.message-cell {
+    order: 4;
     display: block;
     font-size: 0.85rem;
     color: var(--portal-text-secondary);
@@ -2169,8 +2237,9 @@ body.modal-open .dashboard-content {
     word-break: break-word;
   }
 
-  /* Email cell (contacts table) - muted, word-break for long emails */
+  /* Email cell (contacts table) - order 5, contact info */
   [data-page="admin"] .admin-table tbody td.email-cell {
+    order: 5;
     display: block;
     width: auto;
     font-size: 0.8rem;
@@ -2179,7 +2248,7 @@ body.modal-open .dashboard-content {
     word-break: break-all;
   }
 
-  /* Name cell (workflows table) - prominent */
+  /* Name cell (workflows table) - prominent, same as identity */
   [data-page="admin"] .admin-table tbody td.name-cell {
     order: -2;
     font-size: 1rem;
@@ -2193,13 +2262,6 @@ body.modal-open .dashboard-content {
   /* Contact cell - same as identity cell for contacts */
   [data-page="admin"] .admin-table tbody td.contact-cell {
     order: -2;
-  }
-
-  /* Status cell - full width on mobile */
-  [data-page="admin"] .admin-table tbody td.status-cell {
-    display: block;
-    padding: var(--space-2) 0;
-    width: 100%;
   }
 
   /* Status dropdown - full width to match content above */
@@ -2372,6 +2434,7 @@ body.modal-open .dashboard-content {
 .admin-table th.status-col {
   width: 1%;
   white-space: nowrap;
+  padding-right: var(--space-6);
 }
 
 /* Fit-content columns: Type, Budget, Timeline - with extra breathing room */
@@ -2383,20 +2446,25 @@ body.modal-open .dashboard-content {
 .admin-table th.timeline-col {
   width: 1%;
   white-space: nowrap;
+  padding-left: var(--space-4);
   padding-right: var(--space-8);
 }
 
 /* Responsive stacked elements - hidden by default, shown at smaller breakpoints */
 .admin-table .budget-stacked,
 .admin-table .email-stacked,
-.admin-table .date-stacked {
+.admin-table .date-stacked,
+.admin-table .target-stacked,
+.admin-table .last-active-stacked {
   display: none;
 }
 
 /* When stacked elements are shown, style them */
 .admin-table .budget-stacked,
 .admin-table .email-stacked,
-.admin-table .date-stacked {
+.admin-table .date-stacked,
+.admin-table .target-stacked,
+.admin-table .last-active-stacked {
   font-size: var(--font-size-sm);
   color: var(--portal-text-muted);
 }
@@ -2407,6 +2475,8 @@ body.modal-open .dashboard-content {
   width: 1%;
   white-space: nowrap;
   text-align: center;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
 }
 
 /* Email columns: accommodate longer emails */
@@ -2428,31 +2498,21 @@ body.modal-open .dashboard-content {
 .admin-table th.date-col {
   width: 1%;
   white-space: nowrap;
+  padding-left: var(--space-4);
   padding-right: var(--space-6);
 }
 
-/* Contact/Client columns: wider default for names + emails */
-.admin-table .contact-cell,
+/* Contact/Client header column */
 .admin-table th.contact-col {
-  min-width: 200px;
   white-space: nowrap;
 }
 
-/* Actions column: fixed width to accommodate max buttons (4 icon buttons @ 32px + gaps) */
-.admin-table th.actions-col {
-  width: 140px;
-  min-width: 140px;
-  max-width: 140px;
-  white-space: nowrap;
-  padding-right: var(--space-4);
-}
-
+/* Actions column: fit-content width for icon buttons */
+.admin-table th.actions-col,
 .admin-table .actions-cell {
-  width: 140px;
-  min-width: 140px;
-  max-width: 140px;
+  width: 1%;
   white-space: nowrap;
-  text-align: right;
+  text-align: left;
   padding-right: var(--space-4);
 }
 
@@ -2470,7 +2530,7 @@ body.modal-open .dashboard-content {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 /* Table action icon buttons - neutral color, red on hover */
@@ -3254,8 +3314,44 @@ body.modal-open .dashboard-content {
 
 /* ================================================
    TABLE COLUMN STACKING - Prevent horizontal scroll
-   Kicks in at 1280px before scroll becomes necessary
    ================================================ */
+
+/* Projects and Clients tables stack earliest due to most columns */
+@media (max-width: 1760px) {
+  /* Projects table: hide Target column, show stacked target in Start cell */
+  .projects-table th.target-col,
+  .projects-table td.target-cell {
+    display: none;
+  }
+
+  .projects-table .start-cell .target-stacked {
+    display: block;
+  }
+
+  /* Clients table: hide Last Active column, show stacked in Created cell */
+  .clients-table th.last-active-col,
+  .clients-table td.last-active-cell {
+    display: none;
+  }
+
+  .clients-table .created-cell .last-active-stacked {
+    display: block;
+  }
+}
+
+/* Contacts table stacks earlier due to more columns */
+@media (max-width: 1550px) {
+  /* Contacts table: hide Email column, show stacked email in Contact cell */
+  .contacts-table th.email-col,
+  .contacts-table td.email-cell {
+    display: none;
+  }
+
+  .contacts-table .contact-cell .email-stacked {
+    display: block;
+  }
+}
+
 @media (max-width: 1280px) {
   /* Leads table: hide Budget column, show stacked budget in Type cell */
   .leads-table th.budget-col,
@@ -3274,16 +3370,6 @@ body.modal-open .dashboard-content {
   }
 
   .projects-table .type-cell .budget-stacked {
-    display: block;
-  }
-
-  /* Contacts table: hide Email column, show stacked email in Contact cell */
-  .contacts-table th.email-col,
-  .contacts-table td.email-cell {
-    display: none;
-  }
-
-  .contacts-table .contact-cell .email-stacked {
     display: block;
   }
 }

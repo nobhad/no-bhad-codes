@@ -482,7 +482,7 @@ router.get(
       let query = `
         SELECT f.id, f.project_id, f.filename, f.original_filename, f.mime_type, f.file_size,
                f.file_path, f.uploaded_by, f.created_at, f.file_type, f.category,
-               p.name as project_name
+               p.project_name as project_name
         FROM files f
         LEFT JOIN projects p ON f.project_id = p.id
         WHERE (p.client_id = ? OR f.uploaded_by = ?)
@@ -520,10 +520,10 @@ router.get(
 
       // Also get projects list for the filter dropdown
       const projects = await db.all(
-        `SELECT DISTINCT p.id, p.name
+        `SELECT DISTINCT p.id, p.project_name
          FROM projects p
          WHERE p.client_id = ?
-         ORDER BY p.name`,
+         ORDER BY p.project_name`,
         [clientId]
       );
 
@@ -545,7 +545,7 @@ router.get(
         })),
         projects: projects.map((p: any) => ({
           id: p.id,
-          name: p.name
+          name: p.project_name
         }))
       });
     } catch (dbError) {

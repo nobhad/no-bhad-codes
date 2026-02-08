@@ -8,6 +8,54 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ## ✅ Completed - February 8, 2026
 
+### Sidebar Spacing Consistency
+
+- **Even Spacing Throughout Sidebar** - COMPLETE
+  - Avatar/logo spacing made symmetric: 1.5rem above = 1.5rem below (margin-bottom instead of padding-bottom)
+  - Sign Out button removed from absolute positioning, now uses `margin-top: auto`
+  - Sign Out gap matches nav item gap (0.5rem via padding-top)
+  - Collapsed logo also updated to use margin-bottom: 1.5rem for consistency
+  - File: `src/styles/pages/admin.css`
+
+### Table Column Stacking Fixes (1760px breakpoint)
+
+- **Fixed CSS Selectors for Column Hiding** - COMPLETE
+  - Changed `th.date-col:last-of-type` to `th.target-col` (Projects) and `th.last-active-col` (Clients)
+  - `:last-of-type` was incorrectly targeting based on element type, not class
+  - Added specific header classes: `start-col`, `target-col` (Projects), `created-col`, `last-active-col` (Clients)
+  - Files: `admin/index.html`, `src/styles/pages/admin.css`
+
+### Table Column Width & Spacing Refinements
+
+- **Actions Column Simplified** - COMPLETE
+  - Changed from fixed 140px to fit-content (`width: 1%`)
+  - Actions now left-aligned (header and cells)
+  - Table-actions container uses `justify-content: flex-start`
+  - File: `src/styles/pages/admin.css`
+
+- **Checkbox Column Standardized** - COMPLETE
+  - Fixed at 48px width across all tables
+  - Consistent padding: `var(--space-2) var(--space-2) var(--space-2) var(--space-3)`
+  - File: `src/styles/pages/admin.css`
+
+- **Column Padding Adjustments** - COMPLETE
+  - Status column: added `padding-right: var(--space-6)`
+  - Type/Budget/Timeline columns: added `padding-left: var(--space-4)`
+  - Date columns: added `padding-left: var(--space-4)`
+  - Count column: added horizontal padding `var(--space-4)`
+  - File: `src/styles/pages/admin.css`
+
+- **Projects Table Identity Column** - COMPLETE
+  - Added specific rule with `min-width: 180px`, `max-width: 260px`
+  - Allows more room for project + client names
+  - File: `src/styles/pages/admin.css`
+
+- **Removed contact-cell CSS Rule** - COMPLETE
+  - Simplified to only `th.contact-col` with `white-space: nowrap`
+  - Cells now styled entirely by `identity-cell` class
+  - Fixes Clients table spacing inconsistency
+  - File: `src/styles/pages/admin.css`
+
 ### Design Token Migration (Phase 1)
 
 - **New Tokens Added to `variables.css`** - COMPLETE
@@ -429,6 +477,21 @@ This file tracks active development work and TODOs. Completed items are moved to
   - Standardized color scheme: light for primary, secondary for metadata, muted for dates/counts
   - Updated TABLE_AUDIT.md with comprehensive mobile styling documentation
   - File: `src/styles/pages/admin.css`
+
+- **Unified Table Column Order** - COMPLETE
+  - Standardized column order across all admin tables: ☐ → Identity → Type → Status → Details → Date(s) → Actions
+  - Status column moved earlier (position 3-4) for quick scanning
+  - Added checkbox column to Contacts table with bulk actions (Mark Read, Mark Responded, Archive, Delete)
+  - Added Actions column to Projects table with View button
+  - Updated mobile CSS order values to match desktop order
+  - Files modified:
+    - `admin/index.html` - Reordered headers for Leads, Contacts, Projects, Clients
+    - `admin-leads.ts` - Reordered cells
+    - `admin-contacts.ts` - Added checkbox, bulk actions, reordered cells
+    - `admin-projects.ts` - Added Actions column, reordered cells
+    - `admin-clients.ts` - Reordered cells
+    - `admin.css` - Updated mobile order values
+    - `TABLE_AUDIT.md` - Updated column order reference
 
 ### Bulk Actions & Table Improvements
 
