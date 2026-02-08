@@ -895,4 +895,16 @@
     justify-content: center;
   }
 
+  /* Health check header - align button with h3 on mobile */
+  #tab-system .section-header-with-actions {
+    padding: 0;
+  }
+
+  #tab-system .section-header-with-actions h3 {
+    line-height: 36px; /* Match icon-btn height for perfect alignment */
+  }
+
+  #tab-system .section-header-with-actions .icon-btn {
+    margin: 0;
+  }
 }

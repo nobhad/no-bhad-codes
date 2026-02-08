@@ -139,13 +139,13 @@
 .admin-modal-title svg {
   width: 20px;
   height: 20px;
-  color: var(--color-primary);
+  color: var(--portal-text-light);
   flex-shrink: 0;
 }
 
 .admin-modal-header h2 {
   margin: 0;
-  color: var(--color-primary);
+  color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
 }
@@ -425,5 +425,59 @@
 
 .detail-value a:hover {
   text-decoration: underline;
+}
+
+/* ================================================
+   MOBILE RESPONSIVE - Full width modals
+   ================================================ */
+
+@media (max-width: 479px) {
+  /* Modal overlay - no padding on small mobile */
+  [data-page="admin"] .modal-overlay,
+  [data-page="admin"] .admin-modal-overlay {
+    padding: 0;
+    align-items: flex-start;
+  }
+
+  /* Modal content - full width, full height */
+  [data-page="admin"] .modal-content,
+  [data-page="admin"] .admin-modal {
+    max-width: 100%;
+    width: 100%;
+    max-height: 100vh;
+    min-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  /* Modal body - fill available space */
+  [data-page="admin"] .admin-modal-body,
+  [data-page="admin"] .modal-body {
+    padding: var(--space-3);
+    min-height: 0;
+    flex: 1;
+  }
+
+  /* Modal header - tighter padding */
+  [data-page="admin"] .admin-modal-header,
+  [data-page="admin"] .modal-header {
+    padding: var(--space-3);
+  }
+
+  /* Modal footer - tighter padding */
+  [data-page="admin"] .admin-modal-footer,
+  [data-page="admin"] .modal-footer {
+    padding: var(--space-3);
+  }
+
+  /* Detail grid - single column */
+  [data-page="admin"] .detail-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-0-5);
+  }
+
+  [data-page="admin"] .detail-label {
+    margin-bottom: 0;
+  }
 }
 

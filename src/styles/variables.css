@@ -125,9 +125,20 @@ This CSS file defines global variables and font-face rules for consistent stylin
   /* Animations and Transitions */
   --cubic-default: cubic-bezier(0.4, 0, 0.2, 1);
   --menu-padding: clamp(0.5rem, 2vw, 1rem);
+
+  /* Transition tokens - use for consistent animations */
+  --transition-faster: 0.15s ease;
   --transition-fast: 0.2s ease;
   --transition-medium: 0.3s ease;
-  --transition-slow: 0.6s ease;
+  --transition-slow: 0.4s ease;
+  --transition-slower: 0.5s ease;
+
+  /* Duration-only tokens - for complex multi-property transitions */
+  --duration-faster: 0.15s;
+  --duration-fast: 0.2s;
+  --duration-medium: 0.3s;
+  --duration-slow: 0.4s;
+  --duration-slower: 0.5s;
 
   /* Z-index */
   --z-header: 10;
@@ -224,6 +235,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --portal-text-dark: #1a1a1a;
 
   /* Portal background colors */
+  --portal-bg-darkest: #1a1a1a;
   --portal-bg-darker: #2a2a2a;
   --portal-bg-dark: #333333;
   --portal-bg-medium: #444444;
@@ -246,7 +258,9 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --portal-radius-sm: 6px;
   --portal-radius-md: 8px;
   --portal-radius-lg: 12px;
+  --portal-radius-xl: 16px;
   --portal-radius-pill: 50px;
+  --portal-radius-full: 50%;
 
   /* Spacing: Use design-system tokens from src/design-system/tokens/spacing.css
      --space-0-5 (4px), --space-1 (8px), --space-1-5 (12px), --space-2 (16px),

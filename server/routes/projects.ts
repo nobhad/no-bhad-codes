@@ -762,6 +762,10 @@ router.post(
       });
     }
 
+    // Map 'admin' to 'developer' for messages table constraint compatibility
+    // (messages table uses 'client', 'developer', 'system'; general_messages uses 'client', 'admin', 'system')
+    const senderType = req.user!.type === 'admin' ? 'developer' : req.user!.type;
+
     const result = await db.run(
       `
     INSERT INTO messages (project_id, sender_type, sender_name, message)
@@ -769,7 +773,7 @@ router.post(
   `,
       [
         projectId,
-        req.user!.type,
+        senderType,
         req.user!.email, // or get actual name from user profile
         message.trim()
       ]

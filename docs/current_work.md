@@ -1,8 +1,44 @@
 # Current Work
 
-**Last Updated:** February 7, 2026
+**Last Updated:** February 8, 2026
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-02.md`.
+
+---
+
+## ✅ Completed - February 8, 2026
+
+### Design Token Migration (Phase 1)
+
+- **New Tokens Added to `variables.css`** - COMPLETE
+  - `--portal-radius-xl: 16px` and `--portal-radius-full: 50%`
+  - `--transition-faster: 0.15s ease` and `--transition-slower: 0.5s ease`
+  - Duration-only tokens: `--duration-faster/fast/medium/slow/slower`
+
+- **`pages/admin.css` Tokenized** - COMPLETE
+  - All hardcoded `border-radius: Npx` → `var(--portal-radius-*)`
+  - Transitions → `var(--transition-*)` tokens
+  - Font sizes → `var(--font-size-*)` tokens
+  - Letter-spacing → `var(--letter-spacing-*)` tokens
+  - Fixed accessibility violations (small font sizes)
+
+- **`admin/leads-pipeline.css` Tokenized** - COMPLETE
+  - Border radius tokens applied
+  - Transitions tokenized
+  - Letter-spacing tokenized
+  - Fixed 0.625rem → 0.75rem for accessibility
+
+- **`shared/portal-forms.css` Tokenized** - COMPLETE
+  - Border radius and transitions use tokens
+
+- **`shared/portal-buttons.css` Tokenized** - COMPLETE
+  - All `border-radius: 8px` → `var(--portal-radius-md)`
+  - All `transition: stroke-width 0.15s ease` → `var(--transition-faster)`
+
+- **CSS_AUDIT.md Updated** - COMPLETE
+  - Added Token Migration Suggestions section with priorities
+  - Documented migration progress
+  - Added verification commands
 
 ---
 
