@@ -429,8 +429,8 @@ body[data-page="admin"] #tab-analytics .stat-card {
   filter: invert(1);
   opacity: 0.7;
   padding: 4px;
-  border-radius: 4px;
-  transition: opacity 0.15s ease, background-color 0.15s ease;
+  border-radius: var(--portal-radius-xs);
+  transition: opacity var(--duration-faster) ease, background-color var(--duration-faster) ease;
 }
 
 [data-page="admin"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
@@ -604,7 +604,8 @@ body[data-page="admin"] .project-detail-overview {
 /* Table-specific: flexible width - removed fixed min-width for responsive layout */
 .admin-table.leads-table,
 .admin-table.clients-table,
-.admin-table.projects-table {
+.admin-table.projects-table,
+.admin-table.contacts-table {
   min-width: 0;
   table-layout: auto;
 }
@@ -1162,7 +1163,7 @@ body.modal-open .dashboard-content {
 [data-page="admin"] select.status-select {
   padding: var(--space-2) var(--space-8) var(--space-2) var(--space-6);
   border: 1px solid var(--portal-border-dark);
-  border-radius: 9999px;
+  border-radius: var(--portal-radius-pill);
   background-color: var(--portal-bg-medium);
   color: var(--portal-text-light);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23f5f5f5'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
@@ -1262,12 +1263,12 @@ body.modal-open .dashboard-content {
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   font-size: var(--font-size-sm);
   font-weight: 600;
   line-height: 1.5;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-fast);
   width: 160px;
   min-width: 160px;
   justify-content: space-between;
@@ -1281,7 +1282,7 @@ body.modal-open .dashboard-content {
 
 .status-dropdown-trigger .status-arrow {
   font-size: 1rem;
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-fast);
 }
 
 .custom-status-dropdown.open .status-arrow {
@@ -1289,7 +1290,7 @@ body.modal-open .dashboard-content {
 }
 
 .custom-status-dropdown.open .status-dropdown-trigger {
-  border-radius: 4px 4px 0 0;
+  border-radius: var(--portal-radius-xs) var(--portal-radius-xs) 0 0;
 }
 
 /* Status trigger colors */
@@ -1410,13 +1411,13 @@ body.modal-open .dashboard-content {
 .action-btn {
   padding: var(--space-2) var(--space-4);
   border: 1px solid var(--portal-text-muted);
-  border-radius: 9999px;
+  border-radius: var(--portal-radius-pill);
   background: var(--portal-bg-medium);
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-faster);
   height: auto;
   line-height: 1.2;
   box-sizing: border-box;
@@ -1531,11 +1532,11 @@ body.modal-open .dashboard-content {
 .set-password-success .success-icon {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: var(--font-size-xl);
   font-weight: bold;
   margin: 0 auto var(--space-4);
 }
@@ -1907,7 +1908,7 @@ body.modal-open .dashboard-content {
   [data-page="admin"] #tab-system .status-badge {
     flex-shrink: 0;
     width: fit-content;
-    font-size: 10px;
+    font-size: 0.625rem;
     font-weight: 700;
     padding: 0.25rem 0.5rem;
     white-space: nowrap;
@@ -1981,6 +1982,238 @@ body.modal-open .dashboard-content {
   [data-page="admin"] .stat-card .stat-label {
     font-size: 0.75rem;
     text-align: right;
+  }
+
+  /* ================================================
+     MOBILE TABLE - Single column card layout
+     Table rows collapse into stacked cards on small screens.
+     ================================================ */
+
+  /* Hide table header on small mobile */
+  [data-page="admin"] .admin-table thead {
+    display: none;
+  }
+
+  /* Table becomes block layout - force shrink to fit container */
+  [data-page="admin"] .admin-table,
+  [data-page="admin"] .admin-table tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Each row becomes a card - full width within container, no borders */
+  [data-page="admin"] .admin-table tbody tr {
+    display: block;
+    background: var(--portal-bg-medium);
+    border-radius: 0;
+    padding: var(--space-3);
+    margin-bottom: var(--space-2);
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: auto;
+    border: none;
+  }
+
+  [data-page="admin"] .admin-table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Table card container - keep padding for proper spacing */
+  [data-page="admin"] .admin-table-card {
+    padding: var(--space-3);
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  [data-page="admin"] .admin-table-scroll-wrapper {
+    padding: 0;
+    max-width: 100%;
+  }
+
+  [data-page="admin"] .admin-table-container {
+    max-width: 100%;
+  }
+
+  /* Reset corner radius since rows are now separate cards */
+  [data-page="admin"] .admin-table tbody tr:last-child td:first-child,
+  [data-page="admin"] .admin-table tbody tr:last-child td:last-child {
+    border-radius: 0;
+  }
+
+  /* Each cell becomes a block element with text wrapping */
+  [data-page="admin"] .admin-table tbody td {
+    display: block;
+    padding: var(--space-1) 0;
+    background: transparent;
+    height: auto;
+    text-align: left;
+    border: none;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+
+  /* Reset edge padding for mobile cards */
+  [data-page="admin"] .admin-table tbody td:first-child,
+  [data-page="admin"] .admin-table tbody td:last-child {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Bulk select cell - hide on mobile */
+  [data-page="admin"] .admin-table tbody td.bulk-select-cell,
+  [data-page="admin"] .admin-table th.bulk-select-cell {
+    display: none !important;
+  }
+
+  /* Identity cell - prominent at top, first visible element */
+  [data-page="admin"] .admin-table tbody td.identity-cell {
+    order: -2;
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  [data-page="admin"] .admin-table tbody td.identity-cell .identity-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--portal-text-light);
+    display: block;
+    margin-bottom: 2px;
+    word-break: break-word;
+  }
+
+  [data-page="admin"] .admin-table tbody td.identity-cell .identity-contact {
+    font-size: 0.85rem;
+    color: var(--portal-text-secondary);
+    display: block;
+    word-break: break-word;
+  }
+
+  [data-page="admin"] .admin-table tbody td.identity-cell .identity-email,
+  [data-page="admin"] .admin-table tbody td.identity-cell .identity-company {
+    font-size: 0.8rem;
+    color: var(--portal-text-muted);
+    display: block;
+    word-break: break-word;
+  }
+
+  /* Project cell - second priority */
+  [data-page="admin"] .admin-table tbody td.project-cell {
+    order: -1;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--portal-text-light);
+    padding: var(--space-1) 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Meta cells (type, date) - stacked block layout, muted */
+  [data-page="admin"] .admin-table tbody td.type-cell,
+  [data-page="admin"] .admin-table tbody td.date-cell {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--portal-text-muted);
+    padding: var(--space-0-5) 0;
+  }
+
+  /* Budget cell - more prominent color */
+  [data-page="admin"] .admin-table tbody td.budget-cell {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--portal-text-light);
+    padding: var(--space-0-5) 0;
+  }
+
+  /* Message cell (contacts table) - full width, wrap text */
+  [data-page="admin"] .admin-table tbody td.message-cell {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--portal-text-secondary);
+    padding: var(--space-1) 0;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Email cell (contacts table) - muted, word-break for long emails */
+  [data-page="admin"] .admin-table tbody td.email-cell {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--portal-text-muted);
+    padding: var(--space-0-5) 0;
+    word-break: break-all;
+  }
+
+  /* Name cell (workflows table) - prominent */
+  [data-page="admin"] .admin-table tbody td.name-cell {
+    order: -2;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--portal-text-light);
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
+    word-break: break-word;
+  }
+
+  /* Contact cell - same as identity cell for contacts */
+  [data-page="admin"] .admin-table tbody td.contact-cell {
+    order: -2;
+  }
+
+  /* Status cell - full width on mobile */
+  [data-page="admin"] .admin-table tbody td.status-cell {
+    display: block;
+    padding: var(--space-2) 0;
+    width: 100%;
+  }
+
+  /* Status dropdown - full width to match content above */
+  [data-page="admin"] .admin-table tbody td.status-cell .table-dropdown {
+    width: 100%;
+  }
+
+  [data-page="admin"] .admin-table tbody td.status-cell .table-dropdown .custom-dropdown-trigger {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Actions cell - bottom of card */
+  [data-page="admin"] .admin-table tbody td.actions-cell {
+    order: 10;
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
+  }
+
+  /* Hide truly empty cells */
+  [data-page="admin"] .admin-table tbody td:empty {
+    display: none !important;
+  }
+
+  /* Status dropdown menu - full width on mobile */
+  [data-page="admin"] .admin-table tbody td.status-cell .table-dropdown .custom-dropdown-menu {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  /* Scroll wrapper - let cards stack naturally */
+  [data-page="admin"] .admin-table-scroll-wrapper {
+    background: transparent;
+    border-radius: 0;
+    max-width: 100%;
+  }
+
+  /* Table container - transparent bg for card layout */
+  [data-page="admin"] .admin-table-container {
+    background: transparent;
+    max-width: 100%;
   }
 }
 
@@ -2056,11 +2289,11 @@ body.modal-open .dashboard-content {
   width: 16px;
   height: 16px;
   padding: 0;
-  font-size: 9px;
+  font-size: 0.5625rem;
   font-weight: 700;
   line-height: 1;
   transform: none;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   background: var(--color-danger);
   color: #fff;
   box-shadow: 0 0 0 2px var(--portal-bg-dark);
@@ -2082,7 +2315,7 @@ body.modal-open .dashboard-content {
     width: 16px;
     height: 16px;
     padding: 0;
-    font-size: 9px;
+    font-size: 0.5625rem;
     font-weight: 700;
     background: var(--color-danger);
     color: #fff;
@@ -2597,11 +2830,11 @@ body.modal-open .dashboard-content {
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  padding: 8px 12px;
+  padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-darker, #2a2a2a);
   color: var(--portal-text-light);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 400;
   line-height: 1.4;
   text-transform: none;
@@ -2610,13 +2843,13 @@ body.modal-open .dashboard-content {
   width: max-content;
   max-width: 280px;
   text-align: left;
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   box-shadow: var(--shadow-elevated-sm);
   z-index: var(--z-index-portal-dropdown);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease, visibility 0.15s ease;
+  transition: opacity var(--duration-faster) ease, visibility var(--duration-faster) ease;
 }
 
 /* Show tooltip on hover - instant appearance */
@@ -2638,7 +2871,7 @@ body.modal-open .dashboard-content {
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease, visibility 0.15s ease;
+  transition: opacity var(--duration-faster) ease, visibility var(--duration-faster) ease;
 }
 
 [data-page="admin"] [data-tooltip]:hover::before {
@@ -2743,7 +2976,7 @@ body.modal-open .dashboard-content {
   color: white;
   font-size: 0.65rem;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: var(--portal-radius-md);
   line-height: 16px;
   text-align: center;
   z-index: 1;
@@ -2763,12 +2996,12 @@ body.modal-open .dashboard-content {
   padding: 1rem 0.75rem 0.75rem 0.75rem;
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border);
-  border-radius: 8px;
+  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-dropdown-xl);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px);
-  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  transition: opacity var(--duration-fast) ease, visibility var(--duration-fast) ease, transform var(--duration-fast) ease;
 }
 
 .filter-dropdown-wrapper.open .filter-dropdown-menu {
@@ -2793,7 +3026,7 @@ body.modal-open .dashboard-content {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 /* Checkbox group */
@@ -2809,9 +3042,9 @@ body.modal-open .dashboard-content {
   gap: 0.5rem;
   padding: 0.375rem 0.5rem;
   margin: 0 -0.5rem;
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-faster);
 }
 
 .filter-checkbox:hover {
@@ -2840,7 +3073,7 @@ body.modal-open .dashboard-content {
   padding: 0.35rem 0.5rem;
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   color: var(--portal-text-light);
   font-size: 0.8rem;
   height: 32px;
@@ -2861,11 +3094,11 @@ body.modal-open .dashboard-content {
   padding: 0.5rem 1rem;
   background: transparent;
   border: 1px solid var(--portal-border);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   color: var(--portal-text-muted);
   font-size: 0.875rem;
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition: color var(--duration-fast) ease, border-color var(--duration-fast) ease;
 }
 
 .filter-clear-btn:hover {
@@ -2880,7 +3113,7 @@ body.modal-open .dashboard-content {
 .admin-table th.sortable {
   cursor: pointer;
   user-select: none;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-faster);
   position: relative;
   padding-right: calc(var(--space-4) + 20px);
 }
@@ -2899,10 +3132,10 @@ body.modal-open .dashboard-content {
 }
 
 .admin-table th.sortable .sort-icon svg {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
   color: var(--portal-text-muted);
-  transition: color 0.15s ease;
+  transition: color var(--transition-faster);
 }
 
 .admin-table th.sortable:hover .sort-icon svg {
@@ -3149,76 +3382,8 @@ body.modal-open .dashboard-content {
     margin: 0;
   }
 
-  /* ================================================
-     MOBILE TABLE RESPONSIVENESS
-     Hide less critical columns on small screens
-     ================================================ */
-
-  /* Leads table: hide Company (3rd) and Email (4th) columns */
-  .leads-table th:nth-child(3),
-  .leads-table td:nth-child(3),
-  .leads-table th:nth-child(4),
-  .leads-table td:nth-child(4) {
-    display: none;
-  }
-
-  /* Projects table: hide Type (3rd), Timeline (5th), Start Date (6th), End Date (7th) */
-  .projects-table th:nth-child(3),
-  .projects-table td:nth-child(3),
-  .projects-table th:nth-child(5),
-  .projects-table td:nth-child(5),
-  .projects-table th:nth-child(6),
-  .projects-table td:nth-child(6),
-  .projects-table th:nth-child(7),
-  .projects-table td:nth-child(7) {
-    display: none;
-  }
-
-  /* Contacts table: hide Company (4th) column */
-  .contacts-table th:nth-child(4),
-  .contacts-table td:nth-child(4) {
-    display: none;
-  }
-
-  /* Clients table: hide Email (4th) and Created (8th) columns - adjusted for checkbox column */
-  .clients-table th:nth-child(4),
-  .clients-table td:nth-child(4),
-  .clients-table th:nth-child(8),
-  .clients-table td:nth-child(8) {
-    display: none;
-  }
-
-  /* Reduce minimum table width on mobile for better fit */
-  .admin-table {
-    min-width: 400px;
-  }
-
-  /* Tighter cell padding on mobile - horizontal matches header edge (0.75rem) */
-  .admin-table th,
-  .admin-table td {
-    padding: var(--space-2) 0.75rem;
-  }
-
-  /* Scroll indicator on the scroll wrapper (horizontal scroll lives there) */
-  .admin-table-scroll-wrapper {
-    position: relative;
-  }
-
-  .admin-table-scroll-wrapper::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 20px;
-    background: linear-gradient(to left, var(--portal-bg-dark), transparent);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  /* Show scroll indicator when table is scrollable */
-  .admin-table-container:has(.admin-table-scroll-wrapper) .admin-table-scroll-wrapper {
-    -webkit-overflow-scrolling: touch;
-  }
+  /* NOTE: Mobile table card layout styles are in the first @media (--small-mobile) block.
+     The card layout transforms rows into stacked blocks, so nth-child column
+     hiding and horizontal scroll indicators don't apply - all cells are visible
+     as block elements within each card. */
 }
