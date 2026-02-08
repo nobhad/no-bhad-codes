@@ -38,6 +38,7 @@ const commonGlobals = {
   HTMLFormElement: 'readonly',
   HTMLAnchorElement: 'readonly',
   HTMLDivElement: 'readonly',
+  HTMLSpanElement: 'readonly',
   HTMLIFrameElement: 'readonly',
   HTMLCanvasElement: 'readonly',
   HTMLImageElement: 'readonly',
