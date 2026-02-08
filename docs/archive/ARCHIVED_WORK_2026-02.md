@@ -4,6 +4,283 @@ This file contains completed work from February 2026. Items are moved here from 
 
 ---
 
+## Completed - February 8, 2026
+
+### Contact Page Responsiveness Fix
+
+**Status:** COMPLETE
+
+Fixed multiple responsive layout issues on the main site contact page.
+
+**Breakpoint Coverage:**
+
+- Fixed breakpoint gap (601px-767px) causing layout issues
+- Changed mobile/contact.css from `@media (--compact-mobile)` to `@media (--mobile)` (0-767px)
+
+**Two-Column Layout:**
+
+- Desktop two-column layout (form + business card) only appears at 1300px+
+- Tablet portrait (768px-1100px) and wide tablets (1100px-1300px) use single-column layout
+- Business card hidden on smaller screens, contact options text shown instead
+
+**Field Error Elements:**
+
+- Fixed `.field-error` elements appearing as red bars when empty
+- Changed display to `none` by default, shown with `:not(:empty)` selector
+
+**Form Field Alignment:**
+
+- Fixed alignment where heading, text, and fields were not on same left edge
+- Submit button always right-aligned using `justify-content: flex-end`
+
+**Desktop Field Widths:**
+
+- Input fields (Name, Company, Email) use `--contact-input-width: min(460px, 100%)`
+- Message textarea uses `--contact-textarea-width: min(640px, 100%)`
+- Input fields are shorter than message area as designed
+
+**Files Modified:**
+
+- `src/styles/pages/contact.css`
+- `src/styles/mobile/contact.css`
+
+---
+
+### Document Requests Integration into Project Files
+
+**Status:** COMPLETE
+
+Integrated document requests with file uploads in project details.
+
+**Upload Confirmation Modal:**
+
+- Files no longer upload immediately on selection
+- Modal appears with file preview showing name and size
+- User must click "Upload" button to confirm
+
+**File Type Labeling:**
+
+- Added file type dropdown using reusable `createModalDropdown` component
+- 11 predefined file types: Project Proposal, Contract, Intake Form, Invoice, Receipt, Wireframe, Design Mockup, Brand Asset, Content/Copy, Reference Material, Other
+- File type label stored in `description` column on upload
+
+**Pending Request Linking:**
+
+- Optional dropdown to link uploaded file to a pending document request
+- Dropdown only shown when project has pending requests
+- After upload, calls `/api/document-requests/:id/upload` to link file
+- Request status updates to 'uploaded' when linked
+
+**Backend API Additions:**
+
+- `GET /api/document-requests/project/:projectId/pending` - Returns pending requests for a project
+- Added `label` and `file_type` fields to file upload endpoint
+
+**Files Modified:**
+
+- `admin/index.html` - Upload modal HTML structure
+- `src/features/admin/project-details/files.ts` - Upload modal logic, dropdown integration
+- `src/features/admin/modules/admin-projects.ts` - Removed duplicate upload handlers
+- `server/routes/projects.ts` - Added label/file_type to upload endpoint
+- `server/routes/document-requests.ts` - Added pending requests endpoint
+- `src/styles/admin/files.css` - Upload preview styling
+
+---
+
+### Modal Dropdown Component
+
+**Status:** COMPLETE
+
+Created dedicated modal dropdown component separate from table dropdowns.
+
+**New Component:**
+
+- `src/components/modal-dropdown.ts` - Modal dropdown factory
+- `src/styles/admin/modal-dropdown.css` - Modal dropdown styling
+
+**Features:**
+
+- 48px height matching form inputs (vs 32px for table dropdowns)
+- Transparent border by default (blends with modal background)
+- Primary color border on hover/focus/open
+- Black background with caret rotation on open
+
+**Replaced Native Selects:**
+
+- Edit Project modal: Project Type and Status dropdowns
+- Edit Client Info modal: Status dropdown
+- Create Task modal: Priority dropdown
+- Upload Confirmation modal: File Type and Link to Request dropdowns
+
+**Files Modified:**
+
+- `src/features/admin/modules/admin-projects.ts`
+- `src/features/admin/modules/admin-clients.ts`
+- `src/features/admin/modules/admin-tasks.ts`
+- `src/features/admin/project-details/files.ts`
+
+---
+
+### Sidebar Spacing Consistency
+
+**Status:** COMPLETE
+
+Fixed uneven spacing in admin sidebar.
+
+**Changes:**
+
+- Avatar/logo spacing made symmetric: 1.5rem above = 1.5rem below
+- Sign Out button removed from absolute positioning, uses `margin-top: auto`
+- Sign Out gap matches nav item gap (0.5rem via padding-top)
+- Collapsed logo also uses margin-bottom: 1.5rem
+
+**File Modified:** `src/styles/pages/admin.css`
+
+---
+
+### Table Column Stacking Fixes (1760px breakpoint)
+
+**Status:** COMPLETE
+
+Fixed CSS selectors for responsive column hiding.
+
+**Changes:**
+
+- Changed `th.date-col:last-of-type` to `th.target-col` (Projects) and `th.last-active-col` (Clients)
+- Added specific header classes: `start-col`, `target-col`, `created-col`, `last-active-col`
+
+**Files Modified:** `admin/index.html`, `src/styles/pages/admin.css`
+
+---
+
+### Table Column Width & Spacing Refinements
+
+**Status:** COMPLETE
+
+Multiple table styling improvements.
+
+**Actions Column:** Changed from fixed 140px to fit-content (`width: 1%`), left-aligned
+
+**Checkbox Column:** Fixed at 48px width, consistent padding
+
+**Column Padding:** Added padding adjustments to status, type, budget, timeline, date, and count columns
+
+**Projects Table:** Identity column min-width 180px, max-width 260px
+
+**File Modified:** `src/styles/pages/admin.css`
+
+---
+
+### Design Token Migration (Phase 1)
+
+**Status:** COMPLETE
+
+Migrated hardcoded values to design tokens.
+
+**New Tokens Added:**
+
+- `--portal-radius-xl: 16px` and `--portal-radius-full: 50%`
+- `--transition-faster: 0.15s ease` and `--transition-slower: 0.5s ease`
+- Duration-only tokens: `--duration-faster/fast/medium/slow/slower`
+
+**Files Tokenized:**
+
+- `pages/admin.css` - Border-radius, transitions, font sizes, letter-spacing
+- `admin/leads-pipeline.css` - Border radius, transitions, letter-spacing
+- `shared/portal-forms.css` - Border radius and transitions
+- `shared/portal-buttons.css` - Border-radius and transitions
+
+---
+
+### Backend Documentation Update
+
+**Status:** COMPLETE
+
+"The Backend" terminology added to documentation.
+
+**Changes:**
+
+- "The Backend" now refers to entire portal system (Admin Dashboard + Client Portal)
+- Updated docs: ADMIN_DASHBOARD.md, CLIENT_PORTAL.md, README.md, ARCHITECTURE.md, SYSTEM_DOCUMENTATION.md
+
+---
+
+### Portfolio Tech Stack Audit
+
+**Status:** COMPLETE
+
+Fixed incorrect tech stack entries.
+
+**Changes:**
+
+- Removed "React" from nobhad.codes and The Backend (both use Vanilla TypeScript)
+- Replaced "PDFKit" with "pdf-lib" (actual dependency used)
+- Expanded tech stacks with complete tool lists
+
+**Files Modified:** `public/data/portfolio.json`, `docs/features/PROPOSAL_BUILDER.md`, `docs/features/CLIENT_PORTAL.md`
+
+---
+
+### Project Detail Page Enhancements
+
+**Status:** COMPLETE
+
+Enhanced portfolio project detail pages.
+
+**Changes:**
+
+- Added tagline display (italic, muted color)
+- Added status badge (In Progress, Completed, Planned)
+- Added next/previous navigation between projects
+- Fixed PDFKit → pdf-lib in About section tech stack
+
+**Files Modified:** `index.html`, `projects.ts`, `projects-detail.css`
+
+---
+
+### Case Study Sections Added
+
+**Status:** COMPLETE
+
+Added full case study structure to project detail pages.
+
+**New Fields:**
+
+- challenge, approach, results[], keyFeatures[], duration in portfolio.json
+
+**Content Written:**
+
+- nobhad.codes, The Backend, Recycle Content, Linktrees - all with Challenge/Approach/Results/Features
+
+**Files Modified:** `public/data/portfolio.json`, `index.html`, `projects.ts`, `projects-detail.css`
+
+---
+
+### Global Tasks Kanban Feature
+
+**Status:** COMPLETE
+
+Added global tasks view across all projects.
+
+**Backend:**
+
+- `GET /api/admin/tasks` endpoint in `server/routes/admin.ts`
+- `getAllTasks()` method in `server/services/project-service.ts`
+
+**Frontend:**
+
+- `src/features/admin/modules/admin-global-tasks.ts` - Kanban + List views
+- View toggle between Kanban/List
+
+**Dashboard Integration:**
+
+- Sidebar button and tab content in `admin/index.html`
+- Module loader and switch case in admin-dashboard.ts
+
+**Documentation:** `docs/features/TASKS.md`, `docs/API_DOCUMENTATION.md`
+
+---
+
 ## Completed - February 2, 2026
 
 ### Analytics Advanced Features UI
