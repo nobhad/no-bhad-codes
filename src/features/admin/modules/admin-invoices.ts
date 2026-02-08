@@ -408,7 +408,10 @@ function renderInvoicesTable(ctx: AdminDashboardContext): void {
         <td class="contact-cell">${safeClientName}</td>
         <td>${safeProjectName}</td>
         <td class="budget-cell">${amount}</td>
-        <td class="status-cell">${statusIndicator}</td>
+        <td class="status-cell">
+          ${statusIndicator}
+          <span class="date-stacked">${dueDate}</span>
+        </td>
         <td class="date-cell">${dueDate}</td>
         <td class="actions-cell">
           <div class="table-actions">

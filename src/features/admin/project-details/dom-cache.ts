@@ -64,6 +64,7 @@ export type ProjectDetailsDOMKeys = {
   resendInviteBtn: string;
   addMilestoneBtn: string;
   createInvoiceBtn: string;
+  btnAddTask: string;
   processLateFeesBtn: string;
   scheduleInvoiceBtn: string;
   setupRecurringBtn: string;
@@ -154,6 +155,7 @@ export function initDOMCache(): void {
     resendInviteBtn: '#btn-resend-invite',
     addMilestoneBtn: '#btn-add-milestone',
     createInvoiceBtn: '#btn-create-invoice',
+    btnAddTask: '#btn-add-task',
     processLateFeesBtn: '#btn-process-late-fees',
     scheduleInvoiceBtn: '#btn-schedule-invoice',
     setupRecurringBtn: '#btn-setup-recurring',

@@ -1,7 +1,7 @@
 # File Management System
 
 **Status:** Complete
-**Last Updated:** February 2, 2026
+**Last Updated:** February 8, 2026
 
 ## Table of Contents
 
@@ -32,6 +32,9 @@ The File Management system allows clients to upload, view, preview, and download
 |Drag & Drop Upload|Complete|Intuitive file upload via drag and drop (desktop only)|
 |Browse Files|Complete|Traditional file picker button|
 |Multi-file Upload|Complete|Upload up to 5 files at once|
+|Upload Confirmation Modal|Complete|Modal appears before upload with file preview and labeling options|
+|File Type Labeling|Complete|Select from 11 predefined file types (Proposal, Contract, Invoice, etc.)|
+|Document Request Linking|Complete|Optionally link upload to pending document request|
 |File List from API|Complete|Dynamic file list from backend|
 |Demo Mode|Complete|Fallback demo files when backend unavailable|
 |File Preview|Complete|Open images/PDFs in new browser tab|
@@ -832,9 +835,54 @@ const deleteIcon = canDelete
 
 ---
 
+## Upload Confirmation Modal (Admin)
+
+When uploading files in the admin project details Files tab, a confirmation modal appears before upload.
+
+### Modal Features
+
+- **File Preview**: Shows list of files to upload with name and size
+- **File Type Dropdown**: Select from predefined file types
+- **Request Linking**: Optionally link upload to a pending document request
+
+### File Type Options
+
+| Value | Label |
+|-------|-------|
+| `proposal` | Project Proposal |
+| `contract` | Contract |
+| `intake` | Intake Form |
+| `invoice` | Invoice |
+| `receipt` | Receipt |
+| `wireframe` | Wireframe |
+| `mockup` | Design Mockup |
+| `asset` | Brand Asset |
+| `content` | Content/Copy |
+| `reference` | Reference Material |
+| `other` | Other |
+
+### Modal Flow
+
+1. User selects files (drag-drop or browse)
+2. Modal appears with file preview
+3. User selects file type from dropdown
+4. (Optional) User selects pending document request to link
+5. User clicks "Upload" to confirm
+6. Files uploaded with label and file_type metadata
+7. If request linked, request status updates to 'uploaded'
+
+### Implementation
+
+- Uses `createModalDropdown` component for dropdowns
+- Modal structure in `admin/index.html` (`#file-upload-modal`)
+- Logic in `src/features/admin/project-details/files.ts`
+
+---
+
 ## Related Documentation
 
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
+- [Document Requests](./DOCUMENT_REQUESTS.md) - Document request integration
 - [API Reference](../API_REFERENCE.md) - Complete API documentation
 - [Settings](./SETTINGS.md) - Storage preferences
 - [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system

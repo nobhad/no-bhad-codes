@@ -152,12 +152,15 @@ function renderArticlesTable(articles: KBArticle[], _ctx: AdminDashboardContext)
     .map(
       (a) => `
     <tr>
-      <td>${escapeHtml(a.title)}</td>
-      <td>${escapeHtml(a.category_name || '')}</td>
-      <td><code>${escapeHtml(a.slug)}</code></td>
-      <td>${a.is_featured ? 'Yes' : 'No'}</td>
-      <td>${a.is_published ? 'Yes' : 'No'}</td>
-      <td>${formatDate(a.updated_at)}</td>
+      <td class="title-cell">${escapeHtml(a.title)}</td>
+      <td class="type-cell">${escapeHtml(a.category_name || '')}</td>
+      <td class="slug-cell"><code>${escapeHtml(a.slug)}</code></td>
+      <td class="status-cell featured-cell">${a.is_featured ? 'Yes' : 'No'}</td>
+      <td class="status-cell published-cell">
+        ${a.is_published ? 'Yes' : 'No'}
+        <span class="date-stacked">${formatDate(a.updated_at)}</span>
+      </td>
+      <td class="date-cell">${formatDate(a.updated_at)}</td>
       <td class="actions-cell">
         <button type="button" class="icon-btn kb-edit-article" data-id="${a.id}" title="Edit" aria-label="Edit article">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>

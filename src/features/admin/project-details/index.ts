@@ -26,7 +26,8 @@ export {
   loadProjectFiles,
   isAllowedFileType,
   uploadFiles,
-  setupFileUploadHandlers
+  setupFileUploadHandlers,
+  loadPendingRequestsDropdown
 } from './files';
 
 // Milestones

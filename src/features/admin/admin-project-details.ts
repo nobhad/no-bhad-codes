@@ -29,6 +29,7 @@ import {
   // Files
   loadProjectFiles,
   setupFileUploadHandlers,
+  loadPendingRequestsDropdown,
   // Milestones
   loadProjectMilestones,
   updateProgressBar,
@@ -366,6 +367,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private refreshProjectData(projectId: number): void {
     loadProjectMessages(projectId, this.projectsData);
     loadProjectFiles(projectId);
+    loadPendingRequestsDropdown(projectId);
     loadProjectMilestones(projectId, (progress) => updateProgressBar(projectId, progress));
     loadProjectInvoices(projectId);
   }
@@ -479,6 +481,16 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         if (project) {
           showCreateInvoicePrompt(projectId, project, () => loadProjectInvoices(projectId));
         }
+      });
+    }
+
+    // Add Task button
+    const btnAddTask = domCache.get('btnAddTask', true);
+    if (btnAddTask && !btnAddTask.dataset.listenerAdded) {
+      btnAddTask.dataset.listenerAdded = 'true';
+      btnAddTask.addEventListener('click', async () => {
+        const { showCreateTaskModal } = await import('./modules/admin-tasks');
+        await showCreateTaskModal();
       });
     }
 

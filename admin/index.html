@@ -2059,6 +2059,35 @@
                 </div>
               </div>
 
+              <!-- Upload Confirmation Modal -->
+              <div class="admin-modal-overlay hidden" id="file-upload-modal" role="dialog" aria-modal="true" aria-labelledby="file-upload-modal-title">
+                <div class="admin-modal">
+                  <div class="admin-modal-header">
+                    <h2 id="file-upload-modal-title">Upload Files</h2>
+                    <button type="button" class="btn-icon close-modal" id="file-upload-modal-close" aria-label="Close">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </div>
+                  <div class="admin-modal-body">
+                    <div class="upload-files-preview" id="upload-files-preview">
+                      <!-- Files to upload listed here -->
+                    </div>
+                    <div class="form-group">
+                      <label for="upload-file-type" class="field-label">File Type</label>
+                      <div id="upload-file-type-mount"></div>
+                    </div>
+                    <div class="form-group" id="pd-upload-link-request" style="display: none;">
+                      <label for="upload-request-select" class="field-label">Link to pending request (optional)</label>
+                      <div id="upload-request-select-mount"></div>
+                    </div>
+                  </div>
+                  <div class="admin-modal-footer">
+                    <button type="button" class="btn btn-secondary" id="file-upload-modal-cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="file-upload-modal-confirm">Upload</button>
+                  </div>
+                </div>
+              </div>
+
               <!-- Files Browser -->
               <div class="files-browser portal-shadow">
                 <!-- Folder Tree Panel -->
@@ -2083,10 +2112,16 @@
                     <div class="files-path" id="pd-files-path">
                       <span>All Files</span>
                     </div>
-                    <div id="files-view-toggle-mount"></div>
+                    <div class="files-panel-controls">
+                      <div id="files-source-toggle-mount"></div>
+                      <div id="files-view-toggle-mount"></div>
+                    </div>
                   </div>
                   <div class="files-list" id="pd-files-list">
                     <p class="empty-state">No files uploaded yet.</p>
+                  </div>
+                  <div class="pending-requests-list hidden" id="pd-pending-requests-list">
+                    <!-- Pending requests populated by JS -->
                   </div>
                 </div>
               </div>

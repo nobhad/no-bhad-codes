@@ -21,6 +21,7 @@ import {
 import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
 import { createTableDropdown, PROJECT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
+import { createModalDropdown } from '../../../components/modal-dropdown';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import { showToast } from '../../../utils/toast-notifications';
 import {
@@ -38,7 +39,7 @@ import { showTableError } from '../../../utils/error-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { createDOMCache, batchUpdateText } from '../../../utils/dom-cache';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
-import { alertWarning, multiPromptDialog } from '../../../utils/confirm-dialog';
+import { alertWarning, multiPromptDialog, confirmDanger } from '../../../utils/confirm-dialog';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { createRowCheckbox, createBulkActionToolbar, setupBulkSelectionHandlers, resetSelection, type BulkActionConfig } from '../../../utils/table-bulk-actions';
@@ -52,6 +53,8 @@ import {
   type PaginationConfig
 } from '../../../utils/table-pagination';
 import { exportToCsv, PROJECTS_EXPORT_CONFIG } from '../../../utils/table-export';
+import { deleteProject, archiveProject, duplicateProject } from '../project-details/actions';
+import { setupFileUploadHandlers, loadPendingRequestsDropdown, loadProjectFiles as loadProjectFilesFromModule } from '../project-details';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -174,16 +177,20 @@ domCache.register({
 interface LeadProject {
   id: number;
   project_name?: string;
+  client_id?: number;
+  client_name?: string;
   contact_name?: string;
   company_name?: string;
   email?: string;
   project_type?: string;
   budget_range?: string;
+  budget?: number;
   timeline?: string;
   status: 'pending' | 'active' | 'in-progress' | 'on-hold' | 'completed' | 'cancelled';
   description?: string;
   features?: string;
   progress?: number;
+  notes?: string;
   created_at?: string;
   start_date?: string;
   end_date?: string;
@@ -428,13 +435,17 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       <td class="identity-cell">
         <span class="identity-name">${safeName}</span>
         ${(safeContact || safeCompany) ? `<span class="identity-contact">${safeContact}${safeCompany ? ` - ${safeCompany}` : ''}</span>` : ''}
+        <span class="type-budget-stacked">${formatProjectType(project.project_type)} · ${formatDisplayValue(project.budget_range)}</span>
       </td>
       <td class="type-cell">
         <span class="type-value">${formatProjectType(project.project_type)}</span>
         <span class="budget-stacked">${formatDisplayValue(project.budget_range)}</span>
       </td>
       <td class="status-cell"></td>
-      <td class="budget-cell">${formatDisplayValue(project.budget_range)}</td>
+      <td class="budget-cell">
+        <span class="budget-value">${formatDisplayValue(project.budget_range)}</span>
+        <span class="timeline-stacked">${formatDisplayValue(project.timeline)}</span>
+      </td>
       <td class="timeline-cell">${formatDisplayValue(project.timeline)}</td>
       <td class="date-cell start-cell">
         <span class="date-value">${formatDate(project.start_date)}</span>
@@ -565,6 +576,13 @@ export function showProjectDetails(
   loadProjectFiles(projectId, ctx);
   loadProjectMilestones(projectId, ctx);
   loadProjectInvoices(projectId, ctx);
+
+  // Setup file upload with confirmation modal
+  loadPendingRequestsDropdown(projectId);
+  setupFileUploadHandlers(projectId, () => {
+    loadProjectFiles(projectId, ctx);
+    loadProjectFilesFromModule(projectId);
+  });
 }
 
 function populateProjectDetailView(project: LeadProject): void {
@@ -869,27 +887,33 @@ const EDIT_PROJECT_STATUS_OPTIONS = [
 
 /**
  * Initialize custom dropdowns for the edit project modal.
- * Type uses createFilterSelect (plain select); status uses createTableDropdown.
+ * Uses createModalDropdown for modal-specific styling (48px height, form field bg).
  */
 export function initProjectModalDropdowns(project: LeadProject): void {
-  const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
+  const typeMount = document.getElementById('edit-project-type-mount');
   const statusMount = document.getElementById('edit-project-status-mount');
 
-  // Type dropdown: set value on the select created by createFilterSelect
-  if (typeSelect) {
-    typeSelect.value = project.project_type || '';
+  // Type dropdown: modal dropdown with placeholder
+  if (typeMount) {
+    typeMount.innerHTML = '';
+    const typeDropdown = createModalDropdown({
+      options: EDIT_PROJECT_TYPE_OPTIONS,
+      currentValue: project.project_type || '',
+      ariaLabelPrefix: 'Project type',
+      placeholder: 'Select type...'
+    });
+    typeMount.appendChild(typeDropdown);
   }
 
-  // Status dropdown: same reusable component as projects table (createTableDropdown)
+  // Status dropdown: modal dropdown
   if (statusMount) {
     const currentStatus = normalizeStatus(project.status);
     statusMount.innerHTML = '';
-    const statusDropdown = createTableDropdown({
+    const statusDropdown = createModalDropdown({
       options: EDIT_PROJECT_STATUS_OPTIONS,
       currentValue: currentStatus,
-      onChange: () => {} // value read from wrapper on save
+      ariaLabelPrefix: 'Status'
     });
-    statusDropdown.setAttribute('data-modal-dropdown', 'true'); // scope modal styles
     statusMount.appendChild(statusDropdown);
   }
 }
@@ -903,19 +927,7 @@ export function setupEditProjectModalHandlers(modal: HTMLElement): void {
   if (editProjectModalInitialized) return;
   editProjectModalInitialized = true;
 
-  const typeMount = document.getElementById('edit-project-type-mount');
-  if (typeMount && !typeMount.querySelector('select')) {
-    const typeInstance = createFilterSelect({
-      id: 'edit-project-type',
-      ariaLabel: 'Project type',
-      emptyOption: 'Select type...',
-      options: EDIT_PROJECT_TYPE_OPTIONS.slice(1).map((o) => ({ value: o.value, label: o.label })),
-      value: '',
-      className: 'form-input'
-    });
-    typeMount.appendChild(typeInstance.element);
-  }
-
+  // Type dropdown is now created in initProjectModalDropdowns with createTableDropdown
   // Status is created in initProjectModalDropdowns with createTableDropdown (same as table)
 
   const closeBtn = domCache.get('editClose');
@@ -948,12 +960,13 @@ async function saveProjectChanges(projectId: number): Promise<void> {
 
   const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
   const descriptionInput = document.getElementById('edit-project-description') as HTMLTextAreaElement;
-  const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
+  const typeMount = document.getElementById('edit-project-type-mount');
+  const typeValue = typeMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') ?? '';
   const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
   const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
   const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
   const statusMount = document.getElementById('edit-project-status-mount');
-  const statusValue = statusMount?.querySelector('.table-dropdown')?.getAttribute('data-status') ?? '';
+  const statusValue = statusMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') ?? '';
   const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
   const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
   const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
@@ -967,7 +980,7 @@ async function saveProjectChanges(projectId: number): Promise<void> {
   if (nameInput?.value) updates.project_name = nameInput.value;
   // Allow clearing description by sending empty string
   if (descriptionInput) updates.description = descriptionInput.value || '';
-  if (typeSelect?.value) updates.project_type = typeSelect.value;
+  if (typeValue) updates.project_type = typeValue;
   if (budgetInput?.value) updates.budget = budgetInput.value;
   if (priceInput?.value) updates.price = priceInput.value;
   if (timelineInput?.value) updates.timeline = timelineInput.value;
@@ -1066,6 +1079,18 @@ function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
     addMilestoneBtn.addEventListener('click', () => showAddMilestonePrompt());
   }
 
+  // Add Task button handler
+  const btnAddTask = document.getElementById('btn-add-task');
+  if (btnAddTask && !btnAddTask.dataset.listenerAdded) {
+    btnAddTask.dataset.listenerAdded = 'true';
+    btnAddTask.addEventListener('click', async () => {
+      if (!currentProjectId) return;
+      const { initTasksModule, showCreateTaskModal } = await import('./admin-tasks');
+      await initTasksModule(currentProjectId);
+      await showCreateTaskModal();
+    });
+  }
+
   // Send message handler (use cached ref)
   const sendMsgBtn = domCache.get('sendMsgBtn');
   if (sendMsgBtn && !sendMsgBtn.dataset.listenerAdded) {
@@ -1073,8 +1098,100 @@ function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
     sendMsgBtn.addEventListener('click', () => sendProjectMessage());
   }
 
-  // File upload handlers
-  setupProjectFileUpload();
+  // Note: File upload handlers are set up in admin-project-details.ts via setupFileUploadHandlers()
+
+  // More menu (edit, duplicate, archive, delete)
+  setupMoreMenu(ctx);
+}
+
+/**
+ * Set up the more menu dropdown for project actions
+ */
+function setupMoreMenu(ctx: AdminDashboardContext): void {
+  const moreMenu = document.getElementById('pd-more-menu');
+  if (!moreMenu) return;
+
+  const trigger = moreMenu.querySelector('.custom-dropdown-trigger') as HTMLElement;
+  if (!trigger || trigger.dataset.listenerAdded === 'true') return;
+  trigger.dataset.listenerAdded = 'true';
+
+  // Toggle dropdown on trigger click
+  trigger.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    moreMenu.classList.toggle('open');
+  });
+
+  // Handle menu item clicks
+  moreMenu.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+    const item = target.closest('.custom-dropdown-item') as HTMLElement | null;
+    if (!item) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    const action = item.dataset.action;
+    moreMenu.classList.remove('open');
+
+    if (!currentProjectId || !action) return;
+
+    const project = projectsData.find((p) => p.id === currentProjectId);
+    if (!project) return;
+
+    switch (action) {
+    case 'edit':
+      openEditProjectModal(project);
+      break;
+    case 'duplicate':
+      await duplicateProject(
+        currentProjectId,
+        projectsData,
+        () => loadProjects(ctx),
+        (id) => showProjectDetails(id, ctx)
+      );
+      break;
+    case 'archive':
+      await archiveProject(
+        currentProjectId,
+        projectsData,
+        () => loadProjects(ctx),
+        (id) => showProjectDetails(id, ctx)
+      );
+      break;
+    case 'delete':
+      await deleteProject(currentProjectId, projectsData, () => {
+        currentProjectId = null;
+        ctx.switchTab('projects');
+      });
+      break;
+    }
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!moreMenu.contains(e.target as Node)) {
+      moreMenu.classList.remove('open');
+    }
+  });
+
+  // Keyboard support: Escape to close, Enter/Space to toggle
+  trigger.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      moreMenu.classList.remove('open');
+      trigger.focus();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      moreMenu.classList.toggle('open');
+    }
+  });
+
+  // Close on Escape when focus is in the menu
+  moreMenu.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      moreMenu.classList.remove('open');
+      trigger.focus();
+    }
+  });
 }
 
 // NOTE: formatProjectType moved to shared format-utils.ts
@@ -1197,6 +1314,7 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
         ? `<button type="button" class="icon-btn btn-preview" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Preview ${safeName}" title="Preview"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>`
         : '';
       const downloadBtn = `<button type="button" class="icon-btn btn-download" data-file-url="${downloadUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Download ${safeName}" title="Download"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
+      const deleteBtn = `<button type="button" class="icon-btn icon-btn-danger btn-delete-file" data-file-id="${file.id}" data-file-name="${safeName}" aria-label="Delete ${safeName}" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>`;
       return `
               <tr>
                 <td data-label="File">${safeName}</td>
@@ -1205,6 +1323,7 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
                 <td class="file-actions" data-label="Actions">
                   ${previewBtn}
                   ${downloadBtn}
+                  ${deleteBtn}
                 </td>
               </tr>
             `;
@@ -1234,6 +1353,37 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
       const storageFilename = (btn as HTMLElement).dataset.storageFilename;
       if (fileUrl) {
         await downloadFile(fileUrl, fileName || 'download', projectId, storageFilename);
+      }
+    });
+  });
+
+  // Add click handlers for delete buttons
+  container.querySelectorAll('.btn-delete-file').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const fileId = (btn as HTMLElement).dataset.fileId;
+      const fileName = (btn as HTMLElement).dataset.fileName || 'this file';
+      if (!fileId) return;
+
+      const confirmed = await confirmDanger(`Delete "${fileName}"? This action cannot be undone.`);
+      if (!confirmed) return;
+
+      try {
+        const response = await apiFetch(`/api/uploads/file/${fileId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showToast('File deleted', 'success');
+          // Refresh the file list
+          if (storedContext) {
+            await loadProjectFiles(projectId, storedContext);
+          }
+        } else {
+          showToast('Failed to delete file', 'error');
+        }
+      } catch (error) {
+        console.error('[AdminProjects] Error deleting file:', error);
+        showToast('Failed to delete file', 'error');
       }
     });
   });
@@ -2347,121 +2497,6 @@ async function sendProjectMessage(): Promise<void> {
   } catch (error) {
     console.error('[AdminProjects] Error sending message:', error);
     storedContext.showNotification('Error sending message', 'error');
-  }
-}
-
-// =====================================================
-// PROJECT FILE UPLOAD
-// =====================================================
-
-/**
- * Set up file upload handlers for project detail view
- */
-function setupProjectFileUpload(): void {
-  const dropzone = domCache.get('uploadDropzone');
-  const fileInput = domCache.getAs<HTMLInputElement>('fileInput');
-  const browseBtn = domCache.get('browseFilesBtn');
-
-  if (!dropzone) return;
-
-  // Skip if already set up
-  if (dropzone.dataset.listenerAdded) return;
-  dropzone.dataset.listenerAdded = 'true';
-
-  // Browse button click
-  if (browseBtn && fileInput) {
-    browseBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      fileInput.click();
-    });
-
-    // File input change
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files && fileInput.files.length > 0) {
-        uploadProjectFiles(Array.from(fileInput.files));
-        fileInput.value = '';
-      }
-    });
-  }
-
-  // Drag & drop handlers
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropzone.classList.add('dragover');
-  });
-
-  dropzone.addEventListener('dragleave', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropzone.classList.remove('dragover');
-  });
-
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropzone.classList.remove('dragover');
-
-    const files = e.dataTransfer?.files;
-    if (files && files.length > 0) {
-      uploadProjectFiles(Array.from(files));
-    }
-  });
-}
-
-/**
- * Upload files for the current project
- */
-async function uploadProjectFiles(files: File[]): Promise<void> {
-  if (!currentProjectId || !storedContext) return;
-
-  // Check file count limit
-  if (files.length > 5) {
-    alertWarning('Maximum 5 files allowed per upload.');
-    return;
-  }
-
-  // Check file sizes (10MB limit)
-  const maxSize = 10 * 1024 * 1024;
-  const oversizedFiles = files.filter((f) => f.size > maxSize);
-  if (oversizedFiles.length > 0) {
-    alertWarning(`Some files exceed the 10MB limit: ${oversizedFiles.map((f) => f.name).join(', ')}`);
-    return;
-  }
-
-  try {
-    // Upload files one at a time to the project-specific endpoint
-    // This ensures files are properly associated with the project in the database
-    let successCount = 0;
-    for (const file of files) {
-      const formData = new FormData();
-      formData.append('project_file', file);
-
-      const response = await apiFetch(`/api/uploads/project/${currentProjectId}`, {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        successCount++;
-      } else {
-        const error = await response.json();
-        console.error(`Failed to upload ${file.name}:`, error.message);
-      }
-    }
-
-    if (successCount > 0) {
-      storedContext.showNotification(`${successCount} file(s) uploaded successfully`, 'success');
-      // Refresh the files list to show newly uploaded files
-      // Invalidate the cached DOM reference and reload
-      domCache.invalidate('filesList');
-      await loadProjectFiles(currentProjectId, storedContext);
-    } else {
-      throw new Error('All uploads failed');
-    }
-  } catch (error) {
-    console.error('[AdminProjects] Upload error:', error);
-    storedContext.showNotification('Upload failed. Please try again.', 'error');
   }
 }
 

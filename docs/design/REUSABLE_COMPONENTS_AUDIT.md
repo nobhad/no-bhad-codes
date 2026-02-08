@@ -1,37 +1,46 @@
 # Reusable Components Audit
 
-**Date:** February 7, 2026
+**Date:** February 8, 2026
 **Scope:** Admin and Client Portal — identify UI that should use shared components but currently uses native elements or duplicate implementations.
 
 ---
 
 ## 1. Dropdowns / selects
 
-**Two reusable dropdown components:**
+**Three reusable dropdown components:**
 
-- **Table dropdown:** `createTableDropdown()` in `src/components/table-dropdown.ts` (re-exported from `src/utils/table-dropdown.ts`) — for **tables only**: table cells (status, actions) and table header filters (e.g. pagination “Per page”). Compact custom trigger + menu; uses `.table-dropdown.custom-dropdown`, `.custom-dropdown-trigger`, `.custom-dropdown-menu`, `.custom-dropdown-item`.
-- **Form select:** `createFormSelect()` in `src/components/form-select.ts` — for **forms only**: modals and inline forms (client, category, type, status). Native `<select>` with `form-input` styling; mount in a div, call `setOptions()` when data loads.
+- **Table dropdown:** `createTableDropdown()` in `src/components/table-dropdown.ts` — for **tables only**: table cells (status, actions) and table header filters (e.g. pagination "Per page"). Compact 32px height, transparent border; uses `.table-dropdown.custom-dropdown`.
+- **Modal dropdown:** `createModalDropdown()` in `src/components/modal-dropdown.ts` — for **modals and forms**: Edit Project, Edit Client, Create Task, Upload Confirmation. 48px height matching form inputs, transparent border blends with modal background; uses `.modal-dropdown.custom-dropdown`.
+- **Form select:** `createFormSelect()` in `src/components/form-select.ts` — for **native selects**: Native `<select>` with `form-input` styling; mount in a div, call `setOptions()` when data loads.
 
 **Legacy / alternative:**
 
-- **Modal dropdown:** `initModalDropdown(selectElement, options)` in `src/utils/modal-dropdown.ts` — wraps an existing native `<select>` in custom dropdown UI for modals. Prefer `createFormSelect` for new form fields (no static HTML select).
+- **initModalDropdown()** in `src/utils/modal-dropdown.ts` — wraps an existing native `<select>` in custom dropdown UI. **Deprecated:** Prefer `createModalDropdown()` for new modal fields.
 
 ### Dropdown Migration Status
 
-✅ **COMPLETE** - All form selects now use `initModalDropdown()`:
+✅ **COMPLETE** - All modal form selects now use `createModalDropdown()`:
 
-| Location | Status |
-|----------|--------|
-| Admin Leads – Cancel reason | ✅ Wrapped (line 910) |
-| Admin Proposals – Template selects | ✅ Wrapped (lines 909, 913) |
-| Admin Projects – Invoice/deposit modals | ✅ Wrapped (lines 863, 2052, 2057) |
-| Admin Project Details – Invoice type | ✅ Wrapped (line 168) |
-| Client Portal – Files filters | ✅ Wrapped (lines 122, 486, 490) |
-| Admin Document Requests – Client selects | ✅ Wrapped (lines 447, 456) |
+| Location | Component | Status |
+|----------|-----------|--------|
+| Edit Project modal – Type dropdown | `createModalDropdown` | ✅ Complete |
+| Edit Project modal – Status dropdown | `createModalDropdown` | ✅ Complete |
+| Edit Client Info modal – Status dropdown | `createModalDropdown` | ✅ Complete |
+| Create Task modal – Priority dropdown | `createModalDropdown` | ✅ Complete |
+| Upload Confirmation modal – File Type | `createModalDropdown` | ✅ Complete |
+| Upload Confirmation modal – Link to Request | `createModalDropdown` | ✅ Complete |
+| Admin Leads – Cancel reason | `initModalDropdown` | ✅ Wrapped |
+| Admin Proposals – Template selects | `initModalDropdown` | ✅ Wrapped |
+| Admin Projects – Invoice/deposit modals | `initModalDropdown` | ✅ Wrapped |
+| Admin Project Details – Invoice type | `initModalDropdown` | ✅ Wrapped |
+| Client Portal – Files filters | `initModalDropdown` | ✅ Wrapped |
+| Admin Document Requests – Client selects | `initModalDropdown` | ✅ Wrapped |
 
-**Table dropdowns (createTableDropdown):** Leads/Contacts/Projects table status, Proposals status, Pagination "Per page".
+**Table dropdowns (`createTableDropdown`):** Leads/Contacts/Projects table status, Proposals status, Pagination "Per page".
 
-**Modal dropdowns (initModalDropdown):** All modal form selects listed above, plus Add/Edit project modals, Edit client status.
+**Modal dropdowns (`createModalDropdown`):** Edit Project, Edit Client Info, Create Task, Upload Confirmation modals.
+
+**Legacy modal dropdowns (`initModalDropdown`):** Cancel reason, Template selects, Invoice/deposit modals, Files filters, Document request client selects.
 
 ---
 
@@ -130,8 +139,9 @@ Migrating would require significant refactoring for minimal benefit. The custom 
 | Category | Reusable component | Status |
 |----------|-------------------|--------|
 | **Status badges** | createStatusBadge, getStatusBadgeHTML | ✅ COMPLETE - All admin modules use reusable component |
-| **Form dropdowns** | initModalDropdown | ✅ COMPLETE - All modal/form selects wrapped |
-| **Table dropdowns** | createTableDropdown | ✅ COMPLETE - All table status selects use shared component |
+| **Modal dropdowns** | createModalDropdown | ✅ COMPLETE - 48px height, matches form inputs |
+| **Table dropdowns** | createTableDropdown | ✅ COMPLETE - 32px compact height for table cells |
+| **Legacy form dropdowns** | initModalDropdown | ✅ COMPLETE - Wraps native selects (deprecated for new work) |
 | **View toggles** | createViewToggle | ✅ COMPLETE - All view toggles have icons |
 | **Project details status** | Custom implementation | ⚠️ EXCEPTION - Intentionally custom (auto-save behavior) |
 | **Modals** | ModalComponent, confirm-dialog | 📝 LOW PRIORITY - Admin modals are ad-hoc HTML + JS |
@@ -139,3 +149,11 @@ Migrating would require significant refactoring for minimal benefit. The custom 
 **Audit Status:** ✅ COMPLETE
 
 All reusable component migrations are done. Only intentional exceptions remain (project details status dropdown, ad-hoc modals).
+
+**Dropdown Component Selection Guide:**
+
+| Use Case | Component | Height | Border |
+|----------|-----------|--------|--------|
+| Table cell status | `createTableDropdown` | 32px | Transparent, shows on hover |
+| Modal form field | `createModalDropdown` | 48px | Transparent, shows on hover |
+| Existing native select | `initModalDropdown` | Varies | Wraps existing element |

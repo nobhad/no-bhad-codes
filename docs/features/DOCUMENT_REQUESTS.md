@@ -131,12 +131,50 @@ POST /api/document-requests/:id/upload
   Returns: upload confirmation
 ```
 
+## Integration with Project Files
+
+Document requests are integrated with the project Files tab, allowing admins to link uploads to pending requests.
+
+### Admin Files Tab Integration
+
+When uploading files in project details, admins can:
+
+1. Select a file type from predefined options
+2. Optionally link the upload to a pending document request
+3. Request status automatically updates to 'uploaded' when linked
+
+### API Endpoints
+
+```text
+GET /api/document-requests/project/:projectId/pending
+  Returns: pending requests for a specific project
+  Used by: Admin Files tab upload modal
+```
+
+### Upload Flow
+
+1. Admin selects files in project Files tab
+2. Upload modal appears with file preview
+3. Admin selects file type (optional)
+4. Admin selects pending request to link (optional)
+5. Files uploaded via `POST /api/projects/:id/files`
+6. If request selected, `POST /api/document-requests/:id/upload` called with file ID
+7. Request status updates to 'uploaded'
+
+### Files Modified for Integration
+
+- `src/features/admin/project-details/files.ts` - Upload modal with request linking
+- `server/routes/document-requests.ts` - Added pending requests endpoint
+
+---
+
 ## Files
 
 | File | Purpose |
 |------|---------|
 | `src/features/admin/modules/admin-document-requests.ts` | Admin module |
 | `src/features/client/modules/portal-document-requests.ts` | Client module |
+| `src/features/admin/project-details/files.ts` | Files tab integration |
 | `server/routes/document-requests.ts` | API endpoints |
 | `src/utils/table-filter.ts` | Filter configuration |
 | `src/utils/table-bulk-actions.ts` | Bulk action utilities |
