@@ -606,8 +606,6 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
     const displayType = projectType ? projectType.charAt(0).toUpperCase() + projectType.slice(1) : '';
     const displayBudget = formatDisplayValue(leadAny.budget_range);
     const status = lead.status || 'new';
-    const projectName = lead.project_name || '';
-    const safeProjectName = projectName ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(projectName)) : '';
     const hasClient = typeof lead.client_id === 'number';
 
     // Show convert button for leads that can be converted (not yet converted/lost/cancelled)
@@ -615,14 +613,6 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
 
     const row = document.createElement('tr');
     row.dataset.leadId = String(lead.id);
-
-    // Project column: link to project details when lead is in-progress or converted
-    const isActiveProject = ['in-progress', 'converted'].includes(status);
-    const projectContent = safeProjectName
-      ? isActiveProject
-        ? `<a href="/admin/projects/${lead.id}" class="lead-link lead-link-project" data-project-id="${lead.id}" title="View project">${safeProjectName}</a>`
-        : safeProjectName
-      : '—';
 
     // Lead column: Company name is primary (largest), then contact name, then email
     // If no company, contact name becomes primary
@@ -644,9 +634,12 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
         ${secondaryContent ? `<span class="identity-contact">${secondaryContent}</span>` : ''}
         <span class="identity-email">${safeEmail}</span>
       </td>
-      <td class="type-cell">${SanitizationUtils.escapeHtml(displayType)}</td>
+      <td class="type-cell">
+        <span class="type-value">${SanitizationUtils.escapeHtml(displayType)}</span>
+        <span class="budget-stacked">${SanitizationUtils.escapeHtml(displayBudget)}</span>
+      </td>
       <td class="budget-cell">${SanitizationUtils.escapeHtml(displayBudget)}</td>
-      <td class="status-cell"></td>
+      <td class="status-cell"><span class="date-stacked">${date}</span></td>
       <td class="date-cell">${date}</td>
       <td class="actions-cell">
         <div class="table-actions">
@@ -703,16 +696,6 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
           e.stopPropagation();
           openClientDetails(lead.client_id!, ctx);
         });
-      });
-    }
-
-    // Link: project name -> project details
-    const projectLink = row.querySelector('.lead-link-project');
-    if (projectLink) {
-      projectLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showProjectDetails(lead.id, ctx);
       });
     }
 

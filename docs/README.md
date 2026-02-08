@@ -4,7 +4,11 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 
 ## 📚 Documentation Overview
 
-### Client Portal Features
+### The Backend (Portal System)
+
+The Backend refers to the complete portal system with two interfaces:
+
+**Client Portal** - Client-facing dashboard:
 
 |Document|Description|
 |----------|-------------|
@@ -16,13 +20,13 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 |**[New Project](./features/NEW_PROJECT.md)**|Project request form, validation|
 |**[Terminal Intake](./features/TERMINAL_INTAKE.md)**|Terminal-style project intake form with conversational UI|
 
-### Admin Dashboard
+**Admin Dashboard** - Administrative interface:
 
 |Document|Description|
 |----------|-------------|
 |**[Admin Dashboard](./features/ADMIN_DASHBOARD.md)**|Leads, projects, clients, messaging, analytics|
 
-### Backend Features (Phase 1-7)
+### Backend API Features (Phase 1-7)
 
 |Document|Description|
 |----------|-------------|

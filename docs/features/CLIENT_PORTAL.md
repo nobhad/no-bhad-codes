@@ -1,6 +1,8 @@
 # Client Portal Dashboard
 
-**Last Updated:** February 2, 2026
+**Last Updated:** February 8, 2026
+
+> **Part of "The Backend"** - The portal system consisting of both the Admin Dashboard and Client Portal.
 
 ## Table of Contents
 
@@ -25,7 +27,7 @@
 
 ## Overview
 
-The Client Portal is a dedicated dashboard for clients to manage their projects, communicate with the developer, view invoices, upload files, and manage account settings.
+The Client Portal is the client-facing side of "The Backend" portal system. It provides a dedicated dashboard for clients to manage their projects, communicate with the developer, view invoices, upload files, and manage account settings.
 
 **Key Features:**
 

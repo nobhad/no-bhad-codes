@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** February 7, 2026
+**Last Updated:** February 8, 2026
 
 ## Table of Contents
 
@@ -991,6 +991,61 @@ Sort icons in table headers are right-aligned using absolute positioning:
 @custom-media --wide-down (max-width: 1300px);
 @custom-media --ultra-wide (min-width: 1400px);
 ```
+
+### Responsive Table Column Stacking
+
+To prevent horizontal scroll on admin tables at smaller viewports, columns are progressively stacked:
+
+**Pattern:** Data is duplicated in HTML (one visible column, one hidden stacked element). CSS shows/hides based on breakpoint.
+
+**Breakpoints:**
+
+| Width | Tables Affected | Action |
+|-------|-----------------|--------|
+| `1280px` | Leads, Projects | Hide Budget column, show stacked under Type |
+| `1280px` | Contacts | Hide Email column, show stacked under Contact |
+| `1100px` | Leads | Hide Date column, show stacked above Status |
+
+**HTML Pattern (TypeScript renderer):**
+
+```html
+<!-- Type cell with stacked budget (hidden by default) -->
+<td class="type-cell">
+  <span class="type-value">Business-site</span>
+  <span class="budget-stacked">$2.5k-$5k</span>
+</td>
+<!-- Separate budget cell (hidden at smaller breakpoints) -->
+<td class="budget-cell">$2.5k-$5k</td>
+```
+
+**CSS Pattern:**
+
+```css
+/* Hidden by default */
+.admin-table .budget-stacked,
+.admin-table .email-stacked,
+.admin-table .date-stacked {
+  display: none;
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+}
+
+/* Show stacked, hide separate column at breakpoint */
+@media (max-width: 1280px) {
+  .leads-table th.budget-col,
+  .leads-table td.budget-cell {
+    display: none;
+  }
+  .leads-table .type-cell .budget-stacked {
+    display: block;
+  }
+}
+```
+
+**Files:**
+
+- CSS: `src/styles/pages/admin.css`
+- TypeScript: `admin-leads.ts`, `admin-contacts.ts`, `admin-projects.ts`
 
 ### Settings Grid (3 → 2 → 1 columns)
 

@@ -1,6 +1,8 @@
 # Admin Dashboard
 
-**Last Updated:** February 6, 2026
+**Last Updated:** February 8, 2026
+
+> **Part of "The Backend"** - The portal system consisting of both the Admin Dashboard and Client Portal.
 
 ## Table of Contents
 
@@ -19,7 +21,7 @@
 
 ## Overview
 
-The Admin Dashboard provides comprehensive administrative capabilities for managing leads, projects, clients, and analytics. Only users with admin privileges can access this dashboard.
+The Admin Dashboard is the administrative side of "The Backend" portal system. It provides comprehensive capabilities for managing leads, projects, clients, and analytics. Only users with admin privileges can access this dashboard.
 
 **Key Features:**
 
