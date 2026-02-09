@@ -289,6 +289,16 @@
         </div>
       </aside>
 
+      <!-- Secondary Sidebar (shown for multi-tab detail pages) -->
+      <aside id="secondary-sidebar">
+        <!-- Populated dynamically by createSecondarySidebar() -->
+      </aside>
+
+      <!-- Horizontal Tabs Fallback (mobile, when secondary sidebar is hidden) -->
+      <div id="secondary-tabs-horizontal">
+        <!-- Populated dynamically by createSecondarySidebar() -->
+      </div>
+
       <!-- Content Area -->
       <div class="dashboard-content" id="dashboard-content">
         <div class="content-wrapper">
@@ -1845,40 +1855,127 @@
 
           <!-- Project Detail View (mirrors client portal view) -->
           <div class="tab-content" id="tab-project-detail">
-            <!-- Detail Header: Name + Status + Actions -->
-            <div class="detail-title-row">
-              <div class="detail-title-group">
-                <h2 class="detail-title" id="pd-project-name">Project Name</h2>
-                <span class="status-badge" id="pd-status">-</span>
-              </div>
-              <div class="detail-actions">
-                <div class="table-dropdown detail-more-menu" id="pd-more-menu">
-                  <button type="button" class="custom-dropdown-trigger" aria-label="More actions">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                  </button>
-                  <ul class="custom-dropdown-menu">
-                    <li class="custom-dropdown-item" data-action="edit">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                      Edit Project
-                    </li>
-                    <li class="custom-dropdown-item" data-action="duplicate">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                      Duplicate Project
-                    </li>
-                    <li class="custom-dropdown-item" data-action="archive">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
-                      Archive Project
-                    </li>
-                    <li class="dropdown-divider"></li>
-                    <li class="custom-dropdown-item danger" data-action="delete">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                      Delete Project
-                    </li>
-                  </ul>
+            <!-- Project Header Card (matches client detail pattern) -->
+            <div class="portal-project-card portal-shadow pd-header-card">
+              <div class="pd-header-top">
+                <div class="pd-header-info">
+                  <div class="detail-title-row">
+                    <div class="detail-title-group">
+                      <h2 class="detail-title" id="pd-project-name">Project Name</h2>
+                      <span class="status-badge" id="pd-status">-</span>
+                    </div>
+                    <div class="detail-actions">
+                      <button class="icon-btn" id="pd-btn-edit" title="Edit Project" aria-label="Edit project details">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                      </button>
+                      <div class="table-dropdown detail-more-menu" id="pd-more-menu">
+                        <button type="button" class="custom-dropdown-trigger" aria-label="More actions">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                        </button>
+                        <ul class="custom-dropdown-menu">
+                          <li class="custom-dropdown-item" data-action="edit">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                            Edit Project
+                          </li>
+                          <li class="custom-dropdown-item" data-action="duplicate">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                            Duplicate Project
+                          </li>
+                          <li class="custom-dropdown-item" data-action="archive">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
+                            Archive Project
+                          </li>
+                          <li class="dropdown-divider"></li>
+                          <li class="custom-dropdown-item danger" data-action="delete">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                            Delete Project
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Client Info in Header -->
+                  <div class="pd-header-client">
+                    <div class="pd-client-item clickable-client" id="pd-header-client-link">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      <span id="pd-header-client-name">-</span>
+                    </div>
+                    <div class="pd-client-item" id="pd-header-company-row">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+                      <span id="pd-header-company">-</span>
+                    </div>
+                    <div class="pd-client-item">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                      <span id="pd-header-email">-</span>
+                    </div>
+                  </div>
+                  <!-- Project Meta in Header -->
+                  <div class="pd-header-meta">
+                    <div class="pd-meta-item">
+                      <span class="field-label">Type</span>
+                      <span class="pd-meta-value" id="pd-header-type">-</span>
+                    </div>
+                    <div class="pd-meta-item">
+                      <span class="field-label">Start</span>
+                      <span class="pd-meta-value" id="pd-header-start">-</span>
+                    </div>
+                    <div class="pd-meta-item">
+                      <span class="field-label">Target End</span>
+                      <span class="pd-meta-value" id="pd-header-end">-</span>
+                    </div>
+                    <div class="pd-meta-item">
+                      <span class="field-label">Budget</span>
+                      <span class="pd-meta-value" id="pd-header-budget">-</span>
+                    </div>
+                  </div>
+                  <!-- Project Description -->
+                  <div class="pd-header-description">
+                    <span class="field-label">Description</span>
+                    <p class="pd-description" id="pd-description">-</p>
+                  </div>
+                  <!-- Financial Details -->
+                  <div class="pd-header-meta">
+                    <div class="pd-meta-item">
+                      <span class="field-label">Timeline</span>
+                      <span class="pd-meta-value" id="pd-timeline">-</span>
+                    </div>
+                    <div class="pd-meta-item">
+                      <span class="field-label">Quoted Price</span>
+                      <span class="pd-meta-value" id="pd-price">-</span>
+                    </div>
+                    <div class="pd-meta-item">
+                      <span class="field-label">Deposit</span>
+                      <span class="pd-meta-value" id="pd-deposit">-</span>
+                    </div>
+                  </div>
+                  <!-- Project URLs -->
+                  <div class="pd-header-urls" id="pd-urls-section">
+                    <span class="field-label">Links</span>
+                    <div class="pd-urls-row">
+                      <a href="#" id="pd-preview-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>Preview</span>
+                      </a>
+                      <a href="#" id="pd-repo-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                        <span>Repository</span>
+                      </a>
+                      <a href="#" id="pd-production-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                        <span>Production</span>
+                      </a>
+                    </div>
+                  </div>
+                  <!-- Admin Notes (Internal) -->
+                  <div class="pd-header-description" id="pd-admin-notes-section" style="display: none;">
+                    <span class="field-label">Admin Notes (Internal)</span>
+                    <p class="pd-description" id="pd-admin-notes">-</p>
+                  </div>
                 </div>
               </div>
             </div>
 
+            <!-- Project Detail Tabs -->
             <div class="project-detail-tabs portal-tabs">
               <button class="active" data-pd-tab="overview">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
@@ -1912,133 +2009,99 @@
 
             <!-- Overview Sub-Tab -->
             <div class="portal-tab-panel active" id="pd-tab-overview">
-              <!-- Project Overview Card -->
-              <div class="project-detail-overview portal-shadow">
-                <div class="overview-header">
-                  <h3 id="pd-project-name-card">Project Name</h3>
-                </div>
-                <!-- Client Info -->
-                <div class="project-detail-client-row">
-                  <div class="meta-item clickable-client" id="pd-client-link">
-                    <span class="field-label">Client</span>
-                    <span class="meta-value" id="pd-client-name">-</span>
-                  </div>
-                  <div class="meta-item clickable-client" id="pd-company-link">
-                    <span class="field-label">Company</span>
-                    <span class="meta-value" id="pd-company">-</span>
-                  </div>
-                  <div class="meta-item clickable-client" id="pd-email-link">
-                    <span class="field-label">Email</span>
-                    <span class="meta-value" id="pd-client-email">-</span>
-                  </div>
-                </div>
-
-                <!-- Project Timeline & Type -->
-                <div class="project-detail-meta">
-                  <div class="meta-item">
-                    <span class="field-label">Project Type</span>
-                    <span class="meta-value" id="pd-type">-</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Timeline</span>
-                    <span class="meta-value" id="pd-timeline">-</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Start Date</span>
-                    <span class="meta-value" id="pd-start-date">-</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Target End</span>
-                    <span class="meta-value" id="pd-end-date">-</span>
+              <!-- Two Column Grid -->
+              <div class="pd-overview-grid">
+                <!-- LEFT COLUMN (Main Content) -->
+                <div class="pd-overview-main">
+                  <!-- Milestones Section -->
+                  <div class="portal-project-card portal-shadow">
+                    <div class="card-header-with-action">
+                      <h3>Milestones</h3>
+                      <button class="btn btn-secondary btn-sm" id="btn-add-milestone">
+                        + Add Milestone
+                      </button>
+                    </div>
+                    <div class="milestones-list" id="pd-milestones-list">
+                      <p class="empty-state">
+                        No milestones yet. Add milestones to track project progress.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Project Description -->
-                <div class="project-description-row" id="pd-notes">
-                  <div class="meta-item description-item">
-                    <span class="field-label">Project Description</span>
-                    <span class="meta-value" id="pd-description">-</span>
+                <!-- RIGHT COLUMN (Sidebar) -->
+                <div class="pd-overview-sidebar">
+                  <!-- Progress Card -->
+                  <div class="portal-project-card portal-shadow pd-progress-card">
+                    <h3>Progress</h3>
+                    <div class="pd-progress-display">
+                      <div class="pd-progress-ring">
+                        <span class="pd-progress-percent" id="pd-progress-percent">0%</span>
+                      </div>
+                      <div
+                        class="progress-bar"
+                        role="progressbar"
+                        id="pd-progress-bar-container"
+                        aria-valuenow="0"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-label="Project completion progress"
+                      >
+                        <div class="progress-fill" id="pd-progress-bar" style="width: 0%"></div>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <!-- Financial Info -->
-                <div class="project-detail-meta">
-                  <div class="meta-item">
-                    <span class="field-label">Budget</span>
-                    <span class="meta-value" id="pd-budget">-</span>
+                  <!-- Financial Summary -->
+                  <div class="portal-project-card portal-shadow">
+                    <h3>Financials</h3>
+                    <div class="pd-financial-stats">
+                      <div class="pd-stat-item">
+                        <span class="pd-stat-label">Budget</span>
+                        <span class="pd-stat-value" id="pd-sidebar-budget">-</span>
+                      </div>
+                      <div class="pd-stat-item">
+                        <span class="pd-stat-label">Invoiced</span>
+                        <span class="pd-stat-value" id="pd-sidebar-invoiced">$0</span>
+                      </div>
+                      <div class="pd-stat-item">
+                        <span class="pd-stat-label">Paid</span>
+                        <span class="pd-stat-value pd-stat-success" id="pd-sidebar-paid">$0</span>
+                      </div>
+                      <div class="pd-stat-item">
+                        <span class="pd-stat-label">Outstanding</span>
+                        <span class="pd-stat-value pd-stat-warning" id="pd-sidebar-outstanding">$0</span>
+                      </div>
+                    </div>
                   </div>
-                  <div class="meta-item">
-                    <span class="field-label">Quoted Price</span>
-                    <span class="meta-value" id="pd-price">-</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Deposit</span>
-                    <span class="meta-value" id="pd-deposit">-</span>
-                  </div>
-                </div>
 
-                <!-- Project URLs -->
-                <div class="project-detail-meta project-urls-row" id="pd-urls-section">
-                  <div class="meta-item">
-                    <span class="field-label">Preview URL</span>
-                    <span class="meta-value"><a href="#" id="pd-preview-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Repository</span>
-                    <span class="meta-value"><a href="#" id="pd-repo-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Production</span>
-                    <span class="meta-value"><a href="#" id="pd-production-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
-                  </div>
-                </div>
-
-                <!-- Admin Notes (Internal) -->
-                <div class="project-description-row" id="pd-admin-notes-section" style="display: none;">
-                  <div class="meta-item description-item">
-                    <span class="field-label">Admin Notes (Internal)</span>
-                    <span class="meta-value" id="pd-admin-notes">-</span>
+                  <!-- Quick Stats -->
+                  <div class="portal-project-card portal-shadow">
+                    <h3>Quick Stats</h3>
+                    <div class="pd-quick-stats">
+                      <div class="pd-stat-item">
+                        <span class="pd-stat-label">Files</span>
+                        <span class="pd-stat-value" id="pd-stat-files">0</span>
+                      </div>
+                      <div class="pd-stat-item">
+                        <span class="pd-stat-label">Messages</span>
+                        <span class="pd-stat-value" id="pd-stat-messages">0</span>
+                      </div>
+                      <div class="pd-stat-item">
+                        <span class="pd-stat-label">Tasks</span>
+                        <span class="pd-stat-value" id="pd-stat-tasks">0</span>
+                      </div>
+                      <div class="pd-stat-item">
+                        <span class="pd-stat-label">Invoices</span>
+                        <span class="pd-stat-value" id="pd-stat-invoices">0</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Progress Section -->
-              <div class="portal-project-card portal-shadow">
-                <h3>Project Progress</h3>
-                <div class="project-progress-display">
-                  <div class="progress-percentage" id="pd-progress-percent">0%</div>
-                  <div
-                    class="progress-bar"
-                    role="progressbar"
-                    id="pd-progress-bar-container"
-                    aria-valuenow="0"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                    aria-label="Project completion progress"
-                    aria-describedby="pd-progress-percent"
-                  >
-                    <div class="progress-fill" id="pd-progress-bar" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Milestones Section -->
-              <div class="portal-project-card portal-shadow">
-                <div class="card-header-with-action">
-                  <h3>Milestones</h3>
-                  <button class="btn btn-secondary btn-sm" id="btn-add-milestone">
-                    + Add Milestone
-                  </button>
-                </div>
-                <div class="milestones-list" id="pd-milestones-list">
-                  <p class="empty-state">
-                    No milestones yet. Add milestones to track project progress.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Recent Activity -->
-              <div class="recent-activity portal-shadow">
+              <!-- Recent Activity (Full Width, Last Section) -->
+              <div class="portal-project-card portal-shadow pd-activity-card">
                 <h3>Recent Activity</h3>
                 <ul class="activity-list" id="pd-activity-list" aria-live="polite" aria-atomic="false">
                   <li>No activity recorded yet.</li>

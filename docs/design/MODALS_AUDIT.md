@@ -1,6 +1,6 @@
 # Modals & Dialogs Audit
 
-**Last Updated:** 2026-02-06
+**Last Updated:** 2026-02-09
 
 ## Table of Contents
 
@@ -47,7 +47,7 @@
 | Component Modals | 1 | Reusable base implementation |
 | Modal Utilities | 1 | Overlay lifecycle + body scroll lock |
 
-**Current State:** Modal overlays, sizes, and close animations are standardized across admin + portal. No open modal audit issues.
+**Current State:** Modal overlays, sizes, and close animations are standardized across admin + portal. All dynamically-created modals now use `createPortalModal()`. Static HTML modals in `admin/index.html` still use `.admin-modal-*` classes (migration pending). No open modal audit issues.
 
 ---
 
@@ -411,6 +411,7 @@ textarea:not([disabled]),
 
 **File:** `src/features/admin/project-details/invoice-modals.ts`
 **Lines:** 1-343
+**Pattern:** Uses `createPortalModal()` (Feb 9 refactor)
 
 #### showCreateInvoicePrompt()
 
@@ -427,41 +428,47 @@ const invoiceData = await showCreateInvoicePrompt(projectId);
 - Add/remove line items
 - Deposit percentage field (conditional)
 - Form validation
+- Uses `createPortalModal()` with dynamic body content updates
 
 #### CSS Classes Used
 
 ```css
-.confirm-dialog-overlay
-.confirm-dialog
-.confirm-dialog-title
-.confirm-dialog-icon
+.modal-overlay
+.modal-content
+.modal-header
+.modal-body
+.modal-footer
 .invoice-modal
 .invoice-modal-form
 .line-items-container
 .line-item-row
 .line-item-amount
 .invoice-total
-.confirm-dialog-actions
 ```
 
 ---
 
 ### 8. Admin Module Modals
 
-Various admin modules create modals dynamically:
+Various admin modules create modals dynamically. As of Feb 9, 2026, all dynamically-created modals use `createPortalModal()`:
 
-| Module | Modal Types |
-| ------ | ----------- |
-| `admin-knowledge-base.ts` | Category modal, Article modal |
-| `admin-clients.ts` | Add client, Edit info, Edit billing |
-| `admin-proposals.ts` | Proposal creation/editing with tabs |
-| `admin-projects.ts` | File preview, Project detail, Add project |
-| `admin-document-requests.ts` | Tab-based modal structure |
-| `admin-files.ts` | File detail modal |
-| `admin-tasks.ts` | Task creation modal |
-| `admin-leads.ts` | Multi-field prompt dialogs |
-| `admin-analytics.ts` | Alert and confirm dialogs |
-| `admin-contacts.ts` | Contact action modals |
+| Module | Modal Types | Pattern |
+| ------ | ----------- | ------- |
+| `admin-knowledge-base.ts` | Category modal, Article modal | `createPortalModal()` |
+| `admin-clients.ts` | Add client, Edit info, Edit billing | Static HTML (pending) |
+| `admin-proposals.ts` | Template editor modal | `createPortalModal()` ✓ |
+| `admin-projects.ts` | File preview modals | `createPortalModal()` ✓ |
+| `admin-document-requests.ts` | Create/detail modals | Static HTML (pending) |
+| `admin-files.ts` | File upload modal | Static HTML (pending) |
+| `admin-tasks.ts` | Task detail, Task create | `createPortalModal()` ✓ |
+| `admin-global-tasks.ts` | Task detail modal | `createPortalModal()` ✓ |
+| `admin-leads.ts` | Cancelled-by dialog | `createPortalModal()` ✓ |
+| `admin-analytics.ts` | Alert and confirm dialogs | `confirmDialog()` family |
+| `admin-contacts.ts` | Contact action modals | `confirmDialog()` family |
+
+**Legend:**
+- ✓ = Refactored to use `createPortalModal()` (Feb 9, 2026)
+- Static HTML (pending) = Modals defined in `admin/index.html`, not yet migrated
 
 ---
 
@@ -667,7 +674,13 @@ transition: background-color 0.2s ease;
 
 ### Issues Found
 
-None.
+None for dynamically-created modals.
+
+### Pending Work
+
+- **Static HTML Modal Migration** - Modals defined in `admin/index.html` still use `.admin-modal-*` classes
+  - Affected: dr-create-modal, dr-detail-modal, file-upload-modal, detail-modal, add-client-modal, add-project-modal, edit-client-info-modal, edit-billing-modal, edit-project-modal
+  - Once migrated, deprecated CSS classes (`.admin-modal-overlay`, `.admin-modal`, `.admin-modal-*`) can be removed from `modals.css`
 
 ### Recommendations
 
@@ -706,16 +719,12 @@ const deleteIt = await confirmDanger('Delete this item permanently?');
 
 ```typescript
 import { createPortalModal } from '@/components/portal-modal';
-import { manageFocusTrap } from '@/utils/focus-trap';
 
 const modal = createPortalModal({
   id: 'my-form-modal',
   titleId: 'my-form-title',
   title: 'Edit Item',
-  onClose: () => {
-    cleanup();
-    modal.hide();
-  }
+  onClose: () => modal.hide()
 });
 
 modal.body.innerHTML = `
@@ -733,8 +742,9 @@ modal.footer.innerHTML = `
 `;
 
 document.body.appendChild(modal.overlay);
-const cleanup = manageFocusTrap(modal.overlay);
 modal.show();
+
+// Note: Focus trap and body scroll lock handled internally by createPortalModal
 ```
 
 ### Get User Input

@@ -17,6 +17,11 @@ import {
   formatCurrency
 } from '../../utils/format-utils';
 import { alertWarning } from '../../utils/confirm-dialog';
+import {
+  createSecondarySidebar,
+  SECONDARY_TAB_ICONS,
+  type SecondarySidebarController
+} from '../../components/secondary-sidebar';
 
 // Import from sub-modules
 import {
@@ -76,6 +81,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private loadProjectsFn?: () => Promise<void>;
   private formatProjectTypeFn?: (type: string) => string;
   private inviteLeadFn?: (leadId: number, email: string) => Promise<void>;
+  private secondarySidebar?: SecondarySidebarController;
 
   /**
    * Navigate to full project detail view
@@ -111,8 +117,105 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     // Populate the detail view
     this.populateProjectDetailView(project);
 
+    // Initialize secondary sidebar for project tabs
+    this.initSecondarySidebar();
+
     // Set up tab navigation and event handlers
     this.setupProjectDetailTabs();
+  }
+
+  /**
+   * Initialize secondary sidebar for project detail tabs
+   */
+  private initSecondarySidebar(): void {
+    console.log('[AdminProjectDetails] Initializing secondary sidebar...');
+
+    // Clean up existing sidebar if any
+    this.cleanupSecondarySidebar();
+
+    const container = document.getElementById('admin-dashboard');
+    const sidebarMount = document.getElementById('secondary-sidebar');
+    const horizontalMount = document.getElementById('secondary-tabs-horizontal');
+
+    console.log('[AdminProjectDetails] Mount points:', {
+      container: !!container,
+      sidebarMount: !!sidebarMount,
+      horizontalMount: !!horizontalMount
+    });
+
+    if (!container || !sidebarMount || !horizontalMount) {
+      console.warn('[AdminProjectDetails] Secondary sidebar mount points not found');
+      return;
+    }
+
+    // Define project detail tabs
+    const projectTabs = [
+      { id: 'overview', icon: SECONDARY_TAB_ICONS.OVERVIEW, label: 'Overview' },
+      { id: 'tasks', icon: SECONDARY_TAB_ICONS.TASKS, label: 'Tasks' },
+      { id: 'messages', icon: SECONDARY_TAB_ICONS.MESSAGES, label: 'Messages' },
+      { id: 'files', icon: SECONDARY_TAB_ICONS.FILES, label: 'Files' },
+      { id: 'invoices', icon: SECONDARY_TAB_ICONS.INVOICES, label: 'Invoices' },
+      { id: 'contract', icon: SECONDARY_TAB_ICONS.CONTRACT, label: 'Contract' },
+      { id: 'time', icon: SECONDARY_TAB_ICONS.TIMELINE, label: 'Time' },
+      { id: 'case-study', icon: SECONDARY_TAB_ICONS.CASE_STUDY, label: 'Case Study' }
+    ];
+
+    // Create secondary sidebar
+    this.secondarySidebar = createSecondarySidebar({
+      tabs: projectTabs,
+      activeTab: 'overview',
+      title: 'Project',
+      container,
+      onTabChange: (tabId) => {
+        this.handleSecondaryTabChange(tabId);
+      }
+    });
+
+    // Get sidebar elements
+    const sidebarEl = this.secondarySidebar.getElement();
+    const horizontalEl = this.secondarySidebar.getHorizontalTabs();
+
+    // Clear and append to mount points (don't replace - keeps the IDs)
+    sidebarMount.innerHTML = '';
+    sidebarMount.appendChild(sidebarEl);
+
+    horizontalMount.innerHTML = '';
+    horizontalMount.appendChild(horizontalEl);
+
+    // Show the sidebar by adding class to container
+    container.classList.add('has-secondary-sidebar');
+
+    console.log('[AdminProjectDetails] Secondary sidebar initialized:', {
+      sidebarEl: sidebarEl.outerHTML.substring(0, 200),
+      hasClass: container.classList.contains('has-secondary-sidebar')
+    });
+  }
+
+  /**
+   * Handle tab change from secondary sidebar
+   */
+  private handleSecondaryTabChange(tabId: string): void {
+    // Find the corresponding tab button and click it
+    const tabBtn = document.querySelector(`.project-detail-tabs button[data-pd-tab="${tabId}"]`) as HTMLButtonElement;
+    if (tabBtn) {
+      tabBtn.click();
+    }
+  }
+
+  /**
+   * Clean up secondary sidebar when leaving project detail view
+   */
+  private cleanupSecondarySidebar(): void {
+    if (this.secondarySidebar) {
+      this.secondarySidebar.destroy();
+      this.secondarySidebar = undefined;
+    }
+
+    // Restore placeholders if needed
+    const container = document.getElementById('admin-dashboard');
+    if (container) {
+      container.classList.remove('has-secondary-sidebar');
+    }
   }
 
   /**
@@ -395,6 +498,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
           content.classList.toggle('active', content.id === `pd-tab-${tabName}`);
         });
 
+        // Sync secondary sidebar active state
+        if (this.secondarySidebar) {
+          this.secondarySidebar.setActiveTab(tabName);
+        }
+
         // Initialize modules for specific tabs
         if (this.currentProjectId) {
           if (tabName === 'tasks') {
@@ -427,6 +535,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (backBtn && this.switchTabFn && !backBtn.dataset.listenerAdded) {
       backBtn.dataset.listenerAdded = 'true';
       backBtn.addEventListener('click', () => {
+        this.cleanupSecondarySidebar();
         this.currentProjectId = null;
         this.switchTabFn!('projects');
       });
@@ -569,6 +678,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         break;
       case 'delete':
         await deleteProject(this.currentProjectId, this.projectsData, () => {
+          this.cleanupSecondarySidebar();
           this.currentProjectId = null;
           this.switchTabFn?.('projects');
         });

@@ -1,0 +1,463 @@
+/* =====================================================
+   SECONDARY SIDEBAR
+   Vertical tab navigation for multi-tab detail pages
+   (Project details, Client details, Analytics)
+
+   Architecture:
+   .dashboard-container > .sidebar + .secondary-sidebar + .dashboard-content
+
+   Width: 180px expanded, 56px collapsed (icon-only)
+   Shows/hides based on current view via .has-secondary-sidebar class
+   ===================================================== */
+
+/* =====================================================
+   BASE SECONDARY SIDEBAR (Mount Point)
+   ===================================================== */
+[data-page="admin"] #secondary-sidebar {
+  display: none; /* Hidden by default, shown via .has-secondary-sidebar */
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+/* Show mount point when parent has .has-secondary-sidebar class */
+[data-page="admin"] .dashboard-container.has-secondary-sidebar #secondary-sidebar {
+  display: flex;
+}
+
+/* Inner sidebar element (created by component) */
+[data-page="admin"] #secondary-sidebar > .secondary-sidebar,
+[data-page="admin"] .secondary-sidebar {
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+  background: var(--portal-bg-dark);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 100vh;
+  flex-shrink: 0;
+  transition: width 0.2s ease, min-width 0.2s ease, max-width 0.2s ease;
+  overflow: hidden;
+  position: relative;
+  z-index: 55;
+  /* Shadow casting onto content area - matches main sidebar depth */
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3);
+}
+
+/* =====================================================
+   COLLAPSED STATE
+   ===================================================== */
+[data-page="admin"] #secondary-sidebar > .secondary-sidebar.collapsed,
+[data-page="admin"] .secondary-sidebar.collapsed {
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+}
+
+/* =====================================================
+   SECONDARY SIDEBAR HEADER
+   ===================================================== */
+[data-page="admin"] .secondary-sidebar-header {
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  flex-shrink: 0;
+}
+
+/* Back button */
+[data-page="admin"] .secondary-sidebar-back {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--portal-text-muted);
+  transition: background 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+[data-page="admin"] .secondary-sidebar-back:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-primary);
+}
+
+[data-page="admin"] .secondary-sidebar-back svg {
+  width: 16px;
+  height: 16px;
+}
+
+[data-page="admin"] .secondary-sidebar-title {
+  flex: 1;
+  font-family: var(--font-family-acme);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hide back button and title when collapsed */
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-sidebar-back,
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-sidebar-title {
+  display: none;
+}
+
+/* Collapse toggle button */
+[data-page="admin"] .secondary-sidebar-toggle {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--portal-text-muted);
+  transition: background 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+[data-page="admin"] .secondary-sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--portal-text-light);
+}
+
+[data-page="admin"] .secondary-sidebar-toggle svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s ease;
+}
+
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-sidebar-toggle svg {
+  transform: rotate(180deg);
+}
+
+/* Center toggle when collapsed */
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-sidebar-header {
+  justify-content: center;
+  padding: var(--space-2);
+}
+
+/* =====================================================
+   SECONDARY NAV TABS
+   Matches main sidebar button styling
+   ===================================================== */
+[data-page="admin"] .secondary-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Match main sidebar gap */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+[data-page="admin"] .secondary-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* Individual tab button - matches .btn.btn-secondary styling */
+[data-page="admin"] .secondary-nav-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-1-5) var(--space-2);
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-sm);
+  cursor: pointer;
+  color: var(--portal-text-secondary);
+  font-family: var(--font-family-acme, inherit);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease;
+  position: relative;
+}
+
+[data-page="admin"] .secondary-nav-tab:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+}
+
+[data-page="admin"] .secondary-nav-tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* Active tab state - matches main sidebar active state */
+[data-page="admin"] .secondary-nav-tab.active {
+  background: transparent;
+  color: var(--color-primary);
+}
+
+[data-page="admin"] .secondary-nav-tab.active:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+}
+
+/* Tab icon - matches main sidebar 20x20 */
+[data-page="admin"] .secondary-nav-tab-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-page="admin"] .secondary-nav-tab-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Tab label */
+[data-page="admin"] .secondary-nav-tab-label {
+  flex: 1;
+}
+
+/* Hide labels when collapsed */
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab-label {
+  display: none;
+}
+
+/* Collapsed state - consistent spacing like main sidebar */
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav {
+  padding: var(--space-2);
+  gap: 0.5rem;
+  align-items: center;
+}
+
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab {
+  justify-content: center;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   TAB BADGE (for notification counts)
+   ===================================================== */
+[data-page="admin"] .secondary-nav-tab-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-1);
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Position badge absolutely when collapsed */
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab {
+  position: relative;
+  overflow: visible;
+}
+
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  width: 16px;
+  height: 16px;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  padding: 0;
+  border-radius: var(--portal-radius-full);
+  box-shadow: 0 0 0 2px var(--portal-bg-dark);
+}
+
+/* =====================================================
+   TOOLTIP FOR COLLAPSED STATE
+   ===================================================== */
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--portal-radius-sm);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-acme);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+
+[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* =====================================================
+   HORIZONTAL TABS FALLBACK (Mobile)
+   When secondary sidebar is hidden, show horizontal tabs
+   ===================================================== */
+[data-page="admin"] #secondary-tabs-horizontal {
+  display: none; /* Hidden by default, shown on mobile */
+  flex-shrink: 0;
+}
+
+[data-page="admin"] #secondary-tabs-horizontal .secondary-tabs-horizontal,
+[data-page="admin"] .secondary-tabs-horizontal {
+  background: var(--portal-bg-dark);
+  padding: 0 var(--space-3);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex-shrink: 0;
+}
+
+[data-page="admin"] #secondary-tabs-horizontal .secondary-tabs-horizontal::-webkit-scrollbar,
+[data-page="admin"] .secondary-tabs-horizontal::-webkit-scrollbar {
+  display: none;
+}
+
+[data-page="admin"] .secondary-tabs-horizontal-nav {
+  display: flex;
+  gap: var(--space-1);
+  min-width: max-content;
+}
+
+/* Horizontal tab button */
+[data-page="admin"] .secondary-tab-horizontal {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  color: var(--portal-text-secondary);
+  font-family: var(--font-family-acme);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+[data-page="admin"] .secondary-tab-horizontal:hover {
+  color: var(--portal-text-light);
+}
+
+[data-page="admin"] .secondary-tab-horizontal.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+[data-page="admin"] .secondary-tab-horizontal-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-page="admin"] .secondary-tab-horizontal-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* =====================================================
+   RESPONSIVE BEHAVIOR
+   ===================================================== */
+
+/* > 1300px: Both sidebars visible */
+/* (Default behavior - no media query needed) */
+
+/* 1024-1300px: Main sidebar auto-collapses, secondary stays */
+@media (--wide-down) {
+  /* Secondary sidebar stays at 180px */
+  [data-page="admin"] .secondary-sidebar {
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
+  }
+}
+
+/* < 1024px: Secondary sidebar hidden, horizontal tabs fallback */
+@media (max-width: 1024px) {
+  [data-page="admin"] #secondary-sidebar,
+  [data-page="admin"] .secondary-sidebar {
+    display: none !important;
+  }
+
+  /* Show horizontal tabs fallback when secondary sidebar is hidden */
+  [data-page="admin"] .dashboard-container.has-secondary-sidebar #secondary-tabs-horizontal {
+    display: block;
+  }
+}
+
+/* Tablet portrait: Horizontal tabs with smaller padding */
+@media (--tablet-down) {
+  [data-page="admin"] #secondary-tabs-horizontal .secondary-tabs-horizontal,
+  [data-page="admin"] .secondary-tabs-horizontal {
+    padding: 0 var(--space-2);
+  }
+
+  [data-page="admin"] .secondary-tab-horizontal {
+    padding: var(--space-1-5) var(--space-2);
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Mobile: Horizontal tabs only, icon + label */
+@media (--compact-mobile) {
+  [data-page="admin"] .secondary-tab-horizontal {
+    padding: var(--space-1) var(--space-2);
+  }
+
+  /* Hide labels on very small screens, show icons only */
+  [data-page="admin"] .secondary-tab-horizontal-label {
+    display: none;
+  }
+}
+
+/* =====================================================
+   DASHBOARD CONTENT ADJUSTMENT
+   Adjust content when secondary sidebar is present
+   ===================================================== */
+[data-page="admin"] .dashboard-container.has-secondary-sidebar .dashboard-content {
+  /* Content area will naturally flex to fill remaining space */
+}
+
+/* Secondary sidebar is optional - original horizontal tabs remain visible by default */

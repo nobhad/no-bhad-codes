@@ -24,6 +24,8 @@ import { BUSINESS_INFO, getPdfLogoBytes, CONTRACT_TERMS } from '../config/busine
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../utils/pdf-utils.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
+import { generateDefaultMilestones } from '../services/milestone-generator.js';
+import { escalateTaskPriorities, previewEscalation, getEscalationSummary } from '../services/priority-escalation-service.js';
 
 const router = express.Router();
 
@@ -257,6 +259,14 @@ router.post(
 
     const newProject = await db.get('SELECT * FROM projects WHERE id = ?', [result.lastID]);
 
+    // Generate default milestones for the new project
+    try {
+      await generateDefaultMilestones(result.lastID!, projectType);
+    } catch (milestoneError) {
+      console.error('[Projects] Failed to generate milestones:', milestoneError);
+      // Non-critical - don't fail the request
+    }
+
     // Get client info for notification
     const client = await db.get(
       'SELECT email, contact_name, company_name FROM clients WHERE id = ?',
@@ -334,6 +344,16 @@ router.post(
   `,
       [result.lastID]
     );
+
+    // Generate default milestones for the new project
+    try {
+      const projectType = (newProject as { project_type?: string })?.project_type || null;
+      const projectStartDate = start_date ? new Date(start_date) : undefined;
+      await generateDefaultMilestones(result.lastID!, projectType, { startDate: projectStartDate });
+    } catch (milestoneError) {
+      console.error('[Projects] Failed to generate milestones:', milestoneError);
+      // Non-critical - don't fail the request
+    }
 
     res.status(201).json({
       message: 'Project created successfully',
@@ -3534,6 +3554,78 @@ router.get(
     });
 
     res.json({ files, count: files.length });
+  })
+);
+
+// ===================================
+// TASK PRIORITY ESCALATION
+// ===================================
+
+/**
+ * Escalate task priorities based on due date proximity
+ * POST /api/projects/:id/tasks/escalate-priorities
+ * Admin only - escalates priorities for tasks in a specific project
+ */
+router.post(
+  '/:id/tasks/escalate-priorities',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const preview = req.query.preview === 'true';
+
+    // Verify project exists
+    const db = getDatabase();
+    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found', code: 'PROJECT_NOT_FOUND' });
+    }
+
+    if (preview) {
+      // Preview mode - show what would be escalated
+      const result = await previewEscalation(projectId);
+      return res.json({
+        preview: true,
+        ...result
+      });
+    }
+
+    // Execute escalation
+    const result = await escalateTaskPriorities(projectId);
+
+    res.json({
+      success: true,
+      message: `Escalated ${result.updatedCount} task(s)`,
+      ...result
+    });
+  })
+);
+
+/**
+ * Get escalation summary for a project
+ * GET /api/projects/:id/tasks/escalation-summary
+ * Admin only - shows task distribution and what would be escalated
+ */
+router.get(
+  '/:id/tasks/escalation-summary',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+
+    // Verify project exists
+    const db = getDatabase();
+    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found', code: 'PROJECT_NOT_FOUND' });
+    }
+
+    const summary = await getEscalationSummary(projectId);
+
+    res.json({
+      projectId,
+      ...summary
+    });
   })
 );
 

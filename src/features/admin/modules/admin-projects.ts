@@ -55,6 +55,8 @@ import {
 import { exportToCsv, PROJECTS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { deleteProject, archiveProject, duplicateProject } from '../project-details/actions';
 import { setupFileUploadHandlers, loadPendingRequestsDropdown, loadProjectFiles as loadProjectFilesFromModule } from '../project-details';
+import { createSecondarySidebar, SECONDARY_TAB_ICONS, type SecondarySidebarController } from '../../../components/secondary-sidebar';
+import { createPortalModal } from '../../../components/portal-modal';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -213,6 +215,7 @@ interface ProjectsData {
 let projectsData: LeadProject[] = [];
 let currentProjectId: number | null = null;
 let storedContext: AdminDashboardContext | null = null;
+let secondarySidebar: SecondarySidebarController | null = null;
 let filterState: FilterState = loadFilterState(PROJECTS_FILTER_CONFIG.storageKey);
 let filterUIInitialized = false;
 
@@ -555,6 +558,104 @@ export async function updateProjectStatus(
   }
 }
 
+/**
+ * Project detail tabs configuration for secondary sidebar
+ */
+const PROJECT_DETAIL_TABS = [
+  { id: 'overview', icon: SECONDARY_TAB_ICONS.OVERVIEW, label: 'Overview' },
+  { id: 'files', icon: SECONDARY_TAB_ICONS.FILES, label: 'Files' },
+  { id: 'messages', icon: SECONDARY_TAB_ICONS.MESSAGES, label: 'Messages' },
+  { id: 'invoices', icon: SECONDARY_TAB_ICONS.INVOICES, label: 'Invoices' },
+  { id: 'tasks', icon: SECONDARY_TAB_ICONS.TASKS, label: 'Tasks' },
+  { id: 'time', icon: SECONDARY_TAB_ICONS.TIMELINE, label: 'Time' },
+  { id: 'contract', icon: SECONDARY_TAB_ICONS.CONTRACT, label: 'Contract' }
+];
+
+/**
+ * Initialize secondary sidebar for project detail view
+ */
+function initSecondarySidebar(projectName: string): void {
+  // Clean up existing sidebar if any
+  cleanupSecondarySidebar();
+
+  const container = document.querySelector('.dashboard-container');
+  const mountPoint = document.getElementById('secondary-sidebar');
+  const horizontalMountPoint = document.getElementById('secondary-tabs-horizontal');
+
+  if (!mountPoint || !horizontalMountPoint) {
+    console.warn('[AdminProjects] Secondary sidebar mount points not found');
+    return;
+  }
+
+  // Add class to show secondary sidebar
+  container?.classList.add('has-secondary-sidebar');
+
+  // Get current active tab from horizontal tabs
+  const activeHorizontalTab = document.querySelector('.project-detail-tabs button.active') as HTMLElement;
+  const activeTabId = activeHorizontalTab?.dataset.pdTab || 'overview';
+
+  // Truncate project name for sidebar title
+  const truncatedName = projectName.length > 20 ? `${projectName.slice(0, 18)}...` : projectName;
+
+  // Create secondary sidebar
+  secondarySidebar = createSecondarySidebar({
+    tabs: PROJECT_DETAIL_TABS,
+    activeTab: activeTabId,
+    title: truncatedName,
+    onBack: () => storedContext?.switchTab('projects'),
+    persistState: true,
+    container: container as HTMLElement,
+    onTabChange: (tabId) => handleSecondaryTabChange(tabId)
+  });
+
+  // Mount the sidebar and horizontal tabs
+  mountPoint.innerHTML = '';
+  mountPoint.appendChild(secondarySidebar.getElement());
+
+  horizontalMountPoint.innerHTML = '';
+  horizontalMountPoint.appendChild(secondarySidebar.getHorizontalTabs());
+}
+
+/**
+ * Handle tab change from secondary sidebar
+ */
+function handleSecondaryTabChange(tabId: string): void {
+  // Find and click the corresponding horizontal tab button
+  const tabBtn = document.querySelector(`.project-detail-tabs button[data-pd-tab="${tabId}"]`) as HTMLButtonElement;
+  if (tabBtn) {
+    tabBtn.click();
+  }
+}
+
+/**
+ * Clean up secondary sidebar when leaving project detail view
+ */
+function cleanupSecondarySidebar(): void {
+  if (secondarySidebar) {
+    secondarySidebar.destroy();
+    secondarySidebar = null;
+  }
+
+  // Remove has-secondary-sidebar class
+  const container = document.querySelector('.dashboard-container');
+  container?.classList.remove('has-secondary-sidebar');
+
+  // Clear mount points
+  const mountPoint = document.getElementById('secondary-sidebar');
+  const horizontalMountPoint = document.getElementById('secondary-tabs-horizontal');
+  if (mountPoint) mountPoint.innerHTML = '';
+  if (horizontalMountPoint) horizontalMountPoint.innerHTML = '';
+}
+
+/**
+ * Get the current project name for breadcrumbs
+ */
+export function getCurrentProjectName(): string | null {
+  if (!currentProjectId) return null;
+  const project = projectsData.find((p) => p.id === currentProjectId);
+  return project?.project_name ?? null;
+}
+
 export function showProjectDetails(
   projectId: number,
   ctx: AdminDashboardContext
@@ -576,6 +677,7 @@ export function showProjectDetails(
   loadProjectFiles(projectId, ctx);
   loadProjectMilestones(projectId, ctx);
   loadProjectInvoices(projectId, ctx);
+  loadProjectSidebarStats(projectId);
 
   // Setup file upload with confirmation modal
   loadPendingRequestsDropdown(projectId);
@@ -594,44 +696,85 @@ function populateProjectDetailView(project: LeadProject): void {
   // Overview fields - use batch update for text content
   // Note: textContent doesn't interpret HTML, so we decode entities but don't need to escape
   // Empty string for missing values (no dashes). Client email uses innerHTML for copy button.
+  const formattedBudget = formatDisplayValue(project.budget_range);
+  const formattedStartDate = formatDate(projectData.start_date || project.created_at);
+  const formattedEndDate = formatDate(projectData.end_date);
+  const formattedType = formatProjectType(project.project_type);
+
   batchUpdateText({
     'pd-project-name': SanitizationUtils.decodeHtmlEntities(project.project_name || 'Untitled Project'),
     'pd-client-name': SanitizationUtils.decodeHtmlEntities(project.contact_name || ''),
     'pd-company': SanitizationUtils.decodeHtmlEntities(project.company_name || ''),
-    'pd-type': formatProjectType(project.project_type),
-    'pd-budget': formatDisplayValue(project.budget_range),
+    'pd-type': formattedType,
+    'pd-budget': formattedBudget,
     'pd-price': projectData.price ? formatCurrency(Number(projectData.price)) : '',
     'pd-timeline': formatDisplayValue(project.timeline),
-    'pd-start-date': formatDate(projectData.start_date || project.created_at),
-    'pd-end-date': formatDate(projectData.end_date),
+    'pd-start-date': formattedStartDate,
+    'pd-end-date': formattedEndDate,
     'pd-deposit': projectData.deposit_amount ? formatCurrency(Number(projectData.deposit_amount)) : '',
-    'pd-contract-date': formatDate(projectData.contract_signed_date)
+    'pd-contract-date': formatDate(projectData.contract_signed_date),
+    // Header card elements
+    'pd-header-client-name': SanitizationUtils.decodeHtmlEntities(project.contact_name || ''),
+    'pd-header-company': SanitizationUtils.decodeHtmlEntities(project.company_name || ''),
+    'pd-header-email': SanitizationUtils.decodeHtmlEntities(project.email || ''),
+    'pd-header-type': formattedType,
+    'pd-header-start': formattedStartDate,
+    'pd-header-end': formattedEndDate,
+    'pd-header-budget': formattedBudget,
+    // Sidebar financial elements
+    'pd-sidebar-budget': formattedBudget
   });
+
+  // Hide company row in header if no company
+  const companyRow = document.getElementById('pd-header-company-row');
+  if (companyRow) {
+    companyRow.style.display = project.company_name ? '' : 'none';
+  }
 
   // Client email with copy button (innerHTML, not batchUpdateText)
   const pdClientEmailEl = document.getElementById('pd-client-email');
   if (pdClientEmailEl) pdClientEmailEl.innerHTML = getEmailWithCopyHtml(project.email || '', SanitizationUtils.escapeHtml(project.email || ''));
 
-  // Update URL links (preview, repo, production)
+  // Update URL links (preview, repo, production) - new format uses pd-url-link class
   const updateUrlLink = (linkId: string, url: string | null): void => {
     const link = document.getElementById(linkId) as HTMLAnchorElement;
     if (!link) return;
-    const textEl = link.querySelector<HTMLElement>('.url-link-text');
     const decodedUrl = url ? SanitizationUtils.decodeHtmlEntities(url) : null;
-    if (decodedUrl) {
-      link.href = decodedUrl;
-      link.onclick = null;
-      if (textEl) textEl.textContent = decodedUrl;
+
+    // Handle old format with .url-link-text
+    const textEl = link.querySelector<HTMLElement>('.url-link-text');
+    if (textEl) {
+      if (decodedUrl) {
+        link.href = decodedUrl;
+        link.onclick = null;
+        textEl.textContent = decodedUrl;
+      } else {
+        link.href = '#';
+        link.onclick = (e) => e.preventDefault();
+        textEl.textContent = '';
+      }
     } else {
-      link.href = '#';
-      link.onclick = (e) => e.preventDefault();
-      if (textEl) textEl.textContent = '';
+      // New format - just set href, CSS hides if href="#"
+      if (decodedUrl) {
+        link.href = decodedUrl;
+        link.style.display = '';
+      } else {
+        link.href = '#';
+        link.style.display = 'none';
+      }
     }
   };
 
   updateUrlLink('pd-preview-url-link', projectData.preview_url);
   updateUrlLink('pd-repo-url-link', projectData.repo_url);
   updateUrlLink('pd-production-url-link', projectData.production_url);
+
+  // Hide URLs section if no URLs
+  const urlsSection = document.getElementById('pd-urls-section');
+  if (urlsSection) {
+    const hasUrls = projectData.preview_url || projectData.repo_url || projectData.production_url;
+    urlsSection.style.display = hasUrls ? '' : 'none';
+  }
 
   // Admin notes section - show only if notes exist
   const adminNotesSection = document.getElementById('pd-admin-notes-section');
@@ -647,7 +790,7 @@ function populateProjectDetailView(project: LeadProject): void {
 
   // Make client name, company, and email clickable to navigate to client details
   const projectEmail = project.email;
-  const clickableClients = ['pd-client-link', 'pd-company-link', 'pd-email-link'];
+  const clickableClients = ['pd-client-link', 'pd-company-link', 'pd-email-link', 'pd-header-client-link'];
 
   clickableClients.forEach((id) => {
     const el = document.getElementById(id);
@@ -659,6 +802,14 @@ function populateProjectDetailView(project: LeadProject): void {
       newEl.addEventListener('click', () => navigateToClientByEmail(projectEmail));
     }
   });
+
+  // Setup edit button in header card
+  const headerEditBtn = document.getElementById('pd-btn-edit');
+  if (headerEditBtn) {
+    const newHeaderEditBtn = headerEditBtn.cloneNode(true) as HTMLElement;
+    headerEditBtn.parentNode?.replaceChild(newHeaderEditBtn, headerEditBtn);
+    newHeaderEditBtn.addEventListener('click', () => openEditProjectModal(project));
+  }
 
   // Setup edit button
   setupEditProjectButton(project);
@@ -1052,6 +1203,11 @@ function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
       tabContents.forEach((content) => {
         content.classList.toggle('active', content.id === `pd-tab-${tabName}`);
       });
+
+      // Sync secondary sidebar with horizontal tab
+      if (secondarySidebar) {
+        secondarySidebar.setActiveTab(tabName);
+      }
     });
   });
 
@@ -1520,60 +1676,71 @@ interface PreviewModalOptions {
   onClose?: () => void;
 }
 
-/**
- * Create or get the preview modal element
- */
-function getOrCreatePreviewModal(): HTMLElement {
-  let modal = document.getElementById('file-preview-modal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'file-preview-modal';
-    modal.className = 'admin-modal-overlay hidden';
-    document.body.appendChild(modal);
-  }
-
-  // Set ARIA attributes for accessibility
-  modal.setAttribute('role', 'dialog');
-  modal.setAttribute('aria-modal', 'true');
-  modal.setAttribute('aria-labelledby', 'preview-modal-title');
-
-  return modal;
-}
+// Store reference to active preview modal for cleanup
+let activePreviewModal: ReturnType<typeof createPortalModal> | null = null;
 
 /**
  * Show a preview modal with customizable content
  */
 function showPreviewModal(options: PreviewModalOptions): void {
   const { title, content, maxWidth = '700px', bodyClass = '', onClose } = options;
-  const modal = getOrCreatePreviewModal();
 
-  modal.innerHTML = `
-    <div class="admin-modal" style="max-width: ${maxWidth};">
-      <div class="admin-modal-header">
-        <h3 id="preview-modal-title">${SanitizationUtils.escapeHtml(title)}</h3>
-        <button class="admin-modal-close" id="preview-modal-close" aria-label="Close modal">&times;</button>
-      </div>
-      <div class="admin-modal-body${bodyClass ? ` ${bodyClass}` : ''}" style="max-height: 60vh; overflow: auto;">
-        ${content}
-      </div>
-      <div class="admin-modal-footer">
-        <button class="btn btn-secondary" id="preview-modal-close-btn">Close</button>
-      </div>
-    </div>
+  // Clean up any existing preview modal
+  if (activePreviewModal) {
+    activePreviewModal.hide();
+    activePreviewModal = null;
+  }
+
+  // Create modal using portal modal component
+  const modal = createPortalModal({
+    id: 'file-preview-modal',
+    titleId: 'preview-modal-title',
+    title: title,
+    contentClassName: `file-preview-modal-content${bodyClass ? ` ${bodyClass}` : ''}`,
+    onClose: () => {
+      onClose?.();
+      activePreviewModal = null;
+    }
+  });
+
+  // Apply max-width to the modal content
+  const modalContent = modal.overlay.querySelector('.modal-content') as HTMLElement;
+  if (modalContent) {
+    modalContent.style.maxWidth = maxWidth;
+  }
+
+  // Set body content
+  modal.body.innerHTML = content;
+  modal.body.style.maxHeight = '60vh';
+  modal.body.style.overflow = 'auto';
+
+  // Build footer with close button
+  modal.footer.innerHTML = `
+    <button class="btn btn-secondary" id="preview-modal-close-btn">Close</button>
   `;
 
-  openModalOverlay(modal);
+  // Append to DOM and show
+  document.body.appendChild(modal.overlay);
+  modal.show();
+  activePreviewModal = modal;
 
-  const closeModal = () => {
+  // Event handlers
+  modal.footer.querySelector('#preview-modal-close-btn')?.addEventListener('click', () => {
     onClose?.();
-    closeModalOverlay(modal);
-  };
+    modal.hide();
+    activePreviewModal = null;
+  });
 
-  document.getElementById('preview-modal-close')?.addEventListener('click', closeModal);
-  document.getElementById('preview-modal-close-btn')?.addEventListener('click', closeModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  }, { once: true });
+  // Close on Escape key
+  const escHandler = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') {
+      onClose?.();
+      modal.hide();
+      activePreviewModal = null;
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 }
 
 /**
@@ -1732,6 +1899,85 @@ export async function toggleMilestone(
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to toggle milestone:', error);
+  }
+}
+
+// Project Sidebar Stats
+async function loadProjectSidebarStats(projectId: number): Promise<void> {
+  try {
+    // Fetch counts and financial data in parallel
+    const [filesRes, messagesRes, tasksRes, invoicesRes] = await Promise.all([
+      apiFetch(`/api/projects/${projectId}/files`),
+      apiFetch(`/api/projects/${projectId}/messages`),
+      apiFetch(`/api/projects/${projectId}/tasks`),
+      apiFetch(`/api/invoices/project/${projectId}`)
+    ]);
+
+    // Update file count
+    if (filesRes.ok) {
+      const filesData = await filesRes.json();
+      const fileCount = filesData.files?.length || 0;
+      const fileCountEl = document.getElementById('pd-stat-files');
+      if (fileCountEl) fileCountEl.textContent = String(fileCount);
+    }
+
+    // Update message count
+    if (messagesRes.ok) {
+      const messagesData = await messagesRes.json();
+      const messageCount = messagesData.messages?.length || 0;
+      const messageCountEl = document.getElementById('pd-stat-messages');
+      if (messageCountEl) messageCountEl.textContent = String(messageCount);
+    }
+
+    // Update task count
+    if (tasksRes.ok) {
+      const tasksData = await tasksRes.json();
+      const taskCount = tasksData.tasks?.length || 0;
+      const taskCountEl = document.getElementById('pd-stat-tasks');
+      if (taskCountEl) taskCountEl.textContent = String(taskCount);
+    }
+
+    // Update invoice count and financials
+    if (invoicesRes.ok) {
+      const invoicesData = await invoicesRes.json();
+      const invoices = invoicesData.invoices || [];
+      const invoiceCount = invoices.length;
+      const invoiceCountEl = document.getElementById('pd-stat-invoices');
+      if (invoiceCountEl) invoiceCountEl.textContent = String(invoiceCount);
+
+      // Calculate financial totals
+      let totalInvoiced = 0;
+      let totalPaid = 0;
+
+      invoices.forEach((inv: { total_amount?: number; amount_paid?: number; status?: string }) => {
+        const amount = Number(inv.total_amount) || 0;
+        totalInvoiced += amount;
+        if (inv.status === 'paid') {
+          totalPaid += amount;
+        } else {
+          totalPaid += Number(inv.amount_paid) || 0;
+        }
+      });
+
+      const outstanding = totalInvoiced - totalPaid;
+
+      // Update financial stats
+      const invoicedEl = document.getElementById('pd-sidebar-invoiced');
+      const paidEl = document.getElementById('pd-sidebar-paid');
+      const outstandingEl = document.getElementById('pd-sidebar-outstanding');
+
+      if (invoicedEl) invoicedEl.textContent = formatCurrency(totalInvoiced);
+      if (paidEl) paidEl.textContent = formatCurrency(totalPaid);
+      if (outstandingEl) {
+        outstandingEl.textContent = formatCurrency(outstanding);
+        // Remove warning class if no outstanding amount
+        if (outstanding <= 0) {
+          outstandingEl.classList.remove('pd-stat-warning');
+        }
+      }
+    }
+  } catch (error) {
+    console.error('[AdminProjects] Failed to load sidebar stats:', error);
   }
 }
 

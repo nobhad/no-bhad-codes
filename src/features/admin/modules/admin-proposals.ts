@@ -14,10 +14,10 @@ import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { formatDate, formatDateTime, formatProjectType } from '../../../utils/format-utils';
 import { apiFetch, apiPut, apiPost, apiDelete } from '../../../utils/api-client';
 import { createTableDropdown } from '../../../utils/table-dropdown';
-import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
+import { initModalDropdown } from '../../../utils/modal-dropdown';
 import type { AdminDashboardContext } from '../admin-types';
 import { confirmDialog, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
-import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
+import { createPortalModal } from '../../../components/portal-modal';
 import { showToast } from '../../../utils/toast-notifications';
 import { createViewToggle } from '../../../components/view-toggle';
 import {
@@ -446,54 +446,6 @@ function renderProposalsLayout(): string {
         <div class="loading-row">Loading templates...</div>
       </div>
     </div>
-
-    <div class="template-editor-modal modal-overlay hidden" id="template-editor-modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 id="template-modal-title">New Template</h3>
-          <button class="btn-close" id="close-template-modal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="template-name">Template Name</label>
-            <input type="text" id="template-name" class="form-input" placeholder="e.g., Standard Website Package">
-          </div>
-          <div class="form-group">
-            <label for="template-description">Description</label>
-            <textarea id="template-description" class="form-input" rows="2" placeholder="Brief description of this template"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="template-project-type">Project Type</label>
-            <select id="template-project-type" class="form-input">
-              <option value="business-website">Business Website</option>
-              <option value="ecommerce">E-Commerce</option>
-              <option value="web-app">Web Application</option>
-              <option value="branding">Branding</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="template-tier">Default Tier</label>
-            <select id="template-tier" class="form-input">
-              <option value="good">Good</option>
-              <option value="better">Better</option>
-              <option value="best">Best</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="template-base-price">Base Price ($)</label>
-            <input type="number" id="template-base-price" class="form-input" placeholder="0" min="0">
-          </div>
-          <div class="form-group form-checkbox">
-            <input type="checkbox" id="template-is-default">
-            <label for="template-is-default">Set as default template</label>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" id="cancel-template-btn">Cancel</button>
-          <button class="btn btn-primary" id="save-template-btn">Save Template</button>
-        </div>
-      </div>
-    </div>
   `;
 }
 
@@ -863,52 +815,83 @@ function setupTemplateListeners(ctx: AdminDashboardContext): void {
   });
 }
 
+// Store reference to active template modal for cleanup
+let activeTemplateModal: ReturnType<typeof createPortalModal> | null = null;
+
 function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboardContext): void {
-  const modal = document.getElementById('template-editor-modal');
-  const modalTitle = document.getElementById('template-modal-title');
-  const nameInput = document.getElementById('template-name') as HTMLInputElement;
-  const descInput = document.getElementById('template-description') as HTMLTextAreaElement;
-  const typeSelect = document.getElementById('template-project-type') as HTMLSelectElement;
-  const tierSelect = document.getElementById('template-tier') as HTMLSelectElement;
-  const priceInput = document.getElementById('template-base-price') as HTMLInputElement;
-  const defaultCheckbox = document.getElementById('template-is-default') as HTMLInputElement;
-
-  if (!modal || !modalTitle) return;
-
-  // Set modal title
-  modalTitle.textContent = template ? 'Edit Template' : 'New Template';
-
-  // Populate fields if editing
-  if (template) {
-    if (nameInput) nameInput.value = template.name;
-    if (descInput) descInput.value = template.description || '';
-    const content = template.content as { projectType?: string; tier?: string; basePrice?: number };
-    const projectType = content.projectType || 'business-website';
-    const tier = content.tier || 'good';
-    if (typeSelect) {
-      typeSelect.value = projectType;
-      const typeWrapper = typeSelect.previousElementSibling as HTMLElement;
-      if (typeWrapper?.dataset?.modalDropdown === 'true') {
-        setModalDropdownValue(typeWrapper, projectType);
-      }
-    }
-    if (tierSelect) {
-      tierSelect.value = tier;
-      const tierWrapper = tierSelect.previousElementSibling as HTMLElement;
-      if (tierWrapper?.dataset?.modalDropdown === 'true') {
-        setModalDropdownValue(tierWrapper, tier);
-      }
-    }
-    if (priceInput) priceInput.value = (content.basePrice || 0).toString();
-    if (defaultCheckbox) defaultCheckbox.checked = template.is_default;
-  } else {
-    if (nameInput) nameInput.value = '';
-    if (descInput) descInput.value = '';
-    if (typeSelect) typeSelect.value = 'business-website';
-    if (tierSelect) tierSelect.value = 'good';
-    if (priceInput) priceInput.value = '';
-    if (defaultCheckbox) defaultCheckbox.checked = false;
+  // Clean up any existing template modal
+  if (activeTemplateModal) {
+    activeTemplateModal.hide();
+    activeTemplateModal = null;
   }
+
+  // Create modal using portal modal component
+  const modal = createPortalModal({
+    id: 'template-editor-modal',
+    titleId: 'template-modal-title',
+    title: template ? 'Edit Template' : 'New Template',
+    contentClassName: 'template-editor-modal-content',
+    onClose: () => {
+      activeTemplateModal = null;
+    }
+  });
+
+  // Get default values if editing
+  const content = template?.content as { projectType?: string; tier?: string; basePrice?: number } | undefined;
+  const projectType = content?.projectType || 'business-website';
+  const tier = content?.tier || 'good';
+
+  // Build body content
+  modal.body.innerHTML = `
+    <div class="form-group">
+      <label class="form-label" for="template-name">Template Name</label>
+      <input type="text" id="template-name" class="form-input" placeholder="e.g., Standard Website Package" value="${template ? SanitizationUtils.escapeHtml(template.name) : ''}">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="template-description">Description</label>
+      <textarea id="template-description" class="form-input" rows="2" placeholder="Brief description of this template">${template?.description ? SanitizationUtils.escapeHtml(template.description) : ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="template-project-type">Project Type</label>
+      <select id="template-project-type" class="form-input">
+        <option value="business-website" ${projectType === 'business-website' ? 'selected' : ''}>Business Website</option>
+        <option value="ecommerce" ${projectType === 'ecommerce' ? 'selected' : ''}>E-Commerce</option>
+        <option value="web-app" ${projectType === 'web-app' ? 'selected' : ''}>Web Application</option>
+        <option value="branding" ${projectType === 'branding' ? 'selected' : ''}>Branding</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="template-tier">Default Tier</label>
+      <select id="template-tier" class="form-input">
+        <option value="good" ${tier === 'good' ? 'selected' : ''}>Good</option>
+        <option value="better" ${tier === 'better' ? 'selected' : ''}>Better</option>
+        <option value="best" ${tier === 'best' ? 'selected' : ''}>Best</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="template-base-price">Base Price ($)</label>
+      <input type="number" id="template-base-price" class="form-input" placeholder="0" min="0" value="${content?.basePrice || ''}">
+    </div>
+    <div class="form-group form-checkbox">
+      <input type="checkbox" id="template-is-default" ${template?.is_default ? 'checked' : ''}>
+      <label for="template-is-default">Set as default template</label>
+    </div>
+  `;
+
+  // Build footer with action buttons
+  modal.footer.innerHTML = `
+    <button class="btn btn-outline" id="cancel-template-btn">Cancel</button>
+    <button class="btn btn-primary" id="save-template-btn">Save Template</button>
+  `;
+
+  // Append to DOM and show
+  document.body.appendChild(modal.overlay);
+  modal.show();
+  activeTemplateModal = modal;
+
+  // Initialize dropdowns
+  const typeSelect = modal.body.querySelector('#template-project-type') as HTMLSelectElement;
+  const tierSelect = modal.body.querySelector('#template-tier') as HTMLSelectElement;
 
   if (typeSelect && !typeSelect.dataset.dropdownInit) {
     typeSelect.dataset.dropdownInit = 'true';
@@ -919,41 +902,44 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
     initModalDropdown(tierSelect, { placeholder: 'Select tier...' });
   }
 
-  // Show modal
-  openModalOverlay(modal);
+  // Setup button handlers
+  modal.footer.querySelector('#cancel-template-btn')?.addEventListener('click', () => {
+    modal.hide();
+    activeTemplateModal = null;
+  });
 
-  // Setup close handlers
-  const closeBtn = document.getElementById('close-template-modal');
-  const cancelBtn = document.getElementById('cancel-template-btn');
-  const saveBtn = document.getElementById('save-template-btn');
-  const overlay = modal;
+  modal.footer.querySelector('#save-template-btn')?.addEventListener('click', async () => {
+    await saveTemplateFromModal(template?.id || null, modal, ctx);
+  });
 
-  const closeModal = () => {
-    closeModalOverlay(modal);
+  // Close on Escape
+  const escHandler = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') {
+      modal.hide();
+      activeTemplateModal = null;
+      document.removeEventListener('keydown', escHandler);
+    }
   };
+  document.addEventListener('keydown', escHandler);
 
-  if (closeBtn) closeBtn.onclick = closeModal;
-  if (cancelBtn) cancelBtn.onclick = closeModal;
-  if (overlay) {
-    (overlay as HTMLElement).onclick = (e) => {
-      if (e.target === overlay) closeModal();
-    };
-  }
-
-  if (saveBtn) {
-    saveBtn.onclick = async () => {
-      await saveTemplate(template?.id || null, ctx);
-    };
-  }
+  // Focus the name input
+  setTimeout(() => {
+    const nameInput = modal.body.querySelector('#template-name') as HTMLInputElement;
+    nameInput?.focus();
+  }, 100);
 }
 
-async function saveTemplate(templateId: number | null, ctx: AdminDashboardContext): Promise<void> {
-  const nameInput = document.getElementById('template-name') as HTMLInputElement;
-  const descInput = document.getElementById('template-description') as HTMLTextAreaElement;
-  const typeSelect = document.getElementById('template-project-type') as HTMLSelectElement;
-  const tierSelect = document.getElementById('template-tier') as HTMLSelectElement;
-  const priceInput = document.getElementById('template-base-price') as HTMLInputElement;
-  const defaultCheckbox = document.getElementById('template-is-default') as HTMLInputElement;
+async function saveTemplateFromModal(
+  templateId: number | null,
+  modal: ReturnType<typeof createPortalModal>,
+  ctx: AdminDashboardContext
+): Promise<void> {
+  const nameInput = modal.body.querySelector('#template-name') as HTMLInputElement;
+  const descInput = modal.body.querySelector('#template-description') as HTMLTextAreaElement;
+  const typeSelect = modal.body.querySelector('#template-project-type') as HTMLSelectElement;
+  const tierSelect = modal.body.querySelector('#template-tier') as HTMLSelectElement;
+  const priceInput = modal.body.querySelector('#template-base-price') as HTMLInputElement;
+  const defaultCheckbox = modal.body.querySelector('#template-is-default') as HTMLInputElement;
 
   const name = nameInput?.value.trim();
   if (!name) {
@@ -982,8 +968,8 @@ async function saveTemplate(templateId: number | null, ctx: AdminDashboardContex
 
     if (response.ok) {
       alertSuccess(templateId ? 'Template updated' : 'Template created');
-      const modal = document.getElementById('template-editor-modal');
-      if (modal) closeModalOverlay(modal);
+      modal.hide();
+      activeTemplateModal = null;
       await loadTemplates(ctx);
     } else {
       const error = await response.text();

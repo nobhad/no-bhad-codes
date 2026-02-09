@@ -10,6 +10,7 @@
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import { confirmDanger, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { formatDate } from '../../../utils/format-utils';
+import { createPortalModal } from '../../../components/portal-modal';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
 import { getStatusDotHTML } from '../../../components/status-badge';
@@ -400,97 +401,104 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
     console.error('[AdminTasks] Error fetching task details:', e);
   }
 
-  const overlay = document.createElement('div');
-  overlay.className = 'confirm-dialog-overlay';
-  overlay.id = 'task-detail-modal';
-
   const checklistProgress = fullTask.checklist_items?.length
     ? Math.round((fullTask.checklist_items.filter(c => c.is_completed).length / fullTask.checklist_items.length) * 100)
     : 0;
 
-  overlay.innerHTML = `
-    <div class="confirm-dialog task-detail-modal">
-      <div class="task-detail-header">
-        <h3 class="task-detail-title">${SanitizationUtils.escapeHtml(fullTask.title)}</h3>
-        <span class="task-priority ${PRIORITY_CONFIG[fullTask.priority]?.class || ''}">${PRIORITY_CONFIG[fullTask.priority]?.label || fullTask.priority}</span>
-      </div>
-
-      ${fullTask.description ? `
-        <div class="task-detail-section">
-          <h4>Description</h4>
-          <p>${SanitizationUtils.escapeHtml(fullTask.description)}</p>
-        </div>
-      ` : ''}
-
-      <div class="task-detail-section">
-        <h4>Details</h4>
-        <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <div><strong>Status:</strong> ${STATUS_CONFIG[fullTask.status]?.label || fullTask.status}</div>
-          <div><strong>Due:</strong> ${fullTask.due_date ? formatDate(fullTask.due_date) : ''}</div>
-          <div><strong>Assignee:</strong> ${fullTask.assignee_name || ''}</div>
-          <div><strong>Est. Hours:</strong> ${fullTask.estimated_hours || ''}</div>
-        </div>
-      </div>
-
-      ${fullTask.checklist_items && fullTask.checklist_items.length > 0 ? `
-        <div class="task-detail-section">
-          <h4>Checklist</h4>
-          <ul class="task-checklist">
-            ${fullTask.checklist_items.map(item => `
-              <li class="task-checklist-item ${item.is_completed ? 'completed' : ''}" data-item-id="${item.id}">
-                <input type="checkbox" ${item.is_completed ? 'checked' : ''}>
-                <label>${SanitizationUtils.escapeHtml(item.title)}</label>
-              </li>
-            `).join('')}
-          </ul>
-          <div class="task-checklist-progress">
-            <div class="task-checklist-progress-bar">
-              <div class="task-checklist-progress-fill" style="width: ${checklistProgress}%"></div>
-            </div>
-            <span class="task-checklist-progress-text">${checklistProgress}%</span>
-          </div>
-        </div>
-      ` : ''}
-
-      <div class="confirm-dialog-actions">
-        <button type="button" class="confirm-dialog-btn confirm-dialog-cancel">Close</button>
-        <button type="button" class="confirm-dialog-btn" id="btn-edit-task">Edit</button>
-        <button type="button" class="confirm-dialog-btn confirm-dialog-confirm" id="btn-delete-task" style="background: var(--status-cancelled);">Delete</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(overlay);
-
-  const closeModal = (): void => {
-    overlay.classList.add('closing');
-    setTimeout(() => overlay.remove(), 150);
-  };
-
-  // Event handlers
-  overlay.querySelector('.confirm-dialog-cancel')?.addEventListener('click', closeModal);
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal();
+  // Create modal using portal modal component
+  const modal = createPortalModal({
+    id: 'task-detail-modal',
+    titleId: 'task-detail-modal-title',
+    title: fullTask.title,
+    contentClassName: 'task-detail-modal-content',
+    onClose: () => modal.hide()
   });
 
-  overlay.querySelector('#btn-edit-task')?.addEventListener('click', () => {
-    closeModal();
+  // Build body content
+  modal.body.innerHTML = `
+    <div class="task-detail-header-meta">
+      <span class="task-priority ${PRIORITY_CONFIG[fullTask.priority]?.class || ''}">${PRIORITY_CONFIG[fullTask.priority]?.label || fullTask.priority}</span>
+    </div>
+
+    ${fullTask.description ? `
+      <div class="task-detail-section">
+        <h4>Description</h4>
+        <p>${SanitizationUtils.escapeHtml(fullTask.description)}</p>
+      </div>
+    ` : ''}
+
+    <div class="task-detail-section">
+      <h4>Details</h4>
+      <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div><strong>Status:</strong> ${STATUS_CONFIG[fullTask.status]?.label || fullTask.status}</div>
+        <div><strong>Due:</strong> ${fullTask.due_date ? formatDate(fullTask.due_date) : ''}</div>
+        <div><strong>Assignee:</strong> ${fullTask.assignee_name || ''}</div>
+        <div><strong>Est. Hours:</strong> ${fullTask.estimated_hours || ''}</div>
+      </div>
+    </div>
+
+    ${fullTask.checklist_items && fullTask.checklist_items.length > 0 ? `
+      <div class="task-detail-section">
+        <h4>Checklist</h4>
+        <ul class="task-checklist">
+          ${fullTask.checklist_items.map(item => `
+            <li class="task-checklist-item ${item.is_completed ? 'completed' : ''}" data-item-id="${item.id}">
+              <input type="checkbox" ${item.is_completed ? 'checked' : ''}>
+              <label>${SanitizationUtils.escapeHtml(item.title)}</label>
+            </li>
+          `).join('')}
+        </ul>
+        <div class="task-checklist-progress">
+          <div class="task-checklist-progress-bar">
+            <div class="task-checklist-progress-fill" style="width: ${checklistProgress}%"></div>
+          </div>
+          <span class="task-checklist-progress-text">${checklistProgress}%</span>
+        </div>
+      </div>
+    ` : ''}
+  `;
+
+  // Build footer with action buttons
+  modal.footer.innerHTML = `
+    <button type="button" class="btn btn-outline" id="btn-close-task">Close</button>
+    <button type="button" class="btn btn-secondary" id="btn-edit-task">Edit</button>
+    <button type="button" class="btn btn-danger" id="btn-delete-task">Delete</button>
+  `;
+
+  // Append to DOM and show
+  document.body.appendChild(modal.overlay);
+  modal.show();
+
+  // Event handlers
+  modal.footer.querySelector('#btn-close-task')?.addEventListener('click', () => modal.hide());
+
+  modal.footer.querySelector('#btn-edit-task')?.addEventListener('click', () => {
+    modal.hide();
     showEditTaskModal(fullTask);
   });
 
-  overlay.querySelector('#btn-delete-task')?.addEventListener('click', async () => {
-    closeModal();
+  modal.footer.querySelector('#btn-delete-task')?.addEventListener('click', async () => {
+    modal.hide();
     await deleteTask(fullTask.id);
   });
 
   // Checklist item toggles
-  overlay.querySelectorAll('.task-checklist-item input').forEach(checkbox => {
+  modal.body.querySelectorAll('.task-checklist-item input').forEach(checkbox => {
     checkbox.addEventListener('change', async (e) => {
       const target = e.target as HTMLInputElement;
       const itemId = parseInt((target.closest('.task-checklist-item') as HTMLElement).dataset.itemId || '0');
       await toggleChecklistItem(fullTask.id, itemId, target.checked);
     });
   });
+
+  // Close on Escape key
+  const escHandler = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') {
+      modal.hide();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 }
 
 /**
@@ -502,11 +510,6 @@ export async function showCreateTaskModal(): Promise<void> {
     return;
   }
 
-  // Create modal overlay
-  const overlay = document.createElement('div');
-  overlay.className = 'confirm-dialog-overlay';
-  overlay.id = 'create-task-modal';
-
   // Priority options for custom dropdown
   const priorityOptions = [
     { value: 'low', label: 'Low' },
@@ -515,17 +518,20 @@ export async function showCreateTaskModal(): Promise<void> {
     { value: 'urgent', label: 'Urgent' }
   ];
 
-  const closeModal = (): void => {
-    overlay.classList.add('closing');
-    setTimeout(() => overlay.remove(), 150);
-  };
+  // Create modal using portal modal component
+  const modal = createPortalModal({
+    id: 'create-task-modal',
+    titleId: 'create-task-modal-title',
+    title: 'Create Task',
+    onClose: () => modal.hide()
+  });
 
   const submitTask = async (): Promise<void> => {
-    const titleInput = overlay.querySelector('#task-title') as HTMLInputElement;
-    const descriptionInput = overlay.querySelector('#task-description') as HTMLTextAreaElement;
-    const dueDateInput = overlay.querySelector('#task-due-date') as HTMLInputElement;
-    const estimatedHoursInput = overlay.querySelector('#task-estimated-hours') as HTMLInputElement;
-    const priorityMount = overlay.querySelector('#task-priority-mount');
+    const titleInput = modal.body.querySelector('#task-title') as HTMLInputElement;
+    const descriptionInput = modal.body.querySelector('#task-description') as HTMLTextAreaElement;
+    const dueDateInput = modal.body.querySelector('#task-due-date') as HTMLInputElement;
+    const estimatedHoursInput = modal.body.querySelector('#task-estimated-hours') as HTMLInputElement;
+    const priorityMount = modal.body.querySelector('#task-priority-mount');
     const selectedPriority = priorityMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') || 'medium';
 
     const title = titleInput?.value?.trim();
@@ -535,7 +541,7 @@ export async function showCreateTaskModal(): Promise<void> {
       return;
     }
 
-    closeModal();
+    modal.hide();
 
     try {
       const response = await apiPost(`/api/projects/${currentProjectId}/tasks`, {
@@ -560,47 +566,44 @@ export async function showCreateTaskModal(): Promise<void> {
     }
   };
 
-  // Create modal HTML with mount point for priority dropdown
-  overlay.innerHTML = `
-    <div class="confirm-dialog">
-      <div class="confirm-dialog-header">
-        <h3>Create Task</h3>
+  // Build body content
+  modal.body.innerHTML = `
+    <div class="form-group">
+      <label class="form-label" for="task-title">Task Title <span class="required">*</span></label>
+      <input type="text" id="task-title" class="form-input" placeholder="Enter task title" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="task-description">Description</label>
+      <textarea id="task-description" class="form-input" rows="3" placeholder="Task description (optional)"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Priority <span class="required">*</span></label>
+        <div id="task-priority-mount"></div>
       </div>
-      <div class="confirm-dialog-body">
-        <div class="form-group">
-          <label class="form-label" for="task-title">Task Title <span class="required">*</span></label>
-          <input type="text" id="task-title" class="form-input" placeholder="Enter task title" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="task-description">Description</label>
-          <textarea id="task-description" class="form-input" rows="3" placeholder="Task description (optional)"></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Priority <span class="required">*</span></label>
-            <div id="task-priority-mount"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="task-due-date">Due Date</label>
-            <input type="date" id="task-due-date" class="form-input">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="task-estimated-hours">Estimated Hours</label>
-          <input type="number" id="task-estimated-hours" class="form-input" placeholder="0" min="0" step="0.5">
-        </div>
+      <div class="form-group">
+        <label class="form-label" for="task-due-date">Due Date</label>
+        <input type="date" id="task-due-date" class="form-input">
       </div>
-      <div class="confirm-dialog-footer">
-        <button type="button" class="btn btn-outline" id="task-cancel-btn">Cancel</button>
-        <button type="button" class="btn btn-primary" id="task-submit-btn">Create Task</button>
-      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="task-estimated-hours">Estimated Hours</label>
+      <input type="number" id="task-estimated-hours" class="form-input" placeholder="0" min="0" step="0.5">
     </div>
   `;
 
-  document.body.appendChild(overlay);
+  // Build footer with action buttons
+  modal.footer.innerHTML = `
+    <button type="button" class="btn btn-outline" id="task-cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" id="task-submit-btn">Create Task</button>
+  `;
+
+  // Append to DOM and show
+  document.body.appendChild(modal.overlay);
+  modal.show();
 
   // Create priority dropdown using createModalDropdown (matches form field styling)
-  const priorityMount = overlay.querySelector('#task-priority-mount');
+  const priorityMount = modal.body.querySelector('#task-priority-mount');
   if (priorityMount) {
     const priorityDropdown = createModalDropdown({
       options: priorityOptions,
@@ -611,18 +614,13 @@ export async function showCreateTaskModal(): Promise<void> {
   }
 
   // Set up button handlers
-  overlay.querySelector('#task-cancel-btn')?.addEventListener('click', closeModal);
-  overlay.querySelector('#task-submit-btn')?.addEventListener('click', submitTask);
-
-  // Close on overlay click
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal();
-  });
+  modal.footer.querySelector('#task-cancel-btn')?.addEventListener('click', () => modal.hide());
+  modal.footer.querySelector('#task-submit-btn')?.addEventListener('click', submitTask);
 
   // Close on Escape
   const escHandler = (e: KeyboardEvent): void => {
     if (e.key === 'Escape') {
-      closeModal();
+      modal.hide();
       document.removeEventListener('keydown', escHandler);
     }
   };
@@ -630,7 +628,7 @@ export async function showCreateTaskModal(): Promise<void> {
 
   // Focus the title input
   setTimeout(() => {
-    const titleInput = overlay.querySelector('#task-title') as HTMLInputElement;
+    const titleInput = modal.body.querySelector('#task-title') as HTMLInputElement;
     titleInput?.focus();
   }, 100);
 }

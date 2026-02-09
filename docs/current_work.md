@@ -1,8 +1,34 @@
 # Current Work
 
-**Last Updated:** February 8, 2026
+**Last Updated:** February 9, 2026
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-02.md`.
+
+---
+
+## ✅ Completed - February 9, 2026
+
+### Modal Standardization Refactoring
+
+- **Dynamic Modals Converted to `createPortalModal()`** - COMPLETE
+  - All dynamically-created modals in admin modules now use the reusable `createPortalModal()` component
+  - Consistent overlay lifecycle via `modal.show()` / `modal.hide()` with body scroll lock
+  - Focus trap handled internally by portal modal component
+  - Files refactored:
+    - `admin-tasks.ts` - `showTaskDetailModal()`, `showCreateTaskModal()` converted
+    - `admin-global-tasks.ts` - `showTaskDetailModal()` converted, removed manual focus trap
+    - `admin-leads.ts` - `showCancelledByDialog()` converted
+    - `invoice-modals.ts` - `showCreateInvoicePrompt()` converted
+    - `admin-projects.ts` - Preview modals (`showPreviewModal()`, etc.) converted
+    - `admin-proposals.ts` - Template editor modal converted to dynamic creation
+  - Pattern: Import `createPortalModal`, create modal, set `body.innerHTML`, set `footer.innerHTML`, append to DOM, call `show()`
+  - All modals verified: `npm run typecheck` passes, `npm run lint` passes (1 unrelated warning)
+
+- **CSS Cleanup Deferred** - PARTIAL
+  - Issue: Static HTML modals in `admin/index.html` still use `.admin-modal-*` classes
+  - Affected modals: dr-create-modal, dr-detail-modal, file-upload-modal, detail-modal, add-client-modal, add-project-modal, edit-client-info-modal, edit-billing-modal, edit-project-modal
+  - CSS classes cannot be removed until static modals are also migrated
+  - Current state: Both `.modal-*` (portal modal) and `.admin-modal-*` (legacy) classes coexist
 
 ---
 
@@ -403,11 +429,40 @@ After completing any task:
 
 ## Outstanding Tasks
 
-### General UI/UX
+### General UI/UX - COMPLETE (Feb 9)
 
-- [ ] **Secondary Sidebar for Multi-Tab Pages** - Pages with multiple tabs (client details, project details, analytics) should have a collapsible secondary sidebar for tab navigation, matching main sidebar pattern with icons
-- [ ] **Project Milestones System** - Build out milestones for projects that auto-populate on project creation; should link to tasks
-- [ ] **Task Priority Auto-Update** - Priority of tasks should auto-update based on timeline/due dates
+- [x] **Secondary Sidebar for Multi-Tab Pages** - COMPLETE (disabled per user preference)
+  - Created `src/styles/admin/secondary-sidebar.css` with vertical tab styling
+  - Created `src/components/secondary-sidebar.ts` with reusable component
+  - Documented in `docs/features/SECONDARY_SIDEBAR.md` for future re-enablement
+  - Features: collapsible, localStorage persistence, horizontal fallback on mobile
+
+- [x] **Project Milestones Auto-Population** - COMPLETE
+  - Created `server/config/default-milestones.ts` with templates per project type
+  - Created `server/services/milestone-generator.ts` for auto-generation
+  - Integrated into project creation routes (projects.ts, admin.ts)
+  - Supports: simple-site, business-site, ecommerce-site, web-app, maintenance, other
+  - Added `POST /api/admin/milestones/backfill` endpoint for existing projects
+  - Backfill run: 8 milestones created for 2 existing projects
+  - Documented in `docs/features/MILESTONES.md`
+
+- [x] **Task Priority Auto-Update** - COMPLETE
+  - Created `server/services/priority-escalation-service.ts` with escalation logic
+  - Rules: ≤1 day = urgent, ≤3 days = high, ≤7 days = medium
+  - Only escalates UP (never downgrades), excludes completed/cancelled tasks
+  - Added daily 6 AM scheduled job in scheduler-service.ts
+  - Added API endpoint: `POST /api/projects/:id/tasks/escalate-priorities`
+
+- [x] **Project Detail Page Restructure** - COMPLETE
+  - Added header card above tabs (matches client detail pattern)
+  - Header shows: project name, status, client info, type, dates, budget
+  - Restructured overview tab with two-column grid layout
+  - Left column: Project details, Milestones, Recent Activity
+  - Right column: Progress ring, Financial summary, Quick stats
+  - Added sidebar stats: Files, Messages, Tasks, Invoices counts
+  - Added financial stats: Invoiced, Paid, Outstanding totals
+  - Fully responsive: stacks to single column on tablet, optimized for mobile
+  - Files modified: `admin/index.html`, `project-detail.css`, `admin-projects.ts`
 
 ### 1. Documentation Audit
 

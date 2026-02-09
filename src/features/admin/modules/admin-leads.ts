@@ -30,6 +30,7 @@ import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils'
 import { showToast } from '../../../utils/toast-notifications';
 import { getCopyEmailButtonHtml } from '../../../utils/copy-email';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
+import { createPortalModal } from '../../../components/portal-modal';
 import { createRowCheckbox, createBulkActionToolbar, setupBulkSelectionHandlers, resetSelection, type BulkActionConfig } from '../../../utils/table-bulk-actions';
 import {
   createPaginationUI,
@@ -827,54 +828,67 @@ const CANCELLATION_REASONS = [
  */
 async function showCancelledByDialog(): Promise<CancellationInfo | null> {
   return new Promise((resolve) => {
-    const overlay = document.createElement('div');
-    overlay.className = 'confirm-dialog-overlay';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'cancel-dialog-title');
+    let selectedCancelledBy: string | null = null;
+    let resolved = false;
 
     const reasonOptions = CANCELLATION_REASONS.map(r =>
       `<option value="${r.value}">${r.label}</option>`
     ).join('');
 
-    overlay.innerHTML = `
-      <div class="confirm-dialog" style="max-width: 450px;">
-        <h3 id="cancel-dialog-title" class="confirm-dialog-title">CANCELLATION DETAILS</h3>
+    // Create modal using portal modal component
+    const modal = createPortalModal({
+      id: 'cancel-dialog-modal',
+      titleId: 'cancel-dialog-title',
+      title: 'Cancellation Details',
+      onClose: () => {
+        if (!resolved) {
+          resolved = true;
+          resolve(null);
+        }
+      }
+    });
 
-        <div style="text-align: left; margin-bottom: var(--space-4);">
-          <label class="field-label" style="margin-bottom: var(--space-2); display: block;">Who cancelled?</label>
-          <div class="confirm-dialog-actions" style="justify-content: flex-start; margin-bottom: var(--space-4);">
-            <button type="button" class="confirm-dialog-btn cancelled-by-btn" data-value="admin">I Cancelled</button>
-            <button type="button" class="confirm-dialog-btn cancelled-by-btn" data-value="client">Client Cancelled</button>
-          </div>
-
-          <label class="field-label" style="margin-bottom: var(--space-2); display: block;">Reason</label>
-          <select id="cancel-reason" class="form-input" style="width: 100%; margin-bottom: var(--space-3);">
-            <option value="">Select a reason...</option>
-            ${reasonOptions}
-          </select>
-
-          <div id="cancel-description-wrapper" style="display: none;">
-            <label class="field-label" style="margin-bottom: var(--space-2); display: block;">Description (optional)</label>
-            <textarea id="cancel-description" class="form-input" rows="2" placeholder="Additional details..." style="width: 100%; resize: vertical;"></textarea>
-          </div>
+    // Build body content
+    modal.body.innerHTML = `
+      <div class="form-group">
+        <label class="form-label">Who cancelled?</label>
+        <div class="btn-group" style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+          <button type="button" class="btn btn-outline cancelled-by-btn" data-value="admin">I Cancelled</button>
+          <button type="button" class="btn btn-outline cancelled-by-btn" data-value="client">Client Cancelled</button>
         </div>
+      </div>
 
-        <div class="confirm-dialog-actions">
-          <button type="button" class="confirm-dialog-btn cancel-btn">Cancel</button>
-          <button type="button" class="confirm-dialog-btn confirm-btn" style="color: var(--color-danger);" disabled>Confirm Cancellation</button>
-        </div>
+      <div class="form-group">
+        <label class="form-label">Reason</label>
+        <select id="cancel-reason" class="form-input">
+          <option value="">Select a reason...</option>
+          ${reasonOptions}
+        </select>
+      </div>
+
+      <div id="cancel-description-wrapper" class="form-group" style="display: none;">
+        <label class="form-label">Description (optional)</label>
+        <textarea id="cancel-description" class="form-input" rows="2" placeholder="Additional details..."></textarea>
       </div>
     `;
 
-    let selectedCancelledBy: string | null = null;
+    // Build footer with action buttons
+    modal.footer.innerHTML = `
+      <button type="button" class="btn btn-outline cancel-btn">Cancel</button>
+      <button type="button" class="btn btn-danger confirm-btn" disabled>Confirm Cancellation</button>
+    `;
 
-    const cancelledByBtns = overlay.querySelectorAll('.cancelled-by-btn');
-    const reasonSelect = overlay.querySelector('#cancel-reason') as HTMLSelectElement;
-    const descWrapper = overlay.querySelector('#cancel-description-wrapper') as HTMLElement;
-    const descTextarea = overlay.querySelector('#cancel-description') as HTMLTextAreaElement;
-    const confirmBtn = overlay.querySelector('.confirm-btn') as HTMLButtonElement;
-    const cancelBtn = overlay.querySelector('.cancel-btn') as HTMLButtonElement;
+    // Append to DOM and show
+    document.body.appendChild(modal.overlay);
+    modal.show();
+
+    // Get element references
+    const cancelledByBtns = modal.body.querySelectorAll('.cancelled-by-btn');
+    const reasonSelect = modal.body.querySelector('#cancel-reason') as HTMLSelectElement;
+    const descWrapper = modal.body.querySelector('#cancel-description-wrapper') as HTMLElement;
+    const descTextarea = modal.body.querySelector('#cancel-description') as HTMLTextAreaElement;
+    const confirmBtn = modal.footer.querySelector('.confirm-btn') as HTMLButtonElement;
+    const cancelBtn = modal.footer.querySelector('.cancel-btn') as HTMLButtonElement;
 
     if (reasonSelect && !reasonSelect.dataset.dropdownInit) {
       reasonSelect.dataset.dropdownInit = 'true';
@@ -904,16 +918,12 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
       updateConfirmState();
     });
 
-    const closeDialog = (result: CancellationInfo | null) => {
-      overlay.classList.add('closing');
-      setTimeout(() => {
-        overlay.remove();
-        resolve(result);
-      }, 150);
-    };
-
     // Cancel button
-    cancelBtn.addEventListener('click', () => closeDialog(null));
+    cancelBtn.addEventListener('click', () => {
+      resolved = true;
+      modal.hide();
+      resolve(null);
+    });
 
     // Confirm button
     confirmBtn.addEventListener('click', () => {
@@ -933,23 +943,26 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
         }
       }
 
-      closeDialog({
+      resolved = true;
+      modal.hide();
+      resolve({
         cancelled_by: selectedCancelledBy,
         reason
       });
     });
 
-    // Close on overlay click
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeDialog(null);
-    });
-
     // Close on Escape
-    overlay.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeDialog(null);
-    });
-
-    document.body.appendChild(overlay);
+    const escHandler = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        if (!resolved) {
+          resolved = true;
+          modal.hide();
+          resolve(null);
+        }
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
   });
 }
 
