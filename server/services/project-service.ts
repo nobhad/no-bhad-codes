@@ -1659,8 +1659,16 @@ class ProjectService {
     const params: SqlValue[] = [];
 
     if (options?.status) {
-      query += ' AND t.status = ?';
-      params.push(options.status);
+      // Support comma-separated statuses (e.g., "pending,in_progress,blocked")
+      const statuses = options.status.split(',').map(s => s.trim()).filter(Boolean);
+      if (statuses.length === 1) {
+        query += ' AND t.status = ?';
+        params.push(statuses[0]);
+      } else if (statuses.length > 1) {
+        const placeholders = statuses.map(() => '?').join(', ');
+        query += ` AND t.status IN (${placeholders})`;
+        params.push(...statuses);
+      }
     }
     if (options?.priority) {
       query += ' AND t.priority = ?';

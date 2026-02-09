@@ -258,12 +258,16 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-board {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap;
   gap: var(--space-2);
+  width: 100%;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-column {
   min-width: 180px;
-  flex: 1;
+  flex: 1 1 0 !important;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-column-header {

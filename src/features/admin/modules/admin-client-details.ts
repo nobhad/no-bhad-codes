@@ -1017,11 +1017,11 @@ function renderContactCard(contact: ClientContact): string {
     <div class="contact-card ${contact.is_primary ? 'primary' : ''}" data-contact-id="${contact.id}">
       <div class="contact-info">
         <div class="contact-name">
-          ${escapeHtml(contact.name)}
+          ${escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.name))}
           ${contact.is_primary ? '<span class="primary-badge">Primary</span>' : ''}
           ${contact.role ? `<span class="contact-role-badge ${contact.role}">${roleLabel}</span>` : ''}
         </div>
-        ${contact.title ? `<div class="contact-title">${escapeHtml(contact.title)}</div>` : ''}
+        ${contact.title ? `<div class="contact-title">${escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.title))}</div>` : ''}
         <div class="contact-details">
           ${contact.email ? `
             <span class="contact-detail">

@@ -3044,8 +3044,8 @@ async function populateClientDropdown(): Promise<void> {
       const options = [
         { value: '', label: 'Select existing client...' },
         ...clients.map((c) => {
-          const displayName = c.contact_name || c.email;
-          const company = c.company_name ? ` (${c.company_name})` : '';
+          const displayName = SanitizationUtils.decodeHtmlEntities(c.contact_name || c.email);
+          const company = c.company_name ? ` (${SanitizationUtils.decodeHtmlEntities(c.company_name)})` : '';
           return { value: String(c.id), label: `${displayName}${company}` };
         }),
         { value: 'new', label: '+ Create New Client' }

@@ -321,7 +321,7 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
     <tr data-request-id="${r.id}">
       ${createRowCheckbox('document-requests', r.id)}
       <td>${escapeHtml(r.title)}</td>
-      <td>${escapeHtml(r.client_name ?? String(r.client_id))}</td>
+      <td>${escapeHtml(SanitizationUtils.decodeHtmlEntities(r.client_name ?? String(r.client_id)))}</td>
       <td>${SanitizationUtils.capitalizeName(r.document_type || '')}</td>
       <td>${statusLabel(r.status)}</td>
       <td>${formatDate(r.due_date)}</td>
@@ -574,7 +574,7 @@ function openDetailModal(requestId: number, ctx: AdminDashboardContext): void {
     titleEl.textContent = r.title;
     bodyEl.innerHTML = `
       <dl class="dr-detail-dl">
-        <dt>Client</dt><dd>${escapeHtml(r.client_name ?? String(r.client_id))}</dd>
+        <dt>Client</dt><dd>${escapeHtml(SanitizationUtils.decodeHtmlEntities(r.client_name ?? String(r.client_id)))}</dd>
         <dt>Status</dt><dd>${statusLabel(r.status)}</dd>
         <dt>Due date</dt><dd>${formatDate(r.due_date)}</dd>
         <dt>Requested by</dt><dd>${escapeHtml(r.requested_by)}</dd>

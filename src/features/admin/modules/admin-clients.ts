@@ -1001,7 +1001,7 @@ async function sendClientInvitation(clientId: number): Promise<void> {
     return;
   }
 
-  const clientName = client.contact_name || client.email;
+  const clientName = SanitizationUtils.decodeHtmlEntities(client.contact_name || client.email);
   const confirmed = await confirmDialog({
     title: 'Send Invitation',
     message: `Send portal invitation to ${clientName}?`,
@@ -1275,9 +1275,10 @@ async function archiveClient(clientId: number, ctx: AdminDashboardContext): Prom
     return;
   }
 
+  const clientName = SanitizationUtils.decodeHtmlEntities(client.contact_name || client.email);
   const confirmed = await confirmDialog({
     title: 'Archive Client',
-    message: `Archive "${client.contact_name || client.email}"? They can be restored from the clients list later.`,
+    message: `Archive "${clientName}"? They can be restored from the clients list later.`,
     confirmText: 'Archive',
     cancelText: 'Cancel'
   });
@@ -1306,8 +1307,9 @@ async function deleteClient(clientId: number): Promise<void> {
     return;
   }
 
+  const deleteClientName = SanitizationUtils.decodeHtmlEntities(client.contact_name || client.email);
   const confirmed = await confirmDanger(
-    `Are you sure you want to delete client "${client.contact_name || client.email}"? This cannot be undone.`,
+    `Are you sure you want to delete client "${deleteClientName}"? This cannot be undone.`,
     'Delete Client'
   );
   if (!confirmed) return;
