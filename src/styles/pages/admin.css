@@ -215,7 +215,8 @@ body[data-page="admin"]:not(.admin-logged-in) {
 /* Dashboard Content Area */
 [data-page="admin"] .dashboard-content {
   flex: 1;
-  padding: 0.5rem clamp(0.75rem, 2vw, 1.5rem) clamp(0.75rem, 2vw, 1.5rem);
+  /* No top padding - header sits at the very top */
+  padding: 0 clamp(0.75rem, 2vw, 1.5rem) clamp(0.75rem, 2vw, 1.5rem);
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -1484,7 +1485,7 @@ body.modal-open .dashboard-content {
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  background: var(--color-bg-primary);
+  background: var(--portal-bg-darkest);
 }
 
 .set-password-container {
@@ -1493,11 +1494,11 @@ body.modal-open .dashboard-content {
 }
 
 .set-password-card {
-  background: var(--color-bg-secondary);
+  background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border-dark);
-  border-radius: var(--border-radius-card);
+  border-radius: var(--portal-radius-md);
   padding: var(--space-8);
-  box-shadow: var(--shadow-card-rest);
+  box-shadow: var(--shadow-panel);
 }
 
 .set-password-header {
@@ -1518,12 +1519,12 @@ body.modal-open .dashboard-content {
 .set-password-header h1 {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
+  color: var(--portal-text-light);
   margin: 0 0 var(--space-2) 0;
 }
 
 .set-password-subtitle {
-  color: var(--color-text-secondary);
+  color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   margin: 0;
 }
@@ -1549,12 +1550,12 @@ body.modal-open .dashboard-content {
 }
 
 .set-password-error .error-icon {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(var(--color-error-rgb), 0.1);
   color: var(--color-danger);
 }
 
 .set-password-success .success-icon {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(var(--color-success-rgb), 0.1);
   color: var(--color-success);
 }
 
@@ -1566,7 +1567,7 @@ body.modal-open .dashboard-content {
   display: block;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
+  color: var(--portal-text-secondary);
   margin-bottom: var(--space-1);
 }
 
@@ -1574,9 +1575,9 @@ body.modal-open .dashboard-content {
   width: 100%;
   padding: var(--space-3);
   border: 1px solid var(--portal-border-medium);
-  border-radius: var(--border-radius-sm);
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
   font-size: var(--font-size-base);
   box-sizing: border-box;
 }
@@ -1587,15 +1588,15 @@ body.modal-open .dashboard-content {
 }
 
 .set-password-form .form-input[readonly] {
-  background: var(--color-bg-secondary);
+  background: var(--portal-bg-readonly);
   cursor: not-allowed;
 }
 
 .set-password-form .form-error {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(var(--color-error-rgb), 0.1);
   color: var(--color-danger);
   padding: var(--space-3);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-sm);
   margin-bottom: var(--space-4);
 }
@@ -1606,14 +1607,14 @@ body.modal-open .dashboard-content {
 
 .set-password-form .btn-primary {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-white);
   border: none;
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--transition-fast);
 }
 
 .set-password-form .btn-primary:hover {
@@ -1843,10 +1844,12 @@ body.modal-open .dashboard-content {
 
   /* Reset margin-bottom on all tab-specific containers to ensure consistent spacing */
   #tab-overview .upcoming-tasks,
-  #tab-overview .recent-activity,
-  /* Reduce dashboard content padding on mobile */
+  #tab-overview .recent-activity {
+    margin-bottom: 0;
+  }
+  /* Reduce dashboard content padding on mobile - no top padding */
   [data-page="admin"] .dashboard-content {
-    padding: 0.5rem 0.75rem;
+    padding: 0 0.75rem 0.75rem;
   }
 }
 
@@ -2387,7 +2390,7 @@ body.modal-open .dashboard-content {
   transform: none;
   border-radius: var(--portal-radius-full);
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-white);
   box-shadow: 0 0 0 2px var(--portal-bg-dark);
 }
 
@@ -2410,7 +2413,7 @@ body.modal-open .dashboard-content {
     font-size: 0.5625rem;
     font-weight: 700;
     background: var(--color-danger);
-    color: #fff;
+    color: var(--color-white);
     box-shadow: 0 0 0 2px var(--portal-bg-dark);
   }
 }

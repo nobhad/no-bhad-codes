@@ -973,7 +973,7 @@ class AdminDashboard {
    * Navigate to full project detail view (replaces modal approach)
    * This mirrors the client portal view for admin management
    */
-  private showProjectDetails(projectId: number): void {
+  public showProjectDetails(projectId: number): void {
     this.projectDetails.showProjectDetails(
       projectId,
       this.projectsData,

@@ -124,6 +124,90 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // Set up tab navigation and event handlers
     this.setupProjectDetailTabs();
+    this.setupNotesTab();
+  }
+
+  /**
+   * Set up Notes tab edit button
+   */
+  private setupNotesTab(): void {
+    const editNotesBtn = document.getElementById('btn-edit-project-notes');
+    if (editNotesBtn && !editNotesBtn.dataset.listenerAdded) {
+      editNotesBtn.dataset.listenerAdded = 'true';
+      editNotesBtn.addEventListener('click', () => {
+        if (this.currentProjectId) {
+          this.showEditNotesModal(this.currentProjectId);
+        }
+      });
+    }
+  }
+
+  /**
+   * Show modal to edit project notes
+   */
+  private async showEditNotesModal(projectId: number): Promise<void> {
+    const project = this.projectsData.find(p => p.id === projectId);
+    if (!project) return;
+
+    const { createPortalModal } = await import('../../components/portal-modal');
+    const modal = createPortalModal({
+      id: 'edit-notes-modal',
+      titleId: 'edit-notes-title',
+      title: 'Edit Project Notes',
+      onClose: () => modal.hide()
+    });
+
+    modal.body.innerHTML = `
+      <div class="form-group">
+        <label class="form-label">Admin Notes (Internal)</label>
+        <textarea
+          id="edit-notes-textarea"
+          class="form-input"
+          rows="10"
+          placeholder="Add internal notes about this project..."
+        >${project.notes || ''}</textarea>
+      </div>
+    `;
+
+    modal.footer.innerHTML = `
+      <button type="button" class="btn btn-outline" id="btn-cancel-notes">Cancel</button>
+      <button type="button" class="btn btn-primary" id="btn-save-notes">Save Notes</button>
+    `;
+
+    document.body.appendChild(modal.overlay);
+    modal.show();
+
+    // Event handlers
+    modal.footer.querySelector('#btn-cancel-notes')?.addEventListener('click', () => modal.hide());
+    modal.footer.querySelector('#btn-save-notes')?.addEventListener('click', async () => {
+      const textarea = document.getElementById('edit-notes-textarea') as HTMLTextAreaElement;
+      if (!textarea) return;
+
+      try {
+        const response = await this.apiPut(`/api/projects/${projectId}`, {
+          notes: textarea.value.trim()
+        });
+
+        if (response.ok) {
+          // Update local data
+          if (project) {
+            project.notes = textarea.value.trim();
+          }
+          // Refresh the project details display
+          await this.loadProjectDetails(projectId);
+          modal.hide();
+          const { alertSuccess } = await import('../../utils/confirm-dialog');
+          alertSuccess('Project notes updated successfully');
+        } else {
+          const { alertError } = await import('../../utils/confirm-dialog');
+          alertError('Failed to update project notes');
+        }
+      } catch (error) {
+        console.error('[ProjectDetails] Error updating notes:', error);
+        const { alertError } = await import('../../utils/confirm-dialog');
+        alertError('Error updating project notes');
+      }
+    });
   }
 
   /**
@@ -301,6 +385,16 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       if (adminNotes) adminNotes.innerHTML = formatTextWithLineBreaks(project.notes);
     } else {
       if (adminNotesSection) adminNotesSection.style.display = 'none';
+    }
+
+    // Populate Notes tab
+    const notesDisplay = document.getElementById('pd-notes-display');
+    if (notesDisplay) {
+      if (project.notes && project.notes.trim()) {
+        notesDisplay.innerHTML = `<div class="notes-content">${formatTextWithLineBreaks(project.notes)}</div>`;
+      } else {
+        notesDisplay.innerHTML = `<p class="empty-state">No notes yet. Click "Edit Notes" to add internal notes about this project.</p>`;
+      }
     }
 
     // Features

@@ -4,6 +4,75 @@ This file contains completed work from February 2026. Items are moved here from 
 
 ---
 
+## Completed - February 9, 2026 (Late Night)
+
+### Section Toggles in Unified Header
+
+**Status:** ✅ COMPLETE - 100% Operational
+
+**Implementation:** Added section toggles to Leads and Knowledge Base pages for switching between related content views, using the unified portal header pattern established by Analytics/Workflows subtabs.
+
+#### Leads Page Toggle
+
+- Toggle switches between Intake Submissions and Contact Form Submissions cards
+- Mount point: `leads-section-toggle-mount` in unified header
+- Created `setupSectionToggle()` function in `admin-leads.ts`
+- Icons: Intake (document with plus), Contacts (users)
+- Card IDs: `intake-submissions-card`, `contact-submissions-card`
+
+#### Knowledge Base Page Toggle
+
+- Toggle switches between Categories and Articles cards
+- Mount point: `kb-section-toggle-mount` in unified header
+- Created `setupKBSectionToggle()` function in `admin-knowledge-base.ts`
+- Icons: Categories (grid), Articles (document with lines)
+- Card IDs: `kb-categories-card`, `kb-articles-card`
+
+#### CSS Conditional Visibility
+
+- Added CSS `:has()` selectors for conditional toggle visibility
+- Leads toggle shows only when `#tab-leads.active`
+- KB toggle shows only when `#tab-knowledge-base.active`
+- Follows same pattern as Tasks/Analytics/Workflows controls
+
+#### Technical Implementation
+
+**Pattern:** Mount point in unified header → `createViewToggle()` component → show/hide target cards
+
+```typescript
+function setupSectionToggle(): void {
+  const mountPoint = document.getElementById('section-toggle-mount');
+  if (!mountPoint || mountPoint.dataset.initialized) return;
+  mountPoint.dataset.initialized = 'true';
+
+  const toggleEl = createViewToggle({
+    id: 'section-toggle',
+    options: [/* ... */],
+    value: currentSection,
+    onChange: (value) => {
+      currentSection = value;
+      applySection(currentSection);
+    }
+  });
+
+  mountPoint.appendChild(toggleEl);
+  applySection(currentSection);
+}
+```
+
+#### Files Modified
+
+- `admin/index.html` - Added toggle mount points in unified header, added card IDs
+- `src/styles/client-portal/layout.css` - Added `:has()` selectors for conditional visibility
+- `src/features/admin/modules/admin-leads.ts` - Added section toggle logic
+- `src/features/admin/modules/admin-knowledge-base.ts` - Added section toggle logic
+- `docs/design/LAYOUT_CONSISTENCY_AUDIT.md` - Documented implementation
+- `docs/current_work.md` - Added completion entry
+
+**Visual Result:** Both Leads and Knowledge Base pages now have consistent section toggles in unified header matching the pattern used across all admin pages.
+
+---
+
 ## Completed - February 8, 2026
 
 ### Contact Page Responsiveness Fix

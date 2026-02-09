@@ -222,7 +222,7 @@
 
 .cd-project-status {
   font-size: 0.75rem;
-  padding: 2px 6px;
+  padding: var(--space-0-5) var(--space-1);
   border-radius: var(--border-radius-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -231,14 +231,14 @@
 .cd-project-progress {
   height: 3px;
   background: var(--portal-bg-darker);
-  border-radius: 2px;
+  border-radius: var(--portal-radius-xs);
   overflow: hidden;
 }
 
 .cd-project-progress-bar {
   height: 100%;
   background: var(--portal-accent);
-  border-radius: 2px;
+  border-radius: var(--portal-radius-xs);
 }
 
 
@@ -307,13 +307,13 @@
 .cd-health-stats-card .health-factor-bar {
   height: 4px;
   background: var(--portal-bg-darker);
-  border-radius: 2px;
+  border-radius: var(--portal-radius-xs);
   overflow: hidden;
 }
 
 .cd-health-stats-card .health-factor-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: var(--portal-radius-xs);
 }
 
 /* Compact Stats - 2x2 Grid Below Health */

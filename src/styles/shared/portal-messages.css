@@ -541,7 +541,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .reaction-badge.active {
   border-color: var(--color-primary);
-  background: rgba(0, 175, 240, 0.1);
+  background: rgba(var(--color-primary-rgb), 0.1);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .reaction-badge .reaction-count {
@@ -704,9 +704,9 @@
 /* Pinned message indicator */
 :is([data-page="admin"], [data-page="client-portal"]) .message.pinned {
   border-left: 3px solid var(--color-primary);
-  background: rgba(0, 175, 240, 0.05);
-  padding-left: 8px;
-  margin-left: -8px;
+  background: rgba(var(--color-primary-rgb), 0.05);
+  padding-left: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
 }
 
 /* =====================================================
@@ -715,7 +715,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .pinned-messages {
   padding: var(--space-1) var(--space-1-5);
   border-bottom: 1px solid var(--portal-border);
-  background: rgba(0, 175, 240, 0.05);
+  background: rgba(var(--color-primary-rgb), 0.05);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .pinned-messages-header {

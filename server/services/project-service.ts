@@ -461,29 +461,42 @@ class ProjectService {
   }): Promise<ProjectTask[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM project_tasks WHERE project_id = ?';
+    let query = `
+      SELECT
+        t.*,
+        p.project_name,
+        m.title as milestone_title
+      FROM project_tasks t
+      JOIN projects p ON t.project_id = p.id
+      LEFT JOIN milestones m ON t.milestone_id = m.id
+      WHERE t.project_id = ?
+    `;
     const params: SqlValue[] = [projectId];
 
     if (options?.status) {
-      query += ' AND status = ?';
+      query += ' AND t.status = ?';
       params.push(options.status);
     }
     if (options?.assignedTo) {
-      query += ' AND assigned_to = ?';
+      query += ' AND t.assigned_to = ?';
       params.push(options.assignedTo);
     }
     if (options?.milestoneId) {
-      query += ' AND milestone_id = ?';
+      query += ' AND t.milestone_id = ?';
       params.push(options.milestoneId);
     }
     if (!options?.includeSubtasks) {
-      query += ' AND parent_task_id IS NULL';
+      query += ' AND t.parent_task_id IS NULL';
     }
 
-    query += ' ORDER BY sort_order ASC, created_at ASC';
+    query += ' ORDER BY t.sort_order ASC, t.created_at ASC';
 
     const rows = await db.all(query, params);
-    const tasks = (rows as unknown as TaskRow[]).map(toTask);
+    const tasks = (rows as unknown as (TaskRow & { project_name?: string; milestone_title?: string })[]).map(row => ({
+      ...toTask(row),
+      projectName: row.project_name,
+      milestoneTitle: row.milestone_title
+    }));
 
     // Attach subtasks if requested
     if (options?.includeSubtasks) {
@@ -1701,17 +1714,19 @@ class ProjectService {
     status?: string;
     priority?: string;
     limit?: number;
-  }): Promise<(ProjectTask & { projectName: string; clientName?: string })[]> {
+  }): Promise<(ProjectTask & { projectName: string; clientName?: string; milestoneTitle?: string })[]> {
     const db = getDatabase();
 
     let query = `
       SELECT
         t.*,
         p.project_name,
-        c.contact_name as client_name
+        c.contact_name as client_name,
+        m.title as milestone_title
       FROM project_tasks t
       JOIN projects p ON t.project_id = p.id
       LEFT JOIN clients c ON p.client_id = c.id
+      LEFT JOIN milestones m ON t.milestone_id = m.id
       WHERE p.archived_at IS NULL
         AND p.status NOT IN ('cancelled', 'completed')
     `;
@@ -1756,10 +1771,11 @@ class ProjectService {
 
     const rows = await db.all(query, params);
 
-    return (rows as unknown as (TaskRow & { project_name: string; client_name?: string })[]).map(row => ({
+    return (rows as unknown as (TaskRow & { project_name: string; client_name?: string; milestone_title?: string })[]).map(row => ({
       ...toTask(row),
       projectName: row.project_name,
-      clientName: row.client_name
+      clientName: row.client_name,
+      milestoneTitle: row.milestone_title
     }));
   }
 }

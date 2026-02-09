@@ -161,15 +161,23 @@
    TAB SECTION HEADING (for visual hierarchy within tabs)
    ===================================================== */
 .tab-section-heading {
-  margin: 0 0 var(--space-2);
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--portal-text-primary);
-  letter-spacing: 0.02em;
+  font-family: var(--font-family-acme);
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label, 0.05em);
+  color: var(--portal-text-secondary);
+  margin: var(--space-4) 0 var(--space-3);
+  padding-left: var(--space-2);
 }
 
 /* Hide heading on first tab (overview) since it's the main content */
 .portal-tab-panel:first-of-type .tab-section-heading {
+  display: none;
+}
+
+/* Hide section headings in analytics subtabs - the subtab buttons already indicate the section */
+.analytics-subtab-content .tab-section-heading {
   display: none;
 }
 

@@ -71,6 +71,7 @@ let filterUIInitialized = false;
 let currentView: 'table' | 'pipeline' = 'table';
 let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
 let pipelineLinkHandlersAttached = false;
+let currentSection: 'intake' | 'contacts' = 'intake';
 
 // Pagination configuration and state
 const LEADS_PAGINATION_CONFIG: PaginationConfig = {
@@ -149,6 +150,9 @@ export function getLeadsData(): Lead[] {
 export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
   // Store context for global functions (activate from details panel)
   setLeadsContext(ctx);
+
+  // Initialize section toggle in header
+  setupSectionToggle();
 
   // Initialize filter UI once
   if (!filterUIInitialized) {
@@ -252,6 +256,61 @@ const LEADS_TABLE_ICON =
   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>';
 const LEADS_PIPELINE_ICON =
   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="15" y="5" width="6" height="16" rx="1"/></svg>';
+
+const INTAKE_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>';
+const CONTACTS_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+
+/**
+ * Set up section toggle between Intake and Contacts (in unified header)
+ */
+function setupSectionToggle(): void {
+  const mountPoint = document.getElementById('leads-section-toggle-mount');
+  if (!mountPoint || mountPoint.dataset.initialized) return;
+  mountPoint.dataset.initialized = 'true';
+
+  function applySection(section: 'intake' | 'contacts'): void {
+    const intakeCard = document.getElementById('intake-submissions-card');
+    const contactsCard = document.getElementById('contact-submissions-card');
+
+    if (section === 'intake') {
+      if (intakeCard) intakeCard.style.display = 'block';
+      if (contactsCard) contactsCard.style.display = 'none';
+    } else {
+      if (intakeCard) intakeCard.style.display = 'none';
+      if (contactsCard) contactsCard.style.display = 'block';
+    }
+  }
+
+  const toggleEl = createViewToggle({
+    id: 'leads-section-toggle',
+    options: [
+      {
+        value: 'intake',
+        label: 'Intake',
+        title: 'Intake Submissions',
+        ariaLabel: 'View intake submissions',
+        iconSvg: INTAKE_ICON
+      },
+      {
+        value: 'contacts',
+        label: 'Contacts',
+        title: 'Contact Form Submissions',
+        ariaLabel: 'View contact form submissions',
+        iconSvg: CONTACTS_ICON
+      }
+    ],
+    value: currentSection,
+    onChange: (value) => {
+      currentSection = value as 'intake' | 'contacts';
+      applySection(currentSection);
+    }
+  });
+
+  mountPoint.appendChild(toggleEl);
+  applySection(currentSection);
+}
 
 /**
  * Set up view toggle between table and pipeline (reusable view-toggle component)

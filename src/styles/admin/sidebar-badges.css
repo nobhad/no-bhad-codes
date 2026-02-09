@@ -81,7 +81,7 @@
   transform: none;
   border-radius: 50%;
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-white);
   box-shadow: 0 0 0 2px var(--portal-bg-dark);
 }
 
@@ -104,7 +104,7 @@
     font-size: 0.75rem;
     font-weight: 700;
     background: var(--color-danger);
-    color: #fff;
+    color: var(--color-white);
     box-shadow: 0 0 0 2px var(--portal-bg-dark);
   }
 }

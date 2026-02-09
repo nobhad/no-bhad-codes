@@ -1723,9 +1723,48 @@ These components use non-standard styling **by design**. Do NOT attempt to stand
 | Lead details email copy | `admin/leads-pipeline.css` | Uses `display: inline` for `.meta-value-with-copy` to match vertical alignment of other meta-values |
 | Breadcrumb spacing | `client-portal/layout.css` | Extra padding on `.primary-header-row` for visual breathing room |
 | Dropdown focus state | `admin/table-dropdowns.css` | Red border on focus is intentional visual indicator (not an error state) |
-| Set password form | `pages/admin.css` | Uses different styling (smaller border-radius, different padding) for unauthenticated password reset page |
 | Client portal status badge | `client-portal/dashboard.css` | Text-only badges in project cards (scoped to `.project-status .status-badge`) |
 | Admin form inputs | `admin/project-detail.css` | Adds `background-color: var(--color-black)` and thicker focus borders on top of shared base styles |
+
+---
+
+## Design System Audits
+
+### Latest Audit: February 9, 2026
+
+**Full Report:** [CSS_AUDIT_2026-02-09.md](./CSS_AUDIT_2026-02-09.md)
+
+**Summary:** Comprehensive audit of 93 CSS files for design system compliance.
+
+**Key Findings:**
+
+| Issue | Count | Status |
+|-------|-------|--------|
+| Hardcoded `white`/`black` keywords | 15 | ✅ HIGH priority - fix immediately |
+| Hardcoded transitions | 120+ | 🔄 MEDIUM priority - systematic replacement |
+| Hardcoded border-radius | 40+ | 🔄 MEDIUM priority - token migration |
+| Hardcoded rgba() UI colors | 12 | 🔄 MEDIUM priority - variable replacement |
+| Non-portal tokens in portal context | 10+ | 🔄 MEDIUM priority - audit portal pages |
+
+**Compliance Status:**
+
+- ✅ All CSS variables properly defined
+- ✅ Critical `--portal-bg-lighter` variable added
+- ✅ All `#fff`/`#000` hardcoded colors replaced
+- ✅ Set password form refactored to use portal tokens
+- 🔄 Transition tokens migration in progress
+- 🔄 Border-radius tokens migration in progress
+
+**Files Modified (2026-02-09):** 16 files, ~150 lines changed
+
+**Compliance Improvement:** 85% → 92%
+
+**Next Steps:**
+
+1. Replace remaining `color: white` with `var(--color-white)` (15 instances)
+2. Systematic transition token replacement (120+ instances)
+3. Border-radius token migration (40+ instances)
+4. Document intentional exceptions (2px, 3px radius values)
 
 ---
 

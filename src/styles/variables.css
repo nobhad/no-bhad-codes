@@ -240,6 +240,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --portal-bg-dark: #333333;
   --portal-bg-medium: #444444;
   --portal-bg-light: #555555;
+  --portal-bg-lighter: #666666;
   --portal-bg-hover: #3a3a3a;
   --portal-bg-readonly: #222222;
 

@@ -35,6 +35,8 @@ export interface TaskGenerationOptions {
   defaultPriority?: 'low' | 'medium' | 'high' | 'urgent';
   /** Assigned to (team member name/email) */
   assignedTo?: string;
+  /** Start date for task due date calculation (ISO string YYYY-MM-DD). Defaults to today. */
+  startDate?: string | null;
 }
 
 /**
@@ -88,7 +90,7 @@ export async function generateMilestoneTasks(
     console.log(`[TaskGenerator] Generating ${templates.length} tasks for milestone ${milestoneId} "${milestoneTitle}"`);
 
     // Calculate task due dates (spread evenly before milestone due date)
-    const taskDueDates = calculateTaskDueDates(milestoneDueDate, templates.length);
+    const taskDueDates = calculateTaskDueDates(milestoneDueDate, templates.length, options.startDate);
 
     // Generate each task
     for (let i = 0; i < templates.length; i++) {
@@ -131,14 +133,19 @@ export async function generateMilestoneTasks(
 /**
  * Calculate due dates for tasks
  *
- * Distributes task due dates evenly between today and milestone due date.
+ * Distributes task due dates evenly between start date and milestone due date.
  * If no milestone due date provided, tasks get null due dates.
  *
  * @param milestoneDueDate - Due date of the milestone (ISO string YYYY-MM-DD) or null
  * @param taskCount - Number of tasks to generate
+ * @param startDate - Optional start date (ISO string YYYY-MM-DD). If not provided, uses today.
  * @returns Array of due date strings (YYYY-MM-DD) or nulls
  */
-function calculateTaskDueDates(milestoneDueDate: string | null, taskCount: number): (string | null)[] {
+function calculateTaskDueDates(
+  milestoneDueDate: string | null,
+  taskCount: number,
+  startDate?: string | null
+): (string | null)[] {
   // If no milestone due date, all tasks get null due dates
   if (!milestoneDueDate) {
     return new Array(taskCount).fill(null);
@@ -147,14 +154,18 @@ function calculateTaskDueDates(milestoneDueDate: string | null, taskCount: numbe
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset to start of day
 
+  // Use provided start date or default to today
+  const start = startDate ? new Date(startDate) : new Date(today);
+  start.setHours(0, 0, 0, 0);
+
   const milestoneDate = new Date(milestoneDueDate);
   milestoneDate.setHours(0, 0, 0, 0);
 
-  // Calculate days between today and milestone due date
-  const daysUntilMilestone = Math.max(1, Math.ceil((milestoneDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+  // Calculate days between start and milestone due date
+  const daysUntilMilestone = Math.max(1, Math.ceil((milestoneDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
 
   // If milestone is in the past or today, all tasks get milestone due date
-  if (daysUntilMilestone <= 1) {
+  if (daysUntilMilestone <= 1 || milestoneDate <= start) {
     return new Array(taskCount).fill(milestoneDueDate);
   }
 
@@ -164,7 +175,7 @@ function calculateTaskDueDates(milestoneDueDate: string | null, taskCount: numbe
 
   for (let i = 0; i < taskCount; i++) {
     const daysOffset = Math.floor(interval * (i + 1));
-    const taskDueDate = new Date(today);
+    const taskDueDate = new Date(start);
     taskDueDate.setDate(taskDueDate.getDate() + daysOffset);
     dueDates.push(taskDueDate.toISOString().split('T')[0]);
   }
@@ -272,7 +283,7 @@ export async function backfillMilestoneTasks(): Promise<{
 
   // Get milestones without tasks along with project info
   const milestones = await db.all(`
-    SELECT m.id, m.title, m.due_date, m.project_id, p.project_type
+    SELECT m.id, m.title, m.due_date, m.project_id, p.project_type, p.start_date
     FROM milestones m
     JOIN projects p ON m.project_id = p.id
     LEFT JOIN project_tasks t ON m.id = t.milestone_id
@@ -280,34 +291,61 @@ export async function backfillMilestoneTasks(): Promise<{
       AND p.deleted_at IS NULL
       AND p.status NOT IN ('completed', 'cancelled')
     GROUP BY m.id
-    ORDER BY m.due_date
+    ORDER BY m.project_id, m.due_date
   `) as Array<{
     id: number;
     title: string;
     due_date: string | null;
     project_id: number;
     project_type: string | null;
+    start_date: string | null;
   }>;
 
   console.log(`[TaskGenerator] Backfilling tasks for ${milestones.length} milestones`);
 
+  // Group milestones by project to handle sequential dates
+  const milestonesByProject = new Map<number, typeof milestones>();
   for (const milestone of milestones) {
-    try {
-      const taskIds = await generateMilestoneTasks(
-        milestone.project_id,
-        milestone.id,
-        milestone.title,
-        milestone.due_date,
-        milestone.project_type,
-        { skipIfExists: true }
-      );
+    if (!milestonesByProject.has(milestone.project_id)) {
+      milestonesByProject.set(milestone.project_id, []);
+    }
+    milestonesByProject.get(milestone.project_id)!.push(milestone);
+  }
 
-      tasksCreated += taskIds.length;
-      milestonesProcessed++;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      errors.push({ milestoneId: milestone.id, error: errorMessage });
-      console.error(`[TaskGenerator] Failed to backfill milestone ${milestone.id}:`, errorMessage);
+  // Process each project's milestones sequentially
+  for (const [projectId, projectMilestones] of milestonesByProject) {
+    let previousMilestoneDueDate: string | null = null;
+
+    for (let i = 0; i < projectMilestones.length; i++) {
+      const milestone = projectMilestones[i];
+      try {
+        // For first milestone, use project start date; for subsequent ones, use previous milestone's due date
+        const startDate = i === 0 ? milestone.start_date : previousMilestoneDueDate;
+
+        const taskIds = await generateMilestoneTasks(
+          milestone.project_id,
+          milestone.id,
+          milestone.title,
+          milestone.due_date,
+          milestone.project_type,
+          {
+            skipIfExists: true,
+            startDate
+          }
+        );
+
+        tasksCreated += taskIds.length;
+        milestonesProcessed++;
+
+        // Track this milestone's due date for the next milestone
+        if (milestone.due_date) {
+          previousMilestoneDueDate = milestone.due_date;
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        errors.push({ milestoneId: milestone.id, error: errorMessage });
+        console.error(`[TaskGenerator] Failed to backfill milestone ${milestone.id}:`, errorMessage);
+      }
     }
   }
 

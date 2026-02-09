@@ -80,7 +80,7 @@
 
 .default-badge {
   display: inline-block;
-  padding: 2px 8px;
+  padding: var(--space-0-5) var(--space-2);
   background-color: var(--color-primary);
   color: white;
   font-size: 0.625rem;
@@ -453,7 +453,7 @@
 
 .item-type-badge {
   font-size: 0.65rem;
-  padding: 2px 6px;
+  padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-secondary);
   color: var(--portal-text-secondary);
   border-radius: var(--portal-radius-sm);
@@ -567,7 +567,7 @@
 
 .comment-type {
   font-size: 0.65rem;
-  padding: 2px 6px;
+  padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-secondary);
   color: var(--portal-text-secondary);
   border-radius: var(--portal-radius-sm);
@@ -576,7 +576,7 @@
 
 .comment-internal-badge {
   font-size: 0.65rem;
-  padding: 2px 6px;
+  padding: var(--space-0-5) var(--space-1);
   background: rgba(var(--color-warning-rgb), 0.2);
   color: var(--color-warning);
   border-radius: var(--portal-radius-sm);
