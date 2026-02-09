@@ -255,14 +255,6 @@ function renderTaskCard(item: KanbanItem): string {
         </span>
       ` : ''}
     </div>
-    ${meta.assignee ? `
-      <div class="task-assignee">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
-        ${SanitizationUtils.escapeHtml(meta.assignee)}
-      </div>
-    ` : ''}
   `;
 }
 
@@ -301,7 +293,6 @@ function renderListView(): void {
             <th class="type-col">Priority</th>
             <th class="status-col">Status</th>
             <th class="date-col">Due Date</th>
-            <th>Assignee</th>
           </tr>
         </thead>
         <tbody id="global-tasks-table-body">
@@ -356,7 +347,6 @@ function renderListItem(task: GlobalTask): string {
       <td class="type-cell"><span class="task-priority ${priorityClass}">${priorityLabel}</span></td>
       <td class="status-cell">${getStatusDotHTML(task.status)}</td>
       <td class="date-cell ${isOverdue ? 'overdue' : ''}">${task.dueDate ? formatDate(task.dueDate) : ''}</td>
-      <td class="type-cell">${task.assignedTo ? SanitizationUtils.escapeHtml(task.assignedTo) : ''}</td>
     </tr>
   `;
 }
@@ -453,7 +443,6 @@ function showTaskDetailModal(task: GlobalTask): void {
       <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
         <div><strong>Status:</strong> ${statusLabel}</div>
         <div class="${isOverdue ? 'overdue' : ''}"><strong>Due:</strong> ${task.dueDate ? formatDate(task.dueDate) : ''}</div>
-        <div><strong>Assignee:</strong> ${task.assignedTo || ''}</div>
         <div><strong>Est. Hours:</strong> ${task.estimatedHours || ''}</div>
       </div>
     </div>
