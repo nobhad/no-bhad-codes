@@ -252,14 +252,6 @@ function renderTaskCard(item: KanbanItem): string {
         </span>
       ` : ''}
     </div>
-    ${meta.assignee ? `
-      <div class="task-assignee">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
-        ${SanitizationUtils.escapeHtml(meta.assignee)}
-      </div>
-    ` : ''}
   `;
 }
 
@@ -303,7 +295,6 @@ function renderListView(): void {
         <span>Priority</span>
         <span>Status</span>
         <span>Due Date</span>
-        <span>Assignee</span>
       </div>
       ${sortedTasks.map(task => renderListItem(task)).join('')}
     </div>
@@ -337,7 +328,6 @@ function renderListItem(task: ProjectTask): string {
       <span class="task-priority ${priorityClass}">${priorityLabel}</span>
       ${getStatusDotHTML(task.status)}
       <span class="${isOverdue ? 'overdue' : ''}">${task.due_date ? formatDate(task.due_date) : '-'}</span>
-      <span>${task.assignee_name ? SanitizationUtils.escapeHtml(task.assignee_name) : '-'}</span>
     </div>
   `;
 }
@@ -432,7 +422,6 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
       <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
         <div><strong>Status:</strong> ${STATUS_CONFIG[fullTask.status]?.label || fullTask.status}</div>
         <div><strong>Due:</strong> ${fullTask.due_date ? formatDate(fullTask.due_date) : ''}</div>
-        <div><strong>Assignee:</strong> ${fullTask.assignee_name || ''}</div>
         <div><strong>Est. Hours:</strong> ${fullTask.estimated_hours || ''}</div>
       </div>
     </div>
