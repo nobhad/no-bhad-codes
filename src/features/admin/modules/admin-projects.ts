@@ -591,7 +591,7 @@ const PROJECT_DETAIL_TABS = [
 /**
  * Initialize secondary sidebar for project detail view
  */
-function initSecondarySidebar(projectName: string): void {
+function _initSecondarySidebar(projectName: string): void {
   // Clean up existing sidebar if any
   cleanupSecondarySidebar();
 

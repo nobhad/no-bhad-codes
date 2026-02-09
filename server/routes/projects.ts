@@ -259,9 +259,10 @@ router.post(
 
     const newProject = await db.get('SELECT * FROM projects WHERE id = ?', [result.lastID]);
 
-    // Generate default milestones for the new project
+    // Generate default milestones and tasks for the new project
     try {
-      await generateDefaultMilestones(result.lastID!, projectType);
+      const generationResult = await generateDefaultMilestones(result.lastID!, projectType);
+      console.log(`[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${result.lastID}`);
     } catch (milestoneError) {
       console.error('[Projects] Failed to generate milestones:', milestoneError);
       // Non-critical - don't fail the request
@@ -345,11 +346,12 @@ router.post(
       [result.lastID]
     );
 
-    // Generate default milestones for the new project
+    // Generate default milestones and tasks for the new project
     try {
       const projectType = (newProject as { project_type?: string })?.project_type || null;
       const projectStartDate = start_date ? new Date(start_date) : undefined;
-      await generateDefaultMilestones(result.lastID!, projectType, { startDate: projectStartDate });
+      const generationResult = await generateDefaultMilestones(result.lastID!, projectType, { startDate: projectStartDate });
+      console.log(`[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${result.lastID}`);
     } catch (milestoneError) {
       console.error('[Projects] Failed to generate milestones:', milestoneError);
       // Non-critical - don't fail the request
@@ -890,17 +892,29 @@ router.get(
 
     const milestones = await db.all(
       `
-    SELECT id, title, description, due_date, completed_date, is_completed, 
-           deliverables, created_at, updated_at
-    FROM milestones 
-    WHERE project_id = ?
-    ORDER BY due_date ASC, created_at ASC
+    SELECT
+      m.id,
+      m.title,
+      m.description,
+      m.due_date,
+      m.completed_date,
+      m.is_completed,
+      m.deliverables,
+      m.created_at,
+      m.updated_at,
+      COUNT(t.id) as task_count,
+      SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_task_count
+    FROM milestones m
+    LEFT JOIN project_tasks t ON m.id = t.milestone_id
+    WHERE m.project_id = ?
+    GROUP BY m.id
+    ORDER BY m.due_date ASC, m.created_at ASC
   `,
       [projectId]
     );
 
-    // Parse deliverables JSON
-    milestones.forEach((milestone) => {
+    // Parse deliverables JSON and calculate progress
+    milestones.forEach((milestone: any) => {
       const deliverablesStr = getString(milestone, 'deliverables');
       if (deliverablesStr) {
         try {
@@ -911,6 +925,11 @@ router.get(
       } else {
         milestone.deliverables = [];
       }
+
+      // Calculate progress percentage
+      const taskCount = milestone.task_count || 0;
+      const completedCount = milestone.completed_task_count || 0;
+      milestone.progress_percentage = taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0;
     });
 
     res.json({ milestones });

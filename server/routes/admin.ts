@@ -24,6 +24,7 @@ import { getSchedulerService } from '../services/scheduler-service.js';
 import { softDeleteService, SoftDeleteEntityType } from '../services/soft-delete-service.js';
 import { projectService } from '../services/project-service.js';
 import { generateDefaultMilestones, backfillMilestones } from '../services/milestone-generator.js';
+import { backfillMilestoneTasks } from '../services/task-generator.js';
 
 const router = express.Router();
 
@@ -1391,10 +1392,10 @@ router.post(
         ]
       );
 
-      // Generate default milestones for the new project
+      // Generate default milestones and tasks for the new project
       try {
-        await generateDefaultMilestones(projectId, projectType);
-        console.log(`[AdminProjects] Generated milestones for project: ${projectId}`);
+        const generationResult = await generateDefaultMilestones(projectId, projectType);
+        console.log(`[AdminProjects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${projectId}`);
       } catch (milestoneError) {
         console.error('[AdminProjects] Failed to generate milestones:', milestoneError);
         // Non-critical - don't fail the request
@@ -2578,7 +2579,7 @@ router.delete(
 /**
  * POST /api/admin/milestones/backfill - Backfill milestones for existing projects
  *
- * Generates default milestones for all active projects that don't have any.
+ * Generates default milestones and tasks for all active projects that don't have any.
  * Useful for initial setup or migration.
  */
 router.post(
@@ -2592,10 +2593,38 @@ router.post(
 
     res.json({
       success: true,
-      message: `Backfill complete: ${result.milestonesCreated} milestones created for ${result.projectsProcessed} projects`,
+      message: `Backfill complete: ${result.milestonesCreated} milestones and ${result.tasksCreated} tasks created for ${result.projectsProcessed} projects`,
       data: {
         projectsProcessed: result.projectsProcessed,
         milestonesCreated: result.milestonesCreated,
+        tasksCreated: result.tasksCreated,
+        errors: result.errors
+      }
+    });
+  })
+);
+
+/**
+ * POST /api/admin/tasks/backfill - Backfill tasks for existing milestones
+ *
+ * Generates default tasks for all milestones that don't have any.
+ * Useful when milestones exist but tasks weren't auto-generated.
+ */
+router.post(
+  '/tasks/backfill',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
+    console.log('[Admin] Starting task backfill...');
+
+    const result = await backfillMilestoneTasks();
+
+    res.json({
+      success: true,
+      message: `Backfill complete: ${result.tasksCreated} tasks created for ${result.milestonesProcessed} milestones`,
+      data: {
+        milestonesProcessed: result.milestonesProcessed,
+        tasksCreated: result.tasksCreated,
         errors: result.errors
       }
     });

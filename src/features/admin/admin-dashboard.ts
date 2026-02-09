@@ -103,6 +103,24 @@ interface PerformanceMetricsDisplay {
 // NOTE: AnalyticsData, RawVisitorData, ApplicationStatus, VisitorInfo
 // types are defined in admin-types.ts and used by modules
 
+/** Admin tab titles for dynamic page header */
+const ADMIN_TAB_TITLES: Record<string, string> = {
+  overview: 'Dashboard',
+  leads: 'Leads',
+  projects: 'Projects',
+  clients: 'Clients',
+  invoices: 'Invoices',
+  tasks: 'Tasks',
+  messages: 'Messages',
+  analytics: 'Analytics',
+  'document-requests': 'Document Requests',
+  'knowledge-base': 'Knowledge Base',
+  system: 'System Status',
+  workflows: 'Workflows',
+  'client-detail': 'Client Details',
+  'project-detail': 'Project Details'
+};
+
 // Dashboard data management
 class AdminDashboard {
   private currentTab = 'overview';
@@ -1289,11 +1307,37 @@ class AdminDashboard {
 
     this.currentTab = tabName;
 
+    // Update page title in unified header
+    this.updateAdminPageTitle(tabName);
+
     // Update breadcrumb to match active section
     this.updateAdminBreadcrumbs(tabName);
 
     // Load tab-specific data (modules handle all tab data loading)
     this.loadTabData(tabName);
+  }
+
+  /**
+   * Update admin header page title based on active tab/section.
+   */
+  private updateAdminPageTitle(tabName: string): void {
+    const titleEl = document.getElementById('admin-page-title');
+    if (!titleEl) return;
+
+    // Handle detail views with dynamic names
+    if (tabName === 'client-detail') {
+      const clientName = this.clientsModule?.getCurrentClientName?.() || 'Client';
+      titleEl.textContent = clientName;
+      return;
+    }
+
+    if (tabName === 'project-detail') {
+      const projectName = this.projectDetails.getCurrentProjectName() || 'Project';
+      titleEl.textContent = projectName;
+      return;
+    }
+
+    titleEl.textContent = ADMIN_TAB_TITLES[tabName] || 'Dashboard';
   }
 
   /**
@@ -2230,6 +2274,16 @@ class AdminDashboard {
   /** Delete milestone - delegated to projectDetails */
   public deleteMilestone(milestoneId: number): Promise<void> {
     return this.projectDetails.deleteMilestone(milestoneId);
+  }
+
+  /** Toggle milestone tasks visibility - delegated to projectDetails */
+  public toggleMilestoneTasks(milestoneId: number, projectId: number): Promise<void> {
+    return this.projectDetails.toggleMilestoneTasks(milestoneId, projectId);
+  }
+
+  /** Toggle task completion - delegated to projectDetails */
+  public toggleTaskCompletion(taskId: number, isCompleted: boolean, projectId: number): Promise<void> {
+    return this.projectDetails.toggleTaskCompletion(taskId, isCompleted, projectId);
   }
 
   /** Send invoice - delegated to projectDetails */

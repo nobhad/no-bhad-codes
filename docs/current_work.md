@@ -1,6 +1,6 @@
 # Current Work
 
-**Last Updated:** February 9, 2026 (Evening)
+**Last Updated:** February 9, 2026 (Night)
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-02.md`.
 
@@ -12,8 +12,103 @@ See `archive/ARCHIVED_WORK_2026-02.md` for full details.
 
 **Summary:**
 
+- Milestones & Tasks Auto-Generation System
 - General UI/UX Enhancements: Secondary Sidebar, Project Milestones Auto-Population, Task Priority Auto-Update, Project Detail Page Restructure
 - Bug Fixes: Intake PDF HTML entity decoding, PDF newline encoding error, Client proposal preview modal, URL field encoding, Quoted price display
+
+### Milestones & Tasks Auto-Generation System - COMPLETE
+
+**Status:** ✅ COMPLETE - 100% Operational
+
+**Implementation:** Complete system for automatically generating both milestones and tasks when projects are created.
+
+#### Backend Implementation
+
+- **Task Templates Configuration** - COMPLETE
+  - Created `server/config/default-tasks.ts` with task templates for all 6 project types
+  - Simple Site: ~21 tasks, Business Site: ~42 tasks, E-commerce: ~49 tasks, Web App: ~64 tasks, Maintenance: ~27 tasks, Other: ~18 tasks
+
+- **Task Generator Service** - COMPLETE
+  - Created `server/services/task-generator.ts`
+  - Functions: `generateMilestoneTasks`, `generateAllMilestoneTasksForProject`, `backfillMilestoneTasks`
+  - Smart due date distribution (tasks spread evenly before milestone due date)
+
+- **Milestone Generator Integration** - COMPLETE
+  - Updated `server/services/milestone-generator.ts` to call task generator after creating each milestone
+  - Returns both `milestonesCreated` and `tasksCreated` counts
+  - Updated all dependent code in `server/routes/projects.ts` and `server/routes/admin.ts`
+
+- **Progress Calculator Service** - COMPLETE
+  - Created `server/services/progress-calculator.ts`
+  - Functions: `calculateMilestoneProgress`, `calculateProjectProgress`, `checkAndUpdateMilestoneCompletion`
+  - Auto-completes milestones when all tasks are done
+  - Updates project progress based on task completion
+
+- **API Endpoint Updates** - COMPLETE
+  - GET `/api/projects/:id/milestones` - Now includes `task_count`, `completed_task_count`, `progress_percentage`
+  - Task update/delete operations trigger milestone and project progress recalculation
+  - Updated `server/services/project-service.ts` with automatic progress updates
+
+- **Backfill Endpoints** - COMPLETE
+  - POST `/api/admin/milestones/backfill` - Now creates both milestones and tasks
+  - POST `/api/admin/tasks/backfill` - Creates tasks for existing milestones (NEW)
+
+#### Frontend Implementation
+
+- **Milestone View Enhancements** - COMPLETE
+  - Updated `src/features/admin/project-details/milestones.ts`
+  - Display task counts and progress percentages in milestone cards
+  - Visual progress bars for each milestone
+  - Expandable task lists (click to show/hide tasks)
+  - Toggle task completion directly from milestone view
+  - Auto-reload after task status changes
+
+- **Task Kanban Updates** - COMPLETE
+  - Updated `src/features/admin/modules/admin-tasks.ts`
+  - Milestone tags on task cards in Kanban view
+  - "Standalone" tag for tasks not linked to milestones
+  - Added `milestone_title` to task interface
+
+- **CSS Styling** - COMPLETE
+  - Updated `src/styles/admin/project-detail.css` - Milestone progress bars, task lists, expandable containers
+  - Updated `src/styles/admin/tasks.css` - Milestone tags, standalone tags
+
+#### Key Features
+
+- **Automatic Generation**: Creating a project generates milestones AND tasks
+- **Smart Due Dates**: Tasks distributed evenly between today and milestone due date
+- **Progress Tracking**: Milestone progress calculated from task completion (e.g., "5/12 tasks, 42%")
+- **Auto-Completion**: Milestones auto-mark complete when all tasks done
+- **Visual Progress**: Progress bars show completion at a glance
+- **Expandable Tasks**: Click any milestone to see its tasks inline
+- **Quick Actions**: Toggle task completion from milestone view
+- **Task Organization**: Clear distinction between milestone tasks and standalone tasks
+
+#### Files Modified
+
+**Backend:**
+
+- `server/config/default-tasks.ts` (NEW)
+- `server/services/task-generator.ts` (NEW)
+- `server/services/progress-calculator.ts` (NEW)
+- `server/services/milestone-generator.ts` (MODIFIED)
+- `server/services/project-service.ts` (MODIFIED)
+- `server/routes/projects.ts` (MODIFIED)
+- `server/routes/admin.ts` (MODIFIED)
+
+**Frontend:**
+
+- `src/features/admin/project-details/milestones.ts` (MODIFIED)
+- `src/features/admin/modules/admin-tasks.ts` (MODIFIED)
+- `src/features/admin/admin-project-details.ts` (MODIFIED)
+- `src/features/admin/admin-dashboard.ts` (MODIFIED)
+- `src/styles/admin/project-detail.css` (MODIFIED)
+- `src/styles/admin/tasks.css` (MODIFIED)
+
+#### Documentation Updates
+
+- `docs/features/MILESTONES.md` - Updated with task auto-generation documentation
+- `docs/API_DOCUMENTATION.md` - Updated milestones endpoints, added tasks backfill endpoint
 
 ### Tasks Page Desktop Layout & Styling - COMPLETE
 
@@ -45,6 +140,112 @@ See `archive/ARCHIVED_WORK_2026-02.md` for full details.
   - Added `pending` status to the selector for column header accent border
   - Color strip now matches other status tiers (In Progress, Blocked, Done)
   - File: `src/styles/shared/portal-components.css`
+
+### Header Subtabs Implementation - COMPLETE
+
+- **Analytics & Workflows Subtabs Moved to Header** - COMPLETE
+  - Moved subtabs from content area into `.portal-header-title`
+  - Aligned with page title using flexbox
+  - CSS `:has()` selector shows subtabs only when respective tab is active
+  - Responsive: stacks vertically on mobile
+  - Files: `admin/index.html`, `src/styles/client-portal/layout.css`, `src/styles/admin/analytics.css`
+
+### Design System Audit - COMPLETE (February 9, 2026)
+
+**Full Audit Report:** `docs/design/CSS_AUDIT_2026-02-09.md`
+
+**Scope:** 93 CSS files (admin + client-portal + shared styles)
+
+**Compliance Improvement:** 85% → 92%
+
+**Files Modified:** 16 files, ~150 lines changed
+
+#### Fixes Completed
+
+- **CRITICAL: Defined `--portal-bg-lighter`** - COMPLETE
+  - Added missing variable to `variables.css` (8 usages were broken)
+  - Value: `#666666`
+
+- **HIGH: Replaced Hardcoded `#fff` Colors** - COMPLETE (4 files)
+  - Changed to `var(--color-white)` from design system
+  - Files: `secondary-sidebar.css`, `sidebar-badges.css`, `admin.css`, `projects-detail.css`
+
+- **HIGH: Replaced Hardcoded `#000` Colors** - COMPLETE (1 file)
+  - Changed to `var(--color-black)` from design system
+  - File: `projects-detail.css`
+
+- **MEDIUM: Replaced Hardcoded Border-Radius (2-4px)** - COMPLETE (15 locations)
+  - Changed to `var(--portal-radius-xs)` (4px token)
+  - Files: `files.css`, `client-detail.css`, `tasks.css`, `leads-pipeline.css`, `project-detail.css`, `cd-crm.css`
+
+- **MEDIUM: Replaced Hardcoded Padding (2px 6px)** - COMPLETE (20+ locations)
+  - Changed to `var(--space-0-5) var(--space-1)` (4px 8px)
+  - Files: `files.css`, `client-detail.css`, `tasks.css`, `leads-pipeline.css`, `cd-crm.css`, `modals.css`, `pd-invoices.css`, `proposals.css`
+
+- **MEDIUM: Replaced Hardcoded Primary RGBA** - COMPLETE (6 locations)
+  - Changed `rgba(0, 175, 240, 0.x)` to `rgba(var(--color-primary-rgb), 0.x)`
+  - Files: `files.css`, `portal-components.css`, `portal-messages.css`
+
+- **MEDIUM: Fixed Set Password Form Styling** - COMPLETE
+  - Changed hardcoded RGBA to `rgba(var(--color-error-rgb/success-rgb), 0.1)`
+  - Changed `--color-bg-*` to `--portal-bg-*` tokens
+  - Changed `--color-text-*` to `--portal-text-*` tokens
+  - Changed `--border-radius-*` to `--portal-radius-*` tokens
+  - Changed `color: white` to `var(--color-white)`
+  - Changed hardcoded transition to `var(--transition-fast)`
+  - File: `admin.css`
+
+#### Remaining Work (Identified in Audit)
+
+**HIGH Priority:**
+
+- [ ] Replace remaining `color: white` with `var(--color-white)` (15 instances)
+  - Files: `table-features.css`, `pd-contract.css`, `leads-pipeline.css`, `proposals.css`, `table-filters.css`, `analytics.css`, `portal-tabs.css`, `contact.css`, `admin.css`
+
+**MEDIUM Priority:**
+
+- [ ] Replace hardcoded transitions with `--transition-*` tokens (120+ instances)
+  - Files: All admin and shared files
+- [ ] Replace hardcoded border-radius with `--portal-radius-*` tokens (40+ instances)
+  - Files: Multiple admin, shared, and component files
+- [ ] Replace hardcoded rgba() UI colors with CSS variable equivalents (12 instances)
+  - Files: `analytics.css`, `contact.css`, `nav-portal.css`, etc.
+
+#### Documentation Updates
+
+- **Updated CSS_ARCHITECTURE.md** - COMPLETE
+  - Added "Design System Audits" section
+  - Removed "Set password form" from intentional exceptions
+  - Linked to full audit report
+
+- **Updated UX_GUIDELINES.md** - COMPLETE
+  - Added Component Usage section with all reusable classes
+  - Added Status Colors & Badges reference
+  - Added links to all 28 feature documentation files
+
+- **Created CSS_AUDIT_2026-02-09.md** - COMPLETE
+  - Comprehensive audit report with findings by category
+  - Priority-based recommendations
+  - Search patterns used for reproducibility
+
+### Admin Dashboard Design Cohesion - COMPLETE
+
+- **Analytics Subtabs Card Styling** - COMPLETE
+  - Added card containment to `.analytics-subtabs` (background, border-radius, padding, shadow)
+  - Removed border-bottom in favor of proper dark card styling
+  - File: `src/styles/admin/analytics.css`
+
+- **Tab Section Heading Styling** - COMPLETE
+  - Updated `.tab-section-heading` with Acme font, uppercase, proper letter-spacing
+  - Changed from large font (1.25rem) to subtle label style (0.875rem)
+  - Added left padding for visual alignment with content
+  - File: `src/styles/shared/portal-tabs.css`
+
+- **Content Section Card Utility** - COMPLETE
+  - Added `.content-section-card` class for wrapping loose content in cards
+  - Includes dark background, border-radius, padding, shadow
+  - Includes `.section-title` child class for consistent card headings
+  - File: `src/styles/shared/portal-cards.css`
 
 ### Assignee Column Removal - COMPLETE
 
@@ -537,14 +738,6 @@ The portfolio section code is complete but needs images:
 - [ ] Merge Quick Stats + Health into single card
 - [ ] Merge Client Overview + CRM Details into single card
 - [ ] Reduce Overview tab from 7 cards to 3-4
-
-### 5. Analytics Design Cohesion
-
-**Goal:** Make Analytics tab styling consistent with System tab.
-
-**Issues:** Mixed card wrappers, inconsistent titles, nested shadows, multiple grid patterns.
-
-**Plan file:** `/Users/noellebhaduri/.claude/plans/hashed-fluttering-sprout.md`
 
 ---
 

@@ -41,6 +41,8 @@ import {
   showAddMilestonePrompt,
   toggleMilestone as toggleMilestoneModule,
   deleteMilestone as deleteMilestoneModule,
+  toggleMilestoneTasks as toggleMilestoneTasksModule,
+  toggleTaskCompletion as toggleTaskCompletionModule,
   // Invoices
   loadProjectInvoices,
   showCreateInvoicePrompt,
@@ -860,6 +862,14 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     await deleteMilestoneModule(this.currentProjectId, milestoneId, () => {
       loadProjectMilestones(this.currentProjectId!, (progress) => updateProgressBar(this.currentProjectId!, progress));
     });
+  }
+
+  public async toggleMilestoneTasks(milestoneId: number, projectId: number): Promise<void> {
+    await toggleMilestoneTasksModule(milestoneId, projectId);
+  }
+
+  public async toggleTaskCompletion(taskId: number, isCompleted: boolean, projectId: number): Promise<void> {
+    await toggleTaskCompletionModule(taskId, isCompleted, projectId);
   }
 
   public async sendInvoice(invoiceId: number): Promise<void> {

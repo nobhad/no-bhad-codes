@@ -1221,6 +1221,9 @@ Get all milestones for a project.
         "design_mockups.zip",
         "style_guide.pdf"
       ],
+      "task_count": 10,
+      "completed_task_count": 10,
+      "progress_percentage": 100,
       "created_at": "2024-01-15T10:30:00Z",
       "updated_at": "2024-02-14T16:20:00Z"
     },
@@ -1232,12 +1235,22 @@ Get all milestones for a project.
       "completed_date": null,
       "is_completed": false,
       "deliverables": [],
+      "task_count": 12,
+      "completed_task_count": 5,
+      "progress_percentage": 42,
       "created_at": "2024-01-15T10:30:00Z",
       "updated_at": "2024-01-15T10:30:00Z"
     }
   ]
 }
 ```
+
+**Note:** Milestones now include task progress data:
+
+- `task_count`: Total number of tasks in the milestone
+- `completed_task_count`: Number of completed tasks
+- `progress_percentage`: Calculated percentage (0-100)
+- `is_completed`: Auto-set to true when all tasks are complete
 
 ### POST `/projects/:id/milestones`
 
@@ -1338,7 +1351,7 @@ Delete milestone (admin only).
 
 ### POST `/admin/milestones/backfill`
 
-Generate default milestones for existing projects that don't have any (admin only).
+Generate default milestones AND tasks for existing projects that don't have any (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`
 
@@ -1348,17 +1361,53 @@ Generate default milestones for existing projects that don't have any (admin onl
 
 ```json
 {
-  "message": "Backfill complete",
-  "projectsProcessed": 2,
-  "milestonesCreated": 8
+  "success": true,
+  "message": "Backfill complete: 12 milestones and 87 tasks created for 4 projects",
+  "data": {
+    "projectsProcessed": 4,
+    "milestonesCreated": 12,
+    "tasksCreated": 87,
+    "errors": []
+  }
 }
 ```
 
 **Notes:**
 
 - Only creates milestones for projects with zero existing milestones
-- Uses project type to determine which milestone template to use
+- Automatically generates tasks for each milestone created
+- Uses project type to determine which milestone and task templates to use
 - Falls back to 'other' template for unknown project types
+- Task due dates are distributed evenly before milestone due dates
+
+### POST `/admin/tasks/backfill`
+
+Generate tasks for existing milestones that don't have any tasks (admin only).
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Request:** (empty body)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Backfill complete: 87 tasks created for 12 milestones",
+  "data": {
+    "milestonesProcessed": 12,
+    "tasksCreated": 87,
+    "errors": []
+  }
+}
+```
+
+**Notes:**
+
+- Only creates tasks for milestones with zero existing tasks
+- Useful when milestones exist but were created before task auto-generation was implemented
+- Uses milestone title and project type to match task templates
+- Task due dates are distributed evenly before milestone due dates
 
 ## Task Priority Escalation
 

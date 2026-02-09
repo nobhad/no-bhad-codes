@@ -9,6 +9,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { checkAndUpdateMilestoneCompletion, updateProjectProgress } from './progress-calculator.js';
 
 // Type definitions
 type SqlValue = string | number | boolean | null;
@@ -550,8 +551,19 @@ class ProjectService {
   async updateTask(taskId: number, data: Partial<TaskCreateData> & { actualHours?: number }): Promise<ProjectTask> {
     const db = getDatabase();
 
+    // Get current task to check milestone_id and project_id
+    const currentTask = await db.get(
+      'SELECT milestone_id, project_id FROM project_tasks WHERE id = ?',
+      [taskId]
+    ) as { milestone_id: number | null; project_id: number } | undefined;
+
+    if (!currentTask) {
+      throw new Error('Task not found');
+    }
+
     const updates: string[] = [];
     const values: SqlValue[] = [];
+    const statusChanged = data.status !== undefined;
 
     if (data.milestoneId !== undefined) {
       updates.push('milestone_id = ?');
@@ -606,9 +618,29 @@ class ProjectService {
       );
     }
 
+    // Update milestone completion status if task status changed and task belongs to a milestone
+    if (statusChanged && currentTask.milestone_id) {
+      try {
+        await checkAndUpdateMilestoneCompletion(currentTask.milestone_id);
+      } catch (error) {
+        console.error(`[ProjectService] Error updating milestone completion:`, error);
+        // Don't fail the task update if milestone update fails
+      }
+    }
+
+    // Update project progress if task status changed
+    if (statusChanged) {
+      try {
+        await updateProjectProgress(currentTask.project_id);
+      } catch (error) {
+        console.error(`[ProjectService] Error updating project progress:`, error);
+        // Don't fail the task update if project progress update fails
+      }
+    }
+
     const task = await this.getTask(taskId);
     if (!task) {
-      throw new Error('Task not found');
+      throw new Error('Task not found after update');
     }
     return task;
   }
@@ -618,7 +650,34 @@ class ProjectService {
    */
   async deleteTask(taskId: number): Promise<void> {
     const db = getDatabase();
+
+    // Get task info before deleting to update milestone/project progress
+    const task = await db.get(
+      'SELECT milestone_id, project_id FROM project_tasks WHERE id = ?',
+      [taskId]
+    ) as { milestone_id: number | null; project_id: number } | undefined;
+
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
     await db.run('DELETE FROM project_tasks WHERE id = ?', [taskId]);
+
+    // Update milestone completion status if task belonged to a milestone
+    if (task.milestone_id) {
+      try {
+        await checkAndUpdateMilestoneCompletion(task.milestone_id);
+      } catch (error) {
+        console.error(`[ProjectService] Error updating milestone completion after task deletion:`, error);
+      }
+    }
+
+    // Update project progress
+    try {
+      await updateProjectProgress(task.project_id);
+    } catch (error) {
+      console.error(`[ProjectService] Error updating project progress after task deletion:`, error);
+    }
   }
 
   /**

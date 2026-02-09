@@ -55,6 +55,12 @@ export async function loadProjectMilestones(
                   .map((d: string) => `<li>${SanitizationUtils.escapeHtml(d)}</li>`)
                   .join('')
                 : '';
+
+            // Task progress data
+            const taskCount = (m as any).task_count || 0;
+            const completedTaskCount = (m as any).completed_task_count || 0;
+            const progressPercentage = (m as any).progress_percentage || 0;
+
             return `
             <div class="milestone-item ${m.is_completed ? 'completed' : ''}" data-milestone-id="${m.id}">
               <div class="milestone-checkbox">
@@ -64,10 +70,30 @@ export async function loadProjectMilestones(
               <div class="milestone-content">
                 <div class="milestone-header">
                   <h4 class="milestone-title">${safeTitle}</h4>
-                  ${m.due_date ? `<span class="milestone-due-date">${formatDate(m.due_date)}</span>` : ''}
+                  <div class="milestone-meta">
+                    ${m.due_date ? `<span class="milestone-due-date">Due: ${formatDate(m.due_date)}</span>` : ''}
+                    ${taskCount > 0 ? `
+                      <span class="milestone-task-count">${completedTaskCount}/${taskCount} tasks</span>
+                      <span class="milestone-progress-text">${progressPercentage}%</span>
+                    ` : ''}
+                  </div>
                 </div>
+                ${taskCount > 0 ? `
+                  <div class="milestone-progress-bar">
+                    <div class="milestone-progress-fill" style="width: ${progressPercentage}%"></div>
+                  </div>
+                ` : ''}
                 ${safeDescription ? `<p class="milestone-description">${safeDescription}</p>` : ''}
                 ${safeDeliverables ? `<ul class="milestone-deliverables">${safeDeliverables}</ul>` : ''}
+                ${taskCount > 0 ? `
+                  <button class="btn-milestone-tasks" onclick="window.adminDashboard?.toggleMilestoneTasks(${m.id}, ${projectId})">
+                    <svg class="icon-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Show Tasks (${taskCount})</span>
+                  </button>
+                  <div class="milestone-tasks-container" id="milestone-tasks-${m.id}" style="display: none;"></div>
+                ` : ''}
               </div>
               <button class="btn btn-danger btn-sm" onclick="window.adminDashboard?.deleteMilestone(${m.id})">Delete</button>
             </div>
@@ -241,5 +267,135 @@ export async function deleteMilestone(
   } catch (error) {
     console.error('[ProjectMilestones] Error deleting milestone:', error);
     alertError('Failed to delete milestone. Please try again.');
+  }
+}
+
+/**
+ * Toggle visibility of tasks for a milestone
+ */
+export async function toggleMilestoneTasks(
+  milestoneId: number,
+  projectId: number
+): Promise<void> {
+  const container = document.getElementById(`milestone-tasks-${milestoneId}`);
+  const button = document.querySelector(
+    `.milestone-item[data-milestone-id="${milestoneId}"] .btn-milestone-tasks`
+  ) as HTMLButtonElement;
+
+  if (!container || !button) return;
+
+  const isVisible = container.style.display !== 'none';
+
+  if (isVisible) {
+    // Hide tasks
+    container.style.display = 'none';
+    button.innerHTML = `
+      <svg class="icon-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Show Tasks</span>
+    `;
+  } else {
+    // Show tasks - load if empty
+    if (!container.hasAttribute('data-loaded')) {
+      try {
+        const response = await apiFetch(
+          `/api/projects/${projectId}/tasks?milestoneId=${milestoneId}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const tasks = data.tasks || [];
+
+          if (tasks.length === 0) {
+            container.innerHTML = '<p class="milestone-tasks-empty">No tasks for this milestone yet.</p>';
+          } else {
+            container.innerHTML = `
+              <ul class="milestone-task-list">
+                ${tasks
+                  .map(
+                    (task: any) => `
+                  <li class="milestone-task-item ${task.status}" data-task-id="${task.id}">
+                    <input
+                      type="checkbox"
+                      ${task.status === 'completed' ? 'checked' : ''}
+                      onchange="window.adminDashboard?.toggleTaskCompletion(${task.id}, this.checked, ${projectId})"
+                    >
+                    <span class="milestone-task-title">${SanitizationUtils.escapeHtml(task.title)}</span>
+                    <div class="milestone-task-meta">
+                      ${task.due_date ? `<span class="task-due">${formatDate(task.due_date)}</span>` : ''}
+                      ${task.assigned_to ? `<span class="task-assigned">${SanitizationUtils.escapeHtml(task.assigned_to)}</span>` : ''}
+                    </div>
+                  </li>
+                `
+                  )
+                  .join('')}
+              </ul>
+            `;
+          }
+
+          container.setAttribute('data-loaded', 'true');
+        } else {
+          container.innerHTML = '<p class="milestone-tasks-error">Failed to load tasks.</p>';
+        }
+      } catch (error) {
+        console.error('[ProjectMilestones] Error loading milestone tasks:', error);
+        container.innerHTML = '<p class="milestone-tasks-error">Error loading tasks.</p>';
+      }
+    }
+
+    container.style.display = 'block';
+    button.innerHTML = `
+      <svg class="icon-chevron icon-chevron-up" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M12 10L8 6L4 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Hide Tasks</span>
+    `;
+  }
+}
+
+/**
+ * Toggle task completion status
+ */
+export async function toggleTaskCompletion(
+  taskId: number,
+  isCompleted: boolean,
+  projectId: number
+): Promise<void> {
+  if (!AdminAuth.isAuthenticated()) return;
+
+  try {
+    const response = await apiPut(`/api/projects/tasks/${taskId}`, {
+      status: isCompleted ? 'completed' : 'pending'
+    });
+
+    if (response.ok) {
+      // Update task UI
+      const taskElement = document.querySelector(`.milestone-task-item[data-task-id="${taskId}"]`);
+      if (taskElement) {
+        if (isCompleted) {
+          taskElement.classList.add('completed');
+        } else {
+          taskElement.classList.remove('completed');
+        }
+      }
+
+      // Reload milestones to update progress
+      await loadProjectMilestones(projectId, (progress) => {
+        updateProgressBar(projectId, progress);
+      });
+    } else {
+      alertError('Failed to update task. Please try again.');
+      // Revert checkbox
+      const checkbox = document.querySelector(
+        `.milestone-task-item[data-task-id="${taskId}"] input[type="checkbox"]`
+      ) as HTMLInputElement;
+      if (checkbox) {
+        checkbox.checked = !isCompleted;
+      }
+    }
+  } catch (error) {
+    console.error('[ProjectMilestones] Error toggling task:', error);
+    alertError('Failed to update task. Please try again.');
   }
 }

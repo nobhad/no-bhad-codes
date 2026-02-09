@@ -10,6 +10,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { getMilestoneTemplates, normalizeProjectType, MilestoneTemplate } from '../config/default-milestones.js';
+import { generateMilestoneTasks } from './task-generator.js';
 
 /**
  * Generated milestone result
@@ -38,20 +39,22 @@ export interface MilestoneGenerationOptions {
  *
  * Creates milestones based on the project type configuration.
  * Due dates are calculated from the start date plus estimated days.
+ * Also automatically generates tasks for each milestone.
  *
  * @param projectId - ID of the project to create milestones for
  * @param projectType - Type of project (e.g., 'simple-site', 'business-site')
  * @param options - Optional configuration for milestone generation
- * @returns Array of generated milestone IDs
+ * @returns Object with counts of created milestones and tasks
  */
 export async function generateDefaultMilestones(
   projectId: number,
   projectType: string | null | undefined,
   options: MilestoneGenerationOptions = {}
-): Promise<number[]> {
+): Promise<{ milestonesCreated: number; tasksCreated: number }> {
   const db = getDatabase();
   const startDate = options.startDate || new Date();
   const milestoneIds: number[] = [];
+  let totalTasksCreated = 0;
 
   try {
     // Check if milestones already exist for this project
@@ -63,7 +66,7 @@ export async function generateDefaultMilestones(
 
       if (existingCount && existingCount.count > 0) {
         console.log(`[MilestoneGenerator] Skipping project ${projectId}: ${existingCount.count} milestones already exist`);
-        return [];
+        return { milestonesCreated: 0, tasksCreated: 0 };
       }
     }
 
@@ -93,12 +96,29 @@ export async function generateDefaultMilestones(
       );
 
       if (result?.lastID) {
-        milestoneIds.push(result.lastID);
+        const milestoneId = result.lastID;
+        milestoneIds.push(milestoneId);
+
+        // Generate tasks for this milestone
+        try {
+          const taskIds = await generateMilestoneTasks(
+            projectId,
+            milestoneId,
+            template.name,
+            dueDate,
+            projectType,
+            { skipIfExists: false }
+          );
+          totalTasksCreated += taskIds.length;
+        } catch (taskError) {
+          console.error(`[MilestoneGenerator] Error generating tasks for milestone ${milestoneId}:`, taskError);
+          // Continue with other milestones even if task generation fails
+        }
       }
     }
 
-    console.log(`[MilestoneGenerator] Created ${milestoneIds.length} milestones for project ${projectId}`);
-    return milestoneIds;
+    console.log(`[MilestoneGenerator] Created ${milestoneIds.length} milestones and ${totalTasksCreated} tasks for project ${projectId}`);
+    return { milestonesCreated: milestoneIds.length, tasksCreated: totalTasksCreated };
   } catch (error) {
     console.error(`[MilestoneGenerator] Error generating milestones for project ${projectId}:`, error);
     throw error;
@@ -146,24 +166,25 @@ export function previewMilestones(
  *
  * Deletes existing milestones and creates new ones based on project type.
  * Use with caution as this removes all existing milestone data.
+ * Also regenerates all tasks for the milestones.
  *
  * @param projectId - ID of the project
  * @param projectType - Type of project
  * @param startDate - Optional start date
- * @returns Array of new milestone IDs
+ * @returns Object with counts of created milestones and tasks
  */
 export async function regenerateMilestones(
   projectId: number,
   projectType: string | null | undefined,
   startDate?: Date
-): Promise<number[]> {
+): Promise<{ milestonesCreated: number; tasksCreated: number }> {
   const db = getDatabase();
 
   try {
-    // Delete existing milestones
+    // Delete existing milestones (tasks will cascade delete due to FK constraint)
     await db.run('DELETE FROM milestones WHERE project_id = ?', [projectId]);
 
-    // Generate new milestones
+    // Generate new milestones and tasks
     return generateDefaultMilestones(projectId, projectType, {
       startDate: startDate || new Date(),
       skipIfExists: false
@@ -201,20 +222,22 @@ export async function getProjectsWithoutMilestones(): Promise<number[]> {
 /**
  * Backfill milestones for existing projects
  *
- * Generates milestones for all active projects that don't have any.
+ * Generates milestones and tasks for all active projects that don't have any.
  * Useful for initial setup or migration.
  *
- * @returns Object with count of processed projects and created milestones
+ * @returns Object with count of processed projects, created milestones, and created tasks
  */
 export async function backfillMilestones(): Promise<{
   projectsProcessed: number;
   milestonesCreated: number;
+  tasksCreated: number;
   errors: Array<{ projectId: number; error: string }>;
 }> {
   const db = getDatabase();
   const errors: Array<{ projectId: number; error: string }> = [];
   let projectsProcessed = 0;
   let milestonesCreated = 0;
+  let tasksCreated = 0;
 
   // Get projects without milestones along with their types
   const projects = await db.all(`
@@ -232,12 +255,13 @@ export async function backfillMilestones(): Promise<{
   for (const project of projects) {
     try {
       const startDate = project.start_date ? new Date(project.start_date) : new Date();
-      const ids = await generateDefaultMilestones(project.id, project.project_type, {
+      const result = await generateDefaultMilestones(project.id, project.project_type, {
         startDate,
         skipIfExists: true
       });
 
-      milestonesCreated += ids.length;
+      milestonesCreated += result.milestonesCreated;
+      tasksCreated += result.tasksCreated;
       projectsProcessed++;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -246,11 +270,12 @@ export async function backfillMilestones(): Promise<{
     }
   }
 
-  console.log(`[MilestoneGenerator] Backfill complete: ${projectsProcessed} projects, ${milestonesCreated} milestones`);
+  console.log(`[MilestoneGenerator] Backfill complete: ${projectsProcessed} projects, ${milestonesCreated} milestones, ${tasksCreated} tasks`);
 
   return {
     projectsProcessed,
     milestonesCreated,
+    tasksCreated,
     errors
   };
 }

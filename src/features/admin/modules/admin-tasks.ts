@@ -27,6 +27,8 @@ const LIST_ICON =
 interface ProjectTask {
   id: number;
   project_id: number;
+  milestone_id?: number;
+  milestone_title?: string;
   title: string;
   description?: string;
   status: 'pending' | 'in_progress' | 'completed' | 'blocked' | 'cancelled';
@@ -207,7 +209,8 @@ function taskToKanbanItem(task: ProjectTask): KanbanItem {
       dueDate: task.due_date,
       assignee: task.assignee_name,
       checklistCount: task.checklist_items?.length || 0,
-      checklistCompleted: task.checklist_items?.filter(c => c.is_completed).length || 0
+      checklistCompleted: task.checklist_items?.filter(c => c.is_completed).length || 0,
+      milestoneTitle: task.milestone_title
     }
   };
 }
@@ -222,6 +225,7 @@ function renderTaskCard(item: KanbanItem): string {
     assignee?: string;
     checklistCount: number;
     checklistCompleted: number;
+    milestoneTitle?: string;
   };
 
   const priorityClass = PRIORITY_CONFIG[meta.priority as keyof typeof PRIORITY_CONFIG]?.class || '';
@@ -233,6 +237,11 @@ function renderTaskCard(item: KanbanItem): string {
   return `
     <div class="kanban-card-title">${SanitizationUtils.escapeHtml(item.title)}</div>
     ${item.subtitle ? `<div class="kanban-card-subtitle">${SanitizationUtils.escapeHtml(item.subtitle)}</div>` : ''}
+    ${meta.milestoneTitle ? `
+      <div class="task-milestone-tag">${SanitizationUtils.escapeHtml(meta.milestoneTitle)}</div>
+    ` : `
+      <div class="task-standalone-tag">Standalone</div>
+    `}
     <div class="task-meta">
       <span class="task-priority ${priorityClass}">${priorityLabel}</span>
       ${meta.dueDate ? `
