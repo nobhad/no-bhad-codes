@@ -8,6 +8,26 @@
  */
 
 /* ============================================
+   Tasks Main Container
+   ============================================ */
+
+.tasks-main-container {
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-3);
+}
+
+.tasks-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--portal-border);
+}
+
+/* ============================================
    View Toggle
    ============================================ */
 
@@ -230,26 +250,29 @@
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   overflow: hidden;
+  width: 100%;
+  box-shadow: var(--portal-shadow);
 }
 
 .task-list-header {
   display: grid;
-  grid-template-columns: 1fr 100px 120px 100px 100px;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-1-5);
+  grid-template-columns: minmax(200px, 2fr) 100px 120px 120px 140px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
   border-bottom: 1px solid var(--portal-border);
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--portal-text-secondary);
   text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .task-list-item {
   display: grid;
-  grid-template-columns: 1fr 100px 120px 100px 100px;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-1-5);
+  grid-template-columns: minmax(200px, 2fr) 100px 120px 120px 140px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--portal-border);
   align-items: center;
   cursor: pointer;

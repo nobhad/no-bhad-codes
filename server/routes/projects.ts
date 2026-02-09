@@ -1469,8 +1469,9 @@ router.get(
     if (description) {
       page.drawText('Description:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
       y -= 12;
-      // Simple text wrapping for description
-      const words = description.split(' ');
+      // Simple text wrapping for description (sanitize newlines for PDF encoding)
+      const sanitizedDesc = description.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim();
+      const words = sanitizedDesc.split(' ');
       let line = '';
       for (const word of words) {
         const testLine = line + (line ? ' ' : '') + word;
@@ -2276,7 +2277,7 @@ router.get(
     });
 
     // Client name (bold)
-    page.drawText(intakeData.clientInfo.name, {
+    page.drawText(decodeHtml(intakeData.clientInfo.name), {
       x: leftMargin,
       y: y - 14,
       size: 10,
@@ -2287,7 +2288,7 @@ router.get(
     // Company name (if exists)
     let clientLineY = y - 25;
     if (intakeData.clientInfo.companyName) {
-      page.drawText(intakeData.clientInfo.companyName, {
+      page.drawText(decodeHtml(intakeData.clientInfo.companyName), {
         x: leftMargin,
         y: clientLineY,
         size: 10,
@@ -2350,6 +2351,11 @@ router.get(
     });
     y -= 21;
 
+    // Helper to sanitize text for PDF (remove newlines and special chars)
+    const sanitizeForPdf = (text: string): string => {
+      return text.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+    };
+
     // === PROJECT DETAILS ===
     page.drawText('Project Details', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: black });
     y -= 20;
@@ -2357,25 +2363,25 @@ router.get(
     // Project Name
     page.drawText('Project Name: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
     const nameX = leftMargin + helveticaBold.widthOfTextAtSize('Project Name: ', 10);
-    page.drawText(intakeData.projectName, { x: nameX, y: y, size: 10, font: helvetica, color: black });
+    page.drawText(sanitizeForPdf(decodeHtml(intakeData.projectName)), { x: nameX, y: y, size: 10, font: helvetica, color: black });
     y -= 16;
 
     // Project Type
     page.drawText('Project Type: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
     const typeX = leftMargin + helveticaBold.widthOfTextAtSize('Project Type: ', 10);
-    page.drawText(formatProjectType(intakeData.projectDetails.type), { x: typeX, y: y, size: 10, font: helvetica, color: black });
+    page.drawText(sanitizeForPdf(formatProjectType(intakeData.projectDetails.type)), { x: typeX, y: y, size: 10, font: helvetica, color: black });
     y -= 16;
 
     // Timeline
     page.drawText('Timeline: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
     const timelineX = leftMargin + helveticaBold.widthOfTextAtSize('Timeline: ', 10);
-    page.drawText(formatTimeline(intakeData.projectDetails.timeline), { x: timelineX, y: y, size: 10, font: helvetica, color: black });
+    page.drawText(sanitizeForPdf(formatTimeline(intakeData.projectDetails.timeline)), { x: timelineX, y: y, size: 10, font: helvetica, color: black });
     y -= 16;
 
     // Budget
     page.drawText('Budget: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
     const budgetX = leftMargin + helveticaBold.widthOfTextAtSize('Budget: ', 10);
-    page.drawText(formatBudget(intakeData.projectDetails.budget), { x: budgetX, y: y, size: 10, font: helvetica, color: black });
+    page.drawText(sanitizeForPdf(formatBudget(intakeData.projectDetails.budget)), { x: budgetX, y: y, size: 10, font: helvetica, color: black });
     y -= 30;
 
     // === PROJECT DESCRIPTION ===
@@ -2383,7 +2389,7 @@ router.get(
     y -= 18;
 
     // Word wrap description text
-    const description = decodeHtml(intakeData.projectDetails.description || 'No description provided');
+    const description = sanitizeForPdf(decodeHtml(intakeData.projectDetails.description || 'No description provided'));
     const words = description.split(' ');
     let line = '';
     const maxWidth = contentWidth;
@@ -2412,7 +2418,7 @@ router.get(
       y -= 18;
 
       for (const feature of intakeData.projectDetails.features) {
-        const featureText = `•  ${feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`;
+        const featureText = sanitizeForPdf(decodeHtml(`•  ${feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`));
         page.drawText(featureText, { x: leftMargin, y: y, size: 10, font: helvetica, color: black });
         y -= 14;
       }
@@ -2427,13 +2433,13 @@ router.get(
       if (intakeData.technicalInfo.techComfort) {
         page.drawText('Technical Comfort: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
         const tcX = leftMargin + helveticaBold.widthOfTextAtSize('Technical Comfort: ', 10);
-        page.drawText(intakeData.technicalInfo.techComfort, { x: tcX, y: y, size: 10, font: helvetica, color: black });
+        page.drawText(sanitizeForPdf(decodeHtml(intakeData.technicalInfo.techComfort)), { x: tcX, y: y, size: 10, font: helvetica, color: black });
         y -= 14;
       }
       if (intakeData.technicalInfo.domainHosting) {
         page.drawText('Domain/Hosting: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
         const dhX = leftMargin + helveticaBold.widthOfTextAtSize('Domain/Hosting: ', 10);
-        page.drawText(intakeData.technicalInfo.domainHosting, { x: dhX, y: y, size: 10, font: helvetica, color: black });
+        page.drawText(sanitizeForPdf(decodeHtml(intakeData.technicalInfo.domainHosting)), { x: dhX, y: y, size: 10, font: helvetica, color: black });
         y -= 14;
       }
     }
