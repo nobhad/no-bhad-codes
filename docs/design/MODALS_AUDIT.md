@@ -175,13 +175,26 @@ interface PortalModalInstance {
 #### CSS Classes
 
 ```css
-.modal-overlay
-.modal-content
-.portal-shadow
-.modal-header
-.modal-body
-.modal-footer
-.modal-close
+/* Structure */
+.modal-overlay           /* Fixed backdrop, centered flex */
+.modal-content           /* Main container, flexbox column */
+.portal-shadow           /* Box shadow for elevation */
+
+/* Header */
+.modal-header            /* Flexbox: space-between, title + close */
+.modal-header h2         /* Title: flex: 1 (pushes close to right) */
+.modal-close             /* Close button: icon-btn styling */
+.modal-close.icon-btn    /* Combined class from createIconButton */
+
+/* Content areas */
+.modal-body              /* Scrollable content with padding */
+.modal-footer            /* Right-aligned button area */
+
+/* File preview variants */
+.file-preview-modal-content        /* Base: max-width 700px */
+.file-preview-modal-content--wide  /* Wide: max-width 900px */
+.file-preview-modal-body           /* Image centering */
+.file-preview-code                 /* Code/text monospace */
 ```
 
 ---
@@ -492,20 +505,28 @@ Various admin modules create modals dynamically. As of Feb 9, 2026, all dynamica
 | `.modal-overlay.closing` | Close animation state (opacity fade) |
 | `.modal-overlay.hidden` | Forced hidden state (pre-auth + close) |
 | `.modal-content` | Main container, max-width via `--modal-width-md` |
-| `.admin-modal-overlay` | Admin overlay implementation (same z-index token) |
+| `.modal-header` | Header with title (h2) and close button, flexbox layout |
+| `.modal-header h2` | Title styling, flex: 1 to push close button right |
+| `.modal-close` | Close button (icon-btn), positioned right |
+| `.modal-body` | Scrollable content area with padding |
+| `.modal-footer` | Button action area, right-aligned |
+| `.admin-modal-overlay` | Legacy admin overlay (same z-index token) |
 | `.admin-modal-overlay.closing` | Close animation state |
-| `.admin-modal` | Alternative modal container |
+| `.admin-modal` | Legacy modal container |
 | `.admin-modal--wide` | Wide variant (max-width via `--modal-width-lg`) |
-| `.admin-modal-header` | Title & close button area |
+| `.admin-modal-header` | Legacy header styling |
 | `.admin-modal-title` | Header with optional icon |
-| `.admin-modal-close` | Close button styling |
+| `.admin-modal-close` | Legacy close button styling |
 | `.admin-modal-tabs` | Tab navigation structure |
 | `.admin-modal-tab.active` | Active tab underline |
-| `.admin-modal-body` | Scrollable form area |
-| `.admin-modal-footer` | Button action area |
+| `.admin-modal-body` | Legacy scrollable form area |
+| `.admin-modal-footer` | Legacy button action area |
 | `.detail-grid` | Two-column label/value layout |
 | `.detail-row` | Single label/value pair |
-| `.file-preview-modal-body` | Image centering |
+| `.file-preview-modal-content` | File preview base styles (max-width: 700px) |
+| `.file-preview-modal-content--wide` | Wide variant (max-width: 900px) |
+| `.file-preview-modal-body` | Image centering (flex center) |
+| `.file-preview-code` | Code/text preview styling (monospace) |
 
 **Animations:**
 
@@ -674,7 +695,7 @@ transition: background-color 0.2s ease;
 
 ### Issues Found
 
-None for dynamically-created modals.
+- **File Preview Modal Layout** - Initial refactor required additional CSS for proper header/footer layout (Feb 9, fixed)
 
 ### Pending Work
 
