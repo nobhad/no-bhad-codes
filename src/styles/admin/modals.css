@@ -55,14 +55,19 @@
 }
 
 /* Portal modal header - matches admin-modal-header */
+[data-page="admin"] .modal-header,
+[data-page="client-portal"] .modal-header,
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: var(--space-5) var(--space-5) var(--space-4);
   flex-shrink: 0;
+  width: 100%;
 }
 
+[data-page="admin"] .modal-header h2,
+[data-page="client-portal"] .modal-header h2,
 .modal-header h2 {
   margin: 0;
   flex: 1;
@@ -71,25 +76,23 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Portal modal close button */
-.modal-close {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  transition: color 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Portal modal close button - higher specificity to override icon-btn */
+[data-page="admin"] .modal-header .modal-close,
+[data-page="client-portal"] .modal-header .modal-close,
+.modal-header .modal-close {
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
+[data-page="admin"] .modal-close:hover,
+[data-page="client-portal"] .modal-close:hover,
 .modal-close:hover {
-  color: var(--color-text-primary);
+  color: var(--color-primary);
 }
 
 /* Portal modal body */
+[data-page="admin"] .modal-body,
+[data-page="client-portal"] .modal-body,
 .modal-body {
   padding: var(--space-4) var(--space-5);
   overflow-y: auto;
@@ -102,6 +105,8 @@
 }
 
 /* Portal modal footer */
+[data-page="admin"] .modal-footer,
+[data-page="client-portal"] .modal-footer,
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -109,6 +114,7 @@
   padding: var(--space-4) var(--space-5) var(--space-5);
   flex-shrink: 0;
   background: var(--portal-bg-darker);
+  width: 100%;
 }
 
 .admin-modal-overlay {
@@ -336,27 +342,13 @@
   max-width: 900px;
 }
 
-/* Ensure proper modal structure for file previews */
-.file-preview-modal-content .modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.file-preview-modal-content .modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-}
-
 /* Preview modal body - scrollable with constrained height */
 .file-preview-modal-content .modal-body {
   max-height: 60vh;
   overflow: auto;
 }
 
-/* Image preview body - centered (only affects body content, not layout) */
+/* Image preview body - centered */
 .file-preview-modal-content .modal-body.file-preview-modal-body {
   display: flex;
   justify-content: center;
