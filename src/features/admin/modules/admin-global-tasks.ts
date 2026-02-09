@@ -292,8 +292,8 @@ function renderListView(): void {
   }
 
   listContainer.innerHTML = `
-    <div class="data-table-wrapper">
-      <table class="data-table">
+    <div class="admin-table-wrapper">
+      <table class="admin-table">
         <thead>
           <tr>
             <th>Task</th>

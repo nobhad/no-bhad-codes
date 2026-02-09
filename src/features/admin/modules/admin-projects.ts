@@ -59,6 +59,23 @@ import { createSecondarySidebar, SECONDARY_TAB_ICONS, type SecondarySidebarContr
 import { createPortalModal } from '../../../components/portal-modal';
 
 // ============================================
+// UTILITY HELPERS
+// ============================================
+
+/**
+ * Parse a numeric value that might have commas or other formatting
+ * Handles: "4,500", "4500", "$4,500", etc.
+ */
+function parseNumericValue(value: string | number | null | undefined): number {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === 'number') return value;
+  // Remove commas, currency symbols, and whitespace, then parse
+  const cleaned = String(value).replace(/[$,\s]/g, '');
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
+}
+
+// ============================================
 // DOM CACHE - Cached element references
 // ============================================
 
@@ -707,11 +724,11 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-company': SanitizationUtils.decodeHtmlEntities(project.company_name || ''),
     'pd-type': formattedType,
     'pd-budget': formattedBudget,
-    'pd-price': projectData.price ? formatCurrency(Number(projectData.price)) : '',
+    'pd-price': projectData.price ? formatCurrency(parseNumericValue(projectData.price)) : '',
     'pd-timeline': formatDisplayValue(project.timeline),
     'pd-start-date': formattedStartDate,
     'pd-end-date': formattedEndDate,
-    'pd-deposit': projectData.deposit_amount ? formatCurrency(Number(projectData.deposit_amount)) : '',
+    'pd-deposit': projectData.deposit_amount ? formatCurrency(parseNumericValue(projectData.deposit_amount)) : '',
     'pd-contract-date': formatDate(projectData.contract_signed_date),
     // Header card elements
     'pd-header-client-name': SanitizationUtils.decodeHtmlEntities(project.contact_name || ''),
@@ -983,10 +1000,10 @@ function openEditProjectModal(project: LeadProject): void {
   if (endDateInput) endDateInput.value = projectData.end_date ? projectData.end_date.split('T')[0] : '';
   if (depositInput) depositInput.value = projectData.deposit_amount || '';
   if (contractDateInput) contractDateInput.value = projectData.contract_signed_date ? projectData.contract_signed_date.split('T')[0] : '';
-  // URL fields
-  if (previewUrlInput) previewUrlInput.value = projectData.preview_url || '';
-  if (repoUrlInput) repoUrlInput.value = projectData.repo_url || '';
-  if (productionUrlInput) productionUrlInput.value = projectData.production_url || '';
+  // URL fields - decode HTML entities in case they were double-encoded
+  if (previewUrlInput) previewUrlInput.value = SanitizationUtils.decodeHtmlEntities(projectData.preview_url || '');
+  if (repoUrlInput) repoUrlInput.value = SanitizationUtils.decodeHtmlEntities(projectData.repo_url || '');
+  if (productionUrlInput) productionUrlInput.value = SanitizationUtils.decodeHtmlEntities(projectData.production_url || '');
   // Admin notes field - decode entities
   if (notesInput) notesInput.value = SanitizationUtils.decodeHtmlEntities(projectData.notes || '');
 
@@ -1133,14 +1150,15 @@ async function saveProjectChanges(projectId: number): Promise<void> {
   if (descriptionInput) updates.description = descriptionInput.value || '';
   if (typeValue) updates.project_type = typeValue;
   if (budgetInput?.value) updates.budget = budgetInput.value;
-  if (priceInput?.value) updates.price = priceInput.value;
+  // Strip commas from numeric fields before saving
+  if (priceInput?.value) updates.price = priceInput.value.replace(/,/g, '');
   if (timelineInput?.value) updates.timeline = timelineInput.value;
   if (statusValue) updates.status = statusValue;
   // Allow clearing dates by sending empty string
   if (startDateInput) updates.start_date = startDateInput.value || '';
   if (endDateInput) updates.end_date = endDateInput.value || '';
-  // Deposit and contract date (allow clearing)
-  if (depositInput) updates.deposit_amount = depositInput.value || '';
+  // Deposit and contract date (allow clearing) - strip commas from deposit
+  if (depositInput) updates.deposit_amount = (depositInput.value || '').replace(/,/g, '');
   if (contractDateInput) updates.contract_signed_date = contractDateInput.value || '';
   // URL fields (allow clearing)
   if (previewUrlInput) updates.preview_url = previewUrlInput.value || '';
