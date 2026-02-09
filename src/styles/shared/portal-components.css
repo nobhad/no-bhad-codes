@@ -47,8 +47,9 @@
 }
 
 /* Status-based column top accent */
-.kanban-column[data-status="todo"] .kanban-column-header {
-  border-top: 3px solid var(--portal-text-muted);
+.kanban-column[data-status="todo"] .kanban-column-header,
+.kanban-column[data-status="pending"] .kanban-column-header {
+  border-top: 3px solid var(--portal-text-secondary);
 }
 
 .kanban-column[data-status="in_progress"] .kanban-column-header,
@@ -57,7 +58,7 @@
 }
 
 .kanban-column[data-status="blocked"] .kanban-column-header {
-  border-top: 3px solid var(--status-cancelled);
+  border-top: 3px solid var(--color-warning-500);
 }
 
 .kanban-column[data-status="done"] .kanban-column-header,
