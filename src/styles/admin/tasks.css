@@ -24,13 +24,33 @@
    Task Card Enhancements (beyond Kanban default)
    ============================================ */
 
+/* Task card project name */
+.kanban-card-project {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.8125rem;
+  color: var(--portal-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.kanban-card-project svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Task priority badges */
 .task-priority {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 0.625rem;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-0-5) var(--space-1-5);
+  border-radius: var(--portal-radius-sm);
+  font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .task-priority-urgent {
@@ -40,17 +60,17 @@
 
 .task-priority-high {
   background-color: var(--color-warning-500);
-  color: var(--color-white);
+  color: var(--color-neutral-900);
 }
 
 .task-priority-medium {
-  background-color: var(--color-primary);
-  color: var(--color-white);
+  background-color: var(--app-color-primary);
+  color: var(--color-neutral-900);
 }
 
 .task-priority-low {
-  background-color: var(--portal-text-secondary);
-  color: var(--color-white);
+  background-color: var(--portal-bg-medium);
+  color: var(--portal-text-secondary);
 }
 
 /* Priority indicator for dropdowns */
@@ -161,8 +181,11 @@
 .task-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-0-5);
-  margin-top: var(--space-0-5);
+  flex-wrap: wrap;
+  gap: var(--space-1-5);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--portal-border-dark);
   font-size: 0.75rem;
   color: var(--portal-text-secondary);
 }
@@ -170,28 +193,33 @@
 .task-meta svg {
   width: 12px;
   height: 12px;
+  opacity: 0.7;
 }
 
 .task-due-date {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-0-5);
 }
 
 .task-due-date.overdue {
   color: var(--status-cancelled);
 }
 
+.task-due-date.overdue svg {
+  opacity: 1;
+}
+
 .task-assignee {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-0-5);
 }
 
 .task-checklist-count {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-0-5);
 }
 
 /* ============================================

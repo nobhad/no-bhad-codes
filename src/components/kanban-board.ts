@@ -97,6 +97,7 @@ export function createKanbanBoard(config: KanbanConfig): {
       const columnEl = document.createElement('div');
       columnEl.className = 'kanban-column';
       columnEl.dataset.columnId = column.id;
+      columnEl.dataset.status = column.id; // For CSS styling based on status
 
       // Column header
       const header = document.createElement('div');
