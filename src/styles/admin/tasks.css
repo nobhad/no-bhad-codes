@@ -27,6 +27,37 @@
   border-bottom: 1px solid var(--portal-border);
 }
 
+/* Global Tasks Kanban - ensure horizontal layout */
+#global-tasks-kanban-container .kanban-board,
+.tasks-main-container .kanban-board {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap;
+  width: 100%;
+  gap: var(--space-3);
+}
+
+#global-tasks-kanban-container .kanban-column,
+.tasks-main-container .kanban-column {
+  flex: 1 1 0 !important;
+  min-width: 200px;
+  max-width: none;
+}
+
+/* Only stack columns on mobile */
+@media (max-width: 767px) {
+  #global-tasks-kanban-container .kanban-board,
+  .tasks-main-container .kanban-board {
+    flex-direction: column !important;
+  }
+
+  #global-tasks-kanban-container .kanban-column,
+  .tasks-main-container .kanban-column {
+    flex: 0 0 auto !important;
+    min-width: 100%;
+  }
+}
+
 /* ============================================
    View Toggle
    ============================================ */
