@@ -37,7 +37,9 @@ export {
   showAddMilestonePrompt,
   addMilestone,
   toggleMilestone,
-  deleteMilestone
+  deleteMilestone,
+  toggleMilestoneTasks,
+  toggleTaskCompletion
 } from './milestones';
 
 // Invoices
