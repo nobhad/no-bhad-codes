@@ -2453,3 +2453,245 @@ Audited smaller CSS files (<500 lines) for inconsistencies and applied fixes.
 - `docs/current_work.md` - Added CSS Audit completion entry
 
 ---
+
+## Completed - February 9, 2026
+
+### General UI/UX Enhancements
+
+**Status:** COMPLETE
+
+Four interconnected features to improve project management workflow.
+
+#### Secondary Sidebar for Multi-Tab Pages
+
+**Status:** COMPLETE (disabled per user preference)
+
+Created reusable secondary sidebar component for vertical tab navigation on detail pages.
+
+**Implementation:**
+
+- Created `src/styles/admin/secondary-sidebar.css` with vertical tab styling
+- Created `src/components/secondary-sidebar.ts` with reusable component
+- Features: collapsible to icon-only mode, localStorage state persistence, horizontal fallback on mobile
+- Responsive: shows at >1300px, collapses at 1024-1300px, hidden <1024px with horizontal tabs fallback
+
+**Files Created:**
+
+- `src/styles/admin/secondary-sidebar.css`
+- `src/components/secondary-sidebar.ts`
+- `docs/features/SECONDARY_SIDEBAR.md`
+
+**Note:** Feature complete but disabled per user preference. Documentation preserved for future re-enablement.
+
+#### Project Milestones Auto-Population
+
+**Status:** COMPLETE
+
+Milestones are now auto-generated when projects are created.
+
+**Implementation:**
+
+- Created `server/config/default-milestones.ts` with milestone templates per project type
+- Created `server/services/milestone-generator.ts` for auto-generation logic
+- Integrated into `POST /api/projects` and `POST /api/admin/projects` routes
+- Added `POST /api/admin/milestones/backfill` endpoint for existing projects
+
+**Project Type Templates:**
+
+- `simple-site`: Discovery & Planning (3d), Design & Development (7d), Testing & Launch (4d)
+- `business-site`: Discovery (5d), Design (7d), Development (10d), Content (5d), Launch (5d)
+- `ecommerce-site`: Discovery (5d), Design (7d), Development (14d), Product Setup (7d), Launch (5d)
+- `web-app`: Discovery (7d), Architecture (7d), Development (21d), Testing (7d), Launch (5d)
+- `maintenance`: Assessment (3d), Implementation (varies), Documentation (2d)
+- `other`: Phase 1 (7d), Phase 2 (14d), Phase 3 (7d)
+
+**Files Created:**
+
+- `server/config/default-milestones.ts`
+- `server/services/milestone-generator.ts`
+- `docs/features/MILESTONES.md`
+
+**Files Modified:**
+
+- `server/routes/projects.ts` - Added milestone generation on project create
+- `server/routes/admin.ts` - Added milestone generation and backfill endpoint
+
+#### Task Priority Auto-Update
+
+**Status:** COMPLETE
+
+Task priorities automatically escalate based on due date proximity.
+
+**Escalation Rules:**
+
+- ≤1 day until due → `urgent`
+- ≤3 days until due → `high`
+- ≤7 days until due → `medium`
+- >7 days → no change
+
+**Implementation:**
+
+- Created `server/services/priority-escalation-service.ts` with escalation logic
+- Only escalates UP (never downgrades priority)
+- Excludes completed and cancelled tasks
+- Added scheduled job running daily at 6 AM
+- Added API endpoint: `POST /api/projects/:id/tasks/escalate-priorities`
+
+**Files Created:**
+
+- `server/services/priority-escalation-service.ts`
+
+**Files Modified:**
+
+- `server/routes/projects.ts` - Added escalation endpoint
+- `server/services/scheduler-service.ts` - Added daily escalation job
+
+#### Project Detail Page Restructure
+
+**Status:** COMPLETE
+
+Redesigned project detail overview tab with two-column layout and header card.
+
+**Header Card:**
+
+- Added above tabs (matches client detail pattern)
+- Shows: project name, status badge, client info, type, dates, budget
+- Quick actions accessible from header
+
+**Overview Tab Layout:**
+
+- Two-column grid layout (60/40 split)
+- Left column: Project Details card, Milestones card
+- Right column: Progress ring, Financial summary, Quick stats
+- Recent Activity section at bottom (full width)
+
+**Sidebar Stats:**
+
+- Files count, Messages count, Tasks count, Invoices count
+- Financial totals: Invoiced, Paid, Outstanding
+
+**Responsive Behavior:**
+
+- Stacks to single column on tablet (<1024px)
+- Optimized card order for mobile viewing
+
+**Files Modified:**
+
+- `admin/index.html` - Added header card and overview structure
+- `src/styles/admin/project-detail.css` - Two-column grid, responsive styles
+- `src/features/admin/modules/admin-projects.ts` - Data loading and rendering
+
+---
+
+### Bug Fixes - February 9, 2026
+
+#### Intake PDF HTML Entity Decoding
+
+**Status:** COMPLETE
+
+Fixed HTML entities appearing in generated intake PDFs (e.g., `&amp;` instead of `&`).
+
+**Issue:**
+
+- Client names like "Emily Gold & Abigail Wolf" displayed as "Emily Gold &amp; Abigail Wolf"
+- Other fields could also contain encoded entities
+
+**Solution:**
+
+- Applied `decodeHtml()` function to all user-input text fields in PDF generation
+- Fields updated: client name, company name, project name, description, features, technical info
+
+**Files Modified:**
+
+- `server/routes/projects.ts` - Added decodeHtml wrapping to PDF text fields
+
+#### Intake PDF Newline Encoding Error
+
+**Status:** COMPLETE
+
+Fixed "WinAnsi cannot encode \n" error when generating intake PDFs.
+
+**Issue:**
+
+- Description fields containing newlines caused pdf-lib encoding error
+- Error: `WinAnsi cannot encode "\n" (0x000a)`
+
+**Solution:**
+
+- Created `sanitizeForPdf()` helper function
+- Replaces newlines, tabs, and multiple spaces with single spaces
+- Applied to all text fields before rendering to PDF
+
+**Files Modified:**
+
+- `server/routes/projects.ts` - Added sanitizeForPdf helper, applied to all text fields
+
+#### Client Proposal Preview Modal Fix
+
+**Status:** COMPLETE
+
+Fixed two issues with client proposal preview modal.
+
+**Issue 1 - Close Button:**
+
+- Modal couldn't be closed after opening
+- `onClose` callback wasn't calling `modal.hide()`
+
+**Issue 2 - Markdown Rendering:**
+
+- `.md` files displayed raw markdown instead of rendered HTML
+- Styling didn't match rest of site
+
+**Solution:**
+
+- Added `modal.hide()` call in `onClose` callback
+- Created `renderMarkdown()` function for basic markdown-to-HTML conversion
+- Created `showMarkdownPreviewModal()` for `.md` file previews
+- Added `.md-preview` CSS styles for rendered markdown
+
+**Files Modified:**
+
+- `src/features/admin/modules/admin-projects.ts` - Fixed close handler, added markdown rendering
+- `src/styles/admin/modals.css` - Added markdown preview styles
+
+#### URL Field HTML Entity Decoding
+
+**Status:** COMPLETE
+
+Fixed URL fields showing encoded entities in edit modal.
+
+**Issue:**
+
+- URLs displayed as `amp;amp;#x2F;hedgewitchhorticulture.com&amp;amp;a` instead of normal text
+- Affected: preview_url, repo_url, production_url fields
+
+**Solution:**
+
+- Applied `SanitizationUtils.decodeHtmlEntities()` when loading URLs into edit form
+
+**Files Modified:**
+
+- `src/features/admin/modules/admin-projects.ts` - Added entity decoding to URL field loading
+
+#### Quoted Price Display Fix
+
+**Status:** COMPLETE
+
+Fixed quoted price showing as $0.00 when saved with comma formatting.
+
+**Issue:**
+
+- Price saved as "4,500" displayed as "$0.00"
+- `Number("4,500")` returns NaN due to comma
+
+**Solution:**
+
+- Created `parseNumericValue()` helper to strip commas before parsing
+- Applied to price and deposit display
+- Also strip commas when saving to database
+
+**Files Modified:**
+
+- `src/features/admin/modules/admin-projects.ts` - Added parseNumericValue helper, fixed save logic
+
+---
