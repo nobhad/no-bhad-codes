@@ -292,15 +292,15 @@ function renderListView(): void {
   }
 
   listContainer.innerHTML = `
-    <div class="admin-table-wrapper">
-      <table class="admin-table">
+    <div class="admin-table-scroll-wrapper">
+      <table class="admin-table tasks-table">
         <thead>
           <tr>
             <th>Task</th>
             <th>Project</th>
-            <th>Priority</th>
-            <th>Status</th>
-            <th>Due Date</th>
+            <th class="type-col">Priority</th>
+            <th class="status-col">Status</th>
+            <th class="date-col">Due Date</th>
             <th>Assignee</th>
           </tr>
         </thead>

@@ -44,6 +44,34 @@
   max-width: none;
 }
 
+/* Tasks table styling within main container */
+.tasks-main-container .admin-table-scroll-wrapper {
+  border-radius: var(--portal-radius-md);
+  overflow: hidden;
+}
+
+.tasks-main-container .admin-table {
+  margin: 0;
+}
+
+/* Ensure first header row has top radius */
+.tasks-main-container .admin-table thead tr:first-child th:first-child {
+  border-top-left-radius: var(--portal-radius-md);
+}
+
+.tasks-main-container .admin-table thead tr:first-child th:last-child {
+  border-top-right-radius: var(--portal-radius-md);
+}
+
+/* Ensure last body row has bottom radius */
+.tasks-main-container .admin-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: var(--portal-radius-md);
+}
+
+.tasks-main-container .admin-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: var(--portal-radius-md);
+}
+
 /* Only stack columns on mobile */
 @media (max-width: 767px) {
   #global-tasks-kanban-container .kanban-board,

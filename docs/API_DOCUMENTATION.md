@@ -1336,6 +1336,65 @@ Delete milestone (admin only).
 }
 ```
 
+### POST `/admin/milestones/backfill`
+
+Generate default milestones for existing projects that don't have any (admin only).
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Request:** (empty body)
+
+**Response:**
+
+```json
+{
+  "message": "Backfill complete",
+  "projectsProcessed": 2,
+  "milestonesCreated": 8
+}
+```
+
+**Notes:**
+
+- Only creates milestones for projects with zero existing milestones
+- Uses project type to determine which milestone template to use
+- Falls back to 'other' template for unknown project types
+
+## Task Priority Escalation
+
+### POST `/projects/:id/tasks/escalate-priorities`
+
+Automatically escalate task priorities based on due date proximity (admin only).
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Request:** (empty body)
+
+**Response:**
+
+```json
+{
+  "message": "Priority escalation complete",
+  "tasksUpdated": 3
+}
+```
+
+**Escalation Rules:**
+
+| Days Until Due | Minimum Priority |
+|----------------|------------------|
+| ≤ 1 (tomorrow/overdue) | urgent |
+| ≤ 3 | high |
+| ≤ 7 | medium |
+| > 7 | no change |
+
+**Notes:**
+
+- Only escalates priority UP (never downgrades)
+- Excludes completed and cancelled tasks
+- Excludes tasks without due dates
+- Runs automatically daily at 6 AM via scheduler
+
 ## Project Dashboard Endpoint
 
 ### GET `/projects/:id/dashboard`

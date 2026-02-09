@@ -1,7 +1,7 @@
 # Task Management System
 
 **Status:** Complete
-**Last Updated:** February 8, 2026
+**Last Updated:** February 9, 2026
 
 ## Overview
 
@@ -43,6 +43,36 @@ Accessible from Project Detail → Tasks tab. Shows tasks for a specific project
 | `high` | On-hold (amber) | 2 |
 | `medium` | Primary (blue) | 3 |
 | `low` | Neutral | 4 (lowest) |
+
+### Priority Auto-Escalation
+
+Task priorities automatically escalate based on due date proximity.
+
+**Escalation Rules:**
+
+| Days Until Due | Minimum Priority |
+|----------------|------------------|
+| ≤ 1 (tomorrow/overdue) | urgent |
+| ≤ 3 | high |
+| ≤ 7 | medium |
+| > 7 | no change |
+
+**Behavior:**
+
+- Only escalates UP (never downgrades priority)
+- Excludes completed and cancelled tasks
+- Excludes tasks without due dates
+- Runs automatically daily at 6 AM
+- Can be triggered manually via API
+
+**API Endpoint:**
+
+```text
+POST /api/projects/:id/tasks/escalate-priorities
+  Returns: { message, tasksUpdated }
+```
+
+**Service File:** `server/services/priority-escalation-service.ts`
 
 ## Features
 
@@ -109,6 +139,10 @@ PUT /api/projects/:projectId/tasks/:taskId
 
 DELETE /api/projects/:projectId/tasks/:taskId
   Returns: success message
+
+POST /api/projects/:id/tasks/escalate-priorities
+  Returns: { message, tasksUpdated }
+  Note: Auto-escalates priorities based on due dates
 ```
 
 ## Components
@@ -158,8 +192,17 @@ createViewToggle(mountElement, {
 | `server/routes/admin.ts` | Global tasks endpoint |
 | `server/routes/projects.ts` | Project tasks endpoints |
 | `server/services/project-service.ts` | Task service methods |
+| `server/services/priority-escalation-service.ts` | Priority auto-escalation logic |
+| `server/services/scheduler-service.ts` | Daily escalation job (6 AM) |
 
 ## Change Log
+
+### February 9, 2026
+
+- Added priority auto-escalation feature
+- Tasks automatically escalate to urgent/high/medium based on due date proximity
+- Added `POST /api/projects/:id/tasks/escalate-priorities` endpoint
+- Added daily scheduled job at 6 AM
 
 ### February 8, 2026
 
