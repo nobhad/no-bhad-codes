@@ -729,17 +729,17 @@
 
 .project-status-badge.status-in-progress {
   background-color: var(--color-warning, #f59e0b);
-  color: #000;
+  color: var(--color-black);
 }
 
 .project-status-badge.status-completed {
   background-color: var(--color-success, #10b981);
-  color: #fff;
+  color: var(--color-white);
 }
 
 .project-status-badge.status-planned {
   background-color: var(--color-info, #6366f1);
-  color: #fff;
+  color: var(--color-white);
 }
 
 /* ===============================================

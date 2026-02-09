@@ -313,8 +313,8 @@ export async function toggleMilestoneTasks(
             container.innerHTML = `
               <ul class="milestone-task-list">
                 ${tasks
-                  .map(
-                    (task: any) => `
+    .map(
+      (task: any) => `
                   <li class="milestone-task-item ${task.status}" data-task-id="${task.id}">
                     <input
                       type="checkbox"
@@ -328,8 +328,8 @@ export async function toggleMilestoneTasks(
                     </div>
                   </li>
                 `
-                  )
-                  .join('')}
+    )
+    .join('')}
               </ul>
             `;
           }

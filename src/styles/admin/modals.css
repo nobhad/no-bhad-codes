@@ -462,7 +462,7 @@
   font-family: var(--font-family-mono, 'Consolas', 'Monaco', monospace);
   font-size: 0.9em;
   background: var(--portal-bg-medium);
-  padding: 2px 6px;
+  padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-xs);
   color: var(--app-color-primary);
 }

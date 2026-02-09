@@ -643,6 +643,28 @@
 }
 
 /* =====================================================
+   CONTENT SECTION CARD
+   Generic wrapper for content groups that need containment
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .content-section-card {
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-panel);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .content-section-card .section-title {
+  font-family: var(--font-family-acme);
+  font-size: 1rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label, 0.05em);
+  color: var(--portal-text-light);
+  margin: 0 0 var(--space-3);
+}
+
+/* =====================================================
    MOBILE RESPONSIVE
    ===================================================== */
 @media (--mobile) {

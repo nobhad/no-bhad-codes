@@ -1,6 +1,6 @@
 # Current Work
 
-**Last Updated:** February 9, 2026 (Night)
+**Last Updated:** February 9, 2026 (Late Night)
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-02.md`.
 
@@ -12,6 +12,7 @@ See `archive/ARCHIVED_WORK_2026-02.md` for full details.
 
 **Summary:**
 
+- Section Toggles in Unified Header (Leads: Intake/Contacts, Knowledge Base: Categories/Articles)
 - Milestones & Tasks Auto-Generation System
 - General UI/UX Enhancements: Secondary Sidebar, Project Milestones Auto-Population, Task Priority Auto-Update, Project Detail Page Restructure
 - Bug Fixes: Intake PDF HTML entity decoding, PDF newline encoding error, Client proposal preview modal, URL field encoding, Quoted price display
@@ -141,7 +142,7 @@ See `archive/ARCHIVED_WORK_2026-02.md` for full details.
   - Color strip now matches other status tiers (In Progress, Blocked, Done)
   - File: `src/styles/shared/portal-components.css`
 
-### Header Subtabs Implementation - COMPLETE
+### Header Subtabs & Controls Implementation - COMPLETE
 
 - **Analytics & Workflows Subtabs Moved to Header** - COMPLETE
   - Moved subtabs from content area into `.portal-header-title`
@@ -149,6 +150,68 @@ See `archive/ARCHIVED_WORK_2026-02.md` for full details.
   - CSS `:has()` selector shows subtabs only when respective tab is active
   - Responsive: stacks vertically on mobile
   - Files: `admin/index.html`, `src/styles/client-portal/layout.css`, `src/styles/admin/analytics.css`
+
+- **Tasks View Toggle Moved to Header** - COMPLETE
+  - Moved view toggle from `.tasks-header` div to unified portal header
+  - Uses same pattern as Analytics/Workflows subtabs
+  - Shows only when Tasks tab is active (`:has(#tab-tasks.active)`)
+  - Removed old `.page-header` and `.tasks-header` divs
+  - Files: `admin/index.html`, `src/styles/client-portal/layout.css`, `src/styles/admin/tasks.css`
+
+- **Tasks List View Table Structure** - COMPLETE
+  - Added proper `.admin-table-card` wrapper (matches Leads, Projects, etc.)
+  - Added `.admin-table-header` with title and refresh button
+  - Added `.admin-table-container` wrapper for scroll handling
+  - Now has proper card shadow and border styling
+  - Refresh button reloads tasks on click
+  - File: `src/features/admin/modules/admin-global-tasks.ts`
+
+### Layout Consistency Audit - COMPLETE (February 9, 2026)
+
+**Full Audit Report:** `docs/design/LAYOUT_CONSISTENCY_AUDIT.md`
+
+**Purpose:** Analyze layout patterns across admin portal pages to identify inconsistencies and standardize component placement.
+
+**Key Findings:**
+
+- **Inconsistent Page Headers:** 7 pages don't use unified portal header (Leads, Projects, Clients, Invoices, Messages, Tasks)
+- **View Toggle Placement:** Tasks page had toggle buried in content instead of header
+- **Tags Placement:** Inconsistent across entity types (Leads, Projects, Clients)
+- **Filter Patterns:** Mostly consistent, some inline vs above-table variations
+
+**Fixes Completed:**
+
+- ✅ **Tasks Page View Toggle** - Moved to unified portal header (same pattern as Analytics/Workflows)
+- ✅ **Removed Legacy Headers** - Eliminated old `.page-header` and `.tasks-header` divs from Tasks page
+- ✅ **Project Details Notes Tab** - Added missing Notes tab to match Client Details pattern (view/edit internal project notes)
+- ✅ **Unified Portal Header Cleanup** - Removed 12 redundant `.page-title` divs from all admin pages (unified header already working)
+
+**Phase 2 Audits Completed:**
+
+- ✅ **Action Button Order** - All 10 tables compliant with Export → Refresh → Add pattern
+- ⚠️ **Filter Structure** - CSS exists, HTML implementation pending
+- ⚠️ **Tag Placement** - Client Detail complete, Project/Lead Detail missing tags
+
+**Phase 3 Documentation:**
+
+- ✅ **UX_GUIDELINES.md Updated** - Added comprehensive "Layout Patterns" section with HTML templates, CSS patterns, and implementation rules
+
+**Remaining Work:**
+
+- [ ] Add tags to Project Detail (match Client Detail pattern)
+- [ ] Add tags to Lead Detail (dynamic generation in secondary sidebar)
+- [ ] Implement filter structure on key tables (Leads, Projects, Clients, Invoices)
+
+**Files Modified:**
+
+- `admin/index.html` - Moved Tasks view toggle to header, removed old header divs, added Notes tab to Project Details, removed 12 redundant `.page-title` divs
+- `src/styles/client-portal/layout.css` - Added `:has()` selector for Tasks controls
+- `src/styles/admin/tasks.css` - Removed `.tasks-header` styles
+- `src/styles/admin/project-detail.css` - Added Notes tab display styles
+- `src/features/admin/admin-project-details.ts` - Added Notes tab setup, edit modal, and display logic
+- `docs/design/LAYOUT_CONSISTENCY_AUDIT.md` - Complete audit report
+
+---
 
 ### Design System Audit - COMPLETE (February 9, 2026)
 

@@ -98,7 +98,7 @@
 }
 
 .kanban-column-content.drag-over {
-  background: rgba(0, 175, 240, 0.08);
+  background: rgba(var(--color-primary-rgb), 0.08);
 }
 
 .kanban-card {

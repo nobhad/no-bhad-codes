@@ -2168,3 +2168,19 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 /* Contract tab styles moved to pd-contract.css */
 
+/* =====================================================
+   PROJECT NOTES TAB
+   ===================================================== */
+
+/* Notes display container */
+.notes-display {
+  min-height: 100px;
+}
+
+.notes-display .notes-content {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

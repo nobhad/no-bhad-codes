@@ -27,6 +27,7 @@ const LIST_ICON =
 interface ProjectTask {
   id: number;
   project_id: number;
+  project_name?: string;
   milestone_id?: number;
   milestone_title?: string;
   title: string;
@@ -210,7 +211,9 @@ function taskToKanbanItem(task: ProjectTask): KanbanItem {
       assignee: task.assignee_name,
       checklistCount: task.checklist_items?.length || 0,
       checklistCompleted: task.checklist_items?.filter(c => c.is_completed).length || 0,
-      milestoneTitle: task.milestone_title
+      milestoneTitle: task.milestone_title,
+      projectName: task.project_name,
+      projectId: task.project_id
     }
   };
 }
@@ -226,6 +229,8 @@ function renderTaskCard(item: KanbanItem): string {
     checklistCount: number;
     checklistCompleted: number;
     milestoneTitle?: string;
+    projectName?: string;
+    projectId?: number;
   };
 
   const priorityClass = PRIORITY_CONFIG[meta.priority as keyof typeof PRIORITY_CONFIG]?.class || '';
@@ -235,6 +240,17 @@ function renderTaskCard(item: KanbanItem): string {
   const dueDateClass = isOverdue ? 'overdue' : '';
 
   return `
+    ${meta.projectName && meta.projectId ? `
+      <div class="task-project-link">
+        <button type="button" class="task-project-name" onclick="window.adminDashboard?.showProjectDetails(${meta.projectId})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+          ${SanitizationUtils.escapeHtml(meta.projectName)}
+        </button>
+      </div>
+    ` : ''}
     <div class="kanban-card-title">${SanitizationUtils.escapeHtml(item.title)}</div>
     ${item.subtitle ? `<div class="kanban-card-subtitle">${SanitizationUtils.escapeHtml(item.subtitle)}</div>` : ''}
     ${meta.milestoneTitle ? `
@@ -260,6 +276,14 @@ function renderTaskCard(item: KanbanItem): string {
           ${meta.checklistCompleted}/${meta.checklistCount}
         </span>
       ` : ''}
+    </div>
+    <div class="task-card-actions">
+      <button type="button" class="task-delete-btn" onclick="event.stopPropagation(); window.adminTasks?.deleteTask(${item.id})" title="Delete task">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+      </button>
     </div>
   `;
 }
@@ -755,4 +779,27 @@ export function cleanup(): void {
   }
   currentProjectId = null;
   currentTasks = [];
+}
+
+/**
+ * Export deleteTask for global access
+ */
+export { deleteTask };
+
+/**
+ * Expose module on window for onclick handlers
+ */
+declare global {
+  interface Window {
+    adminTasks?: {
+      deleteTask: (taskId: number) => Promise<void>;
+    };
+  }
+}
+
+// Initialize global exposure
+if (typeof window !== 'undefined') {
+  window.adminTasks = {
+    deleteTask
+  };
 }

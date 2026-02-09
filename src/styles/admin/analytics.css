@@ -11,13 +11,8 @@
    Analytics Sub-Tabs
    ============================================ */
 
-.analytics-subtabs {
-  display: flex;
-  gap: var(--space-1);
-  margin-bottom: var(--space-2);
-  padding-bottom: var(--space-1-5);
-  border-bottom: 1px solid var(--portal-border);
-}
+/* Analytics subtabs are now in the portal-page-header
+   Visibility controlled by :has() selector in client-portal/layout.css */
 
 .analytics-subtab {
   padding: var(--space-1) var(--space-2);

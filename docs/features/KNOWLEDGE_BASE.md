@@ -1,7 +1,7 @@
 # Knowledge Base System
 
 **Status:** Complete
-**Last Updated:** February 8, 2026
+**Last Updated:** February 9, 2026
 
 ## Overview
 
@@ -136,6 +136,15 @@ GET /api/kb/categories/:slug/articles
 
 ## UI Components
 
+### Admin - Page Header Controls
+
+The Knowledge Base page features a section toggle in the unified portal header (next to the page title) that switches between two content views:
+
+- **Categories** - Displays the categories management table
+- **Articles** - Displays the articles management table with filters
+
+The toggle uses the `createViewToggle` component with Categories (grid) and Articles (document) icons.
+
 ### Admin - Categories Tab
 
 - Table with name, description, article count, status
@@ -163,3 +172,17 @@ GET /api/kb/categories/:slug/articles
 | `src/features/client/modules/portal-help.ts` | Client module |
 | `server/routes/kb.ts` | API endpoints |
 | `src/components/portal-modal.ts` | Modal component |
+
+## Change Log
+
+### February 9, 2026 - Section Toggle UI Enhancement
+
+- Added section toggle in unified portal header to switch between Categories and Articles tables
+- Toggle appears next to page title, consistent with Analytics/Workflows pattern
+- Uses `createViewToggle` component with icons (Categories: grid, Articles: document)
+
+### February 8, 2026 - Initial Implementation
+
+- Created knowledge base system with categories and articles
+- Added admin CRUD functionality
+- Added client-facing help section with search

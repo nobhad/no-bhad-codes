@@ -16,6 +16,7 @@ import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
+import { createViewToggle } from '../../../components/view-toggle';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { exportToCsv, KNOWLEDGE_BASE_EXPORT_CONFIG } from '../../../utils/table-export';
@@ -38,6 +39,17 @@ import {
 } from '../../../utils/table-pagination';
 
 const KB_API = '/api/kb';
+
+// ---------------------------------------------------------------------------
+// Section Toggle State
+// ---------------------------------------------------------------------------
+
+let currentKBSection: 'categories' | 'articles' = 'categories';
+
+const CATEGORIES_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>';
+const ARTICLES_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -606,9 +618,63 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
   });
 }
 
+/**
+ * Setup section toggle in unified header to switch between Categories and Articles
+ */
+function setupKBSectionToggle(): void {
+  const mountPoint = document.getElementById('kb-section-toggle-mount');
+  if (!mountPoint || mountPoint.dataset.initialized) return;
+  mountPoint.dataset.initialized = 'true';
+
+  /**
+   * Show/hide cards based on selected section
+   */
+  function applySection(section: 'categories' | 'articles'): void {
+    const categoriesCard = document.getElementById('kb-categories-card');
+    const articlesCard = document.getElementById('kb-articles-card');
+
+    if (section === 'categories') {
+      if (categoriesCard) categoriesCard.style.display = 'block';
+      if (articlesCard) articlesCard.style.display = 'none';
+    } else {
+      if (categoriesCard) categoriesCard.style.display = 'none';
+      if (articlesCard) articlesCard.style.display = 'block';
+    }
+  }
+
+  const toggleEl = createViewToggle({
+    id: 'kb-section-toggle',
+    options: [
+      {
+        value: 'categories',
+        label: 'Categories',
+        title: 'Knowledge Base Categories',
+        ariaLabel: 'View categories',
+        iconSvg: CATEGORIES_ICON
+      },
+      {
+        value: 'articles',
+        label: 'Articles',
+        title: 'Knowledge Base Articles',
+        ariaLabel: 'View articles',
+        iconSvg: ARTICLES_ICON
+      }
+    ],
+    value: currentKBSection,
+    onChange: (value) => {
+      currentKBSection = value as 'categories' | 'articles';
+      applySection(currentKBSection);
+    }
+  });
+
+  mountPoint.appendChild(toggleEl);
+  applySection(currentKBSection);
+}
+
 export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<void> {
   _storedKbContext = ctx;
   setupKBListeners(ctx);
+  setupKBSectionToggle();
 
   const categoriesTbody = el('kb-categories-table-body');
   const articlesTbody = el('kb-articles-table-body');

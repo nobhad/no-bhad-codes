@@ -8,8 +8,8 @@
  * Shows tasks across ALL projects, prioritized by urgency + due date.
  */
 
-import { apiFetch, apiPut } from '../../../utils/api-client';
-import { alertSuccess, alertError } from '../../../utils/confirm-dialog';
+import { apiFetch, apiPut, apiDelete } from '../../../utils/api-client';
+import { alertSuccess, alertError, confirmDanger } from '../../../utils/confirm-dialog';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
@@ -30,6 +30,7 @@ interface GlobalTask {
   projectId: number;
   projectName: string;
   clientName?: string;
+  milestoneTitle?: string;
   title: string;
   description?: string;
   status: 'pending' | 'in_progress' | 'completed' | 'blocked' | 'cancelled';
@@ -102,6 +103,7 @@ function mapTaskFromApi(task: Record<string, unknown>): GlobalTask {
     projectId: task.projectId as number,
     projectName: task.projectName as string,
     clientName: task.clientName as string | undefined,
+    milestoneTitle: task.milestoneTitle as string | undefined,
     title: task.title as string,
     description: task.description as string | undefined,
     status: task.status as GlobalTask['status'],
@@ -211,7 +213,8 @@ function taskToKanbanItem(task: GlobalTask): KanbanItem {
       assignee: task.assignedTo,
       projectId: task.projectId,
       projectName: task.projectName,
-      clientName: task.clientName
+      clientName: task.clientName,
+      milestoneTitle: task.milestoneTitle
     }
   };
 }
@@ -226,7 +229,9 @@ function renderTaskCard(item: KanbanItem): string {
     dueDate?: string;
     assignee?: string;
     projectName: string;
+    projectId: number;
     clientName?: string;
+    milestoneTitle?: string;
   };
 
   const priorityConfig = PRIORITY_CONFIG[meta.priority as keyof typeof PRIORITY_CONFIG];
@@ -237,13 +242,23 @@ function renderTaskCard(item: KanbanItem): string {
   const dueDateClass = isOverdue ? 'overdue' : '';
 
   return `
+    ${meta.projectName && meta.projectId ? `
+      <div class="task-project-link">
+        <button type="button" class="task-project-name" onclick="window.adminDashboard?.showProjectDetails(${meta.projectId})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+          ${SanitizationUtils.escapeHtml(meta.projectName)}
+        </button>
+      </div>
+    ` : ''}
     <div class="kanban-card-title">${SanitizationUtils.escapeHtml(item.title)}</div>
-    <div class="kanban-card-project">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-      </svg>
-      ${SanitizationUtils.escapeHtml(meta.projectName)}
-    </div>
+    ${meta.milestoneTitle ? `
+      <div class="task-milestone-tag">${SanitizationUtils.escapeHtml(meta.milestoneTitle)}</div>
+    ` : `
+      <div class="task-standalone-tag">Standalone</div>
+    `}
     <div class="task-meta">
       <span class="task-priority ${priorityClass}">${priorityLabel}</span>
       ${meta.dueDate ? `
@@ -254,6 +269,14 @@ function renderTaskCard(item: KanbanItem): string {
           ${formatDate(meta.dueDate)}
         </span>
       ` : ''}
+    </div>
+    <div class="task-card-actions">
+      <button type="button" class="task-delete-btn" onclick="event.stopPropagation(); window.adminGlobalTasks?.deleteTask(${item.id})" title="Delete task">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+      </button>
     </div>
   `;
 }
@@ -279,28 +302,60 @@ function renderListView(): void {
   const activeTasks = currentTasks.filter(t => t.status !== 'cancelled');
 
   if (activeTasks.length === 0) {
-    listContainer.innerHTML = '<div class="task-list-empty">No tasks found across any projects.</div>';
+    listContainer.innerHTML = `
+      <div class="admin-table-card">
+        <div class="admin-table-header">
+          <h3>All Tasks</h3>
+        </div>
+        <div class="admin-table-container">
+          <div class="task-list-empty">No tasks found across any projects.</div>
+        </div>
+      </div>
+    `;
     return;
   }
 
   listContainer.innerHTML = `
-    <div class="admin-table-scroll-wrapper">
-      <table class="admin-table tasks-table">
-        <thead>
-          <tr>
-            <th>Task</th>
-            <th>Project</th>
-            <th class="type-col">Priority</th>
-            <th class="status-col">Status</th>
-            <th class="date-col">Due Date</th>
-          </tr>
-        </thead>
-        <tbody id="global-tasks-table-body">
-          ${activeTasks.map(task => renderListItem(task)).join('')}
-        </tbody>
-      </table>
+    <div class="admin-table-card">
+      <div class="admin-table-header">
+        <h3>All Tasks</h3>
+        <div class="admin-table-actions">
+          <button class="icon-btn" id="refresh-global-tasks-btn" title="Refresh" aria-label="Refresh tasks">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="admin-table-container">
+        <div class="admin-table-scroll-wrapper">
+          <table class="admin-table tasks-table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Project</th>
+                <th class="milestone-col">Milestone</th>
+                <th class="type-col">Priority</th>
+                <th class="status-col">Status</th>
+                <th class="date-col">Due Date</th>
+                <th class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="global-tasks-table-body">
+              ${activeTasks.map(task => renderListItem(task)).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   `;
+
+  // Add refresh button handler
+  const refreshBtn = document.getElementById('refresh-global-tasks-btn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', async () => {
+      await fetchTasks();
+      renderCurrentView();
+    });
+  }
 
   // Add click and keyboard handlers for accessibility
   const tableBody = listContainer.querySelector('#global-tasks-table-body');
@@ -342,11 +397,28 @@ function renderListItem(task: GlobalTask): string {
         </div>
       </td>
       <td class="project-cell">
-        <span class="project-link">${SanitizationUtils.escapeHtml(task.projectName)}</span>
+        <button type="button" class="project-link-btn" onclick="event.stopPropagation(); window.adminDashboard?.showProjectDetails(${task.projectId})" title="View project">
+          ${SanitizationUtils.escapeHtml(task.projectName)}
+        </button>
+      </td>
+      <td class="milestone-cell">
+        ${task.milestoneTitle ? `
+          <span class="task-milestone-tag">${SanitizationUtils.escapeHtml(task.milestoneTitle)}</span>
+        ` : `
+          <span class="task-standalone-tag">Standalone</span>
+        `}
       </td>
       <td class="type-cell"><span class="task-priority ${priorityClass}">${priorityLabel}</span></td>
       <td class="status-cell">${getStatusDotHTML(task.status)}</td>
       <td class="date-cell ${isOverdue ? 'overdue' : ''}">${task.dueDate ? formatDate(task.dueDate) : ''}</td>
+      <td class="actions-cell">
+        <button type="button" class="btn-icon-sm btn-danger-ghost" onclick="event.stopPropagation(); window.adminGlobalTasks?.deleteTask(${task.id})" title="Delete task">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </td>
     </tr>
   `;
 }
@@ -492,6 +564,33 @@ function showTaskDetailModal(task: GlobalTask): void {
 }
 
 /**
+ * Delete a task
+ */
+async function deleteTask(taskId: number): Promise<void> {
+  const confirmed = await confirmDanger(
+    'Are you sure you want to delete this task? This action cannot be undone.',
+    'Delete Task'
+  );
+
+  if (!confirmed) return;
+
+  try {
+    const response = await apiDelete(`/api/projects/tasks/${taskId}`);
+
+    if (response.ok) {
+      alertSuccess('Task deleted');
+      await fetchTasks();
+      renderCurrentView();
+    } else {
+      alertError('Failed to delete task');
+    }
+  } catch (error) {
+    console.error('[AdminGlobalTasks] Error deleting task:', error);
+    alertError('Error deleting task');
+  }
+}
+
+/**
  * Cleanup module
  */
 export function cleanup(): void {
@@ -505,4 +604,27 @@ export function cleanup(): void {
   }
   currentTasks = [];
   moduleContext = null;
+}
+
+/**
+ * Export deleteTask for global access
+ */
+export { deleteTask };
+
+/**
+ * Expose module on window for onclick handlers
+ */
+declare global {
+  interface Window {
+    adminGlobalTasks?: {
+      deleteTask: (taskId: number) => Promise<void>;
+    };
+  }
+}
+
+// Initialize global exposure
+if (typeof window !== 'undefined') {
+  window.adminGlobalTasks = {
+    deleteTask
+  };
 }

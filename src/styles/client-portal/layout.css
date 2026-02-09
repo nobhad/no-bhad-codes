@@ -56,7 +56,8 @@ body[data-page="client-portal"] {
 /* Dashboard Content Area (right side) - Base styles */
 .dashboard-content {
   flex: 1;
-  padding: clamp(1rem, 3vw, 2rem);
+  /* No top padding - header should sit at the very top */
+  padding: 0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem);
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
@@ -165,23 +166,46 @@ body[data-page="client-portal"] {
    Two rows: breadcrumbs, then page title
    ============================================ */
 .portal-page-header {
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-lg);
-  box-shadow: var(--shadow-card);
-  padding: var(--space-4);
+  background: var(--portal-bg-dark);
+  /* Elevated shadow - header floats above main content */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  /* Full-width: extend beyond content padding with negative margins */
+  margin-left: calc(-1 * clamp(1rem, 3vw, 2rem));
+  margin-right: calc(-1 * clamp(1rem, 3vw, 2rem));
+  /* Reduced top padding for tighter header */
+  padding: var(--space-2) clamp(1rem, 3vw, 2rem) var(--space-4);
   margin-bottom: var(--space-6);
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+/* Admin portal uses different content padding - adjust header margins */
+[data-page="admin"] .portal-page-header {
+  margin-left: calc(-1 * clamp(0.75rem, 2vw, 1.5rem));
+  margin-right: calc(-1 * clamp(0.75rem, 2vw, 1.5rem));
+  padding-left: clamp(0.75rem, 2vw, 1.5rem);
+  padding-right: clamp(0.75rem, 2vw, 1.5rem);
 }
 
 /* Row 1: sidebar toggle + breadcrumbs */
 .portal-header-top {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 0.375rem;
   margin-bottom: var(--space-3);
 }
 
-/* Row 2: page title */
+/* Row 2: page title + optional subtabs - indented to align with content cards */
+.portal-header-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-left: var(--space-4);
+  padding-right: var(--space-2);
+}
+
 .portal-header-title h1 {
   font-family: var(--font-family-acme);
   font-size: clamp(1.75rem, 5vw, 2.5rem);
@@ -189,11 +213,63 @@ body[data-page="client-portal"] {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-title, 0.02em);
+  flex-shrink: 0;
 }
 
 /* Client name span styling */
 .portal-header-title h1 #client-name {
   color: var(--color-primary);
+}
+
+/* ============================================
+   Header Subtabs (Analytics, Workflows)
+   Shown inline with page title
+   ============================================ */
+.header-subtabs {
+  display: flex;
+  align-items: center;
+}
+
+/* Hide all header subtab groups by default - high specificity to override portal-tabs.css */
+.portal-header-title .header-subtabs .header-subtab-group {
+  display: none;
+}
+
+/* Show analytics subtabs when analytics tab is active */
+[data-page="admin"]:has(#tab-analytics.active) .header-subtab-group[data-for-tab="analytics"] {
+  display: flex;
+}
+
+/* Show workflows subtabs when workflows tab is active */
+[data-page="admin"]:has(#tab-workflows.active) .header-subtab-group[data-for-tab="workflows"] {
+  display: flex;
+}
+
+/* Show tasks view toggle when tasks tab is active */
+[data-page="admin"]:has(#tab-tasks.active) .header-controls[data-for-tab="tasks"] {
+  display: flex;
+}
+
+/* Show leads section toggle when leads tab is active */
+[data-page="admin"]:has(#tab-leads.active) .header-controls[data-for-tab="leads"] {
+  display: flex;
+}
+
+/* Show knowledge base section toggle when KB tab is active */
+[data-page="admin"]:has(#tab-knowledge-base.active) .header-controls[data-for-tab="knowledge-base"] {
+  display: flex;
+}
+
+/* Header subtabs styling - compact, no card background */
+.portal-header-title .header-subtab-group.analytics-subtabs,
+.portal-header-title .header-subtab-group.portal-subtabs {
+  gap: var(--space-1);
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* ============================================
@@ -251,12 +327,38 @@ body[data-page="client-portal"] {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .portal-header-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
   .portal-header-title h1 {
     font-size: clamp(1.25rem, 6vw, 1.75rem);
   }
+
+  /* Header subtabs wrap on mobile */
+  .header-subtab-group.analytics-subtabs,
+  .header-subtab-group.portal-subtabs {
+    flex-wrap: wrap;
+  }
+
+  .header-subtab-group .analytics-subtab,
+  .header-subtab-group .portal-subtab {
+    font-size: 0.75rem;
+    padding: var(--space-0-5) var(--space-1-5);
+  }
 }
 
-/* Legacy support: page-title class (backwards compat) */
+/* Hide individual .page-title divs inside tabs when using unified header */
+/* The portal-page-header now contains the dynamic page title */
+[data-page="admin"] .tab-content > .page-title,
+[data-page="admin"] .tab-content > .page-header > .page-title,
+[data-page="client-portal"] .tab-content > .page-title {
+  display: none;
+}
+
+/* Legacy support: page-title class (backwards compat) - only visible when not in portal */
 .page-title {
   margin-bottom: 1.5rem;
 }

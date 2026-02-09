@@ -66,7 +66,7 @@
   color: var(--portal-text-muted);
   text-transform: uppercase;
   background: var(--portal-bg-medium);
-  padding: 2px 6px;
+  padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-xs);
 }
 
@@ -606,7 +606,7 @@
 .rule-condition code {
   background: var(--portal-bg-dark);
   padding: 1px 3px;
-  border-radius: 2px;
+  border-radius: var(--portal-radius-xs);
   font-family: monospace;
   font-size: 0.75rem;
 }
@@ -887,7 +887,7 @@
 
 .task-type-badge {
   font-size: 0.65rem;
-  padding: 2px 6px;
+  padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-medium);
   color: var(--portal-text-secondary);
   border-radius: var(--portal-radius-sm);

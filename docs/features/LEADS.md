@@ -1,7 +1,7 @@
 # Lead Management System
 
 **Status:** Complete
-**Last Updated:** February 6, 2026
+**Last Updated:** February 9, 2026
 
 ## Overview
 
@@ -472,6 +472,15 @@ const { stages, totalValue, weightedValue } = await response.json();
 
 ## Frontend UI
 
+### Page Header Controls
+
+The Leads page features a section toggle in the unified portal header (next to the page title) that switches between two content views:
+
+- **Intake Submissions** - Displays the intake form submissions table
+- **Contact Form Submissions** - Displays the contact form submissions table
+
+The toggle uses the `createViewToggle` component with Intake (document+) and Contacts (users) icons.
+
 ### Lead Pipeline View
 
 - **Table View** - Traditional table with sortable columns, status dropdown, convert button
@@ -520,6 +529,12 @@ When a lead is deleted:
 - `POST /api/admin/deleted-items/lead/:id/restore` - Restore a lead
 
 ## Change Log
+
+### February 9, 2026 - Section Toggle UI Enhancement
+
+- Added section toggle in unified portal header to switch between Intake and Contact submissions
+- Toggle appears next to page title, consistent with Analytics/Workflows pattern
+- Uses `createViewToggle` component with icons (Intake: document+, Contacts: users)
 
 ### February 6, 2026 - Soft Delete System
 
