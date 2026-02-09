@@ -65,6 +65,7 @@
 
 .modal-header h2 {
   margin: 0;
+  flex: 1;
   color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -335,15 +336,28 @@
   max-width: 900px;
 }
 
+/* Ensure proper modal structure for file previews */
+.file-preview-modal-content .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.file-preview-modal-content .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
 /* Preview modal body - scrollable with constrained height */
 .file-preview-modal-content .modal-body {
   max-height: 60vh;
   overflow: auto;
 }
 
-/* Image preview body - centered */
-.file-preview-modal-body {
-  max-height: 70vh;
+/* Image preview body - centered (only affects body content, not layout) */
+.file-preview-modal-content .modal-body.file-preview-modal-body {
   display: flex;
   justify-content: center;
   align-items: center;
