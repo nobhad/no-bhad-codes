@@ -369,8 +369,8 @@ function leadToKanbanItem(lead: Lead): KanbanItem {
   const leadAny = lead as unknown as Record<string, string | number>;
   return {
     id: lead.id,
-    title: lead.contact_name || 'Unknown',
-    subtitle: lead.company_name || undefined,
+    title: SanitizationUtils.decodeHtmlEntities(lead.contact_name || 'Unknown'),
+    subtitle: lead.company_name ? SanitizationUtils.decodeHtmlEntities(lead.company_name) : undefined,
     metadata: {
       email: lead.email,
       budget: leadAny.budget_range,

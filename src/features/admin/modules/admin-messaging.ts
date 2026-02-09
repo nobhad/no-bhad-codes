@@ -173,8 +173,8 @@ function renderThreadList(container: HTMLElement, clients: ClientWithThread[], c
   container.innerHTML = clients.map(client => {
     const isActive = client.client_id === selectedClientId;
     const hasUnread = client.unread_count > 0;
-    const safeCompany = client.company_name ? SanitizationUtils.escapeHtml(client.company_name) : '';
-    const safeContact = client.contact_name ? SanitizationUtils.escapeHtml(client.contact_name) : '';
+    const safeCompany = client.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.company_name)) : '';
+    const safeContact = client.contact_name ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.contact_name)) : '';
     const primaryName = safeCompany || safeContact || 'Unknown Client';
     const secondaryName = safeCompany && safeContact ? safeContact : '';
     const timeStr = client.last_message_at ? formatRelativeTime(new Date(client.last_message_at)) : '';

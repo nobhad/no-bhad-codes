@@ -381,8 +381,8 @@ function renderInvoicesTable(ctx: AdminDashboardContext): void {
 
   tableBody.innerHTML = paginatedInvoices.map((invoice) => {
     const safeInvoiceNumber = SanitizationUtils.escapeHtml(invoice.invoice_number || `INV-${invoice.id}`);
-    const safeClientName = SanitizationUtils.escapeHtml(invoice.client_name || 'Unknown Client');
-    const safeProjectName = SanitizationUtils.escapeHtml(invoice.project_name || '');
+    const safeClientName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(invoice.client_name || 'Unknown Client'));
+    const safeProjectName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(invoice.project_name || ''));
     const amount = formatCurrency(getAmount(invoice));
     const dueDate = invoice.due_date ? formatDate(invoice.due_date) : '-';
 
