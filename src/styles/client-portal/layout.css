@@ -165,6 +165,10 @@ body[data-page="client-portal"] {
    Two rows: breadcrumbs, then page title
    ============================================ */
 .portal-page-header {
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
   margin-bottom: var(--space-6);
   flex-shrink: 0;
 }
@@ -174,7 +178,7 @@ body[data-page="client-portal"] {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 /* Row 2: page title */
