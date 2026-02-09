@@ -1343,6 +1343,7 @@ class AdminDashboard {
       items.push({ label: 'Projects', href: false });
       break;
     case 'project-detail': {
+      // Get project name - will be populated asynchronously if needed
       const projectName = this.projectDetails.getCurrentProjectName();
       const label = projectName
         ? (projectName.length > 40 ? `${projectName.slice(0, 37)}...` : projectName)
@@ -1350,6 +1351,28 @@ class AdminDashboard {
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Projects', href: true, onClick: goProjects });
       items.push({ label, href: false });
+
+      // If no name yet, try to get it from the projects module after a short delay
+      if (!projectName) {
+        setTimeout(async () => {
+          try {
+            const mod = await loadProjectsModule();
+            const modProjectName = mod.getCurrentProjectName?.();
+            if (modProjectName) {
+              // Re-render breadcrumbs with actual name
+              const listEl = document.getElementById('breadcrumb-list');
+              if (listEl) {
+                const truncLabel = modProjectName.length > 40 ? `${modProjectName.slice(0, 37)}...` : modProjectName;
+                renderBreadcrumbs(listEl, [
+                  { label: 'Dashboard', href: true, onClick: goOverview },
+                  { label: 'Projects', href: true, onClick: goProjects },
+                  { label: truncLabel, href: false }
+                ]);
+              }
+            }
+          } catch { /* ignore */ }
+        }, 50);
+      }
       break;
     }
     case 'messages':

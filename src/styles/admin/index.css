@@ -27,6 +27,9 @@
 @import "../client-portal/layout.css";
 @import "../client-portal/sidebar.css";
 
+/* Secondary sidebar (vertical tab nav for detail pages) */
+@import "./secondary-sidebar.css";
+
 /* Admin-specific modules */
 @import "./auth.css";
 @import "./modals.css";

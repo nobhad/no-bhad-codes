@@ -23,6 +23,7 @@ import { auditLogger } from '../services/audit-logger.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
 import { softDeleteService, SoftDeleteEntityType } from '../services/soft-delete-service.js';
 import { projectService } from '../services/project-service.js';
+import { generateDefaultMilestones, backfillMilestones } from '../services/milestone-generator.js';
 
 const router = express.Router();
 
@@ -1390,6 +1391,15 @@ router.post(
         ]
       );
 
+      // Generate default milestones for the new project
+      try {
+        await generateDefaultMilestones(projectId, projectType);
+        console.log(`[AdminProjects] Generated milestones for project: ${projectId}`);
+      } catch (milestoneError) {
+        console.error('[AdminProjects] Failed to generate milestones:', milestoneError);
+        // Non-critical - don't fail the request
+      }
+
       // Log the action
       errorTracker.captureMessage('Admin created project manually', 'info', {
         tags: { component: 'admin-projects' },
@@ -2558,6 +2568,37 @@ router.delete(
         code: 'DELETE_FAILED'
       });
     }
+  })
+);
+
+// =====================================================
+// MILESTONE MANAGEMENT
+// =====================================================
+
+/**
+ * POST /api/admin/milestones/backfill - Backfill milestones for existing projects
+ *
+ * Generates default milestones for all active projects that don't have any.
+ * Useful for initial setup or migration.
+ */
+router.post(
+  '/milestones/backfill',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
+    console.log('[Admin] Starting milestone backfill...');
+
+    const result = await backfillMilestones();
+
+    res.json({
+      success: true,
+      message: `Backfill complete: ${result.milestonesCreated} milestones created for ${result.projectsProcessed} projects`,
+      data: {
+        projectsProcessed: result.projectsProcessed,
+        milestonesCreated: result.milestonesCreated,
+        errors: result.errors
+      }
+    });
   })
 );
 

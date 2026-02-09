@@ -10,6 +10,7 @@ import { AdminAuth } from '../admin-auth';
 import { apiPost } from '../../../utils/api-client';
 import { alertError, alertSuccess, alertWarning } from '../../../utils/confirm-dialog';
 import { initModalDropdown } from '../../../utils/modal-dropdown';
+import { createPortalModal } from '../../../components/portal-modal';
 import type { ProjectResponse } from '../../../types/api';
 import type { InvoiceLineItem } from './types';
 
@@ -21,19 +22,23 @@ export function showCreateInvoicePrompt(
   project: ProjectResponse,
   onSuccess: () => void
 ): void {
-  // Create modal overlay
-  const overlay = document.createElement('div');
-  overlay.className = 'confirm-dialog-overlay';
-  overlay.id = 'create-invoice-modal';
-
   // Line items data
   const lineItems: InvoiceLineItem[] = [
     { description: 'Web Development Services', quantity: 1, rate: project.price || 500 }
   ];
 
+  // Create modal using portal modal component
+  const modal = createPortalModal({
+    id: 'create-invoice-modal',
+    titleId: 'create-invoice-modal-title',
+    title: 'Create Invoice',
+    contentClassName: 'invoice-modal-content',
+    onClose: () => modal.hide()
+  });
+
   // Helper functions (defined before use)
   const saveCurrentValues = (): void => {
-    const rows = overlay.querySelectorAll('.line-item-row');
+    const rows = modal.body.querySelectorAll('.line-item-row');
     rows.forEach((row, index) => {
       if (lineItems[index]) {
         const desc = row.querySelector('.line-item-desc') as HTMLInputElement;
@@ -47,7 +52,7 @@ export function showCreateInvoicePrompt(
   };
 
   const updateLineItemAmounts = (): void => {
-    const rows = overlay.querySelectorAll('.line-item-row');
+    const rows = modal.body.querySelectorAll('.line-item-row');
     let total = 0;
     rows.forEach((row) => {
       const qty = parseFloat((row.querySelector('.line-item-qty') as HTMLInputElement)?.value) || 1;
@@ -57,13 +62,8 @@ export function showCreateInvoicePrompt(
       const amountSpan = row.querySelector('.line-item-amount');
       if (amountSpan) amountSpan.textContent = `$${amount.toFixed(2)}`;
     });
-    const totalEl = overlay.querySelector('.invoice-total strong');
+    const totalEl = modal.body.querySelector('.invoice-total strong');
     if (totalEl) totalEl.textContent = `Total: $${total.toFixed(2)}`;
-  };
-
-  const closeModal = (): void => {
-    overlay.classList.add('closing');
-    setTimeout(() => overlay.remove(), 150);
   };
 
   const submitInvoice = async (): Promise<void> => {
@@ -76,15 +76,15 @@ export function showCreateInvoicePrompt(
       return;
     }
 
-    const typeSelect = overlay.querySelector('#invoice-type-select') as HTMLSelectElement;
+    const typeSelect = modal.body.querySelector('#invoice-type-select') as HTMLSelectElement;
     const isDeposit = typeSelect?.value === 'deposit';
-    const depositPercentageInput = overlay.querySelector('#deposit-percentage') as HTMLInputElement;
+    const depositPercentageInput = modal.body.querySelector('#deposit-percentage') as HTMLInputElement;
     const depositPercentage = isDeposit && depositPercentageInput ? parseFloat(depositPercentageInput.value) : undefined;
 
     // Calculate total
     const totalAmount = validLineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
 
-    closeModal();
+    modal.hide();
 
     if (isDeposit) {
       // For deposit, use first line item description
@@ -101,68 +101,49 @@ export function showCreateInvoicePrompt(
     }
   };
 
-  // Render the modal (defined before attachModalHandlers which uses it)
-  const renderModal = (): void => {
+  // Render the modal content
+  const renderModalContent = (): void => {
     const totalAmount = lineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
 
-    overlay.innerHTML = `
-      <div class="confirm-dialog invoice-modal">
-        <div class="confirm-dialog-icon info">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-          </svg>
-        </div>
-        <h3 class="confirm-dialog-title">Create Invoice</h3>
+    modal.body.innerHTML = `
+      <div class="form-group">
+        <label class="form-label">Invoice Type *</label>
+        <select id="invoice-type-select" class="form-input">
+          <option value="standard">Standard Invoice</option>
+          <option value="deposit">Deposit Invoice</option>
+        </select>
+      </div>
 
-        <div class="invoice-modal-form">
-          <div class="form-group">
-            <label class="form-label">Invoice Type *</label>
-            <select id="invoice-type-select" class="form-input">
-              <option value="standard">Standard Invoice</option>
-              <option value="deposit">Deposit Invoice</option>
-            </select>
-          </div>
+      <div class="form-group deposit-field" style="display: none;">
+        <label class="form-label">Deposit Percentage</label>
+        <input type="number" id="deposit-percentage" class="form-input" value="50" min="1" max="100" placeholder="e.g., 50">
+      </div>
 
-          <div class="form-group deposit-field" style="display: none;">
-            <label class="form-label">Deposit Percentage</label>
-            <input type="number" id="deposit-percentage" class="form-input" value="50" min="1" max="100" placeholder="e.g., 50">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Line Items</label>
-            <div class="line-items-container">
-              ${lineItems.map((item, index) => `
-                <div class="line-item-row" data-index="${index}">
-                  <input type="text" class="form-input line-item-desc" placeholder="Description" value="${SanitizationUtils.escapeHtml(item.description)}" required>
-                  <input type="number" class="form-input line-item-qty" placeholder="Qty" value="${item.quantity}" min="1" style="width: 70px;">
-                  <input type="number" class="form-input line-item-rate" placeholder="Rate" value="${item.rate}" min="0" step="0.01" style="width: 100px;">
-                  <span class="line-item-amount">$${(item.quantity * item.rate).toFixed(2)}</span>
-                  ${lineItems.length > 1 ? `<button type="button" class="btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
-                </div>
-              `).join('')}
+      <div class="form-group">
+        <label class="form-label">Line Items</label>
+        <div class="line-items-container">
+          ${lineItems.map((item, index) => `
+            <div class="line-item-row" data-index="${index}">
+              <input type="text" class="form-input line-item-desc" placeholder="Description" value="${SanitizationUtils.escapeHtml(item.description)}" required>
+              <input type="number" class="form-input line-item-qty" placeholder="Qty" value="${item.quantity}" min="1" style="width: 70px;">
+              <input type="number" class="form-input line-item-rate" placeholder="Rate" value="${item.rate}" min="0" step="0.01" style="width: 100px;">
+              <span class="line-item-amount">$${(item.quantity * item.rate).toFixed(2)}</span>
+              ${lineItems.length > 1 ? `<button type="button" class="btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
             </div>
-            <button type="button" class="btn btn-outline btn-sm" id="btn-add-line-item">+ Add Line Item</button>
-          </div>
-
-          <div class="invoice-total">
-            <strong>Total: $${totalAmount.toFixed(2)}</strong>
-          </div>
+          `).join('')}
         </div>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-add-line-item">+ Add Line Item</button>
+      </div>
 
-        <div class="confirm-dialog-actions">
-          <button type="button" class="confirm-dialog-btn confirm-dialog-cancel">Cancel</button>
-          <button type="button" class="confirm-dialog-btn confirm-dialog-confirm">Create Invoice</button>
-        </div>
+      <div class="invoice-total">
+        <strong>Total: $${totalAmount.toFixed(2)}</strong>
       </div>
     `;
 
-    // Attach event handlers inline
+    // Attach event handlers
     // Invoice type change - show/hide deposit percentage
-    const typeSelect = overlay.querySelector('#invoice-type-select') as HTMLSelectElement;
-    const depositField = overlay.querySelector('.deposit-field') as HTMLElement;
+    const typeSelect = modal.body.querySelector('#invoice-type-select') as HTMLSelectElement;
+    const depositField = modal.body.querySelector('.deposit-field') as HTMLElement;
     if (typeSelect && !typeSelect.dataset.dropdownInit) {
       typeSelect.dataset.dropdownInit = 'true';
       initModalDropdown(typeSelect, { placeholder: 'Invoice type...' });
@@ -174,58 +155,58 @@ export function showCreateInvoicePrompt(
     });
 
     // Add line item button
-    const addLineBtn = overlay.querySelector('#btn-add-line-item');
+    const addLineBtn = modal.body.querySelector('#btn-add-line-item');
     addLineBtn?.addEventListener('click', () => {
       lineItems.push({ description: '', quantity: 1, rate: 0 });
       saveCurrentValues();
-      renderModal();
+      renderModalContent();
     });
 
     // Remove line item buttons
-    overlay.querySelectorAll('.btn-remove-line').forEach(btn => {
+    modal.body.querySelectorAll('.btn-remove-line').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const index = parseInt((e.target as HTMLElement).dataset.index || '0');
         lineItems.splice(index, 1);
         saveCurrentValues();
-        renderModal();
+        renderModalContent();
       });
     });
 
     // Update amounts on input change
-    overlay.querySelectorAll('.line-item-qty, .line-item-rate').forEach(input => {
+    modal.body.querySelectorAll('.line-item-qty, .line-item-rate').forEach(input => {
       input.addEventListener('input', () => {
         updateLineItemAmounts();
       });
     });
-
-    // Cancel button
-    overlay.querySelector('.confirm-dialog-cancel')?.addEventListener('click', closeModal);
-
-    // Confirm button
-    overlay.querySelector('.confirm-dialog-confirm')?.addEventListener('click', submitInvoice);
-
-    // Close on overlay click
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeModal();
-    });
-
-    // Close on Escape
-    const escHandler = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') {
-        closeModal();
-        document.removeEventListener('keydown', escHandler);
-      }
-    };
-    document.addEventListener('keydown', escHandler);
   };
 
+  // Build footer with action buttons
+  modal.footer.innerHTML = `
+    <button type="button" class="btn btn-outline" id="invoice-cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" id="invoice-confirm-btn">Create Invoice</button>
+  `;
+
   // Initial render
-  renderModal();
-  document.body.appendChild(overlay);
+  renderModalContent();
+  document.body.appendChild(modal.overlay);
+  modal.show();
+
+  // Set up button handlers
+  modal.footer.querySelector('#invoice-cancel-btn')?.addEventListener('click', () => modal.hide());
+  modal.footer.querySelector('#invoice-confirm-btn')?.addEventListener('click', submitInvoice);
+
+  // Close on Escape
+  const escHandler = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') {
+      modal.hide();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 
   // Focus first input
   setTimeout(() => {
-    const firstInput = overlay.querySelector('.line-item-desc') as HTMLInputElement;
+    const firstInput = modal.body.querySelector('.line-item-desc') as HTMLInputElement;
     firstInput?.focus();
   }, 100);
 }

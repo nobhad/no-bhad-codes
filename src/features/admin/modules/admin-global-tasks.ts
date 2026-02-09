@@ -15,7 +15,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { createViewToggle } from '../../../components/view-toggle';
-import { manageFocusTrap } from '../../../utils/focus-trap';
+import { createPortalModal } from '../../../components/portal-modal';
 import type { AdminDashboardContext } from '../admin-types';
 
 // View toggle icons
@@ -406,9 +406,6 @@ function handleTaskClick(item: KanbanItem): void {
   showTaskDetailModal(task);
 }
 
-// Focus trap cleanup reference
-let focusTrapCleanup: (() => void) | null = null;
-
 /**
  * Show task detail modal
  */
@@ -419,84 +416,65 @@ function showTaskDetailModal(task: GlobalTask): void {
   const statusLabel = STATUS_CONFIG[task.status]?.label || task.status;
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
 
-  const modalId = 'global-task-detail-modal';
-  const titleId = 'global-task-modal-title';
+  // Create modal using portal modal component
+  const modal = createPortalModal({
+    id: 'global-task-detail-modal',
+    titleId: 'global-task-modal-title',
+    title: task.title,
+    contentClassName: 'task-detail-modal-content',
+    onClose: () => modal.hide()
+  });
 
-  const overlay = document.createElement('div');
-  overlay.className = 'confirm-dialog-overlay';
-  overlay.id = modalId;
+  // Build body content
+  modal.body.innerHTML = `
+    <div class="task-detail-header-meta">
+      <span class="task-priority ${priorityClass}">${priorityLabel}</span>
+    </div>
 
-  overlay.innerHTML = `
-    <div class="confirm-dialog task-detail-modal" role="dialog" aria-modal="true" aria-labelledby="${titleId}">
-      <div class="task-detail-header">
-        <h3 class="task-detail-title" id="${titleId}">${SanitizationUtils.escapeHtml(task.title)}</h3>
-        <span class="task-priority ${priorityClass}">${priorityLabel}</span>
-      </div>
+    <div class="task-detail-section">
+      <h4>Project</h4>
+      <p>
+        <a href="#" class="project-link" data-project-id="${task.projectId}">
+          ${SanitizationUtils.escapeHtml(task.projectName)}
+        </a>
+        ${task.clientName ? `<span class="text-muted"> - ${SanitizationUtils.escapeHtml(task.clientName)}</span>` : ''}
+      </p>
+    </div>
 
+    ${task.description ? `
       <div class="task-detail-section">
-        <h4>Project</h4>
-        <p>
-          <a href="#" class="project-link" data-project-id="${task.projectId}">
-            ${SanitizationUtils.escapeHtml(task.projectName)}
-          </a>
-          ${task.clientName ? `<span class="text-muted"> - ${SanitizationUtils.escapeHtml(task.clientName)}</span>` : ''}
-        </p>
+        <h4>Description</h4>
+        <p>${SanitizationUtils.escapeHtml(task.description)}</p>
       </div>
+    ` : ''}
 
-      ${task.description ? `
-        <div class="task-detail-section">
-          <h4>Description</h4>
-          <p>${SanitizationUtils.escapeHtml(task.description)}</p>
-        </div>
-      ` : ''}
-
-      <div class="task-detail-section">
-        <h4>Details</h4>
-        <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <div><strong>Status:</strong> ${statusLabel}</div>
-          <div class="${isOverdue ? 'overdue' : ''}"><strong>Due:</strong> ${task.dueDate ? formatDate(task.dueDate) : ''}</div>
-          <div><strong>Assignee:</strong> ${task.assignedTo || ''}</div>
-          <div><strong>Est. Hours:</strong> ${task.estimatedHours || ''}</div>
-        </div>
-      </div>
-
-      <div class="confirm-dialog-actions">
-        <button type="button" class="confirm-dialog-btn confirm-dialog-cancel" aria-label="Close modal">Close</button>
-        <button type="button" class="confirm-dialog-btn" id="btn-view-project">View Project</button>
+    <div class="task-detail-section">
+      <h4>Details</h4>
+      <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div><strong>Status:</strong> ${statusLabel}</div>
+        <div class="${isOverdue ? 'overdue' : ''}"><strong>Due:</strong> ${task.dueDate ? formatDate(task.dueDate) : ''}</div>
+        <div><strong>Assignee:</strong> ${task.assignedTo || ''}</div>
+        <div><strong>Est. Hours:</strong> ${task.estimatedHours || ''}</div>
       </div>
     </div>
   `;
 
-  document.body.appendChild(overlay);
+  // Build footer with action buttons
+  modal.footer.innerHTML = `
+    <button type="button" class="btn btn-outline" id="btn-close-task">Close</button>
+    <button type="button" class="btn btn-secondary" id="btn-view-project">View Project</button>
+  `;
 
-  const closeModal = (): void => {
-    // Clean up focus trap
-    if (focusTrapCleanup) {
-      focusTrapCleanup();
-      focusTrapCleanup = null;
-    }
-    overlay.classList.add('closing');
-    setTimeout(() => overlay.remove(), 150);
-  };
-
-  // Set up focus trap for accessibility
-  const dialogEl = overlay.querySelector('.confirm-dialog') as HTMLElement;
-  if (dialogEl) {
-    focusTrapCleanup = manageFocusTrap(dialogEl, {
-      initialFocus: '.confirm-dialog-cancel',
-      onClose: closeModal
-    });
-  }
+  // Append to DOM and show
+  document.body.appendChild(modal.overlay);
+  modal.show();
 
   // Event handlers
-  overlay.querySelector('.confirm-dialog-cancel')?.addEventListener('click', closeModal);
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal();
-  });
+  modal.footer.querySelector('#btn-close-task')?.addEventListener('click', () => modal.hide());
 
   // View project button
-  overlay.querySelector('#btn-view-project')?.addEventListener('click', () => {
-    closeModal();
+  modal.footer.querySelector('#btn-view-project')?.addEventListener('click', () => {
+    modal.hide();
     if (moduleContext) {
       moduleContext.switchTab('project-detail');
       // The project detail tab will need the project ID - dispatch custom event
@@ -505,25 +483,29 @@ function showTaskDetailModal(task: GlobalTask): void {
   });
 
   // Project link click
-  overlay.querySelector('.project-link')?.addEventListener('click', (e) => {
+  modal.body.querySelector('.project-link')?.addEventListener('click', (e) => {
     e.preventDefault();
-    closeModal();
+    modal.hide();
     if (moduleContext) {
       moduleContext.switchTab('project-detail');
       window.dispatchEvent(new CustomEvent('admin:view-project', { detail: { projectId: task.projectId } }));
     }
   });
+
+  // Close on Escape key
+  const escHandler = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') {
+      modal.hide();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 }
 
 /**
  * Cleanup module
  */
 export function cleanup(): void {
-  // Clean up focus trap if active
-  if (focusTrapCleanup) {
-    focusTrapCleanup();
-    focusTrapCleanup = null;
-  }
   // Remove any open modals
   const modal = document.getElementById('global-task-detail-modal');
   if (modal) modal.remove();

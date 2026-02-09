@@ -13,6 +13,7 @@ import { InvoiceService } from './invoice-service.js';
 import { emailService } from './email-service.js';
 import { getDatabase } from '../database/init.js';
 import { softDeleteService } from './soft-delete-service.js';
+import { escalateAllProjects, EscalationResult } from './priority-escalation-service.js';
 
 // Database helper type
 
@@ -26,10 +27,12 @@ interface SchedulerConfig {
   enableRecurringInvoices: boolean;
   enableSoftDeleteCleanup: boolean;
   enableAnalyticsCleanup: boolean;
+  enablePriorityEscalation: boolean;
   reminderCheckInterval: string; // cron expression
   invoiceGenerationTime: string; // cron expression
   softDeleteCleanupTime: string; // cron expression
   analyticsCleanupTime: string; // cron expression
+  priorityEscalationTime: string; // cron expression
   analyticsRetentionDays: number; // days to keep analytics data
 }
 
@@ -41,10 +44,12 @@ const DEFAULT_CONFIG: SchedulerConfig = {
   enableRecurringInvoices: true,
   enableSoftDeleteCleanup: true,
   enableAnalyticsCleanup: true,
+  enablePriorityEscalation: true,
   reminderCheckInterval: '0 * * * *', // Every hour at :00
   invoiceGenerationTime: '0 1 * * *', // Daily at 1:00 AM
   softDeleteCleanupTime: '0 2 * * *', // Daily at 2:00 AM
   analyticsCleanupTime: '0 3 * * *', // Daily at 3:00 AM
+  priorityEscalationTime: '0 6 * * *', // Daily at 6:00 AM
   analyticsRetentionDays: 365 // Keep analytics data for 1 year
 };
 
@@ -76,6 +81,7 @@ export class SchedulerService {
   private invoiceGenerationJob: ScheduledTask | null = null;
   private softDeleteCleanupJob: ScheduledTask | null = null;
   private analyticsCleanupJob: ScheduledTask | null = null;
+  private priorityEscalationJob: ScheduledTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -125,6 +131,11 @@ export class SchedulerService {
       this.scheduleAnalyticsCleanup();
     }
 
+    // Schedule priority escalation (auto-escalate task priorities based on due date)
+    if (this.config.enablePriorityEscalation) {
+      this.schedulePriorityEscalation();
+    }
+
     this.isRunning = true;
     console.log('[Scheduler] Scheduler service started');
   }
@@ -153,6 +164,11 @@ export class SchedulerService {
     if (this.analyticsCleanupJob) {
       this.analyticsCleanupJob.stop();
       this.analyticsCleanupJob = null;
+    }
+
+    if (this.priorityEscalationJob) {
+      this.priorityEscalationJob.stop();
+      this.priorityEscalationJob = null;
     }
 
     this.isRunning = false;
@@ -241,6 +257,45 @@ export class SchedulerService {
         console.error('[Scheduler] Error during analytics cleanup:', error);
       }
     });
+  }
+
+  /**
+   * Schedule priority escalation (runs daily at 6 AM by default)
+   * Escalates task priorities based on due date proximity
+   */
+  private schedulePriorityEscalation(): void {
+    console.log(`[Scheduler] Scheduling priority escalation: ${this.config.priorityEscalationTime}`);
+
+    this.priorityEscalationJob = cron.schedule(this.config.priorityEscalationTime, async () => {
+      try {
+        console.log('[Scheduler] Running priority escalation...');
+        const result = await this.processPriorityEscalation();
+
+        if (result.updatedCount > 0) {
+          console.log(`[Scheduler] Escalated ${result.updatedCount} task priorities`);
+        }
+      } catch (error) {
+        console.error('[Scheduler] Error during priority escalation:', error);
+      }
+    });
+  }
+
+  /**
+   * Process priority escalation for all projects
+   * Escalates task priorities based on due date proximity
+   */
+  async processPriorityEscalation(): Promise<EscalationResult> {
+    console.log('[Scheduler] Processing priority escalation...');
+    const result = await escalateAllProjects();
+
+    if (result.updatedCount > 0) {
+      console.log(`[Scheduler] Escalated priorities for ${result.updatedCount} tasks`);
+      for (const task of result.escalatedTasks) {
+        console.log(`  - Task ${task.taskId}: ${task.oldPriority} → ${task.newPriority} (${task.daysUntilDue} days until due)`);
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -998,14 +1053,23 @@ No Bhad Codes Team
   getStatus(): {
     isRunning: boolean;
     config: SchedulerConfig;
-    jobs: { reminders: boolean; invoiceGeneration: boolean };
+    jobs: {
+      reminders: boolean;
+      invoiceGeneration: boolean;
+      softDeleteCleanup: boolean;
+      analyticsCleanup: boolean;
+      priorityEscalation: boolean;
+    };
     } {
     return {
       isRunning: this.isRunning,
       config: this.config,
       jobs: {
         reminders: this.reminderJob !== null,
-        invoiceGeneration: this.invoiceGenerationJob !== null
+        invoiceGeneration: this.invoiceGenerationJob !== null,
+        softDeleteCleanup: this.softDeleteCleanupJob !== null,
+        analyticsCleanup: this.analyticsCleanupJob !== null,
+        priorityEscalation: this.priorityEscalationJob !== null
       }
     };
   }
@@ -1029,6 +1093,13 @@ No Bhad Codes Team
       : 0;
 
     return { scheduled, recurring };
+  }
+
+  /**
+   * Manually trigger priority escalation (for testing/admin use)
+   */
+  async triggerPriorityEscalation(): Promise<EscalationResult> {
+    return this.processPriorityEscalation();
   }
 }
 

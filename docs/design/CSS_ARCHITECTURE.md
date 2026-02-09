@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** February 8, 2026
+**Last Updated:** February 9, 2026
 
 ## Table of Contents
 
@@ -243,6 +243,31 @@ Admin tables follow a consistent wrapper hierarchy for proper styling and corner
   background: transparent;
 }
 ```
+
+### Portal Modal Structure
+
+All dynamically-created modals use `createPortalModal()` from `src/components/portal-modal.ts`. This provides consistent structure and behavior.
+
+**CSS Classes (active):**
+
+```css
+.modal-overlay      /* Fixed backdrop, z-index: var(--z-index-portal-modal) */
+.modal-content      /* Modal container, max-width: var(--modal-width-md) */
+.modal-header       /* Title and close button */
+.modal-body         /* Scrollable content area */
+.modal-footer       /* Action buttons */
+.modal-close        /* Close button */
+```
+
+**CSS Classes (deprecated - pending removal):**
+
+```css
+.admin-modal-overlay  /* Legacy - still used by static HTML modals */
+.admin-modal          /* Legacy - still used by static HTML modals */
+.admin-modal-*        /* Legacy - will be removed after static modal migration */
+```
+
+**Pattern:** Use `createPortalModal()` for all new modals. See `MODALS_AUDIT.md` for full documentation.
 
 ### Labels (meta-label, field-label)
 
@@ -1254,7 +1279,7 @@ src/styles/
 | `knowledge-base.css` | Knowledge base management |
 | `leads-pipeline.css` | Leads pipeline |
 | `modal-dropdown.css` | Modal form dropdowns (48px height, matches form inputs) |
-| `modals.css` | Admin modals |
+| `modals.css` | Admin modals (`.modal-*` active, `.admin-modal-*` deprecated) |
 | `pd-contract.css` | Project detail: contract tab styles |
 | `pd-invoices.css` | Project detail: invoices tab styles |
 | `project-detail.css` | Project detail (including messaging UI) |

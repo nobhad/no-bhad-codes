@@ -1622,6 +1622,386 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   }
 }
 
+/* =====================================================
+   PROJECT DETAIL HEADER CARD
+   Matches client detail header pattern
+   ===================================================== */
+
+.pd-header-card {
+  margin-bottom: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+}
+
+.pd-header-card .detail-title-row {
+  margin-bottom: 0;
+}
+
+.pd-header-card .detail-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+}
+
+/* Header Client Info */
+.pd-header-client {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.pd-client-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+.pd-client-item svg {
+  color: var(--portal-text-muted);
+  flex-shrink: 0;
+}
+
+.pd-client-item.clickable-client {
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.pd-client-item.clickable-client:hover {
+  color: var(--color-primary);
+}
+
+.pd-client-item.clickable-client:hover svg {
+  color: var(--color-primary);
+}
+
+/* Header Project Meta */
+.pd-header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+.pd-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pd-meta-value {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+/* Header Description */
+.pd-header-description {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+.pd-header-description .pd-description {
+  margin: var(--space-1) 0 0;
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+/* Header URLs */
+.pd-header-urls {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+.pd-header-urls .pd-urls-row {
+  margin-top: var(--space-2);
+}
+
+/* =====================================================
+   PROJECT DETAIL OVERVIEW GRID
+   Two-column layout matching client detail
+   ===================================================== */
+
+.pd-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.pd-overview-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pd-overview-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Activity Card (Full Width, Last Section) */
+.pd-activity-card {
+  margin-top: var(--space-4);
+}
+
+/* Project Details Card (Full Width at Top) */
+.pd-details-card {
+  margin-bottom: var(--space-3);
+}
+
+.pd-detail-section {
+  margin-bottom: var(--space-3);
+}
+
+.pd-detail-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Ensure field labels use muted color consistently */
+.pd-header-card .field-label,
+.pd-details-card .field-label,
+.pd-overview-grid .field-label,
+.pd-detail-section .field-label,
+.pd-detail-item .field-label {
+  color: var(--portal-text-muted);
+}
+
+.pd-description {
+  margin: var(--space-1) 0 0;
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.pd-detail-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.pd-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pd-detail-value {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-light);
+}
+
+/* URL Links */
+.pd-urls-section {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+.pd-urls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.pd-url-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.pd-url-link:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+}
+
+.pd-url-link svg {
+  flex-shrink: 0;
+}
+
+.pd-url-link[href="#"],
+.pd-url-link:not([href]) {
+  display: none;
+}
+
+/* Progress Card */
+.pd-progress-card {
+  text-align: center;
+}
+
+.pd-progress-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.pd-progress-ring {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--portal-bg-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid var(--color-primary);
+}
+
+.pd-progress-percent {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--portal-text-light);
+  font-family: var(--font-family-acme);
+}
+
+.pd-progress-card .progress-bar {
+  width: 100%;
+}
+
+/* Financial Stats */
+.pd-financial-stats,
+.pd-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+.pd-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+}
+
+.pd-stat-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--portal-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pd-stat-value {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--portal-text-light);
+}
+
+.pd-stat-success {
+  color: var(--color-success);
+}
+
+.pd-stat-warning {
+  color: var(--color-warning);
+}
+
+/* =====================================================
+   RESPONSIVE - PROJECT DETAIL
+   ===================================================== */
+
+/* Tablet landscape - stack to single column */
+@media (--tablet-landscape) {
+  .pd-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-overview-sidebar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+/* Tablet portrait */
+@media (--tablet-down) {
+  .pd-header-card {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .pd-header-meta {
+    gap: var(--space-3);
+  }
+
+  .pd-overview-sidebar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pd-detail-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+@media (--mobile) {
+  .pd-header-card {
+    padding: var(--space-3);
+  }
+
+  .pd-header-client {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .pd-header-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .pd-overview-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-detail-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-financial-stats,
+  .pd-quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pd-progress-ring {
+    width: 80px;
+    height: 80px;
+  }
+
+  .pd-progress-percent {
+    font-size: 1.25rem;
+  }
+}
+
+/* Small mobile */
+@media (--small-mobile) {
+  .pd-header-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-urls-row {
+    flex-direction: column;
+  }
+
+  .pd-url-link {
+    justify-content: center;
+  }
+}
+
+/* Legacy styles - keep for backward compat */
 /* Project Overview Card - Stack on mobile */
 @media (--mobile) {
   .project-detail-client-row,

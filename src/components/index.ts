@@ -127,6 +127,8 @@ export type { PortalModalConfig, PortalModalInstance } from './portal-modal';
 export { getPortalCheckboxHTML } from './portal-checkbox';
 export type { PortalCheckboxConfig } from './portal-checkbox';
 export { initPasswordToggle, initAllPasswordToggles } from './password-toggle';
+export { createSecondarySidebar, SECONDARY_TAB_ICONS } from './secondary-sidebar';
+export type { SecondaryTab, SecondarySidebarConfig, SecondarySidebarController } from './secondary-sidebar';
 
 // Register built-in components
 componentStore.register({
