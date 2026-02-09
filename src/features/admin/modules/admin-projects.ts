@@ -1624,8 +1624,14 @@ async function openFilePreview(fileUrl: string, fileName: string, projectId?: nu
       if (!response.ok) throw new Error('Failed to load file');
       const data = await response.json();
       showJsonPreviewModal(data, fileName);
-    } else if (/\.(txt|md)$/i.test(fileName)) {
-      // For text files, fetch and display as text
+    } else if (/\.md$/i.test(fileName)) {
+      // For markdown files, fetch and render as formatted markdown
+      const response = await apiFetch(fileUrl);
+      if (!response.ok) throw new Error('Failed to load file');
+      const text = await response.text();
+      showMarkdownPreviewModal(text, fileName);
+    } else if (/\.txt$/i.test(fileName)) {
+      // For plain text files, fetch and display as text
       const response = await apiFetch(fileUrl);
       if (!response.ok) throw new Error('Failed to load file');
       const text = await response.text();
@@ -1671,7 +1677,7 @@ async function openFilePreview(fileUrl: string, fileName: string, projectId?: nu
 interface PreviewModalOptions {
   title: string;
   content: string;
-  maxWidth?: string;
+  wide?: boolean;
   bodyClass?: string;
   onClose?: () => void;
 }
@@ -1683,7 +1689,7 @@ let activePreviewModal: ReturnType<typeof createPortalModal> | null = null;
  * Show a preview modal with customizable content
  */
 function showPreviewModal(options: PreviewModalOptions): void {
-  const { title, content, maxWidth = '700px', bodyClass = '', onClose } = options;
+  const { title, content, wide = false, bodyClass = '', onClose } = options;
 
   // Clean up any existing preview modal
   if (activePreviewModal) {
@@ -1691,28 +1697,29 @@ function showPreviewModal(options: PreviewModalOptions): void {
     activePreviewModal = null;
   }
 
+  // Build content class name
+  const contentClasses = ['file-preview-modal-content'];
+  if (wide) contentClasses.push('file-preview-modal-content--wide');
+  if (bodyClass) contentClasses.push(bodyClass);
+
   // Create modal using portal modal component
   const modal = createPortalModal({
     id: 'file-preview-modal',
     titleId: 'preview-modal-title',
     title: title,
-    contentClassName: `file-preview-modal-content${bodyClass ? ` ${bodyClass}` : ''}`,
+    contentClassName: contentClasses.join(' '),
     onClose: () => {
       onClose?.();
-      activePreviewModal = null;
+      // Actually close the modal when X button is clicked
+      if (activePreviewModal) {
+        activePreviewModal.hide();
+        activePreviewModal = null;
+      }
     }
   });
 
-  // Apply max-width to the modal content
-  const modalContent = modal.overlay.querySelector('.modal-content') as HTMLElement;
-  if (modalContent) {
-    modalContent.style.maxWidth = maxWidth;
-  }
-
   // Set body content
   modal.body.innerHTML = content;
-  modal.body.style.maxHeight = '60vh';
-  modal.body.style.overflow = 'auto';
 
   // Build footer with close button
   modal.footer.innerHTML = `
@@ -1748,23 +1755,88 @@ function showPreviewModal(options: PreviewModalOptions): void {
  */
 function showJsonPreviewModal(data: unknown, fileName: string): void {
   const formattedJson = JSON.stringify(data, null, 2);
-  const preStyle = 'white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; margin: 0; color: var(--portal-text-light);';
 
   showPreviewModal({
     title: fileName,
-    content: `<pre style="${preStyle}">${SanitizationUtils.escapeHtml(formattedJson)}</pre>`
+    content: `<pre class="file-preview-code">${SanitizationUtils.escapeHtml(formattedJson)}</pre>`
   });
+}
+
+/**
+ * Simple markdown to HTML converter for file previews
+ * Handles: headers, bold, italic, code blocks, inline code, lists, tables, links, horizontal rules
+ */
+function renderMarkdown(text: string): string {
+  // Escape HTML first to prevent XSS, then apply markdown formatting
+  let html = SanitizationUtils.escapeHtml(text);
+
+  // Code blocks (must be done before other formatting to preserve content)
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="md-code-block"><code>$2</code></pre>');
+
+  // Tables
+  html = html.replace(/^\|(.+)\|\s*\n\|[-:\s|]+\|\s*\n((?:\|.+\|\s*\n?)+)/gm, (_match, header, body) => {
+    const headerCells = header.split('|').map((cell: string) => `<th>${cell.trim()}</th>`).join('');
+    const bodyRows = body.trim().split('\n').map((row: string) => {
+      const cells = row.split('|').filter((c: string) => c.trim()).map((cell: string) => `<td>${cell.trim()}</td>`).join('');
+      return `<tr>${cells}</tr>`;
+    }).join('');
+    return `<table class="md-table"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+  });
+
+  // Headers
+  html = html.replace(/^#### (.+)$/gm, '<h4 class="md-h4">$1</h4>');
+  html = html.replace(/^### (.+)$/gm, '<h3 class="md-h3">$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2 class="md-h2">$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1 class="md-h1">$1</h1>');
+
+  // Bold and italic
+  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code class="md-inline-code">$1</code>');
+
+  // Horizontal rules
+  html = html.replace(/^---+$/gm, '<hr class="md-hr">');
+
+  // Unordered lists
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul class="md-list">$&</ul>');
+
+  // Line breaks (preserve paragraph structure)
+  html = html.replace(/\n\n+/g, '</p><p class="md-paragraph">');
+  html = `<p class="md-paragraph">${html}</p>`;
+
+  // Clean up empty paragraphs and fix structure
+  html = html.replace(/<p class="md-paragraph"><\/p>/g, '');
+  html = html.replace(/<p class="md-paragraph">(<h[1-4])/g, '$1');
+  html = html.replace(/(<\/h[1-4]>)<\/p>/g, '$1');
+  html = html.replace(/<p class="md-paragraph">(<ul|<table|<pre|<hr)/g, '$1');
+  html = html.replace(/(<\/ul>|<\/table>|<\/pre>)<\/p>/g, '$1');
+
+  return html;
 }
 
 /**
  * Show text content in a preview modal
  */
 function showTextPreviewModal(text: string, fileName: string): void {
-  const preStyle = 'white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; margin: 0; color: var(--portal-text-light);';
-
   showPreviewModal({
     title: fileName,
-    content: `<pre style="${preStyle}">${SanitizationUtils.escapeHtml(text)}</pre>`
+    content: `<pre class="file-preview-code">${SanitizationUtils.escapeHtml(text)}</pre>`
+  });
+}
+
+/**
+ * Show markdown content in a preview modal with rendered formatting
+ */
+function showMarkdownPreviewModal(text: string, fileName: string): void {
+  showPreviewModal({
+    title: fileName,
+    content: `<div class="md-preview">${renderMarkdown(text)}</div>`,
+    wide: true,
+    bodyClass: 'md-preview-body'
   });
 }
 
@@ -1775,7 +1847,7 @@ function showImagePreviewModal(imageUrl: string, fileName: string): void {
   showPreviewModal({
     title: fileName,
     content: `<img class="file-preview-image" src="${imageUrl}" alt="${SanitizationUtils.escapeHtml(fileName)}" />`,
-    maxWidth: '900px',
+    wide: true,
     bodyClass: 'file-preview-modal-body',
     onClose: () => {
       // Revoke blob URL to free memory
