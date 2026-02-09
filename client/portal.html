@@ -138,21 +138,23 @@
       <!-- Content Area -->
       <div class="dashboard-content" id="dashboard-content">
         <div class="content-wrapper">
-          <!-- Primary header row: sidebar toggle + breadcrumbs (evergreen-style) -->
-          <div class="page-header primary-header-row">
-            <button type="button" class="header-sidebar-toggle header-toggle-button" aria-label="Toggle sidebar">
-              <svg class="sidebar-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/></svg>
-              <span class="sr-only">Toggle Sidebar</span>
-            </button>
-            <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
-              <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
-            </nav>
-          </div>
+          <!-- Portal Header - consistent across all pages -->
+          <header class="portal-page-header">
+            <div class="portal-header-top">
+              <button type="button" class="header-sidebar-toggle header-toggle-button" aria-label="Toggle sidebar">
+                <svg class="sidebar-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/></svg>
+                <span class="sr-only">Toggle Sidebar</span>
+              </button>
+              <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
+                <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
+              </nav>
+            </div>
+            <div class="portal-header-title">
+              <h1 id="portal-page-title">Welcome Back, <span id="client-name">Client</span>!</h1>
+            </div>
+          </header>
           <!-- Dashboard View (Default) -->
           <div class="tab-content active" id="tab-dashboard">
-            <div class="page-title">
-              <h1>Welcome Back, <span id="client-name">Client</span>!</h1>
-            </div>
 
             <!-- Project Cards -->
             <div class="portal-project-cards">
@@ -214,10 +216,6 @@
 
           <!-- Files View -->
           <div class="tab-content" id="tab-files">
-            <div class="page-title">
-              <h1>Files</h1>
-            </div>
-
             <!-- Upload Section -->
             <div class="files-upload-section portal-shadow">
               <h3>Upload Files</h3>
@@ -335,10 +333,6 @@
 
           <!-- Messages View -->
           <div class="tab-content" id="tab-messages">
-            <div class="page-title">
-              <h1>Messages</h1>
-            </div>
-
             <!-- Messages Layout with Thread List -->
             <div class="messages-layout">
               <!-- Thread List Sidebar -->
@@ -381,10 +375,6 @@
 
           <!-- Invoices View -->
           <div class="tab-content" id="tab-invoices">
-            <div class="page-title">
-              <h1>Invoices</h1>
-            </div>
-
             <!-- Invoice Summary -->
             <div class="invoice-summary">
               <div class="summary-card portal-shadow">
@@ -421,9 +411,6 @@
 
           <!-- Documents View (Document requests) -->
           <div class="tab-content" id="tab-documents">
-            <div class="page-title">
-              <h1>Document Requests</h1>
-            </div>
             <p id="documents-intro" class="documents-intro">Documents we need from you. Open a request to view details and upload.</p>
             <div id="documents-list-wrap" class="documents-list-wrap portal-shadow">
               <div id="documents-list" class="documents-list"></div>
@@ -450,9 +437,6 @@
 
           <!-- Help View (Knowledge Base) -->
           <div class="tab-content" id="tab-help">
-            <div class="page-title">
-              <h1>Help</h1>
-            </div>
             <div class="help-search-wrap">
               <label for="help-search-input" class="sr-only">Search help articles</label>
               <input type="search" id="help-search-input" class="help-search-input" placeholder="Search help articles..." autocomplete="off" />
@@ -494,10 +478,6 @@
 
           <!-- Settings View -->
           <div class="tab-content" id="tab-settings">
-            <div class="page-title">
-              <h1>Settings</h1>
-            </div>
-
             <div class="settings-grid">
               <!-- Account Section (Profile) -->
               <div class="settings-section portal-shadow">
@@ -722,9 +702,6 @@
 
           <!-- New Project View - Terminal Intake Form -->
           <div class="tab-content" id="tab-new-project">
-            <div class="page-title">
-              <h1>New Project</h1>
-            </div>
             <section class="terminal-intake-container portal-intake">
               <!-- Terminal UI will be rendered by JavaScript -->
             </section>
@@ -828,10 +805,6 @@
 
           <!-- Project Preview View -->
           <div class="tab-content" id="tab-preview">
-            <div class="page-title">
-              <h1>Project Preview</h1>
-            </div>
-
             <div class="preview-container">
               <div class="preview-toolbar">
                 <div class="preview-url">

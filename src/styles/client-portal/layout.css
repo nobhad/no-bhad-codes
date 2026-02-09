@@ -160,16 +160,41 @@ body[data-page="client-portal"] {
   display: none;
 }
 
-/* Primary header row: sidebar toggle + breadcrumbs (evergreen-style) */
-.page-header.primary-header-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  padding: 0.5rem 0;
+/* ============================================
+   Portal Page Header - Consistent across all pages
+   Two rows: breadcrumbs, then page title
+   ============================================ */
+.portal-page-header {
+  margin-bottom: var(--space-6);
   flex-shrink: 0;
 }
 
+/* Row 1: sidebar toggle + breadcrumbs */
+.portal-header-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Row 2: page title */
+.portal-header-title h1 {
+  font-family: var(--font-family-acme);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  color: var(--portal-text-light);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-title, 0.02em);
+}
+
+/* Client name span styling */
+.portal-header-title h1 #client-name {
+  color: var(--color-primary);
+}
+
+/* ============================================
+   Shared header elements (admin + client portal)
+   ============================================ */
 .header-toggle-button {
   display: inline-flex;
   align-items: center;
@@ -177,18 +202,23 @@ body[data-page="client-portal"] {
   width: 1.75rem;
   height: 1.75rem;
   padding: 0;
-  margin-left: -0.25rem;
   background: transparent;
   border: none;
-  border-radius: var(--portal-radius-md, 6px);
+  border-radius: var(--portal-radius-sm, 4px);
   cursor: pointer;
-  color: var(--portal-text-light);
+  color: var(--portal-text-secondary);
   transition: color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
 }
 
 .header-toggle-button:hover {
   background: rgba(255, 255, 255, 0.08);
   color: var(--portal-text-light);
+}
+
+.header-toggle-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .sidebar-toggle-icon {
@@ -207,7 +237,22 @@ body[data-page="client-portal"] {
   min-width: 0;
 }
 
-/* Page title (h1 preferred, h2 fallback) below primary header row */
+/* Admin primary header row (breadcrumbs) */
+.page-header.primary-header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .portal-header-title h1 {
+    font-size: clamp(1.25rem, 6vw, 1.75rem);
+  }
+}
+
+/* Legacy support: page-title class (backwards compat) */
 .page-title {
   margin-bottom: 1.5rem;
 }
