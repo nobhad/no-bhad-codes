@@ -15,6 +15,63 @@ See `archive/ARCHIVED_WORK_2026-02.md` for full details.
 - General UI/UX Enhancements: Secondary Sidebar, Project Milestones Auto-Population, Task Priority Auto-Update, Project Detail Page Restructure
 - Bug Fixes: Intake PDF HTML entity decoding, PDF newline encoding error, Client proposal preview modal, URL field encoding, Quoted price display
 
+### Tasks Page Desktop Layout & Styling - COMPLETE
+
+- **Kanban Board Horizontal Layout** - COMPLETE
+  - Fixed columns stacking vertically on desktop (now display side-by-side)
+  - Changed flex from `flex: 1` to `flex: 1 1 0` for equal column widths
+  - Added `!important` overrides for `flex-direction: row` to enforce horizontal layout
+  - Used standard `@media (max-width: 767px)` instead of custom media query
+  - Files: `src/styles/shared/portal-components.css`, `src/styles/admin/tasks.css`
+
+- **List View Table Styling** - COMPLETE
+  - Changed from non-existent `admin-table-wrapper` to proper `admin-table-scroll-wrapper`
+  - Changed table class from `data-table` to `admin-table` per CSS documentation
+  - Added proper column classes (`.type-col`, `.status-col`, `.date-col`)
+  - Added border-radius styles for table within `.tasks-main-container`
+  - Files: `src/features/admin/modules/admin-global-tasks.ts`, `src/styles/admin/tasks.css`
+
+- **Shadow Styling Added** - COMPLETE
+  - Added `box-shadow: var(--portal-shadow)` to kanban columns and task list container
+  - Added `.portal-shadow` class to main container in HTML
+  - Files: `src/styles/shared/portal-components.css`, `admin/index.html`
+
+- **View Toggle Inside Main Card** - COMPLETE
+  - Restructured HTML to wrap toggle and content in `.tasks-main-container`
+  - Added `.tasks-header` for toggle placement with border-bottom separator
+  - File: `admin/index.html`, `src/styles/admin/tasks.css`
+
+- **"TO DO" Column Color Strip** - COMPLETE
+  - Added `pending` status to the selector for column header accent border
+  - Color strip now matches other status tiers (In Progress, Blocked, Done)
+  - File: `src/styles/shared/portal-components.css`
+
+### Assignee Column Removal - COMPLETE
+
+- **Removed Assignee from Tasks** - One-person company, no need for assignee field
+  - Removed from global tasks list view (header and rows)
+  - Removed from project tasks list view (header and rows)
+  - Removed from kanban cards (both global and project-specific)
+  - Removed from task detail modals
+  - Updated CSS grid from 5 columns to 4 columns
+  - Files: `src/features/admin/modules/admin-global-tasks.ts`, `src/features/admin/modules/admin-tasks.ts`, `src/styles/admin/tasks.css`
+
+### Dashboard Tasks API Fix - COMPLETE
+
+- **Multiple Status Filter Support** - COMPLETE
+  - Fixed `getAllTasks` in project-service.ts to support comma-separated status values
+  - Dashboard calls API with `status=pending,in_progress,blocked`
+  - Previous code only handled single status (`AND t.status = ?`)
+  - Fixed with SQL `IN` clause for multiple statuses
+  - File: `server/services/project-service.ts`
+
+### Dashboard Kanban Layout Fix - COMPLETE
+
+- **Horizontal Layout for Dashboard Tasks** - COMPLETE
+  - Added CSS to ensure dashboard kanban displays columns horizontally
+  - Used same `!important` pattern as global tasks page
+  - File: `src/styles/shared/portal-cards.css`
+
 ### Modal Standardization Refactoring (Earlier)
 
 - **Dynamic Modals Converted to `createPortalModal()`** - COMPLETE
