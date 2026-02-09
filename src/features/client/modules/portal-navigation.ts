@@ -53,6 +53,7 @@ let cachedMobileHeaderTitle: HTMLElement | null | undefined;
 let cachedBreadcrumbList: HTMLElement | null | undefined;
 let cachedAccountList: HTMLElement | null | undefined;
 let cachedAccountHeader: HTMLElement | null | undefined;
+let cachedPortalPageTitle: HTMLElement | null | undefined;
 
 /** Get cached view element */
 function getView(viewId: string): HTMLElement | null {
@@ -110,6 +111,51 @@ function getAccountHeader(): HTMLElement | null {
   return cachedAccountHeader;
 }
 
+/** Get cached portal page title */
+function getPortalPageTitle(): HTMLElement | null {
+  if (cachedPortalPageTitle === undefined) {
+    cachedPortalPageTitle = document.getElementById('portal-page-title');
+  }
+  return cachedPortalPageTitle;
+}
+
+/** Store the current client name for use in page title */
+let currentClientName = 'Client';
+
+/** Store the current active tab */
+let currentActiveTab = 'dashboard';
+
+/**
+ * Set the client name (called after login)
+ * Updates both the stored value and the page title if on dashboard
+ */
+export function setClientName(name: string): void {
+  currentClientName = name || 'Client';
+  // Update the page title if we're on dashboard
+  if (currentActiveTab === 'dashboard') {
+    updatePortalPageTitle('dashboard');
+  }
+}
+
+/**
+ * Update the portal page header title based on current tab
+ */
+export function updatePortalPageTitle(tabName: string): void {
+  const titleEl = getPortalPageTitle();
+  if (!titleEl) return;
+
+  currentActiveTab = tabName;
+
+  // Special case for dashboard - show "Welcome Back, [Client Name]!"
+  if (tabName === 'dashboard') {
+    titleEl.innerHTML = `Welcome Back, <span id="client-name">${currentClientName}</span>!`;
+  } else {
+    // Show the tab title
+    const title = TAB_TITLES[tabName] || 'Dashboard';
+    titleEl.textContent = title;
+  }
+}
+
 /**
  * Switch to a specific tab in the dashboard
  */
@@ -147,6 +193,9 @@ export function switchTab(tabName: string, callbacks: {
 
   // Update mobile header title
   updateMobileHeaderTitle(tabName);
+
+  // Update portal page header title
+  updatePortalPageTitle(tabName);
 
   // Update breadcrumbs based on current tab
   const tabTitle = TAB_TITLES[tabName] || 'Dashboard';

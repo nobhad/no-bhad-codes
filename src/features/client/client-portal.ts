@@ -756,11 +756,9 @@ export class ClientPortalModule extends BaseModule {
 
       if (!projectsResponse.ok) {
         console.error('[ClientPortal] Failed to fetch projects:', projectsResponse.status);
-        // Show error state
-        const clientNameElement = this.domCache.get('clientName');
-        if (clientNameElement) {
-          clientNameElement.textContent = user.name || user.email || 'Client';
-        }
+        // Show error state with client name
+        const errorClientName = user.name || user.email || 'Client';
+        loadNavigationModule().then((nav) => nav.setClientName(errorClientName));
         if (this.projectsList) {
           this.projectsList.innerHTML =
             '<div class="error-message"><p>Unable to load projects. Please try again later.</p></div>';
@@ -772,11 +770,9 @@ export class ClientPortalModule extends BaseModule {
       const apiProjects = projectsData.projects || [];
 
       if (apiProjects.length === 0) {
-        // No projects yet - show empty state
-        const clientNameElement = this.domCache.get('clientName');
-        if (clientNameElement) {
-          clientNameElement.textContent = user.name || user.email || 'Client';
-        }
+        // No projects yet - show empty state with client name
+        const emptyClientName = user.name || user.email || 'Client';
+        loadNavigationModule().then((nav) => nav.setClientName(emptyClientName));
         this.populateProjectsList([]);
         return;
       }
@@ -852,20 +848,16 @@ export class ClientPortalModule extends BaseModule {
         );
       }
 
-      // Set client name in header
-      const clientNameElement = this.domCache.get('clientName');
-      if (clientNameElement) {
-        clientNameElement.textContent = user.name || user.email || 'Client';
-      }
+      // Set client name in header and page title
+      const clientName = user.name || user.email || 'Client';
+      loadNavigationModule().then((nav) => nav.setClientName(clientName));
 
       this.populateProjectsList(clientProjects);
     } catch (error) {
       console.error('[ClientPortal] Failed to load projects:', error);
-      // Show error state
-      const clientNameElement = this.domCache.get('clientName');
-      if (clientNameElement) {
-        clientNameElement.textContent = user.name || user.email || 'Client';
-      }
+      // Show error state with client name
+      const clientName = user.name || user.email || 'Client';
+      loadNavigationModule().then((nav) => nav.setClientName(clientName));
       if (this.projectsList) {
         this.projectsList.innerHTML =
           '<div class="error-message"><p>Unable to load projects. Please try again later.</p></div>';
