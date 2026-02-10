@@ -1,6 +1,8 @@
 # Proposal Builder
 
-**Last Updated:** January 28, 2026
+**Last Updated:** February 10, 2026
+
+> **Note:** This document covers the client-facing Proposal Builder (tier selection and customization). For advanced proposal management features (templates, versioning, e-signatures, comments, activity tracking), see [PROPOSALS.md](./PROPOSALS.md).
 
 ## Table of Contents
 
@@ -356,6 +358,8 @@ See [API Documentation](../API_DOCUMENTATION.md#proposal-builder-endpoints) for 
 
 ## Related Documentation
 
+- [Proposals](./PROPOSALS.md) - Advanced proposal management (templates, versioning, e-signatures)
+- [Contracts](./CONTRACTS.md) - Contract generation and signing
 - [Terminal Intake](./TERMINAL_INTAKE.md) - Intake form that precedes proposal builder
 - [Admin Dashboard](./ADMIN_DASHBOARD.md) - Admin proposal management
 - [Invoices](./INVOICES.md) - Invoice system (proposals convert to invoices)

@@ -1953,6 +1953,89 @@ Request and collect documents from clients; admin review and templates.
 
 ---
 
+## Ad Hoc Requests API
+
+**Base path:** `/ad-hoc-requests` (mounted at `/api/ad-hoc-requests`)
+
+Admin endpoints for tracking custom client requests and quotes.
+
+**Statuses:** `submitted`, `reviewing`, `quoted`, `approved`, `in_progress`, `completed`, `declined`
+**Request types:** `feature`, `change`, `bug_fix`, `enhancement`, `support`
+**Priorities:** `low`, `normal`, `high`, `urgent`
+**Urgency:** `normal`, `priority`, `urgent`, `emergency`
+
+### Client
+
+|Method|Path|Description|
+|--------|------|-------------|
+|GET|`/ad-hoc-requests/my-requests`|List the authenticated client's requests (optional `status`, `requestType` queries)|
+|POST|`/ad-hoc-requests/my-requests`|Submit a new request (projectId, title, description, requestType, optional priority/urgency/attachmentFileId)|
+|POST|`/ad-hoc-requests/my-requests/:id/approve`|Approve a quoted request|
+|POST|`/ad-hoc-requests/my-requests/:id/decline`|Decline a quoted request|
+
+**Authentication:** Client (cookie or token).
+
+### Admin
+
+|Method|Path|Description|
+|--------|------|-------------|
+|GET|`/ad-hoc-requests`|List requests (optional `projectId`, `clientId`, `status`, `requestType`, `priority`, `urgency` queries)|
+|GET|`/ad-hoc-requests/:id`|Get request by ID|
+|POST|`/ad-hoc-requests`|Create request (projectId, clientId, title, description, requestType, optional status/priority/urgency/estimatedHours/flatRate/hourlyRate/quotedPrice/attachmentFileId)|
+|PUT|`/ad-hoc-requests/:id`|Update request (any fields above)|
+|POST|`/ad-hoc-requests/:id/send-quote`|Send quote email to client (marks status as `quoted`)|
+|POST|`/ad-hoc-requests/:id/convert-to-task`|Convert approved request into project task(s)|
+|DELETE|`/ad-hoc-requests/:id`|Soft delete request|
+
+**Authentication:** Admin only.
+
+**Example: Create ad hoc request**
+
+```bash
+curl -X POST https://nobhad.codes/api/ad-hoc-requests \
+  -H "Authorization: Bearer your-admin-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "projectId": 101,
+    "clientId": 12,
+    "title": "Add two-factor login",
+    "description": "Client wants optional 2FA on the portal login.",
+    "requestType": "feature",
+    "priority": "high",
+    "urgency": "priority",
+    "estimatedHours": 6,
+    "hourlyRate": 150,
+    "quotedPrice": 900,
+    "attachmentFileId": 812
+  }'
+```
+
+```json
+{
+  "success": true,
+  "message": "Ad hoc request created",
+  "request": {
+    "id": 45,
+    "projectId": 101,
+    "clientId": 12,
+    "title": "Add two-factor login",
+    "description": "Client wants optional 2FA on the portal login.",
+    "status": "submitted",
+    "requestType": "feature",
+    "priority": "high",
+    "urgency": "priority",
+    "estimatedHours": 6,
+    "flatRate": null,
+    "hourlyRate": 150,
+    "quotedPrice": 900,
+    "createdAt": "2026-02-10T18:05:00.000Z",
+    "updatedAt": "2026-02-10T18:05:00.000Z"
+  }
+}
+```
+
+---
+
 ## Knowledge Base API
 
 **Base path:** `/kb` (mounted at `/api/kb`)

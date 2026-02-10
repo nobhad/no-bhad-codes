@@ -1034,6 +1034,7 @@ Complete feature specifications with component details:
 
 | Feature | Documentation |
 |---------|---------------|
+| Contracts | [CONTRACTS.md](../features/CONTRACTS.md) |
 | Portfolio | [PORTFOLIO.md](../features/PORTFOLIO.md) |
 | Terminal Intake | [TERMINAL_INTAKE.md](../features/TERMINAL_INTAKE.md) |
 | Intro Animation | [INTRO_ANIMATION.md](../features/INTRO_ANIMATION.md) |

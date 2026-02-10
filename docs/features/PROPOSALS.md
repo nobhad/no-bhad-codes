@@ -1,7 +1,7 @@
 # Proposal System Enhancement
 
 **Status:** Complete
-**Last Updated:** February 6, 2026
+**Last Updated:** February 10, 2026
 
 ## Overview
 
@@ -546,6 +546,78 @@ When a proposal is deleted via `DELETE /api/proposals/:id`:
 - `DELETE /api/proposals/:id` - Soft delete a proposal (NEW endpoint)
 - `GET /api/admin/deleted-items?type=proposal` - List deleted proposals
 - `POST /api/admin/deleted-items/proposal/:id/restore` - Restore a proposal
+
+## Test Coverage
+
+**Test File:** `tests/unit/server/proposals.test.ts`
+**Total Tests:** 46
+
+### Coverage Areas
+
+| Area | Tests | Description |
+|------|-------|-------------|
+| Template Management | 8 | Fetch, create, update templates and tiers |
+| Proposal Builder | 10 | Price calculations, discounts, tax, custom items |
+| PDF Generation | 6 | Branding, signature blocks, watermarks |
+| E-Signature | 12 | Draw/type signatures, status tracking, tokens |
+| Versioning & Comments | 6 | Version history, activity timeline, threaded comments |
+| Error Handling | 4 | Validation, non-existent proposals, signature flow |
+
+### Test Categories
+
+**Template Tests:**
+
+- Fetch all proposal templates
+- Create proposal template with tiers
+- Update template pricing
+- Delete template
+- Set default template per project type
+
+**Builder Tests:**
+
+- Calculate subtotal from features
+- Apply percentage discount
+- Apply fixed amount discount
+- Add custom line items
+- Calculate tax amount
+- Save proposal as draft
+
+**PDF Tests:**
+
+- Generate PDF with branding
+- Include signature block
+- Show feature breakdown
+- Add "Draft" watermark for unsigned
+- Add "Signed" watermark after signature
+
+**Signature Tests:**
+
+- Request signature via email
+- Generate unique signing token
+- Record drawn signature
+- Record typed signature
+- Capture IP and timestamp
+- Handle expired tokens
+- Track signature status
+
+**Version Tests:**
+
+- Create version before changes
+- Restore previous version
+- Compare versions side-by-side
+- Add threaded comments
+- Get activity timeline
+
+---
+
+## Related Documentation
+
+- [Proposal Builder](./PROPOSAL_BUILDER.md) - Client-facing tier selection and customization
+- [Contracts](./CONTRACTS.md) - Contract generation and signing (similar e-signature pattern)
+- [Invoices](./INVOICES.md) - Proposals convert to invoices
+- [PDF Generation](./PDF_GENERATION.md) - PDF generation standards
+
+---
 
 ## Change Log
 

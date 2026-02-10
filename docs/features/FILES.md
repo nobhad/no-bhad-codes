@@ -882,6 +882,7 @@ When uploading files in the admin project details Files tab, a confirmation moda
 ## Related Documentation
 
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
+- [Deliverables](./DELIVERABLES.md) - Design review and deliverable approval
 - [Document Requests](./DOCUMENT_REQUESTS.md) - Document request integration
 - [API Reference](../API_REFERENCE.md) - Complete API documentation
 - [Settings](./SETTINGS.md) - Storage preferences
