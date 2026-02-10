@@ -11,6 +11,7 @@
 import { getDatabase } from '../database/init.js';
 import { getTaskTemplatesForMilestone, TaskTemplate, normalizeMilestoneTitle } from '../config/default-tasks.js';
 import { normalizeProjectType } from '../config/default-milestones.js';
+import { userService } from './user-service.js';
 
 /**
  * Generated task result
@@ -92,6 +93,9 @@ export async function generateMilestoneTasks(
     // Calculate task due dates (spread evenly before milestone due date)
     const taskDueDates = calculateTaskDueDates(milestoneDueDate, templates.length, options.startDate);
 
+    // Look up user ID for assignedTo during transition period
+    const assignedToUserId = await userService.getUserIdByEmail(options.assignedTo);
+
     // Generate each task
     for (let i = 0; i < templates.length; i++) {
       const template = templates[i];
@@ -101,8 +105,8 @@ export async function generateMilestoneTasks(
         `INSERT INTO project_tasks (
           project_id, milestone_id, title, description,
           status, priority, due_date, estimated_hours,
-          sort_order, assigned_to, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+          sort_order, assigned_to, assigned_to_user_id, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
         [
           projectId,
           milestoneId,
@@ -113,7 +117,8 @@ export async function generateMilestoneTasks(
           dueDate,
           template.estimatedHours || null,
           template.order,
-          options.assignedTo || null
+          options.assignedTo || null,
+          assignedToUserId
         ]
       );
 
