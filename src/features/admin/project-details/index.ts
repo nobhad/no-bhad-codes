@@ -86,5 +86,7 @@ export {
   duplicateProject,
   openEditProjectModal,
   saveProjectChanges,
-  handleContractSign
+  handleContractSign,
+  handleContractCountersign,
+  showContractBuilder
 } from './actions';

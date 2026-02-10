@@ -123,8 +123,8 @@ const LEADS_BULK_CONFIG: BulkActionConfig = {
 const PIPELINE_STAGES = [
   { id: 'new', label: 'New', statuses: ['new'], color: 'var(--portal-text-secondary)' },
   { id: 'contacted', label: 'Contacted', statuses: ['contacted'], color: 'var(--app-color-primary)' },
-  { id: 'qualified', label: 'Qualified', statuses: ['qualified'], color: '#f59e0b' },
-  { id: 'in-progress', label: 'In Progress', statuses: ['in-progress'], color: '#8b5cf6' },
+  { id: 'qualified', label: 'Qualified', statuses: ['qualified'], color: 'var(--color-warning-500)' },
+  { id: 'in-progress', label: 'In Progress', statuses: ['in-progress'], color: 'var(--color-info-500)' },
   { id: 'won', label: 'Won', statuses: ['converted'], color: 'var(--status-active)' },
   { id: 'lost', label: 'Lost', statuses: ['lost', 'cancelled'], color: 'var(--status-cancelled)' }
 ];

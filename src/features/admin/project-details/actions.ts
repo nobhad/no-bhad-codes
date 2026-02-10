@@ -12,7 +12,8 @@ import { getElement } from '../../../utils/dom-cache';
 import {
   confirmDialog,
   confirmDanger,
-  alertError
+  alertError,
+  alertSuccess
 } from '../../../utils/confirm-dialog';
 import { domCache } from './dom-cache';
 import { formatDate } from '../../../utils/format-utils';
@@ -35,6 +36,12 @@ interface ProjectBase {
   timeline?: string;
   description?: string;
   notes?: string;
+}
+
+interface ContractTemplateOption {
+  id: number;
+  name: string;
+  type: string;
 }
 
 /**
@@ -358,4 +365,426 @@ export async function handleContractSign(
     console.error('Error requesting signature:', error);
     showToast('Failed to send signature request', 'error');
   }
+}
+
+/**
+ * Handle contract countersign (admin)
+ */
+export async function handleContractCountersign(
+  projectId: number,
+  projectsData: ProjectResponse[]
+): Promise<void> {
+  const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
+  if (!project) return;
+
+  if (!project.contract_signed_at) {
+    showToast('Client signature is required before countersigning.', 'warning');
+    return;
+  }
+
+  if (project.contract_countersigned_at) {
+    showToast('Contract already countersigned.', 'info');
+    return;
+  }
+
+  const { createPortalModal } = await import('../../../components/portal-modal');
+
+  const modal = createPortalModal({
+    id: 'contract-countersign-modal',
+    titleId: 'contract-countersign-title',
+    title: 'Countersign Contract',
+    contentClassName: 'contract-countersign-modal',
+    onClose: () => {
+      modal.hide();
+      modal.overlay.remove();
+    }
+  });
+
+  const form = document.createElement('form');
+  form.className = 'contract-countersign-form';
+  form.innerHTML = `
+    <div class="portal-form-group">
+      <label for="contract-countersign-name">Signer Name</label>
+      <input class="portal-input" id="contract-countersign-name" name="signerName" placeholder="Your name" required />
+    </div>
+    <div class="contract-signature-pad">
+      <div class="signature-canvas-wrap">
+        <canvas id="contract-countersign-canvas" width="520" height="180"></canvas>
+      </div>
+      <div class="signature-actions">
+        <button type="button" class="btn btn-outline" id="contract-countersign-clear">Clear</button>
+      </div>
+      <p class="signature-hint">Draw your signature above using your mouse or trackpad.</p>
+    </div>
+  `;
+
+  modal.body.appendChild(form);
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'btn btn-outline';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => {
+    modal.hide();
+    modal.overlay.remove();
+  });
+
+  const submitBtn = document.createElement('button');
+  submitBtn.type = 'submit';
+  submitBtn.className = 'btn btn-primary';
+  submitBtn.textContent = 'Countersign';
+
+  modal.footer.appendChild(cancelBtn);
+  modal.footer.appendChild(submitBtn);
+
+  document.body.appendChild(modal.overlay);
+  modal.show();
+
+  const canvas = form.querySelector('#contract-countersign-canvas') as HTMLCanvasElement | null;
+  const clearBtn = form.querySelector('#contract-countersign-clear') as HTMLButtonElement | null;
+  const nameInput = form.querySelector('#contract-countersign-name') as HTMLInputElement | null;
+
+  if (!canvas || !clearBtn || !nameInput) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let isDrawing = false;
+  let hasSignature = false;
+
+  // eslint-disable-next-line no-undef
+  const strokeColor = getComputedStyle(document.documentElement)
+    .getPropertyValue('--portal-text-light')
+    .trim();
+  ctx.strokeStyle = strokeColor || 'currentColor';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const getPosition = (event: MouseEvent | TouchEvent) => {
+    const rect = canvas.getBoundingClientRect();
+    if (event instanceof MouseEvent) {
+      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    }
+    const touch = event.touches[0];
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  };
+
+  const startDrawing = (event: MouseEvent | TouchEvent) => {
+    event.preventDefault();
+    isDrawing = true;
+    const { x, y } = getPosition(event);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+
+  const draw = (event: MouseEvent | TouchEvent) => {
+    if (!isDrawing) return;
+    event.preventDefault();
+    const { x, y } = getPosition(event);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    hasSignature = true;
+  };
+
+  const stopDrawing = () => {
+    isDrawing = false;
+  };
+
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseleave', stopDrawing);
+  canvas.addEventListener('touchstart', startDrawing);
+  canvas.addEventListener('touchmove', draw);
+  canvas.addEventListener('touchend', stopDrawing);
+
+  clearBtn.addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasSignature = false;
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    if (!nameInput.value.trim()) {
+      alertError('Signer name is required.');
+      return;
+    }
+
+    if (!hasSignature) {
+      alertError('Please draw your signature before submitting.');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+
+    try {
+      const response = await apiFetch(`/api/projects/${projectId}/contract/countersign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          signerName: nameInput.value.trim(),
+          signatureData: canvas.toDataURL('image/png')
+        })
+      });
+
+      if (response.ok) {
+        showToast('Contract countersigned successfully.', 'success');
+        modal.hide();
+        modal.overlay.remove();
+      } else {
+        const error = await response.json().catch(() => ({}));
+        alertError(error.error || 'Failed to countersign contract.');
+      }
+    } catch (error) {
+      console.error('[ProjectActions] Error countersigning contract:', error);
+      alertError('Failed to countersign contract. Please try again.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Countersign';
+    }
+  });
+}
+
+export async function showContractBuilder(
+  projectId: number,
+  projectsData: ProjectResponse[]
+): Promise<void> {
+  const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
+  if (!project) return;
+
+  const { createPortalModal } = await import('../../../components/portal-modal');
+
+  const modal = createPortalModal({
+    id: 'contract-builder-modal',
+    titleId: 'contract-builder-title',
+    title: 'Contract Builder',
+    onClose: () => modal.hide()
+  });
+
+  modal.body.innerHTML = `
+    <div class="contract-builder-grid">
+      <div class="contract-builder-form">
+        <div class="form-group">
+          <label class="form-label" for="contract-template-select">Template</label>
+          <div class="contract-template-row">
+            <select id="contract-template-select" class="form-input">
+              <option value="">Select a template</option>
+            </select>
+            <button type="button" class="btn btn-outline" id="contract-template-load">Load Template</button>
+            <button type="button" class="btn btn-outline" id="contract-template-clear">Start Blank</button>
+          </div>
+          <p class="form-help">Templates apply variables like {{client.name}} and {{project.name}} automatically.</p>
+        </div>
+
+        <div class="contract-builder-sections">
+          <div class="form-group">
+            <label class="form-label" for="contract-section-scope">Scope</label>
+            <textarea id="contract-section-scope" class="form-input contract-builder-textarea" rows="4" placeholder="Outline the project scope..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="contract-section-timeline">Timeline</label>
+            <textarea id="contract-section-timeline" class="form-input contract-builder-textarea" rows="3" placeholder="Timeline expectations and milestones..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="contract-section-payment">Payment</label>
+            <textarea id="contract-section-payment" class="form-input contract-builder-textarea" rows="3" placeholder="Payment schedule and terms..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="contract-section-ip">IP Rights</label>
+            <textarea id="contract-section-ip" class="form-input contract-builder-textarea" rows="3" placeholder="Ownership and IP transfer details..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="contract-section-termination">Termination</label>
+            <textarea id="contract-section-termination" class="form-input contract-builder-textarea" rows="3" placeholder="Termination clauses and notice period..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contract-content">Contract Draft</label>
+          <textarea id="contract-content" class="form-input contract-builder-content" rows="12" placeholder="Build or paste your contract text..."></textarea>
+        </div>
+      </div>
+
+      <div class="contract-builder-preview">
+        <div class="contract-preview-header">
+          <h4>Preview</h4>
+          <button type="button" class="btn btn-outline" id="contract-generate-draft">Generate Draft</button>
+        </div>
+        <div class="contract-preview-body" id="contract-preview">Draft content will appear here.</div>
+      </div>
+    </div>
+  `;
+
+  modal.footer.innerHTML = `
+    <button type="button" class="btn btn-outline" id="contract-cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-secondary" id="contract-save-draft">Save Draft</button>
+  `;
+
+  document.body.appendChild(modal.overlay);
+  modal.show();
+
+  const templateSelect = modal.body.querySelector('#contract-template-select') as HTMLSelectElement | null;
+  const templateLoadBtn = modal.body.querySelector('#contract-template-load') as HTMLButtonElement | null;
+  const templateClearBtn = modal.body.querySelector('#contract-template-clear') as HTMLButtonElement | null;
+  const contentTextarea = modal.body.querySelector('#contract-content') as HTMLTextAreaElement | null;
+  const previewBody = modal.body.querySelector('#contract-preview') as HTMLElement | null;
+  const generateBtn = modal.body.querySelector('#contract-generate-draft') as HTMLButtonElement | null;
+  const cancelBtn = modal.footer.querySelector('#contract-cancel-btn') as HTMLButtonElement | null;
+  const saveDraftBtn = modal.footer.querySelector('#contract-save-draft') as HTMLButtonElement | null;
+
+  let contractId: number | null = null;
+  let currentTemplateId: number | null = null;
+
+  const updatePreview = (value: string) => {
+    if (!previewBody) return;
+    previewBody.textContent = value.trim() ? value : 'Draft content will appear here.';
+  };
+
+  const buildDraftFromSections = (): string => {
+    const scope = (modal.body.querySelector('#contract-section-scope') as HTMLTextAreaElement | null)?.value.trim();
+    const timeline = (modal.body.querySelector('#contract-section-timeline') as HTMLTextAreaElement | null)?.value.trim();
+    const payment = (modal.body.querySelector('#contract-section-payment') as HTMLTextAreaElement | null)?.value.trim();
+    const ipRights = (modal.body.querySelector('#contract-section-ip') as HTMLTextAreaElement | null)?.value.trim();
+    const termination = (modal.body.querySelector('#contract-section-termination') as HTMLTextAreaElement | null)?.value.trim();
+
+    const sections = [
+      { title: 'Project Overview', body: `Project: ${project.project_name || ''}\nClient: ${project.client_name || project.contact_name || ''}` },
+      { title: 'Scope', body: scope || '' },
+      { title: 'Timeline', body: timeline || '' },
+      { title: 'Payment', body: payment || '' },
+      { title: 'IP Rights', body: ipRights || '' },
+      { title: 'Termination', body: termination || '' }
+    ];
+
+    return sections
+      .filter(section => section.body.trim())
+      .map(section => `${section.title}\n${section.body}`)
+      .join('\n\n');
+  };
+
+  const populateTemplates = async () => {
+    if (!templateSelect) return;
+    try {
+      const response = await apiFetch('/api/contracts/templates');
+      if (!response.ok) {
+        showToast('Failed to load contract templates', 'error');
+        return;
+      }
+      const data = await response.json();
+      const templates: ContractTemplateOption[] = data.templates || [];
+      templates.forEach((template) => {
+        const option = document.createElement('option');
+        option.value = String(template.id);
+        option.textContent = `${template.name} (${template.type})`;
+        templateSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error('[ContractBuilder] Error loading templates:', error);
+      showToast('Failed to load contract templates', 'error');
+    }
+  };
+
+  await populateTemplates();
+
+  templateSelect?.addEventListener('change', () => {
+    currentTemplateId = templateSelect.value ? Number(templateSelect.value) : null;
+  });
+
+  templateLoadBtn?.addEventListener('click', async () => {
+    if (!currentTemplateId) {
+      showToast('Select a template first', 'info');
+      return;
+    }
+    try {
+      const response = await apiPost('/api/contracts/from-template', {
+        templateId: currentTemplateId,
+        projectId,
+        clientId: project.client_id,
+        status: 'draft'
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        showToast(error.message || 'Failed to apply template', 'error');
+        return;
+      }
+
+      const data = await response.json();
+      const contract = data.contract;
+      contractId = contract?.id || null;
+      if (contentTextarea) {
+        contentTextarea.value = contract?.content || '';
+        updatePreview(contentTextarea.value);
+      }
+      const templateLabel = document.getElementById('pd-contract-template-label');
+      if (templateLabel && templateSelect) templateLabel.textContent = templateSelect.options[templateSelect.selectedIndex]?.textContent || 'Template applied';
+      const draftStatus = document.getElementById('pd-contract-draft-status');
+      if (draftStatus) draftStatus.textContent = 'Draft loaded';
+      alertSuccess('Contract draft created from template');
+    } catch (error) {
+      console.error('[ContractBuilder] Error applying template:', error);
+      showToast('Failed to apply template', 'error');
+    }
+  });
+
+  templateClearBtn?.addEventListener('click', () => {
+    if (contentTextarea) {
+      contentTextarea.value = '';
+      updatePreview('');
+    }
+    contractId = null;
+  });
+
+  generateBtn?.addEventListener('click', () => {
+    const draft = buildDraftFromSections();
+    if (contentTextarea) {
+      contentTextarea.value = draft;
+      updatePreview(draft);
+    }
+  });
+
+  contentTextarea?.addEventListener('input', () => {
+    updatePreview(contentTextarea.value);
+  });
+
+  cancelBtn?.addEventListener('click', () => modal.hide());
+
+  saveDraftBtn?.addEventListener('click', async () => {
+    if (!contentTextarea?.value.trim()) {
+      showToast('Add contract content before saving', 'error');
+      return;
+    }
+
+    try {
+      const payload = {
+        templateId: currentTemplateId,
+        projectId,
+        clientId: project.client_id,
+        content: contentTextarea.value,
+        status: 'draft'
+      };
+
+      const response = contractId
+        ? await apiPut(`/api/contracts/${contractId}`, payload)
+        : await apiPost('/api/contracts', payload);
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        showToast(error.message || 'Failed to save draft', 'error');
+        return;
+      }
+
+      const data = await response.json();
+      contractId = data.contract?.id || contractId;
+      const draftStatus = document.getElementById('pd-contract-draft-status');
+      if (draftStatus) draftStatus.textContent = 'Draft saved';
+      alertSuccess('Contract draft saved');
+    } catch (error) {
+      console.error('[ContractBuilder] Error saving draft:', error);
+      showToast('Failed to save draft', 'error');
+    }
+  });
 }

@@ -73,6 +73,24 @@ export async function loadGlobalTasks(ctx: AdminDashboardContext): Promise<void>
   await fetchTasks();
   setupViewToggle();
   renderCurrentView();
+  openTaskFromUrl();
+}
+
+function openTaskFromUrl(): void {
+  const params = new URLSearchParams(window.location.search);
+  const taskIdParam = params.get('taskId');
+  if (!taskIdParam) return;
+
+  const taskId = Number(taskIdParam);
+  if (Number.isNaN(taskId)) return;
+
+  const task = currentTasks.find(t => t.id === taskId);
+  if (task) {
+    handleTaskClick(taskToKanbanItem(task));
+    const url = new URL(window.location.href);
+    url.searchParams.delete('taskId');
+    window.history.replaceState({}, '', url.toString());
+  }
 }
 
 /**

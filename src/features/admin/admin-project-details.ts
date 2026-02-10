@@ -17,6 +17,7 @@ import {
   formatCurrency
 } from '../../utils/format-utils';
 import { alertWarning } from '../../utils/confirm-dialog';
+import { apiPut } from '../../utils/api-client';
 import {
   createSecondarySidebar,
   SECONDARY_TAB_ICONS,
@@ -69,7 +70,9 @@ import {
   duplicateProject,
   openEditProjectModal,
   saveProjectChanges,
-  handleContractSign
+  handleContractSign,
+  handleContractCountersign,
+  showContractBuilder
 } from './project-details';
 
 import type { ProjectResponse } from '../../types/api';
@@ -184,7 +187,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       if (!textarea) return;
 
       try {
-        const response = await this.apiPut(`/api/projects/${projectId}`, {
+        const response = await apiPut(`/api/projects/${projectId}`, {
           notes: textarea.value.trim()
         });
 
@@ -194,7 +197,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
             project.notes = textarea.value.trim();
           }
           // Refresh the project details display
-          await this.loadProjectDetails(projectId);
+          this.populateProjectDetailView(project);
           modal.hide();
           const { alertSuccess } = await import('../../utils/confirm-dialog');
           alertSuccess('Project notes updated successfully');
@@ -393,7 +396,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       if (project.notes && project.notes.trim()) {
         notesDisplay.innerHTML = `<div class="notes-content">${formatTextWithLineBreaks(project.notes)}</div>`;
       } else {
-        notesDisplay.innerHTML = `<p class="empty-state">No notes yet. Click "Edit Notes" to add internal notes about this project.</p>`;
+        notesDisplay.innerHTML = '<p class="empty-state">No notes yet. Click "Edit Notes" to add internal notes about this project.</p>';
       }
     }
 
@@ -457,18 +460,51 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const contractSignedInfo = domCache.get('contractSignedInfo');
     const contractDate = domCache.get('contractDate');
     const contractSignBtn = domCache.get('contractSignBtn');
+    const contractCountersignedInfo = domCache.get('contractCountersignedInfo');
+    const contractCountersignedDate = domCache.get('contractCountersignedDate');
+    const contractCountersignBtn = domCache.get('contractCountersignBtn');
+    const contractSignatureCard = domCache.get('contractSignatureCard');
+    const contractSigner = domCache.get('contractSigner');
+    const contractSignedDatetime = domCache.get('contractSignedDatetime');
+    const contractCountersignRow = domCache.get('contractCountersignRow');
+    const contractCountersignDateRow = domCache.get('contractCountersignDateRow');
+    const contractCountersigner = domCache.get('contractCountersigner');
+    const contractCountersignedDatetime = domCache.get('contractCountersignedDatetime');
 
-    if (project.contract_signed_at) {
+    const hasClientSignature = Boolean(project.contract_signed_at);
+    const hasCountersign = Boolean(project.contract_countersigned_at);
+
+    if (hasClientSignature) {
       if (contractStatusBadge) {
-        contractStatusBadge.textContent = 'Signed';
+        contractStatusBadge.textContent = hasCountersign ? 'Countersigned' : 'Client Signed';
         contractStatusBadge.className = 'status-badge status-completed';
       }
       if (contractSignedInfo) contractSignedInfo.style.display = '';
       if (contractDate) contractDate.textContent = formatDate(project.contract_signed_at);
+      if (contractSignatureCard) contractSignatureCard.style.display = '';
+      if (contractSigner) contractSigner.textContent = project.contract_signer_name || 'Client';
+      if (contractSignedDatetime) contractSignedDatetime.textContent = formatDateTime(project.contract_signed_at);
       if (contractSignBtn) {
         contractSignBtn.textContent = 'View Contract';
         contractSignBtn.classList.remove('btn-primary');
         contractSignBtn.classList.add('btn-outline');
+      }
+      if (contractCountersignBtn) {
+        contractCountersignBtn.style.display = hasCountersign ? 'none' : 'flex';
+      }
+      if (contractCountersignedInfo) contractCountersignedInfo.style.display = hasCountersign ? '' : 'none';
+      if (contractCountersignedDate) {
+        contractCountersignedDate.textContent = hasCountersign && project.contract_countersigned_at
+          ? formatDate(project.contract_countersigned_at)
+          : '-';
+      }
+      if (contractCountersignRow) contractCountersignRow.style.display = hasCountersign ? '' : 'none';
+      if (contractCountersignDateRow) contractCountersignDateRow.style.display = hasCountersign ? '' : 'none';
+      if (contractCountersigner) contractCountersigner.textContent = project.contract_countersigner_name || 'Admin';
+      if (contractCountersignedDatetime) {
+        contractCountersignedDatetime.textContent = hasCountersign && project.contract_countersigned_at
+          ? formatDateTime(project.contract_countersigned_at)
+          : '-';
       }
     } else {
       if (contractStatusBadge) {
@@ -476,6 +512,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         contractStatusBadge.className = 'status-badge status-pending';
       }
       if (contractSignedInfo) contractSignedInfo.style.display = 'none';
+      if (contractCountersignedInfo) contractCountersignedInfo.style.display = 'none';
+      if (contractSignatureCard) contractSignatureCard.style.display = 'none';
+      if (contractCountersignBtn) contractCountersignBtn.style.display = 'none';
       if (contractSignBtn) {
         contractSignBtn.textContent = 'Request Signature';
         contractSignBtn.classList.add('btn-primary');
@@ -666,6 +705,12 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
     }
 
+    // Manage deliverables
+    const btnManageDeliverables = domCache.get('btnManageDeliverables');
+    if (btnManageDeliverables) {
+      btnManageDeliverables.setAttribute('data-project-id', projectId.toString());
+    }
+
     // Add milestone
     const addMilestoneBtn = domCache.get('addMilestoneBtn');
     if (addMilestoneBtn && !addMilestoneBtn.dataset.listenerAdded) {
@@ -707,6 +752,18 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (contractSignBtn && !contractSignBtn.dataset.listenerAdded) {
       contractSignBtn.dataset.listenerAdded = 'true';
       contractSignBtn.addEventListener('click', () => handleContractSign(projectId, this.projectsData));
+    }
+
+    const contractCountersignBtn = domCache.get('contractCountersignBtn');
+    if (contractCountersignBtn && !contractCountersignBtn.dataset.listenerAdded) {
+      contractCountersignBtn.dataset.listenerAdded = 'true';
+      contractCountersignBtn.addEventListener('click', () => handleContractCountersign(projectId, this.projectsData));
+    }
+
+    const contractBuilderBtn = domCache.get('contractBuilderBtn');
+    if (contractBuilderBtn && !contractBuilderBtn.dataset.listenerAdded) {
+      contractBuilderBtn.dataset.listenerAdded = 'true';
+      contractBuilderBtn.addEventListener('click', () => showContractBuilder(projectId, this.projectsData));
     }
 
     // File upload

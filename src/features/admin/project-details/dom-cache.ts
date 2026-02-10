@@ -40,9 +40,20 @@ export type ProjectDetailsDOMKeys = {
   contractStatusBadge: string;
   contractSignedInfo: string;
   contractDate: string;
+  contractCountersignedInfo: string;
+  contractCountersignedDate: string;
   contractPreviewBtn: string;
   contractDownloadBtn: string;
   contractSignBtn: string;
+  contractCountersignBtn: string;
+  contractBuilderBtn: string;
+  contractCountersignRow: string;
+  contractCountersignDateRow: string;
+  contractCountersigner: string;
+  contractCountersignedDatetime: string;
+  contractSignatureCard: string;
+  contractSigner: string;
+  contractSignedDatetime: string;
   // Admin notes
   adminNotesSection: string;
   adminNotes: string;
@@ -65,6 +76,7 @@ export type ProjectDetailsDOMKeys = {
   addMilestoneBtn: string;
   createInvoiceBtn: string;
   btnAddTask: string;
+  btnManageDeliverables: string;
   processLateFeesBtn: string;
   scheduleInvoiceBtn: string;
   setupRecurringBtn: string;
@@ -84,6 +96,8 @@ export type ProjectDetailsDOMKeys = {
   browseFilesBtn: string;
   // Milestones
   milestonesList: string;
+  // Deliverables
+  deliverablesList: string;
   // Invoices
   invoicesList: string;
   outstanding: string;
@@ -131,9 +145,20 @@ export function initDOMCache(): void {
     contractStatusBadge: '#pd-contract-status-badge',
     contractSignedInfo: '#pd-contract-signed-info',
     contractDate: '#pd-contract-date',
+    contractCountersignedInfo: '#pd-contract-countersigned-info',
+    contractCountersignedDate: '#pd-contract-countersigned-date',
     contractPreviewBtn: '#pd-contract-preview-btn',
     contractDownloadBtn: '#pd-contract-download-btn',
     contractSignBtn: '#pd-contract-sign-btn',
+    contractCountersignBtn: '#pd-contract-countersign-btn',
+    contractBuilderBtn: '#pd-contract-builder-btn',
+    contractCountersignRow: '#pd-contract-countersign-row',
+    contractCountersignDateRow: '#pd-contract-countersign-date-row',
+    contractCountersigner: '#pd-contract-countersigner',
+    contractCountersignedDatetime: '#pd-contract-countersigned-datetime',
+    contractSignatureCard: '#pd-contract-signature-card',
+    contractSigner: '#pd-contract-signer',
+    contractSignedDatetime: '#pd-contract-signed-datetime',
     // Admin notes
     adminNotesSection: '#pd-admin-notes-section',
     adminNotes: '#pd-admin-notes',
@@ -156,6 +181,7 @@ export function initDOMCache(): void {
     addMilestoneBtn: '#btn-add-milestone',
     createInvoiceBtn: '#btn-create-invoice',
     btnAddTask: '#btn-add-task',
+    btnManageDeliverables: '#btn-manage-deliverables',
     processLateFeesBtn: '#btn-process-late-fees',
     scheduleInvoiceBtn: '#btn-schedule-invoice',
     setupRecurringBtn: '#btn-setup-recurring',
@@ -175,6 +201,8 @@ export function initDOMCache(): void {
     browseFilesBtn: '#btn-pd-browse-files',
     // Milestones
     milestonesList: '#pd-milestones-list',
+    // Deliverables
+    deliverablesList: '#pd-deliverables-list',
     // Invoices
     invoicesList: '#pd-invoices-list',
     outstanding: '#pd-outstanding',
