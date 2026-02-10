@@ -1,0 +1,179 @@
+/* =====================================================
+   CLIENT PORTAL - AD HOC REQUESTS
+   ===================================================== */
+
+[data-page="client-portal"] .requests-grid {
+  display: grid;
+  gap: var(--space-2);
+}
+
+@media (min-width: 960px) {
+  [data-page="client-portal"] .requests-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+[data-page="client-portal"] .requests-form,
+[data-page="client-portal"] .requests-list {
+  padding: var(--space-2);
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+}
+
+[data-page="client-portal"] .requests-form h3,
+[data-page="client-portal"] .requests-list h3 {
+  margin: 0 0 var(--space-1) 0;
+  font-family: var(--font-family-acme);
+  font-size: var(--font-size-lg);
+  color: var(--portal-text-light);
+}
+
+[data-page="client-portal"] .requests-intro {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+[data-page="client-portal"] .requests-form-body .form-group {
+  margin-bottom: var(--space-1-5);
+}
+
+[data-page="client-portal"] .requests-attachment-note {
+  margin: var(--space-0-5) 0 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+[data-page="client-portal"] .requests-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1-5);
+}
+
+[data-page="client-portal"] .requests-list-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+[data-page="client-portal"] .requests-card {
+  padding: var(--space-1-5);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  border: 1px solid var(--portal-border-light);
+}
+
+[data-page="client-portal"] .requests-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  margin-bottom: var(--space-0-5);
+}
+
+[data-page="client-portal"] .requests-card-title {
+  font-weight: 600;
+  color: var(--portal-text-light);
+}
+
+[data-page="client-portal"] .requests-card-status {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+[data-page="client-portal"] .requests-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-secondary);
+  margin-bottom: var(--space-0-5);
+}
+
+[data-page="client-portal"] .requests-card-description {
+  margin: 0 0 var(--space-1) 0;
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+[data-page="client-portal"] .requests-quote {
+  display: grid;
+  gap: var(--space-0-5);
+  margin: 0 0 var(--space-1) 0;
+  padding: var(--space-1);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+[data-page="client-portal"] .requests-quote-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1);
+}
+
+[data-page="client-portal"] .requests-quote-modal .requests-quote-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+[data-page="client-portal"] .requests-quote-modal-summary {
+  display: grid;
+  gap: var(--space-0-5);
+  padding: var(--space-1);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+[data-page="client-portal"] .requests-quote-modal-note {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+[data-page="client-portal"] .requests-card-footer {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+[data-page="client-portal"] .requests-empty,
+[data-page="client-portal"] .requests-error {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+[data-page="client-portal"] .requests-error {
+  color: var(--color-error-500);
+}
+
+[data-page="client-portal"] .requests-status-submitted,
+[data-page="client-portal"] .requests-status-reviewing,
+[data-page="client-portal"] .requests-status-quoted {
+  color: var(--color-warning-500);
+}
+
+[data-page="client-portal"] .requests-status-approved,
+[data-page="client-portal"] .requests-status-in_progress {
+  color: var(--color-info-500);
+}
+
+[data-page="client-portal"] .requests-status-completed {
+  color: var(--color-success-500);
+}
+
+[data-page="client-portal"] .requests-status-declined {
+  color: var(--color-error-500);
+}

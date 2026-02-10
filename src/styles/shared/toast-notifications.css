@@ -65,6 +65,20 @@
   word-wrap: break-word;
 }
 
+.toast-action {
+  color: var(--portal-text-light);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.toast-action:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 .toast-close {
   background: none;
   border: none;

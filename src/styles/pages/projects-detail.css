@@ -284,13 +284,31 @@
   gap: 2rem;
 }
 
+/* Override pill styling for metadata labels - use smaller caps instead */
 .intro-left-group .round-label {
   width: fit-content;
+  background-color: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  color: var(--color-text-muted, rgba(0, 0, 0, 0.5));
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+[data-theme="dark"] .intro-left-group .round-label {
+  color: var(--color-neutral-700);
 }
 
 .intro-left-group .text-medium {
   color: var(--color-dark);
   font-weight: 500;
+}
+
+[data-theme="dark"] .intro-left-group .text-medium {
+  color: var(--color-dark);
 }
 
 /* Tools section - full width */
@@ -301,8 +319,22 @@
   margin-top: 1.5rem;
 }
 
+/* Override pill styling for tools label - use smaller caps instead */
 .tools-section .round-label {
   width: fit-content;
+  background-color: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  color: var(--color-text-muted, rgba(0, 0, 0, 0.5));
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+[data-theme="dark"] .tools-section .round-label {
+  color: var(--color-neutral-700);
 }
 
 .tools-list {
@@ -324,7 +356,7 @@
 
 [data-theme="dark"] .tools-list .tool-tag {
   background: var(--color-neutral-600);
-  color: var(--color-light);
+  color: var(--color-dark);
 }
 
 /* Right column - description */
@@ -537,8 +569,8 @@
   }
 
   .intro-left-group .round-label {
-    font-size: 0.75rem;
-    padding: 4px 10px;
+    font-size: 0.65rem;
+    /* Padding already 0 from base override */
   }
 
   .worksub-links a {
@@ -574,6 +606,35 @@
   box-shadow: var(--shadow-elevated-sm);
 }
 
+/* Dark mode text colors - all text should be light (var(--color-dark)) */
+[data-theme="dark"] .worksub-intro h1 {
+  color: var(--color-dark);
+}
+
+[data-theme="dark"] .intro-content > p {
+  color: var(--color-dark);
+}
+
+[data-theme="dark"] .section-heading-wrapper h2 {
+  color: var(--color-dark);
+}
+
+[data-theme="dark"] .section-heading-wrapper svg {
+  stroke: var(--color-dark);
+}
+
+[data-theme="dark"] .worksub-divider {
+  background-color: var(--color-dark);
+}
+
+[data-theme="dark"] .worksub-links {
+  border-top-color: var(--color-dark);
+}
+
+[data-theme="dark"] .project-nav {
+  border-top-color: var(--color-dark);
+}
+
 /* ===============================================
    CASE STUDY SECTIONS
    =============================================== */
@@ -601,8 +662,8 @@
 }
 
 [data-theme="dark"] .case-study-heading {
-  color: var(--color-light);
-  border-bottom-color: var(--color-light);
+  color: var(--color-dark);
+  border-bottom-color: var(--color-dark);
 }
 
 .case-study-text {
@@ -613,7 +674,7 @@
 }
 
 [data-theme="dark"] .case-study-text {
-  color: var(--color-light);
+  color: var(--color-dark);
 }
 
 .case-study-list {
@@ -634,7 +695,7 @@
 }
 
 [data-theme="dark"] .case-study-list li {
-  color: var(--color-light);
+  color: var(--color-dark);
 }
 
 .case-study-list li::before {
@@ -650,7 +711,7 @@
 }
 
 [data-theme="dark"] .case-study-list li::before {
-  background-color: var(--color-light);
+  background-color: var(--color-dark);
 }
 
 /* Results list uses same bullet style */
@@ -663,7 +724,7 @@
 }
 
 [data-theme="dark"] .results-list li::before {
-  background-color: var(--color-light);
+  background-color: var(--color-dark);
 }
 
 /* Responsive */
@@ -712,7 +773,7 @@
 }
 
 [data-theme="dark"] .project-tagline {
-  color: var(--color-text-muted, rgba(255, 255, 255, 0.6));
+  color: var(--color-neutral-700);
 }
 
 /* Status badge */
@@ -756,6 +817,10 @@
   border-top: 2px solid var(--color-dark);
 }
 
+[data-theme="dark"] .project-nav {
+  border-top-color: var(--color-dark);
+}
+
 .project-nav-link {
   display: flex;
   flex-direction: column;
@@ -764,16 +829,18 @@
   padding: 1rem 1.5rem;
   text-decoration: none;
   color: var(--color-dark);
-  background-color: var(--color-neutral-200, #f5f5f5);
+  background-color: transparent;
+  border: 2px solid var(--color-dark);
   border-radius: 12px;
   transition: background-color var(--transition-fast, 0.2s),
-              transform var(--transition-fast, 0.2s);
+              transform var(--transition-fast, 0.2s),
+              border-color var(--transition-fast, 0.2s);
   flex: 1;
   max-width: 45%;
 }
 
 .project-nav-link:hover {
-  background-color: var(--color-neutral-300, #e5e5e5);
+  background-color: rgba(0, 0, 0, 0.05);
   transform: translateY(-2px);
 }
 
@@ -803,10 +870,11 @@
 }
 
 .project-nav-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--color-text-muted, rgba(0, 0, 0, 0.5));
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.5);
 }
 
 .project-nav-title {
@@ -817,20 +885,21 @@
 
 /* Dark mode */
 [data-theme="dark"] .project-nav-link {
-  background-color: var(--color-neutral-700, #404040);
-  color: var(--color-light);
+  background-color: transparent;
+  border-color: var(--color-dark);
+  color: var(--color-dark);
 }
 
 [data-theme="dark"] .project-nav-link:hover {
-  background-color: var(--color-neutral-600, #525252);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 [data-theme="dark"] .project-nav-label {
-  color: var(--color-text-muted, rgba(255, 255, 255, 0.5));
+  color: var(--color-neutral-700);
 }
 
 [data-theme="dark"] .project-nav-title {
-  color: var(--color-light);
+  color: var(--color-dark);
 }
 
 /* Responsive */

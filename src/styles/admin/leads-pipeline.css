@@ -103,7 +103,7 @@
 
 .lead-card-client-link:hover,
 .lead-card-project-link:hover {
-  color: var(--color-error-500);
+  color: var(--color-brand-primary);
   text-decoration: underline;
 }
 
@@ -212,42 +212,7 @@
   color: var(--status-cancelled);
 }
 
-/* Lead Tasks */
-.lead-task-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-sm);
-  margin-bottom: var(--space-1);
-  border: 1px solid var(--portal-border);
-}
-
-.lead-task-item input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-.lead-task-item.completed {
-  opacity: 0.6;
-}
-
-.lead-task-item.completed .lead-task-title {
-  text-decoration: line-through;
-}
-
-.lead-task-title {
-  flex: 1;
-  font-size: 0.875rem;
-  color: var(--portal-text-primary);
-}
-
-.lead-task-due {
-  font-size: 0.75rem;
-  color: var(--portal-text-muted);
-}
+/* Lead Tasks - see Lead Tasks List section below for main styles */
 
 .lead-task-due.overdue {
   color: var(--status-cancelled);

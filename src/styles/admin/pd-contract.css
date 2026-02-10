@@ -74,6 +74,70 @@
   gap: var(--space-1-5);
 }
 
+.contract-builder-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.contract-builder-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: var(--space-2);
+}
+
+.contract-template-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.contract-builder-textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.contract-builder-content {
+  min-height: 240px;
+  resize: vertical;
+}
+
+.contract-builder-preview {
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-color);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 100%;
+}
+
+.contract-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+
+.contract-preview-body {
+  background: var(--portal-bg-darker);
+  border: 1px dashed var(--portal-border-color);
+  border-radius: var(--portal-radius-sm);
+  padding: var(--space-2);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  white-space: pre-wrap;
+  min-height: 240px;
+}
+
+@media (max-width: 960px) {
+  .contract-builder-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .contract-action-card {
   display: flex;
   flex-direction: column;
@@ -132,6 +196,44 @@
 
 .signature-info-row:last-child {
   border-bottom: none;
+}
+
+/* Countersign Modal */
+.contract-countersign-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.contract-signature-pad {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.signature-canvas-wrap {
+  background: var(--portal-bg-darker);
+  border: 1px dashed var(--portal-border-color);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-1);
+}
+
+.signature-canvas-wrap canvas {
+  width: 100%;
+  height: 160px;
+  display: block;
+  background: var(--color-black);
+  border-radius: var(--portal-radius-sm);
+}
+
+.signature-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.signature-hint {
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-sm);
 }
 
 .signature-info-row .field-label {

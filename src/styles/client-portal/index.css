@@ -39,3 +39,12 @@
 
 /* Document Requests */
 @import './documents.css';
+
+/* Ad Hoc Requests */
+@import './requests.css';
+
+/* Onboarding Wizard */
+@import './onboarding.css';
+
+/* Questionnaires */
+@import './questionnaires.css';

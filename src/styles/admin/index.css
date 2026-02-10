@@ -43,6 +43,7 @@
 @import "./leads-pipeline.css";
 @import "./files.css";
 @import "./proposals.css";
+@import "./contracts.css";
 @import "./table-features.css";
 @import "./table-dropdowns.css";
 @import "./modal-dropdown.css";
@@ -51,4 +52,7 @@
 @import "./tooltips.css";
 @import "./knowledge-base.css";
 @import "./document-requests.css";
+@import "./ad-hoc-requests.css";
 @import "./workflows.css";
+@import "./questionnaires.css";
+@import "../deliverables.css";
