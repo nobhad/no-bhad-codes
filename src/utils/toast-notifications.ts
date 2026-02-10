@@ -15,6 +15,9 @@ export interface ToastOptions {
   duration?: number;
   /** Whether to show an icon (default: true) */
   showIcon?: boolean;
+  /** Optional action link to display in the toast */
+  actionLabel?: string;
+  actionHref?: string;
 }
 
 /**
@@ -29,7 +32,7 @@ export function showToast(
   type: ToastType = 'info',
   options: ToastOptions = {}
 ): void {
-  const { duration = 3000, showIcon = true } = options;
+  const { duration = 3000, showIcon = true, actionLabel, actionHref } = options;
 
   // Create toast container if it doesn't exist
   let container = document.getElementById('toast-container');
@@ -49,10 +52,15 @@ export function showToast(
   // Icon SVG
   const iconSvg = showIcon ? getIconSvg(type) : '';
 
+  const actionHtml = actionLabel && actionHref
+    ? `<a class="toast-action" href="${escapeHtml(actionHref)}">${escapeHtml(actionLabel)}</a>`
+    : '';
+
   // Toast content
   toast.innerHTML = `
     ${iconSvg ? `<div class="toast-icon">${iconSvg}</div>` : ''}
     <div class="toast-message">${escapeHtml(message)}</div>
+    ${actionHtml}
     <button class="toast-close" aria-label="Close notification">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>

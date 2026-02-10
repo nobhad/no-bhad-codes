@@ -275,7 +275,7 @@ export class Application {
    */
   private async initializeModules(): Promise<void> {
     const currentPath = window.location.pathname;
-    const isClientPortal = currentPath.includes('/client/portal');
+    const isClientPortal = currentPath.startsWith('/client') && !currentPath.includes('/client/intake') && !currentPath.includes('/client/set-password');
     const isClientIntake = currentPath.includes('/client/intake');
     const isAdminPage = currentPath.includes('/admin');
     const isHomePage = currentPath === '/' || currentPath === '/index.html';

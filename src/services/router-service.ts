@@ -179,10 +179,16 @@ export class RouterService extends BaseService {
       title: 'New Client Intake - No Bhad Codes'
     });
 
-    this.routes.set('/client/portal', {
-      path: '/client/portal',
+    this.routes.set('/client', {
+      path: '/client',
       section: '',
-      title: 'Client Dashboard - No Bhad Codes'
+      title: 'Client Portal - No Bhad Codes'
+    });
+
+    this.routes.set('/client/', {
+      path: '/client/',
+      section: '',
+      title: 'Client Portal - No Bhad Codes'
     });
 
     // Admin page - no section navigation needed
