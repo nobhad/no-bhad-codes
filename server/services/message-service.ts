@@ -837,7 +837,7 @@ class MessageService {
       senderName: getString(row, 'sender_name'),
       message: getString(row, 'message'),
       priority: getString(row, 'priority'),
-      isRead: Boolean(row.is_read),
+      isRead: row.read_at !== null,
       isInternal: Boolean(row.is_internal),
       editedAt: row.edited_at as string | undefined,
       deletedAt: row.deleted_at as string | undefined,

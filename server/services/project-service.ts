@@ -10,6 +10,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { checkAndUpdateMilestoneCompletion, updateProjectProgress } from './progress-calculator.js';
+import { userService } from './user-service.js';
 
 // Type definitions
 type SqlValue = string | number | boolean | null;
@@ -418,10 +419,13 @@ class ProjectService {
       sortOrder = (Number(maxOrder?.max_order) || 0) + 1;
     }
 
+    // Look up user ID for assigned_to
+    const assignedToUserId = await userService.getUserIdByEmail(data.assignedTo);
+
     const result = await db.run(
       `INSERT INTO project_tasks (
         project_id, milestone_id, title, description, status, priority,
-        assigned_to, due_date, estimated_hours, sort_order, parent_task_id
+        assigned_to_user_id, due_date, estimated_hours, sort_order, parent_task_id
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         projectId,
@@ -430,7 +434,7 @@ class ProjectService {
         data.description || null,
         data.status || 'pending',
         data.priority || 'medium',
-        data.assignedTo || null,
+        assignedToUserId,
         data.dueDate || null,
         data.estimatedHours || null,
         sortOrder,
@@ -602,8 +606,9 @@ class ProjectService {
       values.push(data.priority);
     }
     if (data.assignedTo !== undefined) {
-      updates.push('assigned_to = ?');
-      values.push(data.assignedTo || null);
+      const userId = await userService.getUserIdByEmail(data.assignedTo);
+      updates.push('assigned_to_user_id = ?');
+      values.push(userId);
     }
     if (data.dueDate !== undefined) {
       updates.push('due_date = ?');
@@ -847,9 +852,12 @@ class ProjectService {
   async addTaskComment(taskId: number, author: string, content: string): Promise<TaskComment> {
     const db = getDatabase();
 
+    // Look up user ID for author
+    const authorUserId = await userService.getUserIdByEmailOrName(author);
+
     const result = await db.run(
-      'INSERT INTO task_comments (task_id, author, content) VALUES (?, ?, ?)',
-      [taskId, author, content]
+      'INSERT INTO task_comments (task_id, author_user_id, content) VALUES (?, ?, ?)',
+      [taskId, authorUserId, content]
     );
 
     const comment = await db.get(
@@ -960,14 +968,17 @@ class ProjectService {
   async logTime(projectId: number, data: TimeEntryData): Promise<TimeEntry> {
     const db = getDatabase();
 
+    // Look up user ID for user
+    const userId = await userService.getUserIdByEmailOrName(data.userName);
+
     const result = await db.run(
       `INSERT INTO time_entries (
-        project_id, task_id, user_name, description, hours, date, billable, hourly_rate
+        project_id, task_id, user_id, description, hours, date, billable, hourly_rate
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         projectId,
         data.taskId || null,
-        data.userName,
+        userId,
         data.description || null,
         data.hours,
         data.date,

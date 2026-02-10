@@ -9,6 +9,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { userService } from './user-service.js';
 
 // Type definitions
 type SqlValue = string | number | boolean | null;
@@ -824,10 +825,13 @@ class LeadService {
   async createTask(projectId: number, data: TaskData): Promise<LeadTask> {
     const db = getDatabase();
 
+    // Look up user ID for assigned_to
+    const assignedToUserId = await userService.getUserIdByEmail(data.assignedTo);
+
     const result = await db.run(
       `INSERT INTO lead_tasks (
         project_id, title, description, task_type, due_date, due_time,
-        assigned_to, priority, reminder_at
+        assigned_to_user_id, priority, reminder_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         projectId,
@@ -836,7 +840,7 @@ class LeadService {
         data.taskType || 'follow_up',
         data.dueDate || null,
         data.dueTime || null,
-        data.assignedTo || null,
+        assignedToUserId,
         data.priority || 'medium',
         data.reminderAt || null
       ]
@@ -909,8 +913,9 @@ class LeadService {
       values.push(data.dueTime || null);
     }
     if (data.assignedTo !== undefined) {
-      updates.push('assigned_to = ?');
-      values.push(data.assignedTo || null);
+      const userId = await userService.getUserIdByEmail(data.assignedTo);
+      updates.push('assigned_to_user_id = ?');
+      values.push(userId);
     }
     if (data.priority !== undefined) {
       updates.push('priority = ?');
@@ -1034,9 +1039,12 @@ class LeadService {
   async addNote(projectId: number, author: string, content: string): Promise<LeadNote> {
     const db = getDatabase();
 
+    // Look up user ID for author during transition period
+    const authorUserId = await userService.getUserIdByEmailOrName(author);
+
     const result = await db.run(
-      `INSERT INTO lead_notes (project_id, author, content) VALUES (?, ?, ?)`,
-      [projectId, author, content]
+      `INSERT INTO lead_notes (project_id, author_user_id, content) VALUES (?, ?, ?)`,
+      [projectId, authorUserId, content]
     );
 
     // Update project's last activity

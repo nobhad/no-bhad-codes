@@ -8,6 +8,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { userService } from './user-service.js';
 
 // =====================================================
 // TYPES
@@ -273,10 +274,13 @@ class KnowledgeBaseService {
 
     const isPublished = data.is_published !== false;
 
+    // Look up user ID for author during transition period
+    const authorUserId = await userService.getUserIdByEmail(data.author_email);
+
     const result = await db.run(
       `INSERT INTO kb_articles
-       (category_id, title, slug, summary, content, keywords, is_featured, is_published, author_email, published_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (category_id, title, slug, summary, content, keywords, is_featured, is_published, author_email, author_user_id, published_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         data.category_id,
         data.title,
@@ -287,6 +291,7 @@ class KnowledgeBaseService {
         data.is_featured ? 1 : 0,
         isPublished ? 1 : 0,
         data.author_email || null,
+        authorUserId,
         isPublished ? new Date().toISOString() : null
       ]
     );

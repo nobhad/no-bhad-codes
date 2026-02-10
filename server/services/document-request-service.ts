@@ -8,6 +8,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { userService } from './user-service.js';
 
 // =====================================================
 // TYPES
@@ -62,6 +63,8 @@ export interface DocumentRequest {
   file_name?: string;
 }
 
+export type TemplateCategory = 'general' | 'brand_assets' | 'content' | 'legal' | 'technical';
+
 export interface DocumentRequestTemplate {
   id: number;
   name: string;
@@ -70,6 +73,8 @@ export interface DocumentRequestTemplate {
   document_type: DocumentType;
   is_required: boolean;
   days_until_due: number;
+  category: TemplateCategory;
+  project_type?: string;
   created_by?: string;
   created_at: string;
   updated_at: string;
@@ -114,14 +119,18 @@ class DocumentRequestService {
   async createRequest(data: CreateRequestData): Promise<DocumentRequest> {
     const db = await getDatabase();
 
+    // Look up user ID for requested_by during transition period
+    const requestedByUserId = await userService.getUserIdByEmail(data.requested_by);
+
     const result = await db.run(
       `INSERT INTO document_requests
-       (client_id, project_id, requested_by, title, description, document_type, priority, due_date, is_required)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (client_id, project_id, requested_by, requested_by_user_id, title, description, document_type, priority, due_date, is_required)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         data.client_id,
         data.project_id || null,
         data.requested_by,
+        requestedByUserId,
         data.title,
         data.description || null,
         data.document_type || 'general',
@@ -322,15 +331,19 @@ class DocumentRequestService {
 
     const oldStatus = request.status;
 
+    // Look up user ID for uploaded_by during transition period
+    const uploadedByUserId = await userService.getUserIdByEmail(uploaderEmail);
+
     await db.run(
       `UPDATE document_requests
        SET status = 'uploaded',
            file_id = ?,
            uploaded_by = ?,
+           uploaded_by_user_id = ?,
            uploaded_at = CURRENT_TIMESTAMP,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [fileId, uploaderEmail, id]
+      [fileId, uploaderEmail, uploadedByUserId, id]
     );
 
     await this.logHistory(id, 'uploaded', oldStatus, 'uploaded', uploaderEmail, 'client');
@@ -353,13 +366,17 @@ class DocumentRequestService {
       throw new Error('Request must be uploaded before review');
     }
 
+    // Look up user ID for reviewed_by during transition period
+    const reviewedByUserId = await userService.getUserIdByEmail(reviewerEmail);
+
     await db.run(
       `UPDATE document_requests
        SET status = 'under_review',
            reviewed_by = ?,
+           reviewed_by_user_id = ?,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [reviewerEmail, id]
+      [reviewerEmail, reviewedByUserId, id]
     );
 
     await this.logHistory(id, 'review_started', 'uploaded', 'under_review', reviewerEmail, 'admin');
@@ -651,6 +668,74 @@ class DocumentRequestService {
   async deleteTemplate(id: number): Promise<void> {
     const db = await getDatabase();
     await db.run('DELETE FROM document_request_templates WHERE id = ?', [id]);
+  }
+
+  // =====================================================
+  // TEMPLATE CATEGORIES
+  // =====================================================
+
+  /**
+   * Get templates grouped by category
+   */
+  async getTemplatesByCategory(): Promise<Record<string, DocumentRequestTemplate[]>> {
+    const db = await getDatabase();
+    const templates = await db.all(
+      'SELECT * FROM document_request_templates ORDER BY category, name'
+    );
+
+    const grouped: Record<string, DocumentRequestTemplate[]> = {
+      general: [],
+      brand_assets: [],
+      content: [],
+      legal: [],
+      technical: []
+    };
+
+    for (const template of templates as unknown as DocumentRequestTemplate[]) {
+      const category = template.category || 'general';
+      if (!grouped[category]) {
+        grouped[category] = [];
+      }
+      grouped[category].push(template);
+    }
+
+    return grouped;
+  }
+
+  /**
+   * Get templates for a specific category
+   */
+  async getTemplatesByProjectType(projectType: string): Promise<DocumentRequestTemplate[]> {
+    const db = await getDatabase();
+    const templates = await db.all(
+      `SELECT * FROM document_request_templates
+       WHERE project_type = ? OR project_type IS NULL
+       ORDER BY category, name`,
+      [projectType]
+    );
+    return templates as unknown as DocumentRequestTemplate[];
+  }
+
+  /**
+   * Bulk request documents by project type
+   * Creates document requests for all templates matching the project type
+   */
+  async bulkRequestByProjectType(
+    clientId: number,
+    projectType: string,
+    requestedBy: string,
+    projectId?: number,
+    requiredOnly = false
+  ): Promise<DocumentRequest[]> {
+    const templates = await this.getTemplatesByProjectType(projectType);
+
+    const filteredTemplates = requiredOnly
+      ? templates.filter(t => t.is_required)
+      : templates;
+
+    const templateIds = filteredTemplates.map(t => t.id);
+
+    return this.createFromTemplates(clientId, templateIds, requestedBy, projectId);
   }
 
   // =====================================================
