@@ -20,9 +20,16 @@
 @import "./shared.css";
 
 /* ============================================
- * NAVIGATION (portal-style nav)
+ * NAVIGATION (main site nav for login page)
  * ============================================ */
+@import "../components/nav-base.css" layer(components);
+@import "../components/nav-responsive.css" layer(components);
 @import "../components/nav-portal.css" layer(components);
+
+/* ============================================
+ * FOOTER (main site footer for auth pages)
+ * ============================================ */
+@import "../components/footer.css" layer(components);
 
 /* ============================================
  * CLIENT PORTAL STYLES
@@ -62,7 +69,17 @@
 
 /* ============================================
  * UNLAYERED STYLES (global overrides)
+ * These MUST be unlayered to override layer rules
  * ============================================ */
+
+/* Ensure dashboard-container.hidden is truly hidden on login page */
+/* Must override sidebar.css [data-page] .sidebar rules */
+body[data-page="client-portal"] .dashboard-container.hidden,
+body[data-page="client-portal"] .dashboard-container.hidden .sidebar,
+body[data-page="client-portal"] .dashboard-container.hidden .dashboard-content {
+  display: none !important;
+  visibility: hidden !important;
+}
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {

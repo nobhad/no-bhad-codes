@@ -1,8 +1,9 @@
 /* Footer Component */
 
-/* Hide footer on dashboard pages (client portal and admin) */
-[data-page="client-portal"] .footer,
-[data-page="admin"] .footer {
+/* Hide main site footer on dashboard pages (client portal and admin)
+   But NOT the portal-footer or admin-footer which are specific to those pages */
+[data-page="client-portal"] .footer:not(.portal-footer),
+[data-page="admin"] .footer:not(.admin-footer) {
   display: none !important;
 }
 
