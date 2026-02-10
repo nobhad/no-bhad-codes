@@ -543,5 +543,68 @@ router.delete(
   })
 );
 
+// =====================================================
+// TEMPLATE CATEGORY ENDPOINTS
+// =====================================================
+
+/**
+ * Get templates grouped by category
+ */
+router.get(
+  '/templates/by-category',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const templatesByCategory = await documentRequestService.getTemplatesByCategory();
+    res.json({ templatesByCategory });
+  })
+);
+
+/**
+ * Get templates for a specific project type
+ */
+router.get(
+  '/templates/by-project-type/:projectType',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectType } = req.params;
+    const templates = await documentRequestService.getTemplatesByProjectType(projectType);
+    res.json({ templates });
+  })
+);
+
+/**
+ * Bulk request documents by project type
+ */
+router.post(
+  '/bulk-request',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { client_id, project_type, project_id, required_only } = req.body;
+
+    if (!client_id || !project_type) {
+      return res.status(400).json({ error: 'client_id and project_type are required' });
+    }
+
+    const requestedBy = req.user?.email || 'admin';
+
+    const requests = await documentRequestService.bulkRequestByProjectType(
+      client_id,
+      project_type,
+      requestedBy,
+      project_id,
+      required_only
+    );
+
+    res.status(201).json({
+      success: true,
+      message: `${requests.length} document request(s) created`,
+      requests
+    });
+  })
+);
+
 export { router as documentRequestsRouter };
 export default router;

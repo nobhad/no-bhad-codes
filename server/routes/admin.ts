@@ -25,6 +25,7 @@ import { softDeleteService, SoftDeleteEntityType } from '../services/soft-delete
 import { projectService } from '../services/project-service.js';
 import { generateDefaultMilestones, backfillMilestones } from '../services/milestone-generator.js';
 import { backfillMilestoneTasks } from '../services/task-generator.js';
+import { userService } from '../services/user-service.js';
 
 const router = express.Router();
 
@@ -248,7 +249,7 @@ router.get(
       const messagesCount = await db.get(`
         SELECT COUNT(*) as count
         FROM general_messages
-        WHERE is_read = 0 AND sender_type != 'admin'
+        WHERE read_at IS NULL AND sender_type != 'admin'
       `);
 
       res.json({
@@ -1111,7 +1112,12 @@ router.post(
 
       // Build invitation link
       const baseUrl = process.env.BASE_URL || 'http://localhost:4000';
-      const invitationLink = `${baseUrl}/client/set-password.html?token=${invitationToken}`;
+      const invitationUrl = new URL('/client/set-password.html', baseUrl);
+      invitationUrl.searchParams.set('token', invitationToken);
+      if (leadEmail) {
+        invitationUrl.searchParams.set('email', leadEmail);
+      }
+      const invitationLink = invitationUrl.toString();
 
       // Send invitation email
       const emailResult = await emailService.sendEmail({
@@ -1381,14 +1387,16 @@ router.post(
       }
 
       // Create initial project update
+      const adminUserId = await userService.getUserIdByEmailOrName('admin');
       await db.run(
         `INSERT INTO project_updates (
-          project_id, title, description, update_type, author, created_at
-        ) VALUES (?, ?, ?, 'general', 'admin', datetime('now'))`,
+          project_id, title, description, update_type, author_user_id, created_at
+        ) VALUES (?, ?, ?, 'general', ?, datetime('now'))`,
         [
           projectId,
           'Project Created',
-          'Project was manually created by admin.'
+          'Project was manually created by admin.',
+          adminUserId
         ]
       );
 

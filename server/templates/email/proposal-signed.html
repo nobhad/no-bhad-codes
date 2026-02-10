@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Proposal Signed - {{clientName}}</title>
+    <style>
+      :root {
+        --primary-color: #00ff41;
+        --secondary-color: #0d1117;
+        --text-color: #24292f;
+        --background-color: #ffffff;
+        --border-color: #d0d7de;
+        --success-color: #1a7f37;
+        --tier-good: #3b82f6;
+        --tier-better: #8b5cf6;
+        --tier-best: #f59e0b;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background-color: #f6f8fa;
+      }
+
+      .email-container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, var(--success-color) 0%, #15803d 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+      }
+
+      .header p {
+        margin: 8px 0 0;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .tier-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 20px;
+      }
+
+      .tier-good {
+        background-color: #dbeafe;
+        color: var(--tier-good);
+      }
+
+      .tier-better {
+        background-color: #ede9fe;
+        color: var(--tier-better);
+      }
+
+      .tier-best {
+        background-color: #fef3c7;
+        color: var(--tier-best);
+      }
+
+      .info-card {
+        background-color: #f8f9fa;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .info-value {
+        font-weight: 600;
+        color: var(--text-color);
+      }
+
+      .price-highlight {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #00cc33 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .features-section {
+        margin: 25px 0;
+      }
+
+      .features-section h3 {
+        margin: 0 0 15px;
+        font-size: 16px;
+        color: var(--text-color);
+      }
+
+      .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .feature-list li {
+        padding: 8px 0;
+        padding-left: 24px;
+        position: relative;
+        font-size: 14px;
+        color: #4b5563;
+      }
+
+      .feature-list li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: var(--success-color);
+        font-weight: bold;
+      }
+
+      .cta-section {
+        text-align: center;
+        margin: 30px 0 20px;
+      }
+
+      .cta-button {
+        display: inline-block;
+        padding: 14px 32px;
+        background: var(--secondary-color);
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .cta-button:hover {
+        background: #1f2937;
+      }
+
+      .timestamp {
+        text-align: center;
+        color: #9ca3af;
+        font-size: 12px;
+        margin-top: 20px;
+      }
+
+      .footer {
+        padding: 20px 30px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+        background-color: #f9fafb;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .footer a {
+        color: var(--success-color);
+        text-decoration: none;
+      }
+
+      @media (max-width: 600px) {
+        .email-container {
+          margin: 0;
+          border-radius: 0;
+        }
+
+        .content,
+        .header {
+          padding: 20px;
+        }
+
+        .info-row {
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .price-highlight {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="header">
+        <div class="header-icon">&#10003;</div>
+        <h1>Proposal Signed!</h1>
+        <p>A client has accepted your proposal</p>
+      </div>
+
+      <div class="content">
+        <div style="text-align: center;">
+          <span class="tier-badge tier-{{selectedTier}}">{{tierName}} Tier</span>
+        </div>
+
+        <div class="info-card">
+          <div class="info-row">
+            <span class="info-label">Client</span>
+            <span class="info-value">{{clientName}}</span>
+          </div>
+          {{#if companyName}}
+          <div class="info-row">
+            <span class="info-label">Company</span>
+            <span class="info-value">{{companyName}}</span>
+          </div>
+          {{/if}}
+          <div class="info-row">
+            <span class="info-label">Project</span>
+            <span class="info-value">{{projectName}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Project Type</span>
+            <span class="info-value">{{projectType}}</span>
+          </div>
+          {{#if maintenanceOption}}
+          <div class="info-row">
+            <span class="info-label">Maintenance Plan</span>
+            <span class="info-value">{{maintenanceOption}}</span>
+          </div>
+          {{/if}}
+          <div class="info-row">
+            <span class="info-label">Contract Value</span>
+            <span class="info-value price-highlight">${{finalPrice}}</span>
+          </div>
+        </div>
+
+        {{#if addedFeatures}}
+        <div class="features-section">
+          <h3>Add-on Features Selected</h3>
+          <ul class="feature-list">
+            {{#each addedFeatures}}
+            <li>{{this.name}} (+${{this.price}})</li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
+
+        <div class="info-card" style="background-color: #f0fdf4; border-color: #86efac;">
+          <h3 style="margin: 0 0 10px; color: var(--success-color);">Signature Details</h3>
+          <div class="info-row">
+            <span class="info-label">Signed By</span>
+            <span class="info-value">{{signerName}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{signerEmail}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Signed At</span>
+            <span class="info-value">{{signedAt}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">IP Address</span>
+            <span class="info-value">{{ipAddress}}</span>
+          </div>
+        </div>
+
+        <div class="cta-section">
+          <a href="{{adminUrl}}/projects/{{projectId}}" class="cta-button">View Project Details</a>
+        </div>
+
+        <div class="timestamp">
+          This notification was sent on {{timestamp}}
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>Next Steps: Set up the project, send welcome materials, and schedule kickoff meeting.</p>
+        <p>
+          <a href="{{adminUrl}}">Admin Dashboard</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

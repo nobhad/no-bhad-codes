@@ -8,24 +8,33 @@
 import express, { Response } from 'express';
 import multer from 'multer';
 import path, { join } from 'path';
-import { existsSync, readFileSync } from 'fs';
-import { PDFDocument as PDFLibDocument, StandardFonts, rgb, PDFPage, PDFFont } from 'pdf-lib';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { PDFDocument as PDFLibDocument, StandardFonts, degrees, rgb, PDFPage } from 'pdf-lib';
 import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache } from '../middleware/cache.js';
-import { getUploadsSubdir, UPLOAD_DIRS, sanitizeFilename } from '../config/uploads.js';
+import { getUploadsDir, getUploadsSubdir, getRelativePath, UPLOAD_DIRS, sanitizeFilename } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { projectService } from '../services/project-service.js';
 import { fileService } from '../services/file-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
 import { BUSINESS_INFO, getPdfLogoBytes, CONTRACT_TERMS } from '../config/business.js';
-import { getPdfCacheKey, getCachedPdf, cachePdf } from '../utils/pdf-utils.js';
+import {
+  getPdfCacheKey,
+  getCachedPdf,
+  cachePdf,
+  ensureSpace,
+  drawWrappedText,
+  addPageNumbers,
+  PAGE_MARGINS
+} from '../utils/pdf-utils.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
 import { generateDefaultMilestones } from '../services/milestone-generator.js';
 import { escalateTaskPriorities, previewEscalation, getEscalationSummary } from '../services/priority-escalation-service.js';
+import { userService } from '../services/user-service.js';
 
 const router = express.Router();
 
@@ -95,7 +104,7 @@ router.get(
       LEFT JOIN (
         SELECT project_id,
                COUNT(*) as message_count,
-               SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END) as unread_count
+               SUM(CASE WHEN read_at IS NULL THEN 1 ELSE 0 END) as unread_count
         FROM messages
         GROUP BY project_id
       ) m_stats ON p.id = m_stats.project_id
@@ -120,7 +129,7 @@ router.get(
       LEFT JOIN (
         SELECT project_id,
                COUNT(*) as message_count,
-               SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END) as unread_count
+               SUM(CASE WHEN read_at IS NULL THEN 1 ELSE 0 END) as unread_count
         FROM messages
         GROUP BY project_id
       ) m_stats ON p.id = m_stats.project_id
@@ -200,7 +209,7 @@ router.get(
     // Get project messages
     const messages = await db.all(
       `
-    SELECT id, sender_type, sender_name, message, is_read, created_at
+    SELECT id, sender_type, sender_name, message, read_at, created_at
     FROM messages
     WHERE project_id = ?
     ORDER BY created_at ASC
@@ -740,7 +749,7 @@ router.get(
 
     const messages = await db.all(
       `
-    SELECT id, sender_type, sender_name, message, is_read, created_at
+    SELECT id, sender_type, sender_name, message, read_at, created_at
     FROM messages
     WHERE project_id = ?
     ORDER BY created_at ASC
@@ -806,7 +815,7 @@ router.post(
 
     const newMessage = await db.get(
       `
-    SELECT id, sender_type, sender_name, message, is_read, created_at
+    SELECT id, sender_type, sender_name, message, read_at, created_at
     FROM messages WHERE id = ?
   `,
       [result.lastID]
@@ -848,8 +857,8 @@ router.put(
     await db.run(
       `
     UPDATE messages 
-    SET is_read = 1 
-    WHERE project_id = ? AND sender_type != ?
+    SET read_at = CURRENT_TIMESTAMP
+    WHERE project_id = ? AND sender_type != ? AND read_at IS NULL
   `,
       [projectId, req.user!.type]
     );
@@ -1188,18 +1197,23 @@ router.post(
       });
     }
 
+    // Look up user ID for author
+    const authorUserId = await userService.getUserIdByEmailOrName(author);
+
     const result = await db.run(
       `
-    INSERT INTO project_updates (project_id, title, description, update_type, author)
+    INSERT INTO project_updates (project_id, title, description, update_type, author_user_id)
     VALUES (?, ?, ?, ?, ?)
   `,
-      [projectId, title, description || null, update_type, author]
+      [projectId, title, description || null, update_type, authorUserId]
     );
 
     const newUpdate = await db.get(
       `
-    SELECT id, title, description, update_type, author, created_at
-    FROM project_updates WHERE id = ?
+    SELECT pu.id, pu.title, pu.description, pu.update_type, u.display_name as author, pu.created_at
+    FROM project_updates pu
+    LEFT JOIN users u ON pu.author_user_id = u.id
+    WHERE pu.id = ?
   `,
       [result.lastID]
     );
@@ -1260,7 +1274,7 @@ router.get(
       COUNT(DISTINCT CASE WHEN m.is_completed = 1 THEN m.id END) as completed_milestones,
       COUNT(DISTINCT f.id) as total_files,
       COUNT(DISTINCT msg.id) as total_messages,
-      COUNT(DISTINCT CASE WHEN msg.is_read = 0 THEN msg.id END) as unread_messages,
+      COUNT(DISTINCT CASE WHEN msg.read_at IS NULL THEN msg.id END) as unread_messages,
       COUNT(DISTINCT u.id) as total_updates
     FROM projects p
     LEFT JOIN milestones m ON p.id = m.project_id
@@ -1299,7 +1313,7 @@ router.get(
     // Get recent messages (last 5)
     const recentMessages = await db.all(
       `
-    SELECT id, sender_type, sender_name, message, is_read, created_at
+    SELECT id, sender_type, sender_name, message, read_at, created_at
     FROM messages
     WHERE project_id = ?
     ORDER BY created_at DESC
@@ -1364,8 +1378,37 @@ router.get(
       });
     }
 
+    // Cast project for helper functions
+    const p = project as Record<string, unknown>;
+
+    // Load latest contract draft (if any) for content and cache invalidation
+    const contractRow = await db.get(
+      `SELECT * FROM contracts WHERE project_id = ? AND status != 'cancelled'
+       ORDER BY created_at DESC LIMIT 1`,
+      [projectId]
+    );
+    const contract = contractRow as Record<string, unknown> | undefined;
+    const contractContent = contract ? getString(contract, 'content') : '';
+    const contractStatus = contract ? getString(contract, 'status') : '';
+    const contractUpdatedAt = contract ? getString(contract, 'updated_at') : undefined;
+
+    const signedPdfPath = getString(p, 'contract_signed_pdf_path');
+    if (signedPdfPath) {
+      const cleanPath = signedPdfPath.replace(/^\//, '').replace(/^uploads\//, '');
+      const absolutePath = path.resolve(getUploadsDir(), cleanPath);
+      if (existsSync(absolutePath)) {
+        const pdfBytes = readFileSync(absolutePath);
+        const projectName = getString(project, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="contract-${projectName}-${projectId}.pdf"`);
+        res.setHeader('Content-Length', pdfBytes.length);
+        res.setHeader('X-PDF-Cache', 'SIGNED');
+        return res.send(Buffer.from(pdfBytes));
+      }
+    }
+
     // Check cache first
-    const cacheKey = getPdfCacheKey('contract', projectId, getString(project, 'updated_at'));
+    const cacheKey = getPdfCacheKey('contract', projectId, contractUpdatedAt || getString(project, 'updated_at'));
     const cachedPdf = getCachedPdf(cacheKey);
     if (cachedPdf) {
       const projectName = getString(project, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
@@ -1375,9 +1418,6 @@ router.get(
       res.setHeader('X-PDF-Cache', 'HIT');
       return res.send(Buffer.from(cachedPdf));
     }
-
-    // Cast project for helper functions
-    const p = project as Record<string, unknown>;
 
     // Helper function to format date
     const formatDate = (dateStr: string | undefined): string => {
@@ -1404,6 +1444,34 @@ router.get(
 
     // Start from top - template uses 0.6 inch from top
     let y = height - 43;
+
+    const isSigned = Boolean(getString(p, 'contract_signed_at') || (contract?.signed_at as string | undefined));
+    const shouldWatermark = !isSigned;
+
+    const drawDraftWatermark = (targetPage: PDFPage): void => {
+      if (!shouldWatermark) return;
+      const label = contractStatus === 'draft' || !contractStatus ? 'DRAFT' : 'UNSIGNED';
+      const fontSize = 72;
+      const textWidth = helveticaBold.widthOfTextAtSize(label, fontSize);
+      targetPage.drawText(label, {
+        x: (width - textWidth) / 2,
+        y: height / 2,
+        size: fontSize,
+        font: helveticaBold,
+        color: rgb(0.88, 0.88, 0.88),
+        rotate: degrees(-20)
+      });
+    };
+
+    const parseSignatureData = (data?: string): Uint8Array | null => {
+      if (!data) return null;
+      const match = data.match(/^data:image\/png;base64,(.+)$/);
+      if (!match) return null;
+      return Uint8Array.from(Buffer.from(match[1], 'base64'));
+    };
+
+
+    drawDraftWatermark(page);
 
     // === HEADER - Title on left, logo and business info on right ===
     const logoHeight = 100; // ~1.4 inch for prominent branding
@@ -1469,138 +1537,222 @@ router.get(
 
     y -= 90;
 
-    // === 1. PROJECT SCOPE ===
-    page.drawText('1. Project Scope', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
-    y -= 18;
-
-    page.drawText('Project Name:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
-    page.drawText(getString(p, 'project_name'), { x: leftMargin + 85, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-    y -= 15;
-
-    const projectType = getString(p, 'project_type');
-    if (projectType) {
-      page.drawText('Project Type:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
-      page.drawText(projectType.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()), { x: leftMargin + 80, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-      y -= 15;
-    }
-
-    const description = getString(p, 'description');
-    if (description) {
-      page.drawText('Description:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
-      y -= 12;
-      // Simple text wrapping for description (sanitize newlines for PDF encoding)
-      const sanitizedDesc = description.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim();
-      const words = sanitizedDesc.split(' ');
-      let line = '';
-      for (const word of words) {
-        const testLine = line + (line ? ' ' : '') + word;
-        if (helvetica.widthOfTextAtSize(testLine, 10) > contentWidth - 20) {
-          page.drawText(line, { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-          y -= 12;
-          line = word;
-        } else {
-          line = testLine;
-        }
-      }
-      if (line) {
-        page.drawText(line, { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-        y -= 12;
-      }
-    }
-
-    y -= 15;
-
-    // === 2. TIMELINE ===
-    page.drawText('2. Timeline', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
-    y -= 18;
+    const formatCurrency = (value?: string): string => {
+      if (!value) return '';
+      const numeric = Number(value);
+      if (Number.isNaN(numeric)) return value;
+      return numeric.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    };
 
     const startDate = getString(p, 'start_date');
     const dueDate = getString(p, 'due_date');
     const timeline = getString(p, 'timeline');
-
-    if (startDate) {
-      page.drawText('Start Date:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
-      page.drawText(formatDate(startDate), { x: leftMargin + 70, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-      y -= 15;
-    }
-    if (dueDate) {
-      page.drawText('Target Completion:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
-      page.drawText(formatDate(dueDate), { x: leftMargin + 110, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-      y -= 15;
-    }
-    if (timeline) {
-      page.drawText('Estimated Timeline:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
-      page.drawText(timeline, { x: leftMargin + 115, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-      y -= 15;
-    }
-
-    y -= 15;
-
-    // === 3. PAYMENT TERMS ===
-    page.drawText('3. Payment Terms', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
-    y -= 18;
-
+    const projectType = getString(p, 'project_type');
+    const description = getString(p, 'description');
     const price = getString(p, 'price');
     const depositAmount = getString(p, 'deposit_amount');
 
-    if (price) {
-      page.drawText('Total Project Cost:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
-      page.drawText(`$${parseFloat(price).toLocaleString()}`, { x: leftMargin + 110, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-      y -= 15;
+    const fallbackContent = [
+      'CONTRACT AGREEMENT',
+      '',
+      `This Agreement is made on ${formatDate(getString(p, 'contract_signed_at') || getString(p, 'created_at'))} between ${BUSINESS_INFO.name} ("Service Provider") and ${getString(p, 'client_name') || 'Client'} ("Client").`,
+      '',
+      '1. Project Scope',
+      `Project Name: ${getString(p, 'project_name')}`,
+      projectType ? `Project Type: ${projectType.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}` : '',
+      description ? `Description: ${description}` : '',
+      '',
+      '2. Timeline',
+      startDate ? `Start Date: ${formatDate(startDate)}` : '',
+      dueDate ? `Target Completion: ${formatDate(dueDate)}` : '',
+      timeline ? `Estimated Timeline: ${timeline}` : '',
+      '',
+      '3. Payment Terms',
+      price ? `Total Project Cost: ${formatCurrency(price)}` : '',
+      depositAmount ? `Deposit Amount: ${formatCurrency(depositAmount)}` : '',
+      'Payment is due according to the agreed milestones. Final payment is due upon project completion and client approval.',
+      '',
+      '4. Terms and Conditions',
+      ...CONTRACT_TERMS.map((term) => `- ${term}`),
+      '',
+      '5. Contact',
+      `Service Provider: ${BUSINESS_INFO.name}`,
+      `Email: ${BUSINESS_INFO.email}`,
+      `Website: ${BUSINESS_INFO.website}`,
+      '',
+      `Client: ${getString(p, 'client_name') || 'Client'}`,
+      `Email: ${getString(p, 'client_email') || ''}`,
+      `Company: ${getString(p, 'company_name') || ''}`
+    ].join('\n');
+
+    const contentSource = contractContent && contractContent.trim() ? contractContent : fallbackContent;
+    const contentLines = contentSource.replace(/\r/g, '').split('\n');
+
+    const ctx = {
+      pdfDoc,
+      currentPage: page,
+      pageNumber: 1,
+      y,
+      width,
+      height,
+      leftMargin,
+      rightMargin,
+      topMargin: PAGE_MARGINS.top,
+      bottomMargin: PAGE_MARGINS.bottom,
+      contentWidth,
+      fonts: {
+        regular: helvetica,
+        bold: helveticaBold
+      }
+    };
+
+    const onNewPage = (nextCtx: typeof ctx): void => {
+      drawDraftWatermark(nextCtx.currentPage);
+    };
+
+    for (const rawLine of contentLines) {
+      const trimmed = rawLine.trim();
+      if (!trimmed) {
+        ctx.y -= 10;
+        continue;
+      }
+
+      let text = trimmed;
+      let font = helvetica;
+      let fontSize = 10;
+      let indent = 0;
+
+      if (/^[-*]\s+/.test(text)) {
+        indent = 12;
+        text = text.replace(/^[-*]\s+/, '');
+      }
+
+      const isTitle = /^[A-Z][A-Z\s]{3,}$/.test(text);
+      const isSection = /^\d+\.\s+/.test(text);
+
+      if (isTitle) {
+        font = helveticaBold;
+        fontSize = 14;
+      } else if (isSection) {
+        font = helveticaBold;
+        fontSize = 12;
+      }
+
+      drawWrappedText(ctx, text, {
+        x: leftMargin + indent,
+        fontSize,
+        font,
+        maxWidth: contentWidth - indent,
+        onNewPage
+      });
+
+      ctx.y -= isTitle || isSection ? 6 : 2;
     }
-    if (depositAmount) {
-      page.drawText('Deposit Amount:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
-      page.drawText(`$${parseFloat(depositAmount).toLocaleString()}`, { x: leftMargin + 100, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-      y -= 15;
-    }
 
-    y -= 5;
-    page.drawText('Payment is due according to the agreed milestones. Final payment is due upon', { x: leftMargin, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-    y -= 12;
-    page.drawText('project completion and client approval.', { x: leftMargin, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-
-    y -= 25;
-
-    // === 4. TERMS AND CONDITIONS ===
-    page.drawText('4. Terms and Conditions', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
-    y -= 18;
-
-    for (const term of CONTRACT_TERMS) {
-      page.drawText(term, { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-      y -= 15;
-    }
-
-    y -= 20;
-
-    // === 5. SIGNATURES ===
-    page.drawText('5. Signatures', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
-    y -= 30;
+    // === SIGNATURES ===
+    ensureSpace(ctx, 120, onNewPage);
+    ctx.currentPage.drawText('Signatures', { x: leftMargin, y: ctx.y, size: 12, font: helveticaBold, color: rgb(0, 0, 0) });
+    ctx.y -= 22;
 
     const signatureWidth = 200;
+    const signatureLineY = ctx.y - 30;
+    const signedDate = isSigned
+      ? formatDate(getString(p, 'contract_signed_at') || (contract?.signed_at as string | undefined))
+      : '______________';
+    const countersignedAt = getString(p, 'contract_countersigned_at') || (contract?.countersigned_at as string | undefined);
+    const countersignedDate = countersignedAt ? formatDate(countersignedAt) : '______________';
 
-    // Client signature
-    page.drawText('Client:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
-    page.drawLine({ start: { x: leftMargin, y: y - 40 }, end: { x: leftMargin + signatureWidth, y: y - 40 }, thickness: 1, color: rgb(0, 0, 0) });
-    page.drawText(getString(p, 'client_name') || 'Client Name', { x: leftMargin, y: y - 55, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-    page.drawText('Date: _______________', { x: leftMargin, y: y - 70, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    const clientSignatureData = getString(p, 'contract_signature_data') || (contract ? getString(contract, 'signature_data') : '');
+    const countersignatureData = getString(p, 'contract_countersignature_data') || (contract ? getString(contract, 'countersignature_data') : '');
+    const clientSignatureBytes = parseSignatureData(clientSignatureData);
+    const countersignatureBytes = parseSignatureData(countersignatureData);
 
-    // Service provider signature
-    page.drawText('Service Provider:', { x: rightCol, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
-    page.drawLine({ start: { x: rightCol, y: y - 40 }, end: { x: rightCol + signatureWidth, y: y - 40 }, thickness: 1, color: rgb(0, 0, 0) });
-    page.drawText(BUSINESS_INFO.name, { x: rightCol, y: y - 55, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-    page.drawText('Date: _______________', { x: rightCol, y: y - 70, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    const signatureImageHeight = 40;
+    const signatureImageWidth = 140;
 
-    // === FOOTER ===
-    const footerText = `Questions? Contact us at ${BUSINESS_INFO.email}`;
-    const footerWidth = helvetica.widthOfTextAtSize(footerText, 9);
-    page.drawText(footerText, { x: (width - footerWidth) / 2, y: 40, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    ctx.currentPage.drawText('Client:', { x: leftMargin, y: ctx.y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    ctx.currentPage.drawLine({ start: { x: leftMargin, y: signatureLineY }, end: { x: leftMargin + signatureWidth, y: signatureLineY }, thickness: 1, color: rgb(0, 0, 0) });
+    if (clientSignatureBytes) {
+      const clientSignatureImage = await pdfDoc.embedPng(clientSignatureBytes);
+      ctx.currentPage.drawImage(clientSignatureImage, {
+        x: leftMargin + 8,
+        y: signatureLineY + 6,
+        width: signatureImageWidth,
+        height: signatureImageHeight
+      });
+    }
+    ctx.currentPage.drawText(getString(p, 'client_name') || 'Client Name', { x: leftMargin, y: signatureLineY - 15, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    ctx.currentPage.drawText(`Date: ${signedDate}`, { x: leftMargin, y: signatureLineY - 30, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+
+    ctx.currentPage.drawText('Service Provider:', { x: rightCol, y: ctx.y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    ctx.currentPage.drawLine({ start: { x: rightCol, y: signatureLineY }, end: { x: rightCol + signatureWidth, y: signatureLineY }, thickness: 1, color: rgb(0, 0, 0) });
+    if (countersignatureBytes) {
+      const countersignatureImage = await pdfDoc.embedPng(countersignatureBytes);
+      ctx.currentPage.drawImage(countersignatureImage, {
+        x: rightCol + 8,
+        y: signatureLineY + 6,
+        width: signatureImageWidth,
+        height: signatureImageHeight
+      });
+    }
+    ctx.currentPage.drawText(BUSINESS_INFO.name, { x: rightCol, y: signatureLineY - 15, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    ctx.currentPage.drawText(`Date: ${countersignedDate}`, { x: rightCol, y: signatureLineY - 30, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+
+    // === FOOTERS ===
+    const footerTerms = 'Standard terms and conditions apply.';
+    const footerContact = `Questions? Contact us at ${BUSINESS_INFO.email}`;
+    for (const footerPage of pdfDoc.getPages()) {
+      const { width: footerWidth } = footerPage.getSize();
+      const termsWidth = helvetica.widthOfTextAtSize(footerTerms, 8);
+      const contactWidth = helvetica.widthOfTextAtSize(footerContact, 9);
+      footerPage.drawText(footerTerms, {
+        x: (footerWidth - termsWidth) / 2,
+        y: 52,
+        size: 8,
+        font: helvetica,
+        color: rgb(0.5, 0.5, 0.5)
+      });
+      footerPage.drawText(footerContact, {
+        x: (footerWidth - contactWidth) / 2,
+        y: 40,
+        size: 9,
+        font: helvetica,
+        color: rgb(0.4, 0.4, 0.4)
+      });
+    }
+
+    await addPageNumbers(pdfDoc, { marginBottom: 30 });
 
     // Generate PDF bytes and send
     const pdfBytes = await pdfDoc.save();
     const projectName = getString(p, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
 
+    const countersignedAtValue = getString(p, 'contract_countersigned_at') || (contract ? getString(contract, 'countersigned_at') : '');
+    if (isSigned && countersignedAtValue && !signedPdfPath) {
+      const contractsDir = getUploadsSubdir(UPLOAD_DIRS.CONTRACTS);
+      const filename = sanitizeFilename(`contract-${projectName}-${projectId}.pdf`);
+      const absolutePath = path.join(contractsDir, filename);
+      writeFileSync(absolutePath, pdfBytes);
+      const relativePath = getRelativePath(UPLOAD_DIRS.CONTRACTS, filename) as string;
+
+      await db.run('UPDATE projects SET contract_signed_pdf_path = ? WHERE id = ?', [relativePath, projectId]);
+
+      const latestContract = await db.get(
+        `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled'
+         ORDER BY created_at DESC LIMIT 1`,
+        [projectId]
+      );
+
+      if (latestContract) {
+        await db.run('UPDATE contracts SET signed_pdf_path = ?, updated_at = datetime(\'now\') WHERE id = ?', [
+          relativePath,
+          (latestContract as Record<string, unknown>).id as number
+        ]);
+      }
+    }
+
     // Cache the generated PDF
-    cachePdf(cacheKey, pdfBytes, getString(p, 'updated_at'));
+    cachePdf(cacheKey, pdfBytes, contractUpdatedAt || getString(p, 'updated_at'));
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="contract-${projectName}-${projectId}.pdf"`);
@@ -1658,6 +1810,24 @@ router.post(
        WHERE id = ?`,
       [signatureToken, expiresAt.toISOString(), projectId]
     );
+
+    const latestContract = await db.get(
+      `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled'
+       ORDER BY created_at DESC LIMIT 1`,
+      [projectId]
+    );
+
+    if (latestContract) {
+      await db.run(
+        `UPDATE contracts SET
+          status = 'sent',
+          sent_at = datetime('now'),
+          expires_at = ?,
+          updated_at = datetime('now')
+         WHERE id = ?`,
+        [expiresAt.toISOString() as string, (latestContract as Record<string, unknown>).id as number]
+      );
+    }
 
     // Log signature request to audit log
     await db.run(
@@ -1803,6 +1973,19 @@ router.get(
       [projectId, req.ip || 'unknown', req.get('user-agent') || 'unknown']
     );
 
+    const latestContract = await db.get(
+      `SELECT id, status FROM contracts WHERE project_id = ? AND status != 'cancelled'
+       ORDER BY created_at DESC LIMIT 1`,
+      [projectId]
+    );
+
+    if (latestContract && (latestContract as Record<string, unknown>).status !== 'signed') {
+      await db.run(
+        `UPDATE contracts SET status = 'viewed', updated_at = datetime('now') WHERE id = ?`,
+        [(latestContract as Record<string, unknown>).id as number]
+      );
+    }
+
     res.json({
       projectId: projectId,
       projectName: p.project_name,
@@ -1883,6 +2066,28 @@ router.post(
        WHERE id = ?`,
       [signedAt, signerName, clientEmail, signerIp, signerUserAgent, signatureData, projectId]
     );
+
+    const latestContract = await db.get(
+      `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled'
+       ORDER BY created_at DESC LIMIT 1`,
+      [projectId]
+    );
+
+    if (latestContract) {
+      await db.run(
+        `UPDATE contracts SET
+          status = 'signed',
+          signed_at = ?,
+          signer_name = ?,
+          signer_email = ?,
+          signer_ip = ?,
+          signer_user_agent = ?,
+          signature_data = ?,
+          updated_at = datetime('now')
+         WHERE id = ?`,
+        [signedAt, signerName, clientEmail, signerIp, signerUserAgent, signatureData, (latestContract as Record<string, unknown>).id]
+      );
+    }
 
     // Log signature to audit log
     await db.run(
@@ -1998,6 +2203,94 @@ ${BUSINESS_INFO.email}
 );
 
 /**
+ * POST /api/projects/:id/contract/countersign
+ * Countersign a contract (ADMIN ONLY)
+ */
+router.post(
+  '/:id/contract/countersign',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const { signatureData, signerName } = req.body;
+    const db = getDatabase();
+
+    if (!signerName) {
+      return res.status(400).json({ error: 'Signer name is required' });
+    }
+
+    const project = await db.get(
+      `SELECT id, project_name, contract_signed_at
+       FROM projects
+       WHERE id = ?`,
+      [projectId]
+    );
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const p = project as Record<string, unknown>;
+
+    if (!p.contract_signed_at) {
+      return res.status(400).json({ error: 'Client signature is required before countersigning.' });
+    }
+
+    const countersignedAt = new Date().toISOString();
+    const countersignerIp = req.ip || req.socket.remoteAddress || 'unknown';
+    const countersignerUserAgent = req.get('user-agent') || 'unknown';
+    const countersignerEmail = req.user?.email || 'admin';
+
+    await db.run(
+      `UPDATE projects SET
+        contract_countersigned_at = ?,
+        contract_countersigner_name = ?,
+        contract_countersigner_email = ?,
+        contract_countersigner_ip = ?,
+        contract_countersigner_user_agent = ?,
+        contract_countersignature_data = ?
+       WHERE id = ?`,
+      [countersignedAt, signerName, countersignerEmail, countersignerIp, countersignerUserAgent, signatureData || null, projectId]
+    );
+
+    const latestContract = await db.get(
+      `SELECT id FROM contracts WHERE project_id = ? AND status != 'cancelled'
+       ORDER BY created_at DESC LIMIT 1`,
+      [projectId]
+    );
+
+    if (latestContract) {
+      await db.run(
+        `UPDATE contracts SET
+          status = 'signed',
+          countersigned_at = ?,
+          countersigner_name = ?,
+          countersigner_email = ?,
+          countersigner_ip = ?,
+          countersigner_user_agent = ?,
+          countersignature_data = ?,
+          updated_at = datetime('now')
+         WHERE id = ?`,
+        [countersignedAt, signerName, countersignerEmail, countersignerIp, countersignerUserAgent, signatureData || null, (latestContract as Record<string, unknown>).id]
+      );
+    }
+
+    await db.run(
+      `INSERT INTO contract_signature_log (project_id, action, actor_email, actor_ip, actor_user_agent, details)
+       VALUES (?, 'countersigned', ?, ?, ?, ?)`,
+      [projectId, countersignerEmail, countersignerIp, countersignerUserAgent, JSON.stringify({ signerName, countersignedAt })]
+    );
+
+    res.json({
+      success: true,
+      message: 'Contract countersigned successfully',
+      countersignedAt,
+      signerName
+    });
+  })
+);
+
+/**
  * GET /api/projects/:id/contract/signature-status
  * Get contract signature status for a project
  */
@@ -2010,7 +2303,9 @@ router.get(
 
     const project = await db.get(
       `SELECT contract_signed_at, contract_signature_requested_at, contract_signature_expires_at,
-              contract_signer_name, contract_signer_email, contract_signer_ip
+              contract_signer_name, contract_signer_email, contract_signer_ip,
+              contract_countersigned_at, contract_countersigner_name, contract_countersigner_email,
+              contract_countersigner_ip, contract_signed_pdf_path
        FROM projects WHERE id = ?`,
       [projectId]
     );
@@ -2028,7 +2323,12 @@ router.get(
       signerEmail: p.contract_signer_email,
       signerIp: p.contract_signer_ip,
       requestedAt: p.contract_signature_requested_at,
-      expiresAt: p.contract_signature_expires_at
+      expiresAt: p.contract_signature_expires_at,
+      countersignedAt: p.contract_countersigned_at,
+      countersignerName: p.contract_countersigner_name,
+      countersignerEmail: p.contract_countersigner_email,
+      countersignerIp: p.contract_countersigner_ip,
+      signedPdfPath: p.contract_signed_pdf_path
     });
   })
 );

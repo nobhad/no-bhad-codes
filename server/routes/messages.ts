@@ -73,7 +73,7 @@ router.get(
         c.email as client_email,
         p.project_name,
         COUNT(gm.id) as message_count,
-        COUNT(CASE WHEN gm.is_read = 0 AND gm.sender_type != 'admin' THEN 1 END) as unread_count
+        COUNT(CASE WHEN gm.read_at IS NULL AND gm.sender_type != 'admin' THEN 1 END) as unread_count
       FROM message_threads mt
       JOIN clients c ON mt.client_id = c.id
       LEFT JOIN projects p ON mt.project_id = p.id
@@ -88,7 +88,7 @@ router.get(
         mt.*,
         p.project_name,
         COUNT(gm.id) as message_count,
-        COUNT(CASE WHEN gm.is_read = 0 AND gm.sender_type != 'client' THEN 1 END) as unread_count
+        COUNT(CASE WHEN gm.read_at IS NULL AND gm.sender_type != 'client' THEN 1 END) as unread_count
       FROM message_threads mt
       LEFT JOIN projects p ON mt.project_id = p.id
       LEFT JOIN general_messages gm ON mt.id = gm.thread_id
@@ -345,7 +345,7 @@ router.get(
       `
     SELECT
       gm.id, gm.sender_type, gm.sender_name, gm.message, gm.priority, gm.reply_to,
-      gm.attachments, gm.is_read, gm.read_at, gm.created_at, gm.updated_at,
+      gm.attachments, gm.read_at, gm.created_at, gm.updated_at,
       CASE WHEN pm.id IS NOT NULL THEN 1 ELSE 0 END as is_pinned
     FROM general_messages gm
     LEFT JOIN pinned_messages pm ON gm.id = pm.message_id AND pm.thread_id = ?
@@ -416,7 +416,7 @@ router.put(
     await db.run(
       `
     UPDATE general_messages 
-    SET is_read = 1, read_at = CURRENT_TIMESTAMP
+    SET read_at = CURRENT_TIMESTAMP
     WHERE thread_id = ? AND sender_type != ?
   `,
       [threadId, req.user!.type]
@@ -1125,7 +1125,7 @@ router.get(
       COUNT(DISTINCT mt.id) as total_threads,
       COUNT(DISTINCT CASE WHEN mt.status = 'active' THEN mt.id END) as active_threads,
       COUNT(gm.id) as total_messages,
-      COUNT(CASE WHEN gm.is_read = 0 THEN gm.id END) as unread_messages,
+      COUNT(CASE WHEN gm.read_at IS NULL THEN gm.id END) as unread_messages,
       COUNT(CASE WHEN gm.sender_type = 'client' THEN gm.id END) as client_messages,
       COUNT(CASE WHEN gm.sender_type = 'admin' THEN gm.id END) as admin_messages,
       COUNT(CASE WHEN gm.message_type = 'inquiry' THEN gm.id END) as inquiries,
