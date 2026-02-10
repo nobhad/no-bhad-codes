@@ -309,8 +309,7 @@ export interface MessageRow extends BaseEntity {
   sender_id: number | null;
   sender_name: string;
   message: string;
-  is_read: number; // SQLite uses 0/1 for boolean
-  read_at: string | null;
+  read_at: string | null; // NULL = unread, timestamp = read
 }
 
 export interface MessageInsert {
@@ -319,12 +318,10 @@ export interface MessageInsert {
   sender_id?: number;
   sender_name: string;
   message: string;
-  is_read?: boolean;
 }
 
 export interface MessageUpdate {
-  is_read?: boolean;
-  read_at?: string;
+  read_at?: string; // Set to CURRENT_TIMESTAMP to mark as read
 }
 
 // ============================================

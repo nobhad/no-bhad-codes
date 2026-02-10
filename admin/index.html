@@ -40,6 +40,17 @@
             }
           } catch (e) {}
         }
+
+        if (w === '1' || w === '0') {
+          try {
+            params.delete('wireframe');
+            var newUrl = window.location.pathname;
+            var query = params.toString();
+            if (query) newUrl += '?' + query;
+            if (window.location.hash) newUrl += window.location.hash;
+            window.history.replaceState({}, '', newUrl);
+          } catch (e) {}
+        }
       })();
     </script>
     <meta name="description" content="Admin Dashboard - Manage your site, leads, and analytics" />
@@ -147,10 +158,75 @@
       </div>
     </header>
 
+    <!-- MOBILE/OVERLAY NAVIGATION - Same as main site -->
+    <nav data-nav="closed" class="nav admin-nav">
+      <div data-menu-toggle="" class="overlay"></div>
+      <div class="menu">
+        <div class="menu-bg">
+          <div class="bg-panel first"></div>
+          <div class="bg-panel second"></div>
+          <div class="bg-panel"></div>
+        </div>
+        <div class="menu-inner">
+          <ul class="menu-list">
+            <li class="menu-list-item">
+              <a href="/" class="menu-link">
+                <p class="menu-link-heading" data-text="home">home</p>
+                <p class="eyebrow">00</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+            <li class="menu-list-item">
+              <a href="/#/about" class="menu-link">
+                <p class="menu-link-heading" data-text="about">about</p>
+                <p class="eyebrow">01</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+            <li class="menu-list-item">
+              <a href="/#/contact" class="menu-link">
+                <p class="menu-link-heading" data-text="contact">contact</p>
+                <p class="eyebrow">02</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+            <li class="menu-list-item">
+              <a href="/#/projects" class="menu-link">
+                <p class="menu-link-heading" data-text="projects">projects</p>
+                <p class="eyebrow">03</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+          </ul>
+          <div class="menu-details" data-menu-fade>
+            <p class="p-small">Socials</p>
+            <div class="socials-row">
+              <a href="https://github.com/nobhad" target="_blank" rel="noopener noreferrer" class="p-large text-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="social-icon" aria-hidden="true">
+                  <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+                  <path d="M9 18c-4.51 2-5-2-7-2"/>
+                </svg>
+                GitHub
+              </a>
+              <a href="https://www.linkedin.com/in/noelle-b-676286106/" target="_blank" rel="noopener noreferrer" class="p-large text-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="social-icon" aria-hidden="true">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                  <rect width="4" height="12" x="2" y="9"/>
+                  <circle cx="4" cy="4" r="2"/>
+                </svg>
+                LinkedIn
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
     <!-- Auth Gate - Login Form -->
     <div class="auth-gate" id="auth-gate">
       <div class="auth-gate-container">
         <div class="auth-gate-header">
+          <img src="/images/avatar.svg" alt="No Bhad Codes" class="auth-gate-logo" />
           <h1>Admin Access</h1>
           <p>Enter your admin password to continue</p>
         </div>
@@ -231,39 +307,18 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
               <span class="btn-text">DASHBOARD</span>
             </button>
-            <button class="btn btn-secondary" id="btn-tasks" data-tab="tasks" aria-label="Tasks">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-              <span class="btn-text">TASKS</span>
+            <button class="btn btn-secondary" id="btn-work" data-tab="work" aria-label="Work">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+              <span class="btn-text">WORK</span>
             </button>
-            <button class="btn btn-secondary" id="btn-leads" data-tab="leads" aria-label="Leads">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
-              <span class="btn-text">LEADS</span>
-              <span class="sidebar-badge" id="leads-badge" style="display: none;"></span>
-            </button>
-            <button class="btn btn-secondary" id="btn-projects" data-tab="projects" aria-label="Projects">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
-              <span class="btn-text">PROJECTS</span>
-            </button>
-            <button class="btn btn-secondary" id="btn-clients" data-tab="clients" aria-label="Clients">
+            <button class="btn btn-secondary" id="btn-crm" data-tab="crm" aria-label="CRM">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span class="btn-text">CLIENTS</span>
+              <span class="btn-text">CRM</span>
+              <span class="sidebar-badge" id="crm-badge" style="display: none;"></span>
             </button>
-            <button class="btn btn-secondary" id="btn-invoices" data-tab="invoices" aria-label="Invoices">
+            <button class="btn btn-secondary" id="btn-documents" data-tab="documents" aria-label="Documents">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
-              <span class="btn-text">INVOICES</span>
-            </button>
-            <button class="btn btn-secondary" id="btn-messages" data-tab="messages">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
-              <span class="btn-text">MESSAGES</span>
-              <span class="sidebar-badge" id="messages-badge" style="display: none;"></span>
-            </button>
-            <button class="btn btn-secondary" id="btn-document-requests" data-tab="document-requests" aria-label="Document requests">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
               <span class="btn-text">DOCUMENTS</span>
-            </button>
-            <button class="btn btn-secondary" id="btn-knowledge-base" data-tab="knowledge-base" aria-label="Knowledge base">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8"/><path d="M8 11h8"/></svg>
-              <span class="btn-text">KNOWLEDGE</span>
             </button>
             <button class="btn btn-secondary" id="btn-workflows" data-tab="workflows" aria-label="Workflows">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
@@ -272,6 +327,10 @@
             <button class="btn btn-secondary" id="btn-analytics" data-tab="analytics" aria-label="Analytics">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
               <span class="btn-text">ANALYTICS</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-support" data-tab="support" aria-label="Support">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="10"/><path d="M8.5 8.5a4 4 0 0 1 7 3c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+              <span class="btn-text">SUPPORT</span>
             </button>
             <button class="btn btn-secondary" id="btn-system" data-tab="system" aria-label="System Status">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10"/><path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/><path d="M1 12h6m6 0h10"/><path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
@@ -319,6 +378,29 @@
               <h1 id="admin-page-title">Dashboard</h1>
               <!-- Header Subtabs (shown for Analytics and Workflows tabs) -->
               <div class="header-subtabs">
+                <!-- Work subtabs -->
+                <div class="portal-subtabs header-subtab-group" data-for-tab="work" data-mode="primary">
+                  <button class="portal-subtab active" data-subtab="projects">Projects</button>
+                  <button class="portal-subtab" data-subtab="tasks">Tasks</button>
+                  <button class="portal-subtab" data-subtab="ad-hoc-requests">Requests</button>
+                </div>
+                <!-- CRM subtabs -->
+                <div class="portal-subtabs header-subtab-group" data-for-tab="crm" data-mode="primary">
+                  <button class="portal-subtab active" data-subtab="leads">Leads</button>
+                  <button class="portal-subtab" data-subtab="clients">Clients</button>
+                  <button class="portal-subtab" data-subtab="messages">Messages</button>
+                </div>
+                <!-- Documents subtabs -->
+                <div class="portal-subtabs header-subtab-group" data-for-tab="documents" data-mode="primary">
+                  <button class="portal-subtab active" data-subtab="invoices">Invoices</button>
+                  <button class="portal-subtab" data-subtab="contracts">Contracts</button>
+                  <button class="portal-subtab" data-subtab="document-requests">Document Requests</button>
+                  <button class="portal-subtab" data-subtab="questionnaires">Questionnaires</button>
+                </div>
+                <!-- Support subtabs -->
+                <div class="portal-subtabs header-subtab-group" data-for-tab="support" data-mode="primary">
+                  <button class="portal-subtab active" data-subtab="knowledge-base">Knowledge Base</button>
+                </div>
                 <!-- Analytics subtabs -->
                 <div class="analytics-subtabs header-subtab-group" data-for-tab="analytics">
                   <button type="button" class="analytics-subtab active" data-subtab="overview">Overview</button>
@@ -330,6 +412,7 @@
                 <div class="portal-subtabs header-subtab-group" data-for-tab="workflows" id="workflows-subtabs">
                   <button class="portal-subtab active" data-subtab="approvals">Approvals</button>
                   <button class="portal-subtab" data-subtab="triggers">Triggers</button>
+                  <button class="portal-subtab" data-subtab="email-templates">Email Templates</button>
                 </div>
                 <!-- Tasks view toggle -->
                 <div class="header-controls header-subtab-group" data-for-tab="tasks">
@@ -814,6 +897,104 @@
             </div>
           </div>
 
+          <!-- Contracts Tab -->
+          <div class="tab-content" id="tab-contracts">
+            <div class="quick-stats">
+              <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="all">
+                <span class="stat-number" id="contracts-total">-</span>
+                <span class="stat-label">Total Contracts</span>
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="draft">
+                <span class="stat-number" id="contracts-draft">-</span>
+                <span class="stat-label">Draft</span>
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="sent">
+                <span class="stat-number" id="contracts-sent">-</span>
+                <span class="stat-label">Sent</span>
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="viewed">
+                <span class="stat-number" id="contracts-viewed">-</span>
+                <span class="stat-label">Viewed</span>
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="signed">
+                <span class="stat-number" id="contracts-signed">-</span>
+                <span class="stat-label">Signed</span>
+              </button>
+            </div>
+
+            <div class="admin-table-card" id="contracts-table-card">
+              <div class="admin-table-header">
+                <h3>Contracts</h3>
+                <div class="admin-table-actions" id="contracts-filter-container">
+                  <button class="icon-btn" id="refresh-contracts-btn" title="Refresh" aria-label="Refresh contracts">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></span>
+                  </button>
+                </div>
+              </div>
+              <div class="admin-table-container contracts-table-container">
+                <div class="admin-table-scroll-wrapper">
+                  <table class="admin-table contracts-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Contract</th>
+                        <th scope="col">Project</th>
+                        <th scope="col" class="contact-col">Client</th>
+                        <th scope="col" class="status-col">Status</th>
+                        <th scope="col" class="date-col">Sent</th>
+                        <th scope="col" class="date-col">Signed</th>
+                        <th scope="col" class="date-col">Expires</th>
+                        <th scope="col" class="actions-col">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="contracts-table-body">
+                      <tr>
+                        <td colspan="8" class="loading-row">Loading contracts...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div id="contracts-pagination" class="table-pagination"></div>
+            </div>
+
+            <!-- Ad Hoc Requests Tab -->
+            <div class="tab-content" id="tab-ad-hoc-requests">
+              <div class="admin-table-card" id="ad-hoc-requests-table-card">
+                <div class="admin-table-header">
+                  <h3>Ad Hoc Requests</h3>
+                  <div class="admin-table-actions" id="ad-hoc-requests-filter-container">
+                    <button class="icon-btn" id="refresh-ad-hoc-requests-btn" title="Refresh" aria-label="Refresh ad hoc requests">
+                      <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></span>
+                    </button>
+                  </div>
+                </div>
+                <div class="admin-table-container ad-hoc-requests-table-container">
+                  <div class="admin-table-scroll-wrapper">
+                    <table class="admin-table ad-hoc-requests-table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Request</th>
+                          <th scope="col" class="contact-col">Client</th>
+                          <th scope="col">Project</th>
+                          <th scope="col">Priority</th>
+                          <th scope="col" class="status-col">Status</th>
+                          <th scope="col" class="date-col">Submitted</th>
+                          <th scope="col" class="actions-col">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="ad-hoc-requests-table-body">
+                        <tr>
+                          <td colspan="7" class="loading-row">Loading requests...</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div id="ad-hoc-requests-pagination" class="table-pagination"></div>
+              </div>
+            </div>
+          </div>
+
           <!-- Tasks Tab (Global) -->
           <div class="tab-content" id="tab-tasks">
             <div class="tasks-main-container portal-shadow">
@@ -1285,6 +1466,12 @@
                 </div>
               </div>
 
+              <!-- Ad Hoc Revenue Widget -->
+              <div class="portal-project-card portal-shadow">
+                <h3>Ad Hoc Revenue Analytics</h3>
+                <div id="ad-hoc-analytics-widget" class="loading-text">Loading ad hoc analytics...</div>
+              </div>
+
               <!-- Lead Analytics & Scoring -->
               <div class="portal-project-card portal-shadow leads-analytics-section" id="leads-analytics-section">
                 <h3>Lead Analytics</h3>
@@ -1653,6 +1840,191 @@
             </div>
           </div>
 
+          <!-- Questionnaires Tab -->
+          <div class="tab-content" id="tab-questionnaires">
+            <div class="admin-table-card portal-shadow">
+              <div class="admin-table-header">
+                <h3>Questionnaires</h3>
+                <div class="admin-table-actions" id="questionnaires-filter-container">
+                  <button type="button" class="icon-btn" id="questionnaires-refresh" title="Refresh" aria-label="Refresh questionnaires">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                  </button>
+                  <button type="button" class="icon-btn icon-btn-primary" id="questionnaires-add" title="Create Questionnaire" aria-label="Create questionnaire">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                  </button>
+                </div>
+              </div>
+              <div class="admin-table-container">
+                <div class="admin-table-scroll-wrapper">
+                <table class="admin-table" aria-label="Questionnaires">
+                  <thead>
+                    <tr>
+                      <th scope="col">Name</th>
+                      <th scope="col">Description</th>
+                      <th scope="col" class="type-col">Project Type</th>
+                      <th scope="col" class="status-col">Status</th>
+                      <th scope="col" class="actions-col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="questionnaires-table-body">
+                    <tr>
+                      <td colspan="5" class="loading-row">Loading questionnaires...</td>
+                    </tr>
+                  </tbody>
+                </table>
+                </div>
+              </div>
+              <div id="questionnaires-pagination" class="table-pagination"></div>
+            </div>
+
+            <!-- Pending Responses Card -->
+            <div class="admin-table-card portal-shadow" style="margin-top: var(--space-lg);">
+              <div class="admin-table-header">
+                <h3>Pending Responses</h3>
+                <div class="admin-table-actions">
+                  <button type="button" class="icon-btn" id="responses-refresh" title="Refresh" aria-label="Refresh responses">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                  </button>
+                </div>
+              </div>
+              <div class="admin-table-container">
+                <div class="admin-table-scroll-wrapper">
+                <table class="admin-table" aria-label="Pending questionnaire responses">
+                  <thead>
+                    <tr>
+                      <th scope="col">Questionnaire</th>
+                      <th scope="col" class="contact-col">Client</th>
+                      <th scope="col" class="status-col">Status</th>
+                      <th scope="col" class="date-col">Due Date</th>
+                      <th scope="col" class="actions-col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="responses-table-body">
+                    <tr>
+                      <td colspan="5" class="loading-row">Loading responses...</td>
+                    </tr>
+                  </tbody>
+                </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Create/Edit Questionnaire Modal -->
+            <div class="admin-modal-overlay hidden" id="questionnaire-modal" role="dialog" aria-modal="true" aria-labelledby="questionnaire-modal-title">
+              <div class="admin-modal admin-modal--lg">
+                <div class="admin-modal-header">
+                  <div class="admin-modal-title">
+                    <h2 id="questionnaire-modal-title">Create Questionnaire</h2>
+                  </div>
+                  <button class="admin-modal-close" id="questionnaire-modal-close" aria-label="Close modal">&times;</button>
+                </div>
+                <div class="admin-modal-body">
+                  <form id="questionnaire-form">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="questionnaire-name">Internal Name</label>
+                        <input type="text" id="questionnaire-name" name="name" required placeholder="e.g., website_discovery" />
+                      </div>
+                      <div class="form-group">
+                        <label for="questionnaire-project-type">Project Type</label>
+                        <select id="questionnaire-project-type" name="project_type">
+                          <option value="">All Types</option>
+                          <option value="website">Website</option>
+                          <option value="branding">Branding</option>
+                          <option value="ecommerce">E-commerce</option>
+                          <option value="marketing">Marketing</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="questionnaire-description">Description (shown to clients)</label>
+                      <textarea id="questionnaire-description" name="description" rows="2" placeholder="Help us understand your project needs..."></textarea>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group form-group--checkbox">
+                        <label>
+                          <input type="checkbox" id="questionnaire-active" name="is_active" checked />
+                          Active
+                        </label>
+                      </div>
+                      <div class="form-group form-group--checkbox">
+                        <label>
+                          <input type="checkbox" id="questionnaire-auto-send" name="auto_send_on_project_create" />
+                          Auto-send on project creation
+                        </label>
+                      </div>
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                      <label>Questions</label>
+                      <div id="questions-builder">
+                        <!-- Questions will be added dynamically -->
+                      </div>
+                      <button type="button" class="btn btn-secondary btn-sm" id="add-question-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        Add Question
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                <div class="admin-modal-footer">
+                  <button type="button" class="btn btn-secondary" id="questionnaire-cancel">Cancel</button>
+                  <button type="submit" form="questionnaire-form" class="btn btn-primary" id="questionnaire-save">Save Questionnaire</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Send Questionnaire Modal -->
+            <div class="admin-modal-overlay hidden" id="send-questionnaire-modal" role="dialog" aria-modal="true" aria-labelledby="send-questionnaire-modal-title">
+              <div class="admin-modal">
+                <div class="admin-modal-header">
+                  <div class="admin-modal-title">
+                    <h2 id="send-questionnaire-modal-title">Send Questionnaire</h2>
+                  </div>
+                  <button class="admin-modal-close" id="send-questionnaire-modal-close" aria-label="Close modal">&times;</button>
+                </div>
+                <div class="admin-modal-body">
+                  <form id="send-questionnaire-form">
+                    <input type="hidden" id="send-questionnaire-id" name="questionnaire_id" />
+                    <div class="form-group">
+                      <label for="send-questionnaire-client">Client</label>
+                      <select id="send-questionnaire-client" name="client_id" required>
+                        <option value="">Select a client...</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="send-questionnaire-due">Due Date (optional)</label>
+                      <input type="date" id="send-questionnaire-due" name="due_date" />
+                    </div>
+                  </form>
+                </div>
+                <div class="admin-modal-footer">
+                  <button type="button" class="btn btn-secondary" id="send-questionnaire-cancel">Cancel</button>
+                  <button type="submit" form="send-questionnaire-form" class="btn btn-primary" id="send-questionnaire-submit">Send</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- View Response Modal -->
+            <div class="admin-modal-overlay hidden" id="view-response-modal" role="dialog" aria-modal="true" aria-labelledby="view-response-modal-title">
+              <div class="admin-modal admin-modal--lg">
+                <div class="admin-modal-header">
+                  <div class="admin-modal-title">
+                    <h2 id="view-response-modal-title">Questionnaire Response</h2>
+                  </div>
+                  <button class="admin-modal-close" id="view-response-modal-close" aria-label="Close modal">&times;</button>
+                </div>
+                <div id="view-response-body" class="admin-modal-body">
+                  <!-- Response content will be populated dynamically -->
+                </div>
+                <div class="admin-modal-footer">
+                  <button type="button" class="btn btn-secondary" id="view-response-close">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Knowledge Base Tab -->
           <div class="tab-content" id="tab-knowledge-base">
             <div class="admin-table-card portal-shadow" id="kb-categories-card">
@@ -1969,6 +2341,10 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
                 <span>Files</span>
               </button>
+              <button data-pd-tab="deliverables">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                <span>Deliverables</span>
+              </button>
               <button data-pd-tab="messages">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
                 <span>Messages</span>
@@ -2094,6 +2470,22 @@
                 <ul class="activity-list" id="pd-activity-list" aria-live="polite" aria-atomic="false">
                   <li>No activity recorded yet.</li>
                 </ul>
+              </div>
+            </div>
+
+            <!-- Deliverables Sub-Tab -->
+            <div class="portal-tab-panel" id="pd-tab-deliverables">
+              <h3 class="tab-section-heading">Deliverables</h3>
+              <div class="portal-project-card portal-shadow">
+                <div class="card-header-with-action">
+                  <h3>Project Deliverables</h3>
+                  <button class="btn btn-secondary btn-sm" id="btn-manage-deliverables" data-action="open-deliverables">
+                    Manage Deliverables
+                  </button>
+                </div>
+                <div id="pd-deliverables-list" class="deliverables-inline-list">
+                  <p class="empty-state">No deliverables yet. Click "Manage Deliverables" to add and track project deliverables.</p>
+                </div>
               </div>
             </div>
 
@@ -2379,6 +2771,10 @@
                         <span class="field-label">Signed On</span>
                         <span class="meta-value" id="pd-contract-date">-</span>
                       </div>
+                      <div class="status-item" id="pd-contract-countersigned-info" style="display: none;">
+                        <span class="field-label">Countersigned On</span>
+                        <span class="meta-value" id="pd-contract-countersigned-date">-</span>
+                      </div>
                       <div class="status-item" id="pd-contract-requested-info" style="display: none;">
                         <span class="field-label">Signature Requested</span>
                         <span class="meta-value" id="pd-contract-requested-date">-</span>
@@ -2404,6 +2800,33 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                       <span id="pd-contract-sign-btn-text">Request Signature</span>
                     </button>
+                    <button type="button" id="pd-contract-countersign-btn" class="contract-action-card" style="display: none;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4"/><path d="M2 16c3-1 6-4 7-7 1-3 4-6 7-7"/><path d="M13 7l4 4"/><path d="M19 3l2 2"/></svg>
+                      <span>Countersign</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Contract Builder Card -->
+                <div class="portal-project-card portal-shadow">
+                  <div class="card-header-with-action">
+                    <div>
+                      <h3>Contract Builder</h3>
+                      <p class="contract-description">Build a draft, pull from templates, and preview before sending.</p>
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="pd-contract-builder-btn">
+                      Open Builder
+                    </button>
+                  </div>
+                  <div class="contract-builder-meta">
+                    <div class="status-item">
+                      <span class="field-label">Template</span>
+                      <span class="meta-value" id="pd-contract-template-label">Not selected</span>
+                    </div>
+                    <div class="status-item">
+                      <span class="field-label">Draft</span>
+                      <span class="meta-value" id="pd-contract-draft-status">No draft yet</span>
+                    </div>
                   </div>
                 </div>
 
@@ -2418,6 +2841,14 @@
                     <div class="signature-info-row">
                       <span class="field-label">Date & Time</span>
                       <span class="meta-value" id="pd-contract-signed-datetime">-</span>
+                    </div>
+                    <div class="signature-info-row" id="pd-contract-countersign-row" style="display: none;">
+                      <span class="field-label">Countersigned By</span>
+                      <span class="meta-value" id="pd-contract-countersigner">-</span>
+                    </div>
+                    <div class="signature-info-row" id="pd-contract-countersign-date-row" style="display: none;">
+                      <span class="field-label">Countersigned At</span>
+                      <span class="meta-value" id="pd-contract-countersigned-datetime">-</span>
                     </div>
                     <div class="signature-info-row">
                       <span class="field-label">IP Address</span>
@@ -2447,7 +2878,81 @@
 
           <!-- Workflows Tab (Approvals + Triggers) -->
           <div class="tab-content" id="tab-workflows">
-            <!-- Approvals Content -->
+            <!-- Pending Approvals Dashboard -->
+            <div id="pending-approvals-section" class="approval-dashboard-section">
+              <div class="quick-stats">
+                <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="all">
+                  <span class="stat-number" id="approvals-total">-</span>
+                  <span class="stat-label">Total Active</span>
+                </button>
+                <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="pending">
+                  <span class="stat-number" id="approvals-pending">-</span>
+                  <span class="stat-label">Pending</span>
+                </button>
+                <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="in_progress">
+                  <span class="stat-number" id="approvals-in-progress">-</span>
+                  <span class="stat-label">In Progress</span>
+                </button>
+                <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="approved">
+                  <span class="stat-number" id="approvals-approved">-</span>
+                  <span class="stat-label">Approved</span>
+                </button>
+              </div>
+
+              <div class="admin-table-card portal-shadow" id="pending-approvals-card">
+                <div class="admin-table-header">
+                  <h3>Pending Approvals</h3>
+                  <div class="admin-table-actions">
+                    <button type="button" class="icon-btn" id="approvals-refresh" title="Refresh" aria-label="Refresh approvals">
+                      <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                    </button>
+                  </div>
+                </div>
+                <!-- Bulk Action Toolbar -->
+                <div class="bulk-action-toolbar hidden" id="approvals-bulk-toolbar">
+                  <div class="bulk-toolbar-left">
+                    <div class="bulk-selection-count">
+                      <strong id="approvals-selected-count">0</strong> selected
+                      <button type="button" class="bulk-clear-selection" id="bulk-clear-btn">Clear</button>
+                    </div>
+                  </div>
+                  <div class="bulk-toolbar-actions">
+                    <button type="button" class="btn btn-sm btn-success" id="bulk-approve-btn">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      Approve All
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" id="bulk-reject-btn">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      Reject All
+                    </button>
+                  </div>
+                </div>
+                <div class="admin-table-container">
+                  <div class="admin-table-scroll-wrapper">
+                    <table class="admin-table" aria-label="Pending approvals">
+                      <thead>
+                        <tr>
+                          <th scope="col" class="checkbox-col">
+                            <input type="checkbox" id="approvals-select-all" aria-label="Select all approvals" />
+                          </th>
+                          <th scope="col" class="type-col">Entity</th>
+                          <th scope="col" class="name-col">Name</th>
+                          <th scope="col" class="type-col">Workflow</th>
+                          <th scope="col" class="status-col">Status</th>
+                          <th scope="col" class="date-col">Initiated</th>
+                          <th scope="col" class="actions-col">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="pending-approvals-table-body">
+                        <tr><td colspan="7" class="loading-row">Loading approvals...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Approvals Content (Workflow Definitions) -->
             <div id="workflows-approvals-content">
               <div class="admin-table-card portal-shadow">
                 <div class="admin-table-header">
@@ -2489,6 +2994,9 @@
                 <div class="admin-table-header">
                   <h3>Event Triggers</h3>
                   <div class="admin-table-actions">
+                    <button type="button" class="icon-btn" id="view-trigger-logs-btn" title="View Execution Logs" aria-label="View Execution Logs">
+                      <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+                    </button>
                     <button type="button" class="icon-btn" id="triggers-refresh" title="Refresh" aria-label="Refresh triggers">
                       <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
                     </button>
@@ -2512,6 +3020,51 @@
                       </thead>
                       <tbody id="triggers-table-body">
                         <tr><td colspan="6" class="loading-row">Loading triggers...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Templates Content -->
+            <div id="workflows-email-templates-content" class="hidden">
+              <div class="admin-table-card portal-shadow">
+                <div class="admin-table-header">
+                  <h3>Email Templates</h3>
+                  <div class="admin-table-actions">
+                    <button type="button" class="icon-btn" id="email-templates-refresh" title="Refresh" aria-label="Refresh templates">
+                      <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                    </button>
+                    <button type="button" class="icon-btn" id="create-email-template-btn" title="Create Template" aria-label="Create Template">
+                      <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                    </button>
+                  </div>
+                </div>
+                <!-- Category filter tabs -->
+                <div class="template-category-tabs">
+                  <button class="template-category-tab active" data-category="all">All</button>
+                  <button class="template-category-tab" data-category="notification">Notification</button>
+                  <button class="template-category-tab" data-category="invoice">Invoice</button>
+                  <button class="template-category-tab" data-category="contract">Contract</button>
+                  <button class="template-category-tab" data-category="project">Project</button>
+                  <button class="template-category-tab" data-category="reminder">Reminder</button>
+                </div>
+                <div class="admin-table-container">
+                  <div class="admin-table-scroll-wrapper">
+                    <table class="admin-table" aria-label="Email templates">
+                      <thead>
+                        <tr>
+                          <th scope="col" class="name-col">Name</th>
+                          <th scope="col" class="type-col">Category</th>
+                          <th scope="col" class="subject-col">Subject</th>
+                          <th scope="col" class="status-col">Status</th>
+                          <th scope="col" class="date-col">Updated</th>
+                          <th scope="col" class="actions-col">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="email-templates-table-body">
+                        <tr><td colspan="6" class="loading-row">Loading templates...</td></tr>
                       </tbody>
                     </table>
                   </div>

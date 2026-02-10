@@ -31,12 +31,10 @@
             <!-- Action Buttons -->
             <div class="sidebar-buttons">
                 <button class="btn btn-secondary active" id="btn-dashboard" data-tab="dashboard">DASHBOARD</button>
-                <button class="btn btn-secondary" id="btn-files" data-tab="files">FILES</button>
-                <button class="btn btn-secondary" id="btn-messages" data-tab="messages">MESSAGES</button>
-                <button class="btn btn-secondary" id="btn-invoices" data-tab="invoices">INVOICES</button>
+                <button class="btn btn-secondary" id="btn-work" data-tab="work">WORK</button>
+                <button class="btn btn-secondary" id="btn-documents" data-tab="docs">DOCUMENTS</button>
+                <button class="btn btn-secondary" id="btn-support" data-tab="support">SUPPORT</button>
                 <button class="btn btn-secondary" id="btn-settings" data-tab="settings">SETTINGS</button>
-                <button class="btn btn-secondary" id="btn-new-project" data-tab="new-project">+ NEW PROJECT</button>
-                <button class="btn btn-secondary btn-preview hidden" id="btn-preview" data-tab="preview">PROJECT PREVIEW</button>
             </div>
         </div>
 
@@ -45,6 +43,38 @@
     <!-- Content Area -->
     <div class="dashboard-content" id="dashboard-content">
         <div class="content-wrapper">
+            <!-- Portal Header - consistent across all pages -->
+            <header class="portal-page-header">
+                <div class="portal-header-top">
+                    <button type="button" class="header-sidebar-toggle header-toggle-button" aria-label="Toggle sidebar">
+                        <svg class="sidebar-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/></svg>
+                        <span class="sr-only">Toggle Sidebar</span>
+                    </button>
+                    <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
+                        <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
+                    </nav>
+                </div>
+                <div class="portal-header-title">
+                    <h1 id="portal-page-title">Welcome Back, <span id="client-name">Client</span>!</h1>
+                    <div class="header-subtabs">
+                        <div class="portal-subtabs header-subtab-group" data-for-tab="work" data-mode="primary">
+                            <button class="portal-subtab active" data-subtab="requests">Requests</button>
+                            <button class="portal-subtab" data-subtab="preview">Review</button>
+                            <button class="portal-subtab" data-subtab="new-project">New Project</button>
+                        </div>
+                        <div class="portal-subtabs header-subtab-group" data-for-tab="docs" data-mode="primary">
+                            <button class="portal-subtab active" data-subtab="files">Files</button>
+                            <button class="portal-subtab" data-subtab="invoices">Invoices</button>
+                            <button class="portal-subtab" data-subtab="documents">Document Requests</button>
+                            <button class="portal-subtab" data-subtab="questionnaires">Questionnaires</button>
+                        </div>
+                        <div class="portal-subtabs header-subtab-group" data-for-tab="support" data-mode="primary">
+                            <button class="portal-subtab active" data-subtab="messages">Messages</button>
+                            <button class="portal-subtab" data-subtab="help">Help</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
             <!-- Dashboard View (Default) -->
             <div class="tab-content active" id="tab-dashboard">
                 <div class="page-header">
