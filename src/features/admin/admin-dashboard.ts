@@ -48,6 +48,7 @@ import {
   loadProjectsModule,
   loadClientsModule,
   loadInvoicesModule,
+  loadContractsModule,
   loadMessagingModule,
   loadAnalyticsModule,
   loadOverviewModule,
@@ -56,9 +57,14 @@ import {
   loadProposalsModule,
   loadKnowledgeBaseModule,
   loadDocumentRequestsModule,
+  loadAdHocRequestsModule,
   loadGlobalTasksModule,
-  loadWorkflowsModule
+  loadWorkflowsModule,
+  loadQuestionnairesModule
 } from './modules';
+
+// Deliverables manager module
+import { initializeDeliverablesModule } from './modules/admin-deliverables';
 
 // Chart.js is loaded dynamically to reduce initial bundle size
 let Chart: typeof import('chart.js').Chart | null = null;
@@ -110,20 +116,70 @@ const ADMIN_TAB_TITLES: Record<string, string> = {
   projects: 'Projects',
   clients: 'Clients',
   invoices: 'Invoices',
+  contracts: 'Contracts',
   tasks: 'Tasks',
   messages: 'Messages',
   analytics: 'Analytics',
   'document-requests': 'Document Requests',
+  'ad-hoc-requests': 'Ad Hoc Requests',
+  questionnaires: 'Questionnaires',
   'knowledge-base': 'Knowledge Base',
   system: 'System Status',
   workflows: 'Workflows',
+  work: 'Work',
+  crm: 'CRM',
+  documents: 'Documents',
+  support: 'Support',
   'client-detail': 'Client Details',
   'project-detail': 'Project Details'
 };
 
+const ADMIN_TAB_GROUPS = {
+  work: {
+    label: 'Work',
+    tabs: ['projects', 'tasks', 'ad-hoc-requests'],
+    defaultTab: 'projects'
+  },
+  crm: {
+    label: 'CRM',
+    tabs: ['leads', 'clients', 'messages'],
+    defaultTab: 'leads'
+  },
+  documents: {
+    label: 'Documents',
+    tabs: ['invoices', 'contracts', 'document-requests', 'questionnaires'],
+    defaultTab: 'invoices'
+  },
+  support: {
+    label: 'Support',
+    tabs: ['knowledge-base'],
+    defaultTab: 'knowledge-base'
+  }
+} as const;
+
+type AdminTabGroup = keyof typeof ADMIN_TAB_GROUPS;
+
+function getAdminGroupForTab(tabName: string): AdminTabGroup | null {
+  const entries = Object.entries(ADMIN_TAB_GROUPS) as [AdminTabGroup, typeof ADMIN_TAB_GROUPS[AdminTabGroup]][];
+  for (const [group, config] of entries) {
+    if ((config.tabs as readonly string[]).includes(tabName)) return group;
+  }
+  return null;
+}
+
+function resolveAdminTab(tabName: string): { group: AdminTabGroup | null; tab: string } {
+  if (tabName in ADMIN_TAB_GROUPS) {
+    const group = tabName as AdminTabGroup;
+    return { group, tab: ADMIN_TAB_GROUPS[group].defaultTab };
+  }
+
+  return { group: getAdminGroupForTab(tabName), tab: tabName };
+}
+
 // Dashboard data management
 class AdminDashboard {
   private currentTab = 'overview';
+  private currentGroup: string | null = null;
   private refreshInterval: NodeJS.Timeout | null = null;
   private charts: Map<string, { destroy: () => void }> = new Map();
 
@@ -212,8 +268,7 @@ class AdminDashboard {
       projectsTableBody: '#projects-table-body',
       clientsTableBody: '#clients-table-body',
       invoicesTableBody: '#invoices-table-body',
-      leadsBadge: '#leads-badge',
-      messagesBadge: '#messages-badge'
+      crmBadge: '#crm-badge'
     });
 
     // Initialize module context
@@ -273,9 +328,33 @@ class AdminDashboard {
     initCopyEmailDelegation(document);
     logger.log('setupEventListeners complete');
     await this.loadDashboardData();
+    this.handleInitialNavigation();
     this.setupTruncatedTextTooltips();
     this.updateSidebarBadges();
     this.startAutoRefresh();
+  }
+
+  private handleInitialNavigation(): void {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    const projectIdParam = params.get('projectId');
+
+    if (tab && ADMIN_TAB_TITLES[tab]) {
+      this.switchTab(tab);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('tab');
+      window.history.replaceState({}, '', url.toString());
+    }
+
+    if (projectIdParam) {
+      const projectId = Number(projectIdParam);
+      if (!Number.isNaN(projectId)) {
+        this.showProjectDetails(projectId);
+        const url = new URL(window.location.href);
+        url.searchParams.delete('projectId');
+        window.history.replaceState({}, '', url.toString());
+      }
+    }
   }
 
   /**
@@ -449,13 +528,24 @@ class AdminDashboard {
       dashboard.classList.remove('hidden');
       dashboard.style.display = '';
     }
+    // Hide header, nav overlay, and footer when showing dashboard
+    const adminHeader = document.querySelector('.admin-header');
+    const adminNav = document.querySelector('.admin-nav');
+    const adminFooter = document.querySelector('.admin-footer');
+    if (adminHeader) (adminHeader as HTMLElement).style.display = 'none';
+    if (adminNav) (adminNav as HTMLElement).style.display = 'none';
+    if (adminFooter) (adminFooter as HTMLElement).style.display = 'none';
     // Add logged-in class to body to hide header/footer
     document.body.classList.add('admin-logged-in');
     // Show initial breadcrumb (Dashboard)
     this.updateAdminBreadcrumbs(this.currentTab);
+    this.updateActiveGroupState(getAdminGroupForTab(this.currentTab), this.currentTab);
   }
 
   private async initializeModules(): Promise<void> {
+    // Initialize deliverables manager module
+    initializeDeliverablesModule();
+
     // Admin dashboard doesn't use theme toggle or main site navigation
     // Theme is handled via CSS and sessionStorage directly
     // No additional modules needed for admin portal
@@ -467,24 +557,36 @@ class AdminDashboard {
     const logoutBtn = this.domCache.get('logoutBtn') || this.domCache.get('btnLogout');
     logger.log('logoutBtn found:', !!logoutBtn);
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', (e) => {
+      logoutBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
         logger.log('Logout button clicked');
-        // Use AdminAuth.logout() to properly clear admin session
-        AdminAuth.logout();
+        try {
+          // Use AdminAuth.logout() to properly clear admin session
+          await AdminAuth.logout();
+        } catch (error) {
+          logger.error('Logout failed:', error);
+          // Force redirect on error
+          window.location.href = '/admin';
+        }
       });
     }
 
     // Document-level event delegation for logout button (fallback for CSS blocking)
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', async (e) => {
       const target = e.target as HTMLElement;
       const logoutButton = target.closest('#btn-logout, #logout-btn, .btn-logout');
       if (logoutButton) {
         logger.log('Logout detected via document delegation');
         e.preventDefault();
         e.stopPropagation();
-        AdminAuth.logout();
+        try {
+          await AdminAuth.logout();
+        } catch (error) {
+          logger.error('Logout via delegation failed:', error);
+          // Force redirect on error
+          window.location.href = '/admin';
+        }
       }
     }, true); // Use capture phase to catch events before they're blocked
 
@@ -513,12 +615,11 @@ class AdminDashboard {
         if (tabName) {
           logger.log('Switching to tab:', tabName);
           this.switchTab(tabName);
-          // Update active state on sidebar buttons
-          sidebarButtons.forEach((b) => b.classList.remove('active'));
-          btn.classList.add('active');
         }
       });
     });
+
+    this.setupHeaderGroupNavigation();
 
     // Clickable stat cards
     const statCards = document.querySelectorAll('.stat-card-clickable[data-tab]');
@@ -527,10 +628,6 @@ class AdminDashboard {
         const tabName = (card as HTMLElement).dataset.tab;
         if (tabName) {
           this.switchTab(tabName);
-          // Update sidebar button active state
-          sidebarButtons.forEach((b) => {
-            b.classList.toggle('active', (b as HTMLElement).dataset.tab === tabName);
-          });
         }
       });
     });
@@ -543,10 +640,6 @@ class AdminDashboard {
         const filter = (card as HTMLElement).dataset.filter;
         if (tabName) {
           this.switchTab(tabName);
-          // Update sidebar button active state
-          sidebarButtons.forEach((b) => {
-            b.classList.toggle('active', (b as HTMLElement).dataset.tab === tabName);
-          });
           // Apply filter if specified
           if (filter) {
             this.applyAttentionFilter(tabName, filter);
@@ -1286,15 +1379,55 @@ class AdminDashboard {
     }
   }
 
+  private setupHeaderGroupNavigation(): void {
+    const groups = document.querySelectorAll('.header-subtab-group[data-mode="primary"]');
+    groups.forEach((group) => {
+      const groupEl = group as HTMLElement;
+      if (groupEl.dataset.initialized === 'true') return;
+      groupEl.dataset.initialized = 'true';
+
+      groupEl.addEventListener('click', (e) => {
+        const target = (e.target as HTMLElement).closest('.portal-subtab') as HTMLElement | null;
+        if (!target) return;
+        const subtab = target.dataset.subtab;
+        if (!subtab) return;
+        this.switchTab(subtab);
+      });
+    });
+  }
+
+  private updateActiveGroupState(group: string | null, tabName: string): void {
+    const activeGroup = group || tabName;
+    this.currentGroup = activeGroup;
+
+    document.body.dataset.activeGroup = activeGroup;
+    document.body.dataset.activeTab = tabName;
+
+    document.querySelectorAll('.sidebar-buttons .btn[data-tab]').forEach((btn) => {
+      const isActive = (btn as HTMLElement).dataset.tab === activeGroup;
+      btn.classList.toggle('active', isActive);
+      if (isActive) {
+        btn.setAttribute('aria-current', 'page');
+      } else {
+        btn.removeAttribute('aria-current');
+      }
+    });
+
+    const subtabGroup = document.querySelector(`.header-subtab-group[data-for-tab="${activeGroup}"]`);
+    if (subtabGroup && (subtabGroup as HTMLElement).dataset.mode === 'primary') {
+      subtabGroup.querySelectorAll('.portal-subtab').forEach((btn) => {
+        btn.classList.toggle('active', (btn as HTMLElement).dataset.subtab === tabName);
+      });
+    }
+  }
+
   private switchTab(tabName: string): void {
-    // Update active tab button (both old .tab-btn style and new sidebar button style)
+    const resolved = resolveAdminTab(tabName);
+    const activeTab = resolved.tab;
+
     document.querySelectorAll('.tab-btn').forEach((btn) => {
       btn.classList.remove('active');
     });
-    document.querySelectorAll('.sidebar-buttons .btn[data-tab]').forEach((btn) => {
-      btn.classList.toggle('active', (btn as HTMLElement).dataset.tab === tabName);
-    });
-    document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
 
     // Update active tab content (HTML uses tab-{name} format, e.g., tab-overview)
     document.querySelectorAll('.tab-content').forEach((content) => {
@@ -1302,19 +1435,20 @@ class AdminDashboard {
     });
     // Try both ID formats: tab-{name} (new) and {name}-tab (old)
     const tabContent =
-      document.getElementById(`tab-${tabName}`) || document.getElementById(`${tabName}-tab`);
+      document.getElementById(`tab-${activeTab}`) || document.getElementById(`${activeTab}-tab`);
     tabContent?.classList.add('active');
 
-    this.currentTab = tabName;
+    this.currentTab = activeTab;
+    this.updateActiveGroupState(resolved.group, activeTab);
 
     // Update page title in unified header
-    this.updateAdminPageTitle(tabName);
+    this.updateAdminPageTitle(activeTab);
 
     // Update breadcrumb to match active section
-    this.updateAdminBreadcrumbs(tabName);
+    this.updateAdminBreadcrumbs(activeTab);
 
     // Load tab-specific data (modules handle all tab data loading)
-    this.loadTabData(tabName);
+    this.loadTabData(activeTab);
   }
 
   /**
@@ -1337,6 +1471,12 @@ class AdminDashboard {
       return;
     }
 
+    const group = getAdminGroupForTab(tabName);
+    if (group) {
+      titleEl.textContent = ADMIN_TAB_GROUPS[group].label;
+      return;
+    }
+
     titleEl.textContent = ADMIN_TAB_TITLES[tabName] || 'Dashboard';
   }
 
@@ -1353,6 +1493,15 @@ class AdminDashboard {
 
     const items: BreadcrumbItem[] = [];
 
+    const group = getAdminGroupForTab(tabName);
+    if (group) {
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: ADMIN_TAB_GROUPS[group].label, href: true, onClick: () => this.switchTab(group) });
+      items.push({ label: ADMIN_TAB_TITLES[tabName] || tabName, href: false });
+      renderBreadcrumbs(list, items);
+      return;
+    }
+
     switch (tabName) {
     case 'overview':
       items.push({ label: 'Dashboard', href: false });
@@ -1364,6 +1513,10 @@ class AdminDashboard {
     case 'invoices':
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Invoices', href: false });
+      break;
+    case 'contracts':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Contracts', href: false });
       break;
     case 'tasks':
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
@@ -1661,6 +1814,12 @@ class AdminDashboard {
           await invoicesModule.loadInvoicesData(this.moduleContext);
         }
         break;
+      case 'contracts':
+        {
+          const contractsModule = await loadContractsModule();
+          await contractsModule.loadContracts(this.moduleContext);
+        }
+        break;
       case 'tasks':
         // Use global tasks module
         {
@@ -1690,6 +1849,16 @@ class AdminDashboard {
       case 'document-requests': {
         const drModule = await loadDocumentRequestsModule();
         await drModule.loadDocumentRequests(this.moduleContext);
+        break;
+      }
+      case 'ad-hoc-requests': {
+        const requestsModule = await loadAdHocRequestsModule();
+        await requestsModule.loadAdHocRequests(this.moduleContext);
+        break;
+      }
+      case 'questionnaires': {
+        const questionnairesModule = await loadQuestionnairesModule();
+        await questionnairesModule.loadQuestionnairesModule(this.moduleContext);
         break;
       }
       case 'system':
@@ -2104,7 +2273,7 @@ class AdminDashboard {
   }
 
   /**
-   * Fetches and updates sidebar notification badges for Leads and Messages
+    * Fetches and updates sidebar notification badges for CRM
    */
   private async updateSidebarBadges(): Promise<void> {
     try {
@@ -2115,25 +2284,14 @@ class AdminDashboard {
       const data = await response.json();
       if (!data.success) return;
 
-      // Update leads badge
-      const leadsBadge = this.domCache.get('leadsBadge');
-      if (leadsBadge) {
-        if (data.leads > 0) {
-          leadsBadge.textContent = String(data.leads);
-          leadsBadge.style.display = '';
-        } else {
-          leadsBadge.style.display = 'none';
-        }
-      }
-
-      // Update messages badge
-      const messagesBadge = this.domCache.get('messagesBadge');
-      if (messagesBadge) {
+      // Update CRM badge (unread messages)
+      const crmBadge = this.domCache.get('crmBadge');
+      if (crmBadge) {
         if (data.messages > 0) {
-          messagesBadge.textContent = String(data.messages);
-          messagesBadge.style.display = '';
+          crmBadge.textContent = String(data.messages);
+          crmBadge.style.display = '';
         } else {
-          messagesBadge.style.display = 'none';
+          crmBadge.style.display = 'none';
         }
       }
     } catch (error) {

@@ -175,12 +175,16 @@ export class AdminAuth {
     // Clear legacy session
     sessionStorage.removeItem(LEGACY_SESSION_KEY);
 
-    // Delegate to authStore
-    await authStore.logout();
-
-    logger.info('Logout complete, navigating to login');
-    // Navigate to /admin to ensure fresh state
-    window.location.href = '/admin';
+    try {
+      // Delegate to authStore
+      await authStore.logout();
+      logger.info('Logout complete, navigating to login');
+    } catch (error) {
+      logger.error('authStore.logout() failed:', error);
+    } finally {
+      // Always navigate to /admin to ensure fresh state, even if logout API fails
+      window.location.href = '/admin';
+    }
   }
 
   /**

@@ -23,13 +23,14 @@ import { showTableError } from '../../../utils/error-utils';
 import { multiPromptDialog, alertDialog, confirmDialog } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { loadLeadAnalytics, loadScoringRules } from './admin-leads';
+import { loadAdHocAnalytics } from './admin-ad-hoc-analytics';
 
 // Register Chart.js components
 Chart.register(...registerables);
 
 const charts: Map<string, Chart> = new Map();
 
-export async function loadOverviewData(_ctx: AdminDashboardContext): Promise<void> {
+export async function loadOverviewData(ctx: AdminDashboardContext): Promise<void> {
   // Setup event listeners for analytics controls
   setupAnalyticsEventListeners();
 
@@ -46,7 +47,8 @@ export async function loadOverviewData(_ctx: AdminDashboardContext): Promise<voi
     loadSourcesChart(),
     loadAnalyticsSummary(),
     loadLeadAnalytics(),
-    loadScoringRules()
+    loadScoringRules(),
+    loadAdHocAnalytics(ctx)
   ]);
 }
 
@@ -1205,7 +1207,7 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
   }
 }
 
-export async function loadAnalyticsData(_ctx: AdminDashboardContext): Promise<void> {
+export async function loadAnalyticsData(ctx: AdminDashboardContext): Promise<void> {
   try {
     const response = await apiFetch('/api/analytics/summary?days=30');
 

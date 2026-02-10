@@ -362,7 +362,7 @@ class AdminMessagingRenderer {
    * Update unread count in sidebar badge
    */
   updateUnreadBadge(count: number): void {
-    const badge = getElement('messages-badge');
+    const badge = getElement('crm-badge');
     if (badge) {
       if (count > 0) {
         badge.textContent = String(count);

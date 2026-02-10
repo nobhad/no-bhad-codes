@@ -76,8 +76,16 @@ export async function loadDocumentRequestsModule() {
   return import('./admin-document-requests');
 }
 
+export async function loadAdHocRequestsModule() {
+  return import('./admin-ad-hoc-requests');
+}
+
 export async function loadInvoicesModule() {
   return import('./admin-invoices');
+}
+
+export async function loadContractsModule() {
+  return import('./admin-contracts');
 }
 
 export async function loadGlobalTasksModule() {
@@ -90,4 +98,12 @@ export async function loadDeletedItemsModule() {
 
 export async function loadWorkflowsModule() {
   return import('./admin-workflows');
+}
+
+export async function loadQuestionnairesModule() {
+  return import('./admin-questionnaires');
+}
+
+export async function loadEmailTemplatesModule() {
+  return import('./admin-email-templates');
 }

@@ -18,6 +18,7 @@ import { createPortalModal, type PortalModalInstance } from '../../../components
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
+import { loadEmailTemplatesData } from './admin-email-templates';
 
 // ============================================
 // TYPES
@@ -72,6 +73,36 @@ interface TriggerOptions {
   actionTypes: { type: ActionType; description: string }[];
 }
 
+// Trigger Execution Log
+interface TriggerExecutionLog {
+  id: number;
+  trigger_id: number;
+  trigger_name: string;
+  event_type: string;
+  event_data: Record<string, unknown> | null;
+  action_result: 'success' | 'failed' | 'skipped';
+  error_message: string | null;
+  execution_time_ms: number;
+  created_at: string;
+}
+
+// Pending Approval Instance (from getActiveWorkflows)
+interface ApprovalInstance {
+  id: number;
+  workflow_definition_id: number;
+  entity_type: EntityType;
+  entity_id: number;
+  status: 'pending' | 'in_progress' | 'approved' | 'rejected' | 'cancelled';
+  current_step: number;
+  initiated_by: string;
+  initiated_at: string;
+  completed_at: string | null;
+  notes: string | null;
+  // Joined from workflow definition
+  workflow_name: string;
+  workflow_type: WorkflowType;
+}
+
 // ============================================
 // CONSTANTS
 // ============================================
@@ -109,15 +140,20 @@ const ACTION_TYPE_LABELS: Record<ActionType, string> = {
 // ============================================
 
 let _storedContext: AdminDashboardContext | null = null;
-let currentSubtab: 'approvals' | 'triggers' = 'approvals';
+let currentSubtab: 'approvals' | 'triggers' | 'email-templates' = 'approvals';
 let cachedWorkflows: WorkflowDefinition[] = [];
 let cachedTriggers: WorkflowTrigger[] = [];
 let triggerOptions: TriggerOptions | null = null;
+let cachedApprovalInstances: ApprovalInstance[] = [];
+let currentApprovalFilter: 'all' | 'proposals' | 'urgent' = 'all';
+const selectedApprovalIds: Set<number> = new Set();
 
 // Modal instances
 let workflowModal: PortalModalInstance | null = null;
 let stepModal: PortalModalInstance | null = null;
 let triggerModal: PortalModalInstance | null = null;
+let triggerLogsModal: PortalModalInstance | null = null;
+let workflowPreviewModal: PortalModalInstance | null = null;
 
 // ============================================
 // DOM HELPERS
@@ -140,10 +176,14 @@ export async function loadWorkflowsData(ctx: AdminDashboardContext): Promise<voi
 
   // Setup subtab navigation if not already done
   setupSubtabNavigation();
+  setupPendingApprovalsHandlers();
 
   // Load data for current subtab
   if (currentSubtab === 'approvals') {
-    await loadApprovalWorkflows();
+    await Promise.all([
+      loadApprovalWorkflows(),
+      loadPendingApprovals()
+    ]);
   } else {
     await loadTriggers();
   }
@@ -163,7 +203,7 @@ function setupSubtabNavigation(): void {
     const btn = (e.target as HTMLElement).closest('[data-subtab]') as HTMLElement;
     if (!btn) return;
 
-    const subtab = btn.dataset.subtab as 'approvals' | 'triggers';
+    const subtab = btn.dataset.subtab as 'approvals' | 'triggers' | 'email-templates';
     if (subtab === currentSubtab) return;
 
     // Update active state
@@ -173,14 +213,17 @@ function setupSubtabNavigation(): void {
     // Show/hide content
     el('workflows-approvals-content')?.classList.toggle('hidden', subtab !== 'approvals');
     el('workflows-triggers-content')?.classList.toggle('hidden', subtab !== 'triggers');
+    el('workflows-email-templates-content')?.classList.toggle('hidden', subtab !== 'email-templates');
 
     currentSubtab = subtab;
 
     // Load data
     if (subtab === 'approvals') {
       await loadApprovalWorkflows();
-    } else {
+    } else if (subtab === 'triggers') {
       await loadTriggers();
+    } else if (subtab === 'email-templates' && _storedContext) {
+      await loadEmailTemplatesData(_storedContext);
     }
   });
 }
@@ -354,11 +397,20 @@ async function openWorkflowModal(id?: number): Promise<void> {
 
     workflowModal.footer.innerHTML = `
       <button type="button" class="btn btn-secondary" id="workflow-cancel-btn">CANCEL</button>
+      <button type="button" class="btn btn-outline" id="workflow-preview-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        PREVIEW
+      </button>
       <button type="submit" form="workflow-form" class="btn btn-primary">SAVE</button>
     `;
 
     // Cancel button
     el('workflow-cancel-btn')?.addEventListener('click', () => workflowModal?.hide());
+
+    // Preview button
+    el('workflow-preview-btn')?.addEventListener('click', async () => {
+      await previewWorkflow();
+    });
 
     // Form submit
     el('workflow-form')?.addEventListener('submit', async (e) => {
@@ -410,6 +462,227 @@ async function saveWorkflow(): Promise<void> {
     console.error('[AdminWorkflows] Save error:', error);
     showToast(error instanceof Error ? error.message : 'Error saving workflow', 'error');
   }
+}
+
+async function previewWorkflow(): Promise<void> {
+  const workflowId = (el('workflow-id') as HTMLInputElement)?.value;
+
+  // Get current form values
+  const name = (el('workflow-name') as HTMLInputElement)?.value.trim() || 'Untitled Workflow';
+  const description = (el('workflow-description') as HTMLTextAreaElement)?.value.trim() || 'No description';
+  const entityType = (el('workflow-entity-type') as HTMLSelectElement)?.value as EntityType;
+  const workflowType = (el('workflow-type') as HTMLSelectElement)?.value as WorkflowType;
+  const isDefault = (el('workflow-is-default') as HTMLInputElement)?.checked || false;
+
+  // Create preview modal if not exists
+  if (!workflowPreviewModal) {
+    workflowPreviewModal = createPortalModal({
+      id: 'workflow-preview-modal',
+      titleId: 'workflow-preview-modal-title',
+      title: 'Workflow Preview',
+      contentClassName: 'workflow-preview-modal-content modal-content-wide',
+      onClose: () => workflowPreviewModal?.hide()
+    });
+  }
+
+  // Show loading state
+  workflowPreviewModal.body.innerHTML = '<div class="loading-message">Loading preview...</div>';
+  workflowPreviewModal.setTitle(`Preview: ${escapeHtml(name)}`);
+  workflowPreviewModal.show();
+  manageFocusTrap(workflowPreviewModal.overlay);
+
+  // Fetch steps if editing existing workflow
+  let steps: WorkflowStep[] = [];
+  if (workflowId) {
+    try {
+      const res = await apiFetch(`${APPROVALS_API}/workflows/${workflowId}`);
+      if (res.ok) {
+        const data = await parseJsonResponse<{ workflow: WorkflowDefinition; steps: WorkflowStep[] }>(res);
+        steps = data.steps || [];
+      }
+    } catch {
+      // Ignore errors, just show preview without steps
+    }
+  }
+
+  // Render preview content
+  const entityLabel = ENTITY_TYPE_LABELS[entityType] || entityType;
+  const typeLabel = WORKFLOW_TYPE_LABELS[workflowType] || workflowType;
+
+  workflowPreviewModal.body.innerHTML = `
+    <div class="workflow-preview">
+      <div class="preview-section">
+        <h4>Workflow Configuration</h4>
+        <div class="preview-info-grid">
+          <div class="preview-info-item">
+            <span class="preview-label">Name</span>
+            <span class="preview-value">${escapeHtml(name)}</span>
+          </div>
+          <div class="preview-info-item">
+            <span class="preview-label">Description</span>
+            <span class="preview-value">${escapeHtml(description)}</span>
+          </div>
+          <div class="preview-info-item">
+            <span class="preview-label">Entity Type</span>
+            <span class="preview-value">${entityLabel}</span>
+          </div>
+          <div class="preview-info-item">
+            <span class="preview-label">Workflow Type</span>
+            <span class="preview-value">${typeLabel}</span>
+          </div>
+          <div class="preview-info-item">
+            <span class="preview-label">Default</span>
+            <span class="preview-value">${isDefault ? 'Yes' : 'No'}</span>
+          </div>
+        </div>
+      </div>
+
+      <hr class="modal-divider" />
+
+      <div class="preview-section">
+        <h4>Workflow Type Behavior</h4>
+        <div class="preview-behavior">
+          ${renderWorkflowTypeBehavior(workflowType)}
+        </div>
+      </div>
+
+      <hr class="modal-divider" />
+
+      <div class="preview-section">
+        <h4>Approval Steps (${steps.length})</h4>
+        ${steps.length > 0 ? renderPreviewSteps(steps, workflowType) : `
+          <div class="empty-message">
+            ${workflowId ? 'No steps configured yet. Add steps after saving.' : 'Save the workflow first, then add approval steps.'}
+          </div>
+        `}
+      </div>
+
+      ${steps.length > 0 ? `
+        <hr class="modal-divider" />
+
+        <div class="preview-section">
+          <h4>Simulation</h4>
+          <div class="preview-simulation">
+            <p>When a <strong>${entityLabel}</strong> enters this workflow:</p>
+            <ol class="simulation-steps">
+              ${renderSimulationSteps(steps, workflowType)}
+            </ol>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderWorkflowTypeBehavior(workflowType: WorkflowType): string {
+  switch (workflowType) {
+  case 'sequential':
+    return `
+        <div class="behavior-card">
+          <div class="behavior-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+          <div class="behavior-content">
+            <strong>Sequential</strong>
+            <p>Approvers must approve in order. Each step waits for the previous to complete.</p>
+          </div>
+        </div>
+      `;
+  case 'parallel':
+    return `
+        <div class="behavior-card">
+          <div class="behavior-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </div>
+          <div class="behavior-content">
+            <strong>Parallel</strong>
+            <p>All approvers are notified at once. All must approve for the workflow to complete.</p>
+          </div>
+        </div>
+      `;
+  case 'any_one':
+    return `
+        <div class="behavior-card">
+          <div class="behavior-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="behavior-content">
+            <strong>Any One</strong>
+            <p>All approvers are notified. Only one approval is required to complete the workflow.</p>
+          </div>
+        </div>
+      `;
+  default:
+    return '';
+  }
+}
+
+function renderPreviewSteps(steps: WorkflowStep[], workflowType: WorkflowType): string {
+  const sortedSteps = [...steps].sort((a, b) => a.step_order - b.step_order);
+
+  return `
+    <div class="preview-steps-list ${workflowType === 'sequential' ? 'sequential' : 'parallel'}">
+      ${sortedSteps.map((step, index) => `
+        <div class="preview-step-item">
+          <div class="preview-step-order">${step.step_order}</div>
+          <div class="preview-step-content">
+            <div class="preview-step-approver">
+              <span class="approver-type">${step.approver_type}</span>:
+              <span class="approver-value">${escapeHtml(step.approver_value)}</span>
+              ${step.is_optional ? '<span class="optional-badge">Optional</span>' : ''}
+            </div>
+            ${step.auto_approve_after_hours ? `
+              <div class="preview-step-auto">
+                Auto-approves after ${step.auto_approve_after_hours} hours
+              </div>
+            ` : ''}
+          </div>
+          ${workflowType === 'sequential' && index < sortedSteps.length - 1 ? `
+            <div class="step-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </div>
+          ` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderSimulationSteps(steps: WorkflowStep[], workflowType: WorkflowType): string {
+  const sortedSteps = [...steps].sort((a, b) => a.step_order - b.step_order);
+
+  if (workflowType === 'sequential') {
+    return sortedSteps.map((step, index) => `
+      <li>
+        ${index === 0 ? 'First, ' : 'Then, '}
+        <strong>${step.approver_value}</strong> (${step.approver_type}) receives approval request
+        ${step.is_optional ? ' (optional)' : ''}
+        ${step.auto_approve_after_hours ? `, auto-approves after ${step.auto_approve_after_hours}h if no response` : ''}
+      </li>
+    `).join('');
+  } else if (workflowType === 'parallel') {
+    return `
+      <li>All approvers receive requests simultaneously:
+        <ul>
+          ${sortedSteps.map(step => `
+            <li><strong>${step.approver_value}</strong> (${step.approver_type})${step.is_optional ? ' (optional)' : ''}</li>
+          `).join('')}
+        </ul>
+      </li>
+      <li>Workflow completes when <strong>all</strong> required approvers approve</li>
+    `;
+  }
+  return `
+      <li>All approvers receive requests simultaneously:
+        <ul>
+          ${sortedSteps.map(step => `
+            <li><strong>${step.approver_value}</strong> (${step.approver_type})</li>
+          `).join('')}
+        </ul>
+      </li>
+      <li>Workflow completes when <strong>any one</strong> approver approves</li>
+    `;
+
 }
 
 async function deleteWorkflow(id: number, name: string): Promise<void> {
@@ -687,6 +960,13 @@ function setupTriggerHandlers(): void {
     }
   });
 
+  // View logs button
+  const viewLogsBtn = el('view-trigger-logs-btn');
+  if (viewLogsBtn && !viewLogsBtn.dataset.bound) {
+    viewLogsBtn.dataset.bound = 'true';
+    viewLogsBtn.addEventListener('click', () => openTriggerLogsModal());
+  }
+
   // Create button
   const createBtn = el('create-trigger-btn');
   if (createBtn && !createBtn.dataset.bound) {
@@ -774,11 +1054,20 @@ async function openTriggerModal(id?: number): Promise<void> {
 
     triggerModal.footer.innerHTML = `
       <button type="button" class="btn btn-secondary" id="trigger-cancel-btn">CANCEL</button>
+      <button type="button" class="btn btn-outline" id="trigger-test-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        TEST
+      </button>
       <button type="submit" form="trigger-form" class="btn btn-primary">SAVE</button>
     `;
 
     // Cancel button
     el('trigger-cancel-btn')?.addEventListener('click', () => triggerModal?.hide());
+
+    // Test button
+    el('trigger-test-btn')?.addEventListener('click', async () => {
+      await testTrigger();
+    });
 
     // Form submit
     el('trigger-form')?.addEventListener('submit', async (e) => {
@@ -857,6 +1146,165 @@ async function saveTrigger(): Promise<void> {
   }
 }
 
+async function testTrigger(): Promise<void> {
+  const eventType = (el('trigger-event-type') as HTMLSelectElement)?.value;
+
+  if (!eventType) {
+    showToast('Please select an event type first', 'warning');
+    return;
+  }
+
+  // Validate JSON fields first
+  let actionConfig: Record<string, unknown> = {};
+  let conditions: Record<string, unknown> | null = null;
+
+  try {
+    const configStr = (el('trigger-action-config') as HTMLTextAreaElement).value.trim();
+    if (configStr) {
+      actionConfig = JSON.parse(configStr);
+    }
+
+    const conditionsStr = (el('trigger-conditions') as HTMLTextAreaElement).value.trim();
+    if (conditionsStr) {
+      conditions = JSON.parse(conditionsStr);
+    }
+  } catch {
+    showToast('Invalid JSON in configuration or conditions', 'error');
+    return;
+  }
+
+  const testBtn = el('trigger-test-btn') as HTMLButtonElement;
+  if (testBtn) {
+    testBtn.disabled = true;
+    testBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      Testing...
+    `;
+  }
+
+  try {
+    // Generate test context based on event type
+    const context = generateTestContext(eventType, conditions, actionConfig);
+
+    const res = await apiPost(`${TRIGGERS_API}/test-emit`, {
+      event_type: eventType,
+      context
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Test failed');
+    }
+
+    showToast(`Test event "${eventType}" emitted successfully. Check execution logs.`, 'success');
+
+    // If logs modal is available, refresh it
+    if (triggerLogsModal) {
+      await loadTriggerLogs();
+    }
+  } catch (error) {
+    console.error('[AdminWorkflows] Test trigger error:', error);
+    showToast(error instanceof Error ? error.message : 'Error testing trigger', 'error');
+  } finally {
+    if (testBtn) {
+      testBtn.disabled = false;
+      testBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        TEST
+      `;
+    }
+  }
+}
+
+/**
+ * Generate sample context data for testing triggers
+ */
+function generateTestContext(eventType: string, conditions: Record<string, unknown> | null, actionConfig: Record<string, unknown>): Record<string, unknown> {
+  // Base context that applies to all events
+  const base: Record<string, unknown> = {
+    timestamp: new Date().toISOString(),
+    triggeredBy: 'admin@test.com'
+  };
+
+  // Parse the entity type from event (e.g., 'invoice.created' -> 'invoice')
+  const [entityType] = eventType.split('.');
+
+  // Generate entity-specific test data
+  switch (entityType) {
+  case 'invoice':
+    return {
+      ...base,
+      entityId: 1,
+      invoice: {
+        id: 1,
+        number: 'INV-TEST-001',
+        amount: 1000,
+        status: conditions?.status || 'draft',
+        client_name: 'Test Client',
+        client_email: 'client@test.com'
+      }
+    };
+  case 'contract':
+    return {
+      ...base,
+      entityId: 1,
+      contract: {
+        id: 1,
+        name: 'Test Contract',
+        status: conditions?.status || 'draft'
+      },
+      project: {
+        id: 1,
+        name: 'Test Project'
+      },
+      client: {
+        id: 1,
+        name: 'Test Client',
+        email: 'client@test.com'
+      }
+    };
+  case 'project':
+    return {
+      ...base,
+      entityId: 1,
+      project: {
+        id: 1,
+        name: 'Test Project',
+        status: conditions?.status || 'active',
+        type: 'website'
+      },
+      client: {
+        id: 1,
+        name: 'Test Client',
+        email: 'client@test.com'
+      }
+    };
+  case 'client':
+    return {
+      ...base,
+      entityId: 1,
+      client: {
+        id: 1,
+        name: 'Test Client',
+        email: 'client@test.com',
+        company: 'Test Company'
+      }
+    };
+  case 'message':
+    return {
+      ...base,
+      entityId: 1,
+      message: {
+        id: 1,
+        preview: 'This is a test message preview...',
+        sender: 'admin@test.com'
+      }
+    };
+  default:
+    return base;
+  }
+}
+
 async function toggleTrigger(id: number): Promise<void> {
   try {
     const res = await apiPost(`${TRIGGERS_API}/${id}/toggle`, {});
@@ -890,4 +1338,763 @@ async function deleteTrigger(id: number, name: string): Promise<void> {
     console.error('[AdminWorkflows] Delete trigger error:', error);
     showToast('Error deleting trigger', 'error');
   }
+}
+
+// ============================================
+// TRIGGER EXECUTION LOGS
+// ============================================
+
+async function openTriggerLogsModal(triggerId?: number): Promise<void> {
+  // Create modal if needed
+  if (!triggerLogsModal) {
+    triggerLogsModal = createPortalModal({
+      id: 'trigger-logs-modal',
+      titleId: 'trigger-logs-modal-title',
+      title: 'Trigger Execution Logs',
+      contentClassName: 'trigger-logs-modal-content modal-content-wide',
+      onClose: () => triggerLogsModal?.hide()
+    });
+
+    triggerLogsModal.body.innerHTML = `
+        <div class="trigger-logs-controls">
+          <div class="form-group">
+            <label for="logs-trigger-filter">Filter by Trigger</label>
+            <select id="logs-trigger-filter" class="portal-input">
+              <option value="">All Triggers</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="logs-result-filter">Result</label>
+            <select id="logs-result-filter" class="portal-input">
+              <option value="">All Results</option>
+              <option value="success">Success</option>
+              <option value="failed">Failed</option>
+              <option value="skipped">Skipped</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-sm btn-secondary" id="logs-refresh-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+            Refresh
+          </button>
+        </div>
+        <div class="trigger-logs-list" id="trigger-logs-list">
+          <div class="loading-message">Loading logs...</div>
+        </div>
+      `;
+
+    // Set up filter handlers
+    const triggerFilter = el('logs-trigger-filter');
+    const resultFilter = el('logs-result-filter');
+    const refreshBtn = el('logs-refresh-btn');
+
+    if (triggerFilter) {
+      triggerFilter.addEventListener('change', () => loadTriggerLogs());
+    }
+    if (resultFilter) {
+      resultFilter.addEventListener('change', () => loadTriggerLogs());
+    }
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => loadTriggerLogs());
+    }
+  }
+
+  // Populate trigger filter dropdown
+  const triggerSelect = el('logs-trigger-filter') as HTMLSelectElement;
+  if (triggerSelect) {
+    triggerSelect.innerHTML = '<option value="">All Triggers</option>';
+    for (const trigger of cachedTriggers) {
+      const option = document.createElement('option');
+      option.value = trigger.id.toString();
+      option.textContent = trigger.name;
+      triggerSelect.appendChild(option);
+    }
+    if (triggerId) {
+      triggerSelect.value = triggerId.toString();
+    }
+  }
+
+  triggerLogsModal.show();
+  manageFocusTrap(triggerLogsModal.overlay);
+  await loadTriggerLogs();
+}
+
+async function loadTriggerLogs(): Promise<void> {
+  const listEl = el('trigger-logs-list');
+  if (!listEl) return;
+
+  listEl.innerHTML = '<div class="loading-message">Loading logs...</div>';
+
+  try {
+    const triggerFilter = (el('logs-trigger-filter') as HTMLSelectElement)?.value || '';
+    const resultFilter = (el('logs-result-filter') as HTMLSelectElement)?.value || '';
+
+    let url = `${TRIGGERS_API}/logs/executions?limit=100`;
+    if (triggerFilter) {
+      url += `&triggerId=${triggerFilter}`;
+    }
+
+    const res = await apiFetch(url);
+    if (!res.ok) throw new Error('Failed to load logs');
+
+    const data = await parseJsonResponse<{ logs: TriggerExecutionLog[] }>(res);
+    let logs = data.logs || [];
+
+    // Client-side filter by result if needed
+    if (resultFilter) {
+      logs = logs.filter(log => log.action_result === resultFilter);
+    }
+
+    renderTriggerLogs(logs);
+  } catch (error) {
+    console.error('[AdminWorkflows] Error loading trigger logs:', error);
+    if (listEl) {
+      listEl.innerHTML = '<div class="empty-message">Error loading logs</div>';
+    }
+  }
+}
+
+function renderTriggerLogs(logs: TriggerExecutionLog[]): void {
+  const listEl = el('trigger-logs-list');
+  if (!listEl) return;
+
+  if (logs.length === 0) {
+    listEl.innerHTML = '<div class="empty-message">No execution logs found</div>';
+    return;
+  }
+
+  const getResultBadgeClass = (result: string): string => {
+    switch (result) {
+    case 'success': return 'status-badge--success';
+    case 'failed': return 'status-badge--danger';
+    case 'skipped': return 'status-badge--muted';
+    default: return '';
+    }
+  };
+
+  const getResultIcon = (result: string): string => {
+    switch (result) {
+    case 'success':
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+    case 'failed':
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+    case 'skipped':
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
+    default:
+      return '';
+    }
+  };
+
+  listEl.innerHTML = logs.map(log => `
+    <div class="trigger-log-entry trigger-log-entry--${log.action_result}">
+      <div class="trigger-log-header">
+        <div class="trigger-log-title">
+          <span class="trigger-log-name">${escapeHtml(log.trigger_name)}</span>
+          <span class="status-badge ${getResultBadgeClass(log.action_result)}">
+            ${getResultIcon(log.action_result)}
+            ${log.action_result}
+          </span>
+        </div>
+        <div class="trigger-log-meta">
+          <span class="trigger-log-time">${formatDate(log.created_at, 'datetime')}</span>
+          <span class="trigger-log-duration">${log.execution_time_ms}ms</span>
+        </div>
+      </div>
+      <div class="trigger-log-details">
+        <div class="trigger-log-event">
+          <code>${escapeHtml(log.event_type)}</code>
+        </div>
+        ${log.error_message ? `
+          <div class="trigger-log-error">
+            <strong>Error:</strong> ${escapeHtml(log.error_message)}
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================
+// PENDING APPROVALS DASHBOARD
+// ============================================
+
+async function loadPendingApprovals(): Promise<void> {
+  const tbody = el('pending-approvals-table-body');
+  if (!tbody) return;
+
+  showTableLoading(tbody, 6, 'Loading pending approvals...');
+
+  try {
+    const res = await apiFetch(`${APPROVALS_API}/active`);
+    if (!res.ok) throw new Error('Failed to load pending approvals');
+
+    const data = await parseJsonResponse<{ workflows: ApprovalInstance[] }>(res);
+    cachedApprovalInstances = data.workflows || [];
+
+    updateApprovalStats();
+    renderPendingApprovalsTable();
+  } catch (error) {
+    console.error('[AdminWorkflows] Error loading pending approvals:', error);
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="6" class="loading-row">Error loading approvals</td></tr>';
+    }
+  }
+}
+
+function updateApprovalStats(): void {
+  const totalEl = el('approvals-total');
+  const proposalsEl = el('approvals-proposals');
+  const urgentEl = el('approvals-urgent');
+
+  const total = cachedApprovalInstances.length;
+  const proposals = cachedApprovalInstances.filter(a => a.entity_type === 'proposal').length;
+
+  // Urgent = older than 24 hours
+  const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const urgent = cachedApprovalInstances.filter(a => {
+    const initiated = new Date(a.initiated_at).getTime();
+    return initiated < dayAgo;
+  }).length;
+
+  if (totalEl) totalEl.textContent = total.toString();
+  if (proposalsEl) proposalsEl.textContent = proposals.toString();
+  if (urgentEl) urgentEl.textContent = urgent.toString();
+}
+
+function filterApprovalInstances(): ApprovalInstance[] {
+  if (currentApprovalFilter === 'all') {
+    return cachedApprovalInstances;
+  }
+
+  if (currentApprovalFilter === 'proposals') {
+    return cachedApprovalInstances.filter(a => a.entity_type === 'proposal');
+  }
+
+  if (currentApprovalFilter === 'urgent') {
+    const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    return cachedApprovalInstances.filter(a => {
+      const initiated = new Date(a.initiated_at).getTime();
+      return initiated < dayAgo;
+    });
+  }
+
+  return cachedApprovalInstances;
+}
+
+function renderPendingApprovalsTable(): void {
+  const tbody = el('pending-approvals-table-body');
+  if (!tbody) return;
+
+  const filtered = filterApprovalInstances();
+
+  // Clear selection when re-rendering
+  selectedApprovalIds.clear();
+  updateBulkToolbar();
+
+  if (filtered.length === 0) {
+    const message = currentApprovalFilter === 'all'
+      ? 'No pending approvals.'
+      : `No ${currentApprovalFilter} approvals found.`;
+    showTableEmpty(tbody, 7, message);
+    // Uncheck select-all
+    const selectAll = el('approvals-select-all') as HTMLInputElement;
+    if (selectAll) selectAll.checked = false;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(a => {
+    const entityLabel = ENTITY_TYPE_LABELS[a.entity_type] || a.entity_type;
+    const statusClass = a.status === 'in_progress' ? 'warning' : 'pending';
+    const statusLabel = a.status === 'in_progress' ? 'In Progress' : 'Pending';
+    const statusBadge = getStatusDotHTML(statusClass as 'pending' | 'warning', { label: statusLabel });
+
+    // Check if urgent (older than 24 hours)
+    const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const initiated = new Date(a.initiated_at).getTime();
+    const isUrgent = initiated < dayAgo;
+    const urgentBadge = isUrgent
+      ? '<span class="urgent-badge" title="Waiting more than 24 hours">!</span>'
+      : '';
+
+    return `
+      <tr data-id="${a.id}">
+        <td class="checkbox-cell">
+          <input type="checkbox" class="approval-checkbox" data-id="${a.id}" aria-label="Select approval ${a.id}" />
+        </td>
+        <td class="name-cell">
+          ${escapeHtml(a.workflow_name)}${urgentBadge}
+          <span class="type-stacked">${entityLabel} #${a.entity_id}</span>
+        </td>
+        <td class="type-cell entity-type-cell">${entityLabel}</td>
+        <td class="type-cell">#${a.entity_id}</td>
+        <td class="status-cell">
+          ${statusBadge}
+          <span class="date-stacked">Step ${a.current_step}</span>
+        </td>
+        <td class="date-cell">${formatDate(a.initiated_at)}</td>
+        <td class="actions-cell">
+          <div class="table-actions">
+            <button type="button" class="icon-btn approval-history" data-entity-type="${a.entity_type}" data-entity-id="${a.entity_id}" title="View History" aria-label="View approval history">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </button>
+            <button type="button" class="icon-btn approval-view" data-id="${a.id}" data-entity-type="${a.entity_type}" data-entity-id="${a.entity_id}" title="View ${entityLabel}" aria-label="View ${entityLabel}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button type="button" class="icon-btn icon-btn-success approval-approve" data-id="${a.id}" title="Approve" aria-label="Approve">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button type="button" class="icon-btn icon-btn-danger approval-reject" data-id="${a.id}" title="Reject" aria-label="Reject">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Reset select-all checkbox
+  const selectAll = el('approvals-select-all') as HTMLInputElement;
+  if (selectAll) selectAll.checked = false;
+}
+
+function setupPendingApprovalsHandlers(): void {
+  const section = el('pending-approvals-section');
+  if (!section || section.dataset.handlersAttached === 'true') return;
+  section.dataset.handlersAttached = 'true';
+
+  // Filter stat cards
+  section.querySelectorAll('[data-approval-filter]').forEach(card => {
+    card.addEventListener('click', () => {
+      const filter = (card as HTMLElement).dataset.approvalFilter as 'all' | 'proposals' | 'urgent';
+      if (filter === currentApprovalFilter) return;
+
+      // Update active state
+      section.querySelectorAll('[data-approval-filter]').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+
+      currentApprovalFilter = filter;
+      renderPendingApprovalsTable();
+    });
+  });
+
+  // Refresh button
+  const refreshBtn = el('approvals-refresh');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => loadPendingApprovals());
+  }
+
+  // Select-all checkbox
+  const selectAll = el('approvals-select-all') as HTMLInputElement;
+  if (selectAll) {
+    selectAll.addEventListener('change', () => {
+      const checkboxes = document.querySelectorAll('.approval-checkbox') as NodeListOf<HTMLInputElement>;
+      checkboxes.forEach(cb => {
+        cb.checked = selectAll.checked;
+        const id = parseInt(cb.dataset.id || '0', 10);
+        if (id) {
+          if (selectAll.checked) {
+            selectedApprovalIds.add(id);
+          } else {
+            selectedApprovalIds.delete(id);
+          }
+        }
+      });
+      updateBulkToolbar();
+    });
+  }
+
+  // Bulk action buttons
+  const bulkApproveBtn = el('bulk-approve-btn');
+  if (bulkApproveBtn) {
+    bulkApproveBtn.addEventListener('click', () => handleBulkAction('approve'));
+  }
+
+  const bulkRejectBtn = el('bulk-reject-btn');
+  if (bulkRejectBtn) {
+    bulkRejectBtn.addEventListener('click', () => handleBulkAction('reject'));
+  }
+
+  const bulkClearBtn = el('bulk-clear-btn');
+  if (bulkClearBtn) {
+    bulkClearBtn.addEventListener('click', () => {
+      selectedApprovalIds.clear();
+      const checkboxes = document.querySelectorAll('.approval-checkbox') as NodeListOf<HTMLInputElement>;
+      checkboxes.forEach(cb => cb.checked = false);
+      const selectAllCb = el('approvals-select-all') as HTMLInputElement;
+      if (selectAllCb) selectAllCb.checked = false;
+      updateBulkToolbar();
+    });
+  }
+
+  // Table actions (delegated)
+  const tbody = el('pending-approvals-table-body');
+  if (tbody) {
+    // Handle checkbox changes
+    tbody.addEventListener('change', (e) => {
+      const checkbox = e.target as HTMLInputElement;
+      if (!checkbox.classList.contains('approval-checkbox')) return;
+
+      const id = parseInt(checkbox.dataset.id || '0', 10);
+      if (!id) return;
+
+      if (checkbox.checked) {
+        selectedApprovalIds.add(id);
+      } else {
+        selectedApprovalIds.delete(id);
+      }
+      updateBulkToolbar();
+      updateSelectAllState();
+    });
+
+    // Handle button clicks
+    tbody.addEventListener('click', async (e) => {
+      const btn = (e.target as HTMLElement).closest('button');
+      if (!btn) return;
+
+      if (btn.classList.contains('approval-history')) {
+        const entityType = btn.dataset.entityType as EntityType;
+        const entityId = btn.dataset.entityId;
+        if (entityType && entityId) {
+          await openApprovalHistoryModal(entityType, entityId);
+        }
+        return;
+      }
+
+      const id = parseInt(btn.dataset.id || '0', 10);
+      if (!id) return;
+
+      if (btn.classList.contains('approval-view')) {
+        const entityType = btn.dataset.entityType as EntityType;
+        const entityId = btn.dataset.entityId;
+        navigateToEntity(entityType, entityId || '');
+      } else if (btn.classList.contains('approval-approve')) {
+        await handleApprovalAction(id, 'approve');
+      } else if (btn.classList.contains('approval-reject')) {
+        await handleApprovalAction(id, 'reject');
+      }
+    });
+  }
+}
+
+function updateBulkToolbar(): void {
+  const toolbar = el('approvals-bulk-toolbar');
+  const countEl = el('approvals-selected-count');
+
+  if (!toolbar) return;
+
+  const count = selectedApprovalIds.size;
+
+  if (count > 0) {
+    toolbar.classList.remove('hidden');
+    if (countEl) countEl.textContent = count.toString();
+  } else {
+    toolbar.classList.add('hidden');
+  }
+}
+
+function updateSelectAllState(): void {
+  const selectAll = el('approvals-select-all') as HTMLInputElement;
+  if (!selectAll) return;
+
+  const checkboxes = document.querySelectorAll('.approval-checkbox') as NodeListOf<HTMLInputElement>;
+  const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(cb => cb.checked);
+  const someChecked = Array.from(checkboxes).some(cb => cb.checked);
+
+  selectAll.checked = allChecked;
+  selectAll.indeterminate = someChecked && !allChecked;
+}
+
+async function handleBulkAction(action: 'approve' | 'reject'): Promise<void> {
+  const ids = Array.from(selectedApprovalIds);
+  if (ids.length === 0) return;
+
+  const actionLabel = action === 'approve' ? 'approve' : 'reject';
+  const actionPast = action === 'approve' ? 'approved' : 'rejected';
+
+  if (action === 'reject') {
+    const confirmed = await confirmDanger(
+      `Are you sure you want to reject ${ids.length} approval(s)? This cannot be undone.`,
+      'Reject All',
+      'Bulk Reject'
+    );
+    if (!confirmed) return;
+  }
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const id of ids) {
+    try {
+      const res = await apiPost(`${APPROVALS_API}/instances/${id}/${action}`, {
+        comment: `Bulk ${actionPast} by admin`
+      });
+
+      if (res.ok) {
+        successCount++;
+      } else {
+        failCount++;
+      }
+    } catch {
+      failCount++;
+    }
+  }
+
+  if (successCount > 0) {
+    showToast(`${successCount} item(s) ${actionPast}`, 'success');
+  }
+  if (failCount > 0) {
+    showToast(`${failCount} item(s) failed to ${actionLabel}`, 'error');
+  }
+
+  // Clear selection and reload
+  selectedApprovalIds.clear();
+  await loadPendingApprovals();
+}
+
+function navigateToEntity(entityType: EntityType, entityId: string): void {
+  // Navigate to the appropriate tab/section based on entity type
+  switch (entityType) {
+  case 'proposal':
+    // Switch to proposals tab and open the proposal
+    window.dispatchEvent(new CustomEvent('admin:navigate-tab', { detail: { tab: 'proposals' } }));
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('admin:open-proposal', { detail: { id: entityId } }));
+    }, 100);
+    break;
+  case 'contract':
+    window.dispatchEvent(new CustomEvent('admin:navigate-tab', { detail: { tab: 'contracts' } }));
+    break;
+  case 'invoice':
+    window.dispatchEvent(new CustomEvent('admin:navigate-tab', { detail: { tab: 'invoices' } }));
+    break;
+  case 'project':
+    // Open project details page
+    window.location.href = `/admin/project/${entityId}`;
+    break;
+  default:
+    showToast(`Cannot navigate to ${entityType}`, 'warning');
+  }
+}
+
+async function handleApprovalAction(instanceId: number, action: 'approve' | 'reject'): Promise<void> {
+  const instance = cachedApprovalInstances.find(a => a.id === instanceId);
+  if (!instance) return;
+
+  const entityLabel = ENTITY_TYPE_LABELS[instance.entity_type] || instance.entity_type;
+  const actionLabel = action === 'approve' ? 'approve' : 'reject';
+  const actionPast = action === 'approve' ? 'approved' : 'rejected';
+
+  if (action === 'reject') {
+    const confirmed = await confirmDanger(
+      `Are you sure you want to reject this ${entityLabel.toLowerCase()} approval?`,
+      'Reject',
+      'Reject Approval'
+    );
+    if (!confirmed) return;
+  }
+
+  try {
+    const res = await apiPost(`${APPROVALS_API}/instances/${instanceId}/${action}`, {
+      comment: action === 'approve' ? 'Approved by admin' : 'Rejected by admin'
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || `Failed to ${actionLabel}`);
+    }
+
+    showToast(`${entityLabel} ${actionPast}`, 'success');
+    await loadPendingApprovals();
+  } catch (error) {
+    console.error(`[AdminWorkflows] ${actionLabel} error:`, error);
+    showToast(error instanceof Error ? error.message : `Error ${actionLabel}ing`, 'error');
+  }
+}
+
+// ============================================
+// APPROVAL HISTORY MODAL
+// ============================================
+
+interface ApprovalHistoryEntry {
+  id: number;
+  workflow_instance_id: number;
+  action: string;
+  actor_email: string;
+  step_id: number | null;
+  comment: string | null;
+  created_at: string;
+}
+
+interface ApprovalRequest {
+  id: number;
+  workflow_instance_id: number;
+  step_id: number;
+  approver_email: string;
+  status: 'pending' | 'approved' | 'rejected' | 'skipped';
+  decision_at: string | null;
+  comment: string | null;
+  created_at: string;
+}
+
+let historyModal: PortalModalInstance | null = null;
+
+async function openApprovalHistoryModal(entityType: EntityType, entityId: string): Promise<void> {
+  const entityLabel = ENTITY_TYPE_LABELS[entityType] || entityType;
+
+  // Create modal if not exists
+  if (!historyModal) {
+    historyModal = createPortalModal({
+      id: 'approval-history-modal',
+      titleId: 'approval-history-modal-title',
+      title: 'Approval History',
+      contentClassName: 'modal-content-wide',
+      onClose: () => historyModal?.hide()
+    });
+
+    historyModal.footer.innerHTML = `
+      <button type="button" class="btn btn-secondary" id="history-modal-close">CLOSE</button>
+    `;
+
+    el('history-modal-close')?.addEventListener('click', () => historyModal?.hide());
+  }
+
+  historyModal.setTitle(`${entityLabel} #${entityId} - Approval History`);
+  historyModal.body.innerHTML = '<div class="loading-row">Loading history...</div>';
+  historyModal.show();
+  manageFocusTrap(historyModal.overlay);
+
+  try {
+    const res = await apiFetch(`${APPROVALS_API}/entity/${entityType}/${entityId}`);
+    if (!res.ok) throw new Error('Failed to load approval history');
+
+    const data = await parseJsonResponse<{
+      instance: ApprovalInstance | null;
+      requests: ApprovalRequest[];
+      history: ApprovalHistoryEntry[];
+    }>(res);
+
+    if (!data.instance) {
+      historyModal.body.innerHTML = `
+        <div class="empty-message">
+          <p>No approval workflow found for this ${entityLabel.toLowerCase()}.</p>
+        </div>
+      `;
+      return;
+    }
+
+    historyModal.body.innerHTML = renderApprovalHistoryContent(data.instance, data.requests, data.history);
+  } catch (error) {
+    console.error('[AdminWorkflows] Error loading history:', error);
+    historyModal.body.innerHTML = '<div class="error-message">Error loading approval history.</div>';
+  }
+}
+
+function renderApprovalHistoryContent(
+  instance: ApprovalInstance,
+  requests: ApprovalRequest[],
+  history: ApprovalHistoryEntry[]
+): string {
+  const entityLabel = ENTITY_TYPE_LABELS[instance.entity_type] || instance.entity_type;
+  const workflowTypeLabel = WORKFLOW_TYPE_LABELS[instance.workflow_type] || instance.workflow_type;
+
+  // Instance status badge
+  const statusClass = instance.status === 'pending' ? 'warning'
+    : instance.status === 'in_progress' ? 'info'
+      : instance.status === 'approved' ? 'success'
+        : instance.status === 'rejected' ? 'danger'
+          : 'muted';
+
+  const instanceSection = `
+    <div class="history-instance-info">
+      <div class="history-info-row">
+        <span class="history-label">Workflow:</span>
+        <span class="history-value">${escapeHtml(instance.workflow_name)}</span>
+      </div>
+      <div class="history-info-row">
+        <span class="history-label">Type:</span>
+        <span class="history-value">${workflowTypeLabel}</span>
+      </div>
+      <div class="history-info-row">
+        <span class="history-label">Status:</span>
+        <span class="status-badge status-badge--${statusClass}">${instance.status.replace('_', ' ')}</span>
+      </div>
+      <div class="history-info-row">
+        <span class="history-label">Started:</span>
+        <span class="history-value">${formatDate(instance.initiated_at)}</span>
+      </div>
+      ${instance.completed_at ? `
+        <div class="history-info-row">
+          <span class="history-label">Completed:</span>
+          <span class="history-value">${formatDate(instance.completed_at)}</span>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  // Requests section
+  const requestsHtml = requests.length === 0 ? '<p class="empty-message">No approval requests.</p>' : `
+    <div class="history-requests-list">
+      ${requests.map(r => {
+    const reqStatusClass = r.status === 'pending' ? 'warning'
+      : r.status === 'approved' ? 'success'
+        : r.status === 'rejected' ? 'danger'
+          : 'muted';
+    return `
+          <div class="history-request-item">
+            <div class="history-request-approver">
+              <span class="approver-email">${escapeHtml(r.approver_email)}</span>
+              <span class="status-badge status-badge--${reqStatusClass}">${r.status}</span>
+            </div>
+            ${r.decision_at ? `<div class="history-request-date">Decided: ${formatDate(r.decision_at)}</div>` : ''}
+            ${r.comment ? `<div class="history-request-comment">"${escapeHtml(r.comment)}"</div>` : ''}
+          </div>
+        `;
+  }).join('')}
+    </div>
+  `;
+
+  // History section
+  const historyHtml = history.length === 0 ? '<p class="empty-message">No history entries.</p>' : `
+    <div class="history-timeline">
+      ${history.map(h => {
+    const actionIcon = h.action === 'approved' ? '&#10003;'
+      : h.action === 'rejected' ? '&#10007;'
+        : h.action === 'initiated' ? '&#9658;'
+          : '&#8226;';
+    const actionClass = h.action === 'approved' ? 'success'
+      : h.action === 'rejected' ? 'danger'
+        : 'neutral';
+    return `
+          <div class="history-entry history-entry--${actionClass}">
+            <div class="history-entry-icon">${actionIcon}</div>
+            <div class="history-entry-content">
+              <div class="history-entry-action">${escapeHtml(h.action)}</div>
+              <div class="history-entry-meta">
+                by ${escapeHtml(h.actor_email)} on ${formatDate(h.created_at)}
+              </div>
+              ${h.comment ? `<div class="history-entry-comment">"${escapeHtml(h.comment)}"</div>` : ''}
+            </div>
+          </div>
+        `;
+  }).join('')}
+    </div>
+  `;
+
+  return `
+    <div class="approval-history-modal-content">
+      <section class="history-section">
+        <h4>Workflow Details</h4>
+        ${instanceSection}
+      </section>
+      <hr class="modal-divider" />
+      <section class="history-section">
+        <h4>Approval Requests</h4>
+        ${requestsHtml}
+      </section>
+      <hr class="modal-divider" />
+      <section class="history-section">
+        <h4>Activity Timeline</h4>
+        ${historyHtml}
+      </section>
+    </div>
+  `;
 }
