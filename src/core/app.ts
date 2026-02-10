@@ -275,13 +275,14 @@ export class Application {
    */
   private async initializeModules(): Promise<void> {
     const currentPath = window.location.pathname;
-    const isClientPortal = currentPath.startsWith('/client') && !currentPath.includes('/client/intake') && !currentPath.includes('/client/set-password');
+    const isClientPortal = currentPath.startsWith('/client') && !currentPath.includes('/client/intake');
     const isClientIntake = currentPath.includes('/client/intake');
     const isAdminPage = currentPath.includes('/admin');
     const isHomePage = currentPath === '/' || currentPath === '/index.html';
 
     let baseCoreModules: string[];
     if (isClientPortal) {
+      // All /client/* pages use portal modules (including set-password, login, etc.)
       baseCoreModules = getClientPortalModules();
     } else if (isClientIntake) {
       baseCoreModules = getClientIntakeModules();
