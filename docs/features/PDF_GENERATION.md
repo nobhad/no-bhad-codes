@@ -1,6 +1,6 @@
 # PDF Generation System
 
-**Last Updated:** January 30, 2026
+**Last Updated:** February 10, 2026
 
 ## Table of Contents
 
@@ -339,6 +339,8 @@ res.send(Buffer.from(pdfBytes));
 ## Related Documentation
 
 - [Invoices Feature](./INVOICES.md) - Invoice system overview
+- [Contracts](./CONTRACTS.md) - Contract system with e-signatures
 - [Proposal Builder](./PROPOSAL_BUILDER.md) - Proposal creation flow
+- [Proposals](./PROPOSALS.md) - Advanced proposal features
 - [Client Portal](./CLIENT_PORTAL.md) - PDF access from client view
 - [Admin Dashboard](./ADMIN_DASHBOARD.md) - PDF management from admin view
