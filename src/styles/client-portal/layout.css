@@ -235,28 +235,26 @@ body[data-page="client-portal"] {
   display: none;
 }
 
-/* Show analytics subtabs when analytics tab is active */
-[data-page="admin"]:has(#tab-analytics.active) .header-subtab-group[data-for-tab="analytics"] {
+/* Show header subtab groups based on active group */
+[data-page="admin"][data-active-group="work"] .header-subtab-group[data-for-tab="work"],
+[data-page="admin"][data-active-group="crm"] .header-subtab-group[data-for-tab="crm"],
+[data-page="admin"][data-active-group="documents"] .header-subtab-group[data-for-tab="documents"],
+[data-page="admin"][data-active-group="support"] .header-subtab-group[data-for-tab="support"],
+[data-page="admin"][data-active-group="analytics"] .header-subtab-group[data-for-tab="analytics"],
+[data-page="admin"][data-active-group="workflows"] .header-subtab-group[data-for-tab="workflows"] {
   display: flex;
 }
 
-/* Show workflows subtabs when workflows tab is active */
-[data-page="admin"]:has(#tab-workflows.active) .header-subtab-group[data-for-tab="workflows"] {
+[data-page="client-portal"][data-active-group="work"] .header-subtab-group[data-for-tab="work"],
+[data-page="client-portal"][data-active-group="docs"] .header-subtab-group[data-for-tab="docs"],
+[data-page="client-portal"][data-active-group="support"] .header-subtab-group[data-for-tab="support"] {
   display: flex;
 }
 
-/* Show tasks view toggle when tasks tab is active */
-[data-page="admin"]:has(#tab-tasks.active) .header-controls[data-for-tab="tasks"] {
-  display: flex;
-}
-
-/* Show leads section toggle when leads tab is active */
-[data-page="admin"]:has(#tab-leads.active) .header-controls[data-for-tab="leads"] {
-  display: flex;
-}
-
-/* Show knowledge base section toggle when KB tab is active */
-[data-page="admin"]:has(#tab-knowledge-base.active) .header-controls[data-for-tab="knowledge-base"] {
+/* Show header controls based on active tab */
+[data-page="admin"][data-active-tab="tasks"] .header-controls[data-for-tab="tasks"],
+[data-page="admin"][data-active-tab="leads"] .header-controls[data-for-tab="leads"],
+[data-page="admin"][data-active-tab="knowledge-base"] .header-controls[data-for-tab="knowledge-base"] {
   display: flex;
 }
 

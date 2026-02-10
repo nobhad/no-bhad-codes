@@ -1,0 +1,429 @@
+/**
+ * ===============================================
+ * CLIENT PORTAL QUESTIONNAIRES STYLES
+ * ===============================================
+ * @file src/styles/client-portal/questionnaires.css
+ *
+ * Styles for client portal questionnaire list and form.
+ * Uses portal theme variables.
+ */
+
+/* ============================================================================
+   QUESTIONNAIRES STATS
+   ============================================================================ */
+
+.cp-questionnaires-stats {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.cp-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-4) var(--space-6);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--portal-radius-md);
+  min-width: 120px;
+}
+
+.cp-stat-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--portal-text-light);
+}
+
+.cp-stat-label {
+  font-size: 0.875rem;
+  color: var(--portal-text-muted);
+}
+
+.cp-stat-item.cp-stat-success .cp-stat-number {
+  color: var(--color-success);
+}
+
+/* ============================================================================
+   QUESTIONNAIRES SECTIONS
+   ============================================================================ */
+
+.cp-questionnaires-section {
+  margin-bottom: var(--space-6);
+}
+
+.cp-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  margin: 0 0 var(--space-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cp-questionnaires-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+/* ============================================================================
+   QUESTIONNAIRE CARDS
+   ============================================================================ */
+
+.cp-questionnaire-card {
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-4);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.cp-questionnaire-card:hover {
+  border-color: var(--color-primary);
+}
+
+.cp-questionnaire-card.completed {
+  opacity: 0.8;
+}
+
+.cp-questionnaire-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.cp-questionnaire-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  margin: 0;
+}
+
+.cp-questionnaire-project {
+  font-size: 0.875rem;
+  color: var(--portal-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.cp-questionnaire-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  font-size: 0.8125rem;
+}
+
+.cp-questionnaire-due {
+  color: var(--portal-text-muted);
+}
+
+.cp-questionnaire-due.overdue {
+  color: var(--color-danger);
+  font-weight: 500;
+}
+
+.cp-questionnaire-completed {
+  color: var(--color-success);
+}
+
+.cp-questionnaire-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ============================================================================
+   EMPTY STATE
+   ============================================================================ */
+
+.cp-questionnaires-empty {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+}
+
+.cp-empty-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--space-4);
+  color: var(--portal-text-muted);
+}
+
+.cp-empty-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cp-questionnaires-empty h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  margin: 0 0 var(--space-2);
+}
+
+.cp-questionnaires-empty p {
+  font-size: 0.9375rem;
+  color: var(--portal-text-muted);
+  margin: 0;
+}
+
+/* ============================================================================
+   LOADING STATE
+   ============================================================================ */
+
+.cp-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  gap: var(--space-4);
+}
+
+.cp-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--portal-border-medium);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: cp-spin 0.8s linear infinite;
+}
+
+@keyframes cp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cp-loading p {
+  color: var(--portal-text-muted);
+  margin: 0;
+}
+
+/* ============================================================================
+   ERROR STATE
+   ============================================================================ */
+
+.cp-error {
+  text-align: center;
+  padding: var(--space-6);
+}
+
+.cp-error p {
+  color: var(--color-danger);
+  margin: 0 0 var(--space-4);
+}
+
+/* ============================================================================
+   QUESTIONNAIRE FORM
+   ============================================================================ */
+
+.cp-questionnaire-form-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.cp-questionnaire-form-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.cp-questionnaire-form-header .btn-ghost {
+  padding: var(--space-2);
+}
+
+.cp-questionnaire-form-title {
+  flex: 1;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  margin: 0;
+}
+
+.cp-questionnaire-form-description {
+  font-size: 0.9375rem;
+  color: var(--portal-text-muted);
+  margin: 0 0 var(--space-6);
+}
+
+.cp-questionnaire-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ============================================================================
+   QUESTION ITEMS
+   ============================================================================ */
+
+.cp-question-item {
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-4);
+}
+
+.cp-question-label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--portal-text-light);
+  margin-bottom: var(--space-3);
+}
+
+.cp-question-number {
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-right: var(--space-2);
+}
+
+.cp-required {
+  color: var(--color-danger);
+  margin-left: 4px;
+}
+
+.cp-question-help {
+  font-size: 0.8125rem;
+  color: var(--portal-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+/* Form inputs */
+.cp-form-input,
+.cp-form-textarea,
+.cp-form-select {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--portal-radius-md);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.cp-form-input::placeholder,
+.cp-form-textarea::placeholder {
+  color: var(--portal-text-muted);
+}
+
+.cp-form-input:focus,
+.cp-form-textarea:focus,
+.cp-form-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.cp-form-input:disabled,
+.cp-form-textarea:disabled,
+.cp-form-select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cp-form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.cp-form-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+/* Checkbox groups */
+.cp-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cp-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-darker);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--portal-radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.cp-checkbox-label:hover {
+  border-color: var(--color-primary);
+}
+
+.cp-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.cp-checkbox-label input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+}
+
+.cp-checkbox-label span {
+  font-size: 0.9375rem;
+  color: var(--portal-text-light);
+}
+
+/* ============================================================================
+   FORM ACTIONS
+   ============================================================================ */
+
+.cp-questionnaire-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--portal-border-medium);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 600px) {
+  .cp-questionnaires-stats {
+    flex-direction: column;
+  }
+
+  .cp-stat-item {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .cp-questionnaires-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-questionnaire-form-header {
+    flex-wrap: wrap;
+  }
+
+  .cp-questionnaire-form-title {
+    order: 2;
+    width: 100%;
+    margin-top: var(--space-2);
+  }
+
+  .cp-questionnaire-form-actions {
+    flex-direction: column;
+  }
+
+  .cp-questionnaire-form-actions .btn {
+    width: 100%;
+  }
+}

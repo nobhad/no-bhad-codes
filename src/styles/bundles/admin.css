@@ -23,6 +23,7 @@
  * NAVIGATION (full nav styles for admin login page)
  * ============================================ */
 @import "../components/nav-base.css" layer(components);
+@import "../components/nav-responsive.css" layer(components);
 @import "../components/nav-portal.css" layer(components);
 
 /* ============================================

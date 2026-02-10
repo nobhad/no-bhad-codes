@@ -1,0 +1,74 @@
+/**
+ * ===============================================
+ * ADMIN CONTRACTS DASHBOARD
+ * ===============================================
+ * @file src/styles/admin/contracts.css
+ */
+
+#tab-contracts .admin-table-actions {
+  gap: var(--space-1);
+}
+
+#tab-contracts .admin-table-actions .portal-input {
+  min-width: 180px;
+  height: 42px;
+}
+
+.contract-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.contract-detail-grid .portal-card {
+  margin-bottom: 0;
+}
+
+.contract-detail-grid .portal-card-header {
+  margin-bottom: var(--space-1);
+}
+
+.contract-detail-grid .detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--portal-border-color);
+}
+
+.contract-detail-grid .detail-row:last-child {
+  border-bottom: none;
+}
+
+.contract-activity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.contract-activity-item {
+  background: var(--portal-bg-darker);
+  border: 1px solid var(--portal-border-color);
+  border-radius: var(--portal-radius-sm);
+  padding: var(--space-1);
+}
+
+.contract-activity-item .activity-title {
+  font-weight: 600;
+  color: var(--portal-text-light);
+  text-transform: capitalize;
+}
+
+.contract-activity-item .activity-meta {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+  margin-top: var(--space-0-5);
+}
+
+@media (max-width: 900px) {
+  .contract-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -78,9 +78,38 @@
   filter: invert(1);
 }
 
+/* Sidebar Footer Buttons */
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
 /* Logout Button */
 .btn-logout {
   width: 100%;
+}
+
+/* Theme Toggle Button in Sidebar */
+.btn-theme-toggle {
+  width: 100%;
+}
+
+/* Theme icons - show/hide based on current theme */
+.btn-theme-toggle .sun-icon {
+  display: block;
+}
+
+.btn-theme-toggle .moon-icon {
+  display: none;
+}
+
+html[data-theme="dark"] .btn-theme-toggle .sun-icon {
+  display: none;
+}
+
+html[data-theme="dark"] .btn-theme-toggle .moon-icon {
+  display: block;
 }
 
 /* Sidebar Logo */

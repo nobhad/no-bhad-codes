@@ -93,3 +93,157 @@
   border-radius: var(--portal-radius-sm);
   transition: width 0.3s ease;
 }
+
+/* =====================================================
+   PENDING APPROVALS SECTION
+   ===================================================== */
+
+[data-page="client-portal"] .pending-approvals-section {
+  padding: var(--space-3);
+}
+
+[data-page="client-portal"] .pending-approvals-section .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+[data-page="client-portal"] .pending-approvals-section .section-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--portal-text-light);
+}
+
+[data-page="client-portal"] .approval-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 var(--space-1);
+  background: var(--color-danger);
+  color: var(--color-white);
+  border-radius: 12px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+[data-page="client-portal"] .approvals-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+[data-page="client-portal"] .approval-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
+  border: 1px solid var(--portal-border-dark);
+  transition: border-color var(--transition-fast);
+}
+
+[data-page="client-portal"] .approval-item:hover {
+  border-color: var(--color-primary);
+}
+
+[data-page="client-portal"] .approval-item.approval-overdue {
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+
+[data-page="client-portal"] .approval-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+[data-page="client-portal"] .approval-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+[data-page="client-portal"] .approval-details {
+  flex: 1;
+  min-width: 0;
+}
+
+[data-page="client-portal"] .approval-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-light);
+  margin-bottom: var(--space-0-5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-page="client-portal"] .approval-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+}
+
+[data-page="client-portal"] .approval-type {
+  background: var(--portal-bg-dark);
+  padding: var(--space-0-5) var(--space-1);
+  border-radius: var(--portal-radius-sm);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+[data-page="client-portal"] .approval-due {
+  color: var(--color-warning);
+}
+
+[data-page="client-portal"] .approval-item.approval-overdue .approval-due {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-semibold);
+}
+
+[data-page="client-portal"] .approval-actions {
+  flex-shrink: 0;
+}
+
+[data-page="client-portal"] .approval-actions .btn-sm {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+/* Mobile responsive */
+@media (max-width: 576px) {
+  [data-page="client-portal"] .approval-item {
+    flex-wrap: wrap;
+  }
+
+  [data-page="client-portal"] .approval-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  [data-page="client-portal"] .approval-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  [data-page="client-portal"] .approval-actions {
+    width: 100%;
+    margin-top: var(--space-2);
+  }
+
+  [data-page="client-portal"] .approval-actions .btn-sm {
+    width: 100%;
+  }
+}

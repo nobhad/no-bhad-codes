@@ -1,0 +1,599 @@
+/**
+ * ===============================================
+ * CLIENT PORTAL ONBOARDING WIZARD STYLES
+ * ===============================================
+ * @file src/styles/client-portal/onboarding.css
+ *
+ * 5-step onboarding wizard following proposal-builder.css patterns.
+ * Uses portal theme variables.
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES - ONBOARDING SPECIFIC
+   ============================================================================ */
+
+:root {
+  /* Onboarding colors */
+  --onboarding-bg: var(--portal-bg-dark);
+  --onboarding-card-bg: var(--portal-bg-medium);
+  --onboarding-card-border: var(--portal-border-medium);
+  --onboarding-text: var(--portal-text-light);
+  --onboarding-text-muted: var(--portal-text-muted);
+  --onboarding-accent: var(--color-primary);
+  --onboarding-success: var(--color-success);
+
+  /* Spacing */
+  --onboarding-spacing-sm: 0.5rem;
+  --onboarding-spacing-md: 1rem;
+  --onboarding-spacing-lg: 1.5rem;
+  --onboarding-spacing-xl: 2rem;
+}
+
+/* ============================================================================
+   MAIN CONTAINER
+   ============================================================================ */
+
+.onboarding-wizard {
+  background: var(--onboarding-bg);
+  color: var(--onboarding-text);
+  padding: var(--onboarding-spacing-xl);
+  border-radius: var(--portal-radius-lg);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.onboarding-header {
+  text-align: center;
+  margin-bottom: var(--onboarding-spacing-xl);
+}
+
+.onboarding-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0 0 var(--onboarding-spacing-sm);
+  color: var(--onboarding-text);
+}
+
+.onboarding-subtitle {
+  font-size: 1rem;
+  color: var(--onboarding-text-muted);
+  margin: 0;
+}
+
+/* ============================================================================
+   STEP INDICATORS
+   ============================================================================ */
+
+.onboarding-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--onboarding-spacing-sm);
+  margin-bottom: var(--onboarding-spacing-xl);
+  padding: var(--onboarding-spacing-md);
+  flex-wrap: wrap;
+}
+
+.onboarding-step-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--onboarding-spacing-sm);
+  padding: var(--onboarding-spacing-sm) var(--onboarding-spacing-md);
+  border-radius: var(--portal-radius-pill);
+  background: var(--portal-bg-medium);
+  opacity: 0.5;
+  transition: opacity 0.3s ease, background-color 0.3s ease;
+  cursor: default;
+}
+
+.onboarding-step-indicator.step--clickable {
+  cursor: pointer;
+}
+
+.onboarding-step-indicator.step--active {
+  opacity: 1;
+  background: var(--onboarding-accent);
+}
+
+.onboarding-step-indicator.step--completed {
+  opacity: 0.8;
+  background: var(--onboarding-success);
+  cursor: pointer;
+}
+
+.onboarding-step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.onboarding-step-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.onboarding-step-divider {
+  width: 40px;
+  height: 2px;
+  background: var(--portal-border-medium);
+}
+
+@media (max-width: 768px) {
+  .onboarding-step-label {
+    display: none;
+  }
+
+  .onboarding-step-divider {
+    width: 20px;
+  }
+}
+
+/* ============================================================================
+   CONTENT AREA
+   ============================================================================ */
+
+.onboarding-content {
+  min-height: 350px;
+  padding: var(--onboarding-spacing-md) 0;
+}
+
+.onboarding-step-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 var(--onboarding-spacing-sm);
+  color: var(--onboarding-text);
+}
+
+.onboarding-step-description {
+  font-size: 0.9375rem;
+  color: var(--onboarding-text-muted);
+  margin: 0 0 var(--onboarding-spacing-lg);
+}
+
+/* ============================================================================
+   FORM STYLES
+   ============================================================================ */
+
+.onboarding-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--onboarding-spacing-lg);
+}
+
+.onboarding-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--onboarding-spacing-md);
+}
+
+@media (max-width: 600px) {
+  .onboarding-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.onboarding-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.onboarding-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--onboarding-text);
+}
+
+.onboarding-label .required {
+  color: var(--color-danger);
+  margin-left: 4px;
+}
+
+.onboarding-input,
+.onboarding-select,
+.onboarding-textarea {
+  width: 100%;
+  padding: var(--onboarding-spacing-md);
+  border: 1px solid var(--onboarding-card-border);
+  border-radius: var(--portal-radius-md);
+  background: var(--portal-bg-darker);
+  color: var(--onboarding-text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.onboarding-input::placeholder,
+.onboarding-textarea::placeholder {
+  color: var(--onboarding-text-muted);
+}
+
+.onboarding-input:focus,
+.onboarding-select:focus,
+.onboarding-textarea:focus {
+  outline: none;
+  border-color: var(--onboarding-accent);
+}
+
+.onboarding-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.onboarding-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+/* ============================================================================
+   CHECKBOX & RADIO GROUPS
+   ============================================================================ */
+
+.onboarding-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--onboarding-spacing-sm);
+}
+
+.onboarding-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--onboarding-spacing-sm);
+  padding: var(--onboarding-spacing-md);
+  background: var(--onboarding-card-bg);
+  border: 1px solid var(--onboarding-card-border);
+  border-radius: var(--portal-radius-md);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.onboarding-checkbox-label:hover {
+  border-color: var(--onboarding-accent);
+}
+
+.onboarding-checkbox-label.is-checked {
+  border-color: var(--onboarding-accent);
+  background: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.onboarding-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--onboarding-accent);
+}
+
+.onboarding-checkbox-text {
+  font-size: 0.9375rem;
+  color: var(--onboarding-text);
+}
+
+.onboarding-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--onboarding-spacing-sm);
+}
+
+/* ============================================================================
+   ASSETS CHECKLIST
+   ============================================================================ */
+
+.onboarding-assets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--onboarding-spacing-md);
+}
+
+.onboarding-asset-card {
+  background: var(--onboarding-card-bg);
+  border: 2px solid var(--onboarding-card-border);
+  border-radius: var(--portal-radius-md);
+  padding: var(--onboarding-spacing-lg);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.onboarding-asset-card:hover {
+  border-color: var(--onboarding-accent);
+  transform: translateY(-2px);
+}
+
+.onboarding-asset-card.is-selected {
+  border-color: var(--onboarding-success);
+  background: rgba(var(--color-success-rgb), 0.1);
+}
+
+.onboarding-asset-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--onboarding-spacing-md);
+  color: var(--onboarding-text-muted);
+}
+
+.onboarding-asset-card.is-selected .onboarding-asset-icon {
+  color: var(--onboarding-success);
+}
+
+.onboarding-asset-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--onboarding-text);
+  margin: 0 0 4px;
+}
+
+.onboarding-asset-status {
+  font-size: 0.8125rem;
+  color: var(--onboarding-text-muted);
+}
+
+.onboarding-asset-card.is-selected .onboarding-asset-status {
+  color: var(--onboarding-success);
+}
+
+/* ============================================================================
+   REVIEW STEP
+   ============================================================================ */
+
+.onboarding-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--onboarding-spacing-lg);
+}
+
+.onboarding-review-section {
+  background: var(--onboarding-card-bg);
+  border: 1px solid var(--onboarding-card-border);
+  border-radius: var(--portal-radius-md);
+  padding: var(--onboarding-spacing-lg);
+}
+
+.onboarding-review-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--onboarding-text-muted);
+  margin: 0 0 var(--onboarding-spacing-md);
+}
+
+.onboarding-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--onboarding-spacing-sm);
+}
+
+.onboarding-review-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--onboarding-spacing-md);
+  padding: var(--onboarding-spacing-sm) 0;
+  border-bottom: 1px solid var(--onboarding-card-border);
+}
+
+.onboarding-review-item:last-child {
+  border-bottom: none;
+}
+
+.onboarding-review-label {
+  font-size: 0.875rem;
+  color: var(--onboarding-text-muted);
+}
+
+.onboarding-review-value {
+  font-size: 0.9375rem;
+  color: var(--onboarding-text);
+  font-weight: 500;
+  text-align: right;
+}
+
+.onboarding-review-value--empty {
+  font-style: italic;
+  color: var(--onboarding-text-muted);
+  font-weight: 400;
+}
+
+.onboarding-review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.onboarding-review-tag {
+  background: rgba(var(--color-primary-rgb), 0.15);
+  color: var(--onboarding-accent);
+  padding: 4px 10px;
+  border-radius: var(--portal-radius-pill);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Confirmation checkbox */
+.onboarding-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--onboarding-spacing-md);
+  padding: var(--onboarding-spacing-lg);
+  background: var(--portal-bg-darker);
+  border: 2px solid var(--onboarding-card-border);
+  border-radius: var(--portal-radius-md);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.onboarding-confirm:hover {
+  border-color: var(--onboarding-accent);
+}
+
+.onboarding-confirm.is-checked {
+  border-color: var(--onboarding-success);
+}
+
+.onboarding-confirm input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--onboarding-success);
+  flex-shrink: 0;
+}
+
+.onboarding-confirm-text {
+  font-size: 0.9375rem;
+  color: var(--onboarding-text);
+  line-height: 1.5;
+}
+
+/* ============================================================================
+   ACTION BUTTONS
+   ============================================================================ */
+
+.onboarding-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--onboarding-spacing-md);
+  padding: var(--onboarding-spacing-lg) 0 0;
+  border-top: 1px solid var(--onboarding-card-border);
+  margin-top: var(--onboarding-spacing-lg);
+}
+
+.onboarding-actions-left {
+  display: flex;
+  gap: var(--onboarding-spacing-md);
+}
+
+.onboarding-btn {
+  padding: var(--onboarding-spacing-md) var(--onboarding-spacing-xl);
+  border-radius: var(--portal-radius-md);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.onboarding-btn:active {
+  transform: scale(0.98);
+}
+
+.onboarding-btn-secondary {
+  background: transparent;
+  border: 2px solid var(--onboarding-card-border);
+  color: var(--onboarding-text);
+}
+
+.onboarding-btn-secondary:hover {
+  border-color: var(--onboarding-text);
+}
+
+.onboarding-btn-primary {
+  background: var(--onboarding-accent);
+  border: 2px solid var(--onboarding-accent);
+  color: var(--onboarding-text);
+}
+
+.onboarding-btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.onboarding-btn-success {
+  background: var(--onboarding-success);
+  border: 2px solid var(--onboarding-success);
+  color: var(--onboarding-text);
+}
+
+.onboarding-btn-success:hover {
+  filter: brightness(1.1);
+}
+
+.onboarding-btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--onboarding-text-muted);
+  padding: var(--onboarding-spacing-md);
+}
+
+.onboarding-btn-ghost:hover {
+  color: var(--onboarding-text);
+}
+
+/* ============================================================================
+   LOADING STATE
+   ============================================================================ */
+
+.onboarding-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.onboarding-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--onboarding-card-border);
+  border-top-color: var(--onboarding-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 600px) {
+  .onboarding-wizard {
+    padding: var(--onboarding-spacing-lg) var(--onboarding-spacing-md);
+  }
+
+  .onboarding-title {
+    font-size: 1.5rem;
+  }
+
+  .onboarding-actions {
+    flex-direction: column-reverse;
+    gap: var(--onboarding-spacing-md);
+  }
+
+  .onboarding-actions-left {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .onboarding-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .onboarding-btn-primary,
+  .onboarding-btn-success {
+    width: 100%;
+  }
+
+  .onboarding-assets-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .onboarding-checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+}
