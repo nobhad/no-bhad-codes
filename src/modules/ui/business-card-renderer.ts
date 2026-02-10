@@ -229,11 +229,11 @@ export class BusinessCardRenderer extends BaseModule {
    * Enable section card after intro completion
    */
   enableAfterIntro() {
-    if (this.elementConfig.businessCardId === 'business-card') {
+    if (this.elementConfig.businessCardId === 'business-card' && this.businessCard) {
       this.log('Enabling section card after intro completion');
-      this.businessCard!.style.opacity = '1';
-      this.businessCard!.style.visibility = 'visible';
-      this.businessCard!.style.display = 'block';
+      this.businessCard.style.opacity = '1';
+      this.businessCard.style.visibility = 'visible';
+      this.businessCard.style.display = 'block';
     }
   }
 
