@@ -9,6 +9,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { userService } from './user-service.js';
 
 // Type definitions
 type SqlValue = string | number | boolean | null;
@@ -591,9 +592,12 @@ class ClientService {
   async logActivity(clientId: number, activity: ActivityData): Promise<ClientActivity> {
     const db = getDatabase();
 
+    // Look up user ID for created_by
+    const createdByUserId = await userService.getUserIdByEmailOrName(activity.createdBy || 'system');
+
     const result = await db.run(
       `INSERT INTO client_activities (
-        client_id, activity_type, title, description, metadata, created_by
+        client_id, activity_type, title, description, metadata, created_by_user_id
       ) VALUES (?, ?, ?, ?, ?, ?)`,
       [
         clientId,
@@ -601,7 +605,7 @@ class ClientService {
         activity.title,
         activity.description || null,
         activity.metadata ? JSON.stringify(activity.metadata) : null,
-        activity.createdBy || 'system'
+        createdByUserId
       ]
     );
 
@@ -708,9 +712,12 @@ class ClientService {
   async addNote(clientId: number, author: string, content: string): Promise<ClientNote> {
     const db = getDatabase();
 
+    // Look up user ID for author
+    const authorUserId = await userService.getUserIdByEmailOrName(author);
+
     const result = await db.run(
-      `INSERT INTO client_notes (client_id, author, content) VALUES (?, ?, ?)`,
-      [clientId, author, content]
+      `INSERT INTO client_notes (client_id, author_user_id, content) VALUES (?, ?, ?)`,
+      [clientId, authorUserId, content]
     );
 
     const note = await db.get(

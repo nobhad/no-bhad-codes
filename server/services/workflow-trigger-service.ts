@@ -12,6 +12,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { emailService } from './email-service.js';
+import { userService } from './user-service.js';
 
 // ============================================
 // Types
@@ -468,14 +469,18 @@ class WorkflowTriggerService {
       ? new Date(Date.now() + config.due_days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       : null;
 
+    // Look up user ID for assignee during transition period
+    const assigneeUserId = await userService.getUserIdByEmail(config.assignee);
+
     await db.run(
-      `INSERT INTO project_tasks (project_id, title, description, assigned_to, due_date, status)
-       VALUES (?, ?, ?, ?, ?, 'pending')`,
+      `INSERT INTO project_tasks (project_id, title, description, assigned_to, assigned_to_user_id, due_date, status)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
       [
         projectId,
         this.interpolate(config.title, context),
         config.description ? this.interpolate(config.description, context) : null,
         config.assignee || null,
+        assigneeUserId,
         dueDate
       ]
     );

@@ -26,6 +26,7 @@ import {
   pricingDataSchema,
   tierStructureSchema
 } from '../../shared/validation/validators.js';
+import { emailService, type ProposalSignedData, type ProposalSignedClientData } from './email-service.js';
 
 // =====================================================
 // TYPES
@@ -738,9 +739,14 @@ class ProposalService {
       ]
     );
 
-    // Update proposal signed_at
+    // Update proposal as signed and legally binding
     await db.run(
-      'UPDATE proposal_requests SET signed_at = datetime(\'now\') WHERE id = ?',
+      `UPDATE proposal_requests SET
+        signed_at = datetime('now'),
+        is_legally_binding = TRUE,
+        terms_accepted_at = datetime('now'),
+        status = 'accepted'
+       WHERE id = ?`,
       [proposalId]
     );
 
@@ -748,7 +754,7 @@ class ProposalService {
     await db.run(
       `UPDATE signature_requests SET
         status = 'signed', signed_at = datetime('now')
-       WHERE proposal_id = ? AND signer_email = ? AND status = 'pending'`,
+       WHERE proposal_id = ? AND signer_email = ? AND status IN ('pending', 'viewed')`,
       [proposalId, data.signerEmail]
     );
 
@@ -758,7 +764,124 @@ class ProposalService {
       signerEmail: data.signerEmail
     }, data.ipAddress, data.userAgent);
 
+    // Send admin notification with tier info
+    await this.sendProposalSignedNotification(proposalId, data);
+
     return this.getSignature(result.lastID!);
+  }
+
+  /**
+   * Send notification to admin when proposal is signed
+   */
+  private async sendProposalSignedNotification(proposalId: number, signatureData: SignatureData): Promise<void> {
+    const db = getDatabase();
+
+    try {
+      // Get proposal with project and client details
+      const proposal = await db.get(`
+        SELECT
+          pr.*,
+          p.name as project_name,
+          p.project_type,
+          c.name as client_name,
+          c.company_name,
+          c.email as client_email
+        FROM proposal_requests pr
+        LEFT JOIN projects p ON pr.project_id = p.id
+        LEFT JOIN clients c ON pr.client_id = c.id
+        WHERE pr.id = ?
+      `, [proposalId]);
+
+      if (!proposal) {
+        console.error('[PROPOSAL] Cannot send notification - proposal not found:', proposalId);
+        return;
+      }
+
+      const p = proposal as Record<string, unknown>;
+
+      // Get add-on features
+      const features = await db.all(`
+        SELECT feature_name, feature_price
+        FROM proposal_feature_selections
+        WHERE proposal_request_id = ? AND is_addon = TRUE
+      `, [proposalId]);
+
+      // Map tier to display name
+      const tierNames: Record<string, string> = {
+        good: 'Good',
+        better: 'Better',
+        best: 'Best'
+      };
+
+      const selectedTier = getString(p, 'selected_tier') as 'good' | 'better' | 'best';
+      const tierName = tierNames[selectedTier] || selectedTier;
+
+      // Format price
+      const finalPrice = getNumber(p, 'final_price') || 0;
+      const formattedPrice = finalPrice.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+
+      // Format signed timestamp
+      const signedAt = new Date().toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short'
+      });
+
+      // Build notification data
+      const notificationData: ProposalSignedData = {
+        clientName: getString(p, 'client_name') || 'Unknown Client',
+        companyName: p.company_name as string | undefined,
+        projectName: getString(p, 'project_name') || 'Untitled Project',
+        projectType: getString(p, 'project_type') || 'General',
+        projectId: getNumber(p, 'project_id') || proposalId,
+        selectedTier,
+        tierName,
+        finalPrice: formattedPrice,
+        maintenanceOption: p.maintenance_option as string | undefined,
+        addedFeatures: features.map((f) => ({
+          name: getString(f as Record<string, unknown>, 'feature_name'),
+          price: (getNumber(f as Record<string, unknown>, 'feature_price') || 0).toLocaleString()
+        })),
+        signerName: signatureData.signerName,
+        signerEmail: signatureData.signerEmail,
+        signedAt,
+        ipAddress: signatureData.ipAddress || 'Unknown'
+      };
+
+      // Send admin notification
+      const adminResult = await emailService.sendProposalSignedNotification(notificationData);
+
+      if (adminResult.success) {
+        console.log('[PROPOSAL] Admin notification sent for proposal:', proposalId);
+      } else {
+        console.error('[PROPOSAL] Failed to send admin notification:', adminResult.message);
+      }
+
+      // Send client confirmation email
+      const baseUrl = process.env.WEBSITE_URL || process.env.BASE_URL || 'http://localhost:3000';
+      const clientData: ProposalSignedClientData = {
+        ...notificationData,
+        portalUrl: `${baseUrl}/client/portal`,
+        supportEmail: process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || 'support@nobhadcodes.com'
+      };
+
+      const clientResult = await emailService.sendProposalSignedClientConfirmation(clientData);
+
+      if (clientResult.success) {
+        console.log('[PROPOSAL] Client confirmation sent for proposal:', proposalId);
+      } else {
+        console.error('[PROPOSAL] Failed to send client confirmation:', clientResult.message);
+      }
+    } catch (error) {
+      console.error('[PROPOSAL] Error sending proposal signed notifications:', error);
+    }
   }
 
   /**
@@ -804,7 +927,7 @@ class ProposalService {
     const signatures = await this.getProposalSignatures(proposalId);
 
     const pendingRows = await db.all(
-      'SELECT * FROM signature_requests WHERE proposal_id = ? AND status = \'pending\'',
+      "SELECT * FROM signature_requests WHERE proposal_id = ? AND status IN ('pending', 'viewed')",
       [proposalId]
     );
     const pendingRequests = pendingRows.map((row) => mapSignatureRequest(row as Record<string, unknown>));

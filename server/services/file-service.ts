@@ -7,6 +7,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { userService } from './user-service.js';
 
 // ============================================
 // Types
@@ -588,10 +589,13 @@ class FileService {
   ): Promise<FileComment> {
     const db = getDatabase();
 
+    // Look up user ID for author during transition period
+    const authorUserId = await userService.getUserIdByEmail(authorEmail);
+
     const result = await db.run(
-      `INSERT INTO file_comments (file_id, author_email, author_type, author_name, content, is_internal, parent_comment_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [fileId, authorEmail, authorType, authorName || null, content, isInternal, parentCommentId || null]
+      `INSERT INTO file_comments (file_id, author_email, author_user_id, author_type, author_name, content, is_internal, parent_comment_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [fileId, authorEmail, authorUserId, authorType, authorName || null, content, isInternal, parentCommentId || null]
     );
 
     return this.getComment(result.lastID!);
@@ -977,11 +981,13 @@ class FileService {
     const workflow = await this.getOrCreateDeliverableWorkflow(fileId, file.project_id);
 
     // Update status
+    // Look up user ID for submitted_by during transition period
+    const submittedByUserId = await userService.getUserIdByEmail(submittedBy);
     await db.run(
       `UPDATE deliverable_workflows
-       SET status = 'pending_review', submitted_at = CURRENT_TIMESTAMP, submitted_by = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
+       SET status = 'pending_review', submitted_at = CURRENT_TIMESTAMP, submitted_by = ?, submitted_by_user_id = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [submittedBy, notes || null, workflow.id]
+      [submittedBy, submittedByUserId, notes || null, workflow.id]
     );
 
     // Log history
@@ -998,11 +1004,13 @@ class FileService {
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
 
+    // Look up user ID for reviewed_by during transition period
+    const reviewerUserId = await userService.getUserIdByEmail(reviewerEmail);
     await db.run(
       `UPDATE deliverable_workflows
-       SET status = 'in_review', reviewed_by = ?, updated_at = CURRENT_TIMESTAMP
+       SET status = 'in_review', reviewed_by = ?, reviewed_by_user_id = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [reviewerEmail, workflow.id]
+      [reviewerEmail, reviewerUserId, workflow.id]
     );
 
     await this.logDeliverableHistory(workflow.id, workflow.status, 'in_review', reviewerEmail);
@@ -1018,11 +1026,13 @@ class FileService {
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
 
+    // Look up user ID for reviewed_by during transition period
+    const reviewerUserId = await userService.getUserIdByEmail(reviewerEmail);
     await db.run(
       `UPDATE deliverable_workflows
-       SET status = 'changes_requested', reviewed_at = CURRENT_TIMESTAMP, reviewed_by = ?, rejection_reason = ?, updated_at = CURRENT_TIMESTAMP
+       SET status = 'changes_requested', reviewed_at = CURRENT_TIMESTAMP, reviewed_by = ?, reviewed_by_user_id = ?, rejection_reason = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [reviewerEmail, feedback, workflow.id]
+      [reviewerEmail, reviewerUserId, feedback, workflow.id]
     );
 
     // Add review comment
@@ -1041,11 +1051,13 @@ class FileService {
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
 
+    // Look up user ID for approved_by during transition period
+    const approverUserId = await userService.getUserIdByEmail(approverEmail);
     await db.run(
       `UPDATE deliverable_workflows
-       SET status = 'approved', approved_at = CURRENT_TIMESTAMP, approved_by = ?, updated_at = CURRENT_TIMESTAMP
+       SET status = 'approved', approved_at = CURRENT_TIMESTAMP, approved_by = ?, approved_by_user_id = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [approverEmail, workflow.id]
+      [approverEmail, approverUserId, workflow.id]
     );
 
     if (comment) {
@@ -1065,11 +1077,13 @@ class FileService {
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
 
+    // Look up user ID for reviewed_by during transition period
+    const reviewerUserId = await userService.getUserIdByEmail(reviewerEmail);
     await db.run(
       `UPDATE deliverable_workflows
-       SET status = 'rejected', reviewed_at = CURRENT_TIMESTAMP, reviewed_by = ?, rejection_reason = ?, updated_at = CURRENT_TIMESTAMP
+       SET status = 'rejected', reviewed_at = CURRENT_TIMESTAMP, reviewed_by = ?, reviewed_by_user_id = ?, rejection_reason = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [reviewerEmail, reason, workflow.id]
+      [reviewerEmail, reviewerUserId, reason, workflow.id]
     );
 
     await this.addReviewComment(workflow.id, reviewerEmail, 'admin', reason, 'rejection');
@@ -1086,12 +1100,14 @@ class FileService {
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
 
+    // Look up user ID for submitted_by during transition period
+    const submittedByUserId = await userService.getUserIdByEmail(submittedBy);
     await db.run(
       `UPDATE deliverable_workflows
-       SET status = 'pending_review', submitted_at = CURRENT_TIMESTAMP, submitted_by = ?,
+       SET status = 'pending_review', submitted_at = CURRENT_TIMESTAMP, submitted_by = ?, submitted_by_user_id = ?,
            version = version + 1, notes = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [submittedBy, notes || null, workflow.id]
+      [submittedBy, submittedByUserId, notes || null, workflow.id]
     );
 
     await this.logDeliverableHistory(workflow.id, workflow.status, 'pending_review', submittedBy, notes);
@@ -1111,11 +1127,15 @@ class FileService {
     authorName?: string
   ): Promise<any> {
     const db = getDatabase();
+
+    // Look up user ID for author during transition period
+    const authorUserId = await userService.getUserIdByEmail(authorEmail);
+
     const result = await db.run(
       `INSERT INTO deliverable_review_comments
-       (workflow_id, author_email, author_name, author_type, comment, comment_type)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [workflowId, authorEmail, authorName || null, authorType, comment, commentType]
+       (workflow_id, author_email, author_user_id, author_name, author_type, comment, comment_type)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [workflowId, authorEmail, authorUserId, authorName || null, authorType, comment, commentType]
     );
     return db.get('SELECT * FROM deliverable_review_comments WHERE id = ?', [result.lastID]);
   }

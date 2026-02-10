@@ -28,12 +28,15 @@ interface SchedulerConfig {
   enableSoftDeleteCleanup: boolean;
   enableAnalyticsCleanup: boolean;
   enablePriorityEscalation: boolean;
+  enableApprovalReminders: boolean;
   reminderCheckInterval: string; // cron expression
   invoiceGenerationTime: string; // cron expression
   softDeleteCleanupTime: string; // cron expression
   analyticsCleanupTime: string; // cron expression
   priorityEscalationTime: string; // cron expression
   analyticsRetentionDays: number; // days to keep analytics data
+  approvalReminderIntervals: number[]; // days after request to send reminders (e.g., [1, 3, 7])
+  approvalStallThresholdDays: number; // days without response before admin notification
 }
 
 const DEFAULT_CONFIG: SchedulerConfig = {
@@ -45,12 +48,15 @@ const DEFAULT_CONFIG: SchedulerConfig = {
   enableSoftDeleteCleanup: true,
   enableAnalyticsCleanup: true,
   enablePriorityEscalation: true,
+  enableApprovalReminders: true,
   reminderCheckInterval: '0 * * * *', // Every hour at :00
   invoiceGenerationTime: '0 1 * * *', // Daily at 1:00 AM
   softDeleteCleanupTime: '0 2 * * *', // Daily at 2:00 AM
   analyticsCleanupTime: '0 3 * * *', // Daily at 3:00 AM
   priorityEscalationTime: '0 6 * * *', // Daily at 6:00 AM
-  analyticsRetentionDays: 365 // Keep analytics data for 1 year
+  analyticsRetentionDays: 365, // Keep analytics data for 1 year
+  approvalReminderIntervals: [1, 3, 7], // Send reminders at 1, 3, and 7 days
+  approvalStallThresholdDays: 7 // Notify admin after 7 days without response
 };
 
 interface WelcomeEmail {
@@ -400,6 +406,12 @@ export class SchedulerService {
     if (this.config.enableWelcomeSequences) {
       const welcomeSent = await this.processWelcomeSequences();
       totalSent += welcomeSent;
+    }
+
+    // Process approval reminders
+    if (this.config.enableApprovalReminders) {
+      const approvalSent = await this.processApprovalReminders();
+      totalSent += approvalSent;
     }
 
     console.log(`[Scheduler] Processed reminders, total sent: ${totalSent}`);
@@ -1039,6 +1051,300 @@ No Bhad Codes Team
     </div>
     <div class="footer">
       <p>Best regards,<br>No Bhad Codes Team</p>
+    </div>
+  </div>
+</body>
+</html>
+      `
+    });
+  }
+
+  // ===================================
+  // APPROVAL REMINDER METHODS
+  // ===================================
+
+  /**
+   * Process pending approval reminders
+   * Sends reminders at configured intervals (1, 3, 7 days by default)
+   * Notifies admin of stalled approvals (after 7 days by default)
+   */
+  async processApprovalReminders(): Promise<number> {
+    console.log('[Scheduler] Processing approval reminders...');
+
+    let sentCount = 0;
+    const now = new Date();
+    const intervals = this.config.approvalReminderIntervals;
+    const stallThreshold = this.config.approvalStallThresholdDays;
+
+    // Get pending approval requests with workflow and entity info
+    const sql = `
+      SELECT
+        ar.id as request_id,
+        ar.approver_email,
+        ar.reminder_count,
+        ar.reminder_sent_at,
+        ar.created_at as request_created_at,
+        wi.id as instance_id,
+        wi.entity_type,
+        wi.entity_id,
+        wd.name as workflow_name
+      FROM approval_requests ar
+      JOIN approval_workflow_instances wi ON ar.workflow_instance_id = wi.id
+      JOIN approval_workflow_definitions wd ON wi.workflow_definition_id = wd.id
+      WHERE ar.status = 'pending'
+        AND wi.status IN ('pending', 'in_progress')
+    `;
+
+    const pendingRequests = await this.db.all(sql);
+
+    for (const request of pendingRequests) {
+      try {
+        const requestAge = Math.floor(
+          (now.getTime() - new Date(request.request_created_at).getTime()) / (1000 * 60 * 60 * 24)
+        );
+        const lastReminderAge = request.reminder_sent_at
+          ? Math.floor(
+            (now.getTime() - new Date(request.reminder_sent_at).getTime()) / (1000 * 60 * 60 * 24)
+          )
+          : requestAge;
+
+        // Check if we should send a reminder based on intervals
+        const nextReminderIndex = request.reminder_count;
+        const shouldSendReminder = nextReminderIndex < intervals.length
+          && requestAge >= intervals[nextReminderIndex]
+          && lastReminderAge >= 1; // Don't send more than one reminder per day
+
+        if (shouldSendReminder) {
+          await this.sendApprovalReminderEmail({
+            email: request.approver_email,
+            entityType: request.entity_type,
+            entityId: request.entity_id,
+            workflowName: request.workflow_name,
+            reminderCount: request.reminder_count + 1,
+            daysWaiting: requestAge
+          });
+
+          // Update reminder tracking
+          await this.db.run(
+            'UPDATE approval_requests SET reminder_sent_at = ?, reminder_count = reminder_count + 1 WHERE id = ?',
+            [now.toISOString(), request.request_id]
+          );
+
+          sentCount++;
+          console.log(`[Scheduler] Sent approval reminder #${request.reminder_count + 1} to ${request.approver_email} for ${request.entity_type} #${request.entity_id}`);
+        }
+
+        // Check if stalled and notify admin
+        if (requestAge >= stallThreshold && request.reminder_count >= intervals.length) {
+          // Only notify once when crossing threshold
+          const lastNotifyAge = request.reminder_sent_at
+            ? Math.floor((now.getTime() - new Date(request.reminder_sent_at).getTime()) / (1000 * 60 * 60 * 24))
+            : 0;
+
+          if (lastNotifyAge >= 1) {
+            await this.sendStalledApprovalAdminNotification({
+              entityType: request.entity_type,
+              entityId: request.entity_id,
+              workflowName: request.workflow_name,
+              approverEmail: request.approver_email,
+              daysStalled: requestAge
+            });
+
+            // Update to prevent repeated notifications
+            await this.db.run(
+              'UPDATE approval_requests SET reminder_sent_at = ? WHERE id = ?',
+              [now.toISOString(), request.request_id]
+            );
+
+            console.log(`[Scheduler] Sent stalled approval notification for ${request.entity_type} #${request.entity_id}`);
+          }
+        }
+      } catch (error) {
+        console.error(`[Scheduler] Error processing approval reminder for request ${request.request_id}:`, error);
+      }
+    }
+
+    console.log(`[Scheduler] Processed approval reminders, sent ${sentCount}`);
+    return sentCount;
+  }
+
+  /**
+   * Send an approval reminder email
+   */
+  private async sendApprovalReminderEmail(data: {
+    email: string;
+    entityType: string;
+    entityId: number;
+    workflowName: string;
+    reminderCount: number;
+    daysWaiting: number;
+  }): Promise<void> {
+    const { email, entityType, entityId, workflowName, reminderCount, daysWaiting } = data;
+
+    const entityLabel = entityType.charAt(0).toUpperCase() + entityType.slice(1);
+    const portalUrl = process.env.CLIENT_PORTAL_URL || 'http://localhost:3000';
+
+    let subject: string;
+    let urgency = '';
+
+    if (reminderCount === 1) {
+      subject = `Reminder: ${entityLabel} Awaiting Your Approval`;
+    } else if (reminderCount === 2) {
+      subject = `Second Reminder: ${entityLabel} Still Awaiting Approval`;
+      urgency = 'This item has been waiting for your approval for several days.';
+    } else {
+      subject = `Urgent: ${entityLabel} Requires Immediate Approval`;
+      urgency = `This item has been pending for ${daysWaiting} days and requires immediate attention.`;
+    }
+
+    await emailService.sendEmail({
+      to: email,
+      subject,
+      text: `
+Hi,
+
+This is a reminder that a ${entityLabel.toLowerCase()} is awaiting your approval.
+
+Workflow: ${workflowName}
+${entityLabel}: #${entityId}
+Waiting: ${daysWaiting} day${daysWaiting !== 1 ? 's' : ''}
+
+${urgency ? `\n${urgency}\n` : ''}
+Please log in to the portal to review and approve or reject this item.
+
+Best regards,
+No Bhad Codes Team
+      `,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: ${reminderCount >= 3 ? '#dc3545' : '#00ff41'}; color: ${reminderCount >= 3 ? '#fff' : '#000'}; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: #f9f9f9; }
+    .info-box { background: #fff; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00ff41; }
+    .button { display: inline-block; padding: 12px 24px; background: #00ff41; color: #000; text-decoration: none; border-radius: 4px; font-weight: bold; }
+    .urgency { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; }
+    .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Approval Reminder</h2>
+    </div>
+    <div class="content">
+      <p>Hi,</p>
+      <p>This is a reminder that a ${entityLabel.toLowerCase()} is awaiting your approval.</p>
+      <div class="info-box">
+        <p><strong>Workflow:</strong> ${workflowName}</p>
+        <p><strong>${entityLabel}:</strong> #${entityId}</p>
+        <p><strong>Waiting:</strong> ${daysWaiting} day${daysWaiting !== 1 ? 's' : ''}</p>
+      </div>
+      ${urgency ? `<div class="urgency"><strong>${urgency}</strong></div>` : ''}
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="${portalUrl}" class="button">Review & Approve</a>
+      </p>
+    </div>
+    <div class="footer">
+      <p>Best regards,<br>No Bhad Codes Team</p>
+    </div>
+  </div>
+</body>
+</html>
+      `
+    });
+  }
+
+  /**
+   * Send admin notification for stalled approvals
+   */
+  private async sendStalledApprovalAdminNotification(data: {
+    entityType: string;
+    entityId: number;
+    workflowName: string;
+    approverEmail: string;
+    daysStalled: number;
+  }): Promise<void> {
+    const { entityType, entityId, workflowName, approverEmail, daysStalled } = data;
+
+    const entityLabel = entityType.charAt(0).toUpperCase() + entityType.slice(1);
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.SUPPORT_EMAIL;
+    const adminUrl = process.env.ADMIN_URL || 'http://localhost:3000/admin';
+
+    if (!adminEmail) {
+      console.warn('[Scheduler] No admin email configured for stalled approval notification');
+      return;
+    }
+
+    await emailService.sendEmail({
+      to: adminEmail,
+      subject: `[Alert] Stalled Approval: ${entityLabel} #${entityId}`,
+      text: `
+STALLED APPROVAL ALERT
+
+A ${entityLabel.toLowerCase()} approval has been stalled for ${daysStalled} days.
+
+Details:
+- Workflow: ${workflowName}
+- ${entityLabel}: #${entityId}
+- Awaiting approval from: ${approverEmail}
+- Days stalled: ${daysStalled}
+
+Action Required:
+Please review this item and consider:
+- Following up with the approver directly
+- Reassigning the approval to another person
+- Taking manual action if urgent
+
+Admin Dashboard: ${adminUrl}
+
+This is an automated alert from the approval system.
+      `,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #dc3545; color: #fff; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: #f9f9f9; }
+    .alert-box { background: #fff; padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid #dc3545; }
+    .action-box { background: #e7f5ff; border-left: 4px solid #0066cc; padding: 15px; margin: 15px 0; }
+    .button { display: inline-block; padding: 12px 24px; background: #0066cc; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold; }
+    .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Stalled Approval Alert</h2>
+    </div>
+    <div class="content">
+      <p>A ${entityLabel.toLowerCase()} approval has been stalled for <strong>${daysStalled} days</strong>.</p>
+      <div class="alert-box">
+        <p><strong>Workflow:</strong> ${workflowName}</p>
+        <p><strong>${entityLabel}:</strong> #${entityId}</p>
+        <p><strong>Awaiting approval from:</strong> ${approverEmail}</p>
+        <p><strong>Days stalled:</strong> ${daysStalled}</p>
+      </div>
+      <div class="action-box">
+        <p><strong>Action Required:</strong></p>
+        <ul>
+          <li>Follow up with the approver directly</li>
+          <li>Reassign the approval to another person</li>
+          <li>Take manual action if urgent</li>
+        </ul>
+      </div>
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="${adminUrl}" class="button">Go to Admin Dashboard</a>
+      </p>
+    </div>
+    <div class="footer">
+      <p>This is an automated alert from the approval system.</p>
     </div>
   </div>
 </body>

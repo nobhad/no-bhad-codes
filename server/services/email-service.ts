@@ -10,6 +10,12 @@
 
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export interface EmailContent {
   to: string;
@@ -42,6 +48,28 @@ interface EmailServiceStatus {
   queueSize: number;
   templatesLoaded: number;
   isProcessingQueue: boolean;
+}
+
+export interface ProposalSignedData {
+  clientName: string;
+  companyName?: string;
+  projectName: string;
+  projectType: string;
+  projectId: number;
+  selectedTier: 'good' | 'better' | 'best';
+  tierName: string;
+  finalPrice: string;
+  maintenanceOption?: string;
+  addedFeatures?: Array<{ name: string; price: string }>;
+  signerName: string;
+  signerEmail: string;
+  signedAt: string;
+  ipAddress: string;
+}
+
+export interface ProposalSignedClientData extends ProposalSignedData {
+  portalUrl: string;
+  supportEmail: string;
 }
 
 interface EmailConfig {
@@ -711,7 +739,7 @@ export const emailService = {
             .content { padding: 20px; background: #f9f9f9; }
             .button {
               display: inline-block;
-              padding: 14px 28px;
+              padding: 28px;
               background: #00ff41;
               color: #000;
               text-decoration: none;
@@ -747,5 +775,254 @@ export const emailService = {
     };
 
     return sendEmail(emailContent);
+  },
+
+  /**
+   * Send notification to admin when a proposal is signed
+   * Includes tier selection, price, and signature details
+   */
+  async sendProposalSignedNotification(data: ProposalSignedData): Promise<EmailResult> {
+    console.log('[EMAIL] Preparing proposal signed notification for project:', data.projectId);
+
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (!adminEmail) {
+      console.warn('[EMAIL] ADMIN_EMAIL not configured - skipping proposal signed notification');
+      return { success: false, message: 'Admin email not configured' };
+    }
+
+    const adminUrl = process.env.ADMIN_URL || `${process.env.WEBSITE_URL || 'http://localhost:3000'}/admin`;
+    const timestamp = new Date().toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short'
+    });
+
+    try {
+      // Read email templates
+      const templateDir = path.join(__dirname, '../templates/email');
+      const [subjectTemplate, htmlTemplate] = await Promise.all([
+        fs.readFile(path.join(templateDir, 'proposal-signed.subject.txt'), 'utf-8'),
+        fs.readFile(path.join(templateDir, 'proposal-signed.html'), 'utf-8')
+      ]);
+
+      // Replace template variables
+      const replacements: Record<string, string> = {
+        clientName: data.clientName,
+        companyName: data.companyName || '',
+        projectName: data.projectName,
+        projectType: data.projectType,
+        projectId: String(data.projectId),
+        selectedTier: data.selectedTier,
+        tierName: data.tierName,
+        finalPrice: data.finalPrice,
+        maintenanceOption: data.maintenanceOption || '',
+        signerName: data.signerName,
+        signerEmail: data.signerEmail,
+        signedAt: data.signedAt,
+        ipAddress: data.ipAddress,
+        adminUrl: adminUrl,
+        timestamp: timestamp
+      };
+
+      let subject = subjectTemplate.trim();
+      let html = htmlTemplate;
+
+      // Replace simple variables
+      for (const [key, value] of Object.entries(replacements)) {
+        const regex = new RegExp(`{{${key}}}`, 'g');
+        subject = subject.replace(regex, value);
+        html = html.replace(regex, value);
+      }
+
+      // Handle conditional blocks: {{#if variable}}...{{/if}}
+      const conditionalRegex = /{{#if (\w+)}}([\s\S]*?){{\/if}}/g;
+      html = html.replace(conditionalRegex, (match, varName, content) => {
+        const value = replacements[varName];
+        return value && value.trim() ? content : '';
+      });
+
+      // Handle addedFeatures array: {{#each addedFeatures}}...{{/each}}
+      if (data.addedFeatures && data.addedFeatures.length > 0) {
+        const eachRegex = /{{#each addedFeatures}}([\s\S]*?){{\/each}}/g;
+        html = html.replace(eachRegex, (match, itemTemplate) => {
+          return data.addedFeatures!
+            .map((feature) => {
+              return itemTemplate
+                .replace(/{{this\.name}}/g, feature.name)
+                .replace(/{{this\.price}}/g, feature.price);
+            })
+            .join('');
+        });
+
+        // Show the addedFeatures section
+        html = html.replace(/{{#if addedFeatures}}([\s\S]*?){{\/if}}/g, '$1');
+      } else {
+        // Remove the addedFeatures section entirely
+        html = html.replace(/{{#if addedFeatures}}[\s\S]*?{{\/if}}/g, '');
+      }
+
+      // Generate plain text version
+      const text = `
+Proposal Signed!
+
+A client has accepted your proposal.
+
+Client: ${data.clientName}
+${data.companyName ? `Company: ${data.companyName}` : ''}
+Project: ${data.projectName}
+Type: ${data.projectType}
+Tier: ${data.tierName}
+${data.maintenanceOption ? `Maintenance: ${data.maintenanceOption}` : ''}
+Contract Value: $${data.finalPrice}
+
+${data.addedFeatures?.length ? `Add-on Features:\n${data.addedFeatures.map((f) => `- ${f.name} (+$${f.price})`).join('\n')}` : ''}
+
+Signature Details:
+- Signed By: ${data.signerName}
+- Email: ${data.signerEmail}
+- Signed At: ${data.signedAt}
+- IP Address: ${data.ipAddress}
+
+View project: ${adminUrl}/projects/${data.projectId}
+      `.trim();
+
+      const emailContent: EmailContent = {
+        to: adminEmail,
+        subject,
+        text,
+        html
+      };
+
+      return sendEmail(emailContent);
+    } catch (error) {
+      console.error('[EMAIL] Failed to load proposal signed templates:', error);
+      return {
+        success: false,
+        message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
+  },
+
+  /**
+   * Send confirmation email to client when they sign a proposal
+   * Includes contract summary and next steps
+   */
+  async sendProposalSignedClientConfirmation(data: ProposalSignedClientData): Promise<EmailResult> {
+    console.log('[EMAIL] Preparing proposal signed confirmation for client:', data.signerEmail);
+
+    try {
+      // Read email templates
+      const templateDir = path.join(__dirname, '../templates/email');
+      const [subjectTemplate, htmlTemplate] = await Promise.all([
+        fs.readFile(path.join(templateDir, 'proposal-signed-client.subject.txt'), 'utf-8'),
+        fs.readFile(path.join(templateDir, 'proposal-signed-client.html'), 'utf-8')
+      ]);
+
+      // Replace template variables
+      const replacements: Record<string, string> = {
+        clientName: data.clientName,
+        companyName: data.companyName || '',
+        projectName: data.projectName,
+        projectType: data.projectType,
+        projectId: String(data.projectId),
+        selectedTier: data.selectedTier,
+        tierName: data.tierName,
+        finalPrice: data.finalPrice,
+        maintenanceOption: data.maintenanceOption || '',
+        signerName: data.signerName,
+        signerEmail: data.signerEmail,
+        signedAt: data.signedAt,
+        ipAddress: data.ipAddress,
+        portalUrl: data.portalUrl,
+        supportEmail: data.supportEmail
+      };
+
+      let subject = subjectTemplate.trim();
+      let html = htmlTemplate;
+
+      // Replace simple variables
+      for (const [key, value] of Object.entries(replacements)) {
+        const regex = new RegExp(`{{${key}}}`, 'g');
+        subject = subject.replace(regex, value);
+        html = html.replace(regex, value);
+      }
+
+      // Handle conditional blocks: {{#if variable}}...{{/if}}
+      const conditionalRegex = /{{#if (\w+)}}([\s\S]*?){{\/if}}/g;
+      html = html.replace(conditionalRegex, (match, varName, content) => {
+        const value = replacements[varName];
+        return value && value.trim() ? content : '';
+      });
+
+      // Handle addedFeatures array: {{#each addedFeatures}}...{{/each}}
+      if (data.addedFeatures && data.addedFeatures.length > 0) {
+        const eachRegex = /{{#each addedFeatures}}([\s\S]*?){{\/each}}/g;
+        html = html.replace(eachRegex, (match, itemTemplate) => {
+          return data.addedFeatures!
+            .map((feature) => {
+              return itemTemplate
+                .replace(/{{this\.name}}/g, feature.name)
+                .replace(/{{this\.price}}/g, feature.price);
+            })
+            .join('');
+        });
+
+        // Show the addedFeatures section
+        html = html.replace(/{{#if addedFeatures}}([\s\S]*?){{\/if}}/g, '$1');
+      } else {
+        // Remove the addedFeatures section entirely
+        html = html.replace(/{{#if addedFeatures}}[\s\S]*?{{\/if}}/g, '');
+      }
+
+      // Generate plain text version
+      const text = `
+Hi ${data.clientName},
+
+Thank you for signing your proposal for ${data.projectName}. Your contract is now confirmed!
+
+Contract Summary:
+- Project: ${data.projectName}
+- Package: ${data.tierName}
+${data.maintenanceOption ? `- Maintenance Plan: ${data.maintenanceOption}` : ''}
+- Total Investment: $${data.finalPrice}
+
+${data.addedFeatures?.length ? `Your Selected Add-ons:\n${data.addedFeatures.map((f) => `- ${f.name} (+$${f.price})`).join('\n')}` : ''}
+
+What Happens Next:
+1. We'll send you a welcome kit with project timeline and milestones
+2. You'll receive an invoice for the initial deposit
+3. We'll schedule a kickoff call to discuss your project in detail
+4. Development begins according to your agreed timeline
+
+Access your client portal: ${data.portalUrl}
+
+Signature Confirmation:
+Signed by: ${data.signerName}
+Date: ${data.signedAt}
+
+Questions? Reply to this email or contact us at ${data.supportEmail}
+
+This email confirms your legally binding agreement. Please keep it for your records.
+      `.trim();
+
+      const emailContent: EmailContent = {
+        to: data.signerEmail,
+        subject,
+        text,
+        html
+      };
+
+      return sendEmail(emailContent);
+    } catch (error) {
+      console.error('[EMAIL] Failed to load proposal signed client templates:', error);
+      return {
+        success: false,
+        message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
   }
 };
