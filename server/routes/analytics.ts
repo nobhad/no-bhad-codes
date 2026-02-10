@@ -1067,4 +1067,127 @@ router.get('/report-runs', authenticateToken, requireAdmin, asyncHandler(async (
   res.json({ runs });
 }));
 
+// =====================================================
+// SECTION 8.1: BUSINESS INTELLIGENCE ENDPOINTS
+// =====================================================
+
+/**
+ * GET /api/analytics/bi/revenue/:period
+ * Get revenue breakdown by time period
+ */
+router.get('/bi/revenue/:period', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const period = req.params.period as 'month' | 'quarter' | 'year';
+  const { startDate, endDate } = req.query;
+  const data = await analyticsService.getRevenueByPeriod(
+    period,
+    startDate as string | undefined,
+    endDate as string | undefined
+  );
+  res.json({ data });
+}));
+
+/**
+ * GET /api/analytics/bi/pipeline
+ * Get project pipeline value
+ */
+router.get('/bi/pipeline', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const data = await analyticsService.getProjectPipelineValue();
+  res.json({ data });
+}));
+
+/**
+ * GET /api/analytics/bi/funnel
+ * Get client acquisition funnel
+ */
+router.get('/bi/funnel', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const { startDate, endDate } = req.query;
+  const data = await analyticsService.getAcquisitionFunnel(
+    startDate as string | undefined,
+    endDate as string | undefined
+  );
+  res.json({ data });
+}));
+
+/**
+ * GET /api/analytics/bi/project-stats
+ * Get project statistics
+ */
+router.get('/bi/project-stats', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const data = await analyticsService.getProjectStatistics();
+  res.json({ data });
+}));
+
+// =====================================================
+// SECTION 8.2: CLIENT INSIGHTS ENDPOINTS
+// =====================================================
+
+/**
+ * GET /api/analytics/clients/ltv
+ * Get client lifetime value
+ */
+router.get('/clients/ltv', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const { limit = '20' } = req.query;
+  const data = await analyticsService.getClientLifetimeValue(parseInt(limit as string, 10));
+  res.json({ data });
+}));
+
+/**
+ * GET /api/analytics/clients/activity-scores
+ * Get client activity scores
+ */
+router.get('/clients/activity-scores', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const { limit = '20' } = req.query;
+  const data = await analyticsService.getClientActivityScores(parseInt(limit as string, 10));
+  res.json({ data });
+}));
+
+/**
+ * GET /api/analytics/clients/upsell
+ * Get upsell opportunities
+ */
+router.get('/clients/upsell', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const data = await analyticsService.getUpsellOpportunities();
+  res.json({ data });
+}));
+
+// =====================================================
+// SECTION 8.3: OPERATIONAL REPORTS ENDPOINTS
+// =====================================================
+
+/**
+ * GET /api/analytics/reports/overdue-invoices
+ * Get overdue invoices report
+ */
+router.get('/reports/overdue-invoices', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const data = await analyticsService.getOverdueInvoicesReport();
+  res.json({ data });
+}));
+
+/**
+ * GET /api/analytics/reports/pending-approvals
+ * Get pending approvals aging report
+ */
+router.get('/reports/pending-approvals', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const data = await analyticsService.getPendingApprovalsReport();
+  res.json({ data });
+}));
+
+/**
+ * GET /api/analytics/reports/document-requests
+ * Get document requests status report
+ */
+router.get('/reports/document-requests', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const data = await analyticsService.getDocumentRequestsStatusReport();
+  res.json({ data });
+}));
+
+/**
+ * GET /api/analytics/reports/project-health
+ * Get project health summary
+ */
+router.get('/reports/project-health', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const data = await analyticsService.getProjectHealthSummary();
+  res.json({ data });
+}));
+
 export default router;

@@ -1083,10 +1083,13 @@ router.post(
       return sendBadRequest(res, 'Invitation has expired. Please contact support for a new invitation.', ErrorCodes.TOKEN_EXPIRED);
     }
 
+    const normalizeValue = (value: string): string =>
+      value && value !== 'undefined' && value !== 'null' ? value : '';
+
     return sendSuccess(res, {
-      email: getString(client, 'email'),
-      name: getString(client, 'contact_name'),
-      company: getString(client, 'company_name')
+      email: normalizeValue(getString(client, 'email')),
+      name: normalizeValue(getString(client, 'contact_name')),
+      company: normalizeValue(getString(client, 'company_name'))
     });
   })
 );
@@ -1174,8 +1177,8 @@ router.post(
     try {
       await db.run(
         `INSERT INTO general_messages
-         (client_id, sender_type, sender_name, subject, message, message_type, priority, status, is_read)
-         VALUES (?, 'system', 'No Bhad Codes', ?, ?, 'system', 'normal', 'new', FALSE)`,
+         (client_id, sender_type, sender_name, subject, message, message_type, priority, status)
+         VALUES (?, 'system', 'No Bhad Codes', ?, ?, 'system', 'normal', 'new')`,
         [
           clientId,
           'Welcome to Your Client Portal!',

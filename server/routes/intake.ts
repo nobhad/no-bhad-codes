@@ -19,6 +19,7 @@ import { generateInvoice } from '../services/invoice-generator.js';
 import { sendWelcomeEmail, sendNewIntakeNotification } from '../services/email-service.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
+import { userService } from '../services/user-service.js';
 
 const router = express.Router();
 
@@ -110,7 +111,24 @@ interface ProposalSelection {
   removedFeatures: string[];
   maintenanceOption: string | null;
   calculatedPrice: number;
+  basePrice?: number;
+  subtotal?: number;
+  discountType?: 'percentage' | 'fixed' | null;
+  discountValue?: number;
+  discountAmount?: number;
+  taxRate?: number;
+  taxAmount?: number;
   notes: string;
+  customItems?: Array<{
+    itemType?: string;
+    description: string;
+    quantity?: number;
+    unitPrice: number;
+    unitLabel?: string;
+    isTaxable?: boolean;
+    isOptional?: boolean;
+  }>;
+  expirationDate?: string | null;
 }
 
 interface IntakeFormData {
@@ -267,16 +285,18 @@ router.post('/', async (req: Request, res: Response) => {
       console.log(`Project created: ${projectId}`);
 
       // Create initial project update
+      const systemUserId = await userService.getUserIdByEmailOrName('system');
       await ctx.run(
         `
         INSERT INTO project_updates (
-          project_id, title, description, update_type, author, created_at
-        ) VALUES (?, ?, ?, 'general', 'system', datetime('now'))
+          project_id, title, description, update_type, author_user_id, created_at
+        ) VALUES (?, ?, ?, 'general', ?, datetime('now'))
       `,
         [
           projectId,
           'Project Intake Received',
-          'Thank you for submitting your project details! We\'re reviewing your requirements and will provide a detailed proposal within 24-48 hours.'
+          'Thank you for submitting your project details! We\'re reviewing your requirements and will provide a detailed proposal within 24-48 hours.',
+          systemUserId
         ]
       );
 
@@ -301,25 +321,71 @@ router.post('/', async (req: Request, res: Response) => {
       let proposalRequestId: number | null = null;
       if (intakeData.proposalSelection) {
         const proposal = intakeData.proposalSelection;
+        const basePrice = proposal.basePrice ?? proposal.calculatedPrice ?? 0;
+        const subtotal = proposal.subtotal ?? basePrice;
+        const discountType = proposal.discountType || null;
+        const discountValue = proposal.discountValue ?? 0;
+        const taxRate = proposal.taxRate ?? 0;
+        const taxAmount = proposal.taxAmount ?? 0;
+        const expirationDate = proposal.expirationDate || null;
+        let validityDays = 30;
+        if (expirationDate) {
+          const diffMs = new Date(expirationDate).getTime() - Date.now();
+          const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+          if (Number.isFinite(diffDays) && diffDays > 0) {
+            validityDays = diffDays;
+          }
+        }
+
         const proposalResult = await ctx.run(
           `INSERT INTO proposal_requests (
             project_id, client_id, project_type, selected_tier,
             base_price, final_price, maintenance_option,
-            status, client_notes, created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'))`,
+            status, client_notes, created_at,
+            subtotal, discount_type, discount_value, tax_rate, tax_amount, expiration_date, validity_days
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'), ?, ?, ?, ?, ?, ?, ?)`,
           [
             projectId,
             clientId,
             intakeData.projectType,
             proposal.selectedTier || 'better',
-            proposal.calculatedPrice || 0,
-            proposal.calculatedPrice || 0,
+            basePrice,
+            proposal.calculatedPrice || basePrice,
             proposal.maintenanceOption || null,
-            proposal.notes || null
+            proposal.notes || null,
+            subtotal,
+            discountType,
+            discountValue,
+            taxRate,
+            taxAmount,
+            expirationDate,
+            validityDays
           ]
         );
         proposalRequestId = proposalResult.lastID!;
         console.log(`Created proposal request ${proposalRequestId} for project ${projectId}`);
+
+        if (proposal.customItems && proposal.customItems.length > 0) {
+          for (const [index, item] of proposal.customItems.entries()) {
+            await ctx.run(
+              `INSERT INTO proposal_custom_items (
+                proposal_id, item_type, description, quantity, unit_price,
+                unit_label, is_taxable, is_optional, sort_order, created_at, updated_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+              [
+                proposalRequestId,
+                item.itemType || 'service',
+                item.description,
+                item.quantity ?? 1,
+                item.unitPrice,
+                item.unitLabel || null,
+                item.isTaxable !== false ? 1 : 0,
+                item.isOptional ? 1 : 0,
+                index
+              ]
+            );
+          }
+        }
       }
 
       return { clientId, projectId, isNewClient, proposalRequestId };

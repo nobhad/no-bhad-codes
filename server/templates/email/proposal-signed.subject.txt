@@ -1,0 +1,1 @@
+Proposal Signed: {{clientName}} selected {{tierName}} tier - ${{finalPrice}}

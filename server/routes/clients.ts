@@ -17,6 +17,7 @@ import { auditLogger } from '../services/audit-logger.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
+import { notificationPreferencesService } from '../services/notification-preferences-service.js';
 
 const router = express.Router();
 
@@ -38,7 +39,6 @@ router.get(
     const db = getDatabase();
     const client = await db.get(
       `SELECT id, email, company_name, contact_name, phone, status, client_type,
-              notification_messages, notification_status, notification_invoices, notification_weekly,
               billing_company, billing_address, billing_address2, billing_city,
               billing_state, billing_zip, billing_country,
               created_at, updated_at
@@ -144,6 +144,7 @@ router.put(
 
 /**
  * PUT /me/notifications - Update notification preferences
+ * Uses notification_preferences table (consolidated from legacy clients columns)
  */
 router.put(
   '/me/notifications',
@@ -154,20 +155,44 @@ router.put(
     }
 
     const { messages, status, invoices, weekly } = req.body;
-    const db = getDatabase();
 
-    await db.run(
-      `UPDATE clients SET
-         notification_messages = ?,
-         notification_status = ?,
-         notification_invoices = ?,
-         notification_weekly = ?,
-         updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [messages ? 1 : 0, status ? 1 : 0, invoices ? 1 : 0, weekly ? 1 : 0, req.user!.id]
-    );
+    // Map legacy field names to new notification_preferences columns
+    await notificationPreferencesService.updatePreferences(req.user!.id, 'client', {
+      notify_new_message: messages,
+      notify_project_update: status,
+      notify_invoice_created: invoices,
+      email_frequency: weekly ? 'weekly_digest' : 'immediate'
+    });
 
     res.json({ success: true, message: 'Notification preferences updated' });
+  })
+);
+
+/**
+ * GET /me/notifications - Get notification preferences
+ */
+router.get(
+  '/me/notifications',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const prefs = await notificationPreferencesService.getPreferences(req.user!.id, 'client');
+
+    // Map to legacy field names for backward compatibility
+    res.json({
+      success: true,
+      notifications: {
+        messages: prefs.notify_new_message,
+        status: prefs.notify_project_update,
+        invoices: prefs.notify_invoice_created,
+        weekly: prefs.email_frequency === 'weekly_digest'
+      },
+      // Also include full preferences for clients that want more options
+      fullPreferences: prefs
+    });
   })
 );
 
@@ -241,7 +266,7 @@ router.get(
     const messagesResult = await db.get(
       `SELECT COUNT(*) as count FROM messages m
        JOIN message_threads t ON m.thread_id = t.id
-       WHERE t.client_id = ? AND m.is_read = 0 AND m.sender_type = 'admin'`,
+       WHERE t.client_id = ? AND m.read_at IS NULL AND m.sender_type = 'admin'`,
       [clientId]
     );
     const unreadMessages = messagesResult?.count || 0;
@@ -769,7 +794,12 @@ router.post(
 
     // Build invitation link
     const baseUrl = process.env.BASE_URL || 'http://localhost:4000';
-    const invitationLink = `${baseUrl}/client/set-password.html?token=${invitationToken}`;
+    const invitationUrl = new URL('/client/set-password.html', baseUrl);
+    invitationUrl.searchParams.set('token', invitationToken);
+    if (clientEmail) {
+      invitationUrl.searchParams.set('email', clientEmail);
+    }
+    const invitationLink = invitationUrl.toString();
 
     // Send invitation email
     try {
@@ -1505,10 +1535,9 @@ router.get(
 );
 
 // =====================================================
-// NOTIFICATION PREFERENCES
+// NOTIFICATION PREFERENCES & TIMELINE
 // =====================================================
 
-import { notificationPreferencesService } from '../services/notification-preferences-service.js';
 import { timelineService } from '../services/timeline-service.js';
 
 /**

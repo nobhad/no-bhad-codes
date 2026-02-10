@@ -9,7 +9,7 @@
  */
 
 import express, { Request, Response } from 'express';
-import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument as PDFLibDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
 import { join } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
@@ -95,6 +95,9 @@ interface ProposalRow {
   created_at: string;
   reviewed_at: string | null;
   reviewed_by: string | null;
+  signed_at?: string | null;
+  terms_and_conditions?: string | null;
+  contract_terms?: string | null;
   // Joined fields
   project_name?: string;
   client_name?: string;
@@ -644,9 +647,10 @@ router.get(
     const { id } = req.params;
     const db = getDatabase();
 
-    // Get proposal with full details
+    // Get proposal with full details including deposit percentage
     const proposal = await db.get(
       `SELECT pr.*, p.project_name, p.description as project_description,
+              p.default_deposit_percentage,
               c.contact_name as client_name, c.email as client_email, c.company_name
        FROM proposal_requests pr
        JOIN projects p ON pr.project_id = p.id
@@ -692,8 +696,17 @@ router.get(
       [id]
     ) as unknown as FeatureRow[];
 
+    // Get signature data if proposal is signed
+    const signature = (proposal as any).signed_at ? await db.get(
+      `SELECT * FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC LIMIT 1`,
+      [id]
+    ) as { signer_name?: string; signer_email?: string; signer_title?: string; signature_data?: string; signature_method?: string; signed_at?: string; ip_address?: string } | undefined : undefined;
+
+    // Check if proposal is signed for watermark
+    const isSigned = Boolean((proposal as any).signed_at);
+
     // Helper functions
-    const formatDate = (dateStr: string | undefined): string => {
+    const formatDate = (dateStr: string | undefined | null): string => {
       if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     };
@@ -907,6 +920,69 @@ router.get(
     const totalText = `$${getNumber(p, 'final_price').toLocaleString()}`;
     page().drawText(totalText, { x: rightMargin - helveticaBold.widthOfTextAtSize(totalText, 12), y: ctx.y, size: 12, font: helveticaBold, color: rgb(0, 0, 0) });
 
+    // === PAYMENT SCHEDULE ===
+    ctx.y -= 35;
+    ensureSpace(ctx, 100, drawContinuationHeader);
+    page().drawText('Payment Schedule', { x: leftMargin, y: ctx.y, size: 14, font: helveticaBold, color: rgb(0, 0.4, 0.8) });
+    ctx.y -= 20;
+
+    // Calculate payment amounts based on deposit percentage (default 50%)
+    const finalPrice = getNumber(p, 'final_price');
+    const depositPercentage = ((proposal as any).default_deposit_percentage as number) || 50;
+    const depositAmount = Math.round(finalPrice * (depositPercentage / 100));
+    const finalPayment = finalPrice - depositAmount;
+
+    // Draw payment schedule table
+    const colWidth = ctx.contentWidth / 3;
+    const paymentRowHeight = 18;
+
+    // Table header
+    page().drawText('Payment', { x: leftMargin, y: ctx.y, size: 10, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+    page().drawText('When Due', { x: leftMargin + colWidth, y: ctx.y, size: 10, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+    page().drawText('Amount', { x: rightMargin - 70, y: ctx.y, size: 10, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+    ctx.y -= 5;
+
+    // Header underline
+    page().drawLine({ start: { x: leftMargin, y: ctx.y }, end: { x: rightMargin, y: ctx.y }, thickness: 0.5, color: rgb(0.7, 0.7, 0.7) });
+    ctx.y -= paymentRowHeight;
+
+    // Row 1: Deposit
+    page().drawText('1. Deposit', { x: leftMargin, y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page().drawText('Upon contract signing', { x: leftMargin + colWidth, y: ctx.y, size: 10, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    const depositText = `$${depositAmount.toLocaleString()}`;
+    page().drawText(depositText, { x: rightMargin - helvetica.widthOfTextAtSize(depositText, 10), y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    ctx.y -= 5;
+
+    // Row separator
+    page().drawLine({ start: { x: leftMargin, y: ctx.y }, end: { x: rightMargin, y: ctx.y }, thickness: 0.25, color: rgb(0.85, 0.85, 0.85) });
+    ctx.y -= paymentRowHeight;
+
+    // Row 2: Final Payment
+    page().drawText('2. Final Payment', { x: leftMargin, y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page().drawText('Upon project completion', { x: leftMargin + colWidth, y: ctx.y, size: 10, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    const finalPaymentText = `$${finalPayment.toLocaleString()}`;
+    page().drawText(finalPaymentText, { x: rightMargin - helvetica.widthOfTextAtSize(finalPaymentText, 10), y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    ctx.y -= 5;
+
+    // Bottom line
+    page().drawLine({ start: { x: leftMargin, y: ctx.y }, end: { x: rightMargin, y: ctx.y }, thickness: 0.5, color: rgb(0.7, 0.7, 0.7) });
+    ctx.y -= paymentRowHeight;
+
+    // Total row
+    page().drawText('Total Project Investment', { x: leftMargin, y: ctx.y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    const totalInvestmentText = `$${finalPrice.toLocaleString()}`;
+    page().drawText(totalInvestmentText, { x: rightMargin - helveticaBold.widthOfTextAtSize(totalInvestmentText, 10), y: ctx.y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    ctx.y -= 15;
+
+    // Payment note
+    page().drawText(`Deposit (${depositPercentage}%) required to begin work. Balance due upon delivery.`, {
+      x: leftMargin,
+      y: ctx.y,
+      size: 8,
+      font: helvetica,
+      color: rgb(0.5, 0.5, 0.5)
+    });
+
     // === CLIENT NOTES ===
     if (proposal.client_notes) {
       ctx.y -= 35;
@@ -916,9 +992,152 @@ router.get(
       page().drawText(proposal.client_notes, { x: leftMargin + 10, y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
     }
 
+    // === TERMS & CONDITIONS ===
+    const termsText = (proposal as any).terms_and_conditions || (proposal as any).contract_terms;
+    if (termsText) {
+      ctx.y -= 35;
+      ensureSpace(ctx, 80, drawContinuationHeader);
+      page().drawText('Terms & Conditions', { x: leftMargin, y: ctx.y, size: 14, font: helveticaBold, color: rgb(0, 0.4, 0.8) });
+      ctx.y -= 18;
+
+      // Split terms into lines and render each
+      const termsLines = termsText.split('\n').filter((line: string) => line.trim());
+      for (const line of termsLines) {
+        ensureSpace(ctx, 14, drawContinuationHeader);
+        // Wrap long lines
+        const maxLineWidth = ctx.contentWidth - 20;
+        const words = line.trim().split(' ');
+        let currentLine = '';
+        for (const word of words) {
+          const testLine = currentLine ? `${currentLine} ${word}` : word;
+          const testWidth = helvetica.widthOfTextAtSize(testLine, 9);
+          if (testWidth > maxLineWidth && currentLine) {
+            page().drawText(currentLine, { x: leftMargin + 10, y: ctx.y, size: 9, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+            ctx.y -= 12;
+            ensureSpace(ctx, 12, drawContinuationHeader);
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
+        }
+        if (currentLine) {
+          page().drawText(currentLine, { x: leftMargin + 10, y: ctx.y, size: 9, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+          ctx.y -= 12;
+        }
+      }
+      ctx.y -= 10;
+    }
+
+    // === SIGNATURE BLOCK (if signed) ===
+    if (isSigned && signature) {
+      ctx.y -= 25;
+      ensureSpace(ctx, 120, drawContinuationHeader);
+
+      // Signature section header
+      page().drawText('Authorization & Signature', { x: leftMargin, y: ctx.y, size: 14, font: helveticaBold, color: rgb(0, 0.4, 0.8) });
+      ctx.y -= 20;
+
+      // Draw signature box
+      const sigBoxY = ctx.y;
+      const sigBoxHeight = 80;
+      page().drawRectangle({
+        x: leftMargin,
+        y: sigBoxY - sigBoxHeight,
+        width: ctx.contentWidth,
+        height: sigBoxHeight,
+        borderColor: rgb(0.7, 0.7, 0.7),
+        borderWidth: 1,
+        color: rgb(0.98, 0.98, 0.98)
+      });
+
+      // Embed signature image if available (drawn signature)
+      if (signature.signature_data && signature.signature_method === 'drawn') {
+        try {
+          // signature_data is base64 PNG data
+          const sigDataUrl = signature.signature_data;
+          const base64Data = sigDataUrl.replace(/^data:image\/png;base64,/, '');
+          const sigImageBytes = Buffer.from(base64Data, 'base64');
+          const sigImage = await pdfDoc.embedPng(sigImageBytes);
+
+          // Scale signature to fit in box (max 200x50)
+          const maxSigWidth = 200;
+          const maxSigHeight = 50;
+          const sigAspect = sigImage.width / sigImage.height;
+          let sigWidth = Math.min(sigImage.width, maxSigWidth);
+          let sigHeight = sigWidth / sigAspect;
+          if (sigHeight > maxSigHeight) {
+            sigHeight = maxSigHeight;
+            sigWidth = sigHeight * sigAspect;
+          }
+
+          // Center signature in left portion of box
+          const sigX = leftMargin + 20;
+          const sigY = sigBoxY - sigBoxHeight / 2 - sigHeight / 2 + 10;
+          page().drawImage(sigImage, { x: sigX, y: sigY, width: sigWidth, height: sigHeight });
+        } catch (sigError) {
+          console.error('[PDF] Failed to embed signature image:', sigError);
+        }
+      } else if (signature.signature_data && signature.signature_method === 'typed') {
+        // Typed signature - render as stylized text
+        const typedSig = signature.signature_data;
+        page().drawText(typedSig, {
+          x: leftMargin + 20,
+          y: sigBoxY - 45,
+          size: 24,
+          font: helvetica,
+          color: rgb(0, 0, 0.6)
+        });
+      }
+
+      // Signer details on right side of box
+      const detailsX = leftMargin + ctx.contentWidth / 2 + 20;
+      let detailsY = sigBoxY - 20;
+
+      page().drawText(signature.signer_name || 'Unknown', { x: detailsX, y: detailsY, size: 11, font: helveticaBold, color: rgb(0, 0, 0) });
+      detailsY -= 14;
+
+      if (signature.signer_title) {
+        page().drawText(signature.signer_title, { x: detailsX, y: detailsY, size: 9, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+        detailsY -= 12;
+      }
+
+      if (signature.signer_email) {
+        page().drawText(signature.signer_email, { x: detailsX, y: detailsY, size: 9, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+        detailsY -= 12;
+      }
+
+      // Signed date
+      const signedDate = signature.signed_at ? formatDate(signature.signed_at) : formatDate(proposal.signed_at);
+      page().drawText(`Signed: ${signedDate}`, { x: detailsX, y: detailsY, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+
+      ctx.y = sigBoxY - sigBoxHeight - 15;
+
+      // Legal binding notice
+      page().drawText('This document constitutes a legally binding agreement between the parties.', {
+        x: leftMargin,
+        y: ctx.y,
+        size: 8,
+        font: helvetica,
+        color: rgb(0.5, 0.5, 0.5)
+      });
+      ctx.y -= 12;
+
+      if (signature.ip_address) {
+        page().drawText(`Signed from IP: ${signature.ip_address}`, {
+          x: leftMargin,
+          y: ctx.y,
+          size: 7,
+          font: helvetica,
+          color: rgb(0.6, 0.6, 0.6)
+        });
+      }
+    }
+
     // === FOOTER (on last page) ===
     const footerY = 60;
-    const footerText1 = 'This proposal is valid for 30 days from the date above.';
+    const footerText1 = isSigned
+      ? 'This signed proposal is a legally binding contract.'
+      : 'This proposal is valid for 30 days from the date above.';
     const footerText2 = `Questions? Contact us at ${BUSINESS_INFO.email}`;
     page().drawText(footerText1, { x: (width - helvetica.widthOfTextAtSize(footerText1, 9)) / 2, y: footerY, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
     page().drawText(footerText2, { x: (width - helvetica.widthOfTextAtSize(footerText2, 9)) / 2, y: footerY - 12, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
@@ -930,6 +1149,25 @@ router.get(
         fontSize: 8,
         marginBottom: 20
       });
+    }
+
+    // === ADD "SIGNED" WATERMARK TO ALL PAGES (if signed) ===
+    if (isSigned) {
+      const pages = pdfDoc.getPages();
+      for (const pg of pages) {
+        const { width: pgWidth, height: pgHeight } = pg.getSize();
+
+        // Draw diagonal "SIGNED" watermark
+        pg.drawText('SIGNED', {
+          x: pgWidth / 2 - 120,
+          y: pgHeight / 2 - 30,
+          size: 72,
+          font: helveticaBold,
+          color: rgb(0, 0.6, 0.2),
+          opacity: 0.08,
+          rotate: degrees(-35)
+        });
+      }
     }
 
     // Generate PDF bytes and send
