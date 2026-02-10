@@ -62,6 +62,7 @@ export function renderProposalBuilderHTML(): string {
       </div>
       <div class="proposal-actions">
         <button class="proposal-btn proposal-btn-secondary" id="proposalBack">Back</button>
+        <button class="proposal-btn proposal-btn-secondary" id="proposalDraft" type="button">Save Draft</button>
         <button class="proposal-btn proposal-btn-primary" id="proposalNext">Continue</button>
       </div>
     </div>
@@ -314,11 +315,22 @@ export function renderSummary(
   const includedFeatures = features.filter(f => tier.baseFeatures.includes(f.id));
   const addedFeatures = features.filter(f => selection.addedFeatures.includes(f.id));
   const maintenance = maintenanceOptions.find(m => m.id === selection.maintenanceOption);
+  const customItems = selection.customItems || [];
 
   // Calculate base price (midpoint of range)
   const basePrice = Math.round((tier.priceRange.min + tier.priceRange.max) / 2);
   const addonsTotal = addedFeatures.reduce((sum, f) => sum + f.price, 0);
-  const projectTotal = basePrice + addonsTotal;
+  const customItemsTotal = customItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+  const subtotal = basePrice + addonsTotal + customItemsTotal;
+  const discountType = selection.discountType;
+  const discountValue = selection.discountValue || 0;
+  const discountAmount = discountType === 'percentage'
+    ? Math.min(subtotal, (subtotal * discountValue) / 100)
+    : Math.min(subtotal, discountValue);
+  const taxableTotal = Math.max(0, subtotal - discountAmount);
+  const taxRate = selection.taxRate || 0;
+  const taxAmount = (taxableTotal * taxRate) / 100;
+  const projectTotal = Math.max(0, taxableTotal + taxAmount);
 
   return `
     <div class="proposal-summary">
@@ -374,8 +386,71 @@ export function renderSummary(
         </div>
       ` : ''}
 
+      <div class="summary-section">
+        <h4 class="summary-section-title">Custom Line Items</h4>
+        <div class="summary-line-items">
+          ${customItems.length ? customItems.map(item => `
+            <div class="summary-line-item" data-item-id="${item.id}">
+              <select class="summary-input" data-item-id="${item.id}" data-item-field="itemType">
+                ${['service', 'product', 'fee', 'hourly'].map(option => `
+                  <option value="${option}" ${item.itemType === option ? 'selected' : ''}>${option.replace('-', ' ')}</option>
+                `).join('')}
+              </select>
+              <input class="summary-input" data-item-id="${item.id}" data-item-field="description" value="${item.description}" placeholder="Description">
+              <input class="summary-input" type="number" min="0" step="0.01" data-item-id="${item.id}" data-item-field="unitPrice" value="${item.unitPrice}">
+              <input class="summary-input" type="number" min="1" step="1" data-item-id="${item.id}" data-item-field="quantity" value="${item.quantity}">
+              <input class="summary-input" data-item-id="${item.id}" data-item-field="unitLabel" value="${item.unitLabel || ''}" placeholder="Unit">
+              <label class="summary-toggle">
+                <input type="checkbox" data-item-id="${item.id}" data-item-field="isTaxable" ${item.isTaxable ? 'checked' : ''}>
+                <span>Taxable</span>
+              </label>
+              <label class="summary-toggle">
+                <input type="checkbox" data-item-id="${item.id}" data-item-field="isOptional" ${item.isOptional ? 'checked' : ''}>
+                <span>Optional</span>
+              </label>
+              <button class="icon-btn summary-remove-item" data-item-id="${item.id}" title="Remove line item" aria-label="Remove line item">
+                ${createDashIcon()}
+              </button>
+            </div>
+          `).join('') : '<div class="summary-empty">No custom items yet.</div>'}
+        </div>
+        <button class="proposal-btn proposal-btn-secondary summary-add-btn" id="add-custom-item-btn" type="button">Add Line Item</button>
+      </div>
+
+      <div class="summary-section">
+        <h4 class="summary-section-title">Pricing Adjustments</h4>
+        <div class="summary-adjustments">
+          <div class="summary-adjustment">
+            <label class="summary-label" for="proposalDiscountType">Discount Type</label>
+            <select id="proposalDiscountType" class="summary-input">
+              <option value="">None</option>
+              <option value="percentage" ${discountType === 'percentage' ? 'selected' : ''}>Percentage</option>
+              <option value="fixed" ${discountType === 'fixed' ? 'selected' : ''}>Fixed Amount</option>
+            </select>
+          </div>
+          <div class="summary-adjustment">
+            <label class="summary-label" for="proposalDiscountValue">Discount Value</label>
+            <input id="proposalDiscountValue" class="summary-input" type="number" min="0" step="0.01" value="${discountValue}">
+          </div>
+          <div class="summary-adjustment">
+            <label class="summary-label" for="proposalTaxRate">Tax Rate (%)</label>
+            <input id="proposalTaxRate" class="summary-input" type="number" min="0" max="100" step="0.01" value="${taxRate}">
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-section">
+        <h4 class="summary-section-title">Validity / Expiration</h4>
+        <div class="summary-adjustments">
+          <div class="summary-adjustment">
+            <label class="summary-label" for="proposalExpirationDate">Expiration Date</label>
+            <input id="proposalExpirationDate" class="summary-input" type="date" value="${selection.expirationDate || ''}">
+          </div>
+        </div>
+      </div>
+
       <div class="summary-section summary-notes">
-        <h4 class="summary-section-title">Additional Notes (Optional)</h4>
+        <h4 class="summary-section-title">Notes / Special Terms (Optional)</h4>
         <textarea
           class="summary-notes-input"
           id="proposalNotes"
@@ -394,6 +469,24 @@ export function renderSummary(
             <div class="total-row">
               <span>Add-ons</span>
               <span>+${formatPrice(addonsTotal)}</span>
+            </div>
+          ` : ''}
+          ${customItemsTotal > 0 ? `
+            <div class="total-row">
+              <span>Custom Items</span>
+              <span>+${formatPrice(customItemsTotal)}</span>
+            </div>
+          ` : ''}
+          ${discountAmount > 0 ? `
+            <div class="total-row">
+              <span>Discount</span>
+              <span>-${formatPrice(discountAmount)}</span>
+            </div>
+          ` : ''}
+          ${taxAmount > 0 ? `
+            <div class="total-row">
+              <span>Tax</span>
+              <span>+${formatPrice(taxAmount)}</span>
             </div>
           ` : ''}
           <div class="total-row total-row--final">
@@ -422,6 +515,9 @@ export function renderPriceBar(breakdown: PriceBreakdown): string {
         <span class="price-tier">${breakdown.tierName}</span>
         ${breakdown.addedFeatures.length > 0
     ? `<span class="price-addons">+${breakdown.addedFeatures.length} add-on${breakdown.addedFeatures.length > 1 ? 's' : ''}</span>`
+    : ''}
+        ${breakdown.customItems.length > 0
+    ? `<span class="price-addons">+${breakdown.customItems.length} custom</span>`
     : ''}
       </div>
       <div class="price-total">

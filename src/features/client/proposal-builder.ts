@@ -16,12 +16,15 @@ import type {
   ProposalStep,
   ProposalBuilderState,
   MaintenanceId,
-  PriceBreakdown
+  PriceBreakdown,
+  ProposalCustomItem,
+  DiscountType
 } from './proposal-builder-types';
 import {
   getTierConfiguration,
-  calculatePrice
+  calculatePriceBreakdown
 } from './proposal-builder-data';
+import { showToast } from '../../utils/toast-notifications';
 import {
   renderProposalBuilderHTML,
   renderTierCards,
@@ -67,7 +70,16 @@ export class ProposalBuilderModule {
       removedFeatures: [],
       maintenanceOption: null,
       calculatedPrice: 0,
-      notes: ''
+      basePrice: 0,
+      subtotal: 0,
+      discountAmount: 0,
+      taxAmount: 0,
+      notes: '',
+      customItems: [],
+      discountType: null,
+      discountValue: 0,
+      taxRate: 0,
+      expirationDate: null
     },
     configuration: null,
     isLoading: false,
@@ -101,6 +113,8 @@ export class ProposalBuilderModule {
     if (recommendedTier) {
       this.state.selection.selectedTier = recommendedTier.id;
     }
+
+    this.loadDraftIfAvailable();
 
     // Calculate initial price
     this.updateCalculatedPrice();
@@ -186,9 +200,11 @@ export class ProposalBuilderModule {
     // Navigation buttons
     const backBtn = document.getElementById('proposalBack');
     const nextBtn = document.getElementById('proposalNext');
+    const draftBtn = document.getElementById('proposalDraft');
 
     backBtn?.addEventListener('click', () => this.handleBack());
     nextBtn?.addEventListener('click', () => this.handleNext());
+    draftBtn?.addEventListener('click', () => this.saveDraft());
 
     // Delegate events for dynamic content
     this.container.addEventListener('click', (e) => this.handleClick(e));
@@ -240,16 +256,30 @@ export class ProposalBuilderModule {
       }
 
     }
+
+    const addCustomItemBtn = target.closest('#add-custom-item-btn');
+    if (addCustomItemBtn) {
+      this.addCustomItem();
+      return;
+    }
+
+    const removeCustomItemBtn = target.closest('.summary-remove-item') as HTMLElement | null;
+    if (removeCustomItemBtn) {
+      const itemId = removeCustomItemBtn.getAttribute('data-item-id');
+      if (itemId) {
+        this.removeCustomItem(itemId);
+      }
+    }
   }
 
   /**
    * Handle change events (delegated)
    */
   private handleChange(e: Event): void {
-    const target = e.target as HTMLInputElement;
+    const target = e.target as HTMLInputElement | HTMLSelectElement;
 
     // Feature checkbox
-    if (target.classList.contains('feature-checkbox')) {
+    if (target.classList.contains('feature-checkbox') && target instanceof HTMLInputElement) {
       const featureId = target.getAttribute('data-feature-id');
       if (featureId) {
         this.toggleFeature(featureId, target.checked);
@@ -259,6 +289,38 @@ export class ProposalBuilderModule {
     // Notes textarea
     if (target.id === 'proposalNotes' && target.tagName === 'TEXTAREA') {
       this.state.selection.notes = (target as unknown as HTMLTextAreaElement).value;
+    }
+
+    if (target.id === 'proposalDiscountType' && target instanceof HTMLSelectElement) {
+      const value = target.value as DiscountType | '';
+      this.state.selection.discountType = value || null;
+      this.updateCalculatedPrice();
+      this.updatePriceDisplay();
+      if (this.state.currentStep === 'summary') this.renderCurrentStep();
+    }
+
+    if (target.id === 'proposalDiscountValue') {
+      this.state.selection.discountValue = Number(target.value || 0);
+      this.updateCalculatedPrice();
+      this.updatePriceDisplay();
+      if (this.state.currentStep === 'summary') this.renderCurrentStep();
+    }
+
+    if (target.id === 'proposalTaxRate') {
+      this.state.selection.taxRate = Number(target.value || 0);
+      this.updateCalculatedPrice();
+      this.updatePriceDisplay();
+      if (this.state.currentStep === 'summary') this.renderCurrentStep();
+    }
+
+    if (target.id === 'proposalExpirationDate') {
+      this.state.selection.expirationDate = target.value || null;
+    }
+
+    const itemId = target.getAttribute('data-item-id');
+    const itemField = target.getAttribute('data-item-field');
+    if (itemId && itemField && target instanceof HTMLInputElement) {
+      this.updateCustomItem(itemId, itemField, target);
     }
   }
 
@@ -406,12 +468,21 @@ export class ProposalBuilderModule {
    * Update calculated price
    */
   private updateCalculatedPrice(): void {
-    this.state.selection.calculatedPrice = calculatePrice(
+    const breakdown = calculatePriceBreakdown(
       this.projectType,
       this.state.selection.selectedTier,
       this.state.selection.addedFeatures,
-      this.state.selection.maintenanceOption
+      this.state.selection.customItems,
+      this.state.selection.discountType,
+      this.state.selection.discountValue,
+      this.state.selection.taxRate
     );
+
+    this.state.selection.calculatedPrice = breakdown.total;
+    this.state.selection.basePrice = breakdown.basePrice;
+    this.state.selection.subtotal = breakdown.subtotal;
+    this.state.selection.discountAmount = breakdown.discountAmount;
+    this.state.selection.taxAmount = breakdown.taxAmount;
   }
 
   /**
@@ -434,14 +505,25 @@ export class ProposalBuilderModule {
       m => m.id === this.state.selection.maintenanceOption
     );
 
+    const computed = calculatePriceBreakdown(
+      this.projectType,
+      this.state.selection.selectedTier,
+      this.state.selection.addedFeatures,
+      this.state.selection.customItems,
+      this.state.selection.discountType,
+      this.state.selection.discountValue,
+      this.state.selection.taxRate
+    );
+
     const breakdown: PriceBreakdown = {
-      tierBasePrice: Math.round((tier.priceRange.min + tier.priceRange.max) / 2),
+      tierBasePrice: computed.basePrice,
       tierName: tier.name,
       addedFeatures: addedFeatures.map(f => ({
         id: f.id,
         name: f.name,
         price: f.price
       })),
+      customItems: this.state.selection.customItems,
       maintenanceOption: maintenance
         ? {
           name: maintenance.name,
@@ -449,8 +531,13 @@ export class ProposalBuilderModule {
           billingCycle: maintenance.billingCycle
         }
         : null,
-      subtotal: this.state.selection.calculatedPrice,
-      total: this.state.selection.calculatedPrice
+      subtotal: computed.subtotal,
+      discountType: this.state.selection.discountType,
+      discountValue: this.state.selection.discountValue,
+      discountAmount: computed.discountAmount,
+      taxRate: this.state.selection.taxRate,
+      taxAmount: computed.taxAmount,
+      total: computed.total
     };
 
     this.priceBar.innerHTML = renderPriceBar(breakdown);
@@ -462,6 +549,7 @@ export class ProposalBuilderModule {
   private updateButtonStates(): void {
     const backBtn = document.getElementById('proposalBack');
     const nextBtn = document.getElementById('proposalNext');
+    const draftBtn = document.getElementById('proposalDraft');
 
     if (!backBtn || !nextBtn) return;
 
@@ -475,6 +563,89 @@ export class ProposalBuilderModule {
     // Next button
     nextBtn.textContent = isLastStep ? 'Submit Proposal' : 'Continue';
     nextBtn.classList.toggle('proposal-btn-submit', isLastStep);
+
+    if (draftBtn) {
+      draftBtn.style.display = isLastStep ? 'inline-flex' : 'none';
+    }
+  }
+
+  private addCustomItem(): void {
+    const newItem: ProposalCustomItem = {
+      id: `item-${Date.now()}`,
+      itemType: 'service',
+      description: '',
+      quantity: 1,
+      unitPrice: 0,
+      unitLabel: '',
+      isTaxable: true,
+      isOptional: false
+    };
+
+    this.state.selection.customItems = [...this.state.selection.customItems, newItem];
+    this.updateCalculatedPrice();
+    this.renderCurrentStep();
+    this.updatePriceDisplay();
+  }
+
+  private removeCustomItem(itemId: string): void {
+    this.state.selection.customItems = this.state.selection.customItems.filter(item => item.id !== itemId);
+    this.updateCalculatedPrice();
+    this.renderCurrentStep();
+    this.updatePriceDisplay();
+  }
+
+  private updateCustomItem(itemId: string, field: string, target: HTMLInputElement): void {
+    const items = this.state.selection.customItems.map(item => ({ ...item }));
+    const item = items.find(entry => entry.id === itemId);
+    if (!item) return;
+
+    if (field === 'itemType') item.itemType = target.value as ProposalCustomItem['itemType'];
+    if (field === 'description') item.description = target.value;
+    if (field === 'unitPrice') item.unitPrice = Number(target.value || 0);
+    if (field === 'quantity') item.quantity = Math.max(1, Number(target.value || 1));
+    if (field === 'unitLabel') item.unitLabel = target.value;
+    if (field === 'isTaxable') item.isTaxable = target.checked;
+    if (field === 'isOptional') item.isOptional = target.checked;
+
+    this.state.selection.customItems = items;
+    this.updateCalculatedPrice();
+    this.updatePriceDisplay();
+    if (this.state.currentStep === 'summary') this.renderCurrentStep();
+  }
+
+  private saveDraft(): void {
+    const draftKey = `proposalBuilderDraft:${this.projectType}`;
+    const draft = {
+      projectType: this.projectType,
+      selection: this.state.selection
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draft));
+    showToast('Draft saved', 'success');
+  }
+
+  private loadDraftIfAvailable(): void {
+    const draftKey = `proposalBuilderDraft:${this.projectType}`;
+    const rawDraft = localStorage.getItem(draftKey);
+    if (!rawDraft) return;
+
+    try {
+      const draft = JSON.parse(rawDraft) as { projectType?: ProjectType; selection?: ProposalSelection };
+      if (!draft?.selection) return;
+      const shouldLoad = window.confirm('We found a saved proposal draft. Load it now?');
+      if (!shouldLoad) return;
+
+      this.state.selection = {
+        ...this.state.selection,
+        ...draft.selection,
+        customItems: draft.selection.customItems || [],
+        discountType: draft.selection.discountType || null,
+        discountValue: draft.selection.discountValue || 0,
+        taxRate: draft.selection.taxRate || 0,
+        expirationDate: draft.selection.expirationDate || null
+      };
+    } catch (error) {
+      console.error('[ProposalBuilder] Failed to load draft:', error);
+    }
   }
 
   /**
@@ -589,19 +760,31 @@ export class ProposalBuilderModule {
       }))
     ];
 
-    // Calculate prices
-    const basePrice = Math.round((tier.priceRange.min + tier.priceRange.max) / 2);
-    const addonsTotal = addonFeatures.reduce((sum, f) => sum + f.price, 0);
-    const finalPrice = basePrice + addonsTotal;
+    const breakdown = calculatePriceBreakdown(
+      this.projectType,
+      this.state.selection.selectedTier,
+      this.state.selection.addedFeatures,
+      this.state.selection.customItems,
+      this.state.selection.discountType,
+      this.state.selection.discountValue,
+      this.state.selection.taxRate
+    );
 
     // Update selection with final values
-    this.state.selection.calculatedPrice = finalPrice;
+    this.state.selection.calculatedPrice = breakdown.total;
+    this.state.selection.basePrice = breakdown.basePrice;
+    this.state.selection.subtotal = breakdown.subtotal;
+    this.state.selection.discountAmount = breakdown.discountAmount;
+    this.state.selection.taxAmount = breakdown.taxAmount;
 
     console.log('[ProposalBuilder] Submitting proposal:', {
       selection: this.state.selection,
       features,
-      basePrice,
-      finalPrice
+      basePrice: breakdown.basePrice,
+      finalPrice: breakdown.total,
+      subtotal: breakdown.subtotal,
+      discountAmount: breakdown.discountAmount,
+      taxAmount: breakdown.taxAmount
     });
 
     // Call completion handler

@@ -47,3 +47,19 @@ export async function loadHelpModule() {
 export async function loadDocumentRequestsModule() {
   return import('./portal-document-requests');
 }
+
+export async function loadOnboardingWizardModule() {
+  return import('./portal-onboarding-wizard');
+}
+
+export async function loadQuestionnairesModule() {
+  return import('./portal-questionnaires');
+}
+
+export async function loadAdHocRequestsModule() {
+  return import('./portal-ad-hoc-requests');
+}
+
+export async function loadApprovalsModule() {
+  return import('./portal-approvals');
+}
