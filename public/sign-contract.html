@@ -5,18 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Contract - No Bhad Codes</title>
   <link rel="icon" type="image/png" href="/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Allura&family=Playfair+Display:wght@600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #00aff0;
-      --primary-hover: #0099d4;
-      --success: #28a745;
-      --danger: #dc3545;
-      --text: #333;
-      --text-muted: #666;
-      --bg: #f5f5f5;
-      --bg-dark: #1a1a2e;
-      --card-bg: #fff;
-      --border: #ddd;
+      --color-brand-primary: #00aff0;
+      --color-brand-primary-hover: #0099d4;
+      --color-status-success: #28a745;
+      --color-status-danger: #dc3545;
+      --portal-bg-dark: #141826;
+      --portal-bg-medium: #101521;
+      --portal-bg-light: #1b2134;
+      --portal-text-light: #f5f7fb;
+      --portal-text-secondary: #c4cbe0;
+      --portal-text-muted: #95a1bd;
+      --portal-border-medium: #2b3450;
+      --surface: #f5f7fb;
+      --surface-muted: #eef1f6;
+      --surface-elevated: #ffffff;
+      --danger-bg: #f8d7da;
+      --danger-text: #721c24;
+      --primary: var(--color-brand-primary);
+      --primary-hover: var(--color-brand-primary-hover);
+      --success: var(--color-status-success);
+      --danger: var(--color-status-danger);
+      --text: #23324a;
+      --text-muted: #64708a;
+      --bg: var(--surface);
+      --bg-dark: var(--portal-bg-dark);
+      --card-bg: var(--surface-elevated);
+      --border: #d7dbe7;
+      --signature-font: 'Allura', 'Segoe Script', cursive;
+      --text-on-dark: var(--portal-text-light);
+      --text-on-dark-muted: rgba(245, 247, 251, 0.7);
+      --shadow-card: 0 2px 10px rgba(16, 24, 40, 0.12);
+      --focus-ring: 0 0 0 3px rgba(0, 175, 240, 0.15);
     }
 
     * {
@@ -26,7 +50,7 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
@@ -35,18 +59,19 @@
 
     .header {
       background: var(--bg-dark);
-      color: white;
+      color: var(--text-on-dark);
       padding: 20px;
       text-align: center;
     }
 
     .header h1 {
-      font-size: 24px;
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
       margin-bottom: 5px;
     }
 
     .header p {
-      color: rgba(255,255,255,0.7);
+      color: var(--text-on-dark-muted);
       font-size: 14px;
     }
 
@@ -59,7 +84,7 @@
     .card {
       background: var(--card-bg);
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow-card);
       padding: 30px;
       margin-bottom: 20px;
     }
@@ -113,7 +138,7 @@
 
     .btn-primary {
       background: var(--primary);
-      color: white;
+      color: var(--surface-elevated);
     }
 
     .btn-primary:hover {
@@ -121,7 +146,7 @@
     }
 
     .btn-primary:disabled {
-      background: #ccc;
+      background: var(--border);
       cursor: not-allowed;
     }
 
@@ -133,12 +158,12 @@
 
     .btn-outline:hover {
       background: var(--primary);
-      color: white;
+      color: var(--surface-elevated);
     }
 
     .btn-success {
       background: var(--success);
-      color: white;
+      color: var(--surface-elevated);
     }
 
     .signature-section {
@@ -150,14 +175,14 @@
       border-radius: 8px;
       padding: 20px;
       text-align: center;
-      background: #fafafa;
+      background: var(--surface-muted);
       margin-bottom: 15px;
     }
 
     #signature-canvas {
       border: 1px solid var(--border);
       border-radius: 4px;
-      background: white;
+      background: var(--surface-elevated);
       cursor: crosshair;
       touch-action: none;
     }
@@ -173,6 +198,52 @@
       gap: 10px;
       margin-top: 10px;
       justify-content: center;
+    }
+
+    .signature-toggle {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .signature-toggle .btn.is-active {
+      background: var(--primary);
+      color: var(--surface-elevated);
+      border-color: var(--primary);
+    }
+
+    .signature-type-container {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      background: var(--surface-muted);
+      display: none;
+    }
+
+    .signature-type-container input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 16px;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      background: var(--surface-elevated);
+      color: var(--text);
+    }
+
+    .signature-type-preview {
+      margin-top: 12px;
+      min-height: 64px;
+      display: flex;
+      font-family: var(--signature-font);
+      align-items: center;
+      justify-content: center;
+      font-family: var(--signature-font);
+      font-size: 40px;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-elevated);
     }
 
     .form-group {
@@ -196,7 +267,7 @@
     .form-group input:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(0,175,240,0.1);
+      box-shadow: var(--focus-ring);
     }
 
     .checkbox-group {
@@ -252,8 +323,8 @@
     }
 
     .error-message {
-      background: #f8d7da;
-      color: #721c24;
+      background: var(--danger-bg);
+      color: var(--danger-text);
       padding: 15px 20px;
       border-radius: 8px;
       margin-bottom: 20px;
@@ -288,7 +359,7 @@
     .success-icon svg {
       width: 40px;
       height: 40px;
-      stroke: white;
+      stroke: var(--surface-elevated);
     }
 
     .success-message h2 {
@@ -414,18 +485,30 @@
 
         <form id="signature-form">
           <div class="form-group">
+            <label for="signer-email">Email Address</label>
+            <input type="email" id="signer-email" name="signerEmail" readonly>
+          </div>
+          <div class="form-group">
             <label for="signer-name">Your Full Legal Name *</label>
             <input type="text" id="signer-name" name="signerName" required placeholder="Enter your full name">
           </div>
 
           <div class="signature-section">
             <label>Your Signature *</label>
+            <div class="signature-toggle">
+              <button type="button" class="btn btn-outline is-active" data-signature-mode="draw">Draw</button>
+              <button type="button" class="btn btn-outline" data-signature-mode="type">Type</button>
+            </div>
             <div class="signature-canvas-container">
               <canvas id="signature-canvas" width="500" height="200"></canvas>
               <p class="signature-hint">Draw your signature above using your mouse or finger</p>
               <div class="signature-actions">
                 <button type="button" class="btn btn-outline" id="clear-signature">Clear</button>
               </div>
+            </div>
+            <div class="signature-type-container" id="signature-type-container">
+              <input type="text" id="signature-typed" placeholder="Type your signature">
+              <div class="signature-type-preview" id="signature-typed-preview">Your Name</div>
             </div>
           </div>
 
@@ -465,6 +548,12 @@
     const formError = document.getElementById('form-error');
     const canvas = document.getElementById('signature-canvas');
     const ctx = canvas.getContext('2d');
+    const signatureCanvasContainer = document.querySelector('.signature-canvas-container');
+    const signatureTypeContainer = document.getElementById('signature-type-container');
+    const signatureTypedInput = document.getElementById('signature-typed');
+    const signatureTypedPreview = document.getElementById('signature-typed-preview');
+    const signatureModeButtons = document.querySelectorAll('[data-signature-mode]');
+    const signerEmailInput = document.getElementById('signer-email');
 
     // Contract data
     let contractData = null;
@@ -472,10 +561,12 @@
     // Signature canvas state
     let isDrawing = false;
     let hasSignature = false;
+    let signatureMode = 'draw';
 
     // Initialize canvas
     function initCanvas() {
-      ctx.strokeStyle = '#000';
+      const inkColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+      ctx.strokeStyle = inkColor || 'currentColor';
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
@@ -537,7 +628,47 @@
     }
 
     function getSignatureData() {
-      return canvas.toDataURL('image/png');
+      if (signatureMode === 'draw') {
+        return canvas.toDataURL('image/png');
+      }
+
+      const typedValue = signatureTypedInput.value.trim();
+      const previewStyle = getComputedStyle(signatureTypedPreview);
+      const inkColor = previewStyle.color;
+      const font = previewStyle.font || `${previewStyle.fontSize} ${previewStyle.fontFamily}`;
+      const typedCanvas = document.createElement('canvas');
+      typedCanvas.width = 500;
+      typedCanvas.height = 200;
+      const typedCtx = typedCanvas.getContext('2d');
+      typedCtx.clearRect(0, 0, typedCanvas.width, typedCanvas.height);
+      typedCtx.fillStyle = 'transparent';
+      typedCtx.fillRect(0, 0, typedCanvas.width, typedCanvas.height);
+      typedCtx.fillStyle = inkColor;
+      typedCtx.font = font;
+      typedCtx.textAlign = 'center';
+      typedCtx.textBaseline = 'middle';
+      typedCtx.fillText(typedValue || 'Signature', typedCanvas.width / 2, typedCanvas.height / 2);
+      return typedCanvas.toDataURL('image/png');
+    }
+
+    function setSignatureMode(mode) {
+      signatureMode = mode;
+      signatureModeButtons.forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.signatureMode === mode);
+      });
+
+      if (mode === 'draw') {
+        signatureCanvasContainer.style.display = 'block';
+        signatureTypeContainer.style.display = 'none';
+      } else {
+        signatureCanvasContainer.style.display = 'none';
+        signatureTypeContainer.style.display = 'block';
+      }
+    }
+
+    function updateTypedPreview() {
+      const value = signatureTypedInput.value.trim();
+      signatureTypedPreview.textContent = value || 'Your Name';
     }
 
     // Load contract data
@@ -567,6 +698,7 @@
         document.getElementById('expires-at').textContent = data.expiresAt
           ? new Date(data.expiresAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
           : '-';
+        if (signerEmailInput) signerEmailInput.value = data.clientEmail || '';
 
         // Set contract preview
         document.getElementById('contract-iframe').src = data.contractPdfUrl;
@@ -584,6 +716,8 @@
 
         // Initialize canvas
         initCanvas();
+        setSignatureMode('draw');
+        updateTypedPreview();
 
       } catch (error) {
         console.error('Error loading contract:', error);
@@ -621,8 +755,13 @@
         return;
       }
 
-      if (!hasSignature) {
+      if (signatureMode === 'draw' && !hasSignature) {
         showFormError('Please draw your signature in the box above.');
+        return;
+      }
+
+      if (signatureMode === 'type' && !signatureTypedInput.value.trim()) {
+        showFormError('Please type your signature before submitting.');
         return;
       }
 
@@ -672,6 +811,12 @@
 
     // Clear signature button
     document.getElementById('clear-signature').addEventListener('click', clearSignature);
+
+    signatureModeButtons.forEach((button) => {
+      button.addEventListener('click', () => setSignatureMode(button.dataset.signatureMode));
+    });
+
+    signatureTypedInput.addEventListener('input', updateTypedPreview);
 
     // Load contract on page load
     loadContract();

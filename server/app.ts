@@ -33,12 +33,21 @@ import invoicesRouter from './routes/invoices.js';
 import uploadsRouter from './routes/uploads.js';
 import intakeRouter from './routes/intake.js';
 import proposalsRouter from './routes/proposals.js';
+import contractsRouter from './routes/contracts.js';
+import adHocRequestsRouter from './routes/ad-hoc-requests.js';
 import apiRouter from './routes/api.js';
 import analyticsRouter from './routes/analytics.js';
 import approvalsRouter from './routes/approvals.js';
 import triggersRouter from './routes/triggers.js';
 import documentRequestsRouter from './routes/document-requests.js';
 import knowledgeBaseRouter from './routes/knowledge-base.js';
+import questionnairesRouter from './routes/questionnaires.js';
+import clientInfoRouter from './routes/client-info.js';
+import emailTemplatesRouter from './routes/email-templates.js';
+import webhooksRouter from './routes/webhooks.js';
+import deliverablesRouter from './routes/deliverables.js';
+import integrationsRouter from './routes/integrations.js';
+import dataQualityRouter from './routes/data-quality.js';
 import { setupSwagger } from './config/swagger.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -159,11 +168,15 @@ app.get('/', (req, res) => {
         uploads: '/api/v1/uploads',
         intake: '/api/v1/intake',
         proposals: '/api/v1/proposals',
+        contracts: '/api/v1/contracts',
+        adHocRequests: '/api/v1/ad-hoc-requests',
         analytics: '/api/v1/analytics',
         approvals: '/api/v1/approvals',
         triggers: '/api/v1/triggers',
         documentRequests: '/api/v1/document-requests',
         knowledgeBase: '/api/v1/kb',
+        webhooks: '/api/v1/webhooks',
+        dataQuality: '/api/v1/data-quality',
         contact: '/api/v1/contact'
       },
       // Legacy endpoints (still supported)
@@ -177,11 +190,15 @@ app.get('/', (req, res) => {
         uploads: '/api/uploads',
         intake: '/api/intake',
         proposals: '/api/proposals',
+        contracts: '/api/contracts',
+        adHocRequests: '/api/ad-hoc-requests',
         analytics: '/api/analytics',
         approvals: '/api/approvals',
         triggers: '/api/triggers',
         documentRequests: '/api/document-requests',
         knowledgeBase: '/api/kb',
+        webhooks: '/api/webhooks',
+        dataQuality: '/api/data-quality',
         contact: '/api/contact'
       }
     }
@@ -243,11 +260,20 @@ const apiRouters = [
   { path: '/uploads', router: uploadsRouter },
   { path: '/intake', router: intakeRouter },
   { path: '/proposals', router: proposalsRouter },
+  { path: '/contracts', router: contractsRouter },
+  { path: '/ad-hoc-requests', router: adHocRequestsRouter },
   { path: '/analytics', router: analyticsRouter },
   { path: '/approvals', router: approvalsRouter },
   { path: '/triggers', router: triggersRouter },
   { path: '/document-requests', router: documentRequestsRouter },
-  { path: '/kb', router: knowledgeBaseRouter }
+  { path: '/kb', router: knowledgeBaseRouter },
+  { path: '/questionnaires', router: questionnairesRouter },
+  { path: '/client-info', router: clientInfoRouter },
+  { path: '/email-templates', router: emailTemplatesRouter },
+  { path: '/webhooks', router: webhooksRouter },
+  { path: '/deliverables', router: deliverablesRouter },
+  { path: '/integrations', router: integrationsRouter },
+  { path: '/data-quality', router: dataQualityRouter }
 ];
 
 // Mount all routers at both /api and /api/v1

@@ -16,7 +16,7 @@ export interface DatabaseRow {
   [key: string]: unknown;
 }
 
-type SqlParam = string | number | boolean | null | undefined;
+export type SqlParam = string | number | boolean | null | undefined;
 type SqlParams = SqlParam[];
 
 interface TransactionContext {
@@ -25,7 +25,7 @@ interface TransactionContext {
   run(sql: string, params?: SqlParams): Promise<{ lastID?: number; changes?: number }>;
 }
 
-interface Database {
+export interface Database {
   get(sql: string, params?: SqlParams): Promise<DatabaseRow | undefined>;
   all(sql: string, params?: SqlParams): Promise<DatabaseRow[]>;
   run(sql: string, params?: SqlParams): Promise<{ lastID?: number; changes?: number }>;
