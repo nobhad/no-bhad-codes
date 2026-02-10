@@ -18,10 +18,52 @@ const TAB_TITLES: Record<string, string> = {
   invoices: 'Invoices',
   settings: 'Settings',
   'new-project': 'New Project',
+  requests: 'Requests',
   help: 'Help',
   documents: 'Document Requests',
-  preview: 'Project Preview'
+  questionnaires: 'Questionnaires',
+  preview: 'Project Preview',
+  work: 'Work',
+  docs: 'Documents',
+  support: 'Support'
 };
+
+const PORTAL_TAB_GROUPS = {
+  work: {
+    label: 'Work',
+    tabs: ['requests', 'preview', 'new-project'],
+    defaultTab: 'requests'
+  },
+  docs: {
+    label: 'Documents',
+    tabs: ['files', 'invoices', 'documents', 'questionnaires'],
+    defaultTab: 'files'
+  },
+  support: {
+    label: 'Support',
+    tabs: ['messages', 'help'],
+    defaultTab: 'messages'
+  }
+} as const;
+
+type PortalTabGroup = keyof typeof PORTAL_TAB_GROUPS;
+
+function getPortalGroupForTab(tabName: string): PortalTabGroup | null {
+  const entries = Object.entries(PORTAL_TAB_GROUPS) as [PortalTabGroup, typeof PORTAL_TAB_GROUPS[PortalTabGroup]][];
+  for (const [group, config] of entries) {
+    if ((config.tabs as readonly string[]).includes(tabName)) return group;
+  }
+  return null;
+}
+
+function resolvePortalTab(tabName: string): { group: PortalTabGroup | null; tab: string } {
+  if (tabName in PORTAL_TAB_GROUPS) {
+    const group = tabName as PortalTabGroup;
+    return { group, tab: PORTAL_TAB_GROUPS[group].defaultTab };
+  }
+
+  return { group: getPortalGroupForTab(tabName), tab: tabName };
+}
 
 /** All portal view IDs */
 const VIEW_IDS = [
@@ -144,14 +186,18 @@ export function updatePortalPageTitle(tabName: string): void {
   const titleEl = getPortalPageTitle();
   if (!titleEl) return;
 
-  currentActiveTab = tabName;
+  const resolved = resolvePortalTab(tabName);
+  currentActiveTab = resolved.tab;
 
   // Special case for dashboard - show "Welcome Back, [Client Name]!"
-  if (tabName === 'dashboard') {
+  if (currentActiveTab === 'dashboard') {
     titleEl.innerHTML = `Welcome Back, <span id="client-name">${currentClientName}</span>!`;
   } else {
     // Show the tab title
-    const title = TAB_TITLES[tabName] || 'Dashboard';
+    const title =
+      resolved.group
+        ? PORTAL_TAB_GROUPS[resolved.group].label
+        : (TAB_TITLES[currentActiveTab] || 'Dashboard');
     titleEl.textContent = title;
   }
 }
@@ -166,16 +212,22 @@ export function switchTab(tabName: string, callbacks: {
   loadMessagesFromAPI: () => Promise<void>;
   loadHelp?: () => Promise<void>;
   loadDocumentRequests?: () => Promise<void>;
+  loadAdHocRequests?: () => Promise<void>;
+  loadQuestionnaires?: () => Promise<void>;
 }): void {
+  const resolved = resolvePortalTab(tabName);
+  const activeTab = resolved.tab;
+  const activeGroup = resolved.group || activeTab;
+
   // Hide all tab content
   const allTabContent = document.querySelectorAll('.tab-content');
   allTabContent.forEach((tab) => tab.classList.remove('active'));
 
   // Show the selected tab content - use cache for tabs
-  if (!cachedViews.has(`tab-${tabName}`)) {
-    cachedViews.set(`tab-${tabName}`, document.getElementById(`tab-${tabName}`));
+  if (!cachedViews.has(`tab-${activeTab}`)) {
+    cachedViews.set(`tab-${activeTab}`, document.getElementById(`tab-${activeTab}`));
   }
-  const targetTab = cachedViews.get(`tab-${tabName}`);
+  const targetTab = cachedViews.get(`tab-${activeTab}`);
   if (targetTab) {
     targetTab.classList.add('active');
   }
@@ -185,21 +237,31 @@ export function switchTab(tabName: string, callbacks: {
   navButtons.forEach((btn) => {
     btn.classList.remove('active');
     btn.removeAttribute('aria-current');
-    if ((btn as HTMLElement).dataset.tab === tabName) {
+    if ((btn as HTMLElement).dataset.tab === activeGroup) {
       btn.classList.add('active');
       btn.setAttribute('aria-current', 'page');
     }
   });
 
+  document.body.dataset.activeGroup = activeGroup;
+  document.body.dataset.activeTab = activeTab;
+
+  const headerGroup = document.querySelector(`.header-subtab-group[data-for-tab="${activeGroup}"]`);
+  if (headerGroup && (headerGroup as HTMLElement).dataset.mode === 'primary') {
+    headerGroup.querySelectorAll('.portal-subtab').forEach((btn) => {
+      btn.classList.toggle('active', (btn as HTMLElement).dataset.subtab === activeTab);
+    });
+  }
+
   // Update mobile header title
-  updateMobileHeaderTitle(tabName);
+  updateMobileHeaderTitle(activeTab);
 
   // Update portal page header title
-  updatePortalPageTitle(tabName);
+  updatePortalPageTitle(activeTab);
 
   // Update breadcrumbs based on current tab
-  const tabTitle = TAB_TITLES[tabName] || 'Dashboard';
-  if (tabName === 'dashboard') {
+  const tabTitle = TAB_TITLES[activeTab] || 'Dashboard';
+  if (activeTab === 'dashboard') {
     updateBreadcrumbs([{ label: 'Dashboard', href: false }]);
   } else {
     updateBreadcrumbs([
@@ -209,18 +271,22 @@ export function switchTab(tabName: string, callbacks: {
   }
 
   // Load tab-specific data
-  if (tabName === 'files') {
+  if (activeTab === 'files') {
     callbacks.loadFiles();
-  } else if (tabName === 'invoices') {
+  } else if (activeTab === 'invoices') {
     callbacks.loadInvoices();
-  } else if (tabName === 'preview') {
+  } else if (activeTab === 'preview') {
     callbacks.loadProjectPreview();
-  } else if (tabName === 'messages') {
+  } else if (activeTab === 'messages') {
     callbacks.loadMessagesFromAPI();
-  } else if (tabName === 'help' && callbacks.loadHelp) {
+  } else if (activeTab === 'help' && callbacks.loadHelp) {
     callbacks.loadHelp();
-  } else if (tabName === 'documents' && callbacks.loadDocumentRequests) {
+  } else if (activeTab === 'documents' && callbacks.loadDocumentRequests) {
     callbacks.loadDocumentRequests();
+  } else if (activeTab === 'requests' && callbacks.loadAdHocRequests) {
+    callbacks.loadAdHocRequests();
+  } else if (activeTab === 'questionnaires' && callbacks.loadQuestionnaires) {
+    callbacks.loadQuestionnaires();
   }
 }
 
@@ -230,7 +296,9 @@ export function switchTab(tabName: string, callbacks: {
 export function updateMobileHeaderTitle(tabName: string): void {
   const mobileHeaderTitle = getMobileHeaderTitle();
   if (!mobileHeaderTitle) return;
-  mobileHeaderTitle.textContent = TAB_TITLES[tabName] || 'Dashboard';
+  const resolved = resolvePortalTab(tabName);
+  const title = resolved.group ? PORTAL_TAB_GROUPS[resolved.group].label : TAB_TITLES[resolved.tab] || 'Dashboard';
+  mobileHeaderTitle.textContent = title;
 }
 
 /**

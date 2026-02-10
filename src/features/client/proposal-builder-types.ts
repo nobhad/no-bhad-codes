@@ -36,6 +36,16 @@ export type FeatureCategory = 'design' | 'development' | 'support' | 'marketing'
 export type BillingCycle = 'monthly' | 'annual';
 
 /**
+ * Discount type
+ */
+export type DiscountType = 'percentage' | 'fixed';
+
+/**
+ * Custom line item type
+ */
+export type CustomItemType = 'service' | 'product' | 'discount' | 'fee' | 'hourly';
+
+/**
  * Maintenance option identifier
  */
 export type MaintenanceId = 'diy' | 'essential' | 'standard' | 'premium';
@@ -97,7 +107,30 @@ export interface ProposalSelection {
   removedFeatures: string[]; // Feature IDs removed from tier (if allowed)
   maintenanceOption: MaintenanceId | null;
   calculatedPrice: number;
+  basePrice: number;
+  subtotal: number;
+  discountAmount: number;
+  taxAmount: number;
   notes: string;
+  customItems: ProposalCustomItem[];
+  discountType: DiscountType | null;
+  discountValue: number;
+  taxRate: number;
+  expirationDate: string | null;
+}
+
+/**
+ * Custom line item
+ */
+export interface ProposalCustomItem {
+  id: string;
+  itemType: CustomItemType;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  unitLabel?: string;
+  isTaxable: boolean;
+  isOptional: boolean;
 }
 
 /**
@@ -121,12 +154,18 @@ export interface PriceBreakdown {
     name: string;
     price: number;
   }>;
+  customItems: ProposalCustomItem[];
   maintenanceOption: {
     name: string;
     price: number;
     billingCycle: BillingCycle;
   } | null;
   subtotal: number;
+  discountType: DiscountType | null;
+  discountValue: number;
+  discountAmount: number;
+  taxRate: number;
+  taxAmount: number;
   total: number;
 }
 
@@ -143,6 +182,11 @@ export interface ProposalRequest {
   basePrice: number;
   finalPrice: number;
   clientNotes: string;
+  discountType?: DiscountType | null;
+  discountValue?: number;
+  taxRate?: number;
+  customItems?: ProposalCustomItem[];
+  expirationDate?: string | null;
 }
 
 /**

@@ -15,7 +15,9 @@ import type {
   ProposalFeature,
   MaintenanceOption,
   MaintenanceId,
-  TierConfiguration
+  TierConfiguration,
+  ProposalCustomItem,
+  DiscountType
 } from './proposal-builder-types';
 
 /**
@@ -854,25 +856,91 @@ export function calculatePrice(
   projectType: ProjectType,
   tierId: TierId,
   addedFeatureIds: string[],
-  _maintenanceId: MaintenanceId | null
+  _maintenanceId: MaintenanceId | null,
+  customItems: ProposalCustomItem[] = [],
+  discountType: DiscountType | null = null,
+  discountValue: number = 0,
+  taxRate: number = 0
 ): number {
+  const breakdown = calculatePriceBreakdown(
+    projectType,
+    tierId,
+    addedFeatureIds,
+    customItems,
+    discountType,
+    discountValue,
+    taxRate
+  );
+
+  return breakdown.total;
+}
+
+/**
+ * Calculate full price breakdown for display
+ */
+export function calculatePriceBreakdown(
+  projectType: ProjectType,
+  tierId: TierId,
+  addedFeatureIds: string[],
+  customItems: ProposalCustomItem[] = [],
+  discountType: DiscountType | null = null,
+  discountValue: number = 0,
+  taxRate: number = 0
+): {
+  basePrice: number;
+  addonsTotal: number;
+  customItemsTotal: number;
+  subtotal: number;
+  discountAmount: number;
+  taxAmount: number;
+  total: number;
+} {
   const config = getTierConfiguration(projectType);
   const tier = config.tiers.find(t => t.id === tierId);
-  if (!tier) return 0;
+  if (!tier) {
+    return {
+      basePrice: 0,
+      addonsTotal: 0,
+      customItemsTotal: 0,
+      subtotal: 0,
+      discountAmount: 0,
+      taxAmount: 0,
+      total: 0
+    };
+  }
 
-  // Use midpoint of tier price range as base
   const basePrice = Math.round((tier.priceRange.min + tier.priceRange.max) / 2);
-
-  // Add feature prices
-  const featureTotal = addedFeatureIds.reduce((total, featureId) => {
+  const addonsTotal = addedFeatureIds.reduce((total, featureId) => {
     const feature = config.features.find(f => f.id === featureId);
     return total + (feature?.price || 0);
   }, 0);
 
-  // Maintenance is recurring, not added to one-time price
-  // But we can show it separately in the UI
+  const customItemsTotal = customItems.reduce((total, item) => {
+    const quantity = Number.isFinite(item.quantity) ? item.quantity : 1;
+    const unitPrice = Number.isFinite(item.unitPrice) ? item.unitPrice : 0;
+    return total + (quantity * unitPrice);
+  }, 0);
 
-  return basePrice + featureTotal;
+  const subtotal = basePrice + addonsTotal + customItemsTotal;
+  const discountBase = Math.max(0, subtotal);
+  const normalizedDiscountValue = Math.max(0, discountValue || 0);
+  const discountAmount = discountType === 'percentage'
+    ? Math.min(discountBase, (discountBase * normalizedDiscountValue) / 100)
+    : Math.min(discountBase, normalizedDiscountValue);
+
+  const taxableTotal = Math.max(0, subtotal - discountAmount);
+  const taxAmount = Math.max(0, (taxRate || 0)) / 100 * taxableTotal;
+  const total = Math.max(0, taxableTotal + taxAmount);
+
+  return {
+    basePrice,
+    addonsTotal,
+    customItemsTotal,
+    subtotal,
+    discountAmount,
+    taxAmount,
+    total
+  };
 }
 
 /**

@@ -29,7 +29,10 @@ import {
   loadProjectsModule,
   loadAuthModule,
   loadHelpModule,
-  loadDocumentRequestsModule
+  loadDocumentRequestsModule,
+  loadQuestionnairesModule,
+  loadAdHocRequestsModule,
+  loadApprovalsModule
 } from './modules';
 import { decodeJwtPayload, isAdminPayload } from '../../utils/jwt-utils';
 import { ICONS, getAccessibleIcon } from '../../constants/icons';
@@ -51,9 +54,9 @@ export class ClientPortalModule extends BaseModule {
 
   // Configuration
   private config = {
-    loginSectionId: 'login-section',
-    dashboardSectionId: 'dashboard-section',
-    loginFormId: 'login-form',
+    loginSectionId: 'auth-gate',
+    dashboardSectionId: 'client-dashboard',
+    loginFormId: 'portal-login-form',
     projectsListId: 'projects-list',
     projectDetailsId: 'project-details'
   };
@@ -214,7 +217,7 @@ export class ClientPortalModule extends BaseModule {
               await this.loadRealUserProjects(user);
               const isOnPortalPage = document.body.getAttribute('data-page') === 'client-portal';
               if (!isOnPortalPage) {
-                window.location.href = '/client/portal.html';
+                window.location.href = '/client/';
                 return;
               }
               this.showDashboard();
@@ -292,17 +295,26 @@ export class ClientPortalModule extends BaseModule {
           const tabName = (btn as HTMLElement).dataset.tab;
           if (tabName) {
             this.switchTab(tabName);
-            // Update active state on buttons
-            sidebarButtons.forEach((b) => {
-              b.classList.remove('active');
-              b.removeAttribute('aria-current');
-            });
-            btn.classList.add('active');
-            btn.setAttribute('aria-current', 'page');
           }
         });
       });
     }
+
+    // Header group subtabs (Work / Documents / Support)
+    const headerGroups = document.querySelectorAll('.header-subtab-group[data-mode="primary"]');
+    headerGroups.forEach((group) => {
+      const groupEl = group as HTMLElement;
+      if (groupEl.dataset.initialized === 'true') return;
+      groupEl.dataset.initialized = 'true';
+
+      groupEl.addEventListener('click', (e) => {
+        const target = (e.target as HTMLElement).closest('.portal-subtab') as HTMLElement | null;
+        if (!target) return;
+        const tabName = target.dataset.subtab;
+        if (!tabName) return;
+        this.switchTab(tabName);
+      });
+    });
 
     // Clickable stat cards
     const statCards = document.querySelectorAll('.stat-card-clickable[data-tab]');
@@ -314,15 +326,6 @@ export class ClientPortalModule extends BaseModule {
           const tabName = (card as HTMLElement).dataset.tab;
           if (tabName) {
             this.switchTab(tabName);
-            // Update active state on sidebar buttons
-            sidebarButtons.forEach((b) => {
-              b.classList.remove('active');
-              b.removeAttribute('aria-current');
-              if ((b as HTMLElement).dataset.tab === tabName) {
-                b.classList.add('active');
-                b.setAttribute('aria-current', 'page');
-              }
-            });
           }
         });
       });
@@ -378,6 +381,8 @@ export class ClientPortalModule extends BaseModule {
 
     this.log('Dashboard event listeners setup complete');
     this.dashboardListenersSetup = true;
+
+    this.switchTab('dashboard');
   }
 
   /**
@@ -923,6 +928,14 @@ export class ClientPortalModule extends BaseModule {
       // Update sidebar badges
       this.updateSidebarBadges(data.stats.unreadMessages || 0, data.stats.pendingInvoices || 0);
 
+      // Load pending approvals for dashboard
+      try {
+        const approvalsModule = await loadApprovalsModule();
+        await approvalsModule.initClientApprovals();
+      } catch (approvalError) {
+        console.warn('[ClientPortal] Error loading approvals:', approvalError);
+      }
+
       this.log('[ClientPortal] Dashboard stats loaded');
     } catch (error) {
       console.error('[ClientPortal] Error loading dashboard stats:', error);
@@ -946,31 +959,29 @@ export class ClientPortalModule extends BaseModule {
    * Update sidebar notification badges
    */
   private updateSidebarBadges(unreadMessages: number, pendingInvoices: number): void {
-    // Messages badge
-    const messagesBadge = document.getElementById('badge-messages');
-    if (messagesBadge) {
+    const supportBadge = document.getElementById('badge-support');
+    if (supportBadge) {
       if (unreadMessages > 0) {
-        messagesBadge.textContent = unreadMessages > 99 ? '99+' : String(unreadMessages);
-        messagesBadge.classList.add('has-count');
-        messagesBadge.setAttribute('aria-label', `${unreadMessages} unread messages`);
+        supportBadge.textContent = unreadMessages > 99 ? '99+' : String(unreadMessages);
+        supportBadge.classList.add('has-count');
+        supportBadge.setAttribute('aria-label', `${unreadMessages} unread messages`);
       } else {
-        messagesBadge.textContent = '';
-        messagesBadge.classList.remove('has-count');
-        messagesBadge.setAttribute('aria-label', 'unread messages');
+        supportBadge.textContent = '';
+        supportBadge.classList.remove('has-count');
+        supportBadge.setAttribute('aria-label', 'unread messages');
       }
     }
 
-    // Invoices badge
-    const invoicesBadge = document.getElementById('badge-invoices');
-    if (invoicesBadge) {
+    const documentsBadge = document.getElementById('badge-documents');
+    if (documentsBadge) {
       if (pendingInvoices > 0) {
-        invoicesBadge.textContent = pendingInvoices > 99 ? '99+' : String(pendingInvoices);
-        invoicesBadge.classList.add('has-count');
-        invoicesBadge.setAttribute('aria-label', `${pendingInvoices} pending invoices`);
+        documentsBadge.textContent = pendingInvoices > 99 ? '99+' : String(pendingInvoices);
+        documentsBadge.classList.add('has-count');
+        documentsBadge.setAttribute('aria-label', `${pendingInvoices} pending invoices`);
       } else {
-        invoicesBadge.textContent = '';
-        invoicesBadge.classList.remove('has-count');
-        invoicesBadge.setAttribute('aria-label', 'pending invoices');
+        documentsBadge.textContent = '';
+        documentsBadge.classList.remove('has-count');
+        documentsBadge.setAttribute('aria-label', 'pending invoices');
       }
     }
   }
@@ -1265,10 +1276,24 @@ export class ClientPortalModule extends BaseModule {
   private showDashboard(): void {
     if (!this.loginSection || !this.dashboardSection) return;
 
-    // Simplified transition without GSAP to prevent flashing
-    if (this.loginSection) this.loginSection.style.display = 'none';
+    // Hide auth gate (login form) and header/footer
+    if (this.loginSection) {
+      this.loginSection.classList.add('hidden');
+      this.loginSection.style.display = 'none';
+    }
+
+    // Hide login page header, nav overlay, and footer
+    const portalHeader = document.querySelector('.portal-header');
+    const portalNav = document.querySelector('.portal-nav');
+    const portalFooter = document.querySelector('.portal-footer');
+    if (portalHeader) (portalHeader as HTMLElement).style.display = 'none';
+    if (portalNav) (portalNav as HTMLElement).style.display = 'none';
+    if (portalFooter) (portalFooter as HTMLElement).style.display = 'none';
+
+    // Show dashboard
     if (this.dashboardSection) {
-      this.dashboardSection.style.display = 'block';
+      this.dashboardSection.classList.remove('hidden');
+      this.dashboardSection.style.display = 'flex';
 
       // Set initial breadcrumb at top of page (Dashboard when on main dashboard tab)
       loadNavigationModule().then((navModule) => {
@@ -1484,7 +1509,9 @@ export class ClientPortalModule extends BaseModule {
       loadProjectPreview: () => this.loadProjectPreview(),
       loadMessagesFromAPI: () => this.loadMessagesFromAPI(),
       loadHelp: () => this.loadHelp(),
-      loadDocumentRequests: () => this.loadDocumentRequests()
+      loadDocumentRequests: () => this.loadDocumentRequests(),
+      loadAdHocRequests: () => this.loadAdHocRequests(),
+      loadQuestionnaires: () => this.loadQuestionnaires()
     });
   }
 
@@ -1510,6 +1537,22 @@ export class ClientPortalModule extends BaseModule {
   private async loadDocumentRequests(): Promise<void> {
     const docModule = await loadDocumentRequestsModule();
     await docModule.loadDocumentRequests(this.moduleContext);
+  }
+
+  /**
+   * Load Ad Hoc requests tab - delegates to ad hoc requests module
+   */
+  private async loadAdHocRequests(): Promise<void> {
+    const requestsModule = await loadAdHocRequestsModule();
+    await requestsModule.loadAdHocRequests(this.moduleContext);
+  }
+
+  /**
+   * Load Questionnaires tab - delegates to questionnaires module
+   */
+  private async loadQuestionnaires(): Promise<void> {
+    const qModule = await loadQuestionnairesModule();
+    await qModule.loadQuestionnaires(this.moduleContext);
   }
 
   private async toggleAccountFolder(): Promise<void> {
