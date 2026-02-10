@@ -152,12 +152,12 @@ export function formatProjectType(type: string | undefined | null): string {
 // ============================================
 
 /**
- * Format date for display in MM/DD/YYYY format
- * Uses consistent formatting across the application
+ * Format date for display with optional format specification
  * @param dateString - ISO date string or Date object
- * @returns Formatted date string (e.g., "01/28/2026")
+ * @param format - 'short' (MM/DD/YYYY), 'datetime' (MM/DD/YYYY, h:mm AM/PM), or undefined (defaults to 'short')
+ * @returns Formatted date string
  */
-export function formatDate(dateString: string | Date | undefined | null): string {
+export function formatDate(dateString: string | Date | undefined | null, format?: 'short' | 'datetime'): string {
   if (!dateString) return '';
 
   try {
@@ -167,8 +167,18 @@ export function formatDate(dateString: string | Date | undefined | null): string
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const year = date.getFullYear();
+    const datePart = `${month}/${day}/${year}`;
 
-    return `${month}/${day}/${year}`;
+    if (format === 'datetime') {
+      const timePart = date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      return `${datePart}, ${timePart}`;
+    }
+
+    return datePart;
   } catch {
     return '';
   }

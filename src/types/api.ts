@@ -323,6 +323,14 @@ export interface ProjectResponse {
   production_url?: string;
   deposit_amount?: number;
   contract_signed_at?: string;
+  contract_signer_name?: string;
+  contract_signer_email?: string;
+  contract_signature_requested_at?: string;
+  contract_signature_expires_at?: string;
+  contract_countersigned_at?: string;
+  contract_countersigner_name?: string;
+  contract_countersigner_email?: string;
+  contract_signed_pdf_path?: string;
   notes?: string;
   features?: string | string[]; // Can be JSON string or parsed array
   password_hash?: string; // Admin only field

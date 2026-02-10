@@ -816,6 +816,32 @@ export const DOCUMENT_REQUESTS_FILTER_CONFIG: TableFilterConfig = {
   storageKey: 'admin_document_requests_filter'
 };
 
+export const AD_HOC_REQUESTS_FILTER_CONFIG: TableFilterConfig = {
+  tableId: 'ad-hoc-requests',
+  searchFields: ['title', 'description', 'clientName', 'projectName'],
+  statusField: 'status',
+  statusOptions: [
+    { value: 'submitted', label: 'Submitted' },
+    { value: 'reviewing', label: 'Reviewing' },
+    { value: 'quoted', label: 'Quoted' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'in_progress', label: 'In Progress' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'declined', label: 'Declined' }
+  ],
+  dateField: 'createdAt',
+  sortableColumns: [
+    { key: 'title', label: 'Request', type: 'string' },
+    { key: 'clientName', label: 'Client', type: 'string' },
+    { key: 'projectName', label: 'Project', type: 'string' },
+    { key: 'requestType', label: 'Type', type: 'string' },
+    { key: 'priority', label: 'Priority', type: 'string' },
+    { key: 'status', label: 'Status', type: 'string' },
+    { key: 'createdAt', label: 'Submitted', type: 'date' }
+  ],
+  storageKey: 'admin_ad_hoc_requests_filter'
+};
+
 export const KNOWLEDGE_BASE_FILTER_CONFIG: TableFilterConfig = {
   tableId: 'kb-articles',
   searchFields: ['title', 'category_name', 'slug', 'summary'],
@@ -830,6 +856,31 @@ export const KNOWLEDGE_BASE_FILTER_CONFIG: TableFilterConfig = {
     { key: 'updated_at', label: 'Updated', type: 'date' }
   ],
   storageKey: 'admin_knowledge_base_filter'
+};
+
+export const CONTRACTS_FILTER_CONFIG: TableFilterConfig = {
+  tableId: 'contracts',
+  searchFields: ['templateName', 'projectName', 'clientName', 'clientEmail'],
+  statusField: 'status',
+  statusOptions: [
+    { value: 'draft', label: 'Draft' },
+    { value: 'sent', label: 'Sent' },
+    { value: 'viewed', label: 'Viewed' },
+    { value: 'signed', label: 'Signed' },
+    { value: 'expired', label: 'Expired' },
+    { value: 'cancelled', label: 'Cancelled' }
+  ],
+  dateField: 'sentAt',
+  sortableColumns: [
+    { key: 'templateName', label: 'Contract', type: 'string' },
+    { key: 'projectName', label: 'Project', type: 'string' },
+    { key: 'clientName', label: 'Client', type: 'string' },
+    { key: 'status', label: 'Status', type: 'string' },
+    { key: 'sentAt', label: 'Sent', type: 'date' },
+    { key: 'signedAt', label: 'Signed', type: 'date' },
+    { key: 'expiresAt', label: 'Expires', type: 'date' }
+  ],
+  storageKey: 'admin_contracts_filter'
 };
 
 export const INVOICES_FILTER_CONFIG: TableFilterConfig = {

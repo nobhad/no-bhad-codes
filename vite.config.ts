@@ -18,9 +18,9 @@ function mpaRoutingPlugin(): Plugin {
         if (url === '/admin' || url === '/admin/') {
           req.url = '/admin/index.html';
         }
-        // Rewrite /client/portal to /client/portal.html
-        else if (url === '/client/portal' || url === '/client/portal/') {
-          req.url = '/client/portal.html';
+        // Rewrite /client to /client/index.html
+        else if (url === '/client' || url === '/client/') {
+          req.url = '/client/index.html';
         }
         // Rewrite /client/intake to /client/intake.html
         else if (url === '/client/intake' || url === '/client/intake/') {
@@ -50,7 +50,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        'client-portal': resolve(__dirname, 'client/portal.html'),
+        client: resolve(__dirname, 'client/index.html'),
         'client-intake': resolve(__dirname, 'client/intake.html'),
         'client-set-password': resolve(__dirname, 'client/set-password.html'),
         admin: resolve(__dirname, 'admin/index.html'),

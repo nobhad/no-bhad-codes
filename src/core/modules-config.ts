@@ -81,14 +81,20 @@ export function registerModules(debug: boolean = false): void {
       factory: async () => {
         const { NavigationModule } = await import('../modules/ui/navigation');
         const routerService = await container.resolve('RouterService');
-        const dataService = await container.resolve('DataService');
+        // DataService may not be available on client/admin pages - handle gracefully
+        let dataService = null;
+        try {
+          dataService = await container.resolve('DataService');
+        } catch {
+          // DataService not available on this page, NavigationModule will use fallbacks
+        }
         return new NavigationModule({
           debug,
           routerService: routerService as any,
           dataService: dataService as any
         });
       },
-      dependencies: ['RouterService', 'DataService']
+      dependencies: ['RouterService']
     },
     {
       name: 'ContactFormModule',
@@ -202,9 +208,12 @@ export function registerModules(debug: boolean = false): void {
       name: 'ClientPortalModule',
       type: 'dom',
       factory: async () => {
-        // Only load client portal on client portal pages
+        // Only load client portal on client pages (now at /client, not /client/portal)
         const currentPath = window.location.pathname;
-        if (currentPath.includes('/client') && currentPath.includes('/portal')) {
+        const isClientPage = currentPath === '/client' ||
+                             currentPath === '/client/' ||
+                             currentPath.startsWith('/client/index');
+        if (isClientPage) {
           const { ClientPortalModule } = await import('../features/client/client-portal');
           return new ClientPortalModule();
         }
@@ -290,7 +299,7 @@ export function getMainSiteModules(): string[] {
  * Get module list for client portal
  */
 export function getClientPortalModules(): string[] {
-  return ['ThemeModule', 'ClientPortalModule'];
+  return ['ThemeModule', 'NavigationModule', 'ClientPortalModule'];
 }
 
 /**
@@ -304,5 +313,5 @@ export function getClientIntakeModules(): string[] {
  * Get module list for admin pages
  */
 export function getAdminModules(): string[] {
-  return ['ThemeModule', 'AdminDashboardModule'];
+  return ['ThemeModule', 'NavigationModule', 'AdminDashboardModule'];
 }
