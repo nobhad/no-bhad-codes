@@ -29,6 +29,7 @@ import {
 } from '../utils/pdf-utils.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
+import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -129,9 +130,7 @@ router.get(
     const { projectType } = req.params;
 
     if (!VALID_PROJECT_TYPES.includes(projectType)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid project type',
+      return errorResponseWithPayload(res, 'Invalid project type', 400, 'VALIDATION_ERROR', {
         validTypes: VALID_PROJECT_TYPES
       });
     }
@@ -160,35 +159,24 @@ router.post(
     const missingFields = requiredFields.filter(field => !(field in submission));
 
     if (missingFields.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required fields',
+      return errorResponseWithPayload(res, 'Missing required fields', 400, 'VALIDATION_ERROR', {
         missingFields
       });
     }
 
     // Validate project type
     if (!VALID_PROJECT_TYPES.includes(submission.projectType)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid project type'
-      });
+      return errorResponse(res, 'Invalid project type', 400, 'VALIDATION_ERROR');
     }
 
     // Validate tier
     if (!VALID_TIERS.includes(submission.selectedTier)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid tier selection'
-      });
+      return errorResponse(res, 'Invalid tier selection', 400, 'VALIDATION_ERROR');
     }
 
     // Validate maintenance option if provided
     if (submission.maintenanceOption && !VALID_MAINTENANCE.includes(submission.maintenanceOption)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid maintenance option'
-      });
+      return errorResponse(res, 'Invalid maintenance option', 400, 'VALIDATION_ERROR');
     }
 
     const db = getDatabase();
@@ -196,19 +184,13 @@ router.post(
     // Verify project exists
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [submission.projectId]);
     if (!project) {
-      return res.status(404).json({
-        success: false,
-        message: 'Project not found'
-      });
+      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     // Verify client exists
     const client = await db.get('SELECT id FROM clients WHERE id = ?', [submission.clientId]);
     if (!client) {
-      return res.status(404).json({
-        success: false,
-        message: 'Client not found'
-      });
+      return errorResponse(res, 'Client not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     // Create proposal in transaction
@@ -295,19 +277,13 @@ router.get(
     ) as ProposalRow | undefined;
 
     if (!proposal) {
-      return res.status(404).json({
-        success: false,
-        message: 'Proposal not found'
-      });
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     // Authorization check: only admin or owning client can view
     const proposalClientId = getNumber(proposal as unknown as Record<string, unknown>, 'client_id');
     if (req.user!.type !== 'admin' && req.user!.id !== proposalClientId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     // Get feature selections
@@ -375,11 +351,7 @@ router.delete(
     const result = await softDeleteService.softDeleteProposal(proposalId, deletedBy);
 
     if (!result.success) {
-      return res.status(404).json({
-        success: false,
-        message: result.message,
-        code: 'PROPOSAL_NOT_FOUND'
-      });
+      return errorResponse(res, result.message, 404, 'PROPOSAL_NOT_FOUND');
     }
 
     res.json({
@@ -479,9 +451,7 @@ router.put(
 
     // Validate status
     if (status && !VALID_STATUSES.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status',
+      return errorResponseWithPayload(res, 'Invalid status', 400, 'INVALID_STATUS', {
         validStatuses: VALID_STATUSES
       });
     }
@@ -489,10 +459,7 @@ router.put(
     // Verify proposal exists
     const proposal = await db.get('SELECT id FROM proposal_requests WHERE id = ?', [id]);
     if (!proposal) {
-      return res.status(404).json({
-        success: false,
-        message: 'Proposal not found'
-      });
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     // Build update query
@@ -513,10 +480,7 @@ router.put(
     }
 
     if (updates.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'No updates provided'
-      });
+      return errorResponse(res, 'No updates provided', 400, 'NO_UPDATES');
     }
 
     params.push(parseInt(id, 10));
@@ -558,17 +522,11 @@ router.post(
     ) as ProposalRow | undefined;
 
     if (!proposal) {
-      return res.status(404).json({
-        success: false,
-        message: 'Proposal not found'
-      });
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     if (getString(proposal as unknown as Record<string, unknown>, 'status') !== 'accepted') {
-      return res.status(400).json({
-        success: false,
-        message: 'Only accepted proposals can be converted to invoices'
-      });
+      return errorResponse(res, 'Only accepted proposals can be converted to invoices', 400, 'VALIDATION_ERROR');
     }
 
     // Get feature selections for line items
@@ -660,10 +618,7 @@ router.get(
     ) as ProposalRow | undefined;
 
     if (!proposal) {
-      return res.status(404).json({
-        success: false,
-        message: 'Proposal not found'
-      });
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     // Check cache first (proposals use created_at as they don't have updated_at)
@@ -684,10 +639,7 @@ router.get(
     // Authorization check: only admin or owning client can download PDF
     const proposalClientId = getNumber(p, 'client_id');
     if (req.user!.type !== 'admin' && req.user!.id !== proposalClientId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     // Get feature selections
@@ -1221,7 +1173,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { name } = req.body;
     if (!name) {
-      return res.status(400).json({ success: false, message: 'Template name is required' });
+      return errorResponse(res, 'Template name is required', 400, 'VALIDATION_ERROR');
     }
     const template = await proposalService.createTemplate(req.body);
     res.status(201).json({ success: true, message: 'Template created successfully', template });
@@ -1301,7 +1253,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { version1, version2 } = req.query;
     if (!version1 || !version2) {
-      return res.status(400).json({ success: false, message: 'version1 and version2 query params required' });
+      return errorResponse(res, 'version1 and version2 query params required', 400, 'VALIDATION_ERROR');
     }
     const comparison = await proposalService.compareVersions(
       parseInt(version1 as string),
@@ -1324,7 +1276,7 @@ router.post(
     const proposalId = parseInt(req.params.id);
     const { signerEmail, signerName, expiresInDays } = req.body;
     if (!signerEmail) {
-      return res.status(400).json({ success: false, message: 'signerEmail is required' });
+      return errorResponse(res, 'signerEmail is required', 400, 'VALIDATION_ERROR');
     }
     const request = await proposalService.requestSignature(proposalId, signerEmail, signerName, expiresInDays);
     res.status(201).json({ success: true, message: 'Signature requested successfully', request });
@@ -1338,7 +1290,12 @@ router.post(
     const proposalId = parseInt(req.params.id);
     const signatureData = req.body;
     if (!signatureData.signerName || !signatureData.signerEmail || !signatureData.signatureData) {
-      return res.status(400).json({ success: false, message: 'signerName, signerEmail, and signatureData are required' });
+      return errorResponse(
+        res,
+        'signerName, signerEmail, and signatureData are required',
+        400,
+        'VALIDATION_ERROR'
+      );
     }
     // Add IP and user agent
     signatureData.ipAddress = req.ip;
@@ -1366,7 +1323,7 @@ router.get(
     const { token } = req.params;
     const request = await proposalService.getSignatureRequestByToken(token);
     if (!request) {
-      return res.status(404).json({ success: false, message: 'Invalid or expired signature request' });
+      return errorResponse(res, 'Invalid or expired signature request', 404, 'RESOURCE_NOT_FOUND');
     }
     // Mark as viewed
     await proposalService.markSignatureViewed(token);
@@ -1409,7 +1366,7 @@ router.post(
     const proposalId = parseInt(req.params.id);
     const { content, isInternal, parentCommentId } = req.body;
     if (!content) {
-      return res.status(400).json({ success: false, message: 'Comment content is required' });
+      return errorResponse(res, 'Comment content is required', 400, 'VALIDATION_ERROR');
     }
     const comment = await proposalService.addComment(
       proposalId,
@@ -1487,7 +1444,7 @@ router.post(
     const proposalId = parseInt(req.params.id);
     const { description, unitPrice } = req.body;
     if (!description || unitPrice === undefined) {
-      return res.status(400).json({ success: false, message: 'description and unitPrice are required' });
+      return errorResponse(res, 'description and unitPrice are required', 400, 'VALIDATION_ERROR');
     }
     const item = await proposalService.addCustomItem(proposalId, req.body);
     res.status(201).json({ success: true, message: 'Custom item added successfully', item });
@@ -1531,10 +1488,10 @@ router.post(
     const proposalId = parseInt(req.params.id);
     const { type, value, reason } = req.body;
     if (!type || value === undefined) {
-      return res.status(400).json({ success: false, message: 'type and value are required' });
+      return errorResponse(res, 'type and value are required', 400, 'VALIDATION_ERROR');
     }
     if (!['percentage', 'fixed'].includes(type)) {
-      return res.status(400).json({ success: false, message: 'type must be percentage or fixed' });
+      return errorResponse(res, 'type must be percentage or fixed', 400, 'VALIDATION_ERROR');
     }
     await proposalService.applyDiscount(proposalId, type, value, reason);
     res.json({ success: true, message: 'Discount applied successfully' });
@@ -1566,7 +1523,7 @@ router.put(
     const proposalId = parseInt(req.params.id);
     const { expirationDate } = req.body;
     if (!expirationDate) {
-      return res.status(400).json({ success: false, message: 'expirationDate is required' });
+      return errorResponse(res, 'expirationDate is required', 400, 'VALIDATION_ERROR');
     }
     await proposalService.setExpiration(proposalId, expirationDate);
     res.json({ success: true, message: 'Expiration date set successfully' });
@@ -1604,7 +1561,7 @@ router.get(
     const { token } = req.params;
     const proposalId = await proposalService.getProposalByAccessToken(token);
     if (!proposalId) {
-      return res.status(404).json({ success: false, message: 'Invalid access token' });
+      return errorResponse(res, 'Invalid access token', 404, 'RESOURCE_NOT_FOUND');
     }
     // Track view
     await proposalService.trackView(proposalId, req.ip, req.get('User-Agent'));

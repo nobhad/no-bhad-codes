@@ -10,6 +10,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../services/logger.js';
+import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 
 // Rate limiting store
 interface RateLimitEntry {
@@ -117,12 +118,13 @@ export function rateLimit(
           req
         );
 
-        return res.status(429).json({
-          success: false,
-          error: 'IP blocked due to too many requests',
-          retryAfter: remainingTime,
-          code: 'RATE_LIMIT_BLOCKED'
-        });
+        return errorResponseWithPayload(
+          res,
+          'IP blocked due to too many requests',
+          429,
+          'RATE_LIMIT_BLOCKED',
+          { retryAfter: remainingTime }
+        );
       }
 
       let currentEntry: RateLimitEntry;
@@ -174,12 +176,13 @@ export function rateLimit(
           onLimitReached(req, currentEntry);
         }
 
-        return res.status(429).json({
-          success: false,
-          error: message,
-          retryAfter: Math.ceil(blockDuration / 1000),
-          code: 'RATE_LIMIT_EXCEEDED'
-        });
+        return errorResponseWithPayload(
+          res,
+          message,
+          429,
+          'RATE_LIMIT_EXCEEDED',
+          { retryAfter: Math.ceil(blockDuration / 1000) }
+        );
       }
 
       next();
@@ -232,22 +235,14 @@ export function csrfProtection(
           req
         );
 
-        return res.status(403).json({
-          success: false,
-          error: 'Invalid CSRF token',
-          code: 'CSRF_TOKEN_INVALID'
-        });
+        return errorResponse(res, 'Invalid CSRF token', 403, 'CSRF_TOKEN_INVALID');
       }
 
       next();
     } catch (_error) {
       await logger.error('CSRF protection middleware error');
 
-      res.status(500).json({
-        success: false,
-        error: 'CSRF protection error',
-        code: 'CSRF_SYSTEM_ERROR'
-      });
+      errorResponse(res, 'CSRF protection error', 500, 'CSRF_SYSTEM_ERROR');
     }
   };
 }
@@ -279,11 +274,7 @@ export function ipFilter(
           req
         );
 
-        return res.status(400).json({
-          success: false,
-          error: 'Unable to determine IP address',
-          code: 'IP_UNKNOWN'
-        });
+        return errorResponse(res, 'Unable to determine IP address', 400, 'IP_UNKNOWN');
       }
 
       // Check blacklist first
@@ -299,11 +290,7 @@ export function ipFilter(
           req
         );
 
-        return res.status(403).json({
-          success: false,
-          error: 'Access denied',
-          code: 'IP_BLACKLISTED'
-        });
+        return errorResponse(res, 'Access denied', 403, 'IP_BLACKLISTED');
       }
 
       // Check whitelist if specified
@@ -320,11 +307,7 @@ export function ipFilter(
           req
         );
 
-        return res.status(403).json({
-          success: false,
-          error: 'Access denied',
-          code: 'IP_NOT_WHITELISTED'
-        });
+        return errorResponse(res, 'Access denied', 403, 'IP_NOT_WHITELISTED');
       }
 
       next();
@@ -368,11 +351,7 @@ export function requestSizeLimit(
           req
         );
 
-        return res.status(414).json({
-          success: false,
-          error: 'URL too long',
-          code: 'URL_TOO_LONG'
-        });
+        return errorResponse(res, 'URL too long', 414, 'URL_TOO_LONG');
       }
 
       // Check header size
@@ -390,11 +369,7 @@ export function requestSizeLimit(
           req
         );
 
-        return res.status(431).json({
-          success: false,
-          error: 'Request headers too large',
-          code: 'HEADERS_TOO_LARGE'
-        });
+        return errorResponse(res, 'Request headers too large', 431, 'HEADERS_TOO_LARGE');
       }
 
       // Body size is typically handled by express.json() limit option
@@ -413,11 +388,7 @@ export function requestSizeLimit(
           req
         );
 
-        return res.status(413).json({
-          success: false,
-          error: 'Request body too large',
-          code: 'BODY_TOO_LARGE'
-        });
+        return errorResponse(res, 'Request body too large', 413, 'BODY_TOO_LARGE');
       }
 
       next();
@@ -483,11 +454,7 @@ export function suspiciousActivityDetector(
           req
         );
 
-        return res.status(403).json({
-          success: false,
-          error: 'Access denied due to suspicious activity',
-          code: 'SUSPICIOUS_ACTIVITY_BLOCKED'
-        });
+        return errorResponse(res, 'Access denied due to suspicious activity', 403, 'SUSPICIOUS_ACTIVITY_BLOCKED');
       }
 
       let suspicious = false;
@@ -583,11 +550,7 @@ export function suspiciousActivityDetector(
             req
           );
 
-          return res.status(403).json({
-            success: false,
-            error: 'Access denied due to suspicious activity',
-            code: 'SUSPICIOUS_ACTIVITY_DETECTED'
-          });
+          return errorResponse(res, 'Access denied due to suspicious activity', 403, 'SUSPICIOUS_ACTIVITY_DETECTED');
         }
       }
 

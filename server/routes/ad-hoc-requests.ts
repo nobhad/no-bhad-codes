@@ -15,6 +15,7 @@ import { adHocRequestService, type AdHocRequest } from '../services/ad-hoc-reque
 import { BUSINESS_INFO } from '../config/business.js';
 import { projectService } from '../services/project-service.js';
 import { InvoiceService, type InvoiceLineItem } from '../services/invoice-service.js';
+import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -151,15 +152,15 @@ router.get(
     const requestType = req.query.requestType as string | undefined;
 
     if (!clientId) {
-      return res.status(401).json({ success: false, message: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401, 'UNAUTHORIZED');
     }
 
     if (status && !adHocRequestService.isValidStatus(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid request status' });
+      return errorResponse(res, 'Invalid request status', 400, 'VALIDATION_ERROR');
     }
 
     if (requestType && !adHocRequestService.isValidType(requestType)) {
-      return res.status(400).json({ success: false, message: 'Invalid request type' });
+      return errorResponse(res, 'Invalid request type', 400, 'VALIDATION_ERROR');
     }
 
     const requests = await adHocRequestService.getRequests({
@@ -189,26 +190,28 @@ router.post(
     } = req.body;
 
     if (!clientId) {
-      return res.status(401).json({ success: false, message: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401, 'UNAUTHORIZED');
     }
 
     if (!projectId || !title || !description || !requestType) {
-      return res.status(400).json({
-        success: false,
-        message: 'projectId, title, description, and requestType are required'
-      });
+      return errorResponse(
+        res,
+        'projectId, title, description, and requestType are required',
+        400,
+        'VALIDATION_ERROR'
+      );
     }
 
     if (!adHocRequestService.isValidType(requestType)) {
-      return res.status(400).json({ success: false, message: 'Invalid request type' });
+      return errorResponse(res, 'Invalid request type', 400, 'VALIDATION_ERROR');
     }
 
     if (priority && !adHocRequestService.isValidPriority(priority)) {
-      return res.status(400).json({ success: false, message: 'Invalid request priority' });
+      return errorResponse(res, 'Invalid request priority', 400, 'VALIDATION_ERROR');
     }
 
     if (urgency && !adHocRequestService.isValidUrgency(urgency)) {
-      return res.status(400).json({ success: false, message: 'Invalid request urgency' });
+      return errorResponse(res, 'Invalid request urgency', 400, 'VALIDATION_ERROR');
     }
 
     const db = getDatabase();
@@ -218,10 +221,7 @@ router.post(
     );
 
     if (!project) {
-      return res.status(403).json({
-        success: false,
-        message: 'Project not found for this client'
-      });
+      return errorResponse(res, 'Project not found for this client', 403, 'ACCESS_DENIED');
     }
 
     if (attachmentFileId) {
@@ -230,10 +230,7 @@ router.post(
         [Number(attachmentFileId), Number(projectId)]
       );
       if (!attachment) {
-        return res.status(400).json({
-          success: false,
-          message: 'Attachment must belong to the selected project'
-        });
+        return errorResponse(res, 'Attachment must belong to the selected project', 400, 'VALIDATION_ERROR');
       }
     }
 
@@ -262,21 +259,21 @@ router.post(
     const requestId = Number(req.params.requestId);
 
     if (!clientId) {
-      return res.status(401).json({ success: false, message: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401, 'UNAUTHORIZED');
     }
 
     if (Number.isNaN(requestId)) {
-      return res.status(400).json({ success: false, message: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const request = await adHocRequestService.getRequest(requestId);
 
     if (request.clientId !== clientId) {
-      return res.status(403).json({ success: false, message: 'Request not found for this client' });
+      return errorResponse(res, 'Request not found for this client', 403, 'ACCESS_DENIED');
     }
 
     if (request.status !== 'quoted') {
-      return res.status(400).json({ success: false, message: 'Quote is not available for approval' });
+      return errorResponse(res, 'Quote is not available for approval', 400, 'VALIDATION_ERROR');
     }
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, { status: 'approved' });
@@ -293,21 +290,21 @@ router.post(
     const requestId = Number(req.params.requestId);
 
     if (!clientId) {
-      return res.status(401).json({ success: false, message: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401, 'UNAUTHORIZED');
     }
 
     if (Number.isNaN(requestId)) {
-      return res.status(400).json({ success: false, message: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const request = await adHocRequestService.getRequest(requestId);
 
     if (request.clientId !== clientId) {
-      return res.status(403).json({ success: false, message: 'Request not found for this client' });
+      return errorResponse(res, 'Request not found for this client', 403, 'ACCESS_DENIED');
     }
 
     if (request.status !== 'quoted') {
-      return res.status(400).json({ success: false, message: 'Quote is not available for decline' });
+      return errorResponse(res, 'Quote is not available for decline', 400, 'VALIDATION_ERROR');
     }
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, { status: 'declined' });
@@ -333,19 +330,19 @@ router.get(
     const urgency = req.query.urgency as string | undefined;
 
     if (status && !adHocRequestService.isValidStatus(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid request status' });
+      return errorResponse(res, 'Invalid request status', 400, 'VALIDATION_ERROR');
     }
 
     if (requestType && !adHocRequestService.isValidType(requestType)) {
-      return res.status(400).json({ success: false, message: 'Invalid request type' });
+      return errorResponse(res, 'Invalid request type', 400, 'VALIDATION_ERROR');
     }
 
     if (priority && !adHocRequestService.isValidPriority(priority)) {
-      return res.status(400).json({ success: false, message: 'Invalid request priority' });
+      return errorResponse(res, 'Invalid request priority', 400, 'VALIDATION_ERROR');
     }
 
     if (urgency && !adHocRequestService.isValidUrgency(urgency)) {
-      return res.status(400).json({ success: false, message: 'Invalid request urgency' });
+      return errorResponse(res, 'Invalid request urgency', 400, 'VALIDATION_ERROR');
     }
 
     const requests = await adHocRequestService.getRequests({
@@ -369,7 +366,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     if (Number.isNaN(requestId)) {
-      return res.status(400).json({ success: false, message: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const request = await adHocRequestService.getRequest(requestId);
@@ -390,20 +387,17 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     if (Number.isNaN(requestId)) {
-      return res.status(400).json({ success: false, message: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const request = await adHocRequestService.getRequest(requestId);
     if (!request.taskId) {
-      return res.status(400).json({ success: false, message: 'Request is not linked to a task yet' });
+      return errorResponse(res, 'Request is not linked to a task yet', 400, 'VALIDATION_ERROR');
     }
 
     const { userName, hours, date, description, billable, hourlyRate } = req.body;
     if (!userName || !hours || !date) {
-      return res.status(400).json({
-        success: false,
-        message: 'userName, hours, and date are required'
-      });
+      return errorResponse(res, 'userName, hours, and date are required', 400, 'VALIDATION_ERROR');
     }
 
     const entry = await projectService.logTime(request.projectId, {
@@ -455,26 +449,28 @@ router.post(
     } = req.body;
 
     if (!projectId || !clientId || !title || !description || !requestType) {
-      return res.status(400).json({
-        success: false,
-        message: 'projectId, clientId, title, description, and requestType are required'
-      });
+      return errorResponse(
+        res,
+        'projectId, clientId, title, description, and requestType are required',
+        400,
+        'VALIDATION_ERROR'
+      );
     }
 
     if (status && !adHocRequestService.isValidStatus(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid request status' });
+      return errorResponse(res, 'Invalid request status', 400, 'VALIDATION_ERROR');
     }
 
     if (!adHocRequestService.isValidType(requestType)) {
-      return res.status(400).json({ success: false, message: 'Invalid request type' });
+      return errorResponse(res, 'Invalid request type', 400, 'VALIDATION_ERROR');
     }
 
     if (priority && !adHocRequestService.isValidPriority(priority)) {
-      return res.status(400).json({ success: false, message: 'Invalid request priority' });
+      return errorResponse(res, 'Invalid request priority', 400, 'VALIDATION_ERROR');
     }
 
     if (urgency && !adHocRequestService.isValidUrgency(urgency)) {
-      return res.status(400).json({ success: false, message: 'Invalid request urgency' });
+      return errorResponse(res, 'Invalid request urgency', 400, 'VALIDATION_ERROR');
     }
 
     if (attachmentFileId && projectId) {
@@ -484,10 +480,7 @@ router.post(
         [Number(attachmentFileId), Number(projectId)]
       );
       if (!attachment) {
-        return res.status(400).json({
-          success: false,
-          message: 'Attachment must belong to the selected project'
-        });
+        return errorResponse(res, 'Attachment must belong to the selected project', 400, 'VALIDATION_ERROR');
       }
     }
 
@@ -526,19 +519,19 @@ router.put(
     } = req.body;
 
     if (status && !adHocRequestService.isValidStatus(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid request status' });
+      return errorResponse(res, 'Invalid request status', 400, 'VALIDATION_ERROR');
     }
 
     if (requestType && !adHocRequestService.isValidType(requestType)) {
-      return res.status(400).json({ success: false, message: 'Invalid request type' });
+      return errorResponse(res, 'Invalid request type', 400, 'VALIDATION_ERROR');
     }
 
     if (priority && !adHocRequestService.isValidPriority(priority)) {
-      return res.status(400).json({ success: false, message: 'Invalid request priority' });
+      return errorResponse(res, 'Invalid request priority', 400, 'VALIDATION_ERROR');
     }
 
     if (urgency && !adHocRequestService.isValidUrgency(urgency)) {
-      return res.status(400).json({ success: false, message: 'Invalid request urgency' });
+      return errorResponse(res, 'Invalid request urgency', 400, 'VALIDATION_ERROR');
     }
 
     const request = await adHocRequestService.updateRequest(requestId, req.body);
@@ -555,13 +548,13 @@ router.post(
     const requestId = Number(req.params.requestId);
 
     if (Number.isNaN(requestId)) {
-      return res.status(400).json({ success: false, message: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const request = await adHocRequestService.getRequest(requestId);
 
     if (!request.clientEmail) {
-      return res.status(400).json({ success: false, message: 'Client email not found' });
+      return errorResponse(res, 'Client email not found', 400, 'VALIDATION_ERROR');
     }
 
     const hasQuoteDetails =
@@ -570,10 +563,7 @@ router.post(
       (request.estimatedHours !== null && request.hourlyRate !== null);
 
     if (!hasQuoteDetails) {
-      return res.status(400).json({
-        success: false,
-        message: 'Quote details are required before sending'
-      });
+      return errorResponse(res, 'Quote details are required before sending', 400, 'VALIDATION_ERROR');
     }
 
     const formatCurrency = (value: number | null): string =>
@@ -671,15 +661,12 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     if (Number.isNaN(requestId)) {
-      return res.status(400).json({ success: false, message: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const request = await adHocRequestService.getRequest(requestId);
     if (request.status !== 'completed') {
-      return res.status(400).json({
-        success: false,
-        message: 'Request must be completed before generating an invoice'
-      });
+      return errorResponse(res, 'Request must be completed before generating an invoice', 400, 'VALIDATION_ERROR');
     }
 
     const { useTimeEntries = true, dueDate, notes, terms } = req.body || {};
@@ -726,7 +713,7 @@ router.post(
     const { requestIds, useTimeEntries = true, dueDate, notes, terms } = req.body || {};
 
     if (!Array.isArray(requestIds) || requestIds.length === 0) {
-      return res.status(400).json({ success: false, message: 'requestIds is required' });
+      return errorResponse(res, 'requestIds is required', 400, 'VALIDATION_ERROR');
     }
 
     const requests = await Promise.all(requestIds.map((id: number) => adHocRequestService.getRequest(Number(id))));
@@ -736,18 +723,17 @@ router.post(
     const sameClient = requests.every((req) => req.clientId === first.clientId);
 
     if (!sameProject || !sameClient) {
-      return res.status(400).json({
-        success: false,
-        message: 'All requests must belong to the same project and client'
-      });
+      return errorResponse(res, 'All requests must belong to the same project and client', 400, 'VALIDATION_ERROR');
     }
 
     const incomplete = requests.find((req) => req.status !== 'completed');
     if (incomplete) {
-      return res.status(400).json({
-        success: false,
-        message: `Request ${incomplete.id} must be completed before invoicing`
-      });
+      return errorResponse(
+        res,
+        `Request ${incomplete.id} must be completed before invoicing`,
+        400,
+        'VALIDATION_ERROR'
+      );
     }
 
     const lineItems: InvoiceLineItem[] = [];
@@ -840,24 +826,23 @@ router.post(
     const requestId = Number(req.params.requestId);
 
     if (Number.isNaN(requestId)) {
-      return res.status(400).json({ success: false, message: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const request = await adHocRequestService.getRequest(requestId);
 
     if (request.status !== 'approved') {
-      return res.status(400).json({
-        success: false,
-        message: 'Request must be approved before converting to a task'
-      });
+      return errorResponse(res, 'Request must be approved before converting to a task', 400, 'VALIDATION_ERROR');
     }
 
     if (request.taskId) {
-      return res.status(409).json({
-        success: false,
-        message: 'Request already converted to a task',
-        taskId: request.taskId
-      });
+      return errorResponseWithPayload(
+        res,
+        'Request already converted to a task',
+        409,
+        'DUPLICATE_RESOURCE',
+        { taskId: request.taskId }
+      );
     }
 
     const {

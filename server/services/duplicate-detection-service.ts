@@ -177,7 +177,7 @@ export async function checkForDuplicates(
 
   // 3. Check leads (projects with pending/lead status)
   const leads = await db.all(
-    `SELECT p.id, p.name as project_name, c.name as client_name, c.email, c.company,
+    `SELECT p.id, p.project_name as project_name, COALESCE(c.contact_name, c.company_name) as client_name, c.email, c.company_name as company,
             p.created_at
      FROM projects p
      LEFT JOIN clients c ON p.client_id = c.id

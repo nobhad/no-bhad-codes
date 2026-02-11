@@ -26,10 +26,10 @@ import { MigrationManager } from './database/migrations.js';
 import sqlite3 from 'sqlite3';
 import authRouter from './routes/auth.js';
 import clientsRouter from './routes/clients.js';
-import projectsRouter from './routes/projects.js';
-import adminRouter from './routes/admin.js';
+import projectsRouter from './routes/projects/index.js';
+import adminRouter from './routes/admin/index.js';
 import messagesRouter from './routes/messages.js';
-import invoicesRouter from './routes/invoices.js';
+import { invoicesRouter } from './routes/invoices/index.js';
 import uploadsRouter from './routes/uploads.js';
 import intakeRouter from './routes/intake.js';
 import proposalsRouter from './routes/proposals.js';
@@ -49,6 +49,7 @@ import deliverablesRouter from './routes/deliverables.js';
 import integrationsRouter from './routes/integrations.js';
 import dataQualityRouter from './routes/data-quality.js';
 import settingsRouter from './routes/settings.js';
+import { errorResponseWithPayload } from './utils/api-response.js';
 import { setupSwagger } from './config/swagger.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -303,8 +304,7 @@ app.use((req, res) => {
     }
   );
 
-  res.status(404).json({
-    error: 'Route not found',
+  errorResponseWithPayload(res, 'Route not found', 404, 'RESOURCE_NOT_FOUND', {
     message: `Cannot ${req.method} ${req.originalUrl}`
   });
 });

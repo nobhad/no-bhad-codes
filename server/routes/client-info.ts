@@ -12,6 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { clientInfoService, OnboardingStatus } from '../services/client-info-service.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -29,13 +30,13 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     const status = await clientInfoService.getClientInfoStatus(clientId);
 
     if (!status) {
-      return res.status(404).json({ error: 'Client not found' });
+      return errorResponse(res, 'Client not found', 404);
     }
 
     res.json({ status });
@@ -52,7 +53,7 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     const items = await clientInfoService.getMissingItems(clientId);
@@ -71,7 +72,7 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     const progress = await clientInfoService.getOnboardingProgress(clientId);
@@ -91,11 +92,11 @@ router.post(
     const { step, stepData, projectId } = req.body;
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     if (typeof step !== 'number' || step < 1 || step > 5) {
-      return res.status(400).json({ error: 'step must be a number between 1 and 5' });
+      return errorResponse(res, 'step must be a number between 1 and 5', 400);
     }
 
     const progress = await clientInfoService.saveOnboardingProgress(
@@ -124,7 +125,7 @@ router.post(
     const { finalData } = req.body;
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     const progress = await clientInfoService.completeOnboarding(clientId, finalData);
@@ -178,13 +179,13 @@ router.get(
     const clientId = parseInt(req.params.clientId);
 
     if (isNaN(clientId)) {
-      return res.status(400).json({ error: 'Invalid client ID' });
+      return errorResponse(res, 'Invalid client ID', 400);
     }
 
     const status = await clientInfoService.getClientInfoStatus(clientId);
 
     if (!status) {
-      return res.status(404).json({ error: 'Client not found' });
+      return errorResponse(res, 'Client not found', 404);
     }
 
     res.json({ status });
@@ -202,7 +203,7 @@ router.get(
     const clientId = parseInt(req.params.clientId);
 
     if (isNaN(clientId)) {
-      return res.status(400).json({ error: 'Invalid client ID' });
+      return errorResponse(res, 'Invalid client ID', 400);
     }
 
     const items = await clientInfoService.getMissingItems(clientId);
@@ -222,7 +223,7 @@ router.post(
     const clientId = parseInt(req.params.clientId);
 
     if (isNaN(clientId)) {
-      return res.status(400).json({ error: 'Invalid client ID' });
+      return errorResponse(res, 'Invalid client ID', 400);
     }
 
     const completeness = await clientInfoService.calculateCompleteness(clientId);
@@ -246,7 +247,7 @@ router.get(
     const clientId = parseInt(req.params.clientId);
 
     if (isNaN(clientId)) {
-      return res.status(400).json({ error: 'Invalid client ID' });
+      return errorResponse(res, 'Invalid client ID', 400);
     }
 
     const progress = await clientInfoService.getOnboardingProgress(clientId);
@@ -266,7 +267,7 @@ router.delete(
     const clientId = parseInt(req.params.clientId);
 
     if (isNaN(clientId)) {
-      return res.status(400).json({ error: 'Invalid client ID' });
+      return errorResponse(res, 'Invalid client ID', 400);
     }
 
     await clientInfoService.resetOnboarding(clientId);

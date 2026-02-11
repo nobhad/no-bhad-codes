@@ -10,6 +10,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { getDatabase } from '../database/init.js';
+import { errorResponseWithPayload } from '../utils/api-response.js';
 
 // Rate limit configuration
 export interface RateLimitConfig {
@@ -156,8 +157,7 @@ export function createRateLimiter(config: RateLimitConfig) {
 
     // Check if IP is permanently blocked
     if (await isIPBlocked(ip)) {
-      res.status(403).json({
-        error: 'Access denied',
+      errorResponseWithPayload(res, 'Access denied', 403, 'IP_BLOCKED', {
         message: 'Your IP address has been blocked'
       });
       return;
@@ -174,8 +174,7 @@ export function createRateLimiter(config: RateLimitConfig) {
       res.setHeader('X-RateLimit-Remaining', 0);
       res.setHeader('X-RateLimit-Reset', Math.ceil(entry.blockedUntil / 1000));
 
-      res.status(429).json({
-        error: 'Too Many Requests',
+      errorResponseWithPayload(res, 'Too Many Requests', 429, 'RATE_LIMIT_EXCEEDED', {
         message: 'Rate limit exceeded. Please try again later.',
         retryAfter
       });
@@ -207,8 +206,7 @@ export function createRateLimiter(config: RateLimitConfig) {
       // Log the rate limit event
       await logRateLimitEvent(ip, req.path, entry.count, true, new Date(entry.blockedUntil));
 
-      res.status(429).json({
-        error: 'Too Many Requests',
+      errorResponseWithPayload(res, 'Too Many Requests', 429, 'RATE_LIMIT_EXCEEDED', {
         message: 'Rate limit exceeded. Please try again later.',
         retryAfter
       });

@@ -1742,7 +1742,7 @@ class AnalyticsService {
     const results = await db.all(`
       SELECT
         c.id as client_id,
-        c.name as client_name,
+        COALESCE(c.contact_name, c.company_name) as client_name,
         SUM(CASE WHEN i.status = 'paid' THEN i.total_amount ELSE 0 END) as total_revenue,
         COUNT(DISTINCT p.id) as project_count,
         MIN(p.created_at) as first_project_date,
@@ -1751,7 +1751,7 @@ class AnalyticsService {
       LEFT JOIN projects p ON c.id = p.client_id
       LEFT JOIN invoices i ON p.id = i.project_id
       WHERE c.deleted_at IS NULL
-      GROUP BY c.id, c.name
+      GROUP BY c.id, COALESCE(c.contact_name, c.company_name)
       HAVING total_revenue > 0
       ORDER BY total_revenue DESC
       LIMIT ?
@@ -1804,9 +1804,9 @@ class AnalyticsService {
     const results = await db.all(`
       SELECT
         c.id as client_id,
-        c.name as client_name,
+        COALESCE(c.contact_name, c.company_name) as client_name,
         c.updated_at as last_activity,
-        (SELECT COUNT(*) FROM messages m WHERE m.client_id = c.id AND m.created_at > datetime('now', '-30 days')) as recent_messages,
+        (SELECT COUNT(*) FROM messages m JOIN message_threads t ON m.thread_id = t.id WHERE t.client_id = c.id AND m.created_at > datetime('now', '-30 days')) as recent_messages,
         (SELECT COUNT(*) FROM invoices i WHERE i.client_id = c.id AND i.status = 'paid') as paid_invoices,
         (SELECT AVG(JULIANDAY(i.paid_at) - JULIANDAY(i.due_date))
          FROM invoices i WHERE i.client_id = c.id AND i.status = 'paid' AND i.paid_at IS NOT NULL) as avg_payment_days
@@ -1867,14 +1867,14 @@ class AnalyticsService {
     const clients = await db.all(`
       SELECT
         c.id as client_id,
-        c.name as client_name,
+        COALESCE(c.contact_name, c.company_name) as client_name,
         c.updated_at as last_contact,
         GROUP_CONCAT(DISTINCT p.project_type) as project_types,
         (SELECT COUNT(*) FROM projects WHERE client_id = c.id AND project_type = 'maintenance') as has_maintenance
       FROM clients c
       LEFT JOIN projects p ON c.id = p.client_id
       WHERE c.deleted_at IS NULL
-      GROUP BY c.id, c.name
+      GROUP BY c.id, COALESCE(c.contact_name, c.company_name)
       HAVING has_maintenance = 0
     `) as Array<{
       client_id: number;
@@ -1928,7 +1928,7 @@ class AnalyticsService {
       SELECT
         i.id as invoice_id,
         i.invoice_number,
-        c.name as client_name,
+        COALESCE(c.contact_name, c.company_name) as client_name,
         i.total_amount as amount,
         i.due_date,
         CAST(JULIANDAY('now') - JULIANDAY(i.due_date) AS INTEGER) as days_overdue,
@@ -1977,8 +1977,8 @@ class AnalyticsService {
       SELECT
         a.id,
         a.entity_type as type,
-        COALESCE(p.name, d.name, 'Unknown') as entity_name,
-        c.name as client_name,
+        COALESCE(p.project_name, d.name, 'Unknown') as entity_name,
+        COALESCE(c.contact_name, c.company_name) as client_name,
         a.created_at as requested_date,
         CAST(JULIANDAY('now') - JULIANDAY(a.created_at) AS INTEGER) as days_waiting,
         (SELECT COUNT(*) FROM approval_reminders WHERE approval_id = a.id) as reminders_sent
@@ -2033,12 +2033,12 @@ class AnalyticsService {
       db.all(`
         SELECT
           c.id as client_id,
-          c.name as client_name,
+          COALESCE(c.contact_name, c.company_name) as client_name,
           SUM(CASE WHEN dr.status = 'pending' THEN 1 ELSE 0 END) as pending,
           SUM(CASE WHEN dr.status = 'pending' AND dr.due_date < date('now') THEN 1 ELSE 0 END) as overdue
         FROM clients c
         JOIN document_requests dr ON dr.client_id = c.id
-        GROUP BY c.id, c.name
+        GROUP BY c.id, COALESCE(c.contact_name, c.company_name)
         HAVING pending > 0
         ORDER BY overdue DESC, pending DESC
       `)
@@ -2083,19 +2083,19 @@ class AnalyticsService {
     const projects = await db.all(`
       SELECT
         p.id as project_id,
-        p.name as project_name,
-        c.name as client_name,
+        p.project_name as project_name,
+        COALESCE(c.contact_name, c.company_name) as client_name,
         p.status,
-        p.end_date as due_date,
+        p.estimated_end_date as due_date,
         p.created_at,
-        (SELECT COUNT(*) FROM tasks WHERE project_id = p.id AND status = 'completed') as completed_tasks,
-        (SELECT COUNT(*) FROM tasks WHERE project_id = p.id) as total_tasks,
-        (SELECT COUNT(*) FROM tasks WHERE project_id = p.id AND status != 'completed' AND due_date < date('now')) as overdue_tasks,
+        (SELECT COUNT(*) FROM project_tasks WHERE project_id = p.id AND status = 'completed') as completed_tasks,
+        (SELECT COUNT(*) FROM project_tasks WHERE project_id = p.id) as total_tasks,
+        (SELECT COUNT(*) FROM project_tasks WHERE project_id = p.id AND status != 'completed' AND due_date < date('now')) as overdue_tasks,
         (SELECT COUNT(*) FROM invoices WHERE project_id = p.id AND status IN ('sent', 'overdue') AND due_date < date('now')) as overdue_invoices
       FROM projects p
       JOIN clients c ON p.client_id = c.id
       WHERE p.status IN ('active', 'in_progress', 'review')
-      ORDER BY p.end_date ASC
+      ORDER BY p.estimated_end_date ASC
     `) as Array<{
       project_id: number;
       project_name: string;

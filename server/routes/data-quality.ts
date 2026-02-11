@@ -34,6 +34,7 @@ import {
   getRateLimitStats
 } from '../middleware/rate-limiter.js';
 import { userService } from '../services/user-service.js';
+import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -71,10 +72,13 @@ router.post('/duplicates/scan', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Duplicate scan error:', error);
-    res.status(500).json({
-      error: 'Failed to scan for duplicates',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
+    errorResponseWithPayload(
+      res,
+      'Failed to scan for duplicates',
+      500,
+      'INTERNAL_ERROR',
+      { message: error instanceof Error ? error.message : 'Unknown error' }
+    );
   }
 });
 
@@ -87,8 +91,7 @@ router.post('/duplicates/check', async (req: Request, res: Response) => {
     const { email, firstName, lastName, company, phone, website } = req.body;
 
     if (!email && !firstName && !lastName) {
-      res.status(400).json({
-        error: 'Validation error',
+      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
         message: 'At least email or name is required'
       });
       return;
@@ -117,10 +120,13 @@ router.post('/duplicates/check', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Duplicate check error:', error);
-    res.status(500).json({
-      error: 'Failed to check for duplicates',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
+    errorResponseWithPayload(
+      res,
+      'Failed to check for duplicates',
+      500,
+      'INTERNAL_ERROR',
+      { message: error instanceof Error ? error.message : 'Unknown error' }
+    );
   }
 });
 
@@ -138,8 +144,7 @@ router.post('/duplicates/merge', async (req: Request, res: Response) => {
     } = req.body;
 
     if (!keepId || !keepType || !mergeIds || !Array.isArray(mergeIds)) {
-      res.status(400).json({
-        error: 'Validation error',
+      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
         message: 'keepId, keepType, and mergeIds array are required'
       });
       return;
@@ -160,10 +165,13 @@ router.post('/duplicates/merge', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Duplicate merge error:', error);
-    res.status(500).json({
-      error: 'Failed to merge records',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
+    errorResponseWithPayload(
+      res,
+      'Failed to merge records',
+      500,
+      'INTERNAL_ERROR',
+      { message: error instanceof Error ? error.message : 'Unknown error' }
+    );
   }
 });
 
@@ -198,10 +206,13 @@ router.post('/duplicates/dismiss', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Duplicate dismiss error:', error);
-    res.status(500).json({
-      error: 'Failed to dismiss duplicate',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
+    errorResponseWithPayload(
+      res,
+      'Failed to dismiss duplicate',
+      500,
+      'INTERNAL_ERROR',
+      { message: error instanceof Error ? error.message : 'Unknown error' }
+    );
   }
 });
 
@@ -231,10 +242,13 @@ router.get('/duplicates/history', async (_req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('History fetch error:', error);
-    res.status(500).json({
-      error: 'Failed to fetch history',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
+    errorResponseWithPayload(
+      res,
+      'Failed to fetch history',
+      500,
+      'INTERNAL_ERROR',
+      { message: error instanceof Error ? error.message : 'Unknown error' }
+    );
   }
 });
 
@@ -251,8 +265,7 @@ router.post('/validate/email', (req: Request, res: Response) => {
     const { email } = req.body;
 
     if (!email) {
-      res.status(400).json({
-        error: 'Validation error',
+      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
         message: 'Email is required'
       });
       return;
@@ -264,8 +277,7 @@ router.post('/validate/email', (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    res.status(500).json({
-      error: 'Validation failed',
+    errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -284,8 +296,7 @@ router.post('/validate/phone', (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    res.status(500).json({
-      error: 'Validation failed',
+    errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -304,8 +315,7 @@ router.post('/validate/url', (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    res.status(500).json({
-      error: 'Validation failed',
+    errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -320,8 +330,7 @@ router.post('/validate/file', (req: Request, res: Response) => {
     const { filename, mimeType, sizeBytes, allowedCategories } = req.body;
 
     if (!filename || !mimeType || sizeBytes === undefined) {
-      res.status(400).json({
-        error: 'Validation error',
+      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
         message: 'filename, mimeType, and sizeBytes are required'
       });
       return;
@@ -333,8 +342,7 @@ router.post('/validate/file', (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    res.status(500).json({
-      error: 'Validation failed',
+    errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -349,8 +357,7 @@ router.post('/validate/object', (req: Request, res: Response) => {
     const { data, schema } = req.body;
 
     if (!data || !schema) {
-      res.status(400).json({
-        error: 'Validation error',
+      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
         message: 'data and schema are required'
       });
       return;
@@ -362,8 +369,7 @@ router.post('/validate/object', (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    res.status(500).json({
-      error: 'Validation failed',
+    errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -378,8 +384,7 @@ router.post('/sanitize', (req: Request, res: Response) => {
     const { input, options } = req.body;
 
     if (input === undefined) {
-      res.status(400).json({
-        error: 'Validation error',
+      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
         message: 'input is required'
       });
       return;
@@ -391,8 +396,7 @@ router.post('/sanitize', (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    res.status(500).json({
-      error: 'Sanitization failed',
+    errorResponseWithPayload(res, 'Sanitization failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -407,8 +411,7 @@ router.post('/security/check', async (req: Request, res: Response) => {
     const { input } = req.body;
 
     if (!input) {
-      res.status(400).json({
-        error: 'Validation error',
+      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
         message: 'input is required'
       });
       return;
@@ -442,8 +445,7 @@ router.post('/security/check', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
-      error: 'Security check failed',
+    errorResponseWithPayload(res, 'Security check failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -466,8 +468,7 @@ router.get('/metrics', async (_req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Metrics fetch error:', error);
-    res.status(500).json({
-      error: 'Failed to fetch metrics',
+    errorResponseWithPayload(res, 'Failed to fetch metrics', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -503,8 +504,7 @@ router.post('/metrics/calculate', async (_req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Metrics calculation error:', error);
-    res.status(500).json({
-      error: 'Failed to calculate metrics',
+    errorResponseWithPayload(res, 'Failed to calculate metrics', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -533,8 +533,7 @@ router.get('/metrics/history', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('History fetch error:', error);
-    res.status(500).json({
-      error: 'Failed to fetch history',
+    errorResponseWithPayload(res, 'Failed to fetch history', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -557,8 +556,7 @@ router.get('/rate-limits/stats', async (_req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Rate limit stats error:', error);
-    res.status(500).json({
-      error: 'Failed to fetch rate limit stats',
+    errorResponseWithPayload(res, 'Failed to fetch rate limit stats', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -573,8 +571,7 @@ router.post('/rate-limits/block', async (req: Request, res: Response) => {
     const { ip, reason, expiresAt, adminEmail } = req.body;
 
     if (!ip || !reason) {
-      res.status(400).json({
-        error: 'Validation error',
+      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
         message: 'ip and reason are required'
       });
       return;
@@ -588,8 +585,7 @@ router.post('/rate-limits/block', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('IP block error:', error);
-    res.status(500).json({
-      error: 'Failed to block IP',
+    errorResponseWithPayload(res, 'Failed to block IP', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -604,8 +600,7 @@ router.post('/rate-limits/unblock', async (req: Request, res: Response) => {
     const { ip } = req.body;
 
     if (!ip) {
-      res.status(400).json({
-        error: 'Validation error',
+      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
         message: 'ip is required'
       });
       return;
@@ -619,8 +614,7 @@ router.post('/rate-limits/unblock', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('IP unblock error:', error);
-    res.status(500).json({
-      error: 'Failed to unblock IP',
+    errorResponseWithPayload(res, 'Failed to unblock IP', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -655,8 +649,7 @@ router.get('/validation-errors', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Validation errors fetch error:', error);
-    res.status(500).json({
-      error: 'Failed to fetch validation errors',
+    errorResponseWithPayload(res, 'Failed to fetch validation errors', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }

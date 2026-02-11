@@ -109,7 +109,7 @@ export async function createPaymentLink(config: PaymentLinkConfig): Promise<Paym
 
   // Get invoice details
   const invoice = await db.get(
-    'SELECT i.*, c.name as client_name, c.email as client_email FROM invoices i LEFT JOIN clients c ON i.client_id = c.id WHERE i.id = ?',
+    'SELECT i.*, COALESCE(c.contact_name, c.company_name) as client_name, c.email as client_email FROM invoices i LEFT JOIN clients c ON i.client_id = c.id WHERE i.id = ?',
     [config.invoiceId]
   ) as InvoiceRow | undefined;
 
