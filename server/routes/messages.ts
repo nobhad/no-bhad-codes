@@ -16,6 +16,7 @@ import { cache, invalidateCache } from '../middleware/cache.js';
 import { getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { messageService } from '../services/message-service.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -64,19 +65,19 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit for message attachments
-    files: 3 // Max 3 files per message
+    fileSize: 10 * 1024 * 1024, // 10MB limit for message attachments
+    files: 5 // Max 5 files per message
   },
   fileFilter: (req, file, cb) => {
     // Allow common attachment types
-    const allowedTypes = /jpeg|jpg|png|pdf|doc|docx|txt|zip/;
+    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|xls|xlsx|txt|zip/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
 
     if (mimetype && extname) {
       return cb(null, true);
     }
-    cb(new Error('Invalid attachment type'));
+    cb(new Error('Invalid attachment type. Allowed: pdf, doc, docx, xls, xlsx, png, jpg, jpeg, gif, txt, zip'));
   }
 });
 
@@ -145,10 +146,7 @@ router.post(
     const { subject, thread_type = 'general', priority = 'normal', project_id } = req.body;
 
     if (!subject || subject.trim().length === 0) {
-      return res.status(400).json({
-        error: 'Subject is required',
-        code: 'MISSING_SUBJECT'
-      });
+      return errorResponse(res, 'Subject is required', 400, 'MISSING_SUBJECT');
     }
 
     const db = getDatabase();
@@ -166,10 +164,7 @@ router.post(
       }
 
       if (!project) {
-        return res.status(404).json({
-          error: 'Project not found or access denied',
-          code: 'PROJECT_NOT_FOUND'
-        });
+        return errorResponse(res, 'Project not found or access denied', 404, 'PROJECT_NOT_FOUND');
       }
     }
 
@@ -201,7 +196,7 @@ router.post(
 router.post(
   '/threads/:threadId/messages',
   authenticateToken,
-  upload.array('attachments', 3),
+  upload.array('attachments', 5),
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const threadId = parseInt(req.params.threadId);
@@ -209,10 +204,7 @@ router.post(
     const attachments = req.files as Express.Multer.File[];
 
     if (!message || message.trim().length === 0) {
-      return res.status(400).json({
-        error: 'Message content is required',
-        code: 'MISSING_MESSAGE'
-      });
+      return errorResponse(res, 'Message content is required', 400, 'MISSING_MESSAGE');
     }
 
     const db = getDatabase();
@@ -229,10 +221,7 @@ router.post(
     }
 
     if (!thread) {
-      return res.status(404).json({
-        error: 'Message thread not found',
-        code: 'THREAD_NOT_FOUND'
-      });
+      return errorResponse(res, 'Message thread not found', 404, 'THREAD_NOT_FOUND');
     }
 
     // Process attachments
@@ -366,10 +355,7 @@ router.get(
     }
 
     if (!thread) {
-      return res.status(404).json({
-        error: 'Message thread not found',
-        code: 'THREAD_NOT_FOUND'
-      });
+      return errorResponse(res, 'Message thread not found', 404, 'THREAD_NOT_FOUND');
     }
 
     const messages = await db.all(
@@ -437,10 +423,7 @@ router.put(
     }
 
     if (!thread) {
-      return res.status(404).json({
-        error: 'Message thread not found',
-        code: 'THREAD_NOT_FOUND'
-      });
+      return errorResponse(res, 'Message thread not found', 404, 'THREAD_NOT_FOUND');
     }
 
     // Mark messages as read (except own messages)
@@ -467,17 +450,14 @@ router.put(
 router.post(
   '/inquiry',
   authenticateToken,
-  upload.array('attachments', 3),
+  upload.array('attachments', 5),
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { subject, message, priority = 'normal', message_type = 'inquiry' } = req.body;
     const attachments = req.files as Express.Multer.File[];
 
     if (!subject || !message) {
-      return res.status(400).json({
-        error: 'Subject and message are required',
-        code: 'MISSING_REQUIRED_FIELDS'
-      });
+      return errorResponse(res, 'Subject and message are required', 400, 'MISSING_REQUIRED_FIELDS');
     }
 
     const db = getDatabase();
@@ -625,10 +605,7 @@ router.put(
     }
 
     if (updates.length === 0) {
-      return res.status(400).json({
-        error: 'No valid fields to update',
-        code: 'NO_UPDATES'
-      });
+      return errorResponse(res, 'No valid fields to update', 400, 'NO_UPDATES');
     }
 
     values.push(req.user!.id);
@@ -669,11 +646,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const messageId = parseInt(req.params.messageId);
     if (isNaN(messageId)) {
-      return res.status(400).json({ error: 'Invalid message ID' });
+      return errorResponse(res, 'Invalid message ID', 400);
     }
 
     if (!(await canAccessMessage(req, messageId))) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const mentions = await messageService.getMentions(messageId);
@@ -704,11 +681,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const messageId = parseInt(req.params.messageId);
     if (isNaN(messageId)) {
-      return res.status(400).json({ error: 'Invalid message ID' });
+      return errorResponse(res, 'Invalid message ID', 400);
     }
 
     if (!(await canAccessMessage(req, messageId))) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const reactions = await messageService.getReactions(messageId);
@@ -726,18 +703,15 @@ router.post(
     const { reaction } = req.body;
 
     if (isNaN(messageId)) {
-      return res.status(400).json({ error: 'Invalid message ID' });
+      return errorResponse(res, 'Invalid message ID', 400);
     }
 
     if (!(await canAccessMessage(req, messageId))) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     if (!reaction) {
-      return res.status(400).json({
-        error: 'Reaction is required',
-        code: 'MISSING_REACTION'
-      });
+      return errorResponse(res, 'Reaction is required', 400, 'MISSING_REACTION');
     }
 
     const reactionData = await messageService.addReaction(
@@ -760,11 +734,11 @@ router.delete(
     const reaction = decodeURIComponent(req.params.reaction);
 
     if (isNaN(messageId)) {
-      return res.status(400).json({ error: 'Invalid message ID' });
+      return errorResponse(res, 'Invalid message ID', 400);
     }
 
     if (!(await canAccessMessage(req, messageId))) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     await messageService.removeReaction(messageId, req.user!.email, reaction);
@@ -783,11 +757,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId);
     if (isNaN(projectId)) {
-      return res.status(400).json({ error: 'Invalid project ID' });
+      return errorResponse(res, 'Invalid project ID', 400);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const subscription = await messageService.getSubscription(projectId, req.user!.email);
@@ -804,11 +778,11 @@ router.put(
     const { notify_all, notify_mentions, notify_replies } = req.body;
 
     if (isNaN(projectId)) {
-      return res.status(400).json({ error: 'Invalid project ID' });
+      return errorResponse(res, 'Invalid project ID', 400);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const subscription = await messageService.updateSubscription(
@@ -829,11 +803,11 @@ router.post(
     const { until } = req.body; // Optional: datetime to mute until
 
     if (isNaN(projectId)) {
-      return res.status(400).json({ error: 'Invalid project ID' });
+      return errorResponse(res, 'Invalid project ID', 400);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const subscription = await messageService.muteProject(
@@ -882,10 +856,7 @@ router.post(
     const { message_ids } = req.body;
 
     if (!message_ids || !Array.isArray(message_ids)) {
-      return res.status(400).json({
-        error: 'message_ids array is required',
-        code: 'MISSING_MESSAGE_IDS'
-      });
+      return errorResponse(res, 'message_ids array is required', 400, 'MISSING_MESSAGE_IDS');
     }
 
     await messageService.markMultipleAsRead(message_ids, req.user!.email, req.user!.type);
@@ -952,10 +923,7 @@ router.post(
     const { thread_id } = req.body;
 
     if (!thread_id) {
-      return res.status(400).json({
-        error: 'thread_id is required',
-        code: 'MISSING_THREAD_ID'
-      });
+      return errorResponse(res, 'thread_id is required', 400, 'MISSING_THREAD_ID');
     }
 
     await messageService.pinMessage(thread_id, messageId, req.user!.email);
@@ -974,10 +942,7 @@ router.delete(
     const threadId = parseInt(req.query.thread_id as string);
 
     if (!threadId) {
-      return res.status(400).json({
-        error: 'thread_id query parameter is required',
-        code: 'MISSING_THREAD_ID'
-      });
+      return errorResponse(res, 'thread_id query parameter is required', 400, 'MISSING_THREAD_ID');
     }
 
     await messageService.unpinMessage(threadId, messageId);
@@ -999,20 +964,14 @@ router.put(
     const { message: content } = req.body;
 
     if (!content || content.trim().length === 0) {
-      return res.status(400).json({
-        error: 'Message content is required',
-        code: 'MISSING_MESSAGE'
-      });
+      return errorResponse(res, 'Message content is required', 400, 'MISSING_MESSAGE');
     }
 
     await messageService.editMessage(messageId, content.trim());
     const updatedMessage = { id: messageId, message: content.trim() };
 
     if (!updatedMessage) {
-      return res.status(403).json({
-        error: 'Cannot edit this message',
-        code: 'EDIT_FORBIDDEN'
-      });
+      return errorResponse(res, 'Cannot edit this message', 403, 'EDIT_FORBIDDEN');
     }
 
     res.json({ message: updatedMessage });
@@ -1031,10 +990,7 @@ router.delete(
     const success = true;
 
     if (!success) {
-      return res.status(403).json({
-        error: 'Cannot delete this message',
-        code: 'DELETE_FORBIDDEN'
-      });
+      return errorResponse(res, 'Cannot delete this message', 403, 'DELETE_FORBIDDEN');
     }
 
     res.json({ message: 'Message deleted' });
@@ -1099,10 +1055,7 @@ router.get(
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
 
     if (!query || query.trim().length === 0) {
-      return res.status(400).json({
-        error: 'Search query is required',
-        code: 'MISSING_QUERY'
-      });
+      return errorResponse(res, 'Search query is required', 400, 'MISSING_QUERY');
     }
 
     const results = await messageService.searchMessages(query.trim(), {
@@ -1132,10 +1085,7 @@ router.post(
     const { message } = req.body;
 
     if (!message || message.trim().length === 0) {
-      return res.status(400).json({
-        error: 'Message content is required',
-        code: 'MISSING_MESSAGE'
-      });
+      return errorResponse(res, 'Message content is required', 400, 'MISSING_MESSAGE');
     }
 
     const db = getDatabase();
@@ -1143,10 +1093,7 @@ router.post(
     // Verify thread exists
     const thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
     if (!thread) {
-      return res.status(404).json({
-        error: 'Thread not found',
-        code: 'THREAD_NOT_FOUND'
-      });
+      return errorResponse(res, 'Thread not found', 404, 'THREAD_NOT_FOUND');
     }
 
     const result = await db.run(
@@ -1240,6 +1187,58 @@ router.get(
       analytics,
       recentActivity
     });
+  })
+);
+
+// ===================================
+// ATTACHMENT DOWNLOAD
+// ===================================
+
+// Download a message attachment
+router.get(
+  '/attachments/:filename/download',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { filename } = req.params;
+
+    // Security: Validate filename to prevent path traversal
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      return errorResponse(res, 'Invalid filename', 400, 'INVALID_FILENAME');
+    }
+
+    const filePath = path.join(getUploadsSubdir(UPLOAD_DIRS.MESSAGES), filename);
+
+    // Check if file exists
+    const fs = await import('fs/promises');
+    try {
+      await fs.access(filePath);
+    } catch {
+      return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
+    }
+
+    // Get the original filename from the database if possible
+    const db = getDatabase();
+    const message = await db.get(
+      'SELECT attachments FROM general_messages WHERE attachments LIKE ?',
+      [`%${  filename  }%`]
+    );
+
+    let originalName = filename;
+    if (message && message.attachments) {
+      try {
+        const attachments = JSON.parse(message.attachments as string);
+        const attachment = attachments.find((a: { filename: string }) => a.filename === filename);
+        if (attachment?.originalName) {
+          originalName = attachment.originalName;
+        }
+      } catch {
+        // Use filename as fallback
+      }
+    }
+
+    // Set headers for download
+    res.setHeader('Content-Disposition', `attachment; filename="${originalName}"`);
+    res.sendFile(filePath);
   })
 );
 

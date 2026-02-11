@@ -10,14 +10,16 @@
 /** Portal file from API */
 export interface PortalFile {
   id: string | number;
-  originalName: string;
+  originalName?: string;
   filename?: string;
   mimetype: string;
   size: number;
-  uploadedBy: string;
+  uploadedBy?: string;
   uploadedAt: string;
-  projectId?: string;
+  projectId?: string | number;
   projectName?: string;
+  fileType?: string;
+  category?: string;
 }
 
 /** Portal invoice from API */
@@ -40,6 +42,15 @@ export interface PortalProject {
   preview_url?: string;
 }
 
+/** Message attachment */
+export interface MessageAttachment {
+  filename: string;
+  originalName: string;
+  path: string;
+  size: number;
+  mimeType: string;
+}
+
 /** Message from API */
 export interface PortalMessage {
   id: string | number;
@@ -47,12 +58,13 @@ export interface PortalMessage {
   sender_name?: string;
   message: string;
   created_at: string;
+  attachments?: MessageAttachment[] | null;
 }
 
 /** Context passed to portal modules */
 export interface ClientPortalContext {
   getAuthToken: () => string | null;
-  showNotification: (message: string, type?: 'success' | 'error' | 'info') => void;
+  showNotification: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   formatDate: (dateString: string) => string;
   escapeHtml: (text: string) => string;
 }
