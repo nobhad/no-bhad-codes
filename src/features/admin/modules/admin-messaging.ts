@@ -19,6 +19,16 @@ import type {
   MessageThreadResponse,
   MessageResponse
 } from '../../../types/api';
+import { ICONS } from '../../../constants/icons';
+import { showToast } from '../../../utils/toast-notifications';
+
+// Attachment configuration
+const MAX_ATTACHMENTS = 5;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'zip'];
+
+// Pending attachments for current message
+let pendingAttachments: File[] = [];
 
 let selectedClientId: number | null = null;
 let selectedThreadId: number | null = null;
@@ -355,6 +365,34 @@ export async function loadThreadMessages(
   }
 }
 
+/**
+ * Render attachment list for a message
+ */
+function renderAdminMessageAttachments(attachments: { filename: string; originalName: string; size: number; mimeType: string }[] | null): string {
+  if (!attachments || attachments.length === 0) return '';
+
+  const attachmentItems = attachments.map(att => {
+    const size = formatFileSize(att.size);
+    const name = att.originalName || att.filename;
+    const displayName = name.length > 25 ? `${name.substring(0, 22)  }...` : name;
+
+    return `
+      <a href="/api/messages/attachments/${att.filename}/download"
+         class="message-attachment"
+         target="_blank"
+         rel="noopener noreferrer"
+         title="Download ${name}">
+        <span class="message-attachment-icon">${ICONS.FILE}</span>
+        <span class="message-attachment-name">${SanitizationUtils.escapeHtml(displayName)}</span>
+        <span class="message-attachment-size">(${size})</span>
+        <span class="message-attachment-download">${ICONS.DOWNLOAD}</span>
+      </a>
+    `;
+  }).join('');
+
+  return `<div class="message-attachments">${attachmentItems}</div>`;
+}
+
 function renderMessages(messages: Message[], container: HTMLElement): void {
   if (messages.length === 0) {
     container.innerHTML =
@@ -363,7 +401,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
   }
 
   container.innerHTML = messages
-    .map((msg: MessageResponse & { is_pinned?: boolean; is_read?: boolean; reactions?: MessageReaction[] }) => {
+    .map((msg: MessageResponse & { is_pinned?: boolean; reactions?: MessageReaction[]; attachments?: { filename: string; originalName: string; size: number; mimeType: string }[] }) => {
       const isAdmin = msg.sender_type === 'admin';
       const dateTime = formatDateTime(msg.created_at);
       const rawSenderName = isAdmin ? 'You' : SanitizationUtils.decodeHtmlEntities(selectedClientName || 'Client');
@@ -376,15 +414,19 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
       // Build reactions HTML
       const reactionsHtml = renderReactionsHtml(msg.id, msg.reactions || []);
 
+      // Build attachments HTML
+      const attachmentsHtml = renderAdminMessageAttachments(msg.attachments || null);
+
       // Read receipt for admin messages
+      const isRead = msg.read_at !== null;
       const readReceiptHtml = isAdmin ? `
-        <div class="message-status ${msg.is_read ? 'read' : ''}">
+        <div class="message-status ${isRead ? 'read' : ''}">
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            ${msg.is_read
+            ${isRead
     ? '<polyline points="20 6 9 17 4 12"></polyline><polyline points="20 12 9 23 4 18"></polyline>'
     : '<polyline points="20 6 9 17 4 12"></polyline>'}
           </svg>
-          ${msg.is_read ? 'Read' : 'Sent'}
+          ${isRead ? 'Read' : 'Sent'}
         </div>
       ` : '';
 
@@ -420,6 +462,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
                 ${actionsHtml}
               </div>
               <div class="message-body">${safeContent}</div>
+              ${attachmentsHtml}
               ${reactionsHtml}
               ${readReceiptHtml}
             </div>
@@ -442,6 +485,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
               ${actionsHtml}
             </div>
             <div class="message-body">${safeContent}</div>
+            ${attachmentsHtml}
             ${reactionsHtml}
           </div>
         </div>
@@ -699,16 +743,43 @@ async function loadThreadMessagesWithReactions(threadId: number, container: HTML
 
 export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
   const input = getElement('admin-message-text') as HTMLInputElement;
-  if (!input || !input.value.trim() || !selectedThreadId) return;
+  if (!input || !selectedThreadId) return;
 
   const message = input.value.trim();
+  if (!message && pendingAttachments.length === 0) return;
+
   input.value = '';
   input.disabled = true;
 
   try {
-    const response = await apiPost(`/api/messages/threads/${selectedThreadId}/messages`, { message });
+    let response: Response;
+
+    // Use FormData if we have attachments, otherwise use JSON
+    if (pendingAttachments.length > 0) {
+      const formData = new FormData();
+      formData.append('message', message || '(Attachment)');
+
+      pendingAttachments.forEach(file => {
+        formData.append('attachments', file);
+      });
+
+      response = await fetch(`/api/messages/threads/${selectedThreadId}/messages`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+    } else {
+      response = await fetch(`/api/messages/threads/${selectedThreadId}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ message })
+      });
+    }
 
     if (response.ok) {
+      // Clear attachments
+      clearAdminAttachments();
       // Use cache busting to ensure we get the latest messages after sending
       loadThreadMessages(selectedThreadId, ctx, true);
       loadClientThreads(ctx);
@@ -721,6 +792,181 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
   } finally {
     input.disabled = false;
     input.focus();
+  }
+}
+
+/**
+ * Clear pending attachments
+ */
+function clearAdminAttachments(): void {
+  pendingAttachments = [];
+  const preview = getElement('admin-attachment-preview');
+  if (preview) {
+    preview.innerHTML = '';
+    preview.classList.add('hidden');
+  }
+  const input = getElement('admin-attachment-input') as HTMLInputElement;
+  if (input) {
+    input.value = '';
+  }
+}
+
+/**
+ * Format file size for display
+ */
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/**
+ * Get file extension from filename
+ */
+function getFileExtension(filename: string): string {
+  return filename.split('.').pop()?.toLowerCase() || '';
+}
+
+/**
+ * Validate a file for attachment
+ */
+function validateAdminFile(file: File): string | null {
+  const ext = getFileExtension(file.name);
+
+  if (!ALLOWED_EXTENSIONS.includes(ext)) {
+    return `File type .${ext} is not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return `File ${file.name} is too large. Maximum size is 10MB.`;
+  }
+
+  return null;
+}
+
+/**
+ * Handle file selection in admin
+ */
+function handleAdminFileSelection(files: FileList | null): void {
+  if (!files || files.length === 0) return;
+
+  const remainingSlots = MAX_ATTACHMENTS - pendingAttachments.length;
+  if (remainingSlots <= 0) {
+    showToast(`Maximum ${MAX_ATTACHMENTS} attachments allowed`, 'error');
+    return;
+  }
+
+  const filesToAdd = Array.from(files).slice(0, remainingSlots);
+
+  for (const file of filesToAdd) {
+    const error = validateAdminFile(file);
+    if (error) {
+      showToast(error, 'error');
+      continue;
+    }
+    pendingAttachments.push(file);
+  }
+
+  if (files.length > remainingSlots) {
+    showToast(`Only ${remainingSlots} more files can be added`, 'warning');
+  }
+
+  renderAdminAttachmentPreview();
+}
+
+/**
+ * Remove a single attachment by index
+ */
+function removeAdminAttachment(index: number): void {
+  pendingAttachments.splice(index, 1);
+  renderAdminAttachmentPreview();
+}
+
+/**
+ * Render attachment preview chips
+ */
+function renderAdminAttachmentPreview(): void {
+  const preview = getElement('admin-attachment-preview');
+  if (!preview) return;
+
+  if (pendingAttachments.length === 0) {
+    preview.innerHTML = '';
+    preview.classList.add('hidden');
+    return;
+  }
+
+  preview.classList.remove('hidden');
+  preview.innerHTML = pendingAttachments.map((file, index) => {
+    const size = formatFileSize(file.size);
+    const name = file.name.length > 20 ? `${file.name.substring(0, 17)  }...` : file.name;
+
+    return `
+      <div class="attachment-chip" data-index="${index}">
+        <span class="attachment-chip-icon">${ICONS.FILE}</span>
+        <span class="attachment-chip-name" title="${file.name}">${name}</span>
+        <span class="attachment-chip-size">(${size})</span>
+        <button type="button" class="attachment-chip-remove" data-index="${index}" aria-label="Remove attachment">
+          ${ICONS.X_SMALL}
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  // Add remove button handlers
+  preview.querySelectorAll('.attachment-chip-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const index = parseInt((btn as HTMLElement).dataset.index || '0');
+      removeAdminAttachment(index);
+    });
+  });
+}
+
+/**
+ * Setup attachment listeners for admin
+ */
+function setupAdminAttachmentListeners(): void {
+  const attachBtn = getElement('admin-attach-btn');
+  const attachInput = getElement('admin-attachment-input') as HTMLInputElement;
+
+  if (attachBtn && attachInput) {
+    attachBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      attachInput.click();
+    });
+
+    attachInput.addEventListener('change', () => {
+      handleAdminFileSelection(attachInput.files);
+      attachInput.value = '';
+    });
+  }
+
+  // Drag and drop support
+  const messageInput = getElement('admin-message-text');
+  if (messageInput) {
+    messageInput.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      messageInput.classList.add('drag-over');
+    });
+
+    messageInput.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      messageInput.classList.remove('drag-over');
+    });
+
+    messageInput.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      messageInput.classList.remove('drag-over');
+      // Access dataTransfer from the event
+      const dragEvent = e as Event & { dataTransfer?: DataTransfer };
+      if (dragEvent.dataTransfer?.files) {
+        handleAdminFileSelection(dragEvent.dataTransfer.files);
+      }
+    });
   }
 }
 
@@ -777,6 +1023,9 @@ export function setupMessagingListeners(ctx: AdminDashboardContext): void {
       }
     });
   }
+
+  // Setup attachment listeners
+  setupAdminAttachmentListeners();
 }
 
 /**

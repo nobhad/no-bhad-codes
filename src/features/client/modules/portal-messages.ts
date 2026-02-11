@@ -11,9 +11,18 @@
 import type { PortalMessage, ClientPortalContext } from '../portal-types';
 import { createDOMCache } from '../../../utils/dom-cache';
 import { showToast } from '../../../utils/toast-notifications';
+import { ICONS } from '../../../constants/icons';
 
 const MESSAGES_API_BASE = '/api/messages';
 const CLIENT_THREAD_TITLE = 'Conversation with Noelle';
+
+// Attachment configuration
+const MAX_ATTACHMENTS = 5;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'zip'];
+
+// Pending attachments for current message
+let pendingAttachments: File[] = [];
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -26,6 +35,9 @@ type MessagesDOMKeys = {
   messagesThread: string;
   messageInput: string;
   sendBtn: string;
+  attachBtn: string;
+  attachInput: string;
+  attachPreview: string;
 };
 
 /** Cached DOM element references for performance */
@@ -37,7 +49,10 @@ domCache.register({
   threadHeader: '#messages-thread-header',
   messagesThread: '#messages-thread',
   messageInput: '#message-input',
-  sendBtn: '#btn-send-message'
+  sendBtn: '#btn-send-message',
+  attachBtn: '#btn-attach-file',
+  attachInput: '#attachment-input',
+  attachPreview: '#attachment-preview'
 });
 
 interface MessageThread {
@@ -72,8 +87,9 @@ let cachedThreads: MessageThread[] = [];
  * Load messages from API
  */
 export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: boolean = false): Promise<void> {
-  const threadList = domCache.get('threadList');
-  const messagesContainer = domCache.get('messagesThread');
+  // Force refresh DOM references since views are dynamically rendered
+  const threadList = domCache.get('threadList', true);
+  const messagesContainer = domCache.get('messagesThread', true);
   if (!messagesContainer) return;
 
   // Show loading state
@@ -119,10 +135,34 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: b
       : threads[0];
 
     await loadThreadMessages(thread.id, ctx, bustCache);
+
+    // Check for pending email change message from settings page
+    checkPendingEmailChangeMessage();
   } catch (error) {
     console.error('Error loading messages:', error);
     messagesContainer.innerHTML =
       '<div class="no-messages"><p>Unable to load messages. Please try again later.</p></div>';
+  }
+}
+
+/**
+ * Check for pending email change message and pre-fill input
+ */
+function checkPendingEmailChangeMessage(): void {
+  const pendingMessage = sessionStorage.getItem('pendingEmailChangeMessage');
+  if (pendingMessage) {
+    try {
+      const { template } = JSON.parse(pendingMessage);
+      const messageInput = domCache.get('messageInput', true) as HTMLTextAreaElement | null;
+      if (messageInput && template) {
+        messageInput.value = template;
+        messageInput.focus();
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    // Clear the pending message after using it
+    sessionStorage.removeItem('pendingEmailChangeMessage');
   }
 }
 
@@ -296,6 +336,34 @@ function formatRelativeTime(date: Date): string {
 }
 
 /**
+ * Render attachment list for a message
+ */
+function renderMessageAttachments(attachments: { filename: string; originalName: string; size: number; mimeType: string }[] | null): string {
+  if (!attachments || attachments.length === 0) return '';
+
+  const attachmentItems = attachments.map(att => {
+    const size = formatFileSize(att.size);
+    const name = att.originalName || att.filename;
+    const displayName = name.length > 25 ? `${name.substring(0, 22)  }...` : name;
+
+    return `
+      <a href="${MESSAGES_API_BASE}/attachments/${att.filename}/download"
+         class="message-attachment"
+         target="_blank"
+         rel="noopener noreferrer"
+         title="Download ${name}">
+        <span class="message-attachment-icon">${ICONS.FILE}</span>
+        <span class="message-attachment-name">${displayName}</span>
+        <span class="message-attachment-size">(${size})</span>
+        <span class="message-attachment-download">${ICONS.DOWNLOAD}</span>
+      </a>
+    `;
+  }).join('');
+
+  return `<div class="message-attachments">${attachmentItems}</div>`;
+}
+
+/**
  * Render messages list
  */
 function renderMessages(
@@ -327,6 +395,10 @@ function renderMessages(
 
       const senderClass = isAdmin ? 'message-admin' : 'message-client';
 
+      // Parse attachments if present
+      const attachments = msg.attachments;
+      const attachmentsHtml = renderMessageAttachments(attachments as { filename: string; originalName: string; size: number; mimeType: string }[] | null);
+
       return `
       <div class="message message-${isSent ? 'sent' : 'received'} ${senderClass}">
         <div class="message-avatar">
@@ -338,6 +410,7 @@ function renderMessages(
             <span class="message-time">${ctx.formatDate(msg.created_at)}</span>
           </div>
           <div class="message-body">${ctx.escapeHtml(msg.message)}</div>
+          ${attachmentsHtml}
         </div>
       </div>
     `;
@@ -355,28 +428,52 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
   if (!messageInput) return;
 
   const message = messageInput.value.trim();
-  if (!message) return;
+  if (!message && pendingAttachments.length === 0) return;
 
   try {
     let url: string;
-    let body: { message: string; subject?: string };
+    let requestInit: RequestInit;
 
-    if (currentThreadId) {
-      url = `${MESSAGES_API_BASE}/threads/${currentThreadId}/messages`;
-      body = { message };
+    // Use FormData if we have attachments, otherwise use JSON
+    if (pendingAttachments.length > 0) {
+      const formData = new FormData();
+      formData.append('message', message || '(Attachment)');
+
+      if (!currentThreadId) {
+        formData.append('subject', 'General Inquiry');
+      }
+
+      pendingAttachments.forEach(file => {
+        formData.append('attachments', file);
+      });
+
+      url = currentThreadId
+        ? `${MESSAGES_API_BASE}/threads/${currentThreadId}/messages`
+        : `${MESSAGES_API_BASE}/inquiry`;
+
+      requestInit = {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      };
     } else {
-      url = `${MESSAGES_API_BASE}/inquiry`;
-      body = { subject: 'General Inquiry', message };
+      const body = currentThreadId
+        ? { message }
+        : { subject: 'General Inquiry', message };
+
+      url = currentThreadId
+        ? `${MESSAGES_API_BASE}/threads/${currentThreadId}/messages`
+        : `${MESSAGES_API_BASE}/inquiry`;
+
+      requestInit = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body)
+      };
     }
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include', // Include HttpOnly cookies
-      body: JSON.stringify(body)
-    });
+    const response = await fetch(url, requestInit);
 
     if (!response.ok) {
       const error = await response.json();
@@ -389,13 +486,144 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
       currentThreadId = data.threadId;
     }
 
+    // Clear input and attachments
     messageInput.value = '';
+    clearAttachments();
+
     // Use cache busting to ensure we get the latest messages after sending
     await loadMessagesFromAPI(ctx, true);
   } catch (error) {
     console.error('Error sending message:', error);
     showToast('Failed to send message. Please try again.', 'error');
   }
+}
+
+/**
+ * Clear pending attachments
+ */
+function clearAttachments(): void {
+  pendingAttachments = [];
+  const preview = domCache.get('attachPreview', true);
+  if (preview) {
+    preview.innerHTML = '';
+    preview.classList.add('hidden');
+  }
+  const input = domCache.get('attachInput', true) as HTMLInputElement;
+  if (input) {
+    input.value = '';
+  }
+}
+
+/**
+ * Remove a single attachment by index
+ */
+function removeAttachment(index: number): void {
+  pendingAttachments.splice(index, 1);
+  renderAttachmentPreview();
+}
+
+/**
+ * Format file size for display
+ */
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/**
+ * Get file extension from filename
+ */
+function getFileExtension(filename: string): string {
+  return filename.split('.').pop()?.toLowerCase() || '';
+}
+
+/**
+ * Validate a file for attachment
+ */
+function validateFile(file: File): string | null {
+  const ext = getFileExtension(file.name);
+
+  if (!ALLOWED_EXTENSIONS.includes(ext)) {
+    return `File type .${ext} is not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return `File ${file.name} is too large. Maximum size is 10MB.`;
+  }
+
+  return null;
+}
+
+/**
+ * Handle file selection
+ */
+function handleFileSelection(files: FileList | null): void {
+  if (!files || files.length === 0) return;
+
+  const remainingSlots = MAX_ATTACHMENTS - pendingAttachments.length;
+  if (remainingSlots <= 0) {
+    showToast(`Maximum ${MAX_ATTACHMENTS} attachments allowed`, 'error');
+    return;
+  }
+
+  const filesToAdd = Array.from(files).slice(0, remainingSlots);
+
+  for (const file of filesToAdd) {
+    const error = validateFile(file);
+    if (error) {
+      showToast(error, 'error');
+      continue;
+    }
+    pendingAttachments.push(file);
+  }
+
+  if (files.length > remainingSlots) {
+    showToast(`Only ${remainingSlots} more files can be added`, 'warning');
+  }
+
+  renderAttachmentPreview();
+}
+
+/**
+ * Render attachment preview chips
+ */
+function renderAttachmentPreview(): void {
+  const preview = domCache.get('attachPreview', true);
+  if (!preview) return;
+
+  if (pendingAttachments.length === 0) {
+    preview.innerHTML = '';
+    preview.classList.add('hidden');
+    return;
+  }
+
+  preview.classList.remove('hidden');
+  preview.innerHTML = pendingAttachments.map((file, index) => {
+    const size = formatFileSize(file.size);
+    const name = file.name.length > 20 ? `${file.name.substring(0, 17)  }...` : file.name;
+
+    return `
+      <div class="attachment-chip" data-index="${index}">
+        <span class="attachment-chip-icon">${ICONS.FILE}</span>
+        <span class="attachment-chip-name" title="${file.name}">${name}</span>
+        <span class="attachment-chip-size">(${size})</span>
+        <button type="button" class="attachment-chip-remove" data-index="${index}" aria-label="Remove attachment">
+          ${ICONS.X_SMALL}
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  // Add remove button handlers
+  preview.querySelectorAll('.attachment-chip-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const index = parseInt((btn as HTMLElement).dataset.index || '0');
+      removeAttachment(index);
+    });
+  });
 }
 
 /**
@@ -416,6 +644,58 @@ export function setupMessagingListeners(ctx: ClientPortalContext): void {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage(ctx);
+      }
+    });
+  }
+
+  // Setup attachment button and input
+  setupAttachmentListeners();
+}
+
+/**
+ * Setup attachment-related listeners
+ */
+function setupAttachmentListeners(): void {
+  const attachBtn = domCache.get('attachBtn', true);
+  const attachInput = domCache.get('attachInput', true) as HTMLInputElement;
+
+  if (attachBtn && attachInput) {
+    // Click on attach button opens file picker
+    attachBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      attachInput.click();
+    });
+
+    // Handle file selection
+    attachInput.addEventListener('change', () => {
+      handleFileSelection(attachInput.files);
+      attachInput.value = ''; // Reset so same file can be selected again
+    });
+  }
+
+  // Drag and drop support on message input
+  const messageInput = domCache.get('messageInput', true);
+  if (messageInput) {
+    messageInput.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      messageInput.classList.add('drag-over');
+    });
+
+    messageInput.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      messageInput.classList.remove('drag-over');
+    });
+
+    messageInput.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      messageInput.classList.remove('drag-over');
+      // Access dataTransfer from the event
+      const dragEvent = e as Event & { dataTransfer?: DataTransfer };
+      if (dragEvent.dataTransfer?.files) {
+        handleFileSelection(dragEvent.dataTransfer.files);
       }
     });
   }
