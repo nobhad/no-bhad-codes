@@ -6,6 +6,33 @@ This file contains completed work from February 2026. Items are moved here from 
 
 ## Completed - February 11, 2026
 
+### Help Page UX Redesign - COMPLETE
+
+Complete redesign of the client portal Help page for improved discoverability and visual appeal.
+
+**Layout Changes:**
+
+- Two-column grid layout: Categories (left, narrower) + Content (right, wider)
+- Hero search section with live suggestions and keyboard navigation
+- Collapsible accordion for categories with single-open behavior
+- Quick Start articles grid with clickable cards
+- Article detail view in right column when article selected
+- Contact section updated for single person ("Contact Noelle")
+
+**Technical Implementation:**
+
+- Accordion only allows one category expanded at a time
+- Container heights fixed so accordion expansion doesn't resize main div
+- Live search with debounced suggestions
+- Keyboard navigation (arrow keys + Enter) for search results
+
+**Files Modified:**
+
+- `src/features/client/modules/portal-views.ts` - Help view HTML
+- `src/features/client/modules/portal-help.ts` - Accordion and search logic
+- `src/styles/client-portal/help.css` - Grid layout and styling
+- `docs/features/KNOWLEDGE_BASE.md` - Updated documentation
+
 ### Password Save Prompt Fix - COMPLETE
 
 Fixed browser showing multiple "Save Password" prompts (4 times) when using password forms.

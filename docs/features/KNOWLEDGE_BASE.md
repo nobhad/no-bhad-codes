@@ -159,10 +159,36 @@ The toggle uses the `createViewToggle` component with Categories (grid) and Arti
 
 ### Client - Help Section
 
-- Category cards with icons
-- Search bar
-- Featured articles carousel
-- Article detail view
+Two-column layout redesigned for better UX:
+
+**Layout Structure:**
+
+```text
++------------------------------------------+
+|  HERO SEARCH (full width)                |
+|  Search with live suggestions            |
++------------------+-----------------------+
+|  LEFT COLUMN     |  RIGHT COLUMN         |
+|  (narrower)      |  (wider)              |
+|                  |                       |
+|  Categories      |  Quick Start Articles |
+|  Accordion       |  (Grid of featured)   |
+|  - Single-open   |                       |
+|  - Loads articles|  Article Detail View  |
+|    on expand     |  (shows when clicked) |
+|                  |                       |
++------------------+-----------------------+
+|  CONTACT SECTION (full width)            |
++------------------------------------------+
+```
+
+**Features:**
+
+- **Hero Search:** Live search suggestions as user types, keyboard navigation (arrows + Enter)
+- **Categories Accordion:** Left column, collapsible with single-open behavior (only one expanded at a time)
+- **Quick Start Grid:** Right column, featured articles in card format, clickable to show detail
+- **Article Detail View:** Replaces Quick Start grid when article is selected, shows full content
+- **Contact Section:** "Still Need Help?" with link to messages (single person, not "we")
 
 ## Files
 
@@ -174,6 +200,22 @@ The toggle uses the `createViewToggle` component with Categories (grid) and Arti
 | `src/components/portal-modal.ts` | Modal component |
 
 ## Change Log
+
+### February 11, 2026 - Help Page UX Redesign
+
+- Redesigned Help page with two-column layout (Categories LEFT, Content RIGHT)
+- Added hero search section with live suggestions and keyboard navigation
+- Implemented collapsible accordion for categories with single-open behavior
+- Quick Start articles now displayed in grid format, clickable to show article detail
+- Article detail view appears in right column when article is selected
+- Updated contact section language for single person ("Contact Noelle" not "Contact us")
+- Fixed container heights so accordion expansion doesn't change main div height
+
+**Files Modified:**
+
+- `src/features/client/modules/portal-views.ts` - Help view HTML structure
+- `src/features/client/modules/portal-help.ts` - Accordion logic, search suggestions
+- `src/styles/client-portal/help.css` - Two-column grid layout styles
 
 ### February 9, 2026 - Section Toggle UI Enhancement
 
