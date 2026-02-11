@@ -26,6 +26,14 @@ function mpaRoutingPlugin(): Plugin {
         else if (url === '/client/intake' || url === '/client/intake/') {
           req.url = '/client/intake.html';
         }
+        // Rewrite /client/portal to /client/index.html (portal is the main client page)
+        else if (url === '/client/portal' || url === '/client/portal/') {
+          req.url = '/client/index.html';
+        }
+        // Rewrite /client/set-password to /client/set-password.html
+        else if (url.startsWith('/client/set-password')) {
+          req.url = url.replace('/client/set-password', '/client/set-password.html');
+        }
 
         next();
       });
