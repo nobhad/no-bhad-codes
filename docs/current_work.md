@@ -182,11 +182,12 @@ After completing any task:
 - [x] Create `server/middleware/access-control.ts` - Centralized access control
 - [x] Create `server/types/invoice-types.ts` - Extracted invoice type definitions
 
-#### Phase 1: Split routes/invoices.ts (4,425 lines -> ~14 files)
+#### Phase 1: Split routes/invoices.ts (4,425 -> 3,774 lines, 651 lines extracted)
 
-- [ ] Create `server/routes/invoices/` directory structure
-- [ ] Extract `invoices/helpers.ts` - Shared helper functions, interfaces
-- [ ] Extract `invoices/pdf.ts` - PDF generation (lines 520-1080)
+- [x] Create `server/routes/invoices/` directory structure
+- [x] Extract `invoices/helpers.ts` - Shared helper functions, transformers
+- [x] Extract `invoices/pdf.ts` - PDF generation (~490 lines)
+- [x] Create `invoices/index.ts` - Re-exports for shared utilities
 - [ ] Extract `invoices/core.ts` - CRUD operations, search
 - [ ] Extract `invoices/deposits.ts` - Deposit endpoints
 - [ ] Extract `invoices/credits.ts` - Credit management
@@ -198,7 +199,6 @@ After completing any task:
 - [ ] Extract `invoices/stripe.ts` - Stripe integration
 - [ ] Extract `invoices/batch.ts` - Batch operations
 - [ ] Extract `invoices/aging.ts` - Aging reports
-- [ ] Create `invoices/index.ts` - Router mounting
 - [ ] Update `server/app.ts` imports
 
 #### Phase 2: Split routes/projects.ts (4,411 lines -> ~18 files)
@@ -252,9 +252,9 @@ After completing any task:
 
 #### Code Quality Tasks
 
-- [ ] Replace inline access control in projects.ts with `middleware/access-control.ts`
+- [x] Replace inline access control in projects.ts with `middleware/access-control.ts`
 - [ ] Replace inline access control in invoices.ts with `middleware/access-control.ts`
-- [ ] Replace snake_case transformers in invoices.ts with `utils/transformers.ts`
+- [x] Replace snake_case transformers in invoices.ts with `invoices/helpers.ts`
 - [ ] Create `server/utils/pdf-generator.ts` - Consolidate PDF generation
 - [ ] Update error responses to use `utils/api-response.ts`
 
@@ -273,6 +273,40 @@ After completing any task:
 
 - [ ] Verify recent activity shows all types (invoices, documents, contracts, messages) in both portals
 - [x] Verify theme toggle icon positioned correctly in global header
+
+### Client Portal Audit - Feb 10, 2026
+
+**Fixed:**
+
+- [x] Hardcoded shadow in layout.css → uses `--shadow-elevated-lg`
+- [x] `.section-header` in pending-approvals-section → uses shared `.section-header-with-actions`
+- [x] `.section-header` in milestones-section → uses shared `.section-header-with-actions`
+- [x] Dashboard.css duplicate styles removed → references shared portal-cards.css
+- [x] Work/Requests page: Replaced native `<select>` with `createModalDropdown` component
+- [x] Work/Requests page: Updated TypeScript to use modal dropdowns for type/priority/urgency
+- [x] Work/Requests page: Added file input wrapper with styled display
+- [x] modal-dropdown.css: Updated selectors to support `[data-page="client-portal"]`
+- [x] client-portal/index.css: Added import for modal-dropdown.css
+
+**Shadow Hierarchy Fixes (Feb 10):**
+
+Child elements with `background: var(--portal-bg-medium)` must have NO border per shadow hierarchy rule.
+
+- [x] dashboard.css: `.approval-item` - removed border, changed hover to background color
+- [x] components.css: `.portal-card` - removed border, uses `--shadow-panel`
+- [x] components.css: `.portal-list-item` - removed border and shadow
+- [x] components.css: `.portal-stat` - removed border and shadow
+- [x] components.css: `.upload-request-option` - removed border
+- [x] requests.css: `.requests-card` - already has `border: none`
+- [x] questionnaires.css: `.cp-stat-item` - removed border
+- [x] questionnaires.css: `.cp-questionnaire-card` - removed border
+- [x] questionnaires.css: `.cp-question-item` - removed border
+- [x] settings.css: `.settings-form .checkbox-item` - removed border
+- [x] settings.css: `.checkbox-item` (generic) - removed border
+
+**Known Deviation (requires JS changes):**
+
+- [ ] `upload-request-modal` (lines 1176-1208) uses hardcoded HTML instead of `createPortalModal()` - needs JavaScript refactoring to migrate
 
 ---
 
