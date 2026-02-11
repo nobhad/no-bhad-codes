@@ -75,7 +75,7 @@ The Backend refers to the complete portal system with two interfaces:
 - **[Developer Guide](./DEVELOPER_GUIDE.md)** - Development practices, module patterns, service layer, and component system
 - **[Configuration Guide](./CONFIGURATION.md)** - Environment variables, frontend config files, TypeScript and Vite configuration
 - **[Performance & Bundle Optimization](./OPTIMIZATION.md)** - Bundle optimization strategies, performance monitoring, Core Web Vitals tracking, and development best practices
- - **[Visitor Tracking System](./features/VISITOR-TRACKING.md)** - Privacy-compliant analytics, consent management, and engagement metrics
+- **[Visitor Tracking System](./features/VISITOR-TRACKING.md)** - Privacy-compliant analytics, consent management, and engagement metrics
 - **[API Documentation](./API_DOCUMENTATION.md)** - Complete API reference with request/response examples
 - **[Code Protection Guide](./code-protection-guide.md)** - Code obfuscation, source map protection, and security practices
 
@@ -123,7 +123,7 @@ npm run db:setup
 # Start development servers (frontend + backend)
 npm run dev:full
 
-# Open http://localhost:4000
+# Open http://<frontend-host>:4000
 ```
 
 ### Development Commands

@@ -14,9 +14,9 @@ Design and front-end changes are applied **directly to the main site** (admin an
 
 ### How to enable
 
-- **URL:** Add `?wireframe=1` to the page. Examples (local dev on port 4000):
-  - Admin: `http://localhost:4000/admin/?wireframe=1`
-  - Client portal: `http://localhost:4000/client/portal.html?wireframe=1`
+- **URL:** Add `?wireframe=1` to the page. Examples (dev host on port 4000):
+  - Admin: `http://<frontend-host>:4000/admin/?wireframe=1`
+  - Client portal: `http://<frontend-host>:4000/client/portal.html?wireframe=1`
 - **Persist:** With `?wireframe=1` once, wireframe state is stored in `localStorage` and stays on until you clear it or disable (see below).
 - **Disable:** Open the same page with `?wireframe=0` or run in console: `localStorage.removeItem('wireframe'); document.documentElement.removeAttribute('data-wireframe'); location.reload();`
 

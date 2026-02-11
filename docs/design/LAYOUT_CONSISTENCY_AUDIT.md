@@ -29,6 +29,7 @@
 ```
 
 **Features:**
+
 - ✅ Consistent position across all pages
 - ✅ Breadcrumbs integrated
 - ✅ Subtabs/toggles aligned with title
@@ -58,6 +59,7 @@
 ```
 
 **Problems:**
+
 - ❌ Separate header inside tab content
 - ❌ No breadcrumbs integration
 - ❌ View toggle buried in content area
@@ -81,6 +83,7 @@
 ```
 
 **Problems:**
+
 - ❌ No header structure
 - ❌ No place for controls/toggles
 - ❌ Inconsistent with unified header pattern
@@ -210,6 +213,7 @@
 ```
 
 **Features:**
+
 - Full-width row
 - Tag input component
 - Below main header info
@@ -304,11 +308,13 @@
 
 **Options:**
 
-**A. Header Row Pattern (Client Detail)**
+#### A. Header Row Pattern (Client Detail)
+
 - Tags in dedicated row below header metadata
 - Full width, prominent
 
-**B. Inline Pattern**
+#### B. Inline Pattern
+
 - Tags inline with title/metadata
 - Space-efficient
 
@@ -326,14 +332,14 @@
 
 ### Phase 2: Standardization (Short-term)
 
-3. ✅ **Action buttons** - Verified consistent ordering (all 10 tables compliant with Export → Refresh → Add pattern)
-4. ⚠️ **Tags consistency** - Audited tag placement (Client Detail complete, Project/Lead Detail missing tags)
-5. ⚠️ **Filter patterns** - Audited filter structure (CSS exists, HTML implementation pending)
+1. ✅ **Action buttons** - Verified consistent ordering (all 10 tables compliant with Export → Refresh → Add pattern)
+2. ⚠️ **Tags consistency** - Audited tag placement (Client Detail complete, Project/Lead Detail missing tags)
+3. ⚠️ **Filter patterns** - Audited filter structure (CSS exists, HTML implementation pending)
 
 ### Phase 3: Documentation (Ongoing) - ✅ COMPLETE
 
-6. ✅ **Update UX_GUIDELINES.md** - Documented all standard patterns in new "Layout Patterns" section
-7. ✅ **Create layout templates** - Provided HTML templates for all common patterns
+1. ✅ **Update UX_GUIDELINES.md** - Documented all standard patterns in new "Layout Patterns" section
+2. ✅ **Create layout templates** - Provided HTML templates for all common patterns
 
 ---
 
@@ -341,7 +347,7 @@
 
 ### BEFORE: Tasks Page (Current - Inconsistent)
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │ [☰] Dashboard > Tasks           (OLD)  │  ← Separate page-header
 ├─────────────────────────────────────────┤
@@ -357,7 +363,7 @@
 
 ### AFTER: Tasks Page (Fixed - Consistent)
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │ [☰] Dashboard > Tasks           (UNIFIED HEADER)
 │ Tasks             [Board] [List]        │  ← Toggle in header with title
@@ -370,7 +376,7 @@
 
 ### Analytics Page (Already Correct - Model to Follow)
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │ [☰] Dashboard > Analytics       (UNIFIED HEADER)
 │ ANALYTICS  [Overview][Business][...]    │  ← Subtabs in header with title
@@ -479,18 +485,21 @@ Tasks List = .admin-table-card > .admin-table-header + .admin-table-container > 
 **Implementation:**
 
 **Leads Page (Intake/Contacts):**
+
 - Added `leads-section-toggle-mount` in unified header
 - Created `setupSectionToggle()` function in admin-leads.ts
 - Toggle switches between Intake Submissions and Contact Form Submissions cards
 - Uses Intake and Contacts icons
 
 **Knowledge Base Page (Categories/Articles):**
+
 - Added `kb-section-toggle-mount` in unified header
 - Created `setupKBSectionToggle()` function in admin-knowledge-base.ts
 - Toggle switches between Categories and Articles cards
 - Uses Categories (grid) and Articles (document) icons
 
 **Files Modified:**
+
 - `admin/index.html` - Added toggle mount points in unified header
 - `src/styles/client-portal/layout.css` - Added CSS `:has()` selectors for conditional visibility
 - `src/features/admin/modules/admin-leads.ts` - Added section toggle logic
@@ -587,6 +596,7 @@ Tasks List = .admin-table-card > .admin-table-header + .admin-table-container > 
 **Implementation Details:**
 
 **Client Detail (`cd-header-tags`):**
+
 - Container: `<div id="cd-header-tags" class="cd-header-tags"></div>`
 - Location: Bottom of `.cd-header-card`, before tabs
 - Component: Uses `createTagInput()` from `/src/components/tag-input.ts`
@@ -594,11 +604,13 @@ Tasks List = .admin-table-card > .admin-table-header + .admin-table-container > 
 - API Endpoints: POST/DELETE `/api/clients/{id}/tags/{tagId}`
 
 **Project Detail:**
+
 - No `pd-header-tags` container in HTML
 - No tags rendering code in TypeScript
 - Header card ends at line 1951, tabs begin at line 1954
 
 **Lead Detail:**
+
 - Panel is dynamically generated in TypeScript
 - No tags section in generated HTML
 - Has lead-score-badge but no tags UI
@@ -606,6 +618,7 @@ Tasks List = .admin-table-card > .admin-table-header + .admin-table-container > 
 **Recommendation:** Add tags to Project Detail and Lead Detail using same "Header Row Pattern" as Client Detail
 
 **Files to Modify:**
+
 - `admin/index.html` - Add `pd-header-tags` container
 - `src/features/admin/admin-project-details.ts` - Add tag rendering logic
 - `src/features/admin/modules/admin-leads.ts` - Add tags to dynamic panel generation
@@ -628,6 +641,7 @@ Tasks List = .admin-table-card > .admin-table-header + .admin-table-container > 
 8. **Filter Structure Pattern** - Planned implementation (CSS ready)
 
 **Each pattern includes:**
+
 - HTML templates
 - CSS patterns
 - Implementation rules
@@ -635,6 +649,7 @@ Tasks List = .admin-table-card > .admin-table-header + .admin-table-container > 
 - Compliance status
 
 **File Modified:**
+
 - `docs/design/UX_GUIDELINES.md` - Added 300+ lines of layout pattern documentation
 
 ---
@@ -642,6 +657,7 @@ Tasks List = .admin-table-card > .admin-table-header + .admin-table-container > 
 **Audit completed by:** Claude Code (Sonnet 4.5)
 
 **Status:**
+
 - ✅ Phase 1 Complete - Critical layout fixes
 - ✅ Phase 2 Complete - Standardization audits (action buttons, filters, tags)
 - ✅ Phase 3 Complete - UX_GUIDELINES.md documented with all standard patterns

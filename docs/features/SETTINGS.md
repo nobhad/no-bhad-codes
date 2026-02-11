@@ -117,7 +117,8 @@ Combined Profile and Password management in one section.
         <div class="form-group">
             <label for="confirm-password">Confirm New Password</label>
             <div class="cp-password-wrapper">
-                <input type="password" id="confirm-password" class="form-input" autocomplete="new-password">
+                <!-- Use autocomplete="off" for confirm field to prevent multiple save password prompts -->
+                <input type="password" id="confirm-password" class="form-input" autocomplete="off">
                 <button type="button" class="cp-password-toggle" data-target="confirm-password"
                         aria-label="Toggle password visibility">
                     <!-- Eye SVG icon -->

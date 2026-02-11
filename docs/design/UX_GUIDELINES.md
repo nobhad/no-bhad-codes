@@ -24,10 +24,11 @@
 
 This document defines the user experience standards for the project. All UI implementations must follow these guidelines to ensure consistency and usability.
 
-**Last Updated:** February 10, 2026
+**Last Updated:** February 11, 2026
 
 **Recent Updates:**
 
+- February 11: CSS spacing standardization - Admin and client portal now use identical spacing (see [CSS Architecture - Spacing Hierarchy](./CSS_ARCHITECTURE.md#spacing-hierarchy-admin--client-portal))
 - February 10: Client portal login fixes, first login welcome messages, theme toggle removal
 - Added comprehensive [Layout Patterns](#layout-patterns) section documenting standardized page structure, table hierarchy, action button order, tag placement, view toggles, modal structure, and tab patterns (based on February 2026 Layout Consistency Audit)
 
@@ -400,16 +401,41 @@ Implementation pattern:
 
 ## Spacing Standards
 
-### Spacing Scale
+### Admin & Client Portal Unified Spacing
+
+**CRITICAL:** Admin and client portal MUST use identical spacing values.
+
+See [CSS Architecture - Spacing Hierarchy](./CSS_ARCHITECTURE.md#spacing-hierarchy-admin--client-portal) for complete documentation.
+
+**Key Values:**
+
+| Context | Token | Pixels | Usage |
+|---------|-------|--------|-------|
+| Container padding | `clamp(0.75rem, 2vw, 1.5rem)` | 12-24px | `.dashboard-content` left/right/bottom |
+| Section gaps | `--space-3` | 24px | Between cards/sections on a page |
+| Internal gaps | `--space-2` | 16px | Within sections, between related items |
+| Tight spacing | `--space-1` | 8px | Within components, minimal gaps |
+| Mobile reduced | `--space-1` | 8px | Under 400px, reduced side padding |
+
+**Rules:**
+
+- ✅ All views inherit `.dashboard-content` padding - do NOT add extra horizontal padding
+- ✅ Use `--space-3` gap between major sections
+- ✅ Use `--space-2` gap within sections
+- ✅ No individual view should override base container padding
+
+### Spacing Scale (Design System Tokens)
 
 |Token|Value|Usage|
 |-------|-------|-------|
-|`--space-xs`|`clamp(0.25rem, 1vw, 0.5rem)`|Tight spacing, inline elements|
-|`--space-sm`|`clamp(0.5rem, 2vw, 1rem)`|Form gaps, button groups|
-|`--space-md`|`clamp(1rem, 3vw, 1.5rem)`|Card padding, section gaps|
-|`--space-lg`|`clamp(1.5rem, 4vw, 2rem)`|Section padding|
-|`--space-xl`|`clamp(2rem, 5vw, 3rem)`|Page sections|
-|`--space-2xl`|`clamp(3rem, 6vw, 4rem)`|Major sections|
+|`--space-0-5`|4px|Minimal spacing, inline elements|
+|`--space-1`|8px|Tight spacing, button groups|
+|`--space-1-5`|12px|Form gaps|
+|`--space-2`|16px|Internal card spacing|
+|`--space-3`|24px|Section gaps (standard)|
+|`--space-4`|32px|Large section gaps|
+|`--space-6`|48px|Page section spacing|
+|`--space-8`|64px|Major sections|
 
 ### Component Spacing
 

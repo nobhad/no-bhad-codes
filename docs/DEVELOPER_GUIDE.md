@@ -70,7 +70,7 @@ The application uses environment variables for configuration. Copy `.env.example
 # Application
 NODE_ENV=development
 PORT=4001
-FRONTEND_URL=http://localhost:4000
+FRONTEND_URL=http://<frontend-host>:4000
 
 # Security
 JWT_SECRET="your-development-jwt-secret-min-32-chars"
@@ -134,21 +134,21 @@ npm run migrate:create   # Create new migration
 
 1. **Start Development Servers**
 
-]\
+  ```bash
+  npm run dev:full
+  ```
 
-   npm run dev:full
+```text
+- Frontend: http://<frontend-host>:4000
+- Backend API: http://<api-host>:4001
+```
 
-   ```<http://localhost:4000>
-   - Frontend: htt<http://localhost:4001>
-   - Backend API: http://localhost:4001
-
-2. **Make Changes**
+1. **Make Changes**
 
    - Frontend changes trigger hot module reload (Vite HMR)
    - Backend: restart dev server manually after changes (`npm run dev:server`); no nodemon by default
 
-
-3. **Run Tests**
+2. **Run Tests**
 
    ```bash
 
@@ -1138,7 +1138,7 @@ server {
     
     # Proxy API requests
     location /api/ {
-        proxy_pass <http://localhost:4001;>
+        proxy_pass http://<api-host>:4001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
