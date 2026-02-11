@@ -168,6 +168,51 @@ GET /api/document-requests/project/:projectId/pending
 
 ---
 
+## Move to Files After Approval (Planned)
+
+**Status:** Planned
+**Priority:** Medium
+
+Automatically move approved documents to project Files tab.
+
+### Requirements
+
+- After admin approves a document request:
+  1. Uploaded file MOVES from Document Requests to project Files tab
+  2. File placed in "Forms" folder
+  3. Original document request marked as complete
+  4. File retains original metadata (uploaded by, date, etc.)
+- Document request shows link to file in Files tab after approval
+
+### Workflow
+
+1. Client uploads document to fulfill request
+2. Admin reviews uploaded document
+3. Admin clicks "Approve"
+4. System moves file to project Files tab (Forms folder)
+5. Request status changes to "approved"
+6. Request shows "View in Files" link
+
+### API Changes (Planned)
+
+Update `POST /api/document-requests/:id/review`:
+
+- When `action: 'approve'`:
+  - Move file from document_requests to uploads table
+  - Set `folder_id` to Forms folder
+  - Update `document_requests.status` to 'approved'
+  - Store `file_id` reference in request
+
+### Database Changes (Planned)
+
+Add to `document_requests` table:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `moved_to_file_id` | INTEGER | FK to uploads after approval |
+
+---
+
 ## Files
 
 | File | Purpose |

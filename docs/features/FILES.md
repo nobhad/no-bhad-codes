@@ -879,6 +879,73 @@ When uploading files in the admin project details Files tab, a confirmation moda
 
 ---
 
+## File Sharing Control (Planned)
+
+**Status:** Planned
+**Priority:** High
+
+Control visibility of generated files to clients via "Share with Client" button.
+
+### Requirements
+
+- All generated PDFs (proposals, contracts, receipts, reports, SOWs) auto-save to project files
+- Files are NOT visible to client by default
+- Admin clicks "Share with Client" button to make file visible
+- Shared status tracked in database
+- Client portal only shows files marked as shared
+
+### Database Changes (Planned)
+
+Add to `uploads` table:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `shared_with_client` | BOOLEAN | Whether file is visible to client (default: FALSE) |
+| `shared_at` | DATETIME | When file was shared |
+| `shared_by` | TEXT | Admin who shared |
+
+### API Endpoints (Planned)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/uploads/:id/share` | Share file with client |
+| POST | `/api/uploads/:id/unshare` | Remove client access |
+
+### UI Changes (Planned)
+
+- Admin Files tab: "Share" / "Unshare" button on each file
+- Client Files tab: Only shows files where `shared_with_client = TRUE`
+- Visual indicator (icon/badge) showing shared status
+
+---
+
+## Project Details PDF Creation (Planned)
+
+**Status:** Planned
+**Priority:** High
+
+Generate all business document types from project details Files tab.
+
+### Document Types
+
+| Type | Description |
+|------|-------------|
+| Proposal | Project proposal with scope and pricing |
+| Contract | Service agreement |
+| Receipt | Payment receipt |
+| Report | Project progress report |
+| SOW | Statement of Work |
+
+### Requirements
+
+- "Create Document" button in project Files tab
+- Document type selector
+- Template-based generation
+- Auto-save to project files (not shared by default)
+- PDF preview before saving
+
+---
+
 ## Related Documentation
 
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview

@@ -1512,6 +1512,83 @@ When an invoice is deleted via `DELETE /api/invoices/:id`:
 
 ---
 
+## Receipts (Planned)
+
+**Status:** Planned
+**Priority:** High
+
+Auto-generate PDF receipts for any payment recorded on an invoice.
+
+### Requirements
+
+- Auto-generate receipt PDF when ANY payment is recorded (including partial payments)
+- Each payment gets its own receipt (e.g., Invoice INV-2026-001 with 3 partial payments = 3 separate receipts)
+- Receipts saved to project Files tab under "Documents" category
+- Receipt management UI in admin portal
+- Client can download receipts from invoices tab
+
+### Receipt PDF Content
+
+- Receipt number (REC-YYYY-NNN format)
+- Original invoice reference
+- Payment amount
+- Payment method
+- Payment date
+- Remaining balance (if partial)
+- Business details (from settings)
+
+### API Endpoints (Planned)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/invoices/:id/receipts` | Get all receipts for an invoice |
+| GET | `/api/receipts/:id/pdf` | Download receipt as PDF |
+| GET | `/api/receipts/client` | Get all receipts for authenticated client |
+
+### Database Changes (Planned)
+
+New `receipts` table:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key |
+| `receipt_number` | TEXT | Unique receipt number |
+| `invoice_id` | INTEGER | FK to invoices |
+| `payment_id` | INTEGER | FK to invoice_payments |
+| `amount` | DECIMAL | Payment amount |
+| `file_id` | INTEGER | FK to uploads (generated PDF) |
+| `created_at` | DATETIME | Generation timestamp |
+
+---
+
+## Project Details Invoices Tab (Planned)
+
+**Status:** Planned
+**Priority:** High
+
+Full invoice management within project details view.
+
+### Requirements
+
+- View all invoices for a project
+- Create new invoices
+- Edit draft invoices
+- Send invoices
+- Mark invoices as paid
+- Record partial payments
+- View payment history
+- All invoice actions available without leaving project details
+
+### UI Components (Planned)
+
+- Invoice list with status badges
+- Create invoice modal
+- Edit invoice modal (drafts only)
+- Record payment modal
+- Payment history panel
+
+---
+
 ## Related Documentation
 
 - [PDF Generation](./PDF_GENERATION.md) - Complete PDF system documentation

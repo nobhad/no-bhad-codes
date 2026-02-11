@@ -142,6 +142,43 @@ Three default questionnaires are seeded on first migration:
 5. Client submits completed questionnaire
 6. Admin reviews responses in client detail view
 
+## Save to Files (Planned)
+
+**Status:** Planned
+**Priority:** Medium
+
+Generate PDF and export raw data when questionnaire is completed.
+
+### Requirements
+
+- On questionnaire completion (submit):
+  1. Generate PDF of Q&A (formatted questions and answers)
+  2. Keep raw JSON data export available
+  3. PDF auto-saves to project Files tab under "Forms" folder
+- Both formats available for download from admin portal
+
+### PDF Format
+
+- Questionnaire title and description
+- Client name and completion date
+- Each question with client's answer
+- Multi-select answers shown as bulleted list
+- Professional formatting matching other PDFs
+
+### API Endpoints (Planned)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/questionnaires/responses/:id/pdf` | Download response as PDF |
+| GET | `/api/questionnaires/responses/:id/json` | Download raw JSON data |
+
+### File Naming Convention
+
+- PDF: `{questionnaire-name}-{client-name}-{date}.pdf`
+- JSON: `{questionnaire-name}-{client-name}-{date}.json`
+
+---
+
 ## Related Documentation
 
 - [Client Portal](./CLIENT_PORTAL.md) - Where clients complete questionnaires
