@@ -198,7 +198,7 @@ function renderFilesList(
 
   container.innerHTML = files
     .map((file) => {
-      const safeName = ctx.escapeHtml(file.originalName);
+      const safeName = ctx.escapeHtml(file.originalName || file.filename || 'File');
       const canDelete = file.uploadedBy === clientEmail || file.uploadedBy === 'client';
       const deleteIcon = canDelete
         ? `<button class="file-delete-icon btn-delete" data-file-id="${file.id}" data-filename="${file.originalName}" aria-label="Delete ${safeName}">
@@ -214,16 +214,16 @@ function renderFilesList(
           <div class="file-info">
             <span class="file-name">${safeName}</span>
             <span class="file-meta">
-              ${file.projectName ? `${file.projectName} • ` : ''}
-              ${ctx.formatDate(file.uploadedAt)} • ${formatFileSize(file.size)}
+              ${file.projectName ? `${ctx.escapeHtml(file.projectName)} • ` : ''}
+              ${formatFileSize(file.size)} • ${ctx.formatDate(file.uploadedAt)}
             </span>
           </div>
           <div class="file-actions">
-            <button class="btn btn-sm btn-outline btn-preview" data-file-id="${file.id}" data-mimetype="${file.mimetype}" aria-label="Preview ${safeName}">
-              Preview
+            <button class="icon-btn btn-preview" data-file-id="${file.id}" data-mimetype="${file.mimetype}" aria-label="Preview ${safeName}" title="Preview">
+              ${ICONS.EYE}
             </button>
-            <button class="btn btn-sm btn-outline btn-download" data-file-id="${file.id}" data-filename="${file.originalName}" aria-label="Download ${safeName}">
-              Download
+            <button class="icon-btn btn-download" data-file-id="${file.id}" data-filename="${file.originalName}" aria-label="Download ${safeName}" title="Download">
+              ${ICONS.DOWNLOAD}
             </button>
           </div>
         </div>
@@ -288,12 +288,11 @@ function attachFileActionListeners(container: HTMLElement, ctx: ClientPortalCont
 /**
  * Preview a file - opens in modal or new tab
  */
-function previewFile(fileId: number, mimetype: string, _ctx: ClientPortalContext): void {
-  if (mimetype.startsWith('image/') || mimetype === 'application/pdf') {
-    const url = `${FILES_API_BASE}/file/${fileId}`;
-    window.open(url, '_blank');
-  } else {
-    downloadFile(fileId, 'file', _ctx);
+function previewFile(fileId: number, _mimetype: string, _ctx: ClientPortalContext): void {
+  const url = `${FILES_API_BASE}/file/${fileId}`;
+  const previewWindow = window.open(url, '_blank', 'noopener');
+  if (previewWindow) {
+    previewWindow.opener = null;
   }
 }
 

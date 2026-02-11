@@ -12,6 +12,16 @@ import type { ClientPortalContext } from '../portal-types';
 
 const DOC_REQUESTS_API = '/api/document-requests';
 const UPLOADS_API = '/api/uploads';
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ALLOWED_EXTENSIONS = /\.(pdf|doc|docx|txt|jpg|jpeg|png)$/i;
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
+  'image/jpeg',
+  'image/png'
+];
 
 // ---------------------------------------------------------------------------
 // Types
@@ -60,6 +70,49 @@ function escapeHtml(text: string): string {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+function setInlineError(message: string | null): void {
+  const errorEl = el('documents-upload-error');
+  if (!errorEl) return;
+  if (!message) {
+    errorEl.textContent = '';
+    errorEl.style.display = 'none';
+    return;
+  }
+  errorEl.textContent = message;
+  errorEl.style.display = 'block';
+}
+
+function isAllowedFileType(file: File): boolean {
+  if (ALLOWED_MIME_TYPES.includes(file.type)) return true;
+  return ALLOWED_EXTENSIONS.test(file.name);
+}
+
+function applySingleFileSelection(fileInput: HTMLInputElement, file: File): void {
+  if (typeof DataTransfer === 'undefined') {
+    return;
+  }
+  const dataTransfer = new DataTransfer();
+  dataTransfer.items.add(file);
+  fileInput.files = dataTransfer.files;
+}
+
+function validateSelectedFile(file: File, ctx: ClientPortalContext): boolean {
+  if (!isAllowedFileType(file)) {
+    const message = 'Unsupported file type. Use PDF, DOC/DOCX, TXT, JPG, or PNG.';
+    ctx.showNotification(message, 'error');
+    setInlineError(message);
+    return false;
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    const message = 'File exceeds the 10MB limit.';
+    ctx.showNotification(message, 'error');
+    setInlineError(message);
+    return false;
+  }
+  setInlineError(null);
+  return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -161,6 +214,7 @@ async function openDetail(request: DocumentRequest, _ctx: ClientPortalContext): 
   const uploadWrap = el('documents-detail-upload');
   const fileInput = document.getElementById('documents-file-input') as HTMLInputElement | null;
   const uploadBtn = el('documents-upload-btn');
+  const dropzone = el('documents-dropzone');
 
   if (titleEl) titleEl.textContent = request.title;
   if (descEl) descEl.textContent = request.description || 'No description.';
@@ -170,6 +224,8 @@ async function openDetail(request: DocumentRequest, _ctx: ClientPortalContext): 
   if (uploadWrap) uploadWrap.style.display = canUpload ? 'block' : 'none';
   if (fileInput) fileInput.value = '';
   if (uploadBtn) (uploadBtn as HTMLButtonElement).disabled = true;
+  if (dropzone) dropzone.classList.remove('dragover');
+  setInlineError(null);
 
   try {
     await markViewed(request.id);
@@ -261,10 +317,76 @@ function setupListeners(ctx: ClientPortalContext): void {
     showList();
   });
 
-  const fileInput = document.getElementById('documents-file-input');
-  fileInput?.addEventListener('change', () => {
+  const fileInput = document.getElementById('documents-file-input') as HTMLInputElement | null;
+  const dropzone = el('documents-dropzone');
+  const browseBtn = document.getElementById('documents-browse-btn');
+
+  const syncUploadState = (): void => {
     const btn = el('documents-upload-btn') as HTMLButtonElement | null;
-    if (btn) btn.disabled = !(fileInput as HTMLInputElement).files?.length;
+    if (!btn) return;
+    if (!fileInput?.files?.length) {
+      btn.disabled = true;
+      setInlineError(null);
+      return;
+    }
+    const file = fileInput.files[0];
+    const isValid = validateSelectedFile(file, ctx);
+    if (!isValid) {
+      fileInput.value = '';
+      btn.disabled = true;
+      return;
+    }
+    btn.disabled = false;
+  };
+
+  fileInput?.addEventListener('change', () => {
+    syncUploadState();
+  });
+
+  browseBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    fileInput?.click();
+  });
+
+  dropzone?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button')) return;
+    fileInput?.click();
+  });
+
+  const setDragState = (isActive: boolean): void => {
+    if (!dropzone) return;
+    dropzone.classList.toggle('dragover', isActive);
+  };
+
+  dropzone?.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    setDragState(true);
+  });
+
+  dropzone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    setDragState(true);
+  });
+
+  dropzone?.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    setDragState(false);
+  });
+
+  dropzone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    setDragState(false);
+    if (!fileInput) return;
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    if (!validateSelectedFile(file, ctx)) {
+      fileInput.value = '';
+      return;
+    }
+    applySingleFileSelection(fileInput, file);
+    syncUploadState();
   });
 
   el('documents-upload-btn')?.addEventListener('click', () => doUpload(ctx));
