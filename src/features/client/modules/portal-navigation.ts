@@ -10,6 +10,7 @@
 
 import { renderBreadcrumbs, type BreadcrumbItem } from '../../../components/breadcrumbs';
 import { authStore } from '../../../auth/auth-store';
+import { renderView } from './portal-views';
 
 /** Tab titles mapping */
 const TAB_TITLES: Record<string, string> = {
@@ -28,6 +29,137 @@ const TAB_TITLES: Record<string, string> = {
   docs: 'Documents',
   support: 'Support'
 };
+
+// ============================================================================
+// HASH-BASED ROUTING
+// ============================================================================
+
+/** Route configuration mapping tabs to hash paths */
+const PORTAL_ROUTES: Record<string, string> = {
+  'dashboard': '/dashboard',
+  'files': '/files',
+  'invoices': '/invoices',
+  'documents': '/documents',
+  'questionnaires': '/questionnaires',
+  'requests': '/requests',
+  'preview': '/review',
+  'new-project': '/new-project',
+  'messages': '/messages',
+  'help': '/help',
+  'settings': '/settings'
+};
+
+/** Reverse mapping from hash path to tab name */
+const HASH_TO_TAB: Record<string, string> = Object.fromEntries(
+  Object.entries(PORTAL_ROUTES).map(([tab, hash]) => [hash, tab])
+);
+
+/** Flag to prevent re-entrant hash updates */
+let isNavigating = false;
+
+/**
+ * Get tab name from current URL hash
+ * Returns 'dashboard' if hash is invalid or empty
+ */
+export function getTabFromHash(): string {
+  const hash = window.location.hash;
+  if (!hash || hash === '#' || hash === '#/') {
+    return 'dashboard';
+  }
+
+  // Remove leading # and normalize
+  const path = hash.startsWith('#') ? hash.slice(1) : hash;
+
+  // Check if it matches a known route
+  if (HASH_TO_TAB[path]) {
+    return HASH_TO_TAB[path];
+  }
+
+  // Invalid hash - return dashboard
+  return 'dashboard';
+}
+
+/**
+ * Update URL hash without triggering navigation
+ * Resolves group names (work, docs, support) to their default tabs
+ */
+function updateHash(tabName: string): void {
+  // Resolve group names to their actual tab
+  const resolved = resolvePortalTab(tabName);
+  const actualTab = resolved.tab;
+
+  const hashPath = PORTAL_ROUTES[actualTab] || '/dashboard';
+  const newHash = `#${hashPath}`;
+
+  // Only update if different to avoid unnecessary history entries
+  if (window.location.hash !== newHash) {
+    isNavigating = true;
+    window.location.hash = newHash;
+    // Reset flag after a tick to allow hashchange to be ignored
+    setTimeout(() => { isNavigating = false; }, 0);
+  }
+}
+
+/**
+ * Navigate to a tab and update URL hash
+ */
+export function navigateTo(
+  tabName: string,
+  callbacks: {
+    loadFiles: () => Promise<void>;
+    loadInvoices: () => Promise<void>;
+    loadProjectPreview: () => Promise<void>;
+    loadMessagesFromAPI: () => Promise<void>;
+    loadHelp?: () => Promise<void>;
+    loadDocumentRequests?: () => Promise<void>;
+    loadAdHocRequests?: () => Promise<void>;
+    loadQuestionnaires?: () => Promise<void>;
+    loadSettings?: () => Promise<void>;
+    loadDashboard?: () => Promise<void>;
+  }
+): void {
+  // Update hash first
+  updateHash(tabName);
+  // Then switch tab (without updating hash again)
+  switchTab(tabName, callbacks, false);
+}
+
+/**
+ * Initialize hash-based router
+ * Sets up hashchange listener and navigates to initial tab from URL
+ */
+export function initHashRouter(callbacks: {
+  loadFiles: () => Promise<void>;
+  loadInvoices: () => Promise<void>;
+  loadProjectPreview: () => Promise<void>;
+  loadMessagesFromAPI: () => Promise<void>;
+  loadHelp?: () => Promise<void>;
+  loadDocumentRequests?: () => Promise<void>;
+  loadAdHocRequests?: () => Promise<void>;
+  loadQuestionnaires?: () => Promise<void>;
+  loadSettings?: () => Promise<void>;
+  loadDashboard?: () => Promise<void>;
+}): void {
+  // Handle browser back/forward navigation
+  window.addEventListener('hashchange', () => {
+    // Skip if we triggered this change ourselves
+    if (isNavigating) return;
+
+    const tabName = getTabFromHash();
+    switchTab(tabName, callbacks, false);
+  });
+
+  // Navigate to initial tab from URL hash
+  const initialTab = getTabFromHash();
+
+  // If no hash, set default to dashboard
+  if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#/') {
+    updateHash('dashboard');
+  }
+
+  // Switch to the initial tab
+  switchTab(initialTab, callbacks, false);
+}
 
 const PORTAL_TAB_GROUPS = {
   work: {
@@ -197,17 +329,17 @@ export function updatePortalPageTitle(tabName: string): void {
     const welcomeText = isFirstLogin ? 'Welcome to the Portal' : 'Welcome Back';
     titleEl.innerHTML = `${welcomeText}, <span id="client-name">${currentClientName}</span>!`;
   } else {
-    // Show the tab title
-    const title =
-      resolved.group
-        ? PORTAL_TAB_GROUPS[resolved.group].label
-        : (TAB_TITLES[currentActiveTab] || 'Dashboard');
+    // Show the individual tab title (not group title)
+    const title = TAB_TITLES[currentActiveTab] || 'Dashboard';
     titleEl.textContent = title;
   }
 }
 
 /**
  * Switch to a specific tab in the dashboard
+ * @param tabName - The tab to switch to
+ * @param callbacks - Data loading callbacks for each tab
+ * @param shouldUpdateHash - Whether to update the URL hash (default: true)
  */
 export function switchTab(tabName: string, callbacks: {
   loadFiles: () => Promise<void>;
@@ -218,23 +350,19 @@ export function switchTab(tabName: string, callbacks: {
   loadDocumentRequests?: () => Promise<void>;
   loadAdHocRequests?: () => Promise<void>;
   loadQuestionnaires?: () => Promise<void>;
-}): void {
+  loadSettings?: () => Promise<void>;
+  loadDashboard?: () => Promise<void>;
+}, shouldUpdateHash = true): void {
+  // Update URL hash if requested (default behavior)
+  if (shouldUpdateHash) {
+    updateHash(tabName);
+  }
   const resolved = resolvePortalTab(tabName);
   const activeTab = resolved.tab;
   const activeGroup = resolved.group || activeTab;
 
-  // Hide all tab content
-  const allTabContent = document.querySelectorAll('.tab-content');
-  allTabContent.forEach((tab) => tab.classList.remove('active'));
-
-  // Show the selected tab content - use cache for tabs
-  if (!cachedViews.has(`tab-${activeTab}`)) {
-    cachedViews.set(`tab-${activeTab}`, document.getElementById(`tab-${activeTab}`));
-  }
-  const targetTab = cachedViews.get(`tab-${activeTab}`);
-  if (targetTab) {
-    targetTab.classList.add('active');
-  }
+  // Render the view dynamically
+  renderView(activeTab);
 
   // Update nav button active states
   const navButtons = document.querySelectorAll('.nav-btn[data-tab], .sidebar-buttons .btn[data-tab]');
@@ -249,6 +377,16 @@ export function switchTab(tabName: string, callbacks: {
 
   document.body.dataset.activeGroup = activeGroup;
   document.body.dataset.activeTab = activeTab;
+
+  // Class-based fallback for mobile CSS targeting (more reliable than data attributes in some browsers)
+  document.body.classList.remove('messages-tab-active', 'files-tab-active', 'help-tab-active');
+  if (activeTab === 'messages') {
+    document.body.classList.add('messages-tab-active');
+  } else if (activeTab === 'files') {
+    document.body.classList.add('files-tab-active');
+  } else if (activeTab === 'help') {
+    document.body.classList.add('help-tab-active');
+  }
 
   const headerGroup = document.querySelector(`.header-subtab-group[data-for-tab="${activeGroup}"]`);
   if (headerGroup && (headerGroup as HTMLElement).dataset.mode === 'primary') {
@@ -275,7 +413,9 @@ export function switchTab(tabName: string, callbacks: {
   }
 
   // Load tab-specific data
-  if (activeTab === 'files') {
+  if (activeTab === 'dashboard' && callbacks.loadDashboard) {
+    callbacks.loadDashboard();
+  } else if (activeTab === 'files') {
     callbacks.loadFiles();
   } else if (activeTab === 'invoices') {
     callbacks.loadInvoices();
@@ -291,6 +431,8 @@ export function switchTab(tabName: string, callbacks: {
     callbacks.loadAdHocRequests();
   } else if (activeTab === 'questionnaires' && callbacks.loadQuestionnaires) {
     callbacks.loadQuestionnaires();
+  } else if (activeTab === 'settings' && callbacks.loadSettings) {
+    callbacks.loadSettings();
   }
 }
 
@@ -301,7 +443,8 @@ export function updateMobileHeaderTitle(tabName: string): void {
   const mobileHeaderTitle = getMobileHeaderTitle();
   if (!mobileHeaderTitle) return;
   const resolved = resolvePortalTab(tabName);
-  const title = resolved.group ? PORTAL_TAB_GROUPS[resolved.group].label : TAB_TITLES[resolved.tab] || 'Dashboard';
+  // Show individual tab title (not group title)
+  const title = TAB_TITLES[resolved.tab] || 'Dashboard';
   mobileHeaderTitle.textContent = title;
 }
 
