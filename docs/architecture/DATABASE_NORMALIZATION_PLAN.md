@@ -1,8 +1,8 @@
 # Database Normalization Plan
 
 **Created:** February 10, 2026
-**Status:** In Progress
-**Target Completion:** TBD
+**Last Updated:** February 11, 2026
+**Status:** Phases 1-3 Complete, Phase 4 Deferred
 
 ## Executive Summary
 
@@ -15,12 +15,12 @@ This document outlines a phased approach to normalize the database schema, addre
 
 ### Risk Assessment
 
-| Phase | Risk Level | Tables Affected | Code Changes | Downtime |
-|-------|------------|-----------------|--------------|----------|
-| Phase 1 | Low | 2 | Minimal | None |
-| Phase 2 | Medium | 35+ | Moderate | Minutes |
-| Phase 3 | Medium-High | 5 | Significant | Minutes |
-| Phase 4 | High | 15+ | Major refactor | Hours |
+| Phase | Risk Level | Status | Tables Affected | Code Changes |
+|-------|------------|--------|-----------------|--------------|
+| Phase 1 | Low | ✅ Complete | 2 | Minimal |
+| Phase 2 | Medium | ✅ Complete | 35+ | Moderate |
+| Phase 3 | Medium-High | ✅ Complete | 5 | Significant |
+| Phase 4 | High | Deferred | 15+ | Major refactor |
 
 ---
 
@@ -182,9 +182,9 @@ Keep TEXT columns for 30 days after migration. If issues arise:
 
 ---
 
-## Phase 3: Remove Data Duplication
+## Phase 3: Remove Data Duplication ✅ COMPLETE
 
-**Status:** Planned
+**Status:** Completed (Migrations 071-074, Feb 11, 2026)
 **Risk:** Medium-High
 **Estimated Effort:** 1-2 days
 
@@ -447,24 +447,27 @@ UPDATE projects SET status = 'active', won_at = CURRENT_TIMESTAMP WHERE id = ?;
 - [ ] Remove TEXT columns (future migration after 30-day transition)
 - [ ] Update all affected queries
 
-### Phase 3 (Partially Complete)
+### Phase 3 ✅ COMPLETE (Feb 11, 2026)
 
 - [x] Audit notification preferences usage
 - [x] Migrate inline notification flags to notification_preferences (Migration 069)
 - [x] Remove redundant columns from clients (Migration 069)
 - [x] Hardcoded business data - addressed via `server/config/business.ts`
-- [ ] Audit contract signature usage
-- [ ] Consolidate to contracts table
-- [ ] Remove duplicate signature columns from projects
+- [x] Create `system_settings` table for centralized settings (Migration 071)
+- [x] Create `invoice_line_items` table (Migration 072)
+- [x] Migrate line items from JSON to table (`server/scripts/migrate-line-items.ts`)
+- [x] Add signature tracking columns to contracts table (Migration 074)
+- [x] Update `invoice-service.ts` with line items table methods
+- [x] Update `contract-service.ts` with signature handling methods
+- [x] Create `settings-service.ts` for centralized settings
+- [x] Create `/api/settings` routes
 
-### Phase 4 (Invoice Normalization - Deferred)
+### Phase 4 (Future Work - Deferred)
 
-- [ ] Design invoice normalization schema
-- [ ] Create invoice_line_items table
-- [ ] Extract line_items from JSON to proper table
-- [ ] Migrate data
-- [ ] Update invoice service
-- [ ] Remove JSON line_items column
+- [ ] Slim invoices table (remove redundant columns) - `075_slim_invoices_table.sql.bak`
+- [ ] Consolidate lead/intake overlap (single source of truth)
+- [ ] Unify message tables (messages vs general_messages)
+- [ ] Add soft-delete to all core entities
 
 ### Phase 5 (Future)
 

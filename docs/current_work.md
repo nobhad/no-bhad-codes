@@ -6,7 +6,7 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ## DESIGN SYSTEM COMPLIANCE - MANDATORY FOR ALL IMPLEMENTATIONS
 
-All features MUST follow these guidelines from `docs/design/UX_GUIDELINES.md` and `docs/design/CSS_ARCHITECTURE.md`.
+All features MUST follow these guidelines from `docs/design/UX_GUIDELINES.md` and `docs/design/CSS_ARCHITECTURE.md`.  Must use reusable components and design tokens, and adhere to the specified patterns for consistency across the portal.
 
 ### Icons and Visual Elements
 
@@ -145,7 +145,7 @@ All features MUST follow these guidelines from `docs/design/UX_GUIDELINES.md` an
 
 After completing any task:
 
-- [ ] Move completed item from current_work to archive
+- [ ] Move fully completed tasks from current_work to archive
 - [ ] Add entry to ARCHIVED_WORK_2026-02.md
 - [ ] Update feature docs (docs/features/*.md) if API/features changed
 - [ ] Update API_DOCUMENTATION.md if endpoints changed
@@ -154,45 +154,50 @@ After completing any task:
 
 ---
 
-## Database Normalization (Remaining Work)
+## Database Normalization
 
 **Full Documentation:** See `docs/architecture/DATABASE_SCHEMA.md` and `docs/architecture/DATABASE_NORMALIZATION_PLAN.md`
 
-**Phase 1-2:** ✅ COMPLETE (Feb 10, 2026) - Migrations 067-070 applied
-
-**Phase 3 - Medium-High Risk:** PLANNED
-
-- [ ] Normalize invoice table (52 cols → ~25 cols)
-- [ ] Extract line_items from JSON to proper table
-- [ ] Consolidate signature systems (contracts only)
+**Phase 1-3:** ✅ COMPLETE (Feb 10, 2026) - Migrations 067-074 applied
 
 **Phase 4 - High Risk:** DEFERRED
 
 - [ ] Consolidate lead/intake overlap (single source of truth)
 - [ ] Unify message tables (messages vs general_messages)
 - [ ] Add soft-delete to all core entities
+- [ ] Slim invoices table (remove redundant columns) - `075_slim_invoices_table.sql.bak`
 
 ---
 
 ## Open Issues
 
-### Design Concerns
+### Uncommitted Changes
 
-- [x] **Project Detail Page - Pill Label Styling**: Fixed - converted pill labels to smaller caps without background
-  - Changed ROLE, YEAR, DURATION, TOOLS labels from pill styling to uppercase muted text
-  - Updated `projects-detail.css` with transparent background, no shadow, no border-radius
-  - Added dark mode support
+The following changes were made in recent sessions and need to be committed:
 
-### Needs User Verification
+- [ ] **Data isolation security fix** - `server/routes/projects.ts` - Added `isUserAdmin()` verification
+- [ ] **Recent activity consolidation (Client Portal)** - `server/routes/clients.ts`, `src/features/client/client-portal.ts`
+- [ ] **Recent activity consolidation (Admin Portal)** - `server/routes/admin.ts`, `src/features/admin/modules/admin-overview.ts`
+- [ ] **Theme toggle CSS fix** - `src/styles/shared/portal-layout.css` - Fixed icon positioning
+- [ ] **Documentation updates** - DATABASE_SCHEMA.md, API_DOCUMENTATION.md, UX_GUIDELINES.md, QUESTIONNAIRES.md (new)
 
-- **Analytics Page KPI Cards**: Fixed but awaiting user testing
-- **Sidebar counts**: GET /api/admin/sidebar-counts - needs verification
+### Minor Documentation Issues
+
+Identified during documentation audit (low priority):
+
+- [ ] ANIMATIONS.md has outdated date (January 2026) DATE IS DATE LAST UPDATED, JAN MAKES SENSE
+- [ ] Missing `/docs/features/README.md` index file
+- [ ] Hardcoded localhost URLs in some documentation
+- [ ] Emojis in main README.md (violates "NO EMOJIS" design rule)
+
+### Pending Testing
+
+- [ ] Verify recent activity shows all types (invoices, documents, contracts, messages) in both portals
+- [x] Verify theme toggle icon positioned correctly in global header
 
 ---
 
-## Outstanding Tasks
-
-### Portfolio Assets Needed
+## Portfolio Assets Needed (for Noelle not Claude)
 
 **Status:** Waiting on assets
 
@@ -201,20 +206,6 @@ After completing any task:
 - [ ] OG images for social sharing (1200x630 PNG)
 
 **Location:** public/images/portfolio/
-
-### Front-End Polish
-
-- [x] Lead funnel styling improvements (Feb 10)
-  - Fixed hardcoded hex colors in pipeline stages (#f59e0b, #8b5cf6 → CSS variables)
-  - Fixed error color used for link hovers → brand primary
-  - Removed duplicate .lead-task-item CSS definitions
-- [ ] Analytics tab: use reusable components instead of analytics-only markup (partial - hardcoded colors fixed)
-
-### Client + Project Details Reorganization (Optional)
-
-- [ ] Merge Quick Stats + Health into single card
-- [ ] Merge Client Overview + CRM Details into single card
-- [ ] Reduce Overview tab from 7 cards to 3-4
 
 ---
 

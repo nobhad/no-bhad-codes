@@ -6,6 +6,143 @@ This file contains completed work from February 2026. Items are moved here from 
 
 ## Completed - February 10, 2026
 
+### Portal Layout & UX Fixes
+
+**Portal Header Refactoring:**
+
+- Created `.portal-global-header` - full-width header spanning viewport
+- Added `.portal-body` wrapper for sidebar + content below header
+- Moved logo/avatar from sidebar to global header
+- Moved breadcrumbs to global header
+- Moved sidebar toggle to be first button in sidebar
+- Added theme toggle to global header
+
+**Files Modified:**
+
+- `admin/index.html`, `client/index.html` - Added global header, portal-body wrapper
+- `src/styles/shared/portal-layout.css` - Global header and portal-body styles
+- `src/styles/client-portal/layout.css`, `src/styles/client-portal/sidebar.css`
+- `src/features/admin/admin-dashboard.ts`, `src/features/client/client-portal.ts`
+
+**Password Save Prompts Fix:**
+
+- Reduced browser password save prompts from 4 to 1
+- Moved settings password form to dynamic rendering (only renders after login)
+- Files: `client/index.html`, `src/features/client/client-portal.ts`
+
+**Sidebar Focus States:**
+
+- Disabled focus outline/box-shadow on all sidebar elements
+- File: `src/styles/shared/portal-layout.css`
+
+**Time Tracker API Alignment:**
+
+- Backend now accepts both `duration_minutes` and `hours` fields
+- Backend now accepts both `is_billable` and `billable` fields
+- Response transforms to frontend format
+- File: `server/routes/projects.ts`
+
+**Recent Activity Expansion:**
+
+- Admin and client portals show all activity types (leads, invoices, messages, documents, contracts, files)
+
+**Data Isolation Security Fix:**
+
+- Added `isUserAdmin()` helper to verify admin status from database
+- Prevents clients from seeing other clients' data via JWT type field manipulation
+- File: `server/routes/projects.ts`
+
+---
+
+### Phase 3 Database Normalization - Complete
+
+**Migrations Applied:**
+
+- `071_system_settings.sql` - Created `system_settings` table with business/payment settings
+- `072_invoice_line_items.sql` - Created `invoice_line_items` table for normalized line items
+- `074_contract_signatures.sql` - Added signature tracking columns to `contracts` table
+
+**Data Migration:**
+
+- `server/scripts/migrate-line-items.ts` - Migrated invoice line items from JSON to table (verified)
+
+**New Files:**
+
+- `server/services/settings-service.ts` - Service for system settings with caching
+- `server/routes/settings.ts` - Admin endpoints for managing settings
+
+**Updated Files:**
+
+- `server/services/invoice-service.ts` - Added `getLineItems()`, `saveLineItems()`, `getBusinessInfoFromSettings()`
+- `server/services/contract-service.ts` - Added signature handling methods
+- `server/routes/projects.ts` - Dual-write signature data to contracts table
+- `server/app.ts` - Registered settings routes
+
+**Database State:**
+
+| Table | Status |
+|-------|--------|
+| `system_settings` | 15 entries (business info, payment, invoice settings) |
+| `invoice_line_items` | 1 entry (migrated from JSON) |
+| `contracts` | New columns: `signature_token`, `signature_requested_at`, `signature_expires_at` |
+
+### Client Portal
+
+- Messages view shows a single main conversation (no thread list) and labels admin messages as "Noelle"
+
+### Main Site
+
+- Project tools tags use inverted theme colors on the project detail view
+
+### Admin
+
+- Analytics tab KPI cards use shared stat-card layout instead of analytics-only markup
+- Password save prompt appears only once per session (admin + client login)
+
+### Client Portal
+
+- File preview buttons open inline instead of forcing downloads
+- Client portal password toggles match admin styling
+- Client portal files naming matches admin conventions
+- Client portal file and invoice actions use icon-only buttons
+- Client portal dashboard shows milestones with completion status
+- Client portal document requests support drag-and-drop uploads
+- Dashboard spacing fixed (`.tab-content.active > * + *` margin rule)
+- First login shows "Welcome to the Portal", return visits show "Welcome Back"
+- Header toggles now use same styling as admin portal
+- Theme toggle button removed from client portal (header + sidebar)
+
+### Client Portal Login - Complete
+
+**Issue:** Users could not login to the client portal. Multiple root causes identified and fixed.
+
+**Root Causes & Fixes:**
+
+1. Cross-origin cookie issues - Changed auth endpoints from absolute URLs to relative paths
+2. Missing `role` property in server responses - Added `role` to all user responses
+3. Response format mismatch - Fixed `fetchWithAuth` to unwrap `data` property
+4. Session format mismatch - Updated dropdown login to save session in authStore format
+5. Path not recognized - Added `/client/portal` to recognized client page paths
+6. Flash of login form - Added inline auth check script to prevent flash
+7. DOM accessibility - Added hidden username field to password form
+
+**Files Modified:**
+
+- `src/config/api.ts`, `server/routes/auth.ts`, `src/auth/auth-store.ts`
+- `src/core/modules-config.ts`, `index.html`, `client/index.html`
+
+### Admin
+
+- Reusable checkbox component for Pending Approvals table (and everywhere else checkboxes needed)
+- Fixed toggles for newly combined pages
+- Cards are now page-specific
+
+### Front-End Polish - Complete
+
+- Lead funnel styling: Fixed hardcoded hex colors in pipeline stages, error color for link hovers, removed duplicate CSS
+- Client login refinements: First login tracking, welcome messages, theme toggle removal
+- Tool tag styling: Fixed dark mode text color for contrast
+
 ### Backend System Comprehensive Improvement Plan - Completed Sections
 
 **Status:** ✅ COMPLETE - All sections except Database Normalization Phase 3-4
