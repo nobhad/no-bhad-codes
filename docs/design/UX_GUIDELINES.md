@@ -24,10 +24,11 @@
 
 This document defines the user experience standards for the project. All UI implementations must follow these guidelines to ensure consistency and usability.
 
-**Last Updated:** February 9, 2026
+**Last Updated:** February 10, 2026
 
 **Recent Updates:**
 
+- February 10: Client portal login fixes, first login welcome messages, theme toggle removal
 - Added comprehensive [Layout Patterns](#layout-patterns) section documenting standardized page structure, table hierarchy, action button order, tag placement, view toggles, modal structure, and tab patterns (based on February 2026 Layout Consistency Audit)
 
 ---
@@ -1029,6 +1030,12 @@ Complete feature specifications with component details:
 | Analytics | [ANALYTICS.md](../features/ANALYTICS.md) | KPI cards, charts, data grid |
 | Milestones | [MILESTONES.md](../features/MILESTONES.md) | Progress indicator, deliverables list |
 | Secondary Sidebar | [SECONDARY_SIDEBAR.md](../features/SECONDARY_SIDEBAR.md) | Collapsed/expanded states, icons |
+
+### Onboarding Features
+
+| Feature | Documentation | Key Components |
+|---------|---------------|----------------|
+| Questionnaires | [QUESTIONNAIRES.md](../features/QUESTIONNAIRES.md) | Question builder, response form, auto-save |
 
 ### Other Features
 

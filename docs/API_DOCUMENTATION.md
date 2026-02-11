@@ -2300,6 +2300,159 @@ curl https://nobhad.codes/api/messages/analytics \
 }
 ```
 
+## Questionnaire Endpoints
+
+The Questionnaire system allows admins to create and send discovery questionnaires to clients.
+
+### Response Statuses
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Questionnaire sent, not yet started |
+| `in_progress` | Client has started but not submitted |
+| `completed` | Client has submitted responses |
+
+### Client Endpoints
+
+#### GET `/api/questionnaires/my-responses`
+
+Get all questionnaire responses for the authenticated client.
+
+**Authentication:** Required (Client)
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `status` | string | Filter by status: pending, in_progress, completed |
+
+**Response (200 OK):**
+
+```json
+{
+  "responses": [
+    {
+      "id": 1,
+      "questionnaire_id": 1,
+      "questionnaire_name": "Website Discovery",
+      "status": "pending",
+      "due_date": "2026-02-15",
+      "created_at": "2026-02-01T10:00:00Z"
+    }
+  ],
+  "stats": {
+    "pending": 1,
+    "in_progress": 0,
+    "completed": 2
+  }
+}
+```
+
+#### GET `/api/questionnaires/responses/:id`
+
+Get a specific response with full questionnaire details for answering.
+
+**Authentication:** Required (Client or Admin)
+
+#### POST `/api/questionnaires/responses/:id/save`
+
+Save progress on a questionnaire response.
+
+**Authentication:** Required (Client)
+
+**Request:**
+
+```json
+{
+  "answers": {
+    "q1": "Our primary goal is to increase online sales",
+    "q2": "Small business owners aged 35-55"
+  }
+}
+```
+
+#### POST `/api/questionnaires/responses/:id/submit`
+
+Submit a completed questionnaire response.
+
+**Authentication:** Required (Client)
+
+### Admin Endpoints
+
+#### GET `/api/questionnaires`
+
+Get all questionnaire templates.
+
+**Authentication:** Required (Admin)
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `project_type` | string | Filter by project type |
+| `active_only` | boolean | Only return active questionnaires |
+
+#### POST `/api/questionnaires`
+
+Create a new questionnaire template.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "name": "Website Discovery",
+  "description": "Help us understand your website project goals",
+  "project_type": "website",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "text",
+      "question": "What is the primary goal of your website?",
+      "required": true
+    },
+    {
+      "id": "q2",
+      "type": "multiselect",
+      "question": "Which features are important?",
+      "options": ["Contact Form", "Blog", "E-commerce"],
+      "required": false
+    }
+  ],
+  "is_active": true,
+  "auto_send_on_project_create": true
+}
+```
+
+#### POST `/api/questionnaires/:id/send`
+
+Send a questionnaire to a client.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "client_id": 5,
+  "project_id": 1,
+  "due_date": "2026-02-15"
+}
+```
+
+#### GET `/api/questionnaires/responses/pending`
+
+Get all pending responses across all clients.
+
+**Authentication:** Required (Admin)
+
+#### POST `/api/questionnaires/responses/:id/remind`
+
+Send a reminder for an incomplete questionnaire.
+
+**Authentication:** Required (Admin)
+
 ## Invoice Endpoints
 
 The Invoice system handles billing, payments, deposits, and credits.

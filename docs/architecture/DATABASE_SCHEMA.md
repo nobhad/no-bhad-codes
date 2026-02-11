@@ -3,7 +3,7 @@
 **Last Updated:** February 10, 2026
 **Database:** SQLite (`data/client_portal.db`)
 **Total Tables:** 118 (includes new `users` table)
-**Total Migrations:** 69
+**Total Migrations:** 72
 
 ## Table of Contents
 
@@ -389,22 +389,22 @@ Missing:
 
 See [DATABASE_NORMALIZATION_PLAN.md](./DATABASE_NORMALIZATION_PLAN.md) for detailed remediation plan.
 
-### Phase 1 - Low Risk (Completed)
+### Phase 1 - Low Risk (Complete)
 
 - [x] Remove redundant `is_read` boolean (Migration 067)
 
-### Phase 2 - Medium Risk (Migration Complete)
+### Phase 2 - Medium Risk (Complete)
 
 - [x] Create `users` table for team members (Migration 068)
 - [x] Add INTEGER FK columns alongside TEXT columns (Migration 068)
-- [ ] Update application code to use new columns (transition period)
-- [ ] Remove duplicate notification preference columns from clients
+- [x] Remove duplicate notification preference columns from clients (Migration 069)
+- [x] Remove TEXT user columns, use INTEGER FKs (Migration 070)
 
-### Phase 3 - Higher Risk (Planned)
+### Phase 3 - Higher Risk (Complete)
 
-- [ ] Normalize invoice table (extract business_info, payment_config)
-- [ ] Consolidate signature systems (contracts only)
-- [ ] Extract hardcoded business data to system_settings
+- [x] Extract hardcoded business data to system_settings (Migration 071)
+- [x] Normalize invoice table - extract line_items (Migration 072)
+- [x] Consolidate signature systems to contracts only (Migration 074)
 
 ### Phase 4 - Major Refactor (Deferred)
 
