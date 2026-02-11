@@ -11,6 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { approvalService, EntityType, WorkflowType } from '../services/approval-service.js';
+import { getDatabase } from '../database/init.js';
 
 const router = express.Router();
 
@@ -208,6 +209,7 @@ router.get(
 router.get(
   '/entity/:entityType/:entityId',
   authenticateToken,
+  requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { entityType, entityId } = req.params;
     const id = parseInt(entityId);
@@ -234,6 +236,7 @@ router.get(
 router.get(
   '/instance/:id',
   authenticateToken,
+  requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -271,6 +274,18 @@ router.post(
     const { comment } = req.body;
     const approverEmail = req.user?.email || 'unknown';
 
+    if (req.user?.type !== 'admin') {
+      const db = getDatabase();
+      const request = await db.get(
+        'SELECT approver_email FROM approval_requests WHERE id = ? AND status = ?',
+        [requestId, 'pending']
+      ) as { approver_email?: string } | undefined;
+
+      if (!request || request.approver_email !== approverEmail) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+    }
+
     try {
       const instance = await approvalService.approve(requestId, approverEmail, comment);
       res.json({
@@ -303,6 +318,18 @@ router.post(
     }
 
     const approverEmail = req.user?.email || 'unknown';
+
+    if (req.user?.type !== 'admin') {
+      const db = getDatabase();
+      const request = await db.get(
+        'SELECT approver_email FROM approval_requests WHERE id = ? AND status = ?',
+        [requestId, 'pending']
+      ) as { approver_email?: string } | undefined;
+
+      if (!request || request.approver_email !== approverEmail) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+    }
 
     try {
       const instance = await approvalService.reject(requestId, approverEmail, reason);

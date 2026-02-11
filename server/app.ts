@@ -48,6 +48,7 @@ import webhooksRouter from './routes/webhooks.js';
 import deliverablesRouter from './routes/deliverables.js';
 import integrationsRouter from './routes/integrations.js';
 import dataQualityRouter from './routes/data-quality.js';
+import settingsRouter from './routes/settings.js';
 import { setupSwagger } from './config/swagger.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -273,7 +274,8 @@ const apiRouters = [
   { path: '/webhooks', router: webhooksRouter },
   { path: '/deliverables', router: deliverablesRouter },
   { path: '/integrations', router: integrationsRouter },
-  { path: '/data-quality', router: dataQualityRouter }
+  { path: '/data-quality', router: dataQualityRouter },
+  { path: '/settings', router: settingsRouter }
 ];
 
 // Mount all routers at both /api and /api/v1

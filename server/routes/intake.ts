@@ -257,14 +257,31 @@ router.post('/', async (req: Request, res: Response) => {
       }
 
       // Create project record
+      const extraNotes: string[] = [];
+      if (features.length) {
+        extraNotes.push(`Features: ${features.join(', ')}`);
+      }
+      if (intakeData.designLevel) {
+        extraNotes.push(`Design level: ${intakeData.designLevel}`);
+      }
+      if (intakeData.techComfort) {
+        extraNotes.push(`Tech comfort: ${intakeData.techComfort}`);
+      }
+      if (intakeData.domainHosting) {
+        extraNotes.push(`Domain/hosting: ${intakeData.domainHosting}`);
+      }
+      if (intakeData.additionalInfo) {
+        extraNotes.push(`Additional info: ${intakeData.additionalInfo}`);
+      }
+      const notes = extraNotes.length ? extraNotes.join('\n') : null;
+
       const projectResult = await ctx.run(
         `
         INSERT INTO projects (
           client_id, project_name, description, status, priority,
-          project_type, budget_range, timeline, features,
-          design_level, tech_comfort, hosting_preference,
-          additional_info, created_at, updated_at
-        ) VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+          project_type, budget_range, timeline, notes,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, datetime('now'), datetime('now'))
       `,
         [
           clientId,
@@ -273,11 +290,7 @@ router.post('/', async (req: Request, res: Response) => {
           intakeData.projectType,
           intakeData.budget,
           intakeData.timeline,
-          features.join(','),
-          intakeData.designLevel || null,
-          intakeData.techComfort || null,
-          intakeData.domainHosting || null,
-          intakeData.additionalInfo || null
+          notes
         ]
       );
 

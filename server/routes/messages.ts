@@ -19,6 +19,37 @@ import { messageService } from '../services/message-service.js';
 
 const router = express.Router();
 
+async function canAccessMessage(req: AuthenticatedRequest, messageId: number): Promise<boolean> {
+  if (req.user?.type === 'admin') {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get(
+    `SELECT 1
+     FROM general_messages gm
+     JOIN message_threads mt ON gm.thread_id = mt.id
+     WHERE gm.id = ? AND mt.client_id = ?`,
+    [messageId, req.user?.id]
+  );
+
+  return !!row;
+}
+
+async function canAccessProject(req: AuthenticatedRequest, projectId: number): Promise<boolean> {
+  if (req.user?.type === 'admin') {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
+    projectId,
+    req.user?.id
+  ]);
+
+  return !!row;
+}
+
 // Configure multer for file attachments using centralized config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -637,6 +668,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const messageId = parseInt(req.params.messageId);
+    if (isNaN(messageId)) {
+      return res.status(400).json({ error: 'Invalid message ID' });
+    }
+
+    if (!(await canAccessMessage(req, messageId))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     const mentions = await messageService.getMentions(messageId);
     res.json({ mentions });
   })
@@ -664,6 +703,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const messageId = parseInt(req.params.messageId);
+    if (isNaN(messageId)) {
+      return res.status(400).json({ error: 'Invalid message ID' });
+    }
+
+    if (!(await canAccessMessage(req, messageId))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     const reactions = await messageService.getReactions(messageId);
     res.json({ reactions });
   })
@@ -677,6 +724,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const messageId = parseInt(req.params.messageId);
     const { reaction } = req.body;
+
+    if (isNaN(messageId)) {
+      return res.status(400).json({ error: 'Invalid message ID' });
+    }
+
+    if (!(await canAccessMessage(req, messageId))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
 
     if (!reaction) {
       return res.status(400).json({
@@ -704,6 +759,14 @@ router.delete(
     const messageId = parseInt(req.params.messageId);
     const reaction = decodeURIComponent(req.params.reaction);
 
+    if (isNaN(messageId)) {
+      return res.status(400).json({ error: 'Invalid message ID' });
+    }
+
+    if (!(await canAccessMessage(req, messageId))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     await messageService.removeReaction(messageId, req.user!.email, reaction);
     res.json({ message: 'Reaction removed' });
   })
@@ -719,6 +782,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId);
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     const subscription = await messageService.getSubscription(projectId, req.user!.email);
     res.json({ subscription });
   })
@@ -731,6 +802,14 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId);
     const { notify_all, notify_mentions, notify_replies } = req.body;
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
 
     const subscription = await messageService.updateSubscription(
       projectId,
@@ -748,6 +827,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId);
     const { until } = req.body; // Optional: datetime to mute until
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
 
     const subscription = await messageService.muteProject(
       projectId,

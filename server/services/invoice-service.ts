@@ -9,6 +9,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { BUSINESS_INFO } from '../config/business.js';
+import { settingsService } from './settings-service.js';
 
 // Type definitions for database operations
 type SqlValue = string | number | boolean | null;
@@ -519,7 +520,17 @@ export class InvoiceService {
       data.billToEmail || null
     ]);
 
-    return this.getInvoiceById(result.lastID!);
+    const invoiceId = result.lastID!;
+
+    // Save line items to new table (dual-write for rollback compatibility)
+    try {
+      await this.saveLineItems(invoiceId, data.lineItems);
+    } catch (err) {
+      // Log but don't fail - JSON column has the data as backup
+      console.warn('Failed to save line items to table:', err);
+    }
+
+    return this.getInvoiceById(invoiceId);
   }
 
   /**
@@ -724,6 +735,15 @@ export class InvoiceService {
     params.push(id);
 
     await this.db.run(sql, params);
+
+    // Update line items in new table if they were changed
+    if (data.lineItems && data.lineItems.length > 0) {
+      try {
+        await this.saveLineItems(id, data.lineItems);
+      } catch (err) {
+        console.warn('Failed to update line items in table:', err);
+      }
+    }
 
     return this.getInvoiceById(id);
   }
@@ -1047,6 +1067,134 @@ export class InvoiceService {
     };
   }
 
+  // ============================================
+  // LINE ITEMS TABLE METHODS (Phase 3.2)
+  // ============================================
+
+  /**
+   * Get line items from the invoice_line_items table
+   * Falls back to JSON column for invoices not yet migrated
+   */
+  async getLineItems(invoiceId: number): Promise<InvoiceLineItem[]> {
+    // First try the new table
+    const rows = await this.db.all(
+      `SELECT * FROM invoice_line_items WHERE invoice_id = ? ORDER BY sort_order ASC`,
+      [invoiceId]
+    );
+
+    if (rows.length > 0) {
+      return rows.map((row: Record<string, unknown>) => ({
+        description: row.description as string,
+        quantity: typeof row.quantity === 'string' ? parseFloat(row.quantity) : (row.quantity as number),
+        rate: typeof row.unit_price === 'string' ? parseFloat(row.unit_price) : (row.unit_price as number),
+        amount: typeof row.amount === 'string' ? parseFloat(row.amount) : (row.amount as number),
+        taxRate: row.tax_rate ? (typeof row.tax_rate === 'string' ? parseFloat(row.tax_rate) : row.tax_rate as number) : undefined,
+        taxAmount: row.tax_amount ? (typeof row.tax_amount === 'string' ? parseFloat(row.tax_amount) : row.tax_amount as number) : undefined,
+        discountType: row.discount_type as 'percentage' | 'fixed' | undefined,
+        discountValue: row.discount_value ? (typeof row.discount_value === 'string' ? parseFloat(row.discount_value) : row.discount_value as number) : undefined,
+        discountAmount: row.discount_amount ? (typeof row.discount_amount === 'string' ? parseFloat(row.discount_amount) : row.discount_amount as number) : undefined
+      }));
+    }
+
+    // Fall back to JSON column for unmigrated invoices
+    const invoice = await this.db.get(
+      'SELECT line_items FROM invoices WHERE id = ?',
+      [invoiceId]
+    );
+
+    if (invoice?.line_items) {
+      try {
+        return JSON.parse(invoice.line_items as string);
+      } catch {
+        return [];
+      }
+    }
+
+    return [];
+  }
+
+  /**
+   * Save line items to the invoice_line_items table
+   * Also writes to JSON column for rollback compatibility
+   */
+  async saveLineItems(invoiceId: number, lineItems: InvoiceLineItem[]): Promise<void> {
+    // Delete existing line items for this invoice
+    await this.db.run(
+      'DELETE FROM invoice_line_items WHERE invoice_id = ?',
+      [invoiceId]
+    );
+
+    // Insert new line items
+    for (let i = 0; i < lineItems.length; i++) {
+      const item = lineItems[i];
+      await this.db.run(
+        `INSERT INTO invoice_line_items (
+          invoice_id, description, quantity, unit_price, amount,
+          tax_rate, tax_amount, discount_type, discount_value, discount_amount,
+          sort_order
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          invoiceId,
+          item.description,
+          item.quantity,
+          item.rate,
+          item.amount,
+          item.taxRate ?? null,
+          item.taxAmount ?? null,
+          item.discountType ?? null,
+          item.discountValue ?? null,
+          item.discountAmount ?? null,
+          i
+        ]
+      );
+    }
+
+    // Also update JSON column for rollback compatibility
+    await this.db.run(
+      'UPDATE invoices SET line_items = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [JSON.stringify(lineItems), invoiceId]
+    );
+  }
+
+  /**
+   * Get business info from settings service
+   * Falls back to BUSINESS_INFO constant if settings not available
+   */
+  async getBusinessInfoFromSettings(): Promise<{
+    name: string;
+    contact: string;
+    email: string;
+    website: string;
+    venmoHandle: string;
+    paypalEmail: string;
+  }> {
+    try {
+      const [businessInfo, paymentSettings] = await Promise.all([
+        settingsService.getBusinessInfo(),
+        settingsService.getPaymentSettings()
+      ]);
+
+      return {
+        name: businessInfo.name || BUSINESS_INFO.name,
+        contact: businessInfo.contact || BUSINESS_INFO.contact,
+        email: businessInfo.email || BUSINESS_INFO.email,
+        website: businessInfo.website || BUSINESS_INFO.website,
+        venmoHandle: paymentSettings.venmoHandle || BUSINESS_INFO.venmoHandle,
+        paypalEmail: paymentSettings.paypalEmail || BUSINESS_INFO.paypalEmail
+      };
+    } catch {
+      // Fall back to constants if settings table doesn't exist yet
+      return {
+        name: BUSINESS_INFO.name,
+        contact: BUSINESS_INFO.contact,
+        email: BUSINESS_INFO.email,
+        website: BUSINESS_INFO.website,
+        venmoHandle: BUSINESS_INFO.venmoHandle,
+        paypalEmail: BUSINESS_INFO.paypalEmail
+      };
+    }
+  }
+
   /**
    * Create a deposit invoice for a project
    */
@@ -1097,7 +1245,16 @@ export class InvoiceService {
       percentage || null
     ]);
 
-    return this.getInvoiceById(result.lastID!);
+    const invoiceId = result.lastID!;
+
+    // Save line items to new table (dual-write for rollback compatibility)
+    try {
+      await this.saveLineItems(invoiceId, lineItems);
+    } catch (err) {
+      console.warn('Failed to save deposit line items to table:', err);
+    }
+
+    return this.getInvoiceById(invoiceId);
   }
 
   /**

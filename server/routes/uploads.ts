@@ -48,6 +48,37 @@ if (!existsSync(uploadDir)) {
   mkdirSync(uploadDir, { recursive: true });
 }
 
+async function canAccessProject(req: AuthenticatedRequest, projectId: number): Promise<boolean> {
+  if (req.user?.type === 'admin') {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
+    projectId,
+    req.user?.id
+  ]);
+
+  return !!row;
+}
+
+async function canAccessFile(req: AuthenticatedRequest, fileId: number): Promise<boolean> {
+  if (req.user?.type === 'admin') {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get(
+    `SELECT 1
+     FROM files f
+     JOIN projects p ON f.project_id = p.id
+     WHERE f.id = ? AND p.client_id = ?`,
+    [fileId, req.user?.id]
+  );
+
+  return !!row;
+}
+
 // Configure multer for file storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -708,8 +739,16 @@ router.delete(
       const userId = req.user?.id;
       const isAdmin = req.user?.type === 'admin';
       const isUploader = file.uploaded_by === userId || file.uploaded_by === String(userId);
+      const isOwner = file.client_id === userId;
 
-      if (!isAdmin && !isUploader) {
+      if (!isAdmin && file.client_id && !isOwner) {
+        return res.status(403).json({
+          error: 'Access denied - this file belongs to another client',
+          code: 'ACCESS_DENIED'
+        });
+      }
+
+      if (!isAdmin && !isOwner && !isUploader) {
         return res.status(403).json({
           error: 'Access denied - only admin or the uploader can delete this file',
           code: 'ACCESS_DENIED'
@@ -803,6 +842,10 @@ router.get(
       return res.status(400).json({ error: 'Invalid project ID' });
     }
 
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     const deliverables = await fileService.getProjectDeliverables(projectId, status);
     const stats = await fileService.getDeliverableStats(projectId);
 
@@ -849,6 +892,10 @@ router.get(
       return res.status(400).json({ error: 'Invalid file ID' });
     }
 
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     const workflow = await fileService.getDeliverableWorkflow(fileId);
     const comments = await fileService.getReviewComments(fileId);
     const history = await fileService.getDeliverableHistory(fileId);
@@ -874,6 +921,10 @@ router.post(
 
     if (isNaN(fileId)) {
       return res.status(400).json({ error: 'Invalid file ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied' });
     }
 
     const submittedBy = req.user?.email || 'unknown';
