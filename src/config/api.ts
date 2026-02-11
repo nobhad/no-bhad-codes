@@ -114,15 +114,21 @@ export function buildApiUrl(endpoint: string): string {
 
 /**
  * Get auth endpoints (client)
+ * Use relative paths so requests go through the dev server proxy and
+ * HttpOnly cookies are handled consistently across login and API calls.
+ * Using `buildApiUrl(...)` produces absolute URLs (e.g. http://localhost:4001),
+ * which can create cross-origin cookie issues in development when the
+ * frontend is served from a different origin. Relative `/api/...` paths
+ * will be proxied by Vite to the backend and preserve cookie behavior.
  */
 export const authEndpoints = {
-  login: buildApiUrl(apiConfig.endpoints.auth.login),
-  logout: buildApiUrl(apiConfig.endpoints.auth.logout),
-  refresh: buildApiUrl(apiConfig.endpoints.auth.refresh),
-  validate: buildApiUrl(apiConfig.endpoints.auth.validate),
-  profile: buildApiUrl(apiConfig.endpoints.auth.profile),
-  magicLink: buildApiUrl(apiConfig.endpoints.auth.magicLink),
-  verifyMagicLink: buildApiUrl(apiConfig.endpoints.auth.verifyMagicLink)
+  login: '/api/auth/login',
+  logout: '/api/auth/logout',
+  refresh: '/api/auth/refresh',
+  validate: '/api/auth/validate',
+  profile: '/api/auth/profile',
+  magicLink: '/api/auth/magic-link',
+  verifyMagicLink: '/api/auth/verify-magic-link'
 };
 
 /**

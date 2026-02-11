@@ -1357,11 +1357,23 @@
               } else {
                 /* Client login */
                 const user = responseData.data?.user || responseData.user;
+                const expiresIn = responseData.data?.expiresIn || responseData.expiresIn || '7d';
 
                 if (!user) {
                   throw new Error('Invalid response format from server');
                 }
 
+                /* Save session in authStore format (nbw_auth_*) */
+                const expiresAt = Date.now() + (7 * 24 * 60 * 60 * 1000); /* 7 days */
+                const sessionId = crypto.randomUUID();
+
+                sessionStorage.setItem('nbw_auth_user', JSON.stringify(user));
+                sessionStorage.setItem('nbw_auth_role', user.role || 'client');
+                sessionStorage.setItem('nbw_auth_expiry', String(expiresAt));
+                sessionStorage.setItem('nbw_auth_session_id', sessionId);
+                sessionStorage.setItem('nbw_auth_mode', 'authenticated');
+
+                /* Also set legacy keys for backward compatibility */
                 sessionStorage.setItem('client_auth_mode', 'authenticated');
                 sessionStorage.setItem('client_auth_user', JSON.stringify(user));
 

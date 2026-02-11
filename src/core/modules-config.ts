@@ -208,11 +208,12 @@ export function registerModules(debug: boolean = false): void {
       name: 'ClientPortalModule',
       type: 'dom',
       factory: async () => {
-        // Only load client portal on client pages (now at /client, not /client/portal)
+        // Only load client portal on client pages
         const currentPath = window.location.pathname;
         const isClientPage = currentPath === '/client' ||
                              currentPath === '/client/' ||
-                             currentPath.startsWith('/client/index');
+                             currentPath.startsWith('/client/index') ||
+                             currentPath.startsWith('/client/portal');
         if (isClientPage) {
           const { ClientPortalModule } = await import('../features/client/client-portal');
           return new ClientPortalModule();

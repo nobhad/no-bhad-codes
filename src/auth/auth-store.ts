@@ -251,13 +251,15 @@ function createAuthStore(): AuthStore {
       }
     });
 
-    const data = await response.json();
+    const json = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || 'Request failed');
+      throw new Error(json.error || 'Request failed');
     }
 
-    return data;
+    // Server wraps responses in { success: true, data: { ... } }
+    // Unwrap the data property for easier access
+    return json.data ?? json;
   }
 
   // ============================================
@@ -307,7 +309,8 @@ function createAuthStore(): AuthStore {
           role: data.user.role,
           expiresAt,
           sessionId,
-          error: null
+          error: null,
+          isFirstLogin: false
         });
 
         startRefreshTimer();
@@ -354,7 +357,8 @@ function createAuthStore(): AuthStore {
           role: 'admin',
           expiresAt,
           sessionId,
-          error: null
+          error: null,
+          isFirstLogin: false
         });
 
         startRefreshTimer();
@@ -485,7 +489,8 @@ function createAuthStore(): AuthStore {
           role: data.user.role,
           expiresAt,
           sessionId,
-          error: null
+          error: null,
+          isFirstLogin: false
         });
 
         startRefreshTimer();

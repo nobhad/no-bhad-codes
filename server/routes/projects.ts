@@ -69,6 +69,126 @@ const upload = multer({
   }
 });
 
+/**
+ * Check if user is actually an admin (verifies against database, not just JWT)
+ */
+async function isUserAdmin(req: AuthenticatedRequest): Promise<boolean> {
+  if (req.user?.type !== 'admin') {
+    return false;
+  }
+
+  // For admin users with id > 0 (not the special admin account), verify from database
+  if (req.user.id > 0) {
+    const db = getDatabase();
+    const client = await db.get('SELECT is_admin FROM clients WHERE id = ?', [req.user.id]);
+    return !!(client && client.is_admin === 1);
+  }
+
+  // Admin account (id = 0) is always admin
+  return true;
+}
+
+async function canAccessProject(req: AuthenticatedRequest, projectId: number): Promise<boolean> {
+  if (await isUserAdmin(req)) {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
+    projectId,
+    req.user?.id
+  ]);
+
+  return !!row;
+}
+
+async function canAccessFile(req: AuthenticatedRequest, fileId: number): Promise<boolean> {
+  if (req.user?.type === 'admin') {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get(
+    `SELECT 1
+     FROM files f
+     JOIN projects p ON f.project_id = p.id
+     WHERE f.id = ? AND p.client_id = ?`,
+    [fileId, req.user?.id]
+  );
+
+  return !!row;
+}
+
+async function canAccessFolder(req: AuthenticatedRequest, folderId: number): Promise<boolean> {
+  if (req.user?.type === 'admin') {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get(
+    `SELECT 1
+     FROM file_folders ff
+     JOIN projects p ON ff.project_id = p.id
+     WHERE ff.id = ? AND p.client_id = ?`,
+    [folderId, req.user?.id]
+  );
+
+  return !!row;
+}
+
+async function canAccessTask(req: AuthenticatedRequest, taskId: number): Promise<boolean> {
+  if (req.user?.type === 'admin') {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get(
+    `SELECT 1
+     FROM project_tasks t
+     JOIN projects p ON t.project_id = p.id
+     WHERE t.id = ? AND p.client_id = ?`,
+    [taskId, req.user?.id]
+  );
+
+  return !!row;
+}
+
+async function canAccessChecklistItem(req: AuthenticatedRequest, itemId: number): Promise<boolean> {
+  if (req.user?.type === 'admin') {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get(
+    `SELECT 1
+     FROM task_checklist_items i
+     JOIN project_tasks t ON i.task_id = t.id
+     JOIN projects p ON t.project_id = p.id
+     WHERE i.id = ? AND p.client_id = ?`,
+    [itemId, req.user?.id]
+  );
+
+  return !!row;
+}
+
+async function canAccessFileComment(req: AuthenticatedRequest, commentId: number): Promise<boolean> {
+  if (req.user?.type === 'admin') {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get(
+    `SELECT 1
+     FROM file_comments fc
+     JOIN files f ON fc.file_id = f.id
+     JOIN projects p ON f.project_id = p.id
+     WHERE fc.id = ? AND p.client_id = ?`,
+    [commentId, req.user?.id]
+  );
+
+  return !!row;
+}
+
 // Get projects for current client
 router.get(
   '/',
@@ -82,7 +202,15 @@ router.get(
     let query = '';
     let params: (string | number | null)[] = [];
 
-    if (req.user!.type === 'admin') {
+    // SECURITY: Double-check admin status from database, don't trust JWT alone
+    let isAdmin = req.user!.type === 'admin';
+    if (isAdmin && req.user!.id > 0) {
+      // Verify this client actually has admin privileges
+      const client = await db.get('SELECT is_admin FROM clients WHERE id = ?', [req.user!.id]);
+      isAdmin = !!(client && client.is_admin === 1);
+    }
+
+    if (isAdmin) {
       // Admin can see all projects with stats in single query (fixes N+1)
       // Filter out soft-deleted projects and clients
       query = `
@@ -881,9 +1009,17 @@ router.get(
     const projectId = parseInt(req.params.id);
     const db = getDatabase();
 
+    // SECURITY: Always filter by client_id for non-admin users
+    // Check admin status from database to ensure JWT wasn't tampered with
+    let isAdmin = req.user!.type === 'admin';
+    if (isAdmin && req.user!.id > 0) {
+      const client = await db.get('SELECT is_admin FROM clients WHERE id = ?', [req.user!.id]);
+      isAdmin = !!(client && client.is_admin === 1);
+    }
+
     // Check if user can access this project
     let project;
-    if (req.user!.type === 'admin') {
+    if (isAdmin) {
       project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     } else {
       project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
@@ -1801,7 +1937,7 @@ router.post(
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // Token valid for 7 days
 
-    // Store the signature request
+    // Store the signature request (dual-write: projects + contracts for rollback)
     await db.run(
       `UPDATE projects SET
         contract_signature_token = ?,
@@ -1818,14 +1954,23 @@ router.post(
     );
 
     if (latestContract) {
+      // Write signature request to contracts table (Phase 3.3 normalization)
       await db.run(
         `UPDATE contracts SET
+          signature_token = ?,
+          signature_requested_at = datetime('now'),
+          signature_expires_at = ?,
           status = 'sent',
           sent_at = datetime('now'),
           expires_at = ?,
           updated_at = datetime('now')
          WHERE id = ?`,
-        [expiresAt.toISOString() as string, (latestContract as Record<string, unknown>).id as number]
+        [
+          signatureToken,
+          expiresAt.toISOString(),
+          expiresAt.toISOString(),
+          (latestContract as Record<string, unknown>).id as number
+        ]
       );
     }
 
@@ -2074,10 +2219,14 @@ router.post(
     );
 
     if (latestContract) {
+      const contractId = (latestContract as Record<string, unknown>).id as number;
+      // Clear signature token and update signature data (Phase 3.3 normalization)
       await db.run(
         `UPDATE contracts SET
           status = 'signed',
           signed_at = ?,
+          signature_token = NULL,
+          signature_expires_at = NULL,
           signer_name = ?,
           signer_email = ?,
           signer_ip = ?,
@@ -2085,15 +2234,16 @@ router.post(
           signature_data = ?,
           updated_at = datetime('now')
          WHERE id = ?`,
-        [signedAt, signerName, clientEmail, signerIp, signerUserAgent, signatureData, (latestContract as Record<string, unknown>).id]
+        [signedAt, signerName, clientEmail, signerIp, signerUserAgent, signatureData, contractId]
       );
     }
 
-    // Log signature to audit log
+    // Log signature to audit log (include contract_id for Phase 3.3)
+    const contractId = latestContract ? (latestContract as Record<string, unknown>).id as number : null;
     await db.run(
-      `INSERT INTO contract_signature_log (project_id, action, actor_email, actor_ip, actor_user_agent, details)
-       VALUES (?, 'signed', ?, ?, ?, ?)`,
-      [projectId, clientEmail, signerIp, signerUserAgent, JSON.stringify({ signerName, signedAt })]
+      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, actor_ip, actor_user_agent, details)
+       VALUES (?, ?, 'signed', ?, ?, ?, ?)`,
+      [projectId, contractId, clientEmail, signerIp, signerUserAgent, JSON.stringify({ signerName, signedAt })]
     );
 
     // Send confirmation email to client
@@ -2992,6 +3142,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id);
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const tasks = await projectService.getBlockedTasks(projectId);
     res.json({ tasks });
   })
@@ -3007,6 +3165,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const taskId = parseInt(req.params.taskId);
+    if (isNaN(taskId)) {
+      return res.status(400).json({ error: 'Invalid task ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessTask(req, taskId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const comments = await projectService.getTaskComments(taskId);
     res.json({ comments });
   })
@@ -3019,6 +3185,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const taskId = parseInt(req.params.taskId);
     const { content } = req.body;
+
+    if (isNaN(taskId)) {
+      return res.status(400).json({ error: 'Invalid task ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessTask(req, taskId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
 
     if (!content) {
       return res.status(400).json({ error: 'Comment content is required', code: 'MISSING_CONTENT' });
@@ -3073,6 +3247,14 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const itemId = parseInt(req.params.itemId);
+    if (isNaN(itemId)) {
+      return res.status(400).json({ error: 'Invalid checklist item ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessChecklistItem(req, itemId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const item = await projectService.toggleChecklistItem(itemId);
     res.json({ message: 'Checklist item toggled', item });
   })
@@ -3418,6 +3600,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const versions = await fileService.getVersions(fileId);
     res.json({ versions });
   })
@@ -3431,6 +3621,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
     const file = req.file;
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
 
     if (!file) {
       return res.status(400).json({ error: 'No file uploaded', code: 'NO_FILE' });
@@ -3475,6 +3673,14 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const parentId = req.query.parent_id ? parseInt(req.query.parent_id as string) : undefined;
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const folders = await fileService.getFolders(projectId, parentId);
     res.json({ folders });
   })
@@ -3487,6 +3693,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const { name, description, parent_folder_id, color, icon } = req.body;
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
 
     if (!name || name.trim().length === 0) {
       return res.status(400).json({ error: 'Folder name is required', code: 'MISSING_NAME' });
@@ -3512,6 +3726,14 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const folderId = parseInt(req.params.folderId);
     const { name, description, color, icon, sort_order } = req.body;
+    if (isNaN(folderId)) {
+      return res.status(400).json({ error: 'Invalid folder ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFolder(req, folderId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const folder = await fileService.updateFolder(folderId, { name, description, color, icon, sort_order });
     res.json({ folder });
   })
@@ -3537,6 +3759,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
     const { folder_id } = req.body;
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     await fileService.moveFile(fileId, folder_id || null);
     res.json({ message: 'File moved' });
   })
@@ -3549,6 +3779,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const folderId = parseInt(req.params.folderId);
     const { parent_folder_id } = req.body;
+    if (isNaN(folderId)) {
+      return res.status(400).json({ error: 'Invalid folder ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFolder(req, folderId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     await fileService.moveFolder(folderId, parent_folder_id || null);
     res.json({ message: 'Folder moved' });
   })
@@ -3564,6 +3802,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const tags = await fileService.getFileTags(fileId);
     res.json({ tags });
   })
@@ -3576,6 +3822,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
     const tagId = parseInt(req.params.tagId);
+    if (isNaN(fileId) || isNaN(tagId)) {
+      return res.status(400).json({ error: 'Invalid file or tag ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     await fileService.addTag(fileId, tagId);
     res.json({ message: 'Tag added' });
   })
@@ -3588,6 +3842,14 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
     const tagId = parseInt(req.params.tagId);
+    if (isNaN(fileId) || isNaN(tagId)) {
+      return res.status(400).json({ error: 'Invalid file or tag ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     await fileService.removeTag(fileId, tagId);
     res.json({ message: 'Tag removed' });
   })
@@ -3600,6 +3862,14 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const tagId = parseInt(req.params.tagId);
+    if (isNaN(projectId) || isNaN(tagId)) {
+      return res.status(400).json({ error: 'Invalid project or tag ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const files = await fileService.getFilesByTag(projectId, tagId);
     res.json({ files });
   })
@@ -3616,6 +3886,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
     const { access_type } = req.body;
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
 
     if (!access_type || !['view', 'download', 'preview'].includes(access_type)) {
       return res.status(400).json({ error: 'Invalid access type', code: 'INVALID_ACCESS_TYPE' });
@@ -3652,6 +3930,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const stats = await fileService.getAccessStats(fileId);
     res.json({ stats });
   })
@@ -3667,6 +3953,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const includeInternal = req.user!.type === 'admin';
     const comments = await fileService.getComments(fileId, includeInternal);
     res.json({ comments });
@@ -3680,6 +3974,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
     const { content, is_internal, parent_comment_id, author_name } = req.body;
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
 
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ error: 'Comment content is required', code: 'MISSING_CONTENT' });
@@ -3705,6 +4007,14 @@ router.delete(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const commentId = parseInt(req.params.commentId);
+    if (isNaN(commentId)) {
+      return res.status(400).json({ error: 'Invalid comment ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFileComment(req, commentId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     await fileService.deleteComment(commentId);
     res.json({ message: 'Comment deleted' });
   })
@@ -3720,6 +4030,14 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     await fileService.archiveFile(fileId, req.user!.email);
     res.json({ message: 'File archived' });
   })
@@ -3731,6 +4049,14 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     await fileService.restoreFile(fileId);
     res.json({ message: 'File restored' });
   })
@@ -3742,6 +4068,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const files = await fileService.getArchivedFiles(projectId);
     res.json({ files });
   })
@@ -3793,6 +4127,14 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     await fileService.lockFile(fileId, req.user!.email);
     res.json({ message: 'File locked' });
   })
@@ -3805,6 +4147,14 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
     const isAdmin = req.user!.type === 'admin';
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     await fileService.unlockFile(fileId, req.user!.email, isAdmin);
     res.json({ message: 'File unlocked' });
   })
@@ -3821,6 +4171,14 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId);
     const { category } = req.body;
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessFile(req, fileId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
 
     const validCategories = ['general', 'deliverable', 'source', 'asset', 'document', 'contract', 'invoice'];
     if (!category || !validCategories.includes(category)) {
@@ -3839,6 +4197,14 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const category = req.params.category as 'general' | 'deliverable' | 'source' | 'asset' | 'document' | 'contract' | 'invoice';
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const files = await fileService.getFilesByCategory(projectId, category);
     res.json({ files });
   })
@@ -3854,6 +4220,14 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
     const stats = await fileService.getFileStats(projectId);
     res.json({ stats });
   })
@@ -3866,6 +4240,14 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const query = req.query.q as string;
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID', code: 'INVALID_ID' });
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
 
     if (!query || query.trim().length === 0) {
       return res.status(400).json({ error: 'Search query is required', code: 'MISSING_QUERY' });

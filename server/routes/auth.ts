@@ -204,7 +204,8 @@ router.post(
         companyName: getString(client, 'company_name'),
         contactName: getString(client, 'contact_name'),
         status: clientStatus,
-        isAdmin: clientIsAdmin
+        isAdmin: clientIsAdmin,
+        role: clientIsAdmin ? 'admin' : 'client'
       },
       expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
     }, 'Login successful');
@@ -258,7 +259,7 @@ router.get(
     const db = getDatabase();
 
     const client = await db.get(
-      'SELECT id, email, company_name, contact_name, phone, status, created_at FROM clients WHERE id = ?',
+      'SELECT id, email, company_name, contact_name, phone, status, is_admin, created_at FROM clients WHERE id = ?',
       [req.user!.id]
     );
 
@@ -266,6 +267,7 @@ router.get(
       return sendNotFound(res, 'User not found', ErrorCodes.NOT_FOUND);
     }
 
+    const isAdmin = getBoolean(client, 'is_admin');
     return sendSuccess(res, {
       user: {
         id: getNumber(client, 'id'),
@@ -274,6 +276,8 @@ router.get(
         contactName: getString(client, 'contact_name'),
         phone: getString(client, 'phone'),
         status: getString(client, 'status'),
+        isAdmin,
+        role: isAdmin ? 'admin' : 'client',
         createdAt: getDate(client, 'created_at')?.toISOString() || null
       }
     });
@@ -780,8 +784,16 @@ router.post(
     // Set HttpOnly cookie with admin auth token
     res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, token, COOKIE_CONFIG.ADMIN_OPTIONS);
 
-    // Also return token in response body for frontend storage
+    // Return user data and token for frontend
     return sendSuccess(res, {
+      user: {
+        id: 0,
+        email: adminEmail,
+        name: 'Admin',
+        username: 'admin',
+        isAdmin: true,
+        role: 'admin'
+      },
       token,
       expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY
     }, 'Admin login successful');
@@ -1038,7 +1050,8 @@ router.post(
         companyName: clientCompanyNameForMagicLink,
         contactName: clientContactNameForMagicLink,
         status: clientStatus,
-        isAdmin: clientIsAdminForMagicLink
+        isAdmin: clientIsAdminForMagicLink,
+        role: clientIsAdminForMagicLink ? 'admin' : 'client'
       },
       expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
     }, 'Login successful');
@@ -1233,7 +1246,27 @@ No Bhad Codes Team`
       // Continue - account was activated successfully
     }
 
-    return sendSuccess(res, { email: clientEmail }, 'Password set successfully. You can now log in.');
+    // 5. Generate JWT token for auto-login
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('[AUTH] JWT_SECRET not configured for auto-login after set-password');
+      return sendSuccess(res, { email: clientEmail }, 'Password set successfully. You can now log in.');
+    }
+
+    const authToken = jwt.sign(
+      {
+        id: clientId,
+        email: clientEmail,
+        type: 'client',
+        isAdmin: false
+      },
+      secret,
+      { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
+    );
+
+    console.log(`[AUTH] Generated auto-login token for client ${clientId}`);
+
+    return sendSuccess(res, { email: clientEmail, token: authToken }, 'Password set successfully.');
   })
 );
 
