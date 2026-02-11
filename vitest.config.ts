@@ -9,6 +9,7 @@ export default defineConfig({
     include: [
       'src/**/*.{test,spec}.{js,ts}',
       'server/**/*.{test,spec}.{js,ts}',
+      'tests/server/**/*.{test,spec}.{js,ts}',
       'tests/unit/**/*.{test,spec}.{js,ts}',
     ],
     exclude: ['node_modules/**', 'dist/**', 'build/**', '**/*.d.ts'],

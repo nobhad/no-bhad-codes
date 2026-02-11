@@ -9,9 +9,9 @@
 
 > Modern TypeScript portfolio website and enterprise-grade client management system built with Vite, Express, and advanced web technologies.
 
-## 🌟 Features
+## Features
 
-### 🎨 **Portfolio Website**
+### **Portfolio Website**
 
 - **Interactive Business Card**: 3D flip animations with GSAP
 - **Responsive Design**: Mobile-first approach with CSS Grid/Flexbox
@@ -20,7 +20,7 @@
 - **Performance Optimized**: Core Web Vitals monitoring, lazy loading
 - **SEO Ready**: Meta tags, structured data, sitemap generation
 
-### 💼 **Client Management System**
+### **Client Management System**
 
 - **Client Portal**: Secure dashboard for project tracking
 - **Intake Forms**: Dynamic project requirement collection with automated processing
@@ -35,7 +35,7 @@
   - Email notifications for new messages
   - Admin analytics and message management
 
-### 🏗️ **Architecture**
+### **Architecture**
 
 - **TypeScript**: Full type safety with strict mode
 - **Dependency Injection**: Container-based DI for testability
@@ -44,7 +44,7 @@
 - **Component System**: Reusable UI components
 - **State Management**: Centralized state with pub-sub pattern
 
-### 🔒 **Security & Operations**
+### **Security & Operations**
 
 - **JWT Authentication**: Role-based access control
 - **Rate Limiting**: Configurable request throttling
@@ -53,7 +53,7 @@
 - **Environment Validation**: Type-safe configuration management
 - **Database Security**: Parameterized queries, data encryption
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -84,12 +84,14 @@ npm run dev:full
 
 ### Development URLs
 
-- **Frontend**: http://localhost:4000
-- **API Server**: http://localhost:4001
-- **Admin Dashboard**: http://localhost:4000/admin
-- **Client Portal**: http://localhost:4000/client/portal
+```text
+- **Frontend**: http://<frontend-host>:4000
+- **API Server**: http://<api-host>:4001
+- **Admin Dashboard**: http://<frontend-host>:4000/admin
+- **Client Portal**: http://<frontend-host>:4000/client/portal
+```
 
-## 📋 Available Scripts
+## Available Scripts
 
 ### Development
 
@@ -128,26 +130,26 @@ npm run migrate         # Run migrations
 npm run migrate:status  # Check migration status
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 no-bhad-codes/
-├── 📁 client/                    # Client portal pages
+├── client/                    # Client portal pages
 │   ├── intake.html              # Client intake form
 │   ├── portal.html              # Client dashboard
 │   └── set-password.html        # Invitation password setup
-├── 📁 server/                    # Backend application
-│   ├── 📁 config/               # Configuration management
+├── server/                    # Backend application
+│   ├── config/               # Configuration management
 │   │   └── environment.ts       # Environment validation
-│   ├── 📁 database/             # Database setup and migrations
-│   ├── 📁 middleware/           # Express middleware
+│   ├── database/             # Database setup and migrations
+│   ├── middleware/           # Express middleware
 │   │   ├── auth.ts              # Authentication middleware
 │   │   ├── errorHandler.ts      # Global error handling
 │   │   ├── logger.ts            # Request logging
 │   │   ├── request-id.ts        # Request correlation IDs
 │   │   ├── sanitization.ts      # Input sanitization
 │   │   └── audit.ts             # Audit logging
-│   ├── 📁 routes/               # API routes
+│   ├── routes/               # API routes
 │   │   ├── auth.ts              # Authentication endpoints
 │   │   ├── admin.ts             # Admin dashboard
 │   │   ├── clients.ts           # Client management
@@ -163,7 +165,7 @@ no-bhad-codes/
 │   │   ├── document-requests.ts # Document requests
 │   │   ├── knowledge-base.ts   # Knowledge base (kb)
 │   │   └── api.ts              # General API (contact, etc.)
-│   ├── 📁 services/             # Business logic services
+│   ├── services/             # Business logic services
 │   │   ├── email-service.ts     # Email notifications
 │   │   ├── invoice-service.ts   # Invoice CRUD and generation
 │   │   ├── invoice-generator.ts # PDF invoice generation
@@ -175,38 +177,38 @@ no-bhad-codes/
 │   │   ├── file-service.ts     # File uploads
 │   │   └── (approvals, document-requests, knowledge-base, etc.)
 │   └── app.ts                   # Express application
-├── 📁 src/                      # Frontend source code
-│   ├── 📁 config/               # Frontend configuration
+├── src/                      # Frontend source code
+│   ├── config/               # Frontend configuration
 │   │   ├── api.ts               # API endpoint configuration
 │   │   ├── branding.ts          # Company branding constants
 │   │   ├── constants.ts         # App-wide constants
 │   │   ├── routes.ts            # Route path definitions
 │   │   └── protection.config.ts # Code protection settings
-│   ├── 📁 core/                 # Application core
+│   ├── core/                 # Application core
 │   │   ├── app.ts               # Main application
 │   │   ├── container.ts         # Dependency injection
 │   │   └── state.ts             # State management
-│   ├── 📁 features/             # Feature modules
-│   │   ├── 📁 admin/            # Admin features
-│   │   └── 📁 client/           # Client portal features
-│   ├── 📁 modules/              # Reusable UI modules
-│   ├── 📁 services/             # Frontend services
-│   ├── 📁 styles/               # CSS architecture
-│   │   ├── 📁 base/             # Base styles (reset, typography)
-│   │   ├── 📁 components/       # Component styles
-│   │   └── 📁 pages/            # Page-specific styles
-│   ├── 📁 utils/                # Utility functions
+│   ├── features/             # Feature modules
+│   │   ├── admin/            # Admin features
+│   │   └── client/           # Client portal features
+│   ├── modules/              # Reusable UI modules
+│   ├── services/             # Frontend services
+│   ├── styles/               # CSS architecture
+│   │   ├── base/             # Base styles (reset, typography)
+│   │   ├── components/       # Component styles
+│   │   └── pages/            # Page-specific styles
+│   ├── utils/                # Utility functions
 │   └── vite-env.d.ts            # Vite environment type definitions
-├── 📁 templates/                # EJS templates
-│   ├── 📁 pages/                # Page templates
-│   └── 📁 partials/             # Reusable template parts
+├── templates/                # EJS templates
+│   ├── pages/                # Page templates
+│   └── partials/             # Reusable template parts
 ├── .env.example                 # Environment configuration template
 ├── tsconfig.json                # TypeScript configuration
 ├── vite.config.ts               # Vite build configuration
 └── package.json                 # Dependencies and scripts
 ```
 
-## 🗄️ Database Schema
+## Database Schema
 
 The application uses SQLite with the following main entities:
 
@@ -343,7 +345,7 @@ The application uses SQLite with the following main entities:
   - **terms**: Payment terms and conditions
   - **created_at**, **updated_at**: Timestamps
 
-## 🛠️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -354,7 +356,7 @@ The application uses comprehensive environment configuration. Copy `.env.example
 ```env
 NODE_ENV=development|production
 PORT=4001
-FRONTEND_URL=http://localhost:4000
+FRONTEND_URL=http://<frontend-host>:4000
 JWT_SECRET=your-secret-key-change-in-production-min-32-chars
 JWT_EXPIRES_IN=7d
 ADMIN_EMAIL=admin@yourdomain.com
@@ -368,8 +370,8 @@ ADMIN_PASSWORD=secure-password
 DATABASE_PATH=./data/client_portal.db
 
 # Client Portal URLs
-CLIENT_PORTAL_URL=http://localhost:4000/client/portal
-WEBSITE_URL=http://localhost:4000
+CLIENT_PORTAL_URL=http://<frontend-host>:4000/client/portal
+WEBSITE_URL=http://<frontend-host>:4000
 
 # Email Configuration
 EMAIL_ENABLED=false
@@ -412,7 +414,7 @@ The project uses strict TypeScript configuration with:
 - **Strict Mode**: Enabled
 - **Path Mapping**: `@/*` → `src/*`
 
-## 🔌 API Documentation
+## API Documentation
 
 ### Authentication Endpoints
 
@@ -654,7 +656,7 @@ Get messaging system analytics and statistics.
 }
 ```
 
-## 🎨 Frontend Architecture
+## Frontend Architecture
 
 ### Module System
 
@@ -752,7 +754,7 @@ const apiService = container.get<ApiService>('apiService');
 - **VisitorTrackingService**: Privacy-respecting analytics with consent
 - **CodeProtectionService**: Security and code protection features
 
-## 🔒 Security Features
+## Security Features
 
 ### Authentication & Authorization
 
@@ -775,7 +777,7 @@ const apiService = container.get<ApiService>('apiService');
 - **Rate Limiting**: Request throttling
 - **File Upload Security**: Type and size validation
 
-## 📊 Monitoring & Logging
+## Monitoring & Logging
 
 ### Centralized Logging
 
@@ -792,7 +794,7 @@ const apiService = container.get<ApiService>('apiService');
 - **Context Preservation**: Full request context in errors
 - **Production Safety**: Sensitive data filtering
 
-## 🧪 Testing
+## Testing
 
 ### Test Structure
 
@@ -820,7 +822,7 @@ npm run test:coverage
 npx playwright test
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Production Build
 
@@ -857,7 +859,7 @@ EXPOSE 4001
 CMD ["node", "dist/server/app.js"]
 ```
 
-## 🤝 Contributing
+## Contributing
 
 ### Development Workflow
 
@@ -883,7 +885,7 @@ CMD ["node", "dist/server/app.js"]
 - Ensure all checks pass
 - Provide clear description
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -926,11 +928,11 @@ npm run build
 - **Discussions**: [GitHub Discussions](https://github.com/noellebhaduri/no-bhad-codes/discussions)
 - **Email**: <nobhaduri@gmail.com>
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
-## 👩‍💻 Author
+## Author
 
 ### Noelle Bhaduri
 

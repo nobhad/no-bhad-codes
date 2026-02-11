@@ -213,8 +213,7 @@ export interface MessageEntity extends BaseEntity {
   sender_id?: number;
   sender_name: string;
   message: string;
-  is_read: boolean;
-  read_at?: string;
+  read_at: string | null; // Datetime when message was read, null if unread
 }
 
 /**
