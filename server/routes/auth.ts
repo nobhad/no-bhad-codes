@@ -133,7 +133,7 @@ router.post(
 
     // Find user in database
     const client = await db.get(
-      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin FROM clients WHERE email = ?',
+      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin, last_login FROM clients WHERE email = ?',
       [email.toLowerCase()]
     );
 
@@ -184,6 +184,16 @@ router.post(
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
     );
 
+    // Check if this is first login (last_login was NULL)
+    const previousLastLogin = client.last_login;
+    const isFirstLogin = previousLastLogin === null;
+
+    // Update last_login timestamp
+    await db.run(
+      'UPDATE clients SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
+      [clientId]
+    );
+
     // Log successful login
     await auditLogger.logLogin(
       clientId,
@@ -207,6 +217,7 @@ router.post(
         isAdmin: clientIsAdmin,
         role: clientIsAdmin ? 'admin' : 'client'
       },
+      isFirstLogin,
       expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
     }, 'Login successful');
   })
