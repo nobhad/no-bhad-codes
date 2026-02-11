@@ -110,6 +110,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
         error: 'Access token required',
         code: 'TOKEN_MISSING',
       });
@@ -127,6 +128,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
         error: 'Server configuration error',
         code: 'CONFIG_ERROR',
       });
@@ -146,6 +148,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
         error: 'Token expired',
         code: 'TOKEN_EXPIRED',
       });
@@ -165,6 +168,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
         error: 'Invalid token',
         code: 'TOKEN_INVALID',
       });
@@ -209,6 +213,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
         error: 'Admin access required',
         code: 'ADMIN_REQUIRED',
       });
@@ -220,6 +225,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
         error: 'Authentication required',
         code: 'AUTH_REQUIRED',
       });
@@ -251,6 +257,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
         error: 'Client access required',
         code: 'CLIENT_REQUIRED',
       });
@@ -262,6 +269,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
         error: 'Authentication required',
         code: 'AUTH_REQUIRED',
       });
