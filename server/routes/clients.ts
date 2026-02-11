@@ -279,7 +279,8 @@ router.get(
           'project_update' as type,
           pu.title as title,
           p.project_name as context,
-          pu.created_at as date
+          pu.created_at as date,
+          NULL as entity_id
         FROM project_updates pu
         JOIN projects p ON pu.project_id = p.id
         WHERE p.client_id = ?
@@ -291,7 +292,8 @@ router.get(
           'message' as type,
           'New message received' as title,
           t.subject as context,
-          m.created_at as date
+          m.created_at as date,
+          t.id as entity_id
         FROM messages m
         JOIN message_threads t ON m.thread_id = t.id
         WHERE t.client_id = ? AND m.sender_type = 'admin'
@@ -304,10 +306,13 @@ router.get(
           CASE
             WHEN status = 'sent' THEN 'Invoice sent'
             WHEN status = 'paid' THEN 'Invoice paid'
+            WHEN status = 'overdue' THEN 'Invoice overdue'
+            WHEN status = 'viewed' THEN 'Invoice viewed'
             ELSE 'Invoice updated'
           END as title,
           invoice_number as context,
-          updated_at as date
+          updated_at as date,
+          id as entity_id
         FROM invoices
         WHERE client_id = ?
 
@@ -318,27 +323,84 @@ router.get(
           'file' as type,
           'File uploaded' as title,
           original_filename as context,
-          created_at as date
-        FROM project_files pf
-        JOIN projects p ON pf.project_id = p.id
+          created_at as date,
+          id as entity_id
+        FROM files f
+        JOIN projects p ON f.project_id = p.id
         WHERE p.client_id = ?
+
+        UNION ALL
+
+        -- Document requests
+        SELECT
+          'document_request' as type,
+          CASE
+            WHEN dr.status = 'requested' THEN 'Document requested'
+            WHEN dr.status = 'approved' THEN 'Document approved'
+            WHEN dr.status = 'rejected' THEN 'Document rejected'
+            WHEN dr.status = 'under_review' THEN 'Document under review'
+            ELSE 'Document request updated'
+          END as title,
+          dr.title as context,
+          dr.updated_at as date,
+          dr.id as entity_id
+        FROM document_requests dr
+        WHERE dr.client_id = ?
+
+        UNION ALL
+
+        -- Contracts
+        SELECT
+          'contract' as type,
+          CASE
+            WHEN c.status = 'sent' THEN 'Contract sent for signature'
+            WHEN c.status = 'signed' THEN 'Contract signed'
+            WHEN c.status = 'expired' THEN 'Contract expired'
+            WHEN c.countersigned_at IS NOT NULL THEN 'Contract countersigned'
+            ELSE 'Contract updated'
+          END as title,
+          p.project_name as context,
+          COALESCE(c.signed_at, c.sent_at, c.updated_at) as date,
+          c.id as entity_id
+        FROM contracts c
+        JOIN projects p ON c.project_id = p.id
+        WHERE c.client_id = ?
       )
       ORDER BY date DESC
       LIMIT 10`,
-      [clientId, clientId, clientId, clientId]
+      [clientId, clientId, clientId, clientId, clientId, clientId]
     );
+
+    // Get pending document requests count
+    const docRequestsResult = await db.get(
+      `SELECT COUNT(*) as count FROM document_requests
+       WHERE client_id = ? AND status IN ('requested', 'rejected')`,
+      [clientId]
+    );
+    const pendingDocRequests = docRequestsResult?.count || 0;
+
+    // Get pending contracts count (sent but not signed)
+    const contractsResult = await db.get(
+      `SELECT COUNT(*) as count FROM contracts
+       WHERE client_id = ? AND status = 'sent'`,
+      [clientId]
+    );
+    const pendingContracts = contractsResult?.count || 0;
 
     res.json({
       stats: {
         activeProjects,
         pendingInvoices,
-        unreadMessages
+        unreadMessages,
+        pendingDocRequests,
+        pendingContracts
       },
       recentActivity: recentActivity.map((item: Record<string, unknown>) => ({
         type: item.type,
         title: item.title,
         context: item.context,
-        date: item.date
+        date: item.date,
+        entityId: item.entity_id
       }))
     });
   })

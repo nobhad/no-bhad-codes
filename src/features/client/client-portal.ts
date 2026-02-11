@@ -74,14 +74,14 @@ export class ClientPortalModule extends BaseModule {
   /** DOM element cache */
   private domCache = createDOMCache<PortalDOMKeys>();
 
-  constructor() {
-    super('client-portal');
+  constructor(options: { debug?: boolean } = {}) {
+    super('client-portal', options);
     this.moduleContext = this.createModuleContext();
 
     // Register DOM element selectors
     this.domCache.register({
-      passwordToggle: '#password-toggle',
-      clientPassword: '#client-password',
+      passwordToggle: '#portal-password-toggle',
+      clientPassword: '#portal-password',
       sidebarToggle: '#sidebar-toggle',
       btnLogout: '#btn-logout',
       messageInput: '#message-input',
@@ -200,17 +200,44 @@ export class ClientPortalModule extends BaseModule {
 
   private setupEventListeners(): void {
     if (this.loginForm) {
+      this.log('Login form found, attaching submit handler');
+      const passwordPromptKey = 'nbw_password_prompted';
+      if (sessionStorage.getItem(passwordPromptKey) === '1') {
+        this.loginForm.setAttribute('autocomplete', 'off');
+        const passwordInput = this.domCache.getAs<HTMLInputElement>('clientPassword');
+        passwordInput?.setAttribute('autocomplete', 'off');
+      }
       this.loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
+        event.stopPropagation();
+        this.log('Login form submitted');
+
+        if (sessionStorage.getItem(passwordPromptKey) !== '1') {
+          sessionStorage.setItem(passwordPromptKey, '1');
+          this.loginForm?.setAttribute('autocomplete', 'off');
+          const passwordInput = this.domCache.getAs<HTMLInputElement>('clientPassword');
+          passwordInput?.setAttribute('autocomplete', 'off');
+        }
+
         const formData = new FormData(this.loginForm!);
+        const email = (formData.get('email') as string || '').trim();
+        const password = formData.get('password') as string || '';
+
+        this.log('Login attempt for:', email);
+
+        if (!email || !password) {
+          this.log('Missing email or password');
+          const authModule = await loadAuthModule();
+          authModule.showLoginError('Please enter your email and password');
+          return;
+        }
+
         const authModule = await loadAuthModule();
         await authModule.handleLogin(
-          {
-            email: formData.get('email') as string,
-            password: formData.get('password') as string
-          },
+          { email, password },
           {
             onLoginSuccess: async (user) => {
+              this.log('Login successful for:', user.email);
               this.isLoggedIn = true;
               this.currentUser = user.email;
               this.currentUserData = user;
@@ -222,13 +249,18 @@ export class ClientPortalModule extends BaseModule {
               }
               this.showDashboard();
             },
-            onLoginError: (message) => authModule.showLoginError(message),
+            onLoginError: (message) => {
+              this.log('Login error:', message);
+              authModule.showLoginError(message);
+            },
             setLoading: (loading) => authModule.setLoginLoading(loading),
             clearErrors: () => authModule.clearErrors(),
             showFieldError: (fieldId, message) => authModule.showFieldError(fieldId, message)
           }
         );
       });
+    } else {
+      this.log('Login form not found');
     }
 
     // Use setTimeout to ensure DOM elements are ready after dashboard is shown
@@ -268,7 +300,7 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
-    // Header sidebar toggle buttons (arrows next to page titles)
+    // Header sidebar toggle buttons (arrows next to page titles) - legacy
     const headerSidebarToggles = document.querySelectorAll('.header-sidebar-toggle');
     headerSidebarToggles.forEach((btn) => {
       btn.addEventListener('click', (e) => {
@@ -276,6 +308,30 @@ export class ClientPortalModule extends BaseModule {
         this.toggleSidebar();
       });
     });
+
+    // New sidebar toggle button (in sidebar)
+    const sidebarToggleBtn = document.getElementById('btn-sidebar-toggle');
+    if (sidebarToggleBtn) {
+      sidebarToggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.toggleSidebar();
+      });
+    }
+
+    // Theme toggle in global header
+    const headerThemeToggle = document.getElementById('header-toggle-theme');
+    if (headerThemeToggle) {
+      headerThemeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        try {
+          localStorage.setItem('theme', newTheme);
+        } catch (e) {
+          // Ignore storage errors
+        }
+      });
+    }
 
     // Logout button
     const logoutBtn = this.domCache.get('btnLogout');
@@ -399,8 +455,11 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
-    // Password form
-    const passwordForm = this.domCache.getAs<HTMLFormElement>('passwordForm');
+    // Render password form dynamically (not in initial HTML to avoid multiple save password prompts)
+    this.renderPasswordForm();
+
+    // Password form - get fresh reference after rendering
+    const passwordForm = document.getElementById('password-form') as HTMLFormElement | null;
     if (passwordForm) {
       passwordForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -517,9 +576,10 @@ export class ClientPortalModule extends BaseModule {
     const contactName = this.domCache.getAs<HTMLInputElement>('settingsName')?.value;
     const companyName = this.domCache.getAs<HTMLInputElement>('settingsCompany')?.value;
     const phone = this.domCache.getAs<HTMLInputElement>('settingsPhone')?.value;
-    const currentPassword = this.domCache.getAs<HTMLInputElement>('currentPassword')?.value;
-    const newPassword = this.domCache.getAs<HTMLInputElement>('newPassword')?.value;
-    const confirmPassword = this.domCache.getAs<HTMLInputElement>('confirmPassword')?.value;
+    // Password fields are rendered dynamically, so access directly from DOM
+    const currentPassword = (document.getElementById('current-password') as HTMLInputElement | null)?.value;
+    const newPassword = (document.getElementById('new-password') as HTMLInputElement | null)?.value;
+    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement | null)?.value;
 
     try {
       // Update profile info
@@ -570,10 +630,10 @@ export class ClientPortalModule extends BaseModule {
           throw new Error(error.error || 'Failed to update password');
         }
 
-        // Clear password fields
-        const currPassEl = this.domCache.getAs<HTMLInputElement>('currentPassword');
-        const newPassEl = this.domCache.getAs<HTMLInputElement>('newPassword');
-        const confPassEl = this.domCache.getAs<HTMLInputElement>('confirmPassword');
+        // Clear password fields (rendered dynamically)
+        const currPassEl = document.getElementById('current-password') as HTMLInputElement | null;
+        const newPassEl = document.getElementById('new-password') as HTMLInputElement | null;
+        const confPassEl = document.getElementById('confirm-password') as HTMLInputElement | null;
         if (currPassEl) currPassEl.value = '';
         if (newPassEl) newPassEl.value = '';
         if (confPassEl) confPassEl.value = '';
@@ -590,6 +650,77 @@ export class ClientPortalModule extends BaseModule {
   }
 
   /**
+   * Render password form dynamically to avoid browser detecting multiple password fields at login
+   */
+  private renderPasswordForm(): void {
+    const placeholder = document.getElementById('password-form-placeholder');
+    if (!placeholder || placeholder.dataset.rendered === 'true') return;
+
+    placeholder.dataset.rendered = 'true';
+    placeholder.innerHTML = `
+      <form class="settings-form" id="password-form" data-form-type="change-password">
+        <input type="text" id="password-form-username" name="username" autocomplete="username" class="sr-only" tabindex="-1" aria-hidden="true" readonly />
+        <div class="form-group">
+          <label for="current-password">Current Password</label>
+          <div class="portal-password-wrapper">
+            <input type="password" id="current-password" class="form-input" autocomplete="current-password" />
+            <button type="button" class="portal-password-toggle password-toggle" data-password-toggle="current-password" aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="new-password">New Password</label>
+          <div class="portal-password-wrapper">
+            <input type="password" id="new-password" class="form-input" autocomplete="new-password" />
+            <button type="button" class="portal-password-toggle password-toggle" data-password-toggle="new-password" aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="confirm-password">Confirm New Password</label>
+          <div class="portal-password-wrapper">
+            <input type="password" id="confirm-password" class="form-input" autocomplete="new-password" />
+            <button type="button" class="portal-password-toggle password-toggle" data-password-toggle="confirm-password" aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-secondary">Update Password</button>
+      </form>
+    `;
+
+    // Initialize password toggles for the newly rendered form
+    const toggles = placeholder.querySelectorAll<HTMLButtonElement>('[data-password-toggle]');
+    toggles.forEach((toggle) => {
+      const inputId = toggle.dataset.passwordToggle;
+      if (!inputId) return;
+      toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        const input = document.getElementById(inputId) as HTMLInputElement | null;
+        if (input) {
+          input.type = input.type === 'password' ? 'text' : 'password';
+          // Update icon
+          const isVisible = input.type === 'text';
+          toggle.innerHTML = isVisible
+            ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>'
+            : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+        }
+      });
+    });
+  }
+
+  /**
    * Save password settings
    */
   private async savePasswordSettings(): Promise<void> {
@@ -600,9 +731,10 @@ export class ClientPortalModule extends BaseModule {
       return;
     }
 
-    const currentPassword = this.domCache.getAs<HTMLInputElement>('currentPassword')?.value;
-    const newPassword = this.domCache.getAs<HTMLInputElement>('newPassword')?.value;
-    const confirmPassword = this.domCache.getAs<HTMLInputElement>('confirmPassword')?.value;
+    // Get password values directly from DOM (elements are rendered dynamically)
+    const currentPassword = (document.getElementById('current-password') as HTMLInputElement | null)?.value;
+    const newPassword = (document.getElementById('new-password') as HTMLInputElement | null)?.value;
+    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement | null)?.value;
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       showToast('Please fill in all password fields', 'error');
@@ -637,10 +769,10 @@ export class ClientPortalModule extends BaseModule {
         throw new Error(error.error || 'Failed to update password');
       }
 
-      // Clear password fields
-      const currPassEl2 = this.domCache.getAs<HTMLInputElement>('currentPassword');
-      const newPassEl2 = this.domCache.getAs<HTMLInputElement>('newPassword');
-      const confPassEl2 = this.domCache.getAs<HTMLInputElement>('confirmPassword');
+      // Clear password fields (rendered dynamically)
+      const currPassEl2 = document.getElementById('current-password') as HTMLInputElement | null;
+      const newPassEl2 = document.getElementById('new-password') as HTMLInputElement | null;
+      const confPassEl2 = document.getElementById('confirm-password') as HTMLInputElement | null;
       if (currPassEl2) currPassEl2.value = '';
       if (newPassEl2) newPassEl2.value = '';
       if (confPassEl2) confPassEl2.value = '';
@@ -768,6 +900,7 @@ export class ClientPortalModule extends BaseModule {
           this.projectsList.innerHTML =
             '<div class="error-message"><p>Unable to load projects. Please try again later.</p></div>';
         }
+        this.renderDashboardMilestones([], 'Unable to load milestones right now.');
         return;
       }
 
@@ -779,6 +912,7 @@ export class ClientPortalModule extends BaseModule {
         const emptyClientName = user.name || user.email || 'Client';
         loadNavigationModule().then((nav) => nav.setClientName(emptyClientName));
         this.populateProjectsList([]);
+        this.renderDashboardMilestones([]);
         return;
       }
 
@@ -858,6 +992,7 @@ export class ClientPortalModule extends BaseModule {
       loadNavigationModule().then((nav) => nav.setClientName(clientName));
 
       this.populateProjectsList(clientProjects);
+      this.renderDashboardMilestones(clientProjects);
     } catch (error) {
       console.error('[ClientPortal] Failed to load projects:', error);
       // Show error state with client name
@@ -867,6 +1002,7 @@ export class ClientPortalModule extends BaseModule {
         this.projectsList.innerHTML =
           '<div class="error-message"><p>Unable to load projects. Please try again later.</p></div>';
       }
+      this.renderDashboardMilestones([], 'Unable to load milestones right now.');
     }
   }
 
@@ -906,13 +1042,14 @@ export class ClientPortalModule extends BaseModule {
       const activityList = document.querySelector('.activity-list');
       if (activityList && data.recentActivity) {
         if (data.recentActivity.length === 0) {
-          activityList.innerHTML = '<li class="activity-empty">No recent activity</li>';
+          activityList.innerHTML = '<li class="activity-item empty">No recent activity</li>';
         } else {
           activityList.innerHTML = data.recentActivity.map((item: {
             type: string;
             title: string;
             context: string;
             date: string;
+            entityId?: number;
           }) => {
             const date = new Date(item.date);
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -920,13 +1057,29 @@ export class ClientPortalModule extends BaseModule {
             const year = date.getFullYear();
             const formattedDate = `${month}/${day}/${year}`;
             const icon = this.getActivityIcon(item.type);
-            return `<li>${icon} ${this.escapeHtml(item.title)}${item.context ? ` - ${this.escapeHtml(item.context)}` : ''} <span class="activity-date">${formattedDate}</span></li>`;
+            const safeTitle = this.escapeHtml(item.title);
+            const safeContext = item.context ? this.escapeHtml(item.context) : '';
+            return `
+              <li class="activity-item">
+                <div class="activity-icon">${icon}</div>
+                <div class="activity-content">
+                  <span class="activity-title">${safeTitle}</span>
+                  ${safeContext ? `<span class="activity-client">${safeContext}</span>` : ''}
+                </div>
+                <span class="activity-time">${formattedDate}</span>
+              </li>
+            `;
           }).join('');
         }
       }
 
       // Update sidebar badges
-      this.updateSidebarBadges(data.stats.unreadMessages || 0, data.stats.pendingInvoices || 0);
+      this.updateSidebarBadges(
+        data.stats.unreadMessages || 0,
+        data.stats.pendingInvoices || 0,
+        data.stats.pendingDocRequests || 0,
+        data.stats.pendingContracts || 0
+      );
 
       // Load pending approvals for dashboard
       try {
@@ -942,23 +1095,144 @@ export class ClientPortalModule extends BaseModule {
     }
   }
 
+  private renderDashboardMilestones(
+    projects: ClientProject[],
+    errorMessage?: string
+  ): void {
+    const list = document.getElementById('milestones-list');
+    const empty = document.getElementById('milestones-empty');
+    const summary = document.getElementById('milestones-summary');
+    if (!list) return;
+
+    if (errorMessage) {
+      list.innerHTML = '';
+      if (summary) summary.textContent = '';
+      if (empty) {
+        empty.textContent = errorMessage;
+        empty.style.display = 'block';
+      }
+      return;
+    }
+
+    const milestones = projects.flatMap((project) =>
+      (project.milestones || []).map((milestone) => ({
+        ...milestone,
+        projectName: project.projectName
+      }))
+    );
+
+    const total = milestones.length;
+    const completed = milestones.filter((milestone) => milestone.isCompleted).length;
+
+    if (summary) {
+      summary.textContent = total > 0 ? `${completed}/${total} complete` : '';
+    }
+
+    if (total === 0) {
+      list.innerHTML = '';
+      if (empty) {
+        empty.textContent = 'No milestones yet.';
+        empty.style.display = 'block';
+      }
+      return;
+    }
+
+    if (empty) {
+      empty.style.display = 'none';
+    }
+
+    const getSortTime = (date?: string): number => {
+      if (!date) return Number.POSITIVE_INFINITY;
+      const time = Date.parse(date);
+      return Number.isNaN(time) ? Number.POSITIVE_INFINITY : time;
+    };
+
+    milestones.sort((a, b) => {
+      if (a.isCompleted !== b.isCompleted) {
+        return a.isCompleted ? 1 : -1;
+      }
+      return getSortTime(a.dueDate) - getSortTime(b.dueDate);
+    });
+
+    list.innerHTML = '';
+
+    milestones.forEach((milestone) => {
+      const item = document.createElement('div');
+      const statusLabel = milestone.isCompleted ? 'Completed' : 'In progress';
+      const statusClass = milestone.isCompleted ? 'completed' : 'pending';
+      const safeTitle = this.escapeHtml(milestone.title || 'Milestone');
+      const safeDescription = this.escapeHtml(milestone.description || '');
+      const safeProjectName = this.escapeHtml(milestone.projectName || 'Project');
+
+      const dueLabel = milestone.isCompleted
+        ? `Completed ${milestone.completedDate ? formatDate(milestone.completedDate) : 'Date TBD'}`
+        : milestone.dueDate
+          ? `Due ${formatDate(milestone.dueDate)}`
+          : 'Due date TBD';
+
+      const deliverables = Array.isArray(milestone.deliverables)
+        ? milestone.deliverables
+        : [];
+      const deliverablesMarkup = deliverables.length > 0
+        ? `<ul class="milestone-deliverables">${deliverables
+          .map((item) => `<li>${this.escapeHtml(String(item))}</li>`)
+          .join('')}</ul>`
+        : '';
+
+      item.className = `milestone-item${milestone.isCompleted ? ' completed' : ''}`;
+      item.innerHTML = `
+        <label class="milestone-checkbox" aria-label="${statusLabel}">
+          <input type="checkbox" ${milestone.isCompleted ? 'checked' : ''} disabled />
+        </label>
+        <div class="milestone-content">
+          <div class="milestone-header">
+            <h4 class="milestone-title">${safeTitle}</h4>
+            <span class="milestone-due-date">${dueLabel}</span>
+          </div>
+          ${safeDescription ? `<p class="milestone-description">${safeDescription}</p>` : ''}
+          <div class="milestone-meta">
+            <span class="milestone-project">${safeProjectName}</span>
+            <span class="milestone-status ${statusClass}">${statusLabel}</span>
+          </div>
+          ${deliverablesMarkup}
+        </div>
+      `;
+
+      list.appendChild(item);
+    });
+  }
+
   /**
    * Get icon for activity type
    */
   private getActivityIcon(type: string): string {
     switch (type) {
-    case 'project_update': return '📋';
-    case 'message': return '💬';
-    case 'invoice': return '📄';
-    case 'file': return '📁';
-    default: return '•';
+    case 'project_update':
+      return getAccessibleIcon('CLIPBOARD', 'Project update', { width: 16, height: 16 });
+    case 'message':
+      return getAccessibleIcon('MAIL', 'Message', { width: 16, height: 16 });
+    case 'invoice':
+      return getAccessibleIcon('FILE_TEXT', 'Invoice', { width: 16, height: 16 });
+    case 'file':
+      return getAccessibleIcon('FILE', 'File', { width: 16, height: 16 });
+    case 'document_request':
+      return getAccessibleIcon('DOCUMENT', 'Document request', { width: 16, height: 16 });
+    case 'contract':
+      return getAccessibleIcon('PENCIL', 'Contract', { width: 16, height: 16 });
+    default:
+      return getAccessibleIcon('CHECK', 'Activity', { width: 16, height: 16 });
     }
   }
 
   /**
    * Update sidebar notification badges
    */
-  private updateSidebarBadges(unreadMessages: number, pendingInvoices: number): void {
+  private updateSidebarBadges(
+    unreadMessages: number,
+    pendingInvoices: number,
+    pendingDocRequests: number = 0,
+    pendingContracts: number = 0
+  ): void {
     const supportBadge = document.getElementById('badge-support');
     if (supportBadge) {
       if (unreadMessages > 0) {
@@ -972,16 +1246,18 @@ export class ClientPortalModule extends BaseModule {
       }
     }
 
+    // Combine invoices and document requests for documents badge
+    const totalDocumentItems = pendingInvoices + pendingDocRequests + pendingContracts;
     const documentsBadge = document.getElementById('badge-documents');
     if (documentsBadge) {
-      if (pendingInvoices > 0) {
-        documentsBadge.textContent = pendingInvoices > 99 ? '99+' : String(pendingInvoices);
+      if (totalDocumentItems > 0) {
+        documentsBadge.textContent = totalDocumentItems > 99 ? '99+' : String(totalDocumentItems);
         documentsBadge.classList.add('has-count');
-        documentsBadge.setAttribute('aria-label', `${pendingInvoices} pending invoices`);
+        documentsBadge.setAttribute('aria-label', `${totalDocumentItems} pending items`);
       } else {
         documentsBadge.textContent = '';
         documentsBadge.classList.remove('has-count');
-        documentsBadge.setAttribute('aria-label', 'pending invoices');
+        documentsBadge.setAttribute('aria-label', 'pending items');
       }
     }
   }
@@ -1277,6 +1553,7 @@ export class ClientPortalModule extends BaseModule {
     if (!this.loginSection || !this.dashboardSection) return;
 
     // Hide auth gate (login form) and header/footer
+    // Note: We don't clear the form here - browsers need to see the credentials to offer to save them
     if (this.loginSection) {
       this.loginSection.classList.add('hidden');
       this.loginSection.style.display = 'none';
