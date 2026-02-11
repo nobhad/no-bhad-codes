@@ -1,0 +1,234 @@
+/**
+ * ===============================================
+ * NOTIFICATION BELL STYLES
+ * ===============================================
+ * @file src/styles/client-portal/notification-bell.css
+ *
+ * Styles for the notification bell dropdown in client portal.
+ */
+
+/* ============================================================================
+   NOTIFICATION BELL CONTAINER
+   ============================================================================ */
+
+.notification-bell-container {
+  position: relative;
+  display: inline-flex;
+}
+
+/* ============================================================================
+   BELL BUTTON
+   ============================================================================ */
+
+.notification-bell-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-sm);
+  color: var(--portal-text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.notification-bell-btn:hover {
+  color: var(--portal-text-light);
+  background: var(--portal-bg-hover);
+}
+
+.notification-bell-btn:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.notification-bell-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================================================
+   NOTIFICATION BADGE
+   ============================================================================ */
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 16px;
+  text-align: center;
+  color: white;
+  background: var(--color-danger-500);
+  border-radius: var(--portal-radius-pill);
+}
+
+.notification-badge.hidden {
+  display: none;
+}
+
+/* ============================================================================
+   NOTIFICATION DROPDOWN
+   ============================================================================ */
+
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  max-height: 420px;
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--portal-radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-index-portal-dropdown, 9700);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-dropdown.hidden {
+  display: none;
+}
+
+/* ============================================================================
+   DROPDOWN HEADER
+   ============================================================================ */
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--portal-border-dark);
+}
+
+.notification-dropdown-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-light);
+  margin: 0;
+}
+
+.notification-header .btn-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notification-header .btn-text:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================================
+   NOTIFICATION LIST
+   ============================================================================ */
+
+.notification-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 360px;
+}
+
+.notification-empty {
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ============================================================================
+   NOTIFICATION ITEM
+   ============================================================================ */
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--portal-border-dark);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background: var(--portal-bg-hover);
+}
+
+.notification-item:focus {
+  outline: none;
+  background: var(--portal-bg-hover);
+}
+
+.notification-item.unread {
+  background: var(--color-state-selected);
+}
+
+.notification-item.unread:hover {
+  background: var(--color-state-hover);
+}
+
+.notification-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-item-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--portal-text-light);
+  margin: 0 0 var(--space-1) 0;
+  line-height: 1.4;
+}
+
+.notification-item-message {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-secondary);
+  margin: 0 0 var(--space-1) 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notification-item-time {
+  font-size: 11px;
+  color: var(--portal-text-muted);
+}
+
+/* Unread dot indicator */
+.notification-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: var(--space-1);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 400px) {
+  .notification-dropdown {
+    width: 100%;
+    right: -10px;
+    max-width: calc(100vw - 20px);
+  }
+}

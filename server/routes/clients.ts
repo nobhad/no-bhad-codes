@@ -18,6 +18,7 @@ import { getString, getNumber } from '../database/row-helpers.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
 import { notificationPreferencesService } from '../services/notification-preferences-service.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -33,13 +34,13 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const db = getDatabase();
     const client = await db.get(
       `SELECT id, email, company_name, contact_name, phone, status, client_type,
-              billing_company, billing_address, billing_address2, billing_city,
+              billing_name, billing_company, billing_address, billing_address2, billing_city,
               billing_state, billing_zip, billing_country,
               created_at, updated_at
        FROM clients WHERE id = ?`,
@@ -47,7 +48,7 @@ router.get(
     );
 
     if (!client) {
-      return res.status(404).json({ error: 'Client not found', code: 'CLIENT_NOT_FOUND' });
+      return errorResponse(res, 'Client not found', 404, 'CLIENT_NOT_FOUND');
     }
 
     res.json({ success: true, client });
@@ -63,7 +64,7 @@ router.put(
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const { contact_name, company_name, phone } = req.body;
@@ -98,37 +99,31 @@ router.put(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return res
-        .status(400)
-        .json({ error: 'Current and new passwords are required', code: 'MISSING_FIELDS' });
+      return errorResponse(res, 'Current and new passwords are required', 400, 'MISSING_FIELDS');
     }
 
     if (newPassword.length < 8) {
-      return res
-        .status(400)
-        .json({ error: 'Password must be at least 8 characters', code: 'WEAK_PASSWORD' });
+      return errorResponse(res, 'Password must be at least 8 characters', 400, 'WEAK_PASSWORD');
     }
 
     const db = getDatabase();
     const client = await db.get('SELECT password_hash FROM clients WHERE id = ?', [req.user!.id]);
 
     if (!client) {
-      return res.status(404).json({ error: 'Client not found', code: 'CLIENT_NOT_FOUND' });
+      return errorResponse(res, 'Client not found', 404, 'CLIENT_NOT_FOUND');
     }
 
     // Verify current password
     const passwordHash = getString(client, 'password_hash');
     const validPassword = await bcrypt.compare(currentPassword, passwordHash);
     if (!validPassword) {
-      return res
-        .status(401)
-        .json({ error: 'Current password is incorrect', code: 'INVALID_PASSWORD' });
+      return errorResponse(res, 'Current password is incorrect', 401, 'INVALID_PASSWORD');
     }
 
     // Hash and save new password
@@ -151,7 +146,7 @@ router.put(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const { messages, status, invoices, weekly } = req.body;
@@ -176,7 +171,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const prefs = await notificationPreferencesService.getPreferences(req.user!.id, 'client');
@@ -204,14 +199,15 @@ router.put(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
-    const { company, address, address2, city, state, zip, country } = req.body;
+    const { billing_name, company, address, address2, city, state, zip, country } = req.body;
     const db = getDatabase();
 
     await db.run(
       `UPDATE clients SET
+         billing_name = ?,
          billing_company = ?,
          billing_address = ?,
          billing_address2 = ?,
@@ -222,6 +218,7 @@ router.put(
          updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
       [
+        billing_name || null,
         company || null,
         address || null,
         address2 || null,
@@ -273,14 +270,14 @@ router.get(
 
     // Get recent activity (last 10 items)
     const recentActivity = await db.all(
-      `SELECT * FROM (
+      `SELECT type, title, context, date, entity_id FROM (
         -- Project updates
         SELECT
           'project_update' as type,
           pu.title as title,
           p.project_name as context,
           pu.created_at as date,
-          NULL as entity_id
+          CAST(NULL as INTEGER) as entity_id
         FROM project_updates pu
         JOIN projects p ON pu.project_id = p.id
         WHERE p.client_id = ?
@@ -304,17 +301,17 @@ router.get(
         SELECT
           'invoice' as type,
           CASE
-            WHEN status = 'sent' THEN 'Invoice sent'
-            WHEN status = 'paid' THEN 'Invoice paid'
-            WHEN status = 'overdue' THEN 'Invoice overdue'
-            WHEN status = 'viewed' THEN 'Invoice viewed'
+            WHEN i.status = 'sent' THEN 'Invoice sent'
+            WHEN i.status = 'paid' THEN 'Invoice paid'
+            WHEN i.status = 'overdue' THEN 'Invoice overdue'
+            WHEN i.status = 'viewed' THEN 'Invoice viewed'
             ELSE 'Invoice updated'
           END as title,
-          invoice_number as context,
-          updated_at as date,
-          id as entity_id
-        FROM invoices
-        WHERE client_id = ?
+          i.invoice_number as context,
+          i.updated_at as date,
+          i.id as entity_id
+        FROM invoices i
+        WHERE i.client_id = ?
 
         UNION ALL
 
@@ -322,9 +319,9 @@ router.get(
         SELECT
           'file' as type,
           'File uploaded' as title,
-          original_filename as context,
-          created_at as date,
-          id as entity_id
+          f.original_filename as context,
+          f.created_at as date,
+          f.id as entity_id
         FROM files f
         JOIN projects p ON f.project_id = p.id
         WHERE p.client_id = ?
@@ -365,7 +362,7 @@ router.get(
         FROM contracts c
         JOIN projects p ON c.project_id = p.id
         WHERE c.client_id = ?
-      )
+      ) AS activity
       ORDER BY date DESC
       LIMIT 10`,
       [clientId, clientId, clientId, clientId, clientId, clientId]
@@ -498,10 +495,7 @@ router.get(
 
     // Check if user can access this client
     if (req.user!.type === 'client' && req.user!.id !== clientId) {
-      return res.status(403).json({
-        error: 'Access denied',
-        code: 'ACCESS_DENIED'
-      });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const db = getDatabase();
@@ -527,10 +521,7 @@ router.get(
     );
 
     if (!client) {
-      return res.status(404).json({
-        error: 'Client not found',
-        code: 'CLIENT_NOT_FOUND'
-      });
+      return errorResponse(res, 'Client not found', 404, 'CLIENT_NOT_FOUND');
     }
 
     // Get client's projects (filter out soft-deleted)
@@ -575,27 +566,18 @@ router.post(
     // Validate required fields - only email is required
     // Password is optional (client can be invited to set password later)
     if (!email) {
-      return res.status(400).json({
-        error: 'Email is required',
-        code: 'MISSING_REQUIRED_FIELDS'
-      });
+      return errorResponse(res, 'Email is required', 400, 'MISSING_REQUIRED_FIELDS');
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        error: 'Invalid email format',
-        code: 'INVALID_EMAIL'
-      });
+      return errorResponse(res, 'Invalid email format', 400, 'INVALID_EMAIL');
     }
 
     // Validate password strength if provided
     if (password && password.length < 8) {
-      return res.status(400).json({
-        error: 'Password must be at least 8 characters long',
-        code: 'WEAK_PASSWORD'
-      });
+      return errorResponse(res, 'Password must be at least 8 characters long', 400, 'WEAK_PASSWORD');
     }
 
     const db = getDatabase();
@@ -606,10 +588,7 @@ router.post(
     ]);
 
     if (existingClient) {
-      return res.status(409).json({
-        error: 'Email already registered',
-        code: 'EMAIL_EXISTS'
-      });
+      return errorResponse(res, 'Email already registered', 409, 'EMAIL_EXISTS');
     }
 
     // Hash password if provided, otherwise empty string (pending invite)
@@ -644,10 +623,7 @@ router.post(
     );
 
     if (!newClient) {
-      return res.status(500).json({
-        error: 'Client created but could not retrieve details',
-        code: 'CLIENT_CREATION_ERROR'
-      });
+      return errorResponse(res, 'Client created but could not retrieve details', 500, 'CLIENT_CREATION_ERROR');
     }
 
     // Send welcome email
@@ -705,10 +681,7 @@ router.put(
 
     // Check if user can update this client
     if (req.user!.type === 'client' && req.user!.id !== clientId) {
-      return res.status(403).json({
-        error: 'Access denied',
-        code: 'ACCESS_DENIED'
-      });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const { email, company_name, contact_name, phone, status } = req.body;
@@ -722,16 +695,16 @@ router.put(
     if (email !== undefined && req.user!.type === 'admin') {
       const trimmed = String(email).trim();
       if (!trimmed) {
-        return res.status(400).json({ error: 'Email cannot be empty', code: 'INVALID_EMAIL' });
+        return errorResponse(res, 'Email cannot be empty', 400, 'INVALID_EMAIL');
       }
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(trimmed)) {
-        return res.status(400).json({ error: 'Invalid email format', code: 'INVALID_EMAIL' });
+        return errorResponse(res, 'Invalid email format', 400, 'INVALID_EMAIL');
       }
       const normalized = trimmed.toLowerCase();
       const existing = await db.get('SELECT id FROM clients WHERE email = ? AND id != ?', [normalized, clientId]);
       if (existing) {
-        return res.status(409).json({ error: 'Email already in use by another client', code: 'EMAIL_EXISTS' });
+        return errorResponse(res, 'Email already in use by another client', 409, 'EMAIL_EXISTS');
       }
       updates.push('email = ?');
       values.push(normalized);
@@ -753,20 +726,14 @@ router.put(
     // Only admins can change status
     if (status !== undefined && req.user!.type === 'admin') {
       if (!['active', 'inactive', 'pending'].includes(status)) {
-        return res.status(400).json({
-          error: 'Invalid status value',
-          code: 'INVALID_STATUS'
-        });
+        return errorResponse(res, 'Invalid status value', 400, 'INVALID_STATUS');
       }
       updates.push('status = ?');
       values.push(status);
     }
 
     if (updates.length === 0) {
-      return res.status(400).json({
-        error: 'No valid fields to update',
-        code: 'NO_UPDATES'
-      });
+      return errorResponse(res, 'No valid fields to update', 400, 'NO_UPDATES');
     }
 
     updates.push('updated_at = CURRENT_TIMESTAMP');
@@ -833,10 +800,7 @@ router.post(
     );
 
     if (!client) {
-      return res.status(404).json({
-        error: 'Client not found',
-        code: 'CLIENT_NOT_FOUND'
-      });
+      return errorResponse(res, 'Client not found', 404, 'CLIENT_NOT_FOUND');
     }
 
     const clientEmail = getString(client, 'email');
@@ -941,10 +905,7 @@ No Bhad Codes Team
       });
     } catch (emailError) {
       console.error('[Clients] Failed to send invitation email:', emailError);
-      res.status(500).json({
-        error: 'Failed to send invitation email',
-        code: 'EMAIL_FAILED'
-      });
+      errorResponse(res, 'Failed to send invitation email', 500, 'EMAIL_FAILED');
     }
   })
 );
@@ -963,10 +924,7 @@ router.delete(
     const result = await softDeleteService.softDeleteClient(clientId, deletedBy);
 
     if (!result.success) {
-      return res.status(404).json({
-        error: result.message,
-        code: 'CLIENT_NOT_FOUND'
-      });
+      return errorResponse(res, result.message || 'Client not found', 404, 'CLIENT_NOT_FOUND');
     }
 
     res.json({
@@ -1014,10 +972,7 @@ router.post(
     const { firstName, lastName, email, phone, title, department, role, isPrimary, notes } = req.body;
 
     if (!firstName || !lastName) {
-      return res.status(400).json({
-        error: 'First name and last name are required',
-        code: 'MISSING_REQUIRED_FIELDS'
-      });
+      return errorResponse(res, 'First name and last name are required', 400, 'MISSING_REQUIRED_FIELDS');
     }
 
     const contact = await clientService.createContact(clientId, {
@@ -1121,10 +1076,7 @@ router.post(
     const { activityType, title, description, metadata } = req.body;
 
     if (!activityType || !title) {
-      return res.status(400).json({
-        error: 'Activity type and title are required',
-        code: 'MISSING_REQUIRED_FIELDS'
-      });
+      return errorResponse(res, 'Activity type and title are required', 400, 'MISSING_REQUIRED_FIELDS');
     }
 
     const activity = await clientService.logActivity(clientId, {
@@ -1210,10 +1162,7 @@ router.post(
     const { content } = req.body;
 
     if (!content || typeof content !== 'string' || !content.trim()) {
-      return res.status(400).json({
-        error: 'Note content is required',
-        code: 'MISSING_CONTENT'
-      });
+      return errorResponse(res, 'Note content is required', 400, 'MISSING_CONTENT');
     }
 
     const note = await clientService.addNote(clientId, req.user?.email || 'admin', content.trim());
@@ -1234,10 +1183,7 @@ router.put(
     const { is_pinned } = req.body;
 
     if (typeof is_pinned !== 'boolean') {
-      return res.status(400).json({
-        error: 'is_pinned must be a boolean',
-        code: 'INVALID_INPUT'
-      });
+      return errorResponse(res, 'is_pinned must be a boolean', 400, 'INVALID_INPUT');
     }
 
     const note = await clientService.updateNote(noteId, { isPinned: is_pinned });
@@ -1289,10 +1235,7 @@ router.post(
     const { fieldName, fieldLabel, fieldType, options, isRequired, placeholder, defaultValue, displayOrder } = req.body;
 
     if (!fieldName || !fieldLabel || !fieldType) {
-      return res.status(400).json({
-        error: 'Field name, label, and type are required',
-        code: 'MISSING_REQUIRED_FIELDS'
-      });
+      return errorResponse(res, 'Field name, label, and type are required', 400, 'MISSING_REQUIRED_FIELDS');
     }
 
     const field = await clientService.createCustomField({
@@ -1365,10 +1308,7 @@ router.put(
     const { values } = req.body;
 
     if (!Array.isArray(values)) {
-      return res.status(400).json({
-        error: 'Values must be an array of { fieldId, value } objects',
-        code: 'INVALID_FORMAT'
-      });
+      return errorResponse(res, 'Values must be an array of { fieldId, value } objects', 400, 'INVALID_FORMAT');
     }
 
     await clientService.setClientCustomFields(clientId, values);
@@ -1405,10 +1345,7 @@ router.post(
     const { name, color, description, tagType } = req.body;
 
     if (!name) {
-      return res.status(400).json({
-        error: 'Tag name is required',
-        code: 'MISSING_REQUIRED_FIELDS'
-      });
+      return errorResponse(res, 'Tag name is required', 400, 'MISSING_REQUIRED_FIELDS');
     }
 
     const tag = await clientService.createTag({ name, color, description, tagType });
@@ -1610,7 +1547,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const projectId = req.query.projectId ? parseInt(req.query.projectId as string) : undefined;
@@ -1635,7 +1572,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const days = req.query.days ? parseInt(req.query.days as string) : 7;
@@ -1653,7 +1590,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const preferences = await notificationPreferencesService.getPreferences(req.user!.id, 'client');
@@ -1669,7 +1606,7 @@ router.put(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const preferences = await notificationPreferencesService.updatePreferences(
@@ -1694,13 +1631,67 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
-      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
-    const history = await notificationPreferencesService.getNotificationHistory(req.user!.id, 'client', limit);
+    const notifications = await notificationPreferencesService.getNotificationHistory(req.user!.id, 'client', limit);
 
-    res.json({ success: true, history });
+    res.json({ success: true, notifications });
+  })
+);
+
+/**
+ * PUT /me/notifications/:id/read - Mark a single notification as read
+ */
+router.put(
+  '/me/notifications/:id/read',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+    }
+
+    const notificationId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Update the notification as read (verify it belongs to this client)
+    const result = await db.run(
+      `UPDATE notification_history
+       SET is_read = 1, read_at = CURRENT_TIMESTAMP
+       WHERE id = ? AND user_id = ? AND user_type = 'client'`,
+      [notificationId, req.user!.id]
+    );
+
+    if (result.changes === 0) {
+      return errorResponse(res, 'Notification not found', 404, 'NOT_FOUND');
+    }
+
+    res.json({ success: true, message: 'Notification marked as read' });
+  })
+);
+
+/**
+ * PUT /me/notifications/mark-all-read - Mark all notifications as read
+ */
+router.put(
+  '/me/notifications/mark-all-read',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+    }
+
+    const db = getDatabase();
+
+    await db.run(
+      `UPDATE notification_history
+       SET is_read = 1, read_at = CURRENT_TIMESTAMP
+       WHERE user_id = ? AND user_type = 'client' AND is_read = 0`,
+      [req.user!.id]
+    );
+
+    res.json({ success: true, message: 'All notifications marked as read' });
   })
 );
 
