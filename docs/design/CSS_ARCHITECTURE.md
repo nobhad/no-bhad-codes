@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** February 10, 2026
+**Last Updated:** February 11, 2026 (Login mobile transparent bg, Help page two-column layout)
 
 ## Table of Contents
 
@@ -39,7 +39,7 @@ The project uses a CSS variable-based architecture for consistent theming across
 - Typography utilities consolidated to `base/typography.css`
 - Password toggle styles consolidated to `shared/portal-forms.css`
 - Hidden selector has single source at `base/layout.css`
-- All `!important` declarations are legitimate (GSAP, print, reduced motion)
+- All `!important` declarations are legitimate (GSAP, print, reduced motion, collapsed sidebar)
 
 ---
 
@@ -179,6 +179,79 @@ Examples of elements that follow this pattern:
 - `.bundle-item` - Bundle analysis items
 
 **Rule:** Shadows appear on the main dark container, not on the lighter grey child elements inside.
+
+### Spacing Hierarchy (Admin + Client Portal)
+
+Both admin and client portal use **identical spacing** for consistency:
+
+#### Container Padding
+
+```css
+.dashboard-content {
+  padding: 0 clamp(0.75rem, 2vw, 1.5rem) clamp(0.75rem, 2vw, 1.5rem);
+}
+```
+
+#### Section-Level Spacing (`--space-3` = 24px)
+
+All major sections/cards on a page use `--space-3` gap:
+
+```css
+/* Tab content children spacing */
+.tab-content.active > * + * {
+  margin-top: var(--space-3);
+}
+
+/* Portal view content container */
+[data-page="client-portal"] #portal-view-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+```
+
+**Files using `--space-3` section gap:**
+
+- `layout.css` - `#portal-view-content`, `.tab-content.active`
+- `dashboard.css` - `.project-progress-section`, `.loading-state`
+- `settings.css` - `.settings-grid`
+- `requests.css` - `.requests-grid`
+- `invoices.css` - `.invoice-summary`
+- `files.css` - `.files-container`
+- `questionnaires.css` - `.cp-questionnaires-grid`
+
+#### Internal Spacing (`--space-2` = 16px)
+
+Within sections, between related items:
+
+```css
+.card-content > * + * {
+  margin-top: var(--space-2);
+}
+```
+
+#### Tight Spacing (`--space-1` = 8px)
+
+Within components, minimal gaps:
+
+```css
+.button-group {
+  gap: var(--space-1);
+}
+```
+
+#### Mobile Reduced Padding (400px and below)
+
+```css
+@media (max-width: 400px) {
+  .dashboard-content {
+    padding-left: var(--space-1);
+    padding-right: var(--space-1);
+  }
+}
+```
+
+**CRITICAL:** Do NOT add extra horizontal padding to individual views. All views inherit `.dashboard-content` padding.
 
 ### Admin Table Structure
 
@@ -1191,6 +1264,28 @@ On mobile (479px and below), table rows transform into stacked cards using CSS f
 }
 ```
 
+### Login Page Mobile Styles
+
+On mobile (≤600px), login containers use transparent backgrounds and no shadows for seamless integration with the page background:
+
+```css
+/* Both admin and client portal login pages */
+@media (max-width: 600px) {
+  .auth-gate-container {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+```
+
+**Files:**
+
+- `src/styles/admin/auth.css` - Admin login
+- `src/styles/client-portal/login.css` - Client portal login
+
 ---
 
 ## Naming Conventions
@@ -1405,7 +1500,7 @@ box-shadow:
 
 ## !important Usage Policy
 
-All `!important` declarations in the codebase are legitimate and necessary. Current count: ~58 instances.
+All `!important` declarations in the codebase are legitimate and necessary. Current count: ~65 instances.
 
 ### Legitimate Use Categories
 
@@ -1461,6 +1556,17 @@ GSAP animation requires initial state to be locked during intro.
 #### 9. Chart.js Inline Style Overrides
 
 Chart.js sets inline styles on legend elements that require `!important` to override.
+
+#### 10. Collapsed Sidebar Text Hiding
+
+When sidebar is collapsed (manually via `.collapsed` class or via media query auto-collapse), button text must be hidden regardless of base styles. Found in:
+
+- `shared/portal-buttons.css` - `.btn-text { display: none !important }` ensures text is always hidden when:
+  - `.sidebar.collapsed` class is present (manual collapse)
+  - `@media (--wide-down)` auto-collapse triggers (viewport ≤1300px)
+  - `@media (--compact-mobile)` mobile auto-collapse triggers (viewport ≤600px)
+
+**Why `!important`:** The base button styles set `overflow: visible` and flex properties that could allow text to overflow and show truncated. The `!important` ensures text is completely hidden regardless of any inherited or competing styles.
 
 ### Specificity Solutions Reference
 

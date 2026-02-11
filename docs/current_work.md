@@ -1,156 +1,104 @@
 # Current Work
 
-**Last Updated:** February 10, 2026
+**Last Updated:** February 11, 2026 (Password Save Prompt Fix - COMPLETE)
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-02.md`.
 
-## DESIGN SYSTEM COMPLIANCE - MANDATORY FOR ALL IMPLEMENTATIONS
+---
 
-All features MUST follow these guidelines from `docs/design/UX_GUIDELINES.md` and `docs/design/CSS_ARCHITECTURE.md`.  Must use reusable components and design tokens, and adhere to the specified patterns for consistency across the portal.
+## Open Issues
 
-### Icons and Visual Elements
+### Active - NEEDS DEEP DIVE
 
-- **NO EMOJIS** - Use Lucide icons only (see icon mappings in UX_GUIDELINES.md)
-- Icon sizes: `--icon-size-sm` (14px), `--icon-size-md` (16px), `--icon-size-lg` (20px), `--icon-size-xl` (24px)
-- Status indicators: 8px dot + text, gap: `--space-1`
-- Enable/disable toggles: Eye icon (active) / EyeOff icon (inactive)
-- View toggles: Always include SVG icons alongside text labels
+- [ ] **Receipts Feature** - Auto-generate PDF receipt for ANY payment (including partial payments), receipt management, download receipts
+- [ ] **Project Details - Invoices Tab** - Full invoice management in project details (view, create, edit, send, mark paid - all invoice actions)
+- [ ] **Project Details - PDF Creation** - Generate all business doc types (proposals, contracts, receipts, reports, SOWs) from files tab
+- [ ] **File Sharing Control** - All generated PDFs auto-save to project files but need "Share with Client" button to make visible to client (applies to ALL file types)
+- [ ] **Questionnaires to Files** - On completion: generate PDF of Q&A + keep raw JSON data export available. PDF saves to Forms folder.
+- [ ] **Document Requests to Files** - After admin approval: uploaded file MOVES from Doc Requests to Files tab (Forms folder). Original request marked complete.
 
-### Colors and Theming
+- [ ] **DIV SPACING** - Help page layout fixed (two-column with Categories LEFT). Remaining pages need verification for consistency
+- [ ] **CSS Base Styling** - Partial fix applied but Help page NOT using consistent card/section structure
+- [x] **FILES Layout** - Now matches admin portal: CSS Grid two-column layout, project folders in left panel, files table on right, intake PDFs display correctly
+- [ ] **Admin global header logo** - Changed from avatar image to "NO BHAD CODES" text - NEEDS TO LOOK LIKE MAIN SITE (not client portal style) AND IN ACME FONT
+- [ ] **CLIENT PORTAL HEADERS** - move toggle + breadcrumbs of client portal to page header, hide title
+- [x] **Files display** - Client portal files now match admin: folder tree shows projects, clicking project filters files, intake files open as PDF
+- [ ] **Dashboard greeting** - Client name  needs to stay together on its own line if full greeting can't fit on one line (e.g., "WELCOME BACK," then "NOELLE BHADURI!").  if full line can fit, should be on one line ("WELCOME BACK, NOELLE BHADURI!")
+- [ ] **Logout button** - Transparent background (no permanent light bg),needs to match rest of sidebar
+- [x] **Login page mobile** - FIXED: Full width, transparent background, no shadow on mobile (both client portal and admin)
+- [ ] **Help Page Layout** - FIXED: Two-column grid layout (Categories LEFT, Featured Articles + Need More Help RIGHT) - NEEDS VERIFICATION
 
-- **NEVER hardcode colors** - use CSS variables only
-- Portal backgrounds: `--portal-bg-darker`, `--portal-bg-dark`, `--portal-bg-medium`, `--portal-bg-light`
-- Portal text: `--portal-text-light`, `--portal-text-secondary`, `--portal-text-muted`
-- Status colors: `--color-status-*` variables (new, active, pending, on-hold, completed, cancelled)
-- Brand primary: `var(--color-brand-primary)` - theme-aware (crimson red)
-- Borders: Use `#000000` for card borders (not variables)
-- Shadows: Use `var(--shadow-md)`, `var(--shadow-lg)`, `var(--shadow-panel)` - no raw values
+### ACTIVE - IN PROGRESS THIS SESSION
 
-### Typography
+- [ ] **Horizontal scroll on mobile** - Fixed `min-width: 320px` to `min-width: 0`, added `overflow-x: hidden` to containers - NEEDS VERIFICATION
 
-- Font families: `--font--acme` (headers, uppercase labels), `--font-body` (body text)
-- Font sizes: `--font-size-xs` through `--font-size-3xl` (fluid clamp values)
-- Font weights: 400 (body), 600 (emphasis, buttons), 700 (headers, stat numbers)
-- Text transform: UPPERCASE for card headers, buttons, badges, nav items
-- Letter spacing: `--letter-spacing-label` (0.05em) for labels and headings
+### PENDING TESTING - NEEDS VERIFICATION
 
-### Button Standards
+- [ ] **Client Portal Files Tab** - Verify project folders display correctly, clicking project filters files, all files (including documents) show for each project
+- [ ] **Intake PDF Access** - Verify intake files open as PDF (not JSON) for logged-in clients
+- [ ] Test hash-based routing: invalid hash `#/invalid` redirects to dashboard
+- [ ] Test Messages page two-column layout at various screen sizes
+- [ ] hash-based routing: browser back/forward navigates correctly - cant test with vite
 
-| Type | Class | Usage |
-|------|-------|-------|
-| Primary | `.btn-primary` | Main CTA (one per section) |
-| Secondary | `.btn-secondary` | Cancel, back, other actions |
-| Icon-only | `.icon-btn` | Toolbars, compact UI |
-| Destructive | `.btn-danger` | Delete, remove actions |
+### VERIFIED FIXED - NO VERIFICATION NEEDED, CAN BE MOVED TO ARCHIVE
 
-- Button text: UPPERCASE, font-weight 600
-- Sidebar nav: Link-style (no bg/border/shadow)
-- Button order in footer: Cancel/Close > Primary Action
+- [x] **Password Save Prompt Fix - COMPLETE** (Feb 11, 2026)
+  - Root cause: Multiple `autocomplete="new-password"` fields caused browsers to show 4 save password prompts
+  - Fixed confirm-password fields to use `autocomplete="off"` instead of `autocomplete="new-password"`
+  - Added `autocomplete="off"` to password forms
+  - Removed dynamic autocomplete manipulation in JavaScript
+  - Files fixed: `set-password.html`, `reset-password.html`, `portal-views.ts`, `client-portal.ejs`
+- [x] **Module Spec Implementation Plan - COMPLETE** (Feb 11, 2026)
+  - [x] Invoice View/Edit Modals - View modal for all invoices, edit modal for drafts only
+  - [x] Password Reset Flow - Forgot password page, reset password page, backend endpoints
+  - [x] Onboarding Wizard Integration - Shows on first login, triggers from client-portal.ts
+  - [x] Notification Center UI - Bell icon, dropdown, mark read, polling
+  - [x] Message File Attachments - Paperclip button, file preview chips, drag & drop, download
+- [x] **Client Portal Files - Project Folders** - Added `populateFolderTree()` to show projects as folders, `selectFolder()` to filter files by project, intake file PDF preview support
+- [x] **Messages Tab Mobile Spacing** - Removed extra padding from `.messages-page-layout`, now matches rest of portal
+- [x] **Dashboard API 500 Error** - FIXED: Ambiguous column references in `/me/dashboard` files subquery (added `f.` prefix to `original_filename`, `created_at`, `id`)
+- [x] **Admin Recent Activity 500 Error** - FIXED: `client_intakes` table has `first_name`/`last_name` not `contact_name`, updated query to use concatenation
+- [x] Verified milestone card layout shows status top-right and date bottom-right
+- [x] Tested settings page loads client profile data from database
+- [x] Tested hash-based routing: sidebar clicks update URL hash
+- [x] Tested sidebar buttons navigate to correct views
+- [x] Tested data isolation - login as different clients and verify no data bleed
+- [x] Tested collapsed sidebar maintains consistent appearance at all screen sizes
+- [x] Tested hash-based routing: direct link to `#/messages` opens messages tab
+- [x] **Header Logo** - Changed from avatar image to "no bhad codes" text.
+- [x] **Milestone Card Layout** - Status in header, due date in footer.
+- [x] **Client Portal Navigation** - Hash-based routing implemented (`#/dashboard`, `#/files`, etc.) with dynamic view rendering via `portal-views.ts`.
+- [x] **Sidebar Background Color** - Changed to match global header (`--portal-bg-darker`).
+- [x] **"Contact support" email link** - FIXED: Now says "Contact Noelle" with link to messages, red text styling
+- [x] **Recent activity "Loading..."** - FIXED: Added `loadDashboard` callback to load stats when dashboard view is rendered
+- [x] **Portal 401 Unauthorized Redirect** - FIXED: Added global fetch interceptor that detects 401 responses and redirects to login with "session expired" message.
+- [x] **Client Dashboard** - FIXED: Moved stat cards above progress/milestones
+- [x] **Client Portal Page Titles** - FIXED: Now shows individual tab titles instead of group titles
+- [x] **Settings page form submission** - FIXED: Now calls `setupSettingsForms()` after view is rendered to attach event handlers
+- [x] **Messages "No messages yet"** - FIXED: Force refresh DOM cache when loading messages
+- [x] **Help page categories on left** - FIXED: Swapped grid columns so categories sidebar is on left
+- [x] **Browser tab title** - FIXED: Shows "No Bhad Codes" not "No Bhad Codes - Portfolio"
+- [x] **Admin "SUPPORT" to "Knowledge Base"** - FIXED: Updated sidebar button and tab titles
+- [x] **Settings Full Name redundancy** - FIXED: Changed billing section label to "Billing Name"
+- [x] **Mobile padding** - FIXED: Reduced left/right padding on screens under 400px
+- [x] **Portal Greeting** - "Welcome Back" for returning users, "Welcome to the Portal" for first login. Database field `last_login` (migration 076), `isFirstLogin` returned on login.
+- [x] **Billing name** - Separate `billing_name` field in database (migration 077), distinct from `contact_name`
+- [x] **Tab switching alignment** - Subtabs (Projects, Tasks, Requests, etc.) aligned to far right in page header
+- [x] **Knowledge Base toggle** - Removed "Knowledge Base" button from support subtabs, only Categories/Articles toggle shows
+- [x] **Mobile menu toggle** - Sidebar panel icon in page header on mobile when sidebar collapsed - opens sidebar
+- [x] **Logout button background** - FIXED: Changed `.logout-btn` from `background: var(--portal-bg-light)` to `transparent` so it matches other sidebar buttons
+- [x] **Messages mobile padding** - FIXED: Added CSS to remove outer `.dashboard-content` padding on messages tab for screens under 600px
+- [x] **Login page menu** - Menu button opens navigation overlay on login page
+- [x] **Mobile overflow** - No horizontal scrolling on any page (375px viewport)
 
-### Form Standards
+---
 
-- Inputs: `.portal-input`, `.form-input` - 100% width, `padding: 0.75rem`, `border-radius: 4px`
-- Focus state: `border-color: var(--color-primary)` + `box-shadow: 0 0 0 3px rgba(...)`
-- Labels: Above input, `--font-size-sm`, font-weight 600, sentence case
-- Password fields: MUST include visibility toggle (`.cp-password-wrapper` + `.cp-password-toggle`)
-- Validation: Error = `--color-error-500`, Success = `--color-success-500`
+## Pre-existing Server TypeScript Errors
 
-### Component Patterns
+These errors existed before current session and are not blocking:
 
-- **Cards**: `.portal-card`, `.admin-table-card` with `.portal-shadow`
-- **Modals**: Use `createPortalModal()` - NEVER custom modal HTML
-- **View toggles**: Use `createViewToggle()` in unified header with `data-for-tab`
-- **Dropdowns**: Table dropdowns (32px), Modal dropdowns (48px)
-- **Status badges**: `padding: 0.25rem 0.75rem`, `border-radius: 999px`, UPPERCASE
-
-### Table Structure (4-Layer Hierarchy)
-
-```text
-.admin-table-card.portal-shadow
-  .admin-table-header (title + action buttons)
-  .table-filters (optional: search + filter chips)
-  .admin-table-container
-    .admin-table-scroll-wrapper
-      table.admin-table
-  .table-pagination (OUTSIDE scroll-wrapper, INSIDE card)
-```
-
-- Pagination MUST be outside `.admin-table-scroll-wrapper`
-- Corner radius: scroll-wrapper gets bottom radius (or pagination if present)
-
-### Layout Patterns
-
-- **Unified portal header**: Breadcrumbs + dynamic page title + optional controls
-- **No redundant titles**: Page titles only in unified header
-- **Action button order**: Export > Refresh > Add (always this order)
-- **Tag placement**: Bottom of header card, before tabs (full-width row)
-- **View toggle placement**: In unified header, not buried in content
-
-### Z-Index Token System
-
-| Context | Variable | Value |
-|---------|----------|-------|
-| Portal base | `--z-index-portal-base` | 9000 |
-| Portal header | `--z-index-portal-header` | 9100 |
-| Portal sidebar | `--z-index-portal-sidebar` | 9200 |
-| Portal overlay | `--z-index-portal-overlay` | 9500 |
-| Portal modal | `--z-index-portal-modal` | 9600 |
-| Portal dropdown | `--z-index-portal-dropdown` | 9700 |
-| Portal toast | `--z-index-portal-toast` | 9800 |
-
-### Spacing
-
-- Design tokens: `--space-0-5` (4px), `--space-1` (8px), `--space-2` (16px), `--space-3` (24px), `--space-4` (32px)
-- Card padding: `--space-3` (24px)
-- Component gaps: `--space-2` (16px)
-- Status dot to text: `--space-1` (8px)
-
-### Animations
-
-- **Complex animations**: Use GSAP (not CSS animations)
-- **Simple transitions**: `var(--transition-fast)` (0.2s) or `var(--transition-medium)` (0.3s)
-- **Reduced motion**: Always respect `prefers-reduced-motion`
-- Easing: `--cubic-default` for standard easing
-
-### Accessibility
-
-- Color contrast: 4.5:1 minimum (3:1 for large text)
-- Focus states: Visible on all interactive elements
-- Keyboard nav: All functionality accessible via keyboard
-- ARIA labels: Required for icon-only buttons
-- Screen readers: Meaningful alt text, proper heading hierarchy
-
-### Naming Conventions
-
-- Class names: Lowercase with hyphens (`stat-card`, `message-thread`)
-- Portal prefix: `portal-` for portal-only components
-- BEM-like: `block__element--modifier` where appropriate
-- CSS variables: `--portal-*` for portal-only tokens
-- Page scoping: `[data-page="admin"]` or `[data-page="client-portal"]`
-
-### Shadow Hierarchy
-
-- **Main containers** (dark bg): Use `--shadow-panel`
-- **Child elements** (lighter grey bg): NO shadow
-- Rule: Shadows on main dark container, not on lighter child elements
-
-### Responsive Design
-
-- Breakpoints: Use `@custom-media` variables (not hardcoded px)
-- Mobile card view: Tables transform at 479px
-- Column stacking: Progressive at 1280px, 1100px breakpoints
-- Grid patterns: 3 > 2 > 1 columns (settings), 4 > 1 columns (invoices)
-
-## Post-Task Documentation Checklist
-
-After completing any task:
-
-- [ ] Move fully completed tasks from current_work to archive
-- [ ] Add entry to ARCHIVED_WORK_2026-02.md
-- [ ] Update feature docs (docs/features/*.md) if API/features changed
-- [ ] Update API_DOCUMENTATION.md if endpoints changed
-- [ ] Update relevant audit file (current state only, no fix logs)
-- [ ] Verify no markdown violations
+- `unknown` type errors in `calendar-service.ts` and `stripe-service.ts`
+- `rootDir` configuration issue with `shared/` folder imports
 
 ---
 
@@ -158,7 +106,7 @@ After completing any task:
 
 **Full Documentation:** See `docs/architecture/DATABASE_SCHEMA.md` and `docs/architecture/DATABASE_NORMALIZATION_PLAN.md`
 
-**Phase 1-3:** ✅ COMPLETE (Feb 10, 2026) - Migrations 067-074 applied
+**Phase 1-3:** COMPLETE (Feb 10, 2026) - Migrations 067-074 applied
 
 **Phase 4 - High Risk:** DEFERRED
 
@@ -166,147 +114,6 @@ After completing any task:
 - [ ] Unify message tables (messages vs general_messages)
 - [ ] Add soft-delete to all core entities
 - [ ] Slim invoices table (remove redundant columns) - `075_slim_invoices_table.sql.bak`
-
----
-
-## Open Issues
-
-### Backend File Splitting (Token Limit Compliance)
-
-**Full Plan:** See `docs/architecture/BACKEND_SPLITTING_PLAN.md`
-
-#### Quick Wins - COMPLETE
-
-- [x] Create `server/utils/api-response.ts` - Standardized API responses
-- [x] Create `server/utils/transformers.ts` - Snake/camel case transformers
-- [x] Create `server/middleware/access-control.ts` - Centralized access control
-- [x] Create `server/types/invoice-types.ts` - Extracted invoice type definitions
-
-#### Phase 1: Split routes/invoices.ts (4,425 -> 3,774 lines, 651 lines extracted)
-
-- [x] Create `server/routes/invoices/` directory structure
-- [x] Extract `invoices/helpers.ts` - Shared helper functions, transformers
-- [x] Extract `invoices/pdf.ts` - PDF generation (~490 lines)
-- [x] Create `invoices/index.ts` - Re-exports for shared utilities
-- [ ] Extract `invoices/core.ts` - CRUD operations, search
-- [ ] Extract `invoices/deposits.ts` - Deposit endpoints
-- [ ] Extract `invoices/credits.ts` - Credit management
-- [ ] Extract `invoices/payment-plans.ts` - Payment plan templates
-- [ ] Extract `invoices/scheduled.ts` - Scheduled invoices
-- [ ] Extract `invoices/recurring.ts` - Recurring invoices
-- [ ] Extract `invoices/reminders.ts` - Reminder endpoints
-- [ ] Extract `invoices/client-routes.ts` - Client-facing routes
-- [ ] Extract `invoices/stripe.ts` - Stripe integration
-- [ ] Extract `invoices/batch.ts` - Batch operations
-- [ ] Extract `invoices/aging.ts` - Aging reports
-- [ ] Update `server/app.ts` imports
-
-#### Phase 2: Split routes/projects.ts (4,411 lines -> ~18 files)
-
-- [ ] Create `server/routes/projects/` directory structure
-- [ ] Extract `projects/helpers.ts` - Access control (use new middleware)
-- [ ] Extract `projects/core.ts` - CRUD operations
-- [ ] Extract `projects/milestones.ts` - Milestone management
-- [ ] Extract `projects/tasks.ts` - Task endpoints
-- [ ] Extract `projects/files.ts` - File management
-- [ ] Extract `projects/file-comments.ts` - File comments
-- [ ] Extract `projects/file-folders.ts` - Folder management
-- [ ] Extract `projects/file-versions.ts` - Version management
-- [ ] Extract `projects/pdf.ts` - PDF generation, intake docs
-- [ ] Extract `projects/contract.ts` - Contract endpoints
-- [ ] Extract `projects/tags.ts` - Tag management
-- [ ] Extract `projects/dependencies.ts` - Task dependencies
-- [ ] Extract `projects/checklist.ts` - Checklist items
-- [ ] Extract `projects/comments.ts` - Task comments
-- [ ] Extract `projects/activity.ts` - Activity log
-- [ ] Extract `projects/health.ts` - Health scoring
-- [ ] Extract `projects/templates.ts` - Project templates
-- [ ] Create `projects/index.ts` - Router mounting
-- [ ] Update `server/app.ts` imports
-
-#### Phase 3: Split routes/admin.ts (2,810 lines -> ~12 files)
-
-- [ ] Create `server/routes/admin/` directory structure
-- [ ] Extract `admin/dashboard.ts` - Stats, overview
-- [ ] Extract `admin/leads.ts` - Lead management
-- [ ] Extract `admin/projects.ts` - Admin project creation
-- [ ] Extract `admin/kpi.ts` - KPI endpoints
-- [ ] Extract `admin/workflows.ts` - Workflow admin
-- [ ] Extract `admin/settings.ts` - Admin settings
-- [ ] Extract `admin/notifications.ts` - Notification management
-- [ ] Extract `admin/tags.ts` - Tag management
-- [ ] Extract `admin/cache.ts` - Cache management
-- [ ] Extract `admin/activity.ts` - Recent activity
-- [ ] Extract `admin/misc.ts` - Miscellaneous
-- [ ] Create `admin/index.ts` - Router mounting
-- [ ] Update `server/app.ts` imports
-
-#### Phase 4: Split services/invoice-service.ts (3,176 lines -> ~6 files)
-
-- [ ] Create `server/services/invoice/` directory structure
-- [ ] Update invoice-service.ts to import from `types/invoice-types.ts`
-- [ ] Extract `invoice/payment-service.ts` - Payment processing
-- [ ] Extract `invoice/recurring-service.ts` - Recurring invoice logic
-- [ ] Extract `invoice/reporting-service.ts` - Reports, analytics
-- [ ] Create `invoice/index.ts` - Re-exports
-
-#### Code Quality Tasks
-
-- [x] Replace inline access control in projects.ts with `middleware/access-control.ts`
-- [ ] Replace inline access control in invoices.ts with `middleware/access-control.ts`
-- [x] Replace snake_case transformers in invoices.ts with `invoices/helpers.ts`
-- [ ] Create `server/utils/pdf-generator.ts` - Consolidate PDF generation
-- [ ] Update error responses to use `utils/api-response.ts`
-
-### Uncommitted Changes
-
-- [ ] **Backend utilities** - api-response.ts, transformers.ts, access-control.ts, invoice-types.ts
-- [ ] **Backend splitting plan** - docs/architecture/BACKEND_SPLITTING_PLAN.md
-
-### Minor Documentation Issues
-
-- [ ] Missing `/docs/features/README.md` index file
-- [ ] Hardcoded localhost URLs in some documentation
-- [ ] Emojis in main README.md (violates "NO EMOJIS" design rule)
-
-### Pending Testing
-
-- [ ] Verify recent activity shows all types (invoices, documents, contracts, messages) in both portals
-- [x] Verify theme toggle icon positioned correctly in global header
-
-### Client Portal Audit - Feb 10, 2026
-
-**Fixed:**
-
-- [x] Hardcoded shadow in layout.css → uses `--shadow-elevated-lg`
-- [x] `.section-header` in pending-approvals-section → uses shared `.section-header-with-actions`
-- [x] `.section-header` in milestones-section → uses shared `.section-header-with-actions`
-- [x] Dashboard.css duplicate styles removed → references shared portal-cards.css
-- [x] Work/Requests page: Replaced native `<select>` with `createModalDropdown` component
-- [x] Work/Requests page: Updated TypeScript to use modal dropdowns for type/priority/urgency
-- [x] Work/Requests page: Added file input wrapper with styled display
-- [x] modal-dropdown.css: Updated selectors to support `[data-page="client-portal"]`
-- [x] client-portal/index.css: Added import for modal-dropdown.css
-
-**Shadow Hierarchy Fixes (Feb 10):**
-
-Child elements with `background: var(--portal-bg-medium)` must have NO border per shadow hierarchy rule.
-
-- [x] dashboard.css: `.approval-item` - removed border, changed hover to background color
-- [x] components.css: `.portal-card` - removed border, uses `--shadow-panel`
-- [x] components.css: `.portal-list-item` - removed border and shadow
-- [x] components.css: `.portal-stat` - removed border and shadow
-- [x] components.css: `.upload-request-option` - removed border
-- [x] requests.css: `.requests-card` - already has `border: none`
-- [x] questionnaires.css: `.cp-stat-item` - removed border
-- [x] questionnaires.css: `.cp-questionnaire-card` - removed border
-- [x] questionnaires.css: `.cp-question-item` - removed border
-- [x] settings.css: `.settings-form .checkbox-item` - removed border
-- [x] settings.css: `.checkbox-item` (generic) - removed border
-
-**Known Deviation (requires JS changes):**
-
-- [ ] `upload-request-modal` (lines 1176-1208) uses hardcoded HTML instead of `createPortalModal()` - needs JavaScript refactoring to migrate
 
 ---
 
@@ -330,3 +137,37 @@ Child elements with `background: var(--portal-bg-medium)` must have NO border pe
 - **Virtual Tour/Walkthrough** - Nice to have
 
 ---
+
+## Recent Test Runs
+
+- 2026-02-11: `npm run test:run` - 34 files, 847 passed, 1 skipped
+- 2026-02-11: `npm run lint` - clean
+
+---
+
+## DO NOT REMOVE OR EDIT ANYTHING BELOW THIS LINE - Used for tracking and documentation purposes
+
+### Design System Reference
+
+For design guidelines, see:
+
+- `docs/design/UX_GUIDELINES.md` - Icons, typography, spacing, accessibility
+- `docs/design/CSS_ARCHITECTURE.md` - CSS variables, component classes, naming conventions
+
+Key rules:
+
+- NO EMOJIS - Use Lucide icons only
+- NEVER hardcode colors - use CSS variables
+- Use `createPortalModal()` for modals - never custom modal HTML
+- Complex animations use GSAP, not CSS animations
+- BUT MUST REVIEW ALL
+
+### Post-Task Documentation Checklist
+
+After completing any task list:
+
+- [ ] Update feature docs (docs/features/*.md) if API/features changed
+- [ ] Update API_DOCUMENTATION.md if endpoints changed
+- [ ] Update relevant audit file (current state only, no fix logs)
+- [ ] Move fully completed tasks from current_work to archive
+- [ ] Verify no markdown violations

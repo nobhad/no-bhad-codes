@@ -1,6 +1,6 @@
 # Admin Dashboard
 
-**Last Updated:** February 8, 2026
+**Last Updated:** February 11, 2026
 
 > **Part of "The Backend"** - The portal system consisting of both the Admin Dashboard and Client Portal.
 
@@ -58,7 +58,7 @@ admin/
 └── index.html                    # Admin HTML entry point
 
 src/features/admin/
-├── admin-dashboard.ts            # Main dashboard coordinator (~200 lines)
+├── admin-dashboard.ts            # Main dashboard coordinator (~2562 lines)
 ├── admin-project-details.ts      # Project detail view handler (~1300 lines)
 ├── admin-auth.ts                 # Admin authentication
 └── admin-security.ts             # Rate limiting and security
@@ -70,37 +70,69 @@ src/features/admin/services/      # Extracted services (January 2026 refactor)
 
 src/features/admin/renderers/     # Extracted UI renderers (January 2026 refactor)
 ├── admin-contacts.renderer.ts    # Contact table and modal rendering
-└── admin-messaging.renderer.ts   # Messaging UI and thread rendering
+├── admin-messaging.renderer.ts   # Messaging UI and thread rendering
+└── admin-performance.renderer.ts # Performance monitoring UI
 
-src/features/admin/modules/       # Extracted modules
+src/features/admin/modules/       # Extracted modules (27 modules)
+├── admin-ad-hoc-analytics.ts     # Ad hoc request analytics
+├── admin-ad-hoc-requests.ts      # Ad hoc requests management
 ├── admin-analytics.ts            # Analytics and charts
 ├── admin-client-details.ts       # Client detail view
 ├── admin-clients.ts              # Client management
 ├── admin-contacts.ts             # Contact form submissions
+├── admin-contracts.ts            # Contracts management
+├── admin-deleted-items.ts        # Soft-deleted items management
+├── admin-deliverables.ts         # Deliverables workflow
+├── admin-design-review.ts        # Design review system
 ├── admin-document-requests.ts    # Document requests
+├── admin-email-templates.ts      # Email template management
 ├── admin-files.ts                # File management
 ├── admin-global-tasks.ts         # Global tasks Kanban (all projects)
+├── admin-invoices.ts             # Invoice management
 ├── admin-knowledge-base.ts       # Knowledge base (KB)
 ├── admin-leads.ts                # Leads management
 ├── admin-messaging.ts            # Messaging system
 ├── admin-overview.ts             # Dashboard overview
-├── admin-performance.ts         # Performance monitoring
+├── admin-performance.ts          # Performance monitoring
 ├── admin-projects.ts             # Projects management
 ├── admin-proposals.ts            # Proposals
-├── admin-system-status.ts       # System status display
+├── admin-questionnaires.ts       # Questionnaires management
+├── admin-system-status.ts        # System status display
 ├── admin-tasks.ts                # Tasks
 ├── admin-time-tracking.ts        # Time tracking
+├── admin-workflows.ts            # Workflows and approvals
 └── index.ts                      # Module exports
 
 src/styles/pages/
 └── admin.css                     # Admin-specific styles
 
 server/routes/
-├── admin.ts                      # Admin API (leads, contacts, invites, dashboard)
+├── admin/                        # Admin API (split into modules)
+│   ├── index.ts                  # Router mounting
+│   ├── dashboard.ts              # Stats and overview
+│   ├── leads.ts                  # Lead management
+│   ├── projects.ts               # Admin project creation
+│   ├── kpi.ts                    # KPI endpoints
+│   ├── workflows.ts              # Workflow admin
+│   ├── settings.ts               # Admin settings
+│   ├── notifications.ts          # Notification management
+│   ├── tags.ts                   # Tag management
+│   ├── cache.ts                  # Cache management
+│   ├── activity.ts               # Recent activity
+│   └── misc.ts                   # Miscellaneous endpoints
+├── projects/                     # Projects API (split into modules)
+│   ├── index.ts                  # Router mounting
+│   ├── core.ts                   # CRUD operations
+│   ├── milestones.ts             # Milestone management
+│   ├── tasks.ts                  # Task endpoints
+│   └── ...                       # Other project subroutes
+├── invoices/                     # Invoice API (split into modules)
+│   ├── index.ts                  # Router mounting
+│   ├── core.ts                   # CRUD operations
+│   ├── pdf.ts                    # PDF generation
+│   └── ...                       # Other invoice subroutes
 ├── auth.ts                       # Authentication (login, set-password, magic-link)
 ├── clients.ts                    # Clients management API
-├── projects.ts                   # Projects management API
-├── invoices.ts                   # Invoice management API
 ├── messages.ts                   # Messaging API
 ├── uploads.ts                    # File upload API
 ├── analytics.ts                  # Visitor analytics
@@ -127,17 +159,23 @@ The admin dashboard uses a sidebar navigation system with the following tabs:
 |Tab|Button ID|Content ID|Description|
 |-----|-----------|------------|-------------|
 |Overview|`btn-overview`|`tab-overview`|Quick stats, upcoming tasks, and recent leads|
+|Work|`btn-work`|`tab-work`|Work management (projects, tasks, deliverables)|
+|CRM|`btn-crm`|`tab-crm`|Customer relationship management|
+|Documents|`btn-documents`|`tab-documents`|Document requests and management|
+|Workflows|`btn-workflows`|`tab-workflows`|Approvals, triggers, and automation|
+|Analytics|`btn-analytics`|`tab-analytics`|Visitor and page analytics|
+|Support|`btn-support`|`tab-support`|Support and help desk|
+|System|`btn-system`|`tab-system`|System information and settings|
 |Tasks|`btn-tasks`|`tab-tasks`|Global tasks Kanban across all projects|
 |Leads|`btn-leads`|`tab-leads`|Lead and contact management|
 |Projects|`btn-projects`|`tab-projects`|Active projects management|
 |Clients|`btn-clients`|`tab-clients`|Client management|
 |Invoices|`btn-invoices`|`tab-invoices`|Invoice management|
 |Messages|`btn-messages`|`tab-messages`|Client communication|
-|Documents|`btn-document-requests`|`tab-document-requests`|Document requests|
-|Knowledge|`btn-knowledge-base`|`tab-knowledge-base`|Knowledge base articles|
-|Analytics|`btn-analytics`|`tab-analytics`|Visitor and page analytics|
-|System|`btn-system`|`tab-system`|System information|
-|Workflows|`btn-workflows`|`tab-workflows`|Approvals and triggers|
+|Access|`btn-access`|`tab-access`|Access control and permissions|
+|Comments|`btn-comments`|`tab-comments`|Comments and feedback|
+|Info|`btn-info`|`tab-info`|Information and metadata|
+|Versions|`btn-versions`|`tab-versions`|Version history and rollbacks|
 |Project Detail|-|`tab-project-detail`|Individual project view (hidden from sidebar)|
 |Client Detail|-|`tab-client-detail`|Individual client view (hidden from sidebar)|
 
@@ -555,7 +593,7 @@ The main dashboard delegates to this module's `setupMessagingListeners()` for pr
 |`src/features/admin/renderers/admin-messaging.renderer.ts`|Messaging UI rendering|
 |`src/styles/pages/admin.css`|Admin styles|
 |`client/set-password.html`|Password setup page|
-|`server/routes/admin.ts`|Admin API endpoints|
+|`server/routes/admin/`|Admin API endpoints (split into modules)|
 |`server/routes/auth.ts`|Auth including set-password|
 |`server/database/migrations/010_client_invitation.sql`|Invitation schema|
 

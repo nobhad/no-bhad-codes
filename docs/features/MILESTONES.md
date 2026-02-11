@@ -1,7 +1,7 @@
 # Milestones & Tasks Feature
 
 **Status:** Active
-**Last Updated:** 2026-02-09
+**Last Updated:** 2026-02-11
 
 ## Overview
 
@@ -204,8 +204,7 @@ Each generated task includes:
 6. Design revisions (4h)
 7. Client design review round 2 (1h)
 8. Prepare design assets for development (2h)
-
-*(Continues for Development, Content Integration, Testing & Launch)*
+**(Continues for Development, Content Integration, Testing & Launch)**
 
 ## API Endpoints
 
@@ -359,8 +358,9 @@ CREATE TABLE project_tasks (
 
 ### Routes
 
-- `server/routes/projects.ts` - CRUD endpoints for milestones and tasks
-- `server/routes/admin.ts` - Backfill endpoints for milestones and tasks
+- `server/routes/projects/milestones.ts` - Milestone CRUD endpoints
+- `server/routes/projects/tasks.ts` - Task CRUD endpoints (includes dependencies, checklist, comments)
+- `server/routes/admin/projects.ts` - Backfill endpoints for milestones and tasks
 
 ### Frontend
 
@@ -368,6 +368,17 @@ CREATE TABLE project_tasks (
 - `src/features/admin/modules/admin-tasks.ts` - Task Kanban/List view with milestone tags
 - `src/styles/admin/project-detail.css` - Milestone and task UI styles
 - `src/styles/admin/tasks.css` - Task card and milestone tag styles
+
+### Router Structure
+
+```text
+server/routes/projects/
+├── index.ts          # Router mounting for all project subroutes
+├── core.ts           # Project CRUD operations
+├── milestones.ts     # Milestone management
+├── tasks.ts          # Task endpoints (dependencies, checklist, comments)
+└── ...               # Other project-related routes
+```
 
 ## Manual Override
 

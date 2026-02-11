@@ -4,6 +4,190 @@ This file contains completed work from February 2026. Items are moved here from 
 
 ---
 
+## Completed - February 11, 2026
+
+### Password Save Prompt Fix - COMPLETE
+
+Fixed browser showing multiple "Save Password" prompts (4 times) when using password forms.
+
+**Root Cause:**
+
+- Multiple password fields with `autocomplete="new-password"` caused browsers to detect each as a separate password to save
+- Dynamic autocomplete attribute changes in JavaScript triggered re-evaluation
+
+**Solution:**
+
+- Changed confirm-password fields from `autocomplete="new-password"` to `autocomplete="off"`
+- Added `autocomplete="off"` to password form elements
+- Removed dynamic autocomplete manipulation in `client-portal.ts`
+
+**Files Modified:**
+
+- `client/set-password.html` - Form and confirm field autocomplete
+- `client/reset-password.html` - Form and confirm field autocomplete
+- `src/features/client/modules/portal-views.ts` - Change password form (already fixed)
+- `src/features/client/client-portal.ts` - Removed dynamic autocomplete changes (already fixed)
+- `templates/pages/client-portal.ejs` - Form and confirm field autocomplete
+- `docs/features/SETTINGS.md` - Updated documentation
+- `docs/features/CLIENT_PORTAL.md` - Added password autocomplete best practices section
+
+### Code Conflicts & Integration Audit - COMPLETE
+
+Full codebase audit to resolve type mismatches, runtime errors, and code quality issues.
+
+#### P0 - Critical (Runtime Crashes)
+
+- Fixed `tasks` table reference in `server/services/soft-delete-service.ts` (changed to `project_tasks`)
+- Fixed `u.name` column in `server/routes/invoices/core.ts` (changed to `u.display_name`)
+
+#### P1 - High Priority (Logic/Type Errors)
+
+- Removed duplicate `/api/intake` route in `server/routes/api.ts`
+- Unified `ProjectStatus` type across 4 files (`src/types/api.ts`, `src/types/client.ts`, `src/features/admin/admin-types.ts`)
+- Unified `InvoiceStatus` type in `server/types/database.ts` to include `'viewed' | 'partial'`
+
+#### P2 - Medium Priority
+
+- Migrated `is_read` to `read_at` in 6 files for message read tracking
+- Renamed duplicate `loadOverviewData()` to `loadAnalyticsCharts()` in `admin-analytics.ts`
+- Broke circular dependency in `admin-leads.ts` using dynamic imports
+
+#### P3 - Low Priority
+
+- Removed camelCase/snake_case workaround in `admin-client-details.ts`
+- Replaced `any` types with proper interfaces in 5 files:
+  - `admin-design-review.ts`: Added `AnnotationTool`/`AnnotationColor` types
+  - `admin-ad-hoc-requests.ts`: Added `TimeEntry` interface
+  - `admin-projects.ts`: Extended `LeadProject`, added `ProjectDropdownData`
+  - `project-details/milestones.ts`: Added `MilestoneTask` interface
+  - `src/types/api.ts`: Extended `ProjectMilestoneResponse` with task count fields
+- Aligned `ClientPortalContext.showNotification` signature with `AdminDashboardContext`
+- Fixed dead CSS (`planning` to `pending`, `review` to `in-review`)
+
+#### Documentation Updates
+
+- Fixed `ADMIN_DASHBOARD.md` line counts and added 11 missing modules
+- Fixed `client/README.md` and added 7 missing modules
+- Fixed `CLIENT_PORTAL.md` line counts and added 7 missing modules
+
+### Admin Routes Split (Phase 3)
+
+- Split `server/routes/admin.ts` into modular routers under `server/routes/admin/`
+- Added `server/routes/admin/index.ts` to mount admin sub-routers
+- Converted `server/routes/admin.ts` to a compatibility re-export
+- Updated `server/app.ts` to import the admin index router
+
+**New Files:**
+
+- `server/routes/admin/index.ts`
+- `server/routes/admin/dashboard.ts`
+- `server/routes/admin/leads.ts`
+- `server/routes/admin/projects.ts`
+- `server/routes/admin/kpi.ts`
+- `server/routes/admin/workflows.ts`
+- `server/routes/admin/settings.ts`
+- `server/routes/admin/notifications.ts`
+- `server/routes/admin/tags.ts`
+- `server/routes/admin/cache.ts`
+- `server/routes/admin/activity.ts`
+- `server/routes/admin/misc.ts`
+
+**Updated Files:**
+
+- `server/routes/admin.ts`
+- `server/app.ts`
+
+### Backend File Splitting - COMPLETE
+
+All phases of backend file splitting completed. See `docs/architecture/BACKEND_SPLITTING_PLAN.md` for full details.
+
+#### Quick Wins
+
+- Created `server/utils/api-response.ts` - Standardized API responses
+- Created `server/utils/transformers.ts` - Snake/camel case transformers
+- Created `server/middleware/access-control.ts` - Centralized access control
+- Created `server/types/invoice-types.ts` - Extracted invoice type definitions
+
+#### Phase 1: Split routes/invoices.ts
+
+- Created `server/routes/invoices/` directory with 13 modules
+- Extracted: `core.ts`, `pdf.ts`, `helpers.ts`, `deposits.ts`, `credits.ts`, `payment-plans.ts`, `scheduled.ts`, `recurring.ts`, `reminders.ts`, `client-routes.ts`, `batch.ts`, `aging.ts`, `index.ts`
+
+#### Phase 2: Split routes/projects.ts
+
+- Created `server/routes/projects/` directory with 18 modules
+- Extracted: `core.ts`, `milestones.ts`, `tasks.ts`, `files.ts`, `file-comments.ts`, `file-folders.ts`, `file-versions.ts`, `contracts.ts`, `intake.ts`, `tags.ts`, `activity.ts`, `health.ts`, `templates.ts`, `time-tracking.ts`, `messages.ts`, `archive.ts`, `escalation.ts`, `index.ts`
+
+#### Phase 4: Split services/invoice-service.ts
+
+- Created `server/services/invoice/` directory
+- Extracted: `payment-service.ts`, `recurring-service.ts`, `reporting-service.ts`, `index.ts`
+
+#### Code Quality Tasks
+
+- Replaced inline access control with centralized middleware
+- Replaced snake_case transformers with shared helpers
+- Created consolidated PDF generator utility
+- Updated error responses to use standardized API response
+
+### Minor Documentation Issues - COMPLETE
+
+- Created `/docs/features/README.md` index file
+- Fixed hardcoded localhost URLs in documentation
+- Removed emojis from main README.md (per design rules)
+
+### Client Portal Audit - Feb 10 - COMPLETE
+
+#### Shadow Hierarchy Fixes
+
+- Fixed hardcoded shadow in layout.css to use `--shadow-elevated-lg`
+- Updated `.section-header` components to use shared `.section-header-with-actions`
+- Removed duplicate styles in dashboard.css
+- Replaced native `<select>` with `createModalDropdown` component in Work/Requests page
+- Updated modal-dropdown.css selectors for client portal support
+
+#### Border Removals (Shadow Hierarchy Compliance)
+
+Child elements with `background: var(--portal-bg-medium)` must have NO border:
+
+- dashboard.css: `.approval-item` - removed border
+- components.css: `.portal-card`, `.portal-list-item`, `.portal-stat`, `.upload-request-option` - removed borders
+- questionnaires.css: `.cp-stat-item`, `.cp-questionnaire-card`, `.cp-question-item` - removed borders
+- settings.css: `.checkbox-item` variants - removed borders
+
+### Shared Components Audit - Feb 11 - COMPLETE
+
+All 5 phases of shared component standardization completed.
+
+#### Phase 1: Shared Primitives
+
+- Standardized status badges to shared `portal-badges.css`
+- Swapped help search input to shared `search-bar` component
+- Aligned document/ad-hoc request cards to `portal-list-item`
+- Aligned questionnaire stats + cards to shared patterns
+- Aligned file list items to shared list pattern
+
+#### Phase 2: Forms Normalization
+
+- Settings labels switched to shared `.field-label` styling
+- Removed client-portal `portal-input`/`portal-form-group` duplicates
+- Auth gate and set-password inputs normalized to shared form styles
+
+#### Phase 3: Tabs and Layout
+
+- Project sidebar/detail view tokens normalized to `--portal-*` colors
+
+#### Phase 4: Modals
+
+- Upload request modal now uses `createPortalModal()` with shared classes
+
+#### Phase 5: Token Cleanup
+
+- Replaced remaining neutral tokens with `--portal-*` tokens
+- Removed `--color-neutral-*` and raw `rgba()` usage from client portal
+
+---
+
 ## Completed - February 10, 2026
 
 ### Portal Layout & UX Fixes
@@ -86,7 +270,7 @@ This file contains completed work from February 2026. Items are moved here from 
 | `invoice_line_items` | 1 entry (migrated from JSON) |
 | `contracts` | New columns: `signature_token`, `signature_requested_at`, `signature_expires_at` |
 
-### Client Portal
+### Client Portal Messsaging & File Management Fixes
 
 - Messages view shows a single main conversation (no thread list) and labels admin messages as "Noelle"
 
@@ -131,7 +315,7 @@ This file contains completed work from February 2026. Items are moved here from 
 - `src/config/api.ts`, `server/routes/auth.ts`, `src/auth/auth-store.ts`
 - `src/core/modules-config.ts`, `index.html`, `client/index.html`
 
-### Admin
+### Admin Section Toggles - Complete
 
 - Reusable checkbox component for Pending Approvals table (and everywhere else checkboxes needed)
 - Fixed toggles for newly combined pages

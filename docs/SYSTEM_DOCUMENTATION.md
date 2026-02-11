@@ -886,7 +886,7 @@ ADMIN_PASSWORD=secure-password
 # Optional
 PORT=4001
 DATABASE_PATH=./data/client_portal.db
-FRONTEND_URL=http://localhost:4000
+FRONTEND_URL=http://<frontend-host>:4000
 
 # Email Service
 SMTP_HOST=localhost
@@ -1029,13 +1029,13 @@ Use tools like Postman or curl to test API endpoints:
 
 ```bash
 # Test invoice system
-curl -X GET http://localhost:4001/api/invoices/test
+curl -X GET http://<api-host>:4001/api/invoices/test
 
 # Test upload system  
-curl -X GET http://localhost:4001/api/uploads/test
+curl -X GET http://<api-host>:4001/api/uploads/test
 
 # Create invoice (requires authentication)
-curl -X POST http://localhost:4001/api/invoices \
+curl -X POST http://<api-host>:4001/api/invoices \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"projectId":1,"clientId":1,"lineItems":[...]}'

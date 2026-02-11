@@ -480,6 +480,7 @@ Various admin modules create modals dynamically. As of Feb 9, 2026, all dynamica
 | `admin-contacts.ts` | Contact action modals | `confirmDialog()` family |
 
 **Legend:**
+
 - ✓ = Refactored to use `createPortalModal()` (Feb 9, 2026)
 - Static HTML (pending) = Modals defined in `admin/index.html`, not yet migrated
 

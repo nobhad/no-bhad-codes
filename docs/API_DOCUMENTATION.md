@@ -209,6 +209,8 @@ Request a magic link for passwordless login.
 
 ## Invoices
 
+**Stripe payment links:** Invoice payment link and webhook endpoints are exposed under `/integrations/stripe` (see integrations routes), not under `/invoices`.
+
 ### GET `/invoices`
 
 Admin endpoint. Returns a JSON array of invoices. Requires authentication as an admin user (HttpOnly cookie or `Authorization: Bearer`).
@@ -1989,7 +1991,7 @@ Admin endpoints for tracking custom client requests and quotes.
 
 **Authentication:** Admin only.
 
-**Example: Create ad hoc request**
+#### Example: Create ad hoc request
 
 ```bash
 curl -X POST https://nobhad.codes/api/ad-hoc-requests \
@@ -2706,7 +2708,7 @@ Get credits applied to an invoice.
       "applied_at": "2026-01-20T14:30:00Z"
     }
   ],
-  "totalCredits": 500
+  "total_credits": 500
 }
 ```
 

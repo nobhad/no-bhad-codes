@@ -1,6 +1,6 @@
 # Client Portal Dashboard
 
-**Last Updated:** February 8, 2026
+**Last Updated:** February 11, 2026
 
 > **Part of "The Backend"** - The portal system consisting of both the Admin Dashboard and Client Portal.
 
@@ -78,7 +78,7 @@ The Client Portal is the client-facing side of "The Backend" portal system. It p
 
 ```text
 src/features/client/
-├── client-portal.ts              # Main portal module (~1400 lines)
+├── client-portal.ts              # Main portal module (~2064 lines)
 ├── terminal-intake.ts            # Terminal-style intake form (~1700 lines)
 ├── terminal-intake-ui.ts         # Terminal UI components (~600 lines)
 ├── terminal-intake-commands.ts   # Terminal commands (~150 lines)
@@ -86,13 +86,20 @@ src/features/client/
 ├── terminal-intake-types.ts      # Type definitions
 └── portal-types.ts               # Portal type definitions
 
-src/features/client/modules/      # Extracted modules (7 modules)
+src/features/client/modules/      # Extracted modules (14 modules)
+├── portal-ad-hoc-requests.ts     # Ad hoc request management (~576 lines)
+├── portal-approvals.ts           # Approval workflows (~247 lines)
 ├── portal-auth.ts                # Login, logout, session (~310 lines)
+├── portal-document-requests.ts   # Document request handling (~446 lines)
 ├── portal-files.ts               # File management (~400 lines)
+├── portal-help.ts                # Help center and FAQ (~371 lines)
 ├── portal-invoices.ts            # Invoice display (~210 lines)
 ├── portal-messages.ts            # Messaging (~270 lines)
 ├── portal-navigation.ts          # Navigation, views, sidebar (~360 lines)
+├── portal-onboarding-ui.ts       # Onboarding UI components (~494 lines)
+├── portal-onboarding-wizard.ts   # Onboarding wizard flow (~551 lines)
 ├── portal-projects.ts            # Project loading, display (~310 lines)
+├── portal-questionnaires.ts      # Questionnaire handling (~786 lines)
 ├── portal-settings.ts            # Settings forms (~260 lines)
 └── index.ts                      # Module exports
 
@@ -296,6 +303,45 @@ Chronological log of project events:
 
 ## Navigation
 
+### Hash-Based Routing
+
+The portal uses hash-based routing for browser navigation support. Each tab has its own URL, enabling:
+
+- Browser back/forward navigation
+- Bookmarking specific views
+- Deep linking to tabs (e.g., `client/#/messages`)
+
+**URL Structure:**
+
+| Tab | URL Hash |
+|-----|----------|
+| Dashboard | `#/dashboard` |
+| Files | `#/files` |
+| Invoices | `#/invoices` |
+| Document Requests | `#/documents` |
+| Questionnaires | `#/questionnaires` |
+| Requests | `#/requests` |
+| Review/Preview | `#/review` |
+| New Project | `#/new-project` |
+| Messages | `#/messages` |
+| Help | `#/help` |
+| Settings | `#/settings` |
+
+**Key Functions (portal-navigation.ts):**
+
+| Function | Purpose |
+|----------|---------|
+| `initHashRouter(callbacks)` | Initialize router, set up hashchange listener |
+| `navigateTo(tabName, callbacks)` | Update hash and switch to tab |
+| `getTabFromHash()` | Parse current URL hash to get tab name |
+| `switchTab(tabName, callbacks, shouldUpdateHash)` | Switch tab with optional hash update |
+
+**Implementation Notes:**
+
+- Invalid hashes redirect to dashboard
+- `isNavigating` flag prevents re-entrant hash updates
+- Hash router initialized after dashboard event listeners are ready
+
 ### Sidebar Navigation
 
 Collapsible sidebar with tab buttons:
@@ -351,45 +397,58 @@ private toggleSidebar(): void {
 
 ---
 
-## Tab System
+## View System (Dynamic Rendering)
 
-### Tab Switching Logic
+The portal uses **dynamic view rendering** instead of hidden tabs. Each view is rendered on-demand when navigating to it.
+
+### Architecture
+
+**File:** `src/features/client/modules/portal-views.ts`
+
+Each view has a dedicated render function that generates the HTML and inserts it into the single content container (`#portal-view-content`).
 
 ```typescript
-// src/features/client/client-portal.ts:1110-1129
-private switchTab(tabName: string): void {
-  // Hide all tab content
-  const allTabContent = document.querySelectorAll('.tab-content');
-  allTabContent.forEach((tab) => tab.classList.remove('active'));
+// View Registry
+export const VIEW_RENDERERS: Record<string, () => void> = {
+  dashboard: renderDashboardView,
+  files: renderFilesView,
+  messages: renderMessagesView,
+  invoices: renderInvoicesView,
+  documents: renderDocumentsView,
+  requests: renderRequestsView,
+  questionnaires: renderQuestionnairesView,
+  help: renderHelpView,
+  settings: renderSettingsView,
+  'new-project': renderNewProjectView,
+  preview: renderPreviewView
+};
 
-  // Show the selected tab content
-  const targetTab = document.getElementById(`tab-${tabName}`);
-  if (targetTab) {
-    targetTab.classList.add('active');
+// Render a view by name
+export function renderView(viewName: string): void {
+  const renderer = VIEW_RENDERERS[viewName];
+  if (renderer) {
+    clearView();
+    renderer();
   }
-
-  // Update nav button active states
-  const navButtons = document.querySelectorAll('.nav-btn[data-tab]');
-  navButtons.forEach((btn) => {
-    btn.classList.remove('active');
-    if ((btn as HTMLElement).dataset.tab === tabName) {
-      btn.classList.add('active');
-    }
-  });
 }
 ```
 
-### Tab Content IDs
+### Benefits
 
-|Tab|Content Element ID|
-|-----|-------------------|
-|Dashboard|`tab-dashboard`|
-|Files|`tab-files`|
-|Messages|`tab-messages`|
-|Invoices|`tab-invoices`|
-|Settings|`tab-settings`|
-|New Project|`tab-new-project`|
-|Preview|`tab-preview`|
+- **Smaller initial payload**: Only the current view's HTML is in the DOM
+- **Proper routing**: Each view has its own URL hash
+- **Browser navigation**: Back/forward buttons work correctly
+- **Deep linking**: Users can bookmark and share specific views
+- **Memory efficient**: Unused views don't consume DOM resources
+
+### HTML Structure
+
+```html
+<!-- Single content container in client/index.html -->
+<div class="portal-view-content" id="portal-view-content">
+  <!-- Content rendered dynamically by portal-views.ts -->
+</div>
+```
 
 ---
 
@@ -613,6 +672,27 @@ if (passwordToggle && passwordInput) {
   });
 }
 ```
+
+### Password Autocomplete Best Practices
+
+To prevent browsers from showing multiple "Save Password" prompts, follow this pattern:
+
+|Field|Autocomplete Value|Reason|
+|-------|---------------------|--------|
+|Form element|`autocomplete="off"`|Prevents form-level password manager triggers|
+|Username/Email|`autocomplete="username"`|Identifies the account field|
+|Current Password|`autocomplete="current-password"`|For login/verification|
+|New Password|`autocomplete="new-password"`|For password changes|
+|Confirm Password|`autocomplete="off"`|**NOT "new-password"** - prevents duplicate save prompts|
+
+**Files using this pattern:**
+
+- `client/set-password.html` - Initial password setup
+- `client/reset-password.html` - Password reset flow
+- `src/features/client/modules/portal-views.ts` - Change password form
+- `templates/pages/client-portal.ejs` - EJS template
+
+**Important:** Never dynamically change autocomplete attributes in JavaScript as this can cause browsers to re-evaluate and show multiple save prompts.
 
 ---
 
@@ -926,8 +1006,8 @@ Settings grid adapts to viewport:
 |File|Purpose|
 |------|---------|
 |`client/portal.html`|Entry point HTML|
-|`src/features/client/client-portal.ts`|Main TypeScript module (~2000 lines)|
-|`src/features/client/modules/`|Extracted portal modules (7 files)|
+|`src/features/client/client-portal.ts`|Main TypeScript module (~2064 lines)|
+|`src/features/client/modules/`|Extracted portal modules (14 files)|
 |`src/styles/client-portal/`|Portal-specific styles (8 CSS files)|
 |`src/portal.ts`|Entry point script (used by client/portal.html)|
 |`server/routes/uploads.ts`|File upload API endpoints|

@@ -22,7 +22,7 @@ Copy `.env.example` to `.env` (or create `.env` from the variables below if no t
 |----------|----------|---------|-------------|
 |`NODE_ENV`|Yes|`development`|Environment mode (`development`, `staging`, `production`, `test`)|
 |`PORT`|Yes|`4001`|Backend API server port|
-|`FRONTEND_URL`|Yes|`http://localhost:4000`|Frontend Vite dev server URL|
+|`FRONTEND_URL`|Yes|`http://<frontend-host>:4000`|Frontend Vite dev server URL|
 
 #### Environments:
 
@@ -62,8 +62,8 @@ Copy `.env.example` to `.env` (or create `.env` from the variables below if no t
 
 |Variable|Required|Default|Description|
 |----------|----------|---------|-------------|
-|`CLIENT_PORTAL_URL`|No|`http://localhost:4000/client/portal`|Client portal URL|
-|`WEBSITE_URL`|No|`http://localhost:4000`|Main website URL|
+|`CLIENT_PORTAL_URL`|No|`http://<frontend-host>:4000/client/portal`|Client portal URL|
+|`WEBSITE_URL`|No|`http://<frontend-host>:4000`|Main website URL|
 
 ### Email Configuration
 
@@ -250,9 +250,9 @@ APP_CONSTANTS.BREAKPOINTS.TABLET  // 1024
 APP_CONSTANTS.BREAKPOINTS.DESKTOP // 1200
 ```
 
-### `src/config/api.ts`
+### API Configuration Reference
 
-API endpoint configuration:
+Quick reference for API configuration helpers:
 
 ```typescript
 import { API_CONFIG, getApiUrl } from './config/api';

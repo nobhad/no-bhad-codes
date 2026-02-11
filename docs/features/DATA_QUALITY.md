@@ -310,7 +310,6 @@ const RATE_LIMIT_PRESETS = {
    - Database logging
    - Error handling
    - Concurrent requests
-
 **Total: 65 tests**
 
 ## Security Considerations

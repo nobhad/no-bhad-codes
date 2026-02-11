@@ -1,6 +1,6 @@
 # Invoice System
 
-**Last Updated:** February 6, 2026
+**Last Updated:** February 11, 2026
 
 ## Table of Contents
 
@@ -29,29 +29,29 @@ The Invoice System provides clients with a complete view of their payment histor
 
 |Feature|Status|Description|
 |---------|--------|-------------|
-|Summary Cards|Complete|Total outstanding and total paid amounts|
-|Invoice List from API|Complete|Dynamic list from backend with demo fallback|
-|Status Badges|Complete|Visual status indicators (Pending, Paid, Overdue, etc.)|
-|Preview|Complete|View invoice details in new tab|
-|Download|Complete|Download invoice as PDF|
-|PDF Generation|Complete|Full PDF generation with pdf-lib (see [PDF_GENERATION.md](./PDF_GENERATION.md))|
-|Project Association|Complete|Link invoices to specific projects|
-|Demo Mode|Complete|Fallback demo data when backend unavailable|
-|Deposit Invoices|Complete|Create deposit invoices with percentage tracking|
-|Credit Application|Complete|Apply paid deposits as credits to standard invoices|
-|Edit Draft Invoices|Complete|Modify invoice line items and notes before sending|
-|Payment Plan Templates|Complete|Reusable payment structures (50/50, 30/30/40, etc.)|
-|Milestone-Linked Invoices|Complete|Link invoices to project milestones|
-|Invoice Scheduling|Complete|Schedule future invoice generation|
-|Recurring Invoices|Complete|Automated recurring invoices (weekly/monthly/quarterly)|
-|Payment Reminders|Complete|Automated reminder emails based on due date|
-|Scheduler Service|Complete|Background job processing for automation|
-|Delete/Void Invoice|Complete|Delete drafts or void sent invoices|
-|Duplicate Invoice|Complete|Clone existing invoice as new draft|
-|Record Payment|Complete|Record partial or full payments with method tracking|
-|Invoice Search|Complete|Search with filters, date range, pagination|
-|Auto-Mark Overdue|Complete|Scheduler automatically marks past-due invoices|
-|Manual Reminder|Complete|Send payment reminder on demand|
+|**Summary Cards**|Complete|Total outstanding and total paid amounts|
+|**Invoice List from API**|Complete|Dynamic list from backend with loading/error states|
+|**Status Badges**|Complete|Visual status indicators (Pending, Paid, Overdue, etc.)|
+|**Preview**|Complete|View invoice details in new tab|
+|**Download**|Complete|Download invoice as PDF|
+|**PDF Generation**|Complete|Full PDF generation with pdf-lib (see [PDF_GENERATION.md](./PDF_GENERATION.md))|
+|**Project Association**|Complete|Link invoices to specific projects|
+|**Demo Mode**|Removed|Invoices list now shows an error message when the API fails|
+|**Deposit Invoices**|Complete|Create deposit invoices with percentage tracking|
+|**Credit Application**|Complete|Apply paid deposits as credits to standard invoices|
+|**Edit Draft Invoices**|Complete|Modify invoice line items and notes before sending|
+|**Payment Plan Templates**|Complete|Reusable payment structures (50/50, 30/30/40, etc.)|
+|**Milestone-Linked Invoices**|Complete|Link invoices to project milestones|
+|**Invoice Scheduling**|Complete|Schedule future invoice generation|
+|**Recurring Invoices**|Complete|Automated recurring invoices (weekly/monthly/quarterly)|
+|**Payment Reminders**|Complete|Automated reminder emails based on due date|
+|**Scheduler Service**|Complete|Background job processing for automation|
+|**Delete/Void Invoice**|Complete|Delete drafts or void sent invoices|
+|**Duplicate Invoice**|Complete|Clone existing invoice as new draft|
+|**Record Payment**|Complete|Record partial or full payments with method tracking|
+|**Invoice Search**|Complete|Search with filters, date range, pagination|
+|**Auto-Mark Overdue**|Complete|Scheduler automatically marks past-due invoices|
+|**Manual Reminder**|Complete|Send payment reminder on demand|
 |**Tax Support**|Complete|Invoice-level and line-item tax rates with calculation|
 |**Discounts**|Complete|Percentage or fixed discounts at invoice or line level|
 |**Late Fees**|Complete|Automatic late fee calculation (flat, percentage, daily)|
@@ -101,6 +101,8 @@ The Invoice System provides clients with a complete view of their payment histor
 ```text
 /api/invoices
 ```
+
+**Stripe payment links:** Invoice payment link and webhook endpoints live under `/api/integrations/stripe` (see [INTEGRATIONS.md](./INTEGRATIONS.md)). The planned `invoices/stripe.ts` split was skipped because those routes already belong to the integrations surface.
 
 ### Endpoints
 
@@ -383,7 +385,7 @@ Get credits applied to an invoice.
       "applied_at": "2026-01-20T14:30:00Z"
     }
   ],
-  "totalCredits": 500
+  "total_credits": 500
 }
 ```
 
@@ -393,7 +395,7 @@ Get credits applied to an invoice.
 
 Download or preview invoice as PDF.
 
-**Authentication:** Required (JWT Bearer token)
+**Authentication:** Required
 
 **Query Parameters:**
 
@@ -405,29 +407,13 @@ Download or preview invoice as PDF.
 - `Content-Type: application/pdf`
 - `Content-Disposition: inline|attachment; filename="INV-2026-001.pdf"`
 
-**PDF Contents:**
-
-- Professional header with 75pt logo (aspect ratio preserved)
-- Business name, owner, tagline, email, website
-- "INVOICE" title (28pt, right-aligned)
-- Invoice number and dates
-- Bill To section with client details
-- Line items table
-- Totals section
-- Payment methods (Zelle, Venmo)
-- Terms and notes
-
 **Implementation:** Uses pdf-lib library. See [PDF_GENERATION.md](./PDF_GENERATION.md) for full documentation.
 
-```typescript
-import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
+#### POST `/api/invoices/preview`
 
-// PDF generated with pdf-lib, sent as Buffer
-const pdfBytes = await generateInvoicePdf(pdfData);
-res.setHeader('Content-Type', 'application/pdf');
-res.setHeader('Content-Disposition', `${disposition}; filename="${invoiceNumber}.pdf"`);
-res.send(Buffer.from(pdfBytes));
-```
+Generate a preview PDF without saving an invoice.
+
+**Authentication:** Required (Admin only)
 
 ---
 
@@ -493,13 +479,108 @@ Link an existing invoice to a milestone.
 
 Schedule a future invoice for automatic generation.
 
+**Authentication:** Required (Admin only)
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "scheduledDate": "2026-02-20",
+  "triggerType": "date",
+  "triggerMilestoneId": null,
+  "lineItems": [
+    { "description": "Phase 1", "quantity": 1, "rate": 1200, "amount": 1200 }
+  ],
+  "notes": "Scheduled after kickoff",
+  "terms": "Net 30"
+}
+```
+
+**Notes:**
+
+- `triggerType` supports `date` or `milestone_complete`.
+- `lineItems` is required and must be non-empty.
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "message": "Invoice scheduled",
+  "scheduled_invoice": {
+    "id": 12,
+    "project_id": 1,
+    "client_id": 5,
+    "scheduled_date": "2026-02-20",
+    "trigger_type": "date",
+    "trigger_milestone_id": null,
+    "line_items": [
+      { "description": "Phase 1", "quantity": 1, "rate": 1200, "amount": 1200 }
+    ],
+    "notes": "Scheduled after kickoff",
+    "terms": "Net 30",
+    "status": "pending",
+    "generated_invoice_id": null,
+    "created_at": "2026-02-11T03:00:00.000Z"
+  }
+}
+```
+
 #### GET `/api/invoices/scheduled`
 
-Get all scheduled invoices (optionally filter by project).
+Get all scheduled invoices.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "scheduled_invoices": [
+    {
+      "id": 12,
+      "project_id": 1,
+      "client_id": 5,
+      "scheduled_date": "2026-02-20",
+      "trigger_type": "date",
+      "trigger_milestone_id": null,
+      "line_items": [
+        { "description": "Phase 1", "quantity": 1, "rate": 1200, "amount": 1200 }
+      ],
+      "notes": "Scheduled after kickoff",
+      "terms": "Net 30",
+      "status": "pending",
+      "generated_invoice_id": null,
+      "created_at": "2026-02-11T03:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+#### GET `/api/invoices/scheduled/:projectId`
+
+Get scheduled invoices for a project.
+
+**Authentication:** Required
 
 #### DELETE `/api/invoices/scheduled/:id`
 
 Cancel a scheduled invoice.
+
+**Authentication:** Required (Admin only)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Scheduled invoice cancelled"
+}
+```
 
 ---
 
@@ -509,27 +590,186 @@ Cancel a scheduled invoice.
 
 Create a recurring invoice pattern.
 
+**Authentication:** Required (Admin only)
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "frequency": "monthly",
+  "dayOfMonth": 15,
+  "lineItems": [
+    { "description": "Monthly retainer", "quantity": 1, "rate": 2000, "amount": 2000 }
+  ],
+  "notes": "Recurring retainer",
+  "terms": "Net 15",
+  "startDate": "2026-02-15",
+  "endDate": null
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "message": "Recurring invoice pattern created",
+  "recurring_invoice": {
+    "id": 21,
+    "project_id": 1,
+    "client_id": 5,
+    "frequency": "monthly",
+    "day_of_month": 15,
+    "day_of_week": null,
+    "line_items": [
+      { "description": "Monthly retainer", "quantity": 1, "rate": 2000, "amount": 2000 }
+    ],
+    "notes": "Recurring retainer",
+    "terms": "Net 15",
+    "start_date": "2026-02-15",
+    "end_date": null,
+    "next_generation_date": "2026-03-15",
+    "last_generated_at": null,
+    "is_active": true,
+    "created_at": "2026-02-11T03:00:00.000Z"
+  }
+}
+```
+
 **Frequency Options:** `weekly`, `monthly`, `quarterly`
 
 #### GET `/api/invoices/recurring`
 
 Get all recurring invoice patterns.
 
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "recurring_invoices": [
+    {
+      "id": 21,
+      "project_id": 1,
+      "client_id": 5,
+      "frequency": "monthly",
+      "day_of_month": 15,
+      "day_of_week": null,
+      "line_items": [
+        { "description": "Monthly retainer", "quantity": 1, "rate": 2000, "amount": 2000 }
+      ],
+      "notes": "Recurring retainer",
+      "terms": "Net 15",
+      "start_date": "2026-02-15",
+      "end_date": null,
+      "next_generation_date": "2026-03-15",
+      "last_generated_at": null,
+      "is_active": true,
+      "created_at": "2026-02-11T03:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+#### GET `/api/invoices/recurring/:projectId`
+
+Get recurring invoice patterns for a project.
+
+**Authentication:** Required
+
 #### PUT `/api/invoices/recurring/:id`
 
 Update a recurring invoice pattern.
+
+**Authentication:** Required (Admin only)
+
+**Request:**
+
+```json
+{
+  "frequency": "weekly",
+  "dayOfWeek": 5,
+  "notes": "Updated schedule"
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Recurring invoice updated",
+  "recurring_invoice": {
+    "id": 21,
+    "project_id": 1,
+    "client_id": 5,
+    "frequency": "weekly",
+    "day_of_month": 15,
+    "day_of_week": 5,
+    "line_items": [
+      { "description": "Monthly retainer", "quantity": 1, "rate": 2000, "amount": 2000 }
+    ],
+    "notes": "Updated schedule",
+    "terms": "Net 15",
+    "start_date": "2026-02-15",
+    "end_date": null,
+    "next_generation_date": "2026-02-21",
+    "last_generated_at": null,
+    "is_active": true,
+    "created_at": "2026-02-11T03:00:00.000Z"
+  }
+}
+```
 
 #### POST `/api/invoices/recurring/:id/pause`
 
 Pause a recurring invoice.
 
+**Authentication:** Required (Admin only)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Recurring invoice paused"
+}
+```
+
 #### POST `/api/invoices/recurring/:id/resume`
 
 Resume a paused recurring invoice.
 
+**Authentication:** Required (Admin only)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Recurring invoice resumed"
+}
+```
+
 #### DELETE `/api/invoices/recurring/:id`
 
 Delete a recurring invoice pattern.
+
+**Authentication:** Required (Admin only)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Recurring invoice deleted"
+}
+```
 
 ---
 
@@ -538,6 +778,28 @@ Delete a recurring invoice pattern.
 #### GET `/api/invoices/:id/reminders`
 
 Get all scheduled reminders for an invoice.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "reminders": [
+    {
+      "id": 5,
+      "invoice_id": 42,
+      "reminder_type": "upcoming",
+      "scheduled_date": "2026-02-18",
+      "sent_at": null,
+      "status": "pending",
+      "created_at": "2026-02-11T03:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
 
 **Reminder Types:**
 
@@ -553,6 +815,38 @@ Get all scheduled reminders for an invoice.
 #### POST `/api/invoices/reminders/:id/skip`
 
 Skip a scheduled reminder.
+
+**Authentication:** Required (Admin only)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Reminder skipped"
+}
+```
+
+#### POST `/api/invoices/:id/send-reminder`
+
+Manually send a payment reminder email.
+
+**Authentication:** Required (Admin only)
+
+**Notes:**
+
+- Returns `400` if the invoice is `paid` or `cancelled`.
+- Returns `400` if the client email is missing.
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Payment reminder sent successfully",
+  "sentTo": "client@example.com"
+}
+```
 
 ---
 
@@ -613,16 +907,16 @@ Skip a scheduled reminder.
 |Method|Endpoint|Description|
 |--------|----------|-------------|
 |GET|`/api/invoices/comprehensive-stats`|Get comprehensive invoice statistics|
+|GET|`/api/invoices/stats`|Get invoice statistics (optional `clientId` query)|
 
 #### Other Operations
 
 |Method|Endpoint|Description|
 |--------|----------|-------------|
 |POST|`/api/invoices/:id/duplicate`|Duplicate an invoice as draft|
-|POST|`/api/invoices/search`|Search invoices with filters|
+|GET|`/api/invoices/search`|Search invoices with filters|
 |POST|`/api/invoices/check-overdue`|Check and mark overdue invoices|
 |POST|`/api/invoices/:id/send-reminder`|Send manual payment reminder|
-|POST|`/api/invoices/:id/generate/intake/:intakeId`|Generate invoice from intake form|
 |POST|`/api/invoices/export-batch`|Export multiple invoices as ZIP (body: `{ invoiceIds: number[] }`)|
 
 ---
@@ -648,6 +942,9 @@ Fetches invoices from the API and renders the list with summary stats.
 ```typescript
 // src/features/client/modules/portal-invoices.ts
 import { formatCurrency } from '../../../utils/format-utils';
+import { getContainerLoadingHTML } from '../../../utils/loading-utils';
+import { showToast } from '../../../utils/toast-notifications';
+import { ICONS } from '../../../constants/icons';
 
 export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
   const invoicesContainer = document.querySelector('.invoices-list');
@@ -656,15 +953,19 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
 
   if (!invoicesContainer) return;
 
-  try {
-    // Demo mode check using context
-    if (ctx.isDemo()) {
-      renderDemoInvoices(invoicesContainer as HTMLElement, ctx);
-      return;
-    }
+  const invoiceItems = invoicesContainer.querySelectorAll('.invoice-item');
+  invoiceItems.forEach((item) => item.remove());
+  const noInvoicesMsg = invoicesContainer.querySelector('.no-invoices-message');
+  if (noInvoicesMsg) noInvoicesMsg.remove();
 
+  const loadingEl = document.createElement('div');
+  loadingEl.className = 'invoices-loading';
+  loadingEl.innerHTML = getContainerLoadingHTML('Loading invoices...');
+  invoicesContainer.appendChild(loadingEl);
+
+  try {
     const response = await fetch(`${INVOICES_API_BASE}/me`, {
-      credentials: 'include' // HttpOnly cookie authentication
+      credentials: 'include'
     });
 
     if (!response.ok) {
@@ -673,7 +974,9 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
 
     const data = await response.json();
 
-    // Update summary cards
+    const loading = invoicesContainer.querySelector('.invoices-loading');
+    if (loading) loading.remove();
+
     if (summaryOutstanding && data.summary) {
       summaryOutstanding.textContent = formatCurrency(data.summary.totalOutstanding);
     }
@@ -683,8 +986,15 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
 
     renderInvoicesList(invoicesContainer as HTMLElement, data.invoices || [], ctx);
   } catch (error) {
+    const loading = invoicesContainer.querySelector('.invoices-loading');
+    if (loading) loading.remove();
     console.error('Error loading invoices:', error);
-    renderDemoInvoices(invoicesContainer as HTMLElement, ctx);
+    if (summaryOutstanding) summaryOutstanding.textContent = '$0.00';
+    if (summaryPaid) summaryPaid.textContent = '$0.00';
+    const noInvoices = document.createElement('p');
+    noInvoices.className = 'no-invoices-message';
+    noInvoices.textContent = 'Unable to load invoices. Please try again later.';
+    (invoicesContainer as HTMLElement).appendChild(noInvoices);
   }
 }
 ```
@@ -733,11 +1043,15 @@ function renderInvoicesList(
       <div class="invoice-amount">${formatCurrency(invoice.amount_total)}</div>
       <span class="invoice-status ${statusClass}">${statusLabel}</span>
       <div class="invoice-actions">
-        <button class="btn btn-outline btn-sm btn-preview-invoice"
-                data-invoice-id="${invoice.id}">Preview</button>
-        <button class="btn btn-outline btn-sm btn-download-invoice"
+        <button class="icon-btn btn-preview-invoice" data-invoice-id="${invoice.id}" aria-label="Preview invoice" title="Preview">
+          ${ICONS.EYE}
+        </button>
+        <button class="icon-btn btn-download-invoice"
                 data-invoice-id="${invoice.id}"
-                data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}">Download</button>
+                data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}"
+                aria-label="Download invoice" title="Download">
+          ${ICONS.DOWNLOAD}
+        </button>
       </div>
     `;
 
@@ -757,13 +1071,8 @@ Downloads invoice as PDF via blob fetch.
 async function downloadInvoice(
   invoiceId: number,
   invoiceNumber: string,
-  ctx: ClientPortalContext
+  _ctx: ClientPortalContext
 ): Promise<void> {
-  if (ctx.isDemo()) {
-    alert('Invoice download not available in demo mode.');
-    return;
-  }
-
   try {
     const response = await fetch(`${INVOICES_API_BASE}/${invoiceId}/pdf`, {
       credentials: 'include' // HttpOnly cookie authentication
@@ -784,7 +1093,7 @@ async function downloadInvoice(
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error downloading invoice:', error);
-    alert('Failed to download invoice. Please try again.');
+    showToast('Failed to download invoice. Please try again.', 'error');
   }
 }
 ```
@@ -880,8 +1189,8 @@ export function formatCurrency(amount: number): string {
   <div class="invoice-amount">$2,500.00</div>
   <span class="invoice-status status-pending">Pending</span>
   <div class="invoice-actions">
-    <button class="btn btn-outline btn-sm btn-preview-invoice">Preview</button>
-    <button class="btn btn-outline btn-sm btn-download-invoice">Download</button>
+    <button class="icon-btn btn-preview-invoice" aria-label="Preview invoice" title="Preview"></button>
+    <button class="icon-btn btn-download-invoice" aria-label="Download invoice" title="Download"></button>
   </div>
 </div>
 ```
@@ -1036,11 +1345,13 @@ DEPOSIT CREDITS APPLIED:
 
 |File|Purpose|
 |------|---------|
-|`server/routes/invoices.ts`|Invoice API endpoints + PDF generation|
+|`server/routes/invoices.ts`|Invoice API router mounting subroutes|
+|`server/routes/invoices/*.ts`|Split invoice route modules (core, deposits, credits, etc.)|
+|`server/routes/invoices/pdf.ts`|PDF generation utilities (used by routes)|
 |`server/services/invoice-service.ts`|Invoice business logic|
 |`src/features/client/modules/portal-invoices.ts`|Frontend invoice handling (~250 lines)|
 |`src/styles/client-portal/invoices.css`|Invoice styling|
-|`client/portal.html`|Invoices tab HTML (tab-invoices section)|
+|`templates/pages/client-portal.ejs`|Invoices tab HTML (tab-invoices section)|
 
 ---
 
@@ -1154,15 +1465,28 @@ When an invoice is sent, reminders are automatically scheduled:
 
 |File|Purpose|
 |------|---------|
-|`server/routes/invoices.ts`|Invoice API endpoints + PDF generation|
-|`server/services/invoice-service.ts`|Invoice business logic (~800 lines)|
+|`server/routes/invoices.ts`|Invoice API router mounting subroutes|
+|`server/routes/invoices/*.ts`|Split invoice route modules (core, deposits, credits, etc.)|
+|`server/routes/invoices/pdf.ts`|PDF generation utilities (used by routes)|
+|`server/services/invoice-service.ts`|Invoice business logic (~3000 lines)|
 |`server/services/scheduler-service.ts`|Automated task scheduling|
 |`server/database/migrations/028_invoice_enhancements.sql`|New tables migration|
 |`src/features/client/modules/portal-invoices.ts`|Frontend invoice handling (~250 lines)|
 |`src/styles/client-portal/invoices.css`|Invoice styling|
-|`client/portal.html`|Invoices tab HTML (tab-invoices section)|
+|`templates/pages/client-portal.ejs`|Invoices tab HTML (tab-invoices section)|
 
 ---
+
+## Test Coverage
+
+|Area|Test File|Notes|
+|------|---------|-----|
+|Invoice routes (auth, search, stats, pdf, preview)|`tests/server/invoices.test.ts`|Covers auth guards and basic admin flows (requires `TEST_ADMIN_TOKEN` for full coverage)|
+|PDF cache helpers|`tests/unit/utils/pdf-utils.test.ts`|Covers cache keys, TTL expiry, and invalidation|
+|Invoice scheduling + recurring logic|`tests/unit/services/invoice-service.test.ts`|Covers scheduled invoice creation/cancel/process, recurring create/update/resume/process, and weekly day-of-week calculation|
+|Late fee calculations|`tests/unit/services/invoice-service.test.ts`|Covers flat, percentage, and daily percentage late fees|
+
+**Last verified:** February 11, 2026
 
 ## Soft Delete Behavior
 

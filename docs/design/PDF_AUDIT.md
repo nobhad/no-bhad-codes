@@ -1484,7 +1484,7 @@ res.setHeader('Content-Disposition', `${disposition}; filename="${filename}"`);
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:4000/api/proposals/123/pdf \
+  http://<api-host>:4001/api/proposals/123/pdf \
   -o proposal.pdf
 ```
 
@@ -1492,7 +1492,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:4000/api/invoices/456/pdf \
+  http://<api-host>:4001/api/invoices/456/pdf \
   -o invoice.pdf
 ```
 
@@ -1500,7 +1500,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:4000/api/projects/123/contract/pdf \
+  http://<api-host>:4001/api/projects/123/contract/pdf \
   -o contract.pdf
 ```
 
@@ -1508,7 +1508,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:4000/api/projects/789/intake/pdf \
+  http://<api-host>:4001/api/projects/789/intake/pdf \
   -o intake.pdf
 ```
 
@@ -1516,7 +1516,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ```bash
 curl -X POST -H "Authorization: Bearer $TOKEN" \
-  http://localhost:4000/api/projects/123/contract/request-signature
+  http://<api-host>:4001/api/projects/123/contract/request-signature
 ```
 
 ### Convert Markdown to PDF
