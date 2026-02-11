@@ -156,6 +156,11 @@ body[data-page="client-portal"] {
   display: block;
 }
 
+/* Spacing between tab content children (matches admin spacing) */
+.tab-content.active > * + * {
+  margin-top: var(--space-3);
+}
+
 /* Dashboard Header (hidden - standard header shown) */
 .dashboard-header {
   display: none;
@@ -188,15 +193,13 @@ body[data-page="client-portal"] {
   padding-right: clamp(0.75rem, 2vw, 1.5rem);
 }
 
-/* Row 1: sidebar toggle + breadcrumbs */
+/* Row 1: portal-header-top is deprecated - breadcrumbs now in global header */
+/* Keeping styles for backward compatibility but hidden */
 .portal-header-top {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  margin-bottom: var(--space-3);
+  display: none;
 }
 
-/* Row 2: page title + optional subtabs - indented to align with content cards */
+/* Page title + optional subtabs */
 .portal-header-title {
   display: flex;
   align-items: center;
@@ -266,8 +269,31 @@ body[data-page="client-portal"] {
   margin: 0;
   background: transparent;
   border: none;
+  border-bottom: none;
   border-radius: 0;
   box-shadow: none;
+}
+
+/* Compact header toggles for combined admin pages (Work/CRM/Documents/Support) */
+.portal-header-title .header-subtab-group.portal-subtabs .portal-subtab {
+  padding: var(--space-0-5) var(--space-1-5);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.portal-header-title .header-subtab-group.portal-subtabs .portal-subtab:hover {
+  background: transparent;
+  color: var(--portal-text-primary);
+}
+
+.portal-header-title .header-subtab-group.portal-subtabs .portal-subtab.active {
+  background: transparent;
+  border-bottom: 2px solid var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* ============================================

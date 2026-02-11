@@ -112,7 +112,16 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   display: block;
 }
 
-/* Sidebar Logo */
+/* Sidebar Logo - Hidden when using global header */
+/* Logo is now in .portal-global-header */
+/* Use !important to override responsive breakpoint rules */
+.portal-body .sidebar .sidebar-logo,
+.portal-body .sidebar .sidebar-collapsed-logo,
+.portal-body .sidebar.collapsed .sidebar-collapsed-logo {
+  display: none !important;
+}
+
+/* Legacy sidebar logo (when not using global header) */
 .sidebar-logo {
   display: flex;
   justify-content: center;
