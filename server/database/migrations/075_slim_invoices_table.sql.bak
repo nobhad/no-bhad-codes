@@ -1,0 +1,188 @@
+-- =====================================================
+-- Migration 075: Slim Invoices Table (DEFERRED 30 DAYS)
+-- =====================================================
+-- Phase 3.4 of Database Normalization
+--
+-- IMPORTANT: This migration should NOT be run until 30 days after
+-- migrations 071-074 have been successfully deployed and verified.
+--
+-- This migration removes redundant columns from the invoices table:
+--   - Business info columns (moved to system_settings in 071)
+--   - JSON line_items column (moved to invoice_line_items in 072)
+--   - Bill-to override columns (use client table)
+--   - Services description columns (rarely used, move to notes)
+--
+-- PREREQUISITE CHECKLIST:
+--   [ ] Migration 071 deployed successfully (system_settings exists)
+--   [ ] Migration 072 deployed successfully (invoice_line_items exists)
+--   [ ] Migration 073 run successfully (line items migrated)
+--   [ ] All invoice service code updated to use new tables
+--   [ ] 30 days elapsed since deployment
+--   [ ] Backup taken before running this migration
+--
+-- Date: 2026-02-10 (DEFERRED - Do not run until 2026-03-12)
+
+-- UP
+
+-- =====================================================
+-- SAFETY CHECK: Verify prerequisites
+-- =====================================================
+-- This will fail if prerequisites are not met
+
+-- Check system_settings exists
+SELECT CASE
+  WHEN (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='system_settings') = 0
+  THEN RAISE(ABORT, 'Migration 075 requires system_settings table from migration 071')
+END;
+
+-- Check invoice_line_items exists
+SELECT CASE
+  WHEN (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='invoice_line_items') = 0
+  THEN RAISE(ABORT, 'Migration 075 requires invoice_line_items table from migration 072')
+END;
+
+-- Check all invoices have migrated line items
+SELECT CASE
+  WHEN (
+    SELECT COUNT(*)
+    FROM invoices i
+    WHERE i.line_items IS NOT NULL
+    AND i.line_items != '[]'
+    AND i.line_items != ''
+    AND NOT EXISTS (
+      SELECT 1 FROM invoice_line_items ili WHERE ili.invoice_id = i.id
+    )
+  ) > 0
+  THEN RAISE(ABORT, 'Migration 075 requires all line items migrated via script 073')
+END;
+
+-- =====================================================
+-- SECTION 1: Recreate invoices table without redundant columns
+-- =====================================================
+-- SQLite doesn't support DROP COLUMN, so we recreate the table
+
+CREATE TABLE invoices_slim (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  invoice_number TEXT UNIQUE NOT NULL,
+  project_id INTEGER NOT NULL,
+  client_id INTEGER NOT NULL,
+  -- Amounts
+  subtotal DECIMAL(10,2),
+  tax_rate DECIMAL(5,2) DEFAULT 0,
+  tax_amount DECIMAL(10,2) DEFAULT 0,
+  discount_type TEXT,
+  discount_value DECIMAL(10,2) DEFAULT 0,
+  discount_amount DECIMAL(10,2) DEFAULT 0,
+  amount_total DECIMAL(10,2) NOT NULL,
+  amount_paid DECIMAL(10,2) DEFAULT 0,
+  currency TEXT DEFAULT 'USD',
+  -- Status and dates
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled')),
+  due_date DATE,
+  issued_date DATE,
+  paid_date DATE,
+  -- Payment info
+  payment_method TEXT,
+  payment_reference TEXT,
+  payment_terms_id INTEGER REFERENCES payment_terms_presets(id),
+  -- Late fees
+  late_fee_rate DECIMAL(5,2) DEFAULT 0,
+  late_fee_type TEXT DEFAULT 'none',
+  late_fee_amount DECIMAL(10,2) DEFAULT 0,
+  late_fee_applied_at DATETIME,
+  -- Notes
+  notes TEXT,
+  terms TEXT,
+  internal_notes TEXT,
+  -- Invoice numbering
+  invoice_prefix TEXT,
+  invoice_sequence INTEGER,
+  -- Invoice type (standard/deposit)
+  invoice_type TEXT DEFAULT 'standard' CHECK (invoice_type IN ('standard', 'deposit')),
+  deposit_for_project_id INTEGER,
+  deposit_percentage DECIMAL(5,2),
+  -- Links
+  milestone_id INTEGER REFERENCES milestones(id) ON DELETE SET NULL,
+  payment_plan_id INTEGER REFERENCES payment_plan_templates(id) ON DELETE SET NULL,
+  -- Timestamps
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  -- Foreign keys
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+);
+
+-- =====================================================
+-- SECTION 2: Copy data from old table
+-- =====================================================
+
+INSERT INTO invoices_slim (
+  id, invoice_number, project_id, client_id,
+  subtotal, tax_rate, tax_amount, discount_type, discount_value, discount_amount,
+  amount_total, amount_paid, currency,
+  status, due_date, issued_date, paid_date,
+  payment_method, payment_reference, payment_terms_id,
+  late_fee_rate, late_fee_type, late_fee_amount, late_fee_applied_at,
+  notes, terms, internal_notes,
+  invoice_prefix, invoice_sequence,
+  invoice_type, deposit_for_project_id, deposit_percentage,
+  milestone_id, payment_plan_id,
+  created_at, updated_at
+)
+SELECT
+  id, invoice_number, project_id, client_id,
+  subtotal, tax_rate, tax_amount, discount_type, discount_value, discount_amount,
+  amount_total, amount_paid, currency,
+  status, due_date, issued_date, paid_date,
+  payment_method, payment_reference, payment_terms_id,
+  late_fee_rate, late_fee_type, late_fee_amount, late_fee_applied_at,
+  notes, terms, internal_notes,
+  invoice_prefix, invoice_sequence,
+  invoice_type, deposit_for_project_id, deposit_percentage,
+  milestone_id, payment_plan_id,
+  created_at, updated_at
+FROM invoices;
+
+-- =====================================================
+-- SECTION 3: Swap tables
+-- =====================================================
+
+DROP TABLE invoices;
+ALTER TABLE invoices_slim RENAME TO invoices;
+
+-- =====================================================
+-- SECTION 4: Recreate indexes
+-- =====================================================
+
+CREATE INDEX IF NOT EXISTS idx_invoices_client ON invoices(client_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_project ON invoices(project_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
+CREATE INDEX IF NOT EXISTS idx_invoices_due_date ON invoices(due_date);
+CREATE INDEX IF NOT EXISTS idx_invoices_type ON invoices(invoice_type);
+CREATE INDEX IF NOT EXISTS idx_invoices_deposit_project ON invoices(deposit_for_project_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_late_fee ON invoices(late_fee_applied_at);
+CREATE INDEX IF NOT EXISTS idx_invoices_payment_terms ON invoices(payment_terms_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_milestone ON invoices(milestone_id);
+
+-- =====================================================
+-- REMOVED COLUMNS (for reference):
+-- =====================================================
+-- business_name        -> system_settings 'business.name'
+-- business_contact     -> system_settings 'business.contact'
+-- business_email       -> system_settings 'business.email'
+-- business_website     -> system_settings 'business.website'
+-- venmo_handle         -> system_settings 'payment.venmo_handle'
+-- paypal_email         -> system_settings 'payment.paypal_email'
+-- line_items           -> invoice_line_items table
+-- bill_to_name         -> JOIN clients table
+-- bill_to_email        -> JOIN clients table
+-- services_title       -> Archived to notes if needed
+-- services_description -> Archived to notes if needed
+-- deliverables         -> Archived to notes if needed
+-- features             -> Archived to notes if needed
+-- payment_terms_name   -> JOIN payment_terms_presets table
+
+-- DOWN
+
+-- This migration cannot be easily rolled back.
+-- Restore from backup if needed.
