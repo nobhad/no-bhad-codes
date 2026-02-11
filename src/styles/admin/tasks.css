@@ -12,9 +12,9 @@
    ============================================ */
 
 .tasks-main-container {
-  background: var(--portal-bg-dark);
+  background: transparent;
   border-radius: var(--portal-radius-md);
-  padding: var(--space-3);
+  padding: 0;
 }
 
 /* Global Tasks Kanban - ensure horizontal layout */

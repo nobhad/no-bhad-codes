@@ -13,6 +13,8 @@
 @import '../shared/portal-files.css';
 @import '../shared/portal-dropdown.css';
 @import '../shared/portal-badges.css';
+@import '../shared/portal-tabs.css';
+@import '../shared/view-toggle.css';
 @import '../shared/confirm-dialog.css';
 
 /* Base Components (cp- prefixed reusable classes) */

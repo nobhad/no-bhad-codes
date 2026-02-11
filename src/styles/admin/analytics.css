@@ -510,6 +510,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0;
   padding: var(--space-1-5) 0;
   overflow-x: auto;
 }
@@ -518,38 +519,76 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: var(--space-0-5);
   padding: var(--space-1-5);
-  background: var(--portal-bg-medium);
+  background: var(--portal-bg-light);
+  border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-md);
-  min-width: 100px;
+  min-width: 110px;
   text-align: center;
 }
 
+.funnel-stage[data-stage="new"] {
+  border-color: var(--status-new);
+}
+
+.funnel-stage[data-stage="contacted"] {
+  border-color: var(--status-pending);
+}
+
+.funnel-stage[data-stage="qualified"] {
+  border-color: var(--status-active);
+}
+
+.funnel-stage[data-stage="proposal"] {
+  border-color: var(--status-on-hold);
+}
+
 .funnel-stage-value {
-  font-size: 1.5rem;
+  font-family: var(--font-family-acme);
+  font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--portal-text-primary);
 }
 
+.funnel-stage[data-stage="new"] .funnel-stage-value {
+  color: var(--status-new);
+}
+
+.funnel-stage[data-stage="contacted"] .funnel-stage-value {
+  color: var(--status-pending);
+}
+
+.funnel-stage[data-stage="qualified"] .funnel-stage-value {
+  color: var(--status-active);
+}
+
+.funnel-stage[data-stage="proposal"] .funnel-stage-value {
+  color: var(--status-on-hold);
+}
+
 .funnel-stage-label {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
   color: var(--portal-text-secondary);
-  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .funnel-stage-success {
-  background: rgba(var(--color-success-rgb), 0.15);
-  border: 1px solid var(--status-active);
+  background: var(--portal-bg-light);
+  border: 1px solid var(--status-completed);
 }
 
 .funnel-stage-success .funnel-stage-value {
-  color: var(--status-active);
+  color: var(--status-completed);
 }
 
 .funnel-arrow {
   color: var(--portal-text-muted);
   flex-shrink: 0;
-  padding: 0 var(--space-0-5);
+  padding: 0;
+  opacity: 0.7;
 }
 
 .funnel-arrow svg {
@@ -559,10 +598,12 @@
 
 .funnel-stats {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
   gap: var(--space-2);
   padding-top: var(--space-1-5);
   border-top: 1px solid var(--portal-border);
-  margin-top: var(--space-1-5);
+  margin-top: var(--space-2);
 }
 
 .funnel-stat {

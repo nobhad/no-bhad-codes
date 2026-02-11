@@ -169,7 +169,10 @@
    PENDING APPROVALS SECTION
    ===================================================== */
 [data-page="admin"] .approval-dashboard-section {
-  margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 
 /* Urgent badge */

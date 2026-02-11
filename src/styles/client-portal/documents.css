@@ -106,6 +106,27 @@
   color: var(--portal-text-light);
 }
 
+[data-page="client-portal"] .documents-dropzone {
+  margin-bottom: var(--space-1-5);
+}
+
+[data-page="client-portal"] .documents-upload-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+[data-page="client-portal"] .documents-upload-hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+[data-page="client-portal"] .documents-upload-error {
+  margin: 0 0 var(--space-1) 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-error-500);
+}
+
 [data-page="client-portal"] .documents-file-input {
   margin-right: var(--space-1);
   margin-bottom: var(--space-1);
