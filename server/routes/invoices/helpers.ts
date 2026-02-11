@@ -7,7 +7,6 @@
  * Shared helpers, transformers, and types for invoice routes
  */
 
-import { AuthenticatedRequest } from '../../middleware/auth.js';
 import {
   InvoiceService,
   Invoice,
@@ -16,7 +15,8 @@ import {
   PaymentPlanTemplate,
   ScheduledInvoice,
   RecurringInvoice,
-  InvoiceReminder
+  InvoiceReminder,
+  InvoicePayment
 } from '../../services/invoice-service.js';
 
 /**
@@ -24,16 +24,6 @@ import {
  */
 export function getInvoiceService(): InvoiceService {
   return InvoiceService.getInstance();
-}
-
-/**
- * Check if user can access an invoice
- */
-export function canAccessInvoice(req: AuthenticatedRequest, invoice: Invoice): boolean {
-  if (req.user?.type === 'admin') {
-    return true;
-  }
-  return req.user?.id === invoice.clientId;
 }
 
 /**
@@ -189,5 +179,21 @@ export function toSnakeCaseReminder(reminder: InvoiceReminder): Record<string, u
     sent_at: reminder.sentAt,
     status: reminder.status,
     created_at: reminder.createdAt
+  };
+}
+
+/**
+ * Transform InvoicePayment to snake_case for frontend
+ */
+export function toSnakeCasePayment(payment: InvoicePayment): Record<string, unknown> {
+  return {
+    id: payment.id,
+    invoice_id: payment.invoiceId,
+    amount: payment.amount,
+    payment_method: payment.paymentMethod,
+    payment_reference: payment.paymentReference,
+    payment_date: payment.paymentDate,
+    notes: payment.notes,
+    created_at: payment.createdAt
   };
 }

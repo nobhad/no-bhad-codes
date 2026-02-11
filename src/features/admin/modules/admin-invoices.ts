@@ -10,7 +10,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
-import type { InvoiceResponse } from '../../../types/api';
+import type { InvoiceResponse, InvoiceLineItem } from '../../../types/api';
 import { formatCurrency, formatDate } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
@@ -20,6 +20,9 @@ import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
 import { exportToCsv, INVOICES_EXPORT_CONFIG } from '../../../utils/table-export';
 import { createBulkActionToolbar, setupBulkSelectionHandlers, type BulkActionConfig } from '../../../utils/table-bulk-actions';
 import { showToast } from '../../../utils/toast-notifications';
+import { createPortalModal } from '../../../components/portal-modal';
+import { manageFocusTrap } from '../../../utils/focus-trap';
+import { withButtonLoading } from '../../../utils/button-loading';
 import {
   createFilterUI,
   createSortableHeaders,
@@ -481,12 +484,10 @@ function setupInvoiceHandlers(ctx: AdminDashboardContext): void {
 
     switch (action) {
     case 'view':
-      // TODO: Implement view invoice modal
-      ctx.showNotification('View invoice coming soon', 'info');
+      showViewInvoiceModal(parseInt(invoiceId), ctx);
       break;
     case 'edit':
-      // TODO: Implement edit invoice modal
-      ctx.showNotification('Edit invoice coming soon', 'info');
+      showEditInvoiceModal(parseInt(invoiceId), ctx);
       break;
     case 'send':
       handleSendInvoice(parseInt(invoiceId), ctx);
@@ -562,4 +563,498 @@ async function handleDownloadPdf(invoiceId: number): Promise<void> {
     console.error('[AdminInvoices] Download error:', error);
     showToast('Failed to download PDF', 'error');
   }
+}
+
+// ============================================
+// VIEW INVOICE MODAL
+// ============================================
+
+/**
+ * Show view invoice modal (read-only)
+ */
+async function showViewInvoiceModal(invoiceId: number, ctx: AdminDashboardContext): Promise<void> {
+  // Find invoice in cache or fetch from API
+  let invoice = cachedInvoices.find(inv => inv.id === invoiceId);
+
+  if (!invoice) {
+    try {
+      const response = await apiFetch(`/api/invoices/${invoiceId}`);
+      if (!response.ok) {
+        showToast('Failed to load invoice', 'error');
+        return;
+      }
+      invoice = await response.json();
+    } catch (error) {
+      console.error('[AdminInvoices] View invoice error:', error);
+      showToast('Failed to load invoice', 'error');
+      return;
+    }
+  }
+
+  if (!invoice) return;
+
+  let cleanupFocusTrap: (() => void) | null = null;
+
+  const modal = createPortalModal({
+    id: 'view-invoice-modal',
+    titleId: 'view-invoice-title',
+    title: `Invoice ${SanitizationUtils.escapeHtml(invoice.invoice_number || `#${invoice.id}`)}`,
+    contentClassName: 'invoice-modal-content',
+    onClose: () => {
+      if (cleanupFocusTrap) cleanupFocusTrap();
+      modal.hide();
+      modal.overlay.remove();
+    }
+  });
+
+  // Build line items table
+  const lineItems = invoice.line_items || [];
+  const lineItemsHTML = lineItems.length > 0
+    ? `<table class="invoice-line-items">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th class="text-right">Qty</th>
+            <th class="text-right">Rate</th>
+            <th class="text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${lineItems.map((item: InvoiceLineItem) => `
+            <tr>
+              <td>${SanitizationUtils.escapeHtml(item.description || '')}</td>
+              <td class="text-right">${item.quantity || 1}</td>
+              <td class="text-right">${formatCurrency(item.rate || 0)}</td>
+              <td class="text-right">${formatCurrency(item.amount || 0)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`
+    : '<p class="text-muted">No line items</p>';
+
+  // Calculate totals
+  const subtotal = lineItems.reduce((sum: number, item: InvoiceLineItem) => sum + (item.amount || 0), 0);
+  const total = getAmount(invoice);
+  const amountPaid = typeof invoice.amount_paid === 'number'
+    ? invoice.amount_paid
+    : parseFloat(String(invoice.amount_paid)) || 0;
+  const balanceDue = total - amountPaid;
+
+  // Build modal body
+  modal.body.innerHTML = `
+    <div class="invoice-view-content">
+      <div class="invoice-header-info">
+        <div class="invoice-info-row">
+          <div class="invoice-info-item">
+            <span class="field-label">Client</span>
+            <span class="field-value">${SanitizationUtils.escapeHtml(invoice.client_name || 'Unknown')}</span>
+          </div>
+          <div class="invoice-info-item">
+            <span class="field-label">Project</span>
+            <span class="field-value">${SanitizationUtils.escapeHtml(invoice.project_name || '-')}</span>
+          </div>
+        </div>
+        <div class="invoice-info-row">
+          <div class="invoice-info-item">
+            <span class="field-label">Status</span>
+            <span class="field-value">${getStatusDotHTML(invoice.status || 'pending')}</span>
+          </div>
+          <div class="invoice-info-item">
+            <span class="field-label">Due Date</span>
+            <span class="field-value">${invoice.due_date ? formatDate(invoice.due_date) : '-'}</span>
+          </div>
+        </div>
+        <div class="invoice-info-row">
+          <div class="invoice-info-item">
+            <span class="field-label">Created</span>
+            <span class="field-value">${invoice.created_at ? formatDate(invoice.created_at) : '-'}</span>
+          </div>
+          ${invoice.paid_date ? `
+            <div class="invoice-info-item">
+              <span class="field-label">Paid</span>
+              <span class="field-value">${formatDate(invoice.paid_date)}</span>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+
+      <div class="invoice-line-items-section">
+        <h3 class="section-title">Line Items</h3>
+        ${lineItemsHTML}
+      </div>
+
+      <div class="invoice-totals">
+        <div class="total-row">
+          <span>Subtotal</span>
+          <span>${formatCurrency(subtotal)}</span>
+        </div>
+        <div class="total-row total-main">
+          <span>Total</span>
+          <span>${formatCurrency(total)}</span>
+        </div>
+        ${amountPaid > 0 ? `
+          <div class="total-row">
+            <span>Amount Paid</span>
+            <span>${formatCurrency(amountPaid)}</span>
+          </div>
+          <div class="total-row total-due">
+            <span>Balance Due</span>
+            <span>${formatCurrency(balanceDue)}</span>
+          </div>
+        ` : ''}
+      </div>
+
+      ${invoice.notes ? `
+        <div class="invoice-notes">
+          <h4 class="section-title">Notes</h4>
+          <p>${SanitizationUtils.escapeHtml(invoice.notes)}</p>
+        </div>
+      ` : ''}
+
+      ${invoice.terms ? `
+        <div class="invoice-terms">
+          <h4 class="section-title">Terms</h4>
+          <p>${SanitizationUtils.escapeHtml(invoice.terms)}</p>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  // Add footer buttons
+  const downloadBtn = document.createElement('button');
+  downloadBtn.type = 'button';
+  downloadBtn.className = 'btn-primary';
+  downloadBtn.textContent = 'Download PDF';
+  downloadBtn.addEventListener('click', () => handleDownloadPdf(invoiceId));
+
+  const closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.className = 'btn-secondary';
+  closeBtn.textContent = 'Close';
+  closeBtn.addEventListener('click', () => {
+    if (cleanupFocusTrap) cleanupFocusTrap();
+    modal.hide();
+    modal.overlay.remove();
+  });
+
+  modal.footer.appendChild(closeBtn);
+  modal.footer.appendChild(downloadBtn);
+
+  // Add to DOM and show
+  document.body.appendChild(modal.overlay);
+  modal.show();
+
+  // Setup focus trap
+  cleanupFocusTrap = manageFocusTrap(modal.overlay, {
+    initialFocus: closeBtn,
+    onClose: () => {
+      modal.hide();
+      modal.overlay.remove();
+    }
+  });
+}
+
+// ============================================
+// EDIT INVOICE MODAL
+// ============================================
+
+/**
+ * Show edit invoice modal (draft invoices only)
+ */
+async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContext): Promise<void> {
+  // Find invoice in cache or fetch from API
+  let invoice = cachedInvoices.find(inv => inv.id === invoiceId);
+
+  if (!invoice) {
+    try {
+      const response = await apiFetch(`/api/invoices/${invoiceId}`);
+      if (!response.ok) {
+        showToast('Failed to load invoice', 'error');
+        return;
+      }
+      invoice = await response.json();
+    } catch (error) {
+      console.error('[AdminInvoices] Edit invoice error:', error);
+      showToast('Failed to load invoice', 'error');
+      return;
+    }
+  }
+
+  if (!invoice) return;
+
+  // Only allow editing draft invoices
+  if (invoice.status !== 'draft') {
+    showToast('Only draft invoices can be edited', 'warning');
+    return;
+  }
+
+  let cleanupFocusTrap: (() => void) | null = null;
+  let lineItemIndex = 0;
+
+  const modal = createPortalModal({
+    id: 'edit-invoice-modal',
+    titleId: 'edit-invoice-title',
+    title: `Edit Invoice ${SanitizationUtils.escapeHtml(invoice.invoice_number || `#${invoice.id}`)}`,
+    contentClassName: 'invoice-modal-content invoice-edit-modal',
+    onClose: () => {
+      if (cleanupFocusTrap) cleanupFocusTrap();
+      modal.hide();
+      modal.overlay.remove();
+    }
+  });
+
+  // Get line items
+  const lineItems = invoice.line_items || [];
+
+  // Build line item rows HTML
+  function buildLineItemRow(item: InvoiceLineItem, index: number): string {
+    return `
+      <tr class="line-item-row" data-index="${index}">
+        <td>
+          <input type="text" class="form-input line-item-desc" name="line_items[${index}][description]"
+            value="${SanitizationUtils.escapeHtml(item.description || '')}" placeholder="Description" required>
+        </td>
+        <td>
+          <input type="number" class="form-input line-item-qty" name="line_items[${index}][quantity]"
+            value="${item.quantity || 1}" min="1" step="1" required>
+        </td>
+        <td>
+          <input type="number" class="form-input line-item-rate" name="line_items[${index}][rate]"
+            value="${item.rate || 0}" min="0" step="0.01" required>
+        </td>
+        <td class="line-item-amount">${formatCurrency(item.amount || 0)}</td>
+        <td>
+          <button type="button" class="icon-btn btn-danger remove-line-item" data-index="${index}" title="Remove">
+            ${ICONS.VIEW.replace('M1 12s4-8 11-8', 'M18 6 6 18M6 6l12 12').replace('circle cx="12" cy="12" r="3"', '')}
+          </button>
+        </td>
+      </tr>
+    `;
+  }
+
+  // Build modal body form
+  modal.body.innerHTML = `
+    <form id="edit-invoice-form" class="invoice-edit-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label" for="invoice-due-date">Due Date</label>
+          <input type="date" id="invoice-due-date" name="due_date" class="form-input"
+            value="${invoice.due_date ? invoice.due_date.split('T')[0] : ''}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">Line Items</label>
+        <table class="invoice-line-items editable">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th class="text-right" style="width: 80px;">Qty</th>
+              <th class="text-right" style="width: 100px;">Rate</th>
+              <th class="text-right" style="width: 100px;">Amount</th>
+              <th style="width: 50px;"></th>
+            </tr>
+          </thead>
+          <tbody id="line-items-body">
+            ${lineItems.map((item, idx) => {
+    lineItemIndex = idx + 1;
+    return buildLineItemRow(item, idx);
+  }).join('')}
+          </tbody>
+        </table>
+        <button type="button" id="add-line-item" class="btn-secondary btn-small">
+          Add Line Item
+        </button>
+      </div>
+
+      <div class="invoice-totals-edit">
+        <div class="total-row total-main">
+          <span>Total</span>
+          <span id="invoice-total">${formatCurrency(getAmount(invoice))}</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label" for="invoice-notes">Notes</label>
+        <textarea id="invoice-notes" name="notes" class="form-input" rows="3"
+          placeholder="Notes to client (optional)">${SanitizationUtils.escapeHtml(invoice.notes || '')}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label" for="invoice-terms">Terms</label>
+        <textarea id="invoice-terms" name="terms" class="form-input" rows="2"
+          placeholder="Payment terms (optional)">${SanitizationUtils.escapeHtml(invoice.terms || '')}</textarea>
+      </div>
+    </form>
+  `;
+
+  // Calculate and update total
+  function recalculateTotal(): void {
+    const rows = modal.body.querySelectorAll('.line-item-row');
+    let total = 0;
+
+    rows.forEach((row) => {
+      const qty = parseFloat((row.querySelector('.line-item-qty') as HTMLInputElement)?.value) || 0;
+      const rate = parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
+      const amount = qty * rate;
+      total += amount;
+
+      const amountCell = row.querySelector('.line-item-amount');
+      if (amountCell) amountCell.textContent = formatCurrency(amount);
+    });
+
+    const totalEl = document.getElementById('invoice-total');
+    if (totalEl) totalEl.textContent = formatCurrency(total);
+  }
+
+  // Add line item
+  function addLineItem(): void {
+    const tbody = document.getElementById('line-items-body');
+    if (!tbody) return;
+
+    const newItem: InvoiceLineItem = { description: '', quantity: 1, rate: 0, amount: 0 };
+    const row = document.createElement('tr');
+    row.className = 'line-item-row';
+    row.dataset.index = String(lineItemIndex);
+    row.innerHTML = `
+      <td>
+        <input type="text" class="form-input line-item-desc" name="line_items[${lineItemIndex}][description]"
+          value="" placeholder="Description" required>
+      </td>
+      <td>
+        <input type="number" class="form-input line-item-qty" name="line_items[${lineItemIndex}][quantity]"
+          value="1" min="1" step="1" required>
+      </td>
+      <td>
+        <input type="number" class="form-input line-item-rate" name="line_items[${lineItemIndex}][rate]"
+          value="0" min="0" step="0.01" required>
+      </td>
+      <td class="line-item-amount">${formatCurrency(0)}</td>
+      <td>
+        <button type="button" class="icon-btn btn-danger remove-line-item" data-index="${lineItemIndex}" title="Remove">
+          ${ICONS.VIEW.replace('M1 12s4-8 11-8', 'M18 6 6 18M6 6l12 12').replace('circle cx="12" cy="12" r="3"', '')}
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+    lineItemIndex++;
+
+    // Focus the description field
+    const descInput = row.querySelector('.line-item-desc') as HTMLInputElement;
+    descInput?.focus();
+  }
+
+  // Setup event listeners after DOM is ready
+  setTimeout(() => {
+    // Add line item button
+    const addBtn = document.getElementById('add-line-item');
+    addBtn?.addEventListener('click', addLineItem);
+
+    // Delegate events for line items
+    modal.body.addEventListener('input', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('line-item-qty') || target.classList.contains('line-item-rate')) {
+        recalculateTotal();
+      }
+    });
+
+    // Remove line item
+    modal.body.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const removeBtn = target.closest('.remove-line-item') as HTMLElement;
+      if (removeBtn) {
+        const row = removeBtn.closest('.line-item-row');
+        row?.remove();
+        recalculateTotal();
+      }
+    });
+  }, 0);
+
+  // Add footer buttons
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'btn-primary';
+  saveBtn.textContent = 'Save Changes';
+  saveBtn.addEventListener('click', async () => {
+    const form = document.getElementById('edit-invoice-form') as HTMLFormElement;
+    if (!form?.checkValidity()) {
+      form?.reportValidity();
+      return;
+    }
+
+    await withButtonLoading(saveBtn, async () => {
+      // Collect form data
+      const dueDate = (document.getElementById('invoice-due-date') as HTMLInputElement)?.value;
+      const notes = (document.getElementById('invoice-notes') as HTMLTextAreaElement)?.value;
+      const terms = (document.getElementById('invoice-terms') as HTMLTextAreaElement)?.value;
+
+      // Collect line items
+      const rows = modal.body.querySelectorAll('.line-item-row');
+      const newLineItems: InvoiceLineItem[] = [];
+
+      rows.forEach((row) => {
+        const desc = (row.querySelector('.line-item-desc') as HTMLInputElement)?.value || '';
+        const qty = parseFloat((row.querySelector('.line-item-qty') as HTMLInputElement)?.value) || 1;
+        const rate = parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
+        const amount = qty * rate;
+
+        if (desc.trim()) {
+          newLineItems.push({ description: desc, quantity: qty, rate, amount });
+        }
+      });
+
+      // Calculate new total
+      const newTotal = newLineItems.reduce((sum, item) => sum + item.amount, 0);
+
+      try {
+        const response = await apiPut(`/api/invoices/${invoiceId}`, {
+          due_date: dueDate || null,
+          notes: notes || null,
+          terms: terms || null,
+          line_items: newLineItems,
+          amount_total: newTotal
+        });
+
+        if (response.ok) {
+          showToast('Invoice updated successfully', 'success');
+          if (cleanupFocusTrap) cleanupFocusTrap();
+          modal.hide();
+          modal.overlay.remove();
+          loadInvoicesData(ctx);
+        } else {
+          const error = await response.json();
+          showToast(error.error || 'Failed to update invoice', 'error');
+        }
+      } catch (error) {
+        console.error('[AdminInvoices] Update error:', error);
+        showToast('Failed to update invoice', 'error');
+      }
+    }, 'Saving...');
+  });
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'btn-secondary';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => {
+    if (cleanupFocusTrap) cleanupFocusTrap();
+    modal.hide();
+    modal.overlay.remove();
+  });
+
+  modal.footer.appendChild(cancelBtn);
+  modal.footer.appendChild(saveBtn);
+
+  // Add to DOM and show
+  document.body.appendChild(modal.overlay);
+  modal.show();
+
+  // Setup focus trap
+  cleanupFocusTrap = manageFocusTrap(modal.overlay, {
+    initialFocus: '#invoice-due-date',
+    onClose: () => {
+      modal.hide();
+      modal.overlay.remove();
+    }
+  });
 }

@@ -15,6 +15,8 @@ import { InvoiceLineItem } from '../../services/invoice-service.js';
 import { getDatabase } from '../../database/init.js';
 import { getString } from '../../database/row-helpers.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../../config/business.js';
+import { errorResponse } from '../../utils/api-response.js';
+import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import {
   PdfPageContext,
   ensureSpace,
@@ -418,10 +420,7 @@ router.post(
     const { projectId, clientId, lineItems, notes, terms } = req.body;
 
     if (!projectId || !clientId || !lineItems || !Array.isArray(lineItems) || lineItems.length === 0) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS'
-      });
+      return errorResponse(res, 'Missing required fields', 400, 'MISSING_FIELDS');
     }
 
     const db = getDatabase();
@@ -432,7 +431,7 @@ router.post(
     );
 
     if (!client) {
-      return res.status(404).json({ error: 'Client not found', code: 'CLIENT_NOT_FOUND' });
+      return errorResponse(res, 'Client not found', 404, 'CLIENT_NOT_FOUND');
     }
 
     const project = await db.get('SELECT project_name FROM projects WHERE id = ?', [projectId]);
@@ -473,14 +472,13 @@ router.post(
 
     try {
       const pdfBytes = await generateInvoicePdf(pdfData);
-
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'inline; filename="invoice-preview.pdf"');
-      res.setHeader('Content-Length', pdfBytes.length);
-      res.send(Buffer.from(pdfBytes));
+      sendPdfResponse(res, pdfBytes, {
+        filename: 'invoice-preview.pdf',
+        disposition: 'inline'
+      });
     } catch (error) {
       console.error('[Invoices] Preview PDF generation error:', error);
-      res.status(500).json({ error: 'Failed to generate preview', code: 'PDF_GENERATION_FAILED' });
+      errorResponse(res, 'Failed to generate preview', 500, 'PDF_GENERATION_FAILED');
     }
   })
 );
