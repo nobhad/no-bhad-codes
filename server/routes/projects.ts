@@ -13,6 +13,15 @@ import { PDFDocument as PDFLibDocument, StandardFonts, degrees, rgb, PDFPage } f
 import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
+import {
+  isUserAdmin,
+  canAccessProject,
+  canAccessFile,
+  canAccessFolder,
+  canAccessTask,
+  canAccessChecklistItem,
+  canAccessFileComment
+} from '../middleware/access-control.js';
 import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache } from '../middleware/cache.js';
 import { getUploadsDir, getUploadsSubdir, getRelativePath, UPLOAD_DIRS, sanitizeFilename } from '../config/uploads.js';
@@ -68,126 +77,6 @@ const upload = multer({
     cb(new Error('Invalid file type'));
   }
 });
-
-/**
- * Check if user is actually an admin (verifies against database, not just JWT)
- */
-async function isUserAdmin(req: AuthenticatedRequest): Promise<boolean> {
-  if (req.user?.type !== 'admin') {
-    return false;
-  }
-
-  // For admin users with id > 0 (not the special admin account), verify from database
-  if (req.user.id > 0) {
-    const db = getDatabase();
-    const client = await db.get('SELECT is_admin FROM clients WHERE id = ?', [req.user.id]);
-    return !!(client && client.is_admin === 1);
-  }
-
-  // Admin account (id = 0) is always admin
-  return true;
-}
-
-async function canAccessProject(req: AuthenticatedRequest, projectId: number): Promise<boolean> {
-  if (await isUserAdmin(req)) {
-    return true;
-  }
-
-  const db = getDatabase();
-  const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
-    projectId,
-    req.user?.id
-  ]);
-
-  return !!row;
-}
-
-async function canAccessFile(req: AuthenticatedRequest, fileId: number): Promise<boolean> {
-  if (req.user?.type === 'admin') {
-    return true;
-  }
-
-  const db = getDatabase();
-  const row = await db.get(
-    `SELECT 1
-     FROM files f
-     JOIN projects p ON f.project_id = p.id
-     WHERE f.id = ? AND p.client_id = ?`,
-    [fileId, req.user?.id]
-  );
-
-  return !!row;
-}
-
-async function canAccessFolder(req: AuthenticatedRequest, folderId: number): Promise<boolean> {
-  if (req.user?.type === 'admin') {
-    return true;
-  }
-
-  const db = getDatabase();
-  const row = await db.get(
-    `SELECT 1
-     FROM file_folders ff
-     JOIN projects p ON ff.project_id = p.id
-     WHERE ff.id = ? AND p.client_id = ?`,
-    [folderId, req.user?.id]
-  );
-
-  return !!row;
-}
-
-async function canAccessTask(req: AuthenticatedRequest, taskId: number): Promise<boolean> {
-  if (req.user?.type === 'admin') {
-    return true;
-  }
-
-  const db = getDatabase();
-  const row = await db.get(
-    `SELECT 1
-     FROM project_tasks t
-     JOIN projects p ON t.project_id = p.id
-     WHERE t.id = ? AND p.client_id = ?`,
-    [taskId, req.user?.id]
-  );
-
-  return !!row;
-}
-
-async function canAccessChecklistItem(req: AuthenticatedRequest, itemId: number): Promise<boolean> {
-  if (req.user?.type === 'admin') {
-    return true;
-  }
-
-  const db = getDatabase();
-  const row = await db.get(
-    `SELECT 1
-     FROM task_checklist_items i
-     JOIN project_tasks t ON i.task_id = t.id
-     JOIN projects p ON t.project_id = p.id
-     WHERE i.id = ? AND p.client_id = ?`,
-    [itemId, req.user?.id]
-  );
-
-  return !!row;
-}
-
-async function canAccessFileComment(req: AuthenticatedRequest, commentId: number): Promise<boolean> {
-  if (req.user?.type === 'admin') {
-    return true;
-  }
-
-  const db = getDatabase();
-  const row = await db.get(
-    `SELECT 1
-     FROM file_comments fc
-     JOIN files f ON fc.file_id = f.id
-     JOIN projects p ON f.project_id = p.id
-     WHERE fc.id = ? AND p.client_id = ?`,
-    [commentId, req.user?.id]
-  );
-
-  return !!row;
-}
 
 // Get projects for current client
 router.get(
