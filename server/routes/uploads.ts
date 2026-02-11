@@ -16,6 +16,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { getDatabase } from '../database/init.js';
 import { getUploadsDir, getUploadsSubdir, UPLOAD_DIRS, sanitizeFilename } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
+import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -169,10 +170,7 @@ router.post(
   upload.single('file'),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (!req.file) {
-      return res.status(400).json({
-        error: 'No file uploaded',
-        code: 'NO_FILE'
-      });
+      return errorResponse(res, 'No file uploaded', 400, 'NO_FILE');
     }
 
     const fileInfo = {
@@ -223,28 +221,62 @@ router.post(
   upload.array('files', 5),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
-      return res.status(400).json({
-        error: 'No files uploaded',
-        code: 'NO_FILES'
+      return errorResponse(res, 'No files uploaded', 400, 'NO_FILES');
+    }
+
+    const db = getDatabase();
+    const uploadedFiles = [];
+
+    // Get client's first project for linking files (or null if none)
+    let defaultProjectId: number | null = null;
+    if (req.user?.type !== 'admin') {
+      const project = await db.get(
+        'SELECT id FROM projects WHERE client_id = ? ORDER BY created_at DESC LIMIT 1',
+        [req.user?.id]
+      ) as { id: number } | undefined;
+      defaultProjectId = project?.id ?? null;
+    }
+
+    for (const file of req.files as Express.Multer.File[]) {
+      // Determine the subdirectory the file was saved to
+      const subDir = file.destination.includes('projects') ? 'projects' :
+                     file.destination.includes('avatars') ? 'avatars' :
+                     file.destination.includes('invoices') ? 'invoices' :
+                     file.destination.includes('messages') ? 'messages' : 'general';
+      const filePath = `uploads/${subDir}/${file.filename}`;
+
+      // Save to database
+      const result = await db.run(
+        `INSERT INTO files (project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+        [
+          defaultProjectId,
+          file.filename,
+          file.originalname,
+          file.mimetype,
+          file.size,
+          filePath,
+          req.user?.id
+        ]
+      );
+
+      uploadedFiles.push({
+        id: result.lastID,
+        filename: file.filename,
+        originalName: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        path: file.path,
+        url: `/${filePath}`,
+        uploadedBy: req.user?.id,
+        uploadedAt: new Date().toISOString()
       });
     }
 
-    const files = (req.files as Express.Multer.File[]).map((file) => ({
-      id: `${Date.now()}-${Math.random().toString(36).substring(2)}`,
-      filename: file.filename,
-      originalName: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      path: file.path,
-      url: `/uploads/${file.filename}`,
-      uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString()
-    }));
-
     res.status(201).json({
       success: true,
-      message: `${files.length} files uploaded successfully`,
-      files
+      message: `${uploadedFiles.length} files uploaded successfully`,
+      files: uploadedFiles
     });
   })
 );
@@ -275,18 +307,12 @@ router.post(
   upload.single('avatar'),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (!req.file) {
-      return res.status(400).json({
-        error: 'No avatar file uploaded',
-        code: 'NO_AVATAR'
-      });
+      return errorResponse(res, 'No avatar file uploaded', 400, 'NO_AVATAR');
     }
 
     // Validate that it's an image
     if (!req.file.mimetype.startsWith('image/')) {
-      return res.status(400).json({
-        error: 'Avatar must be an image file',
-        code: 'INVALID_AVATAR_TYPE'
-      });
+      return errorResponse(res, 'Avatar must be an image file', 400, 'INVALID_AVATAR_TYPE');
     }
 
     const avatarInfo = {
@@ -356,17 +382,11 @@ router.post(
     const projectId = parseInt(req.params.projectId);
 
     if (isNaN(projectId)) {
-      return res.status(400).json({
-        error: 'Invalid project ID',
-        code: 'INVALID_PROJECT_ID'
-      });
+      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_PROJECT_ID');
     }
 
     if (!req.file) {
-      return res.status(400).json({
-        error: 'No project file uploaded',
-        code: 'NO_PROJECT_FILE'
-      });
+      return errorResponse(res, 'No project file uploaded', 400, 'NO_PROJECT_FILE');
     }
 
     const projectFile = {
@@ -435,10 +455,7 @@ router.get(
     const projectId = parseInt(req.params.projectId);
 
     if (isNaN(projectId)) {
-      return res.status(400).json({
-        error: 'Invalid project ID',
-        code: 'INVALID_PROJECT_ID'
-      });
+      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_PROJECT_ID');
     }
 
     try {
@@ -468,10 +485,7 @@ router.get(
       });
     } catch (dbError) {
       console.error('Failed to fetch files:', dbError);
-      return res.status(500).json({
-        error: 'Failed to fetch files',
-        code: 'DB_ERROR'
-      });
+      return errorResponse(res, 'Failed to fetch files', 500, 'DB_ERROR');
     }
   })
 );
@@ -493,10 +507,7 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return res.status(401).json({
-        error: 'Not authenticated',
-        code: 'NOT_AUTHENTICATED'
-      });
+      return errorResponse(res, 'Not authenticated', 401, 'NOT_AUTHENTICATED');
     }
 
     // Filter query params
@@ -581,10 +592,7 @@ router.get(
       });
     } catch (dbError) {
       console.error('Failed to fetch client files:', dbError);
-      return res.status(500).json({
-        error: 'Failed to fetch files',
-        code: 'DB_ERROR'
-      });
+      return errorResponse(res, 'Failed to fetch files', 500, 'DB_ERROR');
     }
   })
 );
@@ -612,10 +620,7 @@ router.get(
     const fileId = parseInt(req.params.fileId);
 
     if (isNaN(fileId)) {
-      return res.status(400).json({
-        error: 'Invalid file ID',
-        code: 'INVALID_FILE_ID'
-      });
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
     try {
@@ -629,10 +634,7 @@ router.get(
       );
 
       if (!file) {
-        return res.status(404).json({
-          error: 'File not found',
-          code: 'FILE_NOT_FOUND'
-        });
+        return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
       }
 
       // Check access: admin, client owns the project, or uploaded the file
@@ -642,30 +644,21 @@ router.get(
       const isUploader = file.uploaded_by === userId || file.uploaded_by === String(userId);
 
       if (!isAdmin && !isOwner && !isUploader) {
-        return res.status(403).json({
-          error: 'Access denied',
-          code: 'ACCESS_DENIED'
-        });
+        return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
       }
 
       // Validate path to prevent path traversal attacks
       const filePathStr = getString(file, 'file_path');
       if (!isPathSafe(filePathStr)) {
         console.error('Path traversal attempt detected:', filePathStr);
-        return res.status(403).json({
-          error: 'Invalid file path',
-          code: 'PATH_TRAVERSAL_DETECTED'
-        });
+        return errorResponse(res, 'Invalid file path', 403, 'PATH_TRAVERSAL_DETECTED');
       }
 
       // Construct the full file path using centralized uploads directory
       const filePath = resolveFilePath(filePathStr);
 
       if (!existsSync(filePath)) {
-        return res.status(404).json({
-          error: 'File not found on disk',
-          code: 'FILE_MISSING'
-        });
+        return errorResponse(res, 'File not found on disk', 404, 'FILE_MISSING');
       }
 
       // Set content disposition based on query param
@@ -681,10 +674,7 @@ router.get(
       res.sendFile(filePath);
     } catch (dbError) {
       console.error('Failed to fetch file:', dbError);
-      return res.status(500).json({
-        error: 'Failed to fetch file',
-        code: 'DB_ERROR'
-      });
+      return errorResponse(res, 'Failed to fetch file', 500, 'DB_ERROR');
     }
   })
 );
@@ -712,10 +702,7 @@ router.delete(
     const fileId = parseInt(req.params.fileId);
 
     if (isNaN(fileId)) {
-      return res.status(400).json({
-        error: 'Invalid file ID',
-        code: 'INVALID_FILE_ID'
-      });
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
     try {
@@ -729,10 +716,7 @@ router.delete(
       );
 
       if (!file) {
-        return res.status(404).json({
-          error: 'File not found',
-          code: 'FILE_NOT_FOUND'
-        });
+        return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
       }
 
       // Check access: admin or uploader can delete
@@ -742,17 +726,16 @@ router.delete(
       const isOwner = file.client_id === userId;
 
       if (!isAdmin && file.client_id && !isOwner) {
-        return res.status(403).json({
-          error: 'Access denied - this file belongs to another client',
-          code: 'ACCESS_DENIED'
-        });
+        return errorResponse(res, 'Access denied - this file belongs to another client', 403, 'ACCESS_DENIED');
       }
 
       if (!isAdmin && !isOwner && !isUploader) {
-        return res.status(403).json({
-          error: 'Access denied - only admin or the uploader can delete this file',
-          code: 'ACCESS_DENIED'
-        });
+        return errorResponse(
+          res,
+          'Access denied - only admin or the uploader can delete this file',
+          403,
+          'ACCESS_DENIED'
+        );
       }
 
       // Delete from database
@@ -777,10 +760,7 @@ router.delete(
       });
     } catch (dbError) {
       console.error('Failed to delete file:', dbError);
-      return res.status(500).json({
-        error: 'Failed to delete file',
-        code: 'DB_ERROR'
-      });
+      return errorResponse(res, 'Failed to delete file', 500, 'DB_ERROR');
     }
   })
 );
@@ -839,11 +819,11 @@ router.get(
     const status = req.query.status as string | undefined;
 
     if (isNaN(projectId)) {
-      return res.status(400).json({ error: 'Invalid project ID' });
+      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_PROJECT_ID');
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const deliverables = await fileService.getProjectDeliverables(projectId, status);
@@ -866,7 +846,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
+      return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
     }
 
     const deliverables = await fileService.getPendingReviewDeliverables();
@@ -889,11 +869,11 @@ router.get(
     const fileId = parseInt(req.params.fileId);
 
     if (isNaN(fileId)) {
-      return res.status(400).json({ error: 'Invalid file ID' });
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const workflow = await fileService.getDeliverableWorkflow(fileId);
@@ -920,11 +900,11 @@ router.post(
     const { notes } = req.body;
 
     if (isNaN(fileId)) {
-      return res.status(400).json({ error: 'Invalid file ID' });
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     const submittedBy = req.user?.email || 'unknown';
@@ -951,13 +931,13 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
+      return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
     }
 
     const fileId = parseInt(req.params.fileId);
 
     if (isNaN(fileId)) {
-      return res.status(400).json({ error: 'Invalid file ID' });
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
     const reviewerEmail = req.user?.email || 'admin';
@@ -984,18 +964,18 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
+      return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
     }
 
     const fileId = parseInt(req.params.fileId);
     const { feedback } = req.body;
 
     if (isNaN(fileId)) {
-      return res.status(400).json({ error: 'Invalid file ID' });
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
     if (!feedback) {
-      return res.status(400).json({ error: 'Feedback is required when requesting changes' });
+      return errorResponse(res, 'Feedback is required when requesting changes', 400, 'VALIDATION_ERROR');
     }
 
     const reviewerEmail = req.user?.email || 'admin';
@@ -1022,14 +1002,14 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
+      return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
     }
 
     const fileId = parseInt(req.params.fileId);
     const { comment } = req.body;
 
     if (isNaN(fileId)) {
-      return res.status(400).json({ error: 'Invalid file ID' });
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
     const approverEmail = req.user?.email || 'admin';
@@ -1056,18 +1036,18 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
+      return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
     }
 
     const fileId = parseInt(req.params.fileId);
     const { reason } = req.body;
 
     if (isNaN(fileId)) {
-      return res.status(400).json({ error: 'Invalid file ID' });
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
     if (!reason) {
-      return res.status(400).json({ error: 'Reason is required when rejecting' });
+      return errorResponse(res, 'Reason is required when rejecting', 400, 'VALIDATION_ERROR');
     }
 
     const reviewerEmail = req.user?.email || 'admin';
@@ -1097,7 +1077,7 @@ router.post(
     const { notes } = req.body;
 
     if (isNaN(fileId)) {
-      return res.status(400).json({ error: 'Invalid file ID' });
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
     const submittedBy = req.user?.email || 'unknown';
@@ -1127,16 +1107,16 @@ router.post(
     const { comment } = req.body;
 
     if (isNaN(fileId)) {
-      return res.status(400).json({ error: 'Invalid file ID' });
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
     if (!comment) {
-      return res.status(400).json({ error: 'Comment is required' });
+      return errorResponse(res, 'Comment is required', 400, 'VALIDATION_ERROR');
     }
 
     const workflow = await fileService.getDeliverableWorkflow(fileId);
     if (!workflow) {
-      return res.status(404).json({ error: 'Deliverable workflow not found' });
+      return errorResponse(res, 'Deliverable workflow not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     const authorEmail = req.user?.email || 'unknown';
@@ -1162,35 +1142,43 @@ router.use(
   (error: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (error instanceof multer.MulterError) {
       if (error.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({
-          error: 'File too large',
-          code: 'FILE_TOO_LARGE',
-          message: 'File size cannot exceed 10MB'
-        });
+        return errorResponseWithPayload(
+          res,
+          'File too large',
+          400,
+          'FILE_TOO_LARGE',
+          { message: 'File size cannot exceed 10MB' }
+        );
       }
 
       if (error.code === 'LIMIT_FILE_COUNT') {
-        return res.status(400).json({
-          error: 'Too many files',
-          code: 'TOO_MANY_FILES',
-          message: 'Cannot upload more than 5 files at once'
-        });
+        return errorResponseWithPayload(
+          res,
+          'Too many files',
+          400,
+          'TOO_MANY_FILES',
+          { message: 'Cannot upload more than 5 files at once' }
+        );
       }
 
-      return res.status(400).json({
-        error: 'Upload error',
-        code: 'UPLOAD_ERROR',
-        message: error.message
-      });
+      return errorResponseWithPayload(
+        res,
+        'Upload error',
+        400,
+        'UPLOAD_ERROR',
+        { message: error.message }
+      );
     }
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     if (errorMessage.includes('File type not allowed')) {
-      return res.status(400).json({
-        error: 'File type not allowed',
-        code: 'INVALID_FILE_TYPE',
-        message: errorMessage
-      });
+      return errorResponseWithPayload(
+        res,
+        'File type not allowed',
+        400,
+        'INVALID_FILE_TYPE',
+        { message: errorMessage }
+      );
     }
 
     next(error);

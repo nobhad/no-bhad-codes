@@ -14,6 +14,7 @@ import { ICONS } from '../../../constants/icons';
 import { showContainerError } from '../../../utils/error-utils';
 import { confirmDanger, alertError } from '../../../utils/confirm-dialog';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
+import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 
 const FILES_API_BASE = '/api/uploads';
 const DOC_REQUESTS_API = '/api/document-requests';
@@ -37,6 +38,9 @@ interface PendingDocumentRequest {
 let pendingRequestsCache: PendingDocumentRequest[] = [];
 let pendingFilesToUpload: File[] = [];
 let uploadRequestModalContext: ClientPortalContext | null = null;
+let uploadRequestModalInstance: PortalModalInstance | null = null;
+let uploadRequestOptionsContainer: HTMLElement | null = null;
+let uploadRequestOtherDescriptionWrap: HTMLElement | null = null;
 
 // Allowed file types (matches server validation)
 const ALLOWED_EXTENSIONS = /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar)$/i;
@@ -148,7 +152,8 @@ function populateProjectFilter(projects: { id: number; name: string }[]): void {
  * Load files from API
  */
 export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
-  const filesContainer = document.querySelector('.files-list-section');
+  // Support both old layout (.files-list-section) and new layout (#files-list)
+  const filesContainer = document.getElementById('files-list') || document.querySelector('.files-list-section');
   if (!filesContainer) return;
 
   try {
@@ -181,7 +186,17 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
 
 
 /**
- * Render the files list
+ * Get file icon CSS class based on mime type
+ */
+function _getFileIconClass(mimetype: string): string {
+  if (mimetype.startsWith('image/')) return 'image';
+  if (mimetype.includes('pdf') || mimetype.includes('document') || mimetype.includes('text')) return 'document';
+  if (mimetype.includes('zip') || mimetype.includes('rar') || mimetype.includes('archive')) return 'archive';
+  return '';
+}
+
+/**
+ * Render the files list as a table (matching admin layout)
  */
 function renderFilesList(
   container: HTMLElement,
@@ -196,40 +211,49 @@ function renderFilesList(
 
   const clientEmail = sessionStorage.getItem('clientEmail') || '';
 
-  container.innerHTML = files
+  const tableRows = files
     .map((file) => {
       const safeName = ctx.escapeHtml(file.originalName || file.filename || 'File');
       const canDelete = file.uploadedBy === clientEmail || file.uploadedBy === 'client';
-      const deleteIcon = canDelete
-        ? `<button class="file-delete-icon btn-delete" data-file-id="${file.id}" data-filename="${file.originalName}" aria-label="Delete ${safeName}">
-            ${ICONS.TRASH}
-          </button>`
+      const size = formatFileSize(file.size);
+      const date = ctx.formatDate(file.uploadedAt);
+
+      const previewBtn = `<button class="icon-btn btn-preview" data-file-id="${file.id}" data-project-id="${file.projectId || ''}" data-filename="${ctx.escapeHtml(file.filename || '')}" data-mimetype="${file.mimetype}" aria-label="Preview ${safeName}" title="Preview">${ICONS.EYE}</button>`;
+      const downloadBtn = `<button class="icon-btn btn-download" data-file-id="${file.id}" data-project-id="${file.projectId || ''}" data-filename="${ctx.escapeHtml(file.filename || '')}" data-original-name="${ctx.escapeHtml(file.originalName || '')}" data-mimetype="${file.mimetype}" aria-label="Download ${safeName}" title="Download">${ICONS.DOWNLOAD}</button>`;
+      const deleteBtn = canDelete
+        ? `<button class="icon-btn icon-btn-danger btn-delete" data-file-id="${file.id}" data-filename="${file.originalName}" aria-label="Delete ${safeName}" title="Delete">${ICONS.TRASH}</button>`
         : '';
+
       return `
-        <div class="file-item" data-file-id="${file.id}">
-          ${deleteIcon}
-          <div class="file-icon">
-            ${getFileIcon(file.mimetype)}
-          </div>
-          <div class="file-info">
-            <span class="file-name">${safeName}</span>
-            <span class="file-meta">
-              ${file.projectName ? `${ctx.escapeHtml(file.projectName)} • ` : ''}
-              ${formatFileSize(file.size)} • ${ctx.formatDate(file.uploadedAt)}
-            </span>
-          </div>
-          <div class="file-actions">
-            <button class="icon-btn btn-preview" data-file-id="${file.id}" data-mimetype="${file.mimetype}" aria-label="Preview ${safeName}" title="Preview">
-              ${ICONS.EYE}
-            </button>
-            <button class="icon-btn btn-download" data-file-id="${file.id}" data-filename="${file.originalName}" aria-label="Download ${safeName}" title="Download">
-              ${ICONS.DOWNLOAD}
-            </button>
-          </div>
-        </div>
+        <tr>
+          <td data-label="File">${safeName}</td>
+          <td data-label="Size">${size}</td>
+          <td data-label="Uploaded">${date}</td>
+          <td class="file-actions" data-label="Actions">
+            ${previewBtn}
+            ${downloadBtn}
+            ${deleteBtn}
+          </td>
+        </tr>
       `;
     })
     .join('');
+
+  container.innerHTML = `
+    <table class="files-table" aria-label="Project files">
+      <thead>
+        <tr>
+          <th scope="col">File</th>
+          <th scope="col">Size</th>
+          <th scope="col">Uploaded</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tableRows}
+      </tbody>
+    </table>
+  `;
 
   attachFileActionListeners(container, ctx);
 }
@@ -237,7 +261,7 @@ function renderFilesList(
 /**
  * Get appropriate icon SVG for file type
  */
-function getFileIcon(mimetype: string): string {
+function _getFileIcon(mimetype: string): string {
   if (mimetype.startsWith('image/')) {
     return ICONS.IMAGE;
   }
@@ -254,10 +278,13 @@ function attachFileActionListeners(container: HTMLElement, ctx: ClientPortalCont
   container.querySelectorAll('.btn-preview').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const fileId = (btn as HTMLElement).dataset.fileId;
-      const mimetype = (btn as HTMLElement).dataset.mimetype;
+      const el = btn as HTMLElement;
+      const fileId = el.dataset.fileId;
+      const projectId = el.dataset.projectId;
+      const filename = el.dataset.filename;
+      const mimetype = el.dataset.mimetype;
       if (fileId) {
-        previewFile(parseInt(fileId), mimetype || '', ctx);
+        previewFile(parseInt(fileId), projectId ? parseInt(projectId) : undefined, filename || '', mimetype || '', ctx);
       }
     });
   });
@@ -265,10 +292,14 @@ function attachFileActionListeners(container: HTMLElement, ctx: ClientPortalCont
   container.querySelectorAll('.btn-download').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const fileId = (btn as HTMLElement).dataset.fileId;
-      const filename = (btn as HTMLElement).dataset.filename;
+      const el = btn as HTMLElement;
+      const fileId = el.dataset.fileId;
+      const projectId = el.dataset.projectId;
+      const filename = el.dataset.filename;
+      const originalName = el.dataset.originalName;
+      const mimetype = el.dataset.mimetype;
       if (fileId) {
-        downloadFile(parseInt(fileId), filename || 'download', ctx);
+        downloadFile(parseInt(fileId), projectId ? parseInt(projectId) : undefined, filename || '', originalName || 'download', mimetype || '', ctx);
       }
     });
   });
@@ -285,10 +316,35 @@ function attachFileActionListeners(container: HTMLElement, ctx: ClientPortalCont
   });
 }
 
+/** Pattern to detect intake files that should be shown as PDF */
+const INTAKE_FILE_PATTERN = /^(intake_|admin_project_|project_intake_|nobhadcodes_intake_)/i;
+
+/**
+ * Check if a file is an intake form JSON that should be converted to PDF
+ */
+function isIntakeFile(filename: string): boolean {
+  return INTAKE_FILE_PATTERN.test(filename) && /\.json$/i.test(filename);
+}
+
 /**
  * Preview a file - opens in modal or new tab
+ * For intake files, opens the PDF version instead of raw JSON
  */
-function previewFile(fileId: number, _mimetype: string, _ctx: ClientPortalContext): void {
+function previewFile(
+  fileId: number,
+  projectId: number | undefined,
+  filename: string,
+  _mimetype: string,
+  _ctx: ClientPortalContext
+): void {
+  // For intake JSON files, open the branded PDF version
+  if (isIntakeFile(filename) && projectId) {
+    const pdfUrl = `/api/projects/${projectId}/intake/pdf`;
+    window.open(pdfUrl, '_blank', 'noopener');
+    return;
+  }
+
+  // For regular files, use the standard file endpoint
   const url = `${FILES_API_BASE}/file/${fileId}`;
   const previewWindow = window.open(url, '_blank', 'noopener');
   if (previewWindow) {
@@ -298,12 +354,34 @@ function previewFile(fileId: number, _mimetype: string, _ctx: ClientPortalContex
 
 /**
  * Download a file
+ * For intake files, downloads the PDF version instead of raw JSON
  */
-function downloadFile(fileId: number, filename: string, _ctx: ClientPortalContext): void {
+function downloadFile(
+  fileId: number,
+  projectId: number | undefined,
+  filename: string,
+  originalName: string,
+  _mimetype: string,
+  _ctx: ClientPortalContext
+): void {
+  // For intake JSON files, download the branded PDF version
+  if (isIntakeFile(filename) && projectId) {
+    const pdfUrl = `/api/projects/${projectId}/intake/pdf`;
+    const a = document.createElement('a');
+    a.href = pdfUrl;
+    a.download = originalName.replace(/\.json$/i, '.pdf');
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    return;
+  }
+
+  // For regular files, use the standard file endpoint
   const url = `${FILES_API_BASE}/file/${fileId}?download=true`;
   const a = document.createElement('a');
   a.href = url;
-  a.download = filename;
+  a.download = originalName;
   a.target = '_blank';
   document.body.appendChild(a);
   a.click();
@@ -572,11 +650,10 @@ function showUploadRequestModal(files: File[], ctx: ClientPortalContext): void {
   pendingFilesToUpload = files;
   uploadRequestModalContext = ctx;
 
-  const modal = getElement('upload-request-modal');
-  const optionsContainer = getElement('upload-request-options');
+  const modal = ensureUploadRequestModal();
+  const optionsContainer = uploadRequestOptionsContainer;
 
   if (!modal || !optionsContainer) {
-    // No modal in DOM, proceed with direct upload
     proceedWithUpload(files, null, ctx);
     return;
   }
@@ -607,25 +684,24 @@ function showUploadRequestModal(files: File[], ctx: ClientPortalContext): void {
     .join('');
 
   // Reset to "Other" selection
-  const otherRadio = modal.querySelector('input[name="upload-request-selection"][value="other"]') as HTMLInputElement;
+  const otherRadio = modal.overlay.querySelector('input[name="upload-request-selection"][value="other"]') as HTMLInputElement | null;
   if (otherRadio) {
     otherRadio.checked = true;
   }
 
+  if (uploadRequestOtherDescriptionWrap) {
+    uploadRequestOtherDescriptionWrap.style.display = 'block';
+  }
+
   // Show the modal
-  modal.classList.remove('hidden');
-  modal.classList.add('active');
+  modal.show();
 }
 
 /**
  * Hide the upload request selection modal
  */
 function hideUploadRequestModal(): void {
-  const modal = getElement('upload-request-modal');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('active');
-  }
+  uploadRequestModalInstance?.hide();
   pendingFilesToUpload = [];
   uploadRequestModalContext = null;
 }
@@ -634,37 +710,118 @@ function hideUploadRequestModal(): void {
  * Get the selected request ID from the modal
  */
 function getSelectedRequestId(): number | null {
-  const modal = getElement('upload-request-modal');
+  const modal = uploadRequestModalInstance?.overlay;
   if (!modal) return null;
 
-  const selectedRadio = modal.querySelector('input[name="upload-request-selection"]:checked') as HTMLInputElement;
+  const selectedRadio = modal.querySelector('input[name="upload-request-selection"]:checked') as HTMLInputElement | null;
   if (!selectedRadio || selectedRadio.value === 'other') {
     return null;
   }
 
-  return parseInt(selectedRadio.value, 10);
+  const parsed = parseInt(selectedRadio.value, 10);
+  return Number.isNaN(parsed) ? null : parsed;
 }
 
 /**
  * Setup modal event listeners
  */
 function setupUploadRequestModalListeners(_ctx: ClientPortalContext): void {
-  const modal = getElement('upload-request-modal');
-  if (!modal || modal.dataset.listenersSetup === 'true') return;
+  ensureUploadRequestModal();
+}
 
-  modal.dataset.listenersSetup = 'true';
+function ensureUploadRequestModal(): PortalModalInstance | null {
+  if (uploadRequestModalInstance) {
+    return uploadRequestModalInstance;
+  }
 
-  // Close button
-  const closeBtn = document.getElementById('upload-request-modal-close');
-  closeBtn?.addEventListener('click', hideUploadRequestModal);
+  const modal = createPortalModal({
+    id: 'upload-request-modal',
+    titleId: 'upload-request-modal-title',
+    title: 'What are you uploading?',
+    contentClassName: 'upload-request-modal-content',
+    onClose: hideUploadRequestModal
+  });
 
-  // Cancel button
-  const cancelBtn = document.getElementById('upload-request-modal-cancel');
-  cancelBtn?.addEventListener('click', hideUploadRequestModal);
+  modal.overlay.classList.add('upload-request-modal');
 
-  // Confirm button
-  const confirmBtn = document.getElementById('upload-request-modal-confirm');
-  confirmBtn?.addEventListener('click', async () => {
+  const description = document.createElement('p');
+  description.className = 'upload-request-modal-description';
+  description.textContent =
+    'Select which document request you are fulfilling, or choose "Other" for general uploads.';
+
+  const options = document.createElement('div');
+  options.className = 'upload-request-options';
+  options.id = 'upload-request-options';
+  options.setAttribute('role', 'radiogroup');
+  options.setAttribute('aria-label', 'Document request options');
+
+  const otherWrap = document.createElement('div');
+  otherWrap.className = 'upload-request-other-wrap';
+
+  const otherLabel = document.createElement('label');
+  otherLabel.className = 'upload-request-option';
+
+  const otherInput = document.createElement('input');
+  otherInput.type = 'radio';
+  otherInput.name = 'upload-request-selection';
+  otherInput.value = 'other';
+  otherInput.checked = true;
+
+  const otherLabelText = document.createElement('span');
+  otherLabelText.className = 'upload-request-option-label';
+
+  const otherTitle = document.createElement('span');
+  otherTitle.className = 'upload-request-option-title';
+  otherTitle.textContent = 'Other / General Upload';
+
+  const otherDesc = document.createElement('span');
+  otherDesc.className = 'upload-request-option-desc';
+  otherDesc.textContent = 'Upload files not related to a specific request';
+
+  otherLabelText.appendChild(otherTitle);
+  otherLabelText.appendChild(otherDesc);
+  otherLabel.appendChild(otherInput);
+  otherLabel.appendChild(otherLabelText);
+
+  const otherDescriptionWrap = document.createElement('div');
+  otherDescriptionWrap.className = 'upload-other-description-wrap';
+  otherDescriptionWrap.id = 'upload-other-description-wrap';
+
+  const otherDescriptionLabel = document.createElement('label');
+  otherDescriptionLabel.className = 'sr-only';
+  otherDescriptionLabel.htmlFor = 'upload-other-description';
+  otherDescriptionLabel.textContent = 'Description (optional)';
+
+  const otherDescription = document.createElement('textarea');
+  otherDescription.id = 'upload-other-description';
+  otherDescription.className = 'form-textarea';
+  otherDescription.placeholder = 'Description (optional)';
+  otherDescription.rows = 2;
+
+  otherDescriptionWrap.appendChild(otherDescriptionLabel);
+  otherDescriptionWrap.appendChild(otherDescription);
+
+  otherWrap.appendChild(otherLabel);
+  otherWrap.appendChild(otherDescriptionWrap);
+
+  modal.body.appendChild(description);
+  modal.body.appendChild(options);
+  modal.body.appendChild(otherWrap);
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'btn btn-secondary';
+  cancelBtn.id = 'upload-request-modal-cancel';
+  cancelBtn.textContent = 'Cancel';
+
+  const confirmBtn = document.createElement('button');
+  confirmBtn.type = 'button';
+  confirmBtn.className = 'btn btn-primary';
+  confirmBtn.id = 'upload-request-modal-confirm';
+  confirmBtn.textContent = 'Upload';
+
+  cancelBtn.addEventListener('click', hideUploadRequestModal);
+  confirmBtn.addEventListener('click', async () => {
     const selectedRequestId = getSelectedRequestId();
     hideUploadRequestModal();
 
@@ -673,23 +830,25 @@ function setupUploadRequestModalListeners(_ctx: ClientPortalContext): void {
     }
   });
 
-  // Close on backdrop click
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      hideUploadRequestModal();
+  modal.overlay.addEventListener('change', (event) => {
+    const target = event.target as HTMLInputElement | null;
+    if (!target || target.name !== 'upload-request-selection') return;
+
+    if (uploadRequestOtherDescriptionWrap) {
+      uploadRequestOtherDescriptionWrap.style.display = target.value === 'other' ? 'block' : 'none';
     }
   });
 
-  // Toggle "Other" description field visibility
-  modal.querySelectorAll('input[name="upload-request-selection"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      const descWrap = document.getElementById('upload-other-description-wrap');
-      const selectedRadio = modal.querySelector('input[name="upload-request-selection"]:checked') as HTMLInputElement;
-      if (descWrap) {
-        descWrap.style.display = selectedRadio?.value === 'other' ? 'block' : 'none';
-      }
-    });
-  });
+  modal.footer.appendChild(cancelBtn);
+  modal.footer.appendChild(confirmBtn);
+
+  document.body.appendChild(modal.overlay);
+
+  uploadRequestModalInstance = modal;
+  uploadRequestOptionsContainer = options;
+  uploadRequestOtherDescriptionWrap = otherDescriptionWrap;
+
+  return modal;
 }
 
 /**
