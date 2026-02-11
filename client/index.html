@@ -230,7 +230,7 @@
               name="email"
               placeholder="Email Address"
               required
-              autocomplete="username email"
+              autocomplete="username"
             />
             <span id="email-error" class="error-message" style="display: none;"></span>
           </div>
@@ -277,6 +277,10 @@
           <a href="/" class="header-logo" aria-label="Go to homepage">
             <img src="/images/avatar.svg" alt="No Bhad Codes" class="header-logo-img" />
           </a>
+          <span class="header-separator"></span>
+          <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
+            <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
+          </nav>
         </div>
         <div class="portal-global-header-right">
           <button id="header-toggle-theme" class="header-theme-toggle" aria-label="Toggle dark/light theme">
@@ -308,7 +312,7 @@
             <!-- Action Buttons -->
             <div class="sidebar-buttons">
               <!-- Sidebar Toggle (first button) -->
-              <button class="sidebar-toggle-btn" id="btn-sidebar-toggle" aria-label="Toggle sidebar">
+              <button class="btn btn-secondary sidebar-toggle-btn" id="btn-sidebar-toggle" aria-label="Toggle sidebar">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true">
                   <rect x="3" y="3" width="7" height="18" rx="1"/>
                   <path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/>
@@ -352,17 +356,8 @@
       <!-- Content Area -->
       <div class="dashboard-content" id="dashboard-content">
         <div class="content-wrapper">
-          <!-- Portal Header - consistent across all pages -->
+          <!-- Portal Page Header - Title and subtabs only (breadcrumbs in global header) -->
           <header class="portal-page-header">
-            <div class="portal-header-top">
-              <button type="button" class="header-sidebar-toggle header-toggle-button" aria-label="Toggle sidebar">
-                <svg class="sidebar-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/></svg>
-                <span class="sr-only">Toggle Sidebar</span>
-              </button>
-              <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
-                <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
-              </nav>
-            </div>
             <div class="portal-header-title">
               <h1 id="portal-page-title">Welcome Back, <span id="client-name">Client</span>!</h1>
               <div class="header-subtabs">
@@ -892,110 +887,12 @@
                 </form>
               </div>
 
-              <!-- Change Password Section -->
-              <div class="settings-section portal-shadow">
+              <!-- Change Password Section - Rendered dynamically to avoid multiple password prompts -->
+              <div class="settings-section portal-shadow" id="password-section-container">
                 <h3>Change Password</h3>
-                <form class="settings-form" id="password-form">
-                  <!-- Hidden username field for accessibility and password managers -->
-                  <input type="text" id="password-form-username" name="username" autocomplete="username" class="sr-only" tabindex="-1" aria-hidden="true" />
-                  <div class="form-group">
-                    <label for="current-password">Current Password</label>
-                    <div class="portal-password-wrapper">
-                      <input
-                        type="password"
-                        id="current-password"
-                        class="form-input"
-                        autocomplete="current-password"
-                      />
-                      <button
-                        type="button"
-                        class="portal-password-toggle password-toggle"
-                        data-password-toggle="current-password"
-                        aria-label="Toggle password visibility"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="new-password">New Password</label>
-                    <div class="portal-password-wrapper">
-                      <input
-                        type="password"
-                        id="new-password"
-                        class="form-input"
-                        autocomplete="new-password"
-                      />
-                      <button
-                        type="button"
-                        class="portal-password-toggle password-toggle"
-                        data-password-toggle="new-password"
-                        aria-label="Toggle password visibility"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="confirm-password">Confirm New Password</label>
-                    <div class="portal-password-wrapper">
-                      <input
-                        type="password"
-                        id="confirm-password"
-                        class="form-input"
-                        autocomplete="new-password"
-                      />
-                      <button
-                        type="button"
-                        class="portal-password-toggle password-toggle"
-                        data-password-toggle="confirm-password"
-                        aria-label="Toggle password visibility"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  <button type="submit" class="btn btn-secondary">Update Password</button>
-                </form>
+                <div id="password-form-placeholder">
+                  <!-- Password form will be rendered here when settings tab is opened -->
+                </div>
               </div>
 
               <!-- Billing Info Section -->

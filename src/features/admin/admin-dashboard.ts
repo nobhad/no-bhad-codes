@@ -113,6 +113,7 @@ interface PerformanceMetricsDisplay {
 const ADMIN_TAB_TITLES: Record<string, string> = {
   overview: 'Dashboard',
   leads: 'Leads',
+  contacts: 'Contacts',
   projects: 'Projects',
   clients: 'Clients',
   invoices: 'Invoices',
@@ -142,7 +143,7 @@ const ADMIN_TAB_GROUPS = {
   },
   crm: {
     label: 'CRM',
-    tabs: ['leads', 'clients', 'messages'],
+    tabs: ['leads', 'contacts', 'messages', 'clients'],
     defaultTab: 'leads'
   },
   documents: {
@@ -468,9 +469,15 @@ class AdminDashboard {
     const passwordInput = this.domCache.getAs<HTMLInputElement>('adminPassword');
     const passwordToggle = this.domCache.get('passwordToggle');
     const authError = this.domCache.get('authError');
+    const passwordPromptKey = 'nbw_password_prompted';
 
     if (authGate) authGate.style.display = 'flex';
     if (dashboard) dashboard.style.display = 'none';
+
+    if (loginForm && sessionStorage.getItem(passwordPromptKey) === '1') {
+      loginForm.setAttribute('autocomplete', 'off');
+      passwordInput?.setAttribute('autocomplete', 'off');
+    }
 
     // Password toggle
     if (passwordToggle && passwordInput) {
@@ -485,6 +492,12 @@ class AdminDashboard {
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (authError) authError.textContent = '';
+
+        if (sessionStorage.getItem(passwordPromptKey) !== '1') {
+          sessionStorage.setItem(passwordPromptKey, '1');
+          loginForm.setAttribute('autocomplete', 'off');
+          passwordInput?.setAttribute('autocomplete', 'off');
+        }
 
         const password = passwordInput?.value;
         if (!password) return;
@@ -664,7 +677,7 @@ class AdminDashboard {
       });
     });
 
-    // Sidebar toggle - multiple buttons, one per tab
+    // Sidebar toggle - multiple buttons, one per tab (legacy)
     const sidebarToggles = document.querySelectorAll('.header-sidebar-toggle');
     sidebarToggles.forEach((toggle) => {
       toggle.addEventListener('click', (e) => {
@@ -672,6 +685,30 @@ class AdminDashboard {
         this.toggleSidebar();
       });
     });
+
+    // New sidebar toggle button (in sidebar)
+    const sidebarToggleBtn = document.getElementById('btn-sidebar-toggle');
+    if (sidebarToggleBtn) {
+      sidebarToggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.toggleSidebar();
+      });
+    }
+
+    // Theme toggle in global header
+    const headerThemeToggle = document.getElementById('header-toggle-theme');
+    if (headerThemeToggle) {
+      headerThemeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        try {
+          localStorage.setItem('theme', newTheme);
+        } catch (e) {
+          // Ignore storage errors
+        }
+      });
+    }
 
     // Refresh leads button
     const refreshLeadsBtn = this.domCache.get('refreshLeadsBtn');
@@ -1391,8 +1428,24 @@ class AdminDashboard {
         if (!target) return;
         const subtab = target.dataset.subtab;
         if (!subtab) return;
+        if (subtab === this.currentTab) return;
         this.switchTab(subtab);
       });
+    });
+
+    const body = document.body as HTMLElement | null;
+    if (!body || body.dataset.subtabListenerAttached === 'true') return;
+    body.dataset.subtabListenerAttached = 'true';
+
+    // Fallback: delegate on document in case header DOM is re-rendered.
+    document.addEventListener('click', (e) => {
+      const target = (e.target as HTMLElement).closest(
+        '.header-subtab-group[data-mode="primary"] .portal-subtab'
+      ) as HTMLElement | null;
+      if (!target) return;
+      const subtab = target.dataset.subtab;
+      if (!subtab || subtab === this.currentTab) return;
+      this.switchTab(subtab);
     });
   }
 
