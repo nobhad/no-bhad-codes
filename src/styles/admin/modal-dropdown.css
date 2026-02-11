@@ -13,7 +13,7 @@
    Base Modal Dropdown
    ================================================ */
 
-[data-page="admin"] .modal-dropdown,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown,
 .confirm-dialog .modal-dropdown,
 .admin-modal .modal-dropdown {
   position: relative;
@@ -23,7 +23,7 @@
 }
 
 /* Trigger - matches form-input styling, transparent border blends with modal bg */
-[data-page="admin"] .modal-dropdown .custom-dropdown-trigger,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-trigger,
 .confirm-dialog .modal-dropdown .custom-dropdown-trigger,
 .admin-modal .modal-dropdown .custom-dropdown-trigger {
   display: flex;
@@ -46,7 +46,7 @@
 }
 
 /* Placeholder text styling */
-[data-page="admin"] .modal-dropdown .custom-dropdown-text.placeholder,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-text.placeholder,
 .confirm-dialog .modal-dropdown .custom-dropdown-text.placeholder,
 .admin-modal .modal-dropdown .custom-dropdown-text.placeholder {
   color: var(--portal-text-light);
@@ -54,7 +54,7 @@
 }
 
 /* Caret icon */
-[data-page="admin"] .modal-dropdown .custom-dropdown-caret,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-caret,
 .confirm-dialog .modal-dropdown .custom-dropdown-caret,
 .admin-modal .modal-dropdown .custom-dropdown-caret {
   width: 14px;
@@ -65,15 +65,15 @@
 }
 
 /* Hover state - 2px primary border */
-[data-page="admin"] .modal-dropdown .custom-dropdown-trigger:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-trigger:hover,
 .confirm-dialog .modal-dropdown .custom-dropdown-trigger:hover,
 .admin-modal .modal-dropdown .custom-dropdown-trigger:hover {
   border-color: var(--color-primary);
 }
 
 /* Focus state - 2px primary border (same as table dropdowns) */
-[data-page="admin"] .modal-dropdown .custom-dropdown-trigger:focus,
-[data-page="admin"] .modal-dropdown .custom-dropdown-trigger:focus-visible,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-trigger:focus,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-trigger:focus-visible,
 .confirm-dialog .modal-dropdown .custom-dropdown-trigger:focus,
 .confirm-dialog .modal-dropdown .custom-dropdown-trigger:focus-visible,
 .admin-modal .modal-dropdown .custom-dropdown-trigger:focus,
@@ -88,14 +88,14 @@
    ================================================ */
 
 /* Rotate caret when open */
-[data-page="admin"] .modal-dropdown.open .custom-dropdown-caret,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown.open .custom-dropdown-caret,
 .confirm-dialog .modal-dropdown.open .custom-dropdown-caret,
 .admin-modal .modal-dropdown.open .custom-dropdown-caret {
   transform: rotate(180deg);
 }
 
 /* Trigger when open - connect to menu */
-[data-page="admin"] .modal-dropdown.open .custom-dropdown-trigger,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown.open .custom-dropdown-trigger,
 .confirm-dialog .modal-dropdown.open .custom-dropdown-trigger,
 .admin-modal .modal-dropdown.open .custom-dropdown-trigger {
   border-color: var(--color-primary);
@@ -107,7 +107,7 @@
    Menu
    ================================================ */
 
-[data-page="admin"] .modal-dropdown .custom-dropdown-menu,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-menu,
 .confirm-dialog .modal-dropdown .custom-dropdown-menu,
 .admin-modal .modal-dropdown .custom-dropdown-menu {
   display: none;
@@ -128,7 +128,7 @@
   box-sizing: border-box;
 }
 
-[data-page="admin"] .modal-dropdown.open .custom-dropdown-menu,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown.open .custom-dropdown-menu,
 .confirm-dialog .modal-dropdown.open .custom-dropdown-menu,
 .admin-modal .modal-dropdown.open .custom-dropdown-menu {
   display: block;
@@ -138,7 +138,7 @@
    Menu Items
    ================================================ */
 
-[data-page="admin"] .modal-dropdown .custom-dropdown-item,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-item,
 .confirm-dialog .modal-dropdown .custom-dropdown-item,
 .admin-modal .modal-dropdown .custom-dropdown-item {
   display: flex;
@@ -153,19 +153,19 @@
   box-sizing: border-box;
 }
 
-[data-page="admin"] .modal-dropdown .custom-dropdown-item:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-item:hover,
 .confirm-dialog .modal-dropdown .custom-dropdown-item:hover,
 .admin-modal .modal-dropdown .custom-dropdown-item:hover {
   background-color: var(--color-primary);
 }
 
-[data-page="admin"] .modal-dropdown .custom-dropdown-item.selected,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-item.selected,
 .confirm-dialog .modal-dropdown .custom-dropdown-item.selected,
 .admin-modal .modal-dropdown .custom-dropdown-item.selected {
   background-color: var(--portal-bg-lighter);
 }
 
-[data-page="admin"] .modal-dropdown .custom-dropdown-item.selected:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-dropdown .custom-dropdown-item.selected:hover,
 .confirm-dialog .modal-dropdown .custom-dropdown-item.selected:hover,
 .admin-modal .modal-dropdown .custom-dropdown-item.selected:hover {
   background-color: var(--color-primary);

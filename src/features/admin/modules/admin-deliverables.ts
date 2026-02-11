@@ -335,14 +335,14 @@ function openUploadModal(): void {
 /**
  * Show version history for a deliverable
  */
-function showVersionHistory(deliverableId: number): void {
+function showVersionHistory(_deliverableId: number): void {
   showToast('Version history view coming soon', 'info');
 }
 
 /**
  * Show comments for a deliverable
  */
-function showComments(deliverableId: number): void {
+function showComments(_deliverableId: number): void {
   showToast('Comments view coming soon', 'info');
 }
 

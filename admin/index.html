@@ -293,9 +293,7 @@
       <!-- Full-Width Global Header -->
       <header class="portal-global-header">
         <div class="portal-global-header-left">
-          <a href="/" class="header-logo" aria-label="Go to homepage">
-            <img src="/images/avatar.svg" alt="No Bhad Codes" class="header-logo-img" />
-          </a>
+          <a href="/" class="header-logo" aria-label="Go to homepage">NO BHAD CODES</a>
           <span class="header-separator"></span>
           <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
             <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
@@ -363,9 +361,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
               <span class="btn-text">ANALYTICS</span>
             </button>
-            <button class="btn btn-secondary" id="btn-support" data-tab="support" aria-label="Support">
+            <button class="btn btn-secondary" id="btn-support" data-tab="support" aria-label="Knowledge Base">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="10"/><path d="M8.5 8.5a4 4 0 0 1 7 3c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-              <span class="btn-text">SUPPORT</span>
+              <span class="btn-text">KNOWLEDGE BASE</span>
             </button>
             <button class="btn btn-secondary" id="btn-system" data-tab="system" aria-label="System Status">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10"/><path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/><path d="M1 12h6m6 0h10"/><path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
@@ -422,10 +420,7 @@
                   <button class="portal-subtab" data-subtab="document-requests">Document Requests</button>
                   <button class="portal-subtab" data-subtab="questionnaires">Questionnaires</button>
                 </div>
-                <!-- Support subtabs -->
-                <div class="portal-subtabs header-subtab-group" data-for-tab="support" data-mode="primary">
-                  <button class="portal-subtab active" data-subtab="knowledge-base">Knowledge Base</button>
-                </div>
+                <!-- Support subtabs - removed, using view toggle instead -->
                 <!-- Analytics subtabs -->
                 <div class="analytics-subtabs header-subtab-group" data-for-tab="analytics">
                   <button type="button" class="analytics-subtab active" data-subtab="overview">Overview</button>
@@ -1344,18 +1339,25 @@
 
                 <!-- Compose Message -->
                 <div class="message-compose" id="admin-compose-area">
+                  <div id="admin-attachment-preview" class="attachment-preview hidden"></div>
                   <div class="message-input-wrapper">
                     <label for="admin-message-text" class="sr-only">Message</label>
                     <textarea
                       id="admin-message-text"
                       class="form-textarea"
-                      placeholder="Type a message..."
+                      placeholder="Type a message or drop files here..."
                       aria-label="Type your message to the client"
                       tabindex="0"
                       disabled
                     ></textarea>
                   </div>
-                  <button class="btn btn-secondary" id="admin-send-message" tabindex="0" disabled>Send Message</button>
+                  <div class="message-compose-actions">
+                    <button type="button" class="btn-attach" id="admin-attach-btn" title="Attach files">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                    </button>
+                    <button class="btn btn-secondary" id="admin-send-message" tabindex="0" disabled>Send Message</button>
+                  </div>
+                  <input type="file" id="admin-attachment-input" class="attachment-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip" />
                 </div>
               </div>
             </div>

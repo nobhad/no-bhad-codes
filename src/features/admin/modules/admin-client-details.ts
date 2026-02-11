@@ -73,20 +73,14 @@ interface ClientNote {
 }
 
 interface ClientStats {
-  // Support both camelCase (from API) and snake_case
-  total_projects?: number;
+  // API returns camelCase
   totalProjects?: number;
-  active_projects?: number;
   activeProjects?: number;
-  completed_projects?: number;
   completedProjects?: number;
-  total_invoiced?: number;
   totalInvoiced?: number;
-  total_paid?: number;
   totalPaid?: number;
-  outstanding?: number;
   totalOutstanding?: number;
-  avg_response_time?: number;
+  avgResponseTime?: number;
 }
 
 interface ClientProject {
@@ -573,12 +567,11 @@ function renderStatsCompact(): void {
   const container = document.getElementById('cd-stats-container');
   if (!container) return;
 
-  // Use fallback values if stats not loaded
-  // API returns camelCase: activeProjects, totalProjects, totalPaid, totalOutstanding
-  const activeProjects = clientStats?.activeProjects ?? clientStats?.active_projects ?? 0;
-  const totalProjects = clientStats?.totalProjects ?? clientStats?.total_projects ?? 0;
-  const totalPaid = clientStats?.totalPaid ?? clientStats?.total_paid ?? 0;
-  const outstanding = clientStats?.totalOutstanding ?? clientStats?.outstanding ?? 0;
+  // API returns camelCase
+  const activeProjects = clientStats?.activeProjects ?? 0;
+  const totalProjects = clientStats?.totalProjects ?? 0;
+  const totalPaid = clientStats?.totalPaid ?? 0;
+  const outstanding = clientStats?.totalOutstanding ?? 0;
 
   container.innerHTML = `
     <div class="cd-stat-item">

@@ -63,8 +63,9 @@
   color: var(--color-black);
 }
 
-/* Cyan/New status badge */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-new {
+/* Cyan/New and Upcoming status badges */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-new,
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-upcoming {
   background: var(--status-new);
   color: var(--color-black);
 }
@@ -193,8 +194,9 @@
 }
 
 /* Status indicator dot colors - same palette as badges */
-/* Cyan/New */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-new .status-dot {
+/* Cyan/New and Upcoming */
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-new .status-dot,
+:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-upcoming .status-dot {
   background-color: var(--status-new);
 }
 
@@ -286,18 +288,47 @@
   transform: translateY(-50%);
 }
 
-/* Collapsed sidebar - badge position on icon button */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-badge {
-  top: -2px;
-  right: -2px;
+/* Collapsed sidebar - only show badges with count > 0 */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-badge:not(.has-count) {
+  display: none !important;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-badge.has-count {
+  display: block;
+  top: 0;
+  right: 0;
   transform: none;
 }
 
-/* Mobile/compact view - same as collapsed */
+/* Mobile/compact view - only show badges with count > 0 */
 @media (--wide-down) {
-  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge {
-    top: -2px;
-    right: -2px;
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge:not(.has-count) {
+    display: none !important;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge.has-count {
+    display: block;
+    top: 0;
+    right: 0;
     transform: none;
+  }
+}
+
+/* FALLBACK: Standard media query - only show badges with count > 0 */
+@media (max-width: 1300px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge:not(.has-count) {
+    display: none !important;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge.has-count {
+    display: block !important;
+    top: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    min-width: 14px !important;
+    height: 14px !important;
+    font-size: 9px !important;
+    padding: 0 3px !important;
+    line-height: 14px !important;
   }
 }

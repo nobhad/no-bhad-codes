@@ -216,7 +216,7 @@ let proposalsData: Proposal[] = [];
 let _storedContext: AdminDashboardContext | null = null;
 let templatesData: ProposalTemplate[] = [];
 let currentProposalVersions: ProposalVersion[] = [];
-let currentProposal: Proposal | null = null;
+let _currentProposal: Proposal | null = null;
 let _currentView: 'proposals' | 'templates' = 'proposals';
 let filterUIInitialized = false;
 
@@ -1940,7 +1940,7 @@ async function showProposalDetails(proposal: Proposal, ctx: AdminDashboardContex
 
   if (!detailsPanel || !detailsContent || !tablePanel) return;
 
-  currentProposal = proposal;
+  _currentProposal = proposal;
 
   // Hide table, show details
   tablePanel.style.display = 'none';

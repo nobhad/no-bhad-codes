@@ -10,7 +10,6 @@
 import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch } from '../../../utils/api-client';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { showToast } from '../../../utils/toast-notifications';
 
 interface AdHocRevenueData {
   invoiceCount: number;
@@ -111,7 +110,7 @@ function formatPercentage(value: string | number): string {
   return `${sign}${num.toFixed(1)}%`;
 }
 
-export async function loadAdHocAnalytics(ctx: AdminDashboardContext): Promise<void> {
+export async function loadAdHocAnalytics(_ctx: AdminDashboardContext): Promise<void> {
   const container = document.getElementById('ad-hoc-analytics-widget');
   if (!container) {
     console.log('[AdHocAnalytics] Widget container not found');

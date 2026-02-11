@@ -213,6 +213,14 @@ interface LeadProject {
   created_at?: string;
   start_date?: string;
   end_date?: string;
+  // Financial fields
+  price?: number;
+  deposit_amount?: number;
+  contract_signed_date?: string;
+  // URL fields
+  preview_url?: string;
+  repo_url?: string;
+  production_url?: string;
   // Computed fields from API stats
   file_count?: number;
   message_count?: number;
@@ -708,14 +716,12 @@ function populateProjectDetailView(project: LeadProject): void {
   const titleEl = domCache.get('detailTitle');
   if (titleEl) titleEl.textContent = 'Project Details';
 
-  const projectData = project as any;
-
   // Overview fields - use batch update for text content
   // Note: textContent doesn't interpret HTML, so we decode entities but don't need to escape
   // Empty string for missing values (no dashes). Client email uses innerHTML for copy button.
   const formattedBudget = formatDisplayValue(project.budget_range);
-  const formattedStartDate = formatDate(projectData.start_date || project.created_at);
-  const formattedEndDate = formatDate(projectData.end_date);
+  const formattedStartDate = formatDate(project.start_date || project.created_at);
+  const formattedEndDate = formatDate(project.end_date);
   const formattedType = formatProjectType(project.project_type);
 
   batchUpdateText({
@@ -724,12 +730,12 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-company': SanitizationUtils.decodeHtmlEntities(project.company_name || ''),
     'pd-type': formattedType,
     'pd-budget': formattedBudget,
-    'pd-price': projectData.price ? formatCurrency(parseNumericValue(projectData.price)) : '',
+    'pd-price': project.price ? formatCurrency(parseNumericValue(project.price)) : '',
     'pd-timeline': formatDisplayValue(project.timeline),
     'pd-start-date': formattedStartDate,
     'pd-end-date': formattedEndDate,
-    'pd-deposit': projectData.deposit_amount ? formatCurrency(parseNumericValue(projectData.deposit_amount)) : '',
-    'pd-contract-date': formatDate(projectData.contract_signed_date),
+    'pd-deposit': project.deposit_amount ? formatCurrency(parseNumericValue(project.deposit_amount)) : '',
+    'pd-contract-date': formatDate(project.contract_signed_date),
     // Header card elements
     'pd-header-client-name': SanitizationUtils.decodeHtmlEntities(project.contact_name || ''),
     'pd-header-company': SanitizationUtils.decodeHtmlEntities(project.company_name || ''),
@@ -782,14 +788,14 @@ function populateProjectDetailView(project: LeadProject): void {
     }
   };
 
-  updateUrlLink('pd-preview-url-link', projectData.preview_url);
-  updateUrlLink('pd-repo-url-link', projectData.repo_url);
-  updateUrlLink('pd-production-url-link', projectData.production_url);
+  updateUrlLink('pd-preview-url-link', project.preview_url ?? null);
+  updateUrlLink('pd-repo-url-link', project.repo_url ?? null);
+  updateUrlLink('pd-production-url-link', project.production_url ?? null);
 
   // Hide URLs section if no URLs
   const urlsSection = document.getElementById('pd-urls-section');
   if (urlsSection) {
-    const hasUrls = projectData.preview_url || projectData.repo_url || projectData.production_url;
+    const hasUrls = project.preview_url || project.repo_url || project.production_url;
     urlsSection.style.display = hasUrls ? '' : 'none';
   }
 
@@ -797,8 +803,8 @@ function populateProjectDetailView(project: LeadProject): void {
   const adminNotesSection = document.getElementById('pd-admin-notes-section');
   const adminNotesEl = document.getElementById('pd-admin-notes');
   if (adminNotesSection && adminNotesEl) {
-    if (projectData.notes) {
-      adminNotesEl.innerHTML = formatTextWithLineBreaks(SanitizationUtils.decodeHtmlEntities(projectData.notes));
+    if (project.notes) {
+      adminNotesEl.innerHTML = formatTextWithLineBreaks(SanitizationUtils.decodeHtmlEntities(project.notes));
       adminNotesSection.style.display = '';
     } else {
       adminNotesSection.style.display = 'none';
@@ -972,7 +978,6 @@ function openEditProjectModal(project: LeadProject): void {
 
   // Store project ID for form submission
   editingProjectId = project.id;
-  const projectData = project as any;
 
   // Populate form fields
   const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
@@ -993,19 +998,19 @@ function openEditProjectModal(project: LeadProject): void {
   if (nameInput) nameInput.value = SanitizationUtils.decodeHtmlEntities(project.project_name || '');
   if (descriptionInput) descriptionInput.value = SanitizationUtils.decodeHtmlEntities(project.description || '');
   if (budgetInput) budgetInput.value = project.budget_range || '';
-  if (priceInput) priceInput.value = projectData.price || '';
+  if (priceInput) priceInput.value = project.price?.toString() || '';
   if (timelineInput) timelineInput.value = project.timeline || '';
   // Date inputs need YYYY-MM-DD format
-  if (startDateInput) startDateInput.value = projectData.start_date ? projectData.start_date.split('T')[0] : '';
-  if (endDateInput) endDateInput.value = projectData.end_date ? projectData.end_date.split('T')[0] : '';
-  if (depositInput) depositInput.value = projectData.deposit_amount || '';
-  if (contractDateInput) contractDateInput.value = projectData.contract_signed_date ? projectData.contract_signed_date.split('T')[0] : '';
+  if (startDateInput) startDateInput.value = project.start_date ? project.start_date.split('T')[0] : '';
+  if (endDateInput) endDateInput.value = project.end_date ? project.end_date.split('T')[0] : '';
+  if (depositInput) depositInput.value = project.deposit_amount?.toString() || '';
+  if (contractDateInput) contractDateInput.value = project.contract_signed_date ? project.contract_signed_date.split('T')[0] : '';
   // URL fields - decode HTML entities in case they were double-encoded
-  if (previewUrlInput) previewUrlInput.value = SanitizationUtils.decodeHtmlEntities(projectData.preview_url || '');
-  if (repoUrlInput) repoUrlInput.value = SanitizationUtils.decodeHtmlEntities(projectData.repo_url || '');
-  if (productionUrlInput) productionUrlInput.value = SanitizationUtils.decodeHtmlEntities(projectData.production_url || '');
+  if (previewUrlInput) previewUrlInput.value = SanitizationUtils.decodeHtmlEntities(project.preview_url || '');
+  if (repoUrlInput) repoUrlInput.value = SanitizationUtils.decodeHtmlEntities(project.repo_url || '');
+  if (productionUrlInput) productionUrlInput.value = SanitizationUtils.decodeHtmlEntities(project.production_url || '');
   // Admin notes field - decode entities
-  if (notesInput) notesInput.value = SanitizationUtils.decodeHtmlEntities(projectData.notes || '');
+  if (notesInput) notesInput.value = SanitizationUtils.decodeHtmlEntities(project.notes || '');
 
   // Setup close handlers and create dropdown elements (only once per modal lifecycle)
   // Must be called BEFORE initProjectModalDropdowns so the select elements exist
@@ -1053,11 +1058,17 @@ const EDIT_PROJECT_STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Cancelled' }
 ];
 
+/** Minimal interface for project modal dropdown initialization */
+interface ProjectDropdownData {
+  project_type?: string;
+  status: string;
+}
+
 /**
  * Initialize custom dropdowns for the edit project modal.
  * Uses createModalDropdown for modal-specific styling (48px height, form field bg).
  */
-export function initProjectModalDropdowns(project: LeadProject): void {
+export function initProjectModalDropdowns(project: ProjectDropdownData): void {
   const typeMount = document.getElementById('edit-project-type-mount');
   const statusMount = document.getElementById('edit-project-status-mount');
 
@@ -2293,7 +2304,7 @@ async function navigateToClientByEmail(email: string): Promise<void> {
 async function showCreateInvoicePrompt(): Promise<void> {
   if (!currentProjectId || !storedContext) return;
 
-  const project = projectsData.find((p) => p.id === currentProjectId) as any;
+  const project = projectsData.find((p) => p.id === currentProjectId);
   if (!project) return;
 
   // Fetch available deposits for this project

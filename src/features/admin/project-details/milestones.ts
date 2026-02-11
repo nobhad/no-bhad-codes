@@ -13,6 +13,14 @@ import { confirmDanger, alertError, multiPromptDialog } from '../../../utils/con
 import { domCache } from './dom-cache';
 import type { ProjectMilestoneResponse } from '../../../types/api';
 
+interface MilestoneTask {
+  id: number;
+  title: string;
+  status: 'pending' | 'in-progress' | 'completed';
+  due_date?: string;
+  assigned_to?: string;
+}
+
 /**
  * Load milestones for the specified project
  */
@@ -57,9 +65,9 @@ export async function loadProjectMilestones(
                 : '';
 
             // Task progress data
-            const taskCount = (m as any).task_count || 0;
-            const completedTaskCount = (m as any).completed_task_count || 0;
-            const progressPercentage = (m as any).progress_percentage || 0;
+            const taskCount = m.task_count || 0;
+            const completedTaskCount = m.completed_task_count || 0;
+            const progressPercentage = m.progress_percentage || 0;
 
             return `
             <div class="milestone-item ${m.is_completed ? 'completed' : ''}" data-milestone-id="${m.id}">
@@ -314,7 +322,7 @@ export async function toggleMilestoneTasks(
               <ul class="milestone-task-list">
                 ${tasks
     .map(
-      (task: any) => `
+      (task: MilestoneTask) => `
                   <li class="milestone-task-item ${task.status}" data-task-id="${task.id}">
                     <input
                       type="checkbox"

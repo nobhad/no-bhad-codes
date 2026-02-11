@@ -704,3 +704,206 @@
   }
 }
 
+/* ================================================
+   Invoice View/Edit Modal Styles
+   ================================================ */
+
+.invoice-modal-content {
+  max-width: var(--modal-width-lg, 700px);
+}
+
+.invoice-view-content,
+.invoice-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.invoice-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--portal-border-dark);
+}
+
+.invoice-info-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.invoice-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.invoice-info-item .field-value {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-base);
+}
+
+.invoice-line-items-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.invoice-line-items {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.invoice-line-items th,
+.invoice-line-items td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--portal-border-dark);
+}
+
+.invoice-line-items th {
+  font-weight: var(--font-weight-medium);
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.5px;
+}
+
+.invoice-line-items td {
+  color: var(--portal-text-light);
+}
+
+.invoice-line-items .text-right {
+  text-align: right;
+}
+
+/* Editable line items table */
+.invoice-line-items.editable th,
+.invoice-line-items.editable td {
+  padding: var(--space-1-5) var(--space-2);
+}
+
+.invoice-line-items.editable td:first-child {
+  padding-left: 0;
+}
+
+.invoice-line-items.editable td:last-child {
+  padding-right: 0;
+}
+
+.invoice-line-items.editable .form-input {
+  padding: var(--space-1-5) var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.invoice-line-items.editable .line-item-desc {
+  min-width: 200px;
+}
+
+.invoice-line-items.editable .line-item-qty,
+.invoice-line-items.editable .line-item-rate {
+  width: 80px;
+  text-align: right;
+}
+
+.invoice-line-items.editable .line-item-amount {
+  text-align: right;
+  font-weight: var(--font-weight-medium);
+}
+
+.invoice-line-items.editable .remove-line-item {
+  padding: var(--space-1);
+  width: 28px;
+  height: 28px;
+}
+
+.invoice-totals,
+.invoice-totals-edit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-left: auto;
+  width: 200px;
+  padding-top: var(--space-3);
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+.total-row.total-main {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  color: var(--portal-text-light);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+.total-row.total-due {
+  color: var(--color-warning-500);
+  font-weight: var(--font-weight-medium);
+}
+
+.invoice-notes,
+.invoice-terms {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+.invoice-notes p,
+.invoice-terms p {
+  margin: 0;
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  white-space: pre-wrap;
+}
+
+.invoice-edit-modal {
+  max-width: var(--modal-width-lg, 800px);
+}
+
+.invoice-edit-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.invoice-edit-form .btn-small {
+  margin-top: var(--space-2);
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .invoice-info-row {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-edit-form .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-totals,
+  .invoice-totals-edit {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .invoice-line-items.editable .line-item-desc {
+    min-width: 120px;
+  }
+}
+

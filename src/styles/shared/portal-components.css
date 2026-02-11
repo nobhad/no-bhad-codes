@@ -586,3 +586,17 @@
     align-items: flex-start;
   }
 }
+
+/* =====================================================
+   UTILITY CLASSES
+   ===================================================== */
+.text-danger,
+a.text-danger,
+a.text-danger:visited {
+  color: var(--color-danger);
+}
+
+a.text-danger:hover {
+  color: var(--color-danger);
+  opacity: 0.8;
+}
