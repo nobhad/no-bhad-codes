@@ -1,32 +1,140 @@
 # Current Work
 
-**Last Updated:** February 11, 2026 (Help Page Redesign + Password Save Prompt Fix - COMPLETE)
+**Last Updated:** February 11, 2026 (Full System Audit Complete)
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-02.md`.
 
 ---
 
+## System Audit Summary (Feb 11, 2026)
+
+**Overall Status:** 85-90% complete. Core features fully operational. Gaps exist in feature integrations.
+
+**Complete:** Client Portal, Admin Dashboard, Invoices (full system), Files (versioning, folders, tags), Messages (with attachments), Deliverables, Document Requests, Questionnaires, Auth, Analytics, Knowledge Base
+
+**Incomplete:** Feature integrations (see below)
+
+---
+
+## HIGH PRIORITY - Feature Integrations Needed
+
+### 1. File Sharing Control (FOUNDATION - Do First)
+
+- [ ] Add `shared_with_client` column to uploads table (BOOLEAN, default FALSE)
+- [ ] Add `shared_at` and `shared_by` columns
+- [ ] Create `/api/uploads/:id/share` and `/api/uploads/:id/unshare` endpoints
+- [ ] Admin Files tab: Add "Share with Client" toggle button
+- [ ] Client portal: Only show files where `shared_with_client = TRUE`
+- [ ] All auto-generated files default to NOT shared
+
+### 2. Receipts Feature
+
+- [ ] Create `receipts` table (receipt_number, invoice_id, payment_id, amount, file_id)
+- [ ] Auto-generate PDF receipt on ANY payment (including partial)
+- [ ] Each payment gets its own receipt
+- [ ] Save receipt PDF to project Files (Documents folder)
+- [ ] Add receipt management UI in admin
+- [ ] Client can download receipts from invoices tab
+
+### 3. Questionnaires to Files Integration
+
+- [ ] On questionnaire completion: generate PDF of Q&A
+- [ ] Keep raw JSON data export available
+- [ ] Auto-save PDF to project Files (Forms folder)
+- [ ] Mark questionnaire as having exported file
+
+### 4. Document Requests to Files Integration
+
+- [ ] After admin approval: MOVE uploaded file from Doc Requests to Files tab
+- [ ] File goes to Forms folder
+- [ ] Original request marked complete with file reference
+- [ ] Maintain audit trail
+
+### 5. Project Details - Invoices Tab
+
+- [ ] Add Invoices section to admin project detail view
+- [ ] Full CRUD: create, view, edit, send, mark paid
+- [ ] Filter invoices by current project
+- [ ] Quick actions without leaving project context
+
+### 6. Project Details - PDF Creation
+
+- [ ] Add document generation dropdown in Files tab
+- [ ] Generate: proposals, contracts, receipts, reports, SOWs
+- [ ] Template-based generation
+- [ ] Auto-save to project Files (NOT shared by default)
+- [ ] Preview before saving
+
+---
+
+## DISCONNECTED FEATURES - Workflow Gaps
+
+These features exist independently but should be connected. The workflow infrastructure (`WorkflowTriggerService`) exists but events aren't being emitted from routes.
+
+### Proposal → Project (BROKEN)
+
+- **Current:** Proposal accepted, status changes, STOPS
+- **Should:** On acceptance → Create project, auto-send questionnaires, create milestones, generate deposit invoice, notify admin for contract
+- **Files:** `server/routes/proposals.ts`, `server/services/proposal-service.ts`
+
+### Contract → Project Status (BROKEN)
+
+- **Current:** Contract signed, timestamp set, STOPS
+- **Should:** On signing → Update project status to 'active', trigger project start, create initial milestone, log in timeline
+- **Files:** `server/services/contract-service.ts`, `server/routes/contracts.ts`
+
+### Milestone → Invoice (BROKEN)
+
+- **Current:** Milestone marked complete, STOPS
+- **Should:** On completion → If payment milestone, create/send invoice automatically, trigger payment workflow
+- **Files:** `server/routes/projects/milestones.ts`, `server/services/invoice-service.ts`
+
+### Deliverable → Files Archive (BROKEN)
+
+- **Current:** Deliverable approved and locked, STOPS
+- **Should:** On approval → Move to Files (Design folder), create file entry, archive from active review, notify client
+- **Files:** `server/services/deliverable-service.ts`, `server/routes/deliverables.ts`
+
+### Ad Hoc Request → Time/Invoice (PARTIAL)
+
+- **Current:** Can manually create invoice from ad hoc request
+- **Should:** On completion → Auto-aggregate time entries, calculate final amount, create invoice line item
+- **Files:** `server/routes/ad-hoc-requests.ts`, `server/services/ad-hoc-request-service.ts`
+
+### Missing Workflow Event Emissions
+
+These event types are defined in `workflow-trigger-service.ts` but NO routes emit them:
+
+- `proposal.accepted`, `proposal.rejected`
+- `contract.signed`
+- `project.milestone_completed`
+- `invoice.paid`
+- `deliverable.approved`
+- `document_request.approved`
+- `questionnaire.completed`
+
+### Missing Notifications
+
+No notifications trigger for: proposal accepted, contract signed, deliverable approved, questionnaire completed, document request approved, invoice paid, milestone completed, ad hoc request completed
+
+---
+
+## MEDIUM PRIORITY - UI/UX Issues
+
+- [ ] **Admin global header logo** - Needs ACME font, match main site style
+- [ ] **Client portal headers** - Move toggle + breadcrumbs to page header, hide title
+- [ ] **Dashboard greeting** - Client name stays together on own line if can't fit
+- [ ] **DIV SPACING** - Verify remaining pages for consistency
+- [ ] **CSS Base Styling** - Help page card/section structure
+
+---
+
 ## Open Issues
 
-### Active - NEEDS DEEP DIVE
+### PENDING TESTING
 
-- [ ] **Receipts Feature** - Auto-generate PDF receipt for ANY payment (including partial payments), receipt management, download receipts
-- [ ] **Project Details - Invoices Tab** - Full invoice management in project details (view, create, edit, send, mark paid - all invoice actions)
-- [ ] **Project Details - PDF Creation** - Generate all business doc types (proposals, contracts, receipts, reports, SOWs) from files tab
-- [ ] **File Sharing Control** - All generated PDFs auto-save to project files but need "Share with Client" button to make visible to client (applies to ALL file types)
-- [ ] **Questionnaires to Files** - On completion: generate PDF of Q&A + keep raw JSON data export available. PDF saves to Forms folder.
-- [ ] **Document Requests to Files** - After admin approval: uploaded file MOVES from Doc Requests to Files tab (Forms folder). Original request marked complete.
-
-- [ ] **DIV SPACING** - Help page layout fixed (two-column with Categories LEFT). Remaining pages need verification for consistency
-- [ ] **CSS Base Styling** - Partial fix applied but Help page NOT using consistent card/section structure
-- [x] **FILES Layout** - Now matches admin portal: CSS Grid two-column layout, project folders in left panel, files table on right, intake PDFs display correctly
-- [ ] **Admin global header logo** - Changed from avatar image to "NO BHAD CODES" text - NEEDS TO LOOK LIKE MAIN SITE (not client portal style) AND IN ACME FONT
-- [ ] **CLIENT PORTAL HEADERS** - move toggle + breadcrumbs of client portal to page header, hide title
-- [x] **Files display** - Client portal files now match admin: folder tree shows projects, clicking project filters files, intake files open as PDF
-- [ ] **Dashboard greeting** - Client name  needs to stay together on its own line if full greeting can't fit on one line (e.g., "WELCOME BACK," then "NOELLE BHADURI!").  if full line can fit, should be on one line ("WELCOME BACK, NOELLE BHADURI!")
-- [ ] **Logout button** - Transparent background (no permanent light bg),needs to match rest of sidebar
-- [x] **Login page mobile** - FIXED: Full width, transparent background, no shadow on mobile (both client portal and admin)
-- [x] **Help Page Layout** - COMPLETE: Two-column grid layout with accordion categories, search suggestions, article detail view
+- [ ] Browser back/forward navigation (needs production build)
+- [ ] Horizontal scroll on mobile - NEEDS VERIFICATION
 
 ### ACTIVE - IN PROGRESS THIS SESSION
 
@@ -96,6 +204,14 @@ This file tracks active development work and TODOs. Completed items are moved to
 - [x] **Messages mobile padding** - FIXED: Added CSS to remove outer `.dashboard-content` padding on messages tab for screens under 600px
 - [x] **Login page menu** - Menu button opens navigation overlay on login page
 - [x] **Mobile overflow** - No horizontal scrolling on any page (375px viewport)
+- [x] **Login page mobile** - FIXED: Full width, transparent background, no shadow on mobile (both client portal and admin)
+- [x] **Help Page Layout** - COMPLETE: Two-column grid layout with accordion categories, search suggestions, article detail view
+- [x] **Files display** - Client portal files now match admin: folder tree shows projects, clicking project filters files, intake files open as PDF
+- [x] **FILES Layout** - Now matches admin portal: CSS Grid two-column layout, project folders in left panel, files table on right, intake PDFs display correctly
+- [x] Messages page two-column layout at various screen sizes
+- [x] Client Portal Files Tab - Verify project folders display correctly
+- [x] Intake PDF Access - Verify intake files open as PDF (not JSON)
+- [ ] Hash-based routing: invalid hash redirects to dashboard
 
 ---
 
