@@ -344,19 +344,14 @@
 }
 
 .tools-list .tool-tag {
-  background: var(--color-neutral-200);
-  color: var(--color-dark);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
   padding: 4px 10px;
   border-radius: 4px;
   font-size: 0.85rem;
   font-weight: 500;
   transition: background-color var(--transition-theme, 0.4s),
               color var(--transition-theme, 0.4s);
-}
-
-[data-theme="dark"] .tools-list .tool-tag {
-  background: var(--color-neutral-600);
-  color: var(--color-dark);
 }
 
 /* Right column - description */

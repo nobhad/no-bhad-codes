@@ -62,6 +62,20 @@
   transition: background 0.2s ease;
 }
 
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--portal-text-secondary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 :is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable {
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -779,8 +793,10 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .attention-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-1-5);
+  justify-content: center;
+  gap: var(--space-1);
   padding: var(--space-4);
   min-height: 88px;
   background: var(--portal-bg-dark);
@@ -790,7 +806,8 @@
   font-family: inherit;
   cursor: pointer;
   transition: all var(--transition-fast);
-  text-align: left;
+  text-align: center;
+  box-shadow: var(--shadow-panel);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .attention-card:hover {
@@ -802,47 +819,51 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
   background: none;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .attention-icon-warning {
-  color: var(--color-warning);
+  color: var(--portal-text-secondary);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .attention-icon-info {
-  color: var(--color-primary);
+  color: var(--portal-text-secondary);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .attention-icon-danger {
-  color: var(--color-danger);
+  color: var(--portal-text-secondary);
 }
 
 /* Attention content */
 :is([data-page="admin"], [data-page="client-portal"]) .attention-content {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .attention-count {
   font-family: var(--font-family-acme);
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
   line-height: 1;
-  color: var(--portal-text-light);
+  color: var(--color-primary);
+  margin-bottom: var(--space-0-5);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .attention-label {
-  font-size: 0.8rem;
-  color: var(--portal-text-muted);
+  font-size: 0.85rem;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 /* Highlight attention cards with values > 0 */
 :is([data-page="admin"], [data-page="client-portal"]) .attention-card.has-items .attention-count {
-  color: var(--color-warning);
+  color: var(--color-primary);
 }
 
 /* =====================================================

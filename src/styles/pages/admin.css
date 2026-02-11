@@ -313,16 +313,16 @@ body[data-page="admin"] #tab-analytics .stat-card {
    OVERVIEW TAB - Shadow Hierarchy
    Main containers get dark bg + shadow; child cards are lighter grey, no shadow
    ===================================================== */
-#tab-overview .attention-grid,
-#tab-overview .quick-stats {
+[data-page="admin"] #tab-overview .attention-grid,
+[data-page="admin"] #tab-overview .quick-stats {
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   padding: var(--space-3);
   box-shadow: var(--shadow-panel);
 }
 
-#tab-overview .attention-card,
-#tab-overview .stat-card {
+[data-page="admin"] #tab-overview .attention-card,
+[data-page="admin"] #tab-overview .stat-card {
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
   padding: var(--space-3);
@@ -330,8 +330,8 @@ body[data-page="admin"] #tab-analytics .stat-card {
   box-shadow: none;
 }
 
-#tab-overview .attention-card:hover,
-#tab-overview .stat-card-clickable:hover {
+[data-page="admin"] #tab-overview .attention-card:hover,
+[data-page="admin"] #tab-overview .stat-card-clickable:hover {
   background: var(--portal-bg-light);
 }
 
@@ -834,19 +834,19 @@ body.modal-open .dashboard-content {
 }
 
 /* Less space below Leads heading */
-#tab-leads .page-title + .quick-stats {
+[data-page="admin"] #tab-leads .page-title + .quick-stats {
   margin-top: var(--space-1-5);
 }
 
 /* Overview Tab */
-.overview-grid {
+[data-page="admin"] .overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
 
-.metric-card {
+[data-page="admin"] .metric-card {
   background: var(--color-bg-secondary);
   border: none;
   border-radius: var(--border-radius-card);
@@ -855,7 +855,7 @@ body.modal-open .dashboard-content {
   transition: var(--animation-card-hover);
 }
 
-.metric-card h3 {
+[data-page="admin"] .metric-card h3 {
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -864,27 +864,27 @@ body.modal-open .dashboard-content {
   letter-spacing: 0.05em;
 }
 
-.metric-value {
+[data-page="admin"] .metric-value {
   color: var(--color-text-primary);
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   margin-bottom: var(--space-1);
 }
 
-.metric-change {
+[data-page="admin"] .metric-change {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
 }
 
-.metric-change.positive {
+[data-page="admin"] .metric-change.positive {
   color: var(--color-success);
 }
 
-.metric-change.negative {
+[data-page="admin"] .metric-change.negative {
   color: var(--color-danger);
 }
 
-.metric-change.neutral {
+[data-page="admin"] .metric-change.neutral {
   color: var(--color-text-secondary);
 }
 
@@ -1843,8 +1843,8 @@ body.modal-open .dashboard-content {
   }
 
   /* Reset margin-bottom on all tab-specific containers to ensure consistent spacing */
-  #tab-overview .upcoming-tasks,
-  #tab-overview .recent-activity {
+  [data-page="admin"] #tab-overview .upcoming-tasks,
+  [data-page="admin"] #tab-overview .recent-activity {
     margin-bottom: 0;
   }
   /* Reduce dashboard content padding on mobile - no top padding */

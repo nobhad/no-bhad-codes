@@ -141,14 +141,18 @@
 
 .portal-password-toggle {
   position: absolute;
-  right: var(--space-1-5);
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
-  color: var(--color-neutral-500);
+  color: var(--portal-text-secondary);
   padding: var(--space-0-5);
   transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .portal-password-toggle:hover {

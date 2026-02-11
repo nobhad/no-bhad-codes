@@ -23,6 +23,11 @@
   overflow: hidden;
 }
 
+[data-page="client-portal"] .messages-layout {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
 /* =====================================================
    GLOBAL SEARCH BAR (spans both columns)
    ===================================================== */
@@ -374,6 +379,38 @@
 :is([data-page="admin"], [data-page="client-portal"]) .message-sent .message-content {
   background: var(--color-neutral-100);
   border-bottom-right-radius: var(--portal-radius-xs);
+}
+
+/* Client portal: match admin bubble colors by sender role */
+[data-page="client-portal"] .message-admin .message-content {
+  background: var(--color-neutral-100);
+  border-bottom-right-radius: var(--portal-radius-xs);
+  border-bottom-left-radius: 18px;
+}
+
+[data-page="client-portal"] .message-client .message-content {
+  background: var(--color-surface-primary);
+  border-bottom-left-radius: var(--portal-radius-xs);
+  border-bottom-right-radius: 18px;
+}
+
+/* Client portal: align client-sent messages to the right, admin to the left */
+[data-page="client-portal"] .message-client {
+  align-self: flex-end;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+[data-page="client-portal"] .message-client .message-content {
+  order: 1;
+}
+
+[data-page="client-portal"] .message-client .message-avatar {
+  order: 2;
+}
+
+[data-page="client-portal"] .message-admin {
+  align-self: flex-start;
 }
 
 /* =====================================================
@@ -764,6 +801,10 @@
   :is([data-page="admin"], [data-page="client-portal"]) .messages-layout {
     grid-template-columns: 200px 1fr;
   }
+
+  [data-page="client-portal"] .messages-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Thread list becomes tabs on mobile */
@@ -772,6 +813,10 @@
     grid-template-columns: 1fr;
     grid-template-rows: auto auto 1fr;
     gap: 0;
+  }
+
+  [data-page="client-portal"] .messages-layout {
+    grid-template-rows: 1fr;
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .messages-global-search {

@@ -7,8 +7,10 @@
 /* ================================================
    CLIENT PORTAL LOGIN PAGE - THEME TOGGLE SUPPORT
    Override --color-neutral-300 in dark mode to match main site
+   Applies to: login page (has dashboard-container.hidden) and set-password page
    ================================================ */
-html[data-theme="dark"] body[data-page="client-portal"]:has(.dashboard-container.hidden) {
+html[data-theme="dark"] body[data-page="client-portal"]:has(.dashboard-container.hidden),
+html[data-theme="dark"] body[data-page="client-portal"][data-view="set-password"] {
   --color-neutral-300: var(--color-dark);
 }
 
@@ -35,25 +37,33 @@ html[data-theme="dark"] body[data-page="client-portal"]:has(.dashboard-container
 /* Override portal theme variables for header elements on login page */
 /* Transition must match body (0.2s) so all elements change simultaneously */
 body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-header,
-body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-header * {
+body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-header *,
+body[data-page="client-portal"][data-view="set-password"] .portal-header,
+body[data-page="client-portal"][data-view="set-password"] .portal-header * {
   color: var(--color-nav-text);
   transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 /* Nav logo and buttons inherit proper color */
-body[data-page="client-portal"]:has(.dashboard-container.hidden) .nav-logo-row {
+body[data-page="client-portal"]:has(.dashboard-container.hidden) .nav-logo-row,
+body[data-page="client-portal"][data-view="set-password"] .nav-logo-row {
   color: var(--color-nav-text);
 }
 
 body[data-page="client-portal"]:has(.dashboard-container.hidden) .theme-button,
-body[data-page="client-portal"]:has(.dashboard-container.hidden) .menu-button {
+body[data-page="client-portal"]:has(.dashboard-container.hidden) .menu-button,
+body[data-page="client-portal"][data-view="set-password"] .theme-button,
+body[data-page="client-portal"][data-view="set-password"] .menu-button {
   color: var(--color-nav-text);
 }
 
 /* Hover states should still turn primary color */
 body[data-page="client-portal"]:has(.dashboard-container.hidden) .nav-logo-row:hover,
 body[data-page="client-portal"]:has(.dashboard-container.hidden) .theme-button:hover,
-body[data-page="client-portal"]:has(.dashboard-container.hidden) .menu-button:hover {
+body[data-page="client-portal"]:has(.dashboard-container.hidden) .menu-button:hover,
+body[data-page="client-portal"][data-view="set-password"] .nav-logo-row:hover,
+body[data-page="client-portal"][data-view="set-password"] .theme-button:hover,
+body[data-page="client-portal"][data-view="set-password"] .menu-button:hover {
   color: var(--color-primary);
 }
 
@@ -65,7 +75,8 @@ body[data-page="client-portal"]:has(.dashboard-container:not(.hidden)) .portal-h
 /* Show footer on client portal login page - override the global hide rule */
 /* Match main site footer styling exactly */
 /* Transition must match body (0.2s) so all elements change simultaneously */
-body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-footer {
+body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-footer,
+body[data-page="client-portal"][data-view="set-password"] .portal-footer {
   display: flex !important;
   position: fixed;
   bottom: 0;
@@ -84,11 +95,13 @@ body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-footer 
 }
 
 /* Footer links should match main site */
-body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-footer a {
+body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-footer a,
+body[data-page="client-portal"][data-view="set-password"] .portal-footer a {
   color: var(--color-nav-text);
 }
 
-body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-footer a:hover {
+body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-footer a:hover,
+body[data-page="client-portal"][data-view="set-password"] .portal-footer a:hover {
   color: var(--color-primary);
 }
 
@@ -110,7 +123,8 @@ body[data-page="client-portal"]:has(.dashboard-container.hidden) .auth-gate {
 }
 
 /* Match main site background for login page (before logged in) */
-body[data-page="client-portal"]:has(.dashboard-container.hidden) {
+body[data-page="client-portal"]:has(.dashboard-container.hidden),
+body[data-page="client-portal"][data-view="set-password"] {
   background: var(--color-neutral-300) !important;
 }
 
@@ -224,6 +238,40 @@ body[data-page="client-portal"] .auth-gate-form input:focus {
   border-color: var(--color-primary);
 }
 
+/* Error states for login form */
+body[data-page="client-portal"] .auth-gate-form input.error {
+  border-color: var(--color-danger, #e74c3c);
+}
+
+body[data-page="client-portal"] .auth-gate-form .error-message {
+  display: none;
+  color: var(--color-danger, #e74c3c);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+body[data-page="client-portal"] .auth-gate-form .error-message:not(:empty) {
+  display: block;
+}
+
+body[data-page="client-portal"] .auth-gate .auth-error {
+  display: none;
+  color: var(--color-danger, #e74c3c);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: var(--portal-radius-md, 8px);
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  font-weight: 500;
+  text-align: center;
+}
+
+body[data-page="client-portal"] .auth-gate .auth-error:not(:empty) {
+  display: block;
+}
+
 body[data-page="client-portal"] .auth-gate .password-input-wrapper {
   position: relative;
   display: flex;
@@ -269,6 +317,23 @@ body[data-page="client-portal"] .auth-gate .auth-submit.active {
   background-color: var(--color-primary);
   color: var(--portal-bg-dark);
   border-color: var(--color-primary);
+}
+
+body[data-page="client-portal"] .auth-gate .auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+body[data-page="client-portal"] .auth-gate .auth-submit.loading .btn-text {
+  display: none;
+}
+
+body[data-page="client-portal"] .auth-gate .auth-submit.loading .btn-loader {
+  display: inline-block;
+}
+
+body[data-page="client-portal"] .auth-gate .auth-submit .btn-loader {
+  display: none;
 }
 
 body[data-page="client-portal"] .auth-gate-footer {
@@ -396,9 +461,15 @@ body[data-page="client-portal"] .auth-divider {
 }
 
 /* Set Password Page Logo */
+.set-password-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-4);
+}
+
 .set-password-logo-img {
-  width: clamp(56px, 10vw, 80px);
-  height: clamp(56px, 10vw, 80px);
+  width: clamp(80px, 15vw, 120px);
+  height: clamp(80px, 15vw, 120px);
   object-fit: contain;
 }
 
@@ -434,6 +505,9 @@ html[data-theme="dark"] .set-password-page {
 .set-password-header {
   text-align: center;
   margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .set-password-header h1 {
@@ -453,22 +527,60 @@ html[data-theme="dark"] .set-password-page {
 .set-password-form {
   display: flex;
   flex-direction: column;
-  gap: clamp(1rem, 2vw, 1.5rem);
 }
 
 .set-password-form .form-group {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(4px, 1vw, 8px);
+  margin-bottom: 1.25rem;
+}
+
+.set-password-form .form-group:last-of-type {
+  margin-bottom: 0;
 }
 
 .set-password-form label {
   display: block;
-  margin-bottom: 0;
+  margin-bottom: 0.5rem;
   font-weight: 600;
   color: var(--portal-text-light);
   font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+/* Field hint - hide on set-password form since placeholder already shows the message */
+.set-password-form .field-hint {
+  display: none;
+}
+
+/* Password input wrapper - relative positioning for toggle button */
+.set-password-form .password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Password toggle button */
+.set-password-form .password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--portal-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.set-password-form .password-toggle:hover {
+  color: var(--color-primary);
+}
+
+.set-password-form .password-toggle svg {
+  width: 20px;
+  height: 20px;
 }
 
 .set-password-form .form-input {
@@ -485,6 +597,11 @@ html[data-theme="dark"] .set-password-page {
   transition: all var(--transition-fast);
   height: clamp(48px, 8vw, 60px);
   caret-color: var(--portal-text-light);
+}
+
+/* Password inputs need extra right padding for toggle button */
+.set-password-form .password-input-wrapper .form-input {
+  padding-right: 3rem;
 }
 
 .set-password-form .form-input::placeholder {
@@ -517,6 +634,16 @@ html[data-theme="dark"] .set-password-page {
 
 .set-password-form .btn-primary:hover {
   background-color: var(--color-primary);
+}
+
+/* Form error message */
+.set-password-form .form-error {
+  color: var(--color-danger, #dc3545);
+  font-size: 0.875rem;
+  padding: 0.75rem;
+  background-color: rgba(220, 53, 69, 0.1);
+  border-radius: var(--portal-radius-lg);
+  text-align: center;
 }
 
 /* Dark Theme Adjustments */
