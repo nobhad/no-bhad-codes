@@ -1,6 +1,6 @@
 # Invoice System
 
-**Last Updated:** February 11, 2026
+**Last Updated:** February 11, 2026 (Added Receipts and Project Details Invoices Tab planned features)
 
 ## Table of Contents
 
