@@ -83,36 +83,6 @@
         <nav class="nav-row">
           <a href="/" aria-label="no bhad codes - Go to homepage" class="nav-logo-row"> no bhad codes </a>
           <div class="nav-row__right">
-            <button id="toggle-theme" class="theme-button" aria-label="Toggle dark/light theme">
-              <div class="icon-wrap">
-                <svg
-                  class="theme-icon sun-icon"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
-                  <path
-                    d="M12 2V4M12 20V22M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  ></path>
-                </svg>
-                <svg
-                  class="theme-icon moon-icon"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"></path>
-                </svg>
-              </div>
-            </button>
             <button data-menu-toggle="" class="menu-button" aria-label="Toggle navigation menu" aria-expanded="false">
               <div class="icon-wrap">
                 <svg
@@ -223,6 +193,26 @@
       </div>
     </nav>
 
+    <!-- Inline script to prevent flash of login form when already authenticated -->
+    <script>
+      (function() {
+        var authUser = sessionStorage.getItem('nbw_auth_user');
+        var authExpiry = sessionStorage.getItem('nbw_auth_expiry');
+        var isAuthenticated = authUser && authExpiry && Date.now() < parseInt(authExpiry, 10);
+        if (isAuthenticated) {
+          document.documentElement.classList.add('auth-checked');
+        }
+      })();
+    </script>
+    <style>
+      /* Hide auth gate when authenticated, show dashboard */
+      .auth-checked #auth-gate { display: none !important; }
+      .auth-checked #client-dashboard { display: flex !important; }
+      .auth-checked .portal-header,
+      .auth-checked .portal-nav,
+      .auth-checked .portal-footer { display: none !important; }
+    </style>
+
     <!-- Auth Gate - Login Form -->
     <div class="auth-gate" id="auth-gate">
       <div class="auth-gate-container">
@@ -231,7 +221,7 @@
           <h1>Client Portal</h1>
           <p>Sign in to access your projects and documents</p>
         </div>
-        <form class="auth-gate-form" id="portal-login-form">
+        <form class="auth-gate-form" id="portal-login-form" method="POST" action="#" onsubmit="return false;" novalidate>
           <div class="form-group">
             <label for="portal-email" class="sr-only">Email Address</label>
             <input
@@ -240,8 +230,9 @@
               name="email"
               placeholder="Email Address"
               required
-              autocomplete="email"
+              autocomplete="username email"
             />
+            <span id="email-error" class="error-message" style="display: none;"></span>
           </div>
           <div class="form-group">
             <label for="portal-password" class="sr-only">Password</label>
@@ -254,18 +245,19 @@
                 required
                 autocomplete="current-password"
               />
-              <button type="button" class="password-toggle" id="portal-password-toggle" aria-label="Toggle password visibility">
+              <button type="button" class="password-toggle" id="portal-password-toggle" data-password-toggle="portal-password" aria-label="Toggle password visibility">
                 <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </button>
             </div>
+            <span id="password-error" class="error-message" style="display: none;"></span>
           </div>
           <div class="auth-error" id="auth-error"></div>
-          <button type="submit" class="btn btn-primary auth-submit">
+          <button type="submit" id="login-btn" class="btn btn-primary auth-submit">
             <span class="btn-text">Sign In</span>
-            <span class="btn-loading" style="display: none;">Signing in...</span>
+            <span class="btn-loading btn-loader" style="display: none;">Signing in...</span>
           </button>
         </form>
         <div class="auth-gate-footer">
@@ -279,21 +271,51 @@
     <!-- Dashboard Layout (hidden until auth) -->
     <div class="dashboard-container hidden" id="client-dashboard">
 
-      <!-- Sidebar -->
-      <aside class="sidebar" id="sidebar">
-        <!-- Collapsed state avatar link -->
-        <a href="/" class="sidebar-collapsed-logo" aria-label="Go to home">
-          <img src="/images/avatar_small_sidebar.svg" alt="No Bhad Codes" class="sidebar-collapsed-logo-img" />
-        </a>
-        <div class="sidebar-content">
-          <!-- Logo -->
-          <a href="/" class="sidebar-logo">
-            <img src="/images/avatar.svg" alt="No Bhad Codes" class="sidebar-logo-img" />
+      <!-- Full-Width Global Header -->
+      <header class="portal-global-header">
+        <div class="portal-global-header-left">
+          <a href="/" class="header-logo" aria-label="Go to homepage">
+            <img src="/images/avatar.svg" alt="No Bhad Codes" class="header-logo-img" />
           </a>
+        </div>
+        <div class="portal-global-header-right">
+          <button id="header-toggle-theme" class="header-theme-toggle" aria-label="Toggle dark/light theme">
+            <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
+              <path d="M12 2V4M12 20V22M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2"></path>
+            </svg>
+            <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
 
-          <!-- Action Buttons -->
-          <div class="sidebar-buttons">
-            <button class="btn btn-secondary active" id="btn-dashboard" data-tab="dashboard">
+      <!-- Portal Body: Sidebar + Content -->
+      <div class="portal-body">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+          <!-- Collapsed state avatar link (hidden by global header) -->
+          <a href="/" class="sidebar-collapsed-logo" aria-label="Go to home">
+            <img src="/images/avatar_small_sidebar.svg" alt="No Bhad Codes" class="sidebar-collapsed-logo-img" />
+          </a>
+          <div class="sidebar-content">
+            <!-- Logo (hidden by global header) -->
+            <a href="/" class="sidebar-logo">
+              <img src="/images/avatar.svg" alt="No Bhad Codes" class="sidebar-logo-img" />
+            </a>
+
+            <!-- Action Buttons -->
+            <div class="sidebar-buttons">
+              <!-- Sidebar Toggle (first button) -->
+              <button class="sidebar-toggle-btn" id="btn-sidebar-toggle" aria-label="Toggle sidebar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="18" rx="1"/>
+                  <path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/>
+                </svg>
+                <span class="btn-text">TOGGLE</span>
+              </button>
+              <button class="btn btn-secondary active" id="btn-dashboard" data-tab="dashboard">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
               <span class="btn-text">DASHBOARD</span>
             </button>
@@ -318,17 +340,6 @@
           </div>
           <!-- Footer Actions -->
           <div class="sidebar-footer">
-            <!-- Theme Toggle -->
-            <button id="toggle-theme" class="btn btn-secondary btn-theme-toggle" aria-label="Toggle dark/light theme">
-              <svg class="theme-icon sun-icon btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
-                <path d="M12 2V4M12 20V22M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2"></path>
-              </svg>
-              <svg class="theme-icon moon-icon btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"></path>
-              </svg>
-              <span class="btn-text">THEME</span>
-            </button>
             <!-- Sign Out Button -->
             <button class="btn btn-secondary btn-logout" id="btn-logout">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
@@ -434,6 +445,20 @@
               </div>
             </div>
 
+            <!-- Milestones -->
+            <div class="milestones-section portal-shadow" id="milestones-section">
+              <div class="section-header">
+                <h3>Milestones</h3>
+                <span class="milestones-summary" id="milestones-summary"></span>
+              </div>
+              <div class="milestones-list" id="milestones-list">
+                <div class="loading-row">Loading...</div>
+              </div>
+              <p class="milestones-empty" id="milestones-empty" style="display: none;">
+                No milestones yet.
+              </p>
+            </div>
+
             <!-- Recent Activity -->
             <div class="recent-activity portal-shadow">
               <h3>Recent Activity</h3>
@@ -525,11 +550,15 @@
                   ></span>
                   <div class="file-info">
                     <span class="file-name">project-brief.pdf</span>
-                    <span class="file-meta">Uploaded Nov 28, 2025 - 2.4 MB</span>
+                    <span class="file-meta">2.4 MB • Nov 28, 2025</span>
                   </div>
                   <div class="file-actions">
-                    <button class="btn btn-outline btn-sm">Preview</button>
-                    <button class="btn btn-outline btn-sm">Download</button>
+                    <button class="icon-btn" aria-label="Preview project-brief.pdf" title="Preview">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                    <button class="icon-btn" aria-label="Download project-brief.pdf" title="Download">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </button>
                   </div>
                 </div>
                 <div class="file-item">
@@ -551,11 +580,15 @@
                   ></span>
                   <div class="file-info">
                     <span class="file-name">logo-v1.png</span>
-                    <span class="file-meta">Uploaded Nov 29, 2025 - 156 KB</span>
+                    <span class="file-meta">156 KB • Nov 29, 2025</span>
                   </div>
                   <div class="file-actions">
-                    <button class="btn btn-outline btn-sm">Preview</button>
-                    <button class="btn btn-outline btn-sm">Download</button>
+                    <button class="icon-btn" aria-label="Preview logo-v1.png" title="Preview">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                    <button class="icon-btn" aria-label="Download logo-v1.png" title="Download">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -564,26 +597,16 @@
 
           <!-- Messages View -->
           <div class="tab-content" id="tab-messages">
-            <!-- Messages Layout with Thread List -->
+            <!-- Messages Layout -->
             <div class="messages-layout">
-              <!-- Thread List Sidebar -->
-              <div class="thread-list-container portal-shadow">
-                <div class="thread-list-header">
-                  <span>Conversations</span>
-                </div>
-                <div class="thread-list" id="thread-list" role="listbox" aria-label="Message threads">
-                  <!-- Threads populated by JS -->
-                </div>
-              </div>
-
               <!-- Messages Thread -->
               <div class="messages-container portal-shadow">
                 <div class="messages-thread-header" id="messages-thread-header">
-                  <span class="thread-title">Select a conversation</span>
+                  <span class="thread-title">Conversation with Noelle</span>
                 </div>
                 <div class="messages-thread" id="messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
                   <div class="no-messages">
-                    <p>Select a conversation from the list to view messages.</p>
+                    <p>No messages yet. Send a message to Noelle to get started.</p>
                   </div>
                 </div>
 
@@ -630,8 +653,12 @@
                 <div class="invoice-amount">$2,500.00</div>
                 <span class="invoice-status status-pending">Pending</span>
                 <div class="invoice-actions">
-                  <button class="btn btn-outline btn-sm">Preview</button>
-                  <button class="btn btn-outline btn-sm">Download</button>
+                  <button class="icon-btn" aria-label="Preview invoice INV-2025-001" title="Preview">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                  <button class="icon-btn" aria-label="Download invoice INV-2025-001" title="Download">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  </button>
                 </div>
               </div>
               <p class="no-invoices-message">
@@ -659,9 +686,49 @@
               <p id="documents-detail-description" class="documents-detail-description"></p>
               <p id="documents-detail-meta" class="documents-detail-meta"></p>
               <div id="documents-detail-upload" class="documents-detail-upload" style="display: none;">
-                <label for="documents-file-input" class="documents-upload-label">Upload document</label>
-                <input type="file" id="documents-file-input" class="documents-file-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" aria-label="Choose file" />
-                <button type="button" id="documents-upload-btn" class="btn btn-primary btn-sm" disabled>UPLOAD</button>
+                <span class="documents-upload-label">Upload document</span>
+                <div class="upload-dropzone documents-dropzone" id="documents-dropzone">
+                  <div class="dropzone-content">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <p class="dropzone-desktop">Drag and drop your document here or</p>
+                    <p class="dropzone-mobile">Tap to select a document</p>
+                    <button type="button" class="btn btn-secondary" id="documents-browse-btn">
+                      Browse Files
+                    </button>
+                    <input
+                      type="file"
+                      id="documents-file-input"
+                      class="documents-file-input"
+                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                      aria-label="Choose file"
+                      hidden
+                    />
+                  </div>
+                </div>
+                <div class="documents-upload-actions">
+                  <button type="button" id="documents-upload-btn" class="btn btn-primary btn-sm" disabled>
+                    Upload
+                  </button>
+                </div>
+                <p class="documents-upload-error" id="documents-upload-error" style="display: none;"></p>
+                <p class="documents-upload-hint">
+                  Accepted: PDF, DOC/DOCX, TXT, JPG/PNG. Max 10MB.
+                </p>
               </div>
             </div>
           </div>
@@ -829,6 +896,8 @@
               <div class="settings-section portal-shadow">
                 <h3>Change Password</h3>
                 <form class="settings-form" id="password-form">
+                  <!-- Hidden username field for accessibility and password managers -->
+                  <input type="text" id="password-form-username" name="username" autocomplete="username" class="sr-only" tabindex="-1" aria-hidden="true" />
                   <div class="form-group">
                     <label for="current-password">Current Password</label>
                     <div class="portal-password-wrapper">
@@ -1201,6 +1270,7 @@
 
         </div>
       </div>
+      </div> <!-- Close portal-body -->
     </div>
 
     <!-- Upload Request Selection Modal -->
