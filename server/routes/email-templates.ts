@@ -16,6 +16,7 @@ import {
   type CreateTemplateData,
   type UpdateTemplateData
 } from '../services/email-template-service.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -60,12 +61,12 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid template ID' });
+      return errorResponse(res, 'Invalid template ID', 400);
     }
 
     const template = await emailTemplateService.getTemplate(id);
     if (!template) {
-      return res.status(404).json({ error: 'Template not found' });
+      return errorResponse(res, 'Template not found', 404);
     }
 
     res.json({ template });
@@ -83,7 +84,7 @@ router.post(
     const { name, description, category, subject, body_html, body_text, variables, is_active } = req.body;
 
     if (!name || !subject || !body_html) {
-      return res.status(400).json({ error: 'name, subject, and body_html are required' });
+      return errorResponse(res, 'name, subject, and body_html are required', 400);
     }
 
     const data: CreateTemplateData = {
@@ -117,7 +118,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid template ID' });
+      return errorResponse(res, 'Invalid template ID', 400);
     }
 
     const { name, description, category, subject, body_html, body_text, variables, is_active, change_reason } = req.body;
@@ -136,7 +137,7 @@ router.put(
     try {
       const template = await emailTemplateService.updateTemplate(id, data, req.user?.email, change_reason);
       if (!template) {
-        return res.status(404).json({ error: 'Template not found' });
+        return errorResponse(res, 'Template not found', 404);
       }
 
       res.json({
@@ -146,7 +147,7 @@ router.put(
       });
     } catch (error) {
       if (error instanceof Error && error.message.includes('system template')) {
-        return res.status(403).json({ error: error.message });
+        return errorResponse(res, error.message, 403);
       }
       throw error;
     }
@@ -163,13 +164,13 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid template ID' });
+      return errorResponse(res, 'Invalid template ID', 400);
     }
 
     try {
       const deleted = await emailTemplateService.deleteTemplate(id);
       if (!deleted) {
-        return res.status(404).json({ error: 'Template not found' });
+        return errorResponse(res, 'Template not found', 404);
       }
 
       res.json({
@@ -178,7 +179,7 @@ router.delete(
       });
     } catch (error) {
       if (error instanceof Error && error.message.includes('system template')) {
-        return res.status(403).json({ error: error.message });
+        return errorResponse(res, error.message, 403);
       }
       throw error;
     }
@@ -199,7 +200,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid template ID' });
+      return errorResponse(res, 'Invalid template ID', 400);
     }
 
     const versions = await emailTemplateService.getVersions(id);
@@ -219,12 +220,12 @@ router.get(
     const version = parseInt(req.params.version);
 
     if (isNaN(id) || isNaN(version)) {
-      return res.status(400).json({ error: 'Invalid template ID or version' });
+      return errorResponse(res, 'Invalid template ID or version', 400);
     }
 
     const v = await emailTemplateService.getVersion(id, version);
     if (!v) {
-      return res.status(404).json({ error: 'Version not found' });
+      return errorResponse(res, 'Version not found', 404);
     }
 
     res.json({ version: v });
@@ -243,12 +244,12 @@ router.post(
     const version = parseInt(req.params.version);
 
     if (isNaN(id) || isNaN(version)) {
-      return res.status(400).json({ error: 'Invalid template ID or version' });
+      return errorResponse(res, 'Invalid template ID or version', 400);
     }
 
     const template = await emailTemplateService.restoreVersion(id, version, req.user?.email);
     if (!template) {
-      return res.status(404).json({ error: 'Version not found' });
+      return errorResponse(res, 'Version not found', 404);
     }
 
     res.json({
@@ -273,12 +274,12 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid template ID' });
+      return errorResponse(res, 'Invalid template ID', 400);
     }
 
     const template = await emailTemplateService.getTemplate(id);
     if (!template) {
-      return res.status(404).json({ error: 'Template not found' });
+      return errorResponse(res, 'Template not found', 404);
     }
 
     // Use provided sample data or generate from variables
@@ -305,7 +306,7 @@ router.post(
     const { subject, body_html, body_text, variables, sample_data } = req.body;
 
     if (!subject || !body_html) {
-      return res.status(400).json({ error: 'subject and body_html are required' });
+      return errorResponse(res, 'subject and body_html are required', 400);
     }
 
     // Generate sample data from variables if not provided
@@ -336,18 +337,18 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid template ID' });
+      return errorResponse(res, 'Invalid template ID', 400);
     }
 
     const { to_email, sample_data } = req.body;
 
     if (!to_email) {
-      return res.status(400).json({ error: 'to_email is required' });
+      return errorResponse(res, 'to_email is required', 400);
     }
 
     const template = await emailTemplateService.getTemplate(id);
     if (!template) {
-      return res.status(404).json({ error: 'Template not found' });
+      return errorResponse(res, 'Template not found', 404);
     }
 
     // Generate preview content
@@ -356,7 +357,7 @@ router.post(
 
     const preview = await emailTemplateService.previewTemplate(id, data);
     if (!preview) {
-      return res.status(500).json({ error: 'Failed to generate preview' });
+      return errorResponse(res, 'Failed to generate preview', 500);
     }
 
     // Log the send attempt (actual sending would use email service)

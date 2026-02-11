@@ -11,6 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { knowledgeBaseService } from '../services/knowledge-base-service.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -38,7 +39,7 @@ router.get(
     const category = await knowledgeBaseService.getCategoryBySlug(req.params.slug);
 
     if (!category) {
-      return res.status(404).json({ error: 'Category not found' });
+      return errorResponse(res, 'Category not found', 404);
     }
 
     const articles = await knowledgeBaseService.getArticlesByCategory(req.params.slug);
@@ -68,7 +69,7 @@ router.get(
     const query = req.query.q as string;
 
     if (!query || query.length < 2) {
-      return res.status(400).json({ error: 'Search query must be at least 2 characters' });
+      return errorResponse(res, 'Search query must be at least 2 characters', 400);
     }
 
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
@@ -92,7 +93,7 @@ router.get(
     const article = await knowledgeBaseService.getArticleBySlug(categorySlug, articleSlug);
 
     if (!article || !article.is_published) {
-      return res.status(404).json({ error: 'Article not found' });
+      return errorResponse(res, 'Article not found', 404);
     }
 
     // Increment view count
@@ -112,11 +113,11 @@ router.post(
     const { isHelpful, comment } = req.body;
 
     if (isNaN(articleId)) {
-      return res.status(400).json({ error: 'Invalid article ID' });
+      return errorResponse(res, 'Invalid article ID', 400);
     }
 
     if (typeof isHelpful !== 'boolean') {
-      return res.status(400).json({ error: 'isHelpful must be a boolean' });
+      return errorResponse(res, 'isHelpful must be a boolean', 400);
     }
 
     await knowledgeBaseService.submitFeedback({
@@ -159,7 +160,7 @@ router.post(
     const { name, slug, description, icon, color, sort_order } = req.body;
 
     if (!name || !slug) {
-      return res.status(400).json({ error: 'name and slug are required' });
+      return errorResponse(res, 'name and slug are required', 400);
     }
 
     const category = await knowledgeBaseService.createCategory({
@@ -190,13 +191,13 @@ router.put(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid category ID' });
+      return errorResponse(res, 'Invalid category ID', 400);
     }
 
     const category = await knowledgeBaseService.updateCategory(id, req.body);
 
     if (!category) {
-      return res.status(404).json({ error: 'Category not found' });
+      return errorResponse(res, 'Category not found', 404);
     }
 
     res.json({
@@ -218,7 +219,7 @@ router.delete(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid category ID' });
+      return errorResponse(res, 'Invalid category ID', 400);
     }
 
     await knowledgeBaseService.deleteCategory(id);
@@ -264,13 +265,13 @@ router.get(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid article ID' });
+      return errorResponse(res, 'Invalid article ID', 400);
     }
 
     const article = await knowledgeBaseService.getArticleById(id);
 
     if (!article) {
-      return res.status(404).json({ error: 'Article not found' });
+      return errorResponse(res, 'Article not found', 404);
     }
 
     res.json({ success: true, article });
@@ -288,7 +289,7 @@ router.post(
     const { category_id, title, slug, summary, content, keywords, is_featured, is_published } = req.body;
 
     if (!category_id || !title || !slug || !content) {
-      return res.status(400).json({ error: 'category_id, title, slug, and content are required' });
+      return errorResponse(res, 'category_id, title, slug, and content are required', 400);
     }
 
     const article = await knowledgeBaseService.createArticle({
@@ -322,13 +323,13 @@ router.put(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid article ID' });
+      return errorResponse(res, 'Invalid article ID', 400);
     }
 
     const article = await knowledgeBaseService.updateArticle(id, req.body);
 
     if (!article) {
-      return res.status(404).json({ error: 'Article not found' });
+      return errorResponse(res, 'Article not found', 404);
     }
 
     res.json({
@@ -350,7 +351,7 @@ router.delete(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid article ID' });
+      return errorResponse(res, 'Invalid article ID', 400);
     }
 
     await knowledgeBaseService.deleteArticle(id);

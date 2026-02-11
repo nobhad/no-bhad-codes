@@ -12,6 +12,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { approvalService, EntityType, WorkflowType } from '../services/approval-service.js';
 import { getDatabase } from '../database/init.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -43,12 +44,12 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid workflow ID' });
+      return errorResponse(res, 'Invalid workflow ID', 400);
     }
 
     const workflow = await approvalService.getWorkflowDefinition(id);
     if (!workflow) {
-      return res.status(404).json({ error: 'Workflow not found' });
+      return errorResponse(res, 'Workflow not found', 404);
     }
 
     const steps = await approvalService.getWorkflowSteps(id);
@@ -67,18 +68,18 @@ router.post(
     const { name, description, entity_type, workflow_type, is_default } = req.body;
 
     if (!name || !entity_type || !workflow_type) {
-      return res.status(400).json({ error: 'Name, entity_type, and workflow_type are required' });
+      return errorResponse(res, 'Name, entity_type, and workflow_type are required', 400);
     }
 
     const validEntityTypes: EntityType[] = ['proposal', 'invoice', 'contract', 'deliverable', 'project'];
     const validWorkflowTypes: WorkflowType[] = ['sequential', 'parallel', 'any_one'];
 
     if (!validEntityTypes.includes(entity_type)) {
-      return res.status(400).json({ error: `Invalid entity_type. Must be one of: ${validEntityTypes.join(', ')}` });
+      return errorResponse(res, `Invalid entity_type. Must be one of: ${validEntityTypes.join(', ')}`, 400);
     }
 
     if (!validWorkflowTypes.includes(workflow_type)) {
-      return res.status(400).json({ error: `Invalid workflow_type. Must be one of: ${validWorkflowTypes.join(', ')}` });
+      return errorResponse(res, `Invalid workflow_type. Must be one of: ${validWorkflowTypes.join(', ')}`, 400);
     }
 
     const workflow = await approvalService.createWorkflowDefinition({
@@ -107,13 +108,13 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const workflowId = parseInt(req.params.id);
     if (isNaN(workflowId)) {
-      return res.status(400).json({ error: 'Invalid workflow ID' });
+      return errorResponse(res, 'Invalid workflow ID', 400);
     }
 
     const { step_order, approver_type, approver_value, is_optional, auto_approve_after_hours } = req.body;
 
     if (!step_order || !approver_type || !approver_value) {
-      return res.status(400).json({ error: 'step_order, approver_type, and approver_value are required' });
+      return errorResponse(res, 'step_order, approver_type, and approver_value are required', 400);
     }
 
     const step = await approvalService.addWorkflowStep({
@@ -147,7 +148,7 @@ router.post(
     const { entity_type, entity_id, workflow_definition_id, notes } = req.body;
 
     if (!entity_type || !entity_id) {
-      return res.status(400).json({ error: 'entity_type and entity_id are required' });
+      return errorResponse(res, 'entity_type and entity_id are required', 400);
     }
 
     const initiatedBy = req.user?.email || 'unknown';
@@ -168,7 +169,7 @@ router.post(
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to start workflow';
-      return res.status(400).json({ error: message });
+      return errorResponse(res, message, 400);
     }
   })
 );
@@ -195,7 +196,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const email = req.user?.email;
     if (!email) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     const approvals = await approvalService.getPendingApprovalsForUser(email);
@@ -215,7 +216,7 @@ router.get(
     const id = parseInt(entityId);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid entity ID' });
+      return errorResponse(res, 'Invalid entity ID', 400);
     }
 
     const instance = await approvalService.getEntityWorkflow(entityType as EntityType, id);
@@ -240,12 +241,12 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid instance ID' });
+      return errorResponse(res, 'Invalid instance ID', 400);
     }
 
     const instance = await approvalService.getWorkflowInstance(id);
     if (!instance) {
-      return res.status(404).json({ error: 'Workflow instance not found' });
+      return errorResponse(res, 'Workflow instance not found', 404);
     }
 
     const requests = await approvalService.getApprovalRequests(id);
@@ -268,7 +269,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const requestId = parseInt(req.params.id);
     if (isNaN(requestId)) {
-      return res.status(400).json({ error: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400);
     }
 
     const { comment } = req.body;
@@ -282,7 +283,7 @@ router.post(
       ) as { approver_email?: string } | undefined;
 
       if (!request || request.approver_email !== approverEmail) {
-        return res.status(403).json({ error: 'Access denied' });
+        return errorResponse(res, 'Access denied', 403);
       }
     }
 
@@ -295,7 +296,7 @@ router.post(
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to approve';
-      return res.status(400).json({ error: message });
+      return errorResponse(res, message, 400);
     }
   })
 );
@@ -309,12 +310,12 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const requestId = parseInt(req.params.id);
     if (isNaN(requestId)) {
-      return res.status(400).json({ error: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400);
     }
 
     const { reason } = req.body;
     if (!reason) {
-      return res.status(400).json({ error: 'Reason is required when rejecting' });
+      return errorResponse(res, 'Reason is required when rejecting', 400);
     }
 
     const approverEmail = req.user?.email || 'unknown';
@@ -327,7 +328,7 @@ router.post(
       ) as { approver_email?: string } | undefined;
 
       if (!request || request.approver_email !== approverEmail) {
-        return res.status(403).json({ error: 'Access denied' });
+        return errorResponse(res, 'Access denied', 403);
       }
     }
 
@@ -340,7 +341,7 @@ router.post(
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to reject';
-      return res.status(400).json({ error: message });
+      return errorResponse(res, message, 400);
     }
   })
 );
@@ -355,7 +356,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const instanceId = parseInt(req.params.id);
     if (isNaN(instanceId)) {
-      return res.status(400).json({ error: 'Invalid instance ID' });
+      return errorResponse(res, 'Invalid instance ID', 400);
     }
 
     const { reason } = req.body;
@@ -370,7 +371,7 @@ router.post(
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to cancel workflow';
-      return res.status(400).json({ error: message });
+      return errorResponse(res, message, 400);
     }
   })
 );

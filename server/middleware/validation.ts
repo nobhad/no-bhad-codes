@@ -12,6 +12,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../services/logger.js';
 import { VALIDATION_PATTERNS } from '../../shared/validation/patterns.js';
+import { errorResponseWithPayload } from '../utils/api-response.js';
 
 // Validation error interface
 export interface ValidationError {
@@ -604,12 +605,8 @@ export function validateRequest(
 
       if (allErrors.length > 0) {
         await logger.error('Request validation failed');
-
-        return res.status(400).json({
-          success: false,
-          error: 'Validation failed',
-          details: allErrors,
-          code: 'VALIDATION_ERROR'
+        return errorResponseWithPayload(res, 'Validation failed', 400, 'VALIDATION_ERROR', {
+          details: allErrors
         });
       }
 
@@ -619,12 +616,7 @@ export function validateRequest(
       next();
     } catch (_error) {
       await logger.error('Validation middleware error');
-
-      res.status(500).json({
-        success: false,
-        error: 'Internal validation error',
-        code: 'VALIDATION_SYSTEM_ERROR'
-      });
+      errorResponseWithPayload(res, 'Internal validation error', 500, 'VALIDATION_SYSTEM_ERROR');
     }
   };
 }

@@ -703,7 +703,7 @@ class SoftDeleteService {
 
       // Tasks
       await db.run(
-        `DELETE FROM tasks
+        `DELETE FROM project_tasks
          WHERE project_id IN (
            SELECT id FROM projects
            WHERE deleted_at IS NOT NULL AND deleted_at < ?
@@ -876,7 +876,7 @@ class SoftDeleteService {
         const projects = await db.all('SELECT id FROM projects WHERE client_id = ?', [entityId]) as { id: number }[];
         for (const project of projects) {
           await db.run('DELETE FROM project_milestones WHERE project_id = ?', [project.id]);
-          await db.run('DELETE FROM tasks WHERE project_id = ?', [project.id]);
+          await db.run('DELETE FROM project_tasks WHERE project_id = ?', [project.id]);
           await db.run('DELETE FROM messages WHERE project_id = ?', [project.id]);
           await db.run('DELETE FROM files WHERE project_id = ?', [project.id]);
         }
@@ -884,7 +884,7 @@ class SoftDeleteService {
       } else if (entityType === 'project') {
         // Delete all project children
         await db.run('DELETE FROM project_milestones WHERE project_id = ?', [entityId]);
-        await db.run('DELETE FROM tasks WHERE project_id = ?', [entityId]);
+        await db.run('DELETE FROM project_tasks WHERE project_id = ?', [entityId]);
         await db.run('DELETE FROM messages WHERE project_id = ?', [entityId]);
         await db.run('DELETE FROM files WHERE project_id = ?', [entityId]);
         await db.run(

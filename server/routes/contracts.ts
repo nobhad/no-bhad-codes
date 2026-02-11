@@ -14,6 +14,7 @@ import { contractService, type ContractStatus } from '../services/contract-servi
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -33,7 +34,7 @@ router.get(
     let status: ContractStatus | undefined;
 
     if (statusParam && !contractService.isValidContractStatus(statusParam)) {
-      return res.status(400).json({ success: false, message: 'Invalid contract status' });
+      return errorResponse(res, 'Invalid contract status', 400, 'VALIDATION_ERROR');
     }
 
     if (statusParam) {
@@ -59,11 +60,11 @@ router.post(
     const { templateId, projectId, clientId, status, expiresAt } = req.body;
 
     if (!templateId || !projectId || !clientId) {
-      return res.status(400).json({ success: false, message: 'templateId, projectId, and clientId are required' });
+      return errorResponse(res, 'templateId, projectId, and clientId are required', 400, 'VALIDATION_ERROR');
     }
 
     if (status && !contractService.isValidContractStatus(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid contract status' });
+      return errorResponse(res, 'Invalid contract status', 400, 'VALIDATION_ERROR');
     }
 
     const contract = await contractService.createContractFromTemplate({
@@ -101,7 +102,7 @@ router.get(
 
     const contract = await db.get('SELECT project_id FROM contracts WHERE id = ?', [contractId]);
     if (!contract) {
-      return res.status(404).json({ success: false, message: 'Contract not found' });
+      return errorResponse(res, 'Contract not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     const projectId = getNumber(contract as Record<string, unknown>, 'project_id');
@@ -126,11 +127,11 @@ router.post(
     const { projectId, clientId, content, status } = req.body;
 
     if (!projectId || !clientId || !content) {
-      return res.status(400).json({ success: false, message: 'projectId, clientId, and content are required' });
+      return errorResponse(res, 'projectId, clientId, and content are required', 400, 'VALIDATION_ERROR');
     }
 
     if (status && !contractService.isValidContractStatus(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid contract status' });
+      return errorResponse(res, 'Invalid contract status', 400, 'VALIDATION_ERROR');
     }
 
     const contract = await contractService.createContract(req.body);
@@ -147,7 +148,7 @@ router.put(
     const contractId = parseInt(req.params.contractId);
 
     if (req.body?.status && !contractService.isValidContractStatus(req.body.status)) {
-      return res.status(400).json({ success: false, message: 'Invalid contract status' });
+      return errorResponse(res, 'Invalid contract status', 400, 'VALIDATION_ERROR');
     }
 
     const contract = await contractService.updateContract(contractId, req.body);
@@ -175,13 +176,13 @@ router.post(
     );
 
     if (!project) {
-      return res.status(404).json({ success: false, message: 'Project not found' });
+      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     const p = project as Record<string, unknown>;
     const signatureToken = p.contract_signature_token as string | null;
     if (!signatureToken) {
-      return res.status(400).json({ success: false, message: 'No active signature token found' });
+      return errorResponse(res, 'No active signature token found', 400, 'VALIDATION_ERROR');
     }
 
     const clientEmail = getString(p, 'email');
@@ -189,7 +190,7 @@ router.post(
     const projectName = getString(p, 'project_name');
 
     if (!clientEmail) {
-      return res.status(400).json({ success: false, message: 'No client email on file' });
+      return errorResponse(res, 'No client email on file', 400, 'VALIDATION_ERROR');
     }
 
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
@@ -323,7 +324,7 @@ router.post(
     );
 
     if (!project) {
-      return res.status(404).json({ success: false, message: 'Project not found' });
+      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     const p = project as Record<string, unknown>;
@@ -333,7 +334,7 @@ router.post(
     const renewalAt = contract.renewalAt ? new Date(contract.renewalAt).toLocaleDateString('en-US') : 'soon';
 
     if (!clientEmail) {
-      return res.status(400).json({ success: false, message: 'No client email on file' });
+      return errorResponse(res, 'No client email on file', 400, 'VALIDATION_ERROR');
     }
 
     const { emailService } = await import('../services/email-service.js');
@@ -406,7 +407,7 @@ router.get(
     const { type } = req.query;
 
     if (type && typeof type === 'string' && !contractService.isValidTemplateType(type)) {
-      return res.status(400).json({ success: false, message: 'Invalid template type' });
+      return errorResponse(res, 'Invalid template type', 400, 'VALIDATION_ERROR');
     }
 
     const templates = await contractService.getTemplates(type as string | undefined);
@@ -435,11 +436,11 @@ router.post(
     const { name, type, content } = req.body;
 
     if (!name || !type || !content) {
-      return res.status(400).json({ success: false, message: 'name, type, and content are required' });
+      return errorResponse(res, 'name, type, and content are required', 400, 'VALIDATION_ERROR');
     }
 
     if (!contractService.isValidTemplateType(type)) {
-      return res.status(400).json({ success: false, message: 'Invalid template type' });
+      return errorResponse(res, 'Invalid template type', 400, 'VALIDATION_ERROR');
     }
 
     const template = await contractService.createTemplate(req.body);
@@ -456,7 +457,7 @@ router.put(
     const templateId = parseInt(req.params.templateId);
 
     if (req.body?.type && !contractService.isValidTemplateType(req.body.type)) {
-      return res.status(400).json({ success: false, message: 'Invalid template type' });
+      return errorResponse(res, 'Invalid template type', 400, 'VALIDATION_ERROR');
     }
 
     const template = await contractService.updateTemplate(templateId, req.body);

@@ -499,7 +499,7 @@ export async function exportUpcomingToICal(daysAhead: number = 30): Promise<stri
 
   // Get upcoming milestones
   const milestones = await db.all(
-    `SELECT m.*, p.name as project_name FROM milestones m
+    `SELECT m.*, p.project_name as project_name FROM milestones m
      JOIN projects p ON m.project_id = p.id
      WHERE m.due_date IS NOT NULL AND m.due_date <= ? AND m.status != 'completed'
      ORDER BY m.due_date`,
@@ -512,7 +512,7 @@ export async function exportUpcomingToICal(daysAhead: number = 30): Promise<stri
 
   // Get upcoming tasks
   const tasks = await db.all(
-    `SELECT t.*, p.name as project_name FROM project_tasks t
+    `SELECT t.*, p.project_name as project_name FROM project_tasks t
      JOIN projects p ON t.project_id = p.id
      WHERE t.due_date IS NOT NULL AND t.due_date <= ? AND t.status != 'completed'
      ORDER BY t.due_date`,
@@ -525,7 +525,7 @@ export async function exportUpcomingToICal(daysAhead: number = 30): Promise<stri
 
   // Get upcoming invoice due dates
   const invoices = await db.all(
-    `SELECT i.*, c.name as client_name FROM invoices i
+    `SELECT i.*, COALESCE(c.contact_name, c.company_name) as client_name FROM invoices i
      JOIN clients c ON i.client_id = c.id
      WHERE i.due_date IS NOT NULL AND i.due_date <= ? AND i.status IN ('sent', 'pending', 'overdue')
      ORDER BY i.due_date`,

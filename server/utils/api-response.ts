@@ -70,6 +70,24 @@ export function errorResponse(
 }
 
 /**
+ * Error response with additional payload fields
+ */
+export function errorResponseWithPayload(
+  res: Response,
+  message: string,
+  status = 400,
+  code?: string,
+  payload?: Record<string, unknown>
+): Response {
+  return res.status(status).json({
+    success: false,
+    error: message,
+    code: code || getErrorCode(status),
+    ...(payload || {})
+  });
+}
+
+/**
  * Not found response (404)
  */
 export function notFoundResponse(

@@ -11,6 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { questionnaireService, ResponseStatus } from '../services/questionnaire-service.js';
+import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -29,7 +30,7 @@ router.get(
     const status = req.query.status as ResponseStatus | undefined;
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     const responses = await questionnaireService.getClientResponses(clientId, status);
@@ -50,22 +51,22 @@ router.get(
     const responseId = parseInt(req.params.id);
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     if (isNaN(responseId)) {
-      return res.status(400).json({ error: 'Invalid response ID' });
+      return errorResponse(res, 'Invalid response ID', 400);
     }
 
     const response = await questionnaireService.getResponse(responseId);
 
     if (!response) {
-      return res.status(404).json({ error: 'Response not found' });
+      return errorResponse(res, 'Response not found', 404);
     }
 
     // Verify client owns this response (unless admin)
     if (req.user?.type !== 'admin' && response.client_id !== clientId) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403);
     }
 
     // Get the full questionnaire
@@ -87,21 +88,21 @@ router.post(
     const { answers } = req.body;
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     if (isNaN(responseId)) {
-      return res.status(400).json({ error: 'Invalid response ID' });
+      return errorResponse(res, 'Invalid response ID', 400);
     }
 
     // Verify ownership
     const existing = await questionnaireService.getResponse(responseId);
     if (!existing) {
-      return res.status(404).json({ error: 'Response not found' });
+      return errorResponse(res, 'Response not found', 404);
     }
 
     if (existing.client_id !== clientId) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403);
     }
 
     const response = await questionnaireService.saveProgress(responseId, answers || {});
@@ -126,25 +127,25 @@ router.post(
     const { answers } = req.body;
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     if (isNaN(responseId)) {
-      return res.status(400).json({ error: 'Invalid response ID' });
+      return errorResponse(res, 'Invalid response ID', 400);
     }
 
     // Verify ownership
     const existing = await questionnaireService.getResponse(responseId);
     if (!existing) {
-      return res.status(404).json({ error: 'Response not found' });
+      return errorResponse(res, 'Response not found', 404);
     }
 
     if (existing.client_id !== clientId) {
-      return res.status(403).json({ error: 'Access denied' });
+      return errorResponse(res, 'Access denied', 403);
     }
 
     if (existing.status === 'completed') {
-      return res.status(400).json({ error: 'Questionnaire already submitted' });
+      return errorResponse(res, 'Questionnaire already submitted', 400);
     }
 
     const response = await questionnaireService.submitResponse(responseId, answers || {});
@@ -188,12 +189,12 @@ router.get(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid questionnaire ID' });
+      return errorResponse(res, 'Invalid questionnaire ID', 400);
     }
 
     const questionnaire = await questionnaireService.getQuestionnaire(id);
     if (!questionnaire) {
-      return res.status(404).json({ error: 'Questionnaire not found' });
+      return errorResponse(res, 'Questionnaire not found', 404);
     }
 
     res.json({ questionnaire });
@@ -219,7 +220,7 @@ router.post(
     } = req.body;
 
     if (!name || !questions || !Array.isArray(questions)) {
-      return res.status(400).json({ error: 'name and questions array are required' });
+      return errorResponse(res, 'name and questions array are required', 400);
     }
 
     const createdBy = req.user?.email;
@@ -254,12 +255,12 @@ router.put(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid questionnaire ID' });
+      return errorResponse(res, 'Invalid questionnaire ID', 400);
     }
 
     const questionnaire = await questionnaireService.updateQuestionnaire(id, req.body);
     if (!questionnaire) {
-      return res.status(404).json({ error: 'Questionnaire not found' });
+      return errorResponse(res, 'Questionnaire not found', 404);
     }
 
     res.json({
@@ -281,7 +282,7 @@ router.delete(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid questionnaire ID' });
+      return errorResponse(res, 'Invalid questionnaire ID', 400);
     }
 
     await questionnaireService.deleteQuestionnaire(id);
@@ -322,24 +323,23 @@ router.post(
     const { client_id, project_id, due_date } = req.body;
 
     if (isNaN(questionnaireId)) {
-      return res.status(400).json({ error: 'Invalid questionnaire ID' });
+      return errorResponse(res, 'Invalid questionnaire ID', 400);
     }
 
     if (!client_id) {
-      return res.status(400).json({ error: 'client_id is required' });
+      return errorResponse(res, 'client_id is required', 400);
     }
 
     // Check if questionnaire exists
     const questionnaire = await questionnaireService.getQuestionnaire(questionnaireId);
     if (!questionnaire) {
-      return res.status(404).json({ error: 'Questionnaire not found' });
+      return errorResponse(res, 'Questionnaire not found', 404);
     }
 
     // Check if already sent
     const existing = await questionnaireService.getClientResponseForQuestionnaire(client_id, questionnaireId);
     if (existing) {
-      return res.status(400).json({
-        error: 'Questionnaire already sent to this client',
+      return errorResponseWithPayload(res, 'Questionnaire already sent to this client', 400, undefined, {
         existing_response_id: existing.id
       });
     }
@@ -371,7 +371,7 @@ router.get(
     const status = req.query.status as ResponseStatus | undefined;
 
     if (isNaN(clientId)) {
-      return res.status(400).json({ error: 'Invalid client ID' });
+      return errorResponse(res, 'Invalid client ID', 400);
     }
 
     const responses = await questionnaireService.getClientResponses(clientId, status);
@@ -392,7 +392,7 @@ router.post(
     const responseId = parseInt(req.params.id);
 
     if (isNaN(responseId)) {
-      return res.status(400).json({ error: 'Invalid response ID' });
+      return errorResponse(res, 'Invalid response ID', 400);
     }
 
     const response = await questionnaireService.sendReminder(responseId);
@@ -416,7 +416,7 @@ router.delete(
     const responseId = parseInt(req.params.id);
 
     if (isNaN(responseId)) {
-      return res.status(400).json({ error: 'Invalid response ID' });
+      return errorResponse(res, 'Invalid response ID', 400);
     }
 
     await questionnaireService.deleteResponse(responseId);

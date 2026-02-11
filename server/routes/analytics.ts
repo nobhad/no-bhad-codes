@@ -32,13 +32,14 @@ import { getNumber } from '../database/row-helpers.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 import { UAParser } from 'ua-parser-js';
 import { analyticsService } from '../services/analytics-service.js';
+import { errorResponse } from '../utils/api-response.js';
 
 // Helper for async route handlers
 const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>) =>
   (req: Request, res: Response) => {
     Promise.resolve(fn(req, res)).catch((error) => {
       logger.error('Route error', { category: 'analytics', metadata: { error } });
-      res.status(500).json({ error: 'Internal server error' });
+      errorResponse(res, 'Internal server error', 500, 'INTERNAL_ERROR');
     });
   };
 
@@ -100,7 +101,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
     const payload: TrackingPayload = req.body;
 
     if (!payload.session || !payload.events) {
-      return res.status(400).json({ error: 'Invalid payload' });
+      return errorResponse(res, 'Invalid payload', 400, 'VALIDATION_ERROR');
     }
 
     const db = getDatabase();
@@ -234,7 +235,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
       category: 'analytics',
       metadata: { error }
     });
-    res.status(500).json({ error: 'Failed to process tracking events' });
+    errorResponse(res, 'Failed to process tracking events', 500, 'INTERNAL_ERROR');
   }
 });
 
@@ -360,7 +361,7 @@ router.get(
         category: 'analytics',
         metadata: { error }
       });
-      res.status(500).json({ error: 'Failed to get analytics summary' });
+      errorResponse(res, 'Failed to get analytics summary', 500, 'INTERNAL_ERROR');
     }
   }
 );
@@ -417,7 +418,7 @@ router.get(
         category: 'analytics',
         metadata: { error }
       });
-      res.status(500).json({ error: 'Failed to get realtime analytics' });
+      errorResponse(res, 'Failed to get realtime analytics', 500, 'INTERNAL_ERROR');
     }
   }
 );
@@ -469,7 +470,7 @@ router.delete(
         category: 'analytics',
         metadata: { error }
       });
-      res.status(500).json({ error: 'Failed to clear analytics data' });
+      errorResponse(res, 'Failed to clear analytics data', 500, 'INTERNAL_ERROR');
     }
   }
 );
@@ -546,7 +547,7 @@ router.get(
         category: 'analytics',
         metadata: { error }
       });
-      res.status(500).json({ error: 'Failed to get sessions list' });
+      errorResponse(res, 'Failed to get sessions list', 500, 'INTERNAL_ERROR');
     }
   }
 );
@@ -577,7 +578,7 @@ router.get(
       );
 
       if (!session) {
-        return res.status(404).json({ error: 'Session not found' });
+        return errorResponse(res, 'Session not found', 404, 'RESOURCE_NOT_FOUND');
       }
 
       // Get page views
@@ -608,7 +609,7 @@ router.get(
         category: 'analytics',
         metadata: { error }
       });
-      res.status(500).json({ error: 'Failed to get session details' });
+      errorResponse(res, 'Failed to get session details', 500, 'INTERNAL_ERROR');
     }
   }
 );
@@ -680,7 +681,7 @@ router.get(
         category: 'analytics',
         metadata: { error }
       });
-      res.status(500).json({ error: 'Failed to export analytics data' });
+      errorResponse(res, 'Failed to export analytics data', 500, 'INTERNAL_ERROR');
     }
   }
 );
@@ -722,7 +723,7 @@ router.post('/reports', authenticateToken, requireAdmin, asyncHandler(async (req
 router.get('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const report = await analyticsService.getSavedReport(parseInt(req.params.id, 10));
   if (!report) {
-    res.status(404).json({ error: 'Report not found' });
+    errorResponse(res, 'Report not found', 404, 'RESOURCE_NOT_FOUND');
     return;
   }
   res.json({ report });

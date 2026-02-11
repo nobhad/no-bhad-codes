@@ -781,9 +781,9 @@ class ProposalService {
       const proposal = await db.get(`
         SELECT
           pr.*,
-          p.name as project_name,
+          p.project_name as project_name,
           p.project_type,
-          c.name as client_name,
+          COALESCE(c.contact_name, c.company_name) as client_name,
           c.company_name,
           c.email as client_email
         FROM proposal_requests pr

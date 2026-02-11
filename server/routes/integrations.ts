@@ -47,6 +47,7 @@ import {
   getCalendarSyncConfig
 } from '../services/integrations';
 import { getDatabase } from '../database/init';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = Router();
 
@@ -55,7 +56,7 @@ const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>) =>
   (req: Request, res: Response) => {
     Promise.resolve(fn(req, res)).catch((error) => {
       console.error('Integration route error:', error);
-      res.status(500).json({ error: error.message || 'Internal server error' });
+      errorResponse(res, error.message || 'Internal server error', 500, 'INTERNAL_ERROR');
     });
   };
 
@@ -126,7 +127,7 @@ router.post('/zapier/webhook', authenticateToken, requireAdmin, asyncHandler(asy
   const { name, url, events } = req.body;
 
   if (!name || !url || !events?.length) {
-    res.status(400).json({ error: 'Name, URL, and events are required' });
+    errorResponse(res, 'Name, URL, and events are required', 400, 'VALIDATION_ERROR');
     return;
   }
 
@@ -148,7 +149,7 @@ router.post('/zapier/format', authenticateToken, requireAdmin, asyncHandler(asyn
   const { eventType, data, entityId } = req.body;
 
   if (!eventType || !data) {
-    res.status(400).json({ error: 'Event type and data are required' });
+    errorResponse(res, 'Event type and data are required', 400, 'VALIDATION_ERROR');
     return;
   }
 
@@ -177,12 +178,12 @@ router.post('/notifications', authenticateToken, requireAdmin, asyncHandler(asyn
   const { id, name, platform, webhook_url, channel, events, is_active } = req.body;
 
   if (!name || !platform || !webhook_url || !events?.length) {
-    res.status(400).json({ error: 'Name, platform, webhook URL, and events are required' });
+    errorResponse(res, 'Name, platform, webhook URL, and events are required', 400, 'VALIDATION_ERROR');
     return;
   }
 
   if (!['slack', 'discord'].includes(platform)) {
-    res.status(400).json({ error: 'Platform must be slack or discord' });
+    errorResponse(res, 'Platform must be slack or discord', 400, 'VALIDATION_ERROR');
     return;
   }
 
@@ -220,7 +221,7 @@ router.post('/notifications/:id/test', authenticateToken, requireAdmin, asyncHan
   const config = configs.find(c => c.id === parseInt(id, 10));
 
   if (!config) {
-    res.status(404).json({ error: 'Notification configuration not found' });
+    errorResponse(res, 'Notification configuration not found', 404, 'RESOURCE_NOT_FOUND');
     return;
   }
 
@@ -236,7 +237,7 @@ router.post('/notifications/preview', authenticateToken, requireAdmin, asyncHand
   const { platform, eventType, data } = req.body;
 
   if (!platform || !eventType) {
-    res.status(400).json({ error: 'Platform and event type are required' });
+    errorResponse(res, 'Platform and event type are required', 400, 'VALIDATION_ERROR');
     return;
   }
 
@@ -277,14 +278,19 @@ router.get('/stripe/status', authenticateToken, requireAdmin, asyncHandler(async
  */
 router.post('/stripe/payment-link', authenticateToken, requireAdmin, asyncHandler(async (req, res) => {
   if (!isStripeConfigured()) {
-    res.status(400).json({ error: 'Stripe is not configured. Set STRIPE_SECRET_KEY environment variable.' });
+    errorResponse(
+      res,
+      'Stripe is not configured. Set STRIPE_SECRET_KEY environment variable.',
+      400,
+      'STRIPE_NOT_CONFIGURED'
+    );
     return;
   }
 
   const { invoiceId, successUrl, cancelUrl } = req.body;
 
   if (!invoiceId) {
-    res.status(400).json({ error: 'Invoice ID is required' });
+    errorResponse(res, 'Invoice ID is required', 400, 'VALIDATION_ERROR');
     return;
   }
 
@@ -292,7 +298,7 @@ router.post('/stripe/payment-link', authenticateToken, requireAdmin, asyncHandle
   const invoice = await db.get('SELECT * FROM invoices WHERE id = ?', [invoiceId]);
 
   if (!invoice) {
-    res.status(404).json({ error: 'Invoice not found' });
+    errorResponse(res, 'Invoice not found', 404, 'RESOURCE_NOT_FOUND');
     return;
   }
 
@@ -317,7 +323,7 @@ router.get('/stripe/payment-link/:invoiceId', authenticateToken, requireAdmin, a
   const link = await getPaymentLink(parseInt(invoiceId, 10));
 
   if (!link) {
-    res.status(404).json({ error: 'No active payment link found' });
+    errorResponse(res, 'No active payment link found', 404, 'RESOURCE_NOT_FOUND');
     return;
   }
 
@@ -342,7 +348,7 @@ router.post('/stripe/webhook', asyncHandler(async (req, res) => {
   const signature = req.headers['stripe-signature'] as string;
 
   if (!signature) {
-    res.status(400).json({ error: 'Missing Stripe signature' });
+    errorResponse(res, 'Missing Stripe signature', 400, 'VALIDATION_ERROR');
     return;
   }
 
@@ -350,7 +356,7 @@ router.post('/stripe/webhook', asyncHandler(async (req, res) => {
   const rawBody = JSON.stringify(req.body);
 
   if (!verifyWebhookSignature(rawBody, signature)) {
-    res.status(400).json({ error: 'Invalid signature' });
+    errorResponse(res, 'Invalid signature', 400, 'VALIDATION_ERROR');
     return;
   }
 
@@ -393,7 +399,7 @@ router.get('/calendar/status', authenticateToken, requireAdmin, asyncHandler(asy
  */
 router.get('/calendar/auth-url', authenticateToken, requireAdmin, asyncHandler(async (req, res) => {
   if (!isGoogleCalendarConfigured()) {
-    res.status(400).json({ error: 'Google Calendar is not configured' });
+    errorResponse(res, 'Google Calendar is not configured', 400, 'GOOGLE_CALENDAR_NOT_CONFIGURED');
     return;
   }
 
@@ -411,7 +417,7 @@ router.post('/calendar/callback', authenticateToken, requireAdmin, asyncHandler(
   const userId = (req as any).user?.id;
 
   if (!code) {
-    res.status(400).json({ error: 'Authorization code is required' });
+    errorResponse(res, 'Authorization code is required', 400, 'VALIDATION_ERROR');
     return;
   }
 
@@ -443,7 +449,7 @@ router.put('/calendar/settings', authenticateToken, requireAdmin, asyncHandler(a
 
   const existing = await getCalendarSyncConfig(userId);
   if (!existing) {
-    res.status(404).json({ error: 'Calendar not connected' });
+    errorResponse(res, 'Calendar not connected', 404, 'RESOURCE_NOT_FOUND');
     return;
   }
 

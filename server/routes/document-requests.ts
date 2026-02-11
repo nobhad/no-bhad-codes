@@ -11,6 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { documentRequestService, RequestStatus } from '../services/document-request-service.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -29,7 +30,7 @@ router.get(
     const status = req.query.status as RequestStatus | undefined;
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     const requests = await documentRequestService.getClientRequests(clientId, status);
@@ -50,11 +51,11 @@ router.post(
     const clientEmail = req.user?.email;
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400);
     }
 
     if (!clientEmail) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     const request = await documentRequestService.markViewed(id, clientEmail);
@@ -74,15 +75,15 @@ router.post(
     const uploaderEmail = req.user?.email;
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400);
     }
 
     if (!fileId) {
-      return res.status(400).json({ error: 'fileId is required' });
+      return errorResponse(res, 'fileId is required', 400);
     }
 
     if (!uploaderEmail) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     const request = await documentRequestService.uploadDocument(id, fileId, uploaderEmail);
@@ -104,7 +105,7 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
     const requests = await documentRequestService.getClientPendingRequests(clientId);
@@ -167,7 +168,7 @@ router.get(
     const status = req.query.status as RequestStatus | undefined;
 
     if (isNaN(clientId)) {
-      return res.status(400).json({ error: 'Invalid client ID' });
+      return errorResponse(res, 'Invalid client ID', 400);
     }
 
     const requests = await documentRequestService.getClientRequests(clientId, status);
@@ -188,7 +189,7 @@ router.get(
     const projectId = parseInt(req.params.projectId);
 
     if (isNaN(projectId)) {
-      return res.status(400).json({ error: 'Invalid project ID' });
+      return errorResponse(res, 'Invalid project ID', 400);
     }
 
     const requests = await documentRequestService.getProjectPendingRequests(projectId);
@@ -207,12 +208,12 @@ router.get(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400);
     }
 
     const request = await documentRequestService.getRequest(id);
     if (!request) {
-      return res.status(404).json({ error: 'Request not found' });
+      return errorResponse(res, 'Request not found', 404);
     }
 
     const history = await documentRequestService.getRequestHistory(id);
@@ -241,7 +242,7 @@ router.post(
     } = req.body;
 
     if (!client_id || !title) {
-      return res.status(400).json({ error: 'client_id and title are required' });
+      return errorResponse(res, 'client_id and title are required', 400);
     }
 
     const requestedBy = req.user?.email || 'admin';
@@ -277,7 +278,7 @@ router.post(
     const { client_id, template_ids, project_id } = req.body;
 
     if (!client_id || !template_ids || !Array.isArray(template_ids)) {
-      return res.status(400).json({ error: 'client_id and template_ids array are required' });
+      return errorResponse(res, 'client_id and template_ids array are required', 400);
     }
 
     const requestedBy = req.user?.email || 'admin';
@@ -309,7 +310,7 @@ router.post(
     const reviewerEmail = req.user?.email || 'admin';
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400);
     }
 
     const request = await documentRequestService.startReview(id, reviewerEmail);
@@ -334,7 +335,7 @@ router.post(
     const reviewerEmail = req.user?.email || 'admin';
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400);
     }
 
     const request = await documentRequestService.approveRequest(id, reviewerEmail, notes);
@@ -359,11 +360,11 @@ router.post(
     const reviewerEmail = req.user?.email || 'admin';
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400);
     }
 
     if (!reason) {
-      return res.status(400).json({ error: 'Rejection reason is required' });
+      return errorResponse(res, 'Rejection reason is required', 400);
     }
 
     const request = await documentRequestService.rejectRequest(id, reviewerEmail, reason);
@@ -386,7 +387,7 @@ router.post(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400);
     }
 
     const request = await documentRequestService.sendReminder(id);
@@ -409,7 +410,7 @@ router.delete(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid request ID' });
+      return errorResponse(res, 'Invalid request ID', 400);
     }
 
     await documentRequestService.deleteRequest(id);
@@ -448,12 +449,12 @@ router.get(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid template ID' });
+      return errorResponse(res, 'Invalid template ID', 400);
     }
 
     const template = await documentRequestService.getTemplate(id);
     if (!template) {
-      return res.status(404).json({ error: 'Template not found' });
+      return errorResponse(res, 'Template not found', 404);
     }
 
     res.json({ template });
@@ -471,7 +472,7 @@ router.post(
     const { name, title, description, document_type, is_required, days_until_due } = req.body;
 
     if (!name || !title) {
-      return res.status(400).json({ error: 'name and title are required' });
+      return errorResponse(res, 'name and title are required', 400);
     }
 
     const createdBy = req.user?.email;
@@ -505,12 +506,12 @@ router.put(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid template ID' });
+      return errorResponse(res, 'Invalid template ID', 400);
     }
 
     const template = await documentRequestService.updateTemplate(id, req.body);
     if (!template) {
-      return res.status(404).json({ error: 'Template not found' });
+      return errorResponse(res, 'Template not found', 404);
     }
 
     res.json({
@@ -532,7 +533,7 @@ router.delete(
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid template ID' });
+      return errorResponse(res, 'Invalid template ID', 400);
     }
 
     await documentRequestService.deleteTemplate(id);
@@ -585,7 +586,7 @@ router.post(
     const { client_id, project_type, project_id, required_only } = req.body;
 
     if (!client_id || !project_type) {
-      return res.status(400).json({ error: 'client_id and project_type are required' });
+      return errorResponse(res, 'client_id and project_type are required', 400);
     }
 
     const requestedBy = req.user?.email || 'admin';

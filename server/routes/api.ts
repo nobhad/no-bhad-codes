@@ -16,6 +16,7 @@ import { rateLimit, requestSizeLimit, suspiciousActivityDetector } from '../midd
 import { logger } from '../services/logger.js';
 import { getDatabase } from '../database/init.js';
 import { emailService } from '../services/email-service.js';
+import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 
 const router = Router();
 
@@ -222,124 +223,14 @@ Received: ${new Date().toISOString()}
       });
     } catch (_error) {
       await logger.error('Contact form processing error');
-
-      res.status(500).json({
-        success: false,
-        error: 'Failed to process contact form',
-        code: 'CONTACT_PROCESSING_ERROR'
-      });
-    }
-  }
-);
-
-/**
- * Client intake form submission
- */
-router.post(
-  '/intake',
-  // Rate limiting for intake forms
-  rateLimit({
-    windowMs: 24 * 60 * 60 * 1000, // 24 hours
-    maxRequests: 3,
-    keyGenerator: (req) => req.body.email || req.ip,
-    message: 'Too many intake form submissions'
-  }),
-
-  // Validate intake form data
-  validateRequest(ValidationSchemas.clientIntake, {
-    validateBody: true,
-    stripUnknownFields: true
-  }),
-
-  async (req, res) => {
-    try {
-      const intakeData = req.body;
-
-      await logger.info('Client intake form received');
-
-      // Process intake form data
-      const { getDatabase: getDatabaseFn } = await import('../database/init.js');
-      const db = getDatabaseFn();
-
-      // Generate unique intake ID
-      const intakeId = `INT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-
-      // Insert intake form data into database
-      await db.run(
-        `
-        INSERT INTO client_intakes (
-          intake_id, company_name, first_name, last_name, email, phone,
-          project_type, budget_range, timeline, project_description,
-          additional_info, status, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', datetime('now'))
-      `,
-        [
-          intakeId,
-          intakeData.companyName || intakeData['company-name'],
-          intakeData.firstName || intakeData['first-name'],
-          intakeData.lastName || intakeData['last-name'],
-          intakeData.email,
-          intakeData.phone || null,
-          intakeData.projectType || intakeData['project-type'],
-          intakeData.budget || null,
-          intakeData.timeline || null,
-          intakeData.projectDescription || intakeData['project-description'],
-          intakeData.additionalInfo || intakeData['additional-info'] || null
-        ]
-      );
-
-      // Send notification email to admin
-      try {
-        const { emailService: emailSvc } = await import('../services/email-service.js');
-        await emailSvc.sendAdminNotification({
-          subject: `New Client Intake: ${intakeData.companyName || intakeData['company-name']}`,
-          intakeId,
-          clientName: `${intakeData.firstName || intakeData['first-name']} ${intakeData.lastName || intakeData['last-name']}`,
-          companyName: intakeData.companyName || intakeData['company-name'],
-          projectType: intakeData.projectType || intakeData['project-type'],
-          budget: intakeData.budget || 'Not specified',
-          timeline: intakeData.timeline || 'Not specified'
-        });
-      } catch (_emailError) {
-        await logger.error('Failed to send admin notification email');
-      }
-
-      // Send confirmation email to client
-      try {
-        const { emailService: emailSvcConfirm } = await import('../services/email-service.js');
-        await emailSvcConfirm.sendIntakeConfirmation({
-          to: intakeData.email,
-          name: intakeData.firstName || intakeData['first-name'],
-          intakeId,
-          estimatedResponseTime: '24-48 hours'
-        });
-      } catch (_emailError) {
-        await logger.error('Failed to send client confirmation email');
-      }
-
-      await logger.info('Client intake processed successfully');
-
-      res.json({
-        success: true,
-        message:
-          'Your intake form has been submitted successfully. We will review your project requirements and get back to you within 24-48 hours.',
-        intakeId,
-        estimatedResponseTime: '24-48 hours'
-      });
-    } catch (_error) {
-      await logger.error('Intake form processing error');
-
-      res.status(500).json({
-        success: false,
-        error: 'Failed to process intake form. Please try again or contact support.',
-        code: 'INTAKE_PROCESSING_ERROR'
-      });
+      errorResponse(res, 'Failed to process contact form', 500, 'CONTACT_PROCESSING_ERROR');
     }
   }
 );
 
 /**
  * File upload endpoint
+ * NOTE: Client intake form is handled by /routes/intake.ts (mounted at /api/intake)
  */
 router.post(
   '/upload',
@@ -357,11 +248,7 @@ router.post(
     try {
       // Implement file upload handling
       if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          error: 'No file uploaded',
-          code: 'NO_FILE'
-        });
+        return errorResponse(res, 'No file uploaded', 400, 'NO_FILE');
       }
 
       const fileInfo = {
@@ -400,12 +287,7 @@ router.post(
       });
     } catch (_error) {
       await logger.error('File upload error');
-
-      res.status(500).json({
-        success: false,
-        error: 'File upload failed',
-        code: 'UPLOAD_ERROR'
-      });
+      errorResponse(res, 'File upload failed', 500, 'UPLOAD_ERROR');
     }
   }
 );
@@ -438,12 +320,7 @@ router.get(
       });
     } catch (_error) {
       await logger.error('Health check error');
-
-      res.status(500).json({
-        success: false,
-        error: 'Health check failed',
-        code: 'HEALTH_CHECK_ERROR'
-      });
+      errorResponse(res, 'Health check failed', 500, 'HEALTH_CHECK_ERROR');
     }
   }
 );
@@ -527,12 +404,7 @@ router.get(
       });
     } catch (_error) {
       await logger.error('Data query error');
-
-      res.status(500).json({
-        success: false,
-        error: 'Data query failed',
-        code: 'DATA_QUERY_ERROR'
-      });
+      errorResponse(res, 'Data query failed', 500, 'DATA_QUERY_ERROR');
     }
   }
 );
@@ -613,12 +485,7 @@ router.get(
       });
     } catch (_error) {
       await logger.error('API status error');
-
-      res.status(500).json({
-        success: false,
-        error: 'Status check failed',
-        code: 'STATUS_ERROR'
-      });
+      errorResponse(res, 'Status check failed', 500, 'STATUS_ERROR');
     }
   }
 );
@@ -626,13 +493,7 @@ router.get(
 // Handle 404 for unmatched API routes
 router.use(async (req, res) => {
   await logger.error('API route not found');
-
-  res.status(404).json({
-    success: false,
-    error: 'API endpoint not found',
-    code: 'ENDPOINT_NOT_FOUND',
-    path: req.path
-  });
+  errorResponseWithPayload(res, 'API endpoint not found', 404, 'ENDPOINT_NOT_FOUND', { path: req.path });
 });
 
 // Error handler for API routes
@@ -646,13 +507,7 @@ router.use(async (error: unknown, req: express.Request, res: express.Response, n
   const status = (error as { status?: number })?.status ?? 500;
   const message = error instanceof Error ? error.message : 'Internal server error';
   const code = (error as { code?: string })?.code ?? 'INTERNAL_ERROR';
-
-  res.status(status).json({
-    success: false,
-    error: message,
-    code,
-    requestId: req.headers['x-request-id']
-  });
+  errorResponseWithPayload(res, message, status, code, { requestId: req.headers['x-request-id'] });
 });
 
 export default router;

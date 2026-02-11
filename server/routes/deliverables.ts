@@ -5,6 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import { deliverableService } from '../services/deliverable-service.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.post('/', async (req: Request, res: Response) => {
     const { projectId, title, description, type, createdById, tags, reviewDeadline, roundNumber } = req.body;
 
     if (!projectId || !title || !type || !createdById) {
-      return res.status(400).json({ error: 'Missing required fields' });
+      return errorResponse(res, 'Missing required fields', 400);
     }
 
     const deliverable = await deliverableService.createDeliverable(
@@ -33,7 +34,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     res.status(201).json({ deliverable });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create deliverable' });
+    errorResponse(res, 'Failed to create deliverable', 500);
   }
 });
 
@@ -47,12 +48,12 @@ router.get('/:id', async (req: Request, res: Response) => {
     const deliverable = await deliverableService.getDeliverableById(parseInt(id));
 
     if (!deliverable) {
-      return res.status(404).json({ error: 'Deliverable not found' });
+      return errorResponse(res, 'Deliverable not found', 404);
     }
 
     res.json({ deliverable });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve deliverable' });
+    errorResponse(res, 'Failed to retrieve deliverable', 500);
   }
 });
 
@@ -74,7 +75,7 @@ router.get('/projects/:projectId/list', async (req: Request, res: Response) => {
 
     res.json({ deliverables: result.deliverables, pagination: { total: result.total } });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to list deliverables' });
+    errorResponse(res, 'Failed to list deliverables', 500);
   }
 });
 
@@ -89,9 +90,9 @@ router.put('/:id', async (req: Request, res: Response) => {
     res.json({ deliverable });
   } catch (error: any) {
     if (error.message.includes('not found')) {
-      return res.status(404).json({ error: 'Deliverable not found' });
+      return errorResponse(res, 'Deliverable not found', 404);
     }
-    res.status(500).json({ error: 'Failed to update deliverable' });
+    errorResponse(res, 'Failed to update deliverable', 500);
   }
 });
 
@@ -105,16 +106,16 @@ router.post('/:id/lock', async (req: Request, res: Response) => {
     const { reviewedById } = req.body;
 
     if (!reviewedById) {
-      return res.status(400).json({ error: 'reviewedById is required' });
+      return errorResponse(res, 'reviewedById is required', 400);
     }
 
     const deliverable = await deliverableService.lockDeliverable(parseInt(id), reviewedById);
     res.json({ deliverable, message: 'Deliverable approved and locked' });
   } catch (error: any) {
     if (error.message.includes('not found')) {
-      return res.status(404).json({ error: 'Deliverable not found' });
+      return errorResponse(res, 'Deliverable not found', 404);
     }
-    res.status(500).json({ error: 'Failed to lock deliverable' });
+    errorResponse(res, 'Failed to lock deliverable', 500);
   }
 });
 
@@ -128,16 +129,16 @@ router.post('/:id/revision', async (req: Request, res: Response) => {
     const { reason, reviewedById } = req.body;
 
     if (!reason || !reviewedById) {
-      return res.status(400).json({ error: 'reason and reviewedById are required' });
+      return errorResponse(res, 'reason and reviewedById are required', 400);
     }
 
     const deliverable = await deliverableService.requestRevision(parseInt(id), reason, reviewedById);
     res.json({ deliverable, message: 'Revision requested' });
   } catch (error: any) {
     if (error.message.includes('not found')) {
-      return res.status(404).json({ error: 'Deliverable not found' });
+      return errorResponse(res, 'Deliverable not found', 404);
     }
-    res.status(500).json({ error: 'Failed to request revision' });
+    errorResponse(res, 'Failed to request revision', 500);
   }
 });
 
@@ -151,7 +152,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     await deliverableService.deleteDeliverable(parseInt(id));
     res.json({ message: 'Deliverable archived' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete deliverable' });
+    errorResponse(res, 'Failed to delete deliverable', 500);
   }
 });
 
@@ -167,7 +168,7 @@ router.post('/:id/versions', async (req: Request, res: Response) => {
     const { filePath, fileName, fileSize, fileType, uploadedById, changeNotes } = req.body;
 
     if (!filePath || !fileName || !uploadedById) {
-      return res.status(400).json({ error: 'Missing required fields' });
+      return errorResponse(res, 'Missing required fields', 400);
     }
 
     const version = await deliverableService.uploadVersion(
@@ -183,9 +184,9 @@ router.post('/:id/versions', async (req: Request, res: Response) => {
     res.status(201).json({ version });
   } catch (error: any) {
     if (error.message.includes('not found')) {
-      return res.status(404).json({ error: 'Deliverable not found' });
+      return errorResponse(res, 'Deliverable not found', 404);
     }
-    res.status(500).json({ error: 'Failed to upload version' });
+    errorResponse(res, 'Failed to upload version', 500);
   }
 });
 
@@ -199,7 +200,7 @@ router.get('/:id/versions', async (req: Request, res: Response) => {
     const versions = await deliverableService.getDeliverableVersions(parseInt(id));
     res.json({ versions });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to list versions' });
+    errorResponse(res, 'Failed to list versions', 500);
   }
 });
 
@@ -213,12 +214,12 @@ router.get('/:id/versions/latest', async (req: Request, res: Response) => {
     const version = await deliverableService.getLatestVersion(parseInt(id));
 
     if (!version) {
-      return res.status(404).json({ error: 'No versions found' });
+      return errorResponse(res, 'No versions found', 404);
     }
 
     res.json({ version });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve latest version' });
+    errorResponse(res, 'Failed to retrieve latest version', 500);
   }
 });
 
@@ -234,7 +235,7 @@ router.post('/:id/comments', async (req: Request, res: Response) => {
     const { authorId, text, x, y, annotationType, elementId } = req.body;
 
     if (!authorId || !text) {
-      return res.status(400).json({ error: 'authorId and text are required' });
+      return errorResponse(res, 'authorId and text are required', 400);
     }
 
     const comment = await deliverableService.addComment(
@@ -247,9 +248,9 @@ router.post('/:id/comments', async (req: Request, res: Response) => {
     res.status(201).json({ comment });
   } catch (error: any) {
     if (error.message.includes('not found')) {
-      return res.status(404).json({ error: 'Deliverable not found' });
+      return errorResponse(res, 'Deliverable not found', 404);
     }
-    res.status(500).json({ error: 'Failed to add comment' });
+    errorResponse(res, 'Failed to add comment', 500);
   }
 });
 
@@ -269,7 +270,7 @@ router.get('/:id/comments', async (req: Request, res: Response) => {
 
     res.json({ comments });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to list comments' });
+    errorResponse(res, 'Failed to list comments', 500);
   }
 });
 
@@ -284,9 +285,9 @@ router.patch('/:deliverableId/comments/:commentId/resolve', async (req: Request,
     res.json({ comment });
   } catch (error: any) {
     if (error.message.includes('not found')) {
-      return res.status(404).json({ error: 'Comment not found' });
+      return errorResponse(res, 'Comment not found', 404);
     }
-    res.status(500).json({ error: 'Failed to resolve comment' });
+    errorResponse(res, 'Failed to resolve comment', 500);
   }
 });
 
@@ -300,7 +301,7 @@ router.delete('/:deliverableId/comments/:commentId', async (req: Request, res: R
     await deliverableService.deleteComment(parseInt(commentId));
     res.json({ message: 'Comment deleted' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete comment' });
+    errorResponse(res, 'Failed to delete comment', 500);
   }
 });
 
@@ -316,16 +317,16 @@ router.post('/:id/elements', async (req: Request, res: Response) => {
     const { name, description } = req.body;
 
     if (!name) {
-      return res.status(400).json({ error: 'name is required' });
+      return errorResponse(res, 'name is required', 400);
     }
 
     const element = await deliverableService.createDesignElement(parseInt(id), name, description);
     res.status(201).json({ element });
   } catch (error: any) {
     if (error.message.includes('not found')) {
-      return res.status(404).json({ error: 'Deliverable not found' });
+      return errorResponse(res, 'Deliverable not found', 404);
     }
-    res.status(500).json({ error: 'Failed to create design element' });
+    errorResponse(res, 'Failed to create design element', 500);
   }
 });
 
@@ -339,7 +340,7 @@ router.get('/:id/elements', async (req: Request, res: Response) => {
     const elements = await deliverableService.getDeliverableElements(parseInt(id));
     res.json({ elements });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to list design elements' });
+    errorResponse(res, 'Failed to list design elements', 500);
   }
 });
 
@@ -353,16 +354,16 @@ router.patch('/:deliverableId/elements/:elementId/approval', async (req: Request
     const { status } = req.body;
 
     if (!['pending', 'approved', 'revision_needed'].includes(status)) {
-      return res.status(400).json({ error: 'Invalid approval status' });
+      return errorResponse(res, 'Invalid approval status', 400);
     }
 
     const element = await deliverableService.updateElementApprovalStatus(parseInt(elementId), status);
     res.json({ element });
   } catch (error: any) {
     if (error.message.includes('not found')) {
-      return res.status(404).json({ error: 'Design element not found' });
+      return errorResponse(res, 'Design element not found', 404);
     }
-    res.status(500).json({ error: 'Failed to update element approval status' });
+    errorResponse(res, 'Failed to update element approval status', 500);
   }
 });
 
@@ -378,7 +379,7 @@ router.post('/:id/reviews', async (req: Request, res: Response) => {
     const { reviewerId, decision, feedback, elementsReviewed } = req.body;
 
     if (!reviewerId || !decision) {
-      return res.status(400).json({ error: 'reviewerId and decision are required' });
+      return errorResponse(res, 'reviewerId and decision are required', 400);
     }
 
     const review = await deliverableService.createReview(
@@ -392,9 +393,9 @@ router.post('/:id/reviews', async (req: Request, res: Response) => {
     res.status(201).json({ review });
   } catch (error: any) {
     if (error.message.includes('not found')) {
-      return res.status(404).json({ error: 'Deliverable not found' });
+      return errorResponse(res, 'Deliverable not found', 404);
     }
-    res.status(500).json({ error: 'Failed to create review' });
+    errorResponse(res, 'Failed to create review', 500);
   }
 });
 
@@ -408,7 +409,7 @@ router.get('/:id/reviews', async (req: Request, res: Response) => {
     const reviews = await deliverableService.getDeliverableReviews(parseInt(id));
     res.json({ reviews });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to list reviews' });
+    errorResponse(res, 'Failed to list reviews', 500);
   }
 });
 

@@ -11,6 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { workflowTriggerService, EventType, ActionType } from '../services/workflow-trigger-service.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -57,12 +58,12 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid trigger ID' });
+      return errorResponse(res, 'Invalid trigger ID', 400, 'INVALID_TRIGGER_ID');
     }
 
     const trigger = await workflowTriggerService.getTrigger(id);
     if (!trigger) {
-      return res.status(404).json({ error: 'Trigger not found' });
+      return errorResponse(res, 'Trigger not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     res.json({ trigger });
@@ -80,7 +81,12 @@ router.post(
     const { name, description, event_type, conditions, action_type, action_config, is_active, priority } = req.body;
 
     if (!name || !event_type || !action_type || !action_config) {
-      return res.status(400).json({ error: 'name, event_type, action_type, and action_config are required' });
+      return errorResponse(
+        res,
+        'name, event_type, action_type, and action_config are required',
+        400,
+        'VALIDATION_ERROR'
+      );
     }
 
     const trigger = await workflowTriggerService.createTrigger({
@@ -112,12 +118,12 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid trigger ID' });
+      return errorResponse(res, 'Invalid trigger ID', 400, 'INVALID_TRIGGER_ID');
     }
 
     const trigger = await workflowTriggerService.updateTrigger(id, req.body);
     if (!trigger) {
-      return res.status(404).json({ error: 'Trigger not found' });
+      return errorResponse(res, 'Trigger not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     res.json({
@@ -138,7 +144,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid trigger ID' });
+      return errorResponse(res, 'Invalid trigger ID', 400, 'INVALID_TRIGGER_ID');
     }
 
     await workflowTriggerService.deleteTrigger(id);
@@ -159,12 +165,12 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid trigger ID' });
+      return errorResponse(res, 'Invalid trigger ID', 400, 'INVALID_TRIGGER_ID');
     }
 
     const trigger = await workflowTriggerService.toggleTrigger(id);
     if (!trigger) {
-      return res.status(404).json({ error: 'Trigger not found' });
+      return errorResponse(res, 'Trigger not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     res.json({
@@ -222,7 +228,7 @@ router.post(
     const { event_type, context } = req.body;
 
     if (!event_type) {
-      return res.status(400).json({ error: 'event_type is required' });
+      return errorResponse(res, 'event_type is required', 400, 'VALIDATION_ERROR');
     }
 
     await workflowTriggerService.emit(event_type as EventType, {

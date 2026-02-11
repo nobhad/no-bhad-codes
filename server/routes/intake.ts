@@ -20,6 +20,7 @@ import { sendWelcomeEmail, sendNewIntakeNotification } from '../services/email-s
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { userService } from '../services/user-service.js';
+import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -201,11 +202,13 @@ router.post('/', async (req: Request, res: Response) => {
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required fields',
-        missingFields
-      });
+      return errorResponseWithPayload(
+        res,
+        'Missing required fields',
+        400,
+        'VALIDATION_ERROR',
+        { missingFields }
+      );
     }
 
     const intakeData: IntakeFormData = req.body;
@@ -483,11 +486,13 @@ router.post('/', async (req: Request, res: Response) => {
   } catch (error: unknown) {
     console.error('Intake processing error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    res.status(500).json({
-      success: false,
-      message: 'Failed to process intake form',
-      error: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error'
-    });
+    errorResponseWithPayload(
+      res,
+      'Failed to process intake form',
+      500,
+      'INTERNAL_ERROR',
+      { details: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error' }
+    );
   }
 });
 
@@ -511,10 +516,7 @@ router.get('/status/:projectId', async (req: Request, res: Response) => {
     );
 
     if (!project) {
-      return res.status(404).json({
-        success: false,
-        message: 'Project not found'
-      });
+      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     // Get latest update
@@ -558,10 +560,7 @@ router.get('/status/:projectId', async (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     console.error('Status check error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get project status'
-    });
+    errorResponse(res, 'Failed to get project status', 500, 'INTERNAL_ERROR');
   }
 });
 

@@ -16,6 +16,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { settingsService } from '../services/settings-service.js';
 import { auditLogger } from '../services/audit-logger.js';
+import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -86,7 +87,7 @@ router.get(
     const setting = await settingsService.getSetting(req.params.key);
 
     if (!setting) {
-      return res.status(404).json({ error: 'Setting not found' });
+      return errorResponse(res, 'Setting not found', 404);
     }
 
     res.json({
@@ -137,7 +138,7 @@ router.put(
     const { value, type, description } = req.body;
 
     if (value === undefined) {
-      return res.status(400).json({ error: 'Value is required' });
+      return errorResponse(res, 'Value is required', 400);
     }
 
     const setting = await settingsService.setSetting(req.params.key, value, {
@@ -186,7 +187,7 @@ router.delete(
     const deleted = await settingsService.deleteSetting(req.params.key);
 
     if (!deleted) {
-      return res.status(404).json({ error: 'Setting not found' });
+      return errorResponse(res, 'Setting not found', 404);
     }
 
     await auditLogger.log({
