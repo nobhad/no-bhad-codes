@@ -119,6 +119,51 @@ No notifications trigger for: proposal accepted, contract signed, deliverable ap
 
 ---
 
+## FRONTEND vs BACKEND Gaps (Audit Feb 11, 2026)
+
+### Backend Endpoints with NO Frontend UI (ORPHANED)
+
+These backend routes exist but have no admin interface:
+
+| Endpoint | Feature | Priority |
+|----------|---------|----------|
+| `/api/invoices/aging/*` | A/R Aging Reports | HIGH |
+| `/api/invoices/recurring/*` | Recurring Invoice Management | HIGH |
+| `/api/invoices/credits/*` | Credit System | HIGH |
+| `/api/invoices/payment-plans/*` | Payment Plan Templates | MEDIUM |
+| `/api/invoices/reminders/*` | Reminder Management | MEDIUM |
+| `/api/analytics/bi/revenue` | Revenue BI Dashboard | MEDIUM |
+| `/api/analytics/bi/pipeline` | Sales Pipeline | MEDIUM |
+| `/api/analytics/bi/funnel` | Conversion Funnel | MEDIUM |
+| `/api/integrations/stripe/*` | Stripe Management | LOW (deferred) |
+| `/api/integrations/calendar/*` | Calendar Integration | LOW |
+| `/api/data-quality/*` | Data Quality Dashboard | LOW |
+
+### Frontend Calling Missing Backend
+
+| Frontend Location | Endpoint Called | Status |
+|-------------------|-----------------|--------|
+| `portal-invoices.ts` | `/api/clients/me/billing` | MISSING - needs endpoint |
+| `admin-ad-hoc-analytics.ts` | `/api/ad-hoc-requests/summary/monthly` | MISSING - uses fallback |
+
+### Debug Code to Remove (Production Cleanup)
+
+- `admin-analytics.ts:587` - console.log for report debug
+- `admin-projects.ts:2216,2235,2322-2329` - Invoice debug logs
+- `portal-invoices.ts:67` - Error logging
+
+### Services with No Admin UI
+
+| Service | Feature | UI Status |
+|---------|---------|-----------|
+| `soft-delete-service.ts` | Deleted Items Recovery | NO UI |
+| `duplicate-detection-service.ts` | Duplicate Detection | LIMITED |
+| Invoice Payment Plans | Template management | NO UI |
+| Invoice Credits | Credit application | NO UI |
+| Invoice Aging | Report viewing | NO UI |
+
+---
+
 ## MEDIUM PRIORITY - UI/UX Issues
 
 - [ ] **Admin global header logo** - Needs ACME font, match main site style
@@ -131,22 +176,18 @@ No notifications trigger for: proposal accepted, contract signed, deliverable ap
 
 ## Open Issues
 
-### PENDING TESTING
-
-- [ ] Browser back/forward navigation (needs production build)
-- [ ] Horizontal scroll on mobile - NEEDS VERIFICATION
-
 ### ACTIVE - IN PROGRESS THIS SESSION
 
+### PENDING TESTING
+
 - [ ] **Horizontal scroll on mobile** - Fixed `min-width: 320px` to `min-width: 0`, added `overflow-x: hidden` to containers - NEEDS VERIFICATION
-
-### PENDING TESTING - NEEDS VERIFICATION
-
 - [ ] **Client Portal Files Tab** - Verify project folders display correctly, clicking project filters files, all files (including documents) show for each project
 - [ ] **Intake PDF Access** - Verify intake files open as PDF (not JSON) for logged-in clients
 - [ ] Test hash-based routing: invalid hash `#/invalid` redirects to dashboard
 - [ ] Test Messages page two-column layout at various screen sizes
 - [ ] hash-based routing: browser back/forward navigates correctly - cant test with vite
+- [ ] Browser back/forward navigation (needs production build)
+- [ ] Horizontal
 
 ### VERIFIED FIXED - NO VERIFICATION NEEDED, CAN BE MOVED TO ARCHIVE
 
