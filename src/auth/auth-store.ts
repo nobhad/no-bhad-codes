@@ -292,6 +292,7 @@ function createAuthStore(): AuthStore {
           message: string;
           user: AnyUser;
           expiresIn: string;
+          isFirstLogin?: boolean;
         }>(authEndpoints.login, {
           method: 'POST',
           body: JSON.stringify(credentials)
@@ -299,8 +300,12 @@ function createAuthStore(): AuthStore {
 
         const expiresAt = Date.now() + AUTH_TIMING.CLIENT_SESSION_TIMEOUT_MS;
         const sessionId = crypto.randomUUID();
+        const isFirstLogin = data.isFirstLogin ?? false;
 
         saveSession(data.user, expiresAt, sessionId);
+
+        // Store isFirstLogin for greeting display
+        sessionStorage.setItem('nbw_auth_is_first_login', isFirstLogin ? 'true' : 'false');
 
         setState({
           isAuthenticated: true,
@@ -310,17 +315,18 @@ function createAuthStore(): AuthStore {
           expiresAt,
           sessionId,
           error: null,
-          isFirstLogin: false
+          isFirstLogin
         });
 
         startRefreshTimer();
-        emitEvent(AUTH_EVENTS.LOGIN, { user: data.user });
+        emitEvent(AUTH_EVENTS.LOGIN, { user: data.user, isFirstLogin });
 
         return {
           success: true,
           data: data.user,
           expiresIn: data.expiresIn,
-          sessionId
+          sessionId,
+          isFirstLogin
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Login failed';
@@ -565,13 +571,18 @@ function createAuthStore(): AuthStore {
     const session = loadSession();
 
     if (session && !isSessionExpired(session.expiresAt)) {
+      // Restore isFirstLogin from session storage
+      const isFirstLoginStr = sessionStorage.getItem('nbw_auth_is_first_login');
+      const isFirstLogin = isFirstLoginStr === 'true';
+
       setState({
         isAuthenticated: true,
         isLoading: false,
         user: session.user,
         role: session.role,
         expiresAt: session.expiresAt,
-        sessionId: session.sessionId
+        sessionId: session.sessionId,
+        isFirstLogin
       });
 
       startRefreshTimer();
@@ -581,6 +592,7 @@ function createAuthStore(): AuthStore {
       store.validateSession();
     } else {
       clearSession();
+      sessionStorage.removeItem('nbw_auth_is_first_login');
       setState({ isLoading: false });
     }
 

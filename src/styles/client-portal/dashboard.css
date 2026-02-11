@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-8);
-  gap: var(--space-4);
+  gap: var(--space-3);
   color: var(--portal-text-secondary);
 }
 
@@ -41,34 +41,6 @@
   font-size: 0.9rem;
 }
 
-/* Status badge - CLIENT PORTAL OVERRIDE
-   Client portal uses text-only badges (no pill background)
-   Override shared/portal-badges.css pill styles */
-[data-page="client-portal"] .project-status .status-badge {
-  font-family: var(--font-family-acme);
-  padding: 0;
-  margin-left: var(--space-1);
-  font-weight: 400;
-  font-size: 1rem;
-  letter-spacing: 0.5px;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-}
-
-/* Status variants - colored text only, no background */
-[data-page="client-portal"] .project-status .status-badge.status-pending {
-  color: var(--color-warning);
-}
-
-[data-page="client-portal"] .project-status .status-badge.status-active {
-  color: var(--color-primary);
-}
-
-[data-page="client-portal"] .project-status .status-badge.status-completed {
-  color: var(--color-success);
-}
-
 /* Project Progress */
 .project-progress {
   margin: 0 0 var(--space-1) 0;
@@ -95,24 +67,70 @@
 }
 
 /* =====================================================
+   PROJECT PROGRESS SECTION (Combined Progress + Milestones)
+   ===================================================== */
+
+/* Card styling + layout - explicit to avoid CSS load order issues */
+[data-page="client-portal"] .project-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  /* Card styling - explicit for reliability */
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-3);
+  color: var(--portal-text-light);
+  box-shadow: var(--shadow-panel);
+}
+
+[data-page="client-portal"] .project-progress-section .progress-overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+[data-page="client-portal"] .project-progress-section .progress-overview .section-header-with-actions {
+  margin-bottom: 0;
+}
+
+[data-page="client-portal"] .project-progress-section .progress-percentage {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+/* Milestones within combined section - no extra background/shadow */
+[data-page="client-portal"] .project-progress-section .milestones-section {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border-top: 1px solid var(--portal-border-dark);
+  padding-top: var(--space-4);
+}
+
+[data-page="client-portal"] .project-progress-section .milestones-section h4 {
+  font-size: var(--font-size-md);
+  margin: 0;
+  color: var(--portal-text-light);
+}
+
+/* =====================================================
    PENDING APPROVALS SECTION
    ===================================================== */
 
-[data-page="client-portal"] .pending-approvals-section {
-  padding: var(--space-3);
-}
+/* Card styling inherited from shared/portal-cards.css */
+/* Section-specific overrides only */
 
-[data-page="client-portal"] .pending-approvals-section .section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* Uses shared .section-header-with-actions from portal-cards.css */
+/* Section-specific h3 overrides below */
+[data-page="client-portal"] .pending-approvals-section .section-header-with-actions {
   margin-bottom: var(--space-3);
 }
 
-[data-page="client-portal"] .pending-approvals-section .section-header h3 {
-  margin: 0;
+[data-page="client-portal"] .pending-approvals-section .section-header-with-actions h3 {
   font-size: var(--font-size-lg);
-  color: var(--portal-text-light);
 }
 
 [data-page="client-portal"] .approval-count {
@@ -123,7 +141,7 @@
   height: 24px;
   padding: 0 var(--space-1);
   background: var(--color-danger);
-  color: var(--color-white);
+  color: var(--portal-text-light);
   border-radius: 12px;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
@@ -135,6 +153,7 @@
   gap: var(--space-2);
 }
 
+/* Child element - follows shadow hierarchy (no border on lighter grey bg) */
 [data-page="client-portal"] .approval-item {
   display: flex;
   align-items: center;
@@ -142,12 +161,11 @@
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
-  border: 1px solid var(--portal-border-dark);
-  transition: border-color var(--transition-fast);
+  transition: background-color var(--transition-fast);
 }
 
 [data-page="client-portal"] .approval-item:hover {
-  border-color: var(--color-primary);
+  background: var(--portal-bg-hover);
 }
 
 [data-page="client-portal"] .approval-item.approval-overdue {
@@ -226,26 +244,16 @@
    MILESTONES SECTION
    ===================================================== */
 
-[data-page="client-portal"] .milestones-section {
-  padding: var(--space-3);
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-md);
-  box-shadow: var(--shadow-panel);
-}
+/* Card styling inherited from shared/portal-cards.css */
+/* Standalone milestones-section uses shared card styles */
 
-[data-page="client-portal"] .milestones-section .section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
+/* Uses shared .section-header-with-actions from portal-cards.css */
+[data-page="client-portal"] .milestones-section .section-header-with-actions {
   margin-bottom: var(--space-3);
 }
 
-[data-page="client-portal"] .milestones-section .section-header h3 {
-  margin: 0;
+[data-page="client-portal"] .milestones-section .section-header-with-actions h3 {
   font-size: var(--font-size-lg);
-  color: var(--portal-text-light);
 }
 
 [data-page="client-portal"] .milestones-summary {
@@ -305,7 +313,7 @@
   top: 2px;
   width: 6px;
   height: 10px;
-  border: solid var(--color-white);
+  border: solid var(--portal-text-light);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -317,8 +325,9 @@
 [data-page="client-portal"] .milestone-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: var(--space-1);
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 [data-page="client-portal"] .milestone-title {
@@ -327,7 +336,13 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--portal-text-light);
-  margin: 0 0 var(--space-1) 0;
+  margin: 0;
+  flex: 1;
+}
+
+/* Status badge in header (top right) */
+[data-page="client-portal"] .milestone-header .milestone-status {
+  flex-shrink: 0;
 }
 
 [data-page="client-portal"] .milestone-item.completed .milestone-title {
@@ -341,14 +356,22 @@
   margin: 0 0 var(--space-1) 0;
 }
 
+/* Footer with due date (bottom right) */
+[data-page="client-portal"] .milestone-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
 [data-page="client-portal"] .milestone-due-date {
   font-size: 0.75rem;
   color: var(--portal-text-secondary);
   background: var(--portal-bg-dark);
-  padding: 2px var(--space-0-5);
+  padding: 2px var(--space-1);
   border-radius: var(--portal-radius-sm);
 }
 
+/* Legacy milestone-meta - keep for backwards compatibility */
 [data-page="client-portal"] .milestone-meta {
   display: flex;
   align-items: center;
@@ -366,21 +389,6 @@
   font-size: var(--font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-[data-page="client-portal"] .milestone-status {
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: var(--font-size-xs);
-}
-
-[data-page="client-portal"] .milestone-status.completed {
-  color: var(--status-completed);
-}
-
-[data-page="client-portal"] .milestone-status.pending {
-  color: var(--status-pending);
 }
 
 [data-page="client-portal"] .milestone-deliverables {

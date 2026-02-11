@@ -105,7 +105,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--portal-bg-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,7 +263,7 @@
 
 .onboarding-checkbox-label.is-checked {
   border-color: var(--onboarding-accent);
-  background: rgba(var(--color-primary-rgb), 0.1);
+  background: var(--color-state-selected);
 }
 
 .onboarding-checkbox-label input[type="checkbox"] {
@@ -311,7 +311,7 @@
 
 .onboarding-asset-card.is-selected {
   border-color: var(--onboarding-success);
-  background: rgba(var(--color-success-rgb), 0.1);
+  background: var(--color-success-light);
 }
 
 .onboarding-asset-icon {
@@ -411,7 +411,7 @@
 }
 
 .onboarding-review-tag {
-  background: rgba(var(--color-primary-rgb), 0.15);
+  background: var(--color-state-selected);
   color: var(--onboarding-accent);
   padding: 4px 10px;
   border-radius: var(--portal-radius-pill);
@@ -595,5 +595,34 @@
 
   .onboarding-checkbox-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   WIZARD OVERLAY (for first-login integration)
+   ============================================================================ */
+
+.onboarding-wizard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-portal-modal, 9600);
+  background: var(--portal-bg-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  overflow: auto;
+}
+
+.onboarding-wizard-container {
+  width: 100%;
+  max-width: 900px;
+  max-height: 100%;
+  overflow: auto;
+}
+
+@media (max-width: 600px) {
+  .onboarding-wizard-overlay {
+    padding: var(--space-2);
   }
 }

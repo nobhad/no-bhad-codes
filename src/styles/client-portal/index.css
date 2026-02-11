@@ -12,6 +12,7 @@
 @import '../shared/portal-forms.css';
 @import '../shared/portal-files.css';
 @import '../shared/portal-dropdown.css';
+@import '../admin/modal-dropdown.css';
 @import '../shared/portal-badges.css';
 @import '../shared/portal-tabs.css';
 @import '../shared/view-toggle.css';

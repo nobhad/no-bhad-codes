@@ -7,15 +7,13 @@
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
-  padding: 0 var(--space-4);
+  gap: var(--space-3);
   max-width: 1100px;
 }
 
 @media (--mobile) {
   .settings-grid {
     grid-template-columns: 1fr;
-    padding: 0 var(--space-2);
   }
 }
 
@@ -100,27 +98,10 @@
   gap: var(--space-3);
 }
 
-.settings-form .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.settings-form label {
-  font-weight: 600;
-  color: var(--portal-text-light);
-  font-size: 0.95rem;
-}
-
-.settings-form .form-input[readonly] {
-  background: var(--portal-bg-readonly);
-  opacity: 0.7;
-  cursor: not-allowed;
-}
 
 .form-help {
   font-size: 0.875rem;
-  color: var(--color-neutral-600);
+  color: var(--portal-text-secondary);
   font-style: italic;
 }
 
@@ -131,20 +112,20 @@
   gap: var(--space-2);
 }
 
+/* Child element - no border per shadow hierarchy */
 .settings-form .checkbox-item {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
   cursor: pointer;
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-sm);
   padding: var(--space-1-5) var(--space-2);
-  transition: border-color 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .settings-form .checkbox-item:hover {
-  border-color: var(--color-primary);
+  background: var(--portal-bg-hover);
 }
 
 .settings-form .checkbox-item input[type="checkbox"] {
@@ -178,23 +159,6 @@
   gap: var(--space-2);
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.form-group label {
-  font-weight: 600;
-  color: var(--portal-text-light);
-  font-size: 0.9rem;
-}
-
-.form-input[readonly] {
-  background: var(--portal-bg-readonly);
-  color: var(--portal-text-muted);
-}
-
 /* Checkbox Group (generic) */
 .checkbox-group {
   display: flex;
@@ -203,21 +167,21 @@
   flex: 1;
 }
 
+/* Child element - no border per shadow hierarchy */
 .checkbox-item {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
   cursor: pointer;
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-sm);
   padding: var(--space-1-5) var(--space-2);
   flex: 1;
-  transition: border-color 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .checkbox-item:hover {
-  border-color: var(--color-primary);
+  background: var(--portal-bg-hover);
 }
 
 .checkbox-item input[type="checkbox"] {
@@ -230,7 +194,7 @@
 .settings-header {
   margin-bottom: var(--space-4);
   padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--color-neutral-300);
+  border-bottom: 1px solid var(--portal-border);
 }
 
 .settings-header h1 {
@@ -243,7 +207,7 @@
 
 .settings-header p {
   font-size: 1rem;
-  color: var(--color-neutral-600);
+  color: var(--portal-text-secondary);
   margin: 0;
 }
 

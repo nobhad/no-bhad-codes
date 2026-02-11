@@ -9,6 +9,31 @@
  */
 
 import type { ClientPortalContext } from '../portal-types';
+import { apiFetch, apiPut } from '../../../utils/api-client';
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+interface ClientProfile {
+  id: number;
+  email: string;
+  company_name: string | null;
+  contact_name: string | null;
+  phone: string | null;
+  status: string;
+  client_type: string;
+  billing_name: string | null;
+  billing_company: string | null;
+  billing_address: string | null;
+  billing_address2: string | null;
+  billing_city: string | null;
+  billing_state: string | null;
+  billing_zip: string | null;
+  billing_country: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 // ============================================================================
 // CACHED DOM REFERENCES
@@ -20,26 +45,75 @@ const cachedForms: Map<string, HTMLElement | null> = new Map();
 /** Cache for input elements */
 const cachedInputs: Map<string, HTMLInputElement | HTMLSelectElement | null> = new Map();
 
-/** Get cached form element */
+/** Get cached form element - does not cache null values for dynamic views */
 function getForm(formId: string): HTMLElement | null {
-  if (!cachedForms.has(formId)) {
-    cachedForms.set(formId, document.getElementById(formId));
+  // Check cache first
+  if (cachedForms.has(formId)) {
+    const cached = cachedForms.get(formId);
+    if (cached) return cached;
   }
-  return cachedForms.get(formId) ?? null;
+  // Look up element (may be dynamically rendered)
+  const element = document.getElementById(formId);
+  // Only cache if element exists (don't cache null for dynamic views)
+  if (element) {
+    cachedForms.set(formId, element);
+  }
+  return element;
 }
 
-/** Get cached input element */
+/** Get cached input element - does not cache null values for dynamic views */
 function getInput<T extends HTMLInputElement | HTMLSelectElement = HTMLInputElement>(inputId: string): T | null {
-  if (!cachedInputs.has(inputId)) {
-    cachedInputs.set(inputId, document.getElementById(inputId) as T | null);
+  // Check cache first
+  if (cachedInputs.has(inputId)) {
+    const cached = cachedInputs.get(inputId);
+    if (cached) return cached as T;
   }
-  return cachedInputs.get(inputId) as T | null;
+  // Look up element (may be dynamically rendered)
+  const element = document.getElementById(inputId) as T | null;
+  // Only cache if element exists (don't cache null for dynamic views)
+  if (element) {
+    cachedInputs.set(inputId, element);
+  }
+  return element;
 }
 
 /**
  * Setup settings forms
  */
 export function setupSettingsForms(ctx: ClientPortalContext): void {
+  // Profile/Account form (settings page)
+  const profileForm = getForm('profile-form');
+  if (profileForm) {
+    profileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await saveContactInfo(new FormData(profileForm as HTMLFormElement), ctx);
+    });
+  }
+
+  // Email change link - pre-fill message when navigating to messages
+  const emailChangeLink = document.querySelector('.email-change-link');
+  if (emailChangeLink) {
+    emailChangeLink.addEventListener('click', (e) => {
+      // Get current email from the settings form
+      const currentEmail = getInput('settings-email')?.value || '';
+      // Store email change request in sessionStorage for messages page to pick up
+      sessionStorage.setItem('pendingEmailChangeMessage', JSON.stringify({
+        currentEmail,
+        template: `Hi Noelle,\n\nI would like to update my email address.\n\nCurrent email: ${currentEmail}\nNew email: \n\nThank you!`
+      }));
+    });
+  }
+
+  // Billing form (settings page)
+  const billingForm = getForm('billing-form');
+  if (billingForm) {
+    billingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await saveBillingAddress(new FormData(billingForm as HTMLFormElement), ctx);
+    });
+  }
+
+  // Legacy form names for backwards compatibility
   const contactForm = getForm('contact-info-form');
   if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
@@ -48,11 +122,11 @@ export function setupSettingsForms(ctx: ClientPortalContext): void {
     });
   }
 
-  const billingForm = getForm('billing-address-form');
-  if (billingForm) {
-    billingForm.addEventListener('submit', async (e) => {
+  const billingAddressForm = getForm('billing-address-form');
+  if (billingAddressForm) {
+    billingAddressForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      await saveBillingAddress(new FormData(billingForm as HTMLFormElement), ctx);
+      await saveBillingAddress(new FormData(billingAddressForm as HTMLFormElement), ctx);
     });
   }
 
@@ -82,50 +156,59 @@ export function setupSettingsForms(ctx: ClientPortalContext): void {
 }
 
 /**
- * Load user settings
+ * Fetch client profile from API
  */
-export function loadUserSettings(currentUser: string | null): void {
-  const userData = {
-    name: currentUser || 'User',
-    email: currentUser || '',
-    company: 'Company Name',
-    phone: '',
-    secondaryEmail: '',
-    billing: {
-      address1: '',
-      address2: '',
-      city: '',
-      state: '',
-      zip: '',
-      country: ''
+export async function fetchClientProfile(): Promise<ClientProfile | null> {
+  try {
+    const response = await apiFetch('/api/clients/me');
+    if (!response.ok) {
+      console.error('[Settings] Failed to fetch client profile');
+      return null;
     }
-  };
+    const data = await response.json();
+    return data.client || null;
+  } catch (error) {
+    console.error('[Settings] Error fetching client profile:', error);
+    return null;
+  }
+}
 
-  const nameInput = getInput('contact-name');
-  const emailInput = getInput('contact-email');
-  const companyInput = getInput('contact-company');
-  const phoneInput = getInput('contact-phone');
-  const secondaryEmailInput = getInput('contact-secondary-email');
+/**
+ * Load user settings from API and populate forms
+ */
+export async function loadUserSettings(_currentUser: string | null): Promise<void> {
+  const profile = await fetchClientProfile();
+  if (!profile) return;
 
-  if (nameInput) nameInput.value = userData.name;
-  if (emailInput) emailInput.value = userData.email;
-  if (companyInput) companyInput.value = userData.company;
-  if (phoneInput) phoneInput.value = userData.phone;
-  if (secondaryEmailInput) secondaryEmailInput.value = userData.secondaryEmail;
+  // Populate Account form (profile-form)
+  const nameInput = getInput('settings-name');
+  const emailInput = getInput('settings-email');
+  const companyInput = getInput('settings-company');
+  const phoneInput = getInput('settings-phone');
 
-  const address1Input = getInput('billing-address1');
-  const address2Input = getInput('billing-address2');
-  const cityInput = getInput('billing-city');
-  const stateInput = getInput('billing-state');
-  const zipInput = getInput('billing-zip');
-  const countryInput = getInput('billing-country');
+  if (nameInput) nameInput.value = profile.contact_name || '';
+  if (emailInput) emailInput.value = profile.email || '';
+  if (companyInput) companyInput.value = profile.company_name || '';
+  if (phoneInput) phoneInput.value = profile.phone || '';
 
-  if (address1Input) address1Input.value = userData.billing.address1;
-  if (address2Input) address2Input.value = userData.billing.address2;
-  if (cityInput) cityInput.value = userData.billing.city;
-  if (stateInput) stateInput.value = userData.billing.state;
-  if (zipInput) zipInput.value = userData.billing.zip;
-  if (countryInput) countryInput.value = userData.billing.country;
+  // Populate Billing form (billing-form)
+  const billingNameInput = getInput('billing-name');
+  const billingCompanyInput = getInput('billing-company');
+  const billingAddressInput = getInput('billing-address');
+  const billingAddress2Input = getInput('billing-address2');
+  const billingCityInput = getInput('billing-city');
+  const billingStateInput = getInput('billing-state');
+  const billingZipInput = getInput('billing-zip');
+  const billingCountryInput = getInput('billing-country');
+
+  if (billingNameInput) billingNameInput.value = profile.billing_name || profile.contact_name || '';
+  if (billingCompanyInput) billingCompanyInput.value = profile.billing_company || profile.company_name || '';
+  if (billingAddressInput) billingAddressInput.value = profile.billing_address || '';
+  if (billingAddress2Input) billingAddress2Input.value = profile.billing_address2 || '';
+  if (billingCityInput) billingCityInput.value = profile.billing_city || '';
+  if (billingStateInput) billingStateInput.value = profile.billing_state || '';
+  if (billingZipInput) billingZipInput.value = profile.billing_zip || '';
+  if (billingCountryInput) billingCountryInput.value = profile.billing_country || '';
 }
 
 /**
@@ -244,15 +327,48 @@ export function loadNotificationSettings(): void {
 async function saveContactInfo(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
 
-  sessionStorage.setItem('client_contact_info', JSON.stringify(data));
-  ctx.showNotification('Contact information saved successfully!', 'success');
+  try {
+    const response = await apiPut('/api/clients/me', {
+      contact_name: data.name || data['contact-name'],
+      company_name: data.company || data['contact-company'],
+      phone: data.phone || data['contact-phone']
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to save contact info');
+    }
+
+    ctx.showNotification('Contact information saved successfully!', 'success');
+  } catch (error) {
+    console.error('[Settings] Error saving contact info:', error);
+    ctx.showNotification('Failed to save contact information. Please try again.', 'error');
+  }
 }
 
 async function saveBillingAddress(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
 
-  sessionStorage.setItem('client_billing_address', JSON.stringify(data));
-  ctx.showNotification('Billing address saved successfully!', 'success');
+  try {
+    const response = await apiPut('/api/clients/me/billing', {
+      billing_name: data.name || data['billing-name'],
+      company: data.company || data['billing-company'],
+      address: data.address || data['billing-address'],
+      address2: data.address2 || data['billing-address2'],
+      city: data.city || data['billing-city'],
+      state: data.state || data['billing-state'],
+      zip: data.zip || data['billing-zip'],
+      country: data.country || data['billing-country']
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to save billing address');
+    }
+
+    ctx.showNotification('Billing address saved successfully!', 'success');
+  } catch (error) {
+    console.error('[Settings] Error saving billing address:', error);
+    ctx.showNotification('Failed to save billing address. Please try again.', 'error');
+  }
 }
 
 async function saveNotificationPrefs(formData: FormData, ctx: ClientPortalContext): Promise<void> {

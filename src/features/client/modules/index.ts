@@ -63,3 +63,7 @@ export async function loadAdHocRequestsModule() {
 export async function loadApprovalsModule() {
   return import('./portal-approvals');
 }
+
+export async function loadViewsModule() {
+  return import('./portal-views');
+}

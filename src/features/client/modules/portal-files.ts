@@ -78,6 +78,45 @@ let currentFilters: FileFilters = {
   dateTo: ''
 };
 
+// Folder categories for the folder tree
+interface FolderCategory {
+  id: string;
+  name: string;
+  count: number;
+}
+
+let folderCategoriesCache: FolderCategory[] = [];
+let folderTreeInitialized = false;
+
+// Cache all files for client-side filtering
+let allFilesCache: PortalFile[] = [];
+
+// File type to folder category mapping
+const FILE_TYPE_TO_FOLDER: Record<string, string> = {
+  // Site folder - design and website files
+  'wireframe': 'site',
+  'mockup': 'site',
+  'asset': 'site',
+  'content': 'site',
+  'reference': 'site',
+  // Forms folder - intake and documents
+  'intake': 'forms',
+  'proposal': 'forms',
+  'contract': 'forms',
+  // Documents - invoices and receipts
+  'invoice': 'documents',
+  'receipt': 'documents'
+};
+
+// Folder display names
+const FOLDER_NAMES: Record<string, string> = {
+  'all': 'All Files',
+  'site': 'Site',
+  'forms': 'Forms',
+  'documents': 'Documents',
+  'client_uploads': 'Client Uploads'
+};
+
 // ============================================================================
 // CACHED DOM REFERENCES
 // ============================================================================
@@ -149,6 +188,138 @@ function populateProjectFilter(projects: { id: number; name: string }[]): void {
 }
 
 /**
+ * Categorize a file into a folder based on its type and upload source
+ */
+function getFileFolder(file: { fileType?: string; category?: string; uploadedBy?: string }): string {
+  // Check if uploaded by client
+  if (file.uploadedBy?.includes('client') || file.category === 'client_upload') {
+    return 'client_uploads';
+  }
+
+  // Check file type mapping
+  if (file.fileType && FILE_TYPE_TO_FOLDER[file.fileType]) {
+    return FILE_TYPE_TO_FOLDER[file.fileType];
+  }
+
+  // Default to site for other files
+  return 'site';
+}
+
+/**
+ * Count files per folder category
+ */
+function countFilesByFolder(files: Array<{ fileType?: string; category?: string; uploadedBy?: string }>): FolderCategory[] {
+  const counts: Record<string, number> = {
+    'site': 0,
+    'forms': 0,
+    'documents': 0,
+    'client_uploads': 0
+  };
+
+  files.forEach((file) => {
+    const folder = getFileFolder(file);
+    counts[folder] = (counts[folder] || 0) + 1;
+  });
+
+  // Return only folders with files
+  return Object.entries(counts)
+    .filter(([_, count]) => count > 0)
+    .map(([id, count]) => ({
+      id,
+      name: FOLDER_NAMES[id] || id,
+      count
+    }));
+}
+
+/**
+ * Populate folder tree with category-based folders
+ * Only shows folders that contain files
+ */
+function populateFolderTree(files: Array<{ fileType?: string; category?: string; uploadedBy?: string }>, ctx: ClientPortalContext): void {
+  const folderTree = document.getElementById('folder-tree');
+  if (!folderTree) return;
+
+  // Count files per folder
+  const folders = countFilesByFolder(files);
+  folderCategoriesCache = folders;
+
+  const folderIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
+
+  // Build folder tree HTML - always show "All Files"
+  let html = `
+    <div class="folder-item root ${currentFilters.category === 'all' ? 'active' : ''}" data-folder-id="all">
+      ${folderIcon}
+      <span>All Files</span>
+    </div>
+  `;
+
+  // Add each folder that has files
+  folders.forEach((folder) => {
+    const isActive = currentFilters.category === folder.id;
+    html += `
+      <div class="folder-item ${isActive ? 'active' : ''}" data-folder-id="${folder.id}">
+        ${folderIcon}
+        <span>${ctx.escapeHtml(folder.name)}</span>
+      </div>
+    `;
+  });
+
+  folderTree.innerHTML = html;
+
+  // Add click handlers to folder items
+  folderTree.querySelectorAll('.folder-item').forEach((item) => {
+    item.addEventListener('click', () => {
+      const folderId = (item as HTMLElement).dataset.folderId;
+      if (folderId) {
+        selectFolder(folderId, ctx);
+      }
+    });
+  });
+}
+
+/**
+ * Handle folder selection
+ */
+function selectFolder(folderId: string, ctx: ClientPortalContext): void {
+  // Update active state
+  const folderTree = document.getElementById('folder-tree');
+  if (folderTree) {
+    folderTree.querySelectorAll('.folder-item').forEach((item) => {
+      const itemId = (item as HTMLElement).dataset.folderId;
+      item.classList.toggle('active', itemId === folderId);
+    });
+  }
+
+  // Update path display
+  const pathEl = document.getElementById('files-path');
+  if (pathEl) {
+    const label = FOLDER_NAMES[folderId] || folderId;
+    pathEl.innerHTML = `<span>${ctx.escapeHtml(label)}</span>`;
+  }
+
+  // Update filter
+  currentFilters.category = folderId;
+
+  // If we have cached files, filter and render without refetching
+  if (allFilesCache.length > 0) {
+    const filesContainer = document.getElementById('files-list') || document.querySelector('.files-list-section');
+    if (filesContainer) {
+      let filteredFiles = allFilesCache;
+      if (folderId !== 'all') {
+        filteredFiles = allFilesCache.filter((file) => {
+          const fileFolder = getFileFolder(file);
+          return fileFolder === folderId;
+        });
+      }
+      renderFilesList(filesContainer as HTMLElement, filteredFiles, ctx);
+    }
+  } else {
+    // No cache, need to fetch
+    loadFiles(ctx);
+  }
+}
+
+/**
  * Load files from API
  */
 export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
@@ -157,7 +328,19 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
   if (!filesContainer) return;
 
   try {
-    const queryString = buildFilterQueryString();
+    // Always fetch all files (don't filter on server for category)
+    const params = new URLSearchParams();
+    if (currentFilters.projectId && currentFilters.projectId !== 'all') {
+      params.append('projectId', currentFilters.projectId);
+    }
+    if (currentFilters.dateFrom) {
+      params.append('dateFrom', currentFilters.dateFrom);
+    }
+    if (currentFilters.dateTo) {
+      params.append('dateTo', currentFilters.dateTo);
+    }
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+
     const response = await fetch(`${FILES_API_BASE}/client${queryString}`, {
       credentials: 'include' // Include HttpOnly cookies
     });
@@ -167,13 +350,34 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
     }
 
     const data = await response.json();
+    const files = data.files || [];
 
-    // Populate project filter dropdown (only on first load or when projects data is returned)
+    // Cache all files for filtering
+    allFilesCache = files;
+
+    // Populate project filter dropdown
     if (data.projects) {
       populateProjectFilter(data.projects);
     }
 
-    renderFilesList(filesContainer as HTMLElement, data.files || [], ctx);
+    // Populate folder tree based on all files (check if needs repopulation)
+    const folderTree = document.getElementById('folder-tree');
+    const folderCount = folderTree?.querySelectorAll('.folder-item').length ?? 0;
+    if (!folderTreeInitialized || folderCount <= 1) {
+      populateFolderTree(files, ctx);
+      folderTreeInitialized = true;
+    }
+
+    // Filter files by selected folder category (client-side)
+    let filteredFiles = files;
+    if (currentFilters.category && currentFilters.category !== 'all') {
+      filteredFiles = files.filter((file: typeof files[0]) => {
+        const fileFolder = getFileFolder(file);
+        return fileFolder === currentFilters.category;
+      });
+    }
+
+    renderFilesList(filesContainer as HTMLElement, filteredFiles, ctx);
   } catch (error) {
     console.error('Error loading files:', error);
     showContainerError(
@@ -1058,4 +1262,22 @@ function showUploadSuccess(count: number, customMessage?: string): void {
       successMsg.remove();
     }, 3000);
   }
+}
+
+/**
+ * Reset files module state when leaving the files view
+ * This ensures the folder tree is repopulated on next visit
+ */
+export function resetFilesState(): void {
+  folderTreeInitialized = false;
+  currentFilters = {
+    projectId: 'all',
+    fileType: 'all',
+    category: 'all',
+    dateFrom: '',
+    dateTo: ''
+  };
+  folderCategoriesCache = [];
+  allFilesCache = [];
+  cachedElements.clear();
 }

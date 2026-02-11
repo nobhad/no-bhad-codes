@@ -4,7 +4,7 @@
 
 [data-page="client-portal"] .requests-grid {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 @media (min-width: 960px) {
@@ -14,20 +14,13 @@
   }
 }
 
+/* Uses .portal-card from shared styles - only layout overrides here */
 [data-page="client-portal"] .requests-form,
 [data-page="client-portal"] .requests-list {
-  padding: var(--space-2);
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
+  padding: var(--space-3);
 }
 
-[data-page="client-portal"] .requests-form h3,
-[data-page="client-portal"] .requests-list h3 {
-  margin: 0 0 var(--space-1) 0;
-  font-family: var(--font-family-acme);
-  font-size: var(--font-size-lg);
-  color: var(--portal-text-light);
-}
+/* h3 styling comes from shared .section-header-with-actions */
 
 [data-page="client-portal"] .requests-intro {
   margin: 0 0 var(--space-2) 0;
@@ -59,11 +52,12 @@
   gap: var(--space-1);
 }
 
-[data-page="client-portal"] .requests-card {
-  padding: var(--space-1-5);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
-  border: 1px solid var(--portal-border-light);
+/* Request cards use shared list item styling */
+[data-page="client-portal"] .requests-card.portal-list-item {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  margin-bottom: 0;
 }
 
 [data-page="client-portal"] .requests-card-header {
@@ -80,10 +74,7 @@
 }
 
 [data-page="client-portal"] .requests-card-status {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  flex-shrink: 0;
 }
 
 [data-page="client-portal"] .requests-card-meta {
@@ -159,21 +150,3 @@
   color: var(--color-error-500);
 }
 
-[data-page="client-portal"] .requests-status-submitted,
-[data-page="client-portal"] .requests-status-reviewing,
-[data-page="client-portal"] .requests-status-quoted {
-  color: var(--color-warning-500);
-}
-
-[data-page="client-portal"] .requests-status-approved,
-[data-page="client-portal"] .requests-status-in_progress {
-  color: var(--color-info-500);
-}
-
-[data-page="client-portal"] .requests-status-completed {
-  color: var(--color-success-500);
-}
-
-[data-page="client-portal"] .requests-status-declined {
-  color: var(--color-error-500);
-}

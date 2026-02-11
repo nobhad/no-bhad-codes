@@ -9,6 +9,7 @@
 
 import type { ClientPortalContext } from '../portal-types';
 import { createPortalModal } from '../../../components/portal-modal';
+import { createModalDropdown } from '../../../components/modal-dropdown';
 
 const REQUESTS_API = '/api/ad-hoc-requests';
 const PROJECTS_API = '/api/projects';
@@ -74,6 +75,21 @@ function getProjectLabel(project: ProjectOption): string {
 
 function getStatusLabel(status: string): string {
   return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function getRequestStatusBadgeClass(status: string): string {
+  const statusMap: Record<string, string> = {
+    submitted: 'status-pending',
+    reviewing: 'status-pending',
+    quoted: 'status-pending',
+    approved: 'status-active',
+    in_progress: 'status-in_progress',
+    completed: 'status-completed',
+    declined: 'status-cancelled',
+    cancelled: 'status-cancelled'
+  };
+
+  return statusMap[status] || 'status-pending';
 }
 
 // ---------------------------------------------------------------------------
@@ -180,7 +196,7 @@ function renderRequests(requests: AdHocRequest[]): void {
 
   requests.forEach((request) => {
     const card = document.createElement('div');
-    card.className = 'requests-card';
+    card.className = 'requests-card portal-list-item';
     const attachmentNote = request.attachmentFileId ? '<span>Attachment on file</span>' : '';
     const hasQuoteDetails =
       request.quotedPrice !== null && request.quotedPrice !== undefined ||
@@ -208,7 +224,7 @@ function renderRequests(requests: AdHocRequest[]): void {
     card.innerHTML = `
       <div class="requests-card-header">
         <span class="requests-card-title">${escapeHtml(request.title)}</span>
-        <span class="requests-card-status requests-status-${request.status}">${escapeHtml(getStatusLabel(request.status))}</span>
+        <span class="requests-card-status status-badge ${getRequestStatusBadgeClass(request.status)}">${escapeHtml(getStatusLabel(request.status))}</span>
       </div>
       <div class="requests-card-meta">
         <span>${escapeHtml(getStatusLabel(request.requestType))}</span>
@@ -293,27 +309,37 @@ function openQuoteConfirmModal(request: AdHocRequest, decision: 'approve' | 'dec
 }
 
 function renderProjects(projects: ProjectOption[]): void {
-  const select = el('ad-hoc-project') as HTMLSelectElement | null;
-  if (!select) return;
+  const mountPoint = el('ad-hoc-project-dropdown');
+  const hiddenInput = el('ad-hoc-project') as HTMLInputElement | null;
+  if (!mountPoint || !hiddenInput) return;
 
-  select.innerHTML = '';
+  mountPoint.innerHTML = '';
 
   if (!projects.length) {
-    const option = document.createElement('option');
-    option.value = '';
-    option.textContent = 'No active projects';
-    select.appendChild(option);
-    select.disabled = true;
+    mountPoint.innerHTML = '<div class="form-input" style="opacity: 0.5;">No active projects</div>';
     return;
   }
 
-  select.disabled = false;
-  projects.forEach((project) => {
-    const option = document.createElement('option');
-    option.value = String(project.id);
-    option.textContent = getProjectLabel(project);
-    select.appendChild(option);
+  const options = projects.map(p => ({
+    value: String(p.id),
+    label: getProjectLabel(p)
+  }));
+
+  // Set initial value to first project
+  const initialValue = options[0]?.value || '';
+  hiddenInput.value = initialValue;
+
+  const dropdown = createModalDropdown({
+    options,
+    currentValue: initialValue,
+    placeholder: 'Select project',
+    ariaLabelPrefix: 'Project',
+    onChange: (value) => {
+      hiddenInput.value = value;
+    }
   });
+  dropdown.setAttribute('data-modal-dropdown', 'true');
+  mountPoint.appendChild(dropdown);
 }
 
 // ---------------------------------------------------------------------------
@@ -324,6 +350,8 @@ function resetForm(): void {
   const form = el('ad-hoc-request-form') as HTMLFormElement | null;
   if (!form) return;
   form.reset();
+  // Re-create static dropdowns to reset their display
+  createStaticDropdowns();
 }
 
 function setSubmitting(isSubmitting: boolean): void {
@@ -340,7 +368,7 @@ function setSubmitting(isSubmitting: boolean): void {
 let listenersAttached = false;
 let requestsCache: AdHocRequest[] = [];
 
-async function loadRequests(ctx: ClientPortalContext): Promise<void> {
+async function loadRequests(_ctx: ClientPortalContext): Promise<void> {
   const error = el('ad-hoc-requests-error');
   if (error) error.style.display = 'none';
 
@@ -356,10 +384,75 @@ async function loadRequests(ctx: ClientPortalContext): Promise<void> {
   }
 }
 
+function createStaticDropdowns(): void {
+  // Request Type dropdown
+  const typeMount = el('ad-hoc-type-dropdown');
+  const typeInput = el('ad-hoc-type') as HTMLInputElement | null;
+  if (typeMount && typeInput) {
+    typeMount.innerHTML = '';
+    const dropdown = createModalDropdown({
+      options: [
+        { value: 'feature', label: 'Feature' },
+        { value: 'change', label: 'Change' },
+        { value: 'bug_fix', label: 'Bug fix' },
+        { value: 'enhancement', label: 'Enhancement' },
+        { value: 'support', label: 'Support' }
+      ],
+      currentValue: '',
+      placeholder: 'Select type',
+      ariaLabelPrefix: 'Request type',
+      onChange: (value) => { typeInput.value = value; }
+    });
+    dropdown.setAttribute('data-modal-dropdown', 'true');
+    typeMount.appendChild(dropdown);
+  }
+
+  // Priority dropdown
+  const priorityMount = el('ad-hoc-priority-dropdown');
+  const priorityInput = el('ad-hoc-priority') as HTMLInputElement | null;
+  if (priorityMount && priorityInput) {
+    priorityMount.innerHTML = '';
+    const dropdown = createModalDropdown({
+      options: [
+        { value: 'normal', label: 'Normal' },
+        { value: 'low', label: 'Low' },
+        { value: 'high', label: 'High' },
+        { value: 'urgent', label: 'Urgent' }
+      ],
+      currentValue: 'normal',
+      ariaLabelPrefix: 'Priority',
+      onChange: (value) => { priorityInput.value = value; }
+    });
+    dropdown.setAttribute('data-modal-dropdown', 'true');
+    priorityMount.appendChild(dropdown);
+  }
+
+  // Urgency dropdown
+  const urgencyMount = el('ad-hoc-urgency-dropdown');
+  const urgencyInput = el('ad-hoc-urgency') as HTMLInputElement | null;
+  if (urgencyMount && urgencyInput) {
+    urgencyMount.innerHTML = '';
+    const dropdown = createModalDropdown({
+      options: [
+        { value: 'normal', label: 'Normal' },
+        { value: 'priority', label: 'Priority' },
+        { value: 'urgent', label: 'Urgent' },
+        { value: 'emergency', label: 'Emergency' }
+      ],
+      currentValue: 'normal',
+      ariaLabelPrefix: 'Urgency',
+      onChange: (value) => { urgencyInput.value = value; }
+    });
+    dropdown.setAttribute('data-modal-dropdown', 'true');
+    urgencyMount.appendChild(dropdown);
+  }
+}
+
 async function loadProjectsForForm(ctx: ClientPortalContext): Promise<void> {
   try {
     const projects = await fetchProjects();
     renderProjects(projects);
+    createStaticDropdowns();
   } catch (err) {
     ctx.showNotification((err as Error).message, 'error');
   }
@@ -369,23 +462,40 @@ function setupListeners(ctx: ClientPortalContext): void {
   if (listenersAttached) return;
   listenersAttached = true;
 
+  // File input change handler - update display text
+  const attachmentInputEl = el('ad-hoc-attachment') as HTMLInputElement | null;
+  const attachmentText = el('ad-hoc-attachment-text');
+  attachmentInputEl?.addEventListener('change', () => {
+    const file = attachmentInputEl.files?.[0];
+    if (attachmentText) {
+      if (file) {
+        attachmentText.textContent = file.name;
+        attachmentText.classList.add('has-file');
+      } else {
+        attachmentText.textContent = 'No file chosen';
+        attachmentText.classList.remove('has-file');
+      }
+    }
+  });
+
   const form = el('ad-hoc-request-form') as HTMLFormElement | null;
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const projectSelect = el('ad-hoc-project') as HTMLSelectElement | null;
+    // Read values from hidden inputs (set by modal dropdowns)
+    const projectInput = el('ad-hoc-project') as HTMLInputElement | null;
     const titleInput = el('ad-hoc-title') as HTMLInputElement | null;
-    const typeSelect = el('ad-hoc-type') as HTMLSelectElement | null;
-    const prioritySelect = el('ad-hoc-priority') as HTMLSelectElement | null;
-    const urgencySelect = el('ad-hoc-urgency') as HTMLSelectElement | null;
+    const typeInput = el('ad-hoc-type') as HTMLInputElement | null;
+    const priorityInput = el('ad-hoc-priority') as HTMLInputElement | null;
+    const urgencyInput = el('ad-hoc-urgency') as HTMLInputElement | null;
     const descriptionInput = el('ad-hoc-description') as HTMLTextAreaElement | null;
     const attachmentInput = el('ad-hoc-attachment') as HTMLInputElement | null;
 
-    const projectId = projectSelect?.value ? Number(projectSelect.value) : 0;
+    const projectId = projectInput?.value ? Number(projectInput.value) : 0;
     const title = titleInput?.value.trim() || '';
-    const requestType = typeSelect?.value || '';
-    const priority = prioritySelect?.value || 'normal';
-    const urgency = urgencySelect?.value || 'normal';
+    const requestType = typeInput?.value || '';
+    const priority = priorityInput?.value || 'normal';
+    const urgency = urgencyInput?.value || 'normal';
     const description = descriptionInput?.value.trim() || '';
     const attachmentFile = attachmentInput?.files?.[0] || null;
 
@@ -412,6 +522,12 @@ function setupListeners(ctx: ClientPortalContext): void {
       ctx.showNotification('Request submitted successfully.', 'success');
       resetForm();
       if (attachmentInput) attachmentInput.value = '';
+      // Reset file input text display
+      const fileText = el('ad-hoc-attachment-text');
+      if (fileText) {
+        fileText.textContent = 'No file chosen';
+        fileText.classList.remove('has-file');
+      }
       await loadRequests(ctx);
     } catch (err) {
       ctx.showNotification((err as Error).message, 'error');

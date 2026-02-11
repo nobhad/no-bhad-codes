@@ -72,6 +72,23 @@ function escapeHtml(text: string): string {
   return div.innerHTML;
 }
 
+function formatStatusLabel(status: string): string {
+  return status
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getDocumentStatusClass(status: string): string {
+  const statusMap: Record<string, string> = {
+    pending: 'status-pending',
+    sent: 'status-sent',
+    viewed: 'status-viewed',
+    uploaded: 'status-completed',
+    completed: 'status-completed'
+  };
+  return statusMap[status] || 'status-pending';
+}
+
 function setInlineError(message: string | null): void {
   const errorEl = el('documents-upload-error');
   if (!errorEl) return;
@@ -171,11 +188,13 @@ function renderList(requests: DocumentRequest[], _ctx: ClientPortalContext): voi
   for (const r of requests) {
     const card = document.createElement('button');
     card.type = 'button';
-    card.className = 'documents-card';
+    card.className = 'documents-card portal-list-item';
     card.setAttribute('data-request-id', String(r.id));
+    const statusClass = getDocumentStatusClass(r.status);
+    const statusLabel = formatStatusLabel(r.status);
     card.innerHTML = `
       <span class="documents-card-title">${escapeHtml(r.title)}</span>
-      <span class="documents-card-status documents-status-${r.status}">${escapeHtml(r.status)}</span>
+      <span class="documents-card-status status-badge ${statusClass}">${escapeHtml(statusLabel)}</span>
       <span class="documents-card-due">Due: ${formatDate(r.due_date)}</span>
     `;
     list.appendChild(card);
@@ -218,7 +237,9 @@ async function openDetail(request: DocumentRequest, _ctx: ClientPortalContext): 
 
   if (titleEl) titleEl.textContent = request.title;
   if (descEl) descEl.textContent = request.description || 'No description.';
-  if (metaEl) metaEl.textContent = `Due: ${formatDate(request.due_date)} · Status: ${request.status}`;
+  if (metaEl) {
+    metaEl.textContent = `Due: ${formatDate(request.due_date)} · Status: ${formatStatusLabel(request.status)}`;
+  }
 
   const canUpload = request.status === 'pending' || request.status === 'sent';
   if (uploadWrap) uploadWrap.style.display = canUpload ? 'block' : 'none';

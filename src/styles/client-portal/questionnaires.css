@@ -13,34 +13,14 @@
    ============================================================================ */
 
 .cp-questionnaires-stats {
-  display: flex;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
   margin-bottom: var(--space-6);
 }
 
-.cp-stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--space-4) var(--space-6);
-  background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-medium);
-  border-radius: var(--portal-radius-md);
-  min-width: 120px;
-}
-
-.cp-stat-number {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--portal-text-light);
-}
-
-.cp-stat-label {
-  font-size: 0.875rem;
-  color: var(--portal-text-muted);
-}
-
-.cp-stat-item.cp-stat-success .cp-stat-number {
+/* Stat cards use shared .stat-card styles */
+.cp-questionnaires-stats .stat-card-success .stat-number {
   color: var(--color-success);
 }
 
@@ -64,7 +44,7 @@
 .cp-questionnaires-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 /* ============================================================================
@@ -72,15 +52,11 @@
    ============================================================================ */
 
 .cp-questionnaire-card {
-  background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-medium);
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-4);
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
-.cp-questionnaire-card:hover {
-  border-color: var(--color-primary);
+.cp-questionnaire-card.overview-card:hover {
+  background: var(--portal-bg-hover);
 }
 
 .cp-questionnaire-card.completed {
@@ -259,9 +235,9 @@
    QUESTION ITEMS
    ============================================================================ */
 
+/* Child element - no border per shadow hierarchy */
 .cp-question-item {
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-md);
   padding: var(--space-4);
 }
@@ -291,52 +267,15 @@
   margin: 0 0 var(--space-3);
 }
 
-/* Form inputs */
-.cp-form-input,
-.cp-form-textarea,
-.cp-form-select {
-  width: 100%;
-  padding: var(--space-3);
-  border: 1px solid var(--portal-border-medium);
-  border-radius: var(--portal-radius-md);
+/* Form inputs use shared portal-forms.css */
+.cp-questionnaire-form .form-input,
+.cp-questionnaire-form .form-textarea,
+.cp-questionnaire-form .form-select {
   background: var(--portal-bg-darker);
-  color: var(--portal-text-light);
-  font-size: 0.9375rem;
-  font-family: inherit;
-  transition: border-color 0.2s ease;
 }
 
-.cp-form-input::placeholder,
-.cp-form-textarea::placeholder {
-  color: var(--portal-text-muted);
-}
-
-.cp-form-input:focus,
-.cp-form-textarea:focus,
-.cp-form-select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.cp-form-input:disabled,
-.cp-form-textarea:disabled,
-.cp-form-select:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.cp-form-textarea {
+.cp-questionnaire-form .form-textarea {
   resize: vertical;
-  min-height: 100px;
-}
-
-.cp-form-select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
 }
 
 /* Checkbox groups */
@@ -360,17 +299,6 @@
 
 .cp-checkbox-label:hover {
   border-color: var(--color-primary);
-}
-
-.cp-checkbox-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--color-primary);
-}
-
-.cp-checkbox-label input[type="checkbox"]:disabled {
-  cursor: not-allowed;
 }
 
 .cp-checkbox-label span {

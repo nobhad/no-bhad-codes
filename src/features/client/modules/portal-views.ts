@@ -221,16 +221,23 @@ export function renderMessagesView(): void {
 
           <!-- Compose Message -->
           <div class="message-compose">
+            <div id="attachment-preview" class="attachment-preview hidden"></div>
             <div class="message-input-wrapper">
               <label for="message-input" class="sr-only">Message</label>
               <textarea
                 id="message-input"
                 class="form-textarea"
-                placeholder="Type your message..."
+                placeholder="Type your message or drop files here..."
                 aria-label="Type your message"
               ></textarea>
             </div>
-            <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
+            <div class="message-compose-actions">
+              <button type="button" class="btn-attach" id="btn-attach-file" title="Attach files">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
+            </div>
+            <input type="file" id="attachment-input" class="attachment-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip" />
           </div>
         </div>
       </div>
@@ -430,76 +437,105 @@ export function renderHelpView(): void {
   if (!container) return;
 
   container.innerHTML = `
-    <!-- Search Bar in Header -->
-    <div class="help-search-wrap">
-      <label for="help-search-input" class="sr-only">Search help articles</label>
-      <div class="search-bar">
-        <span class="search-bar-icon" aria-hidden="true">
-          ${ICONS.SEARCH}
-        </span>
-        <input type="search" id="help-search-input" class="search-bar-input" placeholder="Search help articles..." autocomplete="off" />
+    <!-- Hero Search Section -->
+    <div class="help-hero">
+      <p class="help-hero-text">How can we help you today?</p>
+      <div class="help-search-container">
+        <label for="help-search-input" class="sr-only">Search help articles</label>
+        <div class="help-search-wrapper">
+          <span class="help-search-icon" aria-hidden="true">
+            ${ICONS.SEARCH}
+          </span>
+          <input
+            type="search"
+            id="help-search-input"
+            class="help-search-input"
+            placeholder="Search for help articles..."
+            autocomplete="off"
+            aria-describedby="help-search-hint"
+          />
+          <button type="button" id="help-search-clear" class="help-search-clear" aria-label="Clear search" style="display: none;">
+            ${ICONS.X_SMALL}
+          </button>
+        </div>
+        <div id="help-search-suggestions" class="help-search-suggestions" style="display: none;" role="listbox" aria-label="Search suggestions"></div>
+        <p id="help-search-hint" class="help-search-hint">Start typing to see suggestions</p>
       </div>
-      <button type="button" id="help-search-btn" class="btn btn-primary help-search-btn" aria-label="Search">
-        ${ICONS.SEARCH}
-        <span>SEARCH</span>
-      </button>
     </div>
 
-    <!-- Two Column Layout: Categories LEFT, Featured + Contact RIGHT -->
-    <div id="help-browse" class="help-browse-layout">
-      <!-- LEFT: Categories Section (main container - gets shadow) -->
-      <section class="help-categories portal-shadow" id="help-categories-section" aria-label="Categories">
-        <h3>Categories</h3>
-        <div id="help-categories-list" class="help-categories-list">
-          <div class="loading-row">Loading...</div>
+    <!-- Main Content - Two Column Layout -->
+    <div id="help-browse" class="help-main-grid portal-shadow">
+      <!-- Left Column: Categories Accordion -->
+      <section class="help-left-column" id="help-categories-section" aria-label="Browse by category">
+        <h3 class="help-section-title">Browse by Category</h3>
+        <div id="help-categories-accordion" class="help-accordion">
+          <div class="loading-row">Loading categories...</div>
         </div>
-        <p id="help-categories-empty" class="help-empty" style="display: none;">No categories yet.</p>
+        <p id="help-categories-empty" class="help-empty" style="display: none;">No categories available.</p>
       </section>
 
-      <!-- RIGHT: Featured Articles + Contact (main container - gets shadow) -->
-      <div class="help-main-column portal-shadow">
-        <!-- Featured Articles Section (child - no shadow) -->
-        <section class="help-featured" id="help-featured-section" aria-label="Featured articles">
-          <h3>Featured Articles</h3>
+      <!-- Right Column: Featured OR Article Detail -->
+      <div class="help-right-column">
+        <!-- Featured Articles (default view) -->
+        <section class="help-featured-section" id="help-featured-section" aria-label="Featured articles">
+          <h3 class="help-section-title">
+            <span class="help-section-icon">${ICONS.ROCKET}</span>
+            Quick Start
+          </h3>
           <div id="help-featured-list" class="help-featured-list">
-            <div class="loading-row">Loading...</div>
+            <div class="loading-row">Loading featured articles...</div>
           </div>
           <p id="help-featured-empty" class="help-empty" style="display: none;">No featured articles.</p>
         </section>
 
-        <!-- Contact Section (child - no shadow) -->
-        <section class="help-contact" aria-label="Contact support">
-          <h3>Need More Help?</h3>
-          <div class="help-contact-info">
-            <p class="help-contact-item">
-              <span class="help-contact-icon">${ICONS.MAIL}</span>
-              <span>hello@nobhad.codes</span>
-            </p>
-            <p class="help-contact-note">Or send a message from the Messages tab</p>
+        <!-- Article View (hidden by default, replaces featured) -->
+        <div id="help-article-view" class="help-article-view" style="display: none;" aria-label="Article">
+          <div class="help-article-header">
+            <button type="button" id="help-article-back-btn" class="btn btn-outline btn-sm">
+              ${ICONS.CHEVRON_LEFT}
+              <span>Back</span>
+            </button>
+            <span id="help-article-category" class="help-article-category-badge"></span>
           </div>
-        </section>
+          <article id="help-article-content">
+            <h1 id="help-article-title"></h1>
+            <div id="help-article-body" class="help-article-body"></div>
+          </article>
+        </div>
+
+        <!-- Search Results (hidden by default, replaces featured) -->
+        <div id="help-search-results" class="help-search-results" style="display: none;" aria-label="Search results">
+          <div class="help-results-header">
+            <h3 id="help-search-results-title">Search results</h3>
+            <button type="button" id="help-search-results-back" class="btn btn-outline btn-sm">
+              ${ICONS.X_SMALL}
+              <span>Clear</span>
+            </button>
+          </div>
+          <div id="help-search-results-list" class="help-results-list"></div>
+        </div>
       </div>
     </div>
 
-    <!-- Search Results (hidden by default) -->
-    <div id="help-search-results" class="help-search-results portal-shadow" style="display: none;" aria-label="Search results">
-      <h3 id="help-search-results-title">Search results</h3>
-      <div id="help-search-results-list"></div>
-    </div>
-
-    <!-- Article View (hidden by default) -->
-    <div id="help-article-view" class="help-article-view portal-shadow" style="display: none;" aria-label="Article">
-      <div class="help-article-back">
-        <button type="button" id="help-article-back-btn" class="btn btn-outline btn-sm">
-          ${ICONS.CHEVRON_LEFT}
-          <span>BACK</span>
-        </button>
+    <!-- Contact Section -->
+    <section class="help-contact-section portal-shadow" aria-label="Contact support">
+      <div class="help-contact-content">
+        <div class="help-contact-text">
+          <h3 class="help-section-title">Still Need Help?</h3>
+          <p class="help-contact-description">Can't find what you're looking for? Send me a message.</p>
+        </div>
+        <div class="help-contact-actions">
+          <a href="#/messages" class="btn btn-primary help-contact-btn" data-action="send-message">
+            ${ICONS.SEND}
+            <span>Message Noelle</span>
+          </a>
+          <p class="help-contact-email">
+            <span class="help-contact-icon">${ICONS.MAIL}</span>
+            <span>hello@nobhad.codes</span>
+          </p>
+        </div>
       </div>
-      <article id="help-article-content">
-        <h1 id="help-article-title"></h1>
-        <div id="help-article-body" class="help-article-body"></div>
-      </article>
-    </div>
+    </section>
 
     <p id="help-load-error" class="help-error" style="display: none;"></p>
   `;
@@ -563,8 +599,9 @@ export function renderSettingsView(): void {
       <!-- Change Password Section -->
       <div class="settings-section portal-shadow" id="password-section-container">
         <h3>Change Password</h3>
-        <form class="settings-form" id="password-form" data-form-type="change-password">
-          <input type="text" id="password-form-username" name="username" autocomplete="username" class="sr-only" tabindex="-1" aria-hidden="true" readonly />
+        <form class="settings-form" id="password-form" data-form-type="change-password" autocomplete="off">
+          <!-- Hidden username for password managers - truly hidden with type="hidden" -->
+          <input type="hidden" id="password-form-username" name="username" autocomplete="username" />
           <div class="form-group">
             <label for="current-password" class="field-label">Current Password</label>
             <div class="portal-password-wrapper">
@@ -592,7 +629,7 @@ export function renderSettingsView(): void {
           <div class="form-group">
             <label for="confirm-password" class="field-label">Confirm New Password</label>
             <div class="portal-password-wrapper">
-              <input type="password" id="confirm-password" name="confirm-password" class="form-input" autocomplete="new-password" />
+              <input type="password" id="confirm-password" name="confirm-password" class="form-input" autocomplete="off" />
               <button type="button" class="portal-password-toggle password-toggle" data-password-toggle="confirm-password" aria-label="Toggle password visibility">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
