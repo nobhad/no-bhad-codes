@@ -110,7 +110,7 @@ function statusLabel(status: ResponseStatus): string {
 let questionnairesCache: Questionnaire[] = [];
 let responsesCache: QuestionnaireResponse[] = [];
 let listenersSetup = false;
-let storedContext: AdminDashboardContext | null = null;
+let _storedContext: AdminDashboardContext | null = null;
 let editingQuestionnaireId: number | null = null;
 let questionsData: Question[] = [];
 let questionCounter = 0;
@@ -686,7 +686,7 @@ async function refreshResponses(): Promise<void> {
 function setupListeners(ctx: AdminDashboardContext): void {
   if (listenersSetup) return;
   listenersSetup = true;
-  storedContext = ctx;
+  _storedContext = ctx;
 
   // Questionnaires actions
   el('questionnaires-refresh')?.addEventListener('click', () => refreshQuestionnaires());

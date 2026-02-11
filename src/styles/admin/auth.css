@@ -278,3 +278,24 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   color: var(--color-primary);
 }
 
+/* Mobile: Login container takes full width - edge to edge, transparent bg, no shadow */
+@media (max-width: 600px) {
+  .auth-gate {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .auth-gate-container {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 0;
+    padding: var(--space-3);
+    min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 40px));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+

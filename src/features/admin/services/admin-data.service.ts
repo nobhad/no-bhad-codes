@@ -94,7 +94,7 @@ export interface Message {
   sender_name: string;
   message: string;
   content?: string;
-  is_read: boolean;
+  read_at: string | null; // Datetime when message was read, null if unread
   created_at: string;
 }
 

@@ -2832,7 +2832,7 @@ body.modal-open .dashboard-content {
   background-color: var(--color-status-overdue);
 }
 
-[data-page="admin"] .table-dropdown[data-status="planning"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="pending"] .status-dot,
 [data-page="admin"] .table-dropdown[data-status="partial"] .status-dot {
   background-color: var(--color-status-pending);
 }
@@ -2842,7 +2842,7 @@ body.modal-open .dashboard-content {
   background-color: var(--color-status-new);
 }
 
-[data-page="admin"] .table-dropdown[data-status="review"] .status-dot {
+[data-page="admin"] .table-dropdown[data-status="in-review"] .status-dot {
   background-color: var(--color-status-read);
 }
 
@@ -2895,7 +2895,7 @@ body.modal-open .dashboard-content {
   background-color: var(--color-status-overdue);
 }
 
-[data-page="admin"] .custom-dropdown-item[data-status="planning"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="pending"] .status-dot,
 [data-page="admin"] .custom-dropdown-item[data-status="partial"] .status-dot {
   background-color: var(--color-status-pending);
 }
@@ -2905,7 +2905,7 @@ body.modal-open .dashboard-content {
   background-color: var(--color-status-new);
 }
 
-[data-page="admin"] .custom-dropdown-item[data-status="review"] .status-dot {
+[data-page="admin"] .custom-dropdown-item[data-status="in-review"] .status-dot {
   background-color: var(--color-status-read);
 }
 

@@ -30,11 +30,11 @@ Chart.register(...registerables);
 
 const charts: Map<string, Chart> = new Map();
 
-export async function loadOverviewData(ctx: AdminDashboardContext): Promise<void> {
+export async function loadAnalyticsCharts(ctx: AdminDashboardContext): Promise<void> {
   // Setup event listeners for analytics controls
   setupAnalyticsEventListeners();
 
-  // Load all analytics data in parallel
+  // Load all analytics charts in parallel
   await Promise.all([
     loadBusinessKPIs(),
     loadRevenueChart(),
@@ -1207,7 +1207,7 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
   }
 }
 
-export async function loadAnalyticsData(ctx: AdminDashboardContext): Promise<void> {
+export async function loadAnalyticsData(_ctx: AdminDashboardContext): Promise<void> {
   try {
     const response = await apiFetch('/api/analytics/summary?days=30');
 

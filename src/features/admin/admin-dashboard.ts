@@ -130,7 +130,7 @@ const ADMIN_TAB_TITLES: Record<string, string> = {
   work: 'Work',
   crm: 'CRM',
   documents: 'Documents',
-  support: 'Support',
+  support: 'Knowledge Base',
   'client-detail': 'Client Details',
   'project-detail': 'Project Details'
 };
@@ -152,7 +152,7 @@ const ADMIN_TAB_GROUPS = {
     defaultTab: 'invoices'
   },
   support: {
-    label: 'Support',
+    label: 'Knowledge Base',
     tabs: ['knowledge-base'],
     defaultTab: 'knowledge-base'
   }
@@ -704,7 +704,7 @@ class AdminDashboard {
         document.documentElement.setAttribute('data-theme', newTheme);
         try {
           localStorage.setItem('theme', newTheme);
-        } catch (e) {
+        } catch (_error) {
           // Ignore storage errors
         }
       });
@@ -1771,7 +1771,7 @@ class AdminDashboard {
         // Overview stats (Active Projects, Clients, Revenue MTD, Recent Activity)
         overviewModule.loadOverviewData(this.moduleContext),
         // Analytics charts and KPIs
-        analyticsModule.loadOverviewData(this.moduleContext),
+        analyticsModule.loadAnalyticsCharts(this.moduleContext),
         analyticsModule.loadPerformanceData(this.moduleContext),
         analyticsModule.loadAnalyticsData(this.moduleContext),
         analyticsModule.loadVisitorsData(this.moduleContext),
@@ -1798,7 +1798,7 @@ class AdminDashboard {
 
           // Load analytics charts (Revenue chart, Project status, etc.)
           const analyticsModule = await loadAnalyticsModule();
-          await analyticsModule.loadOverviewData(this.moduleContext);
+          await analyticsModule.loadAnalyticsCharts(this.moduleContext);
         }
         break;
       case 'performance':

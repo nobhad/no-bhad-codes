@@ -60,6 +60,14 @@ interface AdHocRequest {
   updatedAt: string;
 }
 
+interface TimeEntry {
+  hours: number;
+  userName?: string;
+  date: string;
+  description?: string;
+  billable?: boolean;
+}
+
 let requestsCache: AdHocRequest[] = [];
 let storedContext: AdminDashboardContext | null = null;
 let listenersInitialized = false;
@@ -242,7 +250,7 @@ async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTM
   container.className = 'ad-hoc-time-entries-section';
 
   // Fetch existing time entries
-  let timeEntries: any[] = [];
+  let timeEntries: TimeEntry[] = [];
   try {
     const response = await apiFetch(`${REQUESTS_API}/${requestId}/time-entries`);
     const data = await response.json();
@@ -253,7 +261,7 @@ async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTM
     console.error('Failed to load time entries:', error);
   }
 
-  const totalHours = timeEntries.reduce((sum: number, entry: any) => sum + (entry.hours || 0), 0);
+  const totalHours = timeEntries.reduce((sum: number, entry: TimeEntry) => sum + (entry.hours || 0), 0);
 
   container.innerHTML = `
     <div class="ad-hoc-time-entries-header">
@@ -266,7 +274,7 @@ async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTM
       <div class="ad-hoc-time-entries-list">
         ${timeEntries
     .map(
-      (entry: any) => `
+      (entry: TimeEntry) => `
           <div class="ad-hoc-time-entry">
             <div class="ad-hoc-time-entry-header">
               <span class="ad-hoc-time-entry-user">${SanitizationUtils.escapeHtml(entry.userName || 'Unknown')}</span>

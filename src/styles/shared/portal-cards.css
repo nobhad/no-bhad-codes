@@ -5,6 +5,83 @@
    ===================================================== */
 
 /* =====================================================
+   BASE CARD SYSTEM
+   Provides consistent card styling across all portal pages.
+   Use these base classes to reduce custom CSS per page.
+   ===================================================== */
+
+/* Base card container - main content containers */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-card {
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+  box-shadow: var(--shadow-panel);
+  padding: var(--space-4);
+}
+
+/* First child in card - typically header, no top margin */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-card > *:first-child {
+  margin-top: 0;
+}
+
+/* Subsequent children - consistent spacing */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-card > * + * {
+  margin-top: var(--space-3);
+}
+
+/* Card header - ACME font, uppercase */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-card-header {
+  font-family: var(--font-family-acme);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  margin: 0 0 var(--space-2) 0;
+}
+
+/* Inner card - nested content with lighter background, no shadow */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-card-inner {
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  padding: var(--space-3);
+  box-shadow: none;
+}
+
+/* Card with header and actions on same line */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .portal-card-header-row h3 {
+  font-family: var(--font-family-acme);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  margin: 0;
+}
+
+/* Card body - standard content area */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-card-body {
+  color: var(--portal-text-light);
+}
+
+/* Mobile responsive for base cards */
+@media (--mobile) {
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-card {
+    padding: var(--space-2);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-card-inner {
+    padding: var(--space-2);
+  }
+}
+
+/* =====================================================
    4-CARD GRID RULE (GLOBAL)
    All grids with 4 cards: 4 across → 2x2 → 1 column
    NEVER 3+1 split
@@ -124,9 +201,13 @@
 }
 
 /* =====================================================
-   RECENT ACTIVITY
+   CONSISTENT CARD STYLING
+   All main content sections use identical card styling
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity {
+:is([data-page="admin"], [data-page="client-portal"]) .recent-activity,
+:is([data-page="admin"], [data-page="client-portal"]) .project-progress-section,
+:is([data-page="admin"], [data-page="client-portal"]) .milestones-section,
+:is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section {
   background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--portal-radius-md);
@@ -136,6 +217,9 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .recent-activity h3,
+:is([data-page="admin"], [data-page="client-portal"]) .project-progress-section h3,
+:is([data-page="admin"], [data-page="client-portal"]) .milestones-section h3,
+:is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section h3,
 :is([data-page="admin"], [data-page="client-portal"]) .analytics-overview h3 {
   font-family: var(--font-family-acme);
   font-size: 1.1rem;
@@ -157,7 +241,6 @@
   border-radius: var(--portal-radius-md);
   border: none;
   margin-bottom: var(--space-0-5);
-  font-size: 0.9rem;
   color: var(--portal-text-light);
 }
 
@@ -221,8 +304,9 @@
   color: var(--portal-text-muted);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .activity-time {
-  font-size: var(--font-size-xs);
+:is([data-page="admin"], [data-page="client-portal"]) .activity-time,
+:is([data-page="admin"], [data-page="client-portal"]) .activity-date {
+  font-size: var(--font-size-sm);
   color: var(--portal-text-muted);
   white-space: nowrap;
 }
@@ -544,7 +628,9 @@
 :is([data-page="admin"], [data-page="client-portal"]) .messages-container,
 :is([data-page="admin"], [data-page="client-portal"]) .summary-card,
 :is([data-page="admin"], [data-page="client-portal"]) .invoices-list,
-:is([data-page="admin"], [data-page="client-portal"]) .settings-section {
+:is([data-page="admin"], [data-page="client-portal"]) .settings-section,
+:is([data-page="admin"], [data-page="client-portal"]) .project-progress-section,
+:is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section {
   box-shadow: var(--shadow-panel);
 }
 
@@ -691,7 +777,9 @@
   :is([data-page="admin"], [data-page="client-portal"]) .summary-card,
   :is([data-page="admin"], [data-page="client-portal"]) .invoices-list,
   :is([data-page="admin"], [data-page="client-portal"]) .messages-container,
-  :is([data-page="admin"], [data-page="client-portal"]) .settings-section {
+  :is([data-page="admin"], [data-page="client-portal"]) .settings-section,
+  :is([data-page="admin"], [data-page="client-portal"]) .project-progress-section,
+  :is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section {
     padding: var(--space-2);
     border-radius: var(--portal-radius-md);
   }

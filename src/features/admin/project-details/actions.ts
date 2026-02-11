@@ -197,7 +197,7 @@ export function openEditProjectModal(
   // Ensure modal handlers and dropdown elements are initialized before populating
   // This prevents timing issues where selects are not created yet
   setupEditProjectModalHandlers(modal);
-  initProjectModalDropdowns(project as any);
+  initProjectModalDropdowns(project);
 
   // Populate form fields - query fresh since values change between openings
   const nameInput = getElement('edit-project-name') as HTMLInputElement;

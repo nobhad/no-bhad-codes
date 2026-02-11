@@ -1221,7 +1221,7 @@ async function testTrigger(): Promise<void> {
 /**
  * Generate sample context data for testing triggers
  */
-function generateTestContext(eventType: string, conditions: Record<string, unknown> | null, actionConfig: Record<string, unknown>): Record<string, unknown> {
+function generateTestContext(eventType: string, conditions: Record<string, unknown> | null, _actionConfig: Record<string, unknown>): Record<string, unknown> {
   // Base context that applies to all events
   const base: Record<string, unknown> = {
     timestamp: new Date().toISOString(),
@@ -1999,7 +1999,6 @@ function renderApprovalHistoryContent(
   requests: ApprovalRequest[],
   history: ApprovalHistoryEntry[]
 ): string {
-  const entityLabel = ENTITY_TYPE_LABELS[instance.entity_type] || instance.entity_type;
   const workflowTypeLabel = WORKFLOW_TYPE_LABELS[instance.workflow_type] || instance.workflow_type;
 
   // Instance status badge

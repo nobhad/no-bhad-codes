@@ -24,7 +24,7 @@ import {
   type FilterState
 } from '../../../utils/table-filter';
 import type { Lead, AdminDashboardContext } from '../admin-types';
-import { loadProjects, showProjectDetails } from './admin-projects';
+// Note: admin-projects imports moved to dynamic to break circular dependency
 import { confirmDialog, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { showToast } from '../../../utils/toast-notifications';
@@ -349,7 +349,7 @@ function renderPipelineView(ctx: AdminDashboardContext): void {
   // One-time delegated handler for links inside cards (so link click doesn't open lead details)
   if (!pipelineLinkHandlersAttached && container) {
     pipelineLinkHandlersAttached = true;
-    container.addEventListener('click', (e: Event) => {
+    container.addEventListener('click', async (e: Event) => {
       const target = (e.target as HTMLElement).closest?.('.lead-card-client-link, .lead-card-project-link');
       if (!target || !storedContext) return;
       e.preventDefault();
@@ -357,7 +357,10 @@ function renderPipelineView(ctx: AdminDashboardContext): void {
       const clientId = target.getAttribute('data-client-id');
       const projectId = target.getAttribute('data-project-id');
       if (clientId) openClientDetails(parseInt(clientId, 10), storedContext);
-      else if (projectId) showProjectDetails(parseInt(projectId, 10), storedContext);
+      else if (projectId) {
+        const { showProjectDetails } = await import('./admin-projects');
+        showProjectDetails(parseInt(projectId, 10), storedContext);
+      }
     });
   }
 }
@@ -1224,11 +1227,12 @@ export async function showLeadDetails(leadId: number): Promise<void> {
     });
   });
   detailsPanel.querySelectorAll('.panel-link-project').forEach((el) => {
-    el.addEventListener('click', (e) => {
+    el.addEventListener('click', async (e) => {
       e.preventDefault();
       const projectId = (el as HTMLElement).dataset.projectId;
       if (projectId && storedContext) {
         window.closeDetailsPanel();
+        const { showProjectDetails } = await import('./admin-projects');
         showProjectDetails(parseInt(projectId, 10), storedContext);
       }
     });
@@ -1297,6 +1301,7 @@ export async function activateLead(
       ctx.showNotification('Lead activated successfully!', 'success');
 
       // Load projects data and navigate to project detail page
+      const { loadProjects, showProjectDetails } = await import('./admin-projects');
       await loadProjects(ctx);
       const projectId = data.projectId || leadId;
       showProjectDetails(projectId, ctx);

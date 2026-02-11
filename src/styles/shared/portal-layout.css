@@ -67,21 +67,24 @@ body:has([data-page="client-portal"]) {
   margin-left: auto; /* Push to far right */
 }
 
-/* Logo in global header */
+/* Logo in global header - ACME font matching main site branding */
 .portal-global-header .header-logo {
   display: flex;
   align-items: center;
+  text-decoration: none;
+  color: var(--portal-text-light);
+  font-family: var(--font-family-acme);
+  font-weight: 400; /* ACME font doesn't need bold weight */
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: color 0.2s ease;
 }
 
-.portal-global-header .header-logo-img {
-  width: 40px;
-  height: auto;
-  filter: invert(1);
-  transition: transform 0.2s ease;
-}
-
-.portal-global-header .header-logo:hover .header-logo-img {
-  transform: scale(1.05);
+.portal-global-header .header-logo:hover {
+  color: var(--color-primary);
+  text-decoration: none;
 }
 
 /* Separator between logo and breadcrumbs */
@@ -256,3 +259,105 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 /* Base spacing for content sections - uniform 1.5rem gap */
 /* Spacing between containers is controlled by .tab-content.active > * + * in admin.css */
+
+/* =====================================================
+   BASE SECTION SYSTEM
+   Provides consistent section spacing across all portal pages.
+   Use these base classes to enforce DIV spacing consistency.
+   ===================================================== */
+
+/* Standard section - consistent bottom margin */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-section {
+  margin-bottom: var(--space-6);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .portal-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Section with no top margin on first child */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-section > *:first-child {
+  margin-top: 0;
+}
+
+/* Consistent gap between section children */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-section > * + * {
+  margin-top: var(--space-4);
+}
+
+/* Section title - secondary heading within a page */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-section-title {
+  font-family: var(--font-family-acme);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--portal-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--space-2) 0;
+}
+
+/* Content row - flex row with standard gap */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-content-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+/* Content stack - flex column with standard gap */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-content-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Two-column layout - common for pages with sidebar */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-two-column {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+/* Responsive: Stack on smaller screens */
+@media (max-width: 768px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-content-row {
+    flex-direction: column;
+  }
+}
+
+/* =====================================================
+   GRID SYSTEMS
+   Standard grid configurations for portal pages
+   ===================================================== */
+
+/* 2-column grid */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+/* 3-column grid */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+/* Responsive grids */
+@media (--tablet-landscape) {
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-grid-2,
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}

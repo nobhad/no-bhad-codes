@@ -7,7 +7,13 @@
  */
 
 import { createPortalModal } from '../../../components/portal-modal';
-import { AnnotationCanvas, createAnnotationCanvas, type Annotation } from '../../../components/annotation-canvas';
+import {
+  AnnotationCanvas,
+  createAnnotationCanvas,
+  type Annotation,
+  type AnnotationTool,
+  type AnnotationColor
+} from '../../../components/annotation-canvas';
 import { showToast } from '../../../utils/toast-notifications';
 
 // Simple DOM helper
@@ -181,9 +187,9 @@ async function showDesignReviewModal(): Promise<void> {
   await setupDesignViewer();
 
   // Setup event handlers
-  setupAnnotationTools(modal);
-  setupElementApproval(modal);
-  setupRoundSelector(modal);
+  setupAnnotationTools();
+  setupElementApproval();
+  setupRoundSelector();
 
   modal.footer.innerHTML = `
     <button type="button" class="btn btn-secondary" id="design-export-pdf">Export Feedback as PDF</button>
@@ -237,9 +243,9 @@ async function setupDesignViewer(): Promise<void> {
     });
   } catch (error) {
     console.error('Failed to setup design viewer:', error);
-    const container = el('design-canvas-container');
-    if (container) {
-      container.innerHTML = '<div class="error-message">Failed to load design file</div>';
+    const fallbackContainer = el('design-canvas-container');
+    if (fallbackContainer) {
+      fallbackContainer.innerHTML = '<div class="error-message">Failed to load design file</div>';
     }
   }
 }
@@ -247,7 +253,7 @@ async function setupDesignViewer(): Promise<void> {
 /**
  * Setup annotation tools
  */
-function setupAnnotationTools(modal: any): void {
+function setupAnnotationTools(): void {
   if (!annotationCanvas) return;
 
   // Tool buttons
@@ -255,8 +261,8 @@ function setupAnnotationTools(modal: any): void {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.tool-btn').forEach((b) => b.classList.remove('active'));
       (e.currentTarget as HTMLElement).classList.add('active');
-      const tool = (e.currentTarget as HTMLElement).dataset.tool;
-      annotationCanvas?.setTool(tool as any);
+      const tool = (e.currentTarget as HTMLElement).dataset.tool as AnnotationTool;
+      annotationCanvas?.setTool(tool);
     });
   });
 
@@ -265,8 +271,8 @@ function setupAnnotationTools(modal: any): void {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.color-btn').forEach((b) => b.classList.remove('active'));
       (e.currentTarget as HTMLElement).classList.add('active');
-      const color = (e.currentTarget as HTMLElement).dataset.color;
-      annotationCanvas?.setColor(color as any);
+      const color = (e.currentTarget as HTMLElement).dataset.color as AnnotationColor;
+      annotationCanvas?.setColor(color);
     });
   });
 
@@ -305,24 +311,24 @@ function setupAnnotationTools(modal: any): void {
 /**
  * Setup element approval
  */
-function setupElementApproval(modal: any): void {
+function setupElementApproval(): void {
   const elementsList = el('design-elements-list');
   if (!elementsList) return;
 
   elementsList.innerHTML = designElements
     .map(
-      (el) =>
+      (element) =>
         `
-    <div class="design-element-item" data-element-id="${el.id}">
-      <div class="element-name">${el.name}</div>
+    <div class="design-element-item" data-element-id="${element.id}">
+      <div class="element-name">${element.name}</div>
       <div class="element-approval">
-        <button class="approval-btn pending ${el.approvalStatus === 'pending' ? 'active' : ''}" data-status="pending">
+        <button class="approval-btn pending ${element.approvalStatus === 'pending' ? 'active' : ''}" data-status="pending">
           Pending
         </button>
-        <button class="approval-btn approved ${el.approvalStatus === 'approved' ? 'active' : ''}" data-status="approved">
+        <button class="approval-btn approved ${element.approvalStatus === 'approved' ? 'active' : ''}" data-status="approved">
           Approved
         </button>
-        <button class="approval-btn revisions ${el.approvalStatus === 'revisions_needed' ? 'active' : ''}" data-status="revisions_needed">
+        <button class="approval-btn revisions ${element.approvalStatus === 'revisions_needed' ? 'active' : ''}" data-status="revisions_needed">
           Revisions
         </button>
       </div>
@@ -364,7 +370,7 @@ function setupElementApproval(modal: any): void {
 /**
  * Setup round selector
  */
-function setupRoundSelector(modal: any): void {
+function setupRoundSelector(): void {
   const select = el('design-round-select') as HTMLSelectElement;
   if (!select) return;
 
@@ -435,11 +441,11 @@ async function exportFeedbackPDF(): Promise<void> {
               <h2>Design Elements Approval Status</h2>
               ${designElements
     .map(
-      (el) => `
+      (element) => `
                 <div class="element-item">
-                  <span class="element-name">${el.name}</span>
-                  <span class="element-status status-${el.approvalStatus === 'approved' ? 'approved' : el.approvalStatus === 'revisions_needed' ? 'revisions' : 'pending'}">
-                    ${el.approvalStatus === 'approved' ? '✓ Approved' : el.approvalStatus === 'revisions_needed' ? '✗ Revisions Needed' : '○ Pending'}
+                  <span class="element-name">${element.name}</span>
+                  <span class="element-status status-${element.approvalStatus === 'approved' ? 'approved' : element.approvalStatus === 'revisions_needed' ? 'revisions' : 'pending'}">
+                    ${element.approvalStatus === 'approved' ? '✓ Approved' : element.approvalStatus === 'revisions_needed' ? '✗ Revisions Needed' : '○ Pending'}
                   </span>
                 </div>
               `

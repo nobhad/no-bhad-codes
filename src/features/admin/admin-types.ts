@@ -156,7 +156,7 @@ export interface Project {
   name: string;
   client_id: number;
   client_name?: string;
-  status: 'planning' | 'in-progress' | 'review' | 'completed' | 'on-hold';
+  status: 'pending' | 'active' | 'in-progress' | 'in-review' | 'completed' | 'on-hold' | 'cancelled';
   start_date?: string;
   end_date?: string;
   budget?: number;
@@ -216,7 +216,7 @@ export interface Message {
   sender_name: string;
   message: string;
   content?: string;  // Alias for message in some contexts
-  is_read: boolean;
+  read_at: string | null; // Datetime when message was read, null if unread
   created_at: string;
 }
 

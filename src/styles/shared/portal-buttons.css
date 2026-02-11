@@ -149,6 +149,52 @@
 }
 
 /* ============================================
+ * DANGER BUTTON VARIANT
+ * ============================================
+ * For destructive actions (delete, remove, etc.)
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .btn-danger {
+  background: transparent;
+  color: var(--color-error-500, #ef4444);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .btn-danger:hover {
+  background: var(--color-error-500, #ef4444);
+  color: var(--color-white);
+}
+
+/* ============================================
+ * WARNING BUTTON VARIANT
+ * ============================================
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .btn-warning {
+  background: transparent;
+  color: var(--color-warning-500, #f59e0b);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .btn-warning:hover {
+  background: var(--color-warning-500, #f59e0b);
+  color: var(--color-black);
+}
+
+/* ============================================
+ * SUCCESS BUTTON VARIANT
+ * ============================================
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .btn-success {
+  background: transparent;
+  color: var(--color-success-500, #22c55e);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .btn-success:hover {
+  background: var(--color-success-500, #22c55e);
+  color: var(--color-white);
+}
+
+/* ============================================
  * SMALL BUTTON VARIANT
  * ============================================
  */
@@ -340,6 +386,50 @@
 }
 
 /* ============================================
+ * ICON BUTTON - SHARED STYLES
+ * ============================================
+ * Used for action icons in tables, cards, etc.
+ * Consistent 36x36 size across both portals.
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-lg, 12px);
+  color: var(--portal-text-light);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  text-decoration: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .icon-btn:hover {
+  color: var(--color-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .icon-btn.icon-btn-danger:hover {
+  color: var(--color-error-500);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .icon-btn.icon-btn-success:hover {
+  color: var(--color-success-500);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .icon-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
+/* ============================================
  * COLLAPSED SIDEBAR BUTTON STYLES
  * ============================================
  * Icon-only buttons when sidebar is collapsed.
@@ -355,6 +445,8 @@
   border: none;
   background: transparent;
   box-shadow: none;
+  overflow: visible;
+  position: relative;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn.active {
@@ -380,7 +472,13 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn .btn-text {
-  display: none;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn .btn-icon {
@@ -417,6 +515,8 @@
   display: flex;
   align-items: center;
   box-shadow: none;
+  overflow: visible;
+  position: relative;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-logout:hover {
@@ -431,7 +531,13 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-text {
-  display: none;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-logout .btn-icon {
@@ -491,7 +597,13 @@
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn .btn-text {
-    display: none;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn .btn-icon {
@@ -525,7 +637,13 @@
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-text,
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .logout-text {
-    display: none;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout .btn-icon {
@@ -560,6 +678,7 @@
     border: none;
     background: transparent;
     position: relative;
+    overflow: visible;
     box-shadow: none;
   }
 
@@ -580,7 +699,13 @@
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn .btn-text {
-    display: none;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn .btn-icon {
@@ -614,7 +739,13 @@
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-text,
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .logout-text {
-    display: none;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout .btn-icon {
@@ -630,5 +761,59 @@
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout:hover .btn-icon svg {
     stroke-width: 2.5;
+  }
+}
+
+/* ============================================
+ * FALLBACK: STANDARD MEDIA QUERY
+ * ============================================
+ * Ensures collapsed sidebar text is hidden even
+ * if custom media queries aren't processed.
+ * Uses explicit max-width instead of custom property.
+ */
+
+@media (max-width: 1300px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    overflow: visible !important;
+    position: relative !important;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn .btn-text {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn .btn-icon {
+    margin: 0 !important;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-text,
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .logout-text {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout .btn-icon {
+    margin: 0 !important;
   }
 }

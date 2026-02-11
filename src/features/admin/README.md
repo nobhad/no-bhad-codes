@@ -11,6 +11,7 @@ The dashboard is accessible at `/admin.html` and requires authentication.
 ## Features
 
 ### 🔐 Security
+
 - **Authentication Required:** SHA-256 hashed access key
 - **Rate Limiting:** Maximum 3 login attempts with 15-minute lockout
 - **Session Management:** 1-hour session timeout with auto-extension
@@ -19,28 +20,33 @@ The dashboard is accessible at `/admin.html` and requires authentication.
 - **Dev Tools Detection:** Alerts when developer tools are opened
 
 ### 📊 Overview Tab
+
 - **Real-time Metrics:** Visitor count, page views, session duration
 - **Business Card Interactions:** Track card flip interactions
 - **Visual Charts:** Visitor trends and traffic sources (placeholder)
 
 ### ⚡ Performance Tab  
+
 - **Core Web Vitals:** LCP, FID, CLS monitoring
 - **Bundle Analysis:** JavaScript and CSS bundle sizes
 - **Performance Timeline:** Historical performance data
 
 ### 📈 Analytics Tab
+
 - **Popular Pages:** Most visited pages and sections
 - **Device Breakdown:** Desktop, mobile, tablet usage
 - **Geographic Data:** Visitor location distribution  
 - **Engagement Events:** Interaction tracking
 
 ### 👥 Visitors Tab
+
 - **Visitor Records:** Individual visitor tracking
 - **Session Data:** Visit frequency and duration
 - **Search & Filter:** Find specific visitors
 - **Detailed Profiles:** Location and device information
 
 ### 🛠️ System Tab
+
 - **Application Status:** Module and service health
 - **Data Export:** Export analytics, visitor, and performance data
 - **Data Management:** Clear old data or reset analytics
@@ -48,6 +54,7 @@ The dashboard is accessible at `/admin.html` and requires authentication.
 ## Technical Details
 
 ### Architecture
+
 - **Frontend:** TypeScript, Modern CSS, Secure Authentication
 - **Build:** Vite with separate admin chunk (code-splitting)
 - **Storage:** SessionStorage for auth, LocalStorage for rate limiting
@@ -90,6 +97,7 @@ src/styles/admin/             # Admin style modules
 - [Admin Dashboard Feature](../../../docs/features/ADMIN_DASHBOARD.md) - Complete admin dashboard documentation
 
 ### Integration Points
+
 - **NBW_DEBUG Global:** Integrates with main app debug utilities
 - **Performance Service:** Real Core Web Vitals data
 - **Visitor Tracking:** Actual analytics when available  
@@ -101,30 +109,34 @@ src/styles/admin/             # Admin style modules
 
 ```bash
 npm run dev:full
-# Navigate to http://localhost:4000/admin
+# Navigate to http://<frontend-host>:4000/admin
 ```
 
 ### Building
+
 ```bash
 npm run build
 # Creates dist/admin.html
 ```
 
 ### Authentication
+
 The dashboard uses SHA-256 hashing for the access key. To change the key:
 
 1. Generate new hash:
+
 ```javascript
 const key = 'your-new-key';
 const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key));
 console.log(Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join(''));
 ```
 
-2. Update `AUTH_KEY_HASH` in `admin-dashboard.ts`
+1. Update `AUTH_KEY_HASH` in `admin-dashboard.ts`
 
 ## Security Considerations
 
 ### Production Deployment
+
 - [ ] Change default access key
 - [ ] Enable HTTPS only
 - [ ] Configure proper CSP headers
@@ -134,6 +146,7 @@ console.log(Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,
 - [ ] Set up monitoring/alerting for access attempts
 
 ### Server Configuration
+
 ```nginx
 # Nginx example
 location /admin.html {
@@ -151,6 +164,7 @@ location /admin.html {
 ## Monitoring
 
 The dashboard logs security events to the console:
+
 - Failed authentication attempts
 - Rate limiting activations  
 - CSP violations
@@ -160,6 +174,7 @@ The dashboard logs security events to the console:
 ## Data Export
 
 All data can be exported as JSON files:
+
 - **Analytics Export:** Page views, visitor data, events
 - **Visitor Export:** Detailed visitor profiles and sessions
 - **Performance Export:** Core Web Vitals and bundle metrics

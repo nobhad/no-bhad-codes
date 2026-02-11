@@ -385,13 +385,13 @@ export class NavigationModule extends BaseModule {
       {
         path: '/',
         section: 'intro',
-        title: 'No Bhad Codes - Portfolio',
+        title: 'No Bhad Codes',
         onEnter: () => this.onSectionEnter('home')
       },
       {
         path: '#/',
         section: 'intro',
-        title: 'No Bhad Codes - Portfolio',
+        title: 'No Bhad Codes',
         onEnter: () => this.onSectionEnter('home')
       },
       {
