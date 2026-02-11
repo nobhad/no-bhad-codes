@@ -7,7 +7,7 @@
 .invoice-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-2);
+  gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
 
@@ -69,35 +69,6 @@
   color: var(--portal-text-light);
 }
 
-/* Invoice Status */
-.invoice-status {
-  padding: var(--space-0-5) var(--space-1-5);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  border-radius: var(--portal-radius-xs);
-}
-
-.status-pending {
-  background: var(--color-warning);
-  color: var(--color-dark);
-}
-
-.status-paid {
-  background: var(--color-primary);
-  color: var(--color-dark);
-}
-
-.status-overdue {
-  background: var(--color-error);
-  color: var(--color-white);
-}
-
-.status-draft {
-  background: var(--portal-bg-light);
-  color: var(--portal-text-light);
-}
-
 /* Invoice Actions */
 .invoice-actions {
   display: flex;
@@ -113,7 +84,7 @@
 
 .invoice-actions .btn:not(.icon-btn):hover {
   background: var(--color-primary);
-  color: var(--color-dark);
+  color: var(--portal-bg-dark);
 }
 
 /* No Invoices Message */

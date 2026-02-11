@@ -32,8 +32,10 @@ import {
   loadDocumentRequestsModule,
   loadQuestionnairesModule,
   loadAdHocRequestsModule,
-  loadApprovalsModule
+  loadApprovalsModule,
+  loadOnboardingWizardModule
 } from './modules';
+import { authStore } from '../../auth/auth-store';
 import { decodeJwtPayload, isAdminPayload } from '../../utils/jwt-utils';
 import { ICONS, getAccessibleIcon } from '../../constants/icons';
 import { createDOMCache } from '../../utils/dom-cache';
@@ -41,6 +43,7 @@ import { formatTextWithLineBreaks, formatDate } from '../../utils/format-utils';
 import { showToast } from '../../utils/toast-notifications';
 import { withButtonLoading } from '../../utils/button-loading';
 import { initCopyEmailDelegation } from '../../utils/copy-email';
+import { installGlobalAuthInterceptor } from '../../utils/api-fetch';
 
 // DOM element keys for caching
 type PortalDOMKeys = Record<string, string>;
@@ -132,7 +135,7 @@ export class ClientPortalModule extends BaseModule {
   private createModuleContext(): ClientPortalContext {
     return {
       getAuthToken: () => sessionStorage.getItem('client_auth_mode'),
-      showNotification: (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+      showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
         if (type === 'error') {
           console.error('[ClientPortal]', message);
           showToast(message, 'error', { duration: 5000 });
@@ -146,8 +149,13 @@ export class ClientPortalModule extends BaseModule {
   }
 
   protected override async onInit(): Promise<void> {
+    // Install global 401 interceptor to handle expired sessions
+    installGlobalAuthInterceptor();
+
     this.cacheElements();
     this.setupEventListeners();
+    this.setupAuthEventListeners();
+    this.normalizeProjectTabs();
     initCopyEmailDelegation(document);
     // Set initial breadcrumb at top of page when on client portal (so it shows even before/without login)
     if (document.body.getAttribute('data-page') === 'client-portal' && document.getElementById('breadcrumb-list')) {
@@ -201,23 +209,13 @@ export class ClientPortalModule extends BaseModule {
   private setupEventListeners(): void {
     if (this.loginForm) {
       this.log('Login form found, attaching submit handler');
-      const passwordPromptKey = 'nbw_password_prompted';
-      if (sessionStorage.getItem(passwordPromptKey) === '1') {
-        this.loginForm.setAttribute('autocomplete', 'off');
-        const passwordInput = this.domCache.getAs<HTMLInputElement>('clientPassword');
-        passwordInput?.setAttribute('autocomplete', 'off');
-      }
+      // Note: Do NOT dynamically change autocomplete attributes - this causes
+      // browsers to re-evaluate and show multiple save password prompts.
+      // Autocomplete attributes are set correctly in HTML.
       this.loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         event.stopPropagation();
         this.log('Login form submitted');
-
-        if (sessionStorage.getItem(passwordPromptKey) !== '1') {
-          sessionStorage.setItem(passwordPromptKey, '1');
-          this.loginForm?.setAttribute('autocomplete', 'off');
-          const passwordInput = this.domCache.getAs<HTMLInputElement>('clientPassword');
-          passwordInput?.setAttribute('autocomplete', 'off');
-        }
 
         const formData = new FormData(this.loginForm!);
         const email = (formData.get('email') as string || '').trim();
@@ -238,6 +236,8 @@ export class ClientPortalModule extends BaseModule {
           {
             onLoginSuccess: async (user) => {
               this.log('Login successful for:', user.email);
+              // Clear any stale data before loading new user's data
+              this.clearPortalData();
               this.isLoggedIn = true;
               this.currentUser = user.email;
               this.currentUserData = user;
@@ -283,6 +283,105 @@ export class ClientPortalModule extends BaseModule {
     }
   }
 
+  private normalizeProjectTabs(): void {
+    document.querySelectorAll('.project-tabs').forEach((tabs) => {
+      tabs.classList.add('portal-tabs');
+    });
+
+    document.querySelectorAll('.tab-pane').forEach((panel) => {
+      panel.classList.add('portal-tab-panel');
+    });
+  }
+
+  /**
+   * Setup auth event listeners to handle session expiry
+   * Clears sensitive data from DOM when session expires to prevent data leakage
+   */
+  private setupAuthEventListeners(): void {
+    // Listen for session expiry to clear sensitive data and redirect to login
+    window.addEventListener('nbw:auth:session-expired', () => {
+      this.log('Session expired - redirecting to login');
+      this.clearPortalData();
+      // Redirect to login page - prevents seeing any portal content
+      window.location.href = '/client/?session=expired';
+    });
+
+    // Listen for logout to ensure data is cleared
+    window.addEventListener('nbw:auth:logout', () => {
+      this.log('User logged out - clearing portal data');
+      this.clearPortalData();
+    });
+  }
+
+  /**
+   * Clear all portal data from DOM and state
+   * Called on session expiry or logout to prevent data leakage
+   */
+  private clearPortalData(): void {
+    // Clear state
+    this.isLoggedIn = false;
+    this.currentUser = null;
+    this.currentUserData = null;
+
+    // Clear milestones list
+    const milestonesList = document.getElementById('milestones-list');
+    if (milestonesList) {
+      milestonesList.innerHTML = '';
+    }
+
+    // Clear milestones summary
+    const milestonesSummary = document.getElementById('milestones-summary');
+    if (milestonesSummary) {
+      milestonesSummary.textContent = '';
+    }
+
+    // Clear projects list
+    if (this.projectsList) {
+      this.projectsList.innerHTML = '';
+    }
+
+    // Clear project details
+    if (this.projectDetails) {
+      this.projectDetails.innerHTML = '';
+    }
+
+    // Clear any visible project title/description
+    const projectTitle = this.domCache.get('projectTitle');
+    if (projectTitle) {
+      projectTitle.textContent = '';
+    }
+
+    const projectDescription = this.domCache.get('projectDescriptionEl');
+    if (projectDescription) {
+      projectDescription.textContent = '';
+    }
+
+    // Clear progress indicators
+    const progressFill = this.domCache.get('progressFill') as HTMLElement | null;
+    if (progressFill) {
+      progressFill.style.width = '0%';
+    }
+
+    const progressText = this.domCache.get('progressText');
+    if (progressText) {
+      progressText.textContent = '';
+    }
+
+    // Clear messages list
+    const messagesList = this.domCache.get('messagesList');
+    if (messagesList) {
+      messagesList.innerHTML = '';
+    }
+
+    // Clear updates timeline
+    const updatesTimeline = this.domCache.get('updatesTimeline');
+    if (updatesTimeline) {
+      updatesTimeline.innerHTML = '';
+    }
+
+    this.log('Portal data cleared');
+  }
+
   private setupDashboardEventListeners(): void {
     if (this.dashboardListenersSetup) {
       this.log('Dashboard event listeners already set up, skipping...');
@@ -318,6 +417,15 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
+    // Mobile menu toggle button (in page header)
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    if (mobileMenuToggle) {
+      mobileMenuToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.toggleSidebar();
+      });
+    }
+
     // Theme toggle in global header
     const headerThemeToggle = document.getElementById('header-toggle-theme');
     if (headerThemeToggle) {
@@ -327,7 +435,7 @@ export class ClientPortalModule extends BaseModule {
         document.documentElement.setAttribute('data-theme', newTheme);
         try {
           localStorage.setItem('theme', newTheme);
-        } catch (e) {
+        } catch (_error) {
           // Ignore storage errors
         }
       });
@@ -341,14 +449,15 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
-    // Sidebar buttons with data-tab attribute
+    // Sidebar buttons with data-tab attribute - each goes directly to its view
     const sidebarButtons = document.querySelectorAll('.sidebar-buttons .btn[data-tab]');
     if (sidebarButtons.length > 0) {
       this.log(`Found ${sidebarButtons.length} sidebar buttons with data-tab`);
       sidebarButtons.forEach((btn) => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
-          const tabName = (btn as HTMLElement).dataset.tab;
+          const btnEl = btn as HTMLElement;
+          const tabName = btnEl.dataset.tab;
           if (tabName) {
             this.switchTab(tabName);
           }
@@ -356,7 +465,8 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
-    // Header group subtabs (Work / Documents / Support)
+    // Header group subtabs - REMOVED (each page is now standalone)
+    // Legacy support: if any header subtabs still exist, handle them
     const headerGroups = document.querySelectorAll('.header-subtab-group[data-mode="primary"]');
     headerGroups.forEach((group) => {
       const groupEl = group as HTMLElement;
@@ -438,7 +548,8 @@ export class ClientPortalModule extends BaseModule {
     this.log('Dashboard event listeners setup complete');
     this.dashboardListenersSetup = true;
 
-    this.switchTab('dashboard');
+    // Note: Initial tab is now handled by hash router in showDashboard()
+    // via initializeHashRouter() which reads the URL hash
   }
 
   /**
@@ -455,18 +566,10 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
-    // Render password form dynamically (not in initial HTML to avoid multiple save password prompts)
-    this.renderPasswordForm();
-
-    // Password form - get fresh reference after rendering
-    const passwordForm = document.getElementById('password-form') as HTMLFormElement | null;
-    if (passwordForm) {
-      passwordForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const submitBtn = passwordForm.querySelector('button[type="submit"]') as HTMLButtonElement;
-        await withButtonLoading(submitBtn, () => this.savePasswordSettings(), 'Updating...');
-      });
-    }
+    // NOTE: Password form is now part of the settings view template (portal-views.ts)
+    // and is initialized via initializePasswordForm() when settings tab is loaded.
+    // This prevents browser password save prompts on dashboard load since the form
+    // doesn't exist in the DOM until the user navigates to settings.
 
     // Notifications form
     const notificationsForm = this.domCache.getAs<HTMLFormElement>('notificationsForm');
@@ -650,58 +753,17 @@ export class ClientPortalModule extends BaseModule {
   }
 
   /**
-   * Render password form dynamically to avoid browser detecting multiple password fields at login
+   * Initialize password form event handlers (form HTML is now in portal-views.ts template)
+   * Sets up password toggle buttons and form submission
    */
-  private renderPasswordForm(): void {
-    const placeholder = document.getElementById('password-form-placeholder');
-    if (!placeholder || placeholder.dataset.rendered === 'true') return;
+  private initializePasswordForm(): void {
+    const passwordForm = document.getElementById('password-form') as HTMLFormElement | null;
+    if (!passwordForm || passwordForm.dataset.initialized === 'true') return;
 
-    placeholder.dataset.rendered = 'true';
-    placeholder.innerHTML = `
-      <form class="settings-form" id="password-form" data-form-type="change-password">
-        <input type="text" id="password-form-username" name="username" autocomplete="username" class="sr-only" tabindex="-1" aria-hidden="true" readonly />
-        <div class="form-group">
-          <label for="current-password">Current Password</label>
-          <div class="portal-password-wrapper">
-            <input type="password" id="current-password" class="form-input" autocomplete="current-password" />
-            <button type="button" class="portal-password-toggle password-toggle" data-password-toggle="current-password" aria-label="Toggle password visibility">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="new-password">New Password</label>
-          <div class="portal-password-wrapper">
-            <input type="password" id="new-password" class="form-input" autocomplete="new-password" />
-            <button type="button" class="portal-password-toggle password-toggle" data-password-toggle="new-password" aria-label="Toggle password visibility">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="confirm-password">Confirm New Password</label>
-          <div class="portal-password-wrapper">
-            <input type="password" id="confirm-password" class="form-input" autocomplete="new-password" />
-            <button type="button" class="portal-password-toggle password-toggle" data-password-toggle="confirm-password" aria-label="Toggle password visibility">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-secondary">Update Password</button>
-      </form>
-    `;
+    passwordForm.dataset.initialized = 'true';
 
-    // Initialize password toggles for the newly rendered form
-    const toggles = placeholder.querySelectorAll<HTMLButtonElement>('[data-password-toggle]');
+    // Initialize password toggles
+    const toggles = passwordForm.querySelectorAll<HTMLButtonElement>('[data-password-toggle]');
     toggles.forEach((toggle) => {
       const inputId = toggle.dataset.passwordToggle;
       if (!inputId) return;
@@ -717,6 +779,13 @@ export class ClientPortalModule extends BaseModule {
             : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
         }
       });
+    });
+
+    // Attach form submit handler
+    passwordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = passwordForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+      await withButtonLoading(submitBtn, () => this.savePasswordSettings(), 'Updating...');
     });
   }
 
@@ -1017,6 +1086,11 @@ export class ClientPortalModule extends BaseModule {
 
       if (!response.ok) {
         console.warn('[ClientPortal] Failed to load dashboard stats:', response.status);
+        // Clear "Loading..." state on API error
+        const activityList = document.querySelector('.activity-list');
+        if (activityList) {
+          activityList.innerHTML = '<li class="activity-item empty">Unable to load activity</li>';
+        }
         return;
       }
 
@@ -1040,8 +1114,8 @@ export class ClientPortalModule extends BaseModule {
 
       // Update recent activity
       const activityList = document.querySelector('.activity-list');
-      if (activityList && data.recentActivity) {
-        if (data.recentActivity.length === 0) {
+      if (activityList) {
+        if (!data.recentActivity || data.recentActivity.length === 0) {
           activityList.innerHTML = '<li class="activity-item empty">No recent activity</li>';
         } else {
           activityList.innerHTML = data.recentActivity.map((item: {
@@ -1092,6 +1166,11 @@ export class ClientPortalModule extends BaseModule {
       this.log('[ClientPortal] Dashboard stats loaded');
     } catch (error) {
       console.error('[ClientPortal] Error loading dashboard stats:', error);
+      // Clear "Loading..." state on error
+      const activityList = document.querySelector('.activity-list');
+      if (activityList) {
+        activityList.innerHTML = '<li class="activity-item empty">Unable to load activity</li>';
+      }
     }
   }
 
@@ -1156,13 +1235,30 @@ export class ClientPortalModule extends BaseModule {
 
     list.innerHTML = '';
 
+    // Track if we've found the first non-completed milestone (it should be "In Progress")
+    let foundFirstActive = false;
+
     milestones.forEach((milestone) => {
       const item = document.createElement('div');
-      const statusLabel = milestone.isCompleted ? 'Completed' : 'In progress';
-      const statusClass = milestone.isCompleted ? 'completed' : 'pending';
       const safeTitle = this.escapeHtml(milestone.title || 'Milestone');
       const safeDescription = this.escapeHtml(milestone.description || '');
-      const safeProjectName = this.escapeHtml(milestone.projectName || 'Project');
+
+      // Determine status: Completed, In Progress (first non-completed), or Upcoming (rest)
+      let statusLabel: string;
+      let statusClass: string;
+      if (milestone.isCompleted) {
+        statusLabel = 'Completed';
+        statusClass = 'completed';
+      } else if (!foundFirstActive) {
+        // First non-completed milestone is always "In Progress"
+        statusLabel = 'In Progress';
+        statusClass = 'in-progress';
+        foundFirstActive = true;
+      } else {
+        // All other non-completed milestones are "Upcoming"
+        statusLabel = 'Upcoming';
+        statusClass = 'upcoming';
+      }
 
       const dueLabel = milestone.isCompleted
         ? `Completed ${milestone.completedDate ? formatDate(milestone.completedDate) : 'Date TBD'}`
@@ -1175,7 +1271,7 @@ export class ClientPortalModule extends BaseModule {
         : [];
       const deliverablesMarkup = deliverables.length > 0
         ? `<ul class="milestone-deliverables">${deliverables
-          .map((item) => `<li>${this.escapeHtml(String(item))}</li>`)
+          .map((deliverableItem) => `<li>${this.escapeHtml(String(deliverableItem))}</li>`)
           .join('')}</ul>`
         : '';
 
@@ -1187,14 +1283,13 @@ export class ClientPortalModule extends BaseModule {
         <div class="milestone-content">
           <div class="milestone-header">
             <h4 class="milestone-title">${safeTitle}</h4>
-            <span class="milestone-due-date">${dueLabel}</span>
+            <span class="milestone-status status-badge status-${statusClass}">${statusLabel}</span>
           </div>
           ${safeDescription ? `<p class="milestone-description">${safeDescription}</p>` : ''}
-          <div class="milestone-meta">
-            <span class="milestone-project">${safeProjectName}</span>
-            <span class="milestone-status ${statusClass}">${statusLabel}</span>
-          </div>
           ${deliverablesMarkup}
+          <div class="milestone-footer">
+            <span class="milestone-due-date">${dueLabel}</span>
+          </div>
         </div>
       `;
 
@@ -1359,7 +1454,7 @@ export class ClientPortalModule extends BaseModule {
           senderRole: (m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system')) as 'client' | 'developer' | 'system',
           message: m.message || '',
           timestamp: m.created_at || new Date().toISOString(),
-          isRead: Boolean(m.is_read)
+          isRead: m.read_at !== null
         }));
       }
 
@@ -1567,29 +1662,141 @@ export class ClientPortalModule extends BaseModule {
     if (portalNav) (portalNav as HTMLElement).style.display = 'none';
     if (portalFooter) (portalFooter as HTMLElement).style.display = 'none';
 
-    // Show dashboard
-    if (this.dashboardSection) {
-      this.dashboardSection.classList.remove('hidden');
-      this.dashboardSection.style.display = 'flex';
-
-      // Set initial breadcrumb at top of page (Dashboard when on main dashboard tab)
-      loadNavigationModule().then((navModule) => {
-        navModule.updateBreadcrumbs([{ label: 'Dashboard', href: false }]);
-      });
-
-      // Load dashboard stats from API
-      this.loadDashboardStats();
-
-      // Setup dashboard event listeners if not already done
-      if (!this.dashboardListenersSetup) {
-        setTimeout(() => {
-          this.setupDashboardEventListeners();
-        }, 100);
-      }
-
-      // Show admin features if user is admin
-      this.setupAdminFeatures();
+    // Check if this is first login - show onboarding wizard
+    const { isFirstLogin } = authStore.getState();
+    if (isFirstLogin) {
+      this.showOnboardingWizard();
+      return;
     }
+
+    // Show normal dashboard
+    this.showDashboardContent();
+  }
+
+  /**
+   * Show the onboarding wizard for first-time login
+   */
+  private async showOnboardingWizard(): Promise<void> {
+    // Create wizard container overlay
+    const wizardOverlay = document.createElement('div');
+    wizardOverlay.id = 'onboarding-wizard-overlay';
+    wizardOverlay.className = 'onboarding-wizard-overlay';
+
+    const wizardContainer = document.createElement('div');
+    wizardContainer.id = 'onboarding-wizard-container';
+    wizardContainer.className = 'onboarding-wizard-container';
+
+    wizardOverlay.appendChild(wizardContainer);
+    document.body.appendChild(wizardOverlay);
+
+    // Load and initialize the wizard
+    const { OnboardingWizardModule } = await loadOnboardingWizardModule();
+
+    const wizard = new OnboardingWizardModule(wizardContainer, this.moduleContext, {
+      onComplete: () => {
+        this.clearFirstLoginFlag();
+        wizardOverlay.remove();
+        this.showDashboardContent();
+        showToast('Welcome! Your profile is set up.', 'success');
+      },
+      onCancel: () => {
+        this.clearFirstLoginFlag();
+        wizardOverlay.remove();
+        this.showDashboardContent();
+      }
+    });
+
+    await wizard.init();
+  }
+
+  /**
+   * Clear the first login flag after onboarding is complete
+   */
+  private clearFirstLoginFlag(): void {
+    sessionStorage.removeItem('nbw_auth_is_first_login');
+    // Note: The authStore state will be updated on next page load
+    // For this session, we just ensure the wizard doesn't show again
+  }
+
+  /**
+   * Show the main dashboard content
+   */
+  private showDashboardContent(): void {
+    if (!this.dashboardSection) return;
+
+    this.dashboardSection.classList.remove('hidden');
+    this.dashboardSection.style.display = 'flex';
+
+    // Set initial breadcrumb at top of page (Dashboard when on main dashboard tab)
+    loadNavigationModule().then((navModule) => {
+      navModule.updateBreadcrumbs([{ label: 'Dashboard', href: false }]);
+    });
+
+    // Load dashboard stats from API
+    this.loadDashboardStats();
+
+    // Setup dashboard event listeners if not already done, then initialize hash router
+    if (!this.dashboardListenersSetup) {
+      setTimeout(() => {
+        this.setupDashboardEventListeners();
+        // Initialize hash-based routing after listeners are ready
+        this.initializeHashRouter();
+      }, 100);
+    } else {
+      // Listeners already set up, just ensure hash router is initialized
+      this.initializeHashRouter();
+    }
+
+    // Show admin features if user is admin
+    this.setupAdminFeatures();
+
+    // Initialize notification bell
+    this.initNotificationBell();
+  }
+
+  /** Reference to notification bell instance */
+  private notificationBellInstance: unknown = null;
+
+  /**
+   * Initialize the notification bell component
+   */
+  private async initNotificationBell(): Promise<void> {
+    const container = document.getElementById('notification-bell-container');
+    if (!container || this.notificationBellInstance) return;
+
+    try {
+      const { initNotificationBell } = await import('../../components/notification-bell');
+      this.notificationBellInstance = await initNotificationBell(container);
+    } catch (error) {
+      console.warn('[ClientPortal] Failed to initialize notification bell:', error);
+    }
+  }
+
+  /** Flag to track if hash router has been initialized */
+  private hashRouterInitialized = false;
+
+  /**
+   * Initialize hash-based routing for browser navigation
+   */
+  private initializeHashRouter(): void {
+    // Only initialize once
+    if (this.hashRouterInitialized) return;
+    this.hashRouterInitialized = true;
+
+    loadNavigationModule().then((navModule) => {
+      navModule.initHashRouter({
+        loadFiles: () => this.loadFiles(),
+        loadInvoices: () => this.loadInvoices(),
+        loadProjectPreview: () => this.loadProjectPreview(),
+        loadMessagesFromAPI: () => this.loadMessagesFromAPI(),
+        loadHelp: () => this.loadHelp(),
+        loadDocumentRequests: () => this.loadDocumentRequests(),
+        loadAdHocRequests: () => this.loadAdHocRequests(),
+        loadQuestionnaires: () => this.loadQuestionnaires(),
+        loadSettings: () => this.loadUserSettings(),
+        loadDashboard: () => this.loadDashboardStats()
+      });
+    });
   }
 
   /**
@@ -1687,16 +1894,17 @@ export class ClientPortalModule extends BaseModule {
 
   private handleTabClick(event: Event): void {
     event.preventDefault();
-    const tab = event.target as HTMLElement;
+    const tab = (event.target as HTMLElement).closest('button');
+    if (!tab) return;
     const tabName = tab.dataset.tab;
     if (!tabName) return;
 
     // Update tab active states
-    document.querySelectorAll('.project-tab').forEach((t) => t.classList.remove('active'));
+    document.querySelectorAll('.project-tab, .portal-tabs button').forEach((t) => t.classList.remove('active'));
     tab.classList.add('active');
 
     // Update tab content
-    document.querySelectorAll('.tab-pane').forEach((pane) => pane.classList.remove('active'));
+    document.querySelectorAll('.tab-pane, .portal-tab-panel').forEach((pane) => pane.classList.remove('active'));
     const targetPane = document.getElementById(`${tabName}-content`);
     if (targetPane) {
       targetPane.classList.add('active');
@@ -1777,10 +1985,12 @@ export class ClientPortalModule extends BaseModule {
 
   /**
    * Switch to a specific tab in the dashboard - delegates to navigation module
+   * Uses navigateTo to update URL hash for browser back/forward support
    */
   private async switchTab(tabName: string): Promise<void> {
     const navModule = await loadNavigationModule();
-    navModule.switchTab(tabName, {
+    // Use navigateTo to update URL hash and switch tab
+    navModule.navigateTo(tabName, {
       loadFiles: () => this.loadFiles(),
       loadInvoices: () => this.loadInvoices(),
       loadProjectPreview: () => this.loadProjectPreview(),
@@ -1788,8 +1998,18 @@ export class ClientPortalModule extends BaseModule {
       loadHelp: () => this.loadHelp(),
       loadDocumentRequests: () => this.loadDocumentRequests(),
       loadAdHocRequests: () => this.loadAdHocRequests(),
-      loadQuestionnaires: () => this.loadQuestionnaires()
+      loadQuestionnaires: () => this.loadQuestionnaires(),
+      loadSettings: () => this.loadUserSettings(),
+      loadDashboard: () => this.loadDashboardStats()
     });
+  }
+
+  /**
+   * Initialize password form event handlers when settings tab is opened
+   * Form HTML is now rendered as part of the settings view template
+   */
+  private setupPasswordForm(): void {
+    this.initializePasswordForm();
   }
 
   /**
@@ -1851,10 +2071,15 @@ export class ClientPortalModule extends BaseModule {
 
   /**
    * Load user settings - delegates to settings module
+   * Also initializes form handlers after view is available
    */
   private async loadUserSettings(): Promise<void> {
     const settingsModule = await loadSettingsModule();
-    settingsModule.loadUserSettings(this.currentUser);
+    await settingsModule.loadUserSettings(this.currentUser);
+    // Setup form event handlers after settings view is rendered
+    settingsModule.setupSettingsForms(this.moduleContext);
+    // Initialize password form event handlers after settings view is loaded
+    this.setupPasswordForm();
   }
 
   /**

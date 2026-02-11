@@ -34,7 +34,7 @@
 .files-container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 /* File Section - client portal specific alternate layout */
@@ -71,4 +71,15 @@
 
 .file-list .file-item:last-child {
   border-bottom: none;
+}
+
+/* File items - consistent with admin styling */
+[data-page="client-portal"] .files-list-section .file-item {
+  margin-bottom: var(--space-0-5);
+  cursor: default;
+}
+
+[data-page="client-portal"] .files-list-section .file-item:hover {
+  border-color: var(--color-primary);
+  border: 1px solid var(--color-primary);
 }

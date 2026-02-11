@@ -39,13 +39,20 @@ src/features/client/
 ├── portal-types.ts           # Portal type definitions
 └── README.md                 # This file
 
-src/features/client/modules/  # Extracted modules (7 modules)
+src/features/client/modules/  # Extracted modules (14 modules)
+├── portal-ad-hoc-requests.ts # Ad hoc request management (~576 lines)
+├── portal-approvals.ts       # Approval workflows (~247 lines)
 ├── portal-auth.ts            # Login, logout, session (~310 lines)
+├── portal-document-requests.ts # Document request handling (~446 lines)
 ├── portal-files.ts           # File management (~400 lines)
+├── portal-help.ts            # Help center and FAQ (~371 lines)
 ├── portal-invoices.ts        # Invoice display (~210 lines)
 ├── portal-messages.ts        # Messaging (~270 lines)
 ├── portal-navigation.ts      # Navigation, views, sidebar (~360 lines)
+├── portal-onboarding-ui.ts   # Onboarding UI components (~494 lines)
+├── portal-onboarding-wizard.ts # Onboarding wizard flow (~551 lines)
 ├── portal-projects.ts        # Project loading, display (~310 lines)
+├── portal-questionnaires.ts  # Questionnaire handling (~786 lines)
 ├── portal-settings.ts        # Settings forms (~260 lines)
 └── index.ts                  # Module exports
 ```
@@ -64,7 +71,7 @@ src/features/client/modules/  # Extracted modules (7 modules)
 
 ```bash
 npm run dev:full
-# Navigate to http://localhost:4000/client/portal.html
+# Navigate to http://<frontend-host>:4000/client/portal.html
 ```
 
 ### Authentication
@@ -104,16 +111,23 @@ Password: demo123
 
 ### Module Refactor (Completed January 2026)
 
-The `client-portal.ts` module was refactored from ~2,300 lines to ~1,400 lines by extracting 7 specialized modules:
+The `client-portal.ts` module was refactored from ~2,300 lines to ~1,400 lines by extracting specialized modules. Additional modules have been added since:
 
 | Module | Lines | Responsibility |
 |--------|-------|----------------|
+| `portal-ad-hoc-requests.ts` | ~576 | Ad hoc request submission and tracking |
+| `portal-approvals.ts` | ~247 | Approval workflow handling |
 | `portal-auth.ts` | ~310 | Login, logout, session management |
+| `portal-document-requests.ts` | ~446 | Document request handling |
 | `portal-files.ts` | ~400 | File upload, download, management |
+| `portal-help.ts` | ~371 | Help center and FAQ |
 | `portal-invoices.ts` | ~210 | Invoice display and download |
 | `portal-messages.ts` | ~270 | Messaging with cache busting |
 | `portal-navigation.ts` | ~360 | Navigation, views, sidebar |
+| `portal-onboarding-ui.ts` | ~494 | Onboarding UI components |
+| `portal-onboarding-wizard.ts` | ~551 | Onboarding wizard flow |
 | `portal-projects.ts` | ~310 | Project loading and display |
+| `portal-questionnaires.ts` | ~786 | Questionnaire handling |
 | `portal-settings.ts` | ~260 | Settings forms |
 
 ### Terminal Intake

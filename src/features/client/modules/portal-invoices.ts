@@ -113,7 +113,7 @@ function renderInvoicesList(
         <span class="invoice-project">${ctx.escapeHtml(invoice.project_name || 'Project')}</span>
       </div>
       <div class="invoice-amount">${formatCurrency(invoice.amount_total)}</div>
-      <span class="invoice-status ${statusClass}">${statusLabel}</span>
+      <span class="status-badge ${statusClass}">${statusLabel}</span>
       <div class="invoice-actions">
         <button class="icon-btn btn-preview-invoice" data-invoice-id="${invoice.id}" aria-label="Preview invoice" title="Preview">
           ${ICONS.EYE}
@@ -139,8 +139,8 @@ function renderInvoicesList(
 function getInvoiceStatusClass(status: string): string {
   const statusMap: Record<string, string> = {
     draft: 'status-draft',
-    sent: 'status-pending',
-    viewed: 'status-pending',
+    sent: 'status-sent',
+    viewed: 'status-viewed',
     partial: 'status-partial',
     paid: 'status-paid',
     overdue: 'status-overdue',
@@ -155,7 +155,7 @@ function getInvoiceStatusClass(status: string): string {
 function getInvoiceStatusLabel(status: string): string {
   const labelMap: Record<string, string> = {
     draft: 'Draft',
-    sent: 'Pending',
+    sent: 'Sent',
     viewed: 'Viewed',
     partial: 'Partial',
     paid: 'Paid',
@@ -193,7 +193,7 @@ function attachInvoiceActionListeners(container: HTMLElement, ctx: ClientPortalC
  * Preview invoice (open in new tab or modal)
  */
 function previewInvoice(invoiceId: number, _ctx: ClientPortalContext): void {
-  const url = `${INVOICES_API_BASE}/${invoiceId}`;
+  const url = `${INVOICES_API_BASE}/${invoiceId}/pdf?preview=true`;
   window.open(url, '_blank');
 }
 

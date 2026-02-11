@@ -196,6 +196,32 @@
     <!-- Inline script to prevent flash of login form when already authenticated -->
     <script>
       (function() {
+        var params = new URLSearchParams(window.location.search);
+        var sessionExpired = params.get('session') === 'expired';
+
+        // If session expired, clear any stale auth data and show login
+        if (sessionExpired) {
+          sessionStorage.removeItem('nbw_auth_user');
+          sessionStorage.removeItem('nbw_auth_expiry');
+          sessionStorage.removeItem('nbw_auth_role');
+          sessionStorage.removeItem('nbw_auth_session_id');
+          // Show session expired message after DOM loads
+          document.addEventListener('DOMContentLoaded', function() {
+            var errorEl = document.getElementById('auth-error');
+            if (errorEl) {
+              errorEl.textContent = 'Your session has expired. Please sign in again.';
+              errorEl.style.display = 'block';
+            }
+            // Clean up URL
+            params.delete('session');
+            var newUrl = window.location.pathname;
+            var query = params.toString();
+            if (query) newUrl += '?' + query;
+            window.history.replaceState({}, '', newUrl);
+          });
+          return; // Don't check auth if session expired
+        }
+
         var authUser = sessionStorage.getItem('nbw_auth_user');
         var authExpiry = sessionStorage.getItem('nbw_auth_expiry');
         var isAuthenticated = authUser && authExpiry && Date.now() < parseInt(authExpiry, 10);
@@ -228,6 +254,7 @@
               type="email"
               id="portal-email"
               name="email"
+              class="form-input"
               placeholder="Email Address"
               required
               autocomplete="username"
@@ -241,6 +268,7 @@
                 type="password"
                 id="portal-password"
                 name="password"
+                class="form-input"
                 placeholder="Password"
                 required
                 autocomplete="current-password"
@@ -257,11 +285,11 @@
           <div class="auth-error" id="auth-error"></div>
           <button type="submit" id="login-btn" class="btn btn-primary auth-submit">
             <span class="btn-text">Sign In</span>
-            <span class="btn-loading btn-loader" style="display: none;">Signing in...</span>
+            <span class="btn-loading" style="display: none;">Signing in...</span>
           </button>
         </form>
         <div class="auth-gate-footer">
-          <a href="#" id="forgot-password-link" class="auth-link">Forgot password?</a>
+          <a href="/client/forgot-password.html" id="forgot-password-link" class="auth-link">Forgot password?</a>
           <span class="auth-divider">|</span>
           <a href="#" id="magic-link-toggle" class="auth-link">Use magic link instead</a>
         </div>
@@ -274,15 +302,15 @@
       <!-- Full-Width Global Header -->
       <header class="portal-global-header">
         <div class="portal-global-header-left">
-          <a href="/" class="header-logo" aria-label="Go to homepage">
-            <img src="/images/avatar.svg" alt="No Bhad Codes" class="header-logo-img" />
-          </a>
+          <a href="/" class="header-logo" aria-label="Go to homepage">NO BHAD CODES</a>
           <span class="header-separator"></span>
           <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
             <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
           </nav>
         </div>
         <div class="portal-global-header-right">
+          <!-- Notification Bell -->
+          <div class="notification-bell-container" id="notification-bell-container"></div>
           <button id="header-toggle-theme" class="header-theme-toggle" aria-label="Toggle dark/light theme">
             <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
@@ -319,34 +347,48 @@
                 </svg>
                 <span class="btn-text">TOGGLE</span>
               </button>
-              <button class="btn btn-secondary active" id="btn-dashboard" data-tab="dashboard">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+              <button class="btn btn-secondary active" id="btn-dashboard" data-tab="dashboard" aria-label="Dashboard">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
               <span class="btn-text">DASHBOARD</span>
             </button>
-            <button class="btn btn-secondary" id="btn-work" data-tab="work">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-              <span class="btn-text">WORK</span>
+            <button class="btn btn-secondary" id="btn-requests" data-tab="requests" aria-label="Requests">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+              <span class="btn-text">REQUESTS</span>
+              <span class="sidebar-badge" id="badge-requests" aria-label="pending requests"></span>
             </button>
-            <button class="btn btn-secondary" id="btn-documents" data-tab="docs">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
-              <span class="btn-text">DOCUMENTS</span>
+            <button class="btn btn-secondary" id="btn-questionnaires" data-tab="questionnaires" aria-label="Questionnaires">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+              <span class="btn-text">QUESTIONNAIRES</span>
+              <span class="sidebar-badge" id="badge-questionnaires" aria-label="pending questionnaires"></span>
+            </button>
+            <button class="btn btn-secondary" id="btn-messages" data-tab="messages" aria-label="Messages">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+              <span class="btn-text">MESSAGES</span>
+              <span class="sidebar-badge" id="badge-messages" aria-label="unread messages"></span>
+            </button>
+            <button class="btn btn-secondary" id="btn-review" data-tab="preview" aria-label="Review">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span class="btn-text">REVIEW</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-documents" data-tab="files" aria-label="Files">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+              <span class="btn-text">FILES</span>
               <span class="sidebar-badge" id="badge-documents" aria-label="pending invoices"></span>
             </button>
-            <button class="btn btn-secondary" id="btn-support" data-tab="support">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="10"/><path d="M8.5 8.5a4 4 0 0 1 7 3c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-              <span class="btn-text">SUPPORT</span>
-              <span class="sidebar-badge" id="badge-support" aria-label="unread messages"></span>
+            <button class="btn btn-secondary" id="btn-help" data-tab="help" aria-label="Help">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+              <span class="btn-text">HELP</span>
             </button>
-            <button class="btn btn-secondary" id="btn-settings" data-tab="settings">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+            <button class="btn btn-secondary" id="btn-settings" data-tab="settings" aria-label="Settings">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
               <span class="btn-text">SETTINGS</span>
             </button>
           </div>
           <!-- Footer Actions -->
           <div class="sidebar-footer">
             <!-- Sign Out Button -->
-            <button class="btn btn-secondary btn-logout" id="btn-logout">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+            <button type="button" class="btn btn-secondary btn-logout" id="btn-logout" aria-label="Sign out">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
               <span class="btn-text">SIGN OUT</span>
             </button>
           </div>
@@ -356,853 +398,31 @@
       <!-- Content Area -->
       <div class="dashboard-content" id="dashboard-content">
         <div class="content-wrapper">
-          <!-- Portal Page Header - Title and subtabs only (breadcrumbs in global header) -->
+          <!-- Portal Page Header - Title only (no subtabs - each page is standalone) -->
           <header class="portal-page-header">
             <div class="portal-header-title">
+              <!-- Mobile menu toggle - visible only on mobile when sidebar is hidden -->
+              <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Open menu" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="18" rx="1"/>
+                  <path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/>
+                </svg>
+              </button>
               <h1 id="portal-page-title">Welcome Back, <span id="client-name">Client</span>!</h1>
-              <div class="header-subtabs">
-                <div class="portal-subtabs header-subtab-group" data-for-tab="work" data-mode="primary">
-                  <button class="portal-subtab active" data-subtab="requests">Requests</button>
-                  <button class="portal-subtab" data-subtab="preview">Review</button>
-                  <button class="portal-subtab" data-subtab="new-project">New Project</button>
-                </div>
-                <div class="portal-subtabs header-subtab-group" data-for-tab="docs" data-mode="primary">
-                  <button class="portal-subtab active" data-subtab="files">Files</button>
-                  <button class="portal-subtab" data-subtab="invoices">Invoices</button>
-                  <button class="portal-subtab" data-subtab="documents">Document Requests</button>
-                  <button class="portal-subtab" data-subtab="questionnaires">Questionnaires</button>
-                </div>
-                <div class="portal-subtabs header-subtab-group" data-for-tab="support" data-mode="primary">
-                  <button class="portal-subtab active" data-subtab="messages">Messages</button>
-                  <button class="portal-subtab" data-subtab="help">Help</button>
-                </div>
-              </div>
             </div>
           </header>
-          <!-- Dashboard View (Default) -->
-          <div class="tab-content active" id="tab-dashboard">
-
-            <!-- Project Cards -->
-            <div class="portal-project-cards">
-              <div class="portal-project-card portal-shadow">
-                <h3>Your Website Project</h3>
-                <p class="project-status">Status: <span class="status-badge">In Progress</span></p>
-                <p class="project-progress">Progress: 25%</p>
-                <div
-                  class="progress-bar"
-                  role="progressbar"
-                  aria-valuenow="25"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  aria-label="Project progress: 25 percent"
-                >
-                  <div class="progress-fill" style="width: 25%"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="quick-stats">
-              <button
-                class="stat-card stat-card-clickable portal-shadow"
-                data-tab="dashboard"
-                type="button"
-              >
-                <span class="stat-number">1</span>
-                <span class="stat-label">Active Projects</span>
-              </button>
-              <button
-                class="stat-card stat-card-clickable portal-shadow"
-                data-tab="invoices"
-                type="button"
-              >
-                <span class="stat-number">0</span>
-                <span class="stat-label">Pending Invoices</span>
-              </button>
-              <button
-                class="stat-card stat-card-clickable portal-shadow"
-                data-tab="messages"
-                type="button"
-              >
-                <span class="stat-number">1</span>
-                <span class="stat-label">Unread Messages</span>
-              </button>
-            </div>
-
-            <!-- Pending Approvals -->
-            <div class="pending-approvals-section portal-shadow hidden" id="pending-approvals-section">
-              <div class="section-header">
-                <h3>Items Awaiting Your Review</h3>
-                <span class="approval-count" id="approval-count"></span>
-              </div>
-              <div class="approvals-list" id="client-approvals-list">
-                <div class="loading-row">Loading...</div>
-              </div>
-            </div>
-
-            <!-- Milestones -->
-            <div class="milestones-section portal-shadow" id="milestones-section">
-              <div class="section-header">
-                <h3>Milestones</h3>
-                <span class="milestones-summary" id="milestones-summary"></span>
-              </div>
-              <div class="milestones-list" id="milestones-list">
-                <div class="loading-row">Loading...</div>
-              </div>
-              <p class="milestones-empty" id="milestones-empty" style="display: none;">
-                No milestones yet.
-              </p>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="recent-activity portal-shadow">
-              <h3>Recent Activity</h3>
-              <ul class="activity-list" aria-live="polite" aria-atomic="false">
-                <li>Project outline uploaded - Dec 1, 2025</li>
-                <li>Project intake received - Nov 30, 2025</li>
-                <li>Account activated - Nov 28, 2025</li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Files View -->
-          <div class="tab-content" id="tab-files">
-            <!-- Upload Section -->
-            <div class="files-upload-section portal-shadow">
-              <h3>Upload Files</h3>
-              <div class="upload-dropzone" id="upload-dropzone">
-                <p class="dropzone-desktop">Drag and drop files here or</p>
-                <p class="dropzone-mobile">Tap to select files</p>
-                <button class="btn btn-secondary" id="btn-browse-files">Browse Files</button>
-                <input type="file" id="file-input" multiple hidden accept=".jpeg,.jpg,.png,.gif,.pdf,.doc,.docx,.txt,.zip,.rar,image/*,application/pdf" />
-              </div>
-            </div>
-
-            <!-- Files List -->
-            <div class="files-list-section portal-shadow">
-              <h3>Project Files</h3>
-              <div class="files-filter-bar">
-                <div class="files-filter-row">
-                  <div class="filter-group">
-                    <label for="files-project-filter" class="filter-label">Project</label>
-                    <select id="files-project-filter" class="form-select">
-                      <option value="all">All Projects</option>
-                    </select>
-                  </div>
-                  <div class="filter-group">
-                    <label for="files-type-filter" class="filter-label">Type</label>
-                    <select id="files-type-filter" class="form-select">
-                      <option value="all">All Types</option>
-                      <option value="document">Documents</option>
-                      <option value="image">Images</option>
-                      <option value="video">Videos</option>
-                      <option value="archive">Archives</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div class="filter-group">
-                    <label for="files-category-filter" class="filter-label">Category</label>
-                    <select id="files-category-filter" class="form-select">
-                      <option value="all">All Categories</option>
-                      <option value="general">General</option>
-                      <option value="deliverable">Deliverable</option>
-                      <option value="source">Source</option>
-                      <option value="asset">Asset</option>
-                      <option value="document">Document</option>
-                      <option value="contract">Contract</option>
-                      <option value="invoice">Invoice</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="files-filter-row">
-                  <div class="filter-group filter-date">
-                    <label for="files-date-from" class="filter-label">From</label>
-                    <input type="date" id="files-date-from" class="form-input" />
-                  </div>
-                  <div class="filter-group filter-date">
-                    <label for="files-date-to" class="filter-label">To</label>
-                    <input type="date" id="files-date-to" class="form-input" />
-                  </div>
-                  <button type="button" class="btn btn-secondary btn-sm" id="files-clear-filters">Clear Filters</button>
-                </div>
-              </div>
-              <div class="files-list" id="files-list">
-                <div class="file-item">
-                  <span class="file-icon"
-                    ><svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline></svg
-                  ></span>
-                  <div class="file-info">
-                    <span class="file-name">project-brief.pdf</span>
-                    <span class="file-meta">2.4 MB • Nov 28, 2025</span>
-                  </div>
-                  <div class="file-actions">
-                    <button class="icon-btn" aria-label="Preview project-brief.pdf" title="Preview">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </button>
-                    <button class="icon-btn" aria-label="Download project-brief.pdf" title="Download">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    </button>
-                  </div>
-                </div>
-                <div class="file-item">
-                  <span class="file-icon"
-                    ><svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                      <polyline points="21 15 16 10 5 21"></polyline></svg
-                  ></span>
-                  <div class="file-info">
-                    <span class="file-name">logo-v1.png</span>
-                    <span class="file-meta">156 KB • Nov 29, 2025</span>
-                  </div>
-                  <div class="file-actions">
-                    <button class="icon-btn" aria-label="Preview logo-v1.png" title="Preview">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </button>
-                    <button class="icon-btn" aria-label="Download logo-v1.png" title="Download">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Messages View -->
-          <div class="tab-content" id="tab-messages">
-            <!-- Messages Layout -->
-            <div class="messages-layout">
-              <!-- Messages Thread -->
-              <div class="messages-container portal-shadow">
-                <div class="messages-thread-header" id="messages-thread-header">
-                  <span class="thread-title">Conversation with Noelle</span>
-                </div>
-                <div class="messages-thread" id="messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
-                  <div class="no-messages">
-                    <p>No messages yet. Send a message to Noelle to get started.</p>
-                  </div>
-                </div>
-
-                <!-- Compose Message -->
-                <div class="message-compose">
-                  <div class="message-input-wrapper">
-                    <label for="message-input" class="sr-only">Message</label>
-                    <textarea
-                      id="message-input"
-                      class="form-textarea"
-                      placeholder="Type your message..."
-                      aria-label="Type your message"
-                    ></textarea>
-                  </div>
-                  <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Invoices View -->
-          <div class="tab-content" id="tab-invoices">
-            <!-- Invoice Summary -->
-            <div class="invoice-summary">
-              <div class="summary-card portal-shadow">
-                <span class="summary-label">Total Outstanding</span>
-                <span class="summary-value">$0.00</span>
-              </div>
-              <div class="summary-card portal-shadow">
-                <span class="summary-label">Total Paid</span>
-                <span class="summary-value">$0.00</span>
-              </div>
-            </div>
-
-            <!-- Invoices List -->
-            <div class="invoices-list portal-shadow">
-              <h3>Invoice History</h3>
-              <div class="invoice-item">
-                <div class="invoice-info">
-                  <span class="invoice-number">INV-2025-001</span>
-                  <span class="invoice-date">Nov 30, 2025</span>
-                  <span class="invoice-project">Your Website Project</span>
-                </div>
-                <div class="invoice-amount">$2,500.00</div>
-                <span class="invoice-status status-pending">Pending</span>
-                <div class="invoice-actions">
-                  <button class="icon-btn" aria-label="Preview invoice INV-2025-001" title="Preview">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                  </button>
-                  <button class="icon-btn" aria-label="Download invoice INV-2025-001" title="Download">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                  </button>
-                </div>
-              </div>
-              <p class="no-invoices-message">
-                No invoices yet. Your first invoice will appear here once your project begins.
-              </p>
-            </div>
-          </div>
-
-          <!-- Documents View (Document requests) -->
-          <div class="tab-content" id="tab-documents">
-            <p id="documents-intro" class="documents-intro">Documents we need from you. Open a request to view details and upload.</p>
-            <div id="documents-list-wrap" class="documents-list-wrap portal-shadow">
-              <div id="documents-list" class="documents-list"></div>
-              <p id="documents-empty" class="documents-empty" style="display: none;">No document requests.</p>
-              <p id="documents-load-error" class="documents-error" style="display: none;"></p>
-            </div>
-            <div id="documents-detail-wrap" class="documents-detail-wrap portal-shadow" style="display: none;">
-              <div class="documents-detail-back">
-                <button type="button" id="documents-detail-back" class="btn btn-outline btn-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-                  <span>BACK</span>
-                </button>
-              </div>
-              <h3 id="documents-detail-title"></h3>
-              <p id="documents-detail-description" class="documents-detail-description"></p>
-              <p id="documents-detail-meta" class="documents-detail-meta"></p>
-              <div id="documents-detail-upload" class="documents-detail-upload" style="display: none;">
-                <span class="documents-upload-label">Upload document</span>
-                <div class="upload-dropzone documents-dropzone" id="documents-dropzone">
-                  <div class="dropzone-content">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="48"
-                      height="48"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="17 8 12 3 7 8" />
-                      <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    <p class="dropzone-desktop">Drag and drop your document here or</p>
-                    <p class="dropzone-mobile">Tap to select a document</p>
-                    <button type="button" class="btn btn-secondary" id="documents-browse-btn">
-                      Browse Files
-                    </button>
-                    <input
-                      type="file"
-                      id="documents-file-input"
-                      class="documents-file-input"
-                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                      aria-label="Choose file"
-                      hidden
-                    />
-                  </div>
-                </div>
-                <div class="documents-upload-actions">
-                  <button type="button" id="documents-upload-btn" class="btn btn-primary btn-sm" disabled>
-                    Upload
-                  </button>
-                </div>
-                <p class="documents-upload-error" id="documents-upload-error" style="display: none;"></p>
-                <p class="documents-upload-hint">
-                  Accepted: PDF, DOC/DOCX, TXT, JPG/PNG. Max 10MB.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Requests View (Ad hoc requests) -->
-          <div class="tab-content" id="tab-requests">
-            <div class="requests-grid">
-              <div class="requests-form portal-shadow">
-                <h3>Request Something New</h3>
-                <p class="requests-intro">Need an extra feature or change? Send the details here.</p>
-                <form id="ad-hoc-request-form" class="requests-form-body">
-                  <div class="form-group">
-                    <label for="ad-hoc-project">Project</label>
-                    <select id="ad-hoc-project" class="form-input" required></select>
-                  </div>
-                  <div class="form-group">
-                    <label for="ad-hoc-title">Title</label>
-                    <input type="text" id="ad-hoc-title" class="form-input" placeholder="Short summary" required />
-                  </div>
-                  <div class="form-group">
-                    <label for="ad-hoc-type">Request type</label>
-                    <select id="ad-hoc-type" class="form-input" required>
-                      <option value="">Select type</option>
-                      <option value="feature">Feature</option>
-                      <option value="change">Change</option>
-                      <option value="bug_fix">Bug fix</option>
-                      <option value="enhancement">Enhancement</option>
-                      <option value="support">Support</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="ad-hoc-priority">Priority</label>
-                    <select id="ad-hoc-priority" class="form-input">
-                      <option value="normal">Normal</option>
-                      <option value="low">Low</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="ad-hoc-urgency">Urgency</label>
-                    <select id="ad-hoc-urgency" class="form-input">
-                      <option value="normal">Normal</option>
-                      <option value="priority">Priority</option>
-                      <option value="urgent">Urgent</option>
-                      <option value="emergency">Emergency</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="ad-hoc-description">Details</label>
-                    <textarea id="ad-hoc-description" class="form-textarea" placeholder="Describe what you need" required></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label for="ad-hoc-attachment">Attachment (optional)</label>
-                    <input type="file" id="ad-hoc-attachment" class="form-input requests-file-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" />
-                    <p class="requests-attachment-note">Add screenshots or mockups if helpful.</p>
-                  </div>
-                  <button type="submit" id="ad-hoc-submit-btn" class="btn btn-primary">Submit Request</button>
-                </form>
-              </div>
-              <div class="requests-list portal-shadow">
-                <div class="requests-list-header">
-                  <h3>Your Requests</h3>
-                  <button type="button" id="ad-hoc-refresh-btn" class="btn btn-secondary btn-sm">Refresh</button>
-                </div>
-                <div id="ad-hoc-requests-list" class="requests-list-body"></div>
-                <p id="ad-hoc-requests-empty" class="requests-empty" style="display: none;">No requests yet.</p>
-                <p id="ad-hoc-requests-error" class="requests-error" style="display: none;"></p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Questionnaires View -->
-          <div class="tab-content" id="tab-questionnaires">
-            <div id="questionnaires-list-container" class="questionnaires-list-container">
-              <!-- Questionnaires loaded by JS -->
-            </div>
-          </div>
-
-          <!-- Help View (Knowledge Base) -->
-          <div class="tab-content" id="tab-help">
-            <div class="help-search-wrap">
-              <label for="help-search-input" class="sr-only">Search help articles</label>
-              <input type="search" id="help-search-input" class="help-search-input" placeholder="Search help articles..." autocomplete="off" />
-              <button type="button" id="help-search-btn" class="btn btn-primary help-search-btn" aria-label="Search">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <span>SEARCH</span>
-              </button>
-            </div>
-            <div id="help-browse" class="help-browse">
-              <section class="help-featured portal-shadow" id="help-featured-section" aria-label="Featured articles">
-                <h3>Featured</h3>
-                <div id="help-featured-list" class="help-featured-list"></div>
-                <p id="help-featured-empty" class="help-empty" style="display: none;">No featured articles.</p>
-              </section>
-              <section class="help-categories portal-shadow" id="help-categories-section" aria-label="Categories">
-                <h3>Categories</h3>
-                <div id="help-categories-list" class="help-categories-list"></div>
-                <p id="help-categories-empty" class="help-empty" style="display: none;">No categories yet.</p>
-              </section>
-            </div>
-            <div id="help-search-results" class="help-search-results portal-shadow" style="display: none;" aria-label="Search results">
-              <h3 id="help-search-results-title">Search results</h3>
-              <div id="help-search-results-list"></div>
-            </div>
-            <div id="help-article-view" class="help-article-view portal-shadow" style="display: none;" aria-label="Article">
-              <div class="help-article-back">
-                <button type="button" id="help-article-back-btn" class="btn btn-outline btn-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-                  <span>BACK</span>
-                </button>
-              </div>
-              <article id="help-article-content">
-                <h1 id="help-article-title"></h1>
-                <div id="help-article-body" class="help-article-body"></div>
-              </article>
-            </div>
-            <p id="help-load-error" class="help-error" style="display: none;"></p>
-          </div>
-
-          <!-- Settings View -->
-          <div class="tab-content" id="tab-settings">
-            <div class="settings-grid">
-              <!-- Account Section (Profile) -->
-              <div class="settings-section portal-shadow">
-                <h3>Account</h3>
-                <form class="settings-form" id="profile-form">
-                  <div class="form-group">
-                    <label for="settings-name">Full Name</label>
-                    <input type="text" id="settings-name" class="form-input" value="Client Name" />
-                  </div>
-                  <div class="form-group">
-                    <label for="settings-email">Email</label>
-                    <input
-                      type="email"
-                      id="settings-email"
-                      class="form-input"
-                      value="client@example.com"
-                      autocomplete="email"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label for="settings-company">Company</label>
-                    <input
-                      type="text"
-                      id="settings-company"
-                      class="form-input"
-                      placeholder="Your company name"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label for="settings-phone">Phone</label>
-                    <input
-                      type="tel"
-                      id="settings-phone"
-                      class="form-input"
-                      placeholder="(555) 555-5555"
-                    />
-                  </div>
-                  <button type="submit" class="btn btn-secondary">Save Changes</button>
-                </form>
-              </div>
-
-              <!-- Change Password Section - Rendered dynamically to avoid multiple password prompts -->
-              <div class="settings-section portal-shadow" id="password-section-container">
-                <h3>Change Password</h3>
-                <div id="password-form-placeholder">
-                  <!-- Password form will be rendered here when settings tab is opened -->
-                </div>
-              </div>
-
-              <!-- Billing Info Section -->
-              <div class="settings-section settings-section-wide portal-shadow">
-                <h3>Billing Information</h3>
-                <form class="settings-form billing-form-grid" id="billing-form">
-                  <div class="billing-column">
-                    <div class="form-group">
-                      <label for="billing-name">Full Name</label>
-                      <input
-                        type="text"
-                        id="billing-name"
-                        class="form-input"
-                        placeholder="Your full name"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label for="billing-company">Company Name</label>
-                      <input
-                        type="text"
-                        id="billing-company"
-                        class="form-input"
-                        placeholder="Your company name"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label for="billing-address">Street Address</label>
-                      <input
-                        type="text"
-                        id="billing-address"
-                        class="form-input"
-                        placeholder="123 Main St"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label for="billing-address2">Address Line 2</label>
-                      <input
-                        type="text"
-                        id="billing-address2"
-                        class="form-input"
-                        placeholder="Apt, Suite, etc."
-                      />
-                    </div>
-                  </div>
-                  <div class="billing-column">
-                    <div class="form-group">
-                      <label for="billing-city">City</label>
-                      <input type="text" id="billing-city" class="form-input" placeholder="City" />
-                    </div>
-                    <div class="form-group">
-                      <label for="billing-state">State / Province</label>
-                      <input
-                        type="text"
-                        id="billing-state"
-                        class="form-input"
-                        placeholder="State"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label for="billing-zip">ZIP / Postal Code</label>
-                      <input type="text" id="billing-zip" class="form-input" placeholder="12345" />
-                    </div>
-                    <div class="form-group">
-                      <label for="billing-country">Country</label>
-                      <input
-                        type="text"
-                        id="billing-country"
-                        class="form-input"
-                        placeholder="United States"
-                      />
-                    </div>
-                  </div>
-                  <button type="submit" class="btn btn-secondary billing-submit">
-                    Save Billing Info
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <!-- New Project View - Terminal Intake Form -->
-          <div class="tab-content" id="tab-new-project">
-            <section class="terminal-intake-container portal-intake">
-              <!-- Terminal UI will be rendered by JavaScript -->
-            </section>
+          <!-- Dynamic View Content Container -->
+          <!-- Views are rendered dynamically by JavaScript based on the current route -->
+          <div class="portal-view-content" id="portal-view-content">
+            <!-- Content will be rendered here by portal-views.ts -->
+            <div class="loading-row">Loading...</div>
           </div>
 
           <link rel="stylesheet" href="/src/styles/pages/terminal-intake.css" />
-          <script type="module">
-            // Initialize terminal intake when the new project tab is shown
-            document.addEventListener('DOMContentLoaded', () => {
-              const newProjectBtn = document.getElementById('btn-new-project');
-              const intakeContainer = document.querySelector(
-                '#tab-new-project .terminal-intake-container'
-              );
-              let intakeInitialized = false;
-
-              // Helper to get client data from logged-in user
-              function getClientDataForIntake() {
-                const token = localStorage.getItem('client_auth_token');
-
-                // Demo mode - return demo client data
-                if (token && token.startsWith('demo_token_')) {
-                  return {
-                    name: 'Demo User',
-                    email: 'demo@example.com',
-                    company: 'Demo Company',
-                    lastBilling: {
-                      type: 'Monthly Retainer',
-                      amount: '$2,500/month',
-                      description: 'Monthly Retainer - $2,500/month'
-                    }
-                  };
-                }
-
-                if (!token) {
-                  return undefined;
-                }
-
-                // Get data from the client name element and email from localStorage
-                const clientNameEl = document.getElementById('client-name');
-                const settingsNameEl = document.getElementById('settings-name');
-                const settingsEmailEl = document.getElementById('settings-email');
-                const settingsCompanyEl = document.getElementById('settings-company');
-
-                // Try to get last billing info from stored client data
-                const storedClientData = localStorage.getItem('clientData');
-                let lastBilling = undefined;
-                if (storedClientData) {
-                  try {
-                    const parsed = JSON.parse(storedClientData);
-                    if (parsed.lastBilling) {
-                      lastBilling = parsed.lastBilling;
-                    }
-                  } catch (e) {
-                    // Ignore parse errors
-                  }
-                }
-
-                const clientData = {
-                  name: settingsNameEl?.value || clientNameEl?.textContent || undefined,
-                  email: settingsEmailEl?.value || localStorage.getItem('clientEmail') || undefined,
-                  company: settingsCompanyEl?.value || undefined,
-                  lastBilling: lastBilling,
-                };
-
-                // Only return data if we have at least name or email
-                const hasClientData = clientData.name && clientData.name !== 'Client';
-                return hasClientData ? clientData : undefined;
-              }
-
-              // Initialize when tab is clicked
-              newProjectBtn?.addEventListener('click', () => {
-                if (!intakeInitialized && intakeContainer) {
-                  import('/src/features/client/terminal-intake.ts').then((module) => {
-                    const clientData = getClientDataForIntake();
-
-                    const intake = new module.TerminalIntakeModule(intakeContainer, {
-                      isModal: false, // Not a popup
-                      clientData: clientData,
-                    });
-                    intake.init();
-                    intakeInitialized = true;
-                  });
-                }
-              });
-
-              // Also initialize if tab is already active on page load
-              if (intakeContainer && intakeContainer.closest('.tab-content.active')) {
-                import('/src/features/client/terminal-intake.ts').then((module) => {
-                  const clientData = getClientDataForIntake();
-
-                  const intake = new module.TerminalIntakeModule(intakeContainer, {
-                    isModal: false,
-                    clientData: clientData,
-                  });
-                  intake.init();
-                  intakeInitialized = true;
-                });
-              }
-            });
-          </script>
-
-          <!-- Project Preview View -->
-          <div class="tab-content" id="tab-preview">
-            <div class="preview-container">
-              <div class="preview-toolbar">
-                <div class="preview-url">
-                  <span class="url-icon"
-                    ><svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="2" y1="12" x2="22" y2="12"></line>
-                      <path
-                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                      ></path></svg
-                  ></span>
-                  <span class="url-text" id="preview-url"
-                    >https://your-project.nobhad.codes</span
-                  >
-                </div>
-                <div class="preview-actions">
-                  <button
-                    class="btn btn-secondary btn-sm"
-                    id="btn-open-new-tab"
-                    title="Open in new tab"
-                    aria-label="Open preview in new tab"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="btn-icon"
-                    >
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                      <polyline points="15 3 21 3 21 9"></polyline>
-                      <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                  </button>
-                  <button
-                    class="btn btn-secondary btn-sm"
-                    id="btn-refresh-preview"
-                    title="Refresh preview"
-                    aria-label="Refresh preview"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="btn-icon"
-                    >
-                      <polyline points="23 4 23 10 17 10"></polyline>
-                      <polyline points="1 20 1 14 7 14"></polyline>
-                      <path
-                        d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
-                      ></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div class="preview-frame-wrapper">
-                <iframe
-                  id="preview-iframe"
-                  class="preview-frame"
-                  src=""
-                  title="Project Preview"
-                ></iframe>
-              </div>
-            </div>
-          </div>
 
         </div>
       </div>
       </div> <!-- Close portal-body -->
-    </div>
-
-    <!-- Upload Request Selection Modal -->
-    <div class="upload-request-modal hidden" id="upload-request-modal" role="dialog" aria-modal="true" aria-labelledby="upload-request-modal-title">
-      <div class="upload-request-modal-content portal-shadow">
-        <div class="upload-request-modal-header">
-          <h3 id="upload-request-modal-title">What are you uploading?</h3>
-          <button type="button" class="btn-icon close-modal" id="upload-request-modal-close" aria-label="Close">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-        <div class="upload-request-modal-body">
-          <p class="upload-request-modal-description">Select which document request you are fulfilling, or choose "Other" for general uploads.</p>
-          <div class="upload-request-options" id="upload-request-options" role="radiogroup" aria-label="Document request options">
-            <!-- Pending requests populated by JS -->
-          </div>
-          <div class="upload-request-other-wrap">
-            <label class="upload-request-option">
-              <input type="radio" name="upload-request-selection" value="other" checked />
-              <span class="upload-request-option-label">
-                <span class="upload-request-option-title">Other / General Upload</span>
-                <span class="upload-request-option-desc">Upload files not related to a specific request</span>
-              </span>
-            </label>
-            <div class="upload-other-description-wrap" id="upload-other-description-wrap">
-              <label for="upload-other-description" class="sr-only">Description (optional)</label>
-              <textarea id="upload-other-description" class="form-textarea" placeholder="Description (optional)" rows="2"></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="upload-request-modal-footer">
-          <button type="button" class="btn btn-secondary" id="upload-request-modal-cancel">Cancel</button>
-          <button type="button" class="btn btn-primary" id="upload-request-modal-confirm">Upload</button>
-        </div>
-      </div>
     </div>
 
     <!-- Footer -->

@@ -153,9 +153,9 @@ function getVisibleQuestions(questions: Question[], answers: Record<string, unkn
 
 function getStatusClass(status: ResponseStatus): string {
   const map: Record<ResponseStatus, string> = {
-    pending: 'status-badge--muted',
-    in_progress: 'status-badge--warning',
-    completed: 'status-badge--success'
+    pending: 'status-pending',
+    in_progress: 'status-in_progress',
+    completed: 'status-completed'
   };
   return map[status] ?? '';
 }
@@ -222,13 +222,13 @@ function renderQuestionnairesList(): void {
   if (statsCache) {
     html += `
       <div class="cp-questionnaires-stats">
-        <div class="cp-stat-item">
-          <span class="cp-stat-number">${statsCache.pending + statsCache.in_progress}</span>
-          <span class="cp-stat-label">To Complete</span>
+        <div class="stat-card">
+          <span class="stat-number">${statsCache.pending + statsCache.in_progress}</span>
+          <span class="stat-label">To Complete</span>
         </div>
-        <div class="cp-stat-item cp-stat-success">
-          <span class="cp-stat-number">${statsCache.completed}</span>
-          <span class="cp-stat-label">Completed</span>
+        <div class="stat-card stat-card-success">
+          <span class="stat-number">${statsCache.completed}</span>
+          <span class="stat-label">Completed</span>
         </div>
       </div>
     `;
@@ -279,7 +279,7 @@ function renderQuestionnaireCard(response: QuestionnaireResponse): string {
   const dueClass = response.due_date && new Date(response.due_date) < new Date() && !isComplete ? 'overdue' : '';
 
   return `
-    <div class="cp-questionnaire-card ${isComplete ? 'completed' : ''}" data-response-id="${response.id}">
+    <div class="cp-questionnaire-card overview-card ${isComplete ? 'completed' : ''}" data-response-id="${response.id}">
       <div class="cp-questionnaire-header">
         <h4 class="cp-questionnaire-title">${escapeHtml(response.questionnaire_name || 'Questionnaire')}</h4>
         <span class="status-badge ${getStatusClass(response.status)}">
@@ -432,27 +432,27 @@ function renderQuestion(question: Question, index: number, isCompleted: boolean)
   case 'text':
     inputHtml = `
         <input type="text" id="q_${question.id}" name="${question.id}"
-               class="cp-form-input" placeholder="${escapeHtml(question.placeholder || '')}" ${disabled} />
+               class="form-input" placeholder="${escapeHtml(question.placeholder || '')}" ${disabled} />
       `;
     break;
 
   case 'textarea':
     inputHtml = `
         <textarea id="q_${question.id}" name="${question.id}"
-                  class="cp-form-textarea" rows="4" placeholder="${escapeHtml(question.placeholder || '')}" ${disabled}></textarea>
+                  class="form-textarea" rows="4" placeholder="${escapeHtml(question.placeholder || '')}" ${disabled}></textarea>
       `;
     break;
 
   case 'number':
     inputHtml = `
         <input type="number" id="q_${question.id}" name="${question.id}"
-               class="cp-form-input" placeholder="${escapeHtml(question.placeholder || '')}" ${disabled} />
+               class="form-input" placeholder="${escapeHtml(question.placeholder || '')}" ${disabled} />
       `;
     break;
 
   case 'select':
     inputHtml = `
-        <select id="q_${question.id}" name="${question.id}" class="cp-form-select" ${disabled}>
+        <select id="q_${question.id}" name="${question.id}" class="form-select" ${disabled}>
           <option value="">Select an option...</option>
           ${(question.options || []).map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('')}
         </select>
@@ -464,7 +464,9 @@ function renderQuestion(question: Question, index: number, isCompleted: boolean)
         <div class="cp-checkbox-group" id="q_${question.id}">
           ${(question.options || []).map(opt => `
             <label class="cp-checkbox-label">
-              <input type="checkbox" name="${question.id}" value="${escapeHtml(opt)}" ${disabled} />
+              <span class="portal-checkbox">
+                <input type="checkbox" name="${question.id}" value="${escapeHtml(opt)}" ${disabled} />
+              </span>
               <span>${escapeHtml(opt)}</span>
             </label>
           `).join('')}
@@ -475,7 +477,7 @@ function renderQuestion(question: Question, index: number, isCompleted: boolean)
   default:
     inputHtml = `
         <input type="text" id="q_${question.id}" name="${question.id}"
-               class="cp-form-input" ${disabled} />
+               class="form-input" ${disabled} />
       `;
   }
 

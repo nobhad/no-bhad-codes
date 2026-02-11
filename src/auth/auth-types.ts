@@ -138,6 +138,7 @@ export interface AuthResult<T = unknown> {
 export interface LoginResult extends AuthResult<AnyUser> {
   expiresIn?: string;
   sessionId?: string;
+  isFirstLogin?: boolean;
 }
 
 // ============================================

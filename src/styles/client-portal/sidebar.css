@@ -11,7 +11,7 @@
 [data-page="admin"] .sidebar {
   width: clamp(200px, 18vw, 240px);
   min-width: 56px; /* Allow collapse to icon-only at breakpoints */
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-darker);
   border-right: none;
   display: flex;
   flex-direction: column;
@@ -27,7 +27,9 @@
 .sidebar.collapsed {
   width: 56px;
   min-width: 56px;
+  max-width: 56px;
   border-right: none;
+  overflow: hidden;
 }
 
 /* Sidebar Content */
@@ -184,7 +186,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   position: absolute;
   top: 0.5rem;
   right: -12px;
-  background: var(--color-neutral-200);
+  background: var(--portal-bg-light);
   border: var(--portal-border);
   border-radius: 50%;
   width: 24px;
@@ -277,8 +279,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   width: 40px;
   height: 40px;
   padding: 0;
-  background: var(--color-neutral-300);
-  color: var(--color-dark);
+  background: var(--portal-bg-light);
+  color: var(--portal-text-light);
   border: var(--portal-border);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -299,7 +301,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: var(--color-neutral-200);
+  background: var(--portal-bg-dark);
   border: var(--portal-border);
   min-width: 180px;
   z-index: 1000;
@@ -309,9 +311,9 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   width: 100%;
   padding: 0.75rem 1rem;
   background: transparent;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
   border: none;
-  border-bottom: 1px solid var(--color-neutral-300);
+  border-bottom: 1px solid var(--portal-border-dark);
   cursor: pointer;
   transition: all var(--transition-fast);
   display: flex;
@@ -327,7 +329,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 .dropdown-item:hover {
   background: var(--color-primary);
-  color: var(--color-dark);
+  color: var(--portal-bg-dark);
 }
 
 .item-icon {
@@ -339,7 +341,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--color-neutral-300);
+  background: transparent;
+  color: var(--portal-text-light);
   border: var(--portal-border);
   border-radius: 4px;
   padding: 0.5rem 1rem;
@@ -350,6 +353,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 .logout-btn:hover {
   background: var(--color-primary);
+  color: var(--portal-bg-dark);
   transform: translateY(-1px);
 }
 
@@ -408,18 +412,22 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
    INTERMEDIATE BREAKPOINT AUTO-COLLAPSE
    Auto-collapse sidebar when viewport is constrained (zoom or narrow screens)
    1300px triggers at ~150% zoom on 1920px screens (1920/1.5 = 1280px)
+
+   IMPORTANT: Use :not(.collapsed) so manually collapsed sidebars
+   maintain consistent appearance regardless of viewport size.
    ===================================================== */
 @media (--wide-down) {
-  [data-page="client-portal"] .sidebar,
-  [data-page="admin"] .sidebar {
+  /* Only auto-collapse sidebars that aren't manually collapsed */
+  [data-page="client-portal"] .sidebar:not(.collapsed),
+  [data-page="admin"] .sidebar:not(.collapsed) {
     width: 56px !important;
     min-width: 56px !important;
     max-width: 56px !important;
     overflow: hidden;
   }
 
-  [data-page="client-portal"] .sidebar .sidebar-content,
-  [data-page="admin"] .sidebar .sidebar-content {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-content,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-content {
     display: flex;
     flex-direction: column;
     padding: 0.75rem 0.5rem;
@@ -433,16 +441,15 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
   }
 
-
   /* Hide scrollbar for Chrome/Safari */
-  [data-page="client-portal"] .sidebar .sidebar-content::-webkit-scrollbar,
-  [data-page="admin"] .sidebar .sidebar-content::-webkit-scrollbar {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-content::-webkit-scrollbar,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-content::-webkit-scrollbar {
     display: none;
   }
 
   /* Buttons section should grow but allow scroll */
-  [data-page="client-portal"] .sidebar .sidebar-buttons,
-  [data-page="admin"] .sidebar .sidebar-buttons {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -455,18 +462,18 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     -ms-overflow-style: none;
   }
 
-  [data-page="client-portal"] .sidebar .sidebar-buttons::-webkit-scrollbar,
-  [data-page="admin"] .sidebar .sidebar-buttons::-webkit-scrollbar {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons::-webkit-scrollbar,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons::-webkit-scrollbar {
     display: none;
   }
 
-  [data-page="client-portal"] .sidebar .sidebar-logo,
-  [data-page="admin"] .sidebar .sidebar-logo {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-logo,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-logo {
     display: none;
   }
 
-  [data-page="client-portal"] .sidebar .sidebar-collapsed-logo,
-  [data-page="admin"] .sidebar .sidebar-collapsed-logo {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-collapsed-logo,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-collapsed-logo {
     display: flex;
     justify-content: center;
     padding: 0.5rem 0;
@@ -474,7 +481,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     flex-shrink: 0;
   }
 
-  :is([data-page="client-portal"], [data-page="admin"]) .sidebar .sidebar-footer {
+  :is([data-page="client-portal"], [data-page="admin"]) .sidebar:not(.collapsed) .sidebar-footer {
     position: sticky;
     bottom: 0;
     left: 0;
@@ -487,26 +494,26 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     flex-shrink: 0;
   }
 
-  /* Hide text elements */
-  [data-page="client-portal"] .sidebar .client-name,
-  [data-page="client-portal"] .sidebar .project-name,
-  [data-page="client-portal"] .sidebar .subitem-name,
-  [data-page="client-portal"] .sidebar .account-item-title,
-  [data-page="client-portal"] .sidebar h3,
-  [data-page="admin"] .sidebar .client-name,
-  [data-page="admin"] .sidebar .project-name,
-  [data-page="admin"] .sidebar h3 {
+  /* Hide text elements - only for non-collapsed auto-collapse */
+  [data-page="client-portal"] .sidebar:not(.collapsed) .client-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .project-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .subitem-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .account-item-title,
+  [data-page="client-portal"] .sidebar:not(.collapsed) h3,
+  [data-page="admin"] .sidebar:not(.collapsed) .client-name,
+  [data-page="admin"] .sidebar:not(.collapsed) .project-name,
+  [data-page="admin"] .sidebar:not(.collapsed) h3 {
     display: none;
   }
 
-  [data-page="client-portal"] .sidebar .project-subitems,
-  [data-page="client-portal"] .sidebar .account-list,
-  [data-page="admin"] .sidebar .project-subitems {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .project-subitems,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .account-list,
+  [data-page="admin"] .sidebar:not(.collapsed) .project-subitems {
     display: none;
   }
 
   /* Badge positioning when sidebar auto-collapses - client portal only */
-  [data-page="client-portal"] .sidebar .sidebar-badge {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-badge {
     position: absolute;
     top: -2px;
     right: -2px;
@@ -525,16 +532,20 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 /* =====================================================
    SMALL SCREEN AUTO-COLLAPSE
    Auto-collapse sidebar on small screens (no hamburger menu)
+
+   IMPORTANT: Use :not(.collapsed) so manually collapsed sidebars
+   maintain consistent appearance regardless of viewport size.
    ===================================================== */
 @media (--compact-mobile) {
-  [data-page="client-portal"] .sidebar,
-  [data-page="admin"] .sidebar {
+  /* Only auto-collapse sidebars that aren't manually collapsed */
+  [data-page="client-portal"] .sidebar:not(.collapsed),
+  [data-page="admin"] .sidebar:not(.collapsed) {
     width: 56px;
     min-width: 56px;
   }
 
-  [data-page="client-portal"] .sidebar .sidebar-content,
-  [data-page="admin"] .sidebar .sidebar-content {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-content,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-content {
     display: flex;
     padding: 0.5rem;
     padding-top: 1rem;
@@ -542,13 +553,13 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     align-items: center;
   }
 
-  [data-page="client-portal"] .sidebar .sidebar-logo,
-  [data-page="admin"] .sidebar .sidebar-logo {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-logo,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-logo {
     display: none;
   }
 
-  [data-page="client-portal"] .sidebar .sidebar-collapsed-logo,
-  [data-page="admin"] .sidebar .sidebar-collapsed-logo {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-collapsed-logo,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-collapsed-logo {
     display: flex;
     justify-content: center;
     padding-top: 1rem;
@@ -556,8 +567,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   }
 
   /* Sidebar buttons layout - button styles in shared/portal-buttons.css */
-  [data-page="client-portal"] .sidebar .sidebar-buttons,
-  [data-page="admin"] .sidebar .sidebar-buttons {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -565,7 +576,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   }
 
   /* Badge positioning on mobile - client portal only */
-  [data-page="client-portal"] .sidebar .sidebar-badge {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-badge {
     position: absolute;
     top: -2px;
     right: -2px;
@@ -580,15 +591,15 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     line-height: 1;
   }
 
-  /* Footer positioning */
-  :is([data-page="client-portal"], [data-page="admin"]) .sidebar .sidebar-footer {
+  /* Footer positioning - for non-collapsed */
+  :is([data-page="client-portal"], [data-page="admin"]) .sidebar:not(.collapsed) .sidebar-footer {
     left: 0.5rem;
     right: 0.5rem;
     display: flex;
     justify-content: center;
   }
 
-  :is([data-page="client-portal"], [data-page="admin"]) .sidebar .sidebar-toggle {
+  :is([data-page="client-portal"], [data-page="admin"]) .sidebar:not(.collapsed) .sidebar-toggle {
     display: flex;
   }
 
@@ -603,21 +614,21 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     overflow: hidden;
   }
 
-  /* Hide text elements in collapsed state */
-  [data-page="client-portal"] .sidebar .client-name,
-  [data-page="client-portal"] .sidebar .project-name,
-  [data-page="client-portal"] .sidebar .subitem-name,
-  [data-page="client-portal"] .sidebar .account-item-title,
-  [data-page="client-portal"] .sidebar h3,
-  [data-page="admin"] .sidebar .client-name,
-  [data-page="admin"] .sidebar .project-name,
-  [data-page="admin"] .sidebar h3 {
+  /* Hide text elements in auto-collapsed state (not manually collapsed) */
+  [data-page="client-portal"] .sidebar:not(.collapsed) .client-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .project-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .subitem-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .account-item-title,
+  [data-page="client-portal"] .sidebar:not(.collapsed) h3,
+  [data-page="admin"] .sidebar:not(.collapsed) .client-name,
+  [data-page="admin"] .sidebar:not(.collapsed) .project-name,
+  [data-page="admin"] .sidebar:not(.collapsed) h3 {
     display: none;
   }
 
-  [data-page="client-portal"] .sidebar .project-subitems,
-  [data-page="client-portal"] .sidebar .account-list,
-  [data-page="admin"] .sidebar .project-subitems {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .project-subitems,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .account-list,
+  [data-page="admin"] .sidebar:not(.collapsed) .project-subitems {
     display: none;
   }
 }

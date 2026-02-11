@@ -17,14 +17,14 @@
   box-shadow: var(--shadow-panel);
 }
 
-/* ----- COMPONENT: Card - Dark theme to match admin ----- */
+/* ----- COMPONENT: Card - Main container with shadow (no border) ----- */
 .portal-card {
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-medium);
+  border: none;
   border-radius: var(--portal-radius-md);
   padding: var(--space-3);
   margin-bottom: var(--space-3);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-panel);
 }
 
 .portal-card:last-child {
@@ -32,93 +32,10 @@
 }
 
 /* ----- COMPONENT: Card Header ----- */
-.portal-card-header {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
-  color: var(--portal-text-light);
-  margin: 0 0 var(--space-2) 0;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--portal-border-medium);
-  padding-bottom: var(--space-1);
-}
+/* Use shared .section-header-with-actions from portal-cards.css */
 
 /* ----- COMPONENT: Buttons ----- */
 /* All portal button styles consolidated in buttons.css */
-
-/* ----- COMPONENT: Form Inputs ----- */
-/* Base form styles in shared/portal-forms.css */
-/* Only portal-prefixed utility classes here */
-
-.portal-input {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  padding-top: 1.5rem;
-  padding-bottom: var(--space-1);
-  border: none;
-  border-radius: var(--portal-radius-lg);
-  font-size: 1rem;
-  font-weight: 400;
-  background-color: var(--color-black);
-  color: var(--portal-text-light);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  box-sizing: border-box;
-  transition: background-color 0.2s ease;
-  min-height: 60px;
-  height: auto;
-  caret-color: var(--portal-text-light);
-}
-
-.portal-input::placeholder {
-  color: var(--portal-text-light);
-  opacity: 0.5;
-  font-weight: 400;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-.portal-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.portal-input[readonly] {
-  background: var(--portal-bg-readonly);
-  color: var(--portal-text-muted);
-  cursor: not-allowed;
-}
-
-/* ----- COMPONENT: Form Group ----- */
-/* Base form-group styles in shared/portal-forms.css */
-/* Only portal-prefixed utility class here */
-
-.portal-form-group {
-  margin: 0;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.portal-form-group:last-child {
-  margin-bottom: 0;
-}
-
-.portal-form-group label {
-  position: absolute;
-  top: var(--space-1);
-  left: var(--space-3);
-  z-index: 1;
-  font-weight: 500;
-  color: var(--portal-text-secondary);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  pointer-events: none;
-  margin: 0;
-}
-
-.portal-form-group .portal-input {
-  padding-top: 1.5rem;
-  padding-bottom: var(--space-1);
-}
 
 /* ----- COMPONENT: Form Row ----- */
 .portal-form-row {
@@ -134,7 +51,6 @@
   align-items: center;
 }
 
-.portal-password-wrapper .portal-input,
 .portal-password-wrapper .form-input {
   padding-right: 3rem;
 }
@@ -159,22 +75,20 @@
   color: var(--color-primary);
 }
 
-/* ----- COMPONENT: List Item ----- */
+/* ----- COMPONENT: List Item - Child element (no border/shadow per hierarchy) ----- */
 .portal-list-item {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2);
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-sm);
   margin-bottom: var(--space-1);
-  transition: border-color 0.2s ease;
-  box-shadow: var(--shadow-card);
+  transition: background-color 0.2s ease;
 }
 
 .portal-list-item:hover {
-  border-color: var(--color-primary);
+  background: var(--portal-bg-hover);
 }
 
 .portal-list-item:last-child {
@@ -204,17 +118,15 @@
 
 .portal-badge-success {
   background: var(--color-success);
-  color: var(--color-white);
+  color: var(--portal-text-light);
 }
 
-/* ----- COMPONENT: Stat Card ----- */
+/* ----- COMPONENT: Stat Card - Child element (no border per hierarchy) ----- */
 .portal-stat {
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-md);
   padding: var(--space-3);
   text-align: center;
-  box-shadow: var(--shadow-card);
 }
 
 .portal-stat-number {
@@ -229,14 +141,14 @@
 .portal-stat-label {
   display: block;
   font-size: 0.85rem;
-  color: var(--color-neutral-600);
+  color: var(--portal-text-muted);
   margin-top: var(--space-1);
   text-transform: uppercase;
 }
 
 /* ----- COMPONENT: Empty State Message ----- */
 .portal-empty-message {
-  color: var(--color-neutral-600);
+  color: var(--portal-text-muted);
   font-style: italic;
   text-align: center;
   padding: var(--space-4);
@@ -274,25 +186,6 @@
   top: var(--space-3);
   right: var(--space-3);
   margin: 0;
-  padding: 0;
-  font-size: 0;
-  color: transparent;
-  background: transparent;
-}
-
-/* Status badge in project cards - red Acme font, matches h3 title size
-   Uses [data-page] for specificity to override shared badge styles without !important */
-[data-page="client-portal"] .portal-project-card .project-status .status-badge {
-  font-family: var(--font-family-acme);
-  font-size: 1.2rem;
-  color: var(--color-primary);
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 400;
-  border: none;
 }
 
 .portal-project-card .project-progress {
@@ -324,11 +217,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-overlay-medium);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-index-portal-modal);
   padding: var(--space-2);
 }
 
@@ -347,7 +240,7 @@
   overflow: hidden;
 }
 
-.upload-request-modal-header {
+.upload-request-modal-content .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -355,14 +248,15 @@
   border-bottom: 1px solid var(--portal-border);
 }
 
-.upload-request-modal-header h3 {
+.upload-request-modal-content .modal-header h2,
+.upload-request-modal-content .modal-header h3 {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--portal-text-primary);
 }
 
-.upload-request-modal-body {
+.upload-request-modal-content .modal-body {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-2);
@@ -381,20 +275,20 @@
   margin-bottom: var(--space-2);
 }
 
+/* Child element - no border per shadow hierarchy */
 .upload-request-option {
   display: flex;
   align-items: flex-start;
   gap: var(--space-1);
   padding: var(--space-1-5);
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-sm);
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
 .upload-request-option:hover {
-  border-color: var(--color-primary);
+  background: var(--portal-bg-hover);
 }
 
 .upload-request-option input[type="radio"] {
@@ -439,7 +333,7 @@
 }
 
 .upload-request-badge.required {
-  background: rgba(var(--color-error-rgb), 0.2);
+  background: var(--color-danger-bg);
   color: var(--status-cancelled);
 }
 
@@ -470,7 +364,7 @@
   border-color: var(--color-primary);
 }
 
-.upload-request-modal-footer {
+.upload-request-modal-content .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-1);

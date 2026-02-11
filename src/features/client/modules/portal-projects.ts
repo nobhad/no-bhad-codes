@@ -117,7 +117,7 @@ export async function fetchProjectDetails(
         senderRole: (m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system')) as 'client' | 'developer' | 'system',
         message: m.message || '',
         timestamp: m.created_at || new Date().toISOString(),
-        isRead: Boolean(m.is_read)
+        isRead: m.read_at !== null
       }));
     }
 
