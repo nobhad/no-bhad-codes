@@ -3308,7 +3308,17 @@ router.get(
       taskId: taskId ? parseInt(taskId as string) : undefined
     });
 
-    res.json({ entries });
+    // Transform to frontend format (hours -> duration_minutes, billable -> is_billable)
+    const transformedEntries = entries.map((entry) => ({
+      ...entry,
+      duration_minutes: Math.round((entry.hours || 0) * 60),
+      is_billable: entry.billable === true,
+      hourly_rate: entry.hourlyRate || null,
+      user_email: entry.userName || 'admin',
+      user_name: entry.userName || 'Admin'
+    }));
+
+    res.json({ entries: transformedEntries });
   })
 );
 
@@ -3317,7 +3327,7 @@ router.post(
   '/:id/time-entries',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id);
     const db = getDatabase();
 
@@ -3326,34 +3336,95 @@ router.post(
       return res.status(404).json({ error: 'Project not found', code: 'PROJECT_NOT_FOUND' });
     }
 
-    const { userName, hours, date } = req.body;
-    if (!userName || !hours || !date) {
+    // Support both frontend format (duration_minutes, is_billable) and legacy format (hours, billable)
+    const {
+      userName,
+      hours,
+      duration_minutes,
+      date,
+      description,
+      is_billable,
+      billable,
+      hourly_rate,
+      hourlyRate,
+      task_id,
+      taskId
+    } = req.body;
+
+    // Calculate hours from duration_minutes if provided, otherwise use hours
+    const calculatedHours = duration_minutes ? duration_minutes / 60 : hours;
+
+    // Use authenticated user if userName not provided
+    const effectiveUserName = userName || req.user?.email || 'admin';
+
+    if (!calculatedHours || !date) {
       return res.status(400).json({
-        error: 'userName, hours, and date are required',
+        error: 'hours (or duration_minutes) and date are required',
         code: 'MISSING_REQUIRED_FIELDS'
       });
     }
 
-    const entry = await projectService.logTime(projectId, req.body);
+    // Normalize the data for the service
+    const normalizedData = {
+      userName: effectiveUserName,
+      hours: calculatedHours,
+      date,
+      description: description || null,
+      billable: is_billable !== undefined ? is_billable : (billable !== undefined ? billable : true),
+      hourlyRate: hourly_rate || hourlyRate || null,
+      taskId: task_id || taskId || null
+    };
+
+    const entry = await projectService.logTime(projectId, normalizedData);
     res.status(201).json({ message: 'Time logged successfully', entry });
   })
 );
 
 // Update time entry
 router.put(
-  '/time-entries/:entryId',
+  '/:id/time-entries/:entryId',
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const entryId = parseInt(req.params.entryId);
-    const entry = await projectService.updateTimeEntry(entryId, req.body);
+
+    // Support both frontend format and legacy format
+    const {
+      hours,
+      duration_minutes,
+      date,
+      description,
+      is_billable,
+      billable,
+      hourly_rate,
+      hourlyRate,
+      task_id,
+      taskId
+    } = req.body;
+
+    // Calculate hours from duration_minutes if provided
+    const calculatedHours = duration_minutes !== undefined ? duration_minutes / 60 : hours;
+
+    // Normalize the data for the service
+    const normalizedData: Record<string, unknown> = {};
+    if (calculatedHours !== undefined) normalizedData.hours = calculatedHours;
+    if (date !== undefined) normalizedData.date = date;
+    if (description !== undefined) normalizedData.description = description;
+    if (is_billable !== undefined) normalizedData.billable = is_billable;
+    else if (billable !== undefined) normalizedData.billable = billable;
+    if (hourly_rate !== undefined) normalizedData.hourlyRate = hourly_rate;
+    else if (hourlyRate !== undefined) normalizedData.hourlyRate = hourlyRate;
+    if (task_id !== undefined) normalizedData.taskId = task_id;
+    else if (taskId !== undefined) normalizedData.taskId = taskId;
+
+    const entry = await projectService.updateTimeEntry(entryId, normalizedData);
     res.json({ message: 'Time entry updated successfully', entry });
   })
 );
 
 // Delete time entry
 router.delete(
-  '/time-entries/:entryId',
+  '/:id/time-entries/:entryId',
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: express.Response) => {

@@ -55,6 +55,14 @@ import { softDeleteService } from '../services/soft-delete-service.js';
 
 const router = express.Router();
 
+function canAccessInvoice(req: AuthenticatedRequest, invoice: Invoice): boolean {
+  if (req.user?.type === 'admin') {
+    return true;
+  }
+
+  return req.user?.id === invoice.clientId;
+}
+
 // GET /api/invoices
 // Admin invoice listing. Returns an array of invoices (snake_case fields).
 // Supports optional filters via query params (status, clientId, projectId, search, dateFrom, dateTo, minAmount, maxAmount, invoiceType, limit, offset)
@@ -1200,6 +1208,12 @@ router.get(
 
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
+      if (!canAccessInvoice(req, invoice)) {
+        return res.status(403).json({
+          error: 'Access denied',
+          code: 'ACCESS_DENIED'
+        });
+      }
       res.json({ success: true, invoice });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -1235,6 +1249,12 @@ router.get(
 
     try {
       const invoice = await getInvoiceService().getInvoiceByNumber(invoiceNumber);
+      if (!canAccessInvoice(req, invoice)) {
+        return res.status(403).json({
+          error: 'Access denied',
+          code: 'ACCESS_DENIED'
+        });
+      }
       res.json({ success: true, invoice });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -1334,6 +1354,7 @@ router.get(
 router.get(
   '/client/:clientId',
   authenticateToken,
+  requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.clientId);
 
@@ -1373,6 +1394,7 @@ router.get(
 router.get(
   '/project/:projectId',
   authenticateToken,
+  requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId);
 
@@ -1412,6 +1434,7 @@ router.get(
 router.put(
   '/:id/status',
   authenticateToken,
+  requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id);
     const { status, paymentData } = req.body;
@@ -1468,6 +1491,7 @@ router.put(
 router.post(
   '/:id/send',
   authenticateToken,
+  requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id);
 
@@ -1624,6 +1648,13 @@ router.post(
     }
 
     try {
+      const existingInvoice = await getInvoiceService().getInvoiceById(invoiceId);
+      if (!canAccessInvoice(req, existingInvoice)) {
+        return res.status(403).json({
+          error: 'Access denied',
+          code: 'ACCESS_DENIED'
+        });
+      }
       const invoice = await getInvoiceService().markInvoiceAsPaid(invoiceId, {
         amountPaid: parseFloat(amountPaid),
         paymentMethod,
@@ -2927,6 +2958,12 @@ router.get(
 
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
+      if (!canAccessInvoice(req, invoice)) {
+        return res.status(403).json({
+          error: 'Access denied',
+          code: 'ACCESS_DENIED'
+        });
+      }
 
       // Check cache first
       const cacheKey = getPdfCacheKey('invoice', invoiceId, invoice.updatedAt);

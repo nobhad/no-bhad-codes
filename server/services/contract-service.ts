@@ -59,10 +59,25 @@ interface Contract {
   renewalReminderSentAt?: string | null;
   lastReminderAt?: string | null;
   reminderCount?: number | null;
+  // Signature request tracking (Phase 3.3)
+  signatureToken?: string | null;
+  signatureRequestedAt?: string | null;
+  signatureExpiresAt?: string | null;
+  // Signer info
   signerName?: string | null;
   signerEmail?: string | null;
+  signerIp?: string | null;
+  signerUserAgent?: string | null;
+  signatureData?: string | null;
   signedPdfPath?: string | null;
+  // Countersigner info
   countersignedAt?: string | null;
+  countersignerName?: string | null;
+  countersignerEmail?: string | null;
+  countersignerIp?: string | null;
+  countersignerUserAgent?: string | null;
+  countersignatureData?: string | null;
+  // Timestamps
   sentAt?: string | null;
   signedAt?: string | null;
   expiresAt?: string | null;
@@ -122,10 +137,25 @@ function mapContract(row: Record<string, unknown>): Contract {
     renewalReminderSentAt: row.renewal_reminder_sent_at as string | null,
     lastReminderAt: row.last_reminder_at as string | null,
     reminderCount: row.reminder_count as number | null,
+    // Signature request tracking (Phase 3.3)
+    signatureToken: row.signature_token as string | null,
+    signatureRequestedAt: row.signature_requested_at as string | null,
+    signatureExpiresAt: row.signature_expires_at as string | null,
+    // Signer info
     signerName: row.signer_name as string | null,
     signerEmail: row.signer_email as string | null,
+    signerIp: row.signer_ip as string | null,
+    signerUserAgent: row.signer_user_agent as string | null,
+    signatureData: row.signature_data as string | null,
     signedPdfPath: row.signed_pdf_path as string | null,
+    // Countersigner info
     countersignedAt: row.countersigned_at as string | null,
+    countersignerName: row.countersigner_name as string | null,
+    countersignerEmail: row.countersigner_email as string | null,
+    countersignerIp: row.countersigner_ip as string | null,
+    countersignerUserAgent: row.countersigner_user_agent as string | null,
+    countersignatureData: row.countersignature_data as string | null,
+    // Timestamps
     sentAt: row.sent_at as string | null,
     signedAt: row.signed_at as string | null,
     expiresAt: row.expires_at as string | null,
@@ -500,6 +530,203 @@ class ContractService {
 
   isValidContractStatus(status: string): status is ContractStatus {
     return CONTRACT_STATUSES.includes(status as ContractStatus);
+  }
+
+  // ============================================
+  // SIGNATURE HANDLING METHODS (Phase 3.3)
+  // ============================================
+
+  /**
+   * Request signature for a contract
+   */
+  async requestSignature(
+    contractId: number,
+    options: {
+      signatureToken: string;
+      expiresAt: string;
+    }
+  ): Promise<Contract> {
+    const db = getDatabase();
+
+    await db.run(
+      `UPDATE contracts SET
+        signature_token = ?,
+        signature_requested_at = datetime('now'),
+        signature_expires_at = ?,
+        status = 'sent',
+        sent_at = datetime('now'),
+        updated_at = datetime('now')
+       WHERE id = ?`,
+      [options.signatureToken, options.expiresAt, contractId]
+    );
+
+    return this.getContract(contractId);
+  }
+
+  /**
+   * Get contract by signature token
+   */
+  async getContractBySignatureToken(token: string): Promise<Contract | null> {
+    const db = getDatabase();
+    const row = await db.get(
+      `SELECT
+        contracts.*,
+        p.project_name as project_name,
+        c.contact_name as client_name,
+        c.email as client_email,
+        t.name as template_name,
+        t.type as template_type
+       FROM contracts
+       LEFT JOIN projects p ON contracts.project_id = p.id
+       LEFT JOIN clients c ON contracts.client_id = c.id
+       LEFT JOIN contract_templates t ON contracts.template_id = t.id
+       WHERE contracts.signature_token = ?`,
+      [token]
+    );
+
+    if (!row) {
+      return null;
+    }
+
+    return mapContract(row as Record<string, unknown>);
+  }
+
+  /**
+   * Record contract signature
+   */
+  async recordSignature(
+    contractId: number,
+    data: {
+      signerName: string;
+      signerEmail: string;
+      signerIp: string;
+      signerUserAgent: string;
+      signatureData: string;
+    }
+  ): Promise<Contract> {
+    const db = getDatabase();
+    const signedAt = new Date().toISOString();
+
+    await db.run(
+      `UPDATE contracts SET
+        signed_at = ?,
+        signature_token = NULL,
+        signature_expires_at = NULL,
+        signer_name = ?,
+        signer_email = ?,
+        signer_ip = ?,
+        signer_user_agent = ?,
+        signature_data = ?,
+        status = 'signed',
+        updated_at = datetime('now')
+       WHERE id = ?`,
+      [
+        signedAt,
+        data.signerName,
+        data.signerEmail,
+        data.signerIp,
+        data.signerUserAgent,
+        data.signatureData,
+        contractId
+      ]
+    );
+
+    return this.getContract(contractId);
+  }
+
+  /**
+   * Record contract countersignature
+   */
+  async recordCountersignature(
+    contractId: number,
+    data: {
+      countersignerName: string;
+      countersignerEmail: string;
+      countersignerIp: string;
+      countersignerUserAgent: string;
+      countersignatureData: string;
+      signedPdfPath?: string;
+    }
+  ): Promise<Contract> {
+    const db = getDatabase();
+    const countersignedAt = new Date().toISOString();
+
+    await db.run(
+      `UPDATE contracts SET
+        countersigned_at = ?,
+        countersigner_name = ?,
+        countersigner_email = ?,
+        countersigner_ip = ?,
+        countersigner_user_agent = ?,
+        countersignature_data = ?,
+        signed_pdf_path = ?,
+        updated_at = datetime('now')
+       WHERE id = ?`,
+      [
+        countersignedAt,
+        data.countersignerName,
+        data.countersignerEmail,
+        data.countersignerIp,
+        data.countersignerUserAgent,
+        data.countersignatureData,
+        data.signedPdfPath || null,
+        contractId
+      ]
+    );
+
+    return this.getContract(contractId);
+  }
+
+  /**
+   * Expire a contract signature request
+   */
+  async expireSignatureRequest(contractId: number): Promise<Contract> {
+    const db = getDatabase();
+
+    await db.run(
+      `UPDATE contracts SET
+        signature_expires_at = datetime('now'),
+        signature_token = NULL,
+        status = 'expired',
+        updated_at = datetime('now')
+       WHERE id = ?`,
+      [contractId]
+    );
+
+    return this.getContract(contractId);
+  }
+
+  /**
+   * Get signature info for a contract
+   */
+  async getSignatureInfo(contractId: number): Promise<{
+    signedAt: string | null;
+    signatureRequestedAt: string | null;
+    signatureExpiresAt: string | null;
+    signerName: string | null;
+    signerEmail: string | null;
+    signerIp: string | null;
+    countersignedAt: string | null;
+    countersignerName: string | null;
+    countersignerEmail: string | null;
+    countersignerIp: string | null;
+    signedPdfPath: string | null;
+  }> {
+    const contract = await this.getContract(contractId);
+
+    return {
+      signedAt: contract.signedAt ?? null,
+      signatureRequestedAt: contract.signatureRequestedAt ?? null,
+      signatureExpiresAt: contract.signatureExpiresAt ?? null,
+      signerName: contract.signerName ?? null,
+      signerEmail: contract.signerEmail ?? null,
+      signerIp: contract.signerIp ?? null,
+      countersignedAt: contract.countersignedAt ?? null,
+      countersignerName: contract.countersignerName ?? null,
+      countersignerEmail: contract.countersignerEmail ?? null,
+      countersignerIp: contract.countersignerIp ?? null,
+      signedPdfPath: contract.signedPdfPath ?? null
+    };
   }
 }
 
