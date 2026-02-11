@@ -3,8 +3,8 @@
 Purpose: provide concise, repository-specific guidance so AI coding agents can be immediately productive.
 
 1) Quick start (most-used commands)
-- Dev (frontend): `npm run dev` — Vite dev server (http://localhost:4000)
-- Dev (backend): `npm run dev:server` — runs `tsx server/app.ts` (API on http://localhost:4001)
+- Dev (frontend): `npm run dev` — Vite dev server (http://<frontend-host>:4000)
+- Dev (backend): `npm run dev:server` — runs `tsx server/app.ts` (API on http://<api-host>:4001)
 - Full dev (both): `npm run dev:full` (uses `concurrently`)
 - DB migrations: `npm run migrate` (scripts/migrate.ts) and `npm run db:setup`
 - Tests: `npm run test` or `npm run test:run` (Vitest). E2E config lives in [playwright.config.ts](../playwright.config.ts)

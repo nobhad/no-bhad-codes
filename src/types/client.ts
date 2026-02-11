@@ -7,7 +7,18 @@
  * Type definitions for client portal, project management, and intake forms.
  */
 
-export type ClientProjectStatus = 'pending' | 'in-progress' | 'in-review' | 'completed' | 'on-hold';
+/**
+ * Client project status values
+ * NOTE: Must match database CHECK constraint - see src/types/api.ts ProjectStatus
+ */
+export type ClientProjectStatus =
+  | 'pending'
+  | 'active'
+  | 'in-progress'
+  | 'in-review'
+  | 'completed'
+  | 'on-hold'
+  | 'cancelled';
 export type ProjectPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type ProjectType =
   | 'website'

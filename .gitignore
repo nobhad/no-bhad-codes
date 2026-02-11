@@ -198,3 +198,9 @@ storybook-static
 railway.env
 .vercel
 *.ai
+
+# Test results (generated)
+test-results/
+
+# Uploads (user data)
+uploads/

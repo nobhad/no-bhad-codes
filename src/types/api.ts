@@ -278,13 +278,16 @@ export interface LeadStats {
 
 /**
  * Project status values
+ * NOTE: Must match database CHECK constraint in server/types/database.ts
  */
 export type ProjectStatus =
-  | 'planning'
+  | 'pending'
+  | 'active'
   | 'in-progress'
-  | 'review'
+  | 'in-review'
   | 'completed'
-  | 'on-hold';
+  | 'on-hold'
+  | 'cancelled';
 
 /**
  * Project entity response (matches server API response)
@@ -363,6 +366,10 @@ export interface ProjectMilestoneResponse {
   completed_date?: string;
   is_completed: boolean;
   deliverables?: string | string[] | null; // Can be JSON string or parsed array or null
+  // Task progress fields (returned from API with task stats)
+  task_count?: number;
+  completed_task_count?: number;
+  progress_percentage?: number;
 }
 
 /**
@@ -494,7 +501,7 @@ export interface MessageResponse {
   sender_role?: string;
   sender_name: string;
   message: string;
-  is_read: boolean | number; // Can be 0/1 or boolean
+  read_at: string | null; // Datetime when message was read, null if unread
   created_at: string;
   attachments?: string | unknown[]; // Can be JSON string or parsed array
 }
@@ -2178,8 +2185,7 @@ export interface EnhancedMessageResponse {
   priority: 'normal' | 'urgent' | 'low';
   reply_to: number | null;
   attachments: MessageAttachment[] | null;
-  is_read: boolean;
-  read_at: string | null;
+  read_at: string | null; // Datetime when message was read, null if unread
   created_at: string;
   updated_at: string;
   parent_message_id: number | null;
