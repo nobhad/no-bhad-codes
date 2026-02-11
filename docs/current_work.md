@@ -171,21 +171,100 @@ After completing any task:
 
 ## Open Issues
 
+### Backend File Splitting (Token Limit Compliance)
+
+**Full Plan:** See `docs/architecture/BACKEND_SPLITTING_PLAN.md`
+
+#### Quick Wins - COMPLETE
+
+- [x] Create `server/utils/api-response.ts` - Standardized API responses
+- [x] Create `server/utils/transformers.ts` - Snake/camel case transformers
+- [x] Create `server/middleware/access-control.ts` - Centralized access control
+- [x] Create `server/types/invoice-types.ts` - Extracted invoice type definitions
+
+#### Phase 1: Split routes/invoices.ts (4,425 lines -> ~14 files)
+
+- [ ] Create `server/routes/invoices/` directory structure
+- [ ] Extract `invoices/helpers.ts` - Shared helper functions, interfaces
+- [ ] Extract `invoices/pdf.ts` - PDF generation (lines 520-1080)
+- [ ] Extract `invoices/core.ts` - CRUD operations, search
+- [ ] Extract `invoices/deposits.ts` - Deposit endpoints
+- [ ] Extract `invoices/credits.ts` - Credit management
+- [ ] Extract `invoices/payment-plans.ts` - Payment plan templates
+- [ ] Extract `invoices/scheduled.ts` - Scheduled invoices
+- [ ] Extract `invoices/recurring.ts` - Recurring invoices
+- [ ] Extract `invoices/reminders.ts` - Reminder endpoints
+- [ ] Extract `invoices/client-routes.ts` - Client-facing routes
+- [ ] Extract `invoices/stripe.ts` - Stripe integration
+- [ ] Extract `invoices/batch.ts` - Batch operations
+- [ ] Extract `invoices/aging.ts` - Aging reports
+- [ ] Create `invoices/index.ts` - Router mounting
+- [ ] Update `server/app.ts` imports
+
+#### Phase 2: Split routes/projects.ts (4,411 lines -> ~18 files)
+
+- [ ] Create `server/routes/projects/` directory structure
+- [ ] Extract `projects/helpers.ts` - Access control (use new middleware)
+- [ ] Extract `projects/core.ts` - CRUD operations
+- [ ] Extract `projects/milestones.ts` - Milestone management
+- [ ] Extract `projects/tasks.ts` - Task endpoints
+- [ ] Extract `projects/files.ts` - File management
+- [ ] Extract `projects/file-comments.ts` - File comments
+- [ ] Extract `projects/file-folders.ts` - Folder management
+- [ ] Extract `projects/file-versions.ts` - Version management
+- [ ] Extract `projects/pdf.ts` - PDF generation, intake docs
+- [ ] Extract `projects/contract.ts` - Contract endpoints
+- [ ] Extract `projects/tags.ts` - Tag management
+- [ ] Extract `projects/dependencies.ts` - Task dependencies
+- [ ] Extract `projects/checklist.ts` - Checklist items
+- [ ] Extract `projects/comments.ts` - Task comments
+- [ ] Extract `projects/activity.ts` - Activity log
+- [ ] Extract `projects/health.ts` - Health scoring
+- [ ] Extract `projects/templates.ts` - Project templates
+- [ ] Create `projects/index.ts` - Router mounting
+- [ ] Update `server/app.ts` imports
+
+#### Phase 3: Split routes/admin.ts (2,810 lines -> ~12 files)
+
+- [ ] Create `server/routes/admin/` directory structure
+- [ ] Extract `admin/dashboard.ts` - Stats, overview
+- [ ] Extract `admin/leads.ts` - Lead management
+- [ ] Extract `admin/projects.ts` - Admin project creation
+- [ ] Extract `admin/kpi.ts` - KPI endpoints
+- [ ] Extract `admin/workflows.ts` - Workflow admin
+- [ ] Extract `admin/settings.ts` - Admin settings
+- [ ] Extract `admin/notifications.ts` - Notification management
+- [ ] Extract `admin/tags.ts` - Tag management
+- [ ] Extract `admin/cache.ts` - Cache management
+- [ ] Extract `admin/activity.ts` - Recent activity
+- [ ] Extract `admin/misc.ts` - Miscellaneous
+- [ ] Create `admin/index.ts` - Router mounting
+- [ ] Update `server/app.ts` imports
+
+#### Phase 4: Split services/invoice-service.ts (3,176 lines -> ~6 files)
+
+- [ ] Create `server/services/invoice/` directory structure
+- [ ] Update invoice-service.ts to import from `types/invoice-types.ts`
+- [ ] Extract `invoice/payment-service.ts` - Payment processing
+- [ ] Extract `invoice/recurring-service.ts` - Recurring invoice logic
+- [ ] Extract `invoice/reporting-service.ts` - Reports, analytics
+- [ ] Create `invoice/index.ts` - Re-exports
+
+#### Code Quality Tasks
+
+- [ ] Replace inline access control in projects.ts with `middleware/access-control.ts`
+- [ ] Replace inline access control in invoices.ts with `middleware/access-control.ts`
+- [ ] Replace snake_case transformers in invoices.ts with `utils/transformers.ts`
+- [ ] Create `server/utils/pdf-generator.ts` - Consolidate PDF generation
+- [ ] Update error responses to use `utils/api-response.ts`
+
 ### Uncommitted Changes
 
-The following changes were made in recent sessions and need to be committed:
-
-- [ ] **Data isolation security fix** - `server/routes/projects.ts` - Added `isUserAdmin()` verification
-- [ ] **Recent activity consolidation (Client Portal)** - `server/routes/clients.ts`, `src/features/client/client-portal.ts`
-- [ ] **Recent activity consolidation (Admin Portal)** - `server/routes/admin.ts`, `src/features/admin/modules/admin-overview.ts`
-- [ ] **Theme toggle CSS fix** - `src/styles/shared/portal-layout.css` - Fixed icon positioning
-- [ ] **Documentation updates** - DATABASE_SCHEMA.md, API_DOCUMENTATION.md, UX_GUIDELINES.md, QUESTIONNAIRES.md (new)
+- [ ] **Backend utilities** - api-response.ts, transformers.ts, access-control.ts, invoice-types.ts
+- [ ] **Backend splitting plan** - docs/architecture/BACKEND_SPLITTING_PLAN.md
 
 ### Minor Documentation Issues
 
-Identified during documentation audit (low priority):
-
-- [ ] ANIMATIONS.md has outdated date (January 2026) DATE IS DATE LAST UPDATED, JAN MAKES SENSE
 - [ ] Missing `/docs/features/README.md` index file
 - [ ] Hardcoded localhost URLs in some documentation
 - [ ] Emojis in main README.md (violates "NO EMOJIS" design rule)
