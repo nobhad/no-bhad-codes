@@ -73,6 +73,7 @@ export async function loadGlobalTasks(ctx: AdminDashboardContext): Promise<void>
   await fetchTasks();
   setupViewToggle();
   renderCurrentView();
+  setupRefreshHandler();
   openTaskFromUrl();
 }
 
@@ -169,6 +170,16 @@ function renderCurrentView(): void {
   } else {
     renderListView();
   }
+}
+
+function setupRefreshHandler(): void {
+  const refreshBtn = document.getElementById('refresh-global-tasks-btn');
+  if (!refreshBtn || refreshBtn.dataset.listenerAttached === 'true') return;
+  refreshBtn.dataset.listenerAttached = 'true';
+  refreshBtn.addEventListener('click', async () => {
+    await fetchTasks();
+    renderCurrentView();
+  });
 }
 
 /**
@@ -321,59 +332,35 @@ function renderListView(): void {
 
   if (activeTasks.length === 0) {
     listContainer.innerHTML = `
-      <div class="admin-table-card">
-        <div class="admin-table-header">
-          <h3>All Tasks</h3>
-        </div>
-        <div class="admin-table-container">
-          <div class="task-list-empty">No tasks found across any projects.</div>
-        </div>
+      <div class="admin-table-container">
+        <div class="task-list-empty">No tasks found across any projects.</div>
       </div>
     `;
     return;
   }
 
   listContainer.innerHTML = `
-    <div class="admin-table-card">
-      <div class="admin-table-header">
-        <h3>All Tasks</h3>
-        <div class="admin-table-actions">
-          <button class="icon-btn" id="refresh-global-tasks-btn" title="Refresh" aria-label="Refresh tasks">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="admin-table-container">
-        <div class="admin-table-scroll-wrapper">
-          <table class="admin-table tasks-table">
-            <thead>
-              <tr>
-                <th>Task</th>
-                <th>Project</th>
-                <th class="milestone-col">Milestone</th>
-                <th class="type-col">Priority</th>
-                <th class="status-col">Status</th>
-                <th class="date-col">Due Date</th>
-                <th class="actions-col">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="global-tasks-table-body">
-              ${activeTasks.map(task => renderListItem(task)).join('')}
-            </tbody>
-          </table>
-        </div>
+    <div class="admin-table-container">
+      <div class="admin-table-scroll-wrapper">
+        <table class="admin-table tasks-table">
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Project</th>
+              <th class="milestone-col">Milestone</th>
+              <th class="type-col">Priority</th>
+              <th class="status-col">Status</th>
+              <th class="date-col">Due Date</th>
+              <th class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="global-tasks-table-body">
+            ${activeTasks.map(task => renderListItem(task)).join('')}
+          </tbody>
+        </table>
       </div>
     </div>
   `;
-
-  // Add refresh button handler
-  const refreshBtn = document.getElementById('refresh-global-tasks-btn');
-  if (refreshBtn) {
-    refreshBtn.addEventListener('click', async () => {
-      await fetchTasks();
-      renderCurrentView();
-    });
-  }
 
   // Add click and keyboard handlers for accessibility
   const tableBody = listContainer.querySelector('#global-tasks-table-body');

@@ -18,6 +18,7 @@ import { createPortalModal, type PortalModalInstance } from '../../../components
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
+import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
 import { loadEmailTemplatesData } from './admin-email-templates';
 
 // ============================================
@@ -211,6 +212,7 @@ function setupSubtabNavigation(): void {
     btn.classList.add('active');
 
     // Show/hide content
+    el('pending-approvals-section')?.classList.toggle('hidden', subtab !== 'approvals');
     el('workflows-approvals-content')?.classList.toggle('hidden', subtab !== 'approvals');
     el('workflows-triggers-content')?.classList.toggle('hidden', subtab !== 'triggers');
     el('workflows-email-templates-content')?.classList.toggle('hidden', subtab !== 'email-templates');
@@ -1618,7 +1620,11 @@ function renderPendingApprovalsTable(): void {
     return `
       <tr data-id="${a.id}">
         <td class="checkbox-cell">
-          <input type="checkbox" class="approval-checkbox" data-id="${a.id}" aria-label="Select approval ${a.id}" />
+          ${getPortalCheckboxHTML({
+    ariaLabel: `Select approval ${a.id}`,
+    inputClassName: 'approval-checkbox',
+    dataAttributes: { id: a.id }
+  })}
         </td>
         <td class="name-cell">
           ${escapeHtml(a.workflow_name)}${urgentBadge}
