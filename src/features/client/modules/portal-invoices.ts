@@ -12,6 +12,7 @@ import type { PortalInvoice, ClientPortalContext } from '../portal-types';
 import { formatCurrency } from '../../../utils/format-utils';
 import { getContainerLoadingHTML } from '../../../utils/loading-utils';
 import { showToast } from '../../../utils/toast-notifications';
+import { ICONS } from '../../../constants/icons';
 
 const INVOICES_API_BASE = '/api/invoices';
 
@@ -114,11 +115,15 @@ function renderInvoicesList(
       <div class="invoice-amount">${formatCurrency(invoice.amount_total)}</div>
       <span class="invoice-status ${statusClass}">${statusLabel}</span>
       <div class="invoice-actions">
-        <button class="btn btn-outline btn-sm btn-preview-invoice"
-                data-invoice-id="${invoice.id}">Preview</button>
-        <button class="btn btn-outline btn-sm btn-download-invoice"
+        <button class="icon-btn btn-preview-invoice" data-invoice-id="${invoice.id}" aria-label="Preview invoice" title="Preview">
+          ${ICONS.EYE}
+        </button>
+        <button class="icon-btn btn-download-invoice"
                 data-invoice-id="${invoice.id}"
-                data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}">Download</button>
+                data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}"
+                aria-label="Download invoice" title="Download">
+          ${ICONS.DOWNLOAD}
+        </button>
       </div>
     `;
 

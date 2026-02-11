@@ -13,6 +13,7 @@ import { createDOMCache } from '../../../utils/dom-cache';
 import { showToast } from '../../../utils/toast-notifications';
 
 const MESSAGES_API_BASE = '/api/messages';
+const CLIENT_THREAD_TITLE = 'Conversation with Noelle';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -106,7 +107,7 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: b
     if (threads.length === 0) {
       messagesContainer.innerHTML = `
         <div class="no-messages">
-          <p>No messages yet. Start a conversation!</p>
+          <p>No messages yet. Send a message to Noelle to get started.</p>
         </div>
       `;
       return;
@@ -228,7 +229,7 @@ async function loadThreadMessages(threadId: number, ctx: ClientPortalContext, bu
   if (threadHeader && thread) {
     const titleEl = threadHeader.querySelector('.thread-title');
     if (titleEl) {
-      titleEl.textContent = thread.subject || 'General';
+      titleEl.textContent = CLIENT_THREAD_TITLE;
     }
   }
 
@@ -308,7 +309,7 @@ function renderMessages(
   container.setAttribute('aria-live', 'polite');
 
   if (messages.length === 0) {
-    container.innerHTML = '<div class="no-messages"><p>No messages in this thread yet. Send a message below to start the conversation.</p></div>';
+    container.innerHTML = '<div class="no-messages"><p>No messages yet. Send a message to Noelle to get started.</p></div>';
     return;
   }
 
@@ -317,20 +318,23 @@ function renderMessages(
       const isSent = msg.sender_type === 'client';
       const isAdmin = msg.sender_type === 'admin';
       const initials = (msg.sender_name || 'Unknown').substring(0, 3).toUpperCase();
+      const displayName = isAdmin ? 'Noelle' : (msg.sender_name || 'Unknown');
 
       // Admin uses avatar image, clients use initials placeholder
       const avatarHtml = isAdmin
         ? '<img src="/images/avatar_small_sidebar.svg" alt="Admin" class="avatar-img" />'
         : `<div class="avatar-placeholder">${initials}</div>`;
 
+      const senderClass = isAdmin ? 'message-admin' : 'message-client';
+
       return `
-      <div class="message message-${isSent ? 'sent' : 'received'}">
+      <div class="message message-${isSent ? 'sent' : 'received'} ${senderClass}">
         <div class="message-avatar">
           ${avatarHtml}
         </div>
         <div class="message-content">
           <div class="message-header">
-            <span class="message-sender">${ctx.escapeHtml(msg.sender_name || 'Unknown')}</span>
+            <span class="message-sender">${ctx.escapeHtml(displayName)}</span>
             <span class="message-time">${ctx.formatDate(msg.created_at)}</span>
           </div>
           <div class="message-body">${ctx.escapeHtml(msg.message)}</div>

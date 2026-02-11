@@ -9,6 +9,7 @@
  */
 
 import { renderBreadcrumbs, type BreadcrumbItem } from '../../../components/breadcrumbs';
+import { authStore } from '../../../auth/auth-store';
 
 /** Tab titles mapping */
 const TAB_TITLES: Record<string, string> = {
@@ -131,7 +132,8 @@ function getMobileHeaderTitle(): HTMLElement | null {
 
 /** Get cached breadcrumb list */
 function getBreadcrumbList(): HTMLElement | null {
-  if (cachedBreadcrumbList === undefined) {
+  // Always re-query if not found (element may be hidden initially)
+  if (cachedBreadcrumbList === undefined || cachedBreadcrumbList === null) {
     cachedBreadcrumbList = document.getElementById('breadcrumb-list');
   }
   return cachedBreadcrumbList;
@@ -189,9 +191,11 @@ export function updatePortalPageTitle(tabName: string): void {
   const resolved = resolvePortalTab(tabName);
   currentActiveTab = resolved.tab;
 
-  // Special case for dashboard - show "Welcome Back, [Client Name]!"
+  // Special case for dashboard - show "Welcome to the portal" on first login, "Welcome Back" on return visits
   if (currentActiveTab === 'dashboard') {
-    titleEl.innerHTML = `Welcome Back, <span id="client-name">${currentClientName}</span>!`;
+    const { isFirstLogin } = authStore.getState();
+    const welcomeText = isFirstLogin ? 'Welcome to the Portal' : 'Welcome Back';
+    titleEl.innerHTML = `${welcomeText}, <span id="client-name">${currentClientName}</span>!`;
   } else {
     // Show the tab title
     const title =

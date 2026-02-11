@@ -86,19 +86,19 @@ export async function handleLogin(
 
   // Basic validation
   if (!credentials.email.trim()) {
-    callbacks.showFieldError('client-email', 'Email address is required');
+    callbacks.showFieldError('portal-email', 'Email address is required');
     return;
   }
 
   // Email format validation
   const emailValidation = validateEmail(credentials.email, { allowDisposable: true });
   if (!emailValidation.isValid) {
-    callbacks.showFieldError('client-email', emailValidation.error || 'Invalid email format');
+    callbacks.showFieldError('portal-email', emailValidation.error || 'Invalid email format');
     return;
   }
 
   if (!credentials.password.trim()) {
-    callbacks.showFieldError('client-password', 'Password is required');
+    callbacks.showFieldError('portal-password', 'Password is required');
     return;
   }
 
@@ -249,7 +249,8 @@ function showAdminButtons(): void {
  */
 export function showFieldError(fieldId: string, message: string): void {
   const field = document.getElementById(fieldId) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null;
-  const errorId = `${fieldId.replace('client-', '')}-error`;
+  // Handle both 'portal-' and 'client-' prefixes for backward compatibility
+  const errorId = `${fieldId.replace(/^(portal-|client-)/, '')}-error`;
   const errorElement = document.getElementById(errorId);
 
   if (field) {
@@ -269,7 +270,8 @@ export function showFieldError(fieldId: string, message: string): void {
  * Show login error message
  */
 export function showLoginError(message: string): void {
-  const errorElement = document.getElementById('login-error');
+  // Try both possible error element IDs for compatibility
+  const errorElement = document.getElementById('auth-error') || document.getElementById('login-error');
   if (errorElement) {
     errorElement.textContent = message;
     errorElement.style.display = 'block';

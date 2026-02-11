@@ -76,6 +76,9 @@ export interface AuthState {
 
   /** Auth error (if any) */
   error: string | null;
+
+  /** Whether this is the user's first login in this session */
+  isFirstLogin: boolean;
 }
 
 /**
@@ -89,7 +92,8 @@ export const INITIAL_AUTH_STATE: AuthState = {
   role: null,
   expiresAt: null,
   sessionId: null,
-  error: null
+  error: null,
+  isFirstLogin: true
 };
 
 // ============================================
