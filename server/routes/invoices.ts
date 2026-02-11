@@ -8,1427 +8,51 @@
  */
 
 import express from 'express';
-import archiver from 'archiver';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
+import { canAccessInvoice } from '../middleware/access-control.js';
 import {
   InvoiceService,
   InvoiceCreateData,
-  InvoiceLineItem,
   Invoice,
-  InvoiceCredit,
-  DepositSummary,
   PaymentPlanTemplate,
   ScheduledInvoice,
-  RecurringInvoice,
-  InvoiceReminder,
   PaymentTermsPreset,
-  InvoicePayment,
-  InvoiceAgingReport
+  InvoicePayment
 } from '../services/invoice-service.js';
-import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
-import { getString } from '../database/row-helpers.js';
-import { BUSINESS_INFO } from '../config/business.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../utils/pdf-utils.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
-import { generateInvoicePdf, InvoicePdfData } from './invoices/pdf.js';
+import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { sendPdfResponse } from '../utils/pdf-generator.js';
+import { coreRouter } from './invoices/core.js';
+import { depositsRouter } from './invoices/deposits.js';
+import { creditsRouter } from './invoices/credits.js';
+import { paymentPlansRouter } from './invoices/payment-plans.js';
+import { scheduledRouter } from './invoices/scheduled.js';
+import { recurringRouter } from './invoices/recurring.js';
+import { remindersRouter } from './invoices/reminders.js';
+import { clientRoutesRouter } from './invoices/client-routes.js';
+import { batchRouter } from './invoices/batch.js';
+import { agingRouter } from './invoices/aging.js';
 import {
   getInvoiceService,
-  canAccessInvoice,
   toSnakeCaseInvoice,
-  toSnakeCaseCredit,
-  toSnakeCaseDeposit,
-  toSnakeCasePaymentPlan,
-  toSnakeCaseScheduledInvoice,
-  toSnakeCaseRecurringInvoice,
-  toSnakeCaseReminder
 } from './invoices/helpers.js';
 
 const router = express.Router();
 
-// Helper functions imported from ./invoices/helpers.js:
-// - getInvoiceService, canAccessInvoice
-// - toSnakeCaseInvoice, toSnakeCaseCredit, toSnakeCaseDeposit
-// - toSnakeCasePaymentPlan, toSnakeCaseScheduledInvoice
-// - toSnakeCaseRecurringInvoice, toSnakeCaseReminder
-
-// GET /api/invoices
-// Admin invoice listing. Returns an array of invoices (snake_case fields).
-// Supports optional filters via query params (status, clientId, projectId, search, dateFrom, dateTo, minAmount, maxAmount, invoiceType, limit, offset)
-router.get(
-  '/',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 100;
-    const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
-
-    try {
-      // If filters provided, delegate to searchInvoices for advanced filtering
-      const hasFilters = !!(
-        req.query.status ||
-        req.query.clientId ||
-        req.query.projectId ||
-        req.query.search ||
-        req.query.dateFrom ||
-        req.query.dateTo ||
-        req.query.minAmount ||
-        req.query.maxAmount ||
-        req.query.invoiceType
-      );
-
-      if (hasFilters) {
-        const filters: any = {
-          clientId: req.query.clientId ? parseInt(req.query.clientId as string, 10) : undefined,
-          projectId: req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined,
-          status: req.query.status as string | undefined,
-          invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
-          search: req.query.search as string | undefined,
-          dateFrom: req.query.dateFrom as string | undefined,
-          dateTo: req.query.dateTo as string | undefined,
-          minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
-          maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
-          limit,
-          offset
-        };
-
-        const result = await getInvoiceService().searchInvoices(filters);
-        // Return plain array (frontend expects direct array)
-        return res.json(result.invoices.map(toSnakeCaseInvoice));
-      }
-
-      const invoices = await getInvoiceService().getAllInvoices(limit, offset);
-      res.json(invoices.map(toSnakeCaseInvoice));
-    } catch (error: unknown) {
-      res.status(500).json({ error: 'Failed to retrieve invoices', code: 'RETRIEVAL_FAILED', message: error instanceof Error ? error.message : 'Unknown error' });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/test:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Test invoice endpoint
- *     responses:
- *       200:
- *         description: Invoice system is working
- */
-router.get('/test', (req: express.Request, res: express.Response) => {
-  res.json({
-    success: true,
-    message: 'Invoice system is operational',
-    timestamp: new Date().toISOString()
-  });
-});
-
-/**
- * @swagger
- * /api/invoices/test-create:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Test invoice creation (development only)
- *     description: Creates a test invoice without authentication for development testing
- *     responses:
- *       201:
- *         description: Test invoice created successfully
- */
-router.post(
-  '/test-create',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const testInvoiceData: InvoiceCreateData = {
-      projectId: 1,
-      clientId: 1,
-      lineItems: [
-        {
-          description: 'Website Design & Development',
-          quantity: 1,
-          rate: 3500,
-          amount: 3500
-        },
-        {
-          description: 'Content Management System Setup',
-          quantity: 1,
-          rate: 1000,
-          amount: 1000
-        }
-      ],
-      notes: 'Test invoice created for development testing',
-      terms: 'Payment due within 30 days'
-    };
-
-    try {
-      const invoice = await getInvoiceService().createInvoice(testInvoiceData);
-
-      res.status(201).json({
-        success: true,
-        message: 'Test invoice created successfully',
-        invoice
-      });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      res.status(500).json({
-        error: 'Failed to create test invoice',
-        code: 'TEST_CREATION_FAILED',
-        message
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/test-get/{id}:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Test get invoice by ID (development only)
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- */
-router.get(
-  '/test-get/:id',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-
-    if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const invoice = await getInvoiceService().getInvoiceById(invoiceId);
-      res.json({ success: true, invoice });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
-      }
-
-      res.status(500).json({
-        error: 'Failed to retrieve invoice',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Create a new invoice
- *     description: Create a new invoice for a project
- *     security:
- *       - BearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - projectId
- *               - clientId
- *               - lineItems
- *             properties:
- *               projectId:
- *                 type: integer
- *                 example: 1
- *               clientId:
- *                 type: integer
- *                 example: 1
- *               lineItems:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     description:
- *                       type: string
- *                     quantity:
- *                       type: number
- *                     rate:
- *                       type: number
- *                     amount:
- *                       type: number
- *               dueDate:
- *                 type: string
- *                 format: date
- *               notes:
- *                 type: string
- *               terms:
- *                 type: string
- *               currency:
- *                 type: string
- *                 default: USD
- *     responses:
- *       201:
- *         description: Invoice created successfully
- *       400:
- *         description: Invalid request data
- *       401:
- *         description: Authentication required
- */
-router.post(
-  '/',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceData: InvoiceCreateData = req.body;
-
-    // Validate required fields
-    if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
-        required: ['projectId', 'clientId', 'lineItems']
-      });
-    }
-
-    // Validate line items
-    const invalidLineItems = invoiceData.lineItems.filter(
-      (item) =>
-        !item.description ||
-        typeof item.quantity !== 'number' ||
-        typeof item.rate !== 'number' ||
-        typeof item.amount !== 'number'
-    );
-
-    if (invalidLineItems.length > 0) {
-      return res.status(400).json({
-        error: 'Invalid line items',
-        code: 'INVALID_LINE_ITEMS',
-        message: 'Each line item must have description, quantity, rate, and amount'
-      });
-    }
-
-    try {
-      const invoice = await getInvoiceService().createInvoice(invoiceData);
-
-      res.status(201).json({
-        success: true,
-        message: 'Invoice created successfully',
-        invoice
-      });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      res.status(500).json({
-        error: 'Failed to create invoice',
-        code: 'CREATION_FAILED',
-        message
-      });
-    }
-  })
-);
-
-// PDF generation function imported from ./invoices/pdf.js
-// See: server/routes/invoices/pdf.ts for generateInvoicePdf and InvoicePdfData
-
-/**
- * @swagger
- * /api/invoices/preview:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Preview invoice PDF without saving
- */
-router.post(
-  '/preview',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { projectId, clientId, lineItems, notes, terms } = req.body;
-
-    if (!projectId || !clientId || !lineItems || !Array.isArray(lineItems) || lineItems.length === 0) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS'
-      });
-    }
-
-    const db = getDatabase();
-
-    // Get client info
-    const client = await db.get(
-      'SELECT contact_name, company_name, email, phone FROM clients WHERE id = ?',
-      [clientId]
-    );
-
-    if (!client) {
-      return res.status(404).json({ error: 'Client not found', code: 'CLIENT_NOT_FOUND' });
-    }
-
-    // Get project info
-    const project = await db.get('SELECT project_name FROM projects WHERE id = ?', [projectId]);
-
-    // Calculate totals
-    const subtotal = lineItems.reduce((sum: number, item: InvoiceLineItem) => sum + (item.amount || 0), 0);
-
-    // Format date
-    const formatDate = (d: Date): string => {
-      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    };
-
-    const today = new Date();
-    const dueDate = new Date(today);
-    dueDate.setDate(dueDate.getDate() + 30);
-
-    // Generate preview invoice number
-    const previewNumber = 'INV-PREVIEW';
-
-    const pdfData: InvoicePdfData = {
-      invoiceNumber: previewNumber,
-      issuedDate: formatDate(today),
-      dueDate: formatDate(dueDate),
-      clientName: getString(client, 'contact_name') || 'Client',
-      clientCompany: getString(client, 'company_name') || undefined,
-      clientEmail: getString(client, 'email') || '',
-      clientPhone: getString(client, 'phone') || undefined,
-      projectId: projectId,
-      lineItems: lineItems.map((item: InvoiceLineItem) => ({
-        description: item.description || '',
-        quantity: item.quantity || 1,
-        rate: item.rate || 0,
-        amount: item.amount || 0,
-        details: (project ? [`Project: ${getString(project, 'project_name')}`] : undefined)
-      })),
-      subtotal,
-      total: subtotal,
-      notes: notes || undefined,
-      terms: terms || undefined
-    };
-
-    try {
-      const pdfBytes = await generateInvoicePdf(pdfData);
-
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'inline; filename="invoice-preview.pdf"');
-      res.setHeader('Content-Length', pdfBytes.length);
-      res.send(Buffer.from(pdfBytes));
-    } catch (error) {
-      console.error('[Invoices] Preview PDF generation error:', error);
-      res.status(500).json({ error: 'Failed to generate preview', code: 'PDF_GENERATION_FAILED' });
-    }
-  })
-);
-
-// ============================================
-// INVOICE SEARCH
-// ============================================
-// NOTE: This route MUST be defined before /:id to avoid /:id matching "search" as an ID
-
-/**
- * @swagger
- * /api/invoices/search:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Search invoices with filters
- *     description: Search and filter invoices with pagination
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *         description: Single status or comma-separated statuses (draft, sent, viewed, partial, paid, overdue, cancelled)
- *       - in: query
- *         name: clientId
- *         schema:
- *           type: integer
- *       - in: query
- *         name: projectId
- *         schema:
- *           type: integer
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 50
- *       - in: query
- *         name: offset
- *         schema:
- *           type: integer
- *           default: 0
- *     responses:
- *       200:
- *         description: Search results
- */
-router.get(
-  '/search',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    // Define valid statuses for type checking
-    type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
-    const validStatuses: InvoiceStatus[] = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
-
-    // Parse status - can be single value or comma-separated
-    let status: InvoiceStatus | InvoiceStatus[] | undefined;
-    if (req.query.status) {
-      const statusStr = req.query.status as string;
-      if (statusStr.includes(',')) {
-        const statuses = statusStr.split(',').filter(s => validStatuses.includes(s as InvoiceStatus)) as InvoiceStatus[];
-        status = statuses.length > 0 ? statuses : undefined;
-      } else if (validStatuses.includes(statusStr as InvoiceStatus)) {
-        status = statusStr as InvoiceStatus;
-      }
-    }
-
-    const filters = {
-      clientId: req.query.clientId ? parseInt(req.query.clientId as string) : undefined,
-      projectId: req.query.projectId ? parseInt(req.query.projectId as string) : undefined,
-      status,
-      invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
-      search: req.query.search as string | undefined,
-      dateFrom: req.query.dateFrom as string | undefined,
-      dateTo: req.query.dateTo as string | undefined,
-      dueDateFrom: req.query.dueDateFrom as string | undefined,
-      dueDateTo: req.query.dueDateTo as string | undefined,
-      minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
-      maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string) : 0
-    };
-
-    try {
-      const result = await getInvoiceService().searchInvoices(filters);
-
-      res.json({
-        success: true,
-        invoices: result.invoices.map(toSnakeCaseInvoice),
-        total: result.total,
-        limit: filters.limit,
-        offset: filters.offset
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to search invoices',
-        code: 'SEARCH_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/{id}:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get invoice by ID
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- */
-router.get(
-  '/:id',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-
-    if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const invoice = await getInvoiceService().getInvoiceById(invoiceId);
-      if (!canAccessInvoice(req, invoice)) {
-        return res.status(403).json({
-          error: 'Access denied',
-          code: 'ACCESS_DENIED'
-        });
-      }
-      res.json({ success: true, invoice });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
-      }
-
-      res.status(500).json({
-        error: 'Failed to retrieve invoice',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/number/{invoiceNumber}:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get invoice by invoice number
- */
-router.get(
-  '/number/:invoiceNumber',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { invoiceNumber } = req.params;
-
-    try {
-      const invoice = await getInvoiceService().getInvoiceByNumber(invoiceNumber);
-      if (!canAccessInvoice(req, invoice)) {
-        return res.status(403).json({
-          error: 'Access denied',
-          code: 'ACCESS_DENIED'
-        });
-      }
-      res.json({ success: true, invoice });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
-      }
-
-      res.status(500).json({
-        error: 'Failed to retrieve invoice',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/me:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get all invoices for the authenticated client
- *     description: Returns invoices for the currently logged-in client with summary stats
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: Client invoices retrieved successfully
- */
-router.get(
-  '/me',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = req.user?.id;
-
-    if (!clientId) {
-      return res.status(401).json({
-        error: 'Authentication required',
-        code: 'AUTH_REQUIRED'
-      });
-    }
-
-    try {
-      const invoices = await getInvoiceService().getClientInvoices(clientId);
-
-      // Calculate summary stats
-      let totalOutstanding = 0;
-      let totalPaid = 0;
-
-      invoices.forEach((invoice) => {
-        if (invoice.status === 'paid') {
-          totalPaid += invoice.amountTotal || 0;
-        } else if (['sent', 'viewed', 'partial', 'overdue'].includes(invoice.status)) {
-          totalOutstanding += invoice.amountTotal || 0;
-          // Subtract any partial payments
-          if (invoice.amountPaid) {
-            totalOutstanding -= invoice.amountPaid || 0;
-            totalPaid += invoice.amountPaid || 0;
-          }
-        }
-      });
-
-      // Transform invoices to snake_case for frontend compatibility
-      const transformedInvoices = invoices.map(toSnakeCaseInvoice);
-
-      res.json({
-        success: true,
-        invoices: transformedInvoices,
-        count: invoices.length,
-        summary: {
-          totalOutstanding,
-          totalPaid
-        }
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve invoices',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/client/{clientId}:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get all invoices for a client
- */
-router.get(
-  '/client/:clientId',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.clientId);
-
-    if (isNaN(clientId)) {
-      return res.status(400).json({
-        error: 'Invalid client ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const invoices = await getInvoiceService().getClientInvoices(clientId);
-      const transformedInvoices = invoices.map(toSnakeCaseInvoice);
-      res.json({
-        success: true,
-        invoices: transformedInvoices,
-        count: invoices.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve client invoices',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/project/{projectId}:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get all invoices for a project
- */
-router.get(
-  '/project/:projectId',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
-
-    if (isNaN(projectId)) {
-      return res.status(400).json({
-        error: 'Invalid project ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const invoices = await getInvoiceService().getProjectInvoices(projectId);
-      const transformedInvoices = invoices.map(toSnakeCaseInvoice);
-      res.json({
-        success: true,
-        invoices: transformedInvoices,
-        count: invoices.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve project invoices',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/{id}/status:
- *   put:
- *     tags:
- *       - Invoices
- *     summary: Update invoice status
- */
-router.put(
-  '/:id/status',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-    const { status, paymentData } = req.body;
-
-    if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    const validStatuses = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        error: 'Invalid status',
-        code: 'INVALID_STATUS',
-        validStatuses
-      });
-    }
-
-    try {
-      const invoice = await getInvoiceService().updateInvoiceStatus(invoiceId, status, paymentData);
-      res.json({
-        success: true,
-        message: 'Invoice status updated successfully',
-        invoice
-      });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
-      }
-
-      res.status(500).json({
-        error: 'Failed to update invoice status',
-        code: 'UPDATE_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/{id}/send:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Send invoice to client
- */
-router.post(
-  '/:id/send',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-
-    if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const invoice = await getInvoiceService().sendInvoice(invoiceId);
-
-      // Schedule payment reminders
-      try {
-        await getInvoiceService().scheduleReminders(invoiceId);
-        console.log(`[Invoices] Scheduled reminders for invoice #${invoiceId}`);
-      } catch (reminderError) {
-        console.error('[Invoices] Failed to schedule reminders:', reminderError);
-        // Don't fail the send operation if reminders fail
-      }
-
-      // Send email notification to client
-      try {
-        // Get client email from database
-        const db = getDatabase();
-        const clientRow = await db.get(
-          'SELECT u.email, u.name FROM invoices i JOIN users u ON i.client_id = u.id WHERE i.id = ?',
-          [invoiceId]
-        );
-
-        if (!clientRow) {
-          throw new Error('Client not found');
-        }
-
-        const clientEmail = getString(clientRow, 'email');
-        const clientName = getString(clientRow, 'name');
-        const client = { email: clientEmail, name: clientName };
-
-        const invoiceUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000/client/portal'}?invoice=${invoiceId}`;
-
-        // Send invoice email
-        await emailService.sendEmail({
-          to: clientEmail,
-          subject: `Invoice #${invoice.invoiceNumber} from No Bhad Codes`,
-          text: `
-            Hi ${client.name},
-
-            Your invoice #${invoice.invoiceNumber} is now available.
-
-            Amount Due: $${invoice.amountTotal}
-            Due Date: ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'Upon receipt'}
-
-            View and pay your invoice here:
-            ${invoiceUrl}
-
-            If you have any questions, please don't hesitate to contact us.
-
-            Best regards,
-            No Bhad Codes Team
-          `,
-          html: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .invoice-header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
-                .invoice-details { background: #f5f5f5; padding: 20px; margin: 20px 0; }
-                .button { display: inline-block; padding: 12px 24px; background: #00ff41; color: #000; text-decoration: none; border-radius: 4px; }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <div class="invoice-header">
-                  <h2>Invoice #${invoice.invoiceNumber}</h2>
-                </div>
-                <p>Hi ${client.name},</p>
-                <p>Your invoice is now available for review and payment.</p>
-                <div class="invoice-details">
-                  <p><strong>Amount Due:</strong> $${invoice.amountTotal}</p>
-                  <p><strong>Due Date:</strong> ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'Upon receipt'}</p>
-                  <p><strong>Status:</strong> ${invoice.status}</p>
-                </div>
-                <p style="text-align: center; margin: 30px 0;">
-                  <a href="${invoiceUrl}" class="button">View Invoice</a>
-                </p>
-                <p>If you have any questions about this invoice, please don't hesitate to contact us.</p>
-                <p>Best regards,<br>No Bhad Codes Team</p>
-              </div>
-            </body>
-            </html>
-          `
-        });
-
-        console.log(`Invoice email sent to ${client.email} for invoice #${invoiceId}`);
-      } catch (emailError) {
-        console.error('Failed to send invoice email:', emailError);
-        // Don't fail the request if email fails
-      }
-
-      res.json({
-        success: true,
-        message: 'Invoice sent successfully',
-        invoice
-      });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
-      }
-
-      res.status(500).json({
-        error: 'Failed to send invoice',
-        code: 'SEND_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/{id}/pay:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Mark invoice as paid
- */
-router.post(
-  '/:id/pay',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-    const { amountPaid, paymentMethod, paymentReference } = req.body;
-
-    if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    if (!amountPaid || !paymentMethod) {
-      return res.status(400).json({
-        error: 'Missing payment data',
-        code: 'MISSING_PAYMENT_DATA',
-        required: ['amountPaid', 'paymentMethod']
-      });
-    }
-
-    try {
-      const existingInvoice = await getInvoiceService().getInvoiceById(invoiceId);
-      if (!canAccessInvoice(req, existingInvoice)) {
-        return res.status(403).json({
-          error: 'Access denied',
-          code: 'ACCESS_DENIED'
-        });
-      }
-      const invoice = await getInvoiceService().markInvoiceAsPaid(invoiceId, {
-        amountPaid: parseFloat(amountPaid),
-        paymentMethod,
-        paymentReference
-      });
-
-      res.json({
-        success: true,
-        message: 'Invoice marked as paid',
-        invoice
-      });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
-      }
-
-      res.status(500).json({
-        error: 'Failed to process payment',
-        code: 'PAYMENT_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/stats:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get invoice statistics
- */
-router.get(
-  '/stats',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : undefined;
-
-    try {
-      const stats = await getInvoiceService().getInvoiceStats(clientId);
-      res.json({
-        success: true,
-        stats
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve invoice statistics',
-        code: 'STATS_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-// ============================================
-// DEPOSIT INVOICE ENDPOINTS
-// ============================================
-
-/**
- * @swagger
- * /api/invoices/deposit:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Create a deposit invoice
- *     description: Create a special deposit invoice for a project
- */
-router.post(
-  '/deposit',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { projectId, clientId, amount, percentage, description } = req.body;
-
-    if (!projectId || !clientId || !amount) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
-        required: ['projectId', 'clientId', 'amount']
-      });
-    }
-
-    if (typeof amount !== 'number' || amount <= 0) {
-      return res.status(400).json({
-        error: 'Invalid amount',
-        code: 'INVALID_AMOUNT',
-        message: 'Amount must be a positive number'
-      });
-    }
-
-    try {
-      const invoice = await getInvoiceService().createDepositInvoice(
-        projectId,
-        clientId,
-        amount,
-        percentage,
-        description
-      );
-
-      res.status(201).json({
-        success: true,
-        message: 'Deposit invoice created successfully',
-        invoice: toSnakeCaseInvoice(invoice)
-      });
-    } catch (error: unknown) {
-      console.error('[Invoices] Error creating deposit invoice:', error);
-      res.status(500).json({
-        error: 'Failed to create deposit invoice',
-        code: 'CREATION_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/deposits/{projectId}:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get available deposits for a project
- *     description: Returns paid deposit invoices that have available credit
- */
-router.get(
-  '/deposits/:projectId',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
-
-    if (isNaN(projectId)) {
-      return res.status(400).json({
-        error: 'Invalid project ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const deposits = await getInvoiceService().getAvailableDeposits(projectId);
-      res.json({
-        success: true,
-        deposits: deposits.map(toSnakeCaseDeposit),
-        count: deposits.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve available deposits',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/{id}/apply-credit:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Apply deposit credit to an invoice
- *     description: Apply credit from a paid deposit invoice to reduce the amount due
- */
-router.post(
-  '/:id/apply-credit',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-    const { depositInvoiceId, amount } = req.body;
-
-    if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    if (!depositInvoiceId || !amount) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
-        required: ['depositInvoiceId', 'amount']
-      });
-    }
-
-    try {
-      const credit = await getInvoiceService().applyDepositCredit(
-        invoiceId,
-        depositInvoiceId,
-        parseFloat(amount),
-        req.user?.email
-      );
-
-      res.json({
-        success: true,
-        message: 'Credit applied successfully',
-        credit: toSnakeCaseCredit(credit)
-      });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('Insufficient') || message.includes('Invalid')) {
-        return res.status(400).json({
-          error: message,
-          code: 'INVALID_CREDIT'
-        });
-      }
-
-      res.status(500).json({
-        error: 'Failed to apply credit',
-        code: 'CREDIT_FAILED',
-        message
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/{id}/credits:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get credits applied to an invoice
- */
-router.get(
-  '/:id/credits',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-
-    if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const credits = await getInvoiceService().getInvoiceCredits(invoiceId);
-      const totalCredits = await getInvoiceService().getTotalCredits(invoiceId);
-
-      res.json({
-        success: true,
-        credits: credits.map(toSnakeCaseCredit),
-        total_credits: totalCredits
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve credits',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-// ============================================
-// PAYMENT PLAN TEMPLATE ENDPOINTS
-// ============================================
-
-/**
- * @swagger
- * /api/invoices/payment-plans:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get all payment plan templates
- */
-router.get(
-  '/payment-plans',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    try {
-      const templates = await getInvoiceService().getPaymentPlanTemplates();
-      res.json({
-        success: true,
-        templates: templates.map(toSnakeCasePaymentPlan),
-        count: templates.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve payment plan templates',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/payment-plans:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Create a new payment plan template
- */
-router.post(
-  '/payment-plans',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { name, description, payments, isDefault } = req.body;
-
-    if (!name || !payments || !Array.isArray(payments) || payments.length === 0) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
-        required: ['name', 'payments']
-      });
-    }
-
-    try {
-      const template = await getInvoiceService().createPaymentPlanTemplate({
-        name,
-        description,
-        payments,
-        isDefault: isDefault || false
-      });
-
-      res.status(201).json({
-        success: true,
-        message: 'Payment plan template created',
-        template: toSnakeCasePaymentPlan(template)
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to create payment plan template',
-        code: 'CREATION_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/payment-plans/{id}:
- *   delete:
- *     tags:
- *       - Invoices
- *     summary: Delete a payment plan template
- */
-router.delete(
-  '/payment-plans/:id',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const templateId = parseInt(req.params.id);
-
-    if (isNaN(templateId)) {
-      return res.status(400).json({
-        error: 'Invalid template ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      await getInvoiceService().deletePaymentPlanTemplate(templateId);
-      res.json({
-        success: true,
-        message: 'Payment plan template deleted'
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to delete payment plan template',
-        code: 'DELETION_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/generate-from-plan:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Generate invoices from a payment plan template
- */
-router.post(
-  '/generate-from-plan',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { projectId, clientId, templateId, totalAmount } = req.body;
-
-    if (!projectId || !clientId || !templateId || !totalAmount) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
-        required: ['projectId', 'clientId', 'templateId', 'totalAmount']
-      });
-    }
-
-    try {
-      const invoices = await getInvoiceService().generateInvoicesFromTemplate(
-        projectId,
-        clientId,
-        templateId,
-        totalAmount
-      );
-
-      res.status(201).json({
-        success: true,
-        message: `Generated ${invoices.length} invoices from payment plan`,
-        invoices: invoices.map(toSnakeCaseInvoice),
-        count: invoices.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to generate invoices from plan',
-        code: 'GENERATION_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
+router.use(coreRouter);
+router.use(depositsRouter);
+router.use(creditsRouter);
+router.use(paymentPlansRouter);
+router.use(scheduledRouter);
+router.use(recurringRouter);
+router.use(remindersRouter);
+router.use(clientRoutesRouter);
+router.use(batchRouter);
+router.use(agingRouter);
 
 // ============================================
 // MILESTONE-LINKED INVOICE ENDPOINTS
@@ -1450,18 +74,13 @@ router.post(
     const milestoneId = parseInt(req.params.milestoneId);
 
     if (isNaN(milestoneId)) {
-      return res.status(400).json({
-        error: 'Invalid milestone ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid milestone ID', 400, 'INVALID_ID');
     }
 
     const invoiceData: InvoiceCreateData = req.body;
 
     if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
+      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
         required: ['projectId', 'clientId', 'lineItems']
       });
     }
@@ -1475,9 +94,7 @@ router.post(
         invoice: toSnakeCaseInvoice(invoice)
       });
     } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to create milestone invoice',
-        code: 'CREATION_FAILED',
+      errorResponseWithPayload(res, 'Failed to create milestone invoice', 500, 'CREATION_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -1499,10 +116,7 @@ router.get(
     const milestoneId = parseInt(req.params.milestoneId);
 
     if (isNaN(milestoneId)) {
-      return res.status(400).json({
-        error: 'Invalid milestone ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid milestone ID', 400, 'INVALID_ID');
     }
 
     try {
@@ -1514,9 +128,7 @@ router.get(
         count: invoices.length
       });
     } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve milestone invoices',
-        code: 'RETRIEVAL_FAILED',
+      errorResponseWithPayload(res, 'Failed to retrieve milestone invoices', 500, 'RETRIEVAL_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -1540,16 +152,11 @@ router.put(
     const { milestoneId } = req.body;
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     if (!milestoneId) {
-      return res.status(400).json({
-        error: 'Missing milestone ID',
-        code: 'MISSING_FIELDS',
+      return errorResponseWithPayload(res, 'Missing milestone ID', 400, 'MISSING_FIELDS', {
         required: ['milestoneId']
       });
     }
@@ -1563,549 +170,14 @@ router.put(
         invoice: toSnakeCaseInvoice(invoice)
       });
     } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to link invoice to milestone',
-        code: 'LINK_FAILED',
+      errorResponseWithPayload(res, 'Failed to link invoice to milestone', 500, 'LINK_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
 );
 
-// ============================================
-// SCHEDULED INVOICE ENDPOINTS
-// ============================================
 
-/**
- * @swagger
- * /api/invoices/schedule:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Schedule an invoice for future generation
- */
-router.post(
-  '/schedule',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { projectId, clientId, scheduledDate, triggerType, triggerMilestoneId, lineItems, notes, terms } = req.body;
-
-    if (!projectId || !clientId || !scheduledDate || !lineItems?.length) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
-        required: ['projectId', 'clientId', 'scheduledDate', 'lineItems']
-      });
-    }
-
-    try {
-      const scheduled = await getInvoiceService().scheduleInvoice({
-        projectId,
-        clientId,
-        scheduledDate,
-        triggerType,
-        triggerMilestoneId,
-        lineItems,
-        notes,
-        terms
-      });
-
-      res.status(201).json({
-        success: true,
-        message: 'Invoice scheduled',
-        scheduled_invoice: toSnakeCaseScheduledInvoice(scheduled)
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to schedule invoice',
-        code: 'SCHEDULING_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/scheduled:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get all scheduled invoices
- */
-router.get(
-  '/scheduled',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    try {
-      const scheduled = await getInvoiceService().getScheduledInvoices();
-
-      res.json({
-        success: true,
-        scheduled_invoices: scheduled.map(toSnakeCaseScheduledInvoice),
-        count: scheduled.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve scheduled invoices',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/scheduled/{projectId}:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get scheduled invoices for a project
- */
-router.get(
-  '/scheduled/:projectId',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
-
-    if (isNaN(projectId)) {
-      return res.status(400).json({
-        error: 'Invalid project ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const scheduled = await getInvoiceService().getScheduledInvoices(projectId);
-
-      res.json({
-        success: true,
-        scheduled_invoices: scheduled.map(toSnakeCaseScheduledInvoice),
-        count: scheduled.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve scheduled invoices',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/scheduled/{id}:
- *   delete:
- *     tags:
- *       - Invoices
- *     summary: Cancel a scheduled invoice
- */
-router.delete(
-  '/scheduled/:id',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const scheduledId = parseInt(req.params.id);
-
-    if (isNaN(scheduledId)) {
-      return res.status(400).json({
-        error: 'Invalid scheduled invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      await getInvoiceService().cancelScheduledInvoice(scheduledId);
-
-      res.json({
-        success: true,
-        message: 'Scheduled invoice cancelled'
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to cancel scheduled invoice',
-        code: 'CANCELLATION_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-// ============================================
-// RECURRING INVOICE ENDPOINTS
-// ============================================
-
-/**
- * @swagger
- * /api/invoices/recurring:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Create a recurring invoice pattern
- */
-router.post(
-  '/recurring',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { projectId, clientId, frequency, dayOfMonth, dayOfWeek, lineItems, notes, terms, startDate, endDate } = req.body;
-
-    if (!projectId || !clientId || !frequency || !lineItems?.length || !startDate) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
-        required: ['projectId', 'clientId', 'frequency', 'lineItems', 'startDate']
-      });
-    }
-
-    const validFrequencies = ['weekly', 'monthly', 'quarterly'];
-    if (!validFrequencies.includes(frequency)) {
-      return res.status(400).json({
-        error: 'Invalid frequency',
-        code: 'INVALID_FREQUENCY',
-        validFrequencies
-      });
-    }
-
-    try {
-      const recurring = await getInvoiceService().createRecurringInvoice({
-        projectId,
-        clientId,
-        frequency,
-        dayOfMonth,
-        dayOfWeek,
-        lineItems,
-        notes,
-        terms,
-        startDate,
-        endDate
-      });
-
-      res.status(201).json({
-        success: true,
-        message: 'Recurring invoice pattern created',
-        recurring_invoice: toSnakeCaseRecurringInvoice(recurring)
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to create recurring invoice',
-        code: 'CREATION_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/recurring:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get all recurring invoices
- */
-router.get(
-  '/recurring',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    try {
-      const recurring = await getInvoiceService().getRecurringInvoices();
-
-      res.json({
-        success: true,
-        recurring_invoices: recurring.map(toSnakeCaseRecurringInvoice),
-        count: recurring.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve recurring invoices',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/recurring/{projectId}:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get recurring invoices for a project
- */
-router.get(
-  '/recurring/:projectId',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
-
-    if (isNaN(projectId)) {
-      return res.status(400).json({
-        error: 'Invalid project ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const recurring = await getInvoiceService().getRecurringInvoices(projectId);
-
-      res.json({
-        success: true,
-        recurring_invoices: recurring.map(toSnakeCaseRecurringInvoice),
-        count: recurring.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve recurring invoices',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/recurring/{id}:
- *   put:
- *     tags:
- *       - Invoices
- *     summary: Update a recurring invoice pattern
- */
-router.put(
-  '/recurring/:id',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const recurringId = parseInt(req.params.id);
-
-    if (isNaN(recurringId)) {
-      return res.status(400).json({
-        error: 'Invalid recurring invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const recurring = await getInvoiceService().updateRecurringInvoice(recurringId, req.body);
-
-      res.json({
-        success: true,
-        message: 'Recurring invoice updated',
-        recurring_invoice: toSnakeCaseRecurringInvoice(recurring)
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to update recurring invoice',
-        code: 'UPDATE_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/recurring/{id}/pause:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Pause a recurring invoice
- */
-router.post(
-  '/recurring/:id/pause',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const recurringId = parseInt(req.params.id);
-
-    if (isNaN(recurringId)) {
-      return res.status(400).json({
-        error: 'Invalid recurring invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      await getInvoiceService().pauseRecurringInvoice(recurringId);
-
-      res.json({
-        success: true,
-        message: 'Recurring invoice paused'
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to pause recurring invoice',
-        code: 'PAUSE_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/recurring/{id}/resume:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Resume a paused recurring invoice
- */
-router.post(
-  '/recurring/:id/resume',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const recurringId = parseInt(req.params.id);
-
-    if (isNaN(recurringId)) {
-      return res.status(400).json({
-        error: 'Invalid recurring invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      await getInvoiceService().resumeRecurringInvoice(recurringId);
-
-      res.json({
-        success: true,
-        message: 'Recurring invoice resumed'
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to resume recurring invoice',
-        code: 'RESUME_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/recurring/{id}:
- *   delete:
- *     tags:
- *       - Invoices
- *     summary: Delete a recurring invoice pattern
- */
-router.delete(
-  '/recurring/:id',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const recurringId = parseInt(req.params.id);
-
-    if (isNaN(recurringId)) {
-      return res.status(400).json({
-        error: 'Invalid recurring invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      await getInvoiceService().deleteRecurringInvoice(recurringId);
-
-      res.json({
-        success: true,
-        message: 'Recurring invoice deleted'
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to delete recurring invoice',
-        code: 'DELETION_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-// ============================================
-// PAYMENT REMINDER ENDPOINTS
-// ============================================
-
-/**
- * @swagger
- * /api/invoices/{id}/reminders:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get reminders for an invoice
- */
-router.get(
-  '/:id/reminders',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-
-    if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const reminders = await getInvoiceService().getInvoiceReminders(invoiceId);
-
-      res.json({
-        success: true,
-        reminders: reminders.map(toSnakeCaseReminder),
-        count: reminders.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve reminders',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/reminders/{id}/skip:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Skip a scheduled reminder
- */
-router.post(
-  '/reminders/:id/skip',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const reminderId = parseInt(req.params.id);
-
-    if (isNaN(reminderId)) {
-      return res.status(400).json({
-        error: 'Invalid reminder ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      await getInvoiceService().skipReminder(reminderId);
-
-      res.json({
-        success: true,
-        message: 'Reminder skipped'
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to skip reminder',
-        code: 'SKIP_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
 
 // ============================================
 // INVOICE EDIT ENDPOINT
@@ -2128,21 +200,14 @@ router.put(
     const invoiceId = parseInt(req.params.id);
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     // Handle status-only updates (backwards compatibility)
     if (req.body.status && Object.keys(req.body).length === 1) {
       const validStatuses = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
       if (!validStatuses.includes(req.body.status)) {
-        return res.status(400).json({
-          error: 'Invalid status',
-          code: 'INVALID_STATUS',
-          validStatuses
-        });
+        return errorResponseWithPayload(res, 'Invalid status', 400, 'INVALID_STATUS', { validStatuses });
       }
 
       try {
@@ -2155,50 +220,15 @@ router.put(
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         if (message.includes('not found')) {
-          return res.status(404).json({ error: 'Invoice not found', code: 'NOT_FOUND' });
+          return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
         }
-        res.status(500).json({ error: 'Failed to update invoice', code: 'UPDATE_FAILED', message });
+        errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', { message });
       }
       return;
     }
 
-    // Full invoice update (draft only)
     try {
-      const updateData: Partial<InvoiceCreateData> = {};
-
-      if (req.body.lineItems) {
-        updateData.lineItems = req.body.lineItems;
-      }
-      if (req.body.line_items) {
-        updateData.lineItems = req.body.line_items;
-      }
-      if (req.body.dueDate !== undefined || req.body.due_date !== undefined) {
-        updateData.dueDate = req.body.dueDate || req.body.due_date;
-      }
-      if (req.body.notes !== undefined) {
-        updateData.notes = req.body.notes;
-      }
-      if (req.body.terms !== undefined) {
-        updateData.terms = req.body.terms;
-      }
-      if (req.body.billToName !== undefined || req.body.bill_to_name !== undefined) {
-        updateData.billToName = req.body.billToName || req.body.bill_to_name;
-      }
-      if (req.body.billToEmail !== undefined || req.body.bill_to_email !== undefined) {
-        updateData.billToEmail = req.body.billToEmail || req.body.bill_to_email;
-      }
-      if (req.body.servicesTitle !== undefined || req.body.services_title !== undefined) {
-        updateData.servicesTitle = req.body.servicesTitle || req.body.services_title;
-      }
-      if (req.body.servicesDescription !== undefined || req.body.services_description !== undefined) {
-        updateData.servicesDescription = req.body.servicesDescription || req.body.services_description;
-      }
-      if (req.body.deliverables !== undefined) {
-        updateData.deliverables = req.body.deliverables;
-      }
-
-      const invoice = await getInvoiceService().updateInvoice(invoiceId, updateData);
-
+      const invoice = await getInvoiceService().updateInvoice(invoiceId, req.body);
       res.json({
         success: true,
         message: 'Invoice updated successfully',
@@ -2206,214 +236,13 @@ router.put(
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('Only draft invoices can be edited')) {
+        return errorResponse(res, 'Only draft invoices can be edited', 400, 'INVALID_STATUS');
+      }
       if (message.includes('not found')) {
-        return res.status(404).json({ error: 'Invoice not found', code: 'NOT_FOUND' });
+        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      if (message.includes('Only draft')) {
-        return res.status(400).json({ error: message, code: 'NOT_EDITABLE' });
-      }
-
-      res.status(500).json({
-        error: 'Failed to update invoice',
-        code: 'UPDATE_FAILED',
-        message
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/generate/intake/{intakeId}:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Generate invoice from client intake
- */
-router.post(
-  '/generate/intake/:intakeId',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const intakeId = parseInt(req.params.intakeId);
-
-    if (isNaN(intakeId)) {
-      return res.status(400).json({
-        error: 'Invalid intake ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const invoice = await getInvoiceService().generateInvoiceFromIntake(intakeId);
-
-      res.status(201).json({
-        success: true,
-        message: 'Invoice generated from intake successfully',
-        invoice
-      });
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      if (errorMessage.includes('not found')) {
-        return res.status(404).json({
-          error: 'Intake not found',
-          code: 'NOT_FOUND'
-        });
-      }
-
-      if (errorMessage.includes('must be converted')) {
-        return res.status(400).json({
-          error: 'Intake not ready for invoice generation',
-          code: 'INTAKE_NOT_CONVERTED',
-          message: errorMessage
-        });
-      }
-
-      res.status(500).json({
-        error: 'Failed to generate invoice from intake',
-        code: 'GENERATION_FAILED',
-        message: errorMessage
-      });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/{id}/pdf:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Download invoice as PDF
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- */
-router.get(
-  '/:id/pdf',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-
-    if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const invoice = await getInvoiceService().getInvoiceById(invoiceId);
-      if (!canAccessInvoice(req, invoice)) {
-        return res.status(403).json({
-          error: 'Access denied',
-          code: 'ACCESS_DENIED'
-        });
-      }
-
-      // Check cache first
-      const cacheKey = getPdfCacheKey('invoice', invoiceId, invoice.updatedAt);
-      const cachedPdf = getCachedPdf(cacheKey);
-      if (cachedPdf) {
-        const isPreview = req.query.preview === 'true';
-        const disposition = isPreview ? 'inline' : 'attachment';
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `${disposition}; filename="${invoice.invoiceNumber}.pdf"`);
-        res.setHeader('Content-Length', cachedPdf.length);
-        res.setHeader('X-PDF-Cache', 'HIT');
-        return res.send(Buffer.from(cachedPdf));
-      }
-
-      const db = getDatabase();
-
-      // Get client info
-      const client = await db.get(
-        'SELECT contact_name, company_name, email, client_type FROM clients WHERE id = ?',
-        [invoice.clientId]
-      );
-
-      // Helper function to format date as "Month Day, Year"
-      const formatDate = (dateStr: string | undefined): string => {
-        if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-      };
-
-      // Build line items from invoice data
-      const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
-        ? invoice.lineItems.map((item: InvoiceLineItem) => ({
-          description: item.description || '',
-          quantity: item.quantity || 1,
-          rate: item.rate || item.amount || 0,
-          amount: item.amount || 0
-        }))
-        : [];
-
-      // Get credits applied to this invoice (if any)
-      const invoiceCredits = await getInvoiceService().getInvoiceCredits(invoiceId);
-      const totalCredits = await getInvoiceService().getTotalCredits(invoiceId);
-
-      // Build PDF data object
-      const pdfData: InvoicePdfData = {
-        invoiceNumber: invoice.invoiceNumber,
-        issuedDate: formatDate(invoice.issuedDate || invoice.createdAt),
-        dueDate: 'Within 14 days',
-        clientName: invoice.billToName || (client ? getString(client, 'contact_name') : '') || 'Client',
-        clientCompany: client ? getString(client, 'company_name') : '',
-        clientEmail: invoice.billToEmail || (client ? getString(client, 'email') : '') || '',
-        projectId: invoice.projectId,
-        lineItems,
-        subtotal: invoice.amountTotal || 0,
-        total: invoice.amountTotal || 0,
-        notes: invoice.notes,
-        terms: invoice.terms,
-        // Deposit invoice fields
-        isDeposit: invoice.invoiceType === 'deposit',
-        depositPercentage: invoice.depositPercentage,
-        // Credits applied
-        credits: invoiceCredits.map((c) => ({
-          depositInvoiceNumber: c.depositInvoiceNumber || `INV-${c.depositInvoiceId}`,
-          amount: c.amount
-        })),
-        totalCredits
-      };
-
-      // Generate PDF using pdf-lib (template-matching version)
-      const pdfBytes = await generateInvoicePdf(pdfData);
-
-      // Cache the generated PDF
-      cachePdf(cacheKey, pdfBytes, invoice.updatedAt);
-
-      // Check if preview mode (inline) or download mode (attachment)
-      const isPreview = req.query.preview === 'true';
-      const disposition = isPreview ? 'inline' : 'attachment';
-
-      // Set response headers and send PDF
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader(
-        'Content-Disposition',
-        `${disposition}; filename="${invoice.invoiceNumber}.pdf"`
-      );
-      res.setHeader('Content-Length', pdfBytes.length);
-      res.setHeader('X-PDF-Cache', 'MISS');
-      res.send(Buffer.from(pdfBytes));
-    } catch (error: unknown) {
-      console.error('[Invoices] PDF generation error:', error);
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
-      }
-
-      res.status(500).json({
-        error: 'Failed to generate PDF',
-        code: 'PDF_GENERATION_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', { message });
     }
   })
 );
@@ -2447,10 +276,7 @@ router.get(
     const invoiceId = parseInt(req.params.id);
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     try {
@@ -2459,16 +285,9 @@ router.get(
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
+        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-
-      res.status(500).json({
-        error: 'Failed to retrieve invoice',
-        code: 'RETRIEVAL_FAILED'
-      });
+      errorResponse(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED');
     }
   })
 );
@@ -2512,10 +331,7 @@ router.delete(
     const invoiceId = parseInt(req.params.id);
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     try {
@@ -2525,15 +341,9 @@ router.delete(
       if (!result.success) {
         // Check if it's a "cannot delete paid" error
         if (result.message.includes('paid')) {
-          return res.status(400).json({
-            error: result.message,
-            code: 'CANNOT_DELETE_PAID'
-          });
+          return errorResponse(res, result.message, 400, 'CANNOT_DELETE_PAID');
         }
-        return res.status(404).json({
-          error: result.message,
-          code: 'NOT_FOUND'
-        });
+        return errorResponse(res, result.message, 404, 'NOT_FOUND');
       }
 
       res.json({
@@ -2543,12 +353,7 @@ router.delete(
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-
-      res.status(500).json({
-        error: 'Failed to delete invoice',
-        code: 'DELETE_FAILED',
-        message
-      });
+      errorResponseWithPayload(res, 'Failed to delete invoice', 500, 'DELETE_FAILED', { message });
     }
   })
 );
@@ -2587,10 +392,7 @@ router.post(
     const invoiceId = parseInt(req.params.id);
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     try {
@@ -2605,17 +407,9 @@ router.post(
       const message = error instanceof Error ? error.message : 'Unknown error';
 
       if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
+        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-
-      res.status(500).json({
-        error: 'Failed to duplicate invoice',
-        code: 'DUPLICATE_FAILED',
-        message
-      });
+      errorResponseWithPayload(res, 'Failed to duplicate invoice', 500, 'DUPLICATE_FAILED', { message });
     }
   })
 );
@@ -2668,24 +462,15 @@ router.post(
     const { amount, paymentMethod, paymentReference } = req.body;
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     if (!amount || typeof amount !== 'number' || amount <= 0) {
-      return res.status(400).json({
-        error: 'Invalid payment amount',
-        code: 'INVALID_AMOUNT'
-      });
+      return errorResponse(res, 'Invalid payment amount', 400, 'INVALID_AMOUNT');
     }
 
     if (!paymentMethod) {
-      return res.status(400).json({
-        error: 'Payment method is required',
-        code: 'MISSING_PAYMENT_METHOD'
-      });
+      return errorResponse(res, 'Payment method is required', 400, 'MISSING_PAYMENT_METHOD');
     }
 
     try {
@@ -2707,24 +492,13 @@ router.post(
       const message = error instanceof Error ? error.message : 'Unknown error';
 
       if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
+        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
 
       if (message.includes('already fully paid') || message.includes('cancelled')) {
-        return res.status(400).json({
-          error: message,
-          code: 'PAYMENT_NOT_ALLOWED'
-        });
+        return errorResponse(res, message, 400, 'PAYMENT_NOT_ALLOWED');
       }
-
-      res.status(500).json({
-        error: 'Failed to record payment',
-        code: 'PAYMENT_FAILED',
-        message
-      });
+      errorResponseWithPayload(res, 'Failed to record payment', 500, 'PAYMENT_FAILED', { message });
     }
   })
 );
@@ -2763,189 +537,8 @@ router.post(
         count
       });
     } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to check overdue invoices',
-        code: 'CHECK_OVERDUE_FAILED',
+      errorResponseWithPayload(res, 'Failed to check overdue invoices', 500, 'CHECK_OVERDUE_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-// ============================================
-// MANUAL SEND REMINDER
-// ============================================
-
-/**
- * @swagger
- * /api/invoices/{id}/send-reminder:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Send a payment reminder email
- *     description: Manually send a payment reminder for an outstanding invoice
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Reminder sent successfully
- *       400:
- *         description: Invoice is already paid
- */
-router.post(
-  '/:id/send-reminder',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-
-    if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
-    }
-
-    try {
-      const invoice = await getInvoiceService().getInvoiceById(invoiceId);
-
-      if (invoice.status === 'paid') {
-        return res.status(400).json({
-          error: 'Cannot send reminder for a paid invoice',
-          code: 'INVOICE_PAID'
-        });
-      }
-
-      if (invoice.status === 'cancelled') {
-        return res.status(400).json({
-          error: 'Cannot send reminder for a cancelled invoice',
-          code: 'INVOICE_CANCELLED'
-        });
-      }
-
-      // Get client email
-      const db = getDatabase();
-      const clientRow = await db.get(
-        'SELECT email, contact_name FROM clients WHERE id = ?',
-        [invoice.clientId]
-      ) as { email?: string; contact_name?: string } | undefined;
-
-      if (!clientRow || !clientRow.email) {
-        return res.status(400).json({
-          error: 'Client email not found',
-          code: 'NO_CLIENT_EMAIL'
-        });
-      }
-
-      const clientEmail = clientRow.email;
-      const clientName = clientRow.contact_name || 'Valued Client';
-
-      // Determine reminder urgency
-      const today = new Date();
-      const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
-      const daysOverdue = dueDate ? Math.ceil((today.getTime() - dueDate.getTime()) / (24 * 60 * 60 * 1000)) : 0;
-
-      let subject: string;
-      let urgencyMessage = '';
-
-      if (daysOverdue > 14) {
-        subject = `URGENT: Invoice #${invoice.invoiceNumber} is ${daysOverdue} days overdue`;
-        urgencyMessage = 'Immediate payment is required.';
-      } else if (daysOverdue > 0) {
-        subject = `Payment Overdue: Invoice #${invoice.invoiceNumber}`;
-        urgencyMessage = `This invoice is ${daysOverdue} day(s) overdue.`;
-      } else {
-        subject = `Payment Reminder: Invoice #${invoice.invoiceNumber}`;
-        urgencyMessage = dueDate
-          ? `Payment is due on ${dueDate.toLocaleDateString()}.`
-          : 'Payment is due upon receipt.';
-      }
-
-      const outstandingAmount = invoice.amountTotal - (invoice.amountPaid || 0);
-      const portalUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000/client/portal'}?invoice=${invoiceId}`;
-
-      await emailService.sendEmail({
-        to: clientEmail,
-        subject,
-        text: `
-Hi ${clientName},
-
-This is a reminder regarding invoice #${invoice.invoiceNumber}.
-
-Amount Outstanding: $${outstandingAmount.toFixed(2)}
-${urgencyMessage}
-
-View and pay your invoice here: ${portalUrl}
-
-If you have already submitted payment, please disregard this message.
-
-Best regards,
-${BUSINESS_INFO.name}
-        `,
-        html: `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: ${daysOverdue > 0 ? '#dc3545' : '#00ff41'}; color: ${daysOverdue > 0 ? '#fff' : '#000'}; padding: 20px; text-align: center; }
-    .content { padding: 20px; background: #f9f9f9; }
-    .amount { font-size: 24px; font-weight: bold; color: #333; margin: 15px 0; }
-    .button { display: inline-block; padding: 12px 24px; background: #00ff41; color: #000; text-decoration: none; border-radius: 4px; }
-    .urgency { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; }
-    .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h2>${subject}</h2>
-    </div>
-    <div class="content">
-      <p>Hi ${clientName},</p>
-      <p>This is a reminder regarding invoice #${invoice.invoiceNumber}.</p>
-      ${urgencyMessage ? `<div class="urgency"><strong>${urgencyMessage}</strong></div>` : ''}
-      <div class="amount">Amount Outstanding: $${outstandingAmount.toFixed(2)}</div>
-      <p style="text-align: center; margin: 30px 0;">
-        <a href="${portalUrl}" class="button">View Invoice & Pay</a>
-      </p>
-      <p><small>If you have already submitted payment, please disregard this message.</small></p>
-    </div>
-    <div class="footer">
-      <p>Best regards,<br>${BUSINESS_INFO.name}</p>
-    </div>
-  </div>
-</body>
-</html>
-        `
-      });
-
-      res.json({
-        success: true,
-        message: 'Payment reminder sent successfully',
-        sentTo: clientEmail
-      });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-
-      if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
-      }
-
-      res.status(500).json({
-        error: 'Failed to send reminder',
-        code: 'SEND_REMINDER_FAILED',
-        message
       });
     }
   })
@@ -3009,9 +602,7 @@ router.get(
         terms: terms.map(toSnakeCasePaymentTerms)
       });
     } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve payment terms',
-        code: 'RETRIEVAL_FAILED',
+      errorResponseWithPayload(res, 'Failed to retrieve payment terms', 500, 'RETRIEVAL_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -3034,9 +625,7 @@ router.post(
     const { name, daysUntilDue, description, lateFeeRate, lateFeeType, lateFeeFlatAmount, gracePeriodDays, isDefault } = req.body;
 
     if (!name || daysUntilDue === undefined) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
+      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
         required: ['name', 'daysUntilDue']
       });
     }
@@ -3059,9 +648,7 @@ router.post(
         terms: toSnakeCasePaymentTerms(terms)
       });
     } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to create payment terms',
-        code: 'CREATION_FAILED',
+      errorResponseWithPayload(res, 'Failed to create payment terms', 500, 'CREATION_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -3085,16 +672,11 @@ router.post(
     const { termsId } = req.body;
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     if (!termsId) {
-      return res.status(400).json({
-        error: 'Missing termsId',
-        code: 'MISSING_FIELDS',
+      return errorResponseWithPayload(res, 'Missing termsId', 400, 'MISSING_FIELDS', {
         required: ['termsId']
       });
     }
@@ -3109,16 +691,9 @@ router.post(
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice or payment terms not found',
-          code: 'NOT_FOUND'
-        });
+        return errorResponse(res, 'Invoice or payment terms not found', 404, 'NOT_FOUND');
       }
-      res.status(500).json({
-        error: 'Failed to apply payment terms',
-        code: 'UPDATE_FAILED',
-        message
-      });
+      errorResponseWithPayload(res, 'Failed to apply payment terms', 500, 'UPDATE_FAILED', { message });
     }
   })
 );
@@ -3144,10 +719,7 @@ router.put(
     const { taxRate, discountType, discountValue } = req.body;
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     try {
@@ -3166,16 +738,9 @@ router.put(
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('draft')) {
-        return res.status(400).json({
-          error: 'Only draft invoices can be modified',
-          code: 'INVALID_STATUS'
-        });
+        return errorResponse(res, 'Only draft invoices can be modified', 400, 'INVALID_STATUS');
       }
-      res.status(500).json({
-        error: 'Failed to update tax/discount',
-        code: 'UPDATE_FAILED',
-        message
-      });
+      errorResponseWithPayload(res, 'Failed to update tax/discount', 500, 'UPDATE_FAILED', { message });
     }
   })
 );
@@ -3199,10 +764,7 @@ router.get(
     const invoiceId = parseInt(req.params.id);
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     try {
@@ -3219,16 +781,9 @@ router.get(
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
+        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      res.status(500).json({
-        error: 'Failed to calculate late fee',
-        code: 'CALCULATION_FAILED',
-        message
-      });
+      errorResponseWithPayload(res, 'Failed to calculate late fee', 500, 'CALCULATION_FAILED', { message });
     }
   })
 );
@@ -3249,10 +804,7 @@ router.post(
     const invoiceId = parseInt(req.params.id);
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     try {
@@ -3265,22 +817,12 @@ router.post(
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('already been applied')) {
-        return res.status(400).json({
-          error: 'Late fee already applied',
-          code: 'ALREADY_APPLIED'
-        });
+        return errorResponse(res, 'Late fee already applied', 400, 'ALREADY_APPLIED');
       }
       if (message.includes('No late fee applicable')) {
-        return res.status(400).json({
-          error: 'No late fee applicable',
-          code: 'NOT_APPLICABLE'
-        });
+        return errorResponse(res, 'No late fee applicable', 400, 'NOT_APPLICABLE');
       }
-      res.status(500).json({
-        error: 'Failed to apply late fee',
-        code: 'APPLY_FAILED',
-        message
-      });
+      errorResponseWithPayload(res, 'Failed to apply late fee', 500, 'APPLY_FAILED', { message });
     }
   })
 );
@@ -3306,9 +848,7 @@ router.post(
         count
       });
     } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to process late fees',
-        code: 'PROCESS_FAILED',
+      errorResponseWithPayload(res, 'Failed to process late fees', 500, 'PROCESS_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -3334,10 +874,7 @@ router.get(
     const invoiceId = parseInt(req.params.id);
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     try {
@@ -3347,9 +884,7 @@ router.get(
         payments: payments.map(toSnakeCasePayment)
       });
     } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve payment history',
-        code: 'RETRIEVAL_FAILED',
+      errorResponseWithPayload(res, 'Failed to retrieve payment history', 500, 'RETRIEVAL_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -3373,16 +908,11 @@ router.post(
     const { amount, paymentMethod, paymentReference, notes } = req.body;
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     if (!amount || !paymentMethod) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
+      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
         required: ['amount', 'paymentMethod']
       });
     }
@@ -3404,95 +934,11 @@ router.post(
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      res.status(500).json({
-        error: 'Failed to record payment',
-        code: 'RECORD_FAILED',
-        message
-      });
+      errorResponseWithPayload(res, 'Failed to record payment', 500, 'RECORD_FAILED', { message });
     }
   })
 );
 
-/**
- * @swagger
- * /api/invoices/all-payments:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get all payments across all invoices
- */
-router.get(
-  '/all-payments',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const dateFrom = req.query.dateFrom as string | undefined;
-    const dateTo = req.query.dateTo as string | undefined;
-
-    try {
-      const payments = await getInvoiceService().getAllPayments(dateFrom, dateTo);
-      res.json({
-        success: true,
-        payments: payments.map(toSnakeCasePayment),
-        count: payments.length
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve payments',
-        code: 'RETRIEVAL_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
-
-// ============================================
-// INVOICE AGING REPORT
-// ============================================
-
-/**
- * @swagger
- * /api/invoices/aging-report:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Get accounts receivable aging report
- */
-router.get(
-  '/aging-report',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : undefined;
-
-    try {
-      const report = await getInvoiceService().getAgingReport(clientId);
-
-      // Transform the report for frontend
-      const transformedReport = {
-        generated_at: report.generatedAt,
-        total_outstanding: report.totalOutstanding,
-        buckets: report.buckets.map(bucket => ({
-          bucket: bucket.bucket,
-          count: bucket.count,
-          total_amount: bucket.totalAmount,
-          invoices: bucket.invoices.map(toSnakeCaseInvoice)
-        }))
-      };
-
-      res.json({
-        success: true,
-        report: transformedReport
-      });
-    } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to generate aging report',
-        code: 'REPORT_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
 
 // ============================================
 // INTERNAL NOTES
@@ -3515,10 +961,7 @@ router.put(
     const { internalNotes } = req.body;
 
     if (isNaN(invoiceId)) {
-      return res.status(400).json({
-        error: 'Invalid invoice ID',
-        code: 'INVALID_ID'
-      });
+      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
     try {
@@ -3531,16 +974,9 @@ router.put(
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Invoice not found',
-          code: 'NOT_FOUND'
-        });
+        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      res.status(500).json({
-        error: 'Failed to update internal notes',
-        code: 'UPDATE_FAILED',
-        message
-      });
+      errorResponseWithPayload(res, 'Failed to update internal notes', 500, 'UPDATE_FAILED', { message });
     }
   })
 );
@@ -3582,9 +1018,7 @@ router.get(
         }
       });
     } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to retrieve statistics',
-        code: 'STATS_FAILED',
+      errorResponseWithPayload(res, 'Failed to retrieve statistics', 500, 'STATS_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -3611,9 +1045,7 @@ router.post(
     const { prefix, ...invoiceData } = req.body;
 
     if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        code: 'MISSING_FIELDS',
+      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
         required: ['projectId', 'clientId', 'lineItems']
       });
     }
@@ -3630,145 +1062,13 @@ router.post(
         invoice: toSnakeCaseInvoice(invoice)
       });
     } catch (error: unknown) {
-      res.status(500).json({
-        error: 'Failed to create invoice',
-        code: 'CREATION_FAILED',
+      errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
 );
 
-/**
- * POST /api/invoices/export-batch
- * Export multiple invoices as a ZIP file
- * Body: { invoiceIds: number[] }
- */
-router.post(
-  '/export-batch',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { invoiceIds } = req.body;
-
-    if (!Array.isArray(invoiceIds) || invoiceIds.length === 0) {
-      return res.status(400).json({
-        error: 'invoiceIds must be a non-empty array',
-        code: 'INVALID_INPUT'
-      });
-    }
-
-    if (invoiceIds.length > 100) {
-      return res.status(400).json({
-        error: 'Maximum 100 invoices can be exported at once',
-        code: 'TOO_MANY_INVOICES'
-      });
-    }
-
-    const db = getDatabase();
-    const invoiceService = getInvoiceService();
-
-    // Helper function to format date
-    const formatDate = (dateStr: string | undefined): string => {
-      if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-      return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    };
-
-    // Set up ZIP response
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename="invoices-${Date.now()}.zip"`);
-
-    const archive = archiver('zip', { zlib: { level: 9 } });
-
-    archive.on('error', (err) => {
-      console.error('[Invoices] ZIP archive error:', err);
-      if (!res.headersSent) {
-        res.status(500).json({ error: 'Failed to create ZIP archive' });
-      }
-    });
-
-    archive.pipe(res);
-
-    let successCount = 0;
-    let errorCount = 0;
-    const errors: { id: number; error: string }[] = [];
-
-    for (const invoiceId of invoiceIds) {
-      try {
-        const invoice = await invoiceService.getInvoiceById(invoiceId);
-
-        // Get client info
-        const client = await db.get(
-          'SELECT contact_name, company_name, email, client_type FROM clients WHERE id = ?',
-          [invoice.clientId]
-        );
-
-        // Build line items
-        const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
-          ? invoice.lineItems.map((item: InvoiceLineItem) => ({
-            description: item.description || '',
-            quantity: item.quantity || 1,
-            rate: item.rate || item.amount || 0,
-            amount: item.amount || 0
-          }))
-          : [];
-
-        // Get credits
-        const invoiceCredits = await invoiceService.getInvoiceCredits(invoiceId);
-        const totalCredits = await invoiceService.getTotalCredits(invoiceId);
-
-        // Build PDF data
-        const pdfData: InvoicePdfData = {
-          invoiceNumber: invoice.invoiceNumber,
-          issuedDate: formatDate(invoice.issuedDate || invoice.createdAt),
-          dueDate: 'Within 14 days',
-          clientName: invoice.billToName || (client ? getString(client, 'contact_name') : '') || 'Client',
-          clientCompany: client ? getString(client, 'company_name') : '',
-          clientEmail: invoice.billToEmail || (client ? getString(client, 'email') : '') || '',
-          projectId: invoice.projectId,
-          lineItems,
-          subtotal: invoice.amountTotal || 0,
-          total: invoice.amountTotal || 0,
-          notes: invoice.notes,
-          terms: invoice.terms,
-          isDeposit: invoice.invoiceType === 'deposit',
-          depositPercentage: invoice.depositPercentage,
-          credits: invoiceCredits.map((c) => ({
-            depositInvoiceNumber: c.depositInvoiceNumber || `INV-${c.depositInvoiceId}`,
-            amount: c.amount
-          })),
-          totalCredits
-        };
-
-        // Generate PDF
-        const pdfBytes = await generateInvoicePdf(pdfData);
-
-        // Add to ZIP
-        archive.append(Buffer.from(pdfBytes), { name: `${invoice.invoiceNumber}.pdf` });
-        successCount++;
-      } catch (error) {
-        console.error(`[Invoices] Failed to generate PDF for invoice ${invoiceId}:`, error);
-        errorCount++;
-        errors.push({
-          id: invoiceId,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
-    }
-
-    // Add manifest file with export summary
-    const manifest = {
-      exportedAt: new Date().toISOString(),
-      totalRequested: invoiceIds.length,
-      successCount,
-      errorCount,
-      errors: errors.length > 0 ? errors : undefined
-    };
-    archive.append(JSON.stringify(manifest, null, 2), { name: 'manifest.json' });
-
-    await archive.finalize();
-  })
-);
 
 export { router as invoicesRouter };
 export default router;
