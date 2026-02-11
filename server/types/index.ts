@@ -1,14 +1,10 @@
 /**
  * ===============================================
- * SERVER TYPE DEFINITIONS INDEX
+ * TYPE DEFINITIONS INDEX
  * ===============================================
  * @file server/types/index.ts
  *
- * Central export point for all server-side type definitions.
+ * Re-exports all type definitions for easy imports.
  */
 
-// Database entity types
-export * from './database.js';
-
-// Express request extensions
-export * from './request.js';
+export * from './invoice-types.js';
