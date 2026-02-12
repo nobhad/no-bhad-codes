@@ -377,6 +377,404 @@ CREATE INDEX idx_invoice_reminders_invoice_id ON invoice_reminders(invoice_id);
 
 ---
 
+## ACCESSIBILITY (a11y) GAPS (Audit Feb 11, 2026)
+
+### CRITICAL
+
+| Issue | File | Priority |
+|-------|------|----------|
+| Placeholder text contrast (opacity: 0.5) | `portal-forms.css:73` | HIGH |
+| Focus indicator missing on icon buttons | `portal-buttons.css:116-120` | HIGH |
+| No Tab trap in portal modal | `portal-modal.ts` | MEDIUM |
+| No skip links in navigation | Navigation module | MEDIUM |
+
+### Other Issues
+
+- Menu toggle buttons missing `aria-label` (`navigation.ts:104-108`)
+- Disabled links missing `aria-disabled` attribute
+- Modal missing `aria-describedby` for body content
+- Table updates missing `aria-live` for dynamic content
+- WCAG AA likely fails on placeholder color contrast
+
+---
+
+## ERROR HANDLING GAPS (Audit Feb 11, 2026)
+
+### CRITICAL
+
+| Issue | Location | Impact |
+|-------|----------|--------|
+| Missing return after errorResponse | `invoices.ts:97` | Code continues executing |
+| Full request body logged unsanitized | `errorHandler.ts:43` | Passwords/tokens in logs |
+| Email errors swallowed | `auth.ts:566,692,918` | Silent failures |
+| 60+ console.log in production | Throughout routes | Should use logger |
+
+### API Error Consistency
+
+- ~40% of endpoints don't follow `{ success, error, code }` format
+- Two competing response systems: `api-response.ts` vs `response.ts`
+- Missing `success` wrapper in messages.ts, document-requests.ts, clients.ts
+
+### Client-Side
+
+- ~60% of fetch calls lack try/catch blocks
+- No user-facing toast notifications for many API errors
+- Silent failures when DOM elements not found
+
+---
+
+## CODE QUALITY/TECH DEBT (Audit Feb 11, 2026)
+
+### Code Duplication
+
+| Pattern | Count | Files |
+|---------|-------|-------|
+| `formatCurrency()` implementations | 3 different | format-utils.ts, admin-overview.ts, admin-ad-hoc-requests.ts |
+| `normalizeStatus()` function | 2 | admin-projects.ts, table-dropdown.ts |
+| Table rendering pattern | 10+ | All admin modules |
+| Logo embedding in PDFs | 4 | invoices/pdf.ts, proposals.ts, contracts.ts, intake.ts |
+
+### Large Files (>2000 lines)
+
+| File | Lines | Issue |
+|------|-------|-------|
+| `api.ts` | 3,232 | Should split by domain |
+| `admin-projects.ts` | 3,162 | Too many concerns |
+| `admin-proposals.ts` | 2,695 | Monolithic |
+| `admin-dashboard.ts` | 2,562 | Main controller too large |
+| `client-portal.ts` | 2,136 | Multiple sections mixed |
+
+### API Clients
+
+- Two implementations: `api-client.ts` and `api-fetch.ts`
+- Should consolidate to one
+
+---
+
+## API CONSISTENCY GAPS (Audit Feb 11, 2026)
+
+### Response Format Issues
+
+- **Two competing systems**: `api-response.ts` spreads data, `response.ts` wraps in data field
+- Missing `success` field: messages.ts:136, document-requests.ts:39, clients.ts:387-402
+- Inconsistent field names: camelCase vs snake_case mixed
+
+### URL Pattern Inconsistencies
+
+- `/me/dashboard` vs `/my-requests` vs `/at-risk` - no standard
+- `/by-tag/:tagId` should be `/clients?tags=5`
+- Action endpoints inconsistent: `/send-invite` vs `/health/recalculate`
+
+### Missing HTTP Status Codes
+
+- Many POST endpoints default to 200 instead of 201
+- Inconsistent error codes for same scenarios
+
+---
+
+## DEPENDENCY AUDIT (Feb 11, 2026)
+
+### Security Vulnerabilities (5 HIGH)
+
+- All from `sqlite3` → `node-gyp` → `tar` chain
+- Run `npm audit fix` to resolve
+
+### Unused/Extraneous
+
+| Package | Status | Action |
+|---------|--------|--------|
+| `react@19.2.0` | EXTRANEOUS | Remove immediately |
+| `emoji-picker-element` | Likely unused | Verify and remove |
+
+### Recommendations
+
+- Consider `better-sqlite3` instead of `sqlite3` (fewer vulnerabilities)
+- Update `@sentry/vite-plugin` to ^4.6.1
+
+---
+
+## MOBILE/RESPONSIVE GAPS (Audit Feb 11, 2026)
+
+### CRITICAL Issues
+
+| Issue | Count | Impact |
+|-------|-------|--------|
+| Hover-only interactions (no touch) | 40+ | No `@media (hover: hover)` guards |
+| Touch targets <44px | 15+ | Icon buttons 36-40px too small |
+| Modal overflow on mobile | 3 | max-width:800px never reduced |
+| Tables without scroll wrapper | 5+ | Horizontal scroll missing |
+
+### Breakpoint Inconsistencies
+
+- THREE different breakpoint systems in use
+- Custom media queries, design tokens, and inline values
+
+### Missing Mobile Patterns
+
+- No `@media (pointer: coarse)` for touch optimization
+- Some layouts use `100vh` instead of `100dvh`
+
+---
+
+## LOGGING/MONITORING GAPS (Audit Feb 11, 2026)
+
+### Good
+
+- Centralized LoggerService with levels, rotation, timestamps
+- Comprehensive AuditLogger for CRUD operations
+- Request logging middleware with sanitization
+- Sentry integration for error tracking
+
+### Issues
+
+| Issue | Location | Severity |
+|-------|----------|----------|
+| Error handler logs full req.body unsanitized | `errorHandler.ts:43` | HIGH |
+| Email addresses logged throughout | `email-service.ts` | MEDIUM |
+| 60+ console.log/error calls | Routes, services | MEDIUM |
+| No application-level metrics | - | LOW |
+
+---
+
+## i18n/LOCALIZATION (Audit Feb 11, 2026)
+
+### Status: NO i18n INFRASTRUCTURE
+
+- Zero translation files or i18n libraries
+- 320+ hardcoded user-facing strings
+- All date formatting hardcoded to `'en-US'`
+- All currency hardcoded to USD with `$` symbols
+
+### Key Violations
+
+| Category | Count | Examples |
+|----------|-------|----------|
+| Error messages | 50+ | 'Failed to fetch invoices' |
+| UI labels | 100+ | Button text, headings |
+| Date formats | 30+ | `toLocaleDateString('en-US')` |
+| Currency | 50+ | `$` symbols, `currency: 'USD'` |
+
+---
+
+## EMAIL TEMPLATES AUDIT (Feb 11, 2026)
+
+### CRITICAL: XSS Vulnerability
+
+- `email-template-service.ts:416-420` - Variable interpolation NO HTML escaping
+- User data (clientName, projectName) directly substituted
+
+### Issues
+
+| Issue | Location | Severity |
+|-------|----------|----------|
+| XSS - no HTML escaping | `interpolate()` | CRITICAL |
+| Hardcoded email | `message-notification.html:252` | HIGH |
+| Template syntax inconsistency | Uses Handlebars syntax but interpolate() doesn't support it | HIGH |
+| Dual storage systems | Files + database, no clear strategy | MEDIUM |
+
+### Good
+
+- Template versioning system
+- Email preview and test functionality
+- Send logging with status tracking
+
+---
+
+## PDF GENERATION AUDIT (Feb 11, 2026)
+
+### 4 PDF Types
+
+- Invoice PDFs (406 lines, well-structured)
+- Proposal PDFs (679-1136 in proposals.ts, inline)
+- Contract PDFs (101-408 in contracts.ts)
+- Intake PDFs (47-482 in intake.ts)
+
+### Issues
+
+| Issue | Severity |
+|-------|----------|
+| No error handling in proposals.ts (lines 620-1138) | CRITICAL |
+| No questionnaire response PDFs | CRITICAL |
+| PDF generation untested | HIGH |
+| No content size limits (DoS risk) | MEDIUM |
+| Logo embedding duplicated 4x | MEDIUM |
+| Colors/fonts hardcoded, not centralized | MEDIUM |
+
+### Good
+
+- PDF caching with TTL (5 min)
+- Consistent branding via BUSINESS_INFO config
+- Multi-page support
+
+---
+
+## CRON/SCHEDULED TASKS AUDIT (Feb 11, 2026)
+
+### 5 Scheduled Jobs
+
+| Job | Schedule | Status |
+|-----|----------|--------|
+| Reminder Check | Hourly | ⚠️ No retry logic |
+| Invoice Generation | Daily 1 AM | ⚠️ No concurrency control |
+| Soft Delete Cleanup | Daily 2 AM | ⚠️ No transaction |
+| Analytics Cleanup | Daily 3 AM | OK |
+| Priority Escalation | Daily 6 AM | OK |
+
+### CRITICAL Issues
+
+| Issue | Impact |
+|-------|--------|
+| No distributed locks | Duplicate processing on multi-server |
+| No retry logic | Failed reminders/invoices not retried |
+| No idempotency checks | Could generate duplicate invoices |
+| Race conditions | Duplicate emails possible |
+
+### Recommendations
+
+1. Implement distributed locks (jobs_locks table)
+2. Add retry with exponential backoff
+3. Add scheduler status to `/health` endpoint
+4. Use database transactions for multi-step jobs
+
+---
+
+## THIRD-PARTY INTEGRATIONS AUDIT (Feb 11, 2026)
+
+### Summary
+
+| Integration | Timeout | Retry | Error Handling | Fallback |
+|-------------|---------|-------|----------------|----------|
+| Stripe | ❌ None | ❌ None | ⚠️ Basic | ❌ None |
+| Google Calendar | ❌ None | ❌ None | ⚠️ Basic | ❌ None |
+| Nodemailer | ⚠️ SMTP only | ❌ None | ⚠️ Console fallback | ❌ Logs to console |
+| File Upload | N/A | N/A | ⚠️ Basic | ❌ Generic error |
+| Webhooks (outbound) | ✅ 10s | ✅ Backoff | ✅ Good | ⚠️ Retrying |
+| Slack/Discord | ❌ None | ❌ None | ⚠️ Basic | ❌ None |
+
+### CRITICAL
+
+- Add 10-second timeouts to ALL external API calls
+- Implement email retry queue
+- Schedule webhook retry processing
+
+---
+
+## ENVIRONMENT/CONFIG AUDIT (Feb 11, 2026)
+
+### CRITICAL Security
+
+| Issue | Location | Action |
+|-------|----------|--------|
+| Real SMTP password in railway.env | Line 16 | Rotate immediately |
+| Sentry DSN exposed | Multiple files | Consider if sensitive |
+| No .env.example file | - | Create template |
+
+### Issues
+
+- Inconsistent env var naming (`BASE_URL` vs `FRONTEND_URL`)
+- Frontend using `process.env.NODE_ENV` (server-side var)
+- Missing VITE_ variable declarations in vite-env.d.ts
+- STRIPE keys not validated at startup
+
+### Good
+
+- Comprehensive env validation in `environment.ts`
+- Type conversion and constraints
+- Auto-generates secrets in dev mode
+
+---
+
+## CLIENT-SIDE STATE AUDIT (Feb 11, 2026)
+
+### Race Conditions
+
+| Issue | Location | Severity |
+|-------|----------|----------|
+| `pendingAttachments` global state | `portal-messages.ts:25` | HIGH |
+| `currentThreadId` race | `portal-messages.ts:67,236,265` | MEDIUM |
+| Project data fetch race | `client-portal.ts:50-55` | MEDIUM |
+
+### Memory Leaks
+
+| Issue | Location |
+|-------|----------|
+| Event listeners re-attached on every render | `portal-messages.ts:211-229` |
+| Duplicate form submit handlers | `portal-settings.ts:87-155` |
+| DOM cache never cleared | `portal-settings.ts:43-78` |
+
+### Missing
+
+- No URL state sync for navigation (no deep linking)
+- No unsaved changes detection on forms
+- `listenerAdded` data attribute is fragile workaround
+
+### Good
+
+- Auth store well-designed singleton with cross-tab sync
+- Generic StateManager exists (but underutilized)
+
+---
+
+## FILE STRUCTURE AUDIT (Feb 11, 2026)
+
+### Missing Barrel Exports (13+ directories)
+
+- `/src/config/`, `/src/utils/`, `/src/services/`, `/src/modules/`
+- `/server/config/`, `/server/utils/`, `/server/middleware/`
+- Forces long relative imports
+
+### Inconsistent Naming
+
+| Pattern | Example | Issue |
+|---------|---------|-------|
+| Middleware casing | `errorHandler.ts` vs `rate-limiter.ts` | Only one uses camelCase |
+| Admin prefixes | `admin-projects.ts` but `actions.ts` in same feature | Inconsistent |
+| Services duplication | `invoice-service.ts` AND `/services/invoice/` subfolder | Confusing |
+
+### Utils Mega-Folder
+
+- `/src/utils/` has 26 loose files
+- Needs sub-folders: `api/`, `dom/`, `forms/`, `animations/`, `tables/`
+
+### Test Coverage
+
+- Only 38 test files for large codebase
+- No frontend component tests
+- Routes: 7/25 tested (28%)
+- Services: 13/39 tested (33%)
+
+---
+
+## BROWSER COMPATIBILITY (Audit Feb 11, 2026)
+
+### Target: ES2020 (Modern browsers only)
+
+- ✅ Chrome 79+, Firefox 75+, Safari 13.1+, Edge 79+
+- ❌ IE11 NOT supported
+
+### CSS Compatibility Issues
+
+| Feature | Browser Requirement | Impact |
+|---------|---------------------|--------|
+| `clamp()` function | Chrome 79+, FF 75+ | 1126 uses |
+| `aspect-ratio` | Chrome 88+, FF 89+ | Card sizing |
+| CSS Custom Media | Non-standard | Breakpoints |
+| `backdrop-filter` | FF 102+ | Modal blur |
+
+### Missing Configuration
+
+- ❌ No `.browserslistrc` file
+- ❌ No autoprefixer in PostCSS config
+- ❌ No polyfills configured
+
+### Recommendations
+
+1. Add `.browserslistrc` with explicit targets
+2. Add autoprefixer to PostCSS
+3. Add fallbacks for `clamp()` and `aspect-ratio`
+
+---
+
 ## Open Issues
 
 ### ACTIVE - IN PROGRESS THIS SESSION
