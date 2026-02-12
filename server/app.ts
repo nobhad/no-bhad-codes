@@ -21,6 +21,7 @@ import { errorTracker } from './services/error-tracking.js';
 import { emailService } from './services/email-service.js';
 import { cacheService } from './services/cache-service.js';
 import { getSchedulerService } from './services/scheduler-service.js';
+import { registerWorkflowAutomations } from './services/workflow-automations.js';
 import { initializeDatabase, getDatabase, closeDatabase } from './database/init.js';
 import { MigrationManager } from './database/migrations.js';
 import sqlite3 from 'sqlite3';
@@ -49,6 +50,7 @@ import deliverablesRouter from './routes/deliverables.js';
 import integrationsRouter from './routes/integrations.js';
 import dataQualityRouter from './routes/data-quality.js';
 import settingsRouter from './routes/settings.js';
+import receiptsRouter from './routes/receipts.js';
 import { errorResponseWithPayload } from './utils/api-response.js';
 import { setupSwagger } from './config/swagger.js';
 import { logger } from './middleware/logger.js';
@@ -56,6 +58,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { requestIdMiddleware } from './middleware/request-id.js';
 import { sanitizeInputs } from './middleware/sanitization.js';
 import { auditMiddleware } from './middleware/audit.js';
+import { rateLimiters } from './middleware/rate-limiter.js';
 
 // Load environment variables
 dotenv.config();
@@ -125,7 +128,14 @@ app.use(
 );
 
 // Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
+// Skip JSON parsing for Stripe webhook (needs raw body for signature verification)
+app.use((req, res, next) => {
+  if (req.path === '/api/integrations/stripe/webhook' || req.path === '/api/v1/integrations/stripe/webhook') {
+    next();
+  } else {
+    express.json({ limit: '10mb' })(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Cookie parsing middleware (for HttpOnly auth cookies)
@@ -251,6 +261,17 @@ app.get('/health', async (_req, res) => {
 // Setup API documentation
 setupSwagger(app);
 
+// Global rate limiting for all API routes
+// Standard rate limit: 60 requests per minute
+app.use('/api', rateLimiters.standard);
+
+// Stricter rate limiting for sensitive endpoints
+// Sensitive rate limit: 10 requests per hour for payment operations
+app.use('/api/invoices/:id/pay', rateLimiters.sensitive);
+app.use('/api/v1/invoices/:id/pay', rateLimiters.sensitive);
+app.use('/api/webhooks/stripe', rateLimiters.sensitive);
+app.use('/api/v1/webhooks/stripe', rateLimiters.sensitive);
+
 // API routes - mount at both /api and /api/v1 for versioning
 const apiRouters = [
   { path: '/auth', router: authRouter },
@@ -276,7 +297,8 @@ const apiRouters = [
   { path: '/deliverables', router: deliverablesRouter },
   { path: '/integrations', router: integrationsRouter },
   { path: '/data-quality', router: dataQualityRouter },
-  { path: '/settings', router: settingsRouter }
+  { path: '/settings', router: settingsRouter },
+  { path: '/receipts', router: receiptsRouter }
 ];
 
 // Mount all routers at both /api and /api/v1
@@ -398,6 +420,15 @@ async function startServer() {
       }
     } else {
       console.log('ℹ️  Scheduler disabled (set SCHEDULER_ENABLED=true to enable)');
+    }
+
+    // Register workflow automations
+    try {
+      registerWorkflowAutomations();
+      console.log('✅ Workflow automations registered');
+    } catch (workflowError) {
+      console.warn('⚠️  Workflow automations registration failed:', workflowError);
+      console.log('🔄 Server will continue without workflow automations');
     }
 
     // Start server
