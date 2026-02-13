@@ -9,6 +9,7 @@
  */
 
 import { ICONS } from '../../../constants/icons';
+import { BUSINESS_INFO } from '../../../constants/business';
 
 // ============================================================================
 // VIEW CONTAINER
@@ -191,7 +192,7 @@ export function renderMessagesView(): void {
           <div class="messages-contact-info">
             <p class="messages-contact-item">
               <span class="messages-contact-icon">${ICONS.MAIL}</span>
-              <span>hello@nobhad.codes</span>
+              <span>${BUSINESS_INFO.email}</span>
             </p>
             <p class="messages-contact-note">Responses within 24 hours</p>
           </div>
@@ -531,7 +532,7 @@ export function renderHelpView(): void {
           </a>
           <p class="help-contact-email">
             <span class="help-contact-icon">${ICONS.MAIL}</span>
-            <span>hello@nobhad.codes</span>
+            <span>${BUSINESS_INFO.email}</span>
           </p>
         </div>
       </div>

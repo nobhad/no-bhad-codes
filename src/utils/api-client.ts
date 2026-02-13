@@ -8,6 +8,8 @@
  * Intercepts 401 responses and handles session expiration gracefully.
  */
 
+import { AUTH_EVENTS } from '../auth/auth-constants';
+
 /**
  * Error codes returned by the API
  */
@@ -48,6 +50,9 @@ export function configureApiClient(config: ApiClientConfig): void {
  * Default session expired handler - redirects to appropriate login page
  */
 function handleSessionExpired(): void {
+  // Dispatch session expired event for auth system integration
+  window.dispatchEvent(new CustomEvent(AUTH_EVENTS.SESSION_EXPIRED));
+
   // Check if we're in admin or client portal
   const isAdminPage = window.location.pathname.includes('/admin');
 
@@ -183,6 +188,15 @@ export async function apiDelete(url: string, options: RequestInit = {}): Promise
 }
 
 /**
+ * Standard API response structure
+ */
+interface ApiSuccessResponse<T> {
+  success: true;
+  data?: T;
+  message?: string;
+}
+
+/**
  * Helper to parse JSON response with error handling
  */
 export async function parseJsonResponse<T>(response: Response): Promise<T> {
@@ -193,4 +207,61 @@ export async function parseJsonResponse<T>(response: Response): Promise<T> {
     throw new Error(errorData.message || errorData.error || `Request failed: ${response.status}`);
   }
   return response.json();
+}
+
+/**
+ * Parse API response and unwrap data property
+ * Handles the canonical format: { success: true, data: T, message?: string }
+ *
+ * @example
+ * const { clients } = await parseApiResponse<{ clients: Client[] }>(response);
+ */
+export async function parseApiResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const errorData: ApiErrorResponse = await response.json().catch(() => ({
+      error: `HTTP ${response.status}`
+    }));
+    throw new Error(errorData.message || errorData.error || `Request failed: ${response.status}`);
+  }
+
+  const json = await response.json() as ApiSuccessResponse<T> | T;
+
+  // Check if response follows the canonical format with data wrapper
+  if (json && typeof json === 'object' && 'success' in json && json.success === true) {
+    // Return unwrapped data, or empty object if no data property
+    return (json as ApiSuccessResponse<T>).data ?? ({} as T);
+  }
+
+  // Legacy format - return as-is for backward compatibility
+  return json as T;
+}
+
+/**
+ * Install global fetch interceptor to handle 401 responses
+ * Call this once during app initialization.
+ * This intercepts ALL fetch calls to /api/ endpoints.
+ */
+export function installGlobalAuthInterceptor(): void {
+  const originalFetch = window.fetch.bind(window);
+
+  window.fetch = async function (
+    input: Parameters<typeof fetch>[0],
+    init?: Parameters<typeof fetch>[1]
+  ): Promise<Response> {
+    const response = await originalFetch(input, init);
+
+    // Only intercept API calls (not static assets)
+    const url = typeof input === 'string'
+      ? input
+      : input instanceof URL
+        ? input.href
+        : (input as Request).url;
+
+    if (url.startsWith('/api/') && response.status === 401) {
+      // Dispatch session expired event
+      window.dispatchEvent(new CustomEvent(AUTH_EVENTS.SESSION_EXPIRED));
+    }
+
+    return response;
+  };
 }

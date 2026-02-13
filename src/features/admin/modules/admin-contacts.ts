@@ -215,7 +215,9 @@ export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
     const response = await apiFetch('/api/admin/contact-submissions');
 
     if (response.ok) {
-      const data: ContactsData = await response.json();
+      const json = await response.json();
+      // Handle canonical API format { success: true, data: {...} }
+      const data: ContactsData = json.data ?? json;
       contactsData = data.submissions || [];
       updateContactsDisplay(data, ctx);
     }

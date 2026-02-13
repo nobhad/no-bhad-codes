@@ -4,7 +4,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject, canAccessTask, canAccessChecklistItem } from '../../middleware/access-control.js';
 import { projectService } from '../../services/project-service.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -44,7 +44,7 @@ router.get(
       includeSubtasks: includeSubtasks === 'true'
     });
 
-    res.json({ tasks });
+    sendSuccess(res, { tasks });
   })
 );
 
@@ -63,7 +63,7 @@ router.post(
     }
 
     const task = await projectService.createTask(projectId, req.body);
-    res.status(201).json({ message: 'Task created successfully', task });
+    sendCreated(res, { task }, 'Task created successfully');
   })
 );
 
@@ -83,7 +83,7 @@ router.get(
       return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
-    res.json({ task });
+    sendSuccess(res, { task });
   })
 );
 
@@ -95,7 +95,7 @@ router.put(
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId);
     const task = await projectService.updateTask(taskId, req.body);
-    res.json({ message: 'Task updated successfully', task });
+    sendSuccess(res, { task }, 'Task updated successfully');
   })
 );
 
@@ -107,7 +107,7 @@ router.delete(
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId);
     await projectService.deleteTask(taskId);
-    res.json({ message: 'Task deleted successfully' });
+    sendSuccess(res, undefined, 'Task deleted successfully');
   })
 );
 
@@ -119,7 +119,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId);
     const task = await projectService.completeTask(taskId);
-    res.json({ message: 'Task completed successfully', task });
+    sendSuccess(res, { task }, 'Task completed successfully');
   })
 );
 
@@ -133,7 +133,7 @@ router.post(
     const { position, milestoneId } = req.body;
 
     await projectService.moveTask(taskId, position, milestoneId);
-    res.json({ message: 'Task moved successfully' });
+    sendSuccess(res, undefined, 'Task moved successfully');
   })
 );
 
@@ -155,7 +155,7 @@ router.post(
     }
 
     const dependency = await projectService.addDependency(taskId, dependsOnTaskId, type);
-    res.status(201).json({ message: 'Dependency added successfully', dependency });
+    sendCreated(res, { dependency }, 'Dependency added successfully');
   })
 );
 
@@ -169,7 +169,7 @@ router.delete(
     const dependsOnTaskId = parseInt(req.params.dependsOnTaskId);
 
     await projectService.removeDependency(taskId, dependsOnTaskId);
-    res.json({ message: 'Dependency removed successfully' });
+    sendSuccess(res, undefined, 'Dependency removed successfully');
   })
 );
 
@@ -188,7 +188,7 @@ router.get(
     }
 
     const tasks = await projectService.getBlockedTasks(projectId);
-    res.json({ tasks });
+    sendSuccess(res, { tasks });
   })
 );
 
@@ -211,7 +211,7 @@ router.get(
     }
 
     const comments = await projectService.getTaskComments(taskId);
-    res.json({ comments });
+    sendSuccess(res, { comments });
   })
 );
 
@@ -240,7 +240,7 @@ router.post(
       req.user!.email,
       content
     );
-    res.status(201).json({ message: 'Comment added successfully', comment });
+    sendCreated(res, { comment }, 'Comment added successfully');
   })
 );
 
@@ -252,7 +252,7 @@ router.delete(
   asyncHandler(async (req: express.Request, res: Response) => {
     const commentId = parseInt(req.params.commentId);
     await projectService.deleteTaskComment(commentId);
-    res.json({ message: 'Comment deleted successfully' });
+    sendSuccess(res, undefined, 'Comment deleted successfully');
   })
 );
 
@@ -274,7 +274,7 @@ router.post(
     }
 
     const item = await projectService.addChecklistItem(taskId, content);
-    res.status(201).json({ message: 'Checklist item added successfully', item });
+    sendCreated(res, { item }, 'Checklist item added successfully');
   })
 );
 
@@ -293,7 +293,7 @@ router.post(
     }
 
     const item = await projectService.toggleChecklistItem(itemId);
-    res.json({ message: 'Checklist item toggled', item });
+    sendSuccess(res, { item }, 'Checklist item toggled');
   })
 );
 
@@ -305,7 +305,7 @@ router.delete(
   asyncHandler(async (req: express.Request, res: Response) => {
     const itemId = parseInt(req.params.itemId);
     await projectService.deleteChecklistItem(itemId);
-    res.json({ message: 'Checklist item deleted successfully' });
+    sendSuccess(res, undefined, 'Checklist item deleted successfully');
   })
 );
 

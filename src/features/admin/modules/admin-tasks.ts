@@ -109,7 +109,9 @@ async function loadTasks(): Promise<void> {
   try {
     const response = await apiFetch(`/api/projects/${currentProjectId}/tasks`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      // Handle canonical API format { success: true, data: {...} }
+      const data = json.data ?? json;
       currentTasks = data.tasks || [];
     } else {
       currentTasks = [];

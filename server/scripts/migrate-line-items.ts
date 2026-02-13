@@ -84,7 +84,7 @@ async function migrateLineItems(): Promise<void> {
   try {
     // Check if invoice_line_items table exists
     const tableCheck = await dbGet(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='invoice_line_items'"
+      'SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\'invoice_line_items\''
     ) as { name: string } | undefined;
 
     if (!tableCheck) {

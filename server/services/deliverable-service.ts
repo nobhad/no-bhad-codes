@@ -146,6 +146,27 @@ export class DeliverableService {
   }
 
   /**
+   * Update deliverable with archived file ID after archiving to Files tab
+   */
+  async setArchivedFileId(deliverableId: number, fileId: number): Promise<void> {
+    await this.db.run(
+      'UPDATE deliverables SET archived_file_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [fileId, deliverableId]
+    );
+  }
+
+  /**
+   * Get archived file ID for a deliverable
+   */
+  async getArchivedFileId(deliverableId: number): Promise<number | null> {
+    const row = await this.db.get(
+      'SELECT archived_file_id FROM deliverables WHERE id = ?',
+      [deliverableId]
+    ) as { archived_file_id: number | null } | undefined;
+    return row?.archived_file_id ?? null;
+  }
+
+  /**
    * Request revision
    */
   async requestRevision(id: number, reason: string, reviewedById: number): Promise<Deliverable> {
@@ -455,6 +476,7 @@ export class DeliverableService {
       approved_at: row.approved_at,
       locked: Boolean(row.locked),
       tags: row.tags,
+      archived_file_id: row.archived_file_id ?? null,
       created_at: row.created_at,
       updated_at: row.updated_at
     };
@@ -530,7 +552,9 @@ export const deliverableService = {
   createReview: (did: number, rid: number, decision: any, feedback?: string, elements?: number[]) =>
     getDeliverableService().createReview(did, rid, decision, feedback, elements),
   getReviewById: (id: number) => getDeliverableService().getReviewById(id),
-  getDeliverableReviews: (did: number) => getDeliverableService().getDeliverableReviews(did)
+  getDeliverableReviews: (did: number) => getDeliverableService().getDeliverableReviews(did),
+  setArchivedFileId: (did: number, fid: number) => getDeliverableService().setArchivedFileId(did, fid),
+  getArchivedFileId: (did: number) => getDeliverableService().getArchivedFileId(did)
 };
 
 export default deliverableService;

@@ -10,6 +10,10 @@
 
 import { getDatabase } from '../database/init.js';
 import { userService } from './user-service.js';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
 
 // =====================================================
 // TYPES
@@ -59,6 +63,7 @@ export interface QuestionnaireResponse {
   due_date?: string;
   reminder_count: number;
   reminder_sent_at?: string;
+  exported_file_id?: number;
   created_at: string;
   updated_at: string;
   // Joined fields
@@ -546,6 +551,7 @@ class QuestionnaireService {
       due_date: row.due_date as string | undefined,
       reminder_count: row.reminder_count as number,
       reminder_sent_at: row.reminder_sent_at as string | undefined,
+      exported_file_id: row.exported_file_id as number | undefined,
       created_at: row.created_at as string,
       updated_at: row.updated_at as string,
       questionnaire_name: row.questionnaire_name as string | undefined,
@@ -553,6 +559,454 @@ class QuestionnaireService {
       client_name: row.client_name as string | undefined,
       project_name: row.project_name as string | undefined
     };
+  }
+
+  // =====================================================
+  // PDF GENERATION
+  // =====================================================
+
+  /**
+   * Generate PDF of questionnaire Q&A responses
+   */
+  async generateQuestionnairePdf(responseId: number): Promise<Uint8Array> {
+    const response = await this.getResponse(responseId);
+    if (!response) {
+      throw new Error('Response not found');
+    }
+
+    const questionnaire = await this.getQuestionnaire(response.questionnaire_id);
+    if (!questionnaire) {
+      throw new Error('Questionnaire not found');
+    }
+
+    // Create PDF document
+    const pdfDoc = await PDFDocument.create();
+
+    // Set metadata
+    const clientName = response.client_name || 'Client';
+    const pdfTitle = `${questionnaire.name} - ${clientName}`;
+    pdfDoc.setTitle(pdfTitle);
+    pdfDoc.setAuthor(BUSINESS_INFO.name);
+    pdfDoc.setSubject('Questionnaire Response');
+    pdfDoc.setCreator('NoBhadCodes');
+
+    // Create first page
+    let page = pdfDoc.addPage([612, 792]); // LETTER size
+    const { width, height } = page.getSize();
+
+    // Embed fonts
+    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    // Colors
+    const black = rgb(0, 0, 0);
+    const lightGray = rgb(0.5, 0.5, 0.5);
+    const lineGray = rgb(0.8, 0.8, 0.8);
+    const questionColor = rgb(0.2, 0.2, 0.2);
+
+    // Layout constants
+    const leftMargin = 54;
+    const rightMargin = width - 54;
+    const contentWidth = rightMargin - leftMargin;
+    const lineHeight = 14;
+    const bottomMargin = 72;
+
+    // Start position
+    let y = height - 43;
+
+    // === HEADER - Title on left, logo and business info on right ===
+    const logoHeight = 100;
+
+    // Title on left
+    page.drawText('QUESTIONNAIRE', {
+      x: leftMargin,
+      y: y - 20,
+      size: 24,
+      font: helveticaBold,
+      color: rgb(0.15, 0.15, 0.15)
+    });
+
+    // Logo and business info on right
+    let textStartX = rightMargin - 180;
+    const logoBytes = getPdfLogoBytes();
+    if (logoBytes) {
+      try {
+        const logoImage = await pdfDoc.embedPng(logoBytes);
+        const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
+        const logoX = rightMargin - logoWidth - 150;
+        page.drawImage(logoImage, {
+          x: logoX,
+          y: y - logoHeight + 10,
+          width: logoWidth,
+          height: logoHeight
+        });
+        textStartX = logoX + logoWidth + 18;
+      } catch {
+        // Skip logo if embedding fails
+      }
+    }
+
+    // Business info
+    page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y - 11, size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+    page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 34, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 54, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 70, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 86, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+
+    y -= 120;
+
+    // Divider line
+    page.drawLine({
+      start: { x: leftMargin, y: y },
+      end: { x: rightMargin, y: y },
+      thickness: 1,
+      color: lineGray
+    });
+    y -= 25;
+
+    // === META INFO ===
+    // Questionnaire name
+    page.drawText(questionnaire.name.toUpperCase(), {
+      x: leftMargin,
+      y: y,
+      size: 12,
+      font: helveticaBold,
+      color: black
+    });
+    y -= 18;
+
+    if (questionnaire.description) {
+      page.drawText(questionnaire.description, {
+        x: leftMargin,
+        y: y,
+        size: 10,
+        font: helvetica,
+        color: lightGray
+      });
+      y -= 16;
+    }
+
+    // Client and date info
+    y -= 8;
+    page.drawText(`Client: ${clientName}`, {
+      x: leftMargin,
+      y: y,
+      size: 10,
+      font: helvetica,
+      color: black
+    });
+
+    const completedDate = response.completed_at
+      ? new Date(response.completed_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+      : 'In Progress';
+    page.drawText(`Completed: ${completedDate}`, {
+      x: leftMargin + 200,
+      y: y,
+      size: 10,
+      font: helvetica,
+      color: black
+    });
+
+    if (response.project_name) {
+      y -= 14;
+      page.drawText(`Project: ${response.project_name}`, {
+        x: leftMargin,
+        y: y,
+        size: 10,
+        font: helvetica,
+        color: black
+      });
+    }
+
+    y -= 30;
+
+    // Content separator
+    page.drawLine({
+      start: { x: leftMargin, y: y },
+      end: { x: rightMargin, y: y },
+      thickness: 0.5,
+      color: rgb(0.9, 0.9, 0.9)
+    });
+    y -= 25;
+
+    // Helper to sanitize text for PDF
+    const sanitizeForPdf = (text: string): string => {
+      return text.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+    };
+
+    // Helper to draw wrapped text and return new Y position
+    const drawWrappedText = (
+      text: string,
+      startY: number,
+      fontSize: number,
+      font: typeof helvetica,
+      color: ReturnType<typeof rgb>,
+      indent: number = 0
+    ): number => {
+      const sanitized = sanitizeForPdf(text);
+      const words = sanitized.split(' ');
+      let line = '';
+      const maxWidth = contentWidth - indent;
+      let currentY = startY;
+
+      for (const word of words) {
+        const testLine = line + (line ? ' ' : '') + word;
+        const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+        if (testWidth > maxWidth && line) {
+          // Check if we need a new page
+          if (currentY - lineHeight < bottomMargin) {
+            // Add new page
+            page = pdfDoc.addPage([612, 792]);
+            currentY = height - 54;
+          }
+          page.drawText(line, { x: leftMargin + indent, y: currentY, size: fontSize, font, color });
+          currentY -= lineHeight;
+          line = word;
+        } else {
+          line = testLine;
+        }
+      }
+      if (line) {
+        if (currentY - lineHeight < bottomMargin) {
+          page = pdfDoc.addPage([612, 792]);
+          currentY = height - 54;
+        }
+        page.drawText(line, { x: leftMargin + indent, y: currentY, size: fontSize, font, color });
+        currentY -= lineHeight;
+      }
+      return currentY;
+    };
+
+    // === QUESTIONS AND ANSWERS ===
+    let questionNumber = 1;
+    for (const question of questionnaire.questions) {
+      // Check if we need a new page (need at least 60pt for Q&A)
+      if (y - 60 < bottomMargin) {
+        page = pdfDoc.addPage([612, 792]);
+        y = height - 54;
+      }
+
+      // Question number and text
+      const questionPrefix = `Q${questionNumber}. `;
+      page.drawText(questionPrefix, {
+        x: leftMargin,
+        y: y,
+        size: 10,
+        font: helveticaBold,
+        color: questionColor
+      });
+
+      const prefixWidth = helveticaBold.widthOfTextAtSize(questionPrefix, 10);
+      y = drawWrappedText(
+        question.question,
+        y,
+        10,
+        helveticaBold,
+        questionColor,
+        prefixWidth
+      );
+
+      y -= 4;
+
+      // Answer
+      const answer = response.answers[question.id];
+      let answerText = 'No answer provided';
+
+      if (answer !== undefined && answer !== null && answer !== '') {
+        if (Array.isArray(answer)) {
+          answerText = answer.join(', ');
+        } else {
+          answerText = String(answer);
+        }
+      }
+
+      y = drawWrappedText(answerText, y, 10, helvetica, black, 20);
+
+      y -= 20; // Space between Q&A pairs
+      questionNumber++;
+    }
+
+    // === FOOTER on all pages ===
+    const pages = pdfDoc.getPages();
+    const totalPages = pages.length;
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      // Footer line
+      p.drawLine({
+        start: { x: leftMargin, y: bottomMargin },
+        end: { x: rightMargin, y: bottomMargin },
+        thickness: 0.5,
+        color: rgb(0.8, 0.8, 0.8)
+      });
+
+      // Footer text
+      const footerText = `${BUSINESS_INFO.name} - ${BUSINESS_INFO.email} - ${BUSINESS_INFO.website}`;
+      const footerWidth = helvetica.widthOfTextAtSize(footerText, 7);
+      p.drawText(footerText, {
+        x: (width - footerWidth) / 2,
+        y: bottomMargin - 18,
+        size: 7,
+        font: helvetica,
+        color: lightGray
+      });
+
+      // Page numbers
+      if (totalPages > 1) {
+        const pageText = `Page ${i + 1} of ${totalPages}`;
+        const pageTextWidth = helvetica.widthOfTextAtSize(pageText, 8);
+        p.drawText(pageText, {
+          x: rightMargin - pageTextWidth,
+          y: bottomMargin - 18,
+          size: 8,
+          font: helvetica,
+          color: lightGray
+        });
+      }
+    }
+
+    return pdfDoc.save();
+  }
+
+  /**
+   * Save questionnaire PDF to project files
+   * Returns the created file ID
+   */
+  async saveQuestionnairePdfToFiles(responseId: number): Promise<number> {
+    const db = await getDatabase();
+
+    const response = await this.getResponse(responseId);
+    if (!response) {
+      throw new Error('Response not found');
+    }
+
+    if (!response.project_id) {
+      throw new Error('Cannot save PDF: questionnaire has no associated project');
+    }
+
+    const questionnaire = await this.getQuestionnaire(response.questionnaire_id);
+    if (!questionnaire) {
+      throw new Error('Questionnaire not found');
+    }
+
+    // Generate PDF
+    const pdfBytes = await this.generateQuestionnairePdf(responseId);
+
+    // Create filename
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+    const safeQuestionnaireName = questionnaire.name
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_-]/g, '')
+      .substring(0, 30);
+    const filename = `questionnaire_${safeQuestionnaireName}_${timestamp}.pdf`;
+    const originalFilename = `${questionnaire.name} - ${response.client_name || 'Client'}.pdf`;
+
+    // Ensure uploads/forms directory exists
+    const uploadsDir = join(process.cwd(), 'uploads', 'forms');
+    if (!existsSync(uploadsDir)) {
+      mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    // Save PDF file to disk
+    const filePath = join('uploads', 'forms', filename);
+    const fullPath = join(process.cwd(), filePath);
+    writeFileSync(fullPath, Buffer.from(pdfBytes));
+
+    // Get or create Forms folder for the project
+    const formsFolderRow = await db.get(
+      'SELECT id FROM file_folders WHERE project_id = ? AND name = \'Forms\'',
+      [response.project_id]
+    ) as { id: number } | undefined;
+
+    let formsFolderId: number;
+    if (!formsFolderRow) {
+      const folderResult = await db.run(
+        `INSERT INTO file_folders (project_id, name, description, color, icon, sort_order, created_by)
+         VALUES (?, 'Forms', 'Questionnaires, intake forms, and other forms', '#8b5cf6', 'file-text', 1, 'system')`,
+        [response.project_id]
+      );
+      formsFolderId = folderResult.lastID!;
+    } else {
+      formsFolderId = formsFolderRow.id;
+    }
+
+    // Insert file record (NOT shared by default)
+    const fileResult = await db.run(
+      `INSERT INTO files (
+        project_id, folder_id, filename, original_filename, file_path,
+        file_size, mime_type, file_type, category, uploaded_by, description, shared_with_client
+      ) VALUES (?, ?, ?, ?, ?, ?, 'application/pdf', 'document', 'document', 'system', ?, FALSE)`,
+      [
+        response.project_id,
+        formsFolderId,
+        filename,
+        originalFilename,
+        filePath,
+        pdfBytes.length,
+        `Questionnaire response: ${questionnaire.name}`
+      ]
+    );
+
+    const fileId = fileResult.lastID!;
+
+    // Update questionnaire response with exported file ID
+    await db.run(
+      'UPDATE questionnaire_responses SET exported_file_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [fileId, responseId]
+    );
+
+    return fileId;
+  }
+
+  /**
+   * Export questionnaire response as raw JSON data
+   * Returns JSON string of the response data
+   */
+  async exportQuestionnaireJson(responseId: number): Promise<string> {
+    const response = await this.getResponse(responseId);
+    if (!response) {
+      throw new Error('Response not found');
+    }
+
+    const questionnaire = await this.getQuestionnaire(response.questionnaire_id);
+    if (!questionnaire) {
+      throw new Error('Questionnaire not found');
+    }
+
+    // Build structured export data
+    const exportData = {
+      questionnaire: {
+        id: questionnaire.id,
+        name: questionnaire.name,
+        description: questionnaire.description,
+        project_type: questionnaire.project_type
+      },
+      response: {
+        id: response.id,
+        client_id: response.client_id,
+        client_name: response.client_name,
+        project_id: response.project_id,
+        project_name: response.project_name,
+        status: response.status,
+        started_at: response.started_at,
+        completed_at: response.completed_at
+      },
+      questions_and_answers: questionnaire.questions.map(q => ({
+        question_id: q.id,
+        question_type: q.type,
+        question_text: q.question,
+        required: q.required || false,
+        options: q.options,
+        answer: response.answers[q.id] ?? null
+      })),
+      exported_at: new Date().toISOString()
+    };
+
+    return JSON.stringify(exportData, null, 2);
   }
 }
 

@@ -81,19 +81,19 @@ function mapSetting(row: Record<string, unknown>): SystemSetting {
  */
 function parseSettingValue(value: string, type: SettingType): string | number | boolean | unknown {
   switch (type) {
-    case 'number':
-      return parseFloat(value) || 0;
-    case 'boolean':
-      return value.toLowerCase() === 'true' || value === '1';
-    case 'json':
-      try {
-        return JSON.parse(value);
-      } catch {
-        return null;
-      }
-    case 'string':
-    default:
-      return value;
+  case 'number':
+    return parseFloat(value) || 0;
+  case 'boolean':
+    return value.toLowerCase() === 'true' || value === '1';
+  case 'json':
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  case 'string':
+  default:
+    return value;
   }
 }
 
@@ -102,15 +102,15 @@ function parseSettingValue(value: string, type: SettingType): string | number | 
  */
 function stringifySettingValue(value: unknown, type: SettingType): string {
   switch (type) {
-    case 'number':
-      return String(value);
-    case 'boolean':
-      return value ? 'true' : 'false';
-    case 'json':
-      return JSON.stringify(value);
-    case 'string':
-    default:
-      return String(value);
+  case 'number':
+    return String(value);
+  case 'boolean':
+    return value ? 'true' : 'false';
+  case 'json':
+    return JSON.stringify(value);
+  case 'string':
+  default:
+    return String(value);
   }
 }
 

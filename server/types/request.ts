@@ -459,57 +459,5 @@ export function parseDateRange(query: DateRangeQuery): {
   };
 }
 
-/**
- * Send success response
- */
-export function sendSuccess<T>(res: Response, data: T, status: number = 200): void {
-  res.status(status).json({
-    success: true,
-    data
-  } as ApiResponse<T>);
-}
-
-/**
- * Send error response
- */
-export function sendError(
-  res: Response,
-  error: string,
-  status: number = 400,
-  code?: string
-): void {
-  res.status(status).json({
-    success: false,
-    error,
-    code,
-    timestamp: new Date().toISOString()
-  } as ErrorResponse);
-}
-
-/**
- * Send paginated response
- */
-export function sendPaginated<T>(
-  res: Response,
-  data: T[],
-  pagination: {
-    page: number;
-    perPage: number;
-    total: number;
-  }
-): void {
-  const totalPages = Math.ceil(pagination.total / pagination.perPage);
-
-  res.json({
-    success: true,
-    data,
-    pagination: {
-      page: pagination.page,
-      perPage: pagination.perPage,
-      total: pagination.total,
-      totalPages,
-      hasNext: pagination.page < totalPages,
-      hasPrev: pagination.page > 1
-    }
-  } as PaginatedApiResponse<T>);
-}
+// Note: Response utility functions (sendSuccess, sendError, sendPaginated) are now
+// centralized in server/utils/api-response.ts for consistent API response format.

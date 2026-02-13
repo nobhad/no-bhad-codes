@@ -43,7 +43,7 @@ import { formatTextWithLineBreaks, formatDate } from '../../utils/format-utils';
 import { showToast } from '../../utils/toast-notifications';
 import { withButtonLoading } from '../../utils/button-loading';
 import { initCopyEmailDelegation } from '../../utils/copy-email';
-import { installGlobalAuthInterceptor } from '../../utils/api-fetch';
+import { installGlobalAuthInterceptor } from '../../utils/api-client';
 
 // DOM element keys for caching
 type PortalDOMKeys = Record<string, string>;
@@ -420,10 +420,30 @@ export class ClientPortalModule extends BaseModule {
     // Mobile menu toggle button (in page header)
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     if (mobileMenuToggle) {
+      // Add accessibility attributes if not present
+      if (!mobileMenuToggle.hasAttribute('aria-label')) {
+        mobileMenuToggle.setAttribute('aria-label', 'Toggle navigation menu');
+      }
+      if (!mobileMenuToggle.hasAttribute('aria-expanded')) {
+        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+      }
+      mobileMenuToggle.setAttribute('aria-controls', 'sidebar');
+
       mobileMenuToggle.addEventListener('click', (e) => {
         e.preventDefault();
         this.toggleSidebar();
       });
+    }
+
+    // Sidebar toggle button - add accessibility attributes
+    if (sidebarToggleBtn) {
+      if (!sidebarToggleBtn.hasAttribute('aria-label')) {
+        sidebarToggleBtn.setAttribute('aria-label', 'Toggle sidebar');
+      }
+      if (!sidebarToggleBtn.hasAttribute('aria-expanded')) {
+        sidebarToggleBtn.setAttribute('aria-expanded', 'true');
+      }
+      sidebarToggleBtn.setAttribute('aria-controls', 'sidebar');
     }
 
     // Theme toggle in global header
@@ -1094,7 +1114,15 @@ export class ClientPortalModule extends BaseModule {
         return;
       }
 
-      const data = await response.json();
+      const response_data = await response.json();
+      const stats = response_data.data?.stats;
+      const recentActivity = response_data.data?.recentActivity;
+
+      // Defensive check - if stats is missing, log and return
+      if (!stats) {
+        console.warn('[ClientPortal] Dashboard response missing stats:', response_data);
+        return;
+      }
 
       // Update stat cards
       const statCards = document.querySelectorAll('.stat-card');
@@ -1104,21 +1132,21 @@ export class ClientPortalModule extends BaseModule {
         if (!numberEl) return;
 
         if (tabAttr === 'dashboard') {
-          numberEl.textContent = String(data.stats.activeProjects || 0);
+          numberEl.textContent = String(stats.activeProjects || 0);
         } else if (tabAttr === 'invoices') {
-          numberEl.textContent = String(data.stats.pendingInvoices || 0);
+          numberEl.textContent = String(stats.pendingInvoices || 0);
         } else if (tabAttr === 'messages') {
-          numberEl.textContent = String(data.stats.unreadMessages || 0);
+          numberEl.textContent = String(stats.unreadMessages || 0);
         }
       });
 
       // Update recent activity
       const activityList = document.querySelector('.activity-list');
       if (activityList) {
-        if (!data.recentActivity || data.recentActivity.length === 0) {
+        if (!recentActivity || recentActivity.length === 0) {
           activityList.innerHTML = '<li class="activity-item empty">No recent activity</li>';
         } else {
-          activityList.innerHTML = data.recentActivity.map((item: {
+          activityList.innerHTML = recentActivity.map((item: {
             type: string;
             title: string;
             context: string;
@@ -1149,10 +1177,10 @@ export class ClientPortalModule extends BaseModule {
 
       // Update sidebar badges
       this.updateSidebarBadges(
-        data.stats.unreadMessages || 0,
-        data.stats.pendingInvoices || 0,
-        data.stats.pendingDocRequests || 0,
-        data.stats.pendingContracts || 0
+        stats.unreadMessages || 0,
+        stats.pendingInvoices || 0,
+        stats.pendingDocRequests || 0,
+        stats.pendingContracts || 0
       );
 
       // Load pending approvals for dashboard

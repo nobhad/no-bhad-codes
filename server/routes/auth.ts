@@ -15,6 +15,7 @@ import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
 import { rateLimit } from '../middleware/security.js';
 import { auditLogger } from '../services/audit-logger.js';
+import { logger } from '../services/logger.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
 import {
   PASSWORD_CONFIG,
@@ -32,7 +33,7 @@ import {
   sendServerError,
   sendNotFound,
   ErrorCodes
-} from '../utils/response.js';
+} from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -689,7 +690,10 @@ router.post(
         timeline: 'Completed'
       });
     } catch (emailError) {
-      console.error('Failed to send password reset confirmation:', emailError);
+      logger.error('Failed to send password reset confirmation', {
+        category: 'email',
+        metadata: { error: emailError, clientId }
+      });
       // Continue - password was reset successfully
     }
 
@@ -1017,7 +1021,7 @@ router.post(
     const clientContactNameForMagicLink = getString(client, 'contact_name');
     const clientCompanyNameForMagicLink = getString(client, 'company_name');
     const clientIsAdminForMagicLink = getBoolean(client, 'is_admin');
-    
+
     if (clientIdForMagicLink) {
       await db.run(
         'UPDATE clients SET magic_link_token = NULL, magic_link_expires_at = NULL, last_login_at = ? WHERE id = ?',
@@ -1191,9 +1195,15 @@ router.post(
       await emailService.sendAccountActivationEmail(clientEmail, {
         name: clientName
       });
-      console.log(`[AUTH] Sent account activation email to ${clientEmail}`);
+      logger.info('Sent account activation email', {
+        category: 'email',
+        metadata: { clientEmail }
+      });
     } catch (emailError) {
-      console.error('[AUTH] Failed to send account activation email:', emailError);
+      logger.error('Failed to send account activation email', {
+        category: 'email',
+        metadata: { error: emailError, clientEmail }
+      });
       // Continue - account was activated successfully
     }
 

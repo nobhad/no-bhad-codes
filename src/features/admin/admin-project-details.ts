@@ -72,7 +72,9 @@ import {
   saveProjectChanges,
   handleContractSign,
   handleContractCountersign,
-  showContractBuilder
+  showContractBuilder,
+  // Document Generation
+  showDocumentGenerationModal
 } from './project-details';
 
 import type { ProjectResponse } from '../../types/api';
@@ -217,8 +219,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Initialize secondary sidebar for project detail tabs
    */
   private initSecondarySidebar(): void {
-    console.log('[AdminProjectDetails] Initializing secondary sidebar...');
-
     // Clean up existing sidebar if any
     this.cleanupSecondarySidebar();
 
@@ -226,14 +226,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const sidebarMount = document.getElementById('secondary-sidebar');
     const horizontalMount = document.getElementById('secondary-tabs-horizontal');
 
-    console.log('[AdminProjectDetails] Mount points:', {
-      container: !!container,
-      sidebarMount: !!sidebarMount,
-      horizontalMount: !!horizontalMount
-    });
-
     if (!container || !sidebarMount || !horizontalMount) {
-      console.warn('[AdminProjectDetails] Secondary sidebar mount points not found');
       return;
     }
 
@@ -273,11 +266,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // Show the sidebar by adding class to container
     container.classList.add('has-secondary-sidebar');
-
-    console.log('[AdminProjectDetails] Secondary sidebar initialized:', {
-      sidebarEl: sidebarEl.outerHTML.substring(0, 200),
-      hasClass: container.classList.contains('has-secondary-sidebar')
-    });
   }
 
   /**
@@ -828,6 +816,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
             this.loadProjectsFn!,
             (id) => this.showProjectDetail(id)
         );
+        break;
+      case 'generate-docs':
+        await showDocumentGenerationModal(this.currentProjectId, () => {
+          loadProjectFiles(this.currentProjectId!);
+        });
         break;
       case 'delete':
         await deleteProject(this.currentProjectId, this.projectsData, () => {

@@ -1,6 +1,6 @@
 # Documentation
 
-Welcome to the no-bhad-codes portfolio application documentation. This directory contains comprehensive guides for the application's architecture, features, and development practices.
+Welcome to the no-bhad-codes portfolio and "The Backend" (portal) application documentation. This directory contains comprehensive guides for the application's architecture, features, and development practices.
 
 ## 📚 Documentation Overview
 
@@ -13,7 +13,7 @@ The Backend refers to the complete portal system with two interfaces:
 |Document|Description|
 |----------|-------------|
 |**[Client Portal](./features/CLIENT_PORTAL.md)**|Main dashboard, project cards, quick stats, activity log|
-|**[Messages](./features/MESSAGES.md)**|Messaging system, emoji picker, keyboard shortcuts|
+|**[Messaging](./features/MESSAGING.md)**|Messaging system, emoji picker, keyboard shortcuts|
 |**[Files](./features/FILES.md)**|File upload, drag & drop, file management|
 |**[Invoices](./features/INVOICES.md)**|Invoice history, status tracking, PDF download|
 |**[Settings](./features/SETTINGS.md)**|Account, notifications, billing information|
@@ -32,27 +32,34 @@ The Backend refers to the complete portal system with two interfaces:
 |----------|-------------|
 |**[Portfolio Projects](./features/PORTFOLIO.md)**|Adding projects, JSON schema, case study fields, image requirements|
 
-### Backend API Features (Phase 1-7)
+### Backend API Features
 
 |Document|Description|
 |----------|-------------|
+|**[Ad Hoc Requests](./features/AD_HOC_REQUESTS.md)**|On-demand service requests, time tracking, billing|
 |**[Analytics](./features/ANALYTICS.md)**|Business intelligence, dashboards, KPIs, visitor tracking|
+|**[Client Information](./features/CLIENT_INFORMATION.md)**|Client profile data, company details|
 |**[Clients](./features/CLIENTS.md)**|CRM contacts, activities, custom fields, tags, health scoring|
+|**[Contacts](./features/CONTACTS.md)**|Contact management within clients|
+|**[Contracts](./features/CONTRACTS.md)**|Contract generation, signing, management|
+|**[Data Quality](./features/DATA_QUALITY.md)**|Data validation, cleanup, integrity checks|
+|**[Deliverables](./features/DELIVERABLES.md)**|Deliverable tracking, approval workflows, archiving|
+|**[Document Requests](./features/DOCUMENT_REQUESTS.md)**|Document request workflows, templates|
+|**[Integrations](./features/INTEGRATIONS.md)**|Third-party integrations (Stripe, etc.)|
+|**[Knowledge Base](./features/KNOWLEDGE_BASE.md)**|KB articles, categories, search|
 |**[Leads](./features/LEADS.md)**|Lead scoring, pipeline, tasks, notes, duplicate detection|
-|**[Messaging](./features/MESSAGING.md)**|Mentions, reactions, subscriptions, read receipts, pinned messages|
+|**[Milestones](./features/MILESTONES.md)**|Project milestones, tracking, completion|
+|**[PDF Generation](./features/PDF_GENERATION.md)**|Invoice, proposal, contract, receipt PDF generation|
 |**[Projects](./features/PROJECTS.md)**|Tasks, time tracking, templates, dependencies, project health|
+|**[Proposal Builder](./features/PROPOSAL_BUILDER.md)**|Interactive proposal creation tool|
 |**[Proposals](./features/PROPOSALS.md)**|Templates, versioning, signatures, comments, activities|
-|**[PDF Generation](./features/PDF_GENERATION.md)**|Invoice and proposal PDF generation with pdf-lib|
+|**[Questionnaires](./features/QUESTIONNAIRES.md)**|Client questionnaires, PDF export|
 |**[SEO](./features/SEO.md)**|Meta tags, JSON-LD structured data, robots.txt, sitemap|
+|**[Tasks](./features/TASKS.md)**|Task management within projects|
+|**[Time Tracking](./features/TIME_TRACKING.md)**|Time entry, reporting|
+|**[Workflows](./features/WORKFLOWS.md)**|Automation workflows, triggers, actions|
 
-**API-only features** (full reference in [API Documentation](./API_DOCUMENTATION.md)):
-
-|API Prefix|Description|
-|------------|-------------|
-|`/api/approvals`|Approval workflows (definitions, instances, approve/reject)|
-|`/api/triggers`|Workflow triggers (event/action, logs, test-emit)|
-|`/api/document-requests`|Document requests and templates (client + admin)|
-|`/api/kb`|Knowledge base (categories, articles, search, feedback)|
+**API Reference:** See [API Documentation](./API_DOCUMENTATION.md) for complete endpoint reference.
 
 ### Animation Modules
 
@@ -155,13 +162,17 @@ src/
 │   │   ├── admin-dashboard.ts      # Main coordinator
 │   │   ├── admin-project-details.ts
 │   │   ├── admin-auth.ts
+│   │   ├── admin-security.ts
 │   │   ├── services/       # Extracted services (data, chart, export)
 │   │   ├── renderers/      # UI renderers (contacts, messaging, performance)
-│   │   └── modules/        # 14 extracted modules
-│   └── client/             # Client portal
-│       ├── client-portal.ts
-│       ├── terminal-intake.ts
-│       └── modules/        # 7 extracted modules
+│   │   ├── project-details/ # Project detail components
+│   │   └── modules/        # Extracted admin modules
+│   ├── client/             # Client portal
+│   │   ├── client-portal.ts
+│   │   ├── terminal-intake.ts
+│   │   ├── proposal-builder.ts
+│   │   └── modules/        # Extracted portal modules
+│   └── main-site/          # Main site features
 ├── modules/                # Reusable UI modules
 │   ├── base.ts            # Base module class
 │   ├── theme.ts           # Theme switching
@@ -172,6 +183,7 @@ src/
 │   ├── visitor-tracking.ts
 │   └── auth-service.ts
 ├── components/            # Reusable UI components
+├── utils/                 # Utility functions
 └── types/                 # TypeScript definitions
 ```
 

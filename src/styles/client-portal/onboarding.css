@@ -38,7 +38,7 @@
   color: var(--onboarding-text);
   padding: var(--onboarding-spacing-xl);
   border-radius: var(--portal-radius-lg);
-  max-width: 800px;
+  max-width: min(800px, calc(100vw - 2 * var(--space-4, 16px)));
   margin: 0 auto;
 }
 
@@ -616,7 +616,7 @@
 
 .onboarding-wizard-container {
   width: 100%;
-  max-width: 900px;
+  max-width: min(900px, calc(100vw - 2 * var(--space-4, 16px)));
   max-height: 100%;
   overflow: auto;
 }

@@ -19,6 +19,37 @@ interface LoggingRequest extends Request {
   logger?: typeof logger;
 }
 
+/**
+ * Sanitize request body by removing sensitive fields
+ */
+function sanitizeRequestData(data: any): any {
+  if (!data || typeof data !== 'object') return data;
+
+  const sensitiveFields = [
+    'password',
+    'token',
+    'apiKey',
+    'api_key',
+    'secret',
+    'authorization',
+    'creditCard',
+    'credit_card',
+    'ssn',
+    'cvv',
+    'pin'
+  ];
+
+  const sanitized = { ...data };
+
+  for (const field of sensitiveFields) {
+    if (field in sanitized) {
+      sanitized[field] = '[REDACTED]';
+    }
+  }
+
+  return sanitized;
+}
+
 export const errorHandler = (
   error: ApiError,
   req: LoggingRequest,
@@ -40,10 +71,10 @@ export const errorHandler = (
       path: req.path,
       statusCode,
       code,
-      body: req.body,
+      body: sanitizeRequestData(req.body),
       params: req.params,
       query: req.query,
-      headers: req.headers
+      headers: sanitizeRequestData(req.headers)
     },
     requestId: req.id,
     ip: req.ip,

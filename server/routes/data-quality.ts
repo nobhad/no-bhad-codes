@@ -34,7 +34,7 @@ import {
   getRateLimitStats
 } from '../middleware/rate-limiter.js';
 import { userService } from '../services/user-service.js';
-import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { errorResponseWithPayload, sendSuccess } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -62,13 +62,10 @@ router.post('/duplicates/scan', async (req: Request, res: Response) => {
     const results = await checkForDuplicates(checkData);
     const duration = Date.now() - startTime;
 
-    res.json({
-      success: true,
-      data: {
-        duplicates: results,
-        count: results.length,
-        scanDuration: duration
-      }
+    sendSuccess(res, {
+      duplicates: results,
+      count: results.length,
+      scanDuration: duration
     });
   } catch (error) {
     console.error('Duplicate scan error:', error);
@@ -109,14 +106,11 @@ router.post('/duplicates/check', async (req: Request, res: Response) => {
     const results = await checkForDuplicates(checkData);
     const duration = Date.now() - startTime;
 
-    res.json({
-      success: true,
-      data: {
-        hasDuplicates: results.length > 0,
-        duplicates: results,
-        count: results.length,
-        scanDuration: duration
-      }
+    sendSuccess(res, {
+      hasDuplicates: results.length > 0,
+      duplicates: results,
+      count: results.length,
+      scanDuration: duration
     });
   } catch (error) {
     console.error('Duplicate check error:', error);
@@ -159,10 +153,7 @@ router.post('/duplicates/merge', async (req: Request, res: Response) => {
 
     const result = await mergeDuplicates(mergeRequest);
 
-    res.json({
-      success: result.success,
-      message: result.message
-    });
+    sendSuccess(res, undefined, result.message);
   } catch (error) {
     console.error('Duplicate merge error:', error);
     errorResponseWithPayload(
@@ -200,10 +191,7 @@ router.post('/duplicates/dismiss', async (req: Request, res: Response) => {
       [primaryId, primaryType, dismissedId, dismissedType, resolvedBy, resolvedByUserId, notes || null]
     );
 
-    res.json({
-      success: true,
-      message: 'Duplicate dismissed successfully'
-    });
+    sendSuccess(res, undefined, 'Duplicate dismissed successfully');
   } catch (error) {
     console.error('Duplicate dismiss error:', error);
     errorResponseWithPayload(
@@ -226,19 +214,16 @@ router.get('/duplicates/history', async (_req: Request, res: Response) => {
 
     const [detectionLogs, resolutionLogs] = await Promise.all([
       db.all(
-        `SELECT * FROM duplicate_detection_log ORDER BY created_at DESC LIMIT 100`
+        'SELECT * FROM duplicate_detection_log ORDER BY created_at DESC LIMIT 100'
       ),
       db.all(
-        `SELECT * FROM duplicate_resolution_log ORDER BY created_at DESC LIMIT 100`
+        'SELECT * FROM duplicate_resolution_log ORDER BY created_at DESC LIMIT 100'
       )
     ]);
 
-    res.json({
-      success: true,
-      data: {
-        detectionLogs,
-        resolutionLogs
-      }
+    sendSuccess(res, {
+      detectionLogs,
+      resolutionLogs
     });
   } catch (error) {
     console.error('History fetch error:', error);
@@ -272,10 +257,7 @@ router.post('/validate/email', (req: Request, res: Response) => {
     }
 
     const result = validateEmail(email);
-    res.json({
-      success: true,
-      data: result
-    });
+    sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -291,10 +273,7 @@ router.post('/validate/phone', (req: Request, res: Response) => {
   try {
     const { phone } = req.body;
     const result = validatePhone(phone || '');
-    res.json({
-      success: true,
-      data: result
-    });
+    sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -310,10 +289,7 @@ router.post('/validate/url', (req: Request, res: Response) => {
   try {
     const { url } = req.body;
     const result = validateUrl(url || '');
-    res.json({
-      success: true,
-      data: result
-    });
+    sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -337,10 +313,7 @@ router.post('/validate/file', (req: Request, res: Response) => {
     }
 
     const result = validateFile(filename, mimeType, sizeBytes, allowedCategories);
-    res.json({
-      success: true,
-      data: result
-    });
+    sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -364,10 +337,7 @@ router.post('/validate/object', (req: Request, res: Response) => {
     }
 
     const result = validateObject(data, schema);
-    res.json({
-      success: true,
-      data: result
-    });
+    sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -391,10 +361,7 @@ router.post('/sanitize', (req: Request, res: Response) => {
     }
 
     const result = sanitizeInput(input, options || {});
-    res.json({
-      success: true,
-      data: result
-    });
+    sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Sanitization failed', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -436,13 +403,10 @@ router.post('/security/check', async (req: Request, res: Response) => {
       );
     }
 
-    res.json({
-      success: true,
-      data: {
-        safe: !xssResult.detected && !sqlResult.detected,
-        xss: xssResult,
-        sqlInjection: sqlResult
-      }
+    sendSuccess(res, {
+      safe: !xssResult.detected && !sqlResult.detected,
+      xss: xssResult,
+      sqlInjection: sqlResult
     });
   } catch (error) {
     errorResponseWithPayload(res, 'Security check failed', 500, 'INTERNAL_ERROR', {
@@ -462,10 +426,7 @@ router.post('/security/check', async (req: Request, res: Response) => {
 router.get('/metrics', async (_req: Request, res: Response) => {
   try {
     const metrics = await getDuplicateStats();
-    res.json({
-      success: true,
-      data: metrics
-    });
+    sendSuccess(res, metrics);
   } catch (error) {
     console.error('Metrics fetch error:', error);
     errorResponseWithPayload(res, 'Failed to fetch metrics', 500, 'INTERNAL_ERROR', {
@@ -497,11 +458,7 @@ router.post('/metrics/calculate', async (_req: Request, res: Response) => {
       ]
     );
 
-    res.json({
-      success: true,
-      message: 'Data quality metrics calculated and stored',
-      data: metrics
-    });
+    sendSuccess(res, metrics, 'Data quality metrics calculated and stored');
   } catch (error) {
     console.error('Metrics calculation error:', error);
     errorResponseWithPayload(res, 'Failed to calculate metrics', 500, 'INTERNAL_ERROR', {
@@ -523,14 +480,12 @@ router.get('/metrics/history', async (req: Request, res: Response) => {
     const history = await db.all(
       `SELECT * FROM data_quality_metrics
        WHERE metric_date > date('now', '-' || ? || ' days')
-       ORDER BY metric_date DESC, entity_type`,
+       ORDER BY metric_date DESC, entity_type
+       LIMIT 1000`,
       [Number(days)]
     );
 
-    res.json({
-      success: true,
-      data: history
-    });
+    sendSuccess(res, { history });
   } catch (error) {
     console.error('History fetch error:', error);
     errorResponseWithPayload(res, 'Failed to fetch history', 500, 'INTERNAL_ERROR', {
@@ -550,10 +505,7 @@ router.get('/metrics/history', async (req: Request, res: Response) => {
 router.get('/rate-limits/stats', async (_req: Request, res: Response) => {
   try {
     const stats = await getRateLimitStats();
-    res.json({
-      success: true,
-      data: stats
-    });
+    sendSuccess(res, stats);
   } catch (error) {
     console.error('Rate limit stats error:', error);
     errorResponseWithPayload(res, 'Failed to fetch rate limit stats', 500, 'INTERNAL_ERROR', {
@@ -579,10 +531,7 @@ router.post('/rate-limits/block', async (req: Request, res: Response) => {
 
     await blockIP(ip, reason, adminEmail || 'admin', expiresAt ? new Date(expiresAt) : undefined);
 
-    res.json({
-      success: true,
-      message: `IP ${ip} has been blocked`
-    });
+    sendSuccess(res, undefined, `IP ${ip} has been blocked`);
   } catch (error) {
     console.error('IP block error:', error);
     errorResponseWithPayload(res, 'Failed to block IP', 500, 'INTERNAL_ERROR', {
@@ -608,10 +557,7 @@ router.post('/rate-limits/unblock', async (req: Request, res: Response) => {
 
     await unblockIP(ip);
 
-    res.json({
-      success: true,
-      message: `IP ${ip} has been unblocked`
-    });
+    sendSuccess(res, undefined, `IP ${ip} has been unblocked`);
   } catch (error) {
     console.error('IP unblock error:', error);
     errorResponseWithPayload(res, 'Failed to unblock IP', 500, 'INTERNAL_ERROR', {
@@ -630,23 +576,20 @@ router.get('/validation-errors', async (req: Request, res: Response) => {
     const errorTypeParam = req.query.errorType;
     const db = getDatabase();
 
-    let query = `SELECT * FROM validation_error_log`;
+    let query = 'SELECT * FROM validation_error_log';
     const params: (string | number)[] = [];
 
     if (errorTypeParam && typeof errorTypeParam === 'string') {
-      query += ` WHERE error_type = ?`;
+      query += ' WHERE error_type = ?';
       params.push(errorTypeParam);
     }
 
-    query += ` ORDER BY created_at DESC LIMIT ?`;
+    query += ' ORDER BY created_at DESC LIMIT ?';
     params.push(typeof limitParam === 'string' ? Number(limitParam) : 100);
 
     const errors = await db.all(query, params);
 
-    res.json({
-      success: true,
-      data: errors
-    });
+    sendSuccess(res, { errors });
   } catch (error) {
     console.error('Validation errors fetch error:', error);
     errorResponseWithPayload(res, 'Failed to fetch validation errors', 500, 'INTERNAL_ERROR', {

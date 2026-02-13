@@ -8,7 +8,7 @@
  * Handles all API calls and data caching.
  */
 
-import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, parseApiResponse } from '../../../utils/api-client';
 import { createLogger } from '../../../utils/logging';
 
 const logger = createLogger('AdminDataService');
@@ -187,9 +187,7 @@ class AdminDataService {
 
     try {
       const response = await apiFetch('/api/admin/leads');
-      if (!response.ok) throw new Error('Failed to fetch leads');
-
-      const data = await response.json();
+      const data = await parseApiResponse<{ leads: Lead[]; stats: LeadStats }>(response);
       this._leadsData = data.leads || [];
       this.cache.set('leads', data);
       return data;
@@ -249,9 +247,7 @@ class AdminDataService {
 
     try {
       const response = await apiFetch('/api/admin/contact-submissions');
-      if (!response.ok) throw new Error('Failed to fetch contacts');
-
-      const data = await response.json();
+      const data = await parseApiResponse<{ submissions: Contact[]; stats: ContactStats }>(response);
       this._contactsData = data.submissions || [];
       this.cache.set('contacts', data);
       return data;
@@ -289,9 +285,7 @@ class AdminDataService {
 
     try {
       const response = await apiFetch('/api/projects');
-      if (!response.ok) throw new Error('Failed to fetch projects');
-
-      const data = await response.json();
+      const data = await parseApiResponse<{ projects: Project[]; stats: unknown }>(response);
       this._projectsData = data.projects || [];
       this.cache.set('projects', data);
       return data;
@@ -330,9 +324,7 @@ class AdminDataService {
 
     try {
       const response = await apiFetch('/api/admin/clients');
-      if (!response.ok) throw new Error('Failed to fetch clients');
-
-      const data = await response.json();
+      const data = await parseApiResponse<{ clients: Client[]; stats: unknown }>(response);
       this._clientsData = data.clients || [];
       this.cache.set('clients', data);
       return data;
@@ -353,9 +345,7 @@ class AdminDataService {
   async fetchThreads(): Promise<MessageThread[]> {
     try {
       const response = await apiFetch('/api/messages/threads');
-      if (!response.ok) throw new Error('Failed to fetch threads');
-
-      const data = await response.json();
+      const data = await parseApiResponse<{ threads: MessageThread[] }>(response);
       this._threadsData = data.threads || [];
       return this._threadsData;
     } catch (error) {
@@ -367,9 +357,7 @@ class AdminDataService {
   async fetchMessages(threadId: number): Promise<Message[]> {
     try {
       const response = await apiFetch(`/api/messages/threads/${threadId}/messages`);
-      if (!response.ok) throw new Error('Failed to fetch messages');
-
-      const data = await response.json();
+      const data = await parseApiResponse<{ messages: Message[] }>(response);
       return data.messages || [];
     } catch (error) {
       logger.error('Failed to fetch messages', { error, threadId });
@@ -408,7 +396,7 @@ class AdminDataService {
       const response = await apiFetch('/api/admin/sidebar-counts');
       if (!response.ok) return { leads: 0, messages: 0 };
 
-      const data = await response.json();
+      const data = await parseApiResponse<SidebarCounts>(response);
       return {
         leads: data.leads || 0,
         messages: data.messages || 0

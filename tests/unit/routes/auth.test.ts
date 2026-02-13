@@ -15,13 +15,13 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { getDatabase } from '../../../server/database/init';
 import { auditLogger } from '../../../server/services/audit-logger';
-import { sendSuccess, sendBadRequest, sendUnauthorized, sendServerError, sendNotFound } from '../../../server/utils/response';
+import { sendSuccess, sendBadRequest, sendUnauthorized, sendServerError, sendNotFound } from '../../../server/utils/api-response';
 import { AuthenticatedRequest } from '../../../server/middleware/auth';
 
 // Mock dependencies
 vi.mock('../../../server/database/init');
 vi.mock('../../../server/services/audit-logger');
-vi.mock('../../../server/utils/response');
+vi.mock('../../../server/utils/api-response');
 vi.mock('../../../server/middleware/security', () => ({
   rateLimit: () => (req: Request, res: Response, next: NextFunction) => next(),
 }));

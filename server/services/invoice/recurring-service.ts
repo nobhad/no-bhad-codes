@@ -23,6 +23,7 @@ import type {
 
 type SqlValue = string | number | boolean | null;
 
+
 type Database = any;
 
 type CreateInvoice = (data: InvoiceCreateData) => Promise<Invoice>;
@@ -271,6 +272,7 @@ export class InvoiceRecurringService {
 
   /**
    * Process due recurring invoices and generate actual invoices
+   * Uses batch operations and transactions to avoid N+1 queries
    */
   async processRecurringInvoices(): Promise<number> {
     const today = new Date().toISOString().split('T')[0];
@@ -283,7 +285,14 @@ export class InvoiceRecurringService {
     `;
 
     const dueRecurring = await this.db.all(sql, [today, today]);
-    let generatedCount = 0;
+
+    if (dueRecurring.length === 0) {
+      return 0;
+    }
+
+    // Process all recurring invoices and collect results
+    const successfulRecurring: Array<{ id: number; nextDate: string }> = [];
+    const failedIds: number[] = [];
 
     for (const recurring of dueRecurring) {
       try {
@@ -302,22 +311,38 @@ export class InvoiceRecurringService {
           recurring.day_of_week
         );
 
-        await this.db.run(
-          'UPDATE recurring_invoices SET last_generated_at = CURRENT_TIMESTAMP, next_generation_date = ? WHERE id = ?',
-          [nextDate, recurring.id]
-        );
-
-        generatedCount++;
+        successfulRecurring.push({ id: recurring.id, nextDate });
       } catch (error) {
         console.error(`[InvoiceService] Failed to generate recurring invoice ${recurring.id}:`, error);
+        failedIds.push(recurring.id);
       }
     }
 
-    return generatedCount;
+    // Batch update all successful recurring invoices in a single transaction
+    if (successfulRecurring.length > 0) {
+
+      await this.db.transaction(async (ctx: any) => {
+        // Build CASE WHEN statement for batch update
+        const ids = successfulRecurring.map(r => r.id);
+        const caseWhen = successfulRecurring
+          .map(r => `WHEN id = ${r.id} THEN '${r.nextDate}'`)
+          .join(' ');
+
+        await ctx.run(
+          `UPDATE recurring_invoices
+           SET last_generated_at = CURRENT_TIMESTAMP,
+               next_generation_date = CASE ${caseWhen} END
+           WHERE id IN (${ids.join(',')})`
+        );
+      });
+    }
+
+    return successfulRecurring.length;
   }
 
   /**
    * Schedule reminders for an invoice when it's sent
+   * Uses batch INSERT to avoid N+1 queries (6 reminders in one statement)
    */
   async scheduleReminders(invoiceId: number): Promise<void> {
     const invoice = await this.getInvoiceById(invoiceId);
@@ -328,6 +353,7 @@ export class InvoiceRecurringService {
     }
 
     const dueDate = new Date(invoice.dueDate);
+    const now = new Date();
     const reminderSchedule: Array<{ type: string; daysFromDue: number }> = [
       { type: 'upcoming', daysFromDue: -3 },
       { type: 'due', daysFromDue: 0 },
@@ -337,17 +363,33 @@ export class InvoiceRecurringService {
       { type: 'overdue_30', daysFromDue: 30 }
     ];
 
+    // Collect all valid reminders that are in the future
+    const remindersToInsert: Array<{ type: string; scheduledDate: string }> = [];
+
     for (const reminder of reminderSchedule) {
       const scheduledDate = new Date(dueDate);
       scheduledDate.setDate(scheduledDate.getDate() + reminder.daysFromDue);
 
-      if (scheduledDate < new Date()) {
-        continue;
+      if (scheduledDate >= now) {
+        remindersToInsert.push({
+          type: reminder.type,
+          scheduledDate: scheduledDate.toISOString().split('T')[0]
+        });
+      }
+    }
+
+    // Batch insert all reminders in a single statement
+    if (remindersToInsert.length > 0) {
+      const valuePlaceholders = remindersToInsert.map(() => '(?, ?, ?)').join(', ');
+      const params: (number | string)[] = [];
+
+      for (const reminder of remindersToInsert) {
+        params.push(invoiceId, reminder.type, reminder.scheduledDate);
       }
 
       await this.db.run(
-        'INSERT INTO invoice_reminders (invoice_id, reminder_type, scheduled_date) VALUES (?, ?, ?)',
-        [invoiceId, reminder.type, scheduledDate.toISOString().split('T')[0]]
+        `INSERT INTO invoice_reminders (invoice_id, reminder_type, scheduled_date) VALUES ${valuePlaceholders}`,
+        params
       );
     }
   }

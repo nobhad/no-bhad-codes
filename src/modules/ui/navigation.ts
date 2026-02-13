@@ -99,9 +99,26 @@ export class NavigationModule extends BaseModule {
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    // Menu toggle buttons
+    // Menu toggle buttons - add accessibility attributes
     if (this.menuToggles) {
       this.menuToggles.forEach((toggle) => {
+        const toggleEl = toggle as HTMLElement;
+
+        // Add aria-label if not present
+        if (!toggleEl.hasAttribute('aria-label')) {
+          toggleEl.setAttribute('aria-label', 'Toggle navigation menu');
+        }
+
+        // Add aria-expanded state
+        if (!toggleEl.hasAttribute('aria-expanded')) {
+          toggleEl.setAttribute('aria-expanded', 'false');
+        }
+
+        // Add aria-controls pointing to the nav element
+        if (this.nav && !toggleEl.hasAttribute('aria-controls')) {
+          toggleEl.setAttribute('aria-controls', this.nav.id || 'main-nav');
+        }
+
         this.addEventListener(toggle as Element, 'click', () => {
           this.toggleMenu();
         });
@@ -266,7 +283,15 @@ export class NavigationModule extends BaseModule {
    */
   private toggleMenu(): void {
     const currentState = appState.getState().navOpen;
-    appState.setState({ navOpen: !currentState });
+    const newState = !currentState;
+    appState.setState({ navOpen: newState });
+
+    // Update aria-expanded on all toggle buttons for accessibility
+    if (this.menuToggles) {
+      this.menuToggles.forEach((toggle) => {
+        toggle.setAttribute('aria-expanded', String(newState));
+      });
+    }
   }
 
   /**
@@ -525,8 +550,10 @@ export class NavigationModule extends BaseModule {
         if (item.disabled) {
           menuLink.classList.add('disabled');
           menuLink.setAttribute('href', '#');
+          menuLink.setAttribute('aria-disabled', 'true');
         } else {
           menuLink.classList.remove('disabled');
+          menuLink.removeAttribute('aria-disabled');
         }
 
         // Handle coming soon banner

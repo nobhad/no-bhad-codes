@@ -49,32 +49,34 @@ export function toSnakeCaseInvoice(invoice: Invoice): Record<string, unknown> {
     terms: invoice.terms,
     created_at: invoice.createdAt,
     updated_at: invoice.updatedAt,
+    // Client/project info from JOINs
     client_name: invoice.clientName,
+    client_email: invoice.clientEmail,
     project_name: invoice.projectName,
+    // Business info from BUSINESS_INFO constant
     business_name: invoice.businessName,
     business_email: invoice.businessEmail,
     venmo_handle: invoice.venmoHandle,
     paypal_email: invoice.paypalEmail,
-    services_title: invoice.servicesTitle,
-    services_description: invoice.servicesDescription,
-    deliverables: invoice.deliverables,
-    bill_to_name: invoice.billToName,
-    bill_to_email: invoice.billToEmail,
+    // Deposit fields
     invoice_type: invoice.invoiceType,
     deposit_for_project_id: invoice.depositForProjectId,
     deposit_percentage: invoice.depositPercentage,
+    // Tax and discount
     subtotal: invoice.subtotal,
     tax_rate: invoice.taxRate,
     tax_amount: invoice.taxAmount,
     discount_type: invoice.discountType,
     discount_value: invoice.discountValue,
     discount_amount: invoice.discountAmount,
+    // Late fees
     late_fee_rate: invoice.lateFeeRate,
     late_fee_type: invoice.lateFeeType,
     late_fee_amount: invoice.lateFeeAmount,
     late_fee_applied_at: invoice.lateFeeAppliedAt,
+    // Payment terms
     payment_terms_id: invoice.paymentTermsId,
-    payment_terms_name: invoice.paymentTermsName,
+    // Internal
     internal_notes: invoice.internalNotes,
     invoice_prefix: invoice.invoicePrefix,
     invoice_sequence: invoice.invoiceSequence

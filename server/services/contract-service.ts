@@ -303,7 +303,7 @@ class ContractService {
       params.push(data.isDefault ? 1 : 0);
     }
 
-    updates.push("updated_at = datetime('now')");
+    updates.push('updated_at = datetime(\'now\')');
     params.push(templateId);
 
     await db.run(`UPDATE contract_templates SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -313,7 +313,7 @@ class ContractService {
   async deleteTemplate(templateId: number): Promise<void> {
     const db = getDatabase();
     await db.run(
-      "UPDATE contract_templates SET is_active = FALSE, updated_at = datetime('now') WHERE id = ?",
+      'UPDATE contract_templates SET is_active = FALSE, updated_at = datetime(\'now\') WHERE id = ?',
       [templateId]
     );
   }
@@ -517,7 +517,7 @@ class ContractService {
       return this.getContract(contractId);
     }
 
-    updates.push("updated_at = datetime('now')");
+    updates.push('updated_at = datetime(\'now\')');
     params.push(contractId);
 
     await db.run(`UPDATE contracts SET ${updates.join(', ')} WHERE id = ?`, params);

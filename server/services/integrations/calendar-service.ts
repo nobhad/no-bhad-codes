@@ -138,11 +138,16 @@ export async function exchangeCodeForTokens(code: string): Promise<GoogleCalenda
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json() as { error_description?: string; error?: string };
     throw new Error(`Google OAuth error: ${error.error_description || error.error}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as {
+    access_token: string;
+    refresh_token?: string;
+    expires_in: number;
+    token_type: string;
+  };
 
   return {
     access_token: data.access_token,
@@ -174,11 +179,15 @@ export async function refreshAccessToken(refreshToken: string): Promise<GoogleCa
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json() as { error_description?: string; error?: string };
     throw new Error(`Token refresh error: ${error.error_description || error.error}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as {
+    access_token: string;
+    expires_in: number;
+    token_type: string;
+  };
 
   return {
     access_token: data.access_token,
@@ -206,11 +215,11 @@ export async function createGoogleCalendarEvent(
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json() as { error?: { message?: string } };
     throw new Error(`Google Calendar API error: ${error.error?.message || response.statusText}`);
   }
 
-  return response.json();
+  return response.json() as Promise<CalendarEvent>;
 }
 
 /**
@@ -232,11 +241,11 @@ export async function updateGoogleCalendarEvent(
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json() as { error?: { message?: string } };
     throw new Error(`Google Calendar API error: ${error.error?.message || response.statusText}`);
   }
 
-  return response.json();
+  return response.json() as Promise<CalendarEvent>;
 }
 
 /**
@@ -255,7 +264,7 @@ export async function deleteGoogleCalendarEvent(
   });
 
   if (!response.ok && response.status !== 404) {
-    const error = await response.json();
+    const error = await response.json() as { error?: { message?: string } };
     throw new Error(`Google Calendar API error: ${error.error?.message || response.statusText}`);
   }
 }
@@ -543,7 +552,7 @@ export async function exportUpcomingToICal(daysAhead: number = 30): Promise<stri
  * Format date for iCal
  */
 function formatICalDate(date: Date): string {
-  return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  return `${date.toISOString().replace(/[-:]/g, '').split('.')[0]  }Z`;
 }
 
 /**
@@ -571,21 +580,21 @@ export async function saveCalendarSyncConfig(config: CalendarSyncConfig): Promis
            updated_at = datetime('now')
        WHERE id = ?`,
       [config.calendarId, config.accessToken, config.refreshToken, config.expiresAt,
-       config.syncMilestones ? 1 : 0, config.syncTasks ? 1 : 0, config.syncInvoiceDueDates ? 1 : 0,
-       config.isActive ? 1 : 0, config.id]
+        config.syncMilestones ? 1 : 0, config.syncTasks ? 1 : 0, config.syncInvoiceDueDates ? 1 : 0,
+        config.isActive ? 1 : 0, config.id]
     );
     return config;
-  } else {
-    const result = await db.run(
-      `INSERT INTO calendar_sync_configs
+  }
+  const result = await db.run(
+    `INSERT INTO calendar_sync_configs
        (user_id, calendar_id, access_token, refresh_token, expires_at, sync_milestones, sync_tasks, sync_invoice_due_dates, is_active, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-      [config.userId, config.calendarId, config.accessToken, config.refreshToken, config.expiresAt,
-       config.syncMilestones ? 1 : 0, config.syncTasks ? 1 : 0, config.syncInvoiceDueDates ? 1 : 0,
-       config.isActive ? 1 : 0]
-    );
-    return { ...config, id: result.lastID };
-  }
+    [config.userId, config.calendarId, config.accessToken, config.refreshToken, config.expiresAt,
+      config.syncMilestones ? 1 : 0, config.syncTasks ? 1 : 0, config.syncInvoiceDueDates ? 1 : 0,
+      config.isActive ? 1 : 0]
+  );
+  return { ...config, id: result.lastID };
+
 }
 
 /**

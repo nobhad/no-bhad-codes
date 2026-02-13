@@ -202,10 +202,8 @@ export class ProjectsModule extends BaseModule {
 
     if (hasEnoughDocumented) {
       this.renderProjectCards(documentedProjects);
-    } else {
-      // Keep the existing WIP sign - don't modify
-      console.log('[ProjectsModule] Showing WIP sign (less than 2 documented projects)');
     }
+    // If not enough documented projects, keep the existing WIP sign
   }
 
   /**

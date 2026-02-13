@@ -41,7 +41,7 @@
 | Total Lines of PDF Code | ~2,085 |
 | Environment Variables | 9 |
 | Database Tables Used | 6 (proposals, invoices, projects, clients, files, contract_signature_log) |
-| Config File | `server/config/business.ts` (centralized branding) |
+| Config File | `server/config/business.ts` (centralized branding, mirrored in `src/constants/business.ts` for frontend) |
 
 ### PDF Types Generated
 
@@ -109,7 +109,7 @@ All PDF generation is server-side. No client-side PDF libraries (jsPDF, pdfmake)
 ```text
 server/
 ├── config/
-│   └── business.ts       # Centralized BUSINESS_INFO (single source of truth)
+│   └── business.ts       # Centralized BUSINESS_INFO (mirrored in src/constants/business.ts)
 ├── routes/
 │   ├── proposals.ts      # Lines 605-851: Proposal PDF generation
 │   ├── invoices.ts       # Lines 506-901: Invoice PDF generation (generateInvoicePdf function)

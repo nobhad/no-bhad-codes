@@ -17,7 +17,7 @@ import type {
   RawVisitorData,
   AdminDashboardContext
 } from '../admin-types';
-import { formatDateTime } from '../../../utils/format-utils';
+import { formatDateTime, formatCurrencyCompact } from '../../../utils/format-utils';
 import { showTableLoading, getChartSkeletonHTML } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { multiPromptDialog, alertDialog, confirmDialog } from '../../../utils/confirm-dialog';
@@ -127,7 +127,7 @@ async function loadBusinessKPIs(): Promise<void> {
     if (revenueRes.ok) {
       const revenueData = await revenueRes.json();
       const totalRevenue = revenueData.summary?.total_revenue || 0;
-      updateElement('kpi-revenue-value', formatCurrency(totalRevenue));
+      updateElement('kpi-revenue-value', formatCurrencyCompact(totalRevenue));
 
       const changeEl = document.getElementById('kpi-revenue-change');
       if (changeEl) {
@@ -155,7 +155,7 @@ async function loadBusinessKPIs(): Promise<void> {
       const pipelineData = await pipelineRes.json();
       const totalValue = pipelineData.summary?.total_pipeline_value || 0;
       const totalLeads = pipelineData.summary?.total_leads || 0;
-      updateElement('kpi-pipeline-value', formatCurrency(totalValue));
+      updateElement('kpi-pipeline-value', formatCurrencyCompact(totalValue));
 
       const countEl = document.getElementById('kpi-pipeline-count');
       if (countEl) {
@@ -196,7 +196,7 @@ async function loadBusinessKPIs(): Promise<void> {
         // Use amount_total (snake_case from backend)
         const outstandingTotal = invoices.reduce((sum: number, inv: { amount_total?: number }) =>
           sum + (inv.amount_total || 0), 0);
-        updateElement('kpi-invoices-value', formatCurrency(outstandingTotal));
+        updateElement('kpi-invoices-value', formatCurrencyCompact(outstandingTotal));
 
         const countEl = document.getElementById('kpi-invoices-count');
         if (countEl) {
@@ -417,7 +417,7 @@ async function loadLeadFunnel(): Promise<void> {
     updateElement('funnel-conversion-rate', `Conversion Rate: ${conversionRate.toFixed(1)}%`);
 
     const avgValue = data.avgDealValue || 0;
-    updateElement('funnel-avg-value', `Avg Deal Value: ${formatCurrency(avgValue)}`);
+    updateElement('funnel-avg-value', `Avg Deal Value: ${formatCurrencyCompact(avgValue)}`);
 
   } catch (error) {
     console.warn('[AdminAnalytics] Failed to load lead funnel:', error);
@@ -584,7 +584,6 @@ async function runReport(reportId: number): Promise<void> {
 
     if (response.ok) {
       const result = await response.json();
-      console.log('[AdminAnalytics] Report results:', result);
       await alertDialog({
         title: 'Report Complete',
         message: `Report executed successfully. ${result.rowCount || 0} rows returned.`,
@@ -910,7 +909,7 @@ function formatThreshold(metric: string, value: number): string {
     return `${value}%`;
   }
   if (metric.includes('revenue') || metric.includes('value') || metric.includes('invoices')) {
-    return formatCurrency(value);
+    return formatCurrencyCompact(value);
   }
   return String(value);
 }
@@ -1033,16 +1032,6 @@ async function deleteAlert(alertId: number): Promise<void> {
     console.error('[AdminAnalytics] Error deleting alert:', error);
     showToast('Failed to delete alert', 'error');
   }
-}
-
-function formatCurrency(amount: number): string {
-  if (amount >= 1000000) {
-    return `$${(amount / 1000000).toFixed(1)}M`;
-  }
-  if (amount >= 1000) {
-    return `$${(amount / 1000).toFixed(1)}K`;
-  }
-  return `$${amount.toLocaleString()}`;
 }
 
 function escapeHtml(str: string): string {

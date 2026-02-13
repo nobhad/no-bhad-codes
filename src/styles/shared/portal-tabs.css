@@ -160,6 +160,21 @@
 /* =====================================================
    TAB SECTION HEADING (for visual hierarchy within tabs)
    ===================================================== */
+.tab-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 var(--space-3);
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+.tab-section-header .tab-section-heading {
+  margin: 0;
+  padding-left: 0;
+}
+
 .tab-section-heading {
   font-family: var(--font-family-acme);
   font-size: 0.875rem;

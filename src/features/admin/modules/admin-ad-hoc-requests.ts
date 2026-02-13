@@ -10,7 +10,7 @@
 import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { formatDate } from '../../../utils/format-utils';
+import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
 import { getStatusDotHTML } from '../../../components/status-badge';
@@ -112,11 +112,6 @@ function formatLabel(value: string | null | undefined): string {
   return value
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function formatCurrency(value: number | null): string {
-  if (value === null || value === undefined) return '-';
-  return `$${value.toFixed(2)}`;
 }
 
 function parseNumber(value: string): number | null {
@@ -642,7 +637,7 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
       </div>
       <div class="ad-hoc-request-quote-preview">
         <span>Current quote:</span>
-        <strong>${formatCurrency(request.quotedPrice)}</strong>
+        <strong>${request.quotedPrice !== null ? formatCurrency(request.quotedPrice) : '-'}</strong>
       </div>
       <div class="ad-hoc-request-actions">
         <button type="submit" class="btn btn-primary">Save Updates</button>

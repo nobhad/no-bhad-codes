@@ -17,6 +17,41 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Escape HTML special characters to prevent XSS in email content
+ */
+function escapeHtml(text: string | undefined | null): string {
+  if (!text) return '';
+  const entities: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    '\'': '&#x27;'
+  };
+  return String(text).replace(/[&<>"']/g, (m) => entities[m] || m);
+}
+
+/**
+ * Sanitize email address for logging (hide most of the address)
+ * Example: "user@example.com" -> "u***@e***.com"
+ */
+function sanitizeEmailForLog(email: string): string {
+  if (!email || !email.includes('@')) return '[invalid-email]';
+  const [localPart, domain] = email.split('@');
+  const [domainName, ...tldParts] = domain.split('.');
+  const tld = tldParts.join('.');
+
+  const sanitizedLocal = localPart.length > 1
+    ? `${localPart[0]  }***`
+    : '***';
+  const sanitizedDomain = domainName.length > 1
+    ? `${domainName[0]  }***`
+    : '***';
+
+  return `${sanitizedLocal}@${sanitizedDomain}.${tld}`;
+}
+
 export interface EmailContent {
   to: string;
   subject: string;
@@ -97,9 +132,8 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
   // If transporter is not initialized, log and return
   if (!transporter || !emailConfig) {
     console.log('[EMAIL] Transporter not initialized. Email logged to console:');
-    console.log(`To: ${emailContent.to}`);
+    console.log(`To: ${sanitizeEmailForLog(emailContent.to)}`);
     console.log(`Subject: ${emailContent.subject}`);
-    console.log(`Text: ${emailContent.text}`);
     return { success: true, message: 'Email logged to console (transporter not configured)' };
   }
 
@@ -119,7 +153,7 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
     console.error('[EMAIL] Failed to send email:', error);
     // Fall back to logging if send fails
     console.log('[EMAIL] Email content (send failed):');
-    console.log(`To: ${emailContent.to}`);
+    console.log(`To: ${sanitizeEmailForLog(emailContent.to)}`);
     console.log(`Subject: ${emailContent.subject}`);
     return {
       success: false,
@@ -139,7 +173,7 @@ export async function sendWelcomeEmail(
   name: string,
   accessToken: string
 ): Promise<EmailResult> {
-  console.log('[EMAIL] Preparing welcome email for:', email);
+  console.log('[EMAIL] Preparing welcome email for:', sanitizeEmailForLog(email));
 
   const portalUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/client/portal?token=${accessToken}`;
 
@@ -226,6 +260,9 @@ export async function sendNewIntakeNotification(
 }
 
 function generateWelcomeEmailHTML(name: string, portalUrl: string): string {
+  const safeName = escapeHtml(name);
+  const safePortalUrl = escapeHtml(portalUrl);
+
   return `
     <!DOCTYPE html>
     <html>
@@ -238,12 +275,12 @@ function generateWelcomeEmailHTML(name: string, portalUrl: string): string {
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
         .content { padding: 20px; background: #f9f9f9; }
-        .button { 
-          display: inline-block; 
-          background: #00ff41; 
-          color: #000; 
-          padding: 12px 24px; 
-          text-decoration: none; 
+        .button {
+          display: inline-block;
+          background: #00ff41;
+          color: #000;
+          padding: 12px 24px;
+          text-decoration: none;
           border-radius: 5px;
           font-weight: bold;
         }
@@ -255,20 +292,20 @@ function generateWelcomeEmailHTML(name: string, portalUrl: string): string {
         <div class="header">
           <h1>Welcome to No Bhad Codes!</h1>
         </div>
-        
+
         <div class="content">
-          <h2>Hi ${name},</h2>
-          
+          <h2>Hi ${safeName},</h2>
+
           <p>Thank you for choosing <strong>No Bhad Codes</strong> for your project! We're excited to work with you.</p>
-          
+
           <p>Your project details have been received and we're already reviewing your requirements. You'll receive a detailed proposal within <strong>24-48 hours</strong>.</p>
-          
+
           <p>You can access your project portal anytime:</p>
-          
+
           <p style="text-align: center;">
-            <a href="${portalUrl}" class="button">Access Your Portal</a>
+            <a href="${safePortalUrl}" class="button">Access Your Portal</a>
           </p>
-          
+
           <h3>What happens next:</h3>
           <ol>
             <li>We'll review your project requirements</li>
@@ -276,13 +313,13 @@ function generateWelcomeEmailHTML(name: string, portalUrl: string): string {
             <li>We'll schedule a discovery call to discuss details</li>
             <li>Upon agreement, we'll begin development</li>
           </ol>
-          
+
           <p>If you have any questions, feel free to reply to this email.</p>
-          
+
           <p>Best regards,<br>
           <strong>No Bhad Codes Team</strong></p>
         </div>
-        
+
         <div class="footer">
           <p>&copy; 2025 No Bhad Codes. All rights reserved.</p>
         </div>
@@ -297,9 +334,22 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
     ? intakeData.features
     : [intakeData.features].filter(Boolean);
 
+  // Escape all user-supplied values to prevent XSS
+  const safeName = escapeHtml(intakeData.name);
+  const safeEmail = escapeHtml(intakeData.email);
+  const safeProjectType = escapeHtml(intakeData.projectType);
+  const safeBudget = escapeHtml(intakeData.budget);
+  const safeTimeline = escapeHtml(intakeData.timeline);
+  const safeProjectDescription = escapeHtml(intakeData.projectDescription);
+  const safeTechComfort = escapeHtml(intakeData.techComfort);
+  const safeDomainHosting = escapeHtml(intakeData.domainHosting);
+  const safeDesignLevel = escapeHtml(intakeData.designLevel);
+  const safeAdditionalInfo = escapeHtml(intakeData.additionalInfo);
+  const safeFeatures = features.map(f => escapeHtml(f));
+
   const infoRow = (label: string, value: string | undefined) => `
     <tr>
-      <td style="padding: 8px 12px; font-weight: 600; color: #555; width: 140px; vertical-align: top;">${label}</td>
+      <td style="padding: 8px 12px; font-weight: 600; color: #555; width: 140px; vertical-align: top;">${escapeHtml(label)}</td>
       <td style="padding: 8px 12px; color: #222;">${value || 'Not specified'}</td>
     </tr>
   `;
@@ -331,8 +381,8 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                 <td style="padding: 25px 20px 15px;">
                   <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Client</h2>
                   <table width="100%" cellpadding="0" cellspacing="0">
-                    ${infoRow('Name', intakeData.name)}
-                    ${infoRow('Email', `<a href="mailto:${intakeData.email}" style="color: #0066cc;">${intakeData.email}</a>`)}
+                    ${infoRow('Name', safeName)}
+                    ${infoRow('Email', `<a href="mailto:${safeEmail}" style="color: #0066cc;">${safeEmail}</a>`)}
                   </table>
                 </td>
               </tr>
@@ -342,13 +392,13 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                 <td style="padding: 15px 20px;">
                   <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Project</h2>
                   <table width="100%" cellpadding="0" cellspacing="0">
-                    ${infoRow('Type', intakeData.projectType)}
-                    ${infoRow('Budget', intakeData.budget)}
-                    ${infoRow('Timeline', intakeData.timeline)}
+                    ${infoRow('Type', safeProjectType)}
+                    ${infoRow('Budget', safeBudget)}
+                    ${infoRow('Timeline', safeTimeline)}
                   </table>
                   <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #7ff709;">
                     <strong style="display: block; margin-bottom: 8px; color: #555;">Description:</strong>
-                    <span style="color: #222;">${intakeData.projectDescription}</span>
+                    <span style="color: #222;">${safeProjectDescription}</span>
                   </div>
                 </td>
               </tr>
@@ -358,19 +408,19 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                 <td style="padding: 15px 20px;">
                   <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Technical</h2>
                   <table width="100%" cellpadding="0" cellspacing="0">
-                    ${infoRow('Tech Comfort', intakeData.techComfort)}
-                    ${infoRow('Domain/Hosting', intakeData.domainHosting)}
+                    ${infoRow('Tech Comfort', safeTechComfort)}
+                    ${infoRow('Domain/Hosting', safeDomainHosting)}
                   </table>
                 </td>
               </tr>
 
-              ${features.length > 0 ? `
+              ${safeFeatures.length > 0 ? `
               <!-- Features -->
               <tr>
                 <td style="padding: 15px 20px;">
                   <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Features</h2>
                   <div style="padding: 15px; background: #f8f9fa; border-radius: 6px;">
-                    ${features.map((f) => `<span style="display: inline-block; margin: 4px; padding: 6px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 20px; font-size: 14px;">${f}</span>`).join('')}
+                    ${safeFeatures.map((f) => `<span style="display: inline-block; margin: 4px; padding: 6px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 20px; font-size: 14px;">${f}</span>`).join('')}
                   </div>
                 </td>
               </tr>
@@ -381,12 +431,12 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                 <td style="padding: 15px 20px;">
                   <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Design & Notes</h2>
                   <table width="100%" cellpadding="0" cellspacing="0">
-                    ${infoRow('Design Level', intakeData.designLevel)}
+                    ${infoRow('Design Level', safeDesignLevel)}
                   </table>
-                  ${intakeData.additionalInfo ? `
+                  ${safeAdditionalInfo ? `
                   <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #7ff709;">
                     <strong style="display: block; margin-bottom: 8px; color: #555;">Additional Info:</strong>
-                    <span style="color: #222;">${intakeData.additionalInfo}</span>
+                    <span style="color: #222;">${safeAdditionalInfo}</span>
                   </div>
                   ` : ''}
                 </td>
@@ -479,7 +529,7 @@ export const emailService = {
     email: string,
     data: { resetToken: string; name?: string }
   ): Promise<EmailResult> {
-    console.log('[EMAIL] Preparing password reset email for:', email);
+    console.log('[EMAIL] Preparing password reset email for:', sanitizeEmailForLog(email));
 
     const resetUrl = `${process.env.WEBSITE_URL || 'http://localhost:3000'}/reset-password?token=${data.resetToken}`;
     const name = data.name || 'User';
@@ -545,12 +595,12 @@ export const emailService = {
   },
 
   async sendMessageNotification(email: string, data: any): Promise<EmailResult> {
-    console.log('Sending message notification to:', email, data);
+    console.log('[EMAIL] Sending message notification to:', sanitizeEmailForLog(email));
     return { success: true, message: 'Message notification logged for development' };
   },
 
   async sendProjectUpdateEmail(email: string, data: any): Promise<EmailResult> {
-    console.log('Sending project update email to:', email, data);
+    console.log('[EMAIL] Sending project update email to:', sanitizeEmailForLog(email));
     return { success: true, message: 'Project update email logged for development' };
   },
 
@@ -577,7 +627,7 @@ export const emailService = {
     email: string,
     data: { name?: string; portalUrl?: string }
   ): Promise<EmailResult> {
-    console.log('[EMAIL] Preparing account activation welcome email for:', email);
+    console.log('[EMAIL] Preparing account activation welcome email for:', sanitizeEmailForLog(email));
 
     const portalUrl = data.portalUrl || `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal`;
     const settingsUrl = `${portalUrl}#settings`;
@@ -706,7 +756,7 @@ export const emailService = {
     email: string,
     data: { magicLinkToken: string; name?: string }
   ): Promise<EmailResult> {
-    console.log('[EMAIL] Preparing magic link email for:', email);
+    console.log('[EMAIL] Preparing magic link email for:', sanitizeEmailForLog(email));
 
     const loginUrl = `${process.env.WEBSITE_URL || 'http://localhost:3000'}/auth/magic-link?token=${data.magicLinkToken}`;
     const name = data.name || 'there';
@@ -912,7 +962,7 @@ View project: ${adminUrl}/projects/${data.projectId}
    * Includes contract summary and next steps
    */
   async sendProposalSignedClientConfirmation(data: ProposalSignedClientData): Promise<EmailResult> {
-    console.log('[EMAIL] Preparing proposal signed confirmation for client:', data.signerEmail);
+    console.log('[EMAIL] Preparing proposal signed confirmation for client:', sanitizeEmailForLog(data.signerEmail));
 
     try {
       // Read email templates

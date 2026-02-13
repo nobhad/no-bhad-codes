@@ -658,16 +658,11 @@ function setupMessageInteractions(container: HTMLElement): void {
  */
 async function addReaction(messageId: number, reaction: string): Promise<void> {
   try {
-    console.log('[AdminMessaging] Adding reaction:', { messageId, reaction });
     const response = await apiPost(`/api/messages/${messageId}/reactions`, { reaction });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('[AdminMessaging] Failed to add reaction:', response.status, errorData);
       return;
     }
-
-    console.log('[AdminMessaging] Reaction added successfully');
 
     // Reload messages to show updated reactions
     if (selectedThreadId) {

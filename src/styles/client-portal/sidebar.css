@@ -18,7 +18,9 @@
   transition: width 0.2s ease, transform 0.2s ease;
   position: relative;
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
   min-height: 100vh;
+  min-height: 100dvh;
   z-index: 60;
   box-shadow: var(--shadow-sidebar);
   flex-shrink: 0;

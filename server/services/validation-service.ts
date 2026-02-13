@@ -408,7 +408,8 @@ export function validateFile(
     errors.push(`File size (${actualSizeMB}MB) exceeds maximum allowed size (${maxSizeMB}MB)`);
   }
 
-  // Check for dangerous patterns in filename
+  // Check for dangerous patterns in filename (control characters are intentional)
+  // eslint-disable-next-line no-control-regex
   if (/[<>:"/\\|?*\x00-\x1f]/.test(filename)) {
     errors.push('Filename contains invalid characters');
   }
@@ -472,58 +473,58 @@ export function validateObject(
 
     // Type-specific validation
     switch (rules.type) {
-      case 'email': {
-        const result = validateEmail(String(value));
-        if (!result.valid) fieldErrors.push(...result.errors);
-        sanitized[field] = result.sanitized;
-        break;
+    case 'email': {
+      const result = validateEmail(String(value));
+      if (!result.valid) fieldErrors.push(...result.errors);
+      sanitized[field] = result.sanitized;
+      break;
+    }
+    case 'phone': {
+      const result = validatePhone(String(value));
+      if (!result.valid) fieldErrors.push(...result.errors);
+      sanitized[field] = result.sanitized;
+      break;
+    }
+    case 'url': {
+      const result = validateUrl(String(value));
+      if (!result.valid) fieldErrors.push(...result.errors);
+      sanitized[field] = result.sanitized;
+      break;
+    }
+    case 'text': {
+      const strValue = String(value);
+      const sanitizeResult = sanitizeInput(strValue, { maxLength: rules.maxLength });
+      if (rules.minLength && strValue.length < rules.minLength) {
+        fieldErrors.push(`${field} must be at least ${rules.minLength} characters`);
       }
-      case 'phone': {
-        const result = validatePhone(String(value));
-        if (!result.valid) fieldErrors.push(...result.errors);
-        sanitized[field] = result.sanitized;
-        break;
+      if (rules.maxLength && strValue.length > rules.maxLength) {
+        fieldErrors.push(`${field} must be at most ${rules.maxLength} characters`);
       }
-      case 'url': {
-        const result = validateUrl(String(value));
-        if (!result.valid) fieldErrors.push(...result.errors);
-        sanitized[field] = result.sanitized;
-        break;
+      if (rules.pattern && !rules.pattern.test(strValue)) {
+        fieldErrors.push(`${field} format is invalid`);
       }
-      case 'text': {
-        const strValue = String(value);
-        const sanitizeResult = sanitizeInput(strValue, { maxLength: rules.maxLength });
-        if (rules.minLength && strValue.length < rules.minLength) {
-          fieldErrors.push(`${field} must be at least ${rules.minLength} characters`);
+      sanitized[field] = sanitizeResult.value;
+      break;
+    }
+    case 'number': {
+      const numValue = Number(value);
+      if (isNaN(numValue)) {
+        fieldErrors.push(`${field} must be a number`);
+      } else {
+        if (rules.min !== undefined && numValue < rules.min) {
+          fieldErrors.push(`${field} must be at least ${rules.min}`);
         }
-        if (rules.maxLength && strValue.length > rules.maxLength) {
-          fieldErrors.push(`${field} must be at most ${rules.maxLength} characters`);
+        if (rules.max !== undefined && numValue > rules.max) {
+          fieldErrors.push(`${field} must be at most ${rules.max}`);
         }
-        if (rules.pattern && !rules.pattern.test(strValue)) {
-          fieldErrors.push(`${field} format is invalid`);
-        }
-        sanitized[field] = sanitizeResult.value;
-        break;
+        sanitized[field] = numValue;
       }
-      case 'number': {
-        const numValue = Number(value);
-        if (isNaN(numValue)) {
-          fieldErrors.push(`${field} must be a number`);
-        } else {
-          if (rules.min !== undefined && numValue < rules.min) {
-            fieldErrors.push(`${field} must be at least ${rules.min}`);
-          }
-          if (rules.max !== undefined && numValue > rules.max) {
-            fieldErrors.push(`${field} must be at most ${rules.max}`);
-          }
-          sanitized[field] = numValue;
-        }
-        break;
-      }
-      case 'boolean': {
-        sanitized[field] = Boolean(value);
-        break;
-      }
+      break;
+    }
+    case 'boolean': {
+      sanitized[field] = Boolean(value);
+      break;
+    }
     }
 
     if (fieldErrors.length > 0) {

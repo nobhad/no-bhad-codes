@@ -256,7 +256,7 @@ export const INVOICES_EXPORT_CONFIG: ExportConfig = {
     { key: 'client_name', label: 'Client' },
     { key: 'project_name', label: 'Project' },
     { key: 'status', label: 'Status' },
-    { key: 'amount_total', label: 'Total Amount', formatter: formatCurrency },
+    { key: 'amount_total', label: 'Total Amount', formatter: formatCurrencyForExport },
     { key: 'due_date', label: 'Due Date', formatter: formatDate },
     { key: 'paid_at', label: 'Paid Date', formatter: formatDate },
     { key: 'created_at', label: 'Created Date', formatter: formatDate }
@@ -282,9 +282,9 @@ function formatDate(value: unknown): string {
 }
 
 /**
- * Format currency for export
+ * Format currency for CSV export (raw number without $ symbol for spreadsheet compatibility)
  */
-function formatCurrency(value: unknown): string {
+function formatCurrencyForExport(value: unknown): string {
   if (value === null || value === undefined) return '';
   const num = typeof value === 'string' ? parseFloat(value) : Number(value);
   if (isNaN(num)) return '';
@@ -304,7 +304,7 @@ export const PROPOSALS_EXPORT_CONFIG: ExportConfig = {
     { key: 'project.name', label: 'Project Name' },
     { key: 'projectType', label: 'Project Type' },
     { key: 'selectedTier', label: 'Tier' },
-    { key: 'finalPrice', label: 'Final Price', formatter: formatCurrency },
+    { key: 'finalPrice', label: 'Final Price', formatter: formatCurrencyForExport },
     { key: 'status', label: 'Status' },
     { key: 'maintenanceOption', label: 'Maintenance Option' },
     { key: 'createdAt', label: 'Created Date', formatter: formatDate }

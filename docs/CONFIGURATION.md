@@ -144,6 +144,24 @@ Run manually: `npm run db:backup`. For automated backups, add a cron job (e.g. d
 
 The frontend uses centralized configuration files located in `src/config/`.
 
+### `src/constants/business.ts`
+
+Frontend mirror of server business info. Used when client-side code needs business details without an API call:
+
+```typescript
+import { BUSINESS_INFO } from '../constants/business';
+
+// Business identity
+BUSINESS_INFO.name      // "No Bhad Codes"
+BUSINESS_INFO.owner     // "Noelle Bhaduri"
+BUSINESS_INFO.contact   // "Noelle Bhaduri"
+BUSINESS_INFO.tagline   // "Web Development & Design"
+BUSINESS_INFO.email     // "nobhaduri@gmail.com"
+BUSINESS_INFO.website   // "nobhad.codes"
+```
+
+**Note:** This intentionally duplicates `server/config/business.ts` for client-side use. Keep both files in sync when updating business information.
+
 ### `src/config/branding.ts`
 
 Centralized branding and company identity constants:

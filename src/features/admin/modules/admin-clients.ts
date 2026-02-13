@@ -275,7 +275,9 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
     const response = await apiFetch('/api/clients');
 
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      // Handle canonical API format { success: true, data: {...} }
+      const data = json.data ?? json;
       clientsData = data.clients || [];
 
       // Calculate stats

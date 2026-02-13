@@ -244,7 +244,8 @@ export interface ClientNote {
 interface ClientNoteRow {
   id: number;
   client_id: number;
-  author: string;
+  author_user_id: number | null;
+  author_name: string | null; // From JOIN with users table
   content: string;
   is_pinned: number;
   created_at: string;
@@ -354,7 +355,7 @@ function toClientNote(row: ClientNoteRow): ClientNote {
   return {
     id: row.id,
     clientId: row.client_id,
-    author: row.author,
+    author: row.author_name || 'Unknown',
     content: row.content,
     isPinned: Boolean(row.is_pinned),
     createdAt: row.created_at,
@@ -698,9 +699,11 @@ class ClientService {
   async getNotes(clientId: number): Promise<ClientNote[]> {
     const db = getDatabase();
     const rows = await db.all(
-      `SELECT * FROM client_notes
-       WHERE client_id = ?
-       ORDER BY is_pinned DESC, created_at DESC`,
+      `SELECT cn.*, u.display_name as author_name
+       FROM client_notes cn
+       LEFT JOIN users u ON cn.author_user_id = u.id
+       WHERE cn.client_id = ?
+       ORDER BY cn.is_pinned DESC, cn.created_at DESC`,
       [clientId]
     ) as unknown as ClientNoteRow[];
     return rows.map(toClientNote);
@@ -716,12 +719,15 @@ class ClientService {
     const authorUserId = await userService.getUserIdByEmailOrName(author);
 
     const result = await db.run(
-      `INSERT INTO client_notes (client_id, author_user_id, content) VALUES (?, ?, ?)`,
+      'INSERT INTO client_notes (client_id, author_user_id, content) VALUES (?, ?, ?)',
       [clientId, authorUserId, content]
     );
 
     const note = await db.get(
-      'SELECT * FROM client_notes WHERE id = ?',
+      `SELECT cn.*, u.display_name as author_name
+       FROM client_notes cn
+       LEFT JOIN users u ON cn.author_user_id = u.id
+       WHERE cn.id = ?`,
       [result.lastID]
     ) as unknown as ClientNoteRow | undefined;
 
@@ -740,13 +746,16 @@ class ClientService {
 
     if (data.isPinned !== undefined) {
       await db.run(
-        `UPDATE client_notes SET is_pinned = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        'UPDATE client_notes SET is_pinned = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
         [data.isPinned ? 1 : 0, noteId]
       );
     }
 
     const note = await db.get(
-      'SELECT * FROM client_notes WHERE id = ?',
+      `SELECT cn.*, u.display_name as author_name
+       FROM client_notes cn
+       LEFT JOIN users u ON cn.author_user_id = u.id
+       WHERE cn.id = ?`,
       [noteId]
     ) as unknown as ClientNoteRow | undefined;
 
@@ -1046,7 +1055,7 @@ class ClientService {
     const db = getDatabase();
 
     await db.run(
-      `INSERT OR IGNORE INTO client_tags (client_id, tag_id) VALUES (?, ?)`,
+      'INSERT OR IGNORE INTO client_tags (client_id, tag_id) VALUES (?, ?)',
       [clientId, tagId]
     );
 

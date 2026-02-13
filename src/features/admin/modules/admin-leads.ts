@@ -164,7 +164,9 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
     const response = await apiFetch('/api/admin/leads');
 
     if (response.ok) {
-      const data: LeadsData = await response.json();
+      const json = await response.json();
+      // Handle canonical API format { success: true, data: {...} }
+      const data: LeadsData = json.data ?? json;
       leadsData = data.leads || [];
       updateLeadsDisplay(data, ctx);
 

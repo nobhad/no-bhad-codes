@@ -133,7 +133,11 @@ no-bhad-codes/
 │   │   │   ├── quick-stats.ts, recent-activity.ts, timeline.ts
 │   │   │   └── ... (analytics-dashboard, chart-simple, kanban-board, etc.)
 │   │   │
-│   ├── design-system/, config/, constants/, types/, utils/
+│   ├── constants/
+│   │   ├── business.ts            # Frontend mirror of server/config/business.ts
+│   │   └── icons.ts               # Centralized SVG icons
+│   ├── config/                    # App configuration (api, branding, constants)
+│   ├── design-system/, types/, utils/
 │   │
 ├── 📁 server/ (BACKEND — at repo root, sibling of src/)
 │   ├── routes/                       # API routes (auth, admin, clients, projects, etc.)

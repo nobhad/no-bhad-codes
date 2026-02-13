@@ -27,7 +27,7 @@ export interface PortalInvoice {
   id: string | number;
   invoice_number: string;
   amount_total: number;
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  status: 'draft' | 'sent' | 'paid' | 'partial' | 'overdue' | 'cancelled';
   created_at: string;
   due_date?: string;
   paid_date?: string;

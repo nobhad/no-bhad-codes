@@ -169,6 +169,110 @@
 }
 
 /* ===============================================
+   GENERATE DOCUMENT DROPDOWN
+   Button dropdown for generating PDFs in Files tab
+   =============================================== */
+
+[data-page="admin"] .generate-document-menu.table-dropdown {
+  position: relative;
+  width: auto;
+  min-width: auto;
+  height: auto;
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1-5) var(--space-3);
+  height: 36px;
+  min-width: auto;
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--radius-md);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:hover {
+  background: var(--portal-bg-lighter);
+  border-color: var(--portal-border-light);
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:focus,
+[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:focus-visible {
+  outline: none !important;
+  border-color: var(--color-primary);
+  box-shadow: none !important;
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger svg {
+  flex-shrink: 0;
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger .dropdown-caret {
+  margin-left: var(--space-1);
+  transition: transform var(--transition-fast);
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown.open .custom-dropdown-trigger .dropdown-caret {
+  transform: rotate(180deg);
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  left: auto;
+  min-width: 200px;
+  padding: var(--space-1) 0;
+  margin: 0;
+  list-style: none;
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-dropdown);
+  z-index: 1000;
+  overflow: visible;
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown.open .custom-dropdown-menu {
+  display: block;
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  text-align: left;
+  white-space: nowrap;
+  list-style: none;
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-item:hover {
+  background: var(--portal-bg-lighter);
+}
+
+[data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-item svg {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  flex-shrink: 0;
+}
+
+/* ===============================================
    RESPONSIVE STYLES
    =============================================== */
 

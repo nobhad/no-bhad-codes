@@ -397,7 +397,7 @@ class AdHocRequestService {
       return this.getRequest(requestId);
     }
 
-    updates.push("updated_at = datetime('now')");
+    updates.push('updated_at = datetime(\'now\')');
     params.push(requestId);
 
     await db.run(`UPDATE ad_hoc_requests SET ${updates.join(', ')} WHERE id = ?`, params);

@@ -11,7 +11,8 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { documentRequestService, RequestStatus } from '../services/document-request-service.js';
-import { errorResponse } from '../utils/api-response.js';
+import { workflowTriggerService } from '../services/workflow-trigger-service.js';
+import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -36,7 +37,7 @@ router.get(
     const requests = await documentRequestService.getClientRequests(clientId, status);
     const stats = await documentRequestService.getClientStats(clientId);
 
-    res.json({ requests, stats });
+    sendSuccess(res, { requests, stats });
   })
 );
 
@@ -59,7 +60,7 @@ router.post(
     }
 
     const request = await documentRequestService.markViewed(id, clientEmail);
-    res.json({ success: true, request });
+    sendSuccess(res, { request });
   })
 );
 
@@ -87,11 +88,7 @@ router.post(
     }
 
     const request = await documentRequestService.uploadDocument(id, fileId, uploaderEmail);
-    res.json({
-      success: true,
-      message: 'Document uploaded successfully',
-      request
-    });
+    sendSuccess(res, { request }, 'Document uploaded successfully');
   })
 );
 
@@ -109,7 +106,7 @@ router.get(
     }
 
     const requests = await documentRequestService.getClientPendingRequests(clientId);
-    res.json({ requests });
+    sendSuccess(res, { requests });
   })
 );
 
@@ -126,7 +123,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const requests = await documentRequestService.getPendingRequests();
-    res.json({ requests });
+    sendSuccess(res, { requests });
   })
 );
 
@@ -139,7 +136,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const requests = await documentRequestService.getRequestsForReview();
-    res.json({ requests });
+    sendSuccess(res, { requests });
   })
 );
 
@@ -152,7 +149,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const requests = await documentRequestService.getOverdueRequests();
-    res.json({ requests });
+    sendSuccess(res, { requests });
   })
 );
 
@@ -174,7 +171,7 @@ router.get(
     const requests = await documentRequestService.getClientRequests(clientId, status);
     const stats = await documentRequestService.getClientStats(clientId);
 
-    res.json({ requests, stats });
+    sendSuccess(res, { requests, stats });
   })
 );
 
@@ -193,7 +190,7 @@ router.get(
     }
 
     const requests = await documentRequestService.getProjectPendingRequests(projectId);
-    res.json({ requests });
+    sendSuccess(res, { requests });
   })
 );
 
@@ -218,7 +215,7 @@ router.get(
 
     const history = await documentRequestService.getRequestHistory(id);
 
-    res.json({ request, history });
+    sendSuccess(res, { request, history });
   })
 );
 
@@ -259,11 +256,7 @@ router.post(
       is_required
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Document request created',
-      request
-    });
+    sendCreated(res, { request }, 'Document request created');
   })
 );
 
@@ -290,11 +283,7 @@ router.post(
       project_id
     );
 
-    res.status(201).json({
-      success: true,
-      message: `${requests.length} document request(s) created`,
-      requests
-    });
+    sendCreated(res, { requests }, `${requests.length} document request(s) created`);
   })
 );
 
@@ -314,16 +303,15 @@ router.post(
     }
 
     const request = await documentRequestService.startReview(id, reviewerEmail);
-    res.json({
-      success: true,
-      message: 'Review started',
-      request
-    });
+    sendSuccess(res, { request }, 'Review started');
   })
 );
 
 /**
  * Approve a request (admin)
+ * - Copies uploaded file to Files tab (Forms folder)
+ * - Marks original request complete with file reference
+ * - Emits document_request.approved workflow event
  */
 router.post(
   '/:id/approve',
@@ -338,17 +326,30 @@ router.post(
       return errorResponse(res, 'Invalid request ID', 400);
     }
 
-    const request = await documentRequestService.approveRequest(id, reviewerEmail, notes);
-    res.json({
-      success: true,
-      message: 'Document request approved',
-      request
+    // Approve the request - this also copies the file to the Files tab
+    const { request, approvedFileId } = await documentRequestService.approveRequest(id, reviewerEmail, notes);
+
+    // Emit workflow event for document request approval
+    await workflowTriggerService.emit('document_request.approved', {
+      entityId: id,
+      triggeredBy: reviewerEmail,
+      documentRequestId: id,
+      clientId: request.client_id,
+      projectId: request.project_id,
+      title: request.title,
+      documentType: request.document_type,
+      approvedFileId,
+      originalFileId: request.file_id,
+      reviewerEmail
     });
+
+    sendSuccess(res, { request, approvedFileId }, 'Document request approved');
   })
 );
 
 /**
  * Reject a request (admin)
+ * - Emits document_request.rejected workflow event
  */
 router.post(
   '/:id/reject',
@@ -368,11 +369,21 @@ router.post(
     }
 
     const request = await documentRequestService.rejectRequest(id, reviewerEmail, reason);
-    res.json({
-      success: true,
-      message: 'Document request rejected',
-      request
+
+    // Emit workflow event for document request rejection
+    await workflowTriggerService.emit('document_request.rejected', {
+      entityId: id,
+      triggeredBy: reviewerEmail,
+      documentRequestId: id,
+      clientId: request.client_id,
+      projectId: request.project_id,
+      title: request.title,
+      documentType: request.document_type,
+      rejectionReason: reason,
+      reviewerEmail
     });
+
+    sendSuccess(res, { request }, 'Document request rejected');
   })
 );
 
@@ -391,11 +402,7 @@ router.post(
     }
 
     const request = await documentRequestService.sendReminder(id);
-    res.json({
-      success: true,
-      message: 'Reminder sent',
-      request
-    });
+    sendSuccess(res, { request }, 'Reminder sent');
   })
 );
 
@@ -414,10 +421,7 @@ router.delete(
     }
 
     await documentRequestService.deleteRequest(id);
-    res.json({
-      success: true,
-      message: 'Document request deleted'
-    });
+    sendSuccess(res, undefined, 'Document request deleted');
   })
 );
 
@@ -434,7 +438,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const templates = await documentRequestService.getTemplates();
-    res.json({ templates });
+    sendSuccess(res, { templates });
   })
 );
 
@@ -457,7 +461,7 @@ router.get(
       return errorResponse(res, 'Template not found', 404);
     }
 
-    res.json({ template });
+    sendSuccess(res, { template });
   })
 );
 
@@ -487,11 +491,7 @@ router.post(
       created_by: createdBy
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Template created',
-      template
-    });
+    sendCreated(res, { template }, 'Template created');
   })
 );
 
@@ -514,11 +514,7 @@ router.put(
       return errorResponse(res, 'Template not found', 404);
     }
 
-    res.json({
-      success: true,
-      message: 'Template updated',
-      template
-    });
+    sendSuccess(res, { template }, 'Template updated');
   })
 );
 
@@ -537,10 +533,7 @@ router.delete(
     }
 
     await documentRequestService.deleteTemplate(id);
-    res.json({
-      success: true,
-      message: 'Template deleted'
-    });
+    sendSuccess(res, undefined, 'Template deleted');
   })
 );
 
@@ -557,7 +550,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const templatesByCategory = await documentRequestService.getTemplatesByCategory();
-    res.json({ templatesByCategory });
+    sendSuccess(res, { templatesByCategory });
   })
 );
 
@@ -571,7 +564,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectType } = req.params;
     const templates = await documentRequestService.getTemplatesByProjectType(projectType);
-    res.json({ templates });
+    sendSuccess(res, { templates });
   })
 );
 
@@ -599,11 +592,7 @@ router.post(
       required_only
     );
 
-    res.status(201).json({
-      success: true,
-      message: `${requests.length} document request(s) created`,
-      requests
-    });
+    sendCreated(res, { requests }, `${requests.length} document request(s) created`);
   })
 );
 

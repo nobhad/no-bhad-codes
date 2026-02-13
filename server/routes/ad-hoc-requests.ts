@@ -15,7 +15,7 @@ import { adHocRequestService, type AdHocRequest } from '../services/ad-hoc-reque
 import { BUSINESS_INFO } from '../config/business.js';
 import { projectService } from '../services/project-service.js';
 import { InvoiceService, type InvoiceLineItem } from '../services/invoice-service.js';
-import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -25,16 +25,16 @@ function getInvoiceService() {
 
 function mapTaskPriority(priority?: string | null): 'low' | 'medium' | 'high' | 'urgent' {
   switch (priority) {
-    case 'low':
-      return 'low';
-    case 'medium':
-      return 'medium';
-    case 'high':
-      return 'high';
-    case 'urgent':
-      return 'urgent';
-    default:
-      return 'medium';
+  case 'low':
+    return 'low';
+  case 'medium':
+    return 'medium';
+  case 'high':
+    return 'high';
+  case 'urgent':
+    return 'urgent';
+  default:
+    return 'medium';
   }
 }
 
@@ -62,7 +62,7 @@ function buildTaskDescription(request: AdHocRequest): string {
     .join('\n');
 }
 
-function formatMoney(value: number): string {
+function _formatMoney(value: number): string {
   return `$${value.toFixed(2)}`;
 }
 
@@ -169,7 +169,7 @@ router.get(
       requestType: requestType as any
     });
 
-    res.json({ success: true, requests });
+    sendSuccess(res, { requests });
   })
 );
 
@@ -246,7 +246,7 @@ router.post(
       attachmentFileId: attachmentFileId ? Number(attachmentFileId) : null
     });
 
-    res.status(201).json({ success: true, message: 'Request submitted', request });
+    sendCreated(res, { request }, 'Request submitted');
   })
 );
 
@@ -277,7 +277,7 @@ router.post(
     }
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, { status: 'approved' });
-    res.json({ success: true, message: 'Quote approved', request: updatedRequest });
+    sendSuccess(res, { request: updatedRequest }, 'Quote approved');
   })
 );
 
@@ -308,7 +308,7 @@ router.post(
     }
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, { status: 'declined' });
-    res.json({ success: true, message: 'Quote declined', request: updatedRequest });
+    sendSuccess(res, { request: updatedRequest }, 'Quote declined');
   })
 );
 
@@ -354,7 +354,7 @@ router.get(
       urgency: urgency as any
     });
 
-    res.json({ success: true, requests });
+    sendSuccess(res, { requests });
   })
 );
 
@@ -371,11 +371,11 @@ router.get(
 
     const request = await adHocRequestService.getRequest(requestId);
     if (!request.taskId) {
-      return res.json({ success: true, entries: [] });
+      return sendSuccess(res, { entries: [] });
     }
 
     const entries = await projectService.getTimeEntries(request.projectId, { taskId: request.taskId });
-    res.json({ success: true, entries });
+    sendSuccess(res, { entries });
   })
 );
 
@@ -410,7 +410,7 @@ router.post(
       hourlyRate: hourlyRate ?? request.hourlyRate ?? undefined
     });
 
-    res.status(201).json({ success: true, message: 'Time logged', entry });
+    sendCreated(res, { entry }, 'Time logged');
   })
 );
 
@@ -422,7 +422,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     const request = await adHocRequestService.getRequest(requestId);
-    res.json({ success: true, request });
+    sendSuccess(res, { request });
   })
 );
 
@@ -500,7 +500,7 @@ router.post(
       attachmentFileId: attachmentFileId ? Number(attachmentFileId) : null
     });
 
-    res.status(201).json({ success: true, message: 'Ad hoc request created', request });
+    sendCreated(res, { request }, 'Ad hoc request created');
   })
 );
 
@@ -515,7 +515,8 @@ router.put(
       status,
       requestType,
       priority,
-      urgency
+      urgency,
+      autoCreateInvoice = true // Default to auto-create invoice on completion
     } = req.body;
 
     if (status && !adHocRequestService.isValidStatus(status)) {
@@ -534,8 +535,58 @@ router.put(
       return errorResponse(res, 'Invalid request urgency', 400, 'VALIDATION_ERROR');
     }
 
+    // Get current request to check for status transition
+    const currentRequest = await adHocRequestService.getRequest(requestId);
+    const isCompletingRequest = status === 'completed' && currentRequest.status !== 'completed';
+
     const request = await adHocRequestService.updateRequest(requestId, req.body);
-    res.json({ success: true, message: 'Ad hoc request updated', request });
+
+    // Auto-create invoice when status changes to completed
+    let autoInvoice = null;
+    if (isCompletingRequest && autoCreateInvoice) {
+      try {
+        // Check if request has pricing data
+        const hasPricingData =
+          request.quotedPrice !== null ||
+          request.flatRate !== null ||
+          (request.estimatedHours !== null && request.hourlyRate !== null) ||
+          request.taskId; // Has time entries via linked task
+
+        if (hasPricingData) {
+          const summary = await getAdHocTimeSummary(request);
+          const lineItem = buildAdHocLineItem(request, {
+            useTimeEntries: !!request.taskId,
+            totalHours: summary.totalHours,
+            totalAmount: summary.totalAmount
+          });
+
+          autoInvoice = await getInvoiceService().createInvoice({
+            projectId: request.projectId,
+            clientId: request.clientId,
+            lineItems: [lineItem],
+            notes: `Ad Hoc Work - Request #${request.id}: ${request.title}\n\n${request.description}`
+          });
+
+          const db = getDatabase();
+          await db.run(
+            `INSERT INTO ad_hoc_request_invoices (request_id, invoice_id, amount)
+             VALUES (?, ?, ?)`,
+            [request.id, autoInvoice.id, lineItem.amount]
+          );
+        }
+      } catch (invoiceError) {
+        // Log error but don't fail the request update
+        console.error('[AdHocRequests] Auto-invoice creation failed:', invoiceError);
+      }
+    }
+
+    const message = autoInvoice
+      ? 'Ad hoc request completed and invoice created'
+      : 'Ad hoc request updated';
+    const data = autoInvoice
+      ? { request, invoice: autoInvoice }
+      : { request };
+    sendSuccess(res, data, message);
   })
 );
 
@@ -649,7 +700,7 @@ ${BUSINESS_INFO.email}
       ? request
       : await adHocRequestService.updateRequest(requestId, { status: 'quoted' });
 
-    res.json({ success: true, message: 'Quote sent', request: updatedRequest });
+    sendSuccess(res, { request: updatedRequest }, 'Quote sent');
   })
 );
 
@@ -681,11 +732,9 @@ router.post(
       projectId: request.projectId,
       clientId: request.clientId,
       lineItems: [lineItem],
-      notes: notes || `Ad hoc request #${request.id}: ${request.title}`,
+      notes: notes || `Ad Hoc Work - Request #${request.id}: ${request.title}\n\n${request.description}`,
       terms: terms || undefined,
-      dueDate: dueDate || undefined,
-      servicesTitle: 'Ad Hoc Work',
-      servicesDescription: request.description
+      dueDate: dueDate || undefined
     });
 
     const db = getDatabase();
@@ -695,12 +744,7 @@ router.post(
       , [request.id, invoice.id, lineItem.amount]
     );
 
-    res.status(201).json({
-      success: true,
-      message: 'Invoice created',
-      invoice,
-      lineItem
-    });
+    sendCreated(res, { invoice, lineItem }, 'Invoice created');
   })
 );
 
@@ -750,10 +794,9 @@ router.post(
       projectId: first.projectId,
       clientId: first.clientId,
       lineItems,
-      notes: notes || `Ad hoc requests bundled: ${requests.map((r) => `#${r.id}`).join(', ')}`,
+      notes: notes || `Ad Hoc Work (Bundle) - Requests bundled: ${requests.map((r) => `#${r.id}`).join(', ')}`,
       terms: terms || undefined,
-      dueDate: dueDate || undefined,
-      servicesTitle: 'Ad Hoc Work (Bundle)'
+      dueDate: dueDate || undefined
     });
 
     const db = getDatabase();
@@ -765,12 +808,7 @@ router.post(
       );
     }
 
-    res.status(201).json({
-      success: true,
-      message: 'Invoice created',
-      invoice,
-      lineItems
-    });
+    sendCreated(res, { invoice, lineItems }, 'Invoice created');
   })
 );
 
@@ -792,7 +830,7 @@ router.get(
       params.push(clientId);
     }
 
-    where += " AND i.issued_date >= date('now', ?)";
+    where += ' AND i.issued_date >= date(\'now\', ?)';
     params.push(`-${months} months`);
 
     const rows = await db.all(
@@ -813,7 +851,7 @@ router.get(
       params
     );
 
-    res.json({ success: true, summary: rows });
+    sendSuccess(res, { summary: rows });
   })
 );
 
@@ -867,21 +905,21 @@ router.post(
 
     const createdSubtasks = Array.isArray(subtasks)
       ? await Promise.all(
-          subtasks
-            .filter((item) => item && typeof item.title === 'string' && item.title.trim())
-            .map((item) =>
-              projectService.createTask(request.projectId, {
-                title: item.title,
-                description: item.description || undefined,
-                milestoneId: milestoneId ? Number(milestoneId) : undefined,
-                assignedTo: item.assignedTo || assignedTo || undefined,
-                dueDate: item.dueDate || dueDate || undefined,
-                estimatedHours: item.estimatedHours ?? undefined,
-                priority: mapTaskPriority(item.priority || priority || request.priority),
-                parentTaskId: task.id
-              })
-            )
-        )
+        subtasks
+          .filter((item) => item && typeof item.title === 'string' && item.title.trim())
+          .map((item) =>
+            projectService.createTask(request.projectId, {
+              title: item.title,
+              description: item.description || undefined,
+              milestoneId: milestoneId ? Number(milestoneId) : undefined,
+              assignedTo: item.assignedTo || assignedTo || undefined,
+              dueDate: item.dueDate || dueDate || undefined,
+              estimatedHours: item.estimatedHours ?? undefined,
+              priority: mapTaskPriority(item.priority || priority || request.priority),
+              parentTaskId: task.id
+            })
+          )
+      )
       : [];
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, {
@@ -891,13 +929,7 @@ router.post(
       convertedBy: req.user?.email || String(req.user?.id || 'admin')
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Request converted to task',
-      task,
-      subtasks: createdSubtasks,
-      request: updatedRequest
-    });
+    sendCreated(res, { task, subtasks: createdSubtasks, request: updatedRequest }, 'Request converted to task');
   })
 );
 
@@ -910,7 +942,7 @@ router.delete(
     const requestId = Number(req.params.requestId);
     const deletedBy = req.user?.email || String(req.user?.id || 'system');
     await adHocRequestService.softDeleteRequest(requestId, deletedBy);
-    res.json({ success: true, message: 'Ad hoc request deleted' });
+    sendSuccess(res, undefined, 'Ad hoc request deleted');
   })
 );
 

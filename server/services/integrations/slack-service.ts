@@ -347,10 +347,10 @@ function getEventSummary(eventType: string, data: Record<string, unknown>): stri
   const entityData = data[eventType.split('.')[0]] as Record<string, unknown> || data;
 
   const summaries: Record<string, () => string> = {
-    'invoice.created': () => `Invoice ${entityData.number || '#' + entityData.id} created for ${entityData.client_name || 'client'} - ${formatCurrency(Number(entityData.amount) || 0)}`,
-    'invoice.sent': () => `Invoice ${entityData.number || '#' + entityData.id} sent to ${entityData.client_email || entityData.client_name}`,
-    'invoice.paid': () => `Invoice ${entityData.number || '#' + entityData.id} has been paid - ${formatCurrency(Number(entityData.amount_paid || entityData.amount) || 0)}`,
-    'invoice.overdue': () => `Invoice ${entityData.number || '#' + entityData.id} is overdue - ${formatCurrency(Number(entityData.amount) || 0)}`,
+    'invoice.created': () => `Invoice ${entityData.number || `#${  entityData.id}`} created for ${entityData.client_name || 'client'} - ${formatCurrency(Number(entityData.amount) || 0)}`,
+    'invoice.sent': () => `Invoice ${entityData.number || `#${  entityData.id}`} sent to ${entityData.client_email || entityData.client_name}`,
+    'invoice.paid': () => `Invoice ${entityData.number || `#${  entityData.id}`} has been paid - ${formatCurrency(Number(entityData.amount_paid || entityData.amount) || 0)}`,
+    'invoice.overdue': () => `Invoice ${entityData.number || `#${  entityData.id}`} is overdue - ${formatCurrency(Number(entityData.amount) || 0)}`,
     'project.created': () => `New project "${entityData.name}" created for ${entityData.client_name || 'client'}`,
     'project.started': () => `Project "${entityData.name}" has started`,
     'project.completed': () => `Project "${entityData.name}" has been completed`,
@@ -455,15 +455,15 @@ export async function saveNotificationConfig(config: NotificationConfig): Promis
       [config.name, config.platform, config.webhook_url, config.channel || null, config.events.join(','), config.is_active ? 1 : 0, config.id]
     );
     return config;
-  } else {
-    // Create new
-    const result = await db.run(
-      `INSERT INTO notification_integrations (name, platform, webhook_url, channel, events, is_active, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-      [config.name, config.platform, config.webhook_url, config.channel || null, config.events.join(','), config.is_active ? 1 : 0]
-    );
-    return { ...config, id: result.lastID };
   }
+  // Create new
+  const result = await db.run(
+    `INSERT INTO notification_integrations (name, platform, webhook_url, channel, events, is_active, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+    [config.name, config.platform, config.webhook_url, config.channel || null, config.events.join(','), config.is_active ? 1 : 0]
+  );
+  return { ...config, id: result.lastID };
+
 }
 
 /**
@@ -511,10 +511,10 @@ export async function testNotification(config: NotificationConfig): Promise<{ su
   if (config.platform === 'slack') {
     const message = formatSlackMessage('invoice.created', testData, { channel: config.channel });
     return sendSlackNotification(config.webhook_url, message);
-  } else {
-    const message = formatDiscordMessage('invoice.created', testData);
-    return sendDiscordNotification(config.webhook_url, message);
   }
+  const message = formatDiscordMessage('invoice.created', testData);
+  return sendDiscordNotification(config.webhook_url, message);
+
 }
 
 // Helper functions

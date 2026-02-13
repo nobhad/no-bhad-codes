@@ -11,7 +11,9 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { questionnaireService, ResponseStatus } from '../services/questionnaire-service.js';
-import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { workflowTriggerService } from '../services/workflow-trigger-service.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { sendPdfResponse } from '../utils/pdf-generator.js';
 
 const router = express.Router();
 
@@ -36,7 +38,7 @@ router.get(
     const responses = await questionnaireService.getClientResponses(clientId, status);
     const stats = await questionnaireService.getClientStats(clientId);
 
-    res.json({ responses, stats });
+    sendSuccess(res, { responses, stats });
   })
 );
 
@@ -72,7 +74,7 @@ router.get(
     // Get the full questionnaire
     const questionnaire = await questionnaireService.getQuestionnaire(response.questionnaire_id);
 
-    res.json({ response, questionnaire });
+    sendSuccess(res, { response, questionnaire });
   })
 );
 
@@ -107,16 +109,13 @@ router.post(
 
     const response = await questionnaireService.saveProgress(responseId, answers || {});
 
-    res.json({
-      success: true,
-      message: 'Progress saved',
-      response
-    });
+    sendSuccess(res, { response }, 'Progress saved');
   })
 );
 
 /**
  * Submit a completed questionnaire response
+ * On completion: generates PDF, saves to project Files, emits workflow event
  */
 router.post(
   '/responses/:id/submit',
@@ -148,13 +147,40 @@ router.post(
       return errorResponse(res, 'Questionnaire already submitted', 400);
     }
 
+    // Submit the response
     const response = await questionnaireService.submitResponse(responseId, answers || {});
 
-    res.json({
-      success: true,
-      message: 'Questionnaire submitted',
-      response
+    // Generate and save PDF to project Files if response has a project
+    let exportedFileId: number | undefined;
+    if (response.project_id) {
+      try {
+        exportedFileId = await questionnaireService.saveQuestionnairePdfToFiles(responseId);
+      } catch (pdfError) {
+        // Log error but don't fail the submission
+        console.error(`[Questionnaire] Failed to generate PDF for response ${responseId}:`, pdfError);
+      }
+    }
+
+    // Emit workflow event
+    await workflowTriggerService.emit('questionnaire.completed', {
+      entityId: responseId,
+      questionnaireId: response.questionnaire_id,
+      questionnaireName: response.questionnaire_name,
+      clientId: response.client_id,
+      clientName: response.client_name,
+      projectId: response.project_id,
+      projectName: response.project_name,
+      exportedFileId,
+      completedAt: response.completed_at,
+      triggeredBy: req.user?.email
     });
+
+    sendSuccess(res, {
+      response: {
+        ...response,
+        exported_file_id: exportedFileId
+      }
+    }, 'Questionnaire submitted');
   })
 );
 
@@ -174,7 +200,7 @@ router.get(
     const activeOnly = req.query.active_only === 'true';
 
     const questionnaires = await questionnaireService.getQuestionnaires(projectType, activeOnly);
-    res.json({ questionnaires });
+    sendSuccess(res, { questionnaires });
   })
 );
 
@@ -197,7 +223,7 @@ router.get(
       return errorResponse(res, 'Questionnaire not found', 404);
     }
 
-    res.json({ questionnaire });
+    sendSuccess(res, { questionnaire });
   })
 );
 
@@ -236,11 +262,7 @@ router.post(
       created_by: createdBy
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Questionnaire created',
-      questionnaire
-    });
+    sendCreated(res, { questionnaire }, 'Questionnaire created');
   })
 );
 
@@ -263,11 +285,7 @@ router.put(
       return errorResponse(res, 'Questionnaire not found', 404);
     }
 
-    res.json({
-      success: true,
-      message: 'Questionnaire updated',
-      questionnaire
-    });
+    sendSuccess(res, { questionnaire }, 'Questionnaire updated');
   })
 );
 
@@ -287,10 +305,7 @@ router.delete(
 
     await questionnaireService.deleteQuestionnaire(id);
 
-    res.json({
-      success: true,
-      message: 'Questionnaire deleted'
-    });
+    sendSuccess(res, undefined, 'Questionnaire deleted');
   })
 );
 
@@ -307,7 +322,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const responses = await questionnaireService.getPendingResponses();
-    res.json({ responses });
+    sendSuccess(res, { responses });
   })
 );
 
@@ -351,11 +366,7 @@ router.post(
       due_date
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Questionnaire sent to client',
-      response
-    });
+    sendCreated(res, { response }, 'Questionnaire sent to client');
   })
 );
 
@@ -377,7 +388,7 @@ router.get(
     const responses = await questionnaireService.getClientResponses(clientId, status);
     const stats = await questionnaireService.getClientStats(clientId);
 
-    res.json({ responses, stats });
+    sendSuccess(res, { responses, stats });
   })
 );
 
@@ -397,11 +408,7 @@ router.post(
 
     const response = await questionnaireService.sendReminder(responseId);
 
-    res.json({
-      success: true,
-      message: 'Reminder sent',
-      response
-    });
+    sendSuccess(res, { response }, 'Reminder sent');
   })
 );
 
@@ -421,10 +428,133 @@ router.delete(
 
     await questionnaireService.deleteResponse(responseId);
 
-    res.json({
-      success: true,
-      message: 'Response deleted'
+    sendSuccess(res, undefined, 'Response deleted');
+  })
+);
+
+// =====================================================
+// PDF AND DATA EXPORT ENDPOINTS
+// =====================================================
+
+/**
+ * Download questionnaire response as PDF (admin)
+ */
+router.get(
+  '/responses/:id/pdf',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const responseId = parseInt(req.params.id);
+
+    if (isNaN(responseId)) {
+      return errorResponse(res, 'Invalid response ID', 400);
+    }
+
+    const response = await questionnaireService.getResponse(responseId);
+    if (!response) {
+      return errorResponse(res, 'Response not found', 404);
+    }
+
+    const questionnaire = await questionnaireService.getQuestionnaire(response.questionnaire_id);
+    if (!questionnaire) {
+      return errorResponse(res, 'Questionnaire not found', 404);
+    }
+
+    // Generate PDF
+    const pdfBytes = await questionnaireService.generateQuestionnairePdf(responseId);
+
+    // Create filename
+    const safeQuestionnaireName = questionnaire.name
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_-]/g, '')
+      .substring(0, 30);
+    const safeClientName = (response.client_name || 'client')
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_-]/g, '')
+      .substring(0, 30);
+
+    sendPdfResponse(res, pdfBytes, {
+      filename: `questionnaire_${safeQuestionnaireName}_${safeClientName}.pdf`,
+      disposition: 'inline'
     });
+  })
+);
+
+/**
+ * Export questionnaire response as JSON (admin)
+ */
+router.get(
+  '/responses/:id/export',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const responseId = parseInt(req.params.id);
+
+    if (isNaN(responseId)) {
+      return errorResponse(res, 'Invalid response ID', 400);
+    }
+
+    const response = await questionnaireService.getResponse(responseId);
+    if (!response) {
+      return errorResponse(res, 'Response not found', 404);
+    }
+
+    const questionnaire = await questionnaireService.getQuestionnaire(response.questionnaire_id);
+    if (!questionnaire) {
+      return errorResponse(res, 'Questionnaire not found', 404);
+    }
+
+    // Get JSON export
+    const jsonData = await questionnaireService.exportQuestionnaireJson(responseId);
+
+    // Create filename
+    const safeQuestionnaireName = questionnaire.name
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_-]/g, '')
+      .substring(0, 30);
+    const timestamp = new Date().toISOString().substring(0, 10);
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="questionnaire_${safeQuestionnaireName}_${timestamp}.json"`);
+    res.send(jsonData);
+  })
+);
+
+/**
+ * Regenerate PDF for a completed questionnaire response (admin)
+ * Useful if PDF was not generated on completion or needs to be updated
+ */
+router.post(
+  '/responses/:id/regenerate-pdf',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const responseId = parseInt(req.params.id);
+
+    if (isNaN(responseId)) {
+      return errorResponse(res, 'Invalid response ID', 400);
+    }
+
+    const response = await questionnaireService.getResponse(responseId);
+    if (!response) {
+      return errorResponse(res, 'Response not found', 404);
+    }
+
+    if (response.status !== 'completed') {
+      return errorResponse(res, 'Can only regenerate PDF for completed questionnaires', 400);
+    }
+
+    if (!response.project_id) {
+      return errorResponse(res, 'Cannot save PDF: questionnaire has no associated project', 400);
+    }
+
+    // Generate and save PDF to project Files
+    const exportedFileId = await questionnaireService.saveQuestionnairePdfToFiles(responseId);
+
+    sendSuccess(res, { exported_file_id: exportedFileId }, 'PDF regenerated and saved to project files');
   })
 );
 

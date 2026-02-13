@@ -6,7 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { webhookService } from '../services/webhook-service.js';
 import { WebhookConfig } from '../models/webhook.js';
-import { errorResponse } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 
 const router = Router();
 
@@ -17,7 +17,7 @@ const router = Router();
 router.get('/webhooks', async (req: Request, res: Response) => {
   try {
     const webhooks = await webhookService.listWebhooks();
-    res.json({ webhooks });
+    sendSuccess(res, { webhooks });
   } catch (error) {
     errorResponse(res, 'Failed to list webhooks', 500, 'INTERNAL_ERROR');
   }
@@ -38,7 +38,7 @@ router.get('/webhooks/:id', async (req: Request, res: Response) => {
 
     // Don't expose secret key in response
     const { secret_key, ...safe } = webhook;
-    res.json({ webhook: safe });
+    sendSuccess(res, { webhook: safe });
   } catch (error) {
     errorResponse(res, 'Failed to retrieve webhook', 500, 'INTERNAL_ERROR');
   }
@@ -85,7 +85,7 @@ router.post('/webhooks', async (req: Request, res: Response) => {
 
     // Don't expose secret key
     const { secret_key, ...safe } = webhook;
-    res.status(201).json({ webhook: safe });
+    sendCreated(res, { webhook: safe });
   } catch (error) {
     errorResponse(res, 'Failed to create webhook', 500, 'INTERNAL_ERROR');
   }
@@ -110,7 +110,7 @@ router.put('/webhooks/:id', async (req: Request, res: Response) => {
 
     const webhook = await webhookService.updateWebhook(parseInt(id), req.body);
     const { secret_key, ...safe } = webhook;
-    res.json({ webhook: safe });
+    sendSuccess(res, { webhook: safe });
   } catch (error: any) {
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
@@ -127,7 +127,7 @@ router.delete('/webhooks/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await webhookService.deleteWebhook(parseInt(id));
-    res.json({ message: 'Webhook deleted' });
+    sendSuccess(res, undefined, 'Webhook deleted');
   } catch (error) {
     errorResponse(res, 'Failed to delete webhook', 500, 'INTERNAL_ERROR');
   }
@@ -149,7 +149,7 @@ router.patch('/webhooks/:id/toggle', async (req: Request, res: Response) => {
 
     const webhook = await webhookService.toggleWebhook(parseInt(id), active);
     const { secret_key, ...safe } = webhook;
-    res.json({ webhook: safe });
+    sendSuccess(res, { webhook: safe });
   } catch (error: any) {
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
@@ -181,7 +181,7 @@ router.post('/webhooks/:id/test', async (req: Request, res: Response) => {
     // Trigger test event
     await webhookService.triggerEvent(eventType, sampleData || { test: true });
 
-    res.json({ message: 'Test webhook triggered', eventType });
+    sendSuccess(res, { eventType }, 'Test webhook triggered');
   } catch (error) {
     errorResponse(res, 'Failed to test webhook', 500, 'INTERNAL_ERROR');
   }
@@ -204,7 +204,7 @@ router.get('/webhooks/:id/deliveries', async (req: Request, res: Response) => {
       offset: parseInt(offset as string)
     });
 
-    res.json({
+    sendSuccess(res, {
       deliveries: result.deliveries,
       pagination: {
         total: result.total,
@@ -231,7 +231,7 @@ router.get('/webhooks/:id/deliveries/:deliveryId', async (req: Request, res: Res
       return errorResponse(res, 'Delivery not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
-    res.json({ delivery });
+    sendSuccess(res, { delivery });
   } catch (error) {
     errorResponse(res, 'Failed to retrieve delivery', 500, 'INTERNAL_ERROR');
   }
@@ -246,7 +246,7 @@ router.get('/webhooks/:id/stats', async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const stats = await webhookService.getDeliveryStats(parseInt(id));
-    res.json({ stats });
+    sendSuccess(res, { stats });
   } catch (error) {
     errorResponse(res, 'Failed to retrieve statistics', 500, 'INTERNAL_ERROR');
   }
@@ -274,7 +274,7 @@ router.post('/webhooks/:id/retry', async (req: Request, res: Response) => {
     // Trigger retry immediately
     await webhookService.processPendingRetries();
 
-    res.json({ message: 'Delivery queued for retry', deliveryId });
+    sendSuccess(res, { deliveryId }, 'Delivery queued for retry');
   } catch (error) {
     errorResponse(res, 'Failed to retry delivery', 500, 'INTERNAL_ERROR');
   }
@@ -290,11 +290,10 @@ router.post('/webhooks/:id/secret/regenerate', async (req: Request, res: Respons
 
     const newSecret = await webhookService.regenerateSecret(parseInt(id));
 
-    res.json({
-      message: 'Secret regenerated successfully',
+    sendSuccess(res, {
       secret_key: newSecret,
       warning: 'Update any consumers of this webhook with the new secret key'
-    });
+    }, 'Secret regenerated successfully');
   } catch (error) {
     errorResponse(res, 'Failed to regenerate secret', 500, 'INTERNAL_ERROR');
   }
@@ -315,7 +314,7 @@ router.post('/events/trigger', async (req: Request, res: Response) => {
 
     await webhookService.triggerEvent(eventType, data || {});
 
-    res.json({ message: 'Event triggered', eventType, webhooksMatched: 'See logs for details' });
+    sendSuccess(res, { eventType, webhooksMatched: 'See logs for details' }, 'Event triggered');
   } catch (error) {
     errorResponse(res, 'Failed to trigger event', 500, 'INTERNAL_ERROR');
   }

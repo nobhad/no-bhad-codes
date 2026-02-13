@@ -11,7 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { knowledgeBaseService } from '../services/knowledge-base-service.js';
-import { errorResponse } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ router.get(
   '/categories',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const categories = await knowledgeBaseService.getCategories(false);
-    res.json({ success: true, categories });
+    sendSuccess(res, { categories });
   })
 );
 
@@ -44,7 +44,7 @@ router.get(
 
     const articles = await knowledgeBaseService.getArticlesByCategory(req.params.slug);
 
-    res.json({ success: true, category, articles });
+    sendSuccess(res, { category, articles });
   })
 );
 
@@ -56,7 +56,7 @@ router.get(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
     const articles = await knowledgeBaseService.getFeaturedArticles(limit);
-    res.json({ success: true, articles });
+    sendSuccess(res, { articles });
   })
 );
 
@@ -79,7 +79,7 @@ router.get(
       userType: req.user?.type
     });
 
-    res.json({ success: true, articles, query });
+    sendSuccess(res, { articles, query });
   })
 );
 
@@ -99,7 +99,7 @@ router.get(
     // Increment view count
     await knowledgeBaseService.incrementViewCount(article.id);
 
-    res.json({ success: true, article });
+    sendSuccess(res, { article });
   })
 );
 
@@ -128,7 +128,7 @@ router.post(
       comment
     });
 
-    res.json({ success: true, message: 'Feedback submitted' });
+    sendSuccess(res, undefined, 'Feedback submitted');
   })
 );
 
@@ -145,7 +145,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const categories = await knowledgeBaseService.getCategories(true);
-    res.json({ success: true, categories });
+    sendSuccess(res, { categories });
   })
 );
 
@@ -172,11 +172,7 @@ router.post(
       sort_order
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Category created',
-      category
-    });
+    sendCreated(res, { category }, 'Category created');
   })
 );
 
@@ -200,11 +196,7 @@ router.put(
       return errorResponse(res, 'Category not found', 404);
     }
 
-    res.json({
-      success: true,
-      message: 'Category updated',
-      category
-    });
+    sendSuccess(res, { category }, 'Category updated');
   })
 );
 
@@ -223,7 +215,7 @@ router.delete(
     }
 
     await knowledgeBaseService.deleteCategory(id);
-    res.json({ success: true, message: 'Category deleted' });
+    sendSuccess(res, undefined, 'Category deleted');
   })
 );
 
@@ -250,7 +242,7 @@ router.get(
       }
     }
 
-    res.json({ success: true, articles });
+    sendSuccess(res, { articles });
   })
 );
 
@@ -274,7 +266,7 @@ router.get(
       return errorResponse(res, 'Article not found', 404);
     }
 
-    res.json({ success: true, article });
+    sendSuccess(res, { article });
   })
 );
 
@@ -304,11 +296,7 @@ router.post(
       author_email: req.user?.email
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Article created',
-      article
-    });
+    sendCreated(res, { article }, 'Article created');
   })
 );
 
@@ -332,11 +320,7 @@ router.put(
       return errorResponse(res, 'Article not found', 404);
     }
 
-    res.json({
-      success: true,
-      message: 'Article updated',
-      article
-    });
+    sendSuccess(res, { article }, 'Article updated');
   })
 );
 
@@ -355,7 +339,7 @@ router.delete(
     }
 
     await knowledgeBaseService.deleteArticle(id);
-    res.json({ success: true, message: 'Article deleted' });
+    sendSuccess(res, undefined, 'Article deleted');
   })
 );
 
@@ -368,7 +352,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const stats = await knowledgeBaseService.getStats();
-    res.json({ success: true, ...stats });
+    sendSuccess(res, stats);
   })
 );
 

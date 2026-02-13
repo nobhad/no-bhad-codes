@@ -528,11 +528,11 @@ export async function mergeDuplicates(request: MergeRequest): Promise<{ success:
       } else if (mergeItem.type === 'client') {
         // Soft delete duplicate client, reassign relationships
         await db.run(
-          `UPDATE projects SET client_id = ? WHERE client_id = ?`,
+          'UPDATE projects SET client_id = ? WHERE client_id = ?',
           [request.keepId, mergeItem.id]
         );
         await db.run(
-          `UPDATE invoices SET client_id = ? WHERE client_id = ?`,
+          'UPDATE invoices SET client_id = ? WHERE client_id = ?',
           [request.keepId, mergeItem.id]
         );
         await db.run(

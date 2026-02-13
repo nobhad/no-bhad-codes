@@ -106,6 +106,9 @@ function renderInvoicesList(
     const statusClass = getInvoiceStatusClass(invoice.status);
     const statusLabel = getInvoiceStatusLabel(invoice.status);
 
+    // Show receipt button for paid/partial invoices
+    const showReceiptBtn = invoice.status === 'paid' || invoice.status === 'partial';
+
     invoiceElement.innerHTML = `
       <div class="invoice-info">
         <span class="invoice-number">${ctx.escapeHtml(invoice.invoice_number)}</span>
@@ -121,9 +124,17 @@ function renderInvoicesList(
         <button class="icon-btn btn-download-invoice"
                 data-invoice-id="${invoice.id}"
                 data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}"
-                aria-label="Download invoice" title="Download">
+                aria-label="Download invoice" title="Download Invoice">
           ${ICONS.DOWNLOAD}
         </button>
+        ${showReceiptBtn ? `
+        <button class="icon-btn btn-download-receipt"
+                data-invoice-id="${invoice.id}"
+                data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}"
+                aria-label="Download receipt" title="Download Receipt">
+          ${ICONS.FILE_TEXT}
+        </button>
+        ` : ''}
       </div>
     `;
 
@@ -187,6 +198,17 @@ function attachInvoiceActionListeners(container: HTMLElement, ctx: ClientPortalC
       }
     });
   });
+
+  // Receipt download buttons (for paid/partial invoices)
+  container.querySelectorAll('.btn-download-receipt').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const invoiceId = (e.currentTarget as HTMLElement).dataset.invoiceId;
+      const invoiceNumber = (e.currentTarget as HTMLElement).dataset.invoiceNumber || 'receipt';
+      if (invoiceId) {
+        downloadReceipt(parseInt(invoiceId), invoiceNumber);
+      }
+    });
+  });
 }
 
 /**
@@ -226,5 +248,54 @@ async function downloadInvoice(
   } catch (error) {
     console.error('Error downloading invoice:', error);
     showToast('Failed to download invoice. Please try again.', 'error');
+  }
+}
+
+/**
+ * Download receipt PDF for a paid invoice
+ */
+async function downloadReceipt(invoiceId: number, invoiceNumber: string): Promise<void> {
+  try {
+    // First, get receipts for this invoice
+    const receiptsResponse = await fetch(`/api/receipts/invoice/${invoiceId}`, {
+      credentials: 'include'
+    });
+
+    if (!receiptsResponse.ok) {
+      throw new Error('Failed to fetch receipts');
+    }
+
+    const receiptsData = await receiptsResponse.json();
+    const receipts = receiptsData.receipts || [];
+
+    if (receipts.length === 0) {
+      showToast('No receipt found for this invoice.', 'warning');
+      return;
+    }
+
+    // Download the most recent receipt
+    const latestReceipt = receipts[0];
+    const pdfResponse = await fetch(`/api/receipts/${latestReceipt.id}/pdf`, {
+      credentials: 'include'
+    });
+
+    if (!pdfResponse.ok) {
+      throw new Error('Failed to download receipt');
+    }
+
+    const blob = await pdfResponse.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `receipt-${latestReceipt.receipt_number || invoiceNumber}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    showToast('Receipt downloaded successfully', 'success');
+  } catch (error) {
+    console.error('Error downloading receipt:', error);
+    showToast('Failed to download receipt. Please try again.', 'error');
   }
 }

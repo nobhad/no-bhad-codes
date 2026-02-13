@@ -46,6 +46,28 @@ let currentUploadCallback: (() => void) | null = null;
 let uploadRequestDropdown: HTMLElement | null = null;
 let uploadFileTypeDropdown: HTMLElement | null = null;
 
+// File type including sharing fields
+interface ProjectFile {
+  id: number;
+  originalName?: string;
+  filename: string;
+  uploadedAt: string;
+  size: number;
+  sharedWithClient: boolean;
+  sharedAt?: string;
+  sharedBy?: string;
+}
+
+/**
+ * Lucide icon SVGs for share toggle
+ */
+const SHARE_ICONS = {
+  // Share2 icon - shown when file is not shared (click to share)
+  share: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+  // Lock icon - shown when file is shared (click to unshare/lock)
+  lock: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+};
+
 /**
  * Load files for the specified project
  */
@@ -63,15 +85,19 @@ export async function loadProjectFiles(projectId: number): Promise<void> {
 
     if (response.ok) {
       const data = await response.json();
-      const files = data.files || [];
+      const files: ProjectFile[] = data.files || [];
 
       if (files.length === 0) {
         renderEmptyState(filesList, 'No files yet. Upload files above.');
       } else {
         filesList.innerHTML = files
           .map(
-            (file: { id: number; originalName?: string; filename: string; uploadedAt: string; size: number }) => {
+            (file: ProjectFile) => {
               const safeName = SanitizationUtils.escapeHtml(file.originalName || file.filename);
+              const isShared = file.sharedWithClient;
+              const shareIcon = isShared ? SHARE_ICONS.lock : SHARE_ICONS.share;
+              const shareTitle = isShared ? 'Shared with client - Click to unshare' : 'Share with client';
+              const shareClass = isShared ? 'icon-btn-active' : '';
               return `
             <div class="file-item" data-file-id="${file.id}">
               <span class="file-icon">
@@ -81,10 +107,11 @@ export async function loadProjectFiles(projectId: number): Promise<void> {
                 </svg>
               </span>
               <div class="file-info">
-                <span class="file-name">${file.originalName || file.filename}</span>
+                <span class="file-name">${file.originalName || file.filename}${isShared ? '<span class="file-shared-badge">Shared</span>' : ''}</span>
                 <span class="file-meta">Uploaded ${formatDate(file.uploadedAt)} - ${formatFileSize(file.size)}</span>
               </div>
               <div class="file-actions">
+                <button type="button" class="icon-btn btn-share-file ${shareClass}" data-file-id="${file.id}" data-shared="${isShared}" aria-label="${shareTitle}" title="${shareTitle}">${shareIcon}</button>
                 <a href="/api/uploads/file/${file.id}" class="icon-btn" target="_blank" aria-label="Download ${safeName}" title="Download"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>
                 <button type="button" class="icon-btn icon-btn-danger btn-delete-file" data-file-id="${file.id}" data-file-name="${safeName}" aria-label="Delete ${safeName}" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
               </div>
@@ -94,8 +121,9 @@ export async function loadProjectFiles(projectId: number): Promise<void> {
           )
           .join('');
 
-        // Add delete handlers
+        // Add handlers
         setupFileDeleteHandlers(projectId);
+        setupFileShareHandlers(projectId);
       }
     }
   } catch (error) {
@@ -135,6 +163,54 @@ function setupFileDeleteHandlers(projectId: number): void {
       } catch (error) {
         console.error('[ProjectFiles] Error deleting file:', error);
         alertError('Failed to delete file');
+      }
+    });
+  });
+}
+
+/**
+ * Setup share toggle handlers for file items
+ */
+function setupFileShareHandlers(projectId: number): void {
+  const filesList = domCache.get('filesList');
+  if (!filesList) return;
+
+  filesList.querySelectorAll('.btn-share-file').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const fileId = (btn as HTMLElement).dataset.fileId;
+      const isCurrentlyShared = (btn as HTMLElement).dataset.shared === 'true';
+
+      if (!fileId) return;
+
+      // Disable button during request
+      (btn as HTMLButtonElement).disabled = true;
+
+      try {
+        const endpoint = isCurrentlyShared
+          ? `/api/uploads/${fileId}/unshare`
+          : `/api/uploads/${fileId}/share`;
+
+        const response = await apiPost(endpoint, {});
+
+        if (response.ok) {
+          const message = isCurrentlyShared
+            ? 'File unshared from client'
+            : 'File shared with client';
+          showToast(message, 'success');
+          await loadProjectFiles(projectId);
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          const errorMsg = errorData.message || 'Failed to update file sharing';
+          alertError(errorMsg);
+        }
+      } catch (error) {
+        console.error('[ProjectFiles] Error toggling file share:', error);
+        alertError('Failed to update file sharing');
+      } finally {
+        (btn as HTMLButtonElement).disabled = false;
       }
     });
   });

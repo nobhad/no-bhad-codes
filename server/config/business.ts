@@ -68,7 +68,7 @@ export function getFormattedBusinessInfo(): {
   fullAddress: string;
   contactLine: string;
   footerText: string;
-} {
+  } {
   return {
     fullAddress: `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner}`,
     contactLine: `${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`,

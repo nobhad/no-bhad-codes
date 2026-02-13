@@ -24,7 +24,7 @@ import { getDatabase } from '../database/init.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../utils/pdf-utils.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
-import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
 import { coreRouter } from './invoices/core.js';
 import { depositsRouter } from './invoices/deposits.js';
@@ -38,7 +38,7 @@ import { batchRouter } from './invoices/batch.js';
 import { agingRouter } from './invoices/aging.js';
 import {
   getInvoiceService,
-  toSnakeCaseInvoice,
+  toSnakeCaseInvoice
 } from './invoices/helpers.js';
 
 const router = express.Router();
@@ -88,13 +88,9 @@ router.post(
     try {
       const invoice = await getInvoiceService().createMilestoneInvoice(milestoneId, invoiceData);
 
-      res.status(201).json({
-        success: true,
-        message: 'Milestone invoice created',
-        invoice: toSnakeCaseInvoice(invoice)
-      });
+      sendCreated(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Milestone invoice created');
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to create milestone invoice', 500, 'CREATION_FAILED', {
+      return errorResponseWithPayload(res, 'Failed to create milestone invoice', 500, 'CREATION_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -122,13 +118,12 @@ router.get(
     try {
       const invoices = await getInvoiceService().getInvoicesByMilestone(milestoneId);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         invoices: invoices.map(toSnakeCaseInvoice),
         count: invoices.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve milestone invoices', 500, 'RETRIEVAL_FAILED', {
+      return errorResponseWithPayload(res, 'Failed to retrieve milestone invoices', 500, 'RETRIEVAL_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -164,19 +159,14 @@ router.put(
     try {
       const invoice = await getInvoiceService().linkInvoiceToMilestone(invoiceId, milestoneId);
 
-      res.json({
-        success: true,
-        message: 'Invoice linked to milestone',
-        invoice: toSnakeCaseInvoice(invoice)
-      });
+      sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Invoice linked to milestone');
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to link invoice to milestone', 500, 'LINK_FAILED', {
+      return errorResponseWithPayload(res, 'Failed to link invoice to milestone', 500, 'LINK_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
 );
-
 
 
 // ============================================
@@ -212,28 +202,20 @@ router.put(
 
       try {
         const invoice = await getInvoiceService().updateInvoiceStatus(invoiceId, req.body.status);
-        res.json({
-          success: true,
-          message: 'Invoice status updated',
-          invoice: toSnakeCaseInvoice(invoice)
-        });
+        sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Invoice status updated');
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         if (message.includes('not found')) {
           return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
         }
-        errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', { message });
+        return errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', { message });
       }
       return;
     }
 
     try {
       const invoice = await getInvoiceService().updateInvoice(invoiceId, req.body);
-      res.json({
-        success: true,
-        message: 'Invoice updated successfully',
-        invoice: toSnakeCaseInvoice(invoice)
-      });
+      sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Invoice updated successfully');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('Only draft invoices can be edited')) {
@@ -242,7 +224,7 @@ router.put(
       if (message.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', { message });
+      return errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', { message });
     }
   })
 );
@@ -281,13 +263,13 @@ router.get(
 
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
-      res.json({ success: true, invoice });
+      sendSuccess(res, { invoice });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      errorResponse(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED');
+      return errorResponse(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED');
     }
   })
 );
@@ -346,11 +328,7 @@ router.delete(
         return errorResponse(res, result.message, 404, 'NOT_FOUND');
       }
 
-      res.json({
-        success: true,
-        message: result.message,
-        action: 'soft_deleted'
-      });
+      sendSuccess(res, { action: 'soft_deleted' }, result.message);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       errorResponseWithPayload(res, 'Failed to delete invoice', 500, 'DELETE_FAILED', { message });
@@ -398,11 +376,7 @@ router.post(
     try {
       const newInvoice = await getInvoiceService().duplicateInvoice(invoiceId);
 
-      res.status(201).json({
-        success: true,
-        message: 'Invoice duplicated successfully',
-        invoice: toSnakeCaseInvoice(newInvoice)
-      });
+      sendCreated(res, { invoice: toSnakeCaseInvoice(newInvoice) }, 'Invoice duplicated successfully');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
 
@@ -481,13 +455,10 @@ router.post(
         paymentReference
       );
 
-      res.json({
-        success: true,
-        message: invoice.status === 'paid'
-          ? 'Payment recorded - invoice is now fully paid'
-          : 'Partial payment recorded successfully',
-        invoice: toSnakeCaseInvoice(invoice)
-      });
+      const paymentMessage = invoice.status === 'paid'
+        ? 'Payment recorded - invoice is now fully paid'
+        : 'Partial payment recorded successfully';
+      sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, paymentMessage);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
 
@@ -529,13 +500,10 @@ router.post(
     try {
       const count = await getInvoiceService().checkAndMarkOverdue();
 
-      res.json({
-        success: true,
-        message: count > 0
-          ? `Marked ${count} invoice(s) as overdue`
-          : 'No invoices needed to be marked as overdue',
-        count
-      });
+      const overdueMessage = count > 0
+        ? `Marked ${count} invoice(s) as overdue`
+        : 'No invoices needed to be marked as overdue';
+      sendSuccess(res, { count }, overdueMessage);
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to check overdue invoices', 500, 'CHECK_OVERDUE_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -597,10 +565,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const terms = await getInvoiceService().getPaymentTermsPresets();
-      res.json({
-        success: true,
-        terms: terms.map(toSnakeCasePaymentTerms)
-      });
+      sendSuccess(res, { terms: terms.map(toSnakeCasePaymentTerms) });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve payment terms', 500, 'RETRIEVAL_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -642,11 +607,7 @@ router.post(
         isDefault
       });
 
-      res.status(201).json({
-        success: true,
-        message: 'Payment terms preset created',
-        terms: toSnakeCasePaymentTerms(terms)
-      });
+      sendCreated(res, { terms: toSnakeCasePaymentTerms(terms) }, 'Payment terms preset created');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to create payment terms', 500, 'CREATION_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -683,11 +644,7 @@ router.post(
 
     try {
       const invoice = await getInvoiceService().applyPaymentTerms(invoiceId, termsId);
-      res.json({
-        success: true,
-        message: 'Payment terms applied',
-        invoice: toSnakeCaseInvoice(invoice)
-      });
+      sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Payment terms applied');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
@@ -730,11 +687,7 @@ router.put(
         discountValue
       );
 
-      res.json({
-        success: true,
-        message: 'Tax and discount updated',
-        invoice: toSnakeCaseInvoice(invoice)
-      });
+      sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Tax and discount updated');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('draft')) {
@@ -771,8 +724,7 @@ router.get(
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
       const lateFee = getInvoiceService().calculateLateFee(invoice);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         invoiceId,
         lateFee,
         alreadyApplied: !!invoice.lateFeeAppliedAt,
@@ -809,11 +761,7 @@ router.post(
 
     try {
       const invoice = await getInvoiceService().applyLateFee(invoiceId);
-      res.json({
-        success: true,
-        message: 'Late fee applied',
-        invoice: toSnakeCaseInvoice(invoice)
-      });
+      sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Late fee applied');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('already been applied')) {
@@ -842,11 +790,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const count = await getInvoiceService().processLateFees();
-      res.json({
-        success: true,
-        message: `Late fees applied to ${count} invoices`,
-        count
-      });
+      sendSuccess(res, { count }, `Late fees applied to ${count} invoices`);
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to process late fees', 500, 'PROCESS_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -879,10 +823,7 @@ router.get(
 
     try {
       const payments = await getInvoiceService().getPaymentHistory(invoiceId);
-      res.json({
-        success: true,
-        payments: payments.map(toSnakeCasePayment)
-      });
+      sendSuccess(res, { payments: payments.map(toSnakeCasePayment) });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve payment history', 500, 'RETRIEVAL_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -926,12 +867,10 @@ router.post(
         notes
       );
 
-      res.json({
-        success: true,
-        message: 'Payment recorded',
+      sendSuccess(res, {
         invoice: toSnakeCaseInvoice(result.invoice),
         payment: toSnakeCasePayment(result.payment)
-      });
+      }, 'Payment recorded');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       errorResponseWithPayload(res, 'Failed to record payment', 500, 'RECORD_FAILED', { message });
@@ -966,11 +905,7 @@ router.put(
 
     try {
       const invoice = await getInvoiceService().updateInternalNotes(invoiceId, internalNotes || '');
-      res.json({
-        success: true,
-        message: 'Internal notes updated',
-        invoice: toSnakeCaseInvoice(invoice)
-      });
+      sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Internal notes updated');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
@@ -1004,8 +939,7 @@ router.get(
     try {
       const stats = await getInvoiceService().getComprehensiveStats(dateFrom, dateTo);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         stats: {
           total_invoices: stats.totalInvoices,
           total_revenue: stats.totalRevenue,
@@ -1056,11 +990,7 @@ router.post(
         prefix
       });
 
-      res.status(201).json({
-        success: true,
-        message: 'Invoice created with custom number',
-        invoice: toSnakeCaseInvoice(invoice)
-      });
+      sendCreated(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Invoice created with custom number');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'

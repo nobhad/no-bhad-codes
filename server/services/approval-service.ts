@@ -361,7 +361,7 @@ class ApprovalService {
 
     // Update all pending requests to skipped
     await db.run(
-      `UPDATE approval_requests SET status = 'skipped' WHERE workflow_instance_id = ? AND status = 'pending'`,
+      'UPDATE approval_requests SET status = \'skipped\' WHERE workflow_instance_id = ? AND status = \'pending\'',
       [instanceId]
     );
 
@@ -423,12 +423,12 @@ class ApprovalService {
       const hasApproval = requests.some(r => r.status === 'approved');
       if (hasApproval) {
         await db.run(
-          `UPDATE approval_workflow_instances SET status = 'approved', completed_at = CURRENT_TIMESTAMP WHERE id = ?`,
+          'UPDATE approval_workflow_instances SET status = \'approved\', completed_at = CURRENT_TIMESTAMP WHERE id = ?',
           [instanceId]
         );
         // Skip remaining pending requests
         await db.run(
-          `UPDATE approval_requests SET status = 'skipped' WHERE workflow_instance_id = ? AND status = 'pending'`,
+          'UPDATE approval_requests SET status = \'skipped\' WHERE workflow_instance_id = ? AND status = \'pending\'',
           [instanceId]
         );
       }
@@ -445,7 +445,7 @@ class ApprovalService {
 
       if (pendingRequired.length === 0 && allApproved) {
         await db.run(
-          `UPDATE approval_workflow_instances SET status = 'approved', completed_at = CURRENT_TIMESTAMP WHERE id = ?`,
+          'UPDATE approval_workflow_instances SET status = \'approved\', completed_at = CURRENT_TIMESTAMP WHERE id = ?',
           [instanceId]
         );
       }
@@ -461,14 +461,14 @@ class ApprovalService {
         if (nextStep) {
           // Advance to next step
           await db.run(
-            `UPDATE approval_workflow_instances SET current_step = ? WHERE id = ?`,
+            'UPDATE approval_workflow_instances SET current_step = ? WHERE id = ?',
             [nextStep.step_order, instanceId]
           );
           await this.createApprovalRequest(instanceId, nextStep);
         } else {
           // All steps complete
           await db.run(
-            `UPDATE approval_workflow_instances SET status = 'approved', completed_at = CURRENT_TIMESTAMP WHERE id = ?`,
+            'UPDATE approval_workflow_instances SET status = \'approved\', completed_at = CURRENT_TIMESTAMP WHERE id = ?',
             [instanceId]
           );
         }

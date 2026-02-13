@@ -85,7 +85,7 @@ interface FolderCategory {
   count: number;
 }
 
-let folderCategoriesCache: FolderCategory[] = [];
+let _folderCategoriesCache: FolderCategory[] = [];
 let folderTreeInitialized = false;
 
 // Cache all files for client-side filtering
@@ -134,7 +134,7 @@ function getElement(id: string): HTMLElement | null {
 /**
  * Build query string from current filters
  */
-function buildFilterQueryString(): string {
+function _buildFilterQueryString(): string {
   const params = new URLSearchParams();
 
   if (currentFilters.projectId && currentFilters.projectId !== 'all') {
@@ -241,7 +241,7 @@ function populateFolderTree(files: Array<{ fileType?: string; category?: string;
 
   // Count files per folder
   const folders = countFilesByFolder(files);
-  folderCategoriesCache = folders;
+  _folderCategoriesCache = folders;
 
   const folderIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
 
@@ -1277,7 +1277,7 @@ export function resetFilesState(): void {
     dateFrom: '',
     dateTo: ''
   };
-  folderCategoriesCache = [];
+  _folderCategoriesCache = [];
   allFilesCache = [];
   cachedElements.clear();
 }

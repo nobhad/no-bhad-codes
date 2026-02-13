@@ -375,3 +375,198 @@
   background: var(--status-pending-bg);
   color: var(--status-pending);
 }
+
+/* ================================================
+   Invoice Filter Container
+   ================================================ */
+.invoice-filter-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.invoice-filter-container select {
+  min-width: 140px;
+  padding: var(--space-1) var(--space-1-5);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-color);
+  border-radius: var(--portal-radius-sm);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.invoice-filter-container select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* ================================================
+   Invoice Table (in project details)
+   ================================================ */
+#pd-invoices-list .invoices-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#pd-invoices-list .invoices-table th {
+  text-align: left;
+  padding: var(--space-1) var(--space-1-5);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--portal-border-color);
+}
+
+#pd-invoices-list .invoices-table td {
+  padding: var(--space-1-5);
+  border-bottom: 1px solid var(--portal-border-color-light);
+  color: var(--portal-text-light);
+  vertical-align: middle;
+}
+
+#pd-invoices-list .invoices-table tbody tr:hover {
+  background: var(--portal-bg-hover);
+}
+
+#pd-invoices-list .invoices-table .actions-cell {
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+}
+
+#pd-invoices-list .invoices-table .table-actions {
+  display: flex;
+  gap: var(--space-1);
+  justify-content: flex-end;
+}
+
+/* Deposit row highlight */
+#pd-invoices-list .invoices-table tr.invoice-deposit-row {
+  border-left: 3px solid var(--color-info);
+}
+
+/* ================================================
+   View Invoice Modal
+   ================================================ */
+#view-project-invoice-modal .invoice-view-content {
+  padding: var(--space-2) 0;
+}
+
+#view-project-invoice-modal .invoice-header-info {
+  margin-bottom: var(--space-3);
+}
+
+#view-project-invoice-modal .invoice-info-row {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+#view-project-invoice-modal .invoice-info-item {
+  flex: 1;
+}
+
+#view-project-invoice-modal .field-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-0-5);
+}
+
+#view-project-invoice-modal .field-value {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-base);
+}
+
+#view-project-invoice-modal .section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-secondary);
+  margin: 0 0 var(--space-1-5) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#view-project-invoice-modal .invoice-line-items-section {
+  margin-bottom: var(--space-3);
+}
+
+#view-project-invoice-modal .invoice-line-items {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#view-project-invoice-modal .invoice-line-items th {
+  text-align: left;
+  padding: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-secondary);
+  border-bottom: 1px solid var(--portal-border-color);
+}
+
+#view-project-invoice-modal .invoice-line-items th.text-right {
+  text-align: right;
+}
+
+#view-project-invoice-modal .invoice-line-items td {
+  padding: var(--space-1);
+  border-bottom: 1px solid var(--portal-border-color-light);
+  color: var(--portal-text-light);
+}
+
+#view-project-invoice-modal .invoice-line-items td.text-right {
+  text-align: right;
+}
+
+#view-project-invoice-modal .invoice-totals {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--portal-border-color);
+}
+
+#view-project-invoice-modal .total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-1) 0;
+  font-size: var(--font-size-base);
+}
+
+#view-project-invoice-modal .total-row.total-main {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+}
+
+#view-project-invoice-modal .total-row.balance-due {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-warning);
+}
+
+#view-project-invoice-modal .invoice-notes-section {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--portal-border-color);
+}
+
+#view-project-invoice-modal .invoice-notes-section p {
+  color: var(--portal-text-light);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  #view-project-invoice-modal .invoice-info-row {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  #pd-invoices-list .invoices-table th:nth-child(3),
+  #pd-invoices-list .invoices-table td:nth-child(3) {
+    display: none;
+  }
+}

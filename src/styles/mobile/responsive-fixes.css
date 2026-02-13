@@ -1,0 +1,630 @@
+/**
+ * ===============================================
+ * MOBILE/RESPONSIVE FIXES
+ * ===============================================
+ * @file src/styles/mobile/responsive-fixes.css
+ *
+ * Critical responsive fixes for mobile compatibility:
+ * 1. Hover guards - @media (hover: hover) wrapping
+ * 2. Touch targets - minimum 44x44px for accessibility
+ * 3. Modal responsive - max-width scales on mobile
+ * 4. Table scroll wrappers - horizontal scroll on narrow screens
+ * 5. Dynamic viewport height - 100dvh instead of 100vh
+ *
+ * Import this file AFTER other mobile styles in mobile/index.css
+ */
+
+/* ============================================
+ * 1. HOVER GUARDS - Touch-safe hover states
+ * ============================================
+ * Wrap hover effects in @media (hover: hover) to prevent
+ * sticky hover states on touch devices.
+ */
+
+/* Base hover states - active only on hover-capable devices */
+@media (hover: hover) {
+  /* Portal buttons hover - from portal-buttons.css */
+  :is([data-page="admin"], [data-page="client-portal"]) :is(
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-outline,
+    button[type="submit"]
+  ):hover {
+    background: var(--color-primary);
+    color: var(--portal-bg-dark);
+    box-shadow: var(--btn-portal-shadow-hover);
+  }
+
+  /* Icon button hover */
+  :is([data-page="admin"], [data-page="client-portal"]) .icon-btn:hover {
+    color: var(--color-primary);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .icon-btn.icon-btn-danger:hover {
+    color: var(--color-error-500);
+  }
+
+  /* Sidebar button hover */
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn:hover,
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn:hover .btn-icon {
+    color: var(--color-primary);
+  }
+
+  /* Modal tab hover */
+  .admin-modal-tab:hover {
+    color: var(--color-text-primary);
+  }
+
+  /* Modal close hover */
+  .admin-modal-close:hover,
+  .modal-close:hover {
+    color: var(--color-text-primary);
+  }
+
+  /* Table row hover */
+  :is([data-page="admin"], [data-page="client-portal"]) .admin-table tbody tr:hover {
+    background: var(--portal-bg-hover);
+  }
+
+  /* Dropdown item hover */
+  .custom-dropdown-item:hover {
+    background: var(--color-primary);
+    color: var(--portal-text-light);
+  }
+
+  /* Card hover states */
+  .portal-card:hover {
+    border-color: var(--portal-border-medium);
+  }
+
+  /* File item hover */
+  .file-item:hover,
+  .folder-item:hover {
+    background: var(--portal-bg-hover);
+  }
+
+  /* Link hover */
+  .detail-value a:hover {
+    text-decoration: underline;
+  }
+
+  /* Toast notification close hover */
+  .toast-close:hover {
+    opacity: 1;
+  }
+
+  /* Pagination hover */
+  .pagination-btn:hover:not(:disabled) {
+    background: var(--portal-bg-hover);
+    border-color: var(--portal-border-medium);
+  }
+
+  .pagination-page-btn:hover:not(.active) {
+    background: var(--portal-bg-hover);
+    border-color: var(--portal-border-dark);
+  }
+
+  /* Export button hover */
+  .btn-export:hover {
+    background: var(--portal-bg-hover);
+    border-color: var(--portal-border-medium);
+  }
+
+  /* Bulk action hover */
+  .bulk-toolbar-actions .bulk-action-icon-btn:hover {
+    color: var(--color-primary-hover, var(--color-primary));
+  }
+}
+
+/* Touch device fallback - active states instead of hover */
+@media (hover: none) {
+  /* Buttons show feedback on active/press */
+  :is([data-page="admin"], [data-page="client-portal"]) :is(
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-outline,
+    button[type="submit"]
+  ):active {
+    background: var(--color-primary);
+    color: var(--portal-bg-dark);
+    transform: scale(0.98);
+  }
+
+  /* Icon button active */
+  :is([data-page="admin"], [data-page="client-portal"]) .icon-btn:active {
+    color: var(--color-primary);
+    transform: scale(0.95);
+  }
+
+  /* Table row - no hover background on touch */
+  :is([data-page="admin"], [data-page="client-portal"]) .admin-table tbody tr:hover {
+    background: transparent;
+  }
+
+  /* Show active state instead */
+  :is([data-page="admin"], [data-page="client-portal"]) .admin-table tbody tr:active {
+    background: var(--portal-bg-hover);
+  }
+}
+
+/* ============================================
+ * 2. TOUCH TARGETS - Minimum 44x44px
+ * ============================================
+ * WCAG 2.1 Success Criterion 2.5.5 requires
+ * touch targets of at least 44x44px.
+ */
+
+/* Icon buttons - increase from 36px to 44px on touch devices */
+@media (pointer: coarse) {
+  :is([data-page="admin"], [data-page="client-portal"]) .icon-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Close buttons in modals and toasts */
+  .modal-close,
+  .admin-modal-close,
+  .toast-close {
+    min-width: 44px;
+    min-height: 44px;
+    padding: var(--space-2);
+  }
+
+  /* Pagination buttons */
+  .pagination-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .pagination-page-btn {
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  /* Notification bell */
+  .notification-bell {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Mobile menu toggle */
+  .mobile-menu-toggle {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Table action buttons */
+  .admin-table .icon-btn,
+  .data-table .icon-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* File action buttons */
+  .file-actions .icon-btn,
+  .file-item .icon-btn,
+  .folder-item .icon-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Header toggle button */
+  .header-toggle-button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Sidebar collapsed buttons */
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-logout {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Bulk action buttons */
+  .bulk-toolbar-actions .bulk-action-icon-btn,
+  .bulk-dropdown-trigger {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Table filter buttons */
+  .table-filter-btn,
+  .filter-toggle {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Dropdown items - increase tap target */
+  .custom-dropdown-item {
+    min-height: 44px;
+    padding-top: var(--space-2-5, 10px);
+    padding-bottom: var(--space-2-5, 10px);
+  }
+
+  /* Tab buttons */
+  .portal-tab,
+  .admin-tab,
+  .portal-subtab {
+    min-height: 44px;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+
+  /* Checkbox and radio inputs */
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 24px;
+    min-height: 24px;
+  }
+
+  /* Checkbox label wrapper for larger tap area */
+  .portal-checkbox,
+  .form-checkbox {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: var(--space-1) 0;
+  }
+}
+
+/* ============================================
+ * 3. MODAL RESPONSIVE - Scale max-width
+ * ============================================
+ * Modals with fixed max-width overflow on mobile.
+ * Use min() to cap at viewport width.
+ */
+
+/* Modal content - responsive max-width */
+.modal-content,
+.admin-modal {
+  max-width: min(var(--modal-width-md, 560px), calc(100vw - 2 * var(--space-4, 16px)));
+}
+
+/* Wide modal variant */
+.admin-modal.admin-modal--wide,
+.modal-content.modal-content--wide {
+  max-width: min(var(--modal-width-lg, 860px), calc(100vw - 2 * var(--space-4, 16px)));
+}
+
+/* Invoice modal */
+.invoice-modal-content,
+.invoice-edit-modal {
+  max-width: min(var(--modal-width-lg, 800px), calc(100vw - 2 * var(--space-4, 16px)));
+}
+
+/* File preview modal */
+.file-preview-modal-content {
+  max-width: min(700px, calc(100vw - 2 * var(--space-4, 16px)));
+}
+
+.file-preview-modal-content.file-preview-modal-content--wide {
+  max-width: min(900px, calc(100vw - 2 * var(--space-4, 16px)));
+}
+
+/* Client portal specific modals */
+[data-page="client-portal"] .modal-content {
+  max-width: min(var(--modal-width-md, 560px), calc(100vw - 2 * var(--space-3, 12px)));
+}
+
+/* Questionnaire modal */
+.questionnaire-modal {
+  max-width: min(800px, calc(100vw - 2 * var(--space-3, 12px)));
+}
+
+/* Onboarding modal */
+.onboarding-modal {
+  max-width: min(800px, calc(100vw - 2 * var(--space-3, 12px)));
+}
+
+/* Small mobile - full width modals */
+@media (max-width: 479px) {
+  .modal-content,
+  .admin-modal,
+  .invoice-modal-content,
+  .invoice-edit-modal,
+  .file-preview-modal-content,
+  .questionnaire-modal,
+  .onboarding-modal {
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  /* Full height on very small screens */
+  .modal-overlay,
+  .admin-modal-overlay {
+    padding: 0;
+    align-items: flex-start;
+  }
+
+  .modal-content,
+  .admin-modal {
+    min-height: 100vh;
+    min-height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+  }
+}
+
+/* ============================================
+ * 4. TABLE SCROLL WRAPPERS
+ * ============================================
+ * Tables need horizontal scroll on narrow viewports.
+ * Add wrapper class for tables that may overflow.
+ */
+
+/* Table scroll wrapper utility class */
+.table-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure table has minimum width for readability */
+.table-scroll-wrapper > table,
+.table-scroll-wrapper > .admin-table,
+.table-scroll-wrapper > .data-table {
+  min-width: 600px;
+}
+
+/* Apply scroll to admin tables on mobile */
+@media (max-width: 767px) {
+  /* Admin tables - add scroll wrapper behavior */
+  .admin-table-container,
+  .table-container,
+  .data-table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Tables inside containers get minimum width */
+  .admin-table-container > .admin-table,
+  .table-container > table,
+  .data-table-container > .data-table {
+    min-width: 600px;
+  }
+
+  /* Invoice line items table */
+  .invoice-line-items-section {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .invoice-line-items {
+    min-width: 500px;
+  }
+
+  /* Messages table */
+  .messages-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Files table */
+  .files-table-wrapper,
+  .portal-files-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Analytics tables */
+  .analytics-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Detail grid tables in modals */
+  .detail-grid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Small mobile - tighter minimum widths */
+@media (max-width: 479px) {
+  .table-scroll-wrapper > table,
+  .table-scroll-wrapper > .admin-table,
+  .admin-table-container > .admin-table,
+  .table-container > table {
+    min-width: 500px;
+  }
+
+  .invoice-line-items {
+    min-width: 400px;
+  }
+}
+
+/* ============================================
+ * 5. DYNAMIC VIEWPORT HEIGHT (dvh)
+ * ============================================
+ * Use 100dvh instead of 100vh for mobile browsers
+ * that have dynamic toolbars (address bar, etc.)
+ */
+
+/* Client portal layout */
+.client-portal-main {
+  height: 100vh;
+  height: 100dvh;
+}
+
+.client-portal-main .dashboard-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.client-dashboard {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.dashboard-layout {
+  height: 100vh;
+  height: 100dvh;
+}
+
+.dashboard-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.dashboard-content {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Sidebar */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Admin dashboard */
+[data-page="admin"] .dashboard-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+}
+
+[data-page="admin"] .sidebar {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Modal overlay - use dvh for proper sizing */
+.modal-overlay,
+.admin-modal-overlay {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Full-screen modals on mobile */
+@media (max-width: 479px) {
+  .modal-content,
+  .admin-modal {
+    max-height: 100vh;
+    max-height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+/* Navigation */
+.nav-mobile-menu {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Messages container height */
+@media (max-width: 767px) {
+  .messages-container {
+    max-height: calc(100vh - 200px);
+    max-height: calc(100dvh - 200px);
+  }
+
+  .messages-page-layout {
+    height: calc(100vh - 150px);
+    height: calc(100dvh - 150px);
+  }
+}
+
+/* Login page layout */
+.auth-gate {
+  min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 40px));
+  min-height: calc(100dvh - var(--header-height, 60px) - var(--footer-height, 40px));
+}
+
+/* Reset min-height - use dvh for proper mobile sizing */
+@media (max-width: 767px) {
+  body[data-page="admin"] main,
+  body[data-page="client-portal"] main {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+/* ============================================
+ * ADDITIONAL MOBILE IMPROVEMENTS
+ * ============================================ */
+
+/* Prevent text selection on interactive elements for better touch UX */
+@media (pointer: coarse) {
+  .btn,
+  .icon-btn,
+  .sidebar-buttons .btn,
+  .custom-dropdown-trigger,
+  .portal-tab,
+  .admin-tab {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Improved tap highlight for iOS */
+@media (pointer: coarse) {
+  .btn,
+  .icon-btn,
+  .custom-dropdown-item,
+  .portal-tab,
+  .admin-tab,
+  .file-item,
+  .folder-item {
+    -webkit-tap-highlight-color: rgba(var(--color-primary-rgb, 255, 0, 0), 0.1);
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  .modal-content,
+  .admin-modal {
+    padding-left: max(var(--space-5), env(safe-area-inset-left));
+    padding-right: max(var(--space-5), env(safe-area-inset-right));
+  }
+
+  @media (max-width: 479px) {
+    .modal-overlay,
+    .admin-modal-overlay {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+}

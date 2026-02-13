@@ -10,6 +10,7 @@
  */
 
 import { ICONS } from '../constants/icons';
+import { normalizeStatus } from '../utils/format-utils';
 
 /** Internal wrapper type for filter dropdown with setOptions */
 interface TableDropdownWrapper extends HTMLElement {
@@ -42,13 +43,6 @@ export interface TableDropdownConfig {
   ariaLabelPrefix?: string;
   /** When true, show all options in menu with a checkmark next to selected; fixed-width check column so labels align. */
   showAllWithCheckmark?: boolean;
-}
-
-/**
- * Normalize status value (convert underscores to hyphens to match database format)
- */
-function normalizeStatus(status: string): string {
-  return status.replace(/_/g, '-');
 }
 
 /**

@@ -572,7 +572,7 @@ async function handleDownloadPdf(invoiceId: number): Promise<void> {
 /**
  * Show view invoice modal (read-only)
  */
-async function showViewInvoiceModal(invoiceId: number, ctx: AdminDashboardContext): Promise<void> {
+async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardContext): Promise<void> {
   // Find invoice in cache or fetch from API
   let invoice = cachedInvoices.find(inv => inv.id === invoiceId);
 
@@ -912,7 +912,7 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
     const tbody = document.getElementById('line-items-body');
     if (!tbody) return;
 
-    const newItem: InvoiceLineItem = { description: '', quantity: 1, rate: 0, amount: 0 };
+    const _newItem: InvoiceLineItem = { description: '', quantity: 1, rate: 0, amount: 0 };
     const row = document.createElement('tr');
     row.className = 'line-item-row';
     row.dataset.index = String(lineItemIndex);

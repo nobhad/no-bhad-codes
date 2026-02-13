@@ -9,11 +9,17 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-const mockDb = vi.hoisted(() => ({
-  run: vi.fn(),
-  get: vi.fn(),
-  all: vi.fn()
-}));
+const mockDb = vi.hoisted(() => {
+  const db = {
+    run: vi.fn(),
+    get: vi.fn(),
+    all: vi.fn(),
+    transaction: vi.fn()
+  };
+  // Transaction passes a context with run method
+  db.transaction.mockImplementation(async (fn: (ctx: { run: typeof db.run }) => unknown) => fn({ run: db.run }));
+  return db;
+});
 
 vi.mock('../../../server/database/init', () => ({
   getDatabase: () => mockDb
@@ -482,9 +488,12 @@ describe('Invoice Service', () => {
     const count = await service.processRecurringInvoices();
 
     expect(count).toBe(1);
+    // The service uses a batch CASE WHEN update for efficiency
     expect(mockDb.run).toHaveBeenCalledWith(
-      'UPDATE recurring_invoices SET last_generated_at = CURRENT_TIMESTAMP, next_generation_date = ? WHERE id = ?',
-      ['2024-08-16', 12]
+      expect.stringContaining('UPDATE recurring_invoices')
+    );
+    expect(mockDb.run).toHaveBeenCalledWith(
+      expect.stringContaining('CASE WHEN id = 12 THEN')
     );
 
     createInvoiceSpy.mockRestore();

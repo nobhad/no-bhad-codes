@@ -33,7 +33,7 @@
 /* Carousel Container */
 .portfolio-carousel {
   position: relative;
-  max-width: 800px;
+  max-width: min(800px, calc(100vw - 2 * var(--space-4, 16px)));
   margin: 0 auto 3rem auto;
   overflow: hidden;
 }

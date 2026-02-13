@@ -23,24 +23,19 @@ export async function editInvoice(
   invoiceId: number,
   onSuccess: () => void
 ): Promise<void> {
-  console.log('[EditInvoice] Called with invoiceId:', invoiceId);
   if (!AdminAuth.isAuthenticated()) {
-    console.log('[EditInvoice] Not authenticated');
     return;
   }
 
   try {
     // Fetch current invoice data
-    console.log('[EditInvoice] Fetching invoice data...');
     const response = await apiFetch(`/api/invoices/${invoiceId}`);
-    console.log('[EditInvoice] Response status:', response.status, response.ok);
     if (!response.ok) {
       alertError('Failed to load invoice');
       return;
     }
 
     const data = await response.json();
-    console.log('[EditInvoice] Invoice data:', data);
     const invoice = data.invoice;
 
     if (invoice.status !== 'draft') {
@@ -206,14 +201,11 @@ export async function sendInvoice(
   invoiceId: number,
   onSuccess: () => void
 ): Promise<void> {
-  console.log('[SendInvoice] Called with invoiceId:', invoiceId);
   if (!AdminAuth.isAuthenticated()) {
-    console.log('[SendInvoice] Not authenticated');
     return;
   }
 
   try {
-    console.log('[SendInvoice] Sending request...');
     const response = await apiPost(`/api/invoices/${invoiceId}/send`);
 
     if (response.ok) {

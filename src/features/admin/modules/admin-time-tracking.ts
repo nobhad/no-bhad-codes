@@ -61,7 +61,8 @@ async function loadTimeEntries(): Promise<void> {
   try {
     const response = await apiFetch(`/api/projects/${currentProjectId}/time-entries`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       currentEntries = data.entries || [];
     } else {
       currentEntries = [];
