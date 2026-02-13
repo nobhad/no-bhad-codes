@@ -8,7 +8,7 @@
  * - Clients (cascades to projects, proposals; voids unpaid invoices)
  * - Projects (cascades to proposals)
  * - Invoices (blocks paid invoices from deletion)
- * - Leads (client_intakes)
+ * - Leads (projects with status='pending' or 'new' - since migration 086)
  * - Proposals (proposal_requests)
  */
 
@@ -60,11 +60,12 @@ interface SoftDeleteResult {
 const RETENTION_DAYS = 30;
 
 // Table mappings for entity types
+// Note: 'lead' now maps to 'projects' with status filter (since migration 086)
 const TABLE_MAP: Record<SoftDeleteEntityType, string> = {
   client: 'clients',
   project: 'projects',
   invoice: 'invoices',
-  lead: 'client_intakes',
+  lead: 'projects', // Leads are projects with status IN ('pending', 'new')
   proposal: 'proposal_requests'
 };
 
@@ -105,18 +106,31 @@ class SoftDeleteService {
         proposals: 0
       };
 
-      // 1. Soft delete associated projects (which will cascade to their proposals)
+      // 1. Soft delete associated projects and their proposals using batch operations
       const projects = await db.all(
         'SELECT id FROM projects WHERE client_id = ? AND deleted_at IS NULL',
         [clientId]
       ) as { id: number }[];
 
-      for (const project of projects) {
-        const projectResult = await this.softDeleteProject(project.id, deletedBy, true);
-        if (projectResult.affectedItems) {
-          affectedItems.projects += projectResult.affectedItems.projects;
-          affectedItems.proposals += projectResult.affectedItems.proposals;
-        }
+      if (projects.length > 0) {
+        const projectIds = projects.map(p => p.id);
+
+        // Batch soft delete proposals for all projects in one query
+        const proposalResult = await db.run(
+          `UPDATE proposal_requests
+           SET deleted_at = ?, deleted_by = ?
+           WHERE project_id IN (${projectIds.join(',')}) AND deleted_at IS NULL`,
+          [now, deletedBy]
+        );
+        affectedItems.proposals += proposalResult.changes || 0;
+
+        // Batch soft delete all projects in one query
+        await db.run(
+          `UPDATE projects SET deleted_at = ?, deleted_by = ?
+           WHERE id IN (${projectIds.join(',')})`,
+          [now, deletedBy]
+        );
+        affectedItems.projects = projectIds.length;
       }
 
       // 2. Soft delete proposals directly linked to client (not through projects)
@@ -322,29 +336,34 @@ class SoftDeleteService {
   // ===================================================
 
   /**
-   * Soft delete a lead (client_intakes)
+   * Soft delete a lead (projects with status='pending' or 'new')
    * Standalone deletion, no cascades
+   * Note: Since migration 086, leads are stored in projects table
    */
   async softDeleteLead(leadId: number, deletedBy: string): Promise<SoftDeleteResult> {
     const db = getDatabase();
     const now = new Date().toISOString();
 
     try {
+      // Query projects table - leads are projects with pending/new status
       const lead = await db.get(
-        'SELECT id, company_name, contact_name, contact_email FROM client_intakes WHERE id = ? AND deleted_at IS NULL',
+        `SELECT p.id, p.project_name, c.company_name, c.contact_name, c.email
+         FROM projects p
+         LEFT JOIN clients c ON p.client_id = c.id
+         WHERE p.id = ? AND p.status IN ('pending', 'new') AND p.deleted_at IS NULL`,
         [leadId]
-      ) as { id: number; company_name?: string; contact_name?: string; contact_email?: string } | undefined;
+      ) as { id: number; project_name?: string; company_name?: string; contact_name?: string; email?: string } | undefined;
 
       if (!lead) {
         return { success: false, message: 'Lead not found or already deleted' };
       }
 
       await db.run(
-        'UPDATE client_intakes SET deleted_at = ?, deleted_by = ? WHERE id = ?',
+        'UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ?',
         [now, deletedBy, leadId]
       );
 
-      const leadName = lead.company_name || lead.contact_name || lead.contact_email || `Lead #${leadId}`;
+      const leadName = lead.project_name || lead.company_name || lead.contact_name || lead.email || `Lead #${leadId}`;
 
       await auditLogger.log({
         action: 'lead_deleted',
@@ -521,23 +540,23 @@ class SoftDeleteService {
 
       // Determine the name column for each entity type
       switch (type) {
-        case 'client':
-          nameColumn = "COALESCE(company_name, contact_name, email, 'Unknown Client')";
-          break;
-        case 'project':
-          nameColumn = "COALESCE(project_name, 'Unnamed Project')";
-          break;
-        case 'invoice':
-          nameColumn = "COALESCE(invoice_number, 'Unknown Invoice')";
-          break;
-        case 'lead':
-          nameColumn = "COALESCE(company_name, contact_name, contact_email, 'Unknown Lead')";
-          break;
-        case 'proposal':
-          nameColumn = "COALESCE(title, 'Unnamed Proposal')";
-          break;
-        default:
-          nameColumn = "'Unknown'";
+      case 'client':
+        nameColumn = 'COALESCE(company_name, contact_name, email, \'Unknown Client\')';
+        break;
+      case 'project':
+        nameColumn = 'COALESCE(project_name, \'Unnamed Project\')';
+        break;
+      case 'invoice':
+        nameColumn = 'COALESCE(invoice_number, \'Unknown Invoice\')';
+        break;
+      case 'lead':
+        nameColumn = 'COALESCE(company_name, contact_name, contact_email, \'Unknown Lead\')';
+        break;
+      case 'proposal':
+        nameColumn = 'COALESCE(title, \'Unnamed Proposal\')';
+        break;
+      default:
+        nameColumn = '\'Unknown\'';
       }
 
       const rows = await db.all(
@@ -602,8 +621,10 @@ class SoftDeleteService {
     ) as { count: number };
     stats.invoices = invoiceCount.count;
 
+    // Leads are now projects with pending/new status (since migration 086)
     const leadCount = await db.get(
-      'SELECT COUNT(*) as count FROM client_intakes WHERE deleted_at IS NOT NULL'
+      `SELECT COUNT(*) as count FROM projects
+       WHERE status IN ('pending', 'new') AND deleted_at IS NOT NULL`
     ) as { count: number };
     stats.leads = leadCount.count;
 
@@ -738,12 +759,17 @@ class SoftDeleteService {
       );
       deleted.projects = projectResult.changes || 0;
 
-      // 7. Delete leads
-      const leadResult = await db.run(
-        'DELETE FROM client_intakes WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+      // 7. Delete leads (leads are projects with pending/new status - since migration 086)
+      // Note: Lead deletion is handled by the projects deletion above
+      // Count leads separately for reporting
+      const leadCount = await db.get(
+        `SELECT COUNT(*) as count FROM projects
+         WHERE status IN ('pending', 'new')
+         AND deleted_at IS NOT NULL AND deleted_at < ?`,
         [cutoffDateStr]
-      );
-      deleted.leads = leadResult.changes || 0;
+      ) as { count: number };
+      deleted.leads = leadCount.count;
+      // Note: Actual deletion happens in step 6 (projects deletion)
 
       // 8. Delete client children
       // Contacts
