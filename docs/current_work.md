@@ -6,36 +6,11 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ---
 
-## ACTIVE PROJECT: Portal Rebuild + Backend Cleanup
-
-### Backend Cleanup
-
-**Goal:** Complete ALL backend/database work, then rebuild portals with unified reusable components
-
-**Execution Order:** Backend First, Frontend Second
-
----
-
-### Backend Cleanup - COMPLETE
-
-All 4 backend phases completed. See `archive/ARCHIVED_WORK_2026-02-12.md` for details.
-
-| Phase | Description | Status |
-|-------|-------------|--------|
-| 1 | Slim Invoices Table | COMPLETE |
-| 2 | Remove Dual-Write Patterns | COMPLETE |
-| 3 | Message Table Consolidation | COMPLETE |
-| 4 | Lead/Intake Table Consolidation | COMPLETE |
-
-**Migration Note:** Run `npm run migrate` to apply migrations 085 and 086.
-
----
+## ACTIVE PROJECT: Portal Rebuild
 
 ### Portal Rebuild
 
-**Goal:** Complete ALL backend/database work, then rebuild portals with unified reusable components
-
-**Execution Order:** Backend First, Frontend Second
+**Goal:** Rebuild portals with unified reusable components
 
 ---
 
