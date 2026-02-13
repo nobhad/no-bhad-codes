@@ -5,6 +5,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { canAccessProject } from '../../middleware/access-control.js';
 import { getString } from '../../database/row-helpers.js';
 import { errorResponse } from '../../utils/api-response.js';
+import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 
 const router = express.Router();
 
@@ -186,6 +187,14 @@ router.put(
         // Mark as completed
         updates.push('completed_date = ?');
         values.push(new Date().toISOString());
+
+        // Emit workflow event for milestone completion
+        await workflowTriggerService.emit('project.milestone_completed', {
+          entityId: milestoneId,
+          triggeredBy: 'admin',
+          projectId,
+          milestoneTitle: title || milestone.title
+        });
       } else if (!is_completed && milestone.is_completed) {
         // Mark as incomplete
         updates.push('completed_date = ?');

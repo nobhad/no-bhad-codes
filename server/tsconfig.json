@@ -11,12 +11,12 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": false,
     "outDir": "../dist/server",
-    "rootDir": ".",
+    "rootDir": "..",
     "types": ["node"],
     "resolveJsonModule": true,
     "allowImportingTsExtensions": false
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "../shared/**/*.ts"],
   "exclude": ["node_modules", "dist"],
   "ts-node": {
     "esm": true,

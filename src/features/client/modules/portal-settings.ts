@@ -93,7 +93,7 @@ export function setupSettingsForms(ctx: ClientPortalContext): void {
   // Email change link - pre-fill message when navigating to messages
   const emailChangeLink = document.querySelector('.email-change-link');
   if (emailChangeLink) {
-    emailChangeLink.addEventListener('click', (e) => {
+    emailChangeLink.addEventListener('click', (_e) => {
       // Get current email from the settings form
       const currentEmail = getInput('settings-email')?.value || '';
       // Store email change request in sessionStorage for messages page to pick up

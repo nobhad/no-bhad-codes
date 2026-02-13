@@ -927,7 +927,7 @@ class ProposalService {
     const signatures = await this.getProposalSignatures(proposalId);
 
     const pendingRows = await db.all(
-      "SELECT * FROM signature_requests WHERE proposal_id = ? AND status IN ('pending', 'viewed')",
+      'SELECT * FROM signature_requests WHERE proposal_id = ? AND status IN (\'pending\', \'viewed\')',
       [proposalId]
     );
     const pendingRequests = pendingRows.map((row) => mapSignatureRequest(row as Record<string, unknown>));

@@ -220,7 +220,6 @@ export class VisitorTrackingService {
    */
   async init(): Promise<void> {
     if (!this.shouldTrack()) {
-      console.log('[VisitorTracking] Tracking disabled due to privacy settings');
       return;
     }
 
@@ -229,8 +228,6 @@ export class VisitorTrackingService {
     this.setupEventListeners();
     this.trackPageView();
     this.startFlushTimer();
-
-    console.log('[VisitorTracking] Initialized with session:', this.currentSession?.sessionId);
   }
 
   /**
@@ -814,7 +811,6 @@ export class VisitorTrackingService {
     }
 
     this.isTracking = false;
-    console.log('[VisitorTracking] Stopped');
   }
 
   /**

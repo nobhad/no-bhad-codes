@@ -42,7 +42,7 @@
   gap: clamp(1rem, 2vw, 1.5rem);
   text-align: center;
   width: 100%;
-  max-width: 800px;
+  max-width: min(800px, calc(100vw - 2 * var(--space-4, 16px)));
   flex: 1;
   justify-content: flex-start;
   padding: 0; /* No padding */
@@ -501,14 +501,14 @@ body[data-page="client-landing"] .client-login .client-content {
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 800px; /* Make it wider */
+  max-width: min(800px, calc(100vw - 2 * var(--space-4, 16px))); /* Responsive max-width */
   background: var(--color-neutral-100);
   border: 2px solid var(--color-neutral-400);
   border-radius: 0; /* No border radius - sharp corners */
   overflow: hidden;
   max-height: calc(
-    100vh - var(--header-height) - var(--footer-height) - 120px
-  ); /* Ensure bottom is always visible */
+    100dvh - var(--header-height) - var(--footer-height) - 120px
+  ); /* Use dvh for mobile, ensure bottom visible */
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-elevated-sm); /* Drop shadow */

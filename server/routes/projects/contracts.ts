@@ -21,6 +21,7 @@ import {
 } from '../../utils/pdf-utils.js';
 import { errorResponse } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
+import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 
 const router = express.Router();
 
@@ -661,7 +662,7 @@ router.get(
 
     if (latestContract && (latestContract as Record<string, unknown>).status !== 'signed') {
       await db.run(
-        `UPDATE contracts SET status = 'viewed', updated_at = datetime('now') WHERE id = ?`,
+        'UPDATE contracts SET status = \'viewed\', updated_at = datetime(\'now\') WHERE id = ?',
         [(latestContract as Record<string, unknown>).id as number]
       );
     }
@@ -868,6 +869,15 @@ ${BUSINESS_INFO.email}
     });
 
     console.log(`[CONTRACT] Contract signed for project ${projectId} by ${signerName}`);
+
+    // Emit contract.signed event for workflow automations
+    await workflowTriggerService.emit('contract.signed', {
+      entityId: contractId,
+      triggeredBy: clientEmail,
+      projectId,
+      signerName,
+      signerEmail: clientEmail
+    });
 
     // Cancel pending contract reminders since contract is now signed
     try {

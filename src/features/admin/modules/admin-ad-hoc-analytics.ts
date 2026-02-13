@@ -10,6 +10,7 @@
 import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch } from '../../../utils/api-client';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { formatCurrency } from '../../../utils/format-utils';
 
 interface AdHocRevenueData {
   invoiceCount: number;
@@ -98,11 +99,6 @@ async function fetchTopClientsAdHoc(): Promise<ClientAdHocData[]> {
   }
 }
 
-function formatCurrency(value: number | null | undefined): string {
-  if (value === null || value === undefined) return '$0.00';
-  return `$${value.toFixed(2)}`;
-}
-
 function formatPercentage(value: string | number): string {
   const num = typeof value === 'string' ? parseFloat(value) : value;
   if (isNaN(num)) return '—';
@@ -113,7 +109,6 @@ function formatPercentage(value: string | number): string {
 export async function loadAdHocAnalytics(_ctx: AdminDashboardContext): Promise<void> {
   const container = document.getElementById('ad-hoc-analytics-widget');
   if (!container) {
-    console.log('[AdHocAnalytics] Widget container not found');
     return;
   }
 

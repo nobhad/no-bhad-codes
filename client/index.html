@@ -5,18 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Client Portal - No Bhad Codes</title>
     <style>
+      /* Inline fallbacks before main CSS loads - uses design system variables */
       :root {
-        --bg: #ffffff;
-        --fg: #000000;
+        --page-bg: var(--color-neutral-300, #e0e0e0);
+        --page-fg: var(--color-dark, #333333);
       }
       [data-theme='dark'] {
-        --bg: #1a1a1a;
-        --fg: #ffffff;
+        --page-bg: var(--portal-bg-darkest, #1a1a1a);
+        --page-fg: var(--portal-text-light, #f5f5f5);
       }
       html,
       body {
-        background-color: var(--bg);
-        color: var(--fg);
+        background-color: var(--page-bg);
+        color: var(--page-fg);
         margin: 0;
         padding: 0;
       }

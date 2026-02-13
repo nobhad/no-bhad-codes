@@ -83,21 +83,21 @@ router.get(
     const isAdmin = await isUserAdmin(req);
     const project = isAdmin
       ? await db.get(
-          `
+        `
       SELECT p.*, c.company_name, c.contact_name, c.email as client_email
       FROM projects p
       JOIN clients c ON p.client_id = c.id
       WHERE p.id = ?
     `,
-          [projectId]
-        )
+        [projectId]
+      )
       : await db.get(
-          `
+        `
       SELECT * FROM projects 
       WHERE id = ? AND client_id = ?
     `,
-          [projectId, req.user!.id]
-        );
+        [projectId, req.user!.id]
+      );
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
@@ -138,10 +138,11 @@ router.get(
     // Get recent updates (last 5)
     const recentUpdates = await db.all(
       `
-    SELECT id, title, description, update_type, author, created_at
-    FROM project_updates
-    WHERE project_id = ?
-    ORDER BY created_at DESC
+    SELECT pu.id, pu.title, pu.description, pu.update_type, u.display_name as author, pu.created_at
+    FROM project_updates pu
+    LEFT JOIN users u ON pu.author_user_id = u.id
+    WHERE pu.project_id = ?
+    ORDER BY pu.created_at DESC
     LIMIT 5
   `,
       [projectId]

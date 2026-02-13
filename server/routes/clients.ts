@@ -18,7 +18,7 @@ import { getString, getNumber } from '../database/row-helpers.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
 import { notificationPreferencesService } from '../services/notification-preferences-service.js';
-import { errorResponse } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -51,7 +51,7 @@ router.get(
       return errorResponse(res, 'Client not found', 404, 'CLIENT_NOT_FOUND');
     }
 
-    res.json({ success: true, client });
+    sendSuccess(res, { client });
   })
 );
 
@@ -87,7 +87,7 @@ router.put(
       req
     );
 
-    res.json({ success: true, message: 'Profile updated successfully', client: updatedClient });
+    sendSuccess(res, { client: updatedClient }, 'Profile updated successfully');
   })
 );
 
@@ -133,7 +133,7 @@ router.put(
       [newHash, req.user!.id]
     );
 
-    res.json({ success: true, message: 'Password changed successfully' });
+    sendSuccess(res, undefined, 'Password changed successfully');
   })
 );
 
@@ -159,7 +159,7 @@ router.put(
       email_frequency: weekly ? 'weekly_digest' : 'immediate'
     });
 
-    res.json({ success: true, message: 'Notification preferences updated' });
+    sendSuccess(res, undefined, 'Notification preferences updated');
   })
 );
 
@@ -177,8 +177,7 @@ router.get(
     const prefs = await notificationPreferencesService.getPreferences(req.user!.id, 'client');
 
     // Map to legacy field names for backward compatibility
-    res.json({
-      success: true,
+    sendSuccess(res, {
       notifications: {
         messages: prefs.notify_new_message,
         status: prefs.notify_project_update,
@@ -188,6 +187,36 @@ router.get(
       // Also include full preferences for clients that want more options
       fullPreferences: prefs
     });
+  })
+);
+
+/**
+ * GET /me/billing - Get billing information
+ */
+router.get(
+  '/me/billing',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+    }
+
+    const db = getDatabase();
+    const client = await db.get(
+      `SELECT
+         billing_name, billing_company as company,
+         billing_address as address, billing_address2 as address2,
+         billing_city as city, billing_state as state,
+         billing_zip as zip, billing_country as country
+       FROM clients WHERE id = ?`,
+      [req.user!.id]
+    );
+
+    if (!client) {
+      return errorResponse(res, 'Client not found', 404, 'CLIENT_NOT_FOUND');
+    }
+
+    sendSuccess(res, { billing: client });
   })
 );
 
@@ -230,7 +259,7 @@ router.put(
       ]
     );
 
-    res.json({ success: true, message: 'Billing information updated' });
+    sendSuccess(res, undefined, 'Billing information updated');
   })
 );
 
@@ -246,7 +275,7 @@ router.get(
 
     // Get active projects count
     const projectsResult = await db.get(
-      `SELECT COUNT(*) as count FROM projects WHERE client_id = ? AND status IN ('planning', 'in-progress', 'review')`,
+      'SELECT COUNT(*) as count FROM projects WHERE client_id = ? AND status IN (\'planning\', \'in-progress\', \'review\')',
       [clientId]
     );
     const activeProjects = projectsResult?.count || 0;
@@ -384,7 +413,7 @@ router.get(
     );
     const pendingContracts = contractsResult?.count || 0;
 
-    res.json({
+    sendSuccess(res, {
       stats: {
         activeProjects,
         pendingInvoices,
@@ -477,7 +506,7 @@ router.get(
       }
     );
 
-    res.json({ clients });
+    sendSuccess(res, { clients });
   })
 );
 
@@ -547,7 +576,7 @@ router.get(
       }
     );
 
-    res.json({
+    sendSuccess(res, {
       client,
       projects
     });
@@ -664,10 +693,7 @@ router.post(
       // Continue with response - don't fail client creation due to email issues
     }
 
-    res.status(201).json({
-      message: 'Client created successfully',
-      client: newClient
-    });
+    sendCreated(res, { client: newClient }, 'Client created successfully');
   })
 );
 
@@ -751,10 +777,7 @@ router.put(
       [clientId]
     );
 
-    res.json({
-      message: 'Client updated successfully',
-      client: updatedClient
-    });
+    sendSuccess(res, { client: updatedClient }, 'Client updated successfully');
   })
 );
 
@@ -779,7 +802,7 @@ router.get(
       [clientId]
     );
 
-    res.json({ projects });
+    sendSuccess(res, { projects });
   })
 );
 
@@ -897,12 +920,7 @@ No Bhad Codes Team
         userAgent: req.get('user-agent') || 'unknown'
       });
 
-      res.json({
-        success: true,
-        message: 'Invitation sent successfully',
-        clientId,
-        email: clientEmail
-      });
+      sendSuccess(res, { clientId, email: clientEmail }, 'Invitation sent successfully');
     } catch (emailError) {
       console.error('[Clients] Failed to send invitation email:', emailError);
       errorResponse(res, 'Failed to send invitation email', 500, 'EMAIL_FAILED');
@@ -927,11 +945,7 @@ router.delete(
       return errorResponse(res, result.message || 'Client not found', 404, 'CLIENT_NOT_FOUND');
     }
 
-    res.json({
-      success: true,
-      message: result.message,
-      affectedItems: result.affectedItems
-    });
+    sendSuccess(res, { affectedItems: result.affectedItems }, result.message);
   })
 );
 
@@ -955,7 +969,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
     const contacts = await clientService.getContacts(clientId);
-    res.json({ success: true, contacts });
+    sendSuccess(res, { contacts });
   })
 );
 
@@ -987,7 +1001,7 @@ router.post(
       notes
     });
 
-    res.status(201).json({ success: true, contact });
+    sendCreated(res, { contact });
   })
 );
 
@@ -1002,7 +1016,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const contactId = parseInt(req.params.contactId);
     const contact = await clientService.updateContact(contactId, req.body);
-    res.json({ success: true, contact });
+    sendSuccess(res, { contact });
   })
 );
 
@@ -1017,7 +1031,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const contactId = parseInt(req.params.contactId);
     await clientService.deleteContact(contactId);
-    res.json({ success: true, message: 'Contact deleted successfully' });
+    sendSuccess(res, undefined, 'Contact deleted successfully');
   })
 );
 
@@ -1033,7 +1047,7 @@ router.post(
     const clientId = parseInt(req.params.id);
     const contactId = parseInt(req.params.contactId);
     await clientService.setPrimaryContact(clientId, contactId);
-    res.json({ success: true, message: 'Primary contact updated' });
+    sendSuccess(res, undefined, 'Primary contact updated');
   })
 );
 
@@ -1060,7 +1074,7 @@ router.get(
       offset: offset ? parseInt(offset as string) : undefined
     });
 
-    res.json({ success: true, activities });
+    sendSuccess(res, { activities });
   })
 );
 
@@ -1087,7 +1101,7 @@ router.post(
       createdBy: req.user?.email || 'admin'
     });
 
-    res.status(201).json({ success: true, activity });
+    sendCreated(res, { activity });
   })
 );
 
@@ -1114,7 +1128,7 @@ router.get(
       client_name: a.clientName,
       company_name: a.companyName
     }));
-    res.json({ success: true, activities: apiActivities });
+    sendSuccess(res, { activities: apiActivities });
   })
 );
 
@@ -1145,7 +1159,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
     const notes = await clientService.getNotes(clientId);
-    res.json({ notes: notes.map(toApiNote) });
+    sendSuccess(res, { notes: notes.map(toApiNote) });
   })
 );
 
@@ -1166,7 +1180,7 @@ router.post(
     }
 
     const note = await clientService.addNote(clientId, req.user?.email || 'admin', content.trim());
-    res.status(201).json({ note: toApiNote(note) });
+    sendCreated(res, { note: toApiNote(note) });
   })
 );
 
@@ -1187,7 +1201,7 @@ router.put(
     }
 
     const note = await clientService.updateNote(noteId, { isPinned: is_pinned });
-    res.json({ note: toApiNote(note) });
+    sendSuccess(res, { note: toApiNote(note) });
   })
 );
 
@@ -1202,7 +1216,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const noteId = parseInt(req.params.noteId);
     await clientService.deleteNote(noteId);
-    res.json({ message: 'Note deleted' });
+    sendSuccess(res, undefined, 'Note deleted');
   })
 );
 
@@ -1220,7 +1234,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const includeInactive = req.query.includeInactive === 'true';
     const fields = await clientService.getCustomFields(includeInactive);
-    res.json({ success: true, fields });
+    sendSuccess(res, { fields });
   })
 );
 
@@ -1249,7 +1263,7 @@ router.post(
       displayOrder
     });
 
-    res.status(201).json({ success: true, field });
+    sendCreated(res, { field });
   })
 );
 
@@ -1263,7 +1277,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fieldId = parseInt(req.params.fieldId);
     const field = await clientService.updateCustomField(fieldId, req.body);
-    res.json({ success: true, field });
+    sendSuccess(res, { field });
   })
 );
 
@@ -1277,7 +1291,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fieldId = parseInt(req.params.fieldId);
     await clientService.deleteCustomField(fieldId);
-    res.json({ success: true, message: 'Custom field deactivated' });
+    sendSuccess(res, undefined, 'Custom field deactivated');
   })
 );
 
@@ -1291,7 +1305,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
     const values = await clientService.getClientCustomFields(clientId);
-    res.json({ success: true, values });
+    sendSuccess(res, { values });
   })
 );
 
@@ -1312,7 +1326,7 @@ router.put(
     }
 
     await clientService.setClientCustomFields(clientId, values);
-    res.json({ success: true, message: 'Custom field values updated' });
+    sendSuccess(res, undefined, 'Custom field values updated');
   })
 );
 
@@ -1330,7 +1344,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const tagType = req.query.type as string;
     const tags = await clientService.getTags(tagType);
-    res.json({ success: true, tags });
+    sendSuccess(res, { tags });
   })
 );
 
@@ -1349,7 +1363,7 @@ router.post(
     }
 
     const tag = await clientService.createTag({ name, color, description, tagType });
-    res.status(201).json({ success: true, tag });
+    sendCreated(res, { tag });
   })
 );
 
@@ -1363,7 +1377,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const tagId = parseInt(req.params.tagId);
     const tag = await clientService.updateTag(tagId, req.body);
-    res.json({ success: true, tag });
+    sendSuccess(res, { tag });
   })
 );
 
@@ -1377,7 +1391,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const tagId = parseInt(req.params.tagId);
     await clientService.deleteTag(tagId);
-    res.json({ success: true, message: 'Tag deleted successfully' });
+    sendSuccess(res, undefined, 'Tag deleted successfully');
   })
 );
 
@@ -1391,7 +1405,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
     const tags = await clientService.getClientTags(clientId);
-    res.json({ success: true, tags });
+    sendSuccess(res, { tags });
   })
 );
 
@@ -1407,7 +1421,7 @@ router.post(
     const clientId = parseInt(req.params.id);
     const tagId = parseInt(req.params.tagId);
     await clientService.addTagToClient(clientId, tagId);
-    res.json({ success: true, message: 'Tag added to client' });
+    sendSuccess(res, undefined, 'Tag added to client');
   })
 );
 
@@ -1423,7 +1437,7 @@ router.delete(
     const clientId = parseInt(req.params.id);
     const tagId = parseInt(req.params.tagId);
     await clientService.removeTagFromClient(clientId, tagId);
-    res.json({ success: true, message: 'Tag removed from client' });
+    sendSuccess(res, undefined, 'Tag removed from client');
   })
 );
 
@@ -1437,7 +1451,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const tagId = parseInt(req.params.tagId);
     const clients = await clientService.getClientsByTag(tagId);
-    res.json({ success: true, clients });
+    sendSuccess(res, { clients });
   })
 );
 
@@ -1455,7 +1469,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
     const health = await clientService.calculateHealthScore(clientId);
-    res.json({ success: true, health });
+    sendSuccess(res, { health });
   })
 );
 
@@ -1470,7 +1484,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
     const health = await clientService.updateHealthStatus(clientId);
-    res.json({ success: true, health });
+    sendSuccess(res, { health });
   })
 );
 
@@ -1483,7 +1497,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clients = await clientService.getAtRiskClients();
-    res.json({ success: true, clients });
+    sendSuccess(res, { clients });
   })
 );
 
@@ -1497,7 +1511,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
     const stats = await clientService.getClientStats(clientId);
-    res.json({ success: true, stats });
+    sendSuccess(res, { stats });
   })
 );
 
@@ -1516,7 +1530,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
     await clientService.updateCRMFields(clientId, req.body);
-    res.json({ success: true, message: 'CRM fields updated' });
+    sendSuccess(res, undefined, 'CRM fields updated');
   })
 );
 
@@ -1529,7 +1543,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clients = await clientService.getClientsForFollowUp();
-    res.json({ success: true, clients });
+    sendSuccess(res, { clients });
   })
 );
 
@@ -1560,7 +1574,7 @@ router.get(
       offset
     });
 
-    res.json({ success: true, events, total, limit, offset });
+    sendSuccess(res, { events, total, limit, offset });
   })
 );
 
@@ -1578,7 +1592,7 @@ router.get(
     const days = req.query.days ? parseInt(req.query.days as string) : 7;
     const summary = await timelineService.getRecentActivitySummary(req.user!.id, days);
 
-    res.json({ success: true, ...summary });
+    sendSuccess(res, summary);
   })
 );
 
@@ -1594,7 +1608,7 @@ router.get(
     }
 
     const preferences = await notificationPreferencesService.getPreferences(req.user!.id, 'client');
-    res.json({ success: true, preferences });
+    sendSuccess(res, { preferences });
   })
 );
 
@@ -1615,11 +1629,7 @@ router.put(
       req.body
     );
 
-    res.json({
-      success: true,
-      message: 'Notification preferences updated',
-      preferences
-    });
+    sendSuccess(res, { preferences }, 'Notification preferences updated');
   })
 );
 
@@ -1637,7 +1647,7 @@ router.get(
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
     const notifications = await notificationPreferencesService.getNotificationHistory(req.user!.id, 'client', limit);
 
-    res.json({ success: true, notifications });
+    sendSuccess(res, { notifications });
   })
 );
 
@@ -1667,7 +1677,7 @@ router.put(
       return errorResponse(res, 'Notification not found', 404, 'NOT_FOUND');
     }
 
-    res.json({ success: true, message: 'Notification marked as read' });
+    sendSuccess(res, undefined, 'Notification marked as read');
   })
 );
 
@@ -1691,7 +1701,7 @@ router.put(
       [req.user!.id]
     );
 
-    res.json({ success: true, message: 'All notifications marked as read' });
+    sendSuccess(res, undefined, 'All notifications marked as read');
   })
 );
 

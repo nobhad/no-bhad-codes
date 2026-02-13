@@ -864,7 +864,7 @@ No Bhad Codes Team
     case 'check_in':
       subject = 'How\'s Everything Going?';
       heading = 'Quick Check-In';
-      message = `It's been a week since you set up your portal. We wanted to check in and make sure everything is going smoothly. If you have any questions or need help with anything, don't hesitate to reach out through the messaging system in your portal.`;
+      message = 'It\'s been a week since you set up your portal. We wanted to check in and make sure everything is going smoothly. If you have any questions or need help with anything, don\'t hesitate to reach out through the messaging system in your portal.';
       ctaText = 'Send Us a Message';
       ctaUrl = `${portalUrl}#messages`;
       break;

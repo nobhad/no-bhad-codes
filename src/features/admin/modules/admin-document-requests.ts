@@ -266,8 +266,6 @@ async function loadAllRequests(): Promise<DocumentRequest[]> {
   const forReview = forReviewRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(forReviewRes).then((d) => d.requests || []) : [];
   const overdue = overdueRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(overdueRes).then((d) => d.requests || []) : [];
 
-  console.log('[DocRequests] Loaded:', { pending: pending.length, forReview: forReview.length, overdue: overdue.length });
-
   const byId = new Map<number, DocumentRequest>();
   [...pending, ...forReview, ...overdue].forEach((r) => byId.set(r.id, r));
   return Array.from(byId.values()).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
@@ -728,8 +726,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
         throw new Error(errorData.error || `HTTP ${response.status}`);
       }
 
-      const result = await response.json();
-      console.log('[DocRequests] Created request:', result);
+      await response.json();
 
       showToast('Document request created', 'success');
       closeCreateModal();

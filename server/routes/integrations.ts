@@ -12,6 +12,7 @@
  */
 
 import { Router, Request, Response } from 'express';
+import express from 'express';
 import { authenticateToken, requireAdmin } from '../middleware/auth';
 import {
   // Zapier
@@ -47,7 +48,7 @@ import {
   getCalendarSyncConfig
 } from '../services/integrations';
 import { getDatabase } from '../database/init';
-import { errorResponse } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 
 const router = Router();
 
@@ -70,7 +71,7 @@ const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>) =>
  */
 router.get('/status', authenticateToken, requireAdmin, asyncHandler(async (req, res) => {
   const db = getDatabase();
-  const statuses = await db.all('SELECT * FROM integration_status ORDER BY integration_type');
+  const statuses = await db.all('SELECT * FROM integration_status ORDER BY integration_type LIMIT 100');
 
   // Enhance with runtime checks
   const enhanced = statuses.map((status: Record<string, unknown>) => ({
@@ -78,22 +79,22 @@ router.get('/status', authenticateToken, requireAdmin, asyncHandler(async (req, 
     runtime_configured: checkRuntimeConfiguration(status.integration_type as string)
   }));
 
-  res.json({ integrations: enhanced });
+  sendSuccess(res, { integrations: enhanced });
 }));
 
 function checkRuntimeConfiguration(type: string): boolean {
   switch (type) {
-    case 'stripe':
-      return isStripeConfigured();
-    case 'google_calendar':
-      return isGoogleCalendarConfigured();
-    case 'slack':
-    case 'discord':
-      return true; // Configured per-webhook
-    case 'zapier':
-      return true; // Uses existing webhook system
-    default:
-      return false;
+  case 'stripe':
+    return isStripeConfigured();
+  case 'google_calendar':
+    return isGoogleCalendarConfigured();
+  case 'slack':
+  case 'discord':
+    return true; // Configured per-webhook
+  case 'zapier':
+    return true; // Uses existing webhook system
+  default:
+    return false;
   }
 }
 
@@ -107,7 +108,7 @@ function checkRuntimeConfiguration(type: string): boolean {
  */
 router.get('/zapier/events', authenticateToken, requireAdmin, asyncHandler(async (_req, res) => {
   const eventTypes = getZapierEventTypes();
-  res.json({ events: eventTypes });
+  sendSuccess(res, { events: eventTypes });
 }));
 
 /**
@@ -116,7 +117,7 @@ router.get('/zapier/events', authenticateToken, requireAdmin, asyncHandler(async
  */
 router.get('/zapier/samples', authenticateToken, requireAdmin, asyncHandler(async (_req, res) => {
   const samples = getZapierTriggerSamples();
-  res.json({ samples });
+  sendSuccess(res, { samples });
 }));
 
 /**
@@ -132,13 +133,12 @@ router.post('/zapier/webhook', authenticateToken, requireAdmin, asyncHandler(asy
   }
 
   const webhook = await createZapierWebhook(name, url, events);
-  res.status(201).json({
-    message: 'Zapier webhook created',
+  sendCreated(res, {
     webhook: {
       id: webhook.id,
       secretKey: webhook.secret_key
     }
-  });
+  }, 'Zapier webhook created');
 }));
 
 /**
@@ -154,7 +154,7 @@ router.post('/zapier/format', authenticateToken, requireAdmin, asyncHandler(asyn
   }
 
   const payload = formatZapierPayload(eventType, data, entityId);
-  res.json({ payload });
+  sendSuccess(res, { payload });
 }));
 
 // ===================================
@@ -167,7 +167,7 @@ router.post('/zapier/format', authenticateToken, requireAdmin, asyncHandler(asyn
  */
 router.get('/notifications', authenticateToken, requireAdmin, asyncHandler(async (_req, res) => {
   const configs = await getNotificationConfigs();
-  res.json({ notifications: configs });
+  sendSuccess(res, { notifications: configs });
 }));
 
 /**
@@ -198,7 +198,11 @@ router.post('/notifications', authenticateToken, requireAdmin, asyncHandler(asyn
   };
 
   const saved = await saveNotificationConfig(config);
-  res.status(id ? 200 : 201).json({ notification: saved });
+  if (id) {
+    sendSuccess(res, { notification: saved });
+  } else {
+    sendCreated(res, { notification: saved });
+  }
 }));
 
 /**
@@ -208,7 +212,7 @@ router.post('/notifications', authenticateToken, requireAdmin, asyncHandler(asyn
 router.delete('/notifications/:id', authenticateToken, requireAdmin, asyncHandler(async (req, res) => {
   const { id } = req.params;
   await deleteNotificationConfig(parseInt(id, 10));
-  res.json({ message: 'Notification configuration deleted' });
+  sendSuccess(res, undefined, 'Notification configuration deleted');
 }));
 
 /**
@@ -226,7 +230,7 @@ router.post('/notifications/:id/test', authenticateToken, requireAdmin, asyncHan
   }
 
   const result = await testNotification(config);
-  res.json(result);
+  sendSuccess(res, result);
 }));
 
 /**
@@ -252,10 +256,10 @@ router.post('/notifications/preview', authenticateToken, requireAdmin, asyncHand
 
   if (platform === 'slack') {
     const message = formatSlackMessage(eventType, testData);
-    res.json({ message });
+    sendSuccess(res, { message });
   } else {
     const message = formatDiscordMessage(eventType, testData);
-    res.json({ message });
+    sendSuccess(res, { message });
   }
 }));
 
@@ -269,7 +273,7 @@ router.post('/notifications/preview', authenticateToken, requireAdmin, asyncHand
  */
 router.get('/stripe/status', authenticateToken, requireAdmin, asyncHandler(async (_req, res) => {
   const status = getStripeStatus();
-  res.json(status);
+  sendSuccess(res, status);
 }));
 
 /**
@@ -311,7 +315,7 @@ router.post('/stripe/payment-link', authenticateToken, requireAdmin, asyncHandle
     cancelUrl
   });
 
-  res.status(201).json({ paymentLink });
+  sendCreated(res, { paymentLink });
 }));
 
 /**
@@ -327,7 +331,7 @@ router.get('/stripe/payment-link/:invoiceId', authenticateToken, requireAdmin, a
     return;
   }
 
-  res.json({ paymentLink: link });
+  sendSuccess(res, { paymentLink: link });
 }));
 
 /**
@@ -337,32 +341,42 @@ router.get('/stripe/payment-link/:invoiceId', authenticateToken, requireAdmin, a
 router.delete('/stripe/payment-link/:invoiceId', authenticateToken, requireAdmin, asyncHandler(async (req, res) => {
   const { invoiceId } = req.params;
   await expirePaymentLink(parseInt(invoiceId, 10));
-  res.json({ message: 'Payment link expired' });
+  sendSuccess(res, undefined, 'Payment link expired');
 }));
 
 /**
  * POST /api/integrations/stripe/webhook
  * Handle Stripe webhook events (no auth required - uses signature verification)
+ *
+ * IMPORTANT: This route uses express.raw() to get the exact raw body bytes
+ * for Stripe signature verification. The raw body is stored in req.body as a Buffer.
  */
-router.post('/stripe/webhook', asyncHandler(async (req, res) => {
-  const signature = req.headers['stripe-signature'] as string;
+router.post(
+  '/stripe/webhook',
+  express.raw({ type: 'application/json' }),
+  asyncHandler(async (req, res) => {
+    const signature = req.headers['stripe-signature'] as string;
 
-  if (!signature) {
-    errorResponse(res, 'Missing Stripe signature', 400, 'VALIDATION_ERROR');
-    return;
-  }
+    if (!signature) {
+      errorResponse(res, 'Missing Stripe signature', 400, 'VALIDATION_ERROR');
+      return;
+    }
 
-  // Get raw body for signature verification
-  const rawBody = JSON.stringify(req.body);
+    // Get raw body for signature verification - req.body is a Buffer from express.raw()
+    const rawBody = req.body instanceof Buffer ? req.body.toString('utf8') : JSON.stringify(req.body);
 
-  if (!verifyWebhookSignature(rawBody, signature)) {
-    errorResponse(res, 'Invalid signature', 400, 'VALIDATION_ERROR');
-    return;
-  }
+    if (!verifyWebhookSignature(rawBody, signature)) {
+      errorResponse(res, 'Invalid Stripe webhook signature', 401, 'UNAUTHORIZED');
+      return;
+    }
 
-  await handleWebhookEvent(req.body);
-  res.json({ received: true });
-}));
+    // Parse the JSON body now that signature is verified
+    const event = req.body instanceof Buffer ? JSON.parse(rawBody) : req.body;
+
+    await handleWebhookEvent(event);
+    sendSuccess(res, { received: true });
+  })
+);
 
 // ===================================
 // GOOGLE CALENDAR
@@ -381,7 +395,7 @@ router.get('/calendar/status', authenticateToken, requireAdmin, asyncHandler(asy
     syncConfig = await getCalendarSyncConfig(userId);
   }
 
-  res.json({
+  sendSuccess(res, {
     configured,
     connected: Boolean(syncConfig?.isActive),
     syncConfig: syncConfig ? {
@@ -405,7 +419,7 @@ router.get('/calendar/auth-url', authenticateToken, requireAdmin, asyncHandler(a
 
   const state = (req as any).user?.id?.toString() || '';
   const authUrl = getGoogleAuthUrl(state);
-  res.json({ authUrl });
+  sendSuccess(res, { authUrl });
 }));
 
 /**
@@ -436,7 +450,7 @@ router.post('/calendar/callback', authenticateToken, requireAdmin, asyncHandler(
     isActive: true
   });
 
-  res.json({ message: 'Calendar connected successfully' });
+  sendSuccess(res, undefined, 'Calendar connected successfully');
 }));
 
 /**
@@ -461,7 +475,7 @@ router.put('/calendar/settings', authenticateToken, requireAdmin, asyncHandler(a
     isActive: isActive ?? existing.isActive
   });
 
-  res.json({ message: 'Calendar settings updated' });
+  sendSuccess(res, undefined, 'Calendar settings updated');
 }));
 
 /**

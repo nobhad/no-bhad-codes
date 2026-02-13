@@ -5,11 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard - No Bhad Codes</title>
     <style>
-      /* Match main site: use --color-neutral-300 which is overridden in dark mode */
+      /* Inline fallbacks before main CSS loads - uses design system variables */
+      :root {
+        --page-bg: var(--color-neutral-300, #e0e0e0);
+        --page-fg: var(--color-dark, #333333);
+      }
+      [data-theme='dark'] {
+        --page-bg: var(--portal-bg-darkest, #1a1a1a);
+        --page-fg: var(--portal-text-light, #f5f5f5);
+      }
       html,
       body {
-        background-color: var(--color-neutral-300, #e0e0e0);
-        color: var(--color-dark, #333333);
+        background-color: var(--page-bg);
+        color: var(--page-fg);
         margin: 0;
         padding: 0;
       }
@@ -624,7 +632,7 @@
                       <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="leads-table-body">
+                  <tbody id="leads-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                     <tr>
                       <td colspan="7" class="loading-row">Loading leads...</td>
                     </tr>
@@ -672,7 +680,7 @@
                       <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="contacts-table-body">
+                  <tbody id="contacts-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                     <tr>
                       <td colspan="7" class="loading-row">Loading contact submissions...</td>
                     </tr>
@@ -744,7 +752,7 @@
                       <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="projects-table-body">
+                  <tbody id="projects-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                     <tr>
                       <td colspan="9" class="loading-row">Loading projects...</td>
                     </tr>
@@ -816,7 +824,7 @@
                       <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="clients-table-body">
+                  <tbody id="clients-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                     <tr>
                       <td colspan="8" class="loading-row">Loading clients...</td>
                     </tr>
@@ -888,7 +896,7 @@
                         <th scope="col" class="actions-col">Actions</th>
                       </tr>
                     </thead>
-                    <tbody id="invoices-table-body">
+                    <tbody id="invoices-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                       <tr>
                         <td colspan="8" class="loading-row">Loading invoices...</td>
                       </tr>
@@ -950,7 +958,7 @@
                         <th scope="col" class="actions-col">Actions</th>
                       </tr>
                     </thead>
-                    <tbody id="contracts-table-body">
+                    <tbody id="contracts-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                       <tr>
                         <td colspan="8" class="loading-row">Loading contracts...</td>
                       </tr>
@@ -986,7 +994,7 @@
                           <th scope="col" class="actions-col">Actions</th>
                         </tr>
                       </thead>
-                      <tbody id="ad-hoc-requests-table-body">
+                      <tbody id="ad-hoc-requests-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                         <tr>
                           <td colspan="7" class="loading-row">Loading requests...</td>
                         </tr>
@@ -1625,7 +1633,7 @@
                             <th scope="col">Location</th>
                           </tr>
                         </thead>
-                        <tbody id="visitors-table-body">
+                        <tbody id="visitors-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                           <tr>
                             <td colspan="6" class="loading-row">Loading visitor data...</td>
                           </tr>
@@ -1765,7 +1773,7 @@
                       <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="document-requests-table-body">
+                  <tbody id="document-requests-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                     <tr>
                       <td colspan="6" class="loading-row">Loading requests...</td>
                     </tr>
@@ -1878,7 +1886,7 @@
                       <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="questionnaires-table-body">
+                  <tbody id="questionnaires-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                     <tr>
                       <td colspan="5" class="loading-row">Loading questionnaires...</td>
                     </tr>
@@ -1911,7 +1919,7 @@
                       <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="responses-table-body">
+                  <tbody id="responses-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                     <tr>
                       <td colspan="5" class="loading-row">Loading responses...</td>
                     </tr>
@@ -2063,7 +2071,7 @@
                       <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="kb-categories-table-body">
+                  <tbody id="kb-categories-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                     <tr>
                       <td colspan="4" class="loading-row">Loading categories...</td>
                     </tr>
@@ -2101,7 +2109,7 @@
                       <th scope="col" class="actions-col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="kb-articles-table-body">
+                  <tbody id="kb-articles-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                     <tr>
                       <td colspan="5" class="loading-row">Loading articles...</td>
                     </tr>
@@ -2252,6 +2260,10 @@
                           <li class="custom-dropdown-item" data-action="archive">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
                             Archive Project
+                          </li>
+                          <li class="custom-dropdown-item" data-action="generate-docs">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            Generate Documents
                           </li>
                           <li class="dropdown-divider"></li>
                           <li class="custom-dropdown-item danger" data-action="delete">
@@ -2503,7 +2515,39 @@
 
             <!-- Files Sub-Tab -->
             <div class="portal-tab-panel" id="pd-tab-files">
-              <h3 class="tab-section-heading">Files</h3>
+              <div class="tab-section-header">
+                <h3 class="tab-section-heading">Files</h3>
+                <!-- Generate Document Dropdown -->
+                <div class="table-dropdown generate-document-menu" id="pd-generate-document-menu">
+                  <button type="button" class="btn btn-secondary custom-dropdown-trigger" aria-label="Generate document">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                    <span>Generate Document</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-caret"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <ul class="custom-dropdown-menu">
+                    <li class="custom-dropdown-item" data-action="generate-proposal">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                      Generate Proposal PDF
+                    </li>
+                    <li class="custom-dropdown-item" data-action="generate-contract">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                      Generate Contract PDF
+                    </li>
+                    <li class="custom-dropdown-item" data-action="generate-receipt">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                      Generate Receipt PDF
+                    </li>
+                    <li class="custom-dropdown-item" data-action="generate-report">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                      Generate Project Report
+                    </li>
+                    <li class="custom-dropdown-item" data-action="generate-sow">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                      Generate SOW
+                    </li>
+                  </ul>
+                </div>
+              </div>
               <!-- Upload Section -->
               <div class="files-upload-section portal-shadow">
                 <h3>Upload Files for Client</h3>
@@ -2630,6 +2674,10 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                       Lock
                     </button>
+                    <button class="btn btn-secondary" id="btn-share-file">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                      Share with Client
+                    </button>
                     <button class="btn btn-danger" id="btn-delete-file">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                       Delete
@@ -2684,6 +2732,7 @@
                 <div class="card-header-with-action">
                   <h3>Invoices</h3>
                   <div class="invoice-action-buttons">
+                    <div id="pd-invoices-filter" class="invoice-filter-container"></div>
                     <button class="btn btn-outline" id="btn-process-late-fees" title="Apply late fees to overdue invoices">
                       Apply Late Fees
                     </button>
@@ -2957,7 +3006,7 @@
                           <th scope="col" class="actions-col">Actions</th>
                         </tr>
                       </thead>
-                      <tbody id="pending-approvals-table-body">
+                      <tbody id="pending-approvals-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                         <tr><td colspan="7" class="loading-row">Loading approvals...</td></tr>
                       </tbody>
                     </table>
@@ -2993,7 +3042,7 @@
                           <th scope="col" class="actions-col">Actions</th>
                         </tr>
                       </thead>
-                      <tbody id="workflows-table-body">
+                      <tbody id="workflows-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                         <tr><td colspan="6" class="loading-row">Loading workflows...</td></tr>
                       </tbody>
                     </table>
@@ -3032,7 +3081,7 @@
                           <th scope="col" class="actions-col">Actions</th>
                         </tr>
                       </thead>
-                      <tbody id="triggers-table-body">
+                      <tbody id="triggers-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                         <tr><td colspan="6" class="loading-row">Loading triggers...</td></tr>
                       </tbody>
                     </table>
@@ -3077,7 +3126,7 @@
                           <th scope="col" class="actions-col">Actions</th>
                         </tr>
                       </thead>
-                      <tbody id="email-templates-table-body">
+                      <tbody id="email-templates-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                         <tr><td colspan="6" class="loading-row">Loading templates...</td></tr>
                       </tbody>
                     </table>

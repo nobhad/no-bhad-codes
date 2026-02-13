@@ -131,11 +131,8 @@ export class InvoiceService {
     const sql = `
       INSERT INTO invoices (
         invoice_number, project_id, client_id, amount_total, amount_paid,
-        currency, status, due_date, issued_date, line_items, notes, terms,
-        business_name, business_contact, business_email, business_website,
-        venmo_handle, paypal_email, services_title, services_description,
-        deliverables, features, bill_to_name, bill_to_email
-      ) VALUES (?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        currency, status, due_date, issued_date, notes, terms, subtotal
+      ) VALUES (?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, ?)
     `;
 
     const result = await this.db.run(sql, [
@@ -146,32 +143,15 @@ export class InvoiceService {
       data.currency || 'USD',
       dueDate,
       issuedDate,
-      JSON.stringify(data.lineItems),
       data.notes || null,
       data.terms || 'Payment due within 14 days of receipt.',
-      data.businessName || BUSINESS_INFO.name,
-      data.businessContact || BUSINESS_INFO.contact,
-      data.businessEmail || BUSINESS_INFO.email,
-      data.businessWebsite || BUSINESS_INFO.website,
-      data.venmoHandle || BUSINESS_INFO.venmoHandle,
-      data.paypalEmail || BUSINESS_INFO.paypalEmail,
-      data.servicesTitle || null,
-      data.servicesDescription || null,
-      data.deliverables ? JSON.stringify(data.deliverables) : null,
-      data.features || null,
-      data.billToName || null,
-      data.billToEmail || null
+      amountTotal
     ]);
 
     const invoiceId = result.lastID!;
 
-    // Save line items to new table (dual-write for rollback compatibility)
-    try {
-      await this.saveLineItems(invoiceId, data.lineItems);
-    } catch (err) {
-      // Log but don't fail - JSON column has the data as backup
-      console.warn('Failed to save line items to table:', err);
-    }
+    // Save line items to invoice_line_items table
+    await this.saveLineItems(invoiceId, data.lineItems);
 
     return this.getInvoiceById(invoiceId);
   }
@@ -195,7 +175,9 @@ export class InvoiceService {
       throw new Error(`Invoice with ID ${id} not found`);
     }
 
-    return this.mapRowToInvoice(row);
+    const invoice = this.mapRowToInvoice(row);
+    invoice.lineItems = await this.getLineItems(id);
+    return invoice;
   }
 
   /**
@@ -217,7 +199,9 @@ export class InvoiceService {
       throw new Error(`Invoice with number ${invoiceNumber} not found`);
     }
 
-    return this.mapRowToInvoice(row);
+    const invoice = this.mapRowToInvoice(row);
+    invoice.lineItems = await this.getLineItems(invoice.id!);
+    return invoice;
   }
 
   /**
@@ -235,8 +219,14 @@ export class InvoiceService {
     `;
 
     const rows = await this.db.all(sql, [clientId]);
+    const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
-    return rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
+    // Fetch line items for each invoice
+    for (const invoice of invoices) {
+      invoice.lineItems = await this.getLineItems(invoice.id!);
+    }
+
+    return invoices;
   }
 
   /**
@@ -254,8 +244,14 @@ export class InvoiceService {
     `;
 
     const rows = await this.db.all(sql, [projectId]);
+    const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
-    return rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
+    // Fetch line items for each invoice
+    for (const invoice of invoices) {
+      invoice.lineItems = await this.getLineItems(invoice.id!);
+    }
+
+    return invoices;
   }
 
   /**
@@ -324,8 +320,8 @@ export class InvoiceService {
 
     if (data.lineItems && data.lineItems.length > 0) {
       const amountTotal = this.calculateTotal(data.lineItems);
-      updates.push('line_items = ?', 'amount_total = ?');
-      params.push(JSON.stringify(data.lineItems), amountTotal);
+      updates.push('amount_total = ?', 'subtotal = ?');
+      params.push(amountTotal, amountTotal);
     }
 
     if (data.dueDate !== undefined) {
@@ -343,31 +339,6 @@ export class InvoiceService {
       params.push(data.terms);
     }
 
-    if (data.billToName !== undefined) {
-      updates.push('bill_to_name = ?');
-      params.push(data.billToName);
-    }
-
-    if (data.billToEmail !== undefined) {
-      updates.push('bill_to_email = ?');
-      params.push(data.billToEmail);
-    }
-
-    if (data.servicesTitle !== undefined) {
-      updates.push('services_title = ?');
-      params.push(data.servicesTitle);
-    }
-
-    if (data.servicesDescription !== undefined) {
-      updates.push('services_description = ?');
-      params.push(data.servicesDescription);
-    }
-
-    if (data.deliverables !== undefined) {
-      updates.push('deliverables = ?');
-      params.push(data.deliverables ? JSON.stringify(data.deliverables) : null);
-    }
-
     if (updates.length === 0) {
       return currentInvoice;
     }
@@ -379,13 +350,9 @@ export class InvoiceService {
 
     await this.db.run(sql, params);
 
-    // Update line items in new table if they were changed
+    // Update line items in table if they were changed
     if (data.lineItems && data.lineItems.length > 0) {
-      try {
-        await this.saveLineItems(id, data.lineItems);
-      } catch (err) {
-        console.warn('Failed to update line items in table:', err);
-      }
+      await this.saveLineItems(id, data.lineItems);
     }
 
     return this.getInvoiceById(id);
@@ -604,6 +571,7 @@ export class InvoiceService {
 
   /**
    * Map database row to Invoice object
+   * Note: lineItems are loaded separately via getLineItems() for full invoice data
    */
   private mapRowToInvoice(row: InvoiceRow): Invoice {
     // Helper to parse optional numeric fields
@@ -626,30 +594,22 @@ export class InvoiceService {
       paidDate: row.paid_date,
       paymentMethod: row.payment_method,
       paymentReference: row.payment_reference,
-      lineItems: JSON.parse(row.line_items || '[]'),
+      lineItems: [], // Loaded separately via getLineItems()
       notes: row.notes,
       terms: row.terms,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       // Joined client/project display names (from JOINed queries)
       clientName: row.company_name || row.contact_name,
+      clientEmail: row.client_email,
       projectName: row.project_name,
-      // Custom business info
-      businessName: row.business_name || BUSINESS_INFO.name,
-      businessContact: row.business_contact || BUSINESS_INFO.contact,
-      businessEmail: row.business_email || BUSINESS_INFO.email,
-      businessWebsite: row.business_website || BUSINESS_INFO.website,
-      // Payment methods
-      venmoHandle: row.venmo_handle || BUSINESS_INFO.venmoHandle,
-      paypalEmail: row.paypal_email || BUSINESS_INFO.paypalEmail,
-      // Services fields
-      servicesTitle: row.services_title,
-      servicesDescription: row.services_description,
-      deliverables: row.deliverables ? JSON.parse(row.deliverables) : [],
-      features: row.features,
-      // Bill To overrides
-      billToName: row.bill_to_name,
-      billToEmail: row.bill_to_email,
+      // Business info from constant (no longer stored per-invoice)
+      businessName: BUSINESS_INFO.name,
+      businessContact: BUSINESS_INFO.contact,
+      businessEmail: BUSINESS_INFO.email,
+      businessWebsite: BUSINESS_INFO.website,
+      venmoHandle: BUSINESS_INFO.venmoHandle,
+      paypalEmail: BUSINESS_INFO.paypalEmail,
       // Deposit invoice fields
       invoiceType: row.invoice_type || 'standard',
       depositForProjectId: row.deposit_for_project_id,
@@ -671,7 +631,6 @@ export class InvoiceService {
       lateFeeAppliedAt: row.late_fee_applied_at,
       // Advanced features - Payment terms
       paymentTermsId: row.payment_terms_id,
-      paymentTermsName: row.payment_terms_name,
       // Advanced features - Internal notes
       internalNotes: row.internal_notes,
       // Advanced features - Invoice number customization
@@ -686,49 +645,28 @@ export class InvoiceService {
 
   /**
    * Get line items from the invoice_line_items table
-   * Falls back to JSON column for invoices not yet migrated
    */
   async getLineItems(invoiceId: number): Promise<InvoiceLineItem[]> {
-    // First try the new table
     const rows = await this.db.all(
-      `SELECT * FROM invoice_line_items WHERE invoice_id = ? ORDER BY sort_order ASC`,
+      'SELECT * FROM invoice_line_items WHERE invoice_id = ? ORDER BY sort_order ASC',
       [invoiceId]
     );
 
-    if (rows.length > 0) {
-      return rows.map((row: Record<string, unknown>) => ({
-        description: row.description as string,
-        quantity: typeof row.quantity === 'string' ? parseFloat(row.quantity) : (row.quantity as number),
-        rate: typeof row.unit_price === 'string' ? parseFloat(row.unit_price) : (row.unit_price as number),
-        amount: typeof row.amount === 'string' ? parseFloat(row.amount) : (row.amount as number),
-        taxRate: row.tax_rate ? (typeof row.tax_rate === 'string' ? parseFloat(row.tax_rate) : row.tax_rate as number) : undefined,
-        taxAmount: row.tax_amount ? (typeof row.tax_amount === 'string' ? parseFloat(row.tax_amount) : row.tax_amount as number) : undefined,
-        discountType: row.discount_type as 'percentage' | 'fixed' | undefined,
-        discountValue: row.discount_value ? (typeof row.discount_value === 'string' ? parseFloat(row.discount_value) : row.discount_value as number) : undefined,
-        discountAmount: row.discount_amount ? (typeof row.discount_amount === 'string' ? parseFloat(row.discount_amount) : row.discount_amount as number) : undefined
-      }));
-    }
-
-    // Fall back to JSON column for unmigrated invoices
-    const invoice = await this.db.get(
-      'SELECT line_items FROM invoices WHERE id = ?',
-      [invoiceId]
-    );
-
-    if (invoice?.line_items) {
-      try {
-        return JSON.parse(invoice.line_items as string);
-      } catch {
-        return [];
-      }
-    }
-
-    return [];
+    return rows.map((row: Record<string, unknown>) => ({
+      description: row.description as string,
+      quantity: typeof row.quantity === 'string' ? parseFloat(row.quantity) : (row.quantity as number),
+      rate: typeof row.unit_price === 'string' ? parseFloat(row.unit_price) : (row.unit_price as number),
+      amount: typeof row.amount === 'string' ? parseFloat(row.amount) : (row.amount as number),
+      taxRate: row.tax_rate ? (typeof row.tax_rate === 'string' ? parseFloat(row.tax_rate) : row.tax_rate as number) : undefined,
+      taxAmount: row.tax_amount ? (typeof row.tax_amount === 'string' ? parseFloat(row.tax_amount) : row.tax_amount as number) : undefined,
+      discountType: row.discount_type as 'percentage' | 'fixed' | undefined,
+      discountValue: row.discount_value ? (typeof row.discount_value === 'string' ? parseFloat(row.discount_value) : row.discount_value as number) : undefined,
+      discountAmount: row.discount_amount ? (typeof row.discount_amount === 'string' ? parseFloat(row.discount_amount) : row.discount_amount as number) : undefined
+    }));
   }
 
   /**
    * Save line items to the invoice_line_items table
-   * Also writes to JSON column for rollback compatibility
    */
   async saveLineItems(invoiceId: number, lineItems: InvoiceLineItem[]): Promise<void> {
     // Delete existing line items for this invoice
@@ -761,12 +699,6 @@ export class InvoiceService {
         ]
       );
     }
-
-    // Also update JSON column for rollback compatibility
-    await this.db.run(
-      'UPDATE invoices SET line_items = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [JSON.stringify(lineItems), invoiceId]
-    );
   }
 
   /**
@@ -832,10 +764,9 @@ export class InvoiceService {
     const sql = `
       INSERT INTO invoices (
         invoice_number, project_id, client_id, amount_total, amount_paid,
-        currency, status, due_date, issued_date, line_items, notes, terms,
-        business_name, business_contact, business_email, business_website,
-        venmo_handle, paypal_email, invoice_type, deposit_for_project_id, deposit_percentage
-      ) VALUES (?, ?, ?, ?, 0, 'USD', 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'deposit', ?, ?)
+        currency, status, due_date, issued_date, notes, terms,
+        invoice_type, deposit_for_project_id, deposit_percentage, subtotal
+      ) VALUES (?, ?, ?, ?, 0, 'USD', 'draft', ?, ?, ?, ?, 'deposit', ?, ?, ?)
     `;
 
     const result = await this.db.run(sql, [
@@ -845,27 +776,17 @@ export class InvoiceService {
       amount,
       dueDate,
       issuedDate,
-      JSON.stringify(lineItems),
       percentage ? `Deposit (${percentage}% of project total)` : 'Project Deposit',
       'Payment due within 14 days. This deposit secures your project slot.',
-      BUSINESS_INFO.name,
-      BUSINESS_INFO.contact,
-      BUSINESS_INFO.email,
-      BUSINESS_INFO.website,
-      BUSINESS_INFO.venmoHandle,
-      BUSINESS_INFO.paypalEmail,
       projectId,
-      percentage || null
+      percentage || null,
+      amount
     ]);
 
     const invoiceId = result.lastID!;
 
-    // Save line items to new table (dual-write for rollback compatibility)
-    try {
-      await this.saveLineItems(invoiceId, lineItems);
-    } catch (err) {
-      console.warn('Failed to save deposit line items to table:', err);
-    }
+    // Save line items to invoice_line_items table
+    await this.saveLineItems(invoiceId, lineItems);
 
     return this.getInvoiceById(invoiceId);
   }
@@ -1193,7 +1114,14 @@ export class InvoiceService {
     `;
 
     const rows = await this.db.all(sql, [milestoneId]);
-    return rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
+    const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
+
+    // Fetch line items for each invoice
+    for (const invoice of invoices) {
+      invoice.lineItems = await this.getLineItems(invoice.id!);
+    }
+
+    return invoices;
   }
 
   /**
@@ -1407,11 +1335,9 @@ export class InvoiceService {
     const sql = `
       INSERT INTO invoices (
         invoice_number, project_id, client_id, amount_total, amount_paid,
-        currency, status, due_date, issued_date, line_items, notes, terms,
-        business_name, business_contact, business_email, business_website,
-        venmo_handle, paypal_email, services_title, services_description,
-        deliverables, features, bill_to_name, bill_to_email, invoice_type
-      ) VALUES (?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        currency, status, due_date, issued_date, notes, terms,
+        invoice_type, subtotal
+      ) VALUES (?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, 'standard', ?)
     `;
 
     const result = await this.db.run(sql, [
@@ -1422,25 +1348,17 @@ export class InvoiceService {
       original.currency,
       dueDate,
       issuedDate,
-      JSON.stringify(original.lineItems),
       original.notes ? `Copy of ${original.invoiceNumber}: ${original.notes}` : `Copy of ${original.invoiceNumber}`,
       original.terms,
-      original.businessName,
-      original.businessContact,
-      original.businessEmail,
-      original.businessWebsite,
-      original.venmoHandle,
-      original.paypalEmail,
-      original.servicesTitle,
-      original.servicesDescription,
-      original.deliverables ? JSON.stringify(original.deliverables) : null,
-      original.features,
-      original.billToName,
-      original.billToEmail,
-      'standard' // Duplicates are always standard invoices
+      original.amountTotal
     ]);
 
-    return this.getInvoiceById(result.lastID!);
+    const invoiceId = result.lastID!;
+
+    // Copy line items to new invoice
+    await this.saveLineItems(invoiceId, original.lineItems);
+
+    return this.getInvoiceById(invoiceId);
   }
 
   // ============================================
@@ -1593,6 +1511,11 @@ export class InvoiceService {
     const rows = await this.db.all(sql, [...params, limit, offset]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
+    // Fetch line items for each invoice
+    for (const invoice of invoices) {
+      invoice.lineItems = await this.getLineItems(invoice.id!);
+    }
+
     return { invoices, total };
   }
 
@@ -1615,7 +1538,14 @@ export class InvoiceService {
     `;
 
     const rows = await this.db.all(sql, [limit, offset]);
-    return rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
+    const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
+
+    // Fetch line items for each invoice
+    for (const invoice of invoices) {
+      invoice.lineItems = await this.getLineItems(invoice.id!);
+    }
+
+    return invoices;
   }
 
   // ============================================
@@ -1717,7 +1647,6 @@ export class InvoiceService {
     await this.db.run(
       `UPDATE invoices SET
         payment_terms_id = ?,
-        payment_terms_name = ?,
         due_date = ?,
         late_fee_rate = ?,
         late_fee_type = ?,
@@ -1725,7 +1654,6 @@ export class InvoiceService {
       WHERE id = ?`,
       [
         termsId,
-        terms.name,
         dueDate.toISOString().split('T')[0],
         terms.lateFeeRate || 0,
         terms.lateFeeType || 'none',
@@ -2046,11 +1974,8 @@ export class InvoiceService {
       INSERT INTO invoices (
         invoice_number, invoice_prefix, invoice_sequence,
         project_id, client_id, amount_total, amount_paid,
-        currency, status, due_date, issued_date, line_items, notes, terms,
-        business_name, business_contact, business_email, business_website,
-        venmo_handle, paypal_email, services_title, services_description,
-        deliverables, features, bill_to_name, bill_to_email, subtotal
-      ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        currency, status, due_date, issued_date, notes, terms, subtotal
+      ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, ?)
     `;
 
     const result = await this.db.run(sql, [
@@ -2063,25 +1988,17 @@ export class InvoiceService {
       data.currency || 'USD',
       dueDate,
       issuedDate,
-      JSON.stringify(data.lineItems),
       data.notes || null,
       data.terms || 'Payment due within 14 days of receipt.',
-      data.businessName || BUSINESS_INFO.name,
-      data.businessContact || BUSINESS_INFO.contact,
-      data.businessEmail || BUSINESS_INFO.email,
-      data.businessWebsite || BUSINESS_INFO.website,
-      data.venmoHandle || BUSINESS_INFO.venmoHandle,
-      data.paypalEmail || BUSINESS_INFO.paypalEmail,
-      data.servicesTitle || null,
-      data.servicesDescription || null,
-      data.deliverables ? JSON.stringify(data.deliverables) : null,
-      data.features || null,
-      data.billToName || null,
-      data.billToEmail || null,
       amountTotal
     ]);
 
-    return this.getInvoiceById(result.lastID!);
+    const invoiceId = result.lastID!;
+
+    // Save line items to invoice_line_items table
+    await this.saveLineItems(invoiceId, data.lineItems);
+
+    return this.getInvoiceById(invoiceId);
   }
 
   // ============================================

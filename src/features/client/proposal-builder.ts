@@ -740,8 +740,8 @@ export class ProposalBuilderModule {
       f => this.state.selection.addedFeatures.includes(f.id)
     );
 
-    // Build feature list for submission
-    const features = [
+    // Build feature list for submission (reserved for future API integration)
+    const _features = [
       ...includedFeatures.map(f => ({
         featureId: f.id,
         featureName: f.name,
@@ -776,16 +776,6 @@ export class ProposalBuilderModule {
     this.state.selection.subtotal = breakdown.subtotal;
     this.state.selection.discountAmount = breakdown.discountAmount;
     this.state.selection.taxAmount = breakdown.taxAmount;
-
-    console.log('[ProposalBuilder] Submitting proposal:', {
-      selection: this.state.selection,
-      features,
-      basePrice: breakdown.basePrice,
-      finalPrice: breakdown.total,
-      subtotal: breakdown.subtotal,
-      discountAmount: breakdown.discountAmount,
-      taxAmount: breakdown.taxAmount
-    });
 
     // Call completion handler
     if (this.onComplete) {

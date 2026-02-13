@@ -636,6 +636,7 @@ export function updateBreadcrumbs(breadcrumbs: BreadcrumbItem[]): void {
 
 /**
  * Toggle sidebar collapsed/expanded state (desktop)
+ * Updates aria-expanded on toggle buttons for accessibility
  */
 export function toggleSidebar(): void {
   const sidebar = getSidebar();
@@ -646,6 +647,15 @@ export function toggleSidebar(): void {
   }
 
   sidebar.classList.toggle('collapsed');
+
+  // Update aria-expanded on all toggle buttons
+  const isCollapsed = sidebar.classList.contains('collapsed');
+  const toggleButtons = document.querySelectorAll(
+    '#mobile-menu-toggle, #btn-sidebar-toggle, [aria-controls="sidebar"]'
+  );
+  toggleButtons.forEach((btn) => {
+    btn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+  });
 }
 
 /**

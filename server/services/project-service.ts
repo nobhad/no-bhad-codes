@@ -64,7 +64,8 @@ interface TaskRow {
   description?: string;
   status: string;
   priority: string;
-  assigned_to?: string;
+  assigned_to_user_id?: number;
+  assigned_to_name?: string; // From JOIN with users table
   due_date?: string;
   estimated_hours?: number | string;
   actual_hours?: number | string;
@@ -111,7 +112,8 @@ export interface TaskComment {
 interface CommentRow {
   id: number;
   task_id: number;
-  author: string;
+  author_user_id: number | null;
+  author_name: string | null; // From JOIN with users table
   content: string;
   created_at: string;
   updated_at: string;
@@ -176,7 +178,8 @@ interface TimeEntryRow {
   id: number;
   project_id: number;
   task_id?: number;
-  user_name: string;
+  user_id: number | null;
+  user_name: string | null; // From JOIN with users table
   description?: string;
   hours: number | string;
   date: string;
@@ -313,7 +316,7 @@ function toTask(row: TaskRow): ProjectTask {
     description: row.description,
     status: row.status as ProjectTask['status'],
     priority: row.priority as ProjectTask['priority'],
-    assignedTo: row.assigned_to,
+    assignedTo: row.assigned_to_name,
     dueDate: row.due_date,
     estimatedHours: row.estimated_hours ? parseFloat(String(row.estimated_hours)) : undefined,
     actualHours: row.actual_hours ? parseFloat(String(row.actual_hours)) : undefined,
@@ -339,7 +342,7 @@ function toComment(row: CommentRow): TaskComment {
   return {
     id: row.id,
     taskId: row.task_id,
-    author: row.author,
+    author: row.author_name || 'Unknown',
     content: row.content,
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -365,7 +368,7 @@ function toTimeEntry(row: TimeEntryRow): TimeEntry {
     id: row.id,
     projectId: row.project_id,
     taskId: row.task_id,
-    userName: row.user_name,
+    userName: row.user_name || 'Unknown',
     description: row.description,
     hours,
     date: row.date,
@@ -443,7 +446,10 @@ class ProjectService {
     );
 
     const task = await db.get(
-      'SELECT * FROM project_tasks WHERE id = ?',
+      `SELECT t.*, u.display_name as assigned_to_name
+       FROM project_tasks t
+       LEFT JOIN users u ON t.assigned_to_user_id = u.id
+       WHERE t.id = ?`,
       [result.lastID]
     );
 
@@ -468,10 +474,12 @@ class ProjectService {
     let query = `
       SELECT
         t.*,
+        u.display_name as assigned_to_name,
         p.project_name,
         m.title as milestone_title
       FROM project_tasks t
       JOIN projects p ON t.project_id = p.id
+      LEFT JOIN users u ON t.assigned_to_user_id = u.id
       LEFT JOIN milestones m ON t.milestone_id = m.id
       WHERE t.project_id = ?
     `;
@@ -482,7 +490,8 @@ class ProjectService {
       params.push(options.status);
     }
     if (options?.assignedTo) {
-      query += ' AND t.assigned_to = ?';
+      query += ' AND (u.display_name = ? OR u.email = ?)';
+      params.push(options.assignedTo);
       params.push(options.assignedTo);
     }
     if (options?.milestoneId) {
@@ -530,7 +539,10 @@ class ProjectService {
     const db = getDatabase();
 
     const row = await db.get(
-      'SELECT * FROM project_tasks WHERE id = ?',
+      `SELECT t.*, u.display_name as assigned_to_name
+       FROM project_tasks t
+       LEFT JOIN users u ON t.assigned_to_user_id = u.id
+       WHERE t.id = ?`,
       [taskId]
     );
 
@@ -540,7 +552,11 @@ class ProjectService {
 
     // Get subtasks
     const subtaskRows = await db.all(
-      'SELECT * FROM project_tasks WHERE parent_task_id = ? ORDER BY sort_order ASC',
+      `SELECT t.*, u.display_name as assigned_to_name
+       FROM project_tasks t
+       LEFT JOIN users u ON t.assigned_to_user_id = u.id
+       WHERE t.parent_task_id = ?
+       ORDER BY t.sort_order ASC`,
       [taskId]
     );
     task.subtasks = (subtaskRows as unknown as TaskRow[]).map(toTask);
@@ -641,7 +657,7 @@ class ProjectService {
       try {
         await checkAndUpdateMilestoneCompletion(currentTask.milestone_id);
       } catch (error) {
-        console.error(`[ProjectService] Error updating milestone completion:`, error);
+        console.error('[ProjectService] Error updating milestone completion:', error);
         // Don't fail the task update if milestone update fails
       }
     }
@@ -651,7 +667,7 @@ class ProjectService {
       try {
         await updateProjectProgress(currentTask.project_id);
       } catch (error) {
-        console.error(`[ProjectService] Error updating project progress:`, error);
+        console.error('[ProjectService] Error updating project progress:', error);
         // Don't fail the task update if project progress update fails
       }
     }
@@ -686,7 +702,7 @@ class ProjectService {
       try {
         await checkAndUpdateMilestoneCompletion(task.milestone_id);
       } catch (error) {
-        console.error(`[ProjectService] Error updating milestone completion after task deletion:`, error);
+        console.error('[ProjectService] Error updating milestone completion after task deletion:', error);
       }
     }
 
@@ -694,7 +710,7 @@ class ProjectService {
     try {
       await updateProjectProgress(task.project_id);
     } catch (error) {
-      console.error(`[ProjectService] Error updating project progress after task deletion:`, error);
+      console.error('[ProjectService] Error updating project progress after task deletion:', error);
     }
   }
 
@@ -737,7 +753,7 @@ class ProjectService {
 
     // Update task
     await db.run(
-      `UPDATE project_tasks SET sort_order = ?, milestone_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+      'UPDATE project_tasks SET sort_order = ?, milestone_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [newPosition, milestoneId ?? taskMilestoneId, taskId]
     );
   }
@@ -830,7 +846,9 @@ class ProjectService {
     const db = getDatabase();
 
     const rows = await db.all(
-      `SELECT DISTINCT t.* FROM project_tasks t
+      `SELECT DISTINCT t.*, u.display_name as assigned_to_name
+       FROM project_tasks t
+       LEFT JOIN users u ON t.assigned_to_user_id = u.id
        JOIN task_dependencies d ON t.id = d.task_id
        JOIN project_tasks dep ON d.depends_on_task_id = dep.id
        WHERE t.project_id = ? AND t.status NOT IN ('completed', 'cancelled')
@@ -861,7 +879,10 @@ class ProjectService {
     );
 
     const comment = await db.get(
-      'SELECT * FROM task_comments WHERE id = ?',
+      `SELECT tc.*, u.display_name as author_name
+       FROM task_comments tc
+       LEFT JOIN users u ON tc.author_user_id = u.id
+       WHERE tc.id = ?`,
       [result.lastID]
     );
 
@@ -878,7 +899,11 @@ class ProjectService {
   async getTaskComments(taskId: number): Promise<TaskComment[]> {
     const db = getDatabase();
     const rows = await db.all(
-      'SELECT * FROM task_comments WHERE task_id = ? ORDER BY created_at ASC',
+      `SELECT tc.*, u.display_name as author_name
+       FROM task_comments tc
+       LEFT JOIN users u ON tc.author_user_id = u.id
+       WHERE tc.task_id = ?
+       ORDER BY tc.created_at ASC`,
       [taskId]
     );
     return (rows as unknown as CommentRow[]).map(toComment);
@@ -1008,7 +1033,10 @@ class ProjectService {
     );
 
     const entry = await db.get(
-      'SELECT * FROM time_entries WHERE id = ?',
+      `SELECT te.*, u.display_name as user_name
+       FROM time_entries te
+       LEFT JOIN users u ON te.user_id = u.id
+       WHERE te.id = ?`,
       [result.lastID]
     );
 
@@ -1030,8 +1058,9 @@ class ProjectService {
   }): Promise<TimeEntry[]> {
     const db = getDatabase();
 
-    let query = `SELECT te.*, pt.title as task_title
+    let query = `SELECT te.*, u.display_name as user_name, pt.title as task_title
                  FROM time_entries te
+                 LEFT JOIN users u ON te.user_id = u.id
                  LEFT JOIN project_tasks pt ON te.task_id = pt.id
                  WHERE te.project_id = ?`;
     const params: SqlValue[] = [projectId];
@@ -1045,7 +1074,8 @@ class ProjectService {
       params.push(options.endDate);
     }
     if (options?.userName) {
-      query += ' AND te.user_name = ?';
+      query += ' AND (u.display_name = ? OR u.email = ?)';
+      params.push(options.userName);
       params.push(options.userName);
     }
     if (options?.taskId) {
@@ -1099,7 +1129,10 @@ class ProjectService {
     }
 
     const entry = await db.get(
-      'SELECT * FROM time_entries WHERE id = ?',
+      `SELECT te.*, u.display_name as user_name
+       FROM time_entries te
+       LEFT JOIN users u ON te.user_id = u.id
+       WHERE te.id = ?`,
       [entryId]
     );
 
@@ -1138,11 +1171,12 @@ class ProjectService {
 
     // By user
     const byUser = await db.all(
-      `SELECT user_name, SUM(hours) as hours,
-        SUM(CASE WHEN billable = 1 THEN hours * COALESCE(hourly_rate, 0) ELSE 0 END) as amount
-       FROM time_entries
-       WHERE project_id = ?
-       GROUP BY user_name
+      `SELECT u.display_name as user_name, SUM(te.hours) as hours,
+        SUM(CASE WHEN te.billable = 1 THEN te.hours * COALESCE(te.hourly_rate, 0) ELSE 0 END) as amount
+       FROM time_entries te
+       LEFT JOIN users u ON te.user_id = u.id
+       WHERE te.project_id = ?
+       GROUP BY te.user_id, u.display_name
        ORDER BY hours DESC`,
       [projectId]
     );
@@ -1198,13 +1232,14 @@ class ProjectService {
     const db = getDatabase();
 
     const byUser = await db.all(
-      `SELECT user_name,
-        SUM(hours) as total_hours,
-        SUM(CASE WHEN billable = 1 THEN hours ELSE 0 END) as billable_hours,
-        SUM(CASE WHEN billable = 1 THEN hours * COALESCE(hourly_rate, 0) ELSE 0 END) as total_amount
-       FROM time_entries
-       WHERE date >= ? AND date <= ?
-       GROUP BY user_name
+      `SELECT te.user_id, u.display_name as user_name,
+        SUM(te.hours) as total_hours,
+        SUM(CASE WHEN te.billable = 1 THEN te.hours ELSE 0 END) as billable_hours,
+        SUM(CASE WHEN te.billable = 1 THEN te.hours * COALESCE(te.hourly_rate, 0) ELSE 0 END) as total_amount
+       FROM time_entries te
+       LEFT JOIN users u ON te.user_id = u.id
+       WHERE te.date >= ? AND te.date <= ?
+       GROUP BY te.user_id, u.display_name
        ORDER BY total_hours DESC`,
       [startDate, endDate]
     );
@@ -1218,14 +1253,15 @@ class ProjectService {
     };
 
     for (const user of byUser) {
+      const userId = Number(user.user_id);
       const userProjects = await db.all(
         `SELECT te.project_id, p.project_name, SUM(te.hours) as hours
          FROM time_entries te
          JOIN projects p ON te.project_id = p.id
-         WHERE te.user_name = ? AND te.date >= ? AND te.date <= ?
+         WHERE te.user_id = ? AND te.date >= ? AND te.date <= ?
          GROUP BY te.project_id
          ORDER BY hours DESC`,
-        [String(user.user_name), startDate, endDate]
+        [userId, startDate, endDate]
       );
 
       const totalHours = parseFloat(String(user.total_hours));
@@ -1578,7 +1614,7 @@ class ProjectService {
     const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const hoursPerDay = totalHours / totalDays;
 
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
     let cumulativeActual = 0;
 
     while (currentDate <= endDate) {

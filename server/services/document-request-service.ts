@@ -52,6 +52,7 @@ export interface DocumentRequest {
   reviewed_at?: string;
   review_notes?: string;
   rejection_reason?: string;
+  approved_file_id?: number;
   is_required: boolean;
   reminder_sent_at?: string;
   reminder_count: number;
@@ -304,7 +305,7 @@ class DocumentRequestService {
     // Only update if currently in 'requested' status
     if (request.status === 'requested') {
       await db.run(
-        `UPDATE document_requests SET status = 'viewed', updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        'UPDATE document_requests SET status = \'viewed\', updated_at = CURRENT_TIMESTAMP WHERE id = ?',
         [id]
       );
 
@@ -385,13 +386,14 @@ class DocumentRequestService {
   }
 
   /**
-   * Approve a document request
+   * Approve a document request and copy the uploaded file to the Files tab
+   * @returns Object containing the updated request and the new file ID
    */
   async approveRequest(
     id: number,
     reviewerEmail: string,
     notes?: string
-  ): Promise<DocumentRequest> {
+  ): Promise<{ request: DocumentRequest; approvedFileId: number | null }> {
     const db = await getDatabase();
     const request = await this.getRequest(id);
 
@@ -400,21 +402,118 @@ class DocumentRequestService {
     }
 
     const oldStatus = request.status;
+    let approvedFileId: number | null = null;
+
+    // If there's an uploaded file, copy it to the Files tab
+    if (request.file_id) {
+      approvedFileId = await this.copyFileToFilesTab(request, reviewerEmail);
+    }
+
+    // Look up user ID for reviewed_by during transition period
+    const reviewedByUserId = await userService.getUserIdByEmail(reviewerEmail);
 
     await db.run(
       `UPDATE document_requests
        SET status = 'approved',
            reviewed_by = ?,
+           reviewed_by_user_id = ?,
            reviewed_at = CURRENT_TIMESTAMP,
            review_notes = ?,
+           approved_file_id = ?,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [reviewerEmail, notes || null, id]
+      [reviewerEmail, reviewedByUserId, notes || null, approvedFileId, id]
     );
 
     await this.logHistory(id, 'approved', oldStatus, 'approved', reviewerEmail, 'admin', notes);
 
-    return this.getRequest(id) as Promise<DocumentRequest>;
+    const updatedRequest = await this.getRequest(id) as DocumentRequest;
+    return { request: updatedRequest, approvedFileId };
+  }
+
+  /**
+   * Copy the uploaded file from document request to the Files tab
+   * File goes to Forms folder (category: 'forms') with shared_with_client = FALSE
+   */
+  private async copyFileToFilesTab(
+    request: DocumentRequest,
+    reviewerEmail: string
+  ): Promise<number | null> {
+    if (!request.file_id) {
+      return null;
+    }
+
+    const db = await getDatabase();
+
+    // Define the file record interface
+    interface FileRecord {
+      id: number;
+      project_id: number | null;
+      filename: string;
+      original_filename: string;
+      file_path: string;
+      file_size: number | null;
+      mime_type: string | null;
+      file_type: string | null;
+    }
+
+    // Get the original uploaded file info
+    const originalFile = await db.get(
+      `SELECT id, project_id, filename, original_filename, file_path, file_size, mime_type, file_type
+       FROM files WHERE id = ?`,
+      [request.file_id]
+    ) as FileRecord | undefined;
+
+    if (!originalFile) {
+      console.warn(`[DocumentRequest] Original file not found: ${request.file_id}`);
+      return null;
+    }
+
+    // Determine the project_id - use the request's project_id if available
+    const projectId = request.project_id;
+
+    if (!projectId) {
+      console.warn(`[DocumentRequest] No project_id for request ${request.id}, cannot copy file to Files tab`);
+      return null;
+    }
+
+    // Create a new file record in the Files table
+    // Category is 'forms' for approved document request files
+    // shared_with_client = FALSE by default (admin must explicitly share)
+    const result = await db.run(
+      `INSERT INTO files (
+        project_id,
+        filename,
+        original_filename,
+        file_path,
+        file_size,
+        mime_type,
+        file_type,
+        description,
+        uploaded_by,
+        category,
+        shared_with_client,
+        created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE, CURRENT_TIMESTAMP)`,
+      [
+        projectId,
+        originalFile.filename,
+        originalFile.original_filename,
+        originalFile.file_path,
+        originalFile.file_size,
+        originalFile.mime_type,
+        originalFile.file_type || 'document',
+        `Document Request: ${request.title}`,
+        reviewerEmail,
+        'forms' // Category for approved document request files
+      ]
+    );
+
+    const newFileId = result.lastID;
+
+    console.log(`[DocumentRequest] Copied file ${request.file_id} to Files tab as file ${newFileId}`);
+
+    return newFileId || null;
   }
 
   /**
@@ -434,15 +533,19 @@ class DocumentRequestService {
 
     const oldStatus = request.status;
 
+    // Look up user ID for reviewed_by during transition period
+    const reviewedByUserId = await userService.getUserIdByEmail(reviewerEmail);
+
     await db.run(
       `UPDATE document_requests
        SET status = 'rejected',
            reviewed_by = ?,
+           reviewed_by_user_id = ?,
            reviewed_at = CURRENT_TIMESTAMP,
            rejection_reason = ?,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [reviewerEmail, reason, id]
+      [reviewerEmail, reviewedByUserId, reason, id]
     );
 
     await this.logHistory(id, 'rejected', oldStatus, 'rejected', reviewerEmail, 'admin', reason);

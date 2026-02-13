@@ -255,6 +255,37 @@
   height: 10px;
 }
 
+/* Shared with Client Badge */
+.file-shared-badge {
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: var(--space-0-5) var(--space-1);
+  border-radius: var(--portal-radius-xs);
+  text-transform: uppercase;
+  background: rgba(var(--color-success-rgb), 0.2);
+  color: var(--status-active);
+  margin-left: var(--space-1);
+}
+
+/* Share Button Active State */
+.file-actions .icon-btn.icon-btn-active {
+  color: var(--status-active);
+  background: rgba(var(--color-success-rgb), 0.15);
+}
+
+.file-actions .icon-btn.icon-btn-active:hover {
+  background: rgba(var(--color-success-rgb), 0.25);
+}
+
+.file-actions .icon-btn.btn-share-file {
+  transition: all 0.15s ease;
+}
+
+.file-actions .icon-btn.btn-share-file:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Grid View File Item */
 .files-list.grid-view .file-item {
   flex-direction: column;

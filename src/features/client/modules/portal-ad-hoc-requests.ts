@@ -10,6 +10,7 @@
 import type { ClientPortalContext } from '../portal-types';
 import { createPortalModal } from '../../../components/portal-modal';
 import { createModalDropdown } from '../../../components/modal-dropdown';
+import { formatCurrency } from '../../../utils/format-utils';
 
 const REQUESTS_API = '/api/ad-hoc-requests';
 const PROJECTS_API = '/api/projects';
@@ -207,9 +208,9 @@ function renderRequests(requests: AdHocRequest[]): void {
       ? `
         <div class="requests-quote">
           <div>Estimated hours: <strong>${request.estimatedHours ?? '—'}</strong></div>
-          <div>Hourly rate: <strong>${formatCurrency(request.hourlyRate)}</strong></div>
-          <div>Flat rate: <strong>${formatCurrency(request.flatRate)}</strong></div>
-          <div>Quoted total: <strong>${formatCurrency(request.quotedPrice)}</strong></div>
+          <div>Hourly rate: <strong>${request.hourlyRate !== null ? formatCurrency(request.hourlyRate) : '—'}</strong></div>
+          <div>Flat rate: <strong>${request.flatRate !== null ? formatCurrency(request.flatRate) : '—'}</strong></div>
+          <div>Quoted total: <strong>${request.quotedPrice !== null ? formatCurrency(request.quotedPrice) : '—'}</strong></div>
         </div>
       `
       : '';
@@ -241,11 +242,6 @@ function renderRequests(requests: AdHocRequest[]): void {
   });
 }
 
-function formatCurrency(value?: number | null): string {
-  if (value === null || value === undefined) return '—';
-  return `$${value.toFixed(2)}`;
-}
-
 function openQuoteConfirmModal(request: AdHocRequest, decision: 'approve' | 'decline'): Promise<boolean> {
   return new Promise((resolve) => {
     const actionLabel = decision === 'approve' ? 'Approve Quote' : 'Decline Quote';
@@ -271,9 +267,9 @@ function openQuoteConfirmModal(request: AdHocRequest, decision: 'approve' | 'dec
       <div class="requests-quote-modal-summary">
         <div><strong>Request:</strong> ${escapeHtml(request.title)}</div>
         <div><strong>Estimated hours:</strong> ${request.estimatedHours ?? '—'}</div>
-        <div><strong>Hourly rate:</strong> ${formatCurrency(request.hourlyRate)}</div>
-        <div><strong>Flat rate:</strong> ${formatCurrency(request.flatRate)}</div>
-        <div><strong>Quoted total:</strong> ${formatCurrency(request.quotedPrice)}</div>
+        <div><strong>Hourly rate:</strong> ${request.hourlyRate !== null ? formatCurrency(request.hourlyRate) : '—'}</div>
+        <div><strong>Flat rate:</strong> ${request.flatRate !== null ? formatCurrency(request.flatRate) : '—'}</div>
+        <div><strong>Quoted total:</strong> ${request.quotedPrice !== null ? formatCurrency(request.quotedPrice) : '—'}</div>
       </div>
       <p class="requests-quote-modal-note">You can message us if you'd like changes before proceeding.</p>
     `;

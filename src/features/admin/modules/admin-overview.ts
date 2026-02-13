@@ -11,7 +11,7 @@
 
 import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch } from '../../../utils/api-client';
-import { formatDateTime, formatDate } from '../../../utils/format-utils';
+import { formatDateTime, formatDate, formatCurrency } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createViewToggle } from '../../../components/view-toggle';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
@@ -102,7 +102,7 @@ export async function loadOverviewData(ctx: AdminDashboardContext): Promise<void
     // Update Today's Snapshot section
     updateElement('stat-active-projects', formatNumber(dashboardData.snapshot.activeProjects));
     updateElement('stat-total-clients', formatNumber(dashboardData.snapshot.totalClients));
-    updateElement('stat-revenue-mtd', formatCurrency(dashboardData.snapshot.revenueMTD));
+    updateElement('stat-revenue-mtd', formatCurrency(dashboardData.snapshot.revenueMTD, false));
     updateElement('stat-conversion-rate', `${dashboardData.snapshot.conversionRate}%`);
 
   } catch (error) {
@@ -132,16 +132,27 @@ async function loadDashboardData(): Promise<DashboardData> {
     apiFetch('/api/analytics/quick/revenue?days=30').catch(() => null)
   ]);
 
-  // Parse responses - handle nested response objects
-  const invoices = invoicesRes?.ok ? await invoicesRes.json() : [];
-  const projectsData = projectsRes?.ok ? await projectsRes.json() : { projects: [] };
-  const projects = projectsData.projects || projectsData || [];
-  const clientsData = clientsRes?.ok ? await clientsRes.json() : { clients: [] };
-  const clients = clientsData.clients || clientsData || [];
-  const leadsData = leadsRes?.ok ? await leadsRes.json() : { leads: [] };
-  const leads = leadsData.leads || [];
-  const messagesData = messagesRes?.ok ? await messagesRes.json() : { unread_count: 0 };
-  const metricsData = metricsRes?.ok ? await metricsRes.json() : { summary: {}, revenueMTD: 0 };
+  // Parse responses - handle canonical API format { success: true, data: {...} }
+  const invoicesJson = invoicesRes?.ok ? await invoicesRes.json() : { data: [] };
+  const invoices = invoicesJson.data ?? invoicesJson ?? [];
+
+  const projectsJson = projectsRes?.ok ? await projectsRes.json() : { data: { projects: [] } };
+  const projectsData = projectsJson.data ?? projectsJson ?? { projects: [] };
+  const projects = projectsData.projects ?? projectsData ?? [];
+
+  const clientsJson = clientsRes?.ok ? await clientsRes.json() : { data: { clients: [] } };
+  const clientsData = clientsJson.data ?? clientsJson ?? { clients: [] };
+  const clients = clientsData.clients ?? clientsData ?? [];
+
+  const leadsJson = leadsRes?.ok ? await leadsRes.json() : { data: { leads: [] } };
+  const leadsData = leadsJson.data ?? leadsJson ?? { leads: [] };
+  const leads = leadsData.leads ?? [];
+
+  const messagesJson = messagesRes?.ok ? await messagesRes.json() : { data: { unread_count: 0 } };
+  const messagesData = messagesJson.data ?? messagesJson ?? { unread_count: 0 };
+
+  const metricsJson = metricsRes?.ok ? await metricsRes.json() : { data: { summary: {}, revenueMTD: 0 } };
+  const metricsData = metricsJson.data ?? metricsJson ?? { summary: {}, revenueMTD: 0 };
 
   // Calculate overdue invoices (due_date < today and status not paid)
   const today = new Date();
@@ -324,18 +335,6 @@ function updateAttentionCard(id: string, count: number): void {
  */
 function formatNumber(num: number): string {
   return num.toLocaleString();
-}
-
-/**
- * Format currency
- */
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount);
 }
 
 /**

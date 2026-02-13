@@ -19,8 +19,10 @@ import { BUSINESS_INFO } from '../../config/business.js';
 import { generateInvoicePdf, InvoicePdfData } from './pdf.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
+import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
+import { receiptService } from '../../services/receipt-service.js';
 
 const router = express.Router();
 
@@ -91,11 +93,7 @@ router.get(
  *         description: Invoice system is working
  */
 router.get('/test', (req: express.Request, res: express.Response) => {
-  res.json({
-    success: true,
-    message: 'Invoice system is operational',
-    timestamp: new Date().toISOString()
-  });
+  sendSuccess(res, { timestamp: new Date().toISOString() }, 'Invoice system is operational');
 });
 
 /**
@@ -137,11 +135,7 @@ router.post(
     try {
       const invoice = await getInvoiceService().createInvoice(testInvoiceData);
 
-      res.status(201).json({
-        success: true,
-        message: 'Test invoice created successfully',
-        invoice
-      });
+      sendCreated(res, { invoice }, 'Test invoice created successfully');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       errorResponseWithPayload(res, 'Failed to create test invoice', 500, 'TEST_CREATION_FAILED', { message });
@@ -174,7 +168,7 @@ router.get(
 
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
-      res.json({ success: true, invoice });
+      sendSuccess(res, { invoice });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
@@ -276,11 +270,17 @@ router.post(
     try {
       const invoice = await getInvoiceService().createInvoice(invoiceData);
 
-      res.status(201).json({
-        success: true,
-        message: 'Invoice created successfully',
-        invoice
+      // Emit workflow event for invoice creation
+      await workflowTriggerService.emit('invoice.created', {
+        entityId: invoice.id,
+        triggeredBy: req.user?.email || 'system',
+        invoiceNumber: invoice.invoiceNumber,
+        clientId: invoice.clientId,
+        projectId: invoice.projectId,
+        amountTotal: invoice.amountTotal
       });
+
+      sendCreated(res, { invoice }, 'Invoice created successfully');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', { message });
@@ -458,8 +458,7 @@ router.get(
     try {
       const result = await getInvoiceService().searchInvoices(filters);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         invoices: result.invoices.map(toSnakeCaseInvoice),
         total: result.total,
         limit: filters.limit,
@@ -496,8 +495,7 @@ router.get(
     try {
       const invoices = await getInvoiceService().getClientInvoices(clientId);
       const transformedInvoices = invoices.map(toSnakeCaseInvoice);
-      res.json({
-        success: true,
+      sendSuccess(res, {
         invoices: transformedInvoices,
         count: invoices.length
       });
@@ -531,8 +529,7 @@ router.get(
     try {
       const invoices = await getInvoiceService().getProjectInvoices(projectId);
       const transformedInvoices = invoices.map(toSnakeCaseInvoice);
-      res.json({
-        success: true,
+      sendSuccess(res, {
         invoices: transformedInvoices,
         count: invoices.length
       });
@@ -619,9 +616,9 @@ router.get(
         invoiceNumber: invoice.invoiceNumber,
         issuedDate: formatDate(invoice.issuedDate || invoice.createdAt),
         dueDate: invoice.dueDate ? formatDate(invoice.dueDate) : undefined,
-        clientName: invoice.billToName || (clientRow ? getString(clientRow, 'contact_name') : '') || 'Client',
+        clientName: invoice.clientName || (clientRow ? getString(clientRow, 'contact_name') : '') || 'Client',
         clientCompany: clientRow ? getString(clientRow, 'company_name') : undefined,
-        clientEmail: invoice.billToEmail || (clientRow ? getString(clientRow, 'email') : '') || '',
+        clientEmail: invoice.clientEmail || (clientRow ? getString(clientRow, 'email') : '') || '',
         clientPhone: clientRow ? getString(clientRow, 'phone') : undefined,
         projectId: invoice.projectId,
         lineItems,
@@ -681,11 +678,7 @@ router.put(
 
     try {
       const invoice = await getInvoiceService().updateInvoiceStatus(invoiceId, status, paymentData);
-      res.json({
-        success: true,
-        message: 'Invoice status updated successfully',
-        invoice
-      });
+      sendSuccess(res, { invoice }, 'Invoice status updated successfully');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
@@ -809,11 +802,16 @@ router.post(
         // Don't fail the request if email fails
       }
 
-      res.json({
-        success: true,
-        message: 'Invoice sent successfully',
-        invoice
+      // Emit workflow event for invoice sent
+      await workflowTriggerService.emit('invoice.sent', {
+        entityId: invoiceId,
+        triggeredBy: req.user?.email || 'system',
+        invoiceNumber: invoice.invoiceNumber,
+        clientId: invoice.clientId,
+        amountTotal: invoice.amountTotal
       });
+
+      sendSuccess(res, { invoice }, 'Invoice sent successfully');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
@@ -862,11 +860,42 @@ router.post(
         paymentReference
       });
 
-      res.json({
-        success: true,
-        message: 'Invoice marked as paid',
-        invoice
+      // Auto-generate receipt for the payment
+      let receipt = null;
+      try {
+        receipt = await receiptService.createReceipt(
+          invoiceId,
+          null, // payment_id - not tracked separately for full payments
+          parseFloat(amountPaid),
+          {
+            paymentMethod,
+            paymentReference
+          }
+        );
+        console.log(`[Invoices] Receipt ${receipt.receiptNumber} generated for invoice ${invoice.invoiceNumber}`);
+      } catch (receiptError) {
+        console.error('[Invoices] Failed to generate receipt:', receiptError);
+        // Don't fail the payment if receipt generation fails
+      }
+
+      // Emit workflow event for invoice paid
+      await workflowTriggerService.emit('invoice.paid', {
+        entityId: invoiceId,
+        triggeredBy: req.user?.email || 'system',
+        invoiceNumber: invoice.invoiceNumber,
+        clientId: invoice.clientId,
+        amountPaid: parseFloat(amountPaid),
+        paymentMethod
       });
+
+      sendSuccess(res, {
+        invoice,
+        receipt: receipt ? {
+          id: receipt.id,
+          receipt_number: receipt.receiptNumber,
+          amount: receipt.amount
+        } : null
+      }, 'Invoice marked as paid');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
@@ -895,10 +924,7 @@ router.get(
 
     try {
       const stats = await getInvoiceService().getInvoiceStats(clientId);
-      res.json({
-        success: true,
-        stats
-      });
+      sendSuccess(res, { stats });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve invoice statistics', 500, 'STATS_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'

@@ -32,7 +32,7 @@ import { getNumber } from '../database/row-helpers.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 import { UAParser } from 'ua-parser-js';
 import { analyticsService } from '../services/analytics-service.js';
-import { errorResponse } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 
 // Helper for async route handlers
 const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>) =>
@@ -229,7 +229,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
       }
     });
 
-    res.status(200).json({ success: true });
+    sendSuccess(res, undefined);
   } catch (error) {
     logger.error('Failed to process tracking events', {
       category: 'analytics',
@@ -347,7 +347,7 @@ router.get(
         LIMIT 10`
       );
 
-      res.json({
+      sendSuccess(res, {
         summary: summary || {},
         daily,
         topPages,
@@ -408,7 +408,7 @@ router.get(
         LIMIT 20`
       );
 
-      res.json({
+      sendSuccess(res, {
         activeSessions: sessions.length,
         sessions,
         recentPages
@@ -461,10 +461,7 @@ router.delete(
         metadata: { deletedSessions: result.changes, olderThanDays: days }
       });
 
-      res.json({
-        success: true,
-        deletedSessions: result.changes
-      });
+      sendSuccess(res, { deletedSessions: result.changes });
     } catch (error) {
       logger.error('Failed to clear analytics data', {
         category: 'analytics',
@@ -533,7 +530,7 @@ router.get(
         [limitNum, offset]
       );
 
-      res.json({
+      sendSuccess(res, {
         sessions,
         pagination: {
           page: pageNum,
@@ -599,7 +596,7 @@ router.get(
         [sessionId]
       );
 
-      res.json({
+      sendSuccess(res, {
         session,
         pageViews,
         interactions
@@ -675,7 +672,7 @@ router.get(
         `attachment; filename="analytics-export-${new Date().toISOString().split('T')[0]}.json"`
       );
 
-      res.json(exportData);
+      sendSuccess(res, exportData);
     } catch (error) {
       logger.error('Failed to export analytics data', {
         category: 'analytics',
@@ -700,7 +697,7 @@ router.get('/reports', authenticateToken, requireAdmin, asyncHandler(async (req:
     type as string | undefined,
     favorites === 'true'
   );
-  res.json({ reports });
+  sendSuccess(res, { reports });
 }));
 
 /**
@@ -713,7 +710,7 @@ router.post('/reports', authenticateToken, requireAdmin, asyncHandler(async (req
     ...req.body,
     createdBy: userEmail
   });
-  res.status(201).json({ report });
+  sendCreated(res, { report });
 }));
 
 /**
@@ -726,7 +723,7 @@ router.get('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (
     errorResponse(res, 'Report not found', 404, 'RESOURCE_NOT_FOUND');
     return;
   }
-  res.json({ report });
+  sendSuccess(res, { report });
 }));
 
 /**
@@ -738,7 +735,7 @@ router.put('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (
     parseInt(req.params.id, 10),
     req.body
   );
-  res.json({ report });
+  sendSuccess(res, { report });
 }));
 
 /**
@@ -747,7 +744,7 @@ router.put('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (
  */
 router.delete('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   await analyticsService.deleteSavedReport(parseInt(req.params.id, 10));
-  res.json({ success: true });
+  sendSuccess(res, undefined);
 }));
 
 /**
@@ -756,7 +753,7 @@ router.delete('/reports/:id', authenticateToken, requireAdmin, asyncHandler(asyn
  */
 router.post('/reports/:id/favorite', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const report = await analyticsService.toggleReportFavorite(parseInt(req.params.id, 10));
-  res.json({ report });
+  sendSuccess(res, { report });
 }));
 
 /**
@@ -766,7 +763,7 @@ router.post('/reports/:id/favorite', authenticateToken, requireAdmin, asyncHandl
 router.post('/reports/:id/run', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
   const result = await analyticsService.runReport(parseInt(req.params.id, 10));
-  res.json(result);
+  sendSuccess(res, result);
 }));
 
 // =====================================================
@@ -779,7 +776,7 @@ router.post('/reports/:id/run', authenticateToken, requireAdmin, asyncHandler(as
  */
 router.get('/reports/:reportId/schedules', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const schedules = await analyticsService.getReportSchedules(parseInt(req.params.reportId, 10));
-  res.json({ schedules });
+  sendSuccess(res, { schedules });
 }));
 
 /**
@@ -793,7 +790,7 @@ router.post('/reports/:reportId/schedules', authenticateToken, requireAdmin, asy
     reportId: parseInt(req.params.reportId, 10),
     createdBy: userEmail
   });
-  res.status(201).json({ schedule });
+  sendCreated(res, { schedule });
 }));
 
 /**
@@ -805,7 +802,7 @@ router.put('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(async
     parseInt(req.params.id, 10),
     req.body
   );
-  res.json({ schedule });
+  sendSuccess(res, { schedule });
 }));
 
 /**
@@ -814,7 +811,7 @@ router.put('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(async
  */
 router.delete('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   await analyticsService.deleteReportSchedule(parseInt(req.params.id, 10));
-  res.json({ success: true });
+  sendSuccess(res, undefined);
 }));
 
 /**
@@ -823,7 +820,7 @@ router.delete('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(as
  */
 router.post('/schedules/process', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const processed = await analyticsService.processDueSchedules();
-  res.json({ processed });
+  sendSuccess(res, { processed });
 }));
 
 // =====================================================
@@ -837,7 +834,7 @@ router.post('/schedules/process', authenticateToken, requireAdmin, asyncHandler(
 router.get('/widgets', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
   const widgets = await analyticsService.getDashboardWidgets(userEmail);
-  res.json({ widgets });
+  sendSuccess(res, { widgets });
 }));
 
 /**
@@ -850,7 +847,7 @@ router.post('/widgets', authenticateToken, requireAdmin, asyncHandler(async (req
     ...req.body,
     userEmail
   });
-  res.status(201).json({ widget });
+  sendCreated(res, { widget });
 }));
 
 /**
@@ -862,7 +859,7 @@ router.put('/widgets/:id', authenticateToken, requireAdmin, asyncHandler(async (
     parseInt(req.params.id, 10),
     req.body
   );
-  res.json({ widget });
+  sendSuccess(res, { widget });
 }));
 
 /**
@@ -871,7 +868,7 @@ router.put('/widgets/:id', authenticateToken, requireAdmin, asyncHandler(async (
  */
 router.delete('/widgets/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   await analyticsService.deleteDashboardWidget(parseInt(req.params.id, 10));
-  res.json({ success: true });
+  sendSuccess(res, undefined);
 }));
 
 /**
@@ -882,7 +879,7 @@ router.put('/widgets/layout', authenticateToken, requireAdmin, asyncHandler(asyn
   const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
   const { widgets } = req.body;
   await analyticsService.updateWidgetLayout(userEmail, widgets);
-  res.json({ success: true });
+  sendSuccess(res, undefined);
 }));
 
 /**
@@ -891,7 +888,7 @@ router.put('/widgets/layout', authenticateToken, requireAdmin, asyncHandler(asyn
  */
 router.get('/widgets/presets', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const presets = await analyticsService.getDashboardPresets();
-  res.json({ presets });
+  sendSuccess(res, { presets });
 }));
 
 /**
@@ -904,7 +901,7 @@ router.post('/widgets/presets/:id/apply', authenticateToken, requireAdmin, async
     userEmail,
     parseInt(req.params.id, 10)
   );
-  res.json({ widgets });
+  sendSuccess(res, { widgets });
 }));
 
 // =====================================================
@@ -917,7 +914,7 @@ router.post('/widgets/presets/:id/apply', authenticateToken, requireAdmin, async
  */
 router.post('/kpis/snapshot', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   await analyticsService.captureKPISnapshot();
-  res.json({ success: true });
+  sendSuccess(res, undefined);
 }));
 
 /**
@@ -926,7 +923,7 @@ router.post('/kpis/snapshot', authenticateToken, requireAdmin, asyncHandler(asyn
  */
 router.get('/kpis/latest', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const kpis = await analyticsService.getLatestKPIs();
-  res.json({ kpis });
+  sendSuccess(res, { kpis });
 }));
 
 /**
@@ -944,7 +941,7 @@ router.get('/kpis/:type/trend', authenticateToken, requireAdmin, asyncHandler(as
     req.params.type,
     { start: startDate.toISOString().split('T')[0], end: endDate.toISOString().split('T')[0] }
   );
-  res.json({ trend });
+  sendSuccess(res, { trend });
 }));
 
 // =====================================================
@@ -957,7 +954,7 @@ router.get('/kpis/:type/trend', authenticateToken, requireAdmin, asyncHandler(as
  */
 router.get('/alerts', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const alerts = await analyticsService.getMetricAlerts();
-  res.json({ alerts });
+  sendSuccess(res, { alerts });
 }));
 
 /**
@@ -970,7 +967,7 @@ router.post('/alerts', authenticateToken, requireAdmin, asyncHandler(async (req:
     ...req.body,
     createdBy: userEmail
   });
-  res.status(201).json({ alert });
+  sendCreated(res, { alert });
 }));
 
 /**
@@ -982,7 +979,7 @@ router.put('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async (r
     parseInt(req.params.id, 10),
     req.body
   );
-  res.json({ alert });
+  sendSuccess(res, { alert });
 }));
 
 /**
@@ -991,7 +988,7 @@ router.put('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async (r
  */
 router.delete('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   await analyticsService.deleteMetricAlert(parseInt(req.params.id, 10));
-  res.json({ success: true });
+  sendSuccess(res, undefined);
 }));
 
 /**
@@ -1000,7 +997,7 @@ router.delete('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async
  */
 router.post('/alerts/check', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const triggered = await analyticsService.checkAlertTriggers();
-  res.json({ triggered });
+  sendSuccess(res, { triggered });
 }));
 
 // =====================================================
@@ -1014,7 +1011,7 @@ router.post('/alerts/check', authenticateToken, requireAdmin, asyncHandler(async
 router.get('/quick/revenue', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const { days = '30' } = req.query;
   const analytics = await analyticsService.getRevenueAnalytics(parseInt(days as string, 10));
-  res.json(analytics);
+  sendSuccess(res, analytics);
 }));
 
 /**
@@ -1023,7 +1020,7 @@ router.get('/quick/revenue', authenticateToken, requireAdmin, asyncHandler(async
  */
 router.get('/quick/pipeline', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const analytics = await analyticsService.getPipelineAnalytics();
-  res.json(analytics);
+  sendSuccess(res, analytics);
 }));
 
 /**
@@ -1033,7 +1030,7 @@ router.get('/quick/pipeline', authenticateToken, requireAdmin, asyncHandler(asyn
 router.get('/quick/projects', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const { days = '30' } = req.query;
   const analytics = await analyticsService.getProjectAnalytics(parseInt(days as string, 10));
-  res.json(analytics);
+  sendSuccess(res, analytics);
 }));
 
 /**
@@ -1042,7 +1039,7 @@ router.get('/quick/projects', authenticateToken, requireAdmin, asyncHandler(asyn
  */
 router.get('/quick/clients', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const analytics = await analyticsService.getClientAnalytics();
-  res.json(analytics);
+  sendSuccess(res, analytics);
 }));
 
 /**
@@ -1052,7 +1049,7 @@ router.get('/quick/clients', authenticateToken, requireAdmin, asyncHandler(async
 router.get('/quick/team', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const { days = '30' } = req.query;
   const analytics = await analyticsService.getTeamAnalytics(parseInt(days as string, 10));
-  res.json(analytics);
+  sendSuccess(res, analytics);
 }));
 
 /**
@@ -1065,7 +1062,7 @@ router.get('/report-runs', authenticateToken, requireAdmin, asyncHandler(async (
     reportId ? parseInt(reportId as string, 10) : undefined,
     parseInt(limit as string, 10)
   );
-  res.json({ runs });
+  sendSuccess(res, { runs });
 }));
 
 // =====================================================
@@ -1084,7 +1081,7 @@ router.get('/bi/revenue/:period', authenticateToken, requireAdmin, asyncHandler(
     startDate as string | undefined,
     endDate as string | undefined
   );
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 /**
@@ -1093,7 +1090,7 @@ router.get('/bi/revenue/:period', authenticateToken, requireAdmin, asyncHandler(
  */
 router.get('/bi/pipeline', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const data = await analyticsService.getProjectPipelineValue();
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 /**
@@ -1106,7 +1103,7 @@ router.get('/bi/funnel', authenticateToken, requireAdmin, asyncHandler(async (re
     startDate as string | undefined,
     endDate as string | undefined
   );
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 /**
@@ -1115,7 +1112,7 @@ router.get('/bi/funnel', authenticateToken, requireAdmin, asyncHandler(async (re
  */
 router.get('/bi/project-stats', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const data = await analyticsService.getProjectStatistics();
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 // =====================================================
@@ -1129,7 +1126,7 @@ router.get('/bi/project-stats', authenticateToken, requireAdmin, asyncHandler(as
 router.get('/clients/ltv', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const { limit = '20' } = req.query;
   const data = await analyticsService.getClientLifetimeValue(parseInt(limit as string, 10));
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 /**
@@ -1139,7 +1136,7 @@ router.get('/clients/ltv', authenticateToken, requireAdmin, asyncHandler(async (
 router.get('/clients/activity-scores', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const { limit = '20' } = req.query;
   const data = await analyticsService.getClientActivityScores(parseInt(limit as string, 10));
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 /**
@@ -1148,7 +1145,7 @@ router.get('/clients/activity-scores', authenticateToken, requireAdmin, asyncHan
  */
 router.get('/clients/upsell', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const data = await analyticsService.getUpsellOpportunities();
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 // =====================================================
@@ -1161,7 +1158,7 @@ router.get('/clients/upsell', authenticateToken, requireAdmin, asyncHandler(asyn
  */
 router.get('/reports/overdue-invoices', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const data = await analyticsService.getOverdueInvoicesReport();
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 /**
@@ -1170,7 +1167,7 @@ router.get('/reports/overdue-invoices', authenticateToken, requireAdmin, asyncHa
  */
 router.get('/reports/pending-approvals', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const data = await analyticsService.getPendingApprovalsReport();
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 /**
@@ -1179,7 +1176,7 @@ router.get('/reports/pending-approvals', authenticateToken, requireAdmin, asyncH
  */
 router.get('/reports/document-requests', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const data = await analyticsService.getDocumentRequestsStatusReport();
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 /**
@@ -1188,7 +1185,7 @@ router.get('/reports/document-requests', authenticateToken, requireAdmin, asyncH
  */
 router.get('/reports/project-health', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   const data = await analyticsService.getProjectHealthSummary();
-  res.json({ data });
+  sendSuccess(res, { data });
 }));
 
 export default router;

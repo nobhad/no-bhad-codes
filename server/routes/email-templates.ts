@@ -16,7 +16,7 @@ import {
   type CreateTemplateData,
   type UpdateTemplateData
 } from '../services/email-template-service.js';
-import { errorResponse } from '../utils/api-response.js';
+import { sendSuccess, sendCreated, errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -34,7 +34,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const category = req.query.category as EmailTemplateCategory | undefined;
     const templates = await emailTemplateService.getTemplates(category);
-    res.json({ templates });
+    sendSuccess(res, { templates });
   })
 );
 
@@ -47,7 +47,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const categories = emailTemplateService.getCategories();
-    res.json({ categories });
+    sendSuccess(res, { categories });
   })
 );
 
@@ -69,7 +69,7 @@ router.get(
       return errorResponse(res, 'Template not found', 404);
     }
 
-    res.json({ template });
+    sendSuccess(res, { template });
   })
 );
 
@@ -100,11 +100,7 @@ router.post(
 
     const template = await emailTemplateService.createTemplate(data, req.user?.email);
 
-    res.status(201).json({
-      success: true,
-      message: 'Template created',
-      template
-    });
+    sendCreated(res, { template }, 'Template created');
   })
 );
 
@@ -140,11 +136,7 @@ router.put(
         return errorResponse(res, 'Template not found', 404);
       }
 
-      res.json({
-        success: true,
-        message: 'Template updated',
-        template
-      });
+      sendSuccess(res, { template }, 'Template updated');
     } catch (error) {
       if (error instanceof Error && error.message.includes('system template')) {
         return errorResponse(res, error.message, 403);
@@ -173,10 +165,7 @@ router.delete(
         return errorResponse(res, 'Template not found', 404);
       }
 
-      res.json({
-        success: true,
-        message: 'Template deleted'
-      });
+      sendSuccess(res, undefined, 'Template deleted');
     } catch (error) {
       if (error instanceof Error && error.message.includes('system template')) {
         return errorResponse(res, error.message, 403);
@@ -204,7 +193,7 @@ router.get(
     }
 
     const versions = await emailTemplateService.getVersions(id);
-    res.json({ versions });
+    sendSuccess(res, { versions });
   })
 );
 
@@ -228,7 +217,7 @@ router.get(
       return errorResponse(res, 'Version not found', 404);
     }
 
-    res.json({ version: v });
+    sendSuccess(res, { version: v });
   })
 );
 
@@ -252,11 +241,7 @@ router.post(
       return errorResponse(res, 'Version not found', 404);
     }
 
-    res.json({
-      success: true,
-      message: `Template restored to version ${version}`,
-      template
-    });
+    sendSuccess(res, { template }, `Template restored to version ${version}`);
   })
 );
 
@@ -288,10 +273,7 @@ router.post(
 
     const preview = await emailTemplateService.previewTemplate(id, sampleData);
 
-    res.json({
-      preview,
-      sample_data: sampleData
-    });
+    sendSuccess(res, { preview, sample_data: sampleData });
   })
 );
 
@@ -320,10 +302,7 @@ router.post(
       data
     );
 
-    res.json({
-      preview,
-      sample_data: data
-    });
+    sendSuccess(res, { preview, sample_data: data });
   })
 );
 
@@ -375,11 +354,7 @@ router.post(
     console.log(`[EmailTemplates] Test email sent to ${to_email}`);
     console.log(`Subject: ${preview.subject}`);
 
-    res.json({
-      success: true,
-      message: `Test email sent to ${to_email}`,
-      preview
-    });
+    sendSuccess(res, { preview }, `Test email sent to ${to_email}`);
   })
 );
 
@@ -407,7 +382,7 @@ router.get(
       limit
     });
 
-    res.json({ logs });
+    sendSuccess(res, { logs });
   })
 );
 

@@ -5,7 +5,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { canAccessProject, canAccessFile } from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { upload } from './uploads.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -38,7 +38,7 @@ router.get(
     );
 
     // Map to consistent field names
-    res.json({
+    sendSuccess(res, {
       files: files.map((f: any) => ({
         ...f,
         size: f.file_size
@@ -102,10 +102,7 @@ router.post(
       });
     }
 
-    res.status(201).json({
-      message: `${files.length} file(s) uploaded successfully`,
-      files: uploadedFiles
-    });
+    sendCreated(res, { files: uploadedFiles }, `${files.length} file(s) uploaded successfully`);
   })
 );
 
@@ -124,7 +121,7 @@ router.get(
     }
 
     const tags = await fileService.getFileTags(fileId);
-    res.json({ tags });
+    sendSuccess(res, { tags });
   })
 );
 
@@ -144,7 +141,7 @@ router.post(
     }
 
     await fileService.addTag(fileId, tagId);
-    res.json({ message: 'Tag added' });
+    sendSuccess(res, undefined, 'Tag added');
   })
 );
 
@@ -164,7 +161,7 @@ router.delete(
     }
 
     await fileService.removeTag(fileId, tagId);
-    res.json({ message: 'Tag removed' });
+    sendSuccess(res, undefined, 'Tag removed');
   })
 );
 
@@ -184,7 +181,7 @@ router.get(
     }
 
     const files = await fileService.getFilesByTag(projectId, tagId);
-    res.json({ files });
+    sendSuccess(res, { files });
   })
 );
 
@@ -216,7 +213,7 @@ router.post(
       req.ip,
       req.get('User-Agent')
     );
-    res.json({ message: 'Access logged' });
+    sendSuccess(res, undefined, 'Access logged');
   })
 );
 
@@ -229,7 +226,7 @@ router.get(
     const fileId = parseInt(req.params.fileId);
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
     const log = await fileService.getAccessLog(fileId, limit);
-    res.json({ access_log: log });
+    sendSuccess(res, { access_log: log });
   })
 );
 
@@ -248,7 +245,7 @@ router.get(
     }
 
     const stats = await fileService.getAccessStats(fileId);
-    res.json({ stats });
+    sendSuccess(res, { stats });
   })
 );
 
@@ -267,7 +264,7 @@ router.post(
     }
 
     await fileService.archiveFile(fileId, req.user!.email);
-    res.json({ message: 'File archived' });
+    sendSuccess(res, undefined, 'File archived');
   })
 );
 
@@ -286,7 +283,7 @@ router.post(
     }
 
     await fileService.restoreFile(fileId);
-    res.json({ message: 'File restored' });
+    sendSuccess(res, undefined, 'File restored');
   })
 );
 
@@ -305,7 +302,7 @@ router.get(
     }
 
     const files = await fileService.getArchivedFiles(projectId);
-    res.json({ files });
+    sendSuccess(res, { files });
   })
 );
 
@@ -318,7 +315,7 @@ router.put(
     const fileId = parseInt(req.params.fileId);
     const { expires_at } = req.body;
     await fileService.setExpiration(fileId, expires_at || null);
-    res.json({ message: 'Expiration set' });
+    sendSuccess(res, undefined, 'Expiration set');
   })
 );
 
@@ -330,7 +327,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const daysAhead = req.query.days ? parseInt(req.query.days as string) : 7;
     const files = await fileService.getExpiringFiles(daysAhead);
-    res.json({ files });
+    sendSuccess(res, { files });
   })
 );
 
@@ -341,7 +338,7 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const count = await fileService.processExpiredFiles();
-    res.json({ message: `Processed ${count} expired files`, count });
+    sendSuccess(res, { count }, `Processed ${count} expired files`);
   })
 );
 
@@ -360,7 +357,7 @@ router.post(
     }
 
     await fileService.lockFile(fileId, req.user!.email);
-    res.json({ message: 'File locked' });
+    sendSuccess(res, undefined, 'File locked');
   })
 );
 
@@ -380,7 +377,7 @@ router.post(
     }
 
     await fileService.unlockFile(fileId, req.user!.email, isAdmin);
-    res.json({ message: 'File unlocked' });
+    sendSuccess(res, undefined, 'File unlocked');
   })
 );
 
@@ -406,7 +403,7 @@ router.put(
     }
 
     await fileService.setCategory(fileId, category);
-    res.json({ message: 'Category set' });
+    sendSuccess(res, undefined, 'Category set');
   })
 );
 
@@ -426,7 +423,7 @@ router.get(
     }
 
     const files = await fileService.getFilesByCategory(projectId, category);
-    res.json({ files });
+    sendSuccess(res, { files });
   })
 );
 
@@ -445,7 +442,7 @@ router.get(
     }
 
     const stats = await fileService.getFileStats(projectId);
-    res.json({ stats });
+    sendSuccess(res, { stats });
   })
 );
 
@@ -476,7 +473,7 @@ router.get(
       limit: req.query.limit ? parseInt(req.query.limit as string) : 50
     });
 
-    res.json({ files, count: files.length });
+    sendSuccess(res, { files, count: files.length });
   })
 );
 

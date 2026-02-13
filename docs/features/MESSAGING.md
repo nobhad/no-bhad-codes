@@ -33,6 +33,7 @@ The messaging system provides real-time communication between clients and develo
 | Feature | Description |
 |---------|-------------|
 | Thread View | Chronological message display |
+| File Attachments | Upload up to 5 files per message (10MB each) |
 | Emoji Picker | Native emoji keyboard via `emoji-picker-element` (desktop only) |
 | Enter to Send | Quick message sending with keyboard |
 | Shift+Enter | Insert newline without sending |
@@ -302,6 +303,43 @@ On mobile devices (< 768px):
 ---
 
 ## Backend Features
+
+### File Attachments
+
+Messages support file attachments with the following specifications:
+
+**Limits:**
+
+- Maximum 5 files per message
+- Maximum 10MB per file
+- Allowed types: pdf, doc, docx, xls, xlsx, png, jpg, jpeg, gif, zip
+
+**Implementation:**
+
+- Upload via `multer` middleware (multipart/form-data)
+- Files stored in `uploads/messages/` directory
+- Attachments stored as JSON array in `attachments` column
+- Download endpoint: `GET /api/messages/attachments/:filename/download`
+
+**Attachment Object Structure:**
+
+```typescript
+interface MessageAttachment {
+  filename: string;      // Stored filename (UUID-based)
+  original: string;      // Original filename
+  size: number;          // File size in bytes
+  mimetype: string;      // MIME type
+}
+```
+
+**Frontend Integration:**
+
+- Paperclip button in message composer
+- File chips showing attached files before send
+- Attachment previews in message bubbles
+- Click to download attachment
+
+---
 
 ### 1. Message Mentions
 

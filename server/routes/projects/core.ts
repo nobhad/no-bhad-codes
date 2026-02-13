@@ -10,6 +10,7 @@ import { notDeleted } from '../../database/query-helpers.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
 import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 
 const router = express.Router();
 
@@ -244,6 +245,15 @@ router.post(
       console.error('Failed to send admin notification:', emailError);
     }
 
+    // Emit workflow event for project creation
+    await workflowTriggerService.emit('project.created', {
+      entityId: result.lastID,
+      triggeredBy: req.user?.email || 'client',
+      clientId: req.user!.id,
+      projectType,
+      name
+    });
+
     res.status(201).json({
       success: true,
       message: 'Project request submitted successfully. We will review and get back to you soon!',
@@ -309,6 +319,14 @@ router.post(
       console.error('[Projects] Failed to generate milestones:', milestoneError);
       // Non-critical - don't fail the request
     }
+
+    // Emit workflow event for project creation
+    await workflowTriggerService.emit('project.created', {
+      entityId: result.lastID,
+      triggeredBy: 'admin',
+      clientId: client_id,
+      name
+    });
 
     res.status(201).json({
       message: 'Project created successfully',
@@ -393,31 +411,31 @@ router.put(
     const allowedUpdates =
       isAdmin
         ? [
-            'name',
-            'project_name',
-            'project_type',
-            'description',
-            'status',
-            'priority',
-            'start_date',
-            'due_date',
-            'end_date',
-            'estimated_end_date',
-            'budget',
-            'price',
-            'timeline',
-            'preview_url',
-            'progress',
-            'notes',
-            'admin_notes',
-            'repository_url',
-            'repo_url',
-            'staging_url',
-            'production_url',
-            'deposit_amount',
-            'contract_signed_at',
-            'contract_signed_date'
-          ]
+          'name',
+          'project_name',
+          'project_type',
+          'description',
+          'status',
+          'priority',
+          'start_date',
+          'due_date',
+          'end_date',
+          'estimated_end_date',
+          'budget',
+          'price',
+          'timeline',
+          'preview_url',
+          'progress',
+          'notes',
+          'admin_notes',
+          'repository_url',
+          'repo_url',
+          'staging_url',
+          'production_url',
+          'deposit_amount',
+          'contract_signed_at',
+          'contract_signed_date'
+        ]
         : ['description']; // Clients can only update description
 
     for (const field of allowedUpdates) {
@@ -468,6 +486,16 @@ router.put(
       [projectId]
     );
 
+    // Emit workflow event for status change
+    if (req.body.status && req.body.status !== project.status) {
+      await workflowTriggerService.emit('project.status_changed', {
+        entityId: projectId,
+        triggeredBy: req.user?.email || 'system',
+        previousStatus: project.status,
+        newStatus: req.body.status
+      });
+    }
+
     // Send email notification if status changed and it's an admin update
     if (isAdmin && req.body.status && req.body.status !== project.status) {
       try {
@@ -481,10 +509,10 @@ router.put(
           const statusDescriptions: { [key: string]: string } = {
             pending: 'Your project has been queued and will begin soon.',
             'in-progress': 'Work has begun on your project and is progressing well.',
-            'in-review': "Your project is complete and under review. We'll have updates soon.",
+            'in-review': 'Your project is complete and under review. We\'ll have updates soon.',
             completed: 'Congratulations! Your project has been completed successfully.',
             'on-hold':
-              "Your project has been temporarily paused. We'll keep you updated on next steps."
+              'Your project has been temporarily paused. We\'ll keep you updated on next steps.'
           };
 
           const clientEmail = getString(client, 'email');
@@ -555,6 +583,248 @@ router.delete(
       message: result.message,
       projectId,
       affectedItems: result.affectedItems
+    });
+  })
+);
+
+// Generate project report PDF
+router.get(
+  '/:id/report/pdf',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+
+    const { fetchProjectReportData, generateProjectReportPdf } = await import(
+      '../../services/project-report-service.js'
+    );
+
+    const reportData = await fetchProjectReportData(projectId);
+    if (!reportData) {
+      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    const pdfBytes = await generateProjectReportPdf(reportData);
+
+    const filename = `project-report-${reportData.project.name.replace(/[^a-zA-Z0-9]/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBytes.length);
+    res.send(Buffer.from(pdfBytes));
+  })
+);
+
+// Generate Statement of Work PDF
+router.get(
+  '/:id/sow/pdf',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+
+    const { fetchSowData, generateSowPdf } = await import(
+      '../../services/sow-service.js'
+    );
+
+    const sowData = await fetchSowData(projectId);
+    if (!sowData) {
+      return errorResponse(res, 'Project or proposal not found', 404, 'NOT_FOUND');
+    }
+
+    const pdfBytes = await generateSowPdf(sowData);
+
+    const filename = `sow-${sowData.project.name.replace(/[^a-zA-Z0-9]/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBytes.length);
+    res.send(Buffer.from(pdfBytes));
+  })
+);
+
+// Preview project report PDF (inline display)
+router.get(
+  '/:id/report/preview',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+
+    const { fetchProjectReportData, generateProjectReportPdf } = await import(
+      '../../services/project-report-service.js'
+    );
+
+    const reportData = await fetchProjectReportData(projectId);
+    if (!reportData) {
+      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    const pdfBytes = await generateProjectReportPdf(reportData);
+    const filename = `project-report-${reportData.project.name.replace(/[^a-zA-Z0-9]/g, '-')}-preview.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBytes.length);
+    res.send(Buffer.from(pdfBytes));
+  })
+);
+
+// Preview Statement of Work PDF (inline display)
+router.get(
+  '/:id/sow/preview',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+
+    const { fetchSowData, generateSowPdf } = await import(
+      '../../services/sow-service.js'
+    );
+
+    const sowData = await fetchSowData(projectId);
+    if (!sowData) {
+      return errorResponse(res, 'Project or proposal not found', 404, 'NOT_FOUND');
+    }
+
+    const pdfBytes = await generateSowPdf(sowData);
+    const filename = `sow-${sowData.project.name.replace(/[^a-zA-Z0-9]/g, '-')}-preview.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBytes.length);
+    res.send(Buffer.from(pdfBytes));
+  })
+);
+
+// Save project report PDF to project files
+router.post(
+  '/:id/report/save',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    const { fetchProjectReportData, generateProjectReportPdf } = await import(
+      '../../services/project-report-service.js'
+    );
+
+    const reportData = await fetchProjectReportData(projectId);
+    if (!reportData) {
+      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    const pdfBytes = await generateProjectReportPdf(reportData);
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `project-report-${reportData.project.name.replace(/[^a-zA-Z0-9]/g, '-')}-${dateStr}.pdf`;
+
+    // Save to uploads directory
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const uploadsDir = path.join(process.cwd(), 'uploads', 'projects', String(projectId));
+
+    // Ensure directory exists
+    await fs.mkdir(uploadsDir, { recursive: true });
+
+    const filePath = path.join(uploadsDir, filename);
+    await fs.writeFile(filePath, Buffer.from(pdfBytes));
+
+    // Create file record in database
+    const result = await db.run(
+      `INSERT INTO files (
+        project_id, filename, original_filename, file_path, file_size, mime_type,
+        file_type, description, uploaded_by, category, shared_with_client
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        projectId,
+        filename,
+        filename,
+        `uploads/projects/${projectId}/${filename}`,
+        pdfBytes.length,
+        'application/pdf',
+        'document',
+        `Project Report - Generated ${dateStr}`,
+        req.user?.email || 'admin',
+        'document',
+        false
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Project report saved to files',
+      file: {
+        id: result.lastID,
+        filename,
+        size: pdfBytes.length
+      }
+    });
+  })
+);
+
+// Save Statement of Work PDF to project files
+router.post(
+  '/:id/sow/save',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    const { fetchSowData, generateSowPdf } = await import(
+      '../../services/sow-service.js'
+    );
+
+    const sowData = await fetchSowData(projectId);
+    if (!sowData) {
+      return errorResponse(res, 'Project or proposal not found', 404, 'NOT_FOUND');
+    }
+
+    const pdfBytes = await generateSowPdf(sowData);
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `sow-${sowData.project.name.replace(/[^a-zA-Z0-9]/g, '-')}-${dateStr}.pdf`;
+
+    // Save to uploads directory
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const uploadsDir = path.join(process.cwd(), 'uploads', 'projects', String(projectId));
+
+    // Ensure directory exists
+    await fs.mkdir(uploadsDir, { recursive: true });
+
+    const filePath = path.join(uploadsDir, filename);
+    await fs.writeFile(filePath, Buffer.from(pdfBytes));
+
+    // Create file record in database
+    const result = await db.run(
+      `INSERT INTO files (
+        project_id, filename, original_filename, file_path, file_size, mime_type,
+        file_type, description, uploaded_by, category, shared_with_client
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        projectId,
+        filename,
+        filename,
+        `uploads/projects/${projectId}/${filename}`,
+        pdfBytes.length,
+        'application/pdf',
+        'document',
+        `Statement of Work - Generated ${dateStr}`,
+        req.user?.email || 'admin',
+        'contract',
+        false
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Statement of Work saved to files',
+      file: {
+        id: result.lastID,
+        filename,
+        size: pdfBytes.length
+      }
     });
   })
 );

@@ -65,7 +65,8 @@ export const UPLOAD_DIRS = {
   MESSAGES: 'messages',
   INVOICES: 'invoices',
   GENERAL: 'general',
-  CONTRACTS: 'contracts'
+  CONTRACTS: 'contracts',
+  RECEIPTS: 'receipts'
 } as const;
 
 /**

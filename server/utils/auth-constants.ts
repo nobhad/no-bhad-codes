@@ -187,7 +187,7 @@ export function validatePassword(password: string): { valid: boolean; errors: st
     errors.push('Password must contain at least one number');
   }
 
-  if (PASSWORD_CONFIG.REQUIREMENTS.REQUIRE_SPECIAL && !/[@$!%*?&\-]/.test(password)) {
+  if (PASSWORD_CONFIG.REQUIREMENTS.REQUIRE_SPECIAL && !/[@$!%*?&-]/.test(password)) {
     errors.push('Password must contain at least one special character (@$!%*?&-)');
   }
 

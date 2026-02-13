@@ -16,6 +16,7 @@ import { rateLimit, requestSizeLimit, suspiciousActivityDetector } from '../midd
 import { logger } from '../services/logger.js';
 import { getDatabase } from '../database/init.js';
 import { emailService } from '../services/email-service.js';
+import { getSchedulerService } from '../services/scheduler-service.js';
 import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 
 const router = Router();
@@ -306,12 +307,21 @@ router.get(
 
   async (req, res) => {
     try {
+      // Get scheduler status
+      const schedulerService = getSchedulerService();
+      const schedulerStatus = schedulerService.getStatus();
+
       const health = {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         memory: process.memoryUsage(),
-        environment: process.env.NODE_ENV || 'development'
+        environment: process.env.NODE_ENV || 'development',
+        scheduler: {
+          enabled: process.env.SCHEDULER_ENABLED !== 'false',
+          isRunning: schedulerStatus.isRunning,
+          jobs: schedulerStatus.jobs
+        }
       };
 
       res.json({

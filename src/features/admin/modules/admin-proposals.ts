@@ -766,8 +766,9 @@ async function loadTemplates(ctx: AdminDashboardContext): Promise<void> {
   try {
     const response = await apiFetch('/api/proposals/templates');
     if (response.ok) {
-      const data = await response.json();
-      templatesData = data.templates || data.data || [];
+      const json = await response.json();
+      const data = json.data ?? json;
+      templatesData = data.templates || [];
       renderTemplatesList(ctx);
     } else {
       templatesList.innerHTML = '<div class="empty-row">Error loading templates</div>';
@@ -1564,8 +1565,9 @@ async function loadProposalVersions(proposalId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/proposals/${proposalId}/versions`);
     if (response.ok) {
-      const data = await response.json();
-      currentProposalVersions = data.versions || data.data || [];
+      const json = await response.json();
+      const data = json.data ?? json;
+      currentProposalVersions = data.versions || [];
       renderVersionHistory(proposalId);
     } else {
       versionContainer.innerHTML = '<div class="empty-row">No versions available</div>';
@@ -1719,8 +1721,9 @@ async function showVersionComparison(proposalId: number, versionId: number): Pro
     const response = await apiFetch(`/api/proposals/versions/compare?version1=${version1}&version2=${version2}`);
 
     if (response.ok) {
-      const data = await response.json();
-      const comparison = data.comparison || data.data;
+      const json = await response.json();
+      const data = json.data ?? json;
+      const comparison = data.comparison || data;
       const differences = comparison?.differences || {};
 
       const changeEntries = Object.entries(differences);
@@ -1752,8 +1755,9 @@ async function loadSignatureStatus(proposalId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/proposals/${proposalId}/signature-status`);
     if (response.ok) {
-      const data = await response.json();
-      renderSignatureStatus(proposalId, data.data);
+      const json = await response.json();
+      const data = json.data ?? json;
+      renderSignatureStatus(proposalId, data);
     } else if (response.status === 404) {
       // No signature requested yet
       renderSignatureStatus(proposalId, null);
@@ -2286,8 +2290,9 @@ async function loadCustomItems(proposalId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/proposals/${proposalId}/custom-items`);
     if (response.ok) {
-      const data = await response.json();
-      renderCustomItems(proposalId, data.items || data.data || []);
+      const json = await response.json();
+      const data = json.data ?? json;
+      renderCustomItems(proposalId, data.items || []);
     } else {
       container.innerHTML = '<div class="empty-state-small">No custom items</div>';
     }
@@ -2522,8 +2527,9 @@ async function loadProposalComments(proposalId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/proposals/${proposalId}/comments`);
     if (response.ok) {
-      const data = await response.json();
-      renderComments(proposalId, data.comments || data.data || []);
+      const json = await response.json();
+      const data = json.data ?? json;
+      renderComments(proposalId, data.comments || []);
     } else {
       container.innerHTML = '<div class="empty-state-small">No comments</div>';
     }
@@ -2612,8 +2618,9 @@ async function loadProposalActivities(proposalId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/proposals/${proposalId}/activities`);
     if (response.ok) {
-      const data = await response.json();
-      renderActivities(data.activities || data.data || []);
+      const json = await response.json();
+      const data = json.data ?? json;
+      renderActivities(data.activities || []);
     } else {
       container.innerHTML = '<div class="empty-state-small">No activity</div>';
     }

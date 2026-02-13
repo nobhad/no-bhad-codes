@@ -175,6 +175,10 @@
   margin-bottom: var(--space-3);
 }
 
+[data-page="admin"] .approval-dashboard-section.hidden {
+  display: none;
+}
+
 /* Urgent badge */
 [data-page="admin"] .urgent-badge {
   display: inline-flex;

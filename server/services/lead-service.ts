@@ -145,7 +145,8 @@ interface TaskRow {
   due_date?: string;
   due_time?: string;
   status: string;
-  assigned_to?: string;
+  assigned_to_user_id?: number;
+  assigned_to_name?: string; // From JOIN with users table
   priority: string;
   reminder_at?: string;
   completed_at?: string;
@@ -171,7 +172,8 @@ export interface LeadNote {
 interface NoteRow {
   id: number;
   project_id: number;
-  author: string;
+  author_user_id: number | null;
+  author_name: string | null; // From JOIN with users table
   content: string;
   is_pinned: number;
   created_at: string;
@@ -350,7 +352,7 @@ function toTask(row: TaskRow): LeadTask {
     dueDate: row.due_date,
     dueTime: row.due_time,
     status: row.status as LeadTask['status'],
-    assignedTo: row.assigned_to,
+    assignedTo: row.assigned_to_name,
     priority: row.priority as LeadTask['priority'],
     reminderAt: row.reminder_at,
     completedAt: row.completed_at,
@@ -364,7 +366,7 @@ function toNote(row: NoteRow): LeadNote {
   return {
     id: row.id,
     projectId: row.project_id,
-    author: row.author,
+    author: row.author_name || 'Unknown',
     content: row.content,
     isPinned: Boolean(row.is_pinned),
     createdAt: row.created_at,
@@ -564,25 +566,26 @@ class LeadService {
       const fieldValue = this.getFieldValue(project, rule.fieldName);
 
       switch (rule.operator) {
-        case 'equals':
-          matched = fieldValue?.toLowerCase() === rule.thresholdValue.toLowerCase();
-          break;
-        case 'contains':
-          matched = fieldValue?.toLowerCase().includes(rule.thresholdValue.toLowerCase()) || false;
-          break;
-        case 'greater_than':
-          matched = parseFloat(fieldValue || '0') > parseFloat(rule.thresholdValue);
-          break;
-        case 'less_than':
-          matched = parseFloat(fieldValue || '0') < parseFloat(rule.thresholdValue);
-          break;
-        case 'in':
-          const values = rule.thresholdValue.split(',').map(v => v.trim().toLowerCase());
-          matched = values.includes(fieldValue?.toLowerCase() || '');
-          break;
-        case 'not_empty':
-          matched = !!fieldValue && fieldValue.trim() !== '';
-          break;
+      case 'equals':
+        matched = fieldValue?.toLowerCase() === rule.thresholdValue.toLowerCase();
+        break;
+      case 'contains':
+        matched = fieldValue?.toLowerCase().includes(rule.thresholdValue.toLowerCase()) || false;
+        break;
+      case 'greater_than':
+        matched = parseFloat(fieldValue || '0') > parseFloat(rule.thresholdValue);
+        break;
+      case 'less_than':
+        matched = parseFloat(fieldValue || '0') < parseFloat(rule.thresholdValue);
+        break;
+      case 'in': {
+        const values = rule.thresholdValue.split(',').map(v => v.trim().toLowerCase());
+        matched = values.includes(fieldValue?.toLowerCase() || '');
+        break;
+      }
+      case 'not_empty':
+        matched = !!fieldValue && fieldValue.trim() !== '';
+        break;
       }
 
       if (matched) {
@@ -635,7 +638,7 @@ class LeadService {
 
     // Get all leads (projects in pending status)
     const leads = await db.all(
-      `SELECT id FROM projects WHERE status = 'pending'`
+      'SELECT id FROM projects WHERE status = \'pending\''
     ) as unknown as { id: number }[];
 
     for (const lead of leads) {
@@ -683,11 +686,11 @@ class LeadService {
     if (stage.is_won) {
       updates.push('won_at = CURRENT_TIMESTAMP');
       if (stage.auto_convert_to_project) {
-        updates.push("status = 'in-progress'");
+        updates.push('status = \'in-progress\'');
       }
     } else if (stage.is_lost) {
       updates.push('lost_at = CURRENT_TIMESTAMP');
-      updates.push("status = 'on-hold'");
+      updates.push('status = \'on-hold\'');
     }
 
     values.push(projectId);
@@ -770,11 +773,11 @@ class LeadService {
     ) as { total_leads: number; total_value: number | string; avg_days: number } | undefined;
 
     const wonCount = await db.get(
-      `SELECT COUNT(*) as count FROM projects WHERE won_at IS NOT NULL`
+      'SELECT COUNT(*) as count FROM projects WHERE won_at IS NOT NULL'
     ) as { count: number } | undefined;
 
     const lostCount = await db.get(
-      `SELECT COUNT(*) as count FROM projects WHERE lost_at IS NOT NULL`
+      'SELECT COUNT(*) as count FROM projects WHERE lost_at IS NOT NULL'
     ) as { count: number } | undefined;
 
     const totalClosed = (wonCount?.count || 0) + (lostCount?.count || 0);
@@ -849,13 +852,16 @@ class LeadService {
     // Update project's next follow-up date
     if (data.dueDate) {
       await db.run(
-        `UPDATE projects SET next_follow_up_at = ? WHERE id = ? AND (next_follow_up_at IS NULL OR next_follow_up_at > ?)`,
+        'UPDATE projects SET next_follow_up_at = ? WHERE id = ? AND (next_follow_up_at IS NULL OR next_follow_up_at > ?)',
         [data.dueDate, projectId, data.dueDate]
       );
     }
 
     const task = await db.get(
-      'SELECT * FROM lead_tasks WHERE id = ?',
+      `SELECT lt.*, u.display_name as assigned_to_name
+       FROM lead_tasks lt
+       LEFT JOIN users u ON lt.assigned_to_user_id = u.id
+       WHERE lt.id = ?`,
       [result.lastID]
     );
 
@@ -872,12 +878,14 @@ class LeadService {
   async getTasks(projectId: number): Promise<LeadTask[]> {
     const db = getDatabase();
     const rows = await db.all(
-      `SELECT * FROM lead_tasks
-       WHERE project_id = ?
+      `SELECT lt.*, u.display_name as assigned_to_name
+       FROM lead_tasks lt
+       LEFT JOIN users u ON lt.assigned_to_user_id = u.id
+       WHERE lt.project_id = ?
        ORDER BY
-         CASE status WHEN 'pending' THEN 0 WHEN 'snoozed' THEN 1 ELSE 2 END,
-         CASE WHEN due_date IS NULL THEN 1 ELSE 0 END,
-         due_date ASC`,
+         CASE lt.status WHEN 'pending' THEN 0 WHEN 'snoozed' THEN 1 ELSE 2 END,
+         CASE WHEN lt.due_date IS NULL THEN 1 ELSE 0 END,
+         lt.due_date ASC`,
       [projectId]
     ) as unknown as TaskRow[];
     return rows.map(toTask);
@@ -940,7 +948,10 @@ class LeadService {
     }
 
     const task = await db.get(
-      'SELECT * FROM lead_tasks WHERE id = ?',
+      `SELECT lt.*, u.display_name as assigned_to_name
+       FROM lead_tasks lt
+       LEFT JOIN users u ON lt.assigned_to_user_id = u.id
+       WHERE lt.id = ?`,
       [taskId]
     );
 
@@ -968,7 +979,10 @@ class LeadService {
     );
 
     const task = await db.get(
-      'SELECT * FROM lead_tasks WHERE id = ?',
+      `SELECT lt.*, u.display_name as assigned_to_name
+       FROM lead_tasks lt
+       LEFT JOIN users u ON lt.assigned_to_user_id = u.id
+       WHERE lt.id = ?`,
       [taskId]
     ) as unknown as TaskRow | undefined;
 
@@ -1043,7 +1057,7 @@ class LeadService {
     const authorUserId = await userService.getUserIdByEmailOrName(author);
 
     const result = await db.run(
-      `INSERT INTO lead_notes (project_id, author_user_id, content) VALUES (?, ?, ?)`,
+      'INSERT INTO lead_notes (project_id, author_user_id, content) VALUES (?, ?, ?)',
       [projectId, authorUserId, content]
     );
 
@@ -1054,7 +1068,10 @@ class LeadService {
     );
 
     const note = await db.get(
-      'SELECT * FROM lead_notes WHERE id = ?',
+      `SELECT ln.*, u.display_name as author_name
+       FROM lead_notes ln
+       LEFT JOIN users u ON ln.author_user_id = u.id
+       WHERE ln.id = ?`,
       [result.lastID]
     );
 
@@ -1071,9 +1088,11 @@ class LeadService {
   async getNotes(projectId: number): Promise<LeadNote[]> {
     const db = getDatabase();
     const rows = await db.all(
-      `SELECT * FROM lead_notes
-       WHERE project_id = ?
-       ORDER BY is_pinned DESC, created_at DESC`,
+      `SELECT ln.*, u.display_name as author_name
+       FROM lead_notes ln
+       LEFT JOIN users u ON ln.author_user_id = u.id
+       WHERE ln.project_id = ?
+       ORDER BY ln.is_pinned DESC, ln.created_at DESC`,
       [projectId]
     ) as unknown as NoteRow[];
     return rows.map(toNote);
@@ -1094,7 +1113,10 @@ class LeadService {
     );
 
     const note = await db.get(
-      'SELECT * FROM lead_notes WHERE id = ?',
+      `SELECT ln.*, u.display_name as author_name
+       FROM lead_notes ln
+       LEFT JOIN users u ON ln.author_user_id = u.id
+       WHERE ln.id = ?`,
       [noteId]
     ) as unknown as NoteRow | undefined;
 
@@ -1345,7 +1367,7 @@ class LeadService {
   async getAllPendingDuplicates(): Promise<DuplicateResult[]> {
     const db = getDatabase();
     const rows = await db.all(
-      `SELECT * FROM lead_duplicates WHERE status = 'pending' ORDER BY similarity_score DESC`
+      'SELECT * FROM lead_duplicates WHERE status = \'pending\' ORDER BY similarity_score DESC'
     ) as unknown as DuplicateRow[];
     return rows.map(toDuplicateResult);
   }
@@ -1424,7 +1446,7 @@ class LeadService {
 
     // Total leads
     const totalLeads = await db.get(
-      `SELECT COUNT(*) as count FROM projects WHERE status = 'pending'`
+      'SELECT COUNT(*) as count FROM projects WHERE status = \'pending\''
     ) as { count: number } | undefined;
 
     // New leads this month
@@ -1435,17 +1457,17 @@ class LeadService {
 
     // Conversion rate
     const wonCount = await db.get(
-      `SELECT COUNT(*) as count FROM projects WHERE won_at IS NOT NULL`
+      'SELECT COUNT(*) as count FROM projects WHERE won_at IS NOT NULL'
     ) as { count: number } | undefined;
     const lostCount = await db.get(
-      `SELECT COUNT(*) as count FROM projects WHERE lost_at IS NOT NULL`
+      'SELECT COUNT(*) as count FROM projects WHERE lost_at IS NOT NULL'
     ) as { count: number } | undefined;
     const totalClosed = (wonCount?.count || 0) + (lostCount?.count || 0);
     const conversionRate = totalClosed > 0 ? (wonCount?.count || 0) / totalClosed : 0;
 
     // Average lead score
     const avgScore = await db.get(
-      `SELECT AVG(lead_score) as avg FROM projects WHERE status = 'pending'`
+      'SELECT AVG(lead_score) as avg FROM projects WHERE status = \'pending\''
     ) as { avg: number | null } | undefined;
 
     // Average days to close

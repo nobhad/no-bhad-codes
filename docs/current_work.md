@@ -12,8 +12,6 @@ This file tracks active development work and TODOs. Completed items are archived
 
 **Goal:** Rebuild portals with unified reusable components
 
----
-
 #### Phase 1: Reusable Component Library
 
 **Status:** READY TO START

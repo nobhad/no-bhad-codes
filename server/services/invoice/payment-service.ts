@@ -8,6 +8,7 @@
  */
 
 import type { Invoice, InvoicePayment, InvoicePaymentRow } from '../../types/invoice-types.js';
+import { receiptService } from '../receipt-service.js';
 
 type SqlValue = string | number | boolean | null;
 
@@ -117,6 +118,7 @@ export class InvoicePaymentService {
 
   /**
    * Record a payment and add it to payment history
+   * Also auto-generates a receipt for the payment
    */
   async recordPaymentWithHistory(
     invoiceId: number,
@@ -124,7 +126,7 @@ export class InvoicePaymentService {
     paymentMethod: string,
     paymentReference?: string,
     notes?: string
-  ): Promise<{ invoice: Invoice; payment: InvoicePayment }> {
+  ): Promise<{ invoice: Invoice; payment: InvoicePayment; receipt?: { id: number; receiptNumber: string } }> {
     const paymentDate = new Date().toISOString().split('T')[0];
 
     const invoice = await this.recordPayment(invoiceId, amount, paymentMethod, paymentReference);
@@ -155,7 +157,30 @@ export class InvoicePaymentService {
       createdAt: new Date().toISOString()
     };
 
-    return { invoice, payment };
+    // Auto-generate receipt for this payment
+    let receipt: { id: number; receiptNumber: string } | undefined;
+    try {
+      const receiptRecord = await receiptService.createReceipt(
+        invoiceId,
+        payment.id,
+        amount,
+        {
+          paymentMethod,
+          paymentReference,
+          paymentDate
+        }
+      );
+      receipt = {
+        id: receiptRecord.id,
+        receiptNumber: receiptRecord.receiptNumber
+      };
+      console.log(`[PaymentService] Receipt ${receiptRecord.receiptNumber} generated for payment ${payment.id}`);
+    } catch (receiptError) {
+      console.error('[PaymentService] Failed to generate receipt:', receiptError);
+      // Don't fail the payment if receipt generation fails
+    }
+
+    return { invoice, payment, receipt };
   }
 
   /**
@@ -200,7 +225,7 @@ export class InvoicePaymentService {
     }
 
     if (conditions.length > 0) {
-      sql += ' WHERE ' + conditions.join(' AND ');
+      sql += ` WHERE ${  conditions.join(' AND ')}`;
     }
 
     sql += ' ORDER BY payment_date DESC, created_at DESC';

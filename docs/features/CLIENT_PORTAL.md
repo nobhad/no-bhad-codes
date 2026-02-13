@@ -11,17 +11,18 @@
 3. [TypeScript Module](#typescript-module)
 4. [Dashboard Sections](#dashboard-sections)
 5. [Navigation](#navigation)
-6. [Tab System](#tab-system)
-7. [Mobile Responsiveness](#mobile-responsiveness)
-8. [Login System](#login-system)
-9. [File Management](#file-management)
-10. [Invoice Management](#invoice-management)
-11. [Project Management](#project-management)
-12. [View Management](#view-management)
-13. [Settings & Forms](#settings--forms)
-14. [Styling](#styling)
-15. [File Locations](#file-locations)
-16. [Related Documentation](#related-documentation)
+6. [Notification Bell](#notification-bell)
+7. [Tab System](#tab-system)
+8. [Mobile Responsiveness](#mobile-responsiveness)
+9. [Login System](#login-system)
+10. [File Management](#file-management)
+11. [Invoice Management](#invoice-management)
+12. [Project Management](#project-management)
+13. [View Management](#view-management)
+14. [Settings & Forms](#settings--forms)
+15. [Styling](#styling)
+16. [File Locations](#file-locations)
+17. [Related Documentation](#related-documentation)
 
 ---
 
@@ -394,6 +395,68 @@ private toggleSidebar(): void {
   sidebar.classList.toggle('collapsed');
 }
 ```
+
+---
+
+## Notification Bell
+
+The notification bell provides real-time notification updates in the portal header.
+
+### Component
+
+**File:** `src/components/notification-bell.ts`
+
+```typescript
+interface NotificationBellOptions {
+  container: HTMLElement;
+  onNotificationClick?: (notification: Notification) => void;
+  pollInterval?: number; // ms, default 60000 (1 minute)
+}
+```
+
+### Features
+
+- Bell icon with unread count badge
+- Dropdown showing recent 10 notifications
+- Mark individual notifications as read
+- Mark all notifications as read
+- Polls for updates every 60 seconds
+- Click outside closes dropdown
+- Keyboard accessible (Escape to close)
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/clients/me/notifications/history?limit=10` | Fetch recent notifications |
+| PUT | `/api/clients/me/notifications/:id/read` | Mark notification as read |
+| PUT | `/api/clients/me/notifications/mark-all-read` | Mark all as read |
+
+### Usage
+
+```typescript
+import { NotificationBell } from '../components/notification-bell';
+
+const bell = new NotificationBell({
+  container: document.getElementById('notification-container')!,
+  onNotificationClick: (notification) => {
+    // Handle notification click (e.g., navigate to related content)
+  }
+});
+
+await bell.init();
+```
+
+### Styling
+
+**File:** `src/styles/client-portal/notification-bell.css`
+
+- `.notification-bell-btn` - Bell button with icon
+- `.notification-badge` - Unread count badge (hidden when 0)
+- `.notification-dropdown` - Dropdown container
+- `.notification-header` - Header with title and "Mark all read" button
+- `.notification-list` - Scrollable list of notifications
+- `.notification-item` - Individual notification with read/unread states
 
 ---
 

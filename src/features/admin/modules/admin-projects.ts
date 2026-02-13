@@ -16,7 +16,8 @@ import {
   formatDate,
   formatDateTime,
   formatCurrency,
-  formatProjectType
+  formatProjectType,
+  normalizeStatus
 } from '../../../utils/format-utils';
 import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
@@ -288,7 +289,9 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
     const response = await apiFetch('/api/admin/leads');
 
     if (response.ok) {
-      const data: ProjectsData = await response.json();
+      const json = await response.json();
+      // Handle canonical API format { success: true, data: {...} }
+      const data: ProjectsData = json.data ?? json;
       projectsData = data.leads || [];
       updateProjectsDisplay(data, ctx);
     } else {
@@ -1287,6 +1290,9 @@ function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
 
   // More menu (edit, duplicate, archive, delete)
   setupMoreMenu(ctx);
+
+  // Generate document dropdown menu (in Files tab)
+  setupGenerateDocumentMenu();
 }
 
 /**
@@ -1379,16 +1385,249 @@ function setupMoreMenu(ctx: AdminDashboardContext): void {
   });
 }
 
-// NOTE: formatProjectType moved to shared format-utils.ts
+/**
+ * Set up the generate document dropdown menu
+ */
+function setupGenerateDocumentMenu(): void {
+  const menu = document.getElementById('pd-generate-document-menu');
+  if (!menu) return;
+
+  const trigger = menu.querySelector('.custom-dropdown-trigger') as HTMLElement;
+  if (!trigger || trigger.dataset.listenerAdded === 'true') return;
+  trigger.dataset.listenerAdded = 'true';
+
+  // Toggle dropdown on trigger click
+  trigger.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    menu.classList.toggle('open');
+  });
+
+  // Handle menu item clicks
+  menu.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+    const item = target.closest('.custom-dropdown-item') as HTMLElement | null;
+    if (!item) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    const action = item.dataset.action;
+    menu.classList.remove('open');
+
+    if (!currentProjectId || !action) return;
+
+    await handleGenerateDocument(action, currentProjectId);
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!menu.contains(e.target as Node)) {
+      menu.classList.remove('open');
+    }
+  });
+
+  // Keyboard support: Escape to close, Enter/Space to toggle
+  trigger.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      menu.classList.remove('open');
+      trigger.focus();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      menu.classList.toggle('open');
+    }
+  });
+
+  // Close on Escape when focus is in the menu
+  menu.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      menu.classList.remove('open');
+      trigger.focus();
+    }
+  });
+}
 
 /**
- * Normalize status value to hyphen format to match database.
- * Legacy data may have underscores, convert to hyphens for consistency.
+ * Handle document generation actions
  */
-function normalizeStatus(status: string | undefined): string {
-  if (!status) return 'pending';
-  return status.replace(/_/g, '-');
+async function handleGenerateDocument(action: string, projectId: number): Promise<void> {
+  const project = projectsData.find((p) => p.id === projectId);
+  if (!project) {
+    showToast('Project not found', 'error');
+    return;
+  }
+
+  switch (action) {
+  case 'generate-proposal':
+    await generateProposalPdf(projectId);
+    break;
+  case 'generate-contract':
+    await generateContractPdf(projectId);
+    break;
+  case 'generate-receipt':
+    await generateReceiptPdf(projectId);
+    break;
+  case 'generate-report':
+    showToast('Project Report generation coming soon', 'info');
+    break;
+  case 'generate-sow':
+    showToast('Statement of Work generation coming soon', 'info');
+    break;
+  default:
+    showToast('Unknown document type', 'error');
+  }
 }
+
+/**
+ * Generate and download proposal PDF for the project
+ */
+async function generateProposalPdf(projectId: number): Promise<void> {
+  try {
+    // First, find the proposal for this project
+    const response = await apiFetch('/api/proposals/admin/list');
+    if (!response.ok) {
+      showToast('Failed to fetch proposals', 'error');
+      return;
+    }
+
+    const data = await response.json();
+    const proposals = data.proposals || [];
+    const projectProposal = proposals.find((p: { projectId: number }) => p.projectId === projectId);
+
+    if (!projectProposal) {
+      showToast('No proposal found for this project', 'warning');
+      return;
+    }
+
+    // Download the PDF
+    const pdfResponse = await apiFetch(`/api/proposals/${projectProposal.id}/pdf`);
+    if (!pdfResponse.ok) {
+      showToast('Failed to generate proposal PDF', 'error');
+      return;
+    }
+
+    // Download the PDF
+    const blob = await pdfResponse.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `proposal-${projectId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('Proposal PDF downloaded', 'success');
+  } catch (error) {
+    console.error('[AdminProjects] Error generating proposal PDF:', error);
+    showToast('Failed to generate proposal PDF', 'error');
+  }
+}
+
+/**
+ * Generate and download contract PDF for the project
+ */
+async function generateContractPdf(projectId: number): Promise<void> {
+  try {
+    // The contract PDF endpoint is project-based
+    const pdfResponse = await apiFetch(`/api/projects/${projectId}/contract/pdf`);
+    if (!pdfResponse.ok) {
+      if (pdfResponse.status === 404) {
+        showToast('No contract found for this project', 'warning');
+      } else {
+        showToast('Failed to generate contract PDF', 'error');
+      }
+      return;
+    }
+
+    // Download the PDF
+    const blob = await pdfResponse.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `contract-${projectId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('Contract PDF downloaded', 'success');
+  } catch (error) {
+    console.error('[AdminProjects] Error generating contract PDF:', error);
+    showToast('Failed to generate contract PDF', 'error');
+  }
+}
+
+/**
+ * Generate and download receipt PDF for the project
+ * Finds the most recent receipt from paid invoices
+ */
+async function generateReceiptPdf(projectId: number): Promise<void> {
+  try {
+    // First, get invoices for this project
+    const invoicesResponse = await apiFetch(`/api/projects/${projectId}/invoices`);
+    if (!invoicesResponse.ok) {
+      showToast('Failed to fetch project invoices', 'error');
+      return;
+    }
+
+    const invoicesData = await invoicesResponse.json();
+    const invoices = invoicesData.invoices || [];
+
+    // Find paid invoices
+    const paidInvoices = invoices.filter(
+      (inv: { status: string }) => inv.status === 'paid' || inv.status === 'partial'
+    );
+
+    if (paidInvoices.length === 0) {
+      showToast('No paid invoices found for this project', 'warning');
+      return;
+    }
+
+    // Get receipts for the most recent paid invoice
+    const latestInvoice = paidInvoices[0]; // Assuming sorted by date desc
+    const receiptsResponse = await apiFetch(`/api/receipts/invoice/${latestInvoice.id}`);
+
+    if (!receiptsResponse.ok) {
+      showToast('Failed to fetch receipts', 'error');
+      return;
+    }
+
+    const receiptsData = await receiptsResponse.json();
+    const receipts = receiptsData.receipts || [];
+
+    if (receipts.length === 0) {
+      showToast('No receipts found for this invoice', 'warning');
+      return;
+    }
+
+    // Download the most recent receipt PDF
+    const latestReceipt = receipts[0];
+    const pdfResponse = await apiFetch(`/api/receipts/${latestReceipt.id}/pdf`);
+
+    if (!pdfResponse.ok) {
+      showToast('Failed to generate receipt PDF', 'error');
+      return;
+    }
+
+    // Download the PDF
+    const blob = await pdfResponse.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `receipt-${latestReceipt.receipt_number || projectId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('Receipt PDF downloaded', 'success');
+  } catch (error) {
+    console.error('[AdminProjects] Error generating receipt PDF:', error);
+    showToast('Failed to generate receipt PDF', 'error');
+  }
+}
+
+// NOTE: formatProjectType moved to shared format-utils.ts
 
 // Project Messages
 export async function loadProjectMessages(
@@ -2213,7 +2452,6 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
   container.querySelectorAll('.btn-edit-invoice').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const invoiceId = (btn as HTMLElement).dataset.invoiceId;
-      console.log('[Invoice] Edit clicked, invoiceId:', invoiceId, 'adminDashboard:', !!window.adminDashboard);
       if (invoiceId && window.adminDashboard) {
         try {
           await window.adminDashboard.editInvoice(parseInt(invoiceId));
@@ -2232,7 +2470,6 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
   container.querySelectorAll('.btn-send-invoice').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const invoiceId = (btn as HTMLElement).dataset.invoiceId;
-      console.log('[Invoice] Send clicked, invoiceId:', invoiceId, 'adminDashboard:', !!window.adminDashboard);
       if (invoiceId && window.adminDashboard) {
         try {
           await window.adminDashboard.sendInvoice(parseInt(invoiceId));
@@ -2319,14 +2556,12 @@ async function showCreateInvoicePrompt(): Promise<void> {
   let availableDeposits: AvailableDeposit[] = [];
   try {
     const depositsResponse = await apiFetch(`/api/invoices/deposits/${currentProjectId}`);
-    console.log('[Invoice] Deposits response status:', depositsResponse.status);
     if (depositsResponse.ok) {
       const data = await depositsResponse.json();
-      console.log('[Invoice] Available deposits:', data);
       availableDeposits = data.deposits || [];
     }
-  } catch (error) {
-    console.log('[Invoice] Could not fetch deposits:', error);
+  } catch {
+    // Silently handle deposit fetch errors
   }
 
   // Create modal overlay

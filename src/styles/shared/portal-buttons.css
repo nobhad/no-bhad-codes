@@ -112,10 +112,9 @@
   outline: none;
 }
 
-/* Icon buttons - no focus outline */
-:is([data-page="admin"], [data-page="client-portal"]) .icon-btn:focus,
+/* Icon buttons - visible focus indicator for accessibility (WCAG 2.4.7) */
 :is([data-page="admin"], [data-page="client-portal"]) .icon-btn:focus-visible {
-  box-shadow: none;
+  box-shadow: 0 0 0 2px var(--color-primary);
   outline: none;
 }
 

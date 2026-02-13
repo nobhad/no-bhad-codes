@@ -263,7 +263,7 @@ export async function unblockIP(ip: string): Promise<void> {
   const db = getDatabase();
 
   await db.run(
-    `UPDATE blocked_ips SET is_active = 0 WHERE ip_address = ?`,
+    'UPDATE blocked_ips SET is_active = 0 WHERE ip_address = ?',
     [ip]
   );
 
@@ -288,10 +288,10 @@ export async function getRateLimitStats(): Promise<{
 
   const [totalResult, blockedResult, topEndpoints, blockedIPs] = await Promise.all([
     db.get(
-      `SELECT COUNT(*) as count FROM rate_limit_log WHERE created_at > datetime('now', '-24 hours')`
+      'SELECT COUNT(*) as count FROM rate_limit_log WHERE created_at > datetime(\'now\', \'-24 hours\')'
     ) as Promise<{ count: number } | undefined>,
     db.get(
-      `SELECT COUNT(*) as count FROM rate_limit_log WHERE is_blocked = 1 AND created_at > datetime('now', '-24 hours')`
+      'SELECT COUNT(*) as count FROM rate_limit_log WHERE is_blocked = 1 AND created_at > datetime(\'now\', \'-24 hours\')'
     ) as Promise<{ count: number } | undefined>,
     db.all(
       `SELECT endpoint, SUM(request_count) as count

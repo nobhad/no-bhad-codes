@@ -22,14 +22,51 @@ export function formatFileSize(bytes: number): string {
 
 /**
  * Format number as USD currency
- * @param amount - Number to format
- * @returns Formatted currency string (e.g., "$1,234.56")
+ * @param amount - Number to format (handles null/undefined)
+ * @param showCents - Whether to show decimal places (default: true)
+ * @returns Formatted currency string (e.g., "$1,234.56" or "$1,234")
  */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(amount: number | null | undefined, showCents: boolean = true): string {
+  const options: Intl.NumberFormatOptions = {
     style: 'currency',
     currency: 'USD'
-  }).format(amount || 0);
+  };
+
+  if (!showCents) {
+    options.minimumFractionDigits = 0;
+    options.maximumFractionDigits = 0;
+  }
+
+  return new Intl.NumberFormat('en-US', options).format(amount || 0);
+}
+
+/**
+ * Format currency in compact form for dashboards/analytics
+ * Shows $1.5M for millions, $2.3K for thousands
+ * @param amount - Number to format
+ * @returns Compact currency string (e.g., "$1.5M", "$2.3K", "$500")
+ */
+export function formatCurrencyCompact(amount: number | null | undefined): string {
+  const value = amount || 0;
+  if (value >= 1000000) {
+    return `$${(value / 1000000).toFixed(1)}M`;
+  }
+  if (value >= 1000) {
+    return `$${(value / 1000).toFixed(1)}K`;
+  }
+  return `$${value.toLocaleString()}`;
+}
+
+/**
+ * Normalize status value to hyphen format for database consistency.
+ * Legacy data may have underscores, this converts them to hyphens.
+ * @param status - Status value to normalize
+ * @param defaultValue - Default value if status is undefined/empty (default: 'pending')
+ * @returns Normalized status string with hyphens
+ */
+export function normalizeStatus(status: string | undefined | null, defaultValue: string = 'pending'): string {
+  if (!status) return defaultValue;
+  return status.replace(/_/g, '-');
 }
 
 /**

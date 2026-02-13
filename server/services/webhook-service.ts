@@ -106,7 +106,7 @@ export class WebhookService {
       retry_enabled = existing.retry_enabled,
       retry_max_attempts = existing.retry_max_attempts,
       retry_backoff_seconds = existing.retry_backoff_seconds
-    } = {...updates};
+    } = { ...updates };
 
     const eventString = Array.isArray(events) ? events.join(',') : events;
     const headerString = JSON.stringify(headers || {});
@@ -209,6 +209,7 @@ export class WebhookService {
         ...webhook.headers
       };
 
+      // eslint-disable-next-line no-undef
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -261,7 +262,7 @@ export class WebhookService {
     if (attempt > webhook.retry_max_attempts) {
       // Max retries exceeded
       await this.db.run(
-        `UPDATE webhook_deliveries SET status='failed', updated_at=CURRENT_TIMESTAMP WHERE id=?`,
+        'UPDATE webhook_deliveries SET status=\'failed\', updated_at=CURRENT_TIMESTAMP WHERE id=?',
         [deliveryId]
       );
       return;

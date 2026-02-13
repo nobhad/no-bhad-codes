@@ -239,7 +239,8 @@ async function loadClientHealth(clientId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/clients/${clientId}/health`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       clientHealth = data.health || null;
     }
   } catch (error) {
@@ -252,7 +253,8 @@ async function loadClientContacts(clientId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/clients/${clientId}/contacts`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       clientContacts = data.contacts || [];
     }
   } catch (error) {
@@ -265,7 +267,8 @@ async function loadClientActivities(clientId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/clients/${clientId}/activities`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       clientActivities = data.activities || [];
     }
   } catch (error) {
@@ -278,7 +281,8 @@ async function loadClientNotes(clientId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/clients/${clientId}/notes`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       clientNotes = data.notes || [];
     }
   } catch (error) {
@@ -291,7 +295,8 @@ async function loadClientTags(clientId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/clients/${clientId}/tags`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       clientTags = (data.tags || []).map((t: { id: number; name: string; color: string }) => ({
         id: t.id,
         name: t.name,
@@ -308,7 +313,8 @@ async function loadAvailableTags(): Promise<void> {
   try {
     const response = await apiFetch('/api/clients/tags');
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       availableTags = (data.tags || []).map((t: { id: number; name: string; color: string }) => ({
         id: t.id,
         name: t.name,
@@ -325,7 +331,8 @@ async function loadClientStats(clientId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/clients/${clientId}/stats`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       clientStats = data.stats || null;
     }
   } catch (error) {
@@ -338,7 +345,8 @@ async function loadClientProjects(clientId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/clients/${clientId}/projects`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       clientProjects = data.projects || [];
     }
   } catch (error) {
@@ -370,7 +378,8 @@ async function loadClientCRMFields(clientId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/clients/${clientId}`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       const client = data.client || {};
       clientCRMData = {
         industry: client.industry,
@@ -392,7 +401,8 @@ async function loadClientCustomFields(clientId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/clients/${clientId}/custom-fields`);
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       clientCustomFields = data.values || [];
     }
   } catch (error) {
@@ -534,7 +544,8 @@ function renderHeaderTags(): void {
           color: generateTagColor()
         });
         if (response.ok) {
-          const data = await response.json();
+          const json = await response.json();
+          const data = json.data ?? json;
           const newTag: Tag = {
             id: data.tag.id,
             name: data.tag.name,
@@ -1128,7 +1139,8 @@ async function addContact(): Promise<void> {
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       clientContacts.push(data.contact);
       renderContactsTab();
       storedContext?.showNotification('Contact added', 'success');
@@ -1181,7 +1193,8 @@ async function editContact(contactId: number): Promise<void> {
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       const index = clientContacts.findIndex(c => c.id === contactId);
       if (index !== -1) {
         clientContacts[index] = data.contact;
@@ -1357,7 +1370,8 @@ async function logActivity(): Promise<void> {
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       clientActivities.unshift(data.activity);
       filterActivities('all');
       storedContext?.showNotification('Activity logged', 'success');
@@ -1438,7 +1452,8 @@ function setupNoteEventListeners(): void {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const json = await response.json();
+        const data = json.data ?? json;
         clientNotes.unshift(data.note);
         renderNotesTab();
         storedContext?.showNotification('Note added', 'success');

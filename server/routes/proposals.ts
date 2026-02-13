@@ -28,8 +28,10 @@ import {
   PAGE_MARGINS
 } from '../utils/pdf-utils.js';
 import { notDeleted } from '../database/query-helpers.js';
+import { userService } from '../services/user-service.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
-import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 
 const router = express.Router();
 
@@ -137,11 +139,7 @@ router.get(
 
     // Configuration is handled on the frontend
     // This endpoint can be used for future server-side overrides
-    res.json({
-      success: true,
-      message: 'Configuration is managed client-side',
-      projectType
-    });
+    sendSuccess(res, { projectType }, 'Configuration is managed client-side');
   })
 );
 
@@ -242,16 +240,22 @@ router.post(
 
     console.log(`[Proposals] Created proposal request ${result} for project ${submission.projectId}`);
 
-    res.status(201).json({
-      success: true,
-      message: 'Proposal submitted successfully',
-      data: {
-        proposalId: result,
-        projectId: submission.projectId,
-        selectedTier: submission.selectedTier,
-        finalPrice: submission.finalPrice
-      }
+    // Emit workflow event for proposal creation
+    await workflowTriggerService.emit('proposal.created', {
+      entityId: result,
+      triggeredBy: 'client',
+      projectId: submission.projectId,
+      clientId: submission.clientId,
+      selectedTier: submission.selectedTier,
+      finalPrice: submission.finalPrice
     });
+
+    sendCreated(res, {
+      proposalId: result,
+      projectId: submission.projectId,
+      selectedTier: submission.selectedTier,
+      finalPrice: submission.finalPrice
+    }, 'Proposal submitted successfully');
   })
 );
 
@@ -288,50 +292,47 @@ router.get(
 
     // Get feature selections
     const features = await db.all(
-      `SELECT * FROM proposal_feature_selections WHERE proposal_request_id = ?`,
+      'SELECT * FROM proposal_feature_selections WHERE proposal_request_id = ?',
       [id]
     ) as unknown as FeatureRow[];
 
     // Cast proposal for helper functions
     const p = proposal as unknown as Record<string, unknown>;
 
-    res.json({
-      success: true,
-      data: {
-        id: getNumber(p, 'id'),
-        projectId: getNumber(p, 'project_id'),
-        clientId: getNumber(p, 'client_id'),
-        projectType: getString(p, 'project_type'),
-        selectedTier: getString(p, 'selected_tier'),
-        basePrice: getNumber(p, 'base_price'),
-        finalPrice: getNumber(p, 'final_price'),
-        maintenanceOption: proposal.maintenance_option,
-        status: getString(p, 'status'),
-        clientNotes: proposal.client_notes,
-        adminNotes: proposal.admin_notes,
-        createdAt: getString(p, 'created_at'),
-        reviewedAt: proposal.reviewed_at,
-        reviewedBy: proposal.reviewed_by,
-        project: {
-          name: getString(p, 'project_name')
-        },
-        client: {
-          name: getString(p, 'client_name'),
-          email: getString(p, 'client_email'),
-          company: proposal.company_name
-        },
-        features: features.map(f => {
-          const fr = f as unknown as Record<string, unknown>;
-          return {
-            featureId: getString(fr, 'feature_id'),
-            featureName: getString(fr, 'feature_name'),
-            featurePrice: getNumber(fr, 'feature_price'),
-            featureCategory: f.feature_category,
-            isIncludedInTier: Boolean(f.is_included_in_tier),
-            isAddon: Boolean(f.is_addon)
-          };
-        })
-      }
+    sendSuccess(res, {
+      id: getNumber(p, 'id'),
+      projectId: getNumber(p, 'project_id'),
+      clientId: getNumber(p, 'client_id'),
+      projectType: getString(p, 'project_type'),
+      selectedTier: getString(p, 'selected_tier'),
+      basePrice: getNumber(p, 'base_price'),
+      finalPrice: getNumber(p, 'final_price'),
+      maintenanceOption: proposal.maintenance_option,
+      status: getString(p, 'status'),
+      clientNotes: proposal.client_notes,
+      adminNotes: proposal.admin_notes,
+      createdAt: getString(p, 'created_at'),
+      reviewedAt: proposal.reviewed_at,
+      reviewedBy: proposal.reviewed_by,
+      project: {
+        name: getString(p, 'project_name')
+      },
+      client: {
+        name: getString(p, 'client_name'),
+        email: getString(p, 'client_email'),
+        company: proposal.company_name
+      },
+      features: features.map(f => {
+        const fr = f as unknown as Record<string, unknown>;
+        return {
+          featureId: getString(fr, 'feature_id'),
+          featureName: getString(fr, 'feature_name'),
+          featurePrice: getNumber(fr, 'feature_price'),
+          featureCategory: f.feature_category,
+          isIncludedInTier: Boolean(f.is_included_in_tier),
+          isAddon: Boolean(f.is_addon)
+        };
+      })
     });
   })
 );
@@ -354,10 +355,7 @@ router.delete(
       return errorResponse(res, result.message, 404, 'PROPOSAL_NOT_FOUND');
     }
 
-    res.json({
-      success: true,
-      message: result.message
-    });
+    sendSuccess(res, undefined, result.message);
   })
 );
 
@@ -401,37 +399,34 @@ router.get(
     }
     const countResult = await db.get(countQuery, countParams) as { count: number };
 
-    res.json({
-      success: true,
-      data: {
-        proposals: proposals.map(proposal => {
-          const p = proposal as unknown as Record<string, unknown>;
-          return {
-            id: getNumber(p, 'id'),
-            projectId: getNumber(p, 'project_id'),
-            clientId: getNumber(p, 'client_id'),
-            projectType: getString(p, 'project_type'),
-            selectedTier: getString(p, 'selected_tier'),
-            basePrice: getNumber(p, 'base_price'),
-            finalPrice: getNumber(p, 'final_price'),
-            maintenanceOption: proposal.maintenance_option,
-            status: getString(p, 'status'),
-            createdAt: getString(p, 'created_at'),
-            reviewedAt: proposal.reviewed_at,
-            project: {
-              name: getString(p, 'project_name')
-            },
-            client: {
-              name: getString(p, 'client_name'),
-              email: getString(p, 'client_email'),
-              company: proposal.company_name
-            }
-          };
-        }),
-        total: countResult.count,
-        limit: parseInt(limit as string, 10),
-        offset: parseInt(offset as string, 10)
-      }
+    sendSuccess(res, {
+      proposals: proposals.map(proposal => {
+        const p = proposal as unknown as Record<string, unknown>;
+        return {
+          id: getNumber(p, 'id'),
+          projectId: getNumber(p, 'project_id'),
+          clientId: getNumber(p, 'client_id'),
+          projectType: getString(p, 'project_type'),
+          selectedTier: getString(p, 'selected_tier'),
+          basePrice: getNumber(p, 'base_price'),
+          finalPrice: getNumber(p, 'final_price'),
+          maintenanceOption: proposal.maintenance_option,
+          status: getString(p, 'status'),
+          createdAt: getString(p, 'created_at'),
+          reviewedAt: proposal.reviewed_at,
+          project: {
+            name: getString(p, 'project_name')
+          },
+          client: {
+            name: getString(p, 'client_name'),
+            email: getString(p, 'client_email'),
+            company: proposal.company_name
+          }
+        };
+      }),
+      total: countResult.count,
+      limit: parseInt(limit as string, 10),
+      offset: parseInt(offset as string, 10)
     });
   })
 );
@@ -464,14 +459,20 @@ router.put(
 
     // Build update query
     const updates: string[] = [];
-    const params: (string | number)[] = [];
+    const params: (string | number | null)[] = [];
 
     if (status) {
+      const reviewerEmail = req.user?.email || 'admin';
+      // Look up user ID for reviewed_by during transition period
+      const reviewedByUserId = await userService.getUserIdByEmail(reviewerEmail);
+
       updates.push('status = ?');
       params.push(status);
       updates.push('reviewed_at = datetime(\'now\')');
       updates.push('reviewed_by = ?');
-      params.push(req.user?.email || 'admin');
+      params.push(reviewerEmail);
+      updates.push('reviewed_by_user_id = ?');
+      params.push(reviewedByUserId);
     }
 
     if (adminNotes !== undefined) {
@@ -492,10 +493,20 @@ router.put(
 
     console.log(`[Proposals] Updated proposal ${id} - status: ${status || 'unchanged'}`);
 
-    res.json({
-      success: true,
-      message: 'Proposal updated successfully'
-    });
+    // Emit workflow events for status changes
+    if (status === 'accepted') {
+      await workflowTriggerService.emit('proposal.accepted', {
+        entityId: parseInt(id, 10),
+        triggeredBy: req.user?.email || 'admin'
+      });
+    } else if (status === 'rejected') {
+      await workflowTriggerService.emit('proposal.rejected', {
+        entityId: parseInt(id, 10),
+        triggeredBy: req.user?.email || 'admin'
+      });
+    }
+
+    sendSuccess(res, undefined, 'Proposal updated successfully');
   })
 );
 
@@ -531,7 +542,7 @@ router.post(
 
     // Get feature selections for line items
     const features = await db.all(
-      `SELECT * FROM proposal_feature_selections WHERE proposal_request_id = ?`,
+      'SELECT * FROM proposal_feature_selections WHERE proposal_request_id = ?',
       [id]
     ) as unknown as FeatureRow[];
 
@@ -574,7 +585,7 @@ router.post(
 
       // Update proposal status to converted
       await ctx.run(
-        `UPDATE proposal_requests SET status = 'converted', reviewed_at = datetime('now') WHERE id = ?`,
+        'UPDATE proposal_requests SET status = \'converted\', reviewed_at = datetime(\'now\') WHERE id = ?',
         [id]
       );
 
@@ -583,14 +594,7 @@ router.post(
 
     console.log(`[Proposals] Converted proposal ${id} to invoice ${invoiceNumber}`);
 
-    res.json({
-      success: true,
-      message: 'Proposal converted to invoice',
-      data: {
-        invoiceId,
-        invoiceNumber
-      }
-    });
+    sendSuccess(res, { invoiceId, invoiceNumber }, 'Proposal converted to invoice');
   })
 );
 
@@ -644,13 +648,13 @@ router.get(
 
     // Get feature selections
     const features = await db.all(
-      `SELECT * FROM proposal_feature_selections WHERE proposal_request_id = ?`,
+      'SELECT * FROM proposal_feature_selections WHERE proposal_request_id = ?',
       [id]
     ) as unknown as FeatureRow[];
 
     // Get signature data if proposal is signed
     const signature = (proposal as any).signed_at ? await db.get(
-      `SELECT * FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC LIMIT 1`,
+      'SELECT * FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC LIMIT 1',
       [id]
     ) as { signer_name?: string; signer_email?: string; signer_title?: string; signature_data?: string; signature_method?: string; signed_at?: string; ip_address?: string } | undefined : undefined;
 
@@ -688,7 +692,7 @@ router.get(
     // Create multi-page context
     const pageWidth = 612;
     const pageHeight = 792;
-    let currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
+    const currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
     const { width, height } = currentPage.getSize();
 
     // Build context for page break detection
@@ -712,7 +716,7 @@ router.get(
 
     // Helper for continuation header on new pages
     const drawContinuationHeader = (context: PdfPageContext) => {
-      context.currentPage.drawText(`Proposal (continued)`, {
+      context.currentPage.drawText('Proposal (continued)', {
         x: ctx.leftMargin,
         y: context.y,
         size: 10,
@@ -1149,7 +1153,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { projectType } = req.query;
     const templates = await proposalService.getTemplates(projectType as string | undefined);
-    res.json({ success: true, templates });
+    sendSuccess(res, { templates });
   })
 );
 
@@ -1161,7 +1165,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const templateId = parseInt(req.params.templateId);
     const template = await proposalService.getTemplate(templateId);
-    res.json({ success: true, template });
+    sendSuccess(res, { template });
   })
 );
 
@@ -1176,7 +1180,7 @@ router.post(
       return errorResponse(res, 'Template name is required', 400, 'VALIDATION_ERROR');
     }
     const template = await proposalService.createTemplate(req.body);
-    res.status(201).json({ success: true, message: 'Template created successfully', template });
+    sendCreated(res, { template }, 'Template created successfully');
   })
 );
 
@@ -1188,7 +1192,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const templateId = parseInt(req.params.templateId);
     const template = await proposalService.updateTemplate(templateId, req.body);
-    res.json({ success: true, message: 'Template updated successfully', template });
+    sendSuccess(res, { template }, 'Template updated successfully');
   })
 );
 
@@ -1200,7 +1204,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const templateId = parseInt(req.params.templateId);
     await proposalService.deleteTemplate(templateId);
-    res.json({ success: true, message: 'Template deleted successfully' });
+    sendSuccess(res, undefined, 'Template deleted successfully');
   })
 );
 
@@ -1215,7 +1219,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
     const versions = await proposalService.getVersions(proposalId);
-    res.json({ success: true, versions });
+    sendSuccess(res, { versions });
   })
 );
 
@@ -1228,7 +1232,7 @@ router.post(
     const proposalId = parseInt(req.params.id);
     const { notes } = req.body;
     const version = await proposalService.createVersion(proposalId, req.user?.email, notes);
-    res.status(201).json({ success: true, message: 'Version created successfully', version });
+    sendCreated(res, { version }, 'Version created successfully');
   })
 );
 
@@ -1241,7 +1245,7 @@ router.post(
     const proposalId = parseInt(req.params.id);
     const versionId = parseInt(req.params.versionId);
     await proposalService.restoreVersion(proposalId, versionId);
-    res.json({ success: true, message: 'Version restored successfully' });
+    sendSuccess(res, undefined, 'Version restored successfully');
   })
 );
 
@@ -1259,7 +1263,7 @@ router.get(
       parseInt(version1 as string),
       parseInt(version2 as string)
     );
-    res.json({ success: true, comparison });
+    sendSuccess(res, { comparison });
   })
 );
 
@@ -1279,7 +1283,7 @@ router.post(
       return errorResponse(res, 'signerEmail is required', 400, 'VALIDATION_ERROR');
     }
     const request = await proposalService.requestSignature(proposalId, signerEmail, signerName, expiresInDays);
-    res.status(201).json({ success: true, message: 'Signature requested successfully', request });
+    sendCreated(res, { request }, 'Signature requested successfully');
   })
 );
 
@@ -1301,7 +1305,7 @@ router.post(
     signatureData.ipAddress = req.ip;
     signatureData.userAgent = req.get('User-Agent');
     const signature = await proposalService.recordSignature(proposalId, signatureData);
-    res.status(201).json({ success: true, message: 'Proposal signed successfully', signature });
+    sendCreated(res, { signature }, 'Proposal signed successfully');
   })
 );
 
@@ -1312,7 +1316,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
     const status = await proposalService.getSignatureStatus(proposalId);
-    res.json({ success: true, ...status });
+    sendSuccess(res, status);
   })
 );
 
@@ -1327,7 +1331,7 @@ router.get(
     }
     // Mark as viewed
     await proposalService.markSignatureViewed(token);
-    res.json({ success: true, request });
+    sendSuccess(res, { request });
   })
 );
 
@@ -1338,7 +1342,7 @@ router.post(
     const { token } = req.params;
     const { reason } = req.body;
     await proposalService.declineSignature(token, reason);
-    res.json({ success: true, message: 'Signature declined' });
+    sendSuccess(res, undefined, 'Signature declined');
   })
 );
 
@@ -1354,7 +1358,7 @@ router.get(
     const proposalId = parseInt(req.params.id);
     const includeInternal = req.user!.type === 'admin' && req.query.includeInternal === 'true';
     const comments = await proposalService.getComments(proposalId, includeInternal);
-    res.json({ success: true, comments });
+    sendSuccess(res, { comments });
   })
 );
 
@@ -1377,7 +1381,7 @@ router.post(
       isInternal && req.user!.type === 'admin',
       parentCommentId
     );
-    res.status(201).json({ success: true, message: 'Comment added successfully', comment });
+    sendCreated(res, { comment }, 'Comment added successfully');
   })
 );
 
@@ -1389,7 +1393,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const commentId = parseInt(req.params.commentId);
     await proposalService.deleteComment(commentId);
-    res.json({ success: true, message: 'Comment deleted successfully' });
+    sendSuccess(res, undefined, 'Comment deleted successfully');
   })
 );
 
@@ -1406,7 +1410,7 @@ router.get(
     const proposalId = parseInt(req.params.id);
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
     const activities = await proposalService.getActivities(proposalId, limit);
-    res.json({ success: true, activities });
+    sendSuccess(res, { activities });
   })
 );
 
@@ -1416,7 +1420,7 @@ router.post(
   asyncHandler(async (req: Request, res: Response) => {
     const proposalId = parseInt(req.params.id);
     await proposalService.trackView(proposalId, req.ip, req.get('User-Agent'));
-    res.json({ success: true, message: 'View tracked' });
+    sendSuccess(res, undefined, 'View tracked');
   })
 );
 
@@ -1431,7 +1435,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
     const items = await proposalService.getCustomItems(proposalId);
-    res.json({ success: true, items });
+    sendSuccess(res, { items });
   })
 );
 
@@ -1447,7 +1451,7 @@ router.post(
       return errorResponse(res, 'description and unitPrice are required', 400, 'VALIDATION_ERROR');
     }
     const item = await proposalService.addCustomItem(proposalId, req.body);
-    res.status(201).json({ success: true, message: 'Custom item added successfully', item });
+    sendCreated(res, { item }, 'Custom item added successfully');
   })
 );
 
@@ -1459,7 +1463,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const itemId = parseInt(req.params.itemId);
     const item = await proposalService.updateCustomItem(itemId, req.body);
-    res.json({ success: true, message: 'Custom item updated successfully', item });
+    sendSuccess(res, { item }, 'Custom item updated successfully');
   })
 );
 
@@ -1471,7 +1475,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const itemId = parseInt(req.params.itemId);
     await proposalService.deleteCustomItem(itemId);
-    res.json({ success: true, message: 'Custom item deleted successfully' });
+    sendSuccess(res, undefined, 'Custom item deleted successfully');
   })
 );
 
@@ -1494,7 +1498,7 @@ router.post(
       return errorResponse(res, 'type must be percentage or fixed', 400, 'VALIDATION_ERROR');
     }
     await proposalService.applyDiscount(proposalId, type, value, reason);
-    res.json({ success: true, message: 'Discount applied successfully' });
+    sendSuccess(res, undefined, 'Discount applied successfully');
   })
 );
 
@@ -1506,7 +1510,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
     await proposalService.removeDiscount(proposalId);
-    res.json({ success: true, message: 'Discount removed successfully' });
+    sendSuccess(res, undefined, 'Discount removed successfully');
   })
 );
 
@@ -1526,7 +1530,7 @@ router.put(
       return errorResponse(res, 'expirationDate is required', 400, 'VALIDATION_ERROR');
     }
     await proposalService.setExpiration(proposalId, expirationDate);
-    res.json({ success: true, message: 'Expiration date set successfully' });
+    sendSuccess(res, undefined, 'Expiration date set successfully');
   })
 );
 
@@ -1538,7 +1542,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
     await proposalService.markProposalSent(proposalId, req.user!.email);
-    res.json({ success: true, message: 'Proposal marked as sent' });
+    sendSuccess(res, undefined, 'Proposal marked as sent');
   })
 );
 
@@ -1550,7 +1554,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
     const token = await proposalService.generateAccessToken(proposalId);
-    res.json({ success: true, accessToken: token });
+    sendSuccess(res, { accessToken: token });
   })
 );
 
@@ -1565,7 +1569,7 @@ router.get(
     }
     // Track view
     await proposalService.trackView(proposalId, req.ip, req.get('User-Agent'));
-    res.json({ success: true, proposalId });
+    sendSuccess(res, { proposalId });
   })
 );
 
@@ -1576,7 +1580,7 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const count = await proposalService.processExpiredProposals();
-    res.json({ success: true, message: `Processed ${count} expired proposal(s)` });
+    sendSuccess(res, { count }, `Processed ${count} expired proposal(s)`);
   })
 );
 
@@ -1588,7 +1592,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const daysOld = req.query.daysOld ? parseInt(req.query.daysOld as string) : 7;
     const proposalIds = await proposalService.getProposalsDueForReminder(daysOld);
-    res.json({ success: true, proposalIds });
+    sendSuccess(res, { proposalIds });
   })
 );
 
@@ -1600,7 +1604,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
     await proposalService.markReminderSent(proposalId);
-    res.json({ success: true, message: 'Reminder marked as sent' });
+    sendSuccess(res, undefined, 'Reminder marked as sent');
   })
 );
 

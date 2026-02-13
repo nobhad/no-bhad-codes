@@ -38,6 +38,9 @@ interface FileItem {
   is_locked?: boolean;
   locked_by?: string;
   category?: string;
+  shared_with_client?: boolean;
+  shared_at?: string;
+  shared_by?: string;
 }
 
 interface FileVersion {
@@ -190,6 +193,12 @@ function setupEventListeners(): void {
   const deleteBtn = document.getElementById('btn-delete-file');
   if (deleteBtn) {
     deleteBtn.addEventListener('click', deleteCurrentFile);
+  }
+
+  // Share toggle button
+  const shareBtn = document.getElementById('btn-share-file');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', toggleFileSharing);
   }
 
   // Add comment button
@@ -570,6 +579,10 @@ async function loadFileInfo(fileId: number): Promise<void> {
         <span class="file-info-label">Category</span>
         <span class="file-info-value">${file.category || 'Uncategorized'}</span>
       </div>
+      <div class="file-info-item">
+        <span class="file-info-label">Shared with Client</span>
+        <span class="file-info-value">${file.shared_with_client ? `<span class="status-badge status-active">Yes</span> (${formatDateTime(file.shared_at || '')})` : '<span class="status-badge status-inactive">No</span>'}</span>
+      </div>
     `;
 
     // Update lock button state
@@ -579,6 +592,17 @@ async function loadFileInfo(fileId: number): Promise<void> {
         ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>'
         : '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>';
       lockBtn.innerHTML = `${svg} ${file.is_locked ? 'Unlock' : 'Lock'}`;
+    }
+
+    // Update share button state
+    const shareBtn = document.getElementById('btn-share-file');
+    if (shareBtn) {
+      const svg = file.shared_with_client
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
+      shareBtn.innerHTML = `${svg} ${file.shared_with_client ? 'Shared' : 'Share with Client'}`;
+      shareBtn.classList.toggle('btn-success', Boolean(file.shared_with_client));
+      shareBtn.classList.toggle('btn-secondary', !file.shared_with_client);
     }
 
   } catch (error) {
@@ -829,6 +853,38 @@ async function toggleFileLock(): Promise<void> {
   } catch (error) {
     console.error('[AdminFiles] Error toggling lock:', error);
     alertError('Failed to update lock status');
+  }
+}
+
+/**
+ * Toggle file sharing with client
+ */
+async function toggleFileSharing(): Promise<void> {
+  if (!currentFileId) return;
+
+  try {
+    // Check current sharing state from button text
+    const shareBtn = document.getElementById('btn-share-file');
+    const isShared = shareBtn?.textContent?.includes('Shared');
+
+    const endpoint = isShared
+      ? `/api/uploads/${currentFileId}/unshare`
+      : `/api/uploads/${currentFileId}/share`;
+
+    const response = await apiPost(endpoint, {});
+    if (response.ok) {
+      showToast(
+        isShared ? 'File unshared from client' : 'File shared with client',
+        isShared ? 'info' : 'success'
+      );
+      await loadFileInfo(currentFileId);
+      await loadFiles();
+    } else {
+      alertError('Failed to update sharing status');
+    }
+  } catch (error) {
+    console.error('[AdminFiles] Error toggling sharing:', error);
+    alertError('Failed to update sharing status');
   }
 }
 

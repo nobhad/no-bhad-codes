@@ -280,24 +280,17 @@ export interface Invoice {
   terms?: string;
   createdAt?: string;
   updatedAt?: string;
-  // Joined display names
+  // Joined display names (from clients/projects tables)
   clientName?: string;
+  clientEmail?: string;
   projectName?: string;
-  // Business info
+  // Business info (from BUSINESS_INFO constant)
   businessName?: string;
   businessContact?: string;
   businessEmail?: string;
   businessWebsite?: string;
   venmoHandle?: string;
   paypalEmail?: string;
-  // Services fields
-  servicesTitle?: string;
-  servicesDescription?: string;
-  deliverables?: string[];
-  features?: string;
-  // Bill To overrides
-  billToName?: string;
-  billToEmail?: string;
   // Deposit fields
   invoiceType: InvoiceType;
   depositForProjectId?: number;
@@ -317,7 +310,6 @@ export interface Invoice {
   lateFeeAppliedAt?: string;
   // Payment terms
   paymentTermsId?: number;
-  paymentTermsName?: string;
   // Internal
   internalNotes?: string;
   invoicePrefix?: string;
@@ -338,43 +330,35 @@ export interface InvoiceRow {
   paid_date?: string;
   payment_method?: string;
   payment_reference?: string;
-  line_items: string;
   notes?: string;
   terms?: string;
   created_at?: string;
   updated_at?: string;
-  business_name?: string;
-  business_contact?: string;
-  business_email?: string;
-  business_website?: string;
-  venmo_handle?: string;
-  paypal_email?: string;
-  services_title?: string;
-  services_description?: string;
-  deliverables?: string;
-  features?: string;
-  bill_to_name?: string;
-  bill_to_email?: string;
+  // Deposit fields
   invoice_type?: InvoiceType;
   deposit_for_project_id?: number;
   deposit_percentage?: string | number;
+  // Joined fields from clients/projects tables
   company_name?: string;
   contact_name?: string;
   client_email?: string;
   project_name?: string;
   project_description?: string;
+  // Tax and discount
   subtotal?: string | number;
   tax_rate?: string | number;
   tax_amount?: string | number;
   discount_type?: string;
   discount_value?: string | number;
   discount_amount?: string | number;
+  // Late fees
   late_fee_rate?: string | number;
   late_fee_type?: string;
   late_fee_amount?: string | number;
   late_fee_applied_at?: string;
+  // Payment terms
   payment_terms_id?: number;
-  payment_terms_name?: string;
+  // Internal
   internal_notes?: string;
   invoice_prefix?: string;
   invoice_sequence?: number;
@@ -425,16 +409,4 @@ export interface InvoiceCreateData {
   notes?: string;
   terms?: string;
   currency?: string;
-  businessName?: string;
-  businessContact?: string;
-  businessEmail?: string;
-  businessWebsite?: string;
-  venmoHandle?: string;
-  paypalEmail?: string;
-  servicesTitle?: string;
-  servicesDescription?: string;
-  deliverables?: string[];
-  features?: string;
-  billToName?: string;
-  billToEmail?: string;
 }

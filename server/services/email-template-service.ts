@@ -410,13 +410,29 @@ class EmailTemplateService {
   }
 
   /**
+   * Escape HTML special characters to prevent XSS
+   */
+  private escapeHtml(text: string): string {
+    const entities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      '\'': '&#x27;'
+    };
+    return text.replace(/[&<>"']/g, (m) => entities[m] || m);
+  }
+
+  /**
    * Interpolate variables in a template string
    * Supports {{variable.path}} syntax
+   * All interpolated values are HTML-escaped to prevent XSS
    */
   interpolate(template: string, data: Record<string, unknown>): string {
     return template.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
       const value = this.getNestedValue(data, path.trim());
-      return value !== undefined ? String(value) : match;
+      if (value === undefined) return match;
+      return this.escapeHtml(String(value));
     });
   }
 

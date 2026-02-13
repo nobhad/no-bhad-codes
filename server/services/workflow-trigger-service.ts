@@ -59,6 +59,11 @@ export type EventType =
   | 'deliverable.submitted'
   | 'deliverable.approved'
   | 'deliverable.rejected'
+  // Document request events
+  | 'document_request.approved'
+  | 'document_request.rejected'
+  // Questionnaire events
+  | 'questionnaire.completed'
   // Task events
   | 'task.created'
   | 'task.completed'
@@ -361,6 +366,8 @@ class WorkflowTriggerService {
       'proposal.created', 'proposal.sent', 'proposal.accepted', 'proposal.rejected',
       'lead.created', 'lead.converted', 'lead.stage_changed',
       'deliverable.submitted', 'deliverable.approved', 'deliverable.rejected',
+      'document_request.approved', 'document_request.rejected',
+      'questionnaire.completed',
       'task.created', 'task.completed', 'task.overdue'
     ];
   }
@@ -469,17 +476,16 @@ class WorkflowTriggerService {
       ? new Date(Date.now() + config.due_days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       : null;
 
-    // Look up user ID for assignee during transition period
+    // Look up user ID for assignee
     const assigneeUserId = await userService.getUserIdByEmail(config.assignee);
 
     await db.run(
-      `INSERT INTO project_tasks (project_id, title, description, assigned_to, assigned_to_user_id, due_date, status)
-       VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
+      `INSERT INTO project_tasks (project_id, title, description, assigned_to_user_id, due_date, status)
+       VALUES (?, ?, ?, ?, ?, 'pending')`,
       [
         projectId,
         this.interpolate(config.title, context),
         config.description ? this.interpolate(config.description, context) : null,
-        config.assignee || null,
         assigneeUserId,
         dueDate
       ]
@@ -554,7 +560,7 @@ class WorkflowTriggerService {
 
       console.log(`[WorkflowTrigger] Webhook ${config.url} returned ${response.status}`);
     } catch (error) {
-      console.error(`[WorkflowTrigger] Webhook failed:`, error);
+      console.error('[WorkflowTrigger] Webhook failed:', error);
       throw error;
     }
   }

@@ -14,7 +14,8 @@ import { contractService, type ContractStatus } from '../services/contract-servi
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
-import { errorResponse } from '../utils/api-response.js';
+import { sendSuccess, sendCreated, errorResponse } from '../utils/api-response.js';
+import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 
 const router = express.Router();
 
@@ -47,7 +48,7 @@ router.get(
       status
     });
 
-    res.json({ success: true, contracts });
+    sendSuccess(res, { contracts });
   })
 );
 
@@ -75,7 +76,16 @@ router.post(
       expiresAt: expiresAt || null
     });
 
-    res.status(201).json({ success: true, message: 'Contract created successfully', contract });
+    // Emit workflow event for contract creation
+    await workflowTriggerService.emit('contract.created', {
+      entityId: contract.id,
+      triggeredBy: req.user?.email || 'admin',
+      projectId,
+      clientId,
+      templateId
+    });
+
+    sendCreated(res, { contract }, 'Contract created successfully');
   })
 );
 
@@ -87,7 +97,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId);
     const contract = await contractService.getContract(contractId);
-    res.json({ success: true, contract });
+    sendSuccess(res, { contract });
   })
 );
 
@@ -114,7 +124,7 @@ router.get(
       [projectId]
     );
 
-    res.json({ success: true, activity: logs });
+    sendSuccess(res, { activity: logs });
   })
 );
 
@@ -135,7 +145,16 @@ router.post(
     }
 
     const contract = await contractService.createContract(req.body);
-    res.status(201).json({ success: true, message: 'Contract created successfully', contract });
+
+    // Emit workflow event for contract creation
+    await workflowTriggerService.emit('contract.created', {
+      entityId: contract.id,
+      triggeredBy: req.user?.email || 'admin',
+      projectId,
+      clientId
+    });
+
+    sendCreated(res, { contract }, 'Contract created successfully');
   })
 );
 
@@ -152,7 +171,7 @@ router.put(
     }
 
     const contract = await contractService.updateContract(contractId, req.body);
-    res.json({ success: true, message: 'Contract updated successfully', contract });
+    sendSuccess(res, { contract }, 'Contract updated successfully');
   })
 );
 
@@ -244,7 +263,7 @@ router.post(
       [contractId]
     );
 
-    res.json({ success: true, message: 'Reminder sent successfully' });
+    sendSuccess(res, undefined, 'Reminder sent successfully');
   })
 );
 
@@ -277,7 +296,7 @@ router.post(
       [contract.projectId, req.user?.email || 'admin', JSON.stringify({ contractId })]
     );
 
-    res.json({ success: true, message: 'Contract expired', contract });
+    sendSuccess(res, { contract }, 'Contract expired');
   })
 );
 
@@ -301,7 +320,7 @@ router.post(
       parentContractId: original.id
     });
 
-    res.status(201).json({ success: true, message: 'Amendment created', contract: amendment });
+    sendCreated(res, { contract: amendment }, 'Amendment created');
   })
 );
 
@@ -378,7 +397,7 @@ router.post(
       [contract.projectId, req.user?.email || 'admin', JSON.stringify({ contractId })]
     );
 
-    res.json({ success: true, message: 'Renewal reminder sent' });
+    sendSuccess(res, undefined, 'Renewal reminder sent');
   })
 );
 
@@ -390,7 +409,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId);
     const contract = await contractService.updateContract(contractId, { status: 'cancelled' });
-    res.json({ success: true, message: 'Contract cancelled successfully', contract });
+    sendSuccess(res, { contract }, 'Contract cancelled successfully');
   })
 );
 
@@ -411,7 +430,7 @@ router.get(
     }
 
     const templates = await contractService.getTemplates(type as string | undefined);
-    res.json({ success: true, templates });
+    sendSuccess(res, { templates });
   })
 );
 
@@ -423,7 +442,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const templateId = parseInt(req.params.templateId);
     const template = await contractService.getTemplate(templateId);
-    res.json({ success: true, template });
+    sendSuccess(res, { template });
   })
 );
 
@@ -444,7 +463,7 @@ router.post(
     }
 
     const template = await contractService.createTemplate(req.body);
-    res.status(201).json({ success: true, message: 'Template created successfully', template });
+    sendCreated(res, { template }, 'Template created successfully');
   })
 );
 
@@ -461,7 +480,7 @@ router.put(
     }
 
     const template = await contractService.updateTemplate(templateId, req.body);
-    res.json({ success: true, message: 'Template updated successfully', template });
+    sendSuccess(res, { template }, 'Template updated successfully');
   })
 );
 
@@ -473,7 +492,7 @@ router.delete(
   asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
     const templateId = parseInt(_req.params.templateId);
     await contractService.deleteTemplate(templateId);
-    res.json({ success: true, message: 'Template deleted successfully' });
+    sendSuccess(res, undefined, 'Template deleted successfully');
   })
 );
 

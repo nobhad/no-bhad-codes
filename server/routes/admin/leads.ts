@@ -6,7 +6,7 @@ import { emailService } from '../../services/email-service.js';
 import { errorTracker } from '../../services/error-tracking.js';
 import { getDatabase } from '../../database/init.js';
 import { leadService } from '../../services/lead-service.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -73,8 +73,7 @@ router.get(
         FROM projects
       `);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         leads,
         stats: {
           total: stats?.total || 0,
@@ -140,8 +139,7 @@ router.get(
         FROM contact_submissions
       `);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         submissions,
         stats: {
           total: stats?.total || 0,
@@ -197,10 +195,7 @@ router.put(
 
       await db.run(`UPDATE contact_submissions SET ${updateFields} WHERE id = ?`, values);
 
-      res.json({
-        success: true,
-        message: 'Status updated successfully'
-      });
+      sendSuccess(res, undefined, 'Status updated successfully');
     } catch (error) {
       console.error('Error updating contact submission status:', error);
       errorResponse(res, 'Failed to update status', 500, 'INTERNAL_ERROR');
@@ -319,15 +314,11 @@ router.post(
         [clientId, id]
       );
 
-      res.json({
-        success: true,
-        message: existingClient
-          ? 'Contact linked to existing client'
-          : 'Contact converted to client successfully',
+      sendSuccess(res, {
         clientId,
         isExisting: !!existingClient,
         invitationSent: sendInvitation && !existingClient
-      });
+      }, existingClient ? 'Contact linked to existing client' : 'Contact converted to client successfully');
     } catch (error) {
       console.error('Error converting contact to client:', error);
       errorResponse(res, 'Failed to convert contact to client', 500, 'INTERNAL_ERROR');
@@ -411,14 +402,12 @@ router.put(
         );
       }
 
-      res.json({
-        success: true,
-        message: 'Lead status updated successfully',
+      sendSuccess(res, {
         previousStatus: project.status,
         newStatus: status,
         cancelledBy: status === 'cancelled' ? cancelled_by : null,
         cancellationReason: status === 'cancelled' ? cancellation_reason : null
-      });
+      }, 'Lead status updated successfully');
     } catch (error) {
       console.error('Error updating lead status:', error);
       errorResponse(res, 'Failed to update lead status', 500, 'INTERNAL_ERROR');
@@ -600,13 +589,11 @@ No Bhad Codes Team
         extra: { leadId: id, clientEmail: leadEmail }
       });
 
-      res.json({
-        success: true,
-        message: 'Invitation sent successfully',
+      sendSuccess(res, {
         clientId,
         email: leadEmail,
         emailResult
-      });
+      }, 'Invitation sent successfully');
     } catch (error) {
       console.error('Error inviting lead:', error);
       errorResponse(res, 'Failed to send invitation', 500, 'INTERNAL_ERROR');
@@ -658,11 +645,7 @@ router.post(
         extra: { leadId: id, projectName: lead.project_name }
       });
 
-      res.json({
-        success: true,
-        message: 'Lead activated as project successfully',
-        projectId: id
-      });
+      sendSuccess(res, { projectId: id }, 'Lead activated as project successfully');
     } catch (error) {
       console.error('Error activating lead:', error);
       errorResponse(res, 'Failed to activate lead', 500, 'INTERNAL_ERROR');
@@ -684,7 +667,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const includeInactive = req.query.includeInactive === 'true';
     const rules = await leadService.getScoringRules(includeInactive);
-    res.json({ success: true, rules });
+    sendSuccess(res, { rules });
   })
 );
 
@@ -717,7 +700,7 @@ router.post(
       isActive
     });
 
-    res.status(201).json({ success: true, rule });
+    sendCreated(res, { rule });
   })
 );
 
@@ -731,7 +714,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const ruleId = parseInt(req.params.id);
     const rule = await leadService.updateScoringRule(ruleId, req.body);
-    res.json({ success: true, rule });
+    sendSuccess(res, { rule });
   })
 );
 
@@ -745,7 +728,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const ruleId = parseInt(req.params.id);
     await leadService.deleteScoringRule(ruleId);
-    res.json({ success: true, message: 'Scoring rule deleted' });
+    sendSuccess(res, undefined, 'Scoring rule deleted');
   })
 );
 
@@ -759,7 +742,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id);
     const result = await leadService.calculateLeadScore(projectId);
-    res.json({ success: true, ...result });
+    sendSuccess(res, result);
   })
 );
 
@@ -772,7 +755,7 @@ router.post(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const count = await leadService.updateAllLeadScores();
-    res.json({ success: true, message: `Recalculated scores for ${count} leads` });
+    sendSuccess(res, { count }, `Recalculated scores for ${count} leads`);
   })
 );
 
@@ -789,7 +772,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const stages = await leadService.getPipelineStages();
-    res.json({ success: true, stages });
+    sendSuccess(res, { stages });
   })
 );
 
@@ -802,7 +785,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const pipeline = await leadService.getPipelineView();
-    res.json({ success: true, ...pipeline });
+    sendSuccess(res, pipeline);
   })
 );
 
@@ -815,7 +798,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const stats = await leadService.getPipelineStats();
-    res.json({ success: true, stats });
+    sendSuccess(res, { stats });
   })
 );
 
@@ -835,7 +818,7 @@ router.post(
     }
 
     await leadService.moveToStage(projectId, stageId);
-    res.json({ success: true, message: 'Lead moved to stage' });
+    sendSuccess(res, undefined, 'Lead moved to stage');
   })
 );
 
@@ -853,7 +836,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id);
     const tasks = await leadService.getTasks(projectId);
-    res.json({ success: true, tasks });
+    sendSuccess(res, { tasks });
   })
 );
 
@@ -883,7 +866,7 @@ router.post(
       reminderAt
     });
 
-    res.status(201).json({ success: true, task });
+    sendCreated(res, { task });
   })
 );
 
@@ -897,7 +880,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const taskId = parseInt(req.params.taskId);
     const task = await leadService.updateTask(taskId, req.body);
-    res.json({ success: true, task });
+    sendSuccess(res, { task });
   })
 );
 
@@ -911,7 +894,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const taskId = parseInt(req.params.taskId);
     const task = await leadService.completeTask(taskId, req.user?.email);
-    res.json({ success: true, task });
+    sendSuccess(res, { task });
   })
 );
 
@@ -924,7 +907,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const tasks = await leadService.getOverdueTasks();
-    res.json({ success: true, tasks });
+    sendSuccess(res, { tasks });
   })
 );
 
@@ -938,7 +921,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const days = req.query.days ? parseInt(req.query.days as string) : 7;
     const tasks = await leadService.getUpcomingTasks(days);
-    res.json({ success: true, tasks });
+    sendSuccess(res, { tasks });
   })
 );
 
@@ -956,7 +939,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id);
     const notes = await leadService.getNotes(projectId);
-    res.json({ success: true, notes });
+    sendSuccess(res, { notes });
   })
 );
 
@@ -976,7 +959,7 @@ router.post(
     }
 
     const note = await leadService.addNote(projectId, req.user?.email || 'admin', content);
-    res.status(201).json({ success: true, note });
+    sendCreated(res, { note });
   })
 );
 
@@ -990,7 +973,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const noteId = parseInt(req.params.noteId);
     const note = await leadService.togglePinNote(noteId);
-    res.json({ success: true, note });
+    sendSuccess(res, { note });
   })
 );
 
@@ -1004,7 +987,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const noteId = parseInt(req.params.noteId);
     await leadService.deleteNote(noteId);
-    res.json({ success: true, message: 'Note deleted' });
+    sendSuccess(res, undefined, 'Note deleted');
   })
 );
 
@@ -1022,7 +1005,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const includeInactive = req.query.includeInactive === 'true';
     const sources = await leadService.getLeadSources(includeInactive);
-    res.json({ success: true, sources });
+    sendSuccess(res, { sources });
   })
 );
 
@@ -1042,7 +1025,7 @@ router.post(
     }
 
     await leadService.setLeadSource(projectId, sourceId);
-    res.json({ success: true, message: 'Lead source updated' });
+    sendSuccess(res, undefined, 'Lead source updated');
   })
 );
 
@@ -1066,7 +1049,7 @@ router.post(
     }
 
     await leadService.assignLead(projectId, assignee);
-    res.json({ success: true, message: 'Lead assigned' });
+    sendSuccess(res, undefined, 'Lead assigned');
   })
 );
 
@@ -1079,7 +1062,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const leads = await leadService.getMyLeads(req.user?.email || '');
-    res.json({ success: true, leads });
+    sendSuccess(res, { leads });
   })
 );
 
@@ -1092,7 +1075,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const leads = await leadService.getUnassignedLeads();
-    res.json({ success: true, leads });
+    sendSuccess(res, { leads });
   })
 );
 
@@ -1110,7 +1093,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id);
     const duplicates = await leadService.findDuplicates(projectId);
-    res.json({ success: true, duplicates });
+    sendSuccess(res, { duplicates });
   })
 );
 
@@ -1123,7 +1106,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const duplicates = await leadService.getAllPendingDuplicates();
-    res.json({ success: true, duplicates });
+    sendSuccess(res, { duplicates });
   })
 );
 
@@ -1143,7 +1126,7 @@ router.post(
     }
 
     await leadService.resolveDuplicate(duplicateId, status, req.user?.email || 'admin');
-    res.json({ success: true, message: 'Duplicate resolved' });
+    sendSuccess(res, undefined, 'Duplicate resolved');
   })
 );
 
@@ -1166,7 +1149,7 @@ router.post(
     }
 
     const count = await leadService.bulkUpdateStatus(projectIds, status);
-    res.json({ success: true, message: `Updated ${count} leads` });
+    sendSuccess(res, { count }, `Updated ${count} leads`);
   })
 );
 
@@ -1185,7 +1168,7 @@ router.post(
     }
 
     const count = await leadService.bulkAssign(projectIds, assignee);
-    res.json({ success: true, message: `Assigned ${count} leads` });
+    sendSuccess(res, { count }, `Assigned ${count} leads`);
   })
 );
 
@@ -1204,7 +1187,7 @@ router.post(
     }
 
     const count = await leadService.bulkMoveToStage(projectIds, stageId);
-    res.json({ success: true, message: `Moved ${count} leads` });
+    sendSuccess(res, { count }, `Moved ${count} leads`);
   })
 );
 
@@ -1221,7 +1204,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const analytics = await leadService.getLeadAnalytics();
-    res.json({ success: true, analytics });
+    sendSuccess(res, { analytics });
   })
 );
 
@@ -1234,7 +1217,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const funnel = await leadService.getConversionFunnel();
-    res.json({ success: true, funnel });
+    sendSuccess(res, { funnel });
   })
 );
 
@@ -1247,7 +1230,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const sources = await leadService.getSourcePerformance();
-    res.json({ success: true, sources });
+    sendSuccess(res, { sources });
   })
 );
 

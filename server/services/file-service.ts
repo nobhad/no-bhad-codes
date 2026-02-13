@@ -668,7 +668,7 @@ class FileService {
   async archiveFile(fileId: number, archivedBy: string): Promise<void> {
     const db = getDatabase();
     await db.run(
-      `UPDATE files SET is_archived = TRUE, archived_at = CURRENT_TIMESTAMP, archived_by = ? WHERE id = ?`,
+      'UPDATE files SET is_archived = TRUE, archived_at = CURRENT_TIMESTAMP, archived_by = ? WHERE id = ?',
       [archivedBy, fileId]
     );
   }
@@ -679,7 +679,7 @@ class FileService {
   async restoreFile(fileId: number): Promise<void> {
     const db = getDatabase();
     await db.run(
-      `UPDATE files SET is_archived = FALSE, archived_at = NULL, archived_by = NULL WHERE id = ?`,
+      'UPDATE files SET is_archived = FALSE, archived_at = NULL, archived_by = NULL WHERE id = ?',
       [fileId]
     );
   }
@@ -690,7 +690,7 @@ class FileService {
   async getArchivedFiles(projectId: number): Promise<any[]> {
     const db = getDatabase();
     return db.all(
-      `SELECT * FROM files WHERE project_id = ? AND is_archived = TRUE ORDER BY archived_at DESC`,
+      'SELECT * FROM files WHERE project_id = ? AND is_archived = TRUE ORDER BY archived_at DESC',
       [projectId]
     );
   }
@@ -752,7 +752,7 @@ class FileService {
     }
 
     await db.run(
-      `UPDATE files SET is_locked = TRUE, locked_by = ?, locked_at = CURRENT_TIMESTAMP WHERE id = ?`,
+      'UPDATE files SET is_locked = TRUE, locked_by = ?, locked_at = CURRENT_TIMESTAMP WHERE id = ?',
       [lockedBy, fileId]
     );
   }
@@ -769,7 +769,7 @@ class FileService {
     }
 
     await db.run(
-      `UPDATE files SET is_locked = FALSE, locked_by = NULL, locked_at = NULL WHERE id = ?`,
+      'UPDATE files SET is_locked = FALSE, locked_by = NULL, locked_at = NULL WHERE id = ?',
       [fileId]
     );
   }
@@ -792,7 +792,7 @@ class FileService {
   async getFilesByCategory(projectId: number, category: FileCategory): Promise<any[]> {
     const db = getDatabase();
     return db.all(
-      `SELECT * FROM files WHERE project_id = ? AND category = ? AND is_archived = FALSE ORDER BY created_at DESC`,
+      'SELECT * FROM files WHERE project_id = ? AND category = ? AND is_archived = FALSE ORDER BY created_at DESC',
       [projectId, category]
     );
   }
@@ -821,7 +821,7 @@ class FileService {
 
     // Get by category
     const categoryStats = await db.all(
-      `SELECT category, COUNT(*) as count FROM files WHERE project_id = ? AND is_archived = FALSE GROUP BY category`,
+      'SELECT category, COUNT(*) as count FROM files WHERE project_id = ? AND is_archived = FALSE GROUP BY category',
       [projectId]
     );
     const byCategory: Record<string, number> = {};
@@ -831,7 +831,7 @@ class FileService {
 
     // Get by type
     const typeStats = await db.all(
-      `SELECT file_type, COUNT(*) as count FROM files WHERE project_id = ? AND is_archived = FALSE GROUP BY file_type`,
+      'SELECT file_type, COUNT(*) as count FROM files WHERE project_id = ? AND is_archived = FALSE GROUP BY file_type',
       [projectId]
     );
     const byType: Record<string, number> = {};
@@ -889,7 +889,7 @@ class FileService {
       params.push(options.category);
     }
 
-    sql += ` ORDER BY f.created_at DESC LIMIT ?`;
+    sql += ' ORDER BY f.created_at DESC LIMIT ?';
     params.push(options.limit || 50);
 
     return db.all(sql, params);
@@ -926,7 +926,7 @@ class FileService {
     if (!workflow) {
       // Create new workflow
       const result = await db.run(
-        `INSERT INTO deliverable_workflows (file_id, project_id, status) VALUES (?, ?, 'draft')`,
+        'INSERT INTO deliverable_workflows (file_id, project_id, status) VALUES (?, ?, \'draft\')',
         [fileId, projectId]
       );
       workflow = await db.get(
@@ -1247,6 +1247,63 @@ class FileService {
     }
 
     return result;
+  }
+
+  // ============================================
+  // DELIVERABLE ARCHIVE METHODS
+  // ============================================
+
+  /**
+   * Create a file entry from an approved deliverable
+   * Used when a deliverable is locked/approved to archive it to the Files tab
+   */
+  async createFileFromDeliverable(options: {
+    projectId: number;
+    deliverableId: number;
+    deliverableTitle: string;
+    filePath: string;
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+    uploadedBy: string;
+  }): Promise<{ id: number; project_id: number; [key: string]: unknown }> {
+    const db = getDatabase();
+
+    // Determine file type category based on mime type
+    let fileTypeCategory = 'document';
+    if (options.fileType.startsWith('image/')) {
+      fileTypeCategory = 'image';
+    } else if (options.fileType.startsWith('video/')) {
+      fileTypeCategory = 'video';
+    } else if (options.fileType.includes('zip') || options.fileType.includes('archive')) {
+      fileTypeCategory = 'archive';
+    }
+
+    // Create the file entry with category 'deliverable' and shared with client
+    const result = await db.run(
+      `INSERT INTO files (
+        project_id, filename, original_filename, file_path, file_size, mime_type,
+        file_type, description, uploaded_by, category, shared_with_client, shared_at, shared_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'deliverable', TRUE, CURRENT_TIMESTAMP, ?)`,
+      [
+        options.projectId,
+        options.fileName,
+        options.fileName,
+        options.filePath,
+        options.fileSize,
+        options.fileType,
+        fileTypeCategory,
+        `Approved deliverable: ${options.deliverableTitle}`,
+        options.uploadedBy,
+        options.uploadedBy
+      ]
+    );
+
+    if (!result.lastID) {
+      throw new Error('Failed to create file entry from deliverable');
+    }
+
+    return this.getFileById(result.lastID) as Promise<{ id: number; project_id: number; [key: string]: unknown }>;
   }
 }
 

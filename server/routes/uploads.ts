@@ -11,12 +11,12 @@ import express from 'express';
 import multer from 'multer';
 import { resolve, extname, normalize } from 'path';
 import { existsSync, mkdirSync } from 'fs';
-import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
+import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { getDatabase } from '../database/init.js';
 import { getUploadsDir, getUploadsSubdir, UPLOAD_DIRS, sanitizeFilename } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
-import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -185,11 +185,7 @@ router.post(
       uploadedAt: new Date().toISOString()
     };
 
-    res.status(201).json({
-      success: true,
-      message: 'File uploaded successfully',
-      file: fileInfo
-    });
+    sendCreated(res, { file: fileInfo }, 'File uploaded successfully');
   })
 );
 
@@ -240,9 +236,9 @@ router.post(
     for (const file of req.files as Express.Multer.File[]) {
       // Determine the subdirectory the file was saved to
       const subDir = file.destination.includes('projects') ? 'projects' :
-                     file.destination.includes('avatars') ? 'avatars' :
-                     file.destination.includes('invoices') ? 'invoices' :
-                     file.destination.includes('messages') ? 'messages' : 'general';
+        file.destination.includes('avatars') ? 'avatars' :
+          file.destination.includes('invoices') ? 'invoices' :
+            file.destination.includes('messages') ? 'messages' : 'general';
       const filePath = `uploads/${subDir}/${file.filename}`;
 
       // Save to database
@@ -273,11 +269,7 @@ router.post(
       });
     }
 
-    res.status(201).json({
-      success: true,
-      message: `${uploadedFiles.length} files uploaded successfully`,
-      files: uploadedFiles
-    });
+    sendCreated(res, { files: uploadedFiles }, `${uploadedFiles.length} files uploaded successfully`);
   })
 );
 
@@ -340,11 +332,7 @@ router.post(
       }
     }
 
-    res.status(201).json({
-      success: true,
-      message: 'Avatar uploaded successfully',
-      avatar: avatarInfo
-    });
+    sendCreated(res, { avatar: avatarInfo }, 'Avatar uploaded successfully');
   })
 );
 
@@ -424,11 +412,7 @@ router.post(
       // Non-blocking - file is already uploaded
     }
 
-    res.status(201).json({
-      success: true,
-      message: 'Project file uploaded successfully',
-      file: { ...projectFile, id: fileId ?? projectFile.id }
-    });
+    sendCreated(res, { file: { ...projectFile, id: fileId ?? projectFile.id } }, 'Project file uploaded successfully');
   })
 );
 
@@ -461,15 +445,14 @@ router.get(
     try {
       const db = await getDatabase();
       const files = await db.all(
-        `SELECT id, project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at, description
+        `SELECT id, project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at, description, shared_with_client, shared_at, shared_by
          FROM files
          WHERE project_id = ?
          ORDER BY created_at DESC`,
         [projectId]
       );
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         files: files.map((file: any) => ({
           id: file.id,
           projectId: file.project_id,
@@ -480,7 +463,10 @@ router.get(
           url: file.file_path,
           uploadedBy: file.uploaded_by,
           uploadedAt: file.created_at,
-          description: file.description
+          description: file.description,
+          sharedWithClient: !!file.shared_with_client,
+          sharedAt: file.shared_at,
+          sharedBy: file.shared_by
         }))
       });
     } catch (dbError) {
@@ -521,13 +507,15 @@ router.get(
       const db = await getDatabase();
 
       // Build dynamic query with filters
+      // Clients can see files they uploaded OR files explicitly shared with them
       let query = `
         SELECT f.id, f.project_id, f.filename, f.original_filename, f.mime_type, f.file_size,
                f.file_path, f.uploaded_by, f.created_at, f.file_type, f.category,
+               f.shared_with_client, f.shared_at,
                p.project_name as project_name
         FROM files f
         LEFT JOIN projects p ON f.project_id = p.id
-        WHERE (p.client_id = ? OR f.uploaded_by = ?)
+        WHERE (f.uploaded_by = ? OR (p.client_id = ? AND f.shared_with_client = TRUE))
       `;
       const params: (string | number)[] = [clientId, clientId];
 
@@ -569,8 +557,7 @@ router.get(
         [clientId]
       );
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         files: files.map((file: any) => ({
           id: file.id,
           projectId: file.project_id,
@@ -583,7 +570,9 @@ router.get(
           uploadedBy: file.uploaded_by,
           uploadedAt: file.created_at,
           fileType: file.file_type,
-          category: file.category
+          category: file.category,
+          sharedWithClient: file.shared_with_client,
+          sharedAt: file.shared_at
         })),
         projects: projects.map((p: any) => ({
           id: p.id,
@@ -754,10 +743,7 @@ router.delete(
         console.error('Path traversal attempt detected during delete:', file.file_path);
       }
 
-      res.json({
-        success: true,
-        message: 'File deleted successfully'
-      });
+      sendSuccess(res, undefined, 'File deleted successfully');
     } catch (dbError) {
       console.error('Failed to delete file:', dbError);
       return errorResponse(res, 'Failed to delete file', 500, 'DB_ERROR');
@@ -777,9 +763,7 @@ router.delete(
  *         description: Upload system is working
  */
 router.get('/test', (req: express.Request, res: express.Response) => {
-  res.json({
-    success: true,
-    message: 'Upload system is operational',
+  sendSuccess(res, {
     timestamp: new Date().toISOString(),
     uploadDir: uploadDir,
     limits: {
@@ -794,7 +778,7 @@ router.get('/test', (req: express.Request, res: express.Response) => {
       'Archives: zip, rar, tar, gz',
       'Code: js, ts, html, css, json, xml'
     ]
-  });
+  }, 'Upload system is operational');
 });
 
 // =====================================================
@@ -829,7 +813,7 @@ router.get(
     const deliverables = await fileService.getProjectDeliverables(projectId, status);
     const stats = await fileService.getDeliverableStats(projectId);
 
-    res.json({ deliverables, stats });
+    sendSuccess(res, { deliverables, stats });
   })
 );
 
@@ -850,7 +834,7 @@ router.get(
     }
 
     const deliverables = await fileService.getPendingReviewDeliverables();
-    res.json({ deliverables });
+    sendSuccess(res, { deliverables });
   })
 );
 
@@ -880,7 +864,7 @@ router.get(
     const comments = await fileService.getReviewComments(fileId);
     const history = await fileService.getDeliverableHistory(fileId);
 
-    res.json({ workflow, comments, history });
+    sendSuccess(res, { workflow, comments, history });
   })
 );
 
@@ -910,11 +894,7 @@ router.post(
     const submittedBy = req.user?.email || 'unknown';
     const workflow = await fileService.submitForReview(fileId, submittedBy, notes);
 
-    res.json({
-      success: true,
-      message: 'Deliverable submitted for review',
-      workflow
-    });
+    sendSuccess(res, { workflow }, 'Deliverable submitted for review');
   })
 );
 
@@ -943,11 +923,7 @@ router.post(
     const reviewerEmail = req.user?.email || 'admin';
     const workflow = await fileService.startReview(fileId, reviewerEmail);
 
-    res.json({
-      success: true,
-      message: 'Review started',
-      workflow
-    });
+    sendSuccess(res, { workflow }, 'Review started');
   })
 );
 
@@ -981,11 +957,7 @@ router.post(
     const reviewerEmail = req.user?.email || 'admin';
     const workflow = await fileService.requestChanges(fileId, reviewerEmail, feedback);
 
-    res.json({
-      success: true,
-      message: 'Changes requested',
-      workflow
-    });
+    sendSuccess(res, { workflow }, 'Changes requested');
   })
 );
 
@@ -1015,11 +987,7 @@ router.post(
     const approverEmail = req.user?.email || 'admin';
     const workflow = await fileService.approveDeliverable(fileId, approverEmail, comment);
 
-    res.json({
-      success: true,
-      message: 'Deliverable approved',
-      workflow
-    });
+    sendSuccess(res, { workflow }, 'Deliverable approved');
   })
 );
 
@@ -1053,11 +1021,7 @@ router.post(
     const reviewerEmail = req.user?.email || 'admin';
     const workflow = await fileService.rejectDeliverable(fileId, reviewerEmail, reason);
 
-    res.json({
-      success: true,
-      message: 'Deliverable rejected',
-      workflow
-    });
+    sendSuccess(res, { workflow }, 'Deliverable rejected');
   })
 );
 
@@ -1083,11 +1047,7 @@ router.post(
     const submittedBy = req.user?.email || 'unknown';
     const workflow = await fileService.resubmitDeliverable(fileId, submittedBy, notes);
 
-    res.json({
-      success: true,
-      message: 'Deliverable resubmitted for review',
-      workflow
-    });
+    sendSuccess(res, { workflow }, 'Deliverable resubmitted for review');
   })
 );
 
@@ -1129,11 +1089,97 @@ router.post(
       'feedback'
     );
 
-    res.json({
-      success: true,
-      message: 'Comment added',
-      comment: newComment
-    });
+    sendSuccess(res, { comment: newComment }, 'Comment added');
+  })
+);
+
+// ===================================
+// FILE SHARING ENDPOINTS
+// ===================================
+
+/**
+ * @swagger
+ * /api/uploads/{id}/share:
+ *   post:
+ *     tags:
+ *       - Uploads
+ *     summary: Share a file with the client (admin only)
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post(
+  '/:id/share',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const fileId = parseInt(req.params.id);
+
+    if (isNaN(fileId)) {
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+    }
+
+    const db = getDatabase();
+
+    // Verify file exists
+    const file = await db.get('SELECT id, project_id FROM files WHERE id = ?', [fileId]);
+    if (!file) {
+      return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
+    }
+
+    // Share the file with the client
+    await db.run(
+      `UPDATE files
+       SET shared_with_client = TRUE,
+           shared_at = datetime('now'),
+           shared_by = ?
+       WHERE id = ?`,
+      [req.user?.email || 'admin', fileId]
+    );
+
+    sendSuccess(res, undefined, 'File shared with client successfully');
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/{id}/unshare:
+ *   post:
+ *     tags:
+ *       - Uploads
+ *     summary: Revoke client access to a file (admin only)
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post(
+  '/:id/unshare',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const fileId = parseInt(req.params.id);
+
+    if (isNaN(fileId)) {
+      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+    }
+
+    const db = getDatabase();
+
+    // Verify file exists
+    const file = await db.get('SELECT id FROM files WHERE id = ?', [fileId]);
+    if (!file) {
+      return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
+    }
+
+    // Revoke client access
+    await db.run(
+      `UPDATE files
+       SET shared_with_client = FALSE,
+           shared_at = NULL,
+           shared_by = NULL
+       WHERE id = ?`,
+      [fileId]
+    );
+
+    sendSuccess(res, undefined, 'File access revoked successfully');
   })
 );
 

@@ -88,7 +88,8 @@ export async function loadDeletedItems(ctx: AdminDashboardContext): Promise<void
     const response = await apiFetch('/api/admin/deleted-items');
 
     if (response.ok) {
-      const data: DeletedItemsResponse = await response.json();
+      const json = await response.json();
+      const data: DeletedItemsResponse = json.data ?? json;
       deletedItems = data.items || [];
       updateDeletedItemsDisplay(data, ctx);
     } else if (response.status !== 401) {

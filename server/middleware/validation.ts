@@ -30,7 +30,7 @@ export interface ValidationResult {
 }
 
 // Validation rule types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export type ValidationRule = {
   type: 'required' | 'email' | 'string' | 'number' | 'boolean' | 'array' | 'object' | 'custom';
   minLength?: number;
@@ -39,9 +39,9 @@ export type ValidationRule = {
   max?: number;
   pattern?: RegExp;
   // Using any for customValidator to allow strongly-typed validators from calling code
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   customValidator?: (value: any) => boolean | string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   customSanitizer?: (value: any) => unknown;
   allowedValues?: unknown[];
   description?: string;
@@ -771,5 +771,68 @@ export const ValidationSchemas = {
     sortBy: { type: 'string' as const, maxLength: 50 },
     sortOrder: { type: 'string' as const, allowedValues: ['asc', 'desc'] },
     search: { type: 'string' as const, maxLength: 200 }
+  },
+
+  // Intake form submission - matches actual form field names
+  intakeSubmission: {
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 2, maxLength: 100 }
+    ],
+    email: [{ type: 'required' as const }, { type: 'email' as const }],
+    projectFor: {
+      type: 'string' as const,
+      allowedValues: ['personal', 'business']
+    },
+    companyName: { type: 'string' as const, maxLength: 200 },
+    projectType: [
+      { type: 'required' as const },
+      {
+        type: 'string' as const,
+        allowedValues: [
+          'simple-site',
+          'business-site',
+          'portfolio',
+          'e-commerce',
+          'ecommerce',
+          'web-app',
+          'browser-extension',
+          'other'
+        ]
+      }
+    ],
+    projectDescription: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 10, maxLength: 5000 }
+    ],
+    timeline: [
+      { type: 'required' as const },
+      {
+        type: 'string' as const,
+        allowedValues: ['asap', '1-month', '1-3-months', '3-6-months', 'flexible']
+      }
+    ],
+    budget: [
+      { type: 'required' as const },
+      {
+        type: 'string' as const,
+        allowedValues: ['under-1k', 'under-2k', '1k-3k', '2k-5k', '3k-5k', '5k-10k', '10k-plus', '10k+', 'discuss']
+      }
+    ],
+    techComfort: {
+      type: 'string' as const,
+      allowedValues: ['beginner', 'comfortable', 'technical']
+    },
+    domainHosting: {
+      type: 'string' as const,
+      allowedValues: ['need-both', 'have-domain', 'have-both', 'not-sure']
+    },
+    features: { type: 'array' as const, maxLength: 20 },
+    designLevel: {
+      type: 'string' as const,
+      allowedValues: ['basic', 'professional', 'premium', 'custom']
+    },
+    additionalInfo: { type: 'string' as const, maxLength: 5000 },
+    proposalSelection: { type: 'object' as const }
   }
 };
