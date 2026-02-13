@@ -237,7 +237,7 @@ class MessageService {
 
     // Update message mention count
     await db.run(
-      'UPDATE general_messages SET mention_count = ? WHERE id = ?',
+      'UPDATE messages SET mention_count = ? WHERE id = ?',
       [mentions.length, messageId]
     );
 
@@ -262,13 +262,13 @@ class MessageService {
   async getMyMentions(userEmail: string, limit = 50): Promise<MessageWithDetails[]> {
     const db = getDatabase();
     const rows = await db.all(
-      `SELECT gm.*, mt.subject as thread_subject
-       FROM general_messages gm
-       JOIN message_mentions mm ON gm.id = mm.message_id
-       JOIN message_threads mt ON gm.thread_id = mt.id
+      `SELECT m.*, mt.subject as thread_subject
+       FROM messages m
+       JOIN message_mentions mm ON m.id = mm.message_id
+       JOIN message_threads mt ON m.thread_id = mt.id
        WHERE (mm.mentioned_type = 'all' OR mm.mentioned_id = ?)
-         AND gm.deleted_at IS NULL
-       ORDER BY gm.created_at DESC
+         AND m.deleted_at IS NULL
+       ORDER BY m.created_at DESC
        LIMIT ?`,
       [userEmail, limit]
     );
@@ -316,7 +316,7 @@ class MessageService {
 
     // Update message reaction count
     await db.run(
-      'UPDATE general_messages SET reaction_count = reaction_count + 1 WHERE id = ?',
+      'UPDATE messages SET reaction_count = reaction_count + 1 WHERE id = ?',
       [messageId]
     );
 
@@ -338,7 +338,7 @@ class MessageService {
     if (result.changes && result.changes > 0) {
       // Update message reaction count
       await db.run(
-        'UPDATE general_messages SET reaction_count = reaction_count - 1 WHERE id = ?',
+        'UPDATE messages SET reaction_count = reaction_count - 1 WHERE id = ?',
         [messageId]
       );
     }
@@ -501,14 +501,14 @@ class MessageService {
     }
 
     switch (notificationType) {
-      case 'all':
-        return sub.notifyAll;
-      case 'mention':
-        return sub.notifyMentions;
-      case 'reply':
-        return sub.notifyReplies;
-      default:
-        return sub.notifyAll;
+    case 'all':
+      return sub.notifyAll;
+    case 'mention':
+      return sub.notifyMentions;
+    case 'reply':
+      return sub.notifyReplies;
+    default:
+      return sub.notifyAll;
     }
   }
 
@@ -538,9 +538,9 @@ class MessageService {
 
     // Get all unread messages in thread
     const messages = await db.all(
-      `SELECT gm.id FROM general_messages gm
-       LEFT JOIN message_read_receipts mrr ON gm.id = mrr.message_id AND mrr.user_email = ?
-       WHERE gm.thread_id = ? AND mrr.id IS NULL`,
+      `SELECT m.id FROM messages m
+       LEFT JOIN message_read_receipts mrr ON m.id = mrr.message_id AND mrr.user_email = ?
+       WHERE m.thread_id = ? AND mrr.id IS NULL`,
       [userEmail, threadId]
     );
 
@@ -571,14 +571,14 @@ class MessageService {
 
     // Different query based on user type
     const query = userType === 'admin'
-      ? `SELECT COUNT(*) as count FROM general_messages gm
-         LEFT JOIN message_read_receipts mrr ON gm.id = mrr.message_id AND mrr.user_email = ?
-         WHERE gm.sender_type != 'admin' AND gm.deleted_at IS NULL AND mrr.id IS NULL`
-      : `SELECT COUNT(*) as count FROM general_messages gm
-         JOIN message_threads mt ON gm.thread_id = mt.id
-         LEFT JOIN message_read_receipts mrr ON gm.id = mrr.message_id AND mrr.user_email = ?
+      ? `SELECT COUNT(*) as count FROM messages m
+         LEFT JOIN message_read_receipts mrr ON m.id = mrr.message_id AND mrr.user_email = ?
+         WHERE m.sender_type != 'admin' AND m.deleted_at IS NULL AND mrr.id IS NULL`
+      : `SELECT COUNT(*) as count FROM messages m
+         JOIN message_threads mt ON m.thread_id = mt.id
+         LEFT JOIN message_read_receipts mrr ON m.id = mrr.message_id AND mrr.user_email = ?
          WHERE mt.client_id = (SELECT id FROM clients WHERE email = ?)
-           AND gm.sender_type != 'client' AND gm.deleted_at IS NULL AND mrr.id IS NULL`;
+           AND m.sender_type != 'client' AND m.deleted_at IS NULL AND mrr.id IS NULL`;
 
     const params = userType === 'admin' ? [userEmail] : [userEmail, userEmail];
     const row = await db.get(query, params);
@@ -598,7 +598,7 @@ class MessageService {
 
     // Verify message belongs to thread
     const message = await db.get(
-      'SELECT id FROM general_messages WHERE id = ? AND thread_id = ?',
+      'SELECT id FROM messages WHERE id = ? AND thread_id = ?',
       [messageId, threadId]
     );
 
@@ -654,9 +654,9 @@ class MessageService {
   async getPinnedMessages(threadId: number): Promise<PinnedMessage[]> {
     const db = getDatabase();
     const rows = await db.all(
-      `SELECT pm.*, gm.sender_name, gm.message, gm.created_at as message_created_at
+      `SELECT pm.*, m.sender_name, m.message, m.created_at as message_created_at
        FROM pinned_messages pm
-       JOIN general_messages gm ON pm.message_id = gm.id
+       JOIN messages m ON pm.message_id = m.id
        WHERE pm.thread_id = ?
        ORDER BY pm.pinned_at DESC`,
       [threadId]
@@ -685,7 +685,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      `UPDATE general_messages SET message = ?, edited_at = datetime('now') WHERE id = ?`,
+      'UPDATE messages SET message = ?, edited_at = datetime(\'now\') WHERE id = ?',
       [newContent, messageId]
     );
 
@@ -701,7 +701,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      `UPDATE general_messages SET deleted_at = datetime('now'), deleted_by = ? WHERE id = ?`,
+      'UPDATE messages SET deleted_at = datetime(\'now\'), deleted_by = ? WHERE id = ?',
       [deletedBy, messageId]
     );
   }
@@ -713,7 +713,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      `UPDATE general_messages SET deleted_at = NULL, deleted_by = NULL WHERE id = ?`,
+      'UPDATE messages SET deleted_at = NULL, deleted_by = NULL WHERE id = ?',
       [messageId]
     );
   }
@@ -729,7 +729,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      `UPDATE message_threads SET archived_at = datetime('now'), archived_by = ?, status = 'archived' WHERE id = ?`,
+      'UPDATE message_threads SET archived_at = datetime(\'now\'), archived_by = ?, status = \'archived\' WHERE id = ?',
       [archivedBy, threadId]
     );
   }
@@ -741,7 +741,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      `UPDATE message_threads SET archived_at = NULL, archived_by = NULL, status = 'active' WHERE id = ?`,
+      'UPDATE message_threads SET archived_at = NULL, archived_by = NULL, status = \'active\' WHERE id = ?',
       [threadId]
     );
   }
@@ -753,8 +753,8 @@ class MessageService {
     const db = getDatabase();
 
     const query = parentMessageId
-      ? `SELECT * FROM general_messages WHERE thread_id = ? AND parent_message_id = ? AND deleted_at IS NULL ORDER BY created_at ASC`
-      : `SELECT * FROM general_messages WHERE thread_id = ? AND parent_message_id IS NULL AND deleted_at IS NULL ORDER BY created_at ASC`;
+      ? 'SELECT * FROM messages WHERE thread_id = ? AND parent_message_id = ? AND deleted_at IS NULL ORDER BY created_at ASC'
+      : 'SELECT * FROM messages WHERE thread_id = ? AND parent_message_id IS NULL AND deleted_at IS NULL ORDER BY created_at ASC';
 
     const params = parentMessageId ? [threadId, parentMessageId] : [threadId];
     const rows = await db.all(query, params);
@@ -779,13 +779,13 @@ class MessageService {
     const db = getDatabase();
 
     let sql = `
-      SELECT gm.id as message_id, gm.thread_id, mt.subject as thread_subject,
-             gm.sender_name, gm.message, gm.created_at,
+      SELECT m.id as message_id, m.thread_id, mt.subject as thread_subject,
+             m.sender_name, m.message, m.created_at,
              mt.project_id, p.project_name
-      FROM general_messages gm
-      JOIN message_threads mt ON gm.thread_id = mt.id
+      FROM messages m
+      JOIN message_threads mt ON m.thread_id = mt.id
       LEFT JOIN projects p ON mt.project_id = p.id
-      WHERE gm.message LIKE ? AND gm.deleted_at IS NULL
+      WHERE m.message LIKE ? AND m.deleted_at IS NULL
     `;
 
     const params: (string | number)[] = [`%${query}%`];
@@ -796,16 +796,16 @@ class MessageService {
     }
 
     if (options?.threadId) {
-      sql += ' AND gm.thread_id = ?';
+      sql += ' AND m.thread_id = ?';
       params.push(options.threadId);
     }
 
     // Filter out internal messages unless includeInternal is true
     if (!options?.includeInternal) {
-      sql += ' AND (gm.is_internal IS NULL OR gm.is_internal = 0)';
+      sql += ' AND (m.is_internal IS NULL OR m.is_internal = 0)';
     }
 
-    sql += ` ORDER BY gm.created_at DESC LIMIT ?`;
+    sql += ' ORDER BY m.created_at DESC LIMIT ?';
     params.push(options?.limit || 50);
 
     const rows = await db.all(sql, params);
@@ -856,7 +856,7 @@ class MessageService {
   async getSubscription(projectId: number, userEmail: string): Promise<Subscription | null> {
     const db = getDatabase();
     const row = await db.get(
-      `SELECT * FROM message_subscriptions WHERE project_id = ? AND user_email = ?`,
+      'SELECT * FROM message_subscriptions WHERE project_id = ? AND user_email = ?',
       [projectId, userEmail]
     );
 
@@ -894,11 +894,11 @@ class MessageService {
     const db = getDatabase();
     const result = await db.get(`
       SELECT COUNT(*) as count
-      FROM general_messages gm
+      FROM messages m
       LEFT JOIN message_read_receipts mrr
-        ON gm.id = mrr.message_id AND mrr.user_email = ?
-      WHERE gm.thread_id = ?
-        AND gm.deleted_at IS NULL
+        ON m.id = mrr.message_id AND mrr.user_email = ?
+      WHERE m.thread_id = ?
+        AND m.deleted_at IS NULL
         AND mrr.id IS NULL
     `, [userEmail, threadId]);
 

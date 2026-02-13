@@ -21,6 +21,9 @@ import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/upload
 import { getString, getNumber } from '../database/row-helpers.js';
 import { userService } from '../services/user-service.js';
 import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { rateLimiters } from '../middleware/rate-limiter.js';
+import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -186,321 +189,305 @@ interface ProjectStatusResponse {
  * POST /api/intake
  * Process client intake form submission
  */
-router.post('/', async (req: Request, res: Response) => {
-  try {
-    console.log('Received intake form submission:', req.body);
+router.post(
+  '/',
+  rateLimiters.publicForm,
+  validateRequest(ValidationSchemas.intakeSubmission),
+  async (req: Request, res: Response) => {
+    try {
+      console.log('Received intake form submission:', req.body);
 
-    // Validate required fields
-    const requiredFields = [
-      'name',
-      'email',
-      'projectType',
-      'projectDescription',
-      'timeline',
-      'budget'
-    ];
-    const missingFields = requiredFields.filter((field) => !req.body[field]);
+      const intakeData: IntakeFormData = req.body;
 
-    if (missingFields.length > 0) {
-      return errorResponseWithPayload(
-        res,
-        'Missing required fields',
-        400,
-        'VALIDATION_ERROR',
-        { missingFields }
-      );
-    }
+      // Get database and run everything in a transaction
+      const db = getDatabase();
 
-    const intakeData: IntakeFormData = req.body;
+      // Process features array outside transaction
+      const features = Array.isArray(intakeData.features)
+        ? intakeData.features
+        : [intakeData.features].filter(Boolean);
 
-    // Get database and run everything in a transaction
-    const db = getDatabase();
+      // Determine client type and company name
+      const clientType: 'personal' | 'business' = intakeData.projectFor === 'personal' ? 'personal' : 'business';
+      const companyName = clientType === 'personal'
+        ? null  // Personal clients don't have a company name
+        : (intakeData.companyName || intakeData.name);
 
-    // Process features array outside transaction
-    const features = Array.isArray(intakeData.features)
-      ? intakeData.features
-      : [intakeData.features].filter(Boolean);
+      // Generate password hash outside transaction
+      const hashedPassword = await bcrypt.hash(generateRandomPassword(), 10);
 
-    // Determine client type and company name
-    const clientType: 'personal' | 'business' = intakeData.projectFor === 'personal' ? 'personal' : 'business';
-    const companyName = clientType === 'personal'
-      ? null  // Personal clients don't have a company name
-      : (intakeData.companyName || intakeData.name);
-
-    // Generate password hash outside transaction
-    const hashedPassword = await bcrypt.hash(generateRandomPassword(), 10);
-
-    // Execute database operations in a transaction
-    const result = await db.transaction(async (ctx) => {
+      // Execute database operations in a transaction
+      const result = await db.transaction(async (ctx) => {
       // Check if client with this email already exists
-      const existingClient = (await ctx.get('SELECT id, email FROM clients WHERE email = ?', [
-        intakeData.email
-      ])) as ExistingClient | undefined;
+        const existingClient = (await ctx.get('SELECT id, email FROM clients WHERE email = ?', [
+          intakeData.email
+        ])) as ExistingClient | undefined;
 
-      let clientId: number;
-      const isNewClient = !existingClient;
+        let clientId: number;
+        const isNewClient = !existingClient;
 
-      if (existingClient) {
-        clientId = getNumber(existingClient as unknown as { [key: string]: unknown }, 'id');
-        console.log(`Existing client found: ${clientId}`);
-      } else {
+        if (existingClient) {
+          clientId = getNumber(existingClient as unknown as { [key: string]: unknown }, 'id');
+          console.log(`Existing client found: ${clientId}`);
+        } else {
         // Create new client account
-        const clientResult = await ctx.run(
-          `
+          const clientResult = await ctx.run(
+            `
           INSERT INTO clients (
             company_name, contact_name, email, phone,
             password_hash, status, client_type, created_at, updated_at
           ) VALUES (?, ?, ?, ?, ?, 'pending', ?, datetime('now'), datetime('now'))
         `,
-          [companyName, intakeData.name, intakeData.email, '', hashedPassword, clientType]
-        );
+            [companyName, intakeData.name, intakeData.email, '', hashedPassword, clientType]
+          );
 
-        clientId = clientResult.lastID!;
-        console.log(`New client created: ${clientId}`);
-      }
+          clientId = clientResult.lastID!;
+          console.log(`New client created: ${clientId}`);
+        }
 
-      // Create project record
-      const extraNotes: string[] = [];
-      if (features.length) {
-        extraNotes.push(`Features: ${features.join(', ')}`);
-      }
-      if (intakeData.designLevel) {
-        extraNotes.push(`Design level: ${intakeData.designLevel}`);
-      }
-      if (intakeData.techComfort) {
-        extraNotes.push(`Tech comfort: ${intakeData.techComfort}`);
-      }
-      if (intakeData.domainHosting) {
-        extraNotes.push(`Domain/hosting: ${intakeData.domainHosting}`);
-      }
-      if (intakeData.additionalInfo) {
-        extraNotes.push(`Additional info: ${intakeData.additionalInfo}`);
-      }
-      const notes = extraNotes.length ? extraNotes.join('\n') : null;
+        // Create project record
+        const extraNotes: string[] = [];
+        if (features.length) {
+          extraNotes.push(`Features: ${features.join(', ')}`);
+        }
+        if (intakeData.designLevel) {
+          extraNotes.push(`Design level: ${intakeData.designLevel}`);
+        }
+        if (intakeData.techComfort) {
+          extraNotes.push(`Tech comfort: ${intakeData.techComfort}`);
+        }
+        if (intakeData.domainHosting) {
+          extraNotes.push(`Domain/hosting: ${intakeData.domainHosting}`);
+        }
+        if (intakeData.additionalInfo) {
+          extraNotes.push(`Additional info: ${intakeData.additionalInfo}`);
+        }
+        const notes = extraNotes.length ? extraNotes.join('\n') : null;
 
-      const projectResult = await ctx.run(
-        `
+        const projectResult = await ctx.run(
+          `
         INSERT INTO projects (
           client_id, project_name, description, status, priority,
-          project_type, budget_range, timeline, notes,
+          project_type, budget_range, timeline, notes, source_type,
           created_at, updated_at
-        ) VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, datetime('now'), datetime('now'))
+        ) VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, 'intake_form', datetime('now'), datetime('now'))
       `,
-        [
-          clientId,
-          generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name),
-          intakeData.projectDescription,
-          intakeData.projectType,
-          intakeData.budget,
-          intakeData.timeline,
-          notes
-        ]
-      );
+          [
+            clientId,
+            generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name),
+            intakeData.projectDescription,
+            intakeData.projectType,
+            intakeData.budget,
+            intakeData.timeline,
+            notes
+          ]
+        );
 
-      const projectId = projectResult.lastID!;
-      console.log(`Project created: ${projectId}`);
+        const projectId = projectResult.lastID!;
+        console.log(`Project created: ${projectId}`);
 
-      // Create initial project update
-      const systemUserId = await userService.getUserIdByEmailOrName('system');
-      await ctx.run(
-        `
+        // Create initial project update
+        const systemUserId = await userService.getUserIdByEmailOrName('system');
+        await ctx.run(
+          `
         INSERT INTO project_updates (
           project_id, title, description, update_type, author_user_id, created_at
         ) VALUES (?, ?, ?, 'general', ?, datetime('now'))
       `,
-        [
-          projectId,
-          'Project Intake Received',
-          'Thank you for submitting your project details! We\'re reviewing your requirements and will provide a detailed proposal within 24-48 hours.',
-          systemUserId
-        ]
-      );
-
-      // Auto-generate project milestones based on project type and timeline
-      const milestones = generateProjectMilestones(intakeData.projectType, intakeData.timeline);
-      for (const milestone of milestones) {
-        await ctx.run(
-          `INSERT INTO milestones (project_id, title, description, due_date, deliverables, is_completed, created_at)
-           VALUES (?, ?, ?, ?, ?, 0, datetime('now'))`,
           [
             projectId,
-            milestone.title,
-            milestone.description,
-            milestone.dueDate,
-            JSON.stringify(milestone.deliverables)
+            'Project Intake Received',
+            'Thank you for submitting your project details! We\'re reviewing your requirements and will provide a detailed proposal within 24-48 hours.',
+            systemUserId
           ]
         );
-      }
-      console.log(`Created ${milestones.length} milestones for project ${projectId}`);
 
-      // Create proposal request if provided
-      let proposalRequestId: number | null = null;
-      if (intakeData.proposalSelection) {
-        const proposal = intakeData.proposalSelection;
-        const basePrice = proposal.basePrice ?? proposal.calculatedPrice ?? 0;
-        const subtotal = proposal.subtotal ?? basePrice;
-        const discountType = proposal.discountType || null;
-        const discountValue = proposal.discountValue ?? 0;
-        const taxRate = proposal.taxRate ?? 0;
-        const taxAmount = proposal.taxAmount ?? 0;
-        const expirationDate = proposal.expirationDate || null;
-        let validityDays = 30;
-        if (expirationDate) {
-          const diffMs = new Date(expirationDate).getTime() - Date.now();
-          const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-          if (Number.isFinite(diffDays) && diffDays > 0) {
-            validityDays = diffDays;
-          }
+        // Auto-generate project milestones based on project type and timeline
+        const milestones = generateProjectMilestones(intakeData.projectType, intakeData.timeline);
+        for (const milestone of milestones) {
+          await ctx.run(
+            `INSERT INTO milestones (project_id, title, description, due_date, deliverables, is_completed, created_at)
+           VALUES (?, ?, ?, ?, ?, 0, datetime('now'))`,
+            [
+              projectId,
+              milestone.title,
+              milestone.description,
+              milestone.dueDate,
+              JSON.stringify(milestone.deliverables)
+            ]
+          );
         }
+        console.log(`Created ${milestones.length} milestones for project ${projectId}`);
 
-        const proposalResult = await ctx.run(
-          `INSERT INTO proposal_requests (
+        // Create proposal request if provided
+        let proposalRequestId: number | null = null;
+        if (intakeData.proposalSelection) {
+          const proposal = intakeData.proposalSelection;
+          const basePrice = proposal.basePrice ?? proposal.calculatedPrice ?? 0;
+          const subtotal = proposal.subtotal ?? basePrice;
+          const discountType = proposal.discountType || null;
+          const discountValue = proposal.discountValue ?? 0;
+          const taxRate = proposal.taxRate ?? 0;
+          const taxAmount = proposal.taxAmount ?? 0;
+          const expirationDate = proposal.expirationDate || null;
+          let validityDays = 30;
+          if (expirationDate) {
+            const diffMs = new Date(expirationDate).getTime() - Date.now();
+            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+            if (Number.isFinite(diffDays) && diffDays > 0) {
+              validityDays = diffDays;
+            }
+          }
+
+          const proposalResult = await ctx.run(
+            `INSERT INTO proposal_requests (
             project_id, client_id, project_type, selected_tier,
             base_price, final_price, maintenance_option,
             status, client_notes, created_at,
             subtotal, discount_type, discount_value, tax_rate, tax_amount, expiration_date, validity_days
           ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'), ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            projectId,
-            clientId,
-            intakeData.projectType,
-            proposal.selectedTier || 'better',
-            basePrice,
-            proposal.calculatedPrice || basePrice,
-            proposal.maintenanceOption || null,
-            proposal.notes || null,
-            subtotal,
-            discountType,
-            discountValue,
-            taxRate,
-            taxAmount,
-            expirationDate,
-            validityDays
-          ]
-        );
-        proposalRequestId = proposalResult.lastID!;
-        console.log(`Created proposal request ${proposalRequestId} for project ${projectId}`);
+            [
+              projectId,
+              clientId,
+              intakeData.projectType,
+              proposal.selectedTier || 'better',
+              basePrice,
+              proposal.calculatedPrice || basePrice,
+              proposal.maintenanceOption || null,
+              proposal.notes || null,
+              subtotal,
+              discountType,
+              discountValue,
+              taxRate,
+              taxAmount,
+              expirationDate,
+              validityDays
+            ]
+          );
+          proposalRequestId = proposalResult.lastID!;
+          console.log(`Created proposal request ${proposalRequestId} for project ${projectId}`);
 
-        if (proposal.customItems && proposal.customItems.length > 0) {
-          for (const [index, item] of proposal.customItems.entries()) {
-            await ctx.run(
-              `INSERT INTO proposal_custom_items (
+          if (proposal.customItems && proposal.customItems.length > 0) {
+            for (const [index, item] of proposal.customItems.entries()) {
+              await ctx.run(
+                `INSERT INTO proposal_custom_items (
                 proposal_id, item_type, description, quantity, unit_price,
                 unit_label, is_taxable, is_optional, sort_order, created_at, updated_at
               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-              [
-                proposalRequestId,
-                item.itemType || 'service',
-                item.description,
-                item.quantity ?? 1,
-                item.unitPrice,
-                item.unitLabel || null,
-                item.isTaxable !== false ? 1 : 0,
-                item.isOptional ? 1 : 0,
-                index
-              ]
-            );
+                [
+                  proposalRequestId,
+                  item.itemType || 'service',
+                  item.description,
+                  item.quantity ?? 1,
+                  item.unitPrice,
+                  item.unitLabel || null,
+                  item.isTaxable !== false ? 1 : 0,
+                  item.isOptional ? 1 : 0,
+                  index
+                ]
+              );
+            }
           }
         }
-      }
 
-      return { clientId, projectId, isNewClient, proposalRequestId };
-    });
+        return { clientId, projectId, isNewClient, proposalRequestId };
+      });
 
-    const { clientId, projectId, isNewClient, proposalRequestId } = result;
+      const { clientId, projectId, isNewClient, proposalRequestId } = result;
 
-    // Generate project plan based on intake data (outside transaction)
-    const projectPlan: ProjectPlan = await generateProjectPlan(intakeData, projectId);
+      // Generate project plan based on intake data (outside transaction)
+      const projectPlan: ProjectPlan = await generateProjectPlan(intakeData, projectId);
 
-    // Generate initial invoice (outside transaction)
-    await generateInvoice(intakeData, projectId, clientId);
+      // Generate initial invoice (outside transaction)
+      await generateInvoice(intakeData, projectId, clientId);
 
-    // Save intake form as downloadable file
-    const projectName = generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name);
-    try {
-      await saveIntakeAsFile(intakeData, projectId, projectName);
-    } catch (fileError) {
-      console.error('[Intake] Failed to save intake file:', fileError);
-      // Non-critical error - don't fail the whole request
-    }
-
-    // Generate access token for client portal
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error('JWT_SECRET not configured');
-    }
-    const accessToken = jwt.sign(
-      {
-        clientId,
-        projectId,
-        email: intakeData.email,
-        type: 'client_access'
-      },
-      jwtSecret,
-      { expiresIn: '7d' }
-    );
-
-    // Send notifications (async, don't wait)
-    setTimeout(async () => {
+      // Save intake form as downloadable file
+      const projectName = generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name);
       try {
+        await saveIntakeAsFile(intakeData, projectId, projectName);
+      } catch (fileError) {
+        console.error('[Intake] Failed to save intake file:', fileError);
+      // Non-critical error - don't fail the whole request
+      }
+
+      // Generate access token for client portal
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        throw new Error('JWT_SECRET not configured');
+      }
+      const accessToken = jwt.sign(
+        {
+          clientId,
+          projectId,
+          email: intakeData.email,
+          type: 'client_access'
+        },
+        jwtSecret,
+        { expiresIn: '7d' }
+      );
+
+      // Send notifications (async, don't wait)
+      setTimeout(async () => {
+        try {
         // Send welcome email to client
-        if (isNewClient) {
-          await sendWelcomeEmail(intakeData.email, intakeData.name, accessToken);
+          if (isNewClient) {
+            await sendWelcomeEmail(intakeData.email, intakeData.name, accessToken);
+          }
+
+          // Send new intake notification to admin
+          await sendNewIntakeNotification(intakeData, projectId);
+        } catch (emailError) {
+          console.error('Failed to send emails:', emailError);
         }
+      }, 100);
 
-        // Send new intake notification to admin
-        await sendNewIntakeNotification(intakeData, projectId);
-      } catch (emailError) {
-        console.error('Failed to send emails:', emailError);
-      }
-    }, 100);
-
-    // Return success response
-    res.status(201).json({
-      success: true,
-      message: 'Intake form processed successfully',
-      data: {
-        clientId,
-        projectId,
-        proposalRequestId,
-        projectName: generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name),
-        accessToken,
-        isNewClient,
-        projectPlan: projectPlan.summary,
-        estimatedDelivery: projectPlan.estimatedDelivery,
-        nextSteps: proposalRequestId
-          ? [
-            'Review your proposal in the client portal',
-            'We\'ll finalize your quote within 24-48 hours',
-            'Schedule a call to discuss the details',
-            'Begin project development upon agreement'
-          ]
-          : [
-            'Review your project details in the client portal',
-            'We\'ll send a detailed proposal within 24-48 hours',
-            'Schedule a discovery call to discuss requirements',
-            'Begin project development upon agreement'
-          ]
-      }
-    });
-  } catch (error: unknown) {
-    console.error('Intake processing error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    errorResponseWithPayload(
-      res,
-      'Failed to process intake form',
-      500,
-      'INTERNAL_ERROR',
-      { details: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error' }
-    );
+      // Return success response
+      res.status(201).json({
+        success: true,
+        message: 'Intake form processed successfully',
+        data: {
+          clientId,
+          projectId,
+          proposalRequestId,
+          projectName: generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name),
+          accessToken,
+          isNewClient,
+          projectPlan: projectPlan.summary,
+          estimatedDelivery: projectPlan.estimatedDelivery,
+          nextSteps: proposalRequestId
+            ? [
+              'Review your proposal in the client portal',
+              'We\'ll finalize your quote within 24-48 hours',
+              'Schedule a call to discuss the details',
+              'Begin project development upon agreement'
+            ]
+            : [
+              'Review your project details in the client portal',
+              'We\'ll send a detailed proposal within 24-48 hours',
+              'Schedule a discovery call to discuss requirements',
+              'Begin project development upon agreement'
+            ]
+        }
+      });
+    } catch (error: unknown) {
+      console.error('Intake processing error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      errorResponseWithPayload(
+        res,
+        'Failed to process intake form',
+        500,
+        'INTERNAL_ERROR',
+        { details: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error' }
+      );
+    }
   }
-});
+);
 
 /**
  * GET /api/intake/status/:projectId
- * Get intake processing status
+ * Get intake processing status (requires authentication)
  */
-router.get('/status/:projectId', async (req: Request, res: Response) => {
+router.get('/status/:projectId', authenticateToken, rateLimiters.standard, async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params;
 

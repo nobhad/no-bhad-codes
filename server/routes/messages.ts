@@ -16,7 +16,8 @@ import { cache, invalidateCache } from '../middleware/cache.js';
 import { getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { messageService } from '../services/message-service.js';
-import { errorResponse } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { logger } from '../services/logger.js';
 
 const router = express.Router();
 
@@ -28,9 +29,9 @@ async function canAccessMessage(req: AuthenticatedRequest, messageId: number): P
   const db = getDatabase();
   const row = await db.get(
     `SELECT 1
-     FROM general_messages gm
-     JOIN message_threads mt ON gm.thread_id = mt.id
-     WHERE gm.id = ? AND mt.client_id = ?`,
+     FROM messages m
+     JOIN message_threads mt ON m.thread_id = mt.id
+     WHERE m.id = ? AND mt.client_id = ?`,
     [messageId, req.user?.id]
   );
 
@@ -98,32 +99,32 @@ router.get(
     if (req.user!.type === 'admin') {
       // Admin can see all threads
       query = `
-      SELECT 
+      SELECT
         mt.*,
         c.company_name,
         c.contact_name,
         c.email as client_email,
         p.project_name,
-        COUNT(gm.id) as message_count,
-        COUNT(CASE WHEN gm.read_at IS NULL AND gm.sender_type != 'admin' THEN 1 END) as unread_count
+        COUNT(m.id) as message_count,
+        COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'admin' THEN 1 END) as unread_count
       FROM message_threads mt
       JOIN clients c ON mt.client_id = c.id
       LEFT JOIN projects p ON mt.project_id = p.id
-      LEFT JOIN general_messages gm ON mt.id = gm.thread_id
+      LEFT JOIN messages m ON mt.id = m.thread_id AND m.context_type = 'general'
       GROUP BY mt.id
       ORDER BY mt.last_message_at DESC
     `;
     } else {
       // Client can only see their own threads
       query = `
-      SELECT 
+      SELECT
         mt.*,
         p.project_name,
-        COUNT(gm.id) as message_count,
-        COUNT(CASE WHEN gm.read_at IS NULL AND gm.sender_type != 'client' THEN 1 END) as unread_count
+        COUNT(m.id) as message_count,
+        COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'client' THEN 1 END) as unread_count
       FROM message_threads mt
       LEFT JOIN projects p ON mt.project_id = p.id
-      LEFT JOIN general_messages gm ON mt.id = gm.thread_id
+      LEFT JOIN messages m ON mt.id = m.thread_id AND m.context_type = 'general'
       WHERE mt.client_id = ?
       GROUP BY mt.id
       ORDER BY mt.last_message_at DESC
@@ -133,7 +134,7 @@ router.get(
 
     const threads = await db.all(query, params);
 
-    res.json({ threads });
+    sendSuccess(res, { threads });
   })
 );
 
@@ -185,10 +186,7 @@ router.post(
       [result.lastID]
     );
 
-    res.status(201).json({
-      message: 'Message thread created successfully',
-      thread: newThread
-    });
+    sendCreated(res, { thread: newThread }, 'Message thread created successfully');
   })
 );
 
@@ -247,11 +245,11 @@ router.post(
 
     const result = await db.run(
       `
-    INSERT INTO general_messages (
-      client_id, sender_type, sender_name, subject, message, priority, 
+    INSERT INTO messages (
+      context_type, client_id, sender_type, sender_name, subject, message, priority,
       reply_to, attachments, thread_id
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES ('general', ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
       [
         thread.client_id,
@@ -278,7 +276,7 @@ router.post(
 
     const newMessage = await db.get(
       `
-    SELECT * FROM general_messages WHERE id = ?
+    SELECT * FROM messages WHERE id = ?
   `,
       [result.lastID]
     );
@@ -323,14 +321,14 @@ router.post(
         });
       }
     } catch (emailError) {
-      console.error('Failed to send message notification:', emailError);
+      logger.error('Failed to send message notification', {
+        category: 'email',
+        metadata: { error: emailError, threadId, subject: thread.subject }
+      });
       // Continue - don't fail message sending due to email issues
     }
 
-    res.status(201).json({
-      message: 'Message sent successfully',
-      messageData: newMessage
-    });
+    sendCreated(res, { messageData: newMessage }, 'Message sent successfully');
   })
 );
 
@@ -361,13 +359,13 @@ router.get(
     const messages = await db.all(
       `
     SELECT
-      gm.id, gm.sender_type, gm.sender_name, gm.message, gm.priority, gm.reply_to,
-      gm.attachments, gm.read_at, gm.created_at, gm.updated_at,
+      m.id, m.sender_type, m.sender_name, m.message, m.priority, m.reply_to,
+      m.attachments, m.read_at, m.created_at, m.updated_at,
       CASE WHEN pm.id IS NOT NULL THEN 1 ELSE 0 END as is_pinned
-    FROM general_messages gm
-    LEFT JOIN pinned_messages pm ON gm.id = pm.message_id AND pm.thread_id = ?
-    WHERE gm.thread_id = ?
-    ORDER BY gm.created_at ASC
+    FROM messages m
+    LEFT JOIN pinned_messages pm ON m.id = pm.message_id AND pm.thread_id = ?
+    WHERE m.thread_id = ? AND m.context_type = 'general'
+    ORDER BY m.created_at ASC
   `,
       [threadId, threadId]
     );
@@ -395,10 +393,7 @@ router.get(
       msg.reactions = reactions || [];
     }
 
-    res.json({
-      thread,
-      messages
-    });
+    sendSuccess(res, { thread, messages });
   })
 );
 
@@ -429,16 +424,14 @@ router.put(
     // Mark messages as read (except own messages)
     await db.run(
       `
-    UPDATE general_messages 
+    UPDATE messages
     SET read_at = CURRENT_TIMESTAMP
-    WHERE thread_id = ? AND sender_type != ?
+    WHERE thread_id = ? AND sender_type != ? AND context_type = 'general'
   `,
       [threadId, req.user!.type]
     );
 
-    res.json({
-      message: 'Messages marked as read'
-    });
+    sendSuccess(res, undefined, 'Messages marked as read');
   })
 );
 
@@ -497,11 +490,11 @@ router.post(
     // Send message
     await db.run(
       `
-    INSERT INTO general_messages (
-      client_id, sender_type, sender_name, subject, message,
+    INSERT INTO messages (
+      context_type, client_id, sender_type, sender_name, subject, message,
       message_type, priority, attachments, thread_id
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES ('general', ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
       [
         req.user!.id,
@@ -535,10 +528,7 @@ router.post(
       console.error('Failed to send admin notification:', emailError);
     }
 
-    res.status(201).json({
-      message: 'Inquiry sent successfully',
-      threadId: threadId
-    });
+    sendCreated(res, { threadId }, 'Inquiry sent successfully');
   })
 );
 
@@ -573,7 +563,7 @@ router.get(
       ]);
     }
 
-    res.json({ preferences });
+    sendSuccess(res, { preferences });
   })
 );
 
@@ -624,10 +614,7 @@ router.put(
       [req.user!.id]
     );
 
-    res.json({
-      message: 'Notification preferences updated successfully',
-      preferences: updatedPreferences
-    });
+    sendSuccess(res, { preferences: updatedPreferences }, 'Notification preferences updated successfully');
   })
 );
 
@@ -654,7 +641,7 @@ router.get(
     }
 
     const mentions = await messageService.getMentions(messageId);
-    res.json({ mentions });
+    sendSuccess(res, { mentions });
   })
 );
 
@@ -666,7 +653,7 @@ router.get(
     const userEmail = req.user!.email;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
     const mentions = await messageService.getMyMentions(userEmail, limit);
-    res.json({ mentions });
+    sendSuccess(res, { mentions });
   })
 );
 
@@ -689,7 +676,7 @@ router.get(
     }
 
     const reactions = await messageService.getReactions(messageId);
-    res.json({ reactions });
+    sendSuccess(res, { reactions });
   })
 );
 
@@ -720,7 +707,7 @@ router.post(
       req.user!.type,
       reaction
     );
-    res.status(201).json({ reaction: reactionData });
+    sendCreated(res, { reaction: reactionData });
   })
 );
 
@@ -742,7 +729,7 @@ router.delete(
     }
 
     await messageService.removeReaction(messageId, req.user!.email, reaction);
-    res.json({ message: 'Reaction removed' });
+    sendSuccess(res, undefined, 'Reaction removed');
   })
 );
 
@@ -765,7 +752,7 @@ router.get(
     }
 
     const subscription = await messageService.getSubscription(projectId, req.user!.email);
-    res.json({ subscription });
+    sendSuccess(res, { subscription });
   })
 );
 
@@ -790,7 +777,7 @@ router.put(
       req.user!.email,
       { notifyAll: notify_all, notifyMentions: notify_mentions, notifyReplies: notify_replies }
     );
-    res.json({ subscription });
+    sendSuccess(res, { subscription });
   })
 );
 
@@ -816,7 +803,7 @@ router.post(
       req.user!.type,
       until
     );
-    res.json({ message: 'Project muted', subscription });
+    sendSuccess(res, { subscription }, 'Project muted');
   })
 );
 
@@ -828,7 +815,7 @@ router.post(
     const projectId = parseInt(req.params.projectId);
 
     const subscription = await messageService.unmuteProject(projectId, req.user!.email);
-    res.json({ message: 'Project unmuted', subscription });
+    sendSuccess(res, { subscription }, 'Project unmuted');
   })
 );
 
@@ -844,7 +831,7 @@ router.post(
     const messageId = parseInt(req.params.messageId);
 
     await messageService.markAsRead(messageId, req.user!.email, req.user!.type);
-    res.json({ message: 'Marked as read' });
+    sendSuccess(res, undefined, 'Marked as read');
   })
 );
 
@@ -860,7 +847,7 @@ router.post(
     }
 
     await messageService.markMultipleAsRead(message_ids, req.user!.email, req.user!.type);
-    res.json({ message: 'Messages marked as read', count: message_ids.length });
+    sendSuccess(res, { count: message_ids.length }, 'Messages marked as read');
   })
 );
 
@@ -872,7 +859,7 @@ router.get(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const messageId = parseInt(req.params.messageId);
     const receipts = await messageService.getReadReceipts(messageId);
-    res.json({ receipts });
+    sendSuccess(res, { receipts });
   })
 );
 
@@ -882,7 +869,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const count = await messageService.getUnreadCount(req.user!.email, req.user!.type);
-    res.json({ unread_count: count });
+    sendSuccess(res, { unread_count: count });
   })
 );
 
@@ -893,7 +880,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const threadId = parseInt(req.params.threadId);
     const count = await messageService.getThreadUnreadCount(threadId, req.user!.email);
-    res.json({ unread_count: count });
+    sendSuccess(res, { unread_count: count });
   })
 );
 
@@ -908,7 +895,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const threadId = parseInt(req.params.threadId);
     const pinnedMessages = await messageService.getPinnedMessages(threadId);
-    res.json({ pinned_messages: pinnedMessages });
+    sendSuccess(res, { pinned_messages: pinnedMessages });
   })
 );
 
@@ -927,7 +914,7 @@ router.post(
     }
 
     await messageService.pinMessage(thread_id, messageId, req.user!.email);
-    res.json({ message: 'Message pinned' });
+    sendSuccess(res, undefined, 'Message pinned');
   })
 );
 
@@ -946,7 +933,7 @@ router.delete(
     }
 
     await messageService.unpinMessage(threadId, messageId);
-    res.json({ message: 'Message unpinned' });
+    sendSuccess(res, undefined, 'Message unpinned');
   })
 );
 
@@ -974,7 +961,7 @@ router.put(
       return errorResponse(res, 'Cannot edit this message', 403, 'EDIT_FORBIDDEN');
     }
 
-    res.json({ message: updatedMessage });
+    sendSuccess(res, { message: updatedMessage });
   })
 );
 
@@ -993,7 +980,7 @@ router.delete(
       return errorResponse(res, 'Cannot delete this message', 403, 'DELETE_FORBIDDEN');
     }
 
-    res.json({ message: 'Message deleted' });
+    sendSuccess(res, undefined, 'Message deleted');
   })
 );
 
@@ -1011,7 +998,7 @@ router.post(
     const threadId = parseInt(req.params.threadId);
 
     await messageService.archiveThread(threadId, req.user!.email);
-    res.json({ message: 'Thread archived' });
+    sendSuccess(res, undefined, 'Thread archived');
   })
 );
 
@@ -1025,7 +1012,7 @@ router.post(
     const threadId = parseInt(req.params.threadId);
 
     await messageService.unarchiveThread(threadId);
-    res.json({ message: 'Thread unarchived' });
+    sendSuccess(res, undefined, 'Thread unarchived');
   })
 );
 
@@ -1036,7 +1023,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const threads = await messageService.getArchivedThreads();
-    res.json({ threads });
+    sendSuccess(res, { threads });
   })
 );
 
@@ -1066,7 +1053,7 @@ router.get(
       includeInternal: req.user!.type === 'admin'
     });
 
-    res.json({ results, count: results.length });
+    sendSuccess(res, { results, count: results.length });
   })
 );
 
@@ -1098,11 +1085,11 @@ router.post(
 
     const result = await db.run(
       `
-      INSERT INTO general_messages (
-        client_id, sender_type, sender_name, subject, message,
+      INSERT INTO messages (
+        context_type, client_id, sender_type, sender_name, subject, message,
         thread_id, is_internal
       )
-      VALUES (?, 'admin', ?, ?, ?, ?, TRUE)
+      VALUES ('general', ?, 'admin', ?, ?, ?, ?, TRUE)
       `,
       [thread.client_id, req.user!.email, thread.subject, message.trim(), threadId]
     );
@@ -1110,12 +1097,9 @@ router.post(
     // Process mentions in the internal message
     await messageService.processMentions(result.lastID!, message.trim());
 
-    const newMessage = await db.get('SELECT * FROM general_messages WHERE id = ?', [result.lastID]);
+    const newMessage = await db.get('SELECT * FROM messages WHERE id = ?', [result.lastID]);
 
-    res.status(201).json({
-      message: 'Internal message sent',
-      messageData: newMessage
-    });
+    sendCreated(res, { messageData: newMessage }, 'Internal message sent');
   })
 );
 
@@ -1130,14 +1114,14 @@ router.get(
 
     const messages = await db.all(
       `
-      SELECT * FROM general_messages
-      WHERE thread_id = ? AND is_internal = TRUE
+      SELECT * FROM messages
+      WHERE thread_id = ? AND is_internal = TRUE AND context_type = 'general'
       ORDER BY created_at ASC
       `,
       [threadId]
     );
 
-    res.json({ messages });
+    sendSuccess(res, { messages });
   })
 );
 
@@ -1155,17 +1139,17 @@ router.get(
     const db = getDatabase();
 
     const analytics = await db.get(`
-    SELECT 
+    SELECT
       COUNT(DISTINCT mt.id) as total_threads,
       COUNT(DISTINCT CASE WHEN mt.status = 'active' THEN mt.id END) as active_threads,
-      COUNT(gm.id) as total_messages,
-      COUNT(CASE WHEN gm.read_at IS NULL THEN gm.id END) as unread_messages,
-      COUNT(CASE WHEN gm.sender_type = 'client' THEN gm.id END) as client_messages,
-      COUNT(CASE WHEN gm.sender_type = 'admin' THEN gm.id END) as admin_messages,
-      COUNT(CASE WHEN gm.message_type = 'inquiry' THEN gm.id END) as inquiries,
-      COUNT(CASE WHEN gm.priority = 'urgent' THEN gm.id END) as urgent_messages
+      COUNT(m.id) as total_messages,
+      COUNT(CASE WHEN m.read_at IS NULL THEN m.id END) as unread_messages,
+      COUNT(CASE WHEN m.sender_type = 'client' THEN m.id END) as client_messages,
+      COUNT(CASE WHEN m.sender_type = 'admin' THEN m.id END) as admin_messages,
+      COUNT(CASE WHEN m.message_type = 'inquiry' THEN m.id END) as inquiries,
+      COUNT(CASE WHEN m.priority = 'urgent' THEN m.id END) as urgent_messages
     FROM message_threads mt
-    LEFT JOIN general_messages gm ON mt.id = gm.thread_id
+    LEFT JOIN messages m ON mt.id = m.thread_id AND m.context_type = 'general'
   `);
 
     const recentActivity = await db.all(`
@@ -1183,10 +1167,7 @@ router.get(
     LIMIT 10
   `);
 
-    res.json({
-      analytics,
-      recentActivity
-    });
+    sendSuccess(res, { analytics, recentActivity });
   })
 );
 
@@ -1219,8 +1200,8 @@ router.get(
     // Get the original filename from the database if possible
     const db = getDatabase();
     const message = await db.get(
-      'SELECT attachments FROM general_messages WHERE attachments LIKE ?',
-      [`%${  filename  }%`]
+      'SELECT attachments FROM messages WHERE attachments LIKE ?',
+      [`%${filename}%`]
     );
 
     let originalName = filename;

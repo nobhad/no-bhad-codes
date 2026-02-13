@@ -442,7 +442,7 @@ class AnalyticsService {
     );
 
     await db.run(
-      `UPDATE report_schedules SET last_sent_at = CURRENT_TIMESTAMP, next_send_at = ? WHERE id = ?`,
+      'UPDATE report_schedules SET last_sent_at = CURRENT_TIMESTAMP, next_send_at = ? WHERE id = ?',
       [nextSendAt, scheduleId]
     );
   }
@@ -467,38 +467,41 @@ class AnalyticsService {
     }
 
     switch (frequency) {
-      case 'daily':
-        // Already set for next occurrence
-        break;
+    case 'daily':
+      // Already set for next occurrence
+      break;
 
-      case 'weekly':
-        const targetDay = dayOfWeek ?? 1; // Default to Monday
-        while (next.getDay() !== targetDay) {
-          next.setDate(next.getDate() + 1);
-        }
-        break;
+    case 'weekly': {
+      const targetDay = dayOfWeek ?? 1; // Default to Monday
+      while (next.getDay() !== targetDay) {
+        next.setDate(next.getDate() + 1);
+      }
+      break;
+    }
 
-      case 'monthly':
-        const targetDate = dayOfMonth ?? 1;
-        next.setDate(targetDate);
-        if (next <= now) {
-          next.setMonth(next.getMonth() + 1);
-        }
-        break;
+    case 'monthly': {
+      const targetDate = dayOfMonth ?? 1;
+      next.setDate(targetDate);
+      if (next <= now) {
+        next.setMonth(next.getMonth() + 1);
+      }
+      break;
+    }
 
-      case 'quarterly':
-        const targetQuarterDate = dayOfMonth ?? 1;
-        next.setDate(targetQuarterDate);
-        // Move to first month of next quarter
-        const currentQuarter = Math.floor(now.getMonth() / 3);
-        const nextQuarterMonth = (currentQuarter + 1) * 3;
-        if (nextQuarterMonth > 11) {
-          next.setFullYear(next.getFullYear() + 1);
-          next.setMonth(0);
-        } else {
-          next.setMonth(nextQuarterMonth);
-        }
-        break;
+    case 'quarterly': {
+      const targetQuarterDate = dayOfMonth ?? 1;
+      next.setDate(targetQuarterDate);
+      // Move to first month of next quarter
+      const currentQuarter = Math.floor(now.getMonth() / 3);
+      const nextQuarterMonth = (currentQuarter + 1) * 3;
+      if (nextQuarterMonth > 11) {
+        next.setFullYear(next.getFullYear() + 1);
+        next.setMonth(0);
+      } else {
+        next.setMonth(nextQuarterMonth);
+      }
+      break;
+    }
     }
 
     return next.toISOString();
@@ -771,7 +774,7 @@ class AnalyticsService {
 
     // Total revenue (paid invoices)
     const revenue = await db.get(
-      `SELECT COALESCE(SUM(total_amount), 0) as total FROM invoices WHERE status = 'paid'`
+      'SELECT COALESCE(SUM(total_amount), 0) as total FROM invoices WHERE status = \'paid\''
     );
     kpis.push({ type: 'total_revenue', value: Number(revenue?.total ?? 0) });
 
@@ -784,13 +787,13 @@ class AnalyticsService {
 
     // Active clients
     const activeClients = await db.get(
-      `SELECT COUNT(*) as count FROM clients WHERE status = 'active'`
+      'SELECT COUNT(*) as count FROM clients WHERE status = \'active\''
     );
     kpis.push({ type: 'active_clients', value: Number(activeClients?.count ?? 0) });
 
     // Active projects
     const activeProjects = await db.get(
-      `SELECT COUNT(*) as count FROM projects WHERE status IN ('in_progress', 'active')`
+      'SELECT COUNT(*) as count FROM projects WHERE status IN (\'in_progress\', \'active\')'
     );
     kpis.push({ type: 'active_projects', value: Number(activeProjects?.count ?? 0) });
 
@@ -850,7 +853,7 @@ class AnalyticsService {
   ): Promise<KPISnapshot[]> {
     const db = getDatabase();
 
-    let query = `SELECT * FROM kpi_snapshots WHERE kpi_type = ?`;
+    let query = 'SELECT * FROM kpi_snapshots WHERE kpi_type = ?';
     const params: string[] = [kpiType];
 
     if (dateRange?.start) {
@@ -1019,21 +1022,21 @@ class AnalyticsService {
       const value = kpi.value;
 
       switch (alert.condition) {
-        case 'above':
-          triggered = value > alert.threshold_value;
-          break;
-        case 'below':
-          triggered = value < alert.threshold_value;
-          break;
-        case 'equals':
-          triggered = value === alert.threshold_value;
-          break;
-        case 'change_above':
-          triggered = (kpi.change_percent || 0) > alert.threshold_value;
-          break;
-        case 'change_below':
-          triggered = (kpi.change_percent || 0) < alert.threshold_value;
-          break;
+      case 'above':
+        triggered = value > alert.threshold_value;
+        break;
+      case 'below':
+        triggered = value < alert.threshold_value;
+        break;
+      case 'equals':
+        triggered = value === alert.threshold_value;
+        break;
+      case 'change_above':
+        triggered = (kpi.change_percent || 0) > alert.threshold_value;
+        break;
+      case 'change_below':
+        triggered = (kpi.change_percent || 0) < alert.threshold_value;
+        break;
       }
 
       results.push({ alert, currentValue: value, triggered });
@@ -1042,7 +1045,7 @@ class AnalyticsService {
         // Update alert
         const db = getDatabase();
         await db.run(
-          `UPDATE metric_alerts SET last_triggered_at = CURRENT_TIMESTAMP, trigger_count = trigger_count + 1 WHERE id = ?`,
+          'UPDATE metric_alerts SET last_triggered_at = CURRENT_TIMESTAMP, trigger_count = trigger_count + 1 WHERE id = ?',
           [alert.id]
         );
       }
@@ -1065,22 +1068,22 @@ class AnalyticsService {
     const db = getDatabase();
 
     switch (reportType) {
-      case 'revenue':
-        return this.generateRevenueReport(filters);
-      case 'pipeline':
-        return this.generatePipelineReport(filters);
-      case 'project':
-        return this.generateProjectReport(filters);
-      case 'client':
-        return this.generateClientReport(filters);
-      case 'team':
-        return this.generateTeamReport(filters);
-      case 'lead':
-        return this.generateLeadReport(filters);
-      case 'invoice':
-        return this.generateInvoiceReport(filters);
-      default:
-        throw new Error(`Unknown report type: ${reportType}`);
+    case 'revenue':
+      return this.generateRevenueReport(filters);
+    case 'pipeline':
+      return this.generatePipelineReport(filters);
+    case 'project':
+      return this.generateProjectReport(filters);
+    case 'client':
+      return this.generateClientReport(filters);
+    case 'team':
+      return this.generateTeamReport(filters);
+    case 'lead':
+      return this.generateLeadReport(filters);
+    case 'invoice':
+      return this.generateInvoiceReport(filters);
+    default:
+      throw new Error(`Unknown report type: ${reportType}`);
     }
   }
 
@@ -1096,18 +1099,18 @@ class AnalyticsService {
         FROM invoices
         WHERE status = 'paid'
       `;
-    const params: string[] = [];
+      const params: string[] = [];
 
-    if (filters.dateRange?.start) {
-      query += ' AND paid_date >= ?';
-      params.push(filters.dateRange.start);
-    }
-    if (filters.dateRange?.end) {
-      query += ' AND paid_date <= ?';
-      params.push(filters.dateRange.end);
-    }
+      if (filters.dateRange?.start) {
+        query += ' AND paid_date >= ?';
+        params.push(filters.dateRange.start);
+      }
+      if (filters.dateRange?.end) {
+        query += ' AND paid_date <= ?';
+        params.push(filters.dateRange.end);
+      }
 
-    query += ' GROUP BY month ORDER BY month';
+      query += ' GROUP BY month ORDER BY month';
 
       const data = await db.all(query, params);
 
@@ -1224,13 +1227,14 @@ class AnalyticsService {
 
     const data = await db.all(`
       SELECT
-        user_name,
-        SUM(hours) as total_hours,
-        COUNT(DISTINCT project_id) as projects_worked,
-        SUM(CASE WHEN billable = TRUE THEN hours ELSE 0 END) as billable_hours
-      FROM time_entries
-      WHERE date >= date('now', '-30 days')
-      GROUP BY user_name
+        u.display_name as user_name,
+        SUM(te.hours) as total_hours,
+        COUNT(DISTINCT te.project_id) as projects_worked,
+        SUM(CASE WHEN te.billable = TRUE THEN te.hours ELSE 0 END) as billable_hours
+      FROM time_entries te
+      LEFT JOIN users u ON te.user_id = u.id
+      WHERE te.date >= date('now', '-30 days')
+      GROUP BY te.user_id, u.display_name
       ORDER BY total_hours DESC
     `);
 
@@ -1238,7 +1242,7 @@ class AnalyticsService {
       SELECT
         SUM(hours) as total_hours,
         SUM(CASE WHEN billable = TRUE THEN hours ELSE 0 END) as billable_hours,
-        COUNT(DISTINCT user_name) as team_members
+        COUNT(DISTINCT user_id) as team_members
       FROM time_entries
       WHERE date >= date('now', '-30 days')
     `);
@@ -1515,17 +1519,17 @@ class AnalyticsService {
     let groupBy: string;
 
     switch (period) {
-      case 'month':
-        dateFormat = '%Y-%m';
-        groupBy = "strftime('%Y-%m', paid_at)";
-        break;
-      case 'quarter':
-        groupBy = "strftime('%Y', paid_at) || '-Q' || ((CAST(strftime('%m', paid_at) AS INTEGER) + 2) / 3)";
-        break;
-      case 'year':
-        dateFormat = '%Y';
-        groupBy = "strftime('%Y', paid_at)";
-        break;
+    case 'month':
+      dateFormat = '%Y-%m';
+      groupBy = 'strftime(\'%Y-%m\', paid_at)';
+      break;
+    case 'quarter':
+      groupBy = 'strftime(\'%Y\', paid_at) || \'-Q\' || ((CAST(strftime(\'%m\', paid_at) AS INTEGER) + 2) / 3)';
+      break;
+    case 'year':
+      dateFormat = '%Y';
+      groupBy = 'strftime(\'%Y\', paid_at)';
+      break;
     }
 
     let query = `
@@ -1541,12 +1545,12 @@ class AnalyticsService {
     const params: string[] = [];
 
     if (startDate) {
-      query += ` AND paid_at >= ?`;
+      query += ' AND paid_at >= ?';
       params.push(startDate);
     }
 
     if (endDate) {
-      query += ` AND paid_at <= ?`;
+      query += ' AND paid_at <= ?';
       params.push(endDate);
     }
 
@@ -1628,17 +1632,18 @@ class AnalyticsService {
     const params: string[] = [];
 
     if (startDate) {
-      dateFilter = ` AND created_at >= ?`;
+      dateFilter = ' AND created_at >= ?';
       params.push(startDate);
     }
     if (endDate) {
-      dateFilter += ` AND created_at <= ?`;
+      dateFilter += ' AND created_at <= ?';
       params.push(endDate);
     }
 
+    // Since migration 086, leads/intakes are stored in projects table
     const [contacts, leads, proposals, clients] = await Promise.all([
-      db.get(`SELECT COUNT(*) as count FROM client_intakes WHERE 1=1${dateFilter}`, params),
-      db.get(`SELECT COUNT(*) as count FROM client_intakes WHERE status IN ('qualified', 'contacted', 'proposal_sent')${dateFilter}`, params),
+      db.get(`SELECT COUNT(*) as count FROM projects WHERE status IN ('pending', 'new')${dateFilter}`, params),
+      db.get(`SELECT COUNT(*) as count FROM projects WHERE status IN ('pending', 'new', 'in-progress')${dateFilter}`, params),
       db.get(`SELECT COUNT(*) as count FROM proposals WHERE 1=1${dateFilter}`, params),
       db.get(`SELECT COUNT(*) as count FROM clients WHERE 1=1${dateFilter}`, params)
     ]) as Array<{ count: number } | undefined>;

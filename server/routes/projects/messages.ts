@@ -28,7 +28,7 @@ router.get(
       `
     SELECT id, sender_type, sender_name, message, read_at, created_at
     FROM messages
-    WHERE project_id = ?
+    WHERE project_id = ? AND context_type = 'project'
     ORDER BY created_at ASC
   `,
       [projectId]
@@ -61,19 +61,19 @@ router.post(
       return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
     }
 
-    // Map 'admin' to 'developer' for messages table constraint compatibility
-    // (messages table uses 'client', 'developer', 'system'; general_messages uses 'client', 'admin', 'system')
-    const senderType = req.user!.type === 'admin' ? 'developer' : req.user!.type;
+    // Get client_id from project for unified table
+    const projectData = await db.get('SELECT client_id FROM projects WHERE id = ?', [projectId]);
 
     const result = await db.run(
       `
-    INSERT INTO messages (project_id, sender_type, sender_name, message)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO messages (context_type, project_id, client_id, sender_type, sender_name, message)
+    VALUES ('project', ?, ?, ?, ?, ?)
   `,
       [
         projectId,
-        senderType,
-        req.user!.email, // or get actual name from user profile
+        projectData?.client_id,
+        req.user!.type, // Now uses 'admin' directly (unified schema)
+        req.user!.email,
         message.trim()
       ]
     );
@@ -112,9 +112,9 @@ router.put(
 
     await db.run(
       `
-    UPDATE messages 
+    UPDATE messages
     SET read_at = CURRENT_TIMESTAMP
-    WHERE project_id = ? AND sender_type != ? AND read_at IS NULL
+    WHERE project_id = ? AND context_type = 'project' AND sender_type != ? AND read_at IS NULL
   `,
       [projectId, req.user!.type]
     );

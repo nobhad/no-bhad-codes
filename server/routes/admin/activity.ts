@@ -30,12 +30,13 @@ router.get(
         SELECT
           'lead' as type,
           'New inquiry received' as title,
-          COALESCE(ci.first_name || ' ' || ci.last_name, ci.company_name, ci.email) as context,
-          ci.created_at as date,
-          ci.id as entity_id,
-          ci.client_id as client_id
-        FROM client_intakes ci
-        WHERE ci.created_at IS NOT NULL
+          COALESCE(p.project_name, c.company_name, c.contact_name, c.email) as context,
+          p.created_at as date,
+          p.id as entity_id,
+          p.client_id as client_id
+        FROM projects p
+        LEFT JOIN clients c ON p.client_id = c.id
+        WHERE p.status IN ('pending', 'new') AND p.created_at IS NOT NULL
 
         UNION ALL
 
