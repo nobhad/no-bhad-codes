@@ -16,127 +16,18 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ---
 
-#### Phase 1: Slim Invoices Table (Database Phase 4)
+### Backend Cleanup - COMPLETE
 
-**Status:** COMPLETE
+All 4 backend phases completed. See `archive/ARCHIVED_WORK_2026-02-12.md` for details.
 
-**Objective:** Remove redundant columns from invoices table
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 1 | Slim Invoices Table | COMPLETE |
+| 2 | Remove Dual-Write Patterns | COMPLETE |
+| 3 | Message Table Consolidation | COMPLETE |
+| 4 | Lead/Intake Table Consolidation | COMPLETE |
 
-#### Completed Tasks
-
-- [x] Update invoice-service.ts - removed 14 redundant columns from INSERT/UPDATE
-- [x] Update invoice-types.ts - removed obsolete interface fields
-- [x] Run migration 075 - invoices table slimmed
-- [x] Fix dependent files (ad-hoc-requests, invoices/batch, invoices/core, helpers, workflow-automations)
-
-#### Files Modified
-
-- `server/services/invoice-service.ts`
-- `server/types/invoice-types.ts`
-- `server/routes/ad-hoc-requests.ts`
-- `server/routes/invoices/batch.ts`
-- `server/routes/invoices/core.ts`
-- `server/routes/invoices/helpers.ts`
-- `server/services/workflow-automations.ts`
-
----
-
-### Phase 2: Remove Dual-Write Patterns
-
-**Status:** COMPLETE
-
-**Priority:** CRITICAL
-
-**Objective:** Stop writing to deprecated TEXT columns alongside INTEGER FK columns
-
-#### Completed
-
-- [x] Fixed `workflow-trigger-service.ts` - Removed `assigned_to` TEXT column from project_tasks INSERT (column was removed in migration 070)
-
-#### Not Applicable (Solo Freelancer)
-
-- `projects.assigned_to` - TEXT column still used for lead assignment but no `assigned_to_user_id` column exists; deferred since solo freelancer doesn't use team assignments
-
----
-
-### Phase 3: Message Table Consolidation
-
-**Status:** COMPLETE
-
-**Priority:** HIGH
-
-**Objective:** Merge 3 message tables into single unified table
-
-#### Completed Tasks
-
-- [x] Created migration 085_consolidate_messages.sql
-  - Added `context_type` column ('project' or 'general')
-  - Added all advanced columns from `general_messages`
-  - Migrated `messages` data (project context)
-  - Migrated `general_messages` data (general context)
-  - Updated FK references in supporting tables (mentions, reactions, read_receipts, pinned)
-  - Old tables renamed to `_messages_deprecated_085` and `_general_messages_deprecated_085`
-- [x] Updated message-service.ts - all queries now use unified `messages` table
-- [x] Updated routes/messages.ts - all INSERT/SELECT use unified table with context_type='general'
-- [x] Updated routes/projects/messages.ts - uses context_type='project'
-- [x] Normalized sender_type to use 'admin' consistently (removed 'developer' mapping)
-
-#### Files Modified
-
-- `server/database/migrations/085_consolidate_messages.sql` (new)
-- `server/services/message-service.ts`
-- `server/routes/messages.ts`
-- `server/routes/projects/messages.ts`
-
-#### Migration Notes
-
-Run migration after deploying code changes:
-
-```bash
-npm run migrate
-```
-
-Old tables preserved until 2026-03-14 for rollback safety.
-
----
-
-### Phase 4: Lead/Intake Table Consolidation
-
-**Status:** COMPLETE
-
-**Priority:** HIGH
-
-**Objective:** Unify intake forms and leads into single system
-
-#### Completed Tasks
-
-- [x] Created migration 086_consolidate_lead_intake.sql
-  - Added `source_type` column to projects ('direct', 'intake_form', 'referral', 'import', 'other')
-  - Added `intake_id` column for historical reference
-  - Archived `client_intakes` table as `_client_intakes_archived_086`
-  - Created backward-compatibility view for SELECT queries
-- [x] Updated routes/intake.ts - now sets `source_type='intake_form'` on new projects
-- [x] Updated soft-delete-service.ts - leads now query from projects table
-- [x] Updated analytics-service.ts - lead counts from projects table
-- [x] Updated admin/activity.ts - lead activities from projects table
-
-#### Files Modified
-
-- `server/database/migrations/086_consolidate_lead_intake.sql` (new)
-- `server/routes/intake.ts`
-- `server/services/soft-delete-service.ts`
-- `server/services/analytics-service.ts`
-- `server/routes/admin/activity.ts`
-
-#### Migration Notes
-
-Run migration after deploying code changes:
-
-```bash
-npm run migrate
-```
-
-The `client_intakes` table is archived as `_client_intakes_archived_086`. A backward-compatible view is created for any remaining queries.
+**Migration Note:** Run `npm run migrate` to apply migrations 085 and 086.
 
 ---
 
@@ -417,19 +308,15 @@ Each module uses shared components from Phase 1:
 
 ---
 
-## Summary: Execution Order
+## Summary: Remaining Work
 
 | Phase | Description | Status | Priority | Est. Hours |
 |-------|-------------|--------|----------|------------|
-| 1 | Slim Invoices Table | COMPLETE | - | - |
-| 2 | Remove Dual-Write Patterns | COMPLETE | - | - |
-| 3 | Message Table Consolidation | COMPLETE | - | - |
-| 4 | Lead/Intake Consolidation | COMPLETE | - | - |
-| 5 | Reusable Component Library | READY | HIGH | 8-12 |
-| 6 | Admin Portal Dynamic Rebuild | PENDING | HIGH | 6-8 |
-| 7 | Unify Portal Styling | PENDING | HIGH | 4-6 |
+| 1 | Reusable Component Library | READY | HIGH | 8-12 |
+| 2 | Admin Portal Dynamic Rebuild | PENDING | HIGH | 6-8 |
+| 3 | Unify Portal Styling | PENDING | HIGH | 4-6 |
 
-**Total Estimated:** 18-26 hours (backend complete, frontend remaining)
+**Total Estimated:** 18-26 hours (frontend work)
 
 ---
 
