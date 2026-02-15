@@ -16,6 +16,135 @@ import { getStatusDotHTML } from '../../../components/status-badge';
 
 let systemListenersInitialized = false;
 
+// ============================================
+// SVG ICONS FOR DYNAMIC RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
+  TRASH: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+  MAIL: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+  CLOCK: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Renders the System Status tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderSystemStatusTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <!-- Health Check -->
+    <div class="portal-project-card portal-shadow">
+      <div class="section-header-with-actions">
+        <h3>Health Check</h3>
+        <button type="button" class="icon-btn" id="btn-refresh-health" title="Refresh health status" aria-label="Refresh health status">
+          <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+        </button>
+      </div>
+      <div class="health-check-grid" id="health-check-status">
+        <div class="health-item">
+          <span class="health-indicator health-loading" id="health-database"></span>
+          <span class="health-label">Database</span>
+          <span class="health-status" id="health-database-status">Checking...</span>
+        </div>
+        <div class="health-item">
+          <span class="health-indicator health-loading" id="health-email"></span>
+          <span class="health-label">Email Service</span>
+          <span class="health-status" id="health-email-status">Checking...</span>
+        </div>
+        <div class="health-item">
+          <span class="health-indicator health-loading" id="health-storage"></span>
+          <span class="health-label">File Storage</span>
+          <span class="health-status" id="health-storage-status">Checking...</span>
+        </div>
+        <div class="health-item">
+          <span class="health-indicator health-loading" id="health-scheduler"></span>
+          <span class="health-label">Scheduler</span>
+          <span class="health-status" id="health-scheduler-status">Checking...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="portal-project-card portal-shadow">
+      <h3>Quick Actions</h3>
+      <div class="quick-actions-grid">
+        <button type="button" class="btn btn-secondary" id="btn-clear-cache" title="Clear application cache">
+          ${RENDER_ICONS.TRASH}
+          Clear Cache
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-test-email" title="Send test email">
+          ${RENDER_ICONS.MAIL}
+          Test Email
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-run-scheduler" title="Force run scheduled tasks">
+          ${RENDER_ICONS.CLOCK}
+          Run Scheduler
+        </button>
+      </div>
+    </div>
+
+    <!-- Recent Errors -->
+    <div class="portal-project-card portal-shadow">
+      <h3>Recent Errors</h3>
+      <div class="recent-errors-list" id="recent-errors-list">
+        <p class="empty-state-text">No recent errors</p>
+      </div>
+    </div>
+
+    <!-- Build Information -->
+    <details class="portal-project-card portal-shadow system-details" open>
+      <summary><h3>Build Information</h3></summary>
+      <div class="system-info-grid">
+        <div class="system-info-row">
+          <span>Version</span>
+          <span id="sys-version">10.0.0</span>
+        </div>
+        <div class="system-info-row">
+          <span>Environment</span>
+          <span id="sys-environment">development</span>
+        </div>
+        <div class="system-info-row">
+          <span>Build Date</span>
+          <span id="sys-build-date">-</span>
+        </div>
+      </div>
+    </details>
+
+    <!-- Browser Information -->
+    <details class="portal-project-card portal-shadow system-details">
+      <summary><h3>Browser Information</h3></summary>
+      <div class="system-info-grid">
+        <div class="system-info-row">
+          <span>User Agent</span>
+          <span id="sys-useragent" class="truncate-text">-</span>
+        </div>
+        <div class="system-info-row">
+          <span>Screen Resolution</span>
+          <span id="sys-screen">-</span>
+        </div>
+        <div class="system-info-row">
+          <span>Viewport Size</span>
+          <span id="sys-viewport">-</span>
+        </div>
+      </div>
+    </details>
+
+    <!-- Legacy Module/Service Status (hidden, for backwards compat) -->
+    <div class="sr-only" aria-hidden="true">
+      <div id="modules-status"></div>
+      <div id="services-status"></div>
+    </div>
+  `;
+
+  // Reset listeners initialization so they get re-attached
+  systemListenersInitialized = false;
+}
+
 /**
  * Load system status data for admin dashboard
  */

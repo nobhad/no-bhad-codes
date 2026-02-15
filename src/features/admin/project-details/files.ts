@@ -8,7 +8,7 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatFileSize } from '../../../utils/format-utils';
 import { AdminAuth } from '../admin-auth';
-import { apiFetch, apiPost, apiDelete } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { alertError, alertSuccess, confirmDanger } from '../../../utils/confirm-dialog';
 import { renderEmptyState } from '../../../components/empty-state';
 import { domCache } from './dom-cache';
@@ -84,7 +84,7 @@ export async function loadProjectFiles(projectId: number): Promise<void> {
     const response = await apiFetch(`/api/uploads/project/${projectId}`);
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await parseApiResponse<{ files: ProjectFile[] }>(response);
       const files: ProjectFile[] = data.files || [];
 
       if (files.length === 0) {
@@ -263,7 +263,7 @@ export async function uploadFiles(
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await parseApiResponse<{ files: ProjectFile[] }>(response);
       const uploadedFiles = data.files || [];
       showToast(`${uploadedFiles.length} file(s) uploaded`, 'success');
       onSuccess();
@@ -284,7 +284,7 @@ export async function loadPendingRequestsDropdown(projectId: number): Promise<vo
     const response = await apiFetch(`/api/document-requests/project/${projectId}/pending`);
     if (!response.ok) return;
 
-    const data = await response.json();
+    const data = await parseApiResponse<{ requests: PendingRequest[] }>(response);
     const requests: PendingRequest[] = data.requests || [];
     _pendingRequestsCache = requests;
   } catch (error) {
@@ -464,7 +464,7 @@ async function handleUploadConfirm(): Promise<void> {
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await parseApiResponse<{ files: ProjectFile[] }>(response);
       const uploadedFiles = data.files || [];
 
       // If a request was selected and we have uploaded files, link the first file

@@ -1836,7 +1836,50 @@ These components use non-standard styling **by design**. Do NOT attempt to stand
 
 ## Design System Audits
 
-### Latest Audit: February 9, 2026
+### Latest Audit: February 14, 2026
+
+**Focus:** Portal consistency audit for Phase 3 unification
+
+**Critical Fixes Applied:**
+
+| Issue | Before | After | Files |
+|-------|--------|-------|-------|
+| `--color-success-500` fallback | `#22c55e` (wrong) | `#10b981` (correct) | `portal-buttons.css`, `client-auth.css` |
+| `--color-danger` fallback inconsistency | `#e74c3c`, `#dc3545` (mixed) | `#dc2626` (unified) | `login.css`, `button-component.ts` |
+
+**Shared Component Classes (19 files in `src/styles/shared/`):**
+
+| File | Lines | Components |
+|------|-------|------------|
+| `portal-cards.css` | 1,005 | `.portal-card`, `.quick-stats`, `.attention-grid`, `.card-grid-4` |
+| `portal-buttons.css` | 818 | `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`, `.icon-btn` |
+| `portal-messages.css` | 1,216 | Message thread, compose area, client selector |
+| `portal-components.css` | 602 | Panel, card, list items (underutilized by admin) |
+| `portal-forms.css` | 443 | Form inputs, labels, validation states |
+| `portal-badges.css` | 334 | Status badges with color-coded indicators |
+| `portal-tabs.css` | 325 | Tab navigation component |
+| `portal-layout.css` | 363 | Dashboard layout utilities |
+
+**Design Token Coverage:**
+
+| Token Category | Defined | Utilized | Gap |
+|----------------|---------|----------|-----|
+| Colors | 100% | ~85% | Some hardcoded fallbacks remain |
+| Spacing | 100% | ~20% | Major gap - 1,057 hardcoded px values |
+| Shadows | 100% | ~70% | Good coverage, some unnecessary fallbacks |
+| Border Radius | 100% | ~60% | Portal vars override design tokens |
+| Animations | 100% | ~50% | Dual system (legacy + design tokens) |
+
+**Recommendations (Prioritized):**
+
+1. **HIGH:** Increase spacing token adoption (current: 28 uses, target: 100+)
+2. **MEDIUM:** Remove unnecessary CSS variable fallbacks
+3. **MEDIUM:** Admin portal should import `portal-components.css`
+4. **LOW:** Consolidate animation tokens (legacy `--transition-*` vs design-system `--duration-*`)
+
+---
+
+### Previous Audit: February 9, 2026
 
 **Full Report:** [CSS_AUDIT_2026-02-09.md](./CSS_AUDIT_2026-02-09.md)
 

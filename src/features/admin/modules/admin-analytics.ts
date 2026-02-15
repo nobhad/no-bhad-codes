@@ -9,6 +9,7 @@
  */
 
 import { Chart, registerables } from 'chart.js';
+import { getChartColor, getChartColorWithAlpha } from '../../../config/constants';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import type {
   PerformanceMetricsDisplay,
@@ -283,8 +284,8 @@ async function loadRevenueChart(): Promise<void> {
       datasets: [{
         label: 'Revenue',
         data,
-        backgroundColor: 'rgba(0, 175, 240, 0.7)',
-        borderColor: 'var(--app-color-primary)',
+        backgroundColor: getChartColorWithAlpha('PRIMARY', 0.7),
+        borderColor: getChartColor('PRIMARY'),
         borderWidth: 1,
         borderRadius: 4
       }]
@@ -304,14 +305,14 @@ async function loadRevenueChart(): Promise<void> {
         y: {
           beginAtZero: true,
           ticks: {
-            color: '#f5f5f5',
+            color: getChartColor('TEXT'),
             callback: (value) => `$${(value as number / 1000).toFixed(0)}k`
           },
-          grid: { color: '#555555' }
+          grid: { color: getChartColor('GRID') }
         },
         x: {
-          ticks: { color: '#f5f5f5' },
-          grid: { color: '#555555' }
+          ticks: { color: getChartColor('TEXT') },
+          grid: { color: getChartColor('GRID') }
         }
       }
     }
@@ -344,7 +345,12 @@ async function loadProjectStatusChart(): Promise<void> {
 
   let labels: string[] = ['Active', 'Completed', 'On Hold', 'Pending'];
   let data: number[] = [0, 0, 0, 0];
-  const colors = ['#00aff0', '#22c55e', '#f59e0b', '#9ca3af'];
+  const colors = [
+    getChartColor('PRIMARY'),
+    getChartColor('SUCCESS'),
+    getChartColor('WARNING'),
+    getChartColor('QUATERNARY')
+  ];
 
   try {
     const response = await apiFetch('/api/analytics/quick/projects');
@@ -388,7 +394,7 @@ async function loadProjectStatusChart(): Promise<void> {
       plugins: {
         legend: {
           position: 'bottom',
-          labels: { color: '#f5f5f5' }
+          labels: { color: getChartColor('TEXT') }
         }
       }
     }
@@ -1955,8 +1961,8 @@ async function loadVisitorsChart(): Promise<void> {
         {
           label: 'Visitors',
           data,
-          borderColor: '#00aff0',
-          backgroundColor: 'rgba(0, 175, 240, 0.1)',
+          borderColor: getChartColor('PRIMARY'),
+          backgroundColor: getChartColorWithAlpha('PRIMARY', 0.1),
           fill: true,
           tension: 0.4
         }
@@ -1971,12 +1977,12 @@ async function loadVisitorsChart(): Promise<void> {
       scales: {
         y: {
           beginAtZero: true,
-          ticks: { color: '#f5f5f5' },
-          grid: { color: '#555555' }
+          ticks: { color: getChartColor('TEXT') },
+          grid: { color: getChartColor('GRID') }
         },
         x: {
-          ticks: { color: '#f5f5f5' },
-          grid: { color: '#555555' }
+          ticks: { color: getChartColor('TEXT') },
+          grid: { color: getChartColor('GRID') }
         }
       }
     }
@@ -2061,7 +2067,12 @@ async function loadSourcesChart(): Promise<void> {
       datasets: [
         {
           data,
-          backgroundColor: ['#00aff0', '#00d4aa', '#ffc107', '#ff6b6b']
+          backgroundColor: [
+            getChartColor('PRIMARY'),
+            getChartColor('SUCCESS'),
+            getChartColor('WARNING'),
+            getChartColor('DANGER')
+          ]
         }
       ]
     },
@@ -2071,7 +2082,7 @@ async function loadSourcesChart(): Promise<void> {
       plugins: {
         legend: {
           position: 'bottom',
-          labels: { color: '#f5f5f5' }
+          labels: { color: getChartColor('TEXT') }
         }
       }
     }
@@ -2100,4 +2111,381 @@ export async function exportPerformanceData(): Promise<Record<string, unknown>> 
     exportedAt: new Date().toISOString(),
     performance: data
   };
+}
+
+// ---------------------------------------------------------------------------
+// Render icons for dynamic rendering
+// ---------------------------------------------------------------------------
+
+const RENDER_ICONS = {
+  DOLLAR: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>',
+  ACTIVITY: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>',
+  FOLDER: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
+  FILE_TEXT: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
+  CHEVRON_RIGHT: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>',
+  PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+  INFO: '<svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>'
+};
+
+// ---------------------------------------------------------------------------
+// Dynamic Tab Render
+// ---------------------------------------------------------------------------
+
+/**
+ * Render the analytics tab structure dynamically
+ */
+export function renderAnalyticsTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <!-- Overview Sub-Tab -->
+    <div class="analytics-subtab-content active" id="analytics-subtab-overview">
+      <h3 class="tab-section-heading">Overview</h3>
+      <!-- Business KPI Cards -->
+      <div class="card-grid-4" id="business-kpi-section">
+        <div class="stat-card" id="kpi-revenue">
+          <div class="kpi-card-icon">${RENDER_ICONS.DOLLAR}</div>
+          <span class="stat-number" id="kpi-revenue-value">$0</span>
+          <span class="stat-label">Revenue MTD</span>
+          <div class="kpi-card-change" id="kpi-revenue-change">
+            <span class="change-value">-</span>
+            <span class="kpi-card-change-label">vs last month</span>
+          </div>
+        </div>
+        <div class="stat-card" id="kpi-pipeline">
+          <div class="kpi-card-icon">${RENDER_ICONS.ACTIVITY}</div>
+          <span class="stat-number" id="kpi-pipeline-value">$0</span>
+          <span class="stat-label">Pipeline Value</span>
+          <div class="kpi-card-change" id="kpi-pipeline-count">
+            <span class="change-value">-</span>
+            <span class="kpi-card-change-label">active leads</span>
+          </div>
+        </div>
+        <div class="stat-card" id="kpi-projects">
+          <div class="kpi-card-icon">${RENDER_ICONS.FOLDER}</div>
+          <span class="stat-number" id="kpi-projects-value">0</span>
+          <span class="stat-label">Active Projects</span>
+          <div class="kpi-card-change" id="kpi-projects-completion">
+            <span class="change-value">-</span>
+            <span class="kpi-card-change-label">avg completion</span>
+          </div>
+        </div>
+        <div class="stat-card" id="kpi-invoices">
+          <div class="kpi-card-icon">${RENDER_ICONS.FILE_TEXT}</div>
+          <span class="stat-number" id="kpi-invoices-value">$0</span>
+          <span class="stat-label">Outstanding Invoices</span>
+          <div class="kpi-card-change" id="kpi-invoices-count">
+            <span class="change-value">-</span>
+            <span class="kpi-card-change-label">invoices pending</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lead Funnel -->
+      <div class="portal-project-card portal-shadow" id="lead-funnel-section">
+        <h3>Lead Conversion Funnel</h3>
+        <div class="funnel-container" id="lead-funnel">
+          <div class="funnel-stage" data-stage="new">
+            <span class="funnel-stage-value" id="funnel-new">0</span>
+            <span class="funnel-stage-label">New Leads</span>
+          </div>
+          <div class="funnel-arrow">${RENDER_ICONS.CHEVRON_RIGHT}</div>
+          <div class="funnel-stage" data-stage="contacted">
+            <span class="funnel-stage-value" id="funnel-contacted">0</span>
+            <span class="funnel-stage-label">Contacted</span>
+          </div>
+          <div class="funnel-arrow">${RENDER_ICONS.CHEVRON_RIGHT}</div>
+          <div class="funnel-stage" data-stage="qualified">
+            <span class="funnel-stage-value" id="funnel-qualified">0</span>
+            <span class="funnel-stage-label">Qualified</span>
+          </div>
+          <div class="funnel-arrow">${RENDER_ICONS.CHEVRON_RIGHT}</div>
+          <div class="funnel-stage" data-stage="proposal">
+            <span class="funnel-stage-value" id="funnel-proposal">0</span>
+            <span class="funnel-stage-label">Proposal</span>
+          </div>
+          <div class="funnel-arrow">${RENDER_ICONS.CHEVRON_RIGHT}</div>
+          <div class="funnel-stage funnel-stage-success" data-stage="won">
+            <span class="funnel-stage-value" id="funnel-won">0</span>
+            <span class="funnel-stage-label">Won</span>
+          </div>
+        </div>
+        <div class="funnel-stats" id="funnel-stats">
+          <span class="funnel-stat" id="funnel-conversion-rate">Conversion Rate: -</span>
+          <span class="funnel-stat" id="funnel-avg-value">Avg Deal Value: -</span>
+        </div>
+      </div>
+    </div><!-- End Overview Sub-Tab -->
+
+    <!-- Business Sub-Tab -->
+    <div class="analytics-subtab-content" id="analytics-subtab-business">
+      <h3 class="tab-section-heading">Business</h3>
+      <div class="analytics-card-grid">
+        <div class="portal-project-card portal-shadow">
+          <h3>Revenue by Month</h3>
+          <div class="chart-canvas-wrapper" id="revenue-chart-container">
+            <canvas id="revenue-chart"></canvas>
+          </div>
+        </div>
+        <div class="portal-project-card portal-shadow">
+          <h3>Project Status</h3>
+          <div class="chart-canvas-wrapper" id="project-status-chart-container">
+            <canvas id="project-status-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ad Hoc Revenue Widget -->
+      <div class="portal-project-card portal-shadow">
+        <h3>Ad Hoc Revenue Analytics</h3>
+        <div id="ad-hoc-analytics-widget" class="loading-text">Loading ad hoc analytics...</div>
+      </div>
+
+      <!-- Lead Analytics & Scoring -->
+      <div class="portal-project-card portal-shadow leads-analytics-section" id="leads-analytics-section">
+        <h3>Lead Analytics</h3>
+        <div class="analytics-columns-2col">
+          <div class="analytics-column" id="conversion-funnel-card">
+            <span class="field-label">Conversion Funnel</span>
+            <div class="funnel-container" id="leads-conversion-funnel">
+              <div class="loading-text">Loading funnel data...</div>
+            </div>
+          </div>
+          <div class="analytics-column" id="source-performance-card">
+            <span class="field-label">Lead Sources</span>
+            <div class="source-list" id="leads-source-performance">
+              <div class="loading-text">Loading source data...</div>
+            </div>
+          </div>
+        </div>
+        <div class="analytics-column analytics-column-full" id="scoring-rules-card">
+          <div class="analytics-column-header">
+            <span class="field-label">Scoring Rules</span>
+            <button type="button" class="icon-btn" id="add-scoring-rule-btn" title="Add rule" aria-label="Add scoring rule">
+              <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+            </button>
+          </div>
+          <div class="scoring-rules-list" id="scoring-rules-list">
+            <div class="loading-text">Loading scoring rules...</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- End Business Sub-Tab -->
+
+    <!-- Visitors Sub-Tab -->
+    <div class="analytics-subtab-content" id="analytics-subtab-visitors">
+      <h3 class="tab-section-heading">Visitors</h3>
+      <!-- Site Breakdown -->
+      <div class="analytics-card-grid">
+        <div class="portal-project-card portal-shadow">
+          <h3>Main Portfolio Site</h3>
+          <div class="quick-stats analytics-breakdown-stats">
+            <div class="stat-card">
+              <span class="stat-number" id="analytics-portfolio-visitors">-</span>
+              <span class="stat-label">Total Visitors</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="analytics-portfolio-pageviews">-</span>
+              <span class="stat-label">Page Views</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="analytics-portfolio-sessions">-</span>
+              <span class="stat-label">Avg. Session</span>
+            </div>
+          </div>
+        </div>
+        <div class="portal-project-card portal-shadow">
+          <h3>The Backend (Client Portal)</h3>
+          <div class="quick-stats analytics-breakdown-stats">
+            <div class="stat-card">
+              <span class="stat-number" id="analytics-backend-visitors">-</span>
+              <span class="stat-label">Total Visitors</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="analytics-backend-pageviews">-</span>
+              <span class="stat-label">Page Views</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="analytics-backend-sessions">-</span>
+              <span class="stat-label">Avg. Session</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Legacy IDs for dashboard visitor-stats -->
+      <div class="sr-only" aria-hidden="true">
+        <span id="analytics-visitors">-</span>
+        <span id="analytics-pageviews">-</span>
+        <span id="analytics-sessions">-</span>
+      </div>
+
+      <!-- Visitor Charts -->
+      <div class="analytics-card-grid">
+        <div class="portal-project-card portal-shadow">
+          <h3>Visitors Over Time</h3>
+          <div class="chart-canvas-wrapper">
+            <canvas id="visitors-chart"></canvas>
+          </div>
+        </div>
+        <div class="portal-project-card portal-shadow">
+          <h3>Traffic Sources</h3>
+          <div class="chart-canvas-wrapper">
+            <canvas id="sources-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics Data Grid -->
+      <div class="analytics-card-grid">
+        <div class="portal-project-card portal-shadow">
+          <h3>Popular Pages</h3>
+          <div class="data-list" id="popular-pages">
+            <div class="data-item"><span class="data-label">Loading...</span></div>
+          </div>
+        </div>
+        <div class="portal-project-card portal-shadow">
+          <h3>Device Breakdown</h3>
+          <div class="data-list" id="device-breakdown">
+            <div class="data-item"><span class="data-label">Loading...</span></div>
+          </div>
+        </div>
+        <div class="portal-project-card portal-shadow">
+          <h3>Geographic Distribution</h3>
+          <div class="data-list" id="geo-distribution">
+            <div class="data-item"><span class="data-label">Loading...</span></div>
+          </div>
+        </div>
+        <div class="portal-project-card portal-shadow">
+          <h3>Engagement Events</h3>
+          <div class="data-list" id="engagement-events">
+            <div class="data-item"><span class="data-label">Loading...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visitors Table -->
+      <div class="visitors-dashboard">
+        <div class="admin-table-card portal-shadow">
+          <div class="admin-table-header">
+            <h3>Recent Sessions</h3>
+          </div>
+          <div class="admin-table-container">
+            <div class="admin-table-scroll-wrapper">
+              <table class="admin-table visitors-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Session ID</th>
+                    <th scope="col">Started</th>
+                    <th scope="col">Duration</th>
+                    <th scope="col">Pages</th>
+                    <th scope="col">Device</th>
+                    <th scope="col">Location</th>
+                  </tr>
+                </thead>
+                <tbody id="visitors-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+                  <tr>
+                    <td colspan="6" class="loading-row">Loading visitor data...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- End Visitors Sub-Tab -->
+
+    <!-- Reports & Alerts Sub-Tab -->
+    <div class="analytics-subtab-content" id="analytics-subtab-reports">
+      <h3 class="tab-section-heading">Reports & Alerts</h3>
+      <!-- Saved Reports Section -->
+      <div class="portal-project-card portal-shadow" id="saved-reports-section">
+        <div class="section-header-with-actions">
+          <h3>Saved Reports</h3>
+          <button type="button" class="icon-btn" id="create-report-btn" title="New report" aria-label="Create new report">
+            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+          </button>
+        </div>
+        <div class="reports-list" id="saved-reports-list">
+          <div class="loading-text">Loading reports...</div>
+        </div>
+      </div>
+
+      <!-- Scheduled Reports Section -->
+      <div class="portal-project-card portal-shadow" id="scheduled-reports-section">
+        <div class="section-header-with-actions">
+          <h3>Scheduled Reports</h3>
+        </div>
+        <div class="reports-list" id="scheduled-reports-list">
+          <div class="loading-text">Loading scheduled reports...</div>
+        </div>
+      </div>
+
+      <!-- Metric Alerts Section -->
+      <div class="portal-project-card portal-shadow" id="metric-alerts-section">
+        <div class="section-header-with-actions">
+          <h3>Metric Alerts</h3>
+          <button type="button" class="icon-btn" id="create-alert-btn" title="New alert" aria-label="Create new metric alert">
+            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+          </button>
+        </div>
+        <div class="alerts-list" id="metric-alerts-list">
+          <div class="loading-text">Loading alerts...</div>
+        </div>
+      </div>
+
+      <!-- Performance Metrics -->
+      <div class="portal-project-card portal-shadow">
+        <h3>Core Web Vitals</h3>
+        <div class="vitals-grid">
+          <div class="vital-card">
+            <h4>LCP <span class="info-icon-wrapper" data-tooltip="Largest Contentful Paint - Time until the largest visible element loads.&#10;&#10;Good: <2.5s&#10;Needs Improvement: 2.5-4s&#10;Poor: >4s">${RENDER_ICONS.INFO}</span></h4>
+            <div class="vital-value" id="lcp-value">-</div>
+            <span class="vital-status" id="lcp-status">-</span>
+          </div>
+          <div class="vital-card">
+            <h4>FID <span class="info-icon-wrapper" data-tooltip="First Input Delay - Time from first interaction to browser response.&#10;&#10;Good: <100ms&#10;Needs Improvement: 100-300ms&#10;Poor: >300ms">${RENDER_ICONS.INFO}</span></h4>
+            <div class="vital-value" id="fid-value">-</div>
+            <span class="vital-status" id="fid-status">-</span>
+          </div>
+          <div class="vital-card">
+            <h4>CLS <span class="info-icon-wrapper" data-tooltip="Cumulative Layout Shift - Visual stability score measuring unexpected layout shifts.&#10;&#10;Good: <0.1&#10;Needs Improvement: 0.1-0.25&#10;Poor: >0.25">${RENDER_ICONS.INFO}</span></h4>
+            <div class="vital-value" id="cls-value">-</div>
+            <span class="vital-status" id="cls-status">-</span>
+          </div>
+          <div class="vital-card">
+            <h4>TTFB <span class="info-icon-wrapper" data-tooltip="Time to First Byte - Server response time.&#10;&#10;Good: <800ms&#10;Needs Improvement: 800-1800ms&#10;Poor: >1800ms">${RENDER_ICONS.INFO}</span></h4>
+            <div class="vital-value" id="ttfb-value">-</div>
+            <span class="vital-status" id="ttfb-status">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bundle Analysis -->
+      <div class="portal-project-card portal-shadow">
+        <h3>Bundle Analysis</h3>
+        <div class="bundle-info">
+          <div class="bundle-item">
+            <span>Total Bundle Size</span>
+            <span id="total-bundle-size">-</span>
+          </div>
+          <div class="bundle-item">
+            <span>Main JS</span>
+            <span id="js-bundle-size">-</span>
+          </div>
+          <div class="bundle-item">
+            <span>Vendor JS</span>
+            <span id="css-bundle-size">-</span>
+          </div>
+          <div class="bundle-item">
+            <span>Performance Score</span>
+            <span id="performance-score">-</span>
+          </div>
+        </div>
+      </div>
+    </div><!-- End Reports & Alerts Sub-Tab -->
+  `;
+
+  // Reset initialization flag since DOM was rebuilt
+  analyticsListenersInitialized = false;
+
+  // Destroy existing charts since they reference old canvas elements
+  destroyCharts();
 }

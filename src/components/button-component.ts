@@ -171,9 +171,9 @@ export class ButtonComponent extends BaseComponent<ButtonProps, ButtonState> {
       }
 
       .btn--danger {
-        background: var(--color-danger, #dc3545);
+        background: var(--color-danger, #dc2626);
         color: white;
-        border-color: var(--color-danger, #dc3545);
+        border-color: var(--color-danger, #dc2626);
       }
 
       .btn--danger:hover:not(:disabled) {

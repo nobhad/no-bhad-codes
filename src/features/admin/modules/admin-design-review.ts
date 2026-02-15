@@ -7,6 +7,7 @@
  */
 
 import { createPortalModal } from '../../../components/portal-modal';
+import { createModalDropdown } from '../../../components/modal-dropdown';
 import {
   AnnotationCanvas,
   createAnnotationCanvas,
@@ -115,11 +116,7 @@ async function showDesignReviewModal(): Promise<void> {
         <div class="design-viewer-header">
           <div class="round-selector">
             <label>Design Round:</label>
-            <select id="design-round-select" class="portal-input">
-              <option value="1">Round 1</option>
-              <option value="2">Round 2</option>
-              <option value="3">Final Round</option>
-            </select>
+            <div id="design-round-mount"></div>
           </div>
           <div class="view-controls">
             <button id="design-zoom-in" class="icon-btn" title="Zoom In" aria-label="Zoom In">+</button>
@@ -156,10 +153,10 @@ async function showDesignReviewModal(): Promise<void> {
           <div class="color-selector">
             <label>Color:</label>
             <div class="color-buttons">
-              <button class="color-btn red-btn active" data-color="red" style="background-color: #ef4444;" title="Red"></button>
-              <button class="color-btn yellow-btn" data-color="yellow" style="background-color: #eab308;" title="Yellow"></button>
-              <button class="color-btn blue-btn" data-color="blue" style="background-color: #3b82f6;" title="Blue"></button>
-              <button class="color-btn green-btn" data-color="green" style="background-color: #22c55e;" title="Green"></button>
+              <button class="color-btn red active" data-color="red" title="Red"></button>
+              <button class="color-btn yellow" data-color="yellow" title="Yellow"></button>
+              <button class="color-btn blue" data-color="blue" title="Blue"></button>
+              <button class="color-btn green" data-color="green" title="Green"></button>
             </div>
           </div>
 
@@ -195,6 +192,22 @@ async function showDesignReviewModal(): Promise<void> {
     <button type="button" class="btn btn-secondary" id="design-export-pdf">Export Feedback as PDF</button>
     <button type="button" class="btn btn-secondary" id="design-close-btn">Close</button>
   `;
+
+  // Create design round dropdown
+  const roundMount = el('design-round-mount');
+  if (roundMount) {
+    const roundDropdown = createModalDropdown({
+      options: [
+        { value: '1', label: 'Round 1' },
+        { value: '2', label: 'Round 2' },
+        { value: '3', label: 'Final Round' }
+      ],
+      currentValue: String(currentDeliverable?.roundNumber || 1),
+      ariaLabelPrefix: 'Design round'
+    });
+    roundDropdown.id = 'design-round-select';
+    roundMount.appendChild(roundDropdown);
+  }
 
   el('design-export-pdf')?.addEventListener('click', () => exportFeedbackPDF());
   el('design-close-btn')?.addEventListener('click', () => modal.hide());
@@ -456,7 +469,7 @@ async function exportFeedbackPDF(): Promise<void> {
     : ''
 }
 
-          <p style="margin-top: 40px; font-size: 12px; color: #999;">
+          <p class="pdf-footer-note">
             This document was generated on ${new Date().toLocaleString()}
           </p>
         </page>

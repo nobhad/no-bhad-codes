@@ -7,7 +7,7 @@
  * - Statement of Work (SOW) from proposal data
  */
 
-import { apiFetch, apiPost } from '../../../utils/api-client';
+import { apiFetch, apiPost, parseApiResponse } from '../../../utils/api-client';
 import { showToast } from '../../../utils/toast-notifications';
 import { alertError, alertSuccess, confirmDialog } from '../../../utils/confirm-dialog';
 
@@ -90,7 +90,7 @@ export async function saveProjectReportToFiles(
       return;
     }
 
-    const result = await response.json();
+    const result = await parseApiResponse<{ file: { filename: string } }>(response);
     alertSuccess(`Project report saved: ${result.file.filename}`);
 
     if (onSuccess) {
@@ -193,7 +193,7 @@ export async function saveSowToFiles(
       return;
     }
 
-    const result = await response.json();
+    const result = await parseApiResponse<{ file: { filename: string } }>(response);
     alertSuccess(`Statement of Work saved: ${result.file.filename}`);
 
     if (onSuccess) {

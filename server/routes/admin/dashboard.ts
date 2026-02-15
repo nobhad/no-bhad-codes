@@ -223,10 +223,13 @@ router.get(
       `);
 
       // Get unread messages count (from all threads)
+      // Note: Uses unified messages table with context_type after migration 085
       const messagesCount = await db.get(`
         SELECT COUNT(*) as count
-        FROM general_messages
-        WHERE read_at IS NULL AND sender_type != 'admin'
+        FROM messages
+        WHERE context_type = 'general'
+          AND read_at IS NULL
+          AND sender_type != 'admin'
       `);
 
       res.json({

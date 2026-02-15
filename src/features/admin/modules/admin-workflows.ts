@@ -9,12 +9,13 @@
  */
 
 import type { AdminDashboardContext } from '../admin-types';
-import { apiFetch, apiPost, apiPut, apiDelete, parseJsonResponse } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { confirmDanger } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
+import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
@@ -244,7 +245,7 @@ async function loadApprovalWorkflows(): Promise<void> {
     const res = await apiFetch(`${APPROVALS_API}/workflows`);
     if (!res.ok) throw new Error('Failed to load workflows');
 
-    const data = await parseJsonResponse<{ workflows: WorkflowDefinition[] }>(res);
+    const data = await parseApiResponse<{ workflows: WorkflowDefinition[] }>(res);
     cachedWorkflows = data.workflows || [];
 
     renderWorkflowsTable();
@@ -280,7 +281,7 @@ function renderWorkflowsTable(): void {
 
     return `
       <tr data-id="${w.id}">
-        <td class="name-cell">${escapeHtml(w.name)}${defaultIcon}</td>
+        <td class="name-cell"><span class="workflow-name">${escapeHtml(w.name)}</span>${defaultIcon}</td>
         <td class="type-cell entity-type-cell">
           ${entityLabel}
           <span class="type-stacked">${typeLabel}</span>
@@ -311,20 +312,27 @@ function renderWorkflowsTable(): void {
 
 function setupWorkflowHandlers(): void {
   const tbody = el('workflows-table-body');
+  console.log('[Workflows] setupWorkflowHandlers called, tbody:', !!tbody, 'already attached:', tbody?.dataset.handlersAttached);
   if (!tbody || tbody.dataset.handlersAttached === 'true') return;
   tbody.dataset.handlersAttached = 'true';
+  console.log('[Workflows] Attaching handlers to tbody');
 
   // Table row actions
   tbody.addEventListener('click', async (e) => {
-    const btn = (e.target as HTMLElement).closest('button');
+    const target = e.target as HTMLElement;
+    const btn = target.closest('button');
+    console.log('[Workflows] Click on tbody, target:', target.tagName, 'btn found:', !!btn);
     if (!btn) return;
 
     const id = parseInt(btn.dataset.id || '0', 10);
+    console.log('[Workflows] Button clicked, classes:', btn.className, 'id:', id);
     if (!id) return;
 
     if (btn.classList.contains('workflow-edit')) {
+      console.log('[Workflows] Opening edit modal for id:', id);
       await openWorkflowModal(id);
     } else if (btn.classList.contains('workflow-steps')) {
+      console.log('[Workflows] Opening steps modal for id:', id);
       await openStepsModal(id);
     } else if (btn.classList.contains('workflow-delete')) {
       const name = btn.dataset.name || 'this workflow';
@@ -348,11 +356,13 @@ function setupWorkflowHandlers(): void {
 }
 
 async function openWorkflowModal(id?: number): Promise<void> {
+  console.log('[Workflows] openWorkflowModal called with id:', id);
   const isEdit = !!id;
   let workflow: WorkflowDefinition | null = null;
 
   if (isEdit) {
     workflow = cachedWorkflows.find(w => w.id === id) || null;
+    console.log('[Workflows] Found workflow in cache:', !!workflow);
     if (!workflow) return;
   }
 
@@ -377,21 +387,17 @@ async function openWorkflowModal(id?: number): Promise<void> {
           <textarea id="workflow-description" class="form-input" rows="2"></textarea>
         </div>
         <div class="form-group">
-          <label for="workflow-entity-type">Entity Type *</label>
-          <select id="workflow-entity-type" class="form-input" required>
-            ${ENTITY_TYPES.map(t => `<option value="${t}">${ENTITY_TYPE_LABELS[t]}</option>`).join('')}
-          </select>
+          <label>Entity Type *</label>
+          <div id="workflow-entity-type-dropdown"></div>
         </div>
         <div class="form-group">
-          <label for="workflow-type">Workflow Type *</label>
-          <select id="workflow-type" class="form-input" required>
-            ${WORKFLOW_TYPES.map(t => `<option value="${t}">${WORKFLOW_TYPE_LABELS[t]}</option>`).join('')}
-          </select>
+          <label>Workflow Type *</label>
+          <div id="workflow-type-dropdown"></div>
         </div>
-        <div class="form-group form-group-inline">
-          <label>
-            <input type="checkbox" id="workflow-is-default" />
-            Set as default for this entity type
+        <div class="form-group form-group-checkbox">
+          <label class="portal-checkbox-label">
+            ${getPortalCheckboxHTML({ id: 'workflow-is-default', ariaLabel: 'Set as default for this entity type' })}
+            <span>Set as default for this entity type</span>
           </label>
         </div>
       </form>
@@ -406,32 +412,64 @@ async function openWorkflowModal(id?: number): Promise<void> {
       <button type="submit" form="workflow-form" class="btn btn-primary">SAVE</button>
     `;
 
-    // Cancel button
-    el('workflow-cancel-btn')?.addEventListener('click', () => workflowModal?.hide());
+    // Cancel button - use footer.querySelector since modal isn't in DOM yet
+    workflowModal.footer.querySelector('#workflow-cancel-btn')?.addEventListener('click', () => workflowModal?.hide());
 
     // Preview button
-    el('workflow-preview-btn')?.addEventListener('click', async () => {
+    workflowModal.footer.querySelector('#workflow-preview-btn')?.addEventListener('click', async () => {
       await previewWorkflow();
     });
 
     // Form submit
-    el('workflow-form')?.addEventListener('submit', async (e) => {
+    workflowModal.body.querySelector('#workflow-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       await saveWorkflow();
     });
   }
+  console.log('[Workflows] Modal created/found, workflowModal:', !!workflowModal);
 
-  // Set title and populate form
+  // Set title
   workflowModal.setTitle(isEdit ? 'Edit Workflow' : 'Create Workflow');
 
-  (el('workflow-id') as HTMLInputElement).value = workflow?.id?.toString() || '';
-  (el('workflow-name') as HTMLInputElement).value = workflow?.name || '';
-  (el('workflow-description') as HTMLTextAreaElement).value = workflow?.description || '';
-  (el('workflow-entity-type') as HTMLSelectElement).value = workflow?.entity_type || 'proposal';
-  (el('workflow-type') as HTMLSelectElement).value = workflow?.workflow_type || 'sequential';
-  (el('workflow-is-default') as HTMLInputElement).checked = workflow?.is_default || false;
-
+  // Show modal first so elements are in DOM, then populate form
+  console.log('[Workflows] About to show modal');
   workflowModal.show();
+  console.log('[Workflows] Modal shown, overlay visible:', !workflowModal.overlay.classList.contains('hidden'));
+
+  // Use modal body to query elements (they're now in DOM)
+  const modalBody = workflowModal.body;
+  (modalBody.querySelector('#workflow-id') as HTMLInputElement).value = workflow?.id?.toString() || '';
+  (modalBody.querySelector('#workflow-name') as HTMLInputElement).value = workflow?.name || '';
+  (modalBody.querySelector('#workflow-description') as HTMLTextAreaElement).value = workflow?.description || '';
+
+  // Create entity type dropdown
+  const entityTypeContainer = modalBody.querySelector('#workflow-entity-type-dropdown');
+  if (entityTypeContainer) {
+    entityTypeContainer.innerHTML = '';
+    const entityDropdown = createModalDropdown({
+      options: ENTITY_TYPES.map(t => ({ value: t, label: ENTITY_TYPE_LABELS[t] })),
+      currentValue: workflow?.entity_type || 'proposal',
+      ariaLabelPrefix: 'Entity Type'
+    });
+    entityDropdown.id = 'workflow-entity-type';
+    entityTypeContainer.appendChild(entityDropdown);
+  }
+
+  // Create workflow type dropdown
+  const workflowTypeContainer = modalBody.querySelector('#workflow-type-dropdown');
+  if (workflowTypeContainer) {
+    workflowTypeContainer.innerHTML = '';
+    const typeDropdown = createModalDropdown({
+      options: WORKFLOW_TYPES.map(t => ({ value: t, label: WORKFLOW_TYPE_LABELS[t] })),
+      currentValue: workflow?.workflow_type || 'sequential',
+      ariaLabelPrefix: 'Workflow Type'
+    });
+    typeDropdown.id = 'workflow-type';
+    workflowTypeContainer.appendChild(typeDropdown);
+  }
+
+  (modalBody.querySelector('#workflow-is-default') as HTMLInputElement).checked = workflow?.is_default || false;
+
   manageFocusTrap(workflowModal.overlay);
 }
 
@@ -442,8 +480,8 @@ async function saveWorkflow(): Promise<void> {
   const payload = {
     name: (el('workflow-name') as HTMLInputElement).value.trim(),
     description: (el('workflow-description') as HTMLTextAreaElement).value.trim() || null,
-    entity_type: (el('workflow-entity-type') as HTMLSelectElement).value,
-    workflow_type: (el('workflow-type') as HTMLSelectElement).value,
+    entity_type: (el('workflow-entity-type') as HTMLElement)?.dataset.value || 'proposal',
+    workflow_type: (el('workflow-type') as HTMLElement)?.dataset.value || 'sequential',
     is_default: (el('workflow-is-default') as HTMLInputElement).checked
   };
 
@@ -499,7 +537,7 @@ async function previewWorkflow(): Promise<void> {
     try {
       const res = await apiFetch(`${APPROVALS_API}/workflows/${workflowId}`);
       if (res.ok) {
-        const data = await parseJsonResponse<{ workflow: WorkflowDefinition; steps: WorkflowStep[] }>(res);
+        const data = await parseApiResponse<{ workflow: WorkflowDefinition; steps: WorkflowStep[] }>(res);
         steps = data.steps || [];
       }
     } catch {
@@ -721,7 +759,7 @@ async function openStepsModal(workflowId: number): Promise<void> {
     const res = await apiFetch(`${APPROVALS_API}/workflows/${workflowId}`);
     if (!res.ok) throw new Error('Failed to load workflow');
 
-    const data = await parseJsonResponse<{ workflow: WorkflowDefinition; steps: WorkflowStep[] }>(res);
+    const data = await parseApiResponse<{ workflow: WorkflowDefinition; steps: WorkflowStep[] }>(res);
 
     // Create modal if not exists
     if (!stepModal) {
@@ -737,7 +775,8 @@ async function openStepsModal(workflowId: number): Promise<void> {
         <button type="button" class="btn btn-secondary" id="steps-close-btn">CLOSE</button>
       `;
 
-      el('steps-close-btn')?.addEventListener('click', () => stepModal?.hide());
+      // Use footer.querySelector since modal isn't in DOM yet
+      stepModal.footer.querySelector('#steps-close-btn')?.addEventListener('click', () => stepModal?.hide());
     }
 
     stepModal.setTitle(`Approval Steps: ${escapeHtml(workflow.name)}`);
@@ -762,18 +801,13 @@ async function openStepsModal(workflowId: number): Promise<void> {
           </div>
         `).join('')}
       </div>
-      <hr class="modal-divider" />
       <h4>Add New Step</h4>
       <form id="add-step-form" class="add-step-form">
         <input type="hidden" id="step-workflow-id" value="${workflowId}" />
         <div class="form-row">
           <div class="form-group">
-            <label for="step-approver-type">Approver Type</label>
-            <select id="step-approver-type" class="form-input" required>
-              <option value="user">User (Email)</option>
-              <option value="role">Role</option>
-              <option value="client">Client</option>
-            </select>
+            <label>Approver Type</label>
+            <div id="step-approver-type-dropdown"></div>
           </div>
           <div class="form-group">
             <label for="step-approver-value">Approver</label>
@@ -781,15 +815,15 @@ async function openStepsModal(workflowId: number): Promise<void> {
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group form-group-inline">
-            <label>
-              <input type="checkbox" id="step-optional" />
-              Optional step
-            </label>
-          </div>
           <div class="form-group">
             <label for="step-auto-hours">Auto-approve after (hours)</label>
             <input type="number" id="step-auto-hours" class="form-input" min="0" placeholder="Leave empty to disable" />
+          </div>
+          <div class="form-group form-group-checkbox">
+            <label class="portal-checkbox-label">
+              ${getPortalCheckboxHTML({ id: 'step-optional', ariaLabel: 'Optional step' })}
+              <span>Optional step</span>
+            </label>
           </div>
         </div>
         <button type="submit" class="btn btn-primary btn-sm">ADD STEP</button>
@@ -806,11 +840,27 @@ async function openStepsModal(workflowId: number): Promise<void> {
       });
     });
 
-    // Handle add step form
-    el('add-step-form')?.addEventListener('submit', async (e) => {
+    // Handle add step form - use body.querySelector since modal may not be in DOM
+    stepModal.body.querySelector('#add-step-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       await addStep(workflowId);
     });
+
+    // Create approver type dropdown
+    const approverTypeContainer = stepModal.body.querySelector('#step-approver-type-dropdown');
+    if (approverTypeContainer) {
+      const approverDropdown = createModalDropdown({
+        options: [
+          { value: 'user', label: 'User (Email)' },
+          { value: 'role', label: 'Role' },
+          { value: 'client', label: 'Client' }
+        ],
+        currentValue: 'user',
+        ariaLabelPrefix: 'Approver Type'
+      });
+      approverDropdown.id = 'step-approver-type';
+      approverTypeContainer.appendChild(approverDropdown);
+    }
 
     stepModal.show();
     manageFocusTrap(stepModal.overlay);
@@ -823,7 +873,7 @@ async function openStepsModal(workflowId: number): Promise<void> {
 async function addStep(workflowId: number): Promise<void> {
   const payload = {
     step_order: 999, // Will be normalized server-side
-    approver_type: (el('step-approver-type') as HTMLSelectElement).value,
+    approver_type: (el('step-approver-type') as HTMLElement)?.dataset.value || 'user',
     approver_value: (el('step-approver-value') as HTMLInputElement).value.trim(),
     is_optional: (el('step-optional') as HTMLInputElement).checked,
     auto_approve_after_hours: parseInt((el('step-auto-hours') as HTMLInputElement).value, 10) || null
@@ -876,11 +926,11 @@ async function loadTriggers(): Promise<void> {
 
     if (!triggersRes.ok) throw new Error('Failed to load triggers');
 
-    const triggersData = await parseJsonResponse<{ triggers: WorkflowTrigger[] }>(triggersRes);
+    const triggersData = await parseApiResponse<{ triggers: WorkflowTrigger[] }>(triggersRes);
     cachedTriggers = triggersData.triggers || [];
 
     if (optionsRes.ok) {
-      triggerOptions = await parseJsonResponse<TriggerOptions>(optionsRes);
+      triggerOptions = await parseApiResponse<TriggerOptions>(optionsRes);
     }
 
     renderTriggersTable();
@@ -1003,9 +1053,6 @@ async function openTriggerModal(id?: number): Promise<void> {
       onClose: () => triggerModal?.hide()
     });
 
-    const eventOptions = triggerOptions?.eventTypes?.map(e => `<option value="${e}">${e}</option>`).join('') || '';
-    const actionOptions = triggerOptions?.actionTypes?.map(a => `<option value="${a.type}">${a.description}</option>`).join('') || '';
-
     triggerModal.body.innerHTML = `
       <form id="trigger-form" class="modal-form">
         <input type="hidden" id="trigger-id" />
@@ -1019,16 +1066,12 @@ async function openTriggerModal(id?: number): Promise<void> {
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="trigger-event-type">Event Type *</label>
-            <select id="trigger-event-type" class="form-input" required>
-              ${eventOptions}
-            </select>
+            <label>Event Type *</label>
+            <div id="trigger-event-type-dropdown"></div>
           </div>
           <div class="form-group">
-            <label for="trigger-action-type">Action Type *</label>
-            <select id="trigger-action-type" class="form-input" required>
-              ${actionOptions}
-            </select>
+            <label>Action Type *</label>
+            <div id="trigger-action-type-dropdown"></div>
           </div>
         </div>
         <div class="form-group">
@@ -1044,10 +1087,10 @@ async function openTriggerModal(id?: number): Promise<void> {
             <label for="trigger-priority">Priority</label>
             <input type="number" id="trigger-priority" class="form-input" value="0" min="0" />
           </div>
-          <div class="form-group form-group-inline">
-            <label>
-              <input type="checkbox" id="trigger-active" checked />
-              Active
+          <div class="form-group form-group-checkbox">
+            <label class="portal-checkbox-label">
+              ${getPortalCheckboxHTML({ id: 'trigger-active', ariaLabel: 'Trigger is active' })}
+              <span>Active</span>
             </label>
           </div>
         </div>
@@ -1078,20 +1121,51 @@ async function openTriggerModal(id?: number): Promise<void> {
     });
   }
 
-  // Set title and populate form
+  // Set title
   triggerModal.setTitle(isEdit ? 'Edit Trigger' : 'Create Trigger');
 
-  (el('trigger-id') as HTMLInputElement).value = trigger?.id?.toString() || '';
-  (el('trigger-name') as HTMLInputElement).value = trigger?.name || '';
-  (el('trigger-description') as HTMLTextAreaElement).value = trigger?.description || '';
-  (el('trigger-event-type') as HTMLSelectElement).value = trigger?.event_type || '';
-  (el('trigger-action-type') as HTMLSelectElement).value = trigger?.action_type || '';
-  (el('trigger-action-config') as HTMLTextAreaElement).value = trigger?.action_config ? JSON.stringify(trigger.action_config, null, 2) : '';
-  (el('trigger-conditions') as HTMLTextAreaElement).value = trigger?.conditions ? JSON.stringify(trigger.conditions, null, 2) : '';
-  (el('trigger-priority') as HTMLInputElement).value = (trigger?.priority ?? 0).toString();
-  (el('trigger-active') as HTMLInputElement).checked = trigger?.is_active ?? true;
-
+  // Show modal first so elements are in DOM
   triggerModal.show();
+
+  // Use modal body to query elements
+  const modalBody = triggerModal.body;
+  (modalBody.querySelector('#trigger-id') as HTMLInputElement).value = trigger?.id?.toString() || '';
+  (modalBody.querySelector('#trigger-name') as HTMLInputElement).value = trigger?.name || '';
+  (modalBody.querySelector('#trigger-description') as HTMLTextAreaElement).value = trigger?.description || '';
+
+  // Create event type dropdown
+  const eventTypeContainer = modalBody.querySelector('#trigger-event-type-dropdown');
+  if (eventTypeContainer) {
+    eventTypeContainer.innerHTML = '';
+    const eventDropdown = createModalDropdown({
+      options: triggerOptions?.eventTypes?.map(e => ({ value: e, label: e })) || [],
+      currentValue: trigger?.event_type || '',
+      ariaLabelPrefix: 'Event Type',
+      placeholder: 'Select event type...'
+    });
+    eventDropdown.id = 'trigger-event-type';
+    eventTypeContainer.appendChild(eventDropdown);
+  }
+
+  // Create action type dropdown
+  const actionTypeContainer = modalBody.querySelector('#trigger-action-type-dropdown');
+  if (actionTypeContainer) {
+    actionTypeContainer.innerHTML = '';
+    const actionDropdown = createModalDropdown({
+      options: triggerOptions?.actionTypes?.map(a => ({ value: a.type, label: a.description })) || [],
+      currentValue: trigger?.action_type || '',
+      ariaLabelPrefix: 'Action Type',
+      placeholder: 'Select action type...'
+    });
+    actionDropdown.id = 'trigger-action-type';
+    actionTypeContainer.appendChild(actionDropdown);
+  }
+
+  (modalBody.querySelector('#trigger-action-config') as HTMLTextAreaElement).value = trigger?.action_config ? JSON.stringify(trigger.action_config, null, 2) : '';
+  (modalBody.querySelector('#trigger-conditions') as HTMLTextAreaElement).value = trigger?.conditions ? JSON.stringify(trigger.conditions, null, 2) : '';
+  (modalBody.querySelector('#trigger-priority') as HTMLInputElement).value = (trigger?.priority ?? 0).toString();
+  (modalBody.querySelector('#trigger-active') as HTMLInputElement).checked = trigger?.is_active ?? true;
+
   manageFocusTrap(triggerModal.overlay);
 }
 
@@ -1121,8 +1195,8 @@ async function saveTrigger(): Promise<void> {
   const payload = {
     name: (el('trigger-name') as HTMLInputElement).value.trim(),
     description: (el('trigger-description') as HTMLTextAreaElement).value.trim() || null,
-    event_type: (el('trigger-event-type') as HTMLSelectElement).value,
-    action_type: (el('trigger-action-type') as HTMLSelectElement).value,
+    event_type: (el('trigger-event-type') as HTMLElement)?.dataset.value || '',
+    action_type: (el('trigger-action-type') as HTMLElement)?.dataset.value || '',
     action_config: actionConfig,
     conditions,
     priority: parseInt((el('trigger-priority') as HTMLInputElement).value, 10) || 0,
@@ -1312,7 +1386,7 @@ async function toggleTrigger(id: number): Promise<void> {
     const res = await apiPost(`${TRIGGERS_API}/${id}/toggle`, {});
     if (!res.ok) throw new Error('Failed to toggle trigger');
 
-    const data = await parseJsonResponse<{ trigger: WorkflowTrigger }>(res);
+    const data = await parseApiResponse<{ trigger: WorkflowTrigger }>(res);
     showToast(`Trigger ${data.trigger.is_active ? 'enabled' : 'disabled'}`, 'success');
     await loadTriggers();
   } catch (error) {
@@ -1360,19 +1434,12 @@ async function openTriggerLogsModal(triggerId?: number): Promise<void> {
     triggerLogsModal.body.innerHTML = `
         <div class="trigger-logs-controls">
           <div class="form-group">
-            <label for="logs-trigger-filter">Filter by Trigger</label>
-            <select id="logs-trigger-filter" class="portal-input">
-              <option value="">All Triggers</option>
-            </select>
+            <label>Filter by Trigger</label>
+            <div id="logs-trigger-filter-dropdown"></div>
           </div>
           <div class="form-group">
-            <label for="logs-result-filter">Result</label>
-            <select id="logs-result-filter" class="portal-input">
-              <option value="">All Results</option>
-              <option value="success">Success</option>
-              <option value="failed">Failed</option>
-              <option value="skipped">Skipped</option>
-            </select>
+            <label>Result</label>
+            <div id="logs-result-filter-dropdown"></div>
           </div>
           <button type="button" class="btn btn-sm btn-secondary" id="logs-refresh-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
@@ -1384,38 +1451,52 @@ async function openTriggerLogsModal(triggerId?: number): Promise<void> {
         </div>
       `;
 
-    // Set up filter handlers
-    const triggerFilter = el('logs-trigger-filter');
-    const resultFilter = el('logs-result-filter');
-    const refreshBtn = el('logs-refresh-btn');
-
-    if (triggerFilter) {
-      triggerFilter.addEventListener('change', () => loadTriggerLogs());
-    }
-    if (resultFilter) {
-      resultFilter.addEventListener('change', () => loadTriggerLogs());
-    }
+    // Set up refresh button handler
+    const refreshBtn = triggerLogsModal.body.querySelector('#logs-refresh-btn');
     if (refreshBtn) {
       refreshBtn.addEventListener('click', () => loadTriggerLogs());
     }
   }
 
-  // Populate trigger filter dropdown
-  const triggerSelect = el('logs-trigger-filter') as HTMLSelectElement;
-  if (triggerSelect) {
-    triggerSelect.innerHTML = '<option value="">All Triggers</option>';
-    for (const trigger of cachedTriggers) {
-      const option = document.createElement('option');
-      option.value = trigger.id.toString();
-      option.textContent = trigger.name;
-      triggerSelect.appendChild(option);
-    }
-    if (triggerId) {
-      triggerSelect.value = triggerId.toString();
-    }
+  // Show modal first so elements are in DOM
+  triggerLogsModal.show();
+
+  // Create/update trigger filter dropdown
+  const triggerFilterContainer = triggerLogsModal.body.querySelector('#logs-trigger-filter-dropdown');
+  if (triggerFilterContainer) {
+    triggerFilterContainer.innerHTML = '';
+    const triggerFilterOptions = [
+      { value: '', label: 'All Triggers' },
+      ...cachedTriggers.map(t => ({ value: t.id.toString(), label: t.name }))
+    ];
+    const triggerDropdown = createModalDropdown({
+      options: triggerFilterOptions,
+      currentValue: triggerId?.toString() || '',
+      ariaLabelPrefix: 'Filter by Trigger',
+      onChange: () => loadTriggerLogs()
+    });
+    triggerDropdown.id = 'logs-trigger-filter';
+    triggerFilterContainer.appendChild(triggerDropdown);
   }
 
-  triggerLogsModal.show();
+  // Create result filter dropdown
+  const resultFilterContainer = triggerLogsModal.body.querySelector('#logs-result-filter-dropdown');
+  if (resultFilterContainer) {
+    resultFilterContainer.innerHTML = '';
+    const resultDropdown = createModalDropdown({
+      options: [
+        { value: '', label: 'All Results' },
+        { value: 'success', label: 'Success' },
+        { value: 'failed', label: 'Failed' },
+        { value: 'skipped', label: 'Skipped' }
+      ],
+      currentValue: '',
+      ariaLabelPrefix: 'Result Filter',
+      onChange: () => loadTriggerLogs()
+    });
+    resultDropdown.id = 'logs-result-filter';
+    resultFilterContainer.appendChild(resultDropdown);
+  }
   manageFocusTrap(triggerLogsModal.overlay);
   await loadTriggerLogs();
 }
@@ -1427,8 +1508,8 @@ async function loadTriggerLogs(): Promise<void> {
   listEl.innerHTML = '<div class="loading-message">Loading logs...</div>';
 
   try {
-    const triggerFilter = (el('logs-trigger-filter') as HTMLSelectElement)?.value || '';
-    const resultFilter = (el('logs-result-filter') as HTMLSelectElement)?.value || '';
+    const triggerFilter = (el('logs-trigger-filter') as HTMLElement)?.dataset.value || '';
+    const resultFilter = (el('logs-result-filter') as HTMLElement)?.dataset.value || '';
 
     let url = `${TRIGGERS_API}/logs/executions?limit=100`;
     if (triggerFilter) {
@@ -1438,7 +1519,7 @@ async function loadTriggerLogs(): Promise<void> {
     const res = await apiFetch(url);
     if (!res.ok) throw new Error('Failed to load logs');
 
-    const data = await parseJsonResponse<{ logs: TriggerExecutionLog[] }>(res);
+    const data = await parseApiResponse<{ logs: TriggerExecutionLog[] }>(res);
     let logs = data.logs || [];
 
     // Client-side filter by result if needed
@@ -1529,7 +1610,7 @@ async function loadPendingApprovals(): Promise<void> {
     const res = await apiFetch(`${APPROVALS_API}/active`);
     if (!res.ok) throw new Error('Failed to load pending approvals');
 
-    const data = await parseJsonResponse<{ workflows: ApprovalInstance[] }>(res);
+    const data = await parseApiResponse<{ workflows: ApprovalInstance[] }>(res);
     cachedApprovalInstances = data.workflows || [];
 
     updateApprovalStats();
@@ -1972,7 +2053,7 @@ async function openApprovalHistoryModal(entityType: EntityType, entityId: string
     const res = await apiFetch(`${APPROVALS_API}/entity/${entityType}/${entityId}`);
     if (!res.ok) throw new Error('Failed to load approval history');
 
-    const data = await parseJsonResponse<{
+    const data = await parseApiResponse<{
       instance: ApprovalInstance | null;
       requests: ApprovalRequest[];
       history: ApprovalHistoryEntry[];
@@ -2102,4 +2183,227 @@ function renderApprovalHistoryContent(
       </section>
     </div>
   `;
+}
+
+// ---------------------------------------------------------------------------
+// Render icons for dynamic rendering
+// ---------------------------------------------------------------------------
+
+const RENDER_ICONS = {
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
+  PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+  CHECK: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  X: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  FILE_TEXT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
+};
+
+// ---------------------------------------------------------------------------
+// Dynamic Tab Render
+// ---------------------------------------------------------------------------
+
+/**
+ * Render the workflows tab structure dynamically
+ */
+export function renderWorkflowsTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <!-- Pending Approvals Dashboard -->
+    <div id="pending-approvals-section" class="approval-dashboard-section">
+      <div class="quick-stats">
+        <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="all">
+          <span class="stat-number" id="approvals-total">-</span>
+          <span class="stat-label">Total Active</span>
+        </button>
+        <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="pending">
+          <span class="stat-number" id="approvals-pending">-</span>
+          <span class="stat-label">Pending</span>
+        </button>
+        <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="in_progress">
+          <span class="stat-number" id="approvals-in-progress">-</span>
+          <span class="stat-label">In Progress</span>
+        </button>
+        <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="approved">
+          <span class="stat-number" id="approvals-approved">-</span>
+          <span class="stat-label">Approved</span>
+        </button>
+      </div>
+
+      <div class="admin-table-card portal-shadow" id="pending-approvals-card">
+        <div class="admin-table-header">
+          <h3>Pending Approvals</h3>
+          <div class="admin-table-actions">
+            <button type="button" class="icon-btn" id="approvals-refresh" title="Refresh" aria-label="Refresh approvals">
+              <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            </button>
+          </div>
+        </div>
+        <!-- Bulk Action Toolbar -->
+        <div class="bulk-action-toolbar hidden" id="approvals-bulk-toolbar">
+          <div class="bulk-toolbar-left">
+            <div class="bulk-selection-count">
+              <strong id="approvals-selected-count">0</strong> selected
+              <button type="button" class="bulk-clear-selection" id="bulk-clear-btn">Clear</button>
+            </div>
+          </div>
+          <div class="bulk-toolbar-actions">
+            <button type="button" class="btn btn-sm btn-success" id="bulk-approve-btn">
+              ${RENDER_ICONS.CHECK}
+              Approve All
+            </button>
+            <button type="button" class="btn btn-sm btn-danger" id="bulk-reject-btn">
+              ${RENDER_ICONS.X}
+              Reject All
+            </button>
+          </div>
+        </div>
+        <div class="admin-table-container">
+          <div class="admin-table-scroll-wrapper">
+            <table class="admin-table" aria-label="Pending approvals">
+              <thead>
+                <tr>
+                  <th scope="col" class="checkbox-col">
+                    <div class="portal-checkbox">
+                      <input type="checkbox" id="approvals-select-all" aria-label="Select all approvals" />
+                    </div>
+                  </th>
+                  <th scope="col" class="type-col">Entity</th>
+                  <th scope="col" class="name-col">Name</th>
+                  <th scope="col" class="type-col">Workflow</th>
+                  <th scope="col" class="status-col">Status</th>
+                  <th scope="col" class="date-col">Initiated</th>
+                  <th scope="col" class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pending-approvals-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+                <tr><td colspan="7" class="loading-row">Loading approvals...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Approvals Content (Workflow Definitions) -->
+    <div id="workflows-approvals-content">
+      <div class="admin-table-card portal-shadow">
+        <div class="admin-table-header">
+          <h3>Approval Workflows</h3>
+          <div class="admin-table-actions">
+            <button type="button" class="icon-btn" id="workflows-refresh" title="Refresh" aria-label="Refresh workflows">
+              <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            </button>
+            <button type="button" class="icon-btn" id="create-workflow-btn" title="Create Workflow" aria-label="Create Workflow">
+              <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+            </button>
+          </div>
+        </div>
+        <div class="admin-table-container">
+          <div class="admin-table-scroll-wrapper">
+            <table class="admin-table" aria-label="Approval workflows">
+              <thead>
+                <tr>
+                  <th scope="col" class="name-col">Name</th>
+                  <th scope="col" class="type-col">Entity Type</th>
+                  <th scope="col" class="type-col">Workflow Type</th>
+                  <th scope="col" class="status-col">Status</th>
+                  <th scope="col" class="date-col">Updated</th>
+                  <th scope="col" class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="workflows-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+                <tr><td colspan="6" class="loading-row">Loading workflows...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Triggers Content -->
+    <div id="workflows-triggers-content" class="hidden">
+      <div class="admin-table-card portal-shadow">
+        <div class="admin-table-header">
+          <h3>Event Triggers</h3>
+          <div class="admin-table-actions">
+            <button type="button" class="icon-btn" id="view-trigger-logs-btn" title="View Execution Logs" aria-label="View Execution Logs">
+              <span class="icon-btn-svg">${RENDER_ICONS.FILE_TEXT}</span>
+            </button>
+            <button type="button" class="icon-btn" id="triggers-refresh" title="Refresh" aria-label="Refresh triggers">
+              <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            </button>
+            <button type="button" class="icon-btn" id="create-trigger-btn" title="Create Trigger" aria-label="Create Trigger">
+              <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+            </button>
+          </div>
+        </div>
+        <div class="admin-table-container">
+          <div class="admin-table-scroll-wrapper">
+            <table class="admin-table" aria-label="Event triggers">
+              <thead>
+                <tr>
+                  <th scope="col" class="name-col">Name</th>
+                  <th scope="col" class="type-col">Event</th>
+                  <th scope="col" class="type-col">Action</th>
+                  <th scope="col" class="status-col">Status</th>
+                  <th scope="col" class="date-col">Updated</th>
+                  <th scope="col" class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="triggers-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+                <tr><td colspan="6" class="loading-row">Loading triggers...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email Templates Content -->
+    <div id="workflows-email-templates-content" class="hidden">
+      <div class="admin-table-card portal-shadow">
+        <div class="admin-table-header">
+          <h3>Email Templates</h3>
+          <div class="admin-table-actions">
+            <button type="button" class="icon-btn" id="email-templates-refresh" title="Refresh" aria-label="Refresh templates">
+              <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            </button>
+            <button type="button" class="icon-btn" id="create-email-template-btn" title="Create Template" aria-label="Create Template">
+              <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+            </button>
+          </div>
+        </div>
+        <!-- Category filter tabs -->
+        <div class="template-category-tabs">
+          <button class="template-category-tab active" data-category="all">All</button>
+          <button class="template-category-tab" data-category="notification">Notification</button>
+          <button class="template-category-tab" data-category="invoice">Invoice</button>
+          <button class="template-category-tab" data-category="contract">Contract</button>
+          <button class="template-category-tab" data-category="project">Project</button>
+          <button class="template-category-tab" data-category="reminder">Reminder</button>
+        </div>
+        <div class="admin-table-container">
+          <div class="admin-table-scroll-wrapper">
+            <table class="admin-table" aria-label="Email templates">
+              <thead>
+                <tr>
+                  <th scope="col" class="name-col">Name</th>
+                  <th scope="col" class="type-col">Category</th>
+                  <th scope="col" class="subject-col">Subject</th>
+                  <th scope="col" class="status-col">Status</th>
+                  <th scope="col" class="date-col">Updated</th>
+                  <th scope="col" class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="email-templates-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+                <tr><td colspan="6" class="loading-row">Loading templates...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Reset initialization flags since DOM was rebuilt
+  currentSubtab = 'approvals';
+  selectedApprovalIds.clear();
 }

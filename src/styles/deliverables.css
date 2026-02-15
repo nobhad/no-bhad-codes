@@ -506,19 +506,19 @@ textarea.form-input {
 }
 
 .color-btn.red {
-  background-color: #ef4444;
+  background-color: var(--color-annotation-red);
 }
 
 .color-btn.yellow {
-  background-color: #f59e0b;
+  background-color: var(--color-annotation-yellow);
 }
 
 .color-btn.blue {
-  background-color: #3b82f6;
+  background-color: var(--color-annotation-blue);
 }
 
 .color-btn.green {
-  background-color: #10b981;
+  background-color: var(--color-annotation-green);
 }
 
 .color-btn:hover {

@@ -175,7 +175,17 @@ export function createPortalModal(config: PortalModalConfig): PortalModalInstanc
       // Store current focus to restore later
       previousActiveElement = document.activeElement as HTMLElement;
 
+      // Append to DOM if not already there
+      if (!overlay.parentElement) {
+        console.log('[PortalModal] Appending overlay to document.body');
+        document.body.appendChild(overlay);
+      } else {
+        console.log('[PortalModal] Overlay already in DOM');
+      }
+
+      console.log('[PortalModal] Calling openModalOverlay');
       openModalOverlay(overlay, { allowStack: true });
+      console.log('[PortalModal] Modal should now be visible, hidden class:', overlay.classList.contains('hidden'));
 
       // Focus first focusable element after modal is shown
       // Use requestAnimationFrame to ensure DOM is updated

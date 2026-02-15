@@ -65,7 +65,7 @@
 .file-list .file-item {
   padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--portal-border-medium);
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
   color: var(--portal-text-light);
 }
 

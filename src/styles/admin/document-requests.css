@@ -23,7 +23,7 @@
   cursor: pointer;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--portal-radius-sm);
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-faster);
   font-weight: 400;
   margin-bottom: 0;
 }

@@ -30,7 +30,7 @@ body[data-page="client-portal"]:has(.dashboard-container.hidden) .portal-header 
 body[data-page="client-portal"][data-view="set-password"] .portal-header,
 body[data-page="client-portal"][data-view="set-password"] .portal-header * {
   color: var(--portal-text-light);
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
 /* Nav logo and buttons inherit proper color */
@@ -80,7 +80,7 @@ body[data-page="client-portal"][data-view="set-password"] .portal-footer {
   z-index: 50;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 /* Footer links should match main site */
@@ -131,7 +131,7 @@ body[data-page="client-portal"] .auth-gate {
   left: 0;
   right: 0;
   z-index: var(--z-index-portal-overlay, 90);
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
 }
 
 body[data-page="client-portal"] .auth-gate.hidden {
@@ -227,12 +227,12 @@ body[data-page="client-portal"] .auth-gate-form {
 
 /* Error states for login form */
 body[data-page="client-portal"] .auth-gate-form .form-input.error {
-  border-color: var(--color-danger, #e74c3c);
+  border-color: var(--color-danger);
 }
 
 body[data-page="client-portal"] .auth-gate-form .error-message {
   display: none;
-  color: var(--color-danger, #e74c3c);
+  color: var(--color-danger);
   font-size: 0.875rem;
   margin-top: 0.25rem;
   font-weight: 500;
@@ -244,13 +244,13 @@ body[data-page="client-portal"] .auth-gate-form .error-message:not(:empty) {
 
 body[data-page="client-portal"] .auth-gate .auth-error {
   display: none;
-  color: var(--color-danger, #e74c3c);
+  color: var(--color-danger);
   font-size: 0.875rem;
   margin-bottom: 1rem;
   padding: 0.75rem;
   border-radius: var(--portal-radius-md, 8px);
   background-color: transparent;
-  border: 1px solid var(--color-danger, #e74c3c);
+  border: 1px solid var(--color-danger);
   font-weight: 500;
   text-align: center;
 }
@@ -316,7 +316,7 @@ body[data-page="client-portal"] .auth-link {
   color: var(--portal-text-secondary);
   text-decoration: none;
   font-size: 0.875rem;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 body[data-page="client-portal"] .auth-link:hover {
@@ -364,7 +364,7 @@ body[data-page="client-portal"] .auth-divider {
 .login-form {
   background: var(--portal-bg-dark);
   padding: clamp(1rem, 3vw, 2rem);
-  border-radius: 8px;
+  border-radius: var(--portal-radius-md);
   border: 1px solid var(--portal-border-medium);
   max-width: 100%;
   width: 100%;
@@ -415,7 +415,7 @@ body[data-page="client-portal"] .auth-divider {
 .login-form .btn {
   padding: clamp(10px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
   border: var(--portal-border);
-  border-radius: 6px;
+  border-radius: var(--portal-radius-sm);
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   font-weight: 600;
   cursor: pointer;
@@ -504,7 +504,7 @@ body[data-page="client-portal"] .auth-divider {
 
 /* Form error message */
 .set-password-form .form-error {
-  color: var(--color-danger, #dc3545);
+  color: var(--color-danger);
   font-size: 0.875rem;
   padding: 0.75rem;
   background-color: var(--color-danger-bg);

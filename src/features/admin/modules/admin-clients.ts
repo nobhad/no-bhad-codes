@@ -224,6 +224,100 @@ const CLIENTS_BULK_CONFIG: BulkActionConfig = {
   ]
 };
 
+// ============================================
+// SVG ICONS FOR DYNAMIC RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+  USER_PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Renders the Clients tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderClientsTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <!-- Clients Stats -->
+    <div class="quick-stats">
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="clients">
+        <span class="stat-number" id="clients-total">-</span>
+        <span class="stat-label">Total Clients</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="active" data-table="clients">
+        <span class="stat-number" id="clients-active">-</span>
+        <span class="stat-label">Active</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="pending" data-table="clients">
+        <span class="stat-number" id="clients-pending">-</span>
+        <span class="stat-label">Pending</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="inactive" data-table="clients">
+        <span class="stat-number" id="clients-inactive">-</span>
+        <span class="stat-label">Inactive</span>
+      </button>
+    </div>
+
+    <!-- Clients Table -->
+    <div class="admin-table-card" id="clients-table-card">
+      <div class="admin-table-header">
+        <h3><span class="title-full">Client Accounts</span><span class="title-mobile">Clients</span></h3>
+        <div class="admin-table-actions" id="clients-filter-container">
+          <button class="icon-btn" id="export-clients-btn" title="Export to CSV" aria-label="Export clients to CSV">
+            ${RENDER_ICONS.EXPORT}
+          </button>
+          <button class="icon-btn" id="refresh-clients-btn" title="Refresh" aria-label="Refresh clients">
+            ${RENDER_ICONS.REFRESH}
+          </button>
+          <button class="icon-btn" id="add-client-btn" title="Add Client" aria-label="Add client">
+            ${RENDER_ICONS.USER_PLUS}
+          </button>
+        </div>
+      </div>
+      <!-- Bulk Action Toolbar (hidden initially) -->
+      <div id="clients-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
+      <div class="admin-table-container clients-table-container">
+        <div class="admin-table-scroll-wrapper">
+        <table class="admin-table clients-table">
+          <thead>
+            <tr>
+              <th scope="col" class="bulk-select-cell">
+                <div class="portal-checkbox">
+                  <input type="checkbox" id="clients-select-all" class="bulk-select-all" aria-label="Select all clients" />
+                </div>
+              </th>
+              <th scope="col" class="contact-col">Client</th>
+              <th scope="col" class="type-col">Type</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="count-col" title="Projects">#</th>
+              <th scope="col" class="date-col created-col">Created</th>
+              <th scope="col" class="date-col last-active-col">Last Active</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clients-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            <tr>
+              <td colspan="8" class="loading-row">Loading clients...</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <!-- Pagination -->
+      <div id="clients-pagination" class="table-pagination"></div>
+    </div>
+  `;
+
+  // Clear the DOM cache so elements get re-queried after render
+  domCache.clear();
+}
+
 export function getCurrentClientId(): number | null {
   return currentClientId;
 }
@@ -592,6 +686,13 @@ export async function showClientDetails(clientId: number, ctx?: AdminDashboardCo
 
   // Switch to client-detail tab
   context.switchTab('client-detail');
+
+  // Dynamically render the client detail tab structure
+  const tabContainer = document.getElementById('tab-client-detail');
+  if (tabContainer) {
+    const clientDetailsModule = await import('./admin-client-details');
+    clientDetailsModule.renderClientDetailTab(tabContainer);
+  }
 
   // Populate the detail view
   populateClientDetailView(client);

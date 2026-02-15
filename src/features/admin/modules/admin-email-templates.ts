@@ -8,12 +8,13 @@
  */
 
 import type { AdminDashboardContext } from '../admin-types';
-import { apiFetch, apiPost, apiPut, apiDelete, parseJsonResponse } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { confirmDanger } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
+import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
@@ -126,7 +127,7 @@ export async function loadTemplates(): Promise<void> {
     const res = await apiFetch(API_BASE);
     if (!res.ok) throw new Error('Failed to load email templates');
 
-    const data = await parseJsonResponse<{ templates: EmailTemplate[] }>(res);
+    const data = await parseApiResponse<{ templates: EmailTemplate[] }>(res);
     cachedTemplates = data.templates || [];
 
     renderTemplatesTable();
@@ -291,14 +292,7 @@ async function openTemplateModal(id?: number): Promise<void> {
           </div>
           <div class="form-group">
             <label for="template-category">Category *</label>
-            <select id="template-category" class="form-input" required>
-              <option value="notification">Notification</option>
-              <option value="invoice">Invoice</option>
-              <option value="contract">Contract</option>
-              <option value="project">Project</option>
-              <option value="reminder">Reminder</option>
-              <option value="general">General</option>
-            </select>
+            <div id="template-category-mount"></div>
           </div>
         </div>
         <div class="form-group">
@@ -352,6 +346,25 @@ async function openTemplateModal(id?: number): Promise<void> {
       e.preventDefault();
       await saveTemplate();
     });
+
+    // Create category dropdown
+    const categoryMount = el('template-category-mount');
+    if (categoryMount) {
+      const categoryDropdown = createModalDropdown({
+        options: [
+          { value: 'notification', label: 'Notification' },
+          { value: 'invoice', label: 'Invoice' },
+          { value: 'contract', label: 'Contract' },
+          { value: 'project', label: 'Project' },
+          { value: 'reminder', label: 'Reminder' },
+          { value: 'general', label: 'General' }
+        ],
+        currentValue: 'notification',
+        ariaLabelPrefix: 'Category'
+      });
+      categoryDropdown.id = 'template-category';
+      categoryMount.appendChild(categoryDropdown);
+    }
   }
 
   // Set title and populate form
@@ -361,7 +374,24 @@ async function openTemplateModal(id?: number): Promise<void> {
   (el('template-name') as HTMLInputElement).value = template?.name || '';
   (el('template-name') as HTMLInputElement).disabled = !!template?.is_system;
   (el('template-description') as HTMLInputElement).value = template?.description || '';
-  (el('template-category') as HTMLSelectElement).value = template?.category || 'notification';
+
+  // Set category dropdown value
+  const categoryDropdown = el('template-category');
+  if (categoryDropdown) {
+    const categoryValue = template?.category || 'notification';
+    categoryDropdown.setAttribute('data-value', categoryValue);
+    const categoryLabels: Record<string, string> = {
+      notification: 'Notification',
+      invoice: 'Invoice',
+      contract: 'Contract',
+      project: 'Project',
+      reminder: 'Reminder',
+      general: 'General'
+    };
+    const trigger = categoryDropdown.querySelector('.modal-dropdown-trigger span');
+    if (trigger) trigger.textContent = categoryLabels[categoryValue] || categoryValue;
+  }
+
   (el('template-subject') as HTMLInputElement).value = template?.subject || '';
   (el('template-body-html') as HTMLTextAreaElement).value = template?.body_html || '';
   (el('template-body-text') as HTMLTextAreaElement).value = template?.body_text || '';
@@ -388,10 +418,13 @@ async function saveTemplate(): Promise<void> {
     return;
   }
 
+  const categoryEl = el('template-category');
+  const categoryValue = categoryEl?.getAttribute('data-value') || 'notification';
+
   const payload = {
     name: (el('template-name') as HTMLInputElement).value.trim(),
     description: (el('template-description') as HTMLInputElement).value.trim() || null,
-    category: (el('template-category') as HTMLSelectElement).value,
+    category: categoryValue,
     subject: (el('template-subject') as HTMLInputElement).value.trim(),
     body_html: (el('template-body-html') as HTMLTextAreaElement).value,
     body_text: (el('template-body-text') as HTMLTextAreaElement).value || null,
@@ -476,7 +509,7 @@ async function openPreviewModal(id: number): Promise<void> {
     const res = await apiPost(`${API_BASE}/${id}/preview`, {});
     if (!res.ok) throw new Error('Failed to generate preview');
 
-    const data = await parseJsonResponse<{
+    const data = await parseApiResponse<{
       preview: { subject: string; body_html: string; body_text: string | null };
       sample_data: Record<string, unknown>;
     }>(res);
@@ -571,7 +604,7 @@ async function previewFromForm(): Promise<void> {
     const res = await apiPost(`${API_BASE}/preview`, payload);
     if (!res.ok) throw new Error('Failed to generate preview');
 
-    const data = await parseJsonResponse<{
+    const data = await parseApiResponse<{
       preview: { subject: string; body_html: string; body_text: string | null };
       sample_data: Record<string, unknown>;
     }>(res);
@@ -644,7 +677,7 @@ async function openVersionsModal(id: number): Promise<void> {
     const res = await apiFetch(`${API_BASE}/${id}/versions`);
     if (!res.ok) throw new Error('Failed to load versions');
 
-    const data = await parseJsonResponse<{ versions: TemplateVersion[] }>(res);
+    const data = await parseApiResponse<{ versions: TemplateVersion[] }>(res);
     const versions = data.versions || [];
 
     if (versions.length === 0) {

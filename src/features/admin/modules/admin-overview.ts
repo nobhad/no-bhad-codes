@@ -85,6 +85,18 @@ interface DashboardData {
  * Load overview data for admin dashboard
  */
 export async function loadOverviewData(ctx: AdminDashboardContext): Promise<void> {
+  // Store context for use in click handlers
+  dashboardCtx = ctx;
+
+  // Set up click handler for "View all" tasks button
+  const viewAllTasksBtn = document.getElementById('view-all-tasks-btn');
+  if (viewAllTasksBtn && !viewAllTasksBtn.dataset.listenerAdded) {
+    viewAllTasksBtn.dataset.listenerAdded = 'true';
+    viewAllTasksBtn.addEventListener('click', () => {
+      ctx.switchTab?.('tasks');
+    });
+  }
+
   try {
     // Load all dashboard data in parallel
     const [dashboardData] = await Promise.all([
@@ -614,6 +626,121 @@ function renderDashboardListView(): void {
       dashboardCtx?.switchTab?.('tasks');
     });
   });
+}
+
+// ============================================
+// ICONS FOR STAT CARDS
+// ============================================
+
+const ICONS = {
+  WARNING: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  CONTRACT: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>',
+  USER_PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>',
+  MESSAGE: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Render the overview tab HTML structure dynamically.
+ * Call this before loadOverviewData to create the DOM elements.
+ */
+export function renderOverviewTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <!-- DASHBOARD STAT CARDS -->
+    <h3 class="sr-only">Dashboard Statistics</h3>
+    <div class="dashboard-stats-grid" aria-live="polite" aria-atomic="false">
+      <button
+        class="stat-card stat-card-clickable"
+        data-tab="invoices"
+        data-filter="overdue"
+        type="button"
+        id="attention-overdue-invoices"
+      >
+        <span class="stat-card-icon" aria-hidden="true">${ICONS.WARNING}</span>
+        <span class="stat-number" id="stat-overdue-invoices">-</span>
+        <span class="stat-label">Overdue Invoices</span>
+      </button>
+      <button
+        class="stat-card stat-card-clickable"
+        data-tab="projects"
+        data-filter="pending_contract"
+        type="button"
+        id="attention-pending-contracts"
+      >
+        <span class="stat-card-icon" aria-hidden="true">${ICONS.CONTRACT}</span>
+        <span class="stat-number" id="stat-pending-contracts">-</span>
+        <span class="stat-label">Pending Contracts</span>
+      </button>
+      <button
+        class="stat-card stat-card-clickable"
+        data-tab="leads"
+        data-filter="new_this_week"
+        type="button"
+        id="attention-new-leads"
+      >
+        <span class="stat-card-icon" aria-hidden="true">${ICONS.USER_PLUS}</span>
+        <span class="stat-number" id="stat-new-leads">-</span>
+        <span class="stat-label">New Leads This Week</span>
+      </button>
+      <button
+        class="stat-card stat-card-clickable"
+        data-tab="messages"
+        data-filter="unread"
+        type="button"
+        id="attention-unread-messages"
+      >
+        <span class="stat-card-icon" aria-hidden="true">${ICONS.MESSAGE}</span>
+        <span class="stat-number" id="stat-unread-messages">-</span>
+        <span class="stat-label">Unread Messages</span>
+      </button>
+      <button class="stat-card stat-card-clickable" data-tab="projects" type="button">
+        <span class="stat-number" id="stat-active-projects">-</span>
+        <span class="stat-label">Active Projects</span>
+      </button>
+      <button class="stat-card stat-card-clickable" data-tab="clients" type="button">
+        <span class="stat-number" id="stat-total-clients">-</span>
+        <span class="stat-label">Clients</span>
+      </button>
+      <button class="stat-card stat-card-clickable" data-tab="invoices" type="button">
+        <span class="stat-number" id="stat-revenue-mtd">-</span>
+        <span class="stat-label">Revenue MTD</span>
+      </button>
+      <button class="stat-card stat-card-clickable" data-tab="leads" type="button">
+        <span class="stat-number" id="stat-conversion-rate">-</span>
+        <span class="stat-label">Conversion Rate</span>
+      </button>
+    </div>
+
+    <!-- UPCOMING TASKS -->
+    <div class="upcoming-tasks portal-shadow">
+      <div class="section-header-inline">
+        <h3>Upcoming Tasks</h3>
+        <div class="section-header-actions">
+          <div id="dashboard-tasks-view-toggle-mount"></div>
+          <button type="button" class="btn btn-secondary btn-sm" data-tab="tasks" id="view-all-tasks-btn">
+            View All
+          </button>
+        </div>
+      </div>
+      <div id="dashboard-tasks-kanban-container" class="dashboard-tasks-kanban" style="display: none;"></div>
+      <div id="dashboard-tasks-list-container" class="dashboard-tasks-list">
+        <ul id="upcoming-tasks-list" class="upcoming-tasks-list" aria-live="polite">
+          <li class="loading-row">Loading tasks...</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="recent-activity portal-shadow">
+      <h3>Recent Activity</h3>
+      <ul class="activity-list" id="recent-activity-list" aria-live="polite" aria-atomic="false">
+        <li>Loading...</li>
+      </ul>
+    </div>
+  `;
 }
 
 /**

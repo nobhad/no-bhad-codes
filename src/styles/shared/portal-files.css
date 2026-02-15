@@ -67,7 +67,7 @@
   background: var(--portal-bg-medium);
   color: var(--portal-text-light);
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition: border-color var(--transition-mouse) ease, background-color var(--transition-mouse) ease;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone:hover,
@@ -178,7 +178,7 @@
   border-radius: var(--portal-radius-sm);
   color: var(--portal-text-secondary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast) ease;
   font-size: 0.875rem;
   margin-bottom: 2px;
 }
@@ -461,7 +461,7 @@
   border: 1px solid transparent;
   border-radius: var(--portal-radius-md);
   color: var(--portal-text-light);
-  transition: border-color 0.15s ease;
+  transition: border-color var(--transition-fast) ease;
 }
 
 /* File items are not clickable - buttons inside handle actions */
@@ -549,7 +549,7 @@
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-delete {
   color: var(--portal-text-muted);
-  transition: color 0.2s ease;
+  transition: color var(--transition-mouse) ease;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-delete:hover {

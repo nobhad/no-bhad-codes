@@ -114,7 +114,7 @@
   background: var(--portal-bg-darker);
   color: var(--portal-text-light);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-faster);
 }
 
 .pagination-btn:hover:not(:disabled) {
@@ -154,7 +154,7 @@
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-faster);
 }
 
 .pagination-page-btn:hover:not(.active) {
@@ -247,7 +247,7 @@
   font-size: var(--font-size-sm);
   text-decoration: underline;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: color var(--transition-faster);
 }
 
 .bulk-clear-selection:hover {
@@ -278,7 +278,7 @@
   background: transparent;
   color: var(--color-primary);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .bulk-toolbar-actions .bulk-action-icon-btn:hover {
@@ -301,6 +301,14 @@
 /* Bulk action dropdown */
 .bulk-dropdown {
   position: relative;
+  display: inline-flex;
+}
+
+/* Override table-dropdown positioning for bulk toolbar dropdowns */
+.bulk-toolbar-actions .bulk-dropdown .custom-dropdown-menu,
+.bulk-toolbar-actions .bulk-dropdown.table-dropdown .custom-dropdown-menu {
+  left: auto;
+  right: 0;
 }
 
 .bulk-dropdown-trigger {
@@ -315,16 +323,19 @@
   background: transparent;
   color: var(--color-primary);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .bulk-dropdown-trigger:hover {
   color: var(--color-primary-hover, var(--color-primary));
 }
 
-.bulk-dropdown-menu {
+.bulk-dropdown-menu,
+[data-page="admin"] .bulk-dropdown .bulk-dropdown-menu,
+[data-page="admin"] .bulk-dropdown.table-dropdown .custom-dropdown-menu.bulk-dropdown-menu {
   position: absolute;
-  right: 0;
+  right: 0 !important;
+  left: auto !important;
   top: calc(100% + 4px);
   min-width: 140px;
   max-height: 280px;
@@ -335,16 +346,12 @@
   border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-card);
   z-index: var(--z-index-portal-dropdown, 100);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-4px);
-  transition: all 0.15s ease;
 }
 
-.bulk-dropdown.open .bulk-dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+.bulk-dropdown.open .bulk-dropdown-menu,
+[data-page="admin"] .bulk-dropdown.open .bulk-dropdown-menu,
+[data-page="admin"] .bulk-dropdown.table-dropdown.open .custom-dropdown-menu.bulk-dropdown-menu {
+  display: block;
 }
 
 /* Bulk select cell checkbox alignment */
@@ -375,7 +382,7 @@
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-faster);
 }
 
 .btn-export:hover {
@@ -407,7 +414,7 @@
   opacity: 0;
   visibility: hidden;
   transform: translateY(-4px);
-  transition: all 0.15s ease;
+  transition: all var(--transition-faster);
 }
 
 .export-dropdown.open .export-dropdown-menu {
@@ -428,7 +435,7 @@
   font-size: var(--font-size-sm);
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--transition-faster);
 }
 
 .export-dropdown-item:hover {

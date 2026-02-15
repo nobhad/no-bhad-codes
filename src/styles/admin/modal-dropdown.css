@@ -149,7 +149,7 @@
   font-weight: 400;
   color: var(--portal-text-light);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-faster);
   box-sizing: border-box;
 }
 

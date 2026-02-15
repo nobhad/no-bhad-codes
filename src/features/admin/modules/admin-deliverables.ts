@@ -7,6 +7,7 @@
  */
 
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
+import { createModalDropdown } from '../../../components/modal-dropdown';
 import { openDesignReview } from './admin-design-review';
 import { showToast } from '../../../utils/toast-notifications';
 
@@ -292,11 +293,7 @@ function openUploadModal(): void {
 
       <div class="form-group">
         <label for="upload-round">Design Round</label>
-        <select id="upload-round" class="form-input">
-          <option value="1">Round 1</option>
-          <option value="2">Round 2</option>
-          <option value="3">Final Round</option>
-        </select>
+        <div id="upload-round-mount"></div>
       </div>
 
       <div class="form-group">
@@ -318,6 +315,22 @@ function openUploadModal(): void {
       </div>
     </form>
   `;
+
+  // Create design round dropdown
+  const roundMount = el('upload-round-mount');
+  if (roundMount) {
+    const roundDropdown = createModalDropdown({
+      options: [
+        { value: '1', label: 'Round 1' },
+        { value: '2', label: 'Round 2' },
+        { value: '3', label: 'Final Round' }
+      ],
+      currentValue: '1',
+      ariaLabelPrefix: 'Design round'
+    });
+    roundDropdown.id = 'upload-round';
+    roundMount.appendChild(roundDropdown);
+  }
 
   el('upload-cancel-btn')?.addEventListener('click', () => modal.hide());
 

@@ -1208,11 +1208,12 @@ router.post(
     }
 
     // 2. Create welcome system message in portal inbox
+    // Note: Uses unified messages table with context_type after migration 085
     try {
       await db.run(
-        `INSERT INTO general_messages
-         (client_id, sender_type, sender_name, subject, message, message_type, priority, status)
-         VALUES (?, 'system', 'No Bhad Codes', ?, ?, 'system', 'normal', 'new')`,
+        `INSERT INTO messages
+         (context_type, client_id, sender_type, sender_name, subject, message, message_type, priority, status)
+         VALUES ('general', ?, 'system', 'No Bhad Codes', ?, ?, 'system', 'normal', 'new')`,
         [
           clientId,
           'Welcome to Your Client Portal!',

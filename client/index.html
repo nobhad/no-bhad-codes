@@ -289,6 +289,31 @@
             <span class="btn-loading" style="display: none;">Signing in...</span>
           </button>
         </form>
+        <!-- Magic Link Form (hidden by default) -->
+        <form class="auth-gate-form" id="magic-link-form" method="POST" action="#" onsubmit="return false;" novalidate style="display: none;">
+          <div class="form-group">
+            <label for="magic-link-email" class="sr-only">Email Address</label>
+            <input
+              type="email"
+              id="magic-link-email"
+              name="email"
+              class="form-input"
+              placeholder="Email Address"
+              required
+              autocomplete="username"
+            />
+            <span id="magic-email-error" class="error-message" style="display: none;"></span>
+          </div>
+          <div class="auth-error" id="magic-link-error"></div>
+          <div class="magic-link-success" id="magic-link-success" style="display: none;">
+            <p>A secure login link has been sent to your email.</p>
+            <p class="magic-link-info">Check your inbox and click the link to sign in.</p>
+          </div>
+          <button type="submit" id="magic-link-btn" class="btn btn-primary auth-submit">
+            <span class="btn-text">Send Magic Link</span>
+            <span class="btn-loading" style="display: none;">Sending...</span>
+          </button>
+        </form>
         <div class="auth-gate-footer">
           <a href="/client/forgot-password.html" id="forgot-password-link" class="auth-link">Forgot password?</a>
           <span class="auth-divider">|</span>

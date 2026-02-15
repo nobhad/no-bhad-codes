@@ -20,7 +20,6 @@ import {
   normalizeStatus
 } from '../../../utils/format-utils';
 import { initModalDropdown } from '../../../utils/modal-dropdown';
-import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
 import { createTableDropdown, PROJECT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
@@ -257,6 +256,101 @@ let paginationState: PaginationState = {
   ...getDefaultPaginationState(PROJECTS_PAGINATION_CONFIG),
   ...loadPaginationState(PROJECTS_PAGINATION_CONFIG.storageKey!)
 };
+
+// ============================================
+// SVG ICONS FOR DYNAMIC RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+  PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Renders the Projects tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderProjectsTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <!-- Projects Stats -->
+    <div class="quick-stats">
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="projects">
+        <span class="stat-number" id="projects-total">-</span>
+        <span class="stat-label">Total Projects</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="active" data-table="projects">
+        <span class="stat-number" id="projects-active">-</span>
+        <span class="stat-label">Active</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="completed" data-table="projects">
+        <span class="stat-number" id="projects-completed">-</span>
+        <span class="stat-label">Completed</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="on_hold" data-table="projects">
+        <span class="stat-number" id="projects-on-hold">-</span>
+        <span class="stat-label">On Hold</span>
+      </button>
+    </div>
+
+    <!-- Projects Table -->
+    <div class="admin-table-card" id="projects-card">
+      <div class="admin-table-header">
+        <h3>Projects</h3>
+        <div class="admin-table-actions" id="projects-filter-container">
+          <button class="icon-btn" id="export-projects-btn" title="Export to CSV" aria-label="Export projects to CSV">
+            ${RENDER_ICONS.EXPORT}
+          </button>
+          <button class="icon-btn" id="refresh-projects-btn" title="Refresh" aria-label="Refresh projects">
+            ${RENDER_ICONS.REFRESH}
+          </button>
+          <button class="icon-btn" id="add-project-btn" title="Add Project" aria-label="Add project">
+            ${RENDER_ICONS.PLUS}
+          </button>
+        </div>
+      </div>
+      <!-- Bulk Action Toolbar (hidden initially) -->
+      <div id="projects-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
+      <div class="admin-table-container projects-table-container">
+        <div class="admin-table-scroll-wrapper">
+        <table class="admin-table projects-table">
+          <thead>
+            <tr>
+              <th scope="col" class="bulk-select-cell">
+                <div class="portal-checkbox">
+                  <input type="checkbox" id="projects-select-all" class="bulk-select-all" aria-label="Select all projects" />
+                </div>
+              </th>
+              <th scope="col">Project</th>
+              <th scope="col" class="type-col">Type</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="budget-col">Budget</th>
+              <th scope="col" class="timeline-col">Timeline</th>
+              <th scope="col" class="date-col start-col">Start</th>
+              <th scope="col" class="date-col target-col">Target</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="projects-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            <tr>
+              <td colspan="9" class="loading-row">Loading projects...</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <!-- Pagination -->
+      <div id="projects-pagination" class="table-pagination"></div>
+    </div>
+  `;
+
+  // Clear the DOM cache so elements get re-queried after render
+  domCache.clear();
+}
 
 export function getProjectsData(): LeadProject[] {
   return projectsData;
@@ -3093,7 +3187,6 @@ interface ClientOption {
   company_name: string | null;
 }
 
-let newProjectClientSelectInstance: FilterSelectInstance | null = null;
 
 /**
  * Setup the add project button handler
@@ -3173,15 +3266,12 @@ function ensureAddProjectSelects(): void {
   const newClientFields = document.getElementById('new-client-fields');
 
   const clientMount = document.getElementById('new-project-client-mount');
-  if (clientMount && !clientMount.querySelector('select')) {
-    newProjectClientSelectInstance = createFilterSelect({
-      id: 'new-project-client',
-      ariaLabel: 'Client',
-      emptyOption: 'Select existing client...',
+  if (clientMount && !clientMount.querySelector('.modal-dropdown')) {
+    const clientDropdown = createModalDropdown({
       options: [{ value: 'new', label: '+ Create New Client' }],
-      value: '',
-      className: 'form-input',
-      required: true,
+      currentValue: '',
+      ariaLabelPrefix: 'Client',
+      placeholder: 'Select existing client...',
       onChange: (value: string) => {
         if (!newClientFields) return;
         if (value === 'new') {
@@ -3199,15 +3289,13 @@ function ensureAddProjectSelects(): void {
         }
       }
     });
-    clientMount.appendChild(newProjectClientSelectInstance.element);
+    clientDropdown.id = 'new-project-client';
+    clientMount.appendChild(clientDropdown);
   }
 
   const typeMount = document.getElementById('new-project-type-mount');
-  if (typeMount && !typeMount.querySelector('select')) {
-    const typeInstance = createFilterSelect({
-      id: 'new-project-type',
-      ariaLabel: 'Project type',
-      emptyOption: 'Select type...',
+  if (typeMount && !typeMount.querySelector('.modal-dropdown')) {
+    const typeDropdown = createModalDropdown({
       options: [
         { value: 'simple-site', label: 'Simple Website' },
         { value: 'business-site', label: 'Business Website' },
@@ -3217,19 +3305,17 @@ function ensureAddProjectSelects(): void {
         { value: 'browser-extension', label: 'Browser Extension' },
         { value: 'other', label: 'Other' }
       ],
-      value: '',
-      className: 'form-input',
-      required: true
+      currentValue: '',
+      ariaLabelPrefix: 'Project type',
+      placeholder: 'Select type...'
     });
-    typeMount.appendChild(typeInstance.element);
+    typeDropdown.id = 'new-project-type';
+    typeMount.appendChild(typeDropdown);
   }
 
   const budgetMount = document.getElementById('new-project-budget-mount');
-  if (budgetMount && !budgetMount.querySelector('select')) {
-    const budgetInstance = createFilterSelect({
-      id: 'new-project-budget',
-      ariaLabel: 'Budget',
-      emptyOption: 'Select budget...',
+  if (budgetMount && !budgetMount.querySelector('.modal-dropdown')) {
+    const budgetDropdown = createModalDropdown({
       options: [
         { value: 'under-1k', label: 'Under $1,000' },
         { value: '1k-2.5k', label: '$1,000 - $2,500' },
@@ -3237,19 +3323,17 @@ function ensureAddProjectSelects(): void {
         { value: '5k-10k', label: '$5,000 - $10,000' },
         { value: '10k+', label: '$10,000+' }
       ],
-      value: '',
-      className: 'form-input',
-      required: true
+      currentValue: '',
+      ariaLabelPrefix: 'Budget',
+      placeholder: 'Select budget...'
     });
-    budgetMount.appendChild(budgetInstance.element);
+    budgetDropdown.id = 'new-project-budget';
+    budgetMount.appendChild(budgetDropdown);
   }
 
   const timelineMount = document.getElementById('new-project-timeline-mount');
-  if (timelineMount && !timelineMount.querySelector('select')) {
-    const timelineInstance = createFilterSelect({
-      id: 'new-project-timeline',
-      ariaLabel: 'Timeline',
-      emptyOption: 'Select timeline...',
+  if (timelineMount && !timelineMount.querySelector('.modal-dropdown')) {
+    const timelineDropdown = createModalDropdown({
       options: [
         { value: 'asap', label: 'ASAP' },
         { value: '1-month', label: 'Within 1 Month' },
@@ -3257,11 +3341,12 @@ function ensureAddProjectSelects(): void {
         { value: '3-6-months', label: '3-6 Months' },
         { value: 'flexible', label: 'Flexible' }
       ],
-      value: '',
-      className: 'form-input',
-      required: true
+      currentValue: '',
+      ariaLabelPrefix: 'Timeline',
+      placeholder: 'Select timeline...'
     });
-    timelineMount.appendChild(timelineInstance.element);
+    timelineDropdown.id = 'new-project-timeline';
+    timelineMount.appendChild(timelineDropdown);
   }
 }
 
@@ -3269,18 +3354,35 @@ function ensureAddProjectSelects(): void {
  * Reset dropdown values when modal closes
  */
 function resetAddProjectDropdowns(): void {
-  const ids = ['new-project-client', 'new-project-type', 'new-project-budget', 'new-project-timeline'];
-  ids.forEach((id) => {
-    const select = document.getElementById(id) as HTMLSelectElement;
-    if (select) select.value = '';
+  // Reset ALL modal dropdowns by clearing their data-value and resetting display text
+  const dropdownIds = ['new-project-client', 'new-project-type', 'new-project-budget', 'new-project-timeline'];
+  const placeholders: Record<string, string> = {
+    'new-project-client': 'Select existing client...',
+    'new-project-type': 'Select type...',
+    'new-project-budget': 'Select budget...',
+    'new-project-timeline': 'Select timeline...'
+  };
+
+  dropdownIds.forEach((id) => {
+    const dropdown = document.getElementById(id);
+    if (dropdown?.classList.contains('modal-dropdown')) {
+      dropdown.setAttribute('data-value', '');
+      const trigger = dropdown.querySelector('.modal-dropdown-trigger span');
+      if (trigger) trigger.textContent = placeholders[id] || 'Select...';
+    }
   });
+
+  // Also hide new client fields
+  const newClientFields = document.getElementById('new-client-fields');
+  if (newClientFields) newClientFields.classList.add('hidden');
 }
 
 /**
- * Populate the client dropdown with existing clients (reusable component setOptions)
+ * Populate the client dropdown with existing clients
  */
 async function populateClientDropdown(): Promise<void> {
-  if (!newProjectClientSelectInstance) return;
+  const clientMount = document.getElementById('new-project-client-mount');
+  if (!clientMount) return;
 
   try {
     const response = await apiFetch('/api/clients');
@@ -3288,7 +3390,6 @@ async function populateClientDropdown(): Promise<void> {
       const data = await response.json();
       const clients: ClientOption[] = data.clients || [];
       const options = [
-        { value: '', label: 'Select existing client...' },
         ...clients.map((c) => {
           const displayName = SanitizationUtils.decodeHtmlEntities(c.contact_name || c.email);
           const company = c.company_name ? ` (${SanitizationUtils.decodeHtmlEntities(c.company_name)})` : '';
@@ -3296,7 +3397,36 @@ async function populateClientDropdown(): Promise<void> {
         }),
         { value: 'new', label: '+ Create New Client' }
       ];
-      newProjectClientSelectInstance.setOptions(options, '');
+
+      // Remove existing dropdown and create new one with updated options
+      const existingDropdown = clientMount.querySelector('.modal-dropdown');
+      if (existingDropdown) existingDropdown.remove();
+
+      const newClientFields = document.getElementById('new-client-fields');
+      const clientDropdown = createModalDropdown({
+        options,
+        currentValue: '',
+        ariaLabelPrefix: 'Client',
+        placeholder: 'Select existing client...',
+        onChange: (value: string) => {
+          if (!newClientFields) return;
+          if (value === 'new') {
+            newClientFields.classList.remove('hidden');
+            const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
+            const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
+            if (nameInput) nameInput.required = true;
+            if (emailInput) emailInput.required = true;
+          } else {
+            newClientFields.classList.add('hidden');
+            const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
+            const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
+            if (nameInput) nameInput.required = false;
+            if (emailInput) emailInput.required = false;
+          }
+        }
+      });
+      clientDropdown.id = 'new-project-client';
+      clientMount.appendChild(clientDropdown);
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load clients for dropdown:', error);
@@ -3304,11 +3434,19 @@ async function populateClientDropdown(): Promise<void> {
 }
 
 /**
- * Get input value by ID
+ * Get input value by ID (handles both regular inputs and modal dropdowns)
  */
 function getInputValue(id: string): string {
-  const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-  return el?.value?.trim() || '';
+  const el = document.getElementById(id);
+  if (!el) return '';
+
+  // Handle modal dropdowns (check for data-value attribute)
+  if (el.classList.contains('modal-dropdown')) {
+    return el.getAttribute('data-value')?.trim() || '';
+  }
+
+  // Handle regular inputs, selects, textareas
+  return (el as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement).value?.trim() || '';
 }
 
 /**

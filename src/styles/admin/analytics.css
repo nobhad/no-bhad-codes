@@ -20,10 +20,10 @@
   border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-md);
   color: var(--portal-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .analytics-subtab:hover {
@@ -34,7 +34,7 @@
 .analytics-subtab.active {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: white;
+  color: var(--color-white);
 }
 
 .analytics-subtab-content {
@@ -228,7 +228,7 @@
 }
 
 .vital-status.good {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(var(--color-success-rgb), 0.1);
   color: var(--color-success);
 }
 
@@ -310,7 +310,7 @@
 
 .analytics-breakdown-title {
   font-family: var(--font-family-acme);
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-2) 0;
@@ -426,7 +426,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 /* Match .stat-number */
@@ -442,7 +442,7 @@
 /* Match .stat-label */
 .kpi-card-label {
   display: block;
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   margin-top: var(--space-1);
   text-transform: uppercase;
@@ -452,8 +452,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-size: 0.75rem;
+  gap: var(--space-0-5);
+  font-size: var(--font-size-xs);
   margin-top: auto;
 }
 
@@ -607,7 +607,7 @@
 }
 
 .funnel-stat {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
 }
 
@@ -657,17 +657,17 @@
 .report-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 .report-name {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-primary);
 }
 
 .report-meta {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
@@ -677,15 +677,15 @@
 }
 
 .report-actions button {
-  padding: 6px 12px;
-  font-size: 0.75rem;
+  padding: var(--space-0-5) var(--space-1-5);
+  font-size: var(--font-size-xs);
 }
 
 .report-empty {
   text-align: center;
   padding: var(--space-2);
   color: var(--portal-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 /* ============================================
@@ -700,13 +700,13 @@
 
 .alert-item .badge-muted {
   display: inline-block;
-  padding: 2px 6px;
-  font-size: 0.65rem;
+  padding: var(--space-0-5) var(--space-0-5);
+  font-size: var(--font-size-2xs);
   font-weight: 500;
   background: var(--portal-bg-medium);
   color: var(--portal-text-muted);
   border-radius: var(--portal-radius-sm);
-  margin-right: 4px;
+  margin-right: var(--space-0-5);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -719,17 +719,17 @@
 }
 
 .report-actions .btn-sm {
-  padding: 4px 8px;
-  font-size: 0.7rem;
+  padding: var(--space-0-5) var(--space-1);
+  font-size: var(--font-size-2xs);
 }
 
 .report-actions .btn-danger {
-  padding: 4px 6px;
+  padding: var(--space-0-5);
 }
 
 .report-actions .btn-danger svg {
-  width: 12px;
-  height: 12px;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
 }
 
 /* ============================================
@@ -814,8 +814,8 @@
 }
 
 .health-indicator {
-  width: 12px;
-  height: 12px;
+  width: var(--space-1-5);
+  height: var(--space-1-5);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -843,14 +843,14 @@
 }
 
 .health-label {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-primary);
   flex: 1;
 }
 
 .health-status {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
@@ -882,7 +882,7 @@
 .error-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-0-5);
   padding: var(--space-1) var(--space-1-5);
   background: rgba(var(--color-error-rgb), 0.1);
   border: 1px solid rgba(var(--color-error-rgb), 0.2);
@@ -890,13 +890,13 @@
 }
 
 .error-item-message {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
   font-family: var(--font-family-mono);
 }
 
 .error-item-time {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
@@ -904,7 +904,7 @@
   text-align: center;
   padding: var(--space-2);
   color: var(--portal-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   margin: 0;
 }
 

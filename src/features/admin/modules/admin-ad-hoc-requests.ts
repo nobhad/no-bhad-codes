@@ -13,6 +13,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
+import { createModalDropdown } from '../../../components/modal-dropdown';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import {
   createFilterUI,
@@ -228,16 +229,8 @@ async function fetchRequests(): Promise<AdHocRequest[]> {
     throw new Error(data.message || 'Failed to load ad hoc requests');
   }
 
-  return data.requests as AdHocRequest[];
-}
-
-function buildSelectOptions(options: string[], selected: string): string {
-  return options
-    .map((option) => {
-      const label = formatLabel(option);
-      return `<option value="${option}" ${option === selected ? 'selected' : ''}>${label}</option>`;
-    })
-    .join('');
+  // Ensure we always return an array, even if API returns undefined
+  return Array.isArray(data.requests) ? data.requests : [];
 }
 
 async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTMLElement> {
@@ -603,21 +596,15 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
     <form id="ad-hoc-request-form" class="ad-hoc-request-form">
       <div class="form-group">
         <label for="ad-hoc-status">Status</label>
-        <select id="ad-hoc-status" class="form-input">
-          ${buildSelectOptions(STATUS_OPTIONS, request.status)}
-        </select>
+        <div id="ad-hoc-status-mount" data-current="${request.status}"></div>
       </div>
       <div class="form-group">
         <label for="ad-hoc-priority">Priority</label>
-        <select id="ad-hoc-priority" class="form-input">
-          ${buildSelectOptions(['low', 'normal', 'high', 'urgent'], request.priority)}
-        </select>
+        <div id="ad-hoc-priority-mount" data-current="${request.priority}"></div>
       </div>
       <div class="form-group">
         <label for="ad-hoc-urgency">Urgency</label>
-        <select id="ad-hoc-urgency" class="form-input">
-          ${buildSelectOptions(['normal', 'priority', 'urgent', 'emergency'], request.urgency)}
-        </select>
+        <div id="ad-hoc-urgency-mount" data-current="${request.urgency}"></div>
       </div>
       <div class="form-group">
         <label for="ad-hoc-estimated-hours">Estimated hours</label>
@@ -654,6 +641,50 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
 
   modal.body.appendChild(body);
 
+  // Create modal dropdowns for status, priority, urgency
+  const statusMount = body.querySelector('#ad-hoc-status-mount') as HTMLElement | null;
+  if (statusMount) {
+    const statusDropdown = createModalDropdown({
+      options: STATUS_OPTIONS.map(s => ({ value: s, label: formatLabel(s) })),
+      currentValue: request.status,
+      ariaLabelPrefix: 'Status'
+    });
+    statusDropdown.id = 'ad-hoc-status';
+    statusMount.appendChild(statusDropdown);
+  }
+
+  const priorityMount = body.querySelector('#ad-hoc-priority-mount') as HTMLElement | null;
+  if (priorityMount) {
+    const priorityDropdown = createModalDropdown({
+      options: [
+        { value: 'low', label: 'Low' },
+        { value: 'normal', label: 'Normal' },
+        { value: 'high', label: 'High' },
+        { value: 'urgent', label: 'Urgent' }
+      ],
+      currentValue: request.priority,
+      ariaLabelPrefix: 'Priority'
+    });
+    priorityDropdown.id = 'ad-hoc-priority';
+    priorityMount.appendChild(priorityDropdown);
+  }
+
+  const urgencyMount = body.querySelector('#ad-hoc-urgency-mount') as HTMLElement | null;
+  if (urgencyMount) {
+    const urgencyDropdown = createModalDropdown({
+      options: [
+        { value: 'normal', label: 'Normal' },
+        { value: 'priority', label: 'Priority' },
+        { value: 'urgent', label: 'Urgent' },
+        { value: 'emergency', label: 'Emergency' }
+      ],
+      currentValue: request.urgency,
+      ariaLabelPrefix: 'Urgency'
+    });
+    urgencyDropdown.id = 'ad-hoc-urgency';
+    urgencyMount.appendChild(urgencyDropdown);
+  }
+
   // Add time entries section if task is linked
   if (request.taskId) {
     const timeEntriesUI = await createTimeEntryUI(request.id, request.taskId);
@@ -664,9 +695,9 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
   modal.show();
 
   const form = body.querySelector('#ad-hoc-request-form') as HTMLFormElement | null;
-  const statusEl = body.querySelector('#ad-hoc-status') as HTMLSelectElement | null;
-  const priorityEl = body.querySelector('#ad-hoc-priority') as HTMLSelectElement | null;
-  const urgencyEl = body.querySelector('#ad-hoc-urgency') as HTMLSelectElement | null;
+  const statusEl = body.querySelector('#ad-hoc-status') as HTMLElement | null;
+  const priorityEl = body.querySelector('#ad-hoc-priority') as HTMLElement | null;
+  const urgencyEl = body.querySelector('#ad-hoc-urgency') as HTMLElement | null;
   const estimatedHoursEl = body.querySelector('#ad-hoc-estimated-hours') as HTMLInputElement | null;
   const hourlyRateEl = body.querySelector('#ad-hoc-hourly-rate') as HTMLInputElement | null;
   const flatRateEl = body.querySelector('#ad-hoc-flat-rate') as HTMLInputElement | null;
@@ -675,9 +706,9 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
   const convertTaskBtn = body.querySelector('#convert-ad-hoc-task') as HTMLButtonElement | null;
 
   const buildPayload = () => ({
-    status: statusEl?.value || request.status,
-    priority: priorityEl?.value || request.priority,
-    urgency: urgencyEl?.value || request.urgency,
+    status: statusEl?.getAttribute('data-value') || request.status,
+    priority: priorityEl?.getAttribute('data-value') || request.priority,
+    urgency: urgencyEl?.getAttribute('data-value') || request.urgency,
     estimatedHours: parseNumber(estimatedHoursEl?.value || ''),
     hourlyRate: parseNumber(hourlyRateEl?.value || ''),
     flatRate: parseNumber(flatRateEl?.value || ''),
@@ -730,7 +761,7 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
   });
 
   convertTaskBtn?.addEventListener('click', async () => {
-    const selectedStatus = statusEl?.value || request.status;
+    const selectedStatus = statusEl?.getAttribute('data-value') || request.status;
     if (selectedStatus !== 'approved') {
       showToast('Request must be approved before converting to a task.', 'error');
       return;
@@ -801,6 +832,64 @@ function setupListeners(ctx: AdminDashboardContext): void {
       openRequestModal(request);
     }
   });
+}
+
+// ============================================
+// SVG ICONS FOR DYNAMIC RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Renders the Ad Hoc Requests tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderAdHocRequestsTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <div class="admin-table-card" id="ad-hoc-requests-table-card">
+      <div class="admin-table-header">
+        <h3>Ad Hoc Requests</h3>
+        <div class="admin-table-actions" id="ad-hoc-requests-filter-container">
+          <button class="icon-btn" id="refresh-ad-hoc-requests-btn" title="Refresh" aria-label="Refresh ad hoc requests">
+            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+          </button>
+        </div>
+      </div>
+      <div class="admin-table-container ad-hoc-requests-table-container">
+        <div class="admin-table-scroll-wrapper">
+          <table class="admin-table ad-hoc-requests-table">
+            <thead>
+              <tr>
+                <th scope="col">Request</th>
+                <th scope="col" class="contact-col">Client</th>
+                <th scope="col">Project</th>
+                <th scope="col">Priority</th>
+                <th scope="col" class="status-col">Status</th>
+                <th scope="col" class="date-col">Submitted</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ad-hoc-requests-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              <tr>
+                <td colspan="7" class="loading-row">Loading requests...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="ad-hoc-requests-pagination" class="table-pagination"></div>
+    </div>
+  `;
+
+  // Reset initialization flags so they get re-initialized
+  filterUIInitialized = false;
+  listenersInitialized = false;
 }
 
 export async function loadAdHocRequests(ctx: AdminDashboardContext): Promise<void> {

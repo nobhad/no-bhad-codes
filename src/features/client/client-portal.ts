@@ -281,6 +281,113 @@ export class ClientPortalModule extends BaseModule {
             : getAccessibleIcon('EYE_OFF', 'Hide password');
       });
     }
+
+    // Magic link toggle handler
+    this.setupMagicLinkToggle();
+  }
+
+  /**
+   * Setup magic link toggle and form submission
+   */
+  private setupMagicLinkToggle(): void {
+    const toggle = document.getElementById('magic-link-toggle');
+    const passwordForm = document.getElementById('portal-login-form');
+    const magicLinkForm = document.getElementById('magic-link-form');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+
+    if (!toggle || !passwordForm || !magicLinkForm) {
+      return;
+    }
+
+    // Toggle between password and magic link forms
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isShowingPassword = passwordForm.style.display !== 'none';
+
+      if (isShowingPassword) {
+        // Switch to magic link form
+        passwordForm.style.display = 'none';
+        magicLinkForm.style.display = 'block';
+        toggle.textContent = 'Use password instead';
+        if (forgotPasswordLink) {
+          forgotPasswordLink.style.display = 'none';
+        }
+        // Clear any previous magic link errors/success
+        const magicError = document.getElementById('magic-link-error');
+        const magicSuccess = document.getElementById('magic-link-success');
+        if (magicError) magicError.textContent = '';
+        if (magicSuccess) magicSuccess.style.display = 'none';
+      } else {
+        // Switch to password form
+        passwordForm.style.display = 'block';
+        magicLinkForm.style.display = 'none';
+        toggle.textContent = 'Use magic link instead';
+        if (forgotPasswordLink) {
+          forgotPasswordLink.style.display = '';
+        }
+      }
+    });
+
+    // Magic link form submission
+    magicLinkForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('magic-link-email') as HTMLInputElement;
+      const submitBtn = document.getElementById('magic-link-btn') as HTMLButtonElement;
+      const errorEl = document.getElementById('magic-link-error');
+      const successEl = document.getElementById('magic-link-success');
+      const emailError = document.getElementById('magic-email-error');
+
+      if (!emailInput || !submitBtn) return;
+
+      const email = emailInput.value.trim();
+
+      // Clear previous errors
+      if (errorEl) errorEl.textContent = '';
+      if (emailError) emailError.style.display = 'none';
+      if (successEl) successEl.style.display = 'none';
+
+      if (!email) {
+        if (emailError) {
+          emailError.textContent = 'Email address is required';
+          emailError.style.display = 'block';
+        }
+        return;
+      }
+
+      // Show loading state
+      submitBtn.disabled = true;
+      const btnText = submitBtn.querySelector('.btn-text');
+      const btnLoading = submitBtn.querySelector('.btn-loading');
+      if (btnText) (btnText as HTMLElement).style.display = 'none';
+      if (btnLoading) (btnLoading as HTMLElement).style.display = 'inline';
+
+      try {
+        const { requestMagicLink } = await import('../../auth');
+        const result = await requestMagicLink(email);
+
+        if (result.success) {
+          // Show success message
+          if (successEl) {
+            successEl.style.display = 'block';
+          }
+          // Hide the submit button after success
+          submitBtn.style.display = 'none';
+        } else {
+          if (errorEl) {
+            errorEl.textContent = result.error || 'Failed to send magic link. Please try again.';
+          }
+        }
+      } catch (error) {
+        if (errorEl) {
+          errorEl.textContent = 'Failed to send magic link. Please try again.';
+        }
+        console.error('Magic link error:', error);
+      } finally {
+        submitBtn.disabled = false;
+        if (btnText) (btnText as HTMLElement).style.display = 'inline';
+        if (btnLoading) (btnLoading as HTMLElement).style.display = 'none';
+      }
+    });
   }
 
   private normalizeProjectTabs(): void {

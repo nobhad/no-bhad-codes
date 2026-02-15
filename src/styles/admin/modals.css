@@ -23,14 +23,14 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-overlay-light);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   overflow: auto;
   overscroll-behavior: contain;
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn var(--transition-fast);
   opacity: 1;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--transition-faster);
 }
 
 .modal-content {
@@ -42,10 +42,10 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: var(--portal-bg-darker, var(--color-neutral-100, #fff));
+  background: var(--portal-bg-darker);
   border-radius: var(--portal-radius-md);
-  box-shadow: var(--shadow-modal, 0 8px 24px rgba(0, 0, 0, 0.4));
-  animation: slideUp 0.2s ease;
+  box-shadow: var(--shadow-modal);
+  animation: slideUp var(--transition-fast);
 }
 
 .modal-content > .modal-body {
@@ -104,6 +104,12 @@
   overscroll-behavior: contain;
 }
 
+/* Modal body with form - allow dropdown to overflow */
+[data-page="admin"] .modal-body:has(.modal-dropdown),
+[data-page="client-portal"] .modal-body:has(.modal-dropdown) {
+  overflow: visible;
+}
+
 /* Portal modal footer */
 [data-page="admin"] .modal-footer,
 [data-page="client-portal"] .modal-footer,
@@ -123,19 +129,19 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-overlay-light);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: var(--z-index-portal-modal);
   padding: var(--space-4);
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn var(--transition-fast);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   overflow: hidden;
   overscroll-behavior: contain;
   opacity: 1;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--transition-faster);
 }
 
 .admin-modal-overlay.closing,
@@ -160,7 +166,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: slideUp 0.2s ease;
+  animation: slideUp var(--transition-fast);
 }
 
 /* Wide modal variant for detail views */
@@ -200,8 +206,8 @@
 }
 
 .admin-modal-title svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
   color: var(--portal-text-light);
   flex-shrink: 0;
 }
@@ -216,12 +222,12 @@
 .admin-modal-close {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   color: var(--color-text-secondary);
   cursor: pointer;
   padding: 0;
   line-height: 1;
-  transition: color 0.15s ease;
+  transition: color var(--transition-faster);
 }
 
 .admin-modal-close:hover {
@@ -274,7 +280,7 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   position: relative;
-  transition: color 0.15s ease;
+  transition: color var(--transition-faster);
 }
 
 .admin-modal-tab:hover {
@@ -366,7 +372,7 @@
 .file-preview-code {
   white-space: pre-wrap;
   word-break: break-word;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
   margin: 0;
   color: var(--portal-text-light);
@@ -388,7 +394,7 @@
 }
 
 .md-preview .md-h1 {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-3);
@@ -397,21 +403,21 @@
 }
 
 .md-preview .md-h2 {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   color: var(--portal-text-light);
   margin: var(--space-4) 0 var(--space-2);
 }
 
 .md-preview .md-h3 {
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--portal-text-light);
   margin: var(--space-3) 0 var(--space-2);
 }
 
 .md-preview .md-h4 {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--portal-text-secondary);
   margin: var(--space-2) 0 var(--space-1);
@@ -453,7 +459,7 @@
 
 .md-preview .md-code-block code {
   font-family: var(--font-family-mono, 'Consolas', 'Monaco', monospace);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-light);
   white-space: pre;
 }

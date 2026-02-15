@@ -428,15 +428,17 @@ export class SchedulerService {
     let sentCount = 0;
 
     // Get due contract reminders for projects that haven't been signed yet
+    // Note: signature_token is now on the contracts table (migrated in 074)
     const sql = `
-      SELECT r.*, p.project_name, p.contract_signature_token, c.email, c.contact_name
+      SELECT r.*, p.project_name, con.signature_token, c.email, c.contact_name
       FROM contract_reminders r
       JOIN projects p ON r.project_id = p.id
       LEFT JOIN clients c ON p.client_id = c.id
+      LEFT JOIN contracts con ON con.project_id = p.id
       WHERE r.status = 'pending'
         AND r.scheduled_date <= ?
-        AND p.contract_signed_at IS NULL
-        AND p.contract_signature_token IS NOT NULL
+        AND con.signed_at IS NULL
+        AND con.signature_token IS NOT NULL
         AND p.contract_reminders_enabled = TRUE
     `;
 
@@ -450,8 +452,8 @@ export class SchedulerService {
           continue;
         }
 
-        // Build the signing URL
-        const signingUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000'}/contract/sign/${reminder.contract_signature_token}`;
+        // Build the signing URL (signature_token comes from contracts table)
+        const signingUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000'}/contract/sign/${reminder.signature_token}`;
 
         await this.sendContractReminderEmail({
           email: reminder.email,

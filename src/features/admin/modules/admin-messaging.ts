@@ -13,7 +13,7 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDateTime } from '../../../utils/format-utils';
 import type { Message, AdminDashboardContext } from '../admin-types';
-import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import type {
   ClientResponse,
   MessageThreadResponse,
@@ -85,6 +85,96 @@ interface ClientWithThread {
 // Cache clients with threads for reference
 let _cachedClientsWithThreads: ClientWithThread[] = [];
 
+// ============================================
+// SVG ICONS FOR DYNAMIC RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  SEARCH: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+  PIN: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M12 2L12 12M12 22L12 12M12 12L20 4M12 12L4 4"/></svg>',
+  ATTACH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Renders the Messages tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderMessagesTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <!-- Messages Layout - Split View -->
+    <div class="messages-layout portal-shadow">
+      <!-- Full-width Search Bar -->
+      <div class="messages-global-search">
+        <div class="search-bar">
+          <span class="search-bar-icon" aria-hidden="true">
+            ${RENDER_ICONS.SEARCH}
+          </span>
+          <input type="text" id="messages-search-input" class="search-bar-input" placeholder="Search clients and messages..." aria-label="Search clients and messages" />
+        </div>
+      </div>
+
+      <!-- Left Column: Clients List -->
+      <div class="messages-clients-column">
+        <div class="thread-list-header">
+          <span>Clients</span>
+        </div>
+        <div class="thread-list" id="admin-thread-list" role="listbox" aria-label="Client conversations">
+          <!-- Threads populated by JS -->
+        </div>
+      </div>
+
+      <!-- Right Column: Thread + Compose -->
+      <div class="messages-thread-column">
+        <h3 class="sr-only" id="admin-thread-header">Conversation</h3>
+
+        <!-- Pinned Messages Section -->
+        <div class="pinned-messages hidden" id="pinned-messages-section">
+          <div class="pinned-messages-header">
+            ${RENDER_ICONS.PIN}
+            <span>Pinned</span>
+          </div>
+          <div class="pinned-message-preview" id="pinned-message-preview"></div>
+        </div>
+
+        <!-- Messages Thread -->
+        <div class="messages-thread" id="admin-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
+          <p class="empty-state">No conversation selected</p>
+        </div>
+
+        <!-- Compose Message -->
+        <div class="message-compose" id="admin-compose-area">
+          <div id="admin-attachment-preview" class="attachment-preview hidden"></div>
+          <div class="message-input-wrapper">
+            <label for="admin-message-text" class="sr-only">Message</label>
+            <textarea
+              id="admin-message-text"
+              class="form-textarea"
+              placeholder="Type a message or drop files here..."
+              aria-label="Type your message to the client"
+              tabindex="0"
+              disabled
+            ></textarea>
+          </div>
+          <div class="message-compose-actions">
+            <button type="button" class="btn-attach" id="admin-attach-btn" title="Attach files">
+              ${RENDER_ICONS.ATTACH}
+            </button>
+            <button class="btn btn-secondary" id="admin-send-message" tabindex="0" disabled>Send Message</button>
+          </div>
+          <input type="file" id="admin-attachment-input" class="attachment-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip" />
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Clear cached elements so they get re-queried after render
+  cachedElements.clear();
+}
+
 export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
   const threadList = getElement('admin-thread-list');
   if (!threadList) return;
@@ -95,12 +185,12 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
   try {
     // Fetch both clients and threads in parallel
     const [clientsResponse, threadsResponse] = await Promise.all([
-      fetch('/api/clients', { credentials: 'include' }),
-      fetch('/api/messages/threads', { credentials: 'include' })
+      apiFetch('/api/clients'),
+      apiFetch('/api/messages/threads')
     ]);
 
-    const clientsData = clientsResponse.ok ? (await clientsResponse.json() as { clients?: ClientResponse[] }) : { clients: [] };
-    const threadsData = threadsResponse.ok ? (await threadsResponse.json() as { threads?: (MessageThreadResponse & { message_count?: number; last_message_at?: string })[] }) : { threads: [] };
+    const clientsData = clientsResponse.ok ? await parseApiResponse<{ clients?: ClientResponse[] }>(clientsResponse) : { clients: [] };
+    const threadsData = threadsResponse.ok ? await parseApiResponse<{ threads?: (MessageThreadResponse & { message_count?: number; last_message_at?: string })[] }>(threadsResponse) : { threads: [] };
 
     // Create a map of client_id -> thread info
     const threadMap = new Map<number, MessageThreadResponse & { message_count?: number; last_message_at?: string }>();

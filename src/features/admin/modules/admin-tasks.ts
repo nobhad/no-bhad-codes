@@ -78,7 +78,7 @@ let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
 const STATUS_CONFIG = {
   pending: { label: 'To Do', color: 'var(--portal-text-secondary)' },
   in_progress: { label: 'In Progress', color: 'var(--app-color-primary)' },
-  blocked: { label: 'Blocked', color: '#f59e0b' },
+  blocked: { label: 'Blocked', color: 'var(--color-warning-500)' },
   completed: { label: 'Done', color: 'var(--status-active)' },
   cancelled: { label: 'Cancelled', color: 'var(--status-cancelled)' }
 };

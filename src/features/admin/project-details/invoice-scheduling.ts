@@ -8,7 +8,7 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { AdminAuth } from '../admin-auth';
-import { apiFetch, apiPost } from '../../../utils/api-client';
+import { apiFetch, apiPost, parseApiResponse } from '../../../utils/api-client';
 import {
   confirmDialog,
   confirmDanger,
@@ -43,7 +43,7 @@ export async function processLateFees(
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await parseApiResponse<{ processed: number }>(response);
       alertSuccess(`Late fees applied to ${data.processed || 0} invoices`);
       onSuccess();
     } else {
@@ -201,7 +201,7 @@ export async function loadScheduledInvoices(projectId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/invoices/scheduled?projectId=${projectId}`);
     if (response.ok) {
-      const data = await response.json();
+      const data = await parseApiResponse<{ scheduled: { id: number; amount: number; description: string; scheduled_date: string }[] }>(response);
       const scheduled = data.scheduled || [];
 
       if (scheduled.length === 0) {
@@ -232,7 +232,7 @@ export async function loadRecurringInvoices(projectId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/invoices/recurring?projectId=${projectId}`);
     if (response.ok) {
-      const data = await response.json();
+      const data = await parseApiResponse<{ recurring: { id: number; amount: number; description: string; frequency: string; is_active: boolean; next_date: string }[] }>(response);
       const recurring = data.recurring || [];
 
       if (recurring.length === 0) {

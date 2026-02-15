@@ -270,6 +270,27 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
   margin: 0.5rem 0 0 0;
 }
 
+/* Magic Link Success */
+.magic-link-success {
+  background: rgba(var(--color-success-rgb, 16, 185, 129), 0.1);
+  border: 1px solid rgba(var(--color-success-rgb, 16, 185, 129), 0.3);
+  border-radius: var(--portal-radius-md, 8px);
+  padding: var(--space-4, 16px);
+  text-align: center;
+  margin-bottom: var(--space-4, 16px);
+}
+
+.magic-link-success p {
+  margin: 0;
+  color: var(--color-success, #10b981);
+  font-weight: var(--font-weight-medium, 500);
+}
+
+.magic-link-success .magic-link-info {
+  color: var(--color-neutral-500);
+  margin-top: var(--space-2, 8px);
+}
+
 /* Auth Divider */
 .auth-divider {
   display: flex;

@@ -160,6 +160,100 @@ const INVOICES_BULK_CONFIG: BulkActionConfig = {
 };
 
 // ============================================
+// SVG ICONS FOR DYNAMIC RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+  PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Renders the Invoices tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderInvoicesTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <!-- Invoice Stats -->
+    <div class="quick-stats">
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="invoices">
+        <span class="stat-number" id="invoices-total">-</span>
+        <span class="stat-label">Total Invoices</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="pending" data-table="invoices">
+        <span class="stat-number" id="invoices-pending">-</span>
+        <span class="stat-label">Pending</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="paid" data-table="invoices">
+        <span class="stat-number" id="invoices-paid">-</span>
+        <span class="stat-label">Paid</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="overdue" data-table="invoices">
+        <span class="stat-number" id="invoices-overdue">-</span>
+        <span class="stat-label">Overdue</span>
+      </button>
+    </div>
+
+    <!-- Invoices Table -->
+    <div class="admin-table-card" id="invoices-table-card">
+      <div class="admin-table-header">
+        <h3><span class="title-full">All Invoices</span><span class="title-mobile">Invoices</span></h3>
+        <div class="admin-table-actions" id="invoices-filter-container">
+          <button class="icon-btn" id="export-invoices-btn" title="Export to CSV" aria-label="Export invoices to CSV">
+            <span class="icon-btn-svg">${RENDER_ICONS.EXPORT}</span>
+          </button>
+          <button class="icon-btn" id="refresh-invoices-btn" title="Refresh" aria-label="Refresh invoices">
+            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+          </button>
+          <button class="icon-btn" id="create-invoice-btn" title="Add Invoice" aria-label="Add new invoice">
+            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+          </button>
+        </div>
+      </div>
+      <!-- Bulk Action Toolbar (hidden initially) -->
+      <div id="invoices-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
+      <div class="admin-table-container invoices-table-container">
+        <div class="admin-table-scroll-wrapper">
+          <table class="admin-table invoices-table">
+            <thead>
+              <tr>
+                <th scope="col" class="bulk-select-cell">
+                  <div class="portal-checkbox">
+                    <input type="checkbox" id="invoices-select-all" class="bulk-select-all" aria-label="Select all invoices" />
+                  </div>
+                </th>
+                <th scope="col">Invoice #</th>
+                <th scope="col" class="contact-col">Client</th>
+                <th scope="col">Project</th>
+                <th scope="col" class="budget-col">Amount</th>
+                <th scope="col" class="status-col">Status</th>
+                <th scope="col" class="date-col">Due Date</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invoices-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              <tr>
+                <td colspan="8" class="loading-row">Loading invoices...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Pagination -->
+      <div id="invoices-pagination" class="table-pagination"></div>
+    </div>
+  `;
+
+  // Reset filter UI initialization flag so it gets re-initialized
+  filterUIInitialized = false;
+}
+
+// ============================================
 // MAIN FUNCTIONS
 // ============================================
 

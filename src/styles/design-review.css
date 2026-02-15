@@ -411,5 +411,15 @@
   justify-content: center;
   height: 100%;
   color: var(--portal-text-muted);
-  font-size: 14px;
+  font-size: var(--font-size-sm);
+}
+
+/* ============================================
+   PDF EXPORT STYLES
+   ============================================ */
+
+.pdf-footer-note {
+  margin-top: var(--space-4);
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
 }
