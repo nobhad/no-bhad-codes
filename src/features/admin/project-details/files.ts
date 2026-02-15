@@ -76,7 +76,7 @@ export async function loadProjectFiles(projectId: number): Promise<void> {
   if (!filesList) return;
 
   if (!AdminAuth.isAuthenticated()) {
-    filesList.innerHTML = '<p class="empty-state">Authentication required to view files.</p>';
+    renderEmptyState(filesList, 'Authentication required to view files.');
     return;
   }
 
@@ -128,7 +128,7 @@ export async function loadProjectFiles(projectId: number): Promise<void> {
     }
   } catch (error) {
     console.error('[ProjectFiles] Error loading project files:', error);
-    filesList.innerHTML = '<p class="empty-state">Error loading files.</p>';
+    renderEmptyState(filesList, 'Error loading files.');
   }
 }
 

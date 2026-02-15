@@ -491,7 +491,7 @@ export function showContactDetails(contactId: number): void {
   detailsPanel.innerHTML = `
     <div class="details-header">
       <h3>Contact Form Submission</h3>
-      <button class="close-btn" onclick="window.closeContactDetailsPanel && window.closeContactDetailsPanel()" aria-label="Close panel">×</button>
+      <button class="close-btn btn-close-contact-panel" aria-label="Close panel">×</button>
     </div>
     <div class="contact-details-created">Created ${date}</div>
     <div class="details-actions">
@@ -747,6 +747,14 @@ declare global {
     closeContactDetailsPanel?: () => void;
   }
 }
+
+// Event delegation for close contact panel button
+document.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement;
+  if (target.matches('.btn-close-contact-panel')) {
+    window.closeContactDetailsPanel?.();
+  }
+});
 
 window.closeContactDetailsPanel = function (): void {
   const detailsPanel = getElement('contact-details-panel');

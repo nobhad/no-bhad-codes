@@ -10,6 +10,7 @@
  */
 
 import type { AdminDashboardContext, PerformanceMetricsDisplay, PerformanceMetricDisplay } from '../admin-types';
+import { renderEmptyState } from '../../../components/empty-state';
 
 interface WebVitalsResult {
   lcp: number | null;
@@ -367,7 +368,7 @@ function displayPerformanceAlerts(alerts: string[]): void {
   if (!container) return;
 
   if (alerts.length === 0) {
-    container.innerHTML = '<p class="no-alerts">No performance issues detected</p>';
+    renderEmptyState(container, 'No performance issues detected');
     return;
   }
 

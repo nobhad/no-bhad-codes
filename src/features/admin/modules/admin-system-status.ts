@@ -92,7 +92,7 @@ export function renderSystemStatusTab(container: HTMLElement): void {
     <div class="portal-project-card portal-shadow">
       <h3>Recent Errors</h3>
       <div class="recent-errors-list" id="recent-errors-list">
-        <p class="empty-state-text">No recent errors</p>
+        <p class="empty-state">No recent errors</p>
       </div>
     </div>
 

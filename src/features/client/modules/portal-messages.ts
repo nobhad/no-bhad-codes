@@ -12,6 +12,7 @@ import type { PortalMessage, ClientPortalContext } from '../portal-types';
 import { createDOMCache } from '../../../utils/dom-cache';
 import { showToast } from '../../../utils/toast-notifications';
 import { ICONS } from '../../../constants/icons';
+import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 
 const MESSAGES_API_BASE = '/api/messages';
 const CLIENT_THREAD_TITLE = 'Conversation with Noelle';
@@ -121,11 +122,7 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: b
     }
 
     if (threads.length === 0) {
-      messagesContainer.innerHTML = `
-        <div class="no-messages">
-          <p>No messages yet. Send a message to Noelle to get started.</p>
-        </div>
-      `;
+      renderEmptyState(messagesContainer, 'No messages yet. Send a message to Noelle to get started.', { className: 'no-messages' });
       return;
     }
 
@@ -140,8 +137,7 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: b
     checkPendingEmailChangeMessage();
   } catch (error) {
     console.error('Error loading messages:', error);
-    messagesContainer.innerHTML =
-      '<div class="no-messages"><p>Unable to load messages. Please try again later.</p></div>';
+    renderErrorState(messagesContainer, 'Unable to load messages. Please try again later.', { className: 'no-messages', type: 'network' });
   }
 }
 
@@ -171,7 +167,7 @@ function checkPendingEmailChangeMessage(): void {
  */
 function renderThreadList(container: HTMLElement, threads: MessageThread[], ctx: ClientPortalContext): void {
   if (threads.length === 0) {
-    container.innerHTML = '<div class="no-messages"><p>No conversations</p></div>';
+    renderEmptyState(container, 'No conversations', { className: 'no-messages' });
     return;
   }
 
@@ -309,7 +305,7 @@ async function loadThreadMessages(threadId: number, ctx: ClientPortalContext, bu
     }
   } catch (error) {
     console.error('Error loading thread messages:', error);
-    messagesContainer.innerHTML = '<div class="no-messages"><p>Unable to load messages.</p></div>';
+    renderErrorState(messagesContainer, 'Unable to load messages.', { className: 'no-messages', type: 'network' });
   }
 }
 
@@ -377,7 +373,7 @@ function renderMessages(
   container.setAttribute('aria-live', 'polite');
 
   if (messages.length === 0) {
-    container.innerHTML = '<div class="no-messages"><p>No messages yet. Send a message to Noelle to get started.</p></div>';
+    renderEmptyState(container, 'No messages yet. Send a message to Noelle to get started.', { className: 'no-messages' });
     return;
   }
 

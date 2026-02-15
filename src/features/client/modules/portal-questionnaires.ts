@@ -11,6 +11,7 @@
 import { gsap } from 'gsap';
 import type { ClientPortalContext } from '../portal-types';
 import { ICONS } from '../../../constants/icons';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
 
 // =====================================================
 // TYPES
@@ -151,14 +152,6 @@ function getVisibleQuestions(questions: Question[], answers: Record<string, unkn
   return questions.filter((q) => isQuestionVisible(q, answers));
 }
 
-function getStatusClass(status: ResponseStatus): string {
-  const map: Record<ResponseStatus, string> = {
-    pending: 'status-pending',
-    in_progress: 'status-in_progress',
-    completed: 'status-completed'
-  };
-  return map[status] ?? '';
-}
 
 // =====================================================
 // DATA LOADING
@@ -282,9 +275,7 @@ function renderQuestionnaireCard(response: QuestionnaireResponse): string {
     <div class="cp-questionnaire-card overview-card ${isComplete ? 'completed' : ''}" data-response-id="${response.id}">
       <div class="cp-questionnaire-header">
         <h4 class="cp-questionnaire-title">${escapeHtml(response.questionnaire_name || 'Questionnaire')}</h4>
-        <span class="status-badge ${getStatusClass(response.status)}">
-          ${getStatusLabel(response.status)}
-        </span>
+        ${getStatusBadgeHTML(getStatusLabel(response.status), response.status)}
       </div>
       ${response.project_name ? `<p class="cp-questionnaire-project">For: ${escapeHtml(response.project_name)}</p>` : ''}
       <div class="cp-questionnaire-meta">

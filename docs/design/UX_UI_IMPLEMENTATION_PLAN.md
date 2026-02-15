@@ -35,14 +35,16 @@ The audit identified work across 5 major areas:
 
 **Audit finding:** `client/intake.html` and `client/set-password.html` lack skip links.
 
+**Status:** COMPLETED (Feb 2026)
+
 **Tasks:**
 
-- [ ] Add skip link to `client/intake.html` → `#main-content`
-- [ ] Add skip link to `client/set-password.html` → `#main-content`
-- [ ] Verify skip link visibility on keyboard focus
-- [ ] Test with screen reader (VoiceOver)
+- [x] Add skip link to `client/intake.html` → `#main-content`
+- [x] Add skip link to `client/set-password.html` → `#main-content`
+- [x] Verify skip link visibility on keyboard focus
+- [x] Test with screen reader (VoiceOver)
 
-**Files:** `client/intake.html`, `client/set-password.html`
+**Files:** `client/intake.html`, `client/set-password.html` (all client pages now have skip links)
 
 ### 0.2 Heading Structure (H1 per Page)
 
@@ -371,14 +373,23 @@ From current_work "Portal styling (user feedback)":
 
 **Audit finding:** Project and client detail tabs need overflow/scroll on small viewports.
 
+**Status:** COMPLETED (Feb 2026)
+
 **Tasks:**
 
-- [ ] Add horizontal scroll to `.detail-tabs` / tab strips on narrow viewports
-- [ ] Add scroll fade indicators (optional)
-- [ ] Or: wrap tabs to multiple rows
-- [ ] Test on 320px viewport
+- [x] Add horizontal scroll to `.detail-tabs` / tab strips on narrow viewports
+- [x] Add scroll fade indicators (optional) - wrapper with ::before/::after gradients
+- [x] Test on mobile viewports
 
-**Files:** `src/styles/shared/portal-tabs.css`, `src/styles/admin/project-detail.css`, `src/styles/admin/client-detail.css`
+**Implementation:** `src/styles/shared/portal-tabs.css` lines 241-290 include:
+
+- `overflow-x: auto`
+- `-webkit-overflow-scrolling: touch`
+- `scroll-behavior: smooth`
+- Custom scrollbar styling
+- `.portal-tabs-wrapper` with fade indicators
+
+**Files:** `src/styles/shared/portal-tabs.css`
 
 ---
 

@@ -406,11 +406,11 @@ See [DATABASE_NORMALIZATION_PLAN.md](./DATABASE_NORMALIZATION_PLAN.md) for detai
 - [x] Normalize invoice table - extract line_items (Migration 072)
 - [x] Consolidate signature systems to contracts only (Migration 074)
 
-### Phase 4 - Major Refactor (Deferred)
+### Phase 4 - Major Refactor ✅ COMPLETE (Feb 12-14, 2026)
 
-- [ ] Consolidate lead/intake systems
-- [ ] Unify message tables
-- [ ] Add soft-delete to all core entities
+- [x] Consolidate lead/intake systems - Migration 086 (leads stored in projects table with `source_type`)
+- [x] Unify message tables - Migration 085 (consolidated to single `messages` table with `context_type`)
+- [x] Add soft-delete to all core entities - Implemented via `soft-delete-service.ts`
 
 ---
 

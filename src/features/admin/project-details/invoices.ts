@@ -9,6 +9,7 @@ import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { AdminAuth } from '../admin-auth';
 import { apiFetch, parseApiResponse } from '../../../utils/api-client';
+import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { domCache } from './dom-cache';
 import type { InvoiceResponse, InvoiceLineItem } from '../../../types/api';
 import { getStatusDotHTML } from '../../../components/status-badge';
@@ -46,7 +47,7 @@ export async function loadProjectInvoices(projectId: number): Promise<void> {
   _currentProjectId = projectId;
 
   if (!AdminAuth.isAuthenticated()) {
-    invoicesList.innerHTML = '<p class="empty-state">Authentication required.</p>';
+    renderEmptyState(invoicesList, 'Authentication required.');
     return;
   }
 
@@ -84,7 +85,7 @@ export async function loadProjectInvoices(projectId: number): Promise<void> {
     }
   } catch (error) {
     console.error('[ProjectInvoices] Error loading invoices:', error);
-    invoicesList.innerHTML = '<p class="empty-state">Error loading invoices.</p>';
+    renderErrorState(invoicesList, 'Error loading invoices.', { type: 'general' });
   }
 }
 
@@ -154,12 +155,12 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
   const filteredInvoices = filterInvoices(invoices);
 
   if (invoices.length === 0) {
-    container.innerHTML = '<p class="empty-state">No invoices yet. Create one above.</p>';
+    renderEmptyState(container, 'No invoices yet. Create one above.');
     return;
   }
 
   if (filteredInvoices.length === 0) {
-    container.innerHTML = '<p class="empty-state">No invoices match the selected filter.</p>';
+    renderEmptyState(container, 'No invoices match the selected filter.');
     return;
   }
 

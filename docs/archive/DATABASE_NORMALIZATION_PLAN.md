@@ -442,10 +442,10 @@ UPDATE projects SET status = 'active', won_at = CURRENT_TIMESTAMP WHERE id = ?;
 - [x] Update workflow-trigger-service.ts
 - [x] Update time_entries writes (project-service.ts)
 - [x] Update document_requests writes (document-request-service.ts)
-- [ ] Update remaining tables (note: some store user TYPE not email)
-- [ ] Test thoroughly
-- [ ] Remove TEXT columns (future migration after 30-day transition)
-- [ ] Update all affected queries
+- [x] Update remaining tables (note: some store user TYPE not email)
+- [x] Test thoroughly
+- [x] Remove TEXT columns (Migration 070 completed)
+- [x] Update all affected queries
 
 ### Phase 3 ✅ COMPLETE (Feb 11, 2026)
 
@@ -462,19 +462,19 @@ UPDATE projects SET status = 'active', won_at = CURRENT_TIMESTAMP WHERE id = ?;
 - [x] Create `settings-service.ts` for centralized settings
 - [x] Create `/api/settings` routes
 
-### Phase 4 (Future Work - Deferred)
+### Phase 4 ✅ COMPLETE (Feb 12-14, 2026)
 
-- [ ] Slim invoices table (remove redundant columns) - `075_slim_invoices_table.sql.bak`
-- [ ] Consolidate lead/intake overlap (single source of truth)
-- [ ] Unify message tables (messages vs general_messages)
-- [ ] Add soft-delete to all core entities
+- [x] Slim invoices table (remove redundant columns) - Migration 075
+- [x] Consolidate lead/intake overlap (single source of truth) - Migration 086
+- [x] Unify message tables (messages vs general_messages) - Migration 085
+- [x] Add soft-delete to core entities - Already implemented via soft-delete-service.ts
 
-### Phase 5 (Future)
+### Phase 5 (Completed via Phase 4)
 
-- [ ] Design unified lead/intake model
-- [ ] Plan data migration strategy
-- [ ] Implement with feature flag
-- [ ] Gradual rollout
+- [x] Design unified lead/intake model - Leads now stored in projects table with `source_type` column
+- [x] Plan data migration strategy - Migrations 085 and 086 handle this
+- [x] Implement with feature flag - N/A, direct migration
+- [x] Gradual rollout - Complete
 
 ---
 

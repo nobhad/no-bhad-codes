@@ -15,6 +15,7 @@ import { confirmDialog, alertSuccess, alertError } from '../../../utils/confirm-
 import { createViewToggle } from '../../../components/view-toggle';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { showToast } from '../../../utils/toast-notifications';
+import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 
 interface Folder {
   id: number;
@@ -359,7 +360,7 @@ async function loadFiles(): Promise<void> {
 
     const response = await apiFetch(url);
     if (!response.ok) {
-      filesList.innerHTML = '<p class="empty-state">Error loading files.</p>';
+      renderErrorState(filesList, 'Error loading files.', { type: 'general' });
       return;
     }
 
@@ -394,7 +395,7 @@ async function loadFiles(): Promise<void> {
         ? folderLabels[currentFolderId]
         : 'this folder';
       const emptyMessage = `No files in ${folderLabel}. Upload files above.`;
-      filesList.innerHTML = `<p class="empty-state">${emptyMessage}</p>`;
+      renderEmptyState(filesList, emptyMessage);
       return;
     }
 
@@ -410,7 +411,7 @@ async function loadFiles(): Promise<void> {
 
   } catch (error) {
     console.error('[AdminFiles] Error loading files:', error);
-    filesList.innerHTML = '<p class="empty-state">Error loading files.</p>';
+    renderErrorState(filesList, 'Error loading files.', { type: 'general' });
   }
 }
 
@@ -623,7 +624,7 @@ async function loadFileVersions(fileId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/projects/files/${fileId}/versions`);
     if (!response.ok) {
-      container.innerHTML = '<p class="empty-state">Could not load versions</p>';
+      renderErrorState(container, 'Could not load versions', { type: 'general' });
       return;
     }
 
@@ -631,7 +632,7 @@ async function loadFileVersions(fileId: number): Promise<void> {
     const versions: FileVersion[] = data.versions || [];
 
     if (versions.length === 0) {
-      container.innerHTML = '<p class="empty-state">No version history</p>';
+      renderEmptyState(container, 'No version history');
       return;
     }
 
@@ -664,7 +665,7 @@ async function loadFileVersions(fileId: number): Promise<void> {
 
   } catch (error) {
     console.error('[AdminFiles] Error loading versions:', error);
-    container.innerHTML = '<p class="empty-state">Error loading versions</p>';
+    renderErrorState(container, 'Error loading versions', { type: 'general' });
   }
 }
 
@@ -708,7 +709,7 @@ async function loadFileComments(fileId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/projects/files/${fileId}/comments`);
     if (!response.ok) {
-      container.innerHTML = '<p class="empty-state">Could not load comments</p>';
+      renderErrorState(container, 'Could not load comments', { type: 'general' });
       return;
     }
 
@@ -716,7 +717,7 @@ async function loadFileComments(fileId: number): Promise<void> {
     const comments: FileComment[] = data.comments || [];
 
     if (comments.length === 0) {
-      container.innerHTML = '<p class="empty-state">No comments yet</p>';
+      renderEmptyState(container, 'No comments yet');
       return;
     }
 
@@ -732,7 +733,7 @@ async function loadFileComments(fileId: number): Promise<void> {
 
   } catch (error) {
     console.error('[AdminFiles] Error loading comments:', error);
-    container.innerHTML = '<p class="empty-state">Error loading comments</p>';
+    renderErrorState(container, 'Error loading comments', { type: 'general' });
   }
 }
 
@@ -776,7 +777,7 @@ async function loadFileAccessLog(fileId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/projects/files/${fileId}/access-log`);
     if (!response.ok) {
-      container.innerHTML = '<p class="empty-state">Could not load access log</p>';
+      renderErrorState(container, 'Could not load access log', { type: 'general' });
       return;
     }
 
@@ -784,7 +785,7 @@ async function loadFileAccessLog(fileId: number): Promise<void> {
     const log: AccessLogEntry[] = data.log || [];
 
     if (log.length === 0) {
-      container.innerHTML = '<p class="empty-state">No access history</p>';
+      renderEmptyState(container, 'No access history');
       return;
     }
 
@@ -798,7 +799,7 @@ async function loadFileAccessLog(fileId: number): Promise<void> {
 
   } catch (error) {
     console.error('[AdminFiles] Error loading access log:', error);
-    container.innerHTML = '<p class="empty-state">Error loading access log</p>';
+    renderErrorState(container, 'Error loading access log', { type: 'general' });
   }
 }
 
@@ -967,7 +968,7 @@ async function loadPendingRequests(): Promise<void> {
   try {
     const response = await apiFetch(`/api/document-requests/project/${currentProjectId}/pending`);
     if (!response.ok) {
-      pendingList.innerHTML = '<p class="empty-state">Error loading pending requests.</p>';
+      renderErrorState(pendingList, 'Error loading pending requests.', { type: 'general' });
       return;
     }
 
@@ -976,7 +977,7 @@ async function loadPendingRequests(): Promise<void> {
     _pendingRequestsCache = requests;
 
     if (requests.length === 0) {
-      pendingList.innerHTML = '<p class="empty-state">No pending document requests for this project.</p>';
+      renderEmptyState(pendingList, 'No pending document requests for this project.');
       return;
     }
 
@@ -996,7 +997,7 @@ async function loadPendingRequests(): Promise<void> {
 
   } catch (error) {
     console.error('[AdminFiles] Error loading pending requests:', error);
-    pendingList.innerHTML = '<p class="empty-state">Error loading pending requests.</p>';
+    renderErrorState(pendingList, 'Error loading pending requests.', { type: 'general' });
   }
 }
 

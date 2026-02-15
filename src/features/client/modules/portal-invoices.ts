@@ -13,6 +13,8 @@ import { formatCurrency } from '../../../utils/format-utils';
 import { getContainerLoadingHTML } from '../../../utils/loading-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { ICONS } from '../../../constants/icons';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { createEmptyState, createErrorState } from '../../../components/empty-state';
 
 const INVOICES_API_BASE = '/api/invoices';
 
@@ -67,10 +69,14 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
     console.error('Error loading invoices:', error);
     if (summaryOutstanding) summaryOutstanding.textContent = '$0.00';
     if (summaryPaid) summaryPaid.textContent = '$0.00';
-    const noInvoices = document.createElement('p');
-    noInvoices.className = 'no-invoices-message';
-    noInvoices.textContent = 'Unable to load invoices. Please try again later.';
-    (invoicesContainer as HTMLElement).appendChild(noInvoices);
+    const errorState = createErrorState(
+      'Unable to load invoices. Please try again later.',
+      {
+        className: 'no-invoices-message',
+        onRetry: () => loadInvoices(ctx)
+      }
+    );
+    (invoicesContainer as HTMLElement).appendChild(errorState);
   }
 }
 
@@ -90,11 +96,11 @@ function renderInvoicesList(
   if (noInvoicesMsg) noInvoicesMsg.remove();
 
   if (invoices.length === 0) {
-    const noInvoices = document.createElement('p');
-    noInvoices.className = 'no-invoices-message';
-    noInvoices.textContent =
-      'No invoices yet. Your first invoice will appear here once your project begins.';
-    container.appendChild(noInvoices);
+    const emptyState = createEmptyState(
+      'No invoices yet. Your first invoice will appear here once your project begins.',
+      { className: 'no-invoices-message' }
+    );
+    container.appendChild(emptyState);
     return;
   }
 
@@ -103,7 +109,6 @@ function renderInvoicesList(
     invoiceElement.className = 'invoice-item';
     invoiceElement.dataset.invoiceId = String(invoice.id);
 
-    const statusClass = getInvoiceStatusClass(invoice.status);
     const statusLabel = getInvoiceStatusLabel(invoice.status);
 
     // Show receipt button for paid/partial invoices
@@ -116,7 +121,7 @@ function renderInvoicesList(
         <span class="invoice-project">${ctx.escapeHtml(invoice.project_name || 'Project')}</span>
       </div>
       <div class="invoice-amount">${formatCurrency(invoice.amount_total)}</div>
-      <span class="status-badge ${statusClass}">${statusLabel}</span>
+      ${getStatusBadgeHTML(statusLabel, invoice.status)}
       <div class="invoice-actions">
         <button class="icon-btn btn-preview-invoice" data-invoice-id="${invoice.id}" aria-label="Preview invoice" title="Preview">
           ${ICONS.EYE}
@@ -142,22 +147,6 @@ function renderInvoicesList(
   });
 
   attachInvoiceActionListeners(container, ctx);
-}
-
-/**
- * Get CSS class for invoice status
- */
-function getInvoiceStatusClass(status: string): string {
-  const statusMap: Record<string, string> = {
-    draft: 'status-draft',
-    sent: 'status-sent',
-    viewed: 'status-viewed',
-    partial: 'status-partial',
-    paid: 'status-paid',
-    overdue: 'status-overdue',
-    cancelled: 'status-cancelled'
-  };
-  return statusMap[status] || 'status-pending';
 }
 
 /**

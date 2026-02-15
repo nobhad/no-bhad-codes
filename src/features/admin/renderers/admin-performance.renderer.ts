@@ -10,6 +10,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createLogger } from '../../../utils/logging';
+import { renderEmptyState } from '../../../components/empty-state';
 
 const logger = createLogger('AdminPerformanceRenderer');
 
@@ -107,12 +108,7 @@ class AdminPerformanceRenderer {
     if (!container) return;
 
     if (alerts.length === 0) {
-      container.innerHTML = `
-        <div class="no-alerts">
-          <span class="alert-icon success">&#10003;</span>
-          <span>No performance issues detected</span>
-        </div>
-      `;
+      renderEmptyState(container, 'No performance issues detected');
       return;
     }
 
@@ -248,7 +244,7 @@ class AdminPerformanceRenderer {
     if (!container) return;
 
     if (sizes.length === 0) {
-      container.innerHTML = '<p class="no-data">No bundle data available</p>';
+      renderEmptyState(container, 'No bundle data available');
       return;
     }
 

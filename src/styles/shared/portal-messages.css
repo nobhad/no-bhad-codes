@@ -943,7 +943,16 @@
   }
 }
 
-/* Thread list becomes tabs on mobile */
+/* =====================================================
+   MOBILE CLIENT DROPDOWN
+   ===================================================== */
+
+/* Hidden on desktop */
+:is([data-page="admin"], [data-page="client-portal"]) .messages-mobile-select {
+  display: none;
+}
+
+/* Thread list becomes dropdown on mobile */
 @media (max-width: 700px) {
   :is([data-page="admin"], [data-page="client-portal"]) .messages-layout {
     grid-template-columns: 1fr;
@@ -960,42 +969,34 @@
     grid-row: 1;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+  /* Show mobile dropdown */
+  :is([data-page="admin"], [data-page="client-portal"]) .messages-mobile-select {
+    display: block;
     grid-column: 1;
     grid-row: 2;
-    border-right: none;
+    padding: var(--space-2);
+    background: var(--color-neutral-200);
     border-bottom: 1px solid var(--portal-border);
-    max-height: 180px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .messages-mobile-select .form-select {
+    width: 100%;
+    background: var(--color-black);
+    color: var(--portal-text-light);
+    border: 1px solid var(--portal-border);
+    border-radius: var(--portal-radius-md);
+    padding: var(--space-1-5) var(--space-2);
+    font-size: var(--font-size-sm);
+  }
+
+  /* Hide thread list column on mobile */
+  :is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+    display: none;
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .messages-thread-column {
     grid-column: 1;
     grid-row: 3;
-  }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .thread-list-container,
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
-    max-height: 180px;
-  }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .thread-list {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    gap: 0;
-  }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .thread-item {
-    min-width: 200px;
-    flex-shrink: 0;
-    border-bottom: none;
-    border-right: 1px solid var(--portal-border);
-  }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .thread-item.active {
-    border-left: none;
-    border-bottom: 3px solid var(--color-primary);
   }
 }
 

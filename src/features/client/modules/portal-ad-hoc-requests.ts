@@ -11,6 +11,7 @@ import type { ClientPortalContext } from '../portal-types';
 import { createPortalModal } from '../../../components/portal-modal';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatCurrency } from '../../../utils/format-utils';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
 
 const REQUESTS_API = '/api/ad-hoc-requests';
 const PROJECTS_API = '/api/projects';
@@ -78,19 +79,21 @@ function getStatusLabel(status: string): string {
   return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function getRequestStatusBadgeClass(status: string): string {
+/**
+ * Map ad hoc request status to badge variant.
+ */
+function getRequestStatusVariant(status: string): string {
   const statusMap: Record<string, string> = {
-    submitted: 'status-pending',
-    reviewing: 'status-pending',
-    quoted: 'status-pending',
-    approved: 'status-active',
-    in_progress: 'status-in_progress',
-    completed: 'status-completed',
-    declined: 'status-cancelled',
-    cancelled: 'status-cancelled'
+    submitted: 'pending',
+    reviewing: 'pending',
+    quoted: 'pending',
+    approved: 'active',
+    in_progress: 'in_progress',
+    completed: 'completed',
+    declined: 'cancelled',
+    cancelled: 'cancelled'
   };
-
-  return statusMap[status] || 'status-pending';
+  return statusMap[status] || 'pending';
 }
 
 // ---------------------------------------------------------------------------
@@ -225,7 +228,7 @@ function renderRequests(requests: AdHocRequest[]): void {
     card.innerHTML = `
       <div class="requests-card-header">
         <span class="requests-card-title">${escapeHtml(request.title)}</span>
-        <span class="requests-card-status status-badge ${getRequestStatusBadgeClass(request.status)}">${escapeHtml(getStatusLabel(request.status))}</span>
+        <span class="requests-card-status">${getStatusBadgeHTML(getStatusLabel(request.status), getRequestStatusVariant(request.status))}</span>
       </div>
       <div class="requests-card-meta">
         <span>${escapeHtml(getStatusLabel(request.requestType))}</span>

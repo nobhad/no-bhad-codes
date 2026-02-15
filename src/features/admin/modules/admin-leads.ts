@@ -44,6 +44,7 @@ import {
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { exportToCsv, LEADS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { createViewToggle } from '../../../components/view-toggle';
+import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 
 interface LeadsData {
   leads: Lead[];
@@ -1035,7 +1036,7 @@ export async function showLeadDetails(leadId: number): Promise<void> {
     <div class="details-header">
       <h3>Lead Details</h3>
       <div class="lead-score-badge ${scoreClass}">Score: ${score}</div>
-      <button class="close-btn" onclick="window.closeDetailsPanel()" aria-label="Close panel">×</button>
+      <button class="close-btn btn-close-details-panel" aria-label="Close panel">×</button>
     </div>
     <div class="lead-details-created">Created ${formatDateTime(lead.created_at)}</div>
     <div class="details-actions">
@@ -1258,6 +1259,14 @@ declare global {
   }
 }
 
+// Event delegation for close panel button
+document.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement;
+  if (target.matches('.btn-close-details-panel')) {
+    window.closeDetailsPanel();
+  }
+});
+
 window.closeDetailsPanel = function (): void {
   // Close lead details panel
   const leadDetailsPanel = getElement('lead-details-panel');
@@ -1380,18 +1389,18 @@ async function loadConversionFunnel(): Promise<void> {
       }));
       renderConversionFunnel(container, funnel);
     } else {
-      container.innerHTML = '<div class="empty-state">Unable to load funnel data</div>';
+      renderErrorState(container, 'Unable to load funnel data', { type: 'general' });
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to load conversion funnel:', error);
-    container.innerHTML = '<div class="empty-state">Error loading funnel</div>';
+    renderErrorState(container, 'Error loading funnel', { type: 'general' });
   }
 }
 
 function renderConversionFunnel(container: HTMLElement, funnel: FunnelStage[]): void {
   const safeFunnel = Array.isArray(funnel) ? funnel : [];
   if (safeFunnel.length === 0) {
-    container.innerHTML = '<div class="empty-state">No funnel data available</div>';
+    renderEmptyState(container, 'No funnel data available');
     return;
   }
 
@@ -1447,17 +1456,17 @@ async function loadSourcePerformance(): Promise<void> {
         .filter((s: SourcePerformance) => s.source.length > 0);
       renderSourcePerformance(container, sources);
     } else {
-      container.innerHTML = '<div class="empty-state">Unable to load source data</div>';
+      renderErrorState(container, 'Unable to load source data', { type: 'general' });
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to load source performance:', error);
-    container.innerHTML = '<div class="empty-state">Error loading sources</div>';
+    renderErrorState(container, 'Error loading sources', { type: 'general' });
   }
 }
 
 function renderSourcePerformance(container: HTMLElement, sources: SourcePerformance[]): void {
   if (sources.length === 0) {
-    container.innerHTML = '<div class="empty-state">No source data available</div>';
+    renderEmptyState(container, 'No source data available');
     return;
   }
 
@@ -1508,11 +1517,11 @@ export async function loadScoringRules(): Promise<void> {
       const data: { rules: ScoringRule[] } = await response.json();
       renderScoringRules(container, data.rules || []);
     } else {
-      container.innerHTML = '<div class="empty-state">Unable to load scoring rules</div>';
+      renderErrorState(container, 'Unable to load scoring rules', { type: 'general' });
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to load scoring rules:', error);
-    container.innerHTML = '<div class="empty-state">Error loading rules</div>';
+    renderErrorState(container, 'Error loading rules', { type: 'general' });
   }
 }
 
@@ -1526,7 +1535,7 @@ function setupScoringRulesListeners(): void {
 
 function renderScoringRules(container: HTMLElement, rules: ScoringRule[]): void {
   if (rules.length === 0) {
-    container.innerHTML = '<div class="empty-state">No scoring rules configured</div>';
+    renderEmptyState(container, 'No scoring rules configured');
     return;
   }
 

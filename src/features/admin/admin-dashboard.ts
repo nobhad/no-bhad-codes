@@ -607,6 +607,16 @@ class AdminDashboard {
       }
     }, true); // Use capture phase to catch events before they're blocked
 
+    // Details overlay - close panels when clicking overlay
+    const detailsOverlay = document.getElementById('details-overlay');
+    if (detailsOverlay) {
+      detailsOverlay.addEventListener('click', () => {
+        if (typeof window.closeDetailsPanel === 'function') {
+          window.closeDetailsPanel();
+        }
+      });
+    }
+
     // Tab navigation - old style (.tab-btn)
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach((btn) => {
@@ -2688,6 +2698,16 @@ class AdminDashboard {
   /** Record payment on invoice - delegated to projectDetails */
   public recordPayment(invoiceId: number): Promise<void> {
     return this.projectDetails.recordPayment(invoiceId);
+  }
+
+  /** Cancel scheduled invoice - delegated to projectDetails */
+  public cancelScheduledInvoice(scheduleId: number): Promise<void> {
+    return this.projectDetails.cancelScheduledInvoice(scheduleId);
+  }
+
+  /** Toggle recurring invoice - delegated to projectDetails */
+  public toggleRecurringInvoice(recurringId: number, isActive: boolean): Promise<void> {
+    return this.projectDetails.toggleRecurringInvoice(recurringId, isActive);
   }
 }
 

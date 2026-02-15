@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** February 11, 2026 (Login mobile transparent bg, Help page two-column layout)
+**Last Updated:** February 15, 2026 (Portal Rebuild Phase 3 - 165+ hardcoded values replaced with design tokens)
 
 ## Table of Contents
 
