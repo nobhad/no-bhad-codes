@@ -36,7 +36,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-mouse) ease;
 }
 
 .portal-subtab:hover,
@@ -215,7 +215,7 @@
   width: 32px;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-mouse) ease;
   z-index: 5;
 }
 

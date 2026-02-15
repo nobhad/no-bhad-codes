@@ -83,16 +83,21 @@ export const APP_CONSTANTS = {
   // Chart color CSS variable mappings
   // Use getChartColors() to read these at runtime
   CHART_COLOR_VARS: {
-    PRIMARY: '--color-brand-primary',
+    PRIMARY: '--color-primary',
+    SECONDARY: '--color-success-500',
+    TERTIARY: '--color-warning-500',
+    QUATERNARY: '--color-gray-400',
     DARK: '--color-dark',
     GRAY_600: '--color-gray-600',
     GRAY_400: '--color-gray-400',
     GRAY_300: '--color-gray-300',
     WHITE: '--color-white',
-    GRID: '--color-shadow-sm',
-    SUCCESS: '--color-success',
-    DANGER: '--color-danger',
-    WARNING: '--color-warning'
+    GRID: '--color-gray-600',
+    TEXT: '--color-gray-100',
+    SUCCESS: '--color-success-500',
+    DANGER: '--color-error-500',
+    WARNING: '--color-warning-500',
+    INFO: '--color-info-500'
   },
 
   // Storage keys
@@ -113,6 +118,24 @@ export const APP_CONSTANTS = {
     TIMEOUT: 10000,
     RETRY_ATTEMPTS: 3,
     RETRY_DELAY: 1000
+  },
+
+  // Tag color palette - for user-customizable tags/labels
+  // These are intentionally hardcoded as a color palette selection
+  TAG_COLORS: [
+    '#ef4444', '#f97316', '#f59e0b', '#eab308',
+    '#84cc16', '#22c55e', '#10b981', '#14b8a6',
+    '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
+    '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'
+  ] as const,
+
+  // Overflow tag color
+  TAG_OVERFLOW_COLOR: '#6b7280',
+
+  // Contrast text colors for accessibility
+  CONTRAST_TEXT: {
+    DARK: '#000000',
+    LIGHT: '#ffffff'
   },
 
   // File upload limits
@@ -225,16 +248,17 @@ export function getStorageKey(key: keyof typeof APP_CONSTANTS.STORAGE_KEYS): str
  * Chart color fallbacks for SSR or when CSS variables unavailable
  */
 const CHART_COLOR_FALLBACKS: Record<string, string> = {
-  '--color-brand-primary': '#dc2626',
+  '--color-primary': '#00aff0',
+  '--color-success-500': '#10b981',
+  '--color-warning-500': '#f59e0b',
+  '--color-error-500': '#ef4444',
+  '--color-info-500': '#3b82f6',
   '--color-dark': '#333333',
   '--color-gray-600': '#525252',
   '--color-gray-400': '#a3a3a3',
   '--color-gray-300': '#d4d4d4',
-  '--color-white': '#ffffff',
-  '--color-shadow-sm': 'rgba(0, 0, 0, 0.05)',
-  '--color-success': '#10b981',
-  '--color-danger': '#ef4444',
-  '--color-warning': '#f59e0b'
+  '--color-gray-100': '#f5f5f5',
+  '--color-white': '#ffffff'
 };
 
 /**

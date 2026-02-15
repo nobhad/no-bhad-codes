@@ -111,6 +111,20 @@
   --color-overlay-medium: rgba(0, 0, 0, 0.7);
   --color-overlay-heavy: rgba(0, 0, 0, 0.8);
   --color-overlay-dark: rgba(0, 0, 0, 0.85);
+
+  /* Annotation/Marker Colors - for design review, comments, highlights */
+  --color-annotation-red: #ef4444;
+  --color-annotation-yellow: #eab308;
+  --color-annotation-blue: #3b82f6;
+  --color-annotation-green: #22c55e;
+
+  /* Chart Colors - for data visualization */
+  --color-chart-primary: var(--color-primary);
+  --color-chart-secondary: #22c55e;
+  --color-chart-tertiary: #f59e0b;
+  --color-chart-quaternary: #9ca3af;
+  --color-chart-text: var(--color-gray-100);
+  --color-chart-grid: var(--color-gray-600);
 }
 
 /* ============================================
@@ -391,6 +405,7 @@ html[data-theme="light"] {
   --color-admin-bg-start: #444444;
   --color-admin-bg-end: #444444;
   --color-admin-purple: #a855f7;
+  --color-admin-purple-rgb: 168, 85, 247;
   --color-admin-purple-dark: #9333ea;
 
   /* Legacy form variables */

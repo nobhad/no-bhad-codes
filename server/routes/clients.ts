@@ -510,6 +510,89 @@ router.get(
   })
 );
 
+// =====================================================
+// TAGS & SEGMENTATION (static routes before /:id)
+// =====================================================
+
+/**
+ * GET /clients/tags - Get all tags
+ */
+router.get(
+  '/tags',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const tagType = req.query.type as string;
+    const tags = await clientService.getTags(tagType);
+    sendSuccess(res, { tags });
+  })
+);
+
+/**
+ * POST /clients/tags - Create a new tag
+ */
+router.post(
+  '/tags',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { name, color, description, tagType } = req.body;
+
+    if (!name) {
+      return errorResponse(res, 'Tag name is required', 400, 'MISSING_REQUIRED_FIELDS');
+    }
+
+    const tag = await clientService.createTag({ name, color, description, tagType });
+    sendCreated(res, { tag });
+  })
+);
+
+/**
+ * PUT /clients/tags/:tagId - Update a tag
+ */
+router.put(
+  '/tags/:tagId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const tagId = parseInt(req.params.tagId);
+    const tag = await clientService.updateTag(tagId, req.body);
+    sendSuccess(res, { tag });
+  })
+);
+
+/**
+ * DELETE /clients/tags/:tagId - Delete a tag
+ */
+router.delete(
+  '/tags/:tagId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const tagId = parseInt(req.params.tagId);
+    await clientService.deleteTag(tagId);
+    sendSuccess(res, undefined, 'Tag deleted successfully');
+  })
+);
+
+/**
+ * GET /clients/by-tag/:tagId - Get all clients with a specific tag
+ */
+router.get(
+  '/by-tag/:tagId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const tagId = parseInt(req.params.tagId);
+    const clients = await clientService.getClientsByTag(tagId);
+    sendSuccess(res, { clients });
+  })
+);
+
+// =====================================================
+// SINGLE CLIENT ENDPOINTS (/:id routes)
+// =====================================================
+
 // Get single client (admin or own profile)
 router.get(
   '/:id',
@@ -1331,69 +1414,8 @@ router.put(
 );
 
 // =====================================================
-// TAGS & SEGMENTATION
+// CLIENT TAG ASSIGNMENTS (/:id/tags routes)
 // =====================================================
-
-/**
- * GET /clients/tags - Get all tags
- */
-router.get(
-  '/tags',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const tagType = req.query.type as string;
-    const tags = await clientService.getTags(tagType);
-    sendSuccess(res, { tags });
-  })
-);
-
-/**
- * POST /clients/tags - Create a new tag
- */
-router.post(
-  '/tags',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { name, color, description, tagType } = req.body;
-
-    if (!name) {
-      return errorResponse(res, 'Tag name is required', 400, 'MISSING_REQUIRED_FIELDS');
-    }
-
-    const tag = await clientService.createTag({ name, color, description, tagType });
-    sendCreated(res, { tag });
-  })
-);
-
-/**
- * PUT /clients/tags/:tagId - Update a tag
- */
-router.put(
-  '/tags/:tagId',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const tagId = parseInt(req.params.tagId);
-    const tag = await clientService.updateTag(tagId, req.body);
-    sendSuccess(res, { tag });
-  })
-);
-
-/**
- * DELETE /clients/tags/:tagId - Delete a tag
- */
-router.delete(
-  '/tags/:tagId',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const tagId = parseInt(req.params.tagId);
-    await clientService.deleteTag(tagId);
-    sendSuccess(res, undefined, 'Tag deleted successfully');
-  })
-);
 
 /**
  * GET /clients/:id/tags - Get tags for a client
@@ -1438,20 +1460,6 @@ router.delete(
     const tagId = parseInt(req.params.tagId);
     await clientService.removeTagFromClient(clientId, tagId);
     sendSuccess(res, undefined, 'Tag removed from client');
-  })
-);
-
-/**
- * GET /clients/by-tag/:tagId - Get all clients with a specific tag
- */
-router.get(
-  '/by-tag/:tagId',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const tagId = parseInt(req.params.tagId);
-    const clients = await clientService.getClientsByTag(tagId);
-    sendSuccess(res, { clients });
   })
 );
 

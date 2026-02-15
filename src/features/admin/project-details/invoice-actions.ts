@@ -6,7 +6,7 @@
  */
 
 import { AdminAuth } from '../admin-auth';
-import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, parseApiResponse } from '../../../utils/api-client';
 import {
   confirmDialog,
   confirmDanger,
@@ -35,7 +35,7 @@ export async function editInvoice(
       return;
     }
 
-    const data = await response.json();
+    const data = await parseApiResponse<{ invoice: { status: string; notes?: string; lineItems?: { description: string; amount: number }[] } }>(response);
     const invoice = data.invoice;
 
     if (invoice.status !== 'draft') {
@@ -325,7 +325,7 @@ export async function deleteInvoice(
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await parseApiResponse<{ action: string }>(response);
       alertSuccess(data.action === 'deleted' ? 'Invoice deleted' : 'Invoice voided');
       onSuccess();
     } else {
@@ -397,7 +397,7 @@ export async function recordPayment(
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await parseApiResponse<{ message: string }>(response);
       alertSuccess(data.message || 'Payment recorded');
       onSuccess();
     } else {

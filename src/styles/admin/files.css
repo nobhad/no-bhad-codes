@@ -44,7 +44,7 @@
 
 .folder-panel-header h4 {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--portal-text-primary);
 }
@@ -63,9 +63,9 @@
   border-radius: var(--portal-radius-sm);
   cursor: pointer;
   color: var(--portal-text-secondary);
-  font-size: 0.875rem;
-  transition: all 0.15s ease;
-  margin-bottom: 2px;
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-faster);
+  margin-bottom: var(--space-0-5);
 }
 
 .folder-item:hover {
@@ -93,9 +93,9 @@
 .folder-item-actions {
   margin-left: auto;
   display: flex;
-  gap: 4px;
+  gap: var(--space-0-5);
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition-fast);
 }
 
 .folder-item:hover .folder-item-actions {
@@ -126,7 +126,7 @@
 }
 
 .files-path {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
 }
 
@@ -159,7 +159,7 @@
   border-radius: var(--portal-radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-faster);
   margin-bottom: var(--space-0-5);
 }
 
@@ -201,7 +201,7 @@
 }
 
 .file-name {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-primary);
   white-space: nowrap;
@@ -209,23 +209,23 @@
   text-overflow: ellipsis;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-0-5);
 }
 
 .file-meta {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
 }
 
 .file-badges {
   display: flex;
-  gap: 6px;
+  gap: var(--space-0-5);
   align-items: center;
 }
 
 .file-badge {
-  font-size: 0.625rem;
+  font-size: var(--font-size-2xs);
   font-weight: 600;
   padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-xs);
@@ -247,17 +247,17 @@
   color: var(--portal-text-secondary);
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: var(--space-0-5);
 }
 
 .file-badge.comments svg {
-  width: 10px;
-  height: 10px;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
 }
 
 /* Shared with Client Badge */
 .file-shared-badge {
-  font-size: 0.625rem;
+  font-size: var(--font-size-2xs);
   font-weight: 600;
   padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-xs);
@@ -278,7 +278,7 @@
 }
 
 .file-actions .icon-btn.btn-share-file {
-  transition: all 0.15s ease;
+  transition: all var(--transition-faster);
 }
 
 .file-actions .icon-btn.btn-share-file:disabled {
@@ -319,7 +319,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-overlay-medium);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -351,7 +351,7 @@
 
 .file-detail-header h2 {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--portal-text-primary);
   white-space: nowrap;
@@ -361,7 +361,7 @@
 
 .file-detail-tabs {
   display: flex;
-  gap: 4px;
+  gap: var(--space-0-5);
   padding: var(--space-1) var(--space-1-5);
   border-bottom: 1px solid var(--portal-border);
 }
@@ -371,10 +371,10 @@
   background: transparent;
   border: none;
   color: var(--portal-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   cursor: pointer;
   border-radius: var(--portal-radius-sm);
-  transition: all 0.15s ease;
+  transition: all var(--transition-faster);
 }
 
 .file-detail-tabs button:hover {
@@ -408,18 +408,18 @@
 .file-info-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-0-5);
 }
 
 .file-info-label {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .file-info-value {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
 }
 
@@ -447,20 +447,20 @@
 .version-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 .version-label {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-primary);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-0-5);
 }
 
 .version-label .badge {
-  font-size: 0.625rem;
+  font-size: var(--font-size-2xs);
   padding: var(--space-0-5) var(--space-1);
   background: var(--color-primary);
   color: var(--color-white);
@@ -468,7 +468,7 @@
 }
 
 .version-meta {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
@@ -498,22 +498,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-0-5);
 }
 
 .comment-author {
-  font-size: 0.813rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-primary);
 }
 
 .comment-date {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
 .comment-text {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   line-height: 1.5;
 }
@@ -530,7 +530,7 @@
   border-radius: var(--portal-radius-sm);
   padding: var(--space-1);
   color: var(--portal-text-primary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   resize: vertical;
 }
 
@@ -557,7 +557,7 @@
   padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
-  font-size: 0.813rem;
+  font-size: var(--font-size-sm);
 }
 
 .access-log-action {
@@ -584,7 +584,7 @@
 .file-detail-actions button {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-0-5);
 }
 
 /* ============================================
@@ -609,7 +609,7 @@
 
 .upload-link-request label {
   display: block;
-  font-size: 0.813rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   margin-bottom: var(--space-0-5);
 }
@@ -643,7 +643,7 @@
   border-radius: var(--portal-radius-sm);
   border: 1px solid var(--portal-border);
   margin-bottom: var(--space-1);
-  transition: border-color 0.15s ease;
+  transition: border-color var(--transition-faster);
 }
 
 .pending-request-item:hover {
@@ -672,13 +672,13 @@
 }
 
 .pending-request-title {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-primary);
 }
 
 .pending-request-badge {
-  font-size: 0.625rem;
+  font-size: var(--font-size-2xs);
   font-weight: 600;
   padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-xs);
@@ -709,7 +709,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   margin-bottom: var(--space-0-5);
 }
@@ -724,7 +724,7 @@
 }
 
 .pending-request-description {
-  font-size: 0.813rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   margin: 0;
   line-height: 1.4;
@@ -737,7 +737,7 @@
 }
 
 .pending-request-actions .btn {
-  padding: 6px;
+  padding: var(--space-0-5);
 }
 
 .pending-request-actions .btn svg {
@@ -781,7 +781,7 @@
 
 .upload-file-preview-item .file-name {
   flex: 1;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -789,7 +789,7 @@
 }
 
 .upload-file-preview-item .file-size {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   flex-shrink: 0;
 }

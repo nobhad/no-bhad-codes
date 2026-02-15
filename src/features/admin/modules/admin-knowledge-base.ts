@@ -9,7 +9,7 @@
  */
 
 import type { AdminDashboardContext } from '../admin-types';
-import { apiFetch, apiPost, apiPut, apiDelete, parseJsonResponse } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { confirmDanger } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
@@ -96,7 +96,7 @@ function el(id: string): HTMLElement | null {
 async function loadCategories(_ctx: AdminDashboardContext): Promise<KBCategory[]> {
   const res = await apiFetch(`${KB_API}/admin/categories`);
   if (!res.ok) return [];
-  const data = await parseJsonResponse<{ categories: KBCategory[] }>(res);
+  const data = await parseApiResponse<{ categories: KBCategory[] }>(res);
   return data.categories || [];
 }
 
@@ -104,7 +104,7 @@ async function loadArticles(ctx: AdminDashboardContext, categorySlug?: string): 
   const url = categorySlug ? `${KB_API}/admin/articles?category=${encodeURIComponent(categorySlug)}` : `${KB_API}/admin/articles`;
   const res = await apiFetch(url);
   if (!res.ok) return [];
-  const data = await parseJsonResponse<{ articles: KBArticle[] }>(res);
+  const data = await parseApiResponse<{ articles: KBArticle[] }>(res);
   return data.articles || [];
 }
 
@@ -596,7 +596,7 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
       try {
         const res = await apiFetch(`${KB_API}/admin/articles/${id}`);
         if (!res.ok) throw new Error('Failed to load article');
-        const data = await parseJsonResponse<{ article: KBArticle }>(res);
+        const data = await parseApiResponse<{ article: KBArticle }>(res);
         openArticleModal(categoriesCache, data.article);
       } catch (err) {
         showToast((err as Error).message, 'error');
@@ -669,6 +669,107 @@ function setupKBSectionToggle(): void {
 
   mountPoint.appendChild(toggleEl);
   applySection(currentKBSection);
+}
+
+// ============================================
+// SVG ICONS FOR DYNAMIC RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
+  PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Renders the Knowledge Base tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderKnowledgeBaseTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <div class="admin-table-card portal-shadow" id="kb-categories-card">
+      <div class="admin-table-header">
+        <h3>Categories</h3>
+        <div class="admin-table-actions">
+          <button type="button" class="icon-btn" id="kb-refresh-categories" title="Refresh" aria-label="Refresh categories">
+            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+          </button>
+          <button type="button" class="icon-btn" id="kb-add-category" title="Add Category" aria-label="Add Category">
+            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+          </button>
+        </div>
+      </div>
+      <div class="admin-table-container">
+        <div class="admin-table-scroll-wrapper">
+        <table class="admin-table" aria-label="Knowledge base categories">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Slug</th>
+              <th scope="col" class="count-col">Articles</th>
+              <th scope="col" class="status-col">Active</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="kb-categories-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            <tr>
+              <td colspan="4" class="loading-row">Loading categories...</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="admin-table-card portal-shadow" id="kb-articles-card">
+      <div class="admin-table-header">
+        <h3>Articles</h3>
+        <div class="admin-table-actions" id="kb-articles-filter-container">
+          <button type="button" class="icon-btn" id="kb-export" title="Export to CSV" aria-label="Export articles to CSV">
+            <span class="icon-btn-svg">${RENDER_ICONS.EXPORT}</span>
+          </button>
+          <button type="button" class="icon-btn" id="kb-refresh-articles" title="Refresh" aria-label="Refresh articles">
+            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+          </button>
+          <button type="button" class="icon-btn" id="kb-add-article" title="Add Article" aria-label="Add Article">
+            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+          </button>
+        </div>
+      </div>
+      <div class="admin-table-container">
+        <div class="admin-table-scroll-wrapper">
+        <table class="admin-table" aria-label="Knowledge base articles">
+          <thead>
+            <tr>
+              <th scope="col">Title</th>
+              <th scope="col" class="type-col">Category</th>
+              <th scope="col">Slug</th>
+              <th scope="col" class="status-col">Featured</th>
+              <th scope="col" class="status-col">Published</th>
+              <th scope="col" class="date-col">Updated</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="kb-articles-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            <tr>
+              <td colspan="5" class="loading-row">Loading articles...</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <!-- Pagination -->
+      <div id="kb-articles-pagination" class="table-pagination"></div>
+    </div>
+    <!-- KB category and article modals are created by createPortalModal in admin-knowledge-base.ts -->
+  `;
+
+  // Reset listener flags and filter container so they get re-attached
+  kbListenersSetup = false;
+  filterUIContainer = null;
 }
 
 export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<void> {

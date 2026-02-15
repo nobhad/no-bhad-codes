@@ -245,7 +245,7 @@
   border-radius: var(--portal-radius-md);
   color: var(--portal-text-light);
   font-size: var(--font-size-base);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color var(--transition-mouse) ease, box-shadow var(--transition-mouse) ease;
 }
 
 .prompt-dialog-input:focus {

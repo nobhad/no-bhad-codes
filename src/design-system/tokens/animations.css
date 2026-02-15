@@ -28,8 +28,14 @@
   /* Theme color transitions (slower for smooth color changes) */
   --transition-theme: 0.4s;
 
+  /* Quick micro-interactions (buttons, icons) */
+  --transition-fast: 0.15s;
+
   /* Mouse/hover interactions (fast for responsive feel) */
   --transition-mouse: 0.2s;
+
+  /* Standard animation timing (for most UI transitions) */
+  --transition-normal: 0.3s;
 
   /* Standard animation length (most common duration) */
   --transition-length: 0.5s;

@@ -29,9 +29,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-0-5);
-  padding: 2px var(--space-1);
+  padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-lg);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   margin-bottom: var(--space-1);
 }
@@ -52,17 +52,17 @@
 }
 
 .lead-card-value {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--portal-text-primary);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-0-5);
 }
 
 .lead-card-source {
   display: inline-flex;
   align-items: center;
   gap: var(--space-0-5);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   text-transform: uppercase;
   background: var(--portal-bg-medium);
@@ -78,21 +78,21 @@
 }
 
 .lead-card-company {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
 .lead-card-project {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-0-5);
 }
 
 .lead-card-client-name {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
-  margin-top: 2px;
-  margin-bottom: 4px;
+  margin-top: var(--space-0-5);
+  margin-bottom: var(--space-0-5);
 }
 
 .lead-card-client-link,
@@ -108,7 +108,7 @@
 }
 
 .lead-card-date {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
@@ -118,7 +118,7 @@
 
 .lead-detail-tabs {
   display: flex;
-  gap: 4px;
+  gap: var(--space-0-5);
   border-bottom: 1px solid var(--portal-border);
   margin-bottom: var(--space-1-5);
   padding-bottom: var(--space-0-5);
@@ -129,7 +129,7 @@
   background: transparent;
   border: none;
   color: var(--portal-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   cursor: pointer;
   border-radius: var(--portal-radius-sm) var(--portal-radius-sm) 0 0;
   transition: all var(--transition-faster);
@@ -178,7 +178,7 @@
 .lead-score-value.cold { color: var(--portal-text-secondary); }
 
 .lead-score-label {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
 }
 
@@ -192,7 +192,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 .lead-score-factor-name {
@@ -240,7 +240,7 @@
 }
 
 .lead-note-meta {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
@@ -259,7 +259,7 @@
 }
 
 .lead-note-content {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
   line-height: 1.5;
 }
@@ -277,7 +277,7 @@
   border: 1px dashed var(--portal-border);
   border-radius: var(--portal-radius-sm);
   color: var(--portal-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   cursor: pointer;
   transition: all var(--transition-faster);
 }
@@ -372,7 +372,7 @@
   flex-direction: row;
   align-items: center;
   gap: var(--space-0-5);
-  padding: 2px 0;
+  padding: var(--space-0-5) 0;
   background: none;
   border-radius: 0;
   min-width: 0;
@@ -380,7 +380,7 @@
 }
 
 .leads-analytics-section .funnel-stage-label {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--portal-text-light);
   min-width: 78px;
@@ -413,20 +413,20 @@
 .leads-analytics-section .funnel-stage-stats {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-0-5);
   min-width: 56px;
   flex-shrink: 0;
   justify-content: flex-end;
 }
 
 .leads-analytics-section .funnel-count {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-light);
   font-weight: 600;
 }
 
 .leads-analytics-section .funnel-percentage {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
@@ -443,7 +443,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 3px 0;
+  padding: var(--space-0-5) 0;
   border-bottom: 1px solid var(--portal-border-light);
   border-radius: 0;
 }
@@ -453,7 +453,7 @@
 }
 
 .source-name {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-light);
 }
 
@@ -461,7 +461,7 @@
   display: flex;
   gap: var(--space-1);
   align-items: center;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .source-total {
@@ -523,7 +523,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-0-5);
-  padding: 3px 0;
+  padding: var(--space-0-5) 0;
   background: transparent;
   border: none;
   border-radius: 0;
@@ -553,7 +553,7 @@
 .analytics-column .rule-name,
 .analytics-column-full .rule-name,
 .leads-analytics-section .rule-name {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--portal-text-light);
   line-height: 1.3;
@@ -563,21 +563,21 @@
 .analytics-column .rule-condition,
 .analytics-column-full .rule-condition,
 .leads-analytics-section .rule-condition {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
   line-height: 1.3;
 }
 
 .rule-condition code {
   background: var(--portal-bg-dark);
-  padding: 1px 3px;
+  padding: var(--space-0-5) var(--space-0-5);
   border-radius: var(--portal-radius-xs);
   font-family: monospace;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .rule-operator {
-  margin: 0 2px;
+  margin: 0 var(--space-0-5);
   color: var(--portal-text-muted);
 }
 
@@ -585,9 +585,9 @@
 .analytics-column .rule-points,
 .analytics-column-full .rule-points,
 .leads-analytics-section .rule-points {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
-  min-width: 40px;
+  min-width: var(--space-5);
   text-align: right;
   flex-shrink: 0;
   color: var(--portal-text-light);
@@ -612,7 +612,7 @@
 
 .lead-details-tabs {
   display: flex;
-  gap: 4px;
+  gap: var(--space-0-5);
   border-bottom: 1px solid var(--portal-border);
   margin-bottom: var(--space-1-5);
   padding-bottom: var(--space-0-5);
@@ -624,7 +624,7 @@
   background: var(--portal-bg-light);
   border: none;
   color: var(--portal-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   cursor: pointer;
   border-radius: var(--portal-radius-sm) var(--portal-radius-sm) 0 0;
   transition: all var(--transition-faster);
@@ -677,12 +677,12 @@
 #lead-details-panel .panel-status-row {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
   margin-bottom: var(--space-4);
 }
 
 #lead-details-panel .panel-status-row .field-label {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
@@ -731,9 +731,9 @@
 
 /* Lead Score Badge in Header - high contrast on dark panel */
 .lead-score-badge {
-  padding: var(--space-0-5) 10px;
+  padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-lg);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   margin-left: auto;
   margin-right: var(--space-1-5);
@@ -774,7 +774,7 @@
 }
 
 .lead-tab-section-title {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--portal-text-secondary);
   text-transform: uppercase;
@@ -830,28 +830,28 @@
 .task-checkbox.checked {
   background: var(--status-active);
   border-color: var(--status-active);
-  color: white;
+  color: var(--color-white);
 }
 
 .task-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 .task-title {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
 }
 
 .task-due {
-  font-size: 0.7rem;
+  font-size: var(--font-size-2xs);
   color: var(--portal-text-muted);
 }
 
 .task-type-badge {
-  font-size: 0.65rem;
+  font-size: var(--font-size-2xs);
   padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-medium);
   color: var(--portal-text-secondary);
@@ -884,19 +884,19 @@
 }
 
 .note-author {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--portal-text-secondary);
 }
 
 .note-date {
-  font-size: 0.7rem;
+  font-size: var(--font-size-2xs);
   color: var(--portal-text-muted);
   margin-left: var(--space-1);
 }
 
 .note-content {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
   line-height: 1.5;
 }
@@ -906,7 +906,7 @@
   padding: var(--space-1-5);
   text-align: center;
   color: var(--portal-text-muted);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 /* ============================================

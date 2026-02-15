@@ -81,6 +81,507 @@ import type { ProjectResponse } from '../../types/api';
 
 export type { ProjectDetailsHandler };
 
+// ========================================
+// ICONS FOR DYNAMIC RENDERING
+// ========================================
+const RENDER_ICONS = {
+  EDIT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+  MORE: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>',
+  COPY: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+  ARCHIVE: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>',
+  DOC: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+  TRASH: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>',
+  USER: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  BUILDING: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>',
+  MAIL: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+  EYE: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  GITHUB: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>',
+  GLOBE: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
+  OVERVIEW: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>',
+  FILE: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>',
+  UPLOAD: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>',
+  MESSAGE: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>',
+  INVOICE: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>',
+  TASK: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+  CLOCK: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  CONTRACT: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>',
+  NOTES: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/></svg>',
+  PEN: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+  SIGN: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+  DOWNLOAD: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
+  CLOSE: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+  FOLDER: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
+  FOLDER_PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>',
+  LOCK: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
+  SHARE: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>',
+  COUNTERSIGN: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4"/><path d="M2 16c3-1 6-4 7-7 1-3 4-6 7-7"/><path d="M13 7l4 4"/><path d="M19 3l2 2"/></svg>',
+  CREDIT_CARD: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+  LIST: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>',
+  CHEVRON_DOWN: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-caret"><path d="m6 9 6 6 6-6"/></svg>'
+};
+
+/**
+ * Render the project detail tab structure dynamically
+ */
+export function renderProjectDetailTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <!-- Project Header Card -->
+    <div class="portal-project-card portal-shadow pd-header-card">
+      <div class="pd-header-top">
+        <div class="pd-header-info">
+          <div class="detail-title-row">
+            <div class="detail-title-group">
+              <h2 class="detail-title" id="pd-project-name">Project Name</h2>
+              <span class="status-badge" id="pd-status">-</span>
+            </div>
+            <div class="detail-actions">
+              <button class="icon-btn" id="pd-btn-edit" title="Edit Project" aria-label="Edit project details">
+                ${RENDER_ICONS.EDIT}
+              </button>
+              <div class="table-dropdown detail-more-menu" id="pd-more-menu">
+                <button type="button" class="custom-dropdown-trigger" aria-label="More actions">
+                  ${RENDER_ICONS.MORE}
+                </button>
+                <ul class="custom-dropdown-menu">
+                  <li class="custom-dropdown-item" data-action="edit">${RENDER_ICONS.PEN} Edit Project</li>
+                  <li class="custom-dropdown-item" data-action="duplicate">${RENDER_ICONS.COPY} Duplicate Project</li>
+                  <li class="custom-dropdown-item" data-action="archive">${RENDER_ICONS.ARCHIVE} Archive Project</li>
+                  <li class="custom-dropdown-item" data-action="generate-docs">${RENDER_ICONS.DOC} Generate Documents</li>
+                  <li class="dropdown-divider"></li>
+                  <li class="custom-dropdown-item danger" data-action="delete">${RENDER_ICONS.TRASH} Delete Project</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- Client Info -->
+          <div class="pd-header-client">
+            <div class="pd-client-item clickable-client" id="pd-header-client-link">
+              ${RENDER_ICONS.USER}
+              <span id="pd-header-client-name">-</span>
+            </div>
+            <div class="pd-client-item" id="pd-header-company-row">
+              ${RENDER_ICONS.BUILDING}
+              <span id="pd-header-company">-</span>
+            </div>
+            <div class="pd-client-item">
+              ${RENDER_ICONS.MAIL}
+              <span id="pd-header-email">-</span>
+            </div>
+          </div>
+          <!-- Project Meta -->
+          <div class="pd-header-meta">
+            <div class="pd-meta-item">
+              <span class="field-label">Type</span>
+              <span class="pd-meta-value" id="pd-header-type">-</span>
+            </div>
+            <div class="pd-meta-item">
+              <span class="field-label">Start</span>
+              <span class="pd-meta-value" id="pd-header-start">-</span>
+            </div>
+            <div class="pd-meta-item">
+              <span class="field-label">Target End</span>
+              <span class="pd-meta-value" id="pd-header-end">-</span>
+            </div>
+            <div class="pd-meta-item">
+              <span class="field-label">Budget</span>
+              <span class="pd-meta-value" id="pd-header-budget">-</span>
+            </div>
+          </div>
+          <!-- Description -->
+          <div class="pd-header-description">
+            <span class="field-label">Description</span>
+            <p class="pd-description" id="pd-description">-</p>
+          </div>
+          <!-- Financial Details -->
+          <div class="pd-header-meta">
+            <div class="pd-meta-item">
+              <span class="field-label">Timeline</span>
+              <span class="pd-meta-value" id="pd-timeline">-</span>
+            </div>
+            <div class="pd-meta-item">
+              <span class="field-label">Quoted Price</span>
+              <span class="pd-meta-value" id="pd-price">-</span>
+            </div>
+            <div class="pd-meta-item">
+              <span class="field-label">Deposit</span>
+              <span class="pd-meta-value" id="pd-deposit">-</span>
+            </div>
+          </div>
+          <!-- URLs -->
+          <div class="pd-header-urls" id="pd-urls-section">
+            <span class="field-label">Links</span>
+            <div class="pd-urls-row">
+              <a href="#" id="pd-preview-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
+                ${RENDER_ICONS.EYE} <span>Preview</span>
+              </a>
+              <a href="#" id="pd-repo-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
+                ${RENDER_ICONS.GITHUB} <span>Repository</span>
+              </a>
+              <a href="#" id="pd-production-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
+                ${RENDER_ICONS.GLOBE} <span>Production</span>
+              </a>
+            </div>
+          </div>
+          <!-- Admin Notes -->
+          <div class="pd-header-description" id="pd-admin-notes-section" style="display: none;">
+            <span class="field-label">Admin Notes (Internal)</span>
+            <p class="pd-description" id="pd-admin-notes">-</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="project-detail-tabs portal-tabs">
+      <button class="active" data-pd-tab="overview">${RENDER_ICONS.OVERVIEW}<span>Overview</span></button>
+      <button data-pd-tab="files">${RENDER_ICONS.FILE}<span>Files</span></button>
+      <button data-pd-tab="deliverables">${RENDER_ICONS.UPLOAD}<span>Deliverables</span></button>
+      <button data-pd-tab="messages">${RENDER_ICONS.MESSAGE}<span>Messages</span></button>
+      <button data-pd-tab="invoices">${RENDER_ICONS.INVOICE}<span>Invoices</span></button>
+      <button data-pd-tab="tasks">${RENDER_ICONS.TASK}<span>Tasks</span></button>
+      <button data-pd-tab="time">${RENDER_ICONS.CLOCK}<span>Time</span></button>
+      <button data-pd-tab="contract">${RENDER_ICONS.CONTRACT}<span>Contract</span></button>
+      <button data-pd-tab="notes">${RENDER_ICONS.NOTES}<span>Notes</span></button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div class="portal-tab-panel active" id="pd-tab-overview">
+      <div class="pd-overview-grid">
+        <div class="pd-overview-main">
+          <div class="portal-project-card portal-shadow">
+            <div class="card-header-with-action">
+              <h3>Milestones</h3>
+              <button class="btn btn-secondary btn-sm" id="btn-add-milestone">+ Add Milestone</button>
+            </div>
+            <div class="milestones-list" id="pd-milestones-list">
+              <p class="empty-state">No milestones yet. Add milestones to track project progress.</p>
+            </div>
+          </div>
+        </div>
+        <div class="pd-overview-sidebar">
+          <div class="portal-project-card portal-shadow pd-progress-card">
+            <h3>Progress</h3>
+            <div class="pd-progress-display">
+              <div class="pd-progress-ring">
+                <span class="pd-progress-percent" id="pd-progress-percent">0%</span>
+              </div>
+              <div class="progress-bar" role="progressbar" id="pd-progress-bar-container" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Project completion progress">
+                <div class="progress-fill" id="pd-progress-bar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="portal-project-card portal-shadow">
+            <h3>Financials</h3>
+            <div class="pd-financial-stats">
+              <div class="pd-stat-item"><span class="pd-stat-label">Budget</span><span class="pd-stat-value" id="pd-sidebar-budget">-</span></div>
+              <div class="pd-stat-item"><span class="pd-stat-label">Invoiced</span><span class="pd-stat-value" id="pd-sidebar-invoiced">$0</span></div>
+              <div class="pd-stat-item"><span class="pd-stat-label">Paid</span><span class="pd-stat-value pd-stat-success" id="pd-sidebar-paid">$0</span></div>
+              <div class="pd-stat-item"><span class="pd-stat-label">Outstanding</span><span class="pd-stat-value pd-stat-warning" id="pd-sidebar-outstanding">$0</span></div>
+            </div>
+          </div>
+          <div class="portal-project-card portal-shadow">
+            <h3>Quick Stats</h3>
+            <div class="pd-quick-stats">
+              <div class="pd-stat-item"><span class="pd-stat-label">Files</span><span class="pd-stat-value" id="pd-stat-files">0</span></div>
+              <div class="pd-stat-item"><span class="pd-stat-label">Messages</span><span class="pd-stat-value" id="pd-stat-messages">0</span></div>
+              <div class="pd-stat-item"><span class="pd-stat-label">Tasks</span><span class="pd-stat-value" id="pd-stat-tasks">0</span></div>
+              <div class="pd-stat-item"><span class="pd-stat-label">Invoices</span><span class="pd-stat-value" id="pd-stat-invoices">0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="portal-project-card portal-shadow pd-activity-card">
+        <h3>Recent Activity</h3>
+        <ul class="activity-list" id="pd-activity-list" aria-live="polite" aria-atomic="false">
+          <li>No activity recorded yet.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Deliverables Tab -->
+    <div class="portal-tab-panel" id="pd-tab-deliverables">
+      <h3 class="tab-section-heading">Deliverables</h3>
+      <div class="portal-project-card portal-shadow">
+        <div class="card-header-with-action">
+          <h3>Project Deliverables</h3>
+          <button class="btn btn-secondary btn-sm" id="btn-manage-deliverables" data-action="open-deliverables">Manage Deliverables</button>
+        </div>
+        <div id="pd-deliverables-list" class="deliverables-inline-list">
+          <p class="empty-state">No deliverables yet. Click "Manage Deliverables" to add and track project deliverables.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Files Tab -->
+    <div class="portal-tab-panel" id="pd-tab-files">
+      <div class="tab-section-header">
+        <h3 class="tab-section-heading">Files</h3>
+        <div class="table-dropdown generate-document-menu" id="pd-generate-document-menu">
+          <button type="button" class="btn btn-secondary custom-dropdown-trigger" aria-label="Generate document">
+            ${RENDER_ICONS.DOC} <span>Generate Document</span> ${RENDER_ICONS.CHEVRON_DOWN}
+          </button>
+          <ul class="custom-dropdown-menu">
+            <li class="custom-dropdown-item" data-action="generate-proposal">${RENDER_ICONS.DOC} Generate Proposal PDF</li>
+            <li class="custom-dropdown-item" data-action="generate-contract">${RENDER_ICONS.PEN} Generate Contract PDF</li>
+            <li class="custom-dropdown-item" data-action="generate-receipt">${RENDER_ICONS.CREDIT_CARD} Generate Receipt PDF</li>
+            <li class="custom-dropdown-item" data-action="generate-report">${RENDER_ICONS.DOC} Generate Project Report</li>
+            <li class="custom-dropdown-item" data-action="generate-sow">${RENDER_ICONS.LIST} Generate SOW</li>
+          </ul>
+        </div>
+      </div>
+      <div class="files-upload-section portal-shadow">
+        <h3>Upload Files for Client</h3>
+        <div class="upload-dropzone" id="pd-upload-dropzone">
+          <p>Drag and drop files here or</p>
+          <button class="btn btn-secondary" id="btn-pd-browse-files">Browse Files</button>
+          <input type="file" id="pd-file-input" multiple hidden accept=".jpeg,.jpg,.png,.gif,.pdf,.doc,.docx,.txt,.zip,.rar,image/*,application/pdf" />
+        </div>
+      </div>
+      <div class="admin-modal-overlay hidden" id="file-upload-modal" role="dialog" aria-modal="true" aria-labelledby="file-upload-modal-title">
+        <div class="admin-modal">
+          <div class="admin-modal-header">
+            <h2 id="file-upload-modal-title">Upload Files</h2>
+            <button type="button" class="btn-icon close-modal" id="file-upload-modal-close" aria-label="Close">${RENDER_ICONS.CLOSE}</button>
+          </div>
+          <div class="admin-modal-body">
+            <div class="upload-files-preview" id="upload-files-preview"></div>
+            <div class="form-group">
+              <label for="upload-file-type" class="field-label">File Type</label>
+              <div id="upload-file-type-mount"></div>
+            </div>
+            <div class="form-group" id="pd-upload-link-request" style="display: none;">
+              <label for="upload-request-select" class="field-label">Link to pending request (optional)</label>
+              <div id="upload-request-select-mount"></div>
+            </div>
+          </div>
+          <div class="admin-modal-footer">
+            <button type="button" class="btn btn-secondary" id="file-upload-modal-cancel">Cancel</button>
+            <button type="button" class="btn btn-primary" id="file-upload-modal-confirm">Upload</button>
+          </div>
+        </div>
+      </div>
+      <div class="files-browser portal-shadow">
+        <div class="folder-panel">
+          <div class="folder-panel-header">
+            <h4>Folders</h4>
+            <button class="btn-icon" id="btn-create-folder" title="Create Folder" aria-label="Create folder">${RENDER_ICONS.FOLDER_PLUS}</button>
+          </div>
+          <div class="folder-tree" id="pd-folder-tree">
+            <div class="folder-item root active" data-folder-id="root">${RENDER_ICONS.FOLDER} <span>All Files</span></div>
+          </div>
+        </div>
+        <div class="files-panel">
+          <div class="files-panel-header">
+            <div class="files-path" id="pd-files-path"><span>All Files</span></div>
+            <div class="files-panel-controls">
+              <div id="files-source-toggle-mount"></div>
+              <div id="files-view-toggle-mount"></div>
+            </div>
+          </div>
+          <div class="files-list" id="pd-files-list"><p class="empty-state">No files uploaded yet.</p></div>
+          <div class="pending-requests-list hidden" id="pd-pending-requests-list"></div>
+        </div>
+      </div>
+      <div class="file-detail-modal hidden" id="file-detail-modal">
+        <div class="file-detail-content portal-shadow">
+          <div class="file-detail-header">
+            <h2 id="file-detail-name">File Name</h2>
+            <button class="btn-icon close-modal" id="close-file-detail">${RENDER_ICONS.CLOSE}</button>
+          </div>
+          <div class="file-detail-tabs">
+            <button class="active" data-tab="info">Info</button>
+            <button data-tab="versions">Versions</button>
+            <button data-tab="comments">Comments</button>
+            <button data-tab="access">Access Log</button>
+          </div>
+          <div class="file-detail-tab-content active" data-tab-content="info">
+            <div class="file-info-grid" id="file-info-content"></div>
+          </div>
+          <div class="file-detail-tab-content" data-tab-content="versions">
+            <div class="file-versions-list" id="file-versions-list"></div>
+          </div>
+          <div class="file-detail-tab-content" data-tab-content="comments">
+            <div class="file-comments-list" id="file-comments-list"></div>
+            <div class="file-comment-form">
+              <label for="file-comment-input" class="sr-only">Add a comment</label>
+              <textarea id="file-comment-input" placeholder="Add a comment..." rows="2" aria-label="Add a comment"></textarea>
+              <button class="btn btn-secondary btn-sm" id="btn-add-file-comment">Add Comment</button>
+            </div>
+          </div>
+          <div class="file-detail-tab-content" data-tab-content="access">
+            <div class="file-access-log" id="file-access-log"></div>
+          </div>
+          <div class="file-detail-actions">
+            <button class="btn btn-secondary" id="btn-download-file">${RENDER_ICONS.DOWNLOAD} Download</button>
+            <button class="btn btn-secondary" id="btn-lock-file">${RENDER_ICONS.LOCK} Lock</button>
+            <button class="btn btn-secondary" id="btn-share-file">${RENDER_ICONS.SHARE} Share with Client</button>
+            <button class="btn btn-danger" id="btn-delete-file">${RENDER_ICONS.TRASH} Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages Tab -->
+    <div class="portal-tab-panel" id="pd-tab-messages">
+      <h3 class="tab-section-heading">Messages</h3>
+      <div class="messages-container portal-shadow">
+        <div class="messages-thread" id="pd-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Project messages thread">
+          <p class="empty-state">No messages yet. Start the conversation with your client.</p>
+        </div>
+        <div class="message-compose">
+          <div class="message-input-wrapper">
+            <label for="pd-message-input" class="sr-only">Message</label>
+            <textarea id="pd-message-input" class="form-textarea" placeholder="Type your message to the client..." aria-label="Type your message to the client"></textarea>
+          </div>
+          <button class="btn btn-secondary" id="btn-pd-send-message">Send Message</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoices Tab -->
+    <div class="portal-tab-panel" id="pd-tab-invoices">
+      <h3 class="tab-section-heading">Invoices</h3>
+      <div class="invoice-summary">
+        <div class="summary-card portal-shadow"><span class="summary-label">Total Outstanding</span><span class="summary-value" id="pd-outstanding">$0.00</span></div>
+        <div class="summary-card portal-shadow"><span class="summary-label">Total Paid</span><span class="summary-value" id="pd-paid">$0.00</span></div>
+      </div>
+      <div class="portal-project-card portal-shadow">
+        <div class="card-header-with-action">
+          <h3>Invoices</h3>
+          <div class="invoice-action-buttons">
+            <div id="pd-invoices-filter" class="invoice-filter-container"></div>
+            <button class="btn btn-outline" id="btn-process-late-fees" title="Apply late fees to overdue invoices">Apply Late Fees</button>
+            <button class="btn btn-secondary" id="btn-create-invoice">+ Create Invoice</button>
+          </div>
+        </div>
+        <div class="invoices-list" id="pd-invoices-list"><p class="empty-state">No invoices created yet.</p></div>
+      </div>
+      <div class="portal-project-card portal-shadow">
+        <div class="card-header-with-action">
+          <h3>Payment Plans & Recurring</h3>
+          <div class="invoice-action-buttons">
+            <button class="btn btn-outline" id="btn-schedule-invoice">Schedule Invoice</button>
+            <button class="btn btn-outline" id="btn-setup-recurring">Setup Recurring</button>
+          </div>
+        </div>
+        <div class="payment-plans-section">
+          <h4>Scheduled Invoices</h4>
+          <div id="pd-scheduled-invoices" class="scheduled-list"><p class="empty-state">No scheduled invoices.</p></div>
+          <h4>Recurring Invoices</h4>
+          <div id="pd-recurring-invoices" class="recurring-list"><p class="empty-state">No recurring invoices configured.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks Tab -->
+    <div class="portal-tab-panel" id="pd-tab-tasks">
+      <h3 class="tab-section-heading">Tasks</h3>
+      <div class="portal-project-card portal-shadow">
+        <div class="card-header-with-action">
+          <div class="view-toggle-container">
+            <div id="tasks-view-toggle-mount"></div>
+            <button class="btn btn-secondary" id="btn-add-task">+ Add Task</button>
+          </div>
+        </div>
+        <div id="tasks-kanban-container"></div>
+        <div id="tasks-list-container" style="display: none;"></div>
+      </div>
+    </div>
+
+    <!-- Time Tracking Tab -->
+    <div class="portal-tab-panel" id="pd-tab-time">
+      <h3 class="tab-section-heading">Time Tracking</h3>
+      <div class="time-tracking-header">
+        <div>
+          <button class="btn btn-secondary" id="btn-log-time">+ Log Time</button>
+          <button class="btn btn-outline" id="btn-export-time">Export CSV</button>
+        </div>
+      </div>
+      <div class="time-tracking-summary" id="time-tracking-summary"></div>
+      <div class="time-weekly-chart">
+        <h4>This Week</h4>
+        <div id="time-weekly-chart-container"></div>
+      </div>
+      <div class="portal-project-card portal-shadow">
+        <h3>Time Entries</h3>
+        <div id="time-entries-list"><p class="empty-state">No time entries yet.</p></div>
+      </div>
+    </div>
+
+    <!-- Contract Tab -->
+    <div class="portal-tab-panel" id="pd-tab-contract">
+      <h3 class="tab-section-heading">Contract</h3>
+      <div class="contract-tab-content">
+        <div class="portal-project-card portal-shadow">
+          <div class="contract-status-display">
+            <div class="contract-status-info">
+              <div class="status-item"><span class="field-label">Status</span><span class="status-badge" id="pd-contract-status-badge">Not Signed</span></div>
+              <div class="status-item" id="pd-contract-signed-info" style="display: none;"><span class="field-label">Signed On</span><span class="meta-value" id="pd-contract-date">-</span></div>
+              <div class="status-item" id="pd-contract-countersigned-info" style="display: none;"><span class="field-label">Countersigned On</span><span class="meta-value" id="pd-contract-countersigned-date">-</span></div>
+              <div class="status-item" id="pd-contract-requested-info" style="display: none;"><span class="field-label">Signature Requested</span><span class="meta-value" id="pd-contract-requested-date">-</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="portal-project-card portal-shadow">
+          <h3>Contract Document</h3>
+          <p class="contract-description">Preview, download, or request a signature for this project's contract.</p>
+          <div class="contract-actions-grid">
+            <a href="#" id="pd-contract-preview-btn" target="_blank" class="contract-action-card">
+              ${RENDER_ICONS.EYE.replace('width="14"', 'width="24"').replace('height="14"', 'height="24"')} <span>Preview Contract</span>
+            </a>
+            <a href="#" id="pd-contract-download-btn" class="contract-action-card" download>
+              ${RENDER_ICONS.DOWNLOAD} <span>Download PDF</span>
+            </a>
+            <button type="button" id="pd-contract-sign-btn" class="contract-action-card primary">
+              ${RENDER_ICONS.SIGN} <span id="pd-contract-sign-btn-text">Request Signature</span>
+            </button>
+            <button type="button" id="pd-contract-countersign-btn" class="contract-action-card" style="display: none;">
+              ${RENDER_ICONS.COUNTERSIGN} <span>Countersign</span>
+            </button>
+          </div>
+        </div>
+        <div class="portal-project-card portal-shadow">
+          <div class="card-header-with-action">
+            <div>
+              <h3>Contract Builder</h3>
+              <p class="contract-description">Build a draft, pull from templates, and preview before sending.</p>
+            </div>
+            <button type="button" class="btn btn-secondary" id="pd-contract-builder-btn">Open Builder</button>
+          </div>
+          <div class="contract-builder-meta">
+            <div class="status-item"><span class="field-label">Template</span><span class="meta-value" id="pd-contract-template-label">Not selected</span></div>
+            <div class="status-item"><span class="field-label">Draft</span><span class="meta-value" id="pd-contract-draft-status">No draft yet</span></div>
+          </div>
+        </div>
+        <div class="portal-project-card portal-shadow" id="pd-contract-signature-card" style="display: none;">
+          <h3>Signature Details</h3>
+          <div class="signature-details">
+            <div class="signature-info-row"><span class="field-label">Signed By</span><span class="meta-value" id="pd-contract-signer">-</span></div>
+            <div class="signature-info-row"><span class="field-label">Date & Time</span><span class="meta-value" id="pd-contract-signed-datetime">-</span></div>
+            <div class="signature-info-row" id="pd-contract-countersign-row" style="display: none;"><span class="field-label">Countersigned By</span><span class="meta-value" id="pd-contract-countersigner">-</span></div>
+            <div class="signature-info-row" id="pd-contract-countersign-date-row" style="display: none;"><span class="field-label">Countersigned At</span><span class="meta-value" id="pd-contract-countersigned-datetime">-</span></div>
+            <div class="signature-info-row"><span class="field-label">IP Address</span><span class="meta-value" id="pd-contract-signer-ip">-</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes Tab -->
+    <div class="portal-tab-panel" id="pd-tab-notes">
+      <h3 class="tab-section-heading">Project Notes</h3>
+      <div class="portal-project-card portal-shadow">
+        <div class="card-header-with-action">
+          <h3>Admin Notes (Internal)</h3>
+          <button class="btn btn-secondary btn-sm" id="btn-edit-project-notes">Edit Notes</button>
+        </div>
+        <div id="pd-notes-display" class="notes-display">
+          <p class="empty-state">No notes yet. Click "Edit Notes" to add internal notes about this project.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 export class AdminProjectDetails implements ProjectDetailsHandler {
   private currentProjectId: number | null = null;
   private projectsData: ProjectResponse[] = [];
@@ -120,6 +621,12 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // Switch to project detail view
     switchTab('project-detail');
+
+    // Dynamically render the project detail tab structure
+    const tabContainer = document.getElementById('tab-project-detail');
+    if (tabContainer) {
+      renderProjectDetailTab(tabContainer);
+    }
 
     // Populate the detail view
     this.populateProjectDetailView(project);

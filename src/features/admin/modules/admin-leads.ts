@@ -1895,3 +1895,93 @@ async function toggleNotePin(noteId: number, leadId: number): Promise<void> {
   }
 }
 
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+};
+
+/**
+ * Render the leads tab HTML structure dynamically.
+ * Call this before loadLeads to create the DOM elements.
+ */
+export function renderLeadsTab(container: HTMLElement): void {
+  // Reset cached elements and state when re-rendering
+  cachedElements.clear();
+  filterUIInitialized = false;
+
+  container.innerHTML = `
+    <!-- Leads Stats -->
+    <div class="quick-stats">
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="leads">
+        <span class="stat-number" id="leads-total">-</span>
+        <span class="stat-label">Total Leads</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="pending" data-table="leads">
+        <span class="stat-number" id="leads-pending">-</span>
+        <span class="stat-label">Pending</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="in_progress" data-table="leads">
+        <span class="stat-number" id="leads-active">-</span>
+        <span class="stat-label">In Progress</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="completed" data-table="leads">
+        <span class="stat-number" id="leads-completed">-</span>
+        <span class="stat-label">Completed</span>
+      </button>
+    </div>
+
+    <!-- Leads Table -->
+    <div class="admin-table-card" id="intake-submissions-card">
+      <div class="admin-table-header">
+        <h3><span class="title-full">Intake Submissions</span><span class="title-mobile">Leads</span></h3>
+        <div class="admin-table-actions" id="leads-filter-container">
+          <div id="leads-view-toggle"></div>
+          <button class="icon-btn" id="export-leads-btn" title="Export to CSV" aria-label="Export leads to CSV">
+            ${RENDER_ICONS.EXPORT}
+          </button>
+          <button class="icon-btn" id="refresh-leads-btn" title="Refresh" aria-label="Refresh leads">
+            ${RENDER_ICONS.REFRESH}
+          </button>
+        </div>
+      </div>
+      <!-- Bulk Action Toolbar (hidden initially) -->
+      <div id="leads-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
+      <!-- Pipeline View Container -->
+      <div class="leads-pipeline-container hidden" id="leads-pipeline-container"></div>
+      <!-- Table View -->
+      <div class="admin-table-container leads-table-container" id="leads-table-view">
+        <div class="admin-table-scroll-wrapper">
+        <table class="admin-table leads-table">
+          <thead>
+            <tr>
+              <th scope="col" class="bulk-select-cell">
+                <div class="portal-checkbox">
+                  <input type="checkbox" id="leads-select-all" class="bulk-select-all" aria-label="Select all leads" />
+                </div>
+              </th>
+              <th scope="col">Lead</th>
+              <th scope="col" class="type-col">Type</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="budget-col">Budget</th>
+              <th scope="col" class="date-col">Date</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leads-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            <tr>
+              <td colspan="7" class="loading-row">Loading leads...</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <!-- Pagination -->
+      <div id="leads-pagination" class="table-pagination"></div>
+    </div>
+  `;
+}
+

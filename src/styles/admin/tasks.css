@@ -15,6 +15,20 @@
   background: transparent;
   border-radius: var(--portal-radius-md);
   padding: 0;
+  min-height: calc(100vh - 200px);
+}
+
+/* Global tasks tab content should fill available height */
+[data-page="admin"] #tab-tasks .tasks-main-container {
+  min-height: calc(100vh - 220px);
+}
+
+[data-page="admin"] #tab-tasks .tasks-main-container .kanban-board {
+  min-height: calc(100vh - 280px);
+}
+
+[data-page="admin"] #tab-tasks .tasks-main-container .kanban-column {
+  min-height: calc(100vh - 320px);
 }
 
 /* Global Tasks Kanban - ensure horizontal layout */
@@ -98,14 +112,14 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   margin-bottom: var(--space-2);
 }
 
 .kanban-card-project svg {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
   opacity: 0.7;
   flex-shrink: 0;
 }
@@ -116,7 +130,7 @@
   align-items: center;
   padding: var(--space-0-5) var(--space-1-5);
   border-radius: var(--portal-radius-sm);
-  font-size: 0.6875rem;
+  font-size: var(--font-size-2xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -144,8 +158,8 @@
 
 /* Priority indicator for dropdowns */
 .priority-indicator {
-  width: 8px;
-  height: 8px;
+  width: var(--space-1);
+  height: var(--space-1);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -183,7 +197,7 @@
 
 .form-dropdown .dropdown-caret {
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-fast);
 }
 
 .form-dropdown.open .dropdown-caret {
@@ -196,18 +210,18 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  margin-top: 4px;
+  margin-top: var(--space-0-5);
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-sm);
   box-shadow: var(--portal-shadow);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-8px);
-  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  transform: translateY(calc(-1 * var(--space-1)));
+  transition: opacity var(--transition-faster), transform var(--transition-faster), visibility var(--transition-faster);
   list-style: none;
-  padding: 4px 0;
-  margin: 4px 0 0;
+  padding: var(--space-0-5) 0;
+  margin: var(--space-0-5) 0 0;
 }
 
 .form-dropdown.open .custom-dropdown-menu {
@@ -222,7 +236,7 @@
   gap: var(--space-1);
   padding: var(--space-1) var(--space-1-5);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-faster);
 }
 
 .form-dropdown .custom-dropdown-item:hover {
@@ -255,13 +269,13 @@
   margin-top: var(--space-2);
   padding-top: var(--space-2);
   border-top: 1px solid var(--portal-border-dark);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
 .task-meta svg {
-  width: 12px;
-  height: 12px;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
   opacity: 0.7;
 }
 
@@ -310,7 +324,7 @@
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
   border-bottom: 1px solid var(--portal-border);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--portal-text-secondary);
   text-transform: uppercase;
@@ -325,7 +339,7 @@
   border-bottom: 1px solid var(--portal-border);
   align-items: center;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-faster);
 }
 
 .task-list-item:hover {
@@ -339,7 +353,7 @@
 .task-list-title {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-px);
 }
 
 .task-list-title span {
@@ -348,7 +362,7 @@
 }
 
 .task-list-title small {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
@@ -375,7 +389,7 @@
 }
 
 .task-detail-title {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   color: var(--portal-text-primary);
 }
@@ -385,7 +399,7 @@
 }
 
 .task-detail-section h4 {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--portal-text-secondary);
   margin-bottom: var(--space-1);
@@ -412,8 +426,8 @@
 }
 
 .task-checklist-item input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: var(--space-2);
+  height: var(--space-2);
   cursor: pointer;
 }
 
@@ -437,7 +451,7 @@
 
 .task-checklist-progress-bar {
   flex: 1;
-  height: 6px;
+  height: var(--space-0-5);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-xs);
   overflow: hidden;
@@ -446,11 +460,11 @@
 .task-checklist-progress-fill {
   height: 100%;
   background: var(--status-active);
-  transition: width 0.3s ease;
+  transition: width var(--transition-medium);
 }
 
 .task-checklist-progress-text {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
@@ -464,11 +478,11 @@
 .task-dependency-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
+  gap: var(--space-0-5);
+  padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
@@ -493,22 +507,22 @@
 .task-comment-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-0-5);
 }
 
 .task-comment-author {
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
 }
 
 .task-comment-time {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
 .task-comment-body {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   line-height: 1.5;
 }
@@ -540,16 +554,16 @@
 }
 
 .time-summary-value {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--portal-text-primary);
 }
 
 .time-summary-label {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  margin-top: 4px;
+  margin-top: var(--space-0-5);
 }
 
 .time-entries-table {
@@ -569,14 +583,14 @@
 
 .time-entries-table th {
   background: var(--portal-bg-medium);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--portal-text-secondary);
   text-transform: uppercase;
 }
 
 .time-entries-table td {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
 }
 
@@ -596,10 +610,10 @@
 .time-entry-billable {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-0-5);
   padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-xs);
-  font-size: 0.625rem;
+  font-size: var(--font-size-2xs);
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -640,7 +654,7 @@
 
 .time-entry-duration-inputs span {
   color: var(--portal-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 /* Weekly chart container */
@@ -653,7 +667,7 @@
 }
 
 .time-weekly-chart h4 {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--portal-text-secondary);
   margin-bottom: var(--space-1-5);
@@ -676,7 +690,7 @@
 
   .task-list-item > *:not(:first-child) {
     display: inline-flex;
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
   }
 
   .time-entries-table {
@@ -696,16 +710,16 @@
 
 /* Project Link */
 .task-project-link {
-  margin-bottom: 8px;
-  padding-bottom: 8px;
+  margin-bottom: var(--space-1);
+  padding-bottom: var(--space-1);
   border-bottom: 1px solid var(--portal-border);
 }
 
 .task-project-name {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
+  gap: var(--space-0-5);
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--portal-text-secondary);
   text-decoration: none;
@@ -713,7 +727,7 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .task-project-name:hover {
@@ -728,18 +742,18 @@
 .task-milestone-tag,
 .task-standalone-tag {
   display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  padding: var(--space-0-5) var(--space-1);
+  border-radius: var(--portal-radius-xs);
+  font-size: var(--font-size-xs);
   font-weight: 500;
-  margin-top: 8px;
-  margin-bottom: 4px;
+  margin-top: var(--space-1);
+  margin-bottom: var(--space-0-5);
 }
 
 .task-milestone-tag {
-  background: var(--app-color-primary-light, rgba(0, 175, 240, 0.1));
-  color: var(--app-color-primary);
-  border: 1px solid var(--app-color-primary);
+  background: rgba(var(--color-primary-rgb), 0.1);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
 }
 
 .task-standalone-tag {
@@ -752,9 +766,9 @@
 .task-card-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 12px;
-  padding-top: 12px;
+  gap: var(--space-1);
+  margin-top: var(--space-1-5);
+  padding-top: var(--space-1-5);
   border-top: 1px solid var(--portal-border);
 }
 
@@ -762,19 +776,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px;
+  padding: var(--space-1);
   background: none;
   border: 1px solid var(--portal-border);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   color: var(--portal-text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .task-delete-btn:hover {
-  background: var(--app-color-danger-light, rgba(220, 38, 38, 0.1));
-  border-color: var(--app-color-danger);
-  color: var(--app-color-danger);
+  background: rgba(var(--color-danger-rgb), 0.1);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 .task-delete-btn svg {
@@ -791,7 +805,7 @@
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .project-link-btn:hover {

@@ -15,6 +15,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
+import { APP_CONSTANTS } from '../../../config/constants';
 import type { AdminDashboardContext } from '../admin-types';
 import { formatDateTime, formatCurrency, formatDate } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
@@ -1524,15 +1525,10 @@ async function deleteNote(noteId: number): Promise<void> {
 // ============================================
 
 /**
- * Generate a random tag color
+ * Generate a random tag color from the palette
  */
 function generateTagColor(): string {
-  const colors = [
-    '#ef4444', '#f97316', '#f59e0b', '#eab308',
-    '#84cc16', '#22c55e', '#10b981', '#14b8a6',
-    '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
-    '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'
-  ];
+  const colors = APP_CONSTANTS.TAG_COLORS;
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
@@ -1563,7 +1559,7 @@ export function getTagsHtml(tags: Tag[]): string {
   ).join('');
 
   if (extraCount > 0) {
-    html += `<span class="table-tag-mini" style="background-color: #6b7280; color: white">+${extraCount}</span>`;
+    html += `<span class="table-tag-mini" style="background-color: ${APP_CONSTANTS.TAG_OVERFLOW_COLOR}; color: ${APP_CONSTANTS.CONTRAST_TEXT.LIGHT}">+${extraCount}</span>`;
   }
 
   html += '</div>';
@@ -1579,7 +1575,315 @@ function getContrastColor(hexColor: string): string {
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5 ? '#000000' : '#ffffff';
+  return luminance > 0.5 ? APP_CONSTANTS.CONTRAST_TEXT.DARK : APP_CONSTANTS.CONTRAST_TEXT.LIGHT;
+}
+
+// ============================================
+// SVG ICONS FOR DYNAMIC RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  SEND: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>',
+  EDIT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+  MORE: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>',
+  MAIL: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+  PHONE: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  BUILDING: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>',
+  KEY: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  ARCHIVE: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>',
+  TRASH: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>',
+  EDIT_SM: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Renders the Client Detail tab structure dynamically.
+ * Called by admin-clients.ts before populating data.
+ */
+export function renderClientDetailTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <!-- Client Header Card -->
+    <div class="portal-project-card portal-shadow cd-header-card">
+      <div class="cd-header-top">
+        <div class="cd-header-info">
+          <div class="detail-title-row">
+            <div class="detail-title-group">
+              <h2 class="detail-title" id="cd-client-name">Client Name</h2>
+              <span class="status-badge" id="cd-status-badge">Active</span>
+            </div>
+            <div class="detail-actions">
+              <!-- Quick Action Buttons -->
+              <button class="icon-btn" id="cd-btn-send-invite" title="Send Invitation" aria-label="Send invitation to client">
+                ${RENDER_ICONS.SEND}
+              </button>
+              <button class="icon-btn" id="cd-btn-edit" title="Edit Client" aria-label="Edit client details">
+                ${RENDER_ICONS.EDIT}
+              </button>
+              <!-- More Menu -->
+              <div class="table-dropdown detail-more-menu" id="cd-more-menu">
+                <button class="custom-dropdown-trigger" aria-label="More actions">
+                  ${RENDER_ICONS.MORE}
+                </button>
+                <ul class="custom-dropdown-menu">
+                  <li class="custom-dropdown-item" data-action="resend-invite">
+                    ${RENDER_ICONS.SEND}
+                    Resend Invitation
+                  </li>
+                  <li class="custom-dropdown-item" data-action="reset-password">
+                    ${RENDER_ICONS.KEY}
+                    Reset Password
+                  </li>
+                  <li class="custom-dropdown-item" data-action="archive">
+                    ${RENDER_ICONS.ARCHIVE}
+                    Archive Client
+                  </li>
+                  <li class="dropdown-divider"></li>
+                  <li class="custom-dropdown-item danger" data-action="delete">
+                    ${RENDER_ICONS.TRASH}
+                    Delete Client
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- Contact Info in Header -->
+          <div class="cd-header-contact">
+            <div class="cd-contact-item">
+              ${RENDER_ICONS.MAIL}
+              <span id="cd-email">-</span>
+            </div>
+            <div class="cd-contact-item">
+              ${RENDER_ICONS.PHONE}
+              <span id="cd-phone">-</span>
+            </div>
+            <div class="cd-contact-item">
+              ${RENDER_ICONS.BUILDING}
+              <span id="cd-company">-</span>
+            </div>
+          </div>
+          <!-- Account Details in Header -->
+          <div class="cd-header-account">
+            <div class="cd-account-item">
+              <span class="cd-account-label">Type</span>
+              <span class="cd-account-value" id="cd-client-type">-</span>
+            </div>
+            <div class="cd-account-item">
+              <span class="cd-account-label">Since</span>
+              <span class="cd-account-value" id="cd-created">-</span>
+            </div>
+            <div class="cd-account-item">
+              <span class="cd-account-label">Last Login</span>
+              <span class="cd-account-value" id="cd-last-login">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Tags in header card -->
+      <div id="cd-header-tags" class="cd-header-tags"></div>
+    </div>
+
+    <!-- Client Detail Tabs -->
+    <div class="client-detail-tabs portal-tabs" id="client-detail-tabs">
+      <button class="active" data-cd-tab="overview">Overview</button>
+      <button data-cd-tab="contacts">Contacts</button>
+      <button data-cd-tab="activity">Activity</button>
+      <button data-cd-tab="projects">Projects</button>
+      <button data-cd-tab="invoices">Invoices</button>
+      <button data-cd-tab="notes">Notes</button>
+    </div>
+
+    <!-- Overview Tab - Two Column Layout -->
+    <div class="client-detail-tab-content portal-tab-panel active" id="cd-tab-overview">
+      <div class="cd-overview-grid">
+        <!-- LEFT COLUMN -->
+        <div class="cd-overview-main">
+          <!-- Projects Summary -->
+          <div class="portal-project-card portal-shadow">
+            <div class="card-header-with-action">
+              <h3>Projects</h3>
+              <button class="btn btn-sm btn-secondary" data-action="view-projects">View All</button>
+            </div>
+            <div class="cd-projects-summary" id="cd-overview-projects">
+              <p class="empty-state">Loading...</p>
+            </div>
+          </div>
+
+          <!-- CRM Details -->
+          <div class="portal-project-card portal-shadow">
+            <h3>CRM Details</h3>
+            <div class="cd-contact-grid">
+              <div class="meta-item">
+                <span class="field-label">Industry</span>
+                <span class="meta-value" id="cd-crm-industry">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="field-label">Company Size</span>
+                <span class="meta-value" id="cd-crm-company-size">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="field-label">Acquisition Source</span>
+                <span class="meta-value" id="cd-crm-acquisition-source">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="field-label">Website</span>
+                <span class="meta-value" id="cd-crm-website">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="field-label">Last Contact</span>
+                <span class="meta-value" id="cd-crm-last-contact">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="field-label">Next Follow-up</span>
+                <span class="meta-value" id="cd-crm-next-followup">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom Fields (hidden when empty) -->
+          <div class="portal-project-card portal-shadow" id="cd-custom-fields-card" style="display: none;">
+            <h3>Custom Fields</h3>
+            <div id="cd-custom-fields-container"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN (Sidebar) -->
+        <div class="cd-overview-sidebar">
+          <!-- Health & Stats Combined -->
+          <div class="portal-project-card portal-shadow cd-health-stats-card">
+            <h3>Client Health</h3>
+            <div id="cd-health-score-container">
+              <p class="empty-state">Loading...</p>
+            </div>
+            <div class="cd-stats-compact" id="cd-stats-container">
+              <!-- Stats rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity - Full Width spanning both columns -->
+        <div class="portal-project-card portal-shadow cd-recent-activity-full">
+          <h3>Recent Activity</h3>
+          <div id="cd-recent-activity">
+            <p class="empty-state">Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacts Tab -->
+    <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-contacts">
+      <div class="portal-project-card portal-shadow">
+        <h3>Contacts</h3>
+        <div id="cd-contacts-list">
+          <p class="empty-state">Loading contacts...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Tab -->
+    <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-activity">
+      <div class="portal-project-card portal-shadow">
+        <h3>Activity Timeline</h3>
+        <div id="cd-activity-list">
+          <p class="empty-state">Loading activity...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projects Tab -->
+    <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-projects">
+      <div class="portal-project-card portal-shadow">
+        <h3>Projects</h3>
+        <div class="client-projects-list" id="cd-projects-list">
+          <p class="empty-state">No projects found for this client.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoices Tab -->
+    <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-invoices">
+      <!-- Billing Summary -->
+      <div class="portal-project-card portal-shadow">
+        <h3>Billing Summary</h3>
+        <div class="billing-summary">
+          <div class="meta-item">
+            <span class="field-label">Total Invoiced</span>
+            <span class="meta-value" id="cd-total-invoiced">$0.00</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Total Paid</span>
+            <span class="meta-value" id="cd-total-paid">$0.00</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Outstanding</span>
+            <span class="meta-value" id="cd-outstanding">$0.00</span>
+          </div>
+        </div>
+      </div>
+      <!-- Billing Address -->
+      <div class="portal-project-card portal-shadow">
+        <div class="card-header-with-action">
+          <h3>Billing Address</h3>
+          <button class="icon-btn" id="cd-btn-edit-billing-invoices" title="Edit Billing Details" aria-label="Edit billing details">
+            ${RENDER_ICONS.EDIT_SM}
+          </button>
+        </div>
+        <div class="billing-info-grid">
+          <div class="meta-item">
+            <span class="field-label">Name</span>
+            <span class="meta-value" id="cd-billing-name-full">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Email</span>
+            <span class="meta-value" id="cd-billing-email-full">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Address</span>
+            <span class="meta-value" id="cd-billing-address">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">City</span>
+            <span class="meta-value" id="cd-billing-city">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">State/Province</span>
+            <span class="meta-value" id="cd-billing-state">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">ZIP/Postal Code</span>
+            <span class="meta-value" id="cd-billing-zip">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Country</span>
+            <span class="meta-value" id="cd-billing-country">-</span>
+          </div>
+        </div>
+      </div>
+      <!-- Invoice List -->
+      <div class="portal-project-card portal-shadow">
+        <h3>Invoice History</h3>
+        <div class="client-invoices-list" id="cd-invoices-list">
+          <p class="empty-state">No invoices found for this client.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes Tab -->
+    <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-notes">
+      <div class="portal-project-card portal-shadow">
+        <h3>Notes</h3>
+        <div id="cd-notes-list">
+          <p class="empty-state">Loading notes...</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Reset current tab to overview
+  _currentTab = 'overview';
 }
 
 // Export for use by admin-clients.ts

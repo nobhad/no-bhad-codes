@@ -830,3 +830,62 @@ async function handleConvertToClient(
     showToast('Failed to convert contact to client', 'error');
   }
 }
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+};
+
+/**
+ * Render the contacts tab HTML structure dynamically.
+ * Call this before loadContacts to create the DOM elements.
+ */
+export function renderContactsTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <div class="admin-table-card" id="contact-submissions-card">
+      <div class="admin-table-header">
+        <h3><span class="title-full">Contact Form Submissions</span><span class="title-mobile">Contacts</span></h3>
+        <div class="admin-table-actions" id="contacts-filter-container">
+          <button class="icon-btn" id="export-contacts-btn" title="Export to CSV" aria-label="Export contact submissions to CSV">
+            ${RENDER_ICONS.EXPORT}
+          </button>
+          <button class="icon-btn" id="refresh-contacts-btn" title="Refresh" aria-label="Refresh contact submissions">
+            ${RENDER_ICONS.REFRESH}
+          </button>
+        </div>
+      </div>
+      <div id="contacts-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
+      <div class="admin-table-container contacts-table-container">
+        <div class="admin-table-scroll-wrapper">
+        <table class="admin-table contacts-table">
+          <thead>
+            <tr>
+              <th scope="col" class="bulk-select-cell">
+                <div class="portal-checkbox">
+                  <input type="checkbox" id="contacts-select-all" class="bulk-select-all" aria-label="Select all contacts" />
+                </div>
+              </th>
+              <th scope="col" class="contact-col">Contact</th>
+              <th scope="col" class="email-col">Email</th>
+              <th scope="col">Message</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="date-col">Date</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="contacts-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            <tr>
+              <td colspan="7" class="loading-row">Loading contact submissions...</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <div id="contacts-pagination" class="table-pagination"></div>
+    </div>
+  `;
+}

@@ -106,7 +106,7 @@
   border-radius: var(--portal-radius-sm);
   padding: var(--space-3);
   cursor: grab;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease, border-color var(--transition-fast) ease;
   border: 1px solid var(--portal-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
@@ -250,7 +250,7 @@
   cursor: pointer;
   padding: 0;
   opacity: 0.7;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition-fast);
 }
 
 .tag-remove:hover {
@@ -302,7 +302,7 @@
   cursor: pointer;
   color: var(--portal-text-primary);
   font-size: 0.875rem;
-  transition: background-color 0.15s;
+  transition: background-color var(--transition-fast);
 }
 
 .tag-dropdown-item:hover {
@@ -460,7 +460,7 @@
 
 .bar-chart-bar {
   border-radius: 4px;
-  transition: width 0.3s ease;
+  transition: width var(--transition-normal) ease;
 }
 
 .bar-chart-value {

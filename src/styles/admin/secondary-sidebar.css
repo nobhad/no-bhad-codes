@@ -36,12 +36,12 @@
   height: 100vh;
   min-height: 100vh;
   flex-shrink: 0;
-  transition: width 0.2s ease, min-width 0.2s ease, max-width 0.2s ease;
+  transition: width var(--transition-fast), min-width var(--transition-fast), max-width var(--transition-fast);
   overflow: hidden;
   position: relative;
   z-index: 55;
   /* Shadow casting onto content area - matches main sidebar depth */
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sidebar);
 }
 
 /* =====================================================
@@ -79,12 +79,12 @@
   align-items: center;
   justify-content: center;
   color: var(--portal-text-muted);
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background var(--transition-fast), color var(--transition-fast);
   flex-shrink: 0;
 }
 
 [data-page="admin"] .secondary-sidebar-back:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--portal-bg-hover);
   color: var(--color-primary);
 }
 
@@ -96,7 +96,7 @@
 [data-page="admin"] .secondary-sidebar-title {
   flex: 1;
   font-family: var(--font-family-acme);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--portal-text-light);
   text-transform: uppercase;
@@ -125,19 +125,19 @@
   align-items: center;
   justify-content: center;
   color: var(--portal-text-muted);
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background var(--transition-fast), color var(--transition-fast);
   flex-shrink: 0;
 }
 
 [data-page="admin"] .secondary-sidebar-toggle:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--portal-bg-hover);
   color: var(--portal-text-light);
 }
 
 [data-page="admin"] .secondary-sidebar-toggle svg {
   width: 14px;
   height: 14px;
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-fast);
 }
 
 [data-page="admin"] .secondary-sidebar.collapsed .secondary-sidebar-toggle svg {
@@ -161,7 +161,7 @@
   padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; /* Match main sidebar gap */
+  gap: var(--space-1); /* Match main sidebar gap */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -189,7 +189,7 @@
   text-transform: uppercase;
   text-align: left;
   white-space: nowrap;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background var(--transition-fast), color var(--transition-fast);
   position: relative;
 }
 
@@ -259,14 +259,14 @@
    TAB BADGE (for notification counts)
    ===================================================== */
 [data-page="admin"] .secondary-nav-tab-badge {
-  min-width: 18px;
-  height: 18px;
+  min-width: var(--space-2);
+  height: var(--space-2);
   padding: 0 var(--space-1);
   background: var(--color-danger);
   color: var(--color-white);
-  font-size: 0.7rem;
+  font-size: var(--font-size-2xs);
   font-weight: 600;
-  border-radius: 9px;
+  border-radius: var(--portal-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -281,12 +281,12 @@
 
 [data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  min-width: 16px;
-  width: 16px;
-  height: 16px;
-  font-size: 0.5625rem;
+  top: var(--space-0-5);
+  right: var(--space-0-5);
+  min-width: var(--space-2);
+  width: var(--space-2);
+  height: var(--space-2);
+  font-size: var(--font-size-2xs);
   font-weight: 700;
   padding: 0;
   border-radius: var(--portal-radius-full);
@@ -314,7 +314,7 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
   z-index: 100;
   box-shadow: var(--shadow-md);
 }
@@ -372,7 +372,7 @@
   letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
 [data-page="admin"] .secondary-tab-horizontal:hover {

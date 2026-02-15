@@ -107,7 +107,7 @@
   border-radius: var(--border-radius-md);
   min-height: 40px;
   padding: var(--space-2) var(--space-3);
-  transition: border-color 0.15s ease;
+  transition: border-color var(--transition-faster);
 }
 
 #tab-client-detail #cd-tags-container .tag-input-wrapper:focus-within {
@@ -148,7 +148,7 @@
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: var(--portal-radius-lg);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
 }
@@ -462,7 +462,7 @@
 .table-tag-mini {
   font-size: 0.75rem;
   padding: var(--space-0-5) var(--space-1);
-  border-radius: 8px;
+  border-radius: var(--portal-radius-md);
 }
 
 /* Responsive */

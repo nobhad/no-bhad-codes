@@ -52,7 +52,7 @@
    ============================================================================ */
 
 .cp-questionnaire-card {
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
 }
 
 .cp-questionnaire-card.overview-card:hover {
@@ -294,7 +294,7 @@
   border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-sm);
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .cp-checkbox-label:hover {

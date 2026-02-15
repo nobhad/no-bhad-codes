@@ -79,7 +79,7 @@ body:has([data-page="client-portal"]) {
   text-transform: uppercase;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  transition: color 0.2s ease;
+  transition: color var(--transition-mouse) ease;
 }
 
 .portal-global-header .header-logo:hover {
@@ -126,7 +126,7 @@ body:has([data-page="client-portal"]) {
   font-size: inherit;
   padding: 0;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--transition-mouse) ease;
 }
 
 .portal-global-header .breadcrumb-link:hover {
@@ -157,7 +157,7 @@ body:has([data-page="client-portal"]) {
   border-radius: var(--portal-radius-sm, 4px);
   cursor: pointer;
   color: var(--portal-text-secondary);
-  transition: color 0.2s ease, background 0.2s ease;
+  transition: color var(--transition-mouse) ease, background var(--transition-mouse) ease;
 }
 
 /* Override nav-base.css absolute positioning for portal header icons */

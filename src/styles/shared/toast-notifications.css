@@ -23,7 +23,7 @@
   padding: var(--space-3) var(--space-4);
   background: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-dark);
-  border-radius: var(--border-radius-md);
+  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-modal);
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
@@ -31,7 +31,7 @@
   pointer-events: auto;
   opacity: 0;
   transform: translateX(100%);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity var(--transition-normal) ease, transform var(--transition-normal) ease;
   min-width: 250px;
   max-width: 400px;
 }
@@ -70,7 +70,7 @@
   font-weight: 600;
   text-decoration: none;
   border-bottom: 1px solid transparent;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color var(--transition-fast) ease, color var(--transition-fast) ease;
   white-space: nowrap;
 }
 
@@ -88,8 +88,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--border-radius-sm);
-  transition: background-color 0.15s ease, color 0.15s ease;
+  border-radius: var(--portal-radius-sm);
+  transition: background-color var(--transition-fast) ease, color var(--transition-fast) ease;
   flex-shrink: 0;
   width: 24px;
   height: 24px;

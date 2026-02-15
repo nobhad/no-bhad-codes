@@ -16,7 +16,7 @@
 .table-filter-controls {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-1);
   height: 36px;
 }
 
@@ -115,7 +115,7 @@
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px);
-  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast), transform var(--transition-fast);
 }
 
 .filter-dropdown-wrapper.open .filter-dropdown-menu {
@@ -126,16 +126,16 @@
 
 /* Filter sections */
 .filter-section {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-1-5);
 }
 
 .filter-section:last-of-type {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-1);
 }
 
 .filter-section-label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-1);
   color: var(--portal-text-muted);
   font-size: 0.75rem;
   font-weight: 600;
@@ -147,15 +147,15 @@
 .filter-checkbox-group {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: var(--space-1);
 }
 
 .filter-checkbox {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.5rem;
-  margin: 0 -0.5rem;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-1);
+  margin: 0 calc(-1 * var(--space-1));
   border-radius: var(--portal-radius-sm);
   cursor: pointer;
   transition: background-color var(--transition-fast);
@@ -179,12 +179,12 @@
 .filter-date-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-1);
 }
 
 .filter-date-input {
   width: 100%;
-  padding: 0.35rem 0.5rem;
+  padding: var(--space-1) var(--space-1);
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-sm);
@@ -205,7 +205,7 @@
 /* Clear button */
 .filter-clear-btn {
   width: 100%;
-  padding: 0.5rem 1rem;
+  padding: var(--space-1) var(--space-2);
   background: transparent;
   border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-sm);
@@ -227,7 +227,7 @@
 .admin-table th.sortable {
   cursor: pointer;
   user-select: none;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-faster);
   position: relative;
   padding-right: calc(var(--space-4) + 20px);
 }
@@ -249,7 +249,7 @@
   width: 14px;
   height: 14px;
   color: var(--portal-text-muted);
-  transition: color 0.15s ease;
+  transition: color var(--transition-faster);
 }
 
 .admin-table th.sortable:hover .sort-icon svg {
@@ -269,7 +269,7 @@
   .table-filter-controls {
     flex-wrap: wrap;
     width: 100%;
-    margin-top: 0.75rem;
+    margin-top: var(--space-1-5);
   }
 
   .filter-search {
@@ -311,7 +311,7 @@
   }
 
   .table-filter-controls {
-    gap: 0.5rem;
+    gap: var(--space-1);
     flex-wrap: nowrap;
     margin-top: 0;
   }

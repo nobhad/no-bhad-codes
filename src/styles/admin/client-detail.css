@@ -556,7 +556,7 @@
 .clickable-link {
   color: var(--portal-accent);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .clickable-link:hover {
@@ -567,7 +567,7 @@
 /* Clickable client items in project details */
 .clickable-client {
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-fast);
 }
 
 .clickable-client:hover {
@@ -751,7 +751,7 @@
   border: none;
   border-radius: var(--portal-radius-md);
   margin-bottom: var(--space-1);
-  transition: background 0.2s ease;
+  transition: background var(--transition-fast);
 }
 
 .client-invoice-item:hover {

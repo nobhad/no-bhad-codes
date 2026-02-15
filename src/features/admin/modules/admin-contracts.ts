@@ -291,7 +291,8 @@ async function fetchContracts(): Promise<ContractListItem[]> {
     throw new Error(data.message || 'Failed to load contracts');
   }
 
-  return data.contracts as ContractListItem[];
+  // Ensure we always return an array, even if API returns undefined
+  return Array.isArray(data.contracts) ? data.contracts : [];
 }
 
 async function fetchContractActivity(contractId: number): Promise<ContractActivityItem[]> {
@@ -302,7 +303,8 @@ async function fetchContractActivity(contractId: number): Promise<ContractActivi
     throw new Error(data.message || 'Failed to load contract activity');
   }
 
-  return data.activity as ContractActivityItem[];
+  // Ensure we always return an array, even if API returns undefined
+  return Array.isArray(data.activity) ? data.activity : [];
 }
 
 async function openContractDetail(contract: ContractListItem): Promise<void> {
@@ -531,6 +533,88 @@ function attachContractsListeners(context: AdminDashboardContext): void {
       break;
     }
   });
+}
+
+// ============================================
+// SVG ICONS FOR DYNAMIC RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Renders the Contracts tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderContractsTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <div class="quick-stats">
+      <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="all">
+        <span class="stat-number" id="contracts-total">-</span>
+        <span class="stat-label">Total Contracts</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="draft">
+        <span class="stat-number" id="contracts-draft">-</span>
+        <span class="stat-label">Draft</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="sent">
+        <span class="stat-number" id="contracts-sent">-</span>
+        <span class="stat-label">Sent</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="viewed">
+        <span class="stat-number" id="contracts-viewed">-</span>
+        <span class="stat-label">Viewed</span>
+      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="signed">
+        <span class="stat-number" id="contracts-signed">-</span>
+        <span class="stat-label">Signed</span>
+      </button>
+    </div>
+
+    <div class="admin-table-card" id="contracts-table-card">
+      <div class="admin-table-header">
+        <h3>Contracts</h3>
+        <div class="admin-table-actions" id="contracts-filter-container">
+          <button class="icon-btn" id="refresh-contracts-btn" title="Refresh" aria-label="Refresh contracts">
+            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+          </button>
+        </div>
+      </div>
+      <div class="admin-table-container contracts-table-container">
+        <div class="admin-table-scroll-wrapper">
+          <table class="admin-table contracts-table">
+            <thead>
+              <tr>
+                <th scope="col">Contract</th>
+                <th scope="col">Project</th>
+                <th scope="col" class="contact-col">Client</th>
+                <th scope="col" class="status-col">Status</th>
+                <th scope="col" class="date-col">Sent</th>
+                <th scope="col" class="date-col">Signed</th>
+                <th scope="col" class="date-col">Expires</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="contracts-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              <tr>
+                <td colspan="8" class="loading-row">Loading contracts...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="contracts-pagination" class="table-pagination"></div>
+    </div>
+  `;
+
+  // Reset filter UI initialization flag so it gets re-initialized
+  filterUIInitialized = false;
+  listenersInitialized = false;
 }
 
 export async function loadContracts(context: AdminDashboardContext): Promise<void> {

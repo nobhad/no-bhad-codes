@@ -22,14 +22,14 @@
 :is([data-page="admin"], [data-page="client-portal"]) textarea,
 :is([data-page="admin"], [data-page="client-portal"]) select:not(.status-select) {
   width: 100%;
-  height: 48px;
-  padding: 0 16px;
+  height: var(--space-6);
+  padding: 0 var(--space-2);
   border: 1px solid var(--portal-border-dark);
   border-radius: var(--portal-radius-lg);
   font-size: var(--font-size-base);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-weight: 400;
-  line-height: 48px;
+  line-height: var(--space-6);
   background-color: var(--color-black);
   color: var(--portal-text-light);
   box-sizing: border-box;
@@ -52,12 +52,38 @@
 /* Textarea specific - needs different height/padding */
 /* Padding matches dropdown trigger visually: 12px vertical, 16px horizontal */
 :is([data-page="admin"], [data-page="client-portal"]) textarea,
-:is([data-page="admin"], [data-page="client-portal"]) .form-textarea {
-  height: auto;
-  min-height: 100px;
-  padding: 12px 16px;
-  line-height: 1.5;
+:is([data-page="admin"], [data-page="client-portal"]) .form-textarea,
+:is([data-page="admin"], [data-page="client-portal"]) textarea.form-input {
+  height: auto !important;
+  min-height: calc(var(--space-6) * 2);
+  padding: var(--space-1-5) var(--space-2);
+  line-height: 1.4 !important;
   resize: vertical;
+}
+
+/* =====================================================
+   MODAL FORM GROUPS - Proper spacing between groups
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .modal-body .form-group {
+  margin-bottom: var(--space-4);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .modal-body .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* =====================================================
+   MODAL FORM LABELS - Uppercase, proper spacing
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .modal-body .form-group > label:not(.portal-checkbox-label),
+:is([data-page="admin"], [data-page="client-portal"]) .modal-body label:not(.portal-checkbox-label):not([class*="checkbox"]) {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* =====================================================
@@ -133,7 +159,7 @@
   position: static;
   display: block;
   margin-bottom: var(--field-label-value-gap);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--portal-text-secondary);
   text-transform: uppercase;
@@ -152,10 +178,10 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside label {
   position: absolute;
-  top: 8px;
-  left: 16px;
+  top: var(--space-1);
+  left: var(--space-2);
   z-index: 1;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--portal-text-secondary);
   text-transform: uppercase;
@@ -167,8 +193,8 @@
 :is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside input,
 :is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside select,
 :is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside textarea {
-  height: 60px;
-  padding: 24px 16px 8px 16px;
+  height: calc(var(--space-6) + var(--space-1-5));
+  padding: var(--space-3) var(--space-2) var(--space-1) var(--space-2);
   line-height: normal;
 }
 
@@ -231,8 +257,8 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .form-error-message {
   color: var(--color-danger);
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-0-5);
 }
 
 /* =====================================================
@@ -245,10 +271,10 @@
   :is([data-page="admin"], [data-page="client-portal"]) input,
   :is([data-page="admin"], [data-page="client-portal"]) textarea,
   :is([data-page="admin"], [data-page="client-portal"]) select {
-    height: 44px;
-    padding: 0 12px;
+    height: calc(var(--space-5) + var(--space-0-5));
+    padding: 0 var(--space-1-5);
     font-size: var(--font-size-sm);
-    line-height: 44px;
+    line-height: calc(var(--space-5) + var(--space-0-5));
   }
 
   /* Keep left-icon padding so text never overlaps icon */
@@ -260,8 +286,8 @@
   :is([data-page="admin"], [data-page="client-portal"]) textarea,
   :is([data-page="admin"], [data-page="client-portal"]) .form-textarea {
     height: auto;
-    min-height: 80px;
-    padding: 10px 12px;
+    min-height: var(--space-10);
+    padding: var(--space-1) var(--space-1-5);
     line-height: 1.5;
   }
 }
@@ -274,11 +300,11 @@
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .portal-checkbox {
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  width: var(--space-2);
+  height: var(--space-2);
   cursor: pointer;
   background: var(--portal-bg-darkest);
-  border: 1px solid var(--portal-border-dark, rgba(255, 255, 255, 0.2));
+  border: 1px solid var(--portal-border-dark);
   border-radius: var(--portal-radius-xs);
   position: relative;
   display: flex;

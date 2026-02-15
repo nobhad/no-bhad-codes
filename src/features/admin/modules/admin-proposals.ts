@@ -201,11 +201,11 @@ interface ProposalActivity {
 // ============================================================================
 
 const PROPOSAL_STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pending', color: 'var(--color-warning, #f59e0b)' },
-  { value: 'reviewed', label: 'Reviewed', color: 'var(--color-info, #3b82f6)' },
-  { value: 'accepted', label: 'Accepted', color: 'var(--color-success, #22c55e)' },
-  { value: 'rejected', label: 'Rejected', color: 'var(--color-danger, #ef4444)' },
-  { value: 'converted', label: 'Converted', color: 'var(--color-primary, #00aff0)' }
+  { value: 'pending', label: 'Pending', color: 'var(--color-warning-500)' },
+  { value: 'reviewed', label: 'Reviewed', color: 'var(--color-info-500)' },
+  { value: 'accepted', label: 'Accepted', color: 'var(--color-success-500)' },
+  { value: 'rejected', label: 'Rejected', color: 'var(--color-error-500)' },
+  { value: 'converted', label: 'Converted', color: 'var(--color-primary)' }
 ];
 
 // ============================================================================

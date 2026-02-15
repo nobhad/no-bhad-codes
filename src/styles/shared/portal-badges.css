@@ -24,7 +24,7 @@
   text-align: center;
   box-sizing: border-box;
   white-space: nowrap;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-mouse) ease;
 }
 
 /* =====================================================

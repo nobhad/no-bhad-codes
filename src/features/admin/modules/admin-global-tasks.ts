@@ -65,6 +65,44 @@ const PRIORITY_CONFIG = {
   urgent: { label: 'Urgent', class: 'task-priority-urgent', color: 'var(--status-cancelled)' }
 };
 
+// ============================================
+// SVG ICONS FOR DYNAMIC RENDERING
+// ============================================
+
+const RENDER_ICONS = {
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+};
+
+// ============================================
+// DYNAMIC TAB RENDERING
+// ============================================
+
+/**
+ * Renders the Global Tasks tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderGlobalTasksTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <div class="admin-table-card portal-shadow tasks-main-container" id="global-tasks-card">
+      <div class="admin-table-header">
+        <h3>All Tasks</h3>
+        <div class="admin-table-actions">
+          <div id="global-tasks-view-toggle-mount"></div>
+          <button class="icon-btn" id="refresh-global-tasks-btn" title="Refresh" aria-label="Refresh tasks">
+            ${RENDER_ICONS.REFRESH}
+          </button>
+        </div>
+      </div>
+      <div id="global-tasks-kanban-container"></div>
+      <div id="global-tasks-list-container" style="display: none;"></div>
+    </div>
+  `;
+
+  // Reset view state
+  currentView = 'kanban';
+  kanbanBoard = null;
+}
+
 /**
  * Load global tasks and render the view
  */

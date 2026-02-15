@@ -31,6 +31,7 @@
   --font-size-base-px: 16;
 
   /* Fluid type scale using clamp() */
+  --font-size-2xs: clamp(0.625rem, 0.6rem + 0.125vw, 0.6875rem); /* 10px → 11px */
   --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); /* 12px → 14px */
   --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem); /* 14px → 16px */
   --font-size-md: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* 16px → 18px */

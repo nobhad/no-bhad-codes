@@ -10,8 +10,7 @@
  */
 
 import type { AdminDashboardContext } from '../admin-types';
-import { apiFetch, apiPost, apiDelete } from '../../../utils/api-client';
-import { parseJsonResponse } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { confirmDanger } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
@@ -262,9 +261,9 @@ async function loadAllRequests(): Promise<DocumentRequest[]> {
     console.error('[DocRequests] Failed to load overdue:', overdueRes.status);
   }
 
-  const pending = pendingRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(pendingRes).then((d) => d.requests || []) : [];
-  const forReview = forReviewRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(forReviewRes).then((d) => d.requests || []) : [];
-  const overdue = overdueRes.ok ? await parseJsonResponse<{ requests: DocumentRequest[] }>(overdueRes).then((d) => d.requests || []) : [];
+  const pending = pendingRes.ok ? await parseApiResponse<{ requests: DocumentRequest[] }>(pendingRes).then((d) => d.requests || []) : [];
+  const forReview = forReviewRes.ok ? await parseApiResponse<{ requests: DocumentRequest[] }>(forReviewRes).then((d) => d.requests || []) : [];
+  const overdue = overdueRes.ok ? await parseApiResponse<{ requests: DocumentRequest[] }>(overdueRes).then((d) => d.requests || []) : [];
 
   const byId = new Map<number, DocumentRequest>();
   [...pending, ...forReview, ...overdue].forEach((r) => byId.set(r.id, r));
@@ -274,21 +273,21 @@ async function loadAllRequests(): Promise<DocumentRequest[]> {
 async function loadClients(): Promise<ClientOption[]> {
   const res = await apiFetch('/api/clients');
   if (!res.ok) return [];
-  const data = await parseJsonResponse<{ clients: ClientOption[] }>(res);
+  const data = await parseApiResponse<{ clients: ClientOption[] }>(res);
   return data.clients || [];
 }
 
 async function loadTemplates(): Promise<DocumentRequestTemplate[]> {
   const res = await apiFetch(`${DR_API}/templates/list`);
   if (!res.ok) return [];
-  const data = await parseJsonResponse<{ templates: DocumentRequestTemplate[] }>(res);
+  const data = await parseApiResponse<{ templates: DocumentRequestTemplate[] }>(res);
   return data.templates || [];
 }
 
 async function loadRequestDetail(id: number): Promise<{ request: DocumentRequest; history: DocumentRequestHistory[] } | null> {
   const res = await apiFetch(`${DR_API}/${id}`);
   if (!res.ok) return null;
-  return parseJsonResponse(res);
+  return parseApiResponse(res);
 }
 
 // ---------------------------------------------------------------------------
@@ -910,6 +909,156 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
       }
     }
   });
+}
+
+// ---------------------------------------------------------------------------
+// Render icons for dynamic rendering
+// ---------------------------------------------------------------------------
+
+const RENDER_ICONS = {
+  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
+  PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+  DOCUMENT: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
+};
+
+// ---------------------------------------------------------------------------
+// Dynamic Tab Render
+// ---------------------------------------------------------------------------
+
+/**
+ * Render the document requests tab structure dynamically
+ */
+export function renderDocumentRequestsTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <div class="admin-table-card portal-shadow">
+      <div class="admin-table-header">
+        <h3>Requests</h3>
+        <div class="admin-table-actions" id="dr-filter-container">
+          <button type="button" class="icon-btn" id="dr-export" title="Export to CSV" aria-label="Export to CSV">
+            <span class="icon-btn-svg">${RENDER_ICONS.EXPORT}</span>
+          </button>
+          <button type="button" class="icon-btn" id="dr-refresh" title="Refresh" aria-label="Refresh">
+            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+          </button>
+          <button type="button" class="icon-btn" id="dr-add-request" title="Add Request" aria-label="Add Request">
+            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+          </button>
+        </div>
+      </div>
+      <div id="dr-bulk-toolbar" class="bulk-action-toolbar"></div>
+      <div class="admin-table-container">
+        <div class="admin-table-scroll-wrapper">
+        <table class="admin-table" aria-label="Document requests">
+          <thead>
+            <tr>
+              <th scope="col" class="bulk-select-cell">
+                <div class="portal-checkbox">
+                  <input type="checkbox" id="document-requests-select-all" class="bulk-select-all" aria-label="Select all document requests" />
+                </div>
+              </th>
+              <th scope="col">Title</th>
+              <th scope="col" class="contact-col">Client</th>
+              <th scope="col" class="type-col">Type</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="date-col">Due</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="document-requests-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            <tr>
+              <td colspan="7" class="loading-row">Loading requests...</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <!-- Pagination -->
+      <div id="document-requests-pagination" class="table-pagination"></div>
+    </div>
+    <!-- Create Modal -->
+    <div class="admin-modal-overlay hidden" id="dr-create-modal" role="dialog" aria-modal="true" aria-labelledby="dr-create-modal-title">
+      <div class="admin-modal">
+        <div class="admin-modal-header">
+          <div class="admin-modal-title">
+            ${RENDER_ICONS.DOCUMENT}
+            <h2 id="dr-create-modal-title">New Document Request</h2>
+          </div>
+          <button class="admin-modal-close" id="dr-create-modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="admin-modal-tabs">
+          <button type="button" class="admin-modal-tab active" data-dr-tab="single">Single Request</button>
+          <button type="button" class="admin-modal-tab" data-dr-tab="templates">From Templates</button>
+        </div>
+        <!-- Single Request Tab -->
+        <form id="dr-create-form" data-dr-tab-content="single">
+          <div class="admin-modal-body">
+            <div class="form-group">
+              <label class="field-label" for="dr-create-client">Client *</label>
+              <select id="dr-create-client" name="dr-create-client" class="form-input" required>
+                <option value="">Select client</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="field-label" for="dr-create-title">Title *</label>
+              <input type="text" id="dr-create-title" class="form-input" placeholder="Document title" required />
+            </div>
+            <div class="form-group">
+              <label class="field-label" for="dr-create-description">Description</label>
+              <textarea id="dr-create-description" class="form-input" rows="3" placeholder="Additional details about the document request"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="field-label" for="dr-create-due">Due Date</label>
+              <input type="date" id="dr-create-due" class="form-input" />
+            </div>
+          </div>
+          <div class="admin-modal-footer">
+            <button type="button" class="btn btn-secondary" id="dr-create-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Request</button>
+          </div>
+        </form>
+        <!-- From Templates Tab -->
+        <form id="dr-from-templates-form" data-dr-tab-content="templates" style="display: none;">
+          <div class="admin-modal-body">
+            <div class="form-group">
+              <label class="field-label" for="dr-templates-client">Client *</label>
+              <select id="dr-templates-client" name="dr-templates-client" class="form-input" required>
+                <option value="">Select client</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="field-label">Select Templates *</label>
+              <div id="dr-templates-list" class="dr-templates-checkboxes" aria-label="Select templates"></div>
+            </div>
+          </div>
+          <div class="admin-modal-footer">
+            <button type="button" class="btn btn-secondary" id="dr-templates-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Requests</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Detail Modal -->
+    <div class="admin-modal-overlay hidden" id="dr-detail-modal" role="dialog" aria-modal="true" aria-labelledby="dr-detail-modal-title">
+      <div class="admin-modal admin-modal--wide">
+        <div class="admin-modal-header">
+          <div class="admin-modal-title">
+            ${RENDER_ICONS.DOCUMENT}
+            <h2 id="dr-detail-modal-title">Document Request</h2>
+          </div>
+          <button class="admin-modal-close" id="dr-detail-modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <div id="dr-detail-body" class="admin-modal-body"></div>
+        <div id="dr-detail-footer" class="admin-modal-footer"></div>
+      </div>
+    </div>
+  `;
+
+  // Reset initialization flags since DOM was rebuilt
+  drListenersSetup = false;
+  filterUIContainer = null;
+  drCreateClientDropdownInit = false;
+  drTemplatesClientDropdownInit = false;
 }
 
 // ---------------------------------------------------------------------------

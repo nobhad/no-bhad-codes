@@ -6,7 +6,7 @@
  */
 
 import { AdminAuth } from '../admin-auth';
-import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { showToast } from '../../../utils/toast-notifications';
 import { getElement } from '../../../utils/dom-cache';
 import {
@@ -160,7 +160,7 @@ export async function duplicateProject(
     });
 
     if (response.ok) {
-      const result = await response.json();
+      const result = await parseApiResponse<{ project: ProjectResponse }>(response);
       showToast('Project duplicated successfully', 'success');
       // Refresh projects list and show the new project
       await loadProjects();
@@ -673,7 +673,7 @@ export async function showContractBuilder(
         showToast('Failed to load contract templates', 'error');
         return;
       }
-      const data = await response.json();
+      const data = await parseApiResponse<{ templates: ContractTemplateOption[] }>(response);
       const templates: ContractTemplateOption[] = data.templates || [];
       templates.forEach((template) => {
         const option = document.createElement('option');
@@ -712,7 +712,7 @@ export async function showContractBuilder(
         return;
       }
 
-      const data = await response.json();
+      const data = await parseApiResponse<{ contract: { id: number; content: string } }>(response);
       const contract = data.contract;
       contractId = contract?.id || null;
       if (contentTextarea) {
@@ -777,7 +777,7 @@ export async function showContractBuilder(
         return;
       }
 
-      const data = await response.json();
+      const data = await parseApiResponse<{ contract: { id: number } }>(response);
       contractId = data.contract?.id || contractId;
       const draftStatus = document.getElementById('pd-contract-draft-status');
       if (draftStatus) draftStatus.textContent = 'Draft saved';

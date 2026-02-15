@@ -8,7 +8,7 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate } from '../../../utils/format-utils';
 import { AdminAuth } from '../admin-auth';
-import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { confirmDanger, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { domCache } from './dom-cache';
 import type { ProjectMilestoneResponse } from '../../../types/api';
@@ -40,7 +40,7 @@ export async function loadProjectMilestones(
     const response = await apiFetch(`/api/projects/${projectId}/milestones`);
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await parseApiResponse<{ milestones: ProjectMilestoneResponse[] }>(response);
       const milestones = data.milestones || [];
 
       if (milestones.length === 0) {
@@ -312,7 +312,7 @@ export async function toggleMilestoneTasks(
         );
 
         if (response.ok) {
-          const data = await response.json();
+          const data = await parseApiResponse<{ tasks: MilestoneTask[] }>(response);
           const tasks = data.tasks || [];
 
           if (tasks.length === 0) {

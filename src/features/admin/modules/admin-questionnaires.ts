@@ -9,8 +9,7 @@
  */
 
 import type { AdminDashboardContext } from '../admin-types';
-import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
-import { parseJsonResponse } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { confirmDanger } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
@@ -127,21 +126,21 @@ let clientDropdownInit = false;
 async function loadQuestionnaires(): Promise<Questionnaire[]> {
   const res = await apiFetch(QUESTIONNAIRES_API);
   if (!res.ok) return [];
-  const data = await parseJsonResponse<{ questionnaires: Questionnaire[] }>(res);
+  const data = await parseApiResponse<{ questionnaires: Questionnaire[] }>(res);
   return data.questionnaires || [];
 }
 
 async function loadPendingResponses(): Promise<QuestionnaireResponse[]> {
   const res = await apiFetch(`${QUESTIONNAIRES_API}/responses/pending`);
   if (!res.ok) return [];
-  const data = await parseJsonResponse<{ responses: QuestionnaireResponse[] }>(res);
+  const data = await parseApiResponse<{ responses: QuestionnaireResponse[] }>(res);
   return data.responses || [];
 }
 
 async function loadClients(): Promise<ClientOption[]> {
   const res = await apiFetch('/api/clients');
   if (!res.ok) return [];
-  const data = await parseJsonResponse<{ clients: ClientOption[] }>(res);
+  const data = await parseApiResponse<{ clients: ClientOption[] }>(res);
   return data.clients || [];
 }
 
@@ -551,7 +550,7 @@ async function openViewResponseModal(responseId: number): Promise<void> {
     const res = await apiFetch(`${QUESTIONNAIRES_API}/responses/${responseId}`);
     if (!res.ok) throw new Error('Failed to load response');
 
-    const data = await parseJsonResponse<{
+    const data = await parseApiResponse<{
       response: QuestionnaireResponse;
       questionnaire: Questionnaire;
     }>(res);
@@ -832,6 +831,214 @@ function setupListeners(ctx: AdminDashboardContext): void {
       await deleteResponse(id);
     }
   });
+}
+
+// ---------------------------------------------------------------------------
+// SVG ICONS FOR DYNAMIC RENDERING
+// ---------------------------------------------------------------------------
+
+const RENDER_ICONS = {
+  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
+  PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+  PLUS_SM: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>'
+};
+
+// ---------------------------------------------------------------------------
+// DYNAMIC TAB RENDERING
+// ---------------------------------------------------------------------------
+
+/**
+ * Renders the Questionnaires tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderQuestionnairesTab(container: HTMLElement): void {
+  container.innerHTML = `
+    <div class="admin-table-card portal-shadow">
+      <div class="admin-table-header">
+        <h3>Questionnaires</h3>
+        <div class="admin-table-actions" id="questionnaires-filter-container">
+          <button type="button" class="icon-btn" id="questionnaires-refresh" title="Refresh" aria-label="Refresh questionnaires">
+            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+          </button>
+          <button type="button" class="icon-btn icon-btn-primary" id="questionnaires-add" title="Create Questionnaire" aria-label="Create questionnaire">
+            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+          </button>
+        </div>
+      </div>
+      <div class="admin-table-container">
+        <div class="admin-table-scroll-wrapper">
+        <table class="admin-table" aria-label="Questionnaires">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Description</th>
+              <th scope="col" class="type-col">Project Type</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="questionnaires-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            <tr>
+              <td colspan="5" class="loading-row">Loading questionnaires...</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <div id="questionnaires-pagination" class="table-pagination"></div>
+    </div>
+
+    <!-- Pending Responses Card -->
+    <div class="admin-table-card portal-shadow" style="margin-top: var(--space-3);">
+      <div class="admin-table-header">
+        <h3>Pending Responses</h3>
+        <div class="admin-table-actions">
+          <button type="button" class="icon-btn" id="responses-refresh" title="Refresh" aria-label="Refresh responses">
+            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+          </button>
+        </div>
+      </div>
+      <div class="admin-table-container">
+        <div class="admin-table-scroll-wrapper">
+        <table class="admin-table" aria-label="Pending questionnaire responses">
+          <thead>
+            <tr>
+              <th scope="col">Questionnaire</th>
+              <th scope="col" class="contact-col">Client</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="date-col">Due Date</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="responses-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            <tr>
+              <td colspan="5" class="loading-row">Loading responses...</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create/Edit Questionnaire Modal -->
+    <div class="admin-modal-overlay hidden" id="questionnaire-modal" role="dialog" aria-modal="true" aria-labelledby="questionnaire-modal-title">
+      <div class="admin-modal admin-modal--lg">
+        <div class="admin-modal-header">
+          <div class="admin-modal-title">
+            <h2 id="questionnaire-modal-title">Create Questionnaire</h2>
+          </div>
+          <button class="admin-modal-close" id="questionnaire-modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="admin-modal-body">
+          <form id="questionnaire-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="questionnaire-name">Internal Name</label>
+                <input type="text" id="questionnaire-name" name="name" required placeholder="e.g., website_discovery" />
+              </div>
+              <div class="form-group">
+                <label for="questionnaire-project-type">Project Type</label>
+                <select id="questionnaire-project-type" name="project_type">
+                  <option value="">All Types</option>
+                  <option value="website">Website</option>
+                  <option value="branding">Branding</option>
+                  <option value="ecommerce">E-commerce</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="questionnaire-description">Description (shown to clients)</label>
+              <textarea id="questionnaire-description" name="description" rows="2" placeholder="Help us understand your project needs..."></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group form-group--checkbox">
+                <label>
+                  <input type="checkbox" id="questionnaire-active" name="is_active" checked />
+                  Active
+                </label>
+              </div>
+              <div class="form-group form-group--checkbox">
+                <label>
+                  <input type="checkbox" id="questionnaire-auto-send" name="auto_send_on_project_create" />
+                  Auto-send on project creation
+                </label>
+              </div>
+            </div>
+            <hr />
+            <div class="form-group">
+              <label>Questions</label>
+              <div id="questions-builder">
+                <!-- Questions will be added dynamically -->
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="add-question-btn">
+                ${RENDER_ICONS.PLUS_SM}
+                Add Question
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="admin-modal-footer">
+          <button type="button" class="btn btn-secondary" id="questionnaire-cancel">Cancel</button>
+          <button type="submit" form="questionnaire-form" class="btn btn-primary" id="questionnaire-save">Save Questionnaire</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Send Questionnaire Modal -->
+    <div class="admin-modal-overlay hidden" id="send-questionnaire-modal" role="dialog" aria-modal="true" aria-labelledby="send-questionnaire-modal-title">
+      <div class="admin-modal">
+        <div class="admin-modal-header">
+          <div class="admin-modal-title">
+            <h2 id="send-questionnaire-modal-title">Send Questionnaire</h2>
+          </div>
+          <button class="admin-modal-close" id="send-questionnaire-modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="admin-modal-body">
+          <form id="send-questionnaire-form">
+            <input type="hidden" id="send-questionnaire-id" name="questionnaire_id" />
+            <div class="form-group">
+              <label for="send-questionnaire-client">Client</label>
+              <select id="send-questionnaire-client" name="client_id" required>
+                <option value="">Select a client...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="send-questionnaire-due">Due Date (optional)</label>
+              <input type="date" id="send-questionnaire-due" name="due_date" />
+            </div>
+          </form>
+        </div>
+        <div class="admin-modal-footer">
+          <button type="button" class="btn btn-secondary" id="send-questionnaire-cancel">Cancel</button>
+          <button type="submit" form="send-questionnaire-form" class="btn btn-primary" id="send-questionnaire-submit">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Response Modal -->
+    <div class="admin-modal-overlay hidden" id="view-response-modal" role="dialog" aria-modal="true" aria-labelledby="view-response-modal-title">
+      <div class="admin-modal admin-modal--lg">
+        <div class="admin-modal-header">
+          <div class="admin-modal-title">
+            <h2 id="view-response-modal-title">Questionnaire Response</h2>
+          </div>
+          <button class="admin-modal-close" id="view-response-modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <div id="view-response-body" class="admin-modal-body">
+          <!-- Response content will be populated dynamically -->
+        </div>
+        <div class="admin-modal-footer">
+          <button type="button" class="btn btn-secondary" id="view-response-close">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Reset listener flags so they get re-attached
+  listenersSetup = false;
+  clientDropdownInit = false;
 }
 
 // ---------------------------------------------------------------------------

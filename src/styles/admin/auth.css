@@ -20,7 +20,7 @@
   right: 0;
   bottom: 0;
   z-index: var(--z-index-portal-overlay);
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
 }
 
 .auth-gate input::placeholder {
@@ -70,7 +70,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   cursor: pointer;
   padding: var(--space-1);
   color: var(--color-text-secondary);
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .auth-gate .portal-password-toggle:hover {
@@ -125,8 +125,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   display: none;
 }
 
-/* Auth Gate Container - Matches portal dashboard styling */
-/* Shadow matches button style (--shadow-button-dark) */
+/* Auth Gate Container - Matches client login styling with dark theme */
 .auth-gate-container {
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-lg);
@@ -192,7 +191,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   color: var(--portal-text-light);
   font-family: inherit;
   min-height: 60px;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
   box-sizing: border-box;
   caret-color: var(--portal-text-light);
 }
@@ -204,11 +203,12 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   font-weight: 600;
 }
 
-/* Match portal focus style */
+/* Match portal focus style with focus ring like client login */
 [data-page="admin"] .auth-gate .password-input-wrapper input:focus,
 .auth-gate .password-input-wrapper input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.25);
 }
 
 .auth-gate .password-toggle {
@@ -220,7 +220,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   border: none;
   cursor: pointer;
   padding: var(--space-0-5);
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
   color: var(--portal-text-secondary);
 }
 
@@ -228,11 +228,11 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   color: var(--color-primary);
 }
 
-/* Auth submit button - matches portal button styling */
+/* Auth submit button - filled by default like client portal */
 .auth-submit {
   width: 100%;
-  padding: var(--space-1-5) var(--space-3);
-  border: 2px solid var(--portal-border-light);
+  padding: var(--space-3) var(--space-4);
+  border: none;
   border-radius: var(--portal-radius-lg);
   font-size: 0.9rem;
   font-weight: 600;
@@ -241,26 +241,18 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   letter-spacing: 1px;
   transition: all var(--transition-fast);
   text-transform: uppercase;
-  background-color: transparent;
+  background-color: var(--portal-bg-lighter);
   color: var(--portal-text-light);
-  margin-top: var(--space-2);
+  margin-top: var(--space-4);
 }
 
 .auth-submit:hover {
   background-color: var(--color-primary);
   color: var(--portal-bg-dark);
-  border-color: var(--color-primary);
-}
-
-/* Active state when form is valid */
-.auth-submit.active {
-  background-color: var(--color-primary);
-  color: var(--portal-bg-dark);
-  border-color: var(--color-primary);
 }
 
 .auth-submit:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -271,14 +263,14 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   color: var(--color-neutral-400);
   text-decoration: none;
   font-size: clamp(0.875rem, 2.5vw, 1rem);
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .back-link:hover {
   color: var(--color-primary);
 }
 
-/* Mobile: Login container takes full width - edge to edge, transparent bg, no shadow */
+/* Mobile: Login container matches client portal mobile styling */
 @media (max-width: 600px) {
   .auth-gate {
     padding: 0;
@@ -290,12 +282,25 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
     width: 100%;
     border-radius: 0;
     padding: var(--space-3);
-    min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 40px));
+    min-height: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     background: transparent;
     box-shadow: none;
+  }
+
+  .auth-gate-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .auth-gate-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .auth-gate-header p {
+    font-size: 0.875rem;
   }
 }
 

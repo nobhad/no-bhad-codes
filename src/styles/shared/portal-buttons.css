@@ -38,7 +38,7 @@
   border: none;
   border-radius: var(--portal-radius-lg, 12px);
   cursor: pointer;
-  transition: all 150ms;
+  transition: all var(--transition-fast);
   box-shadow: var(--btn-portal-shadow);
   text-decoration: none;
   white-space: nowrap;
@@ -185,11 +185,11 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .btn-success {
   background: transparent;
-  color: var(--color-success-500, #22c55e);
+  color: var(--color-success-500, #10b981);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .btn-success:hover {
-  background: var(--color-success-500, #22c55e);
+  background: var(--color-success-500, #10b981);
   color: var(--color-white);
 }
 
@@ -406,7 +406,7 @@
   color: var(--portal-text-light);
   cursor: pointer;
   flex-shrink: 0;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition: color var(--transition-mouse) ease, background-color var(--transition-mouse) ease;
   text-decoration: none;
 }
 

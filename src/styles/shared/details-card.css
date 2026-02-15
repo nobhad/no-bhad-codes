@@ -52,7 +52,7 @@
   border-left: 5px solid var(--portal-text-secondary);
   border-top: 4px solid transparent;
   border-bottom: 4px solid transparent;
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-mouse) ease;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .details-card[open] summary::before,

@@ -8,7 +8,7 @@
 import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { AdminAuth } from '../admin-auth';
-import { apiFetch } from '../../../utils/api-client';
+import { apiFetch, parseApiResponse } from '../../../utils/api-client';
 import { domCache } from './dom-cache';
 import type { InvoiceResponse, InvoiceLineItem } from '../../../types/api';
 import { getStatusDotHTML } from '../../../components/status-badge';
@@ -54,7 +54,7 @@ export async function loadProjectInvoices(projectId: number): Promise<void> {
     const response = await apiFetch(`/api/invoices/project/${projectId}`);
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await parseApiResponse<{ invoices: ExtendedInvoice[] }>(response);
       const invoices: ExtendedInvoice[] = data.invoices || [];
       cachedInvoices = invoices;
 
@@ -385,7 +385,7 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
         console.error('[ProjectInvoices] Failed to load invoice');
         return;
       }
-      const data = await response.json();
+      const data = await parseApiResponse<{ invoice: ExtendedInvoice }>(response);
       invoice = data.invoice;
     } catch (error) {
       console.error('[ProjectInvoices] View invoice error:', error);
