@@ -9,6 +9,8 @@
  */
 
 import type { ClientPortalContext } from '../portal-types';
+import { escapeHtml } from '../../../../shared/validation/validators';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
 
 const DOC_REQUESTS_API = '/api/document-requests';
 const UPLOADS_API = '/api/uploads';
@@ -66,27 +68,22 @@ function formatDate(s: string | undefined): string {
   }
 }
 
-function escapeHtml(text: string): string {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
+/**
+ * Format status text for display (capitalize, handle underscores/hyphens).
+ */
 function formatStatusLabel(status: string): string {
   return status
     .replace(/[_-]+/g, ' ')
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function getDocumentStatusClass(status: string): string {
-  const statusMap: Record<string, string> = {
-    pending: 'status-pending',
-    sent: 'status-sent',
-    viewed: 'status-viewed',
-    uploaded: 'status-completed',
-    completed: 'status-completed'
-  };
-  return statusMap[status] || 'status-pending';
+/**
+ * Map document request status to badge variant.
+ */
+function getDocumentStatusVariant(status: string): string {
+  // Map 'uploaded' to 'completed' for consistent badge styling
+  if (status === 'uploaded') return 'completed';
+  return status;
 }
 
 function setInlineError(message: string | null): void {
@@ -190,11 +187,11 @@ function renderList(requests: DocumentRequest[], _ctx: ClientPortalContext): voi
     card.type = 'button';
     card.className = 'documents-card portal-list-item';
     card.setAttribute('data-request-id', String(r.id));
-    const statusClass = getDocumentStatusClass(r.status);
     const statusLabel = formatStatusLabel(r.status);
+    const statusVariant = getDocumentStatusVariant(r.status);
     card.innerHTML = `
       <span class="documents-card-title">${escapeHtml(r.title)}</span>
-      <span class="documents-card-status status-badge ${statusClass}">${escapeHtml(statusLabel)}</span>
+      <span class="documents-card-status">${getStatusBadgeHTML(statusLabel, statusVariant)}</span>
       <span class="documents-card-due">Due: ${formatDate(r.due_date)}</span>
     `;
     list.appendChild(card);

@@ -22,6 +22,7 @@
 @import "../shared/portal-components.css";
 @import "../shared/portal-tabs.css";
 @import "../shared/view-toggle.css";
+@import "../shared/rich-text-editor.css";
 
 /* Portal layout and sidebar (shared with client portal) */
 @import "../client-portal/layout.css";

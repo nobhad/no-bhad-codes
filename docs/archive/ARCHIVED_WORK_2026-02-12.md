@@ -1038,3 +1038,298 @@ All backend database normalization phases now complete:
 | 4 | Lead/Intake Consolidation | COMPLETE |
 
 **Next:** Portal Rebuild (Component Library, Admin Rebuild, Unified Styling)
+
+---
+
+## Portal Rebuild - COMPLETE (February 15, 2026)
+
+### Phase 1: Reusable Component Library - COMPLETE
+
+**Objective:** Create complete shared component library (55 patterns identified)
+
+**Result:** All 55 component patterns implemented across 8 new files + enhancements to existing files.
+
+**Component Exports Added to index.ts:**
+
+- [x] `createBulkActionToolbar` + all bulk action helpers
+- [x] Focus trap utilities (`createFocusTrap`, `removeFocusTrap`, `manageFocusTrap`)
+- [x] Loading state utilities (all loading-utils.ts exports)
+- [x] Button loading utilities (`setButtonLoading`, `clearButtonLoading`, `withButtonLoading`)
+
+**New Form Components (form-builder.ts):**
+
+- [x] `createFormGroup()` - Label + input + error wrapper
+- [x] `createTextInput()` - Standard text input with validation
+- [x] `createTextArea()` - Multi-line with auto-resize
+- [x] `createDatePicker()` - Date input wrapper
+- [x] `setInputError()` / `clearInputError()` - Validation helpers
+- [x] `validateFormGroup()` - Form validation utility
+- [x] `createNumberInput()` - Number input with +/- buttons, currency/percent formatting
+- [x] `getNumberInputValue()` / `setNumberInputValue()` - Value helpers
+- [x] `createRadioGroup()` - Radio button group with descriptions
+- [x] `createFormRow()` - Horizontal layout for multiple fields
+- [x] `createFormSection()` - Collapsible section for grouped fields
+- [x] `createFileUpload()` - Drag-and-drop file upload with validation
+- [x] `clearFileUpload()` - Clear file upload component
+
+**New Table Components (table-builder.ts):**
+
+- [x] `createTableRow()` - Row with data attributes
+- [x] `createTableCell()` - Cell with content
+- [x] `createActionCell()` - Cell with icon buttons
+- [x] `getActionCellHTML()` - HTML string version
+- [x] `createStatusCell()` - Cell with status badge
+- [x] `getStatusCellHTML()` - HTML string version
+- [x] `createTablePagination()` - Pagination controls
+- [x] `createSortableHeader()` - Sortable header cell
+
+**Enhanced Loading States (empty-state.ts):**
+
+- [x] `createLoadingState()` - Spinner or skeleton loader
+- [x] `createErrorState()` - Error with retry button
+- [x] `renderLoadingState()` / `renderErrorState()` helpers
+
+**New Button Components (button.ts):**
+
+- [x] `createButton()` - Full button with variants (primary, secondary, danger, ghost, link)
+- [x] `getButtonHTML()` - HTML string version
+- [x] `createButtonGroup()` - Horizontal button group
+- [x] `createLinkButton()` - Anchor styled as button
+- [x] `createToggleButton()` - Two-state toggle button
+- [x] `createButtonWithBadge()` - Button with notification badge
+- [x] `updateButtonBadge()` - Update badge count
+- [x] `setButtonLoadingState()` - Set button loading state
+
+**New Filter Components (filters.ts):**
+
+- [x] `createSearchFilter()` - Debounced search with expandable mode
+- [x] `createStatusFilter()` - Multi-select status dropdown
+- [x] `createDateRangeFilter()` - Date range with presets
+- [x] `createPerPageSelect()` - Per-page dropdown
+- [x] `createFilterBar()` - Combined filter bar
+
+**New Data Display Components (data-display.ts):**
+
+- [x] `createCard()` - Card with header/body/footer
+- [x] `createStatCard()` - Statistics card with trend
+- [x] `createInfoRow()` - Label-value pair
+- [x] `createInfoList()` - List of info rows
+- [x] `createProgressBar()` / `updateProgressBar()` - Progress indicator
+- [x] `createAlert()` - Alert box with variants
+- [x] `createSpinner()` - Loading spinner
+- [x] `createSkeleton()` / `createSkeletonList()` - Skeleton loading
+
+**New Dropdown Components (dropdown.ts):**
+
+- [x] `createDropdown()` - Dropdown menu with keyboard nav
+- [x] `createDropdownButton()` - Button with dropdown
+- [x] `createSplitButton()` - Split button with dropdown
+- [x] `createTooltip()` - Hover tooltip
+- [x] `createPopover()` - Click popover
+
+**New Navigation Components (navigation.ts):**
+
+- [x] `createTabs()` - Tabbed interface (underline, pills, boxed variants)
+- [x] `switchTab()` - Programmatic tab switch
+- [x] `createNavItem()` - Navigation item with submenu support
+- [x] `createSidebar()` - Sidebar with collapse
+- [x] `toggleSidebar()` / `setActiveNavItem()` - Sidebar helpers
+- [x] `createStepIndicator()` - Multi-step progress indicator
+- [x] `setCurrentStep()` - Update current step
+
+**New Complex Components (complex-components.ts):**
+
+- [x] `createLineItemEditor()` - Invoice line items with drag-reorder
+- [x] `getLineItems()` - Get line items from editor
+- [x] `createFileIcon()` - Icon by file type (PDF, image, video, etc.)
+- [x] `createInlineEdit()` - Click-to-edit field
+- [x] `createTableToolbar()` - Search, filters, view toggle, actions
+- [x] `createDataTable()` - Full data table with sort, select, pagination
+- [x] `getSelectedKeys()` - Get selected table rows
+
+**CSS Token Cleanup:**
+
+- [x] 147 hardcoded transitions → CSS variables (`--transition-faster`, `--transition-fast`, `--transition-medium`)
+- [x] 124 hardcoded border-radius → CSS variables (`--portal-radius-xs` through `--portal-radius-pill`)
+- [x] Total: 271 hardcoded values replaced in 34 CSS files
+
+---
+
+### Phase 2: Admin Portal Dynamic Rebuild - COMPLETE
+
+**Objective:** Convert admin from pre-built HTML to dynamic JS rendering
+
+**Task 2.1: Strip admin/index.html to shell - COMPLETE**
+
+- [x] Keep: sidebar, header, main content container
+- [x] Removed all pre-built section HTML (all tabs converted)
+
+**Task 2.2: Convert admin modules (19/19 complete):**
+
+- [x] `admin-overview.ts` - `renderOverviewTab()` function
+- [x] `admin-leads.ts` - `renderLeadsTab()` function
+- [x] `admin-contacts.ts` - `renderContactsTab()` function
+- [x] `admin-projects.ts` - `renderProjectsTab()` function
+- [x] `admin-clients.ts` - `renderClientsTab()` function
+- [x] `admin-invoices.ts` - `renderInvoicesTab()` function
+- [x] `admin-contracts.ts` - `renderContractsTab()` function
+- [x] `admin-ad-hoc-requests.ts` - `renderAdHocRequestsTab()` function
+- [x] `admin-global-tasks.ts` - `renderGlobalTasksTab()` function
+- [x] `admin-messaging.ts` - `renderMessagesTab()` function
+- [x] `admin-system-status.ts` - `renderSystemStatusTab()` function
+- [x] `admin-knowledge-base.ts` - `renderKnowledgeBaseTab()` function
+- [x] `admin-questionnaires.ts` - `renderQuestionnairesTab()` function
+- [x] `admin-document-requests.ts` - `renderDocumentRequestsTab()` function
+- [x] `admin-analytics.ts` - `renderAnalyticsTab()` function
+- [x] `admin-workflows.ts` - `renderWorkflowsTab()` function
+- [x] `admin-client-details.ts` - `renderClientDetailTab()` function
+- [x] `admin-project-details.ts` - `renderProjectDetailTab()` function
+- [x] `admin-proposals.ts` - Already dynamic
+
+**CSS Token Cleanup (During Phase 2):**
+
+- [x] Added new transition tokens: `--transition-fast: 0.15s`, `--transition-normal: 0.3s`
+- [x] Updated 42+ hardcoded transitions in shared CSS files
+
+---
+
+### Phase 3: Unify Admin + Client Portal Styling - COMPLETE
+
+**Objective:** Client portal matches admin as much as possible
+
+**Task 3.1: Shared CSS architecture - COMPLETE**
+
+- [x] Audit CSS variables for consistency
+- [x] Document shared component classes (19 shared files, 6,916 lines)
+- [x] Design tokens verified in `src/design-system/tokens/`
+
+**Admin Portal CSS Audit - COMPLETE:**
+
+- Fixed `ad-hoc-requests.css`: rgba values, hardcoded colors, spacing
+- Fixed `table-filters.css`: gap, margin, padding values → `var(--space-*)`
+- Fixed `secondary-sidebar.css`: hardcoded shadow, rgba hover states
+- Fixed `workflows.css`: rgba colors for success, purple, primary
+- Fixed `analytics.css`: rgba success color
+- Fixed `tasks.css`: rgba colors, spacing
+- Fixed `modals.css`: rgba overlay colors
+- Fixed `files.css`: replaced overlay color
+- Fixed `table-dropdowns.css`: removed fallback
+- Fixed `tooltips.css`: removed hardcoded color fallbacks
+- Added `--color-admin-purple-rgb` to colors.css
+
+**Client Portal CSS Audit - COMPLETE:**
+
+- Fixed `login.css`: removed 5 `--color-danger` fallbacks
+- Fixed `notification-bell.css`: padding, font-size → tokens
+- Fixed `onboarding.css`: local spacing → global `--space-*` tokens
+- Fixed `projects.css`: 12+ hardcoded values → tokens
+- Fixed `sidebar.css`: gap, padding, font-size → tokens
+- Fixed `help.css`: padding values → tokens
+- Added `--font-size-2xs` token to typography.css
+
+**JavaScript/TypeScript Styling Audit - COMPLETE:**
+
+- Fixed `admin-design-review.ts`: inline color styles → CSS classes
+- Fixed `admin-analytics.ts`: chart colors → `getChartColor()` utilities
+- Fixed `admin-client-details.ts`: tag colors → `APP_CONSTANTS.TAG_COLORS`
+- Fixed `admin-tasks.ts`: status colors → CSS variables
+- Fixed `admin-proposals.ts`: removed CSS variable fallbacks
+
+**Comprehensive Backend Portal CSS Audit - COMPLETE:**
+
+- Fixed `portal-forms.css`: 11 edits
+- Fixed `search-bar.css`: 5 edits
+- Fixed `toast-notifications.css`: 2 edits
+- Fixed `portal-messages.css`: 16 edits
+- Fixed `layout.css`: 18 edits
+- Fixed `tasks.css`: 32 edits
+- Fixed `proposals.css`: 31 edits
+- Fixed `files.css`: 25 edits
+- Fixed `analytics.css`: 23 edits
+- Fixed `modals.css`: 8 edits
+- Fixed `leads-pipeline.css`: 40 edits
+- Fixed `secondary-sidebar.css`: 3 edits
+
+**Total:** 165+ hardcoded values replaced with design tokens
+
+**Task 3.2: Update admin login - COMPLETE**
+
+- [x] Match client login styling (4px border accent, double shadow)
+- [x] Consistent form styling
+- [x] Same visual polish
+
+**Task 3.3: Update client portal - COMPLETE**
+
+- [x] Replace manual HTML with shared components (7 modules, 100% converted)
+  - `portal-invoices.ts`: `getStatusBadgeHTML()`, `createEmptyState()`, `createErrorState()`
+  - `portal-document-requests.ts`: `getStatusBadgeHTML()`, shared `escapeHtml()`
+  - `portal-questionnaires.ts`: `getStatusBadgeHTML()`
+  - `portal-ad-hoc-requests.ts`: `getStatusBadgeHTML()`
+  - `portal-projects.ts`: `createStatusBadge()` for project status
+  - `client-portal.ts`: `getStatusBadgeHTML()` for milestones, `createStatusBadge()` for project status
+- [x] Match admin layouts where appropriate
+- [x] Permission-based content hiding (server-side API filtering)
+
+**Task 3.4: Visual polish - COMPLETE**
+
+- [x] Consistent hover/focus states (677 occurrences across 82 files)
+- [x] Mobile responsive verification (173 occurrences across 54 files)
+- [x] Accessibility foundation (ARIA labels, focus visible, keyboard navigation)
+
+---
+
+### Inline Event Handler Cleanup - COMPLETE (February 15, 2026)
+
+**Problem:** Multiple inline `onclick` and `onchange` handlers in admin portal violating event delegation best practices.
+
+**Files Fixed:**
+
+1. **admin/index.html**
+   - Removed inline onclick from logout button
+   - Removed inline onclick from details overlay
+
+2. **admin-dashboard.ts**
+   - Added event listeners for overlay close
+   - Added wrapper methods: `cancelScheduledInvoice()`, `toggleRecurringInvoice()`
+
+3. **admin-leads.ts**
+   - Changed inline onclick to `.btn-close-details-panel` class delegation
+
+4. **admin-contacts.ts**
+   - Changed inline onclick to `.btn-close-contact-panel` class delegation
+
+5. **admin-global-tasks.ts**
+   - 4 inline handlers → `data-action` pattern with event delegation
+   - Actions: `view-project`, `delete-task`
+
+6. **admin-tasks.ts**
+   - 2 inline handlers → `data-action` pattern with event delegation
+   - Actions: `view-project`, `delete-project-task`
+
+7. **invoice-scheduling.ts**
+   - 2 inline handlers → `data-action` pattern with event delegation
+   - Actions: `cancel-scheduled-invoice`, `toggle-recurring-invoice`
+
+8. **milestones.ts**
+   - 4 inline handlers → class-based and `data-action` patterns
+   - Checkbox: `.milestone-checkbox-input` with `change` event
+   - Tasks toggle: `toggle-milestone-tasks` action
+   - Delete: `delete-milestone` action
+   - Task checkbox: `.milestone-task-checkbox` with `change` event
+
+9. **admin-project-details.ts**
+   - Set `data-project-id` on deliverables button for event delegation
+
+**Result:** Zero inline onclick/onchange handlers in admin or client portal TypeScript files or HTML files.
+
+---
+
+### Portal Rebuild Summary
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 1 | Reusable Component Library | **COMPLETE** (55 patterns) |
+| 2 | Admin Portal Dynamic Rebuild | **COMPLETE** (19/19 modules) |
+| 3 | Unify Portal Styling | **COMPLETE** (165+ token fixes) |
+
+**Portal Rebuild Project:** COMPLETE

@@ -22,6 +22,7 @@ import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client'
 import { confirmDialog, confirmDanger, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { createTimeline, type TimelineEvent } from '../../../components/timeline';
 import { createTagInput, type Tag } from '../../../components/tag-input';
+import { renderEmptyState } from '../../../components/empty-state';
 
 // ============================================
 // INTERFACES
@@ -610,7 +611,7 @@ function renderProjectsSummary(): void {
   if (!container) return;
 
   if (clientProjects.length === 0) {
-    container.innerHTML = '<p class="empty-state">No projects yet</p>';
+    renderEmptyState(container, 'No projects yet');
     return;
   }
 
@@ -620,7 +621,7 @@ function renderProjectsSummary(): void {
     .slice(0, 3);
 
   if (recentProjects.length === 0) {
-    container.innerHTML = '<p class="empty-state">No active projects</p>';
+    renderEmptyState(container, 'No active projects');
     return;
   }
 
@@ -680,7 +681,7 @@ function renderRecentActivity(): void {
   const recentActivities = clientActivities.slice(0, 5);
 
   if (recentActivities.length === 0) {
-    container.innerHTML = '<p class="empty-state">No recent activity</p>';
+    renderEmptyState(container, 'No recent activity');
     return;
   }
 
@@ -977,17 +978,10 @@ function renderContactsTab(): void {
   if (!container) return;
 
   if (clientContacts.length === 0) {
-    container.innerHTML = `
-      <p class="empty-state">No contacts added yet.</p>
-      <button class="btn btn-secondary add-contact-btn" id="btn-add-contact">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        Add Contact
-      </button>
-    `;
-    setupAddContactButton();
+    renderEmptyState(container, 'No contacts added yet.', {
+      ctaLabel: 'Add Contact',
+      ctaOnClick: () => addContact()
+    });
     return;
   }
 
@@ -1405,10 +1399,18 @@ function renderNotesTab(): void {
         <button class="btn btn-secondary" id="btn-add-note">Add Note</button>
       </div>
     </div>
-    <div class="notes-section">
-      ${sortedNotes.length === 0 ? '<p class="empty-state">No notes yet.</p>' : sortedNotes.map(note => renderNoteCard(note)).join('')}
+    <div class="notes-section" id="cd-notes-section">
+      ${sortedNotes.map(note => renderNoteCard(note)).join('')}
     </div>
   `;
+
+  // Render empty state for notes if none exist
+  if (sortedNotes.length === 0) {
+    const notesSection = document.getElementById('cd-notes-section');
+    if (notesSection) {
+      renderEmptyState(notesSection, 'No notes yet.');
+    }
+  }
 
   setupNoteEventListeners();
 }

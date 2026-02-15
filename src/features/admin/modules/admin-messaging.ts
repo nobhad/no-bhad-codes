@@ -21,6 +21,7 @@ import type {
 } from '../../../types/api';
 import { ICONS } from '../../../constants/icons';
 import { showToast } from '../../../utils/toast-notifications';
+import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 
 // Attachment configuration
 const MAX_ATTACHMENTS = 5;
@@ -117,7 +118,15 @@ export function renderMessagesTab(container: HTMLElement): void {
         </div>
       </div>
 
-      <!-- Left Column: Clients List -->
+      <!-- Mobile Client Dropdown (visible on small screens) -->
+      <div class="messages-mobile-select">
+        <label for="mobile-client-select" class="sr-only">Select client</label>
+        <select id="mobile-client-select" class="form-select" aria-label="Select client to message">
+          <option value="">Select a client...</option>
+        </select>
+      </div>
+
+      <!-- Left Column: Clients List (hidden on mobile) -->
       <div class="messages-clients-column">
         <div class="thread-list-header">
           <span>Clients</span>
@@ -235,7 +244,7 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
     renderThreadList(threadList, clientsWithThreads, ctx);
   } catch (error) {
     console.error('[AdminMessaging] Failed to load clients/threads:', error);
-    threadList.innerHTML = '<div class="empty-state">Failed to load conversations</div>';
+    renderErrorState(threadList, 'Failed to load conversations', { type: 'general' });
   }
 }
 
@@ -266,7 +275,7 @@ function formatRelativeTime(date: Date): string {
  */
 function renderThreadList(container: HTMLElement, clients: ClientWithThread[], ctx: AdminDashboardContext): void {
   if (clients.length === 0) {
-    container.innerHTML = '<div class="empty-state">No clients yet</div>';
+    renderEmptyState(container, 'No clients yet');
     return;
   }
 
@@ -299,6 +308,20 @@ function renderThreadList(container: HTMLElement, clients: ClientWithThread[], c
       </div>
     `;
   }).join('');
+
+  // Populate mobile dropdown
+  const mobileSelect = getElement('mobile-client-select') as HTMLSelectElement;
+  if (mobileSelect) {
+    const options = clients.map(client => {
+      const name = client.company_name || client.contact_name || 'Unknown Client';
+      const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(name));
+      const value = `${client.client_id}:${client.thread_id || 'new'}`;
+      const isSelected = client.client_id === selectedClientId;
+      const unreadLabel = client.unread_count > 0 ? ` (${client.unread_count} new)` : '';
+      return `<option value="${value}"${isSelected ? ' selected' : ''}>${safeName}${unreadLabel}</option>`;
+    }).join('');
+    mobileSelect.innerHTML = `<option value="">Select a client...</option>${options}`;
+  }
 
   // Add click handlers
   setupThreadListHandlers(container, ctx);
@@ -1111,6 +1134,49 @@ export function setupMessagingListeners(ctx: AdminDashboardContext): void {
 
   // Setup attachment listeners
   setupAdminAttachmentListeners();
+
+  // Mobile client dropdown handler
+  const mobileSelect = getElement('mobile-client-select') as HTMLSelectElement;
+  if (mobileSelect) {
+    mobileSelect.addEventListener('change', async () => {
+      const value = mobileSelect.value;
+      if (!value) return;
+
+      const [clientIdStr, threadIdStr] = value.split(':');
+      const clientId = parseInt(clientIdStr);
+      const client = _cachedClientsWithThreads.find(c => c.client_id === clientId);
+      const clientName = client?.contact_name || client?.company_name || 'Client';
+      selectedClientName = clientName;
+
+      // Update visual state in thread list
+      const threadList = getElement('admin-thread-list');
+      if (threadList) {
+        threadList.querySelectorAll('.thread-item').forEach(item => {
+          const itemClientId = (item as HTMLElement).dataset.clientId;
+          item.classList.toggle('active', itemClientId === clientIdStr);
+          item.setAttribute('aria-selected', String(itemClientId === clientIdStr));
+        });
+      }
+
+      if (threadIdStr === 'new') {
+        try {
+          const response = await apiPost('/api/messages/threads', {
+            client_id: clientId,
+            subject: `Conversation with ${clientName}`,
+            thread_type: 'general'
+          });
+          if (response.ok) {
+            const data = await response.json();
+            selectThread(clientId, data.thread.id, ctx);
+          }
+        } catch (error) {
+          console.error('[AdminMessaging] Failed to create thread:', error);
+        }
+      } else {
+        selectThread(clientId, parseInt(threadIdStr), ctx);
+      }
+    });
+  }
 }
 
 /**

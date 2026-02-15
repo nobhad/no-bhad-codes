@@ -16,6 +16,7 @@ import {
   alertSuccess,
   multiPromptDialog
 } from '../../../utils/confirm-dialog';
+import { renderEmptyState } from '../../../components/empty-state';
 import { domCache } from './dom-cache';
 
 /**
@@ -205,14 +206,14 @@ export async function loadScheduledInvoices(projectId: number): Promise<void> {
       const scheduled = data.scheduled || [];
 
       if (scheduled.length === 0) {
-        container.innerHTML = '<p class="empty-state">No scheduled invoices.</p>';
+        renderEmptyState(container, 'No scheduled invoices.');
       } else {
         container.innerHTML = scheduled.map((inv: { id: number; amount: number; description: string; scheduled_date: string }) => `
           <div class="scheduled-item">
             <span class="scheduled-date">${formatDate(inv.scheduled_date)}</span>
             <span class="scheduled-desc">${SanitizationUtils.escapeHtml(inv.description)}</span>
             <span class="scheduled-amount">${formatCurrency(inv.amount)}</span>
-            <button class="btn btn-danger btn-sm" onclick="window.adminDashboard?.cancelScheduledInvoice(${inv.id})">Cancel</button>
+            <button class="btn btn-danger btn-sm" data-action="cancel-scheduled-invoice" data-schedule-id="${inv.id}">Cancel</button>
           </div>
         `).join('');
       }
@@ -236,7 +237,7 @@ export async function loadRecurringInvoices(projectId: number): Promise<void> {
       const recurring = data.recurring || [];
 
       if (recurring.length === 0) {
-        container.innerHTML = '<p class="empty-state">No recurring invoices configured.</p>';
+        renderEmptyState(container, 'No recurring invoices configured.');
       } else {
         container.innerHTML = recurring.map((inv: { id: number; amount: number; description: string; frequency: string; is_active: boolean; next_date: string }) => `
           <div class="recurring-item">
@@ -245,7 +246,7 @@ export async function loadRecurringInvoices(projectId: number): Promise<void> {
             <span class="recurring-amount">${formatCurrency(inv.amount)}</span>
             <span class="recurring-next">Next: ${formatDate(inv.next_date)}</span>
             <span class="recurring-status ${inv.is_active ? 'active' : 'paused'}">${inv.is_active ? 'Active' : 'Paused'}</span>
-            <button class="icon-btn" onclick="window.adminDashboard?.toggleRecurringInvoice(${inv.id}, ${inv.is_active})" title="${inv.is_active ? 'Pause' : 'Resume'}" aria-label="${inv.is_active ? 'Pause recurring invoice' : 'Resume recurring invoice'}">
+            <button class="icon-btn" data-action="toggle-recurring-invoice" data-recurring-id="${inv.id}" data-is-active="${inv.is_active}" title="${inv.is_active ? 'Pause' : 'Resume'}" aria-label="${inv.is_active ? 'Pause recurring invoice' : 'Resume recurring invoice'}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 ${inv.is_active
     ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
@@ -321,4 +322,30 @@ export async function toggleRecurringInvoice(
     console.error('[InvoiceScheduling] Error toggling recurring invoice:', error);
     alertError('Error updating recurring invoice');
   }
+}
+
+// Event delegation for invoice scheduling actions
+if (typeof window !== 'undefined') {
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const actionBtn = target.closest('[data-action]') as HTMLElement | null;
+    if (!actionBtn) return;
+
+    const action = actionBtn.dataset.action;
+
+    if (action === 'cancel-scheduled-invoice') {
+      const scheduleId = parseInt(actionBtn.dataset.scheduleId || '0');
+      if (scheduleId && window.adminDashboard?.cancelScheduledInvoice) {
+        window.adminDashboard.cancelScheduledInvoice(scheduleId);
+      }
+    }
+
+    if (action === 'toggle-recurring-invoice') {
+      const recurringId = parseInt(actionBtn.dataset.recurringId || '0');
+      const isActive = actionBtn.dataset.isActive === 'true';
+      if (recurringId && window.adminDashboard?.toggleRecurringInvoice) {
+        window.adminDashboard.toggleRecurringInvoice(recurringId, isActive);
+      }
+    }
+  });
 }

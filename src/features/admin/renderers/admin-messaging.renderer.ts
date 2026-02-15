@@ -12,6 +12,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatDateTime } from '../../../utils/format-utils';
 import { createLogger } from '../../../utils/logging';
 import { type MessageThread, type Message } from '../services/admin-data.service';
+import { renderEmptyState } from '../../../components/empty-state';
 
 const logger = createLogger('AdminMessagingRenderer');
 
@@ -83,11 +84,7 @@ class AdminMessagingRenderer {
     }
 
     if (threads.length === 0) {
-      listContainer.innerHTML = `
-        <div class="no-threads-message">
-          No message threads yet. Threads will appear when clients send messages.
-        </div>
-      `;
+      renderEmptyState(listContainer, 'No message threads yet. Threads will appear when clients send messages.');
       return;
     }
 
@@ -211,11 +208,7 @@ class AdminMessagingRenderer {
     }
 
     if (messages.length === 0) {
-      container.innerHTML = `
-        <div class="no-messages-message">
-          No messages yet. Start the conversation!
-        </div>
-      `;
+      renderEmptyState(container, 'No messages yet. Start the conversation!');
       return;
     }
 

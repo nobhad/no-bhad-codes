@@ -244,7 +244,7 @@ function renderTaskCard(item: KanbanItem): string {
   return `
     ${meta.projectName && meta.projectId ? `
       <div class="task-project-link">
-        <button type="button" class="task-project-name" onclick="window.adminDashboard?.showProjectDetails(${meta.projectId})">
+        <button type="button" class="task-project-name" data-action="view-project" data-project-id="${meta.projectId}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
@@ -280,7 +280,7 @@ function renderTaskCard(item: KanbanItem): string {
       ` : ''}
     </div>
     <div class="task-card-actions">
-      <button type="button" class="task-delete-btn" onclick="event.stopPropagation(); window.adminTasks?.deleteTask(${item.id})" title="Delete task">
+      <button type="button" class="task-delete-btn" data-action="delete-project-task" data-task-id="${item.id}" title="Delete task">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6"></polyline>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -804,4 +804,29 @@ if (typeof window !== 'undefined') {
   window.adminTasks = {
     deleteTask
   };
+
+  // Event delegation for task actions
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const actionBtn = target.closest('[data-action]') as HTMLElement | null;
+    if (!actionBtn) return;
+
+    const action = actionBtn.dataset.action;
+
+    if (action === 'view-project') {
+      e.stopPropagation();
+      const projectId = parseInt(actionBtn.dataset.projectId || '0');
+      if (projectId && window.adminDashboard?.showProjectDetails) {
+        window.adminDashboard.showProjectDetails(projectId);
+      }
+    }
+
+    if (action === 'delete-project-task') {
+      e.stopPropagation();
+      const taskId = parseInt(actionBtn.dataset.taskId || '0');
+      if (taskId) {
+        deleteTask(taskId);
+      }
+    }
+  });
 }

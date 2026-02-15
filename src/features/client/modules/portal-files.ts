@@ -15,6 +15,7 @@ import { showContainerError } from '../../../utils/error-utils';
 import { confirmDanger, alertError } from '../../../utils/confirm-dialog';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
+import { renderEmptyState } from '../../../components/empty-state';
 
 const FILES_API_BASE = '/api/uploads';
 const DOC_REQUESTS_API = '/api/document-requests';
@@ -408,8 +409,7 @@ function renderFilesList(
   ctx: ClientPortalContext
 ): void {
   if (files.length === 0) {
-    container.innerHTML =
-      '<p class="no-files">No files uploaded yet. Drag and drop files above to upload.</p>';
+    renderEmptyState(container, 'No files uploaded yet. Drag and drop files above to upload.', { className: 'no-files' });
     return;
   }
 

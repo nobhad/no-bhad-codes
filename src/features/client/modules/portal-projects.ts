@@ -15,6 +15,8 @@ import type {
   MessageResponse
 } from '../../../types/api';
 import { formatTextWithLineBreaks } from '../../../utils/format-utils';
+import { createStatusBadge } from '../../../components/status-badge';
+import { renderEmptyState } from '../../../components/empty-state';
 
 /** API endpoints */
 const PROJECTS_API_BASE = '/api/projects';
@@ -50,7 +52,7 @@ export function populateProjectsList(
   onProjectSelect: (project: ClientProject) => void
 ): void {
   if (projects.length === 0) {
-    projectsList.innerHTML = '<div class="no-projects"><p>No projects found.</p></div>';
+    renderEmptyState(projectsList, 'No projects found.', { className: 'no-projects' });
     return;
   }
 
@@ -141,11 +143,15 @@ export function populateProjectDetails(
     titleElement.textContent = currentProject.projectName;
   }
 
-  // Populate status
+  // Populate status using shared component
   const statusElement = getElement('project-status');
-  if (statusElement) {
-    statusElement.textContent = currentProject.status.replace('-', ' ');
-    statusElement.className = `status-badge status-${currentProject.status}`;
+  if (statusElement && statusElement.parentElement) {
+    const statusLabel = currentProject.status.replace('-', ' ');
+    const newBadge = createStatusBadge(statusLabel, currentProject.status);
+    newBadge.id = 'project-status';
+    statusElement.replaceWith(newBadge);
+    // Clear cache so next getElement fetches the new element
+    cachedElements.delete('project-status');
   }
 
   // Populate project description (use innerHTML with sanitized line breaks)

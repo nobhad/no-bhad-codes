@@ -57,6 +57,7 @@ import { deleteProject, archiveProject, duplicateProject } from '../project-deta
 import { setupFileUploadHandlers, loadPendingRequestsDropdown, loadProjectFiles as loadProjectFilesFromModule } from '../project-details';
 import { createSecondarySidebar, SECONDARY_TAB_ICONS, type SecondarySidebarController } from '../../../components/secondary-sidebar';
 import { createPortalModal } from '../../../components/portal-modal';
+import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 
 // ============================================
 // UTILITY HELPERS
@@ -1738,17 +1739,17 @@ export async function loadProjectMessages(
       const data = await response.json();
       renderProjectMessages(data.messages || [], container);
     } else {
-      container.innerHTML = '<p class="empty-state">No messages yet.</p>';
+      renderEmptyState(container, 'No messages yet.');
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load messages:', error);
-    container.innerHTML = '<p class="empty-state">Failed to load messages.</p>';
+    renderErrorState(container, 'Failed to load messages.', { type: 'general' });
   }
 }
 
 function renderProjectMessages(messages: Message[], container: HTMLElement): void {
   if (messages.length === 0) {
-    container.innerHTML = '<p class="empty-state">No messages yet. Start the conversation!</p>';
+    renderEmptyState(container, 'No messages yet. Start the conversation!');
     return;
   }
 
@@ -1788,17 +1789,17 @@ export async function loadProjectFiles(
       const data = await response.json();
       renderProjectFiles(data.files || [], container, projectId);
     } else {
-      container.innerHTML = '<p class="empty-state">No files yet. Upload files in the Files tab.</p>';
+      renderEmptyState(container, 'No files yet. Upload files in the Files tab.');
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load files:', error);
-    container.innerHTML = '<p class="empty-state">Failed to load files.</p>';
+    renderErrorState(container, 'Failed to load files.', { type: 'general' });
   }
 }
 
 function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projectId: number): void {
   if (files.length === 0) {
-    container.innerHTML = '<p class="empty-state">No files yet. Upload files in the Files tab.</p>';
+    renderEmptyState(container, 'No files yet. Upload files in the Files tab.');
     return;
   }
 
@@ -2235,11 +2236,11 @@ export async function loadProjectMilestones(
       const data = await response.json();
       renderProjectMilestones(data.milestones || [], container, ctx);
     } else {
-      container.innerHTML = '<p class="empty-state">No milestones yet. Add one to track progress.</p>';
+      renderEmptyState(container, 'No milestones yet. Add one to track progress.');
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load milestones:', error);
-    container.innerHTML = '<p class="empty-state">Failed to load milestones.</p>';
+    renderErrorState(container, 'Failed to load milestones.', { type: 'general' });
   }
 }
 
@@ -2249,7 +2250,7 @@ function renderProjectMilestones(
   ctx: AdminDashboardContext
 ): void {
   if (milestones.length === 0) {
-    container.innerHTML = '<p class="empty-state">No milestones yet. Add one to track progress.</p>';
+    renderEmptyState(container, 'No milestones yet. Add one to track progress.');
     return;
   }
 
@@ -2430,17 +2431,17 @@ export async function loadProjectInvoices(
       const data = await response.json();
       renderProjectInvoices(data.invoices || [], container);
     } else {
-      container.innerHTML = '<p class="empty-state">No invoices yet. Create one in the Invoices tab.</p>';
+      renderEmptyState(container, 'No invoices yet. Create one in the Invoices tab.');
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load invoices:', error);
-    container.innerHTML = '<p class="empty-state">Failed to load invoices.</p>';
+    renderErrorState(container, 'Failed to load invoices.', { type: 'general' });
   }
 }
 
 function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElement): void {
   if (invoices.length === 0) {
-    container.innerHTML = '<p class="empty-state">No invoices yet. Create one in the Invoices tab.</p>';
+    renderEmptyState(container, 'No invoices yet. Create one in the Invoices tab.');
     return;
   }
 

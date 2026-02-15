@@ -28,8 +28,7 @@ export async function loadProjectMessages(
   if (!messagesThread) return;
 
   if (!AdminAuth.isAuthenticated()) {
-    messagesThread.innerHTML =
-      '<p class="empty-state">Authentication required to view messages.</p>';
+    renderEmptyState(messagesThread, 'Authentication required to view messages.');
     return;
   }
 
@@ -37,8 +36,7 @@ export async function loadProjectMessages(
     // Get the client ID for this project
     const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
     if (!project || !project.client_id) {
-      messagesThread.innerHTML =
-        '<p class="empty-state">No client account linked. Invite the client first to enable messaging.</p>';
+      renderEmptyState(messagesThread, 'No client account linked. Invite the client first to enable messaging.');
       return;
     }
 

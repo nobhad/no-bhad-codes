@@ -55,6 +55,7 @@ import { getHealthBadgeHtml } from './admin-client-details';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
+import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -907,17 +908,17 @@ async function loadClientProjects(clientId: number): Promise<void> {
       const data = await response.json() as { projects?: ProjectResponse[] };
       renderClientProjects(data.projects || [], container);
     } else {
-      container.innerHTML = '<p class="empty-state">No projects found for this client.</p>';
+      renderEmptyState(container, 'No projects found for this client.');
     }
   } catch (error) {
     console.error('[AdminClients] Failed to load client projects:', error);
-    container.innerHTML = '<p class="empty-state">Failed to load projects.</p>';
+    renderErrorState(container, 'Failed to load projects.', { type: 'general' });
   }
 }
 
 function renderClientProjects(projects: ProjectResponse[], container: HTMLElement): void {
   if (projects.length === 0) {
-    container.innerHTML = '<p class="empty-state">No projects found for this client.</p>';
+    renderEmptyState(container, 'No projects found for this client.');
     return;
   }
 
@@ -1001,7 +1002,7 @@ async function loadClientBilling(clientId: number): Promise<void> {
       }
     } else {
       if (container) {
-        container.innerHTML = '<p class="empty-state">No invoices found for this client.</p>';
+        renderEmptyState(container, 'No invoices found for this client.');
       }
       const outstandingCountEl = domCache.get('outstandingInvoicesCount');
       if (outstandingCountEl) outstandingCountEl.textContent = '0';
@@ -1009,7 +1010,7 @@ async function loadClientBilling(clientId: number): Promise<void> {
   } catch (error) {
     console.error('[AdminClients] Failed to load client billing:', error);
     if (container) {
-      container.innerHTML = '<p class="empty-state">Failed to load billing data.</p>';
+      renderErrorState(container, 'Failed to load billing data.', { type: 'general' });
     }
     const outstandingCountEl = domCache.get('outstandingInvoicesCount');
     if (outstandingCountEl) outstandingCountEl.textContent = '-';
@@ -1018,7 +1019,7 @@ async function loadClientBilling(clientId: number): Promise<void> {
 
 function renderClientInvoices(invoices: InvoiceResponse[], container: HTMLElement): void {
   if (invoices.length === 0) {
-    container.innerHTML = '<p class="empty-state">No invoices found for this client.</p>';
+    renderEmptyState(container, 'No invoices found for this client.');
     return;
   }
 

@@ -1,0 +1,314 @@
+/* =====================================================
+   RICH TEXT EDITOR STYLES
+   @file src/styles/shared/rich-text-editor.css
+
+   Styles for the Quill.js-based rich text editor.
+   Used in contract builder, proposal templates, etc.
+   ===================================================== */
+
+/* Container */
+.rich-text-editor {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-md);
+  overflow: hidden;
+  background: var(--color-black);
+}
+
+/* Toolbar */
+.rich-text-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5);
+  padding: var(--space-1) var(--space-1-5);
+  background: var(--portal-bg-dark);
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.rich-text-toolbar .ql-formats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  margin-right: var(--space-1-5);
+  padding-right: var(--space-1-5);
+  border-right: 1px solid var(--portal-border-light);
+}
+
+.rich-text-toolbar .ql-formats:last-child {
+  margin-right: 0;
+  padding-right: 0;
+  border-right: none;
+}
+
+/* Toolbar buttons */
+.rich-text-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--portal-radius-sm);
+  color: var(--portal-text-light);
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+}
+
+.rich-text-toolbar button:hover {
+  background: var(--portal-bg-medium);
+  border-color: var(--portal-border-light);
+}
+
+.rich-text-toolbar button.ql-active,
+.rich-text-toolbar button:active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+/* Toolbar select dropdowns */
+.rich-text-toolbar select {
+  height: 28px;
+  padding: var(--space-0-5) var(--space-1);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.rich-text-toolbar select:hover {
+  border-color: var(--color-primary);
+}
+
+.rich-text-toolbar select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+}
+
+/* Quill toolbar icons - make them visible on dark theme */
+.rich-text-toolbar .ql-stroke {
+  stroke: var(--portal-text-light);
+}
+
+.rich-text-toolbar .ql-fill {
+  fill: var(--portal-text-light);
+}
+
+.rich-text-toolbar button:hover .ql-stroke,
+.rich-text-toolbar button.ql-active .ql-stroke {
+  stroke: currentColor;
+}
+
+.rich-text-toolbar button:hover .ql-fill,
+.rich-text-toolbar button.ql-active .ql-fill {
+  fill: currentColor;
+}
+
+/* Content area */
+.rich-text-content {
+  flex: 1;
+  min-height: 200px;
+  overflow-y: auto;
+}
+
+.rich-text-content .ql-editor {
+  padding: var(--space-2);
+  color: var(--portal-text-light);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  caret-color: var(--portal-text-light);
+}
+
+.rich-text-content .ql-editor.ql-blank::before {
+  color: var(--portal-text-muted);
+  font-style: italic;
+}
+
+/* Content styling */
+.rich-text-content .ql-editor h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+  color: var(--portal-text-light);
+}
+
+.rich-text-content .ql-editor h2 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: var(--space-1-5);
+  color: var(--portal-text-light);
+}
+
+.rich-text-content .ql-editor h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+  color: var(--portal-text-light);
+}
+
+.rich-text-content .ql-editor p {
+  margin-bottom: var(--space-1-5);
+}
+
+.rich-text-content .ql-editor ul,
+.rich-text-content .ql-editor ol {
+  padding-left: var(--space-3);
+  margin-bottom: var(--space-1-5);
+}
+
+.rich-text-content .ql-editor li {
+  margin-bottom: var(--space-0-5);
+}
+
+.rich-text-content .ql-editor a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.rich-text-content .ql-editor blockquote {
+  border-left: 3px solid var(--color-primary);
+  padding-left: var(--space-2);
+  margin: var(--space-2) 0;
+  color: var(--portal-text-secondary);
+  font-style: italic;
+}
+
+.rich-text-content .ql-editor code {
+  background: var(--portal-bg-medium);
+  padding: var(--space-px) var(--space-0-5);
+  border-radius: var(--portal-radius-xs);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+.rich-text-content .ql-editor pre {
+  background: var(--portal-bg-medium);
+  padding: var(--space-2);
+  border-radius: var(--portal-radius-md);
+  margin: var(--space-2) 0;
+  overflow-x: auto;
+}
+
+/* Variable highlighting */
+.rich-text-content .ql-editor .variable,
+.rich-text-content .ql-editor [data-variable] {
+  background: rgba(var(--color-primary-rgb), 0.2);
+  color: var(--color-primary);
+  padding: var(--space-px) var(--space-0-5);
+  border-radius: var(--portal-radius-xs);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+/* Focus state */
+.rich-text-editor:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+}
+
+/* Disabled state */
+.rich-text-editor.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* =====================================================
+   OVERRIDE QUILL DEFAULT STYLES
+   ===================================================== */
+
+/* Hide default Quill toolbar (we use custom) */
+.ql-toolbar.ql-snow {
+  display: none;
+}
+
+/* Remove default Quill borders */
+.ql-container.ql-snow {
+  border: none;
+}
+
+/* Fix Quill tooltip on dark theme */
+.ql-snow .ql-tooltip {
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-md);
+  color: var(--portal-text-light);
+  box-shadow: var(--shadow-lg);
+}
+
+.ql-snow .ql-tooltip input[type="text"] {
+  background: var(--color-black);
+  border: 1px solid var(--portal-border);
+  color: var(--portal-text-light);
+  padding: var(--space-1);
+  border-radius: var(--portal-radius-sm);
+}
+
+.ql-snow .ql-tooltip a.ql-action,
+.ql-snow .ql-tooltip a.ql-remove {
+  color: var(--color-primary);
+}
+
+/* =====================================================
+   VARIABLE INSERT TOOLBAR
+   ===================================================== */
+
+.rich-text-variables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5);
+  padding: var(--space-1) var(--space-1-5);
+  background: var(--portal-bg-dark);
+  border-top: 1px solid var(--portal-border);
+}
+
+.rich-text-variables-label {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+  margin-right: var(--space-1);
+  align-self: center;
+}
+
+.rich-text-variable-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-0-5) var(--space-1);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  color: var(--color-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+}
+
+.rich-text-variable-btn:hover {
+  background: rgba(var(--color-primary-rgb), 0.1);
+  border-color: var(--color-primary);
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 600px) {
+  .rich-text-toolbar {
+    padding: var(--space-0-5) var(--space-1);
+  }
+
+  .rich-text-toolbar .ql-formats {
+    margin-right: var(--space-1);
+    padding-right: var(--space-1);
+  }
+
+  .rich-text-toolbar button {
+    width: 24px;
+    height: 24px;
+  }
+}

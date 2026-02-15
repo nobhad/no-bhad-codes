@@ -381,7 +381,7 @@
 
           <!-- Sign Out Button -->
           <div class="sidebar-footer">
-            <button type="button" class="btn btn-secondary btn-logout" id="btn-logout" aria-label="Sign out" onclick="window.adminDashboard?.handleLogout?.() || (window.location.href = '/admin')">
+            <button type="button" class="btn btn-secondary btn-logout" id="btn-logout" aria-label="Sign out">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
               <span class="btn-text">SIGN OUT</span>
             </button>
@@ -546,7 +546,7 @@
     </div>
 
     <!-- Details Overlay (darkens page when panel is open) -->
-    <div class="details-overlay hidden" id="details-overlay" onclick="window.closeDetailsPanel && window.closeDetailsPanel()"></div>
+    <div class="details-overlay hidden" id="details-overlay"></div>
 
     <!-- Lead Details Panel (Hidden by default) -->
     <div class="details-panel hidden" id="lead-details-panel"></div>

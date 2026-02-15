@@ -311,7 +311,7 @@ function renderTaskCard(item: KanbanItem): string {
   return `
     ${meta.projectName && meta.projectId ? `
       <div class="task-project-link">
-        <button type="button" class="task-project-name" onclick="window.adminDashboard?.showProjectDetails(${meta.projectId})">
+        <button type="button" class="task-project-name" data-action="view-project" data-project-id="${meta.projectId}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
@@ -338,7 +338,7 @@ function renderTaskCard(item: KanbanItem): string {
       ` : ''}
     </div>
     <div class="task-card-actions">
-      <button type="button" class="task-delete-btn" onclick="event.stopPropagation(); window.adminGlobalTasks?.deleteTask(${item.id})" title="Delete task">
+      <button type="button" class="task-delete-btn" data-action="delete-task" data-task-id="${item.id}" title="Delete task">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6"></polyline>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -440,7 +440,7 @@ function renderListItem(task: GlobalTask): string {
         </div>
       </td>
       <td class="project-cell">
-        <button type="button" class="project-link-btn" onclick="event.stopPropagation(); window.adminDashboard?.showProjectDetails(${task.projectId})" title="View project">
+        <button type="button" class="project-link-btn" data-action="view-project" data-project-id="${task.projectId}" title="View project">
           ${SanitizationUtils.escapeHtml(task.projectName)}
         </button>
       </td>
@@ -455,7 +455,7 @@ function renderListItem(task: GlobalTask): string {
       <td class="status-cell">${getStatusDotHTML(task.status)}</td>
       <td class="date-cell ${isOverdue ? 'overdue' : ''}">${task.dueDate ? formatDate(task.dueDate) : ''}</td>
       <td class="actions-cell">
-        <button type="button" class="btn-icon-sm btn-danger-ghost" onclick="event.stopPropagation(); window.adminGlobalTasks?.deleteTask(${task.id})" title="Delete task">
+        <button type="button" class="btn-icon-sm btn-danger-ghost" data-action="delete-task" data-task-id="${task.id}" title="Delete task">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6"></polyline>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -670,4 +670,29 @@ if (typeof window !== 'undefined') {
   window.adminGlobalTasks = {
     deleteTask
   };
+
+  // Event delegation for task actions
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const actionBtn = target.closest('[data-action]') as HTMLElement | null;
+    if (!actionBtn) return;
+
+    const action = actionBtn.dataset.action;
+
+    if (action === 'view-project') {
+      e.stopPropagation();
+      const projectId = parseInt(actionBtn.dataset.projectId || '0');
+      if (projectId && window.adminDashboard?.showProjectDetails) {
+        window.adminDashboard.showProjectDetails(projectId);
+      }
+    }
+
+    if (action === 'delete-task') {
+      e.stopPropagation();
+      const taskId = parseInt(actionBtn.dataset.taskId || '0');
+      if (taskId) {
+        deleteTask(taskId);
+      }
+    }
+  });
 }

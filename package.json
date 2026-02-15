@@ -133,6 +133,7 @@
     "nodemailer": "^7.0.6",
     "pdf-lib": "^1.17.1",
     "picocolors": "^1.1.1",
+    "quill": "^2.0.3",
     "redis": "^5.8.2",
     "sqlite3": "^5.0.2",
     "swagger-jsdoc": "^6.2.8",

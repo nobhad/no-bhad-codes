@@ -20,6 +20,7 @@ import { formatDate } from '../../../utils/format-utils';
 import type { ProjectResponse } from '../../../types/api';
 import { initProjectModalDropdowns, setupEditProjectModalHandlers } from '../modules/admin-projects';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
+import { createRichTextEditor, htmlToPlainText, plainTextToHTML, type RichTextEditorInstance } from '../../../components/rich-text-editor';
 
 /** Base project type for action functions - compatible with both LeadProject and ProjectResponse */
 interface ProjectBase {
@@ -603,8 +604,16 @@ export async function showContractBuilder(
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="contract-content">Contract Draft</label>
-          <textarea id="contract-content" class="form-input contract-builder-content" rows="12" placeholder="Build or paste your contract text..."></textarea>
+          <label class="form-label">Contract Draft</label>
+          <div id="contract-editor-container"></div>
+          <div class="rich-text-variables" id="contract-variables">
+            <span class="rich-text-variables-label">Insert variable:</span>
+            <button type="button" class="rich-text-variable-btn" data-variable="client.name">client.name</button>
+            <button type="button" class="rich-text-variable-btn" data-variable="client.company">client.company</button>
+            <button type="button" class="rich-text-variable-btn" data-variable="project.name">project.name</button>
+            <button type="button" class="rich-text-variable-btn" data-variable="project.price">project.price</button>
+            <button type="button" class="rich-text-variable-btn" data-variable="date.today">date.today</button>
+          </div>
         </div>
       </div>
 
@@ -629,7 +638,8 @@ export async function showContractBuilder(
   const templateSelect = modal.body.querySelector('#contract-template-select') as HTMLSelectElement | null;
   const templateLoadBtn = modal.body.querySelector('#contract-template-load') as HTMLButtonElement | null;
   const templateClearBtn = modal.body.querySelector('#contract-template-clear') as HTMLButtonElement | null;
-  const contentTextarea = modal.body.querySelector('#contract-content') as HTMLTextAreaElement | null;
+  const editorContainer = modal.body.querySelector('#contract-editor-container') as HTMLElement | null;
+  const variablesContainer = modal.body.querySelector('#contract-variables') as HTMLElement | null;
   const previewBody = modal.body.querySelector('#contract-preview') as HTMLElement | null;
   const generateBtn = modal.body.querySelector('#contract-generate-draft') as HTMLButtonElement | null;
   const cancelBtn = modal.footer.querySelector('#contract-cancel-btn') as HTMLButtonElement | null;
@@ -637,11 +647,37 @@ export async function showContractBuilder(
 
   let contractId: number | null = null;
   let currentTemplateId: number | null = null;
+  let editor: RichTextEditorInstance | null = null;
 
   const updatePreview = (value: string) => {
     if (!previewBody) return;
     previewBody.textContent = value.trim() ? value : 'Draft content will appear here.';
   };
+
+  // Initialize rich text editor
+  if (editorContainer) {
+    editor = createRichTextEditor({
+      container: editorContainer,
+      placeholder: 'Build or paste your contract text...',
+      height: '300px',
+      toolbarOptions: 'standard',
+      onChange: (content) => {
+        updatePreview(htmlToPlainText(content));
+      }
+    });
+  }
+
+  // Setup variable insertion buttons
+  if (variablesContainer && editor) {
+    variablesContainer.querySelectorAll('.rich-text-variable-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const variable = (btn as HTMLElement).dataset.variable;
+        if (variable) {
+          editor?.insertVariable(variable);
+        }
+      });
+    });
+  }
 
   const buildDraftFromSections = (): string => {
     const scope = (modal.body.querySelector('#contract-section-scope') as HTMLTextAreaElement | null)?.value.trim();
@@ -715,9 +751,11 @@ export async function showContractBuilder(
       const data = await parseApiResponse<{ contract: { id: number; content: string } }>(response);
       const contract = data.contract;
       contractId = contract?.id || null;
-      if (contentTextarea) {
-        contentTextarea.value = contract?.content || '';
-        updatePreview(contentTextarea.value);
+      if (editor) {
+        // Convert plain text to HTML for the editor
+        const htmlContent = plainTextToHTML(contract?.content || '');
+        editor.setHTML(htmlContent);
+        updatePreview(contract?.content || '');
       }
       const templateLabel = document.getElementById('pd-contract-template-label');
       if (templateLabel && templateSelect) templateLabel.textContent = templateSelect.options[templateSelect.selectedIndex]?.textContent || 'Template applied';
@@ -731,8 +769,8 @@ export async function showContractBuilder(
   });
 
   templateClearBtn?.addEventListener('click', () => {
-    if (contentTextarea) {
-      contentTextarea.value = '';
+    if (editor) {
+      editor.setText('');
       updatePreview('');
     }
     contractId = null;
@@ -740,20 +778,22 @@ export async function showContractBuilder(
 
   generateBtn?.addEventListener('click', () => {
     const draft = buildDraftFromSections();
-    if (contentTextarea) {
-      contentTextarea.value = draft;
+    if (editor) {
+      const htmlContent = plainTextToHTML(draft);
+      editor.setHTML(htmlContent);
       updatePreview(draft);
     }
   });
 
-  contentTextarea?.addEventListener('input', () => {
-    updatePreview(contentTextarea.value);
+  cancelBtn?.addEventListener('click', () => {
+    editor?.destroy();
+    modal.hide();
   });
 
-  cancelBtn?.addEventListener('click', () => modal.hide());
-
   saveDraftBtn?.addEventListener('click', async () => {
-    if (!contentTextarea?.value.trim()) {
+    const editorContent = editor?.getHTML() || '';
+    const plainTextContent = htmlToPlainText(editorContent);
+    if (!plainTextContent.trim()) {
       showToast('Add contract content before saving', 'error');
       return;
     }
@@ -763,7 +803,7 @@ export async function showContractBuilder(
         templateId: currentTemplateId,
         projectId,
         clientId: project.client_id,
-        content: contentTextarea.value,
+        content: plainTextContent,
         status: 'draft'
       };
 

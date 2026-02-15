@@ -44,6 +44,8 @@ import { showToast } from '../../utils/toast-notifications';
 import { withButtonLoading } from '../../utils/button-loading';
 import { initCopyEmailDelegation } from '../../utils/copy-email';
 import { installGlobalAuthInterceptor } from '../../utils/api-client';
+import { getStatusBadgeHTML, createStatusBadge } from '../../components/status-badge';
+import { renderEmptyState } from '../../components/empty-state';
 
 // DOM element keys for caching
 type PortalDOMKeys = Record<string, string>;
@@ -1418,7 +1420,7 @@ export class ClientPortalModule extends BaseModule {
         <div class="milestone-content">
           <div class="milestone-header">
             <h4 class="milestone-title">${safeTitle}</h4>
-            <span class="milestone-status status-badge status-${statusClass}">${statusLabel}</span>
+            <span class="milestone-status">${getStatusBadgeHTML(statusLabel, statusClass)}</span>
           </div>
           ${safeDescription ? `<p class="milestone-description">${safeDescription}</p>` : ''}
           ${deliverablesMarkup}
@@ -1496,7 +1498,7 @@ export class ClientPortalModule extends BaseModule {
     if (!this.projectsList) return;
 
     if (projects.length === 0) {
-      this.projectsList.innerHTML = '<div class="no-projects"><p>No projects yet. Submit a project request to get started!</p></div>';
+      renderEmptyState(this.projectsList, 'No projects yet. Submit a project request to get started!', { className: 'no-projects' });
       return;
     }
 
@@ -1607,11 +1609,14 @@ export class ClientPortalModule extends BaseModule {
       titleElement.textContent = this.currentProject.projectName;
     }
 
-    // Populate status
+    // Populate status using shared component
     const statusElement = this.domCache.get('projectStatus');
-    if (statusElement) {
-      statusElement.textContent = this.currentProject.status.replace('-', ' ');
-      statusElement.className = `status-badge status-${this.currentProject.status}`;
+    if (statusElement && statusElement.parentElement) {
+      const statusLabel = this.currentProject.status.replace('-', ' ');
+      const newBadge = createStatusBadge(statusLabel, this.currentProject.status);
+      newBadge.id = statusElement.id;
+      statusElement.replaceWith(newBadge);
+      this.domCache.invalidate('projectStatus');
     }
 
     // Populate project description (use innerHTML with sanitized line breaks)

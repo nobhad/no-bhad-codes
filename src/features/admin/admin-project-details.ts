@@ -23,6 +23,7 @@ import {
   SECONDARY_TAB_ICONS,
   type SecondarySidebarController
 } from '../../components/secondary-sidebar';
+import { renderEmptyState } from '../../components/empty-state';
 
 // Import from sub-modules
 import {
@@ -628,6 +629,12 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       renderProjectDetailTab(tabContainer);
     }
 
+    // Set project ID on deliverables button for event delegation
+    const deliverablesBtn = document.getElementById('btn-manage-deliverables');
+    if (deliverablesBtn) {
+      deliverablesBtn.dataset.projectId = String(projectId);
+    }
+
     // Populate the detail view
     this.populateProjectDetailView(project);
 
@@ -891,7 +898,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       if (project.notes && project.notes.trim()) {
         notesDisplay.innerHTML = `<div class="notes-content">${formatTextWithLineBreaks(project.notes)}</div>`;
       } else {
-        notesDisplay.innerHTML = '<p class="empty-state">No notes yet. Click "Edit Notes" to add internal notes about this project.</p>';
+        renderEmptyState(notesDisplay, 'No notes yet. Click "Edit Notes" to add internal notes about this project.');
       }
     }
 

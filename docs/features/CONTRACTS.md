@@ -33,7 +33,7 @@ The Contracts System provides complete contract management for client projects, 
 - [x] Admin countersign functionality
 - [x] Signature audit logging
 - [x] Signed PDF storage
-- [ ] Rich text editor for template content (pending)
+- [x] Rich text editor for template content
 
 **Access:** Contract tab in Project Detail view (Admin Portal)
 
@@ -525,6 +525,14 @@ When both parties have signed:
 ---
 
 ## Change Log
+
+### February 15, 2026 - Rich Text Editor Added
+
+- Added Quill.js rich text editor to contract builder
+- Created reusable rich text editor component (`src/components/rich-text-editor.ts`)
+- Added variable insertion toolbar for contract placeholders
+- Editor converts HTML to plain text for PDF compatibility
+- Added CSS styles for dark theme integration
 
 ### February 10, 2026 - Documentation Created
 

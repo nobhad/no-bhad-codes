@@ -10,6 +10,7 @@ import { formatDate } from '../../../utils/format-utils';
 import { AdminAuth } from '../admin-auth';
 import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { confirmDanger, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
+import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { domCache } from './dom-cache';
 import type { ProjectMilestoneResponse } from '../../../types/api';
 
@@ -32,7 +33,7 @@ export async function loadProjectMilestones(
   if (!milestonesList) return;
 
   if (!AdminAuth.isAuthenticated()) {
-    milestonesList.innerHTML = '<p class="empty-state">Authentication required.</p>';
+    renderEmptyState(milestonesList, 'Authentication required.');
     return;
   }
 
@@ -44,8 +45,7 @@ export async function loadProjectMilestones(
       const milestones = data.milestones || [];
 
       if (milestones.length === 0) {
-        milestonesList.innerHTML =
-          '<p class="empty-state">No milestones yet. Add milestones to track project progress.</p>';
+        renderEmptyState(milestonesList, 'No milestones yet. Add milestones to track project progress.');
       } else {
         milestonesList.innerHTML = milestones
           .map((m: ProjectMilestoneResponse) => {
@@ -73,7 +73,7 @@ export async function loadProjectMilestones(
             <div class="milestone-item ${m.is_completed ? 'completed' : ''}" data-milestone-id="${m.id}">
               <div class="milestone-checkbox">
                 <input type="checkbox" ${m.is_completed ? 'checked' : ''}
-                       onchange="window.adminDashboard?.toggleMilestone(${m.id}, this.checked)">
+                       class="milestone-checkbox-input" data-milestone-id="${m.id}">
               </div>
               <div class="milestone-content">
                 <div class="milestone-header">
@@ -94,7 +94,7 @@ export async function loadProjectMilestones(
                 ${safeDescription ? `<p class="milestone-description">${safeDescription}</p>` : ''}
                 ${safeDeliverables ? `<ul class="milestone-deliverables">${safeDeliverables}</ul>` : ''}
                 ${taskCount > 0 ? `
-                  <button class="btn-milestone-tasks" onclick="window.adminDashboard?.toggleMilestoneTasks(${m.id}, ${projectId})">
+                  <button class="btn-milestone-tasks" data-action="toggle-milestone-tasks" data-milestone-id="${m.id}" data-project-id="${projectId}">
                     <svg class="icon-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -103,7 +103,7 @@ export async function loadProjectMilestones(
                   <div class="milestone-tasks-container" id="milestone-tasks-${m.id}" style="display: none;"></div>
                 ` : ''}
               </div>
-              <button class="btn btn-danger btn-sm" onclick="window.adminDashboard?.deleteMilestone(${m.id})">Delete</button>
+              <button class="btn btn-danger btn-sm" data-action="delete-milestone" data-milestone-id="${m.id}">Delete</button>
             </div>
           `;
           })
@@ -118,7 +118,7 @@ export async function loadProjectMilestones(
     }
   } catch (error) {
     console.error('[ProjectMilestones] Error loading milestones:', error);
-    milestonesList.innerHTML = '<p class="empty-state">Error loading milestones.</p>';
+    renderErrorState(milestonesList, 'Error loading milestones.', { type: 'general' });
   }
 }
 
@@ -327,7 +327,7 @@ export async function toggleMilestoneTasks(
                     <input
                       type="checkbox"
                       ${task.status === 'completed' ? 'checked' : ''}
-                      onchange="window.adminDashboard?.toggleTaskCompletion(${task.id}, this.checked, ${projectId})"
+                      class="milestone-task-checkbox" data-task-id="${task.id}" data-project-id="${projectId}"
                     >
                     <span class="milestone-task-title">${SanitizationUtils.escapeHtml(task.title)}</span>
                     <div class="milestone-task-meta">
@@ -406,4 +406,53 @@ export async function toggleTaskCompletion(
     console.error('[ProjectMilestones] Error toggling task:', error);
     alertError('Failed to update task. Please try again.');
   }
+}
+
+// Event delegation for milestone actions
+if (typeof window !== 'undefined') {
+  // Click events for buttons
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const actionBtn = target.closest('[data-action]') as HTMLElement | null;
+    if (!actionBtn) return;
+
+    const action = actionBtn.dataset.action;
+
+    if (action === 'toggle-milestone-tasks') {
+      const milestoneId = parseInt(actionBtn.dataset.milestoneId || '0');
+      const projectId = parseInt(actionBtn.dataset.projectId || '0');
+      if (milestoneId && projectId && window.adminDashboard?.toggleMilestoneTasks) {
+        window.adminDashboard.toggleMilestoneTasks(milestoneId, projectId);
+      }
+    }
+
+    if (action === 'delete-milestone') {
+      const milestoneId = parseInt(actionBtn.dataset.milestoneId || '0');
+      if (milestoneId && window.adminDashboard?.deleteMilestone) {
+        window.adminDashboard.deleteMilestone(milestoneId);
+      }
+    }
+  });
+
+  // Change events for checkboxes
+  document.addEventListener('change', (e) => {
+    const target = e.target as HTMLInputElement;
+
+    // Milestone completion checkbox
+    if (target.matches('.milestone-checkbox-input')) {
+      const milestoneId = parseInt(target.dataset.milestoneId || '0');
+      if (milestoneId && window.adminDashboard?.toggleMilestone) {
+        window.adminDashboard.toggleMilestone(milestoneId, target.checked);
+      }
+    }
+
+    // Task completion checkbox
+    if (target.matches('.milestone-task-checkbox')) {
+      const taskId = parseInt(target.dataset.taskId || '0');
+      const projectId = parseInt(target.dataset.projectId || '0');
+      if (taskId && projectId && window.adminDashboard?.toggleTaskCompletion) {
+        window.adminDashboard.toggleTaskCompletion(taskId, target.checked, projectId);
+      }
+    }
+  });
 }
