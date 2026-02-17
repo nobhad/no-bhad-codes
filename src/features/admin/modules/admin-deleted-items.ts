@@ -13,6 +13,7 @@ import { ICONS } from '../../../constants/icons';
 import { confirmDialog } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
+import { showTableError } from '../../../utils/error-utils';
 import { formatDate } from '../../../utils/format-utils';
 import type { AdminDashboardContext } from '../admin-types';
 
@@ -66,11 +67,13 @@ function clearElementCache(): void {
   cachedElements.clear();
 }
 
+let storedContext: AdminDashboardContext | null = null;
+
 /**
- * Store context for later use (no-op, context passed directly to functions)
+ * Store context for later use
  */
-export function setDeletedItemsContext(_ctx: AdminDashboardContext): void {
-  // Context is passed directly to functions that need it
+export function setDeletedItemsContext(ctx: AdminDashboardContext): void {
+  storedContext = ctx;
 }
 
 /**
@@ -95,13 +98,17 @@ export async function loadDeletedItems(ctx: AdminDashboardContext): Promise<void
     } else if (response.status !== 401) {
       console.error('[AdminDeletedItems] API error:', response.status);
       if (tableBody) {
-        tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">Error loading deleted items</td></tr>';
+        showTableError(tableBody, 6, `Error loading deleted items (${response.status})`, () => {
+          if (storedContext) loadDeletedItems(storedContext);
+        });
       }
     }
   } catch (error) {
     console.error('[AdminDeletedItems] Failed to load:', error);
     if (tableBody) {
-      tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">Network error loading deleted items</td></tr>';
+      showTableError(tableBody, 6, 'Network error loading deleted items', () => {
+        if (storedContext) loadDeletedItems(storedContext);
+      });
     }
   }
 }

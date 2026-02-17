@@ -52,6 +52,8 @@ import {
   type PaginationState,
   type PaginationConfig
 } from '../../../utils/table-pagination';
+import { showTableError } from '../../../utils/error-utils';
+import { showTableLoading } from '../../../utils/loading-utils';
 
 // ============================================================================
 // TYPES
@@ -377,7 +379,7 @@ export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
 async function refreshProposals(ctx: AdminDashboardContext): Promise<void> {
   const tableBody = document.getElementById('proposals-table-body');
   if (tableBody) {
-    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Loading proposals...</td></tr>';
+    showTableLoading(tableBody, 8, 'Loading proposals...');
   }
 
   try {
@@ -392,13 +394,17 @@ async function refreshProposals(ctx: AdminDashboardContext): Promise<void> {
     } else if (response.status !== 401) {
       console.error('[AdminProposals] API error:', response.status);
       if (tableBody) {
-        tableBody.innerHTML = `<tr><td colspan="8" class="loading-row">Error loading proposals: ${response.status}</td></tr>`;
+        showTableError(tableBody, 8, `Error loading proposals (${response.status})`, () => {
+          if (_storedContext) refreshProposals(_storedContext);
+        });
       }
     }
   } catch (error) {
     console.error('[AdminProposals] Failed to load proposals:', error);
     if (tableBody) {
-      tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Network error loading proposals</td></tr>';
+      showTableError(tableBody, 8, 'Network error loading proposals', () => {
+        if (_storedContext) refreshProposals(_storedContext);
+      });
     }
   }
 }

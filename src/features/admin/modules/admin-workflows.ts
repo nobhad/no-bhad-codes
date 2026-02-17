@@ -11,6 +11,7 @@
 import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
+import { showTableError } from '../../../utils/error-utils';
 import { confirmDanger } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
@@ -253,7 +254,7 @@ async function loadApprovalWorkflows(): Promise<void> {
   } catch (error) {
     console.error('[AdminWorkflows] Error loading workflows:', error);
     if (tbody) {
-      tbody.innerHTML = '<tr><td colspan="6" class="loading-row">Error loading workflows</td></tr>';
+      showTableError(tbody, 6, 'Error loading workflows', loadApprovalWorkflows);
     }
   }
 }
@@ -938,7 +939,7 @@ async function loadTriggers(): Promise<void> {
   } catch (error) {
     console.error('[AdminWorkflows] Error loading triggers:', error);
     if (tbody) {
-      tbody.innerHTML = '<tr><td colspan="6" class="loading-row">Error loading triggers</td></tr>';
+      showTableError(tbody, 6, 'Error loading triggers', loadTriggers);
     }
   }
 }
@@ -1618,7 +1619,7 @@ async function loadPendingApprovals(): Promise<void> {
   } catch (error) {
     console.error('[AdminWorkflows] Error loading pending approvals:', error);
     if (tbody) {
-      tbody.innerHTML = '<tr><td colspan="6" class="loading-row">Error loading approvals</td></tr>';
+      showTableError(tbody, 6, 'Error loading approvals', loadPendingApprovals);
     }
   }
 }

@@ -168,26 +168,22 @@ export function renderMessagesView(): void {
   if (!container) return;
 
   container.innerHTML = `
-    <!-- Search Bar -->
-    <div class="messages-search-wrap">
-      <label for="messages-search-input" class="sr-only">Search messages</label>
-      <div class="search-bar">
-        <span class="search-bar-icon" aria-hidden="true">
-          ${ICONS.SEARCH}
-        </span>
-        <input type="search" id="messages-search-input" class="search-bar-input" placeholder="Search messages..." autocomplete="off" />
+    <!-- Messages Layout - Split View (matching admin structure) -->
+    <div class="messages-layout portal-shadow">
+      <!-- Full-width Search Bar -->
+      <div class="messages-global-search">
+        <label for="messages-search-input" class="sr-only">Search messages</label>
+        <div class="search-bar">
+          <span class="search-bar-icon" aria-hidden="true">
+            ${ICONS.SEARCH}
+          </span>
+          <input type="search" id="messages-search-input" class="search-bar-input" placeholder="Search messages..." autocomplete="off" aria-label="Search messages" />
+        </div>
       </div>
-      <button type="button" id="messages-search-btn" class="btn btn-primary messages-search-btn" aria-label="Search">
-        ${ICONS.SEARCH}
-        <span>SEARCH</span>
-      </button>
-    </div>
 
-    <!-- Two Column Layout -->
-    <div class="messages-page-layout">
-      <!-- Left Column: Contact Info -->
-      <div class="messages-sidebar">
-        <section class="messages-contact-card portal-shadow" aria-label="Contact information">
+      <!-- Left Column: Contact Info & Tips -->
+      <div class="messages-clients-column">
+        <section class="messages-contact-card" aria-label="Contact information">
           <h3>Contact</h3>
           <div class="messages-contact-info">
             <p class="messages-contact-item">
@@ -198,7 +194,7 @@ export function renderMessagesView(): void {
           </div>
         </section>
 
-        <section class="messages-tips-card portal-shadow" aria-label="Tips">
+        <section class="messages-tips-card" aria-label="Tips">
           <h3>Tips</h3>
           <ul class="messages-tips-list">
             <li>Include project details for faster responses</li>
@@ -208,38 +204,36 @@ export function renderMessagesView(): void {
         </section>
       </div>
 
-      <!-- Right Column: Messages Thread -->
-      <div class="messages-main">
-        <div class="messages-container portal-shadow">
-          <div class="messages-thread-header" id="messages-thread-header">
-            <span class="thread-title">Conversation with Noelle</span>
+      <!-- Right Column: Thread + Compose -->
+      <div class="messages-thread-column">
+        <div class="messages-thread-header" id="messages-thread-header">
+          <span class="thread-title">Conversation with Noelle</span>
+        </div>
+        <div class="messages-thread" id="messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
+          <div class="no-messages">
+            <p>No messages yet. Send a message to Noelle to get started.</p>
           </div>
-          <div class="messages-thread" id="messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
-            <div class="no-messages">
-              <p>No messages yet. Send a message to Noelle to get started.</p>
-            </div>
-          </div>
+        </div>
 
-          <!-- Compose Message -->
-          <div class="message-compose">
-            <div id="attachment-preview" class="attachment-preview hidden"></div>
-            <div class="message-input-wrapper">
-              <label for="message-input" class="sr-only">Message</label>
-              <textarea
-                id="message-input"
-                class="form-textarea"
-                placeholder="Type your message or drop files here..."
-                aria-label="Type your message"
-              ></textarea>
-            </div>
-            <div class="message-compose-actions">
-              <button type="button" class="btn-attach" id="btn-attach-file" title="Attach files">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-              </button>
-              <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
-            </div>
-            <input type="file" id="attachment-input" class="attachment-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip" />
+        <!-- Compose Message -->
+        <div class="message-compose">
+          <div id="attachment-preview" class="attachment-preview hidden"></div>
+          <div class="message-input-wrapper">
+            <label for="message-input" class="sr-only">Message</label>
+            <textarea
+              id="message-input"
+              class="form-textarea"
+              placeholder="Type your message or drop files here..."
+              aria-label="Type your message"
+            ></textarea>
           </div>
+          <div class="message-compose-actions">
+            <button type="button" class="btn-attach" id="btn-attach-file" title="Attach files">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
+          </div>
+          <input type="file" id="attachment-input" class="attachment-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip" />
         </div>
       </div>
     </div>
@@ -423,7 +417,7 @@ export function renderQuestionnairesView(): void {
   if (!container) return;
 
   container.innerHTML = `
-    <div id="questionnaires-list-container" class="questionnaires-list-container">
+    <div id="questionnaires-list-container" class="questionnaires-list-container portal-shadow">
       <div class="loading-row">Loading questionnaires...</div>
     </div>
   `;
@@ -439,7 +433,7 @@ export function renderHelpView(): void {
 
   container.innerHTML = `
     <!-- Hero Search Section -->
-    <div class="help-hero">
+    <div class="help-hero portal-shadow">
       <p class="help-hero-text">How can we help you today?</p>
       <div class="help-search-container">
         <label for="help-search-input" class="sr-only">Search help articles</label>
@@ -699,7 +693,7 @@ export function renderNewProjectView(): void {
   if (!container) return;
 
   container.innerHTML = `
-    <section class="terminal-intake-container portal-intake" id="terminal-intake-container">
+    <section class="terminal-intake-container portal-intake portal-shadow" id="terminal-intake-container">
       <!-- Terminal UI will be rendered by JavaScript -->
     </section>
   `;
@@ -714,7 +708,7 @@ export function renderPreviewView(): void {
   if (!container) return;
 
   container.innerHTML = `
-    <div class="preview-container">
+    <div class="preview-container portal-shadow">
       <div class="preview-toolbar">
         <div class="preview-url">
           <span class="url-icon">${ICONS.GLOBE}</span>

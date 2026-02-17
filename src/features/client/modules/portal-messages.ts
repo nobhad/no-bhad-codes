@@ -13,6 +13,7 @@ import { createDOMCache } from '../../../utils/dom-cache';
 import { showToast } from '../../../utils/toast-notifications';
 import { ICONS } from '../../../constants/icons';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
+import { confirmDanger, promptDialog } from '../../../utils/confirm-dialog';
 
 const MESSAGES_API_BASE = '/api/messages';
 const CLIENT_THREAD_TITLE = 'Conversation with Noelle';
@@ -395,8 +396,20 @@ function renderMessages(
       const attachments = msg.attachments;
       const attachmentsHtml = renderMessageAttachments(attachments as { filename: string; originalName: string; size: number; mimeType: string }[] | null);
 
+      // Client messages get edit/delete actions
+      const actionsHtml = isSent ? `
+        <div class="message-actions">
+          <button type="button" class="message-action-btn message-edit-btn" data-message-id="${msg.id}" title="Edit message" aria-label="Edit message">
+            ${ICONS.EDIT}
+          </button>
+          <button type="button" class="message-action-btn message-delete-btn" data-message-id="${msg.id}" title="Delete message" aria-label="Delete message">
+            ${ICONS.TRASH}
+          </button>
+        </div>
+      ` : '';
+
       return `
-      <div class="message message-${isSent ? 'sent' : 'received'} ${senderClass}">
+      <div class="message message-${isSent ? 'sent' : 'received'} ${senderClass}" data-message-id="${msg.id}">
         <div class="message-avatar">
           ${avatarHtml}
         </div>
@@ -404,6 +417,7 @@ function renderMessages(
           <div class="message-header">
             <span class="message-sender">${ctx.escapeHtml(displayName)}</span>
             <span class="message-time">${ctx.formatDate(msg.created_at)}</span>
+            ${actionsHtml}
           </div>
           <div class="message-body">${ctx.escapeHtml(msg.message)}</div>
           ${attachmentsHtml}
@@ -413,7 +427,116 @@ function renderMessages(
     })
     .join('');
 
+  // Set up edit/delete handlers for client messages
+  setupMessageActionHandlers(container, ctx);
+
   container.scrollTop = container.scrollHeight;
+}
+
+/**
+ * Set up click handlers for edit/delete message buttons
+ */
+function setupMessageActionHandlers(container: HTMLElement, ctx: ClientPortalContext): void {
+  // Edit button handlers
+  container.querySelectorAll('.message-edit-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const messageId = (btn as HTMLElement).dataset.messageId;
+      if (messageId) {
+        await handleEditMessage(parseInt(messageId), container, ctx);
+      }
+    });
+  });
+
+  // Delete button handlers
+  container.querySelectorAll('.message-delete-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const messageId = (btn as HTMLElement).dataset.messageId;
+      if (messageId) {
+        await handleDeleteMessage(parseInt(messageId), ctx);
+      }
+    });
+  });
+}
+
+/**
+ * Handle editing a message
+ */
+async function handleEditMessage(messageId: number, container: HTMLElement, ctx: ClientPortalContext): Promise<void> {
+  // Find the message element to get current text
+  const messageEl = container.querySelector(`[data-message-id="${messageId}"]`);
+  const currentText = messageEl?.querySelector('.message-body')?.textContent || '';
+
+  const newText = await promptDialog({
+    title: 'Edit Message',
+    label: 'Message',
+    defaultValue: currentText,
+    required: true,
+    confirmText: 'Save',
+    cancelText: 'Cancel'
+  });
+
+  if (newText === null || newText.trim() === currentText.trim()) {
+    return; // Cancelled or no change
+  }
+
+  try {
+    const response = await fetch(`${MESSAGES_API_BASE}/messages/${messageId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ message: newText.trim() })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to edit message');
+    }
+
+    showToast('Message updated', 'success');
+    // Reload messages to reflect the change
+    await loadMessagesFromAPI(ctx, true);
+  } catch (error) {
+    console.error('Error editing message:', error);
+    showToast('Failed to edit message. Please try again.', 'error');
+  }
+}
+
+/**
+ * Handle deleting a message
+ */
+async function handleDeleteMessage(messageId: number, ctx: ClientPortalContext): Promise<void> {
+  const confirmed = await confirmDanger(
+    'This message will be permanently deleted.',
+    'Delete',
+    'Delete Message'
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${MESSAGES_API_BASE}/messages/${messageId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to delete message');
+    }
+
+    showToast('Message deleted', 'success');
+    // Reload messages to reflect the change
+    await loadMessagesFromAPI(ctx, true);
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    showToast('Failed to delete message. Please try again.', 'error');
+  }
 }
 
 /**
