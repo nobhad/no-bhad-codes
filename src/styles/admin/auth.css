@@ -228,12 +228,14 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   color: var(--color-primary);
 }
 
-/* Auth submit button - filled by default like client portal */
-.auth-submit {
+/* Auth submit button - outline style matching client portal */
+/* Use !important to override portal-buttons.css rules */
+.auth-gate .auth-submit,
+.auth-gate-form .auth-submit {
   width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border: none;
-  border-radius: var(--portal-radius-lg);
+  padding: var(--space-1-5) var(--space-3) !important;
+  border: 2px solid var(--portal-border-light) !important;
+  border-radius: var(--portal-radius-lg) !important;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -241,14 +243,17 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   letter-spacing: 1px;
   transition: all var(--transition-fast);
   text-transform: uppercase;
-  background-color: var(--portal-bg-lighter);
-  color: var(--portal-text-light);
-  margin-top: var(--space-4);
+  background-color: transparent !important;
+  color: var(--portal-text-light) !important;
+  margin-top: var(--space-2);
+  box-shadow: none !important;
 }
 
-.auth-submit:hover {
-  background-color: var(--color-primary);
-  color: var(--portal-bg-dark);
+.auth-gate .auth-submit:hover,
+.auth-gate-form .auth-submit:hover {
+  background-color: var(--color-primary) !important;
+  color: var(--portal-bg-dark) !important;
+  border-color: var(--color-primary) !important;
 }
 
 .auth-submit:disabled {
