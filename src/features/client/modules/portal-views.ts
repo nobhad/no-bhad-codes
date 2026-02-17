@@ -380,13 +380,12 @@ export function renderRequestsView(): void {
             <textarea id="ad-hoc-description" class="form-textarea" placeholder="Describe what you need" required></textarea>
           </div>
           <div class="form-group">
-            <label class="field-label">Attachment (optional)</label>
+            <label class="field-label">Attachment <span class="field-label-hint">(optional: Add screenshots or mockups if helpful.)</span></label>
             <div class="file-input-wrapper">
               <input type="file" id="ad-hoc-attachment" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" />
               <span class="file-input-text" id="ad-hoc-attachment-text">No file chosen</span>
               <button type="button" class="btn btn-secondary btn-sm file-input-btn" id="ad-hoc-attachment-btn">Choose File</button>
             </div>
-            <p class="requests-attachment-note">Add screenshots or mockups if helpful.</p>
           </div>
           <button type="submit" id="ad-hoc-submit-btn" class="btn btn-primary">Submit Request</button>
         </form>

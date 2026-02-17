@@ -396,21 +396,23 @@
 
 /* =====================================================
    FILE INPUT WRAPPER
-   Custom styled file input to match portal forms
+   Custom styled file input with dashed border (dropzone style)
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .file-input-wrapper {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2);
-  background: var(--color-black);
-  border: 1px solid var(--portal-border-dark);
-  border-radius: var(--portal-radius-lg);
-  transition: border-color var(--transition-fast);
+  background: var(--portal-bg-medium);
+  border: 2px dashed var(--portal-text-light);
+  border-radius: var(--portal-radius-md);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  cursor: pointer;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .file-input-wrapper:hover {
   border-color: var(--color-primary);
+  background: var(--portal-bg-light);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .file-input-wrapper input[type="file"] {

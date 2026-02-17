@@ -129,6 +129,12 @@
   font-weight: var(--label-font-weight, 500);
 }
 
+/* Hint text within field labels - same styling but not uppercase */
+[data-page="admin"] .field-label-hint,
+[data-page="client-portal"] .field-label-hint {
+  text-transform: none;
+}
+
 /* Root meta-value styling - match client detail (portal-text-light for body text) */
 .meta-value {
   font-size: 1rem;

@@ -792,6 +792,35 @@ export function showProjectDetails(
   // Switch to project-detail tab
   ctx.switchTab('project-detail');
 
+  // Render the project detail tab HTML structure first
+  const tabContainer = document.getElementById('tab-project-detail');
+  if (tabContainer) {
+    // Import and render the tab structure
+    import('../admin-project-details').then(({ renderProjectDetailTab }) => {
+      renderProjectDetailTab(tabContainer);
+      // Clear DOM cache to ensure fresh lookups after rendering
+      domCache.clear();
+      // Now populate with project data
+      populateProjectDetailView(project);
+      setupProjectDetailTabs(ctx);
+
+      // Load project-specific data
+      loadProjectMessages(projectId, ctx);
+      loadProjectFiles(projectId, ctx);
+      loadProjectMilestones(projectId, ctx);
+      loadProjectInvoices(projectId, ctx);
+      loadProjectSidebarStats(projectId);
+
+      // Setup file upload with confirmation modal
+      loadPendingRequestsDropdown(projectId);
+      setupFileUploadHandlers(projectId, () => {
+        loadProjectFiles(projectId, ctx);
+        loadProjectFilesFromModule(projectId);
+      });
+    });
+    return;
+  }
+
   populateProjectDetailView(project);
   setupProjectDetailTabs(ctx);
 
@@ -847,7 +876,7 @@ function populateProjectDetailView(project: LeadProject): void {
   });
 
   // Hide company row in header if no company
-  const companyRow = document.getElementById('pd-header-company-row');
+  const companyRow = document.getElementById('pd-company-row');
   if (companyRow) {
     companyRow.style.display = project.company_name ? '' : 'none';
   }
@@ -911,7 +940,7 @@ function populateProjectDetailView(project: LeadProject): void {
 
   // Make client name, company, and email clickable to navigate to client details
   const projectEmail = project.email;
-  const clickableClients = ['pd-client-link', 'pd-company-link', 'pd-email-link', 'pd-header-client-link'];
+  const clickableClients = ['pd-client-link', 'pd-company-link', 'pd-email-link'];
 
   clickableClients.forEach((id) => {
     const el = document.getElementById(id);

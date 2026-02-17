@@ -312,12 +312,26 @@ function renderProjects(projects: ProjectOption[]): void {
   const hiddenInput = el('ad-hoc-project') as HTMLInputElement | null;
   if (!mountPoint || !hiddenInput) return;
 
+  // Get the parent form-group to hide if only one project
+  const formGroup = mountPoint.closest('.form-group');
+
   mountPoint.innerHTML = '';
 
   if (!projects.length) {
     mountPoint.innerHTML = '<div class="form-input" style="opacity: 0.5;">No active projects</div>';
+    if (formGroup) (formGroup as HTMLElement).style.display = '';
     return;
   }
+
+  // If only one project, hide the dropdown and auto-select it
+  if (projects.length === 1) {
+    hiddenInput.value = String(projects[0].id);
+    if (formGroup) (formGroup as HTMLElement).style.display = 'none';
+    return;
+  }
+
+  // Multiple projects - show dropdown
+  if (formGroup) (formGroup as HTMLElement).style.display = '';
 
   const options = projects.map(p => ({
     value: String(p.id),
@@ -569,6 +583,10 @@ function setupListeners(ctx: ClientPortalContext): void {
 }
 
 export async function loadAdHocRequests(ctx: ClientPortalContext): Promise<void> {
+  // Clear DOM cache to ensure fresh lookups after view is rendered
+  cache.clear();
+  // Reset listeners flag since view was re-rendered
+  listenersAttached = false;
   await loadProjectsForForm(ctx);
   await loadRequests(ctx);
   setupListeners(ctx);

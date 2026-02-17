@@ -156,36 +156,36 @@ export function renderProjectDetailTab(container: HTMLElement): void {
           </div>
           <!-- Client Info -->
           <div class="pd-header-client">
-            <div class="pd-client-item clickable-client" id="pd-header-client-link">
+            <div class="pd-client-item clickable-client" id="pd-client-link">
               ${RENDER_ICONS.USER}
-              <span id="pd-header-client-name">-</span>
+              <span id="pd-client-name">-</span>
             </div>
-            <div class="pd-client-item" id="pd-header-company-row">
+            <div class="pd-client-item" id="pd-company-row">
               ${RENDER_ICONS.BUILDING}
-              <span id="pd-header-company">-</span>
+              <span id="pd-company">-</span>
             </div>
             <div class="pd-client-item">
               ${RENDER_ICONS.MAIL}
-              <span id="pd-header-email">-</span>
+              <span id="pd-client-email">-</span>
             </div>
           </div>
           <!-- Project Meta -->
           <div class="pd-header-meta">
             <div class="pd-meta-item">
               <span class="field-label">Type</span>
-              <span class="pd-meta-value" id="pd-header-type">-</span>
+              <span class="pd-meta-value" id="pd-type">-</span>
             </div>
             <div class="pd-meta-item">
               <span class="field-label">Start</span>
-              <span class="pd-meta-value" id="pd-header-start">-</span>
+              <span class="pd-meta-value" id="pd-start-date">-</span>
             </div>
             <div class="pd-meta-item">
               <span class="field-label">Target End</span>
-              <span class="pd-meta-value" id="pd-header-end">-</span>
+              <span class="pd-meta-value" id="pd-end-date">-</span>
             </div>
             <div class="pd-meta-item">
               <span class="field-label">Budget</span>
-              <span class="pd-meta-value" id="pd-header-budget">-</span>
+              <span class="pd-meta-value" id="pd-budget">-</span>
             </div>
           </div>
           <!-- Description -->
@@ -627,6 +627,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const tabContainer = document.getElementById('tab-project-detail');
     if (tabContainer) {
       renderProjectDetailTab(tabContainer);
+      // Clear DOM cache to ensure fresh lookups after re-rendering
+      domCache.clear();
     }
 
     // Set project ID on deliverables button for event delegation
