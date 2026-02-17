@@ -10,6 +10,7 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Express } from 'express';
+import { logger } from '../services/logger.js';
 
 // Basic API information
 const options = {
@@ -473,9 +474,9 @@ export function setupSwagger(app: Express): void {
   app.use('/api-docs', swaggerUi.serve);
   app.get('/api-docs', swaggerUi.setup(specs, swaggerUiOptions));
 
-  console.log('📚 API Documentation available at:');
-  console.log('   • Swagger UI: http://localhost:4001/api-docs');
-  console.log('   • OpenAPI JSON: http://localhost:4001/api-docs.json');
+  logger.info('API Documentation available at:');
+  logger.info('   Swagger UI: http://localhost:4001/api-docs');
+  logger.info('   OpenAPI JSON: http://localhost:4001/api-docs.json');
 }
 
 export { specs };

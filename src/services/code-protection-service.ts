@@ -452,13 +452,13 @@ export class CodeProtectionService {
       }
 
       // Check for common debugging tools
-      const windowAny = window as unknown as {
+      const debugWindow = window as typeof window & {
         chrome?: { runtime?: unknown };
         webkitRequestAnimationFrame?: { toString(): string };
       };
       if (
-        windowAny.chrome?.runtime ||
-        windowAny.webkitRequestAnimationFrame?.toString().includes('native') === false
+        debugWindow.chrome?.runtime ||
+        debugWindow.webkitRequestAnimationFrame?.toString().includes('native') === false
       ) {
         this.logViolation('tampering', { type: 'extension-detected' });
       }

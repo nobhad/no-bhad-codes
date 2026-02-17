@@ -32,7 +32,7 @@ export interface ConsentBannerState extends ComponentState {
 }
 
 export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBannerState> {
-  private hideTimer: any = null;
+  private hideTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(props: ConsentBannerProps) {
     const initialState: ConsentBannerState = {

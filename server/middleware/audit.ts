@@ -10,6 +10,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { auditLogger, AuditAction, AuditEntityType } from '../services/audit-logger.js';
+import { logger } from '../services/logger.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -137,7 +138,10 @@ export function auditMiddleware() {
             statusCode: res.statusCode,
             responseId: body?.id || body?.data?.id
           }
-        }).catch((err) => console.error('[AUDIT] Failed to log:', err));
+        }).catch((err) => {
+          logger.error('[AUDIT] Failed to log', { error: err });
+          console.error('[AUDIT] Failed to log:', err);
+        });
       }
 
       return originalJson(body);

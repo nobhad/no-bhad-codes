@@ -9,6 +9,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { BUSINESS_INFO } from '../config/business.js';
+import { logger } from './logger.js';
 import { settingsService } from './settings-service.js';
 import { InvoicePaymentService } from './invoice/payment-service.js';
 import { InvoiceRecurringService } from './invoice/recurring-service.js';
@@ -221,10 +222,8 @@ export class InvoiceService {
     const rows = await this.db.all(sql, [clientId]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
-    // Fetch line items for each invoice
-    for (const invoice of invoices) {
-      invoice.lineItems = await this.getLineItems(invoice.id!);
-    }
+    // Batch fetch line items (eliminates N+1 query)
+    await this.attachLineItemsToInvoices(invoices);
 
     return invoices;
   }
@@ -246,10 +245,8 @@ export class InvoiceService {
     const rows = await this.db.all(sql, [projectId]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
-    // Fetch line items for each invoice
-    for (const invoice of invoices) {
-      invoice.lineItems = await this.getLineItems(invoice.id!);
-    }
+    // Batch fetch line items (eliminates N+1 query)
+    await this.attachLineItemsToInvoices(invoices);
 
     return invoices;
   }
@@ -663,6 +660,61 @@ export class InvoiceService {
       discountValue: row.discount_value ? (typeof row.discount_value === 'string' ? parseFloat(row.discount_value) : row.discount_value as number) : undefined,
       discountAmount: row.discount_amount ? (typeof row.discount_amount === 'string' ? parseFloat(row.discount_amount) : row.discount_amount as number) : undefined
     }));
+  }
+
+  /**
+   * Get line items for multiple invoices in a single query (batch fetch)
+   * This eliminates N+1 query problem when fetching invoices with line items
+   */
+  async getLineItemsForInvoices(invoiceIds: number[]): Promise<Map<number, InvoiceLineItem[]>> {
+    if (invoiceIds.length === 0) {
+      return new Map();
+    }
+
+    const placeholders = invoiceIds.map(() => '?').join(',');
+    const rows = await this.db.all(
+      `SELECT * FROM invoice_line_items WHERE invoice_id IN (${placeholders}) ORDER BY invoice_id, sort_order ASC`,
+      invoiceIds
+    );
+
+    // Group line items by invoice_id
+    const lineItemsMap = new Map<number, InvoiceLineItem[]>();
+
+    for (const row of rows as Record<string, unknown>[]) {
+      const invoiceId = row.invoice_id as number;
+      const lineItem: InvoiceLineItem = {
+        description: row.description as string,
+        quantity: typeof row.quantity === 'string' ? parseFloat(row.quantity) : (row.quantity as number),
+        rate: typeof row.unit_price === 'string' ? parseFloat(row.unit_price) : (row.unit_price as number),
+        amount: typeof row.amount === 'string' ? parseFloat(row.amount) : (row.amount as number),
+        taxRate: row.tax_rate ? (typeof row.tax_rate === 'string' ? parseFloat(row.tax_rate) : row.tax_rate as number) : undefined,
+        taxAmount: row.tax_amount ? (typeof row.tax_amount === 'string' ? parseFloat(row.tax_amount) : row.tax_amount as number) : undefined,
+        discountType: row.discount_type as 'percentage' | 'fixed' | undefined,
+        discountValue: row.discount_value ? (typeof row.discount_value === 'string' ? parseFloat(row.discount_value) : row.discount_value as number) : undefined,
+        discountAmount: row.discount_amount ? (typeof row.discount_amount === 'string' ? parseFloat(row.discount_amount) : row.discount_amount as number) : undefined
+      };
+
+      if (!lineItemsMap.has(invoiceId)) {
+        lineItemsMap.set(invoiceId, []);
+      }
+      lineItemsMap.get(invoiceId)!.push(lineItem);
+    }
+
+    return lineItemsMap;
+  }
+
+  /**
+   * Attach line items to invoices using batch fetch
+   */
+  private async attachLineItemsToInvoices(invoices: Invoice[]): Promise<void> {
+    if (invoices.length === 0) return;
+
+    const invoiceIds = invoices.map(inv => inv.id!).filter(id => id != null);
+    const lineItemsMap = await this.getLineItemsForInvoices(invoiceIds);
+
+    for (const invoice of invoices) {
+      invoice.lineItems = lineItemsMap.get(invoice.id!) || [];
+    }
   }
 
   /**
@@ -1116,10 +1168,8 @@ export class InvoiceService {
     const rows = await this.db.all(sql, [milestoneId]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
-    // Fetch line items for each invoice
-    for (const invoice of invoices) {
-      invoice.lineItems = await this.getLineItems(invoice.id!);
-    }
+    // Batch fetch line items (eliminates N+1 query)
+    await this.attachLineItemsToInvoices(invoices);
 
     return invoices;
   }
@@ -1511,10 +1561,8 @@ export class InvoiceService {
     const rows = await this.db.all(sql, [...params, limit, offset]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
-    // Fetch line items for each invoice
-    for (const invoice of invoices) {
-      invoice.lineItems = await this.getLineItems(invoice.id!);
-    }
+    // Batch fetch line items (eliminates N+1 query)
+    await this.attachLineItemsToInvoices(invoices);
 
     return { invoices, total };
   }
@@ -1540,10 +1588,8 @@ export class InvoiceService {
     const rows = await this.db.all(sql, [limit, offset]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
-    // Fetch line items for each invoice
-    for (const invoice of invoices) {
-      invoice.lineItems = await this.getLineItems(invoice.id!);
-    }
+    // Batch fetch line items (eliminates N+1 query)
+    await this.attachLineItemsToInvoices(invoices);
 
     return invoices;
   }
@@ -1874,7 +1920,7 @@ export class InvoiceService {
           appliedCount++;
         }
       } catch (error) {
-        console.error(`[InvoiceService] Failed to apply late fee to invoice ${row.id}:`, error);
+        logger.error(`[InvoiceService] Failed to apply late fee to invoice ${row.id}`, { error: error instanceof Error ? error : undefined });
       }
     }
 

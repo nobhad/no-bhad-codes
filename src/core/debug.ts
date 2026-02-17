@@ -11,7 +11,7 @@
 import type { Application } from './app';
 import { container } from './container';
 import { appState } from './state';
-import { componentStore, ComponentRegistry } from '../components';
+import { componentStore } from '../components';
 
 // Type definitions for window globals
 interface ServiceInstance {
@@ -60,7 +60,7 @@ export function setupDebugHelpers(app: Application): void {
     container,
     components: componentStore,
     getStatus: () => app.getStatus(),
-    getComponentStats: () => ComponentRegistry.getStats(),
+    getComponentStats: () => ({ message: 'Component stats not available' }),
     getPerformanceReport: async () => {
       const perfService = (await container.resolve('PerformanceService')) as ServiceInstance;
       return perfService.generateReport?.();

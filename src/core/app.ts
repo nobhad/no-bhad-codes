@@ -10,7 +10,7 @@
 
 import { container } from './container';
 import { appState } from './state';
-import { ComponentRegistry, createConsentBanner, ConsentBanner } from '../components';
+import { createConsentBanner, ConsentBanner } from '../components';
 import { registerServices } from './services-config';
 import {
   registerModules,
@@ -22,6 +22,14 @@ import {
 import { setupDebugHelpers } from './debug';
 import { isDev } from './env';
 import { APP_CONSTANTS } from '../config/constants';
+import { initGlobalErrorHandler } from '../portal-global-error-handler';
+import { initI18n } from '../i18n';
+
+// Initialize global error handler immediately
+initGlobalErrorHandler();
+
+// Initialize i18n with browser locale detection
+initI18n();
 
 // Type definitions
 interface ServiceInstance {
@@ -81,7 +89,7 @@ export class Application {
       await this.initializeModules();
 
       // Initialize components from data attributes
-      await ComponentRegistry.autoInit();
+      // ComponentRegistry.autoInit() is not implemented; skip this step.
 
       // Initialize visitor tracking (config has cookieConsent: false, so no consent needed)
       if (typeof window !== 'undefined') {

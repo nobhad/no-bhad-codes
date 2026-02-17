@@ -82,9 +82,12 @@ export function registerModules(debug: boolean = false): void {
         const { NavigationModule } = await import('../modules/ui/navigation');
         const routerService = await container.resolve('RouterService');
         // DataService may not be available on client/admin pages - handle gracefully
-        let dataService = null;
+        let dataService: { init?: () => Promise<void> | void } | null = null;
         try {
-          dataService = await container.resolve('DataService');
+          dataService = await container.resolve('DataService') as { init?: () => Promise<void> | void };
+          if (dataService && typeof dataService.init === 'function') {
+            await dataService.init();
+          }
         } catch {
           // DataService not available on this page, NavigationModule will use fallbacks
         }

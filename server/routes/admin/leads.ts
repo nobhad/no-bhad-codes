@@ -7,6 +7,7 @@ import { errorTracker } from '../../services/error-tracking.js';
 import { getDatabase } from '../../database/init.js';
 import { leadService } from '../../services/lead-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -83,7 +84,7 @@ router.get(
         }
       });
     } catch (error) {
-      console.error('Error fetching leads:', error);
+      logger.error('Error fetching leads:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to fetch leads', 500, 'INTERNAL_ERROR');
     }
   })
@@ -150,7 +151,7 @@ router.get(
         }
       });
     } catch (error) {
-      console.error('Error fetching contact submissions:', error);
+      logger.error('Error fetching contact submissions:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to fetch contact submissions', 500, 'INTERNAL_ERROR');
     }
   })
@@ -197,7 +198,7 @@ router.put(
 
       sendSuccess(res, undefined, 'Status updated successfully');
     } catch (error) {
-      console.error('Error updating contact submission status:', error);
+      logger.error('Error updating contact submission status:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to update status', 500, 'INTERNAL_ERROR');
     }
   })
@@ -300,7 +301,7 @@ router.post(
               text: `Welcome, ${contact.name}!\n\nYou've been invited to set up your client portal account.\n\nVisit this link to create your password: ${inviteLink}\n\nThis link will expire in 7 days.`
             });
           } catch (emailError) {
-            console.error('Failed to send invitation email:', emailError);
+            logger.error('Failed to send invitation email:', { error: emailError instanceof Error ? emailError : undefined });
             // Don't fail the conversion if email fails
           }
         }
@@ -320,7 +321,7 @@ router.post(
         invitationSent: sendInvitation && !existingClient
       }, existingClient ? 'Contact linked to existing client' : 'Contact converted to client successfully');
     } catch (error) {
-      console.error('Error converting contact to client:', error);
+      logger.error('Error converting contact to client:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to convert contact to client', 500, 'INTERNAL_ERROR');
     }
   })
@@ -409,7 +410,7 @@ router.put(
         cancellationReason: status === 'cancelled' ? cancellation_reason : null
       }, 'Lead status updated successfully');
     } catch (error) {
-      console.error('Error updating lead status:', error);
+      logger.error('Error updating lead status:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to update lead status', 500, 'INTERNAL_ERROR');
     }
   })
@@ -595,7 +596,7 @@ No Bhad Codes Team
         emailResult
       }, 'Invitation sent successfully');
     } catch (error) {
-      console.error('Error inviting lead:', error);
+      logger.error('Error inviting lead:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to send invitation', 500, 'INTERNAL_ERROR');
     }
   })
@@ -647,7 +648,7 @@ router.post(
 
       sendSuccess(res, { projectId: id }, 'Lead activated as project successfully');
     } catch (error) {
-      console.error('Error activating lead:', error);
+      logger.error('Error activating lead:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to activate lead', 500, 'INTERNAL_ERROR');
     }
   })

@@ -10,6 +10,7 @@
 
 import { existsSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
+import { logger } from '../services/logger.js';
 
 /**
  * Get the base uploads directory.
@@ -41,7 +42,7 @@ export function getUploadsSubdir(subdir: string): string {
 
   if (!existsSync(fullPath)) {
     mkdirSync(fullPath, { recursive: true });
-    console.log(`[Uploads] Created directory: ${fullPath}`);
+    logger.info(`[Uploads] Created directory: ${fullPath}`);
   }
 
   return fullPath;

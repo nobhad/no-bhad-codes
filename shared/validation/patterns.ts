@@ -151,9 +151,10 @@ export const VALIDATION_PATTERNS = {
   URL_HTTP: /^https?:\/\/(?:[\w-]+\.)+[\w-]+(?::\d{1,5})?(?:\/[^\s]*)?$/,
 
   /**
-   * Any URL validation (includes ftp, mailto, etc.)
-   */
-  URL_ANY: /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/(?:[\w-]+\.)+[\w-]+(?::\d{1,5})?(?:\/[^\s]*)?$/,
+  * Generic URL validation (includes ftp, mailto, etc.)
+  * Use for broad URL matching, not strict HTTP/HTTPS
+  */
+  URL_GENERIC: /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/(?:[\w-]+\.)+[\w-]+(?::\d{1,5})?(?:\/[^\s]*)?$/,
 
   /**
    * Domain name validation
@@ -323,7 +324,7 @@ export const PATTERN_DESCRIPTIONS: Record<keyof typeof VALIDATION_PATTERNS, stri
   USERNAME: 'a valid username (3-30 alphanumeric characters, starting with a letter)',
   USERNAME_EXTENDED: 'a valid username',
   URL_HTTP: 'a valid HTTP/HTTPS URL',
-  URL_ANY: 'a valid URL',
+  URL_GENERIC: 'a valid generic URL',
   DOMAIN: 'a valid domain name',
   DATE_ISO: 'a valid date (YYYY-MM-DD)',
   DATETIME_ISO: 'a valid datetime',

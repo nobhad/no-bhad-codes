@@ -239,7 +239,7 @@ export class BaseModule {
    * @param {string} eventName - Name of the event
    * @param {Object} [detail={}] - Custom data for the event
    */
-  protected dispatchEvent(eventName: string, detail: any = {}): void {
+  protected dispatchEvent(eventName: string, detail: Record<string, unknown> = {}): void {
     const event = new CustomEvent(`${this.name}:${eventName}`, { detail });
     document.dispatchEvent(event);
     this.log(`Dispatched event: ${eventName}`);

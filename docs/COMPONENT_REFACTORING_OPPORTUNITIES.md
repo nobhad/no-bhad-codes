@@ -1,25 +1,21 @@
 # Component Refactoring Opportunities
 
-**Last Updated:** February 2, 2026
+**Last Updated:** February 15, 2026
 
-This document identifies places in the codebase where reusable components should be used but are currently implemented with manual DOM manipulation or native browser APIs. **Completed items:** Client portal and admin alert/prompt/toast/confirm refactors are done; remaining deferred items (Buttons, Modals) are documented below.
+---
 
-## Summary
+## Button/Modal Standardization — COMPLETE
 
-|Component Type|Current Usage|Should Use|Status|
-|----------------|---------------|------------|--------|
-|**Alert Dialogs**|`alert()` (native)|`alertDialog()` utility|✅ COMPLETE|
-|**Prompt Dialogs**|`prompt()` (native)|`multiPromptDialog()` utility|✅ COMPLETE|
-|**Focus Trap**|Missing on detail modal|`manageFocusTrap()` utility|✅ COMPLETE|
-|**Buttons**|`createElement('button')`|`ButtonComponent`|⏸️ DEFERRED|
-|**Modals**|Manual DOM manipulation|`ModalComponent`|⏸️ DEFERRED|
-|**Toast Notifications**|`alert()` or custom DOM|`showToast()` utility|✅ COMPLETE|
+All manual button and modal usages have been refactored to use standardized ButtonComponent and ModalComponent patterns. CSS classes and variables are now consistent, and accessibility is improved across all modules.
 
-### Deferred Items Rationale
+### Refactor Summary
 
-**Buttons:** The manual button creations use specific classes (`custom-dropdown-trigger`, `chat-option`) and structures (status dots, caret icons) that are tightly coupled to their dropdown/chat systems. Refactoring would require extending ButtonComponent significantly and updating all related CSS, with risk of breaking existing functionality.
+- All button creation now uses ButtonComponent/button.ts/icon-button.ts
+- All modal implementations use ModalComponent or createPortalModal
+- CSS updated for shared classes and variables
+- ARIA, keyboard, and focus management standardized
 
-**Modals:** The detail modal in admin-dashboard.ts now has proper focus trapping via `manageFocusTrap()`. Full ModalComponent refactoring would require updating HTML templates and all content injection code, with marginal benefit.
+See src/components/button-component.ts, button.ts, icon-button.ts, modal-component.ts, portal-modal.ts for implementation details.
 
 ---
 
@@ -65,7 +61,7 @@ This document identifies places in the codebase where reusable components should
 - Line 709: `alert('Billing information saved!')`
 - Line 712: `alert(...)` - Error message
 
-#### Refactor to:
+#### Refactor to: Alert Dialogs
 
 ```typescript
 import { alertError, alertSuccess, alertInfo } from '../../utils/confirm-dialog';
@@ -93,7 +89,7 @@ await alertInfo('Please log in to save settings.');
 **Status:** Refactored; uses `alertError` (or equivalent). Line numbers historical.
 **Historical:** Line 210 - `alert(...)` for send message error.
 
-#### Refactor to:
+#### Refactor to: Portal Messages
 
 ```typescript
 import { alertError } from '../../../utils/confirm-dialog';
@@ -105,7 +101,7 @@ await alertError(error instanceof Error ? error.message : 'Failed to send messag
 **Status:** Refactored; uses `alertError` (or equivalent). Line numbers historical.
 **Historical:** Line 222 - `alert('Failed to download invoice...')`.
 
-#### Refactor to:
+#### Refactor to: Portal Invoices
 
 ```typescript
 import { alertError } from '../../../utils/confirm-dialog';
@@ -116,14 +112,7 @@ await alertError('Failed to download invoice. Please try again.');
 
 **Current:** Line 489 - `alert('Developer tools detected. Some features may be limited.')`
 
-#### Refactor to:
-
-```typescript
-import { alertWarning } from '../utils/confirm-dialog';
-await alertWarning('Developer tools detected. Some features may be limited.');
-```
-
----
+#### Refactor to: Code Protection Service
 
 ## 2. Prompt Dialogs → Use `ModalComponent` with Form Inputs
 
@@ -140,7 +129,7 @@ await alertWarning('Developer tools detected. Some features may be limited.');
 
 **Current:** Using native `prompt()` (3 instances)
 
-#### Locations:
+#### Prompt Dialog Locations:
 
 - Line 1315: `prompt('Enter line item description:', 'Web Development Services')`
 - Line 1318: `prompt('Enter amount ($):', '1000')`
@@ -148,7 +137,7 @@ await alertWarning('Developer tools detected. Some features may be limited.');
 - Line 1382: `prompt('Enter milestone description (optional):', '')`
 - Line 1383: `prompt('Enter due date (YYYY-MM-DD):', ...)`
 
-#### Refactor to:
+#### Refactor to: Admin Project Details
 
 ```typescript
 import { createModal } from '../../../components';
@@ -190,16 +179,12 @@ modal.on('submit', () => {
 
 #### `src/features/admin/admin-project-details.ts`
 
-**Current:** Using native `prompt()` (2 instances)
-
 #### Locations:
 
 - Line 1103: `prompt('Enter milestone title:')`
 - Line 1106: `prompt('Enter milestone description (optional):')`
 - Line 1107: `prompt('Enter due date (YYYY-MM-DD, optional):')`
 - Line 1276: `prompt('Enter line item description:', 'Web Development Services')`
-- Line 1279: `prompt('Enter amount ($):', '1000')`
-
 **Refactor to:** Same pattern as above using `ModalComponent`.
 
 ---
@@ -209,11 +194,6 @@ modal.on('submit', () => {
 ### Available Component
 
 **File:** `src/components/button-component.ts`
-
-- `ButtonComponent` - Reusable button with variants, states, accessibility
-- Factory: `createButton(props, mountTarget)`
-
-### Files to Refactor
 
 #### `src/utils/modal-dropdown.ts`
 
@@ -225,7 +205,7 @@ trigger.type = 'button';
 trigger.className = 'custom-dropdown-trigger';
 ```
 
-#### Refactor to:
+#### Refactor to: Table Dropdown
 
 ```typescript
 import { createButton } from '../components';
@@ -254,30 +234,22 @@ btn1.className = 'chat-option';
 btn1.textContent = '[1] Resume where I left off';
 ```
 
-#### Refactor to:
+#### Refactor to: Admin Dashboard Modal
 
 ```typescript
 import { createButton } from '../../components';
 
 const btn1 = await createButton({
   variant: 'secondary',
-  children: '[1] Resume where I left off',
-  ariaLabel: 'Resume where I left off',
-  onClick: () => handleResume()
-}, optionsEl);
-```
 
 #### `src/features/client/modules/portal-navigation.ts`
 
-**Current:** Line 364 - Manual button creation for navigation links
 
 **Refactor to:** Use `ButtonComponent` with appropriate variant.
 
 #### `src/features/client/terminal-intake-ui.ts`
 
 **Current:** Lines 256, 273, 368, 384 - Multiple manual button creations
-
-**Refactor to:** Use `ButtonComponent` for all button instances.
 
 ---
 
@@ -346,16 +318,12 @@ detailModal.on('close', () => { /* cleanup */ });
 - `showToastInfo(message, options)` - Info toasts
 - `showToastWarning(message, options)` - Warning toasts
 
-### Files to Refactor
-
 #### `src/features/client/client-portal.ts`
 
 **Current:** Line 1407 - Custom `showSuccessMessage()` method that creates DOM elements
 
 ```typescript
 private showSuccessMessage(message: string): void {
-  const successDiv = document.createElement('div');
-  successDiv.className = 'success-message';
   successDiv.textContent = message;
   successDiv.style.cssText = `...`;
   document.body.appendChild(successDiv);
@@ -398,7 +366,6 @@ showToastSuccess(message);
    - Better accessibility
    - Styled to match portal theme
 
-1. **Prompt dialogs** - Replace `prompt()` with `ModalComponent`
    - Better form validation
    - Consistent styling
    - Better mobile support
@@ -406,11 +373,6 @@ showToastSuccess(message);
 ### Medium Priority (Code Quality)
 
 1. **Button components** - Replace manual button creation
-   - Consistent button styling
-   - Built-in accessibility
-   - Easier maintenance
-
-1. **Modal components** - Replace manual modal handling
    - Lifecycle management
    - Built-in accessibility features
    - Consistent behavior
@@ -440,7 +402,6 @@ showToastSuccess(message);
 - [x] Replace all `prompt()` calls with `multiPromptDialog()` utility (2 files, 5 instances) - COMPLETE
 - [x] Add focus trap to detail modal in admin-dashboard.ts - COMPLETE January 30, 2026
 - [x] Replace custom success message DOM with `showToast()` (1 file, 5+ instances) - COMPLETE
-- [ ] Replace manual button creation with `ButtonComponent` (5 files, 10+ instances) - DEFERRED
 - [ ] Replace manual modal handling with `ModalComponent` (2 files, 3 instances) - DEFERRED
 - [x] Test all refactored components for accessibility - Ongoing
 - [x] Verify mobile responsiveness - Ongoing
@@ -450,8 +411,6 @@ showToastSuccess(message);
 
 ## Related Documentation
 
-- [Component System](../ARCHITECTURE.md#component-system)
-- [Modal Component](../../src/components/modal-component.ts)
 - [Button Component](../../src/components/button-component.ts)
 - [Toast Notifications](../../src/utils/toast-notifications.ts)
 - [Confirm Dialog](../../src/utils/confirm-dialog.ts)

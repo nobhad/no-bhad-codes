@@ -8,6 +8,8 @@
  * Provides error UI components with retry mechanisms.
  */
 
+import { SanitizationUtils } from './sanitization-utils';
+
 /**
  * Options for error state display
  */
@@ -25,11 +27,13 @@ export interface ErrorStateOptions {
  */
 export function getTableErrorRow(colspan: number, options: ErrorStateOptions): string {
   const { message, onRetry, retryLabel = 'Try Again', showIcon = true } = options;
+  const safeMessage = SanitizationUtils.escapeHtml(message);
+  const safeRetryLabel = SanitizationUtils.escapeHtml(retryLabel);
   const iconHtml = showIcon
     ? '<span class="error-icon" aria-hidden="true">⚠</span>'
     : '';
   const retryHtml = onRetry
-    ? `<button class="btn btn-sm btn-retry" type="button">${retryLabel}</button>`
+    ? `<button class="btn btn-sm btn-retry" type="button">${safeRetryLabel}</button>`
     : '';
 
   return `
@@ -37,7 +41,7 @@ export function getTableErrorRow(colspan: number, options: ErrorStateOptions): s
       <td colspan="${colspan}" class="error-row">
         <div class="error-state">
           ${iconHtml}
-          <span class="error-message">${message}</span>
+          <span class="error-message">${safeMessage}</span>
           ${retryHtml}
         </div>
       </td>
@@ -51,17 +55,19 @@ export function getTableErrorRow(colspan: number, options: ErrorStateOptions): s
  */
 export function getContainerErrorHTML(options: ErrorStateOptions): string {
   const { message, onRetry, retryLabel = 'Try Again', showIcon = true } = options;
+  const safeMessage = SanitizationUtils.escapeHtml(message);
+  const safeRetryLabel = SanitizationUtils.escapeHtml(retryLabel);
   const iconHtml = showIcon
     ? '<span class="error-icon error-icon--large" aria-hidden="true">⚠</span>'
     : '';
   const retryHtml = onRetry
-    ? `<button class="btn btn-sm btn-retry" type="button">${retryLabel}</button>`
+    ? `<button class="btn btn-sm btn-retry" type="button">${safeRetryLabel}</button>`
     : '';
 
   return `
     <div class="error-container" role="alert">
       ${iconHtml}
-      <p class="error-message">${message}</p>
+      <p class="error-message">${safeMessage}</p>
       ${retryHtml}
     </div>
   `;
@@ -72,7 +78,8 @@ export function getContainerErrorHTML(options: ErrorStateOptions): string {
  * @param message Error message
  */
 export function getInlineErrorHTML(message: string): string {
-  return `<span class="error-inline" role="alert">${message}</span>`;
+  const safeMessage = SanitizationUtils.escapeHtml(message);
+  return `<span class="error-inline" role="alert">${safeMessage}</span>`;
 }
 
 /**
@@ -125,12 +132,13 @@ export function showContainerError(
  * @param duration Duration in ms before auto-hide (0 = no auto-hide)
  */
 export function createErrorNotification(message: string, duration: number = 5000): HTMLElement {
+  const safeMessage = SanitizationUtils.escapeHtml(message);
   const notification = document.createElement('div');
   notification.className = 'error-notification';
   notification.setAttribute('role', 'alert');
   notification.innerHTML = `
     <span class="error-icon" aria-hidden="true">⚠</span>
-    <span class="error-message">${message}</span>
+    <span class="error-message">${safeMessage}</span>
     <button class="error-dismiss" type="button" aria-label="Dismiss">×</button>
   `;
 

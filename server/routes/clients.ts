@@ -1,3 +1,4 @@
+import { logger } from '../services/logger.js';
 /**
  * ===============================================
  * CLIENT ROUTES
@@ -772,7 +773,7 @@ router.post(
         timeline: 'New Client'
       });
     } catch (emailError) {
-      console.error('Failed to send welcome email:', emailError);
+      await logger.error('Failed to send welcome email:', { error: emailError instanceof Error ? emailError : undefined, category: 'CLIENTS' });
       // Continue with response - don't fail client creation due to email issues
     }
 
@@ -1005,7 +1006,7 @@ No Bhad Codes Team
 
       sendSuccess(res, { clientId, email: clientEmail }, 'Invitation sent successfully');
     } catch (emailError) {
-      console.error('[Clients] Failed to send invitation email:', emailError);
+      await logger.error('[Clients] Failed to send invitation email:', { error: emailError instanceof Error ? emailError : undefined, category: 'CLIENTS' });
       errorResponse(res, 'Failed to send invitation email', 500, 'EMAIL_FAILED');
     }
   })

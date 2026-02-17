@@ -1,3 +1,4 @@
+import { logger } from '../services/logger.js';
 /**
  * ===============================================
  * EMAIL TEMPLATE ROUTES
@@ -351,8 +352,8 @@ router.post(
     );
 
     // In production, this would call the email service to send
-    console.log(`[EmailTemplates] Test email sent to ${to_email}`);
-    console.log(`Subject: ${preview.subject}`);
+    await logger.info(`[EmailTemplates] Test email sent to ${to_email}`, { category: 'EMAIL' });
+    await logger.info(`Subject: ${preview.subject}`, { category: 'EMAIL' });
 
     sendSuccess(res, { preview }, `Test email sent to ${to_email}`);
   })

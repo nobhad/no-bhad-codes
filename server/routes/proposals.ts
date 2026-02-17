@@ -1,3 +1,4 @@
+import { logger } from '../services/logger.js';
 /**
  * ===============================================
  * PROPOSAL ROUTES
@@ -239,6 +240,7 @@ router.post(
     });
 
     console.log(`[Proposals] Created proposal request ${result} for project ${submission.projectId}`);
+  await logger.info(`[Proposals] Created proposal request ${result} for project ${submission.projectId}`, { category: 'PROPOSALS' });
 
     // Emit workflow event for proposal creation
     await workflowTriggerService.emit('proposal.created', {
@@ -492,6 +494,7 @@ router.put(
     );
 
     console.log(`[Proposals] Updated proposal ${id} - status: ${status || 'unchanged'}`);
+  await logger.info(`[Proposals] Updated proposal ${id} - status: ${status || 'unchanged'}`, { category: 'PROPOSALS' });
 
     // Emit workflow events for status changes
     if (status === 'accepted') {
@@ -593,6 +596,7 @@ router.post(
     });
 
     console.log(`[Proposals] Converted proposal ${id} to invoice ${invoiceNumber}`);
+  await logger.info(`[Proposals] Converted proposal ${id} to invoice ${invoiceNumber}`, { category: 'PROPOSALS' });
 
     sendSuccess(res, { invoiceId, invoiceNumber }, 'Proposal converted to invoice');
   })
@@ -1031,7 +1035,7 @@ router.get(
           const sigY = sigBoxY - sigBoxHeight / 2 - sigHeight / 2 + 10;
           page().drawImage(sigImage, { x: sigX, y: sigY, width: sigWidth, height: sigHeight });
         } catch (sigError) {
-          console.error('[PDF] Failed to embed signature image:', sigError);
+          await logger.error('[PDF] Failed to embed signature image:', { error: sigError instanceof Error ? sigError : undefined, category: 'PROPOSALS' });
         }
       } else if (signature.signature_data && signature.signature_method === 'typed') {
         // Typed signature - render as stylized text

@@ -696,3 +696,13 @@ function setupAttachmentListeners(): void {
     });
   }
 }
+
+/**
+ * Cleanup function to be called when leaving the messages view
+ * Clears pending attachments to prevent memory leaks
+ */
+export function cleanupMessages(): void {
+  pendingAttachments = [];
+  cachedThreads = [];
+  currentThreadId = null;
+}

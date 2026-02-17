@@ -20,7 +20,8 @@ interface LoggingRequest extends Request {
 }
 
 /**
- * Sanitize request body by removing sensitive fields
+ * Sanitize request body/headers by removing sensitive fields
+ * Uses case-insensitive matching for HTTP headers
  */
 function sanitizeRequestData(data: any): any {
   if (!data || typeof data !== 'object') return data;
@@ -36,14 +37,20 @@ function sanitizeRequestData(data: any): any {
     'credit_card',
     'ssn',
     'cvv',
-    'pin'
+    'pin',
+    'cookie',
+    'set-cookie',
+    'x-api-key',
+    'x-auth-token',
+    'x-access-token'
   ];
 
   const sanitized = { ...data };
+  const sensitiveSet = new Set(sensitiveFields.map(f => f.toLowerCase()));
 
-  for (const field of sensitiveFields) {
-    if (field in sanitized) {
-      sanitized[field] = '[REDACTED]';
+  for (const key of Object.keys(sanitized)) {
+    if (sensitiveSet.has(key.toLowerCase())) {
+      sanitized[key] = '[REDACTED]';
     }
   }
 

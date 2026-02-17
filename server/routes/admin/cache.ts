@@ -4,6 +4,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { cacheService } from '../../services/cache-service.js';
 import { errorTracker } from '../../services/error-tracking.js';
 import { errorResponse } from '../../utils/api-response.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router.get(
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Error getting cache stats:', error);
+      logger.error('Error getting cache stats:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to retrieve cache statistics', 500, 'CACHE_STATS_ERROR');
     }
   })
@@ -78,7 +79,7 @@ router.post(
         errorResponse(res, 'Failed to clear cache', 500, 'CACHE_CLEAR_FAILED');
       }
     } catch (error) {
-      console.error('Error clearing cache:', error);
+      logger.error('Error clearing cache:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to clear cache', 500, 'CACHE_CLEAR_ERROR');
     }
   })
@@ -147,7 +148,7 @@ router.post(
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Error invalidating cache:', error);
+      logger.error('Error invalidating cache:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to invalidate cache', 500, 'CACHE_INVALIDATE_ERROR');
     }
   })

@@ -1,3 +1,4 @@
+import { logger } from '../services/logger.js';
 /**
  * ===============================================
  * AD HOC REQUEST ROUTES
@@ -576,7 +577,7 @@ router.put(
         }
       } catch (invoiceError) {
         // Log error but don't fail the request update
-        console.error('[AdHocRequests] Auto-invoice creation failed:', invoiceError);
+         await logger.error('[AdHocRequests] Auto-invoice creation failed:', { error: invoiceError instanceof Error ? invoiceError : undefined, category: 'AD_HOC' });
       }
     }
 
