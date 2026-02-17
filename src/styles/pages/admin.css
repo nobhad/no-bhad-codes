@@ -619,7 +619,8 @@ body[data-page="admin"] .project-detail-overview {
 }
 
 .admin-table .loading-row,
-.admin-table .empty-row {
+.admin-table .empty-row,
+.admin-table .error-row {
   text-align: center;
   color: var(--color-text-secondary);
   font-style: italic;

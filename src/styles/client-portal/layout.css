@@ -126,9 +126,9 @@ body[data-page="client-portal"] {
     margin: 0 !important;
   }
 
-  body[data-active-tab="messages"] .messages-page-layout,
-  body.messages-tab-active .messages-page-layout {
-    gap: var(--space-2);
+  body[data-active-tab="messages"] .messages-layout,
+  body.messages-tab-active .messages-layout {
+    gap: 0;
   }
 
   /* Messages container spacing on mobile */

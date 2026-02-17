@@ -562,7 +562,7 @@
     max-height: calc(100dvh - 200px);
   }
 
-  .messages-page-layout {
+  .messages-layout {
     height: calc(100vh - 150px);
     height: calc(100dvh - 150px);
   }

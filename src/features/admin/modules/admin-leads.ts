@@ -42,6 +42,7 @@ import {
   type PaginationConfig
 } from '../../../utils/table-pagination';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
+import { showTableError } from '../../../utils/error-utils';
 import { exportToCsv, LEADS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { createViewToggle } from '../../../components/view-toggle';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
@@ -177,14 +178,14 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
       console.error('[AdminLeads] API error:', response.status, errorText);
       const errorTableBody = getElement('leads-table-body');
       if (errorTableBody) {
-        errorTableBody.innerHTML = `<tr><td colspan="7" class="loading-row">Error loading leads: ${response.status}</td></tr>`;
+        showTableError(errorTableBody, 7, `Error loading leads: ${response.status}`, () => loadLeads(ctx));
       }
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to load leads:', error);
     const catchTableBody = getElement('leads-table-body');
     if (catchTableBody) {
-      catchTableBody.innerHTML = '<tr><td colspan="7" class="loading-row">Network error loading leads</td></tr>';
+      showTableError(catchTableBody, 7, 'Network error loading leads', () => loadLeads(ctx));
     }
   }
 }
