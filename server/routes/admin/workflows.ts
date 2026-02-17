@@ -4,6 +4,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { getSchedulerService } from '../../services/scheduler-service.js';
 import { backfillMilestones } from '../../services/milestone-generator.js';
 import { backfillMilestoneTasks } from '../../services/task-generator.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -42,7 +43,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
-    console.log('[Admin] Starting milestone backfill...');
+    logger.info('[Admin] Starting milestone backfill...');
 
     const result = await backfillMilestones();
 
@@ -70,7 +71,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
-    console.log('[Admin] Starting task backfill...');
+    logger.info('[Admin] Starting task backfill...');
 
     const result = await backfillMilestoneTasks();
 

@@ -9,6 +9,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { logger } from '../services/logger.js';
 
 /**
  * Sanitize a string to prevent XSS attacks
@@ -128,7 +129,7 @@ export function sanitizeInputs(
 
       next();
     } catch (error) {
-      console.error('Sanitization middleware error:', error);
+      logger.error('Sanitization middleware error', { error: error instanceof Error ? error : undefined });
       // Don't block the request on sanitization error, but log it
       next();
     }

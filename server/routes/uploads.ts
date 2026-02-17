@@ -1,3 +1,4 @@
+import { logger } from '../services/logger.js';
 /**
  * ===============================================
  * FILE UPLOAD ROUTES
@@ -107,6 +108,40 @@ const storage = multer.diskStorage({
   }
 });
 
+// MIME type to extension mapping for validation
+// Ensures the claimed MIME type matches allowed extensions
+const MIME_TO_EXTENSIONS: Record<string, string[]> = {
+  // Images
+  'image/jpeg': ['jpg', 'jpeg'],
+  'image/png': ['png'],
+  'image/gif': ['gif'],
+  'image/webp': ['webp'],
+  'image/svg+xml': ['svg'],
+  // Documents
+  'application/pdf': ['pdf'],
+  'application/msword': ['doc'],
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
+  'text/plain': ['txt', 'md'],
+  'application/rtf': ['rtf'],
+  // Spreadsheets
+  'application/vnd.ms-excel': ['xls'],
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
+  'text/csv': ['csv'],
+  // Presentations
+  'application/vnd.ms-powerpoint': ['ppt'],
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['pptx'],
+  // Archives
+  'application/zip': ['zip'],
+  'application/x-rar-compressed': ['rar'],
+  'application/x-tar': ['tar'],
+  'application/gzip': ['gz'],
+  'application/x-7z-compressed': ['7z'],
+  // Data
+  'application/json': ['json'],
+  'text/xml': ['xml'],
+  'application/xml': ['xml']
+};
+
 // File filter for security
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   // Define allowed file types
@@ -122,13 +157,25 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
   };
 
   const fileName = file.originalname.toLowerCase();
+  const fileExt = extname(fileName).slice(1); // Remove the leading dot
   const isAllowed = Object.values(allowedTypes).some((regex) => regex.test(fileName));
 
-  if (isAllowed) {
-    cb(null, true);
-  } else {
-    cb(new Error(`File type not allowed: ${extname(file.originalname)}`));
+  if (!isAllowed) {
+    return cb(new Error(`File type not allowed: ${extname(file.originalname)}`));
   }
+
+  // SECURITY: Verify MIME type matches the extension
+  // This prevents attacks where a malicious file is renamed to an allowed extension
+  const allowedExtensions = MIME_TO_EXTENSIONS[file.mimetype];
+  if (!allowedExtensions) {
+    return cb(new Error(`Unsupported MIME type: ${file.mimetype}`));
+  }
+
+  if (!allowedExtensions.includes(fileExt)) {
+    return cb(new Error(`MIME type ${file.mimetype} does not match extension .${fileExt}`));
+  }
+
+  cb(null, true);
 };
 
 // Configure multer with limits and validation
@@ -327,7 +374,7 @@ router.post(
           [avatarInfo.url, req.user.id]
         );
       } catch (dbError) {
-        console.error('Failed to update avatar in database:', dbError);
+        await logger.error('Failed to update avatar in database:', { error: dbError instanceof Error ? dbError : undefined, category: 'UPLOAD' });
         // Non-blocking - file is already uploaded
       }
     }
@@ -408,7 +455,7 @@ router.post(
       );
       fileId = result.lastID;
     } catch (dbError) {
-      console.error('Failed to save file info to database:', dbError);
+      await logger.error('Failed to save file info to database:', { error: dbError instanceof Error ? dbError : undefined, category: 'UPLOAD' });
       // Non-blocking - file is already uploaded
     }
 
@@ -470,7 +517,7 @@ router.get(
         }))
       });
     } catch (dbError) {
-      console.error('Failed to fetch files:', dbError);
+      await logger.error('Failed to fetch files:', { error: dbError instanceof Error ? dbError : undefined, category: 'UPLOAD' });
       return errorResponse(res, 'Failed to fetch files', 500, 'DB_ERROR');
     }
   })
@@ -639,7 +686,7 @@ router.get(
       // Validate path to prevent path traversal attacks
       const filePathStr = getString(file, 'file_path');
       if (!isPathSafe(filePathStr)) {
-        console.error('Path traversal attempt detected:', filePathStr);
+        await logger.error('Path traversal attempt detected:', { error: new Error('Path traversal'), category: 'UPLOAD', metadata: { filePath: filePathStr } });
         return errorResponse(res, 'Invalid file path', 403, 'PATH_TRAVERSAL_DETECTED');
       }
 
@@ -740,12 +787,12 @@ router.delete(
           await fs.unlink(filePath);
         }
       } else {
-        console.error('Path traversal attempt detected during delete:', file.file_path);
+        await logger.error('Path traversal attempt detected during delete:', { error: new Error('Path traversal'), category: 'UPLOAD', metadata: { filePath: file.file_path } });
       }
 
       sendSuccess(res, undefined, 'File deleted successfully');
     } catch (dbError) {
-      console.error('Failed to delete file:', dbError);
+      await logger.error('Failed to delete file:', { error: dbError instanceof Error ? dbError : undefined, category: 'UPLOAD' });
       return errorResponse(res, 'Failed to delete file', 500, 'DB_ERROR');
     }
   })

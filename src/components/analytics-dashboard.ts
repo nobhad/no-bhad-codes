@@ -43,7 +43,7 @@ export class AnalyticsDashboard extends BaseComponent<
   AnalyticsDashboardState
 > {
   private trackingService: VisitorTrackingService | null = null;
-  private updateTimer: any = null;
+  private updateTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(props: AnalyticsDashboardProps) {
     const initialState: AnalyticsDashboardState = {

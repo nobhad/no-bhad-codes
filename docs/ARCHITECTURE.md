@@ -127,6 +127,14 @@ no-bhad-codes/
 │   │   │   └── code-protection-service.ts
 │   │   │
 │   │   ├── 🎨 COMPONENTS (UI Building Blocks — src/components/)
+│   │   │   ├── index.ts                # Central registry (now modular)
+│   │   │   ├── ui-components.ts        # UI primitives (buttons, modals, headers)
+│   │   │   ├── dashboard-components.ts # Dashboard widgets (stats, activity, charts)
+│   │   │   ├── form-components.ts      # Forms, inputs, validation
+│   │   │   ├── table-components.ts     # Tables, lists, data views
+│   │   │   ├── portal-components.ts    # Portal-specific UI
+│   │   │   ├── state-components.ts     # Stateful components
+│   │   │   ├── utility-components.ts   # Utility and helper components
 │   │   │   ├── base-component.ts, modal-component.ts
 │   │   │   ├── page-header.ts, page-title.ts, breadcrumbs.ts
 │   │   │   ├── tab-router.ts, search-bar.ts, empty-state.ts
@@ -162,6 +170,10 @@ no-bhad-codes/
 │   │   ├── notification-preferences-service.ts
 │   │   └── logger.ts                 # Logging infrastructure
 │   ├── database/                     # SQLite, migrations, init, query-helpers.ts
+│   │   ├── migrations/               # Migration scripts
+│   │   │   ├── 089_additional_performance_indexes.sql  # Index creation (2024)
+│   │   │   └── ...
+│   │   └── ...
 │   ├── middleware/                   # auth, sanitization, audit, etc.
 │   ├── config/                       # Swagger, environment
 │   └── templates/                    # Email templates
@@ -187,6 +199,45 @@ no-bhad-codes/
 ---
 
 ## 🏗️ CORE ARCHITECTURE
+
+### 4. Component Registry Refactor (2024)
+
+#### Modular Export Structure
+
+The central component registry (`src/components/index.ts`) was split into logical group files for maintainability:
+
+- `ui-components.ts`: UI primitives (buttons, modals, headers)
+- `dashboard-components.ts`: Dashboard widgets (stats, activity, charts)
+- `form-components.ts`: Forms, inputs, validation
+- `table-components.ts`: Tables, lists, data views
+- `portal-components.ts`: Portal-specific UI
+- `state-components.ts`: Stateful components
+- `utility-components.ts`: Utility and helper components
+
+Each group file exports related components, and `index.ts` re-exports from these. This reduces file size and improves discoverability.
+
+**Example:**
+
+```typescript
+// src/components/index.ts
+export * from './ui-components';
+export * from './dashboard-components';
+export * from './form-components';
+export * from './table-components';
+export * from './portal-components';
+export * from './state-components';
+export * from './utility-components';
+```
+
+---
+
+### 5. Database Migration Fixes
+
+#### Migration Error Resolution
+
+Migration script `089_additional_performance_indexes.sql` attempted to create indexes for tables that did not exist (`client_onboarding_progress`, `email_log`). These index creation statements were commented out to allow migrations to succeed. Ensure migration scripts match the current schema to avoid errors.
+
+---
 
 ### 1. Application Bootstrap (`src/main.ts`)
 

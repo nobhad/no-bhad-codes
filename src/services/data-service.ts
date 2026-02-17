@@ -9,6 +9,9 @@
  */
 
 import { BaseService } from './base-service';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('DataService');
 
 export interface Project {
   id: string;
@@ -107,7 +110,7 @@ export class DataService extends BaseService {
       // Clear cache when new data is loaded
       this.cache.clear();
     } catch (error) {
-      this.warn('Failed to load portfolio data, using fallback:', error);
+      logger.error('Failed to load portfolio data, using fallback', error);
       this.data = this.getFallbackData();
     }
   }
@@ -149,6 +152,7 @@ export class DataService extends BaseService {
    */
   getProjects(): Project[] {
     if (!this.data) {
+      logger.error('Data not loaded. Call init() first.');
       throw new Error('Data not loaded. Call init() first.');
     }
     return this.data.projects;
@@ -199,6 +203,7 @@ export class DataService extends BaseService {
    */
   getCategories(): Category[] {
     if (!this.data) {
+      logger.error('Data not loaded. Call init() first.');
       throw new Error('Data not loaded. Call init() first.');
     }
     return this.data.categories;
@@ -226,6 +231,7 @@ export class DataService extends BaseService {
    */
   getNavigation(): { main: NavigationItem[] } {
     if (!this.data) {
+      logger.error('Data not loaded. Call init() first.');
       throw new Error('Data not loaded. Call init() first.');
     }
     return this.data.navigation;
@@ -236,6 +242,7 @@ export class DataService extends BaseService {
    */
   getProfile(): Profile {
     if (!this.data) {
+      logger.error('Data not loaded. Call init() first.');
       throw new Error('Data not loaded. Call init() first.');
     }
     return this.data.profile;
@@ -246,6 +253,7 @@ export class DataService extends BaseService {
    */
   getContactData(): ContactData {
     if (!this.data) {
+      logger.error('Data not loaded. Call init() first.');
       throw new Error('Data not loaded. Call init() first.');
     }
     return this.data.contact;

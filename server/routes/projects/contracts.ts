@@ -22,6 +22,7 @@ import {
 import { errorResponse } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -589,14 +590,14 @@ ${BUSINESS_INFO.email}
       `.trim()
     });
 
-    console.log(`[CONTRACT] Signature request sent for project ${projectId} to ${clientEmail}`);
+    logger.info(`[CONTRACT] Signature request sent for project ${projectId} to ${clientEmail}`);
 
     // Schedule contract reminders
     try {
       const scheduler = getSchedulerService();
       await scheduler.scheduleContractReminders(projectId);
     } catch (reminderError) {
-      console.error('[CONTRACT] Failed to schedule contract reminders:', reminderError);
+      logger.error('[CONTRACT] Failed to schedule contract reminders:', { error: reminderError instanceof Error ? reminderError : undefined });
       // Continue - don't fail the request if reminder scheduling fails
     }
 
@@ -868,7 +869,7 @@ ${BUSINESS_INFO.email}
       html: `<p>Contract signed for <strong>"${projectName}"</strong> by ${signerName} (${clientEmail}) from IP ${signerIp} at ${new Date(signedAt).toLocaleString()}.</p>`
     });
 
-    console.log(`[CONTRACT] Contract signed for project ${projectId} by ${signerName}`);
+    logger.info(`[CONTRACT] Contract signed for project ${projectId} by ${signerName}`);
 
     // Emit contract.signed event for workflow automations
     await workflowTriggerService.emit('contract.signed', {
@@ -884,7 +885,7 @@ ${BUSINESS_INFO.email}
       const scheduler = getSchedulerService();
       await scheduler.cancelContractReminders(projectId);
     } catch (reminderError) {
-      console.error('[CONTRACT] Failed to cancel contract reminders:', reminderError);
+      logger.error('[CONTRACT] Failed to cancel contract reminders:', { error: reminderError instanceof Error ? reminderError : undefined });
       // Continue - don't fail the signing if reminder cancellation fails
     }
 

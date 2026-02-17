@@ -1,3 +1,4 @@
+import { logger } from '../services/logger.js';
 /**
  * ===============================================
  * INTEGRATIONS API ROUTES
@@ -56,7 +57,7 @@ const router = Router();
 const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>) =>
   (req: Request, res: Response) => {
     Promise.resolve(fn(req, res)).catch((error) => {
-      console.error('Integration route error:', error);
+      logger.error('Integration route error:', { error, category: 'INTEGRATION' });
       errorResponse(res, error.message || 'Internal server error', 500, 'INTERNAL_ERROR');
     });
   };

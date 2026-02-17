@@ -372,14 +372,13 @@ function renderPipelineView(ctx: AdminDashboardContext): void {
  * Convert lead to Kanban item
  */
 function leadToKanbanItem(lead: Lead): KanbanItem {
-  const leadAny = lead as unknown as Record<string, string | number>;
   return {
     id: lead.id,
     title: SanitizationUtils.decodeHtmlEntities(lead.contact_name || 'Unknown'),
     subtitle: lead.company_name ? SanitizationUtils.decodeHtmlEntities(lead.company_name) : undefined,
     metadata: {
       email: lead.email,
-      budget: leadAny.budget_range,
+      budget: lead.budget_range,
       source: lead.source || 'Website',
       score: calculateLeadScore(lead),
       createdAt: lead.created_at,
@@ -1993,4 +1992,3 @@ export function renderLeadsTab(container: HTMLElement): void {
     </div>
   `;
 }
-

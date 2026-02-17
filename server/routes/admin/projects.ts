@@ -9,6 +9,7 @@ import { errorTracker } from '../../services/error-tracking.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
 import { userService } from '../../services/user-service.js';
 import { errorResponse } from '../../utils/api-response.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -80,7 +81,7 @@ router.post(
           email: newClient.email.toLowerCase()
         };
 
-        console.log(`[AdminProjects] Created new client: ${finalClientId}`);
+        logger.info(`[AdminProjects] Created new client: ${finalClientId}`);
       } else {
         // Validate existing client
         const client = await db.get(
@@ -111,7 +112,7 @@ router.post(
       );
       const projectId = projectResult.lastID!;
 
-      console.log(`[AdminProjects] Created project: ${projectId} - ${projectName}`);
+      logger.info(`[AdminProjects] Created project: ${projectId} - ${projectName}`);
 
       // Save project data as JSON file (like intake form)
       try {
@@ -126,7 +127,7 @@ router.post(
           notes: notes || null
         }, projectId, projectName);
       } catch (fileError) {
-        console.error('[AdminProjects] Failed to save project file:', fileError);
+        logger.error('[AdminProjects] Failed to save project file:', { error: fileError instanceof Error ? fileError : undefined });
         // Non-critical error - don't fail the whole request
       }
 
@@ -147,9 +148,9 @@ router.post(
       // Generate default milestones and tasks for the new project
       try {
         const generationResult = await generateDefaultMilestones(projectId, projectType);
-        console.log(`[AdminProjects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${projectId}`);
+        logger.info(`[AdminProjects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${projectId}`);
       } catch (milestoneError) {
-        console.error('[AdminProjects] Failed to generate milestones:', milestoneError);
+        logger.error('[AdminProjects] Failed to generate milestones:', { error: milestoneError instanceof Error ? milestoneError : undefined });
         // Non-critical - don't fail the request
       }
 
@@ -168,7 +169,7 @@ router.post(
         clientId: finalClientId
       });
     } catch (error) {
-      console.error('[AdminProjects] Error creating project:', error);
+      logger.error('[AdminProjects] Error creating project:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to create project', 500, 'INTERNAL_ERROR');
     }
   })
@@ -275,7 +276,7 @@ async function saveAdminProjectAsFile(
     ]
   );
 
-  console.log(`[AdminProjects] Saved project file: ${relativePath}`);
+  logger.info(`[AdminProjects] Saved project file: ${relativePath}`);
 }
 
 export default router;

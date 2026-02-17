@@ -8,6 +8,7 @@ import { deliverableService } from '../services/deliverable-service.js';
 import { fileService } from '../services/file-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
+import { logger } from '../services/logger.js';
 
 const router = Router();
 
@@ -45,6 +46,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     sendCreated(res, { deliverable });
   } catch (error) {
+    logger.error('[Deliverables] Failed to create deliverable', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to create deliverable', 500);
   }
 });
@@ -64,6 +66,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
     sendSuccess(res, { deliverable });
   } catch (error) {
+    logger.error('[Deliverables] Failed to retrieve deliverable', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to retrieve deliverable', 500);
   }
 });
@@ -86,6 +89,7 @@ router.get('/projects/:projectId/list', async (req: Request, res: Response) => {
 
     sendSuccess(res, { deliverables: result.deliverables, pagination: { total: result.total } });
   } catch (error) {
+    logger.error('[Deliverables] Failed to list deliverables', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to list deliverables', 500);
   }
 });
@@ -103,6 +107,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404);
     }
+    logger.error('[Deliverables] Failed to update deliverable', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to update deliverable', 500);
   }
 });
@@ -158,7 +163,7 @@ router.post('/:id/lock', async (req: Request, res: Response) => {
         });
       } catch (archiveError) {
         // Log but don't fail the lock operation if archiving fails
-        console.error('[Deliverables] Failed to archive deliverable file:', archiveError);
+        logger.error('[Deliverables] Failed to archive deliverable file', { error: archiveError instanceof Error ? archiveError : new Error(String(archiveError)), category: 'DELIVERABLE' });
       }
     }
 
@@ -178,6 +183,7 @@ router.post('/:id/lock', async (req: Request, res: Response) => {
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404);
     }
+    logger.error('[Deliverables] Failed to lock deliverable', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to lock deliverable', 500);
   }
 });
@@ -209,6 +215,7 @@ router.post('/:id/revision', async (req: Request, res: Response) => {
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404);
     }
+    logger.error('[Deliverables] Failed to request revision', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to request revision', 500);
   }
 });
@@ -223,6 +230,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     await deliverableService.deleteDeliverable(parseInt(id));
     sendSuccess(res, undefined, 'Deliverable archived');
   } catch (error) {
+    logger.error('[Deliverables] Failed to delete deliverable', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to delete deliverable', 500);
   }
 });
@@ -257,6 +265,7 @@ router.post('/:id/versions', async (req: Request, res: Response) => {
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404);
     }
+    logger.error('[Deliverables] Failed to upload version', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to upload version', 500);
   }
 });
@@ -271,6 +280,7 @@ router.get('/:id/versions', async (req: Request, res: Response) => {
     const versions = await deliverableService.getDeliverableVersions(parseInt(id));
     sendSuccess(res, { versions });
   } catch (error) {
+    logger.error('[Deliverables] Failed to list versions', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to list versions', 500);
   }
 });
@@ -290,6 +300,7 @@ router.get('/:id/versions/latest', async (req: Request, res: Response) => {
 
     sendSuccess(res, { version });
   } catch (error) {
+    logger.error('[Deliverables] Failed to retrieve latest version', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to retrieve latest version', 500);
   }
 });
@@ -321,6 +332,7 @@ router.post('/:id/comments', async (req: Request, res: Response) => {
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404);
     }
+    logger.error('[Deliverables] Failed to add comment', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to add comment', 500);
   }
 });
@@ -341,6 +353,7 @@ router.get('/:id/comments', async (req: Request, res: Response) => {
 
     sendSuccess(res, { comments });
   } catch (error) {
+    logger.error('[Deliverables] Failed to list comments', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to list comments', 500);
   }
 });
@@ -358,6 +371,7 @@ router.patch('/:deliverableId/comments/:commentId/resolve', async (req: Request,
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Comment not found', 404);
     }
+    logger.error('[Deliverables] Failed to resolve comment', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to resolve comment', 500);
   }
 });
@@ -372,6 +386,7 @@ router.delete('/:deliverableId/comments/:commentId', async (req: Request, res: R
     await deliverableService.deleteComment(parseInt(commentId));
     sendSuccess(res, undefined, 'Comment deleted');
   } catch (error) {
+    logger.error('[Deliverables] Failed to delete comment', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to delete comment', 500);
   }
 });
@@ -397,6 +412,7 @@ router.post('/:id/elements', async (req: Request, res: Response) => {
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404);
     }
+    logger.error('[Deliverables] Failed to create design element', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to create design element', 500);
   }
 });
@@ -411,6 +427,7 @@ router.get('/:id/elements', async (req: Request, res: Response) => {
     const elements = await deliverableService.getDeliverableElements(parseInt(id));
     sendSuccess(res, { elements });
   } catch (error) {
+    logger.error('[Deliverables] Failed to list design elements', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to list design elements', 500);
   }
 });
@@ -434,6 +451,7 @@ router.patch('/:deliverableId/elements/:elementId/approval', async (req: Request
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Design element not found', 404);
     }
+    logger.error('[Deliverables] Failed to update element approval status', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to update element approval status', 500);
   }
 });
@@ -466,6 +484,7 @@ router.post('/:id/reviews', async (req: Request, res: Response) => {
     if (error.message.includes('not found')) {
       return errorResponse(res, 'Deliverable not found', 404);
     }
+    logger.error('[Deliverables] Failed to create review', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to create review', 500);
   }
 });
@@ -480,6 +499,7 @@ router.get('/:id/reviews', async (req: Request, res: Response) => {
     const reviews = await deliverableService.getDeliverableReviews(parseInt(id));
     sendSuccess(res, { reviews });
   } catch (error) {
+    logger.error('[Deliverables] Failed to list reviews', { error: error instanceof Error ? error : new Error(String(error)), category: 'DELIVERABLE' });
     errorResponse(res, 'Failed to list reviews', 500);
   }
 });

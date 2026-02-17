@@ -12,6 +12,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseDeposit, toSnakeCaseInvoice } from './helpers.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -58,7 +59,7 @@ router.post(
         invoice: toSnakeCaseInvoice(invoice)
       });
     } catch (error: unknown) {
-      console.error('[Invoices] Error creating deposit invoice:', error);
+      logger.error('[Invoices] Error creating deposit invoice:', { error: error instanceof Error ? error : undefined });
       errorResponseWithPayload(res, 'Failed to create deposit invoice', 500, 'CREATION_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
       });

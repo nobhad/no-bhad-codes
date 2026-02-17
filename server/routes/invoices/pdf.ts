@@ -23,6 +23,7 @@ import {
   addPageNumbers,
   PAGE_MARGINS
 } from '../../utils/pdf-utils.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -477,7 +478,7 @@ router.post(
         disposition: 'inline'
       });
     } catch (error) {
-      console.error('[Invoices] Preview PDF generation error:', error);
+      logger.error('[Invoices] Preview PDF generation error:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to generate preview', 500, 'PDF_GENERATION_FAILED');
     }
   })

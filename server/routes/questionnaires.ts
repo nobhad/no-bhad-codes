@@ -1,3 +1,4 @@
+import { logger } from '../services/logger.js';
 /**
  * ===============================================
  * QUESTIONNAIRE ROUTES
@@ -157,7 +158,7 @@ router.post(
         exportedFileId = await questionnaireService.saveQuestionnairePdfToFiles(responseId);
       } catch (pdfError) {
         // Log error but don't fail the submission
-        console.error(`[Questionnaire] Failed to generate PDF for response ${responseId}:`, pdfError);
+        await logger.error(`[Questionnaire] Failed to generate PDF for response ${responseId}:`, { error: pdfError instanceof Error ? pdfError : undefined, category: 'QUESTIONNAIRE', metadata: { responseId } });
       }
     }
 

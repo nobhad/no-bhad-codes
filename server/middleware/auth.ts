@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { COOKIE_CONFIG } from '../utils/auth-constants.js';
 import { errorResponse } from '../utils/api-response.js';
+import { logger } from '../services/logger.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -33,7 +34,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
 
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    console.error('JWT_SECRET not configured');
+    logger.error('JWT_SECRET not configured');
     return errorResponse(res, 'Server configuration error', 500, 'CONFIG_ERROR');
   }
 
@@ -52,7 +53,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
       return errorResponse(res, 'Invalid token', 403, 'TOKEN_INVALID');
     }
 
-    console.error('Token verification error:', error);
+    logger.error('Token verification error', { error: error instanceof Error ? error : undefined });
     return errorResponse(res, 'Token verification failed', 403, 'TOKEN_ERROR');
   }
 };

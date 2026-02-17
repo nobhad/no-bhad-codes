@@ -11,6 +11,7 @@
 import sqlite3 from 'sqlite3';
 import { dirname } from 'path';
 import fs from 'fs';
+import { logger } from '../services/logger.js';
 
 export interface DatabaseRow {
   [key: string]: unknown;
@@ -251,7 +252,7 @@ class DatabaseConnectionPool implements Database {
       try {
         await ctx.run('ROLLBACK');
       } catch (rollbackError) {
-        console.error('Rollback failed:', rollbackError);
+        logger.error('Rollback failed:', { error: rollbackError instanceof Error ? rollbackError : undefined });
       }
       throw error;
     } finally {
@@ -320,7 +321,7 @@ export async function initializeDatabase(): Promise<void> {
   const dataDir = dirname(dbPath);
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
-    console.log(`📁 Created data directory: ${dataDir}`);
+    logger.info(`Created data directory: ${dataDir}`);
   }
 
   try {
@@ -329,16 +330,16 @@ export async function initializeDatabase(): Promise<void> {
     // Test the connection by running a simple query
     await dbPool.get('SELECT 1');
 
-    console.log(`✅ Database connection pool initialized with ${maxConnections} max connections`);
-    console.log(`📊 Database path: ${dbPath}`);
+    logger.info(`Database connection pool initialized with ${maxConnections} max connections`);
+    logger.info(`Database path: ${dbPath}`);
 
     // Log connection stats
     const stats = dbPool.getConnectionStats();
-    console.log(
-      `📈 Pool stats: ${stats.activeConnections} active, ${stats.totalConnections} total`
+    logger.info(
+      `Pool stats: ${stats.activeConnections} active, ${stats.totalConnections} total`
     );
   } catch (error: any) {
-    console.error('❌ Failed to initialize database:', error.message);
+    logger.error('Failed to initialize database:', { error: error instanceof Error ? error : undefined });
     throw error;
   }
 }
@@ -353,13 +354,13 @@ export async function closeDatabase(): Promise<void> {
 
   try {
     const stats = dbPool.getConnectionStats();
-    console.log(`🔄 Closing database pool (${stats.totalConnections} connections)...`);
+    logger.info(`Closing database pool (${stats.totalConnections} connections)...`);
 
     await dbPool.close();
     dbPool = null;
-    console.log('✅ Database connection pool closed');
+    logger.info('Database connection pool closed');
   } catch (err) {
-    console.error('❌ Error closing database pool:', err);
+    logger.error('Error closing database pool:', { error: err instanceof Error ? err : undefined });
     throw err;
   }
 }

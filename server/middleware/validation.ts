@@ -187,7 +187,7 @@ export class ApiValidator {
         sanitizedValue = rule.customSanitizer(sanitizedValue);
       } catch (error) {
         // If sanitizer fails, log but don't fail validation
-        console.warn(`Custom sanitizer failed for ${field}:`, error);
+        logger.warn(`Custom sanitizer failed for ${field}`, { error: error instanceof Error ? error : undefined });
       }
     }
 

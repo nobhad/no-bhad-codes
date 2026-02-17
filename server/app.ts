@@ -11,6 +11,7 @@
 import { Sentry } from './instrument.js';
 
 import express from 'express';
+import { i18nMiddleware } from './middleware/i18n-middleware';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -53,7 +54,8 @@ import settingsRouter from './routes/settings.js';
 import receiptsRouter from './routes/receipts.js';
 import { errorResponseWithPayload } from './utils/api-response.js';
 import { setupSwagger } from './config/swagger.js';
-import { logger } from './middleware/logger.js';
+import { logger as requestLoggerMiddleware } from './middleware/logger.js';
+import { logger } from './services/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { requestIdMiddleware } from './middleware/request-id.js';
 import { sanitizeInputs } from './middleware/sanitization.js';
@@ -67,6 +69,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+app.use(i18nMiddleware);
 const PORT = process.env.PORT || 4001;
 
 // Initialize Sentry for error tracking
@@ -83,7 +86,7 @@ errorTracker.init({
 app.use(requestIdMiddleware);
 
 // Request logging and error tracking
-app.use(logger);
+app.use(requestLoggerMiddleware);
 
 // Security middleware
 app.use(
@@ -344,7 +347,7 @@ async function startServer() {
   try {
     // Initialize database
     await initializeDatabase();
-    console.log('✅ Database initialized');
+    logger.info('Database initialized');
 
     // Run database migrations
     const dbPath = process.env.DATABASE_PATH || './data/client_portal.db';
@@ -353,9 +356,9 @@ async function startServer() {
 
     try {
       await migrator.migrate();
-      console.log('✅ Database migrations complete');
+      logger.info('Database migrations complete');
     } catch (migrationError) {
-      console.error('❌ Migration failed:', migrationError);
+      logger.error('Migration failed:', { error: migrationError instanceof Error ? migrationError : undefined });
       throw migrationError;
     } finally {
       db.close();
@@ -376,10 +379,10 @@ async function startServer() {
 
     try {
       await emailService.init(emailConfig);
-      console.log('✅ Email service initialized');
+      logger.info('Email service initialized');
     } catch (emailError) {
-      console.warn('⚠️  Email service initialization failed:', emailError);
-      console.log('📧 Server will continue without email functionality');
+      logger.warn('Email service initialization failed:', { error: emailError instanceof Error ? emailError : undefined });
+      logger.info('Server will continue without email functionality');
     }
 
     // Initialize cache service (only if Redis is enabled)
@@ -395,13 +398,13 @@ async function startServer() {
 
       try {
         await cacheService.init(cacheConfig);
-        console.log('✅ Cache service initialized');
+        logger.info('Cache service initialized');
       } catch (cacheError) {
-        console.warn('⚠️  Cache service initialization failed:', cacheError);
-        console.log('🚀 Server will continue without caching functionality');
+        logger.warn('Cache service initialization failed:', { error: cacheError instanceof Error ? cacheError : undefined });
+        logger.info('Server will continue without caching functionality');
       }
     } else {
-      console.log('ℹ️  Redis caching disabled (set REDIS_ENABLED=true to enable)');
+      logger.info('Redis caching disabled (set REDIS_ENABLED=true to enable)');
     }
 
     // Initialize scheduler service for invoice reminders and recurring invoices
@@ -413,28 +416,28 @@ async function startServer() {
           enableRecurringInvoices: process.env.SCHEDULER_RECURRING !== 'false'
         });
         scheduler.start();
-        console.log('✅ Scheduler service initialized');
+        logger.info('Scheduler service initialized');
       } catch (schedulerError) {
-        console.warn('⚠️  Scheduler service initialization failed:', schedulerError);
-        console.log('📅 Server will continue without scheduling functionality');
+        logger.warn('Scheduler service initialization failed:', { error: schedulerError instanceof Error ? schedulerError : undefined });
+        logger.info('Server will continue without scheduling functionality');
       }
     } else {
-      console.log('ℹ️  Scheduler disabled (set SCHEDULER_ENABLED=true to enable)');
+      logger.info('Scheduler disabled (set SCHEDULER_ENABLED=true to enable)');
     }
 
     // Register workflow automations
     try {
       registerWorkflowAutomations();
-      console.log('✅ Workflow automations registered');
+      logger.info('Workflow automations registered');
     } catch (workflowError) {
-      console.warn('⚠️  Workflow automations registration failed:', workflowError);
-      console.log('🔄 Server will continue without workflow automations');
+      logger.warn('Workflow automations registration failed:', { error: workflowError instanceof Error ? workflowError : undefined });
+      logger.info('Server will continue without workflow automations');
     }
 
     // Start server
     const server = app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/health`);
+      logger.info(`Server running on http://localhost:${PORT}`);
+      logger.info(`Health check: http://localhost:${PORT}/health`);
 
       errorTracker.captureMessage(`Server started on port ${PORT}`, 'info', {
         tags: { component: 'server' },
@@ -444,44 +447,44 @@ async function startServer() {
 
     // Graceful shutdown
     const shutdown = async (signal: string) => {
-      console.log(`\n🔄 ${signal} received. Shutting down gracefully...`);
+      logger.info(`${signal} received. Shutting down gracefully...`);
 
       // Stop scheduler service
       try {
         const scheduler = getSchedulerService();
         scheduler.stop();
-        console.log('✅ Scheduler service stopped');
+        logger.info('Scheduler service stopped');
       } catch (error) {
-        console.error('❌ Error stopping scheduler:', error);
+        logger.error('Error stopping scheduler:', { error: error instanceof Error ? error : undefined });
       }
 
       // Close server
       server.close(async () => {
-        console.log('✅ HTTP server closed');
+        logger.info('HTTP server closed');
 
         // Close database pool
         try {
           await closeDatabase();
         } catch (dbErr) {
-          console.error('❌ Error closing database:', dbErr);
+          logger.error('Error closing database:', { error: dbErr instanceof Error ? dbErr : undefined });
         }
 
         // Flush Sentry events
         try {
           await errorTracker.flush(2000);
           await errorTracker.close(1000);
-          console.log('✅ Error tracking closed');
+          logger.info('Error tracking closed');
         } catch (error) {
-          console.error('❌ Error closing error tracking:', error);
+          logger.error('Error closing error tracking:', { error: error instanceof Error ? error : undefined });
         }
 
-        console.log('👋 Server shut down complete');
+        logger.info('Server shut down complete');
         process.exit(0);
       });
 
       // Force shutdown after 10 seconds
       setTimeout(() => {
-        console.error('❌ Forced shutdown after timeout');
+        logger.error('Forced shutdown after timeout');
         process.exit(1);
       }, 10000);
     };
@@ -490,7 +493,7 @@ async function startServer() {
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    logger.error('Failed to start server:', { error: error instanceof Error ? error : undefined });
     errorTracker.captureException(error as Error, {
       tags: { component: 'server', phase: 'startup' }
     });
@@ -500,7 +503,7 @@ async function startServer() {
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
+  logger.error('Uncaught Exception:', { error });
   errorTracker.captureException(error, {
     tags: { type: 'uncaughtException' }
   });
@@ -509,7 +512,7 @@ process.on('uncaughtException', (error) => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled Rejection:', { metadata: { promise: promise.toString(), reason } });
   errorTracker.captureException(new Error(`Unhandled Rejection: ${reason}`), {
     tags: { type: 'unhandledRejection' },
     extra: { promise: promise.toString(), reason }

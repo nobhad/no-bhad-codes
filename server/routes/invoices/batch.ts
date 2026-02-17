@@ -17,6 +17,7 @@ import { getString } from '../../database/row-helpers.js';
 import { getInvoiceService, toSnakeCasePayment } from './helpers.js';
 import { generateInvoicePdf, InvoicePdfData } from './pdf.js';
 import { InvoiceLineItem } from '../../services/invoice-service.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -87,7 +88,7 @@ router.post(
     const archive = archiver('zip', { zlib: { level: 9 } });
 
     archive.on('error', (err) => {
-      console.error('[Invoices] ZIP archive error:', err);
+      logger.error('[Invoices] ZIP archive error:', { error: err });
       if (!res.headersSent) {
         errorResponse(res, 'Failed to create ZIP archive', 500, 'ZIP_FAILED');
       }
@@ -153,7 +154,7 @@ router.post(
         archive.append(Buffer.from(pdfBytes), { name: `${invoice.invoiceNumber}.pdf` });
         successCount++;
       } catch (error) {
-        console.error(`[Invoices] Failed to generate PDF for invoice ${invoiceId}:`, error);
+         logger.error(`[Invoices] Failed to generate PDF for invoice ${invoiceId}:`, { error: error instanceof Error ? error : undefined });
         errorCount++;
         errors.push({
           id: invoiceId,

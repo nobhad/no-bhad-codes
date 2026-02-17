@@ -1,3 +1,4 @@
+import { logger } from '../services/logger.js';
 /**
  * ===============================================
  * CLIENT INTAKE API ROUTES
@@ -107,6 +108,7 @@ async function saveIntakeAsFile(
   );
 
   console.log(`[Intake] Saved intake form as file: ${relativePath}`);
+  await logger.info(`[Intake] Saved intake form as file: ${relativePath}`, { category: 'INTAKE' });
 }
 
 interface ProposalSelection {
@@ -228,7 +230,7 @@ router.post(
 
         if (existingClient) {
           clientId = getNumber(existingClient as unknown as { [key: string]: unknown }, 'id');
-          console.log(`Existing client found: ${clientId}`);
+          await logger.info(`Existing client found: ${clientId}`, { category: 'INTAKE' });
         } else {
         // Create new client account
           const clientResult = await ctx.run(
@@ -242,7 +244,7 @@ router.post(
           );
 
           clientId = clientResult.lastID!;
-          console.log(`New client created: ${clientId}`);
+          await logger.info(`New client created: ${clientId}`, { category: 'INTAKE' });
         }
 
         // Create project record
@@ -284,7 +286,7 @@ router.post(
         );
 
         const projectId = projectResult.lastID!;
-        console.log(`Project created: ${projectId}`);
+        await logger.info(`Project created: ${projectId}`, { category: 'INTAKE' });
 
         // Create initial project update
         const systemUserId = await userService.getUserIdByEmailOrName('system');
@@ -316,6 +318,7 @@ router.post(
               JSON.stringify(milestone.deliverables)
             ]
           );
+          await logger.info(`Created milestone for project ${projectId}: ${milestone.title}`, { category: 'INTAKE' });
         }
         console.log(`Created ${milestones.length} milestones for project ${projectId}`);
 
@@ -365,7 +368,7 @@ router.post(
             ]
           );
           proposalRequestId = proposalResult.lastID!;
-          console.log(`Created proposal request ${proposalRequestId} for project ${projectId}`);
+          await logger.info(`Created proposal request ${proposalRequestId} for project ${projectId}`, { category: 'INTAKE' });
 
           if (proposal.customItems && proposal.customItems.length > 0) {
             for (const [index, item] of proposal.customItems.entries()) {
@@ -406,7 +409,7 @@ router.post(
       try {
         await saveIntakeAsFile(intakeData, projectId, projectName);
       } catch (fileError) {
-        console.error('[Intake] Failed to save intake file:', fileError);
+         await logger.error('[Intake] Failed to save intake file:', { error: fileError instanceof Error ? fileError : undefined, category: 'INTAKE' });
       // Non-critical error - don't fail the whole request
       }
 
@@ -437,7 +440,7 @@ router.post(
           // Send new intake notification to admin
           await sendNewIntakeNotification(intakeData, projectId);
         } catch (emailError) {
-          console.error('Failed to send emails:', emailError);
+           await logger.error('Failed to send emails:', { error: emailError instanceof Error ? emailError : undefined, category: 'INTAKE' });
         }
       }, 100);
 
@@ -470,7 +473,7 @@ router.post(
         }
       });
     } catch (error: unknown) {
-      console.error('Intake processing error:', error);
+      await logger.error('Intake processing error:', { error: error instanceof Error ? error : undefined, category: 'INTAKE' });
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       errorResponseWithPayload(
         res,
@@ -546,7 +549,7 @@ router.get('/status/:projectId', authenticateToken, rateLimiters.standard, async
       data: responseData
     });
   } catch (error: unknown) {
-    console.error('Status check error:', error);
+    await logger.error('Status check error:', { error: error instanceof Error ? error : undefined, category: 'INTAKE' });
     errorResponse(res, 'Failed to get project status', 500, 'INTERNAL_ERROR');
   }
 });

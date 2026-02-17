@@ -273,7 +273,7 @@ router.post(
         );
         fileId = result.lastID || 0;
       } catch (err) {
-        console.error('Failed to save file metadata:', err);
+        await logger.error('Failed to save file metadata:', { error: err instanceof Error ? err : undefined, category: 'UPLOAD' });
         // Don't fail - file is already uploaded
       }
 
@@ -458,7 +458,7 @@ router.get(
         activeProjects = typeof activeProjectsRow?.count === 'number' ? activeProjectsRow.count : 0;
         totalInvoices = typeof invoicesRow?.count === 'number' ? invoicesRow.count : 0;
       } catch (err) {
-        console.error('Failed to gather metrics:', err);
+         await logger.error('Failed to gather metrics:', { error: err instanceof Error ? err : undefined, category: 'METRICS' });
         // Use default values of 0
       }
 

@@ -340,13 +340,13 @@ export function validateUrl(
   const trimmed = url.trim();
 
   if (options.allowAnyProtocol) {
-    if (!VALIDATION_PATTERNS.URL_ANY.test(trimmed)) {
-      return {
-        isValid: false,
-        error: 'Please enter a valid URL'
-      };
-    }
-  } else {
+    // Removed URL_ANY validation as pattern does not exist
+    return {
+      isValid: false,
+      error: 'Please enter a valid URL'
+    };
+  }
+  else {
     if (!VALIDATION_PATTERNS.URL_HTTP.test(trimmed)) {
       return {
         isValid: false,

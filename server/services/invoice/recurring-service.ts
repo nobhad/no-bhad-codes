@@ -20,6 +20,7 @@ import type {
   InvoiceReminder,
   InvoiceReminderRow
 } from '../../types/invoice-types.js';
+import { logger } from '../logger.js';
 
 type SqlValue = string | number | boolean | null;
 
@@ -127,7 +128,7 @@ export class InvoiceRecurringService {
 
         generatedCount++;
       } catch (error) {
-        console.error(`[InvoiceService] Failed to generate scheduled invoice ${scheduled.id}:`, error);
+        logger.error(`Failed to generate scheduled invoice ${scheduled.id}`, error instanceof Error ? error : undefined);
       }
     }
 
@@ -313,7 +314,7 @@ export class InvoiceRecurringService {
 
         successfulRecurring.push({ id: recurring.id, nextDate });
       } catch (error) {
-        console.error(`[InvoiceService] Failed to generate recurring invoice ${recurring.id}:`, error);
+        logger.error(`Failed to generate recurring invoice ${recurring.id}`, error instanceof Error ? error : undefined);
         failedIds.push(recurring.id);
       }
     }
@@ -348,7 +349,7 @@ export class InvoiceRecurringService {
     const invoice = await this.getInvoiceById(invoiceId);
 
     if (!invoice.dueDate) {
-      console.warn(`[InvoiceService] Cannot schedule reminders for invoice ${invoiceId} without due date`);
+      logger.warn(`[InvoiceService] Cannot schedule reminders for invoice ${invoiceId} without due date`);
       return;
     }
 
@@ -475,6 +476,7 @@ export class InvoiceRecurringService {
     const row = await this.db.get(sql, [id]);
 
     if (!row) {
+      logger.error(`Scheduled invoice not found: ${id}`);
       throw new Error(`Scheduled invoice with ID ${id} not found`);
     }
 
@@ -503,6 +505,7 @@ export class InvoiceRecurringService {
     const row = await this.db.get(sql, [id]);
 
     if (!row) {
+      logger.error(`Recurring invoice not found: ${id}`);
       throw new Error(`Recurring invoice with ID ${id} not found`);
     }
 

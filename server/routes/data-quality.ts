@@ -1,3 +1,4 @@
+import { logger } from '../services/logger.js';
 /**
  * ===============================================
  * DATA QUALITY API ROUTES
@@ -68,7 +69,7 @@ router.post('/duplicates/scan', async (req: Request, res: Response) => {
       scanDuration: duration
     });
   } catch (error) {
-    console.error('Duplicate scan error:', error);
+    await logger.error('Duplicate scan error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(
       res,
       'Failed to scan for duplicates',
@@ -113,7 +114,7 @@ router.post('/duplicates/check', async (req: Request, res: Response) => {
       scanDuration: duration
     });
   } catch (error) {
-    console.error('Duplicate check error:', error);
+    await logger.error('Duplicate check error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(
       res,
       'Failed to check for duplicates',
@@ -155,7 +156,7 @@ router.post('/duplicates/merge', async (req: Request, res: Response) => {
 
     sendSuccess(res, undefined, result.message);
   } catch (error) {
-    console.error('Duplicate merge error:', error);
+    await logger.error('Duplicate merge error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(
       res,
       'Failed to merge records',
@@ -193,7 +194,7 @@ router.post('/duplicates/dismiss', async (req: Request, res: Response) => {
 
     sendSuccess(res, undefined, 'Duplicate dismissed successfully');
   } catch (error) {
-    console.error('Duplicate dismiss error:', error);
+    await logger.error('Duplicate dismiss error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(
       res,
       'Failed to dismiss duplicate',
@@ -226,7 +227,7 @@ router.get('/duplicates/history', async (_req: Request, res: Response) => {
       resolutionLogs
     });
   } catch (error) {
-    console.error('History fetch error:', error);
+    await logger.error('History fetch error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(
       res,
       'Failed to fetch history',
@@ -428,7 +429,7 @@ router.get('/metrics', async (_req: Request, res: Response) => {
     const metrics = await getDuplicateStats();
     sendSuccess(res, metrics);
   } catch (error) {
-    console.error('Metrics fetch error:', error);
+    await logger.error('Metrics fetch error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(res, 'Failed to fetch metrics', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -460,7 +461,7 @@ router.post('/metrics/calculate', async (_req: Request, res: Response) => {
 
     sendSuccess(res, metrics, 'Data quality metrics calculated and stored');
   } catch (error) {
-    console.error('Metrics calculation error:', error);
+    await logger.error('Metrics calculation error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(res, 'Failed to calculate metrics', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -487,7 +488,7 @@ router.get('/metrics/history', async (req: Request, res: Response) => {
 
     sendSuccess(res, { history });
   } catch (error) {
-    console.error('History fetch error:', error);
+    await logger.error('History fetch error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(res, 'Failed to fetch history', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -507,7 +508,7 @@ router.get('/rate-limits/stats', async (_req: Request, res: Response) => {
     const stats = await getRateLimitStats();
     sendSuccess(res, stats);
   } catch (error) {
-    console.error('Rate limit stats error:', error);
+    await logger.error('Rate limit stats error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(res, 'Failed to fetch rate limit stats', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -533,7 +534,7 @@ router.post('/rate-limits/block', async (req: Request, res: Response) => {
 
     sendSuccess(res, undefined, `IP ${ip} has been blocked`);
   } catch (error) {
-    console.error('IP block error:', error);
+    await logger.error('IP block error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(res, 'Failed to block IP', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -559,7 +560,7 @@ router.post('/rate-limits/unblock', async (req: Request, res: Response) => {
 
     sendSuccess(res, undefined, `IP ${ip} has been unblocked`);
   } catch (error) {
-    console.error('IP unblock error:', error);
+    await logger.error('IP unblock error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(res, 'Failed to unblock IP', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -591,7 +592,7 @@ router.get('/validation-errors', async (req: Request, res: Response) => {
 
     sendSuccess(res, { errors });
   } catch (error) {
-    console.error('Validation errors fetch error:', error);
+    await logger.error('Validation errors fetch error:', { error: error instanceof Error ? error : undefined, category: 'DATA_QUALITY' });
     errorResponseWithPayload(res, 'Failed to fetch validation errors', 500, 'INTERNAL_ERROR', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });

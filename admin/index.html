@@ -240,6 +240,8 @@
         </div>
         <form class="auth-gate-form" id="admin-login-form">
           <!-- Hidden username field for accessibility and password managers -->
+          <!-- Prevent default form submission to /admin -->
+          <form class="auth-gate-form" id="admin-login-form" autocomplete="off" novalidate>
           <input
             type="email"
             id="admin-username"

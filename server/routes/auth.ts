@@ -170,7 +170,7 @@ router.post(
     // Generate JWT token
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      console.error('JWT_SECRET not configured');
+      await logger.error('JWT_SECRET not configured', { category: 'AUTH' });
       return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
@@ -564,7 +564,7 @@ router.post(
           timestamp: new Date()
         });
       } catch (error) {
-        console.error('Failed to send password reset email:', error);
+         await logger.error('Failed to send password reset email:', { error: error instanceof Error ? error : undefined, category: 'AUTH' });
         // Still return success to user - don't reveal internal errors
       }
     }
@@ -760,7 +760,7 @@ router.post(
     // Get admin password hash from environment
     const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
     if (!adminPasswordHash) {
-      console.error('ADMIN_PASSWORD_HASH not configured');
+      await logger.error('ADMIN_PASSWORD_HASH not configured', { category: 'AUTH' });
       return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
@@ -774,13 +774,13 @@ router.post(
     // Generate JWT token for admin
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      console.error('JWT_SECRET not configured');
+      await logger.error('JWT_SECRET not configured', { category: 'AUTH' });
       return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
     const adminEmail = process.env.ADMIN_EMAIL;
     if (!adminEmail) {
-      console.error('ADMIN_EMAIL not configured');
+      await logger.error('ADMIN_EMAIL not configured', { category: 'AUTH' });
       return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
     const token = jwt.sign(
@@ -919,7 +919,7 @@ router.post(
           userAgent: req.get('user-agent') || 'unknown'
         });
       } catch (error) {
-        console.error('Failed to send magic link email:', error);
+         await logger.error('Failed to send magic link email:', { error: error instanceof Error ? error : undefined, category: 'AUTH' });
         // Still return success to user - don't reveal internal errors
       }
     }
@@ -1032,7 +1032,7 @@ router.post(
     // Generate JWT token
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      console.error('JWT_SECRET not configured');
+      await logger.error('JWT_SECRET not configured', { category: 'AUTH' });
       return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
@@ -1240,7 +1240,7 @@ No Bhad Codes Team`
       );
       console.log(`[AUTH] Created welcome message for client ${clientId}`);
     } catch (messageError) {
-      console.error('[AUTH] Failed to create welcome message:', messageError);
+      await logger.error('[AUTH] Failed to create welcome message:', { error: messageError instanceof Error ? messageError : undefined, category: 'AUTH' });
       // Continue - account was activated successfully
     }
 
@@ -1262,16 +1262,16 @@ No Bhad Codes Team`
     try {
       const scheduler = getSchedulerService();
       await scheduler.startWelcomeSequence(clientId);
-      console.log(`[AUTH] Started welcome sequence for client ${clientId}`);
+      await logger.info(`[AUTH] Started welcome sequence for client ${clientId}`, { category: 'AUTH' });
     } catch (welcomeError) {
-      console.error('[AUTH] Failed to start welcome sequence:', welcomeError);
+      await logger.error('[AUTH] Failed to start welcome sequence:', { error: welcomeError instanceof Error ? welcomeError : undefined, category: 'AUTH' });
       // Continue - account was activated successfully
     }
 
     // 5. Generate JWT token for auto-login
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      console.error('[AUTH] JWT_SECRET not configured for auto-login after set-password');
+      await logger.error('[AUTH] JWT_SECRET not configured for auto-login after set-password', { category: 'AUTH' });
       return sendSuccess(res, { email: clientEmail }, 'Password set successfully. You can now log in.');
     }
 
@@ -1287,6 +1287,7 @@ No Bhad Codes Team`
     );
 
     console.log(`[AUTH] Generated auto-login token for client ${clientId}`);
+  await logger.info(`[AUTH] Generated auto-login token for client ${clientId}`, { category: 'AUTH' });
 
     return sendSuccess(res, { email: clientEmail, token: authToken }, 'Password set successfully.');
   })

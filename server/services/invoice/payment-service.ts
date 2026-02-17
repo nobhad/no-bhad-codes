@@ -9,6 +9,7 @@
 
 import type { Invoice, InvoicePayment, InvoicePaymentRow } from '../../types/invoice-types.js';
 import { receiptService } from '../receipt-service.js';
+import { logger } from '../logger.js';
 
 type SqlValue = string | number | boolean | null;
 
@@ -93,24 +94,38 @@ export class InvoicePaymentService {
       newStatus = 'partial';
     }
 
-    await this.db.run(
-      `UPDATE invoices SET
-        amount_paid = ?,
-        status = ?,
-        payment_method = ?,
-        payment_reference = ?,
-        paid_date = COALESCE(?, paid_date),
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?`,
-      [newAmountPaid, newStatus, paymentMethod, paymentReference || null, paidDate, id]
-    );
+    const updateInvoiceSql = `UPDATE invoices SET
+      amount_paid = ?,
+      status = ?,
+      payment_method = ?,
+      payment_reference = ?,
+      paid_date = COALESCE(?, paid_date),
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?`;
+    const updateInvoiceParams = [newAmountPaid, newStatus, paymentMethod, paymentReference || null, paidDate, id];
+    const startUpdate = Date.now();
+    await this.db.run(updateInvoiceSql, updateInvoiceParams);
+    logger.info('Query executed', {
+      metadata: {
+        sql: updateInvoiceSql,
+        params: updateInvoiceParams,
+        durationMs: Date.now() - startUpdate
+      }
+    });
 
     // If fully paid, skip remaining reminders
     if (newStatus === 'paid') {
-      await this.db.run(
-        'UPDATE invoice_reminders SET status = ? WHERE invoice_id = ? AND status = ?',
-        ['skipped', id, 'pending']
-      );
+      const skipRemindersSql = 'UPDATE invoice_reminders SET status = ? WHERE invoice_id = ? AND status = ?';
+      const skipRemindersParams = ['skipped', id, 'pending'];
+      const startSkip = Date.now();
+      await this.db.run(skipRemindersSql, skipRemindersParams);
+      logger.info('Query executed', {
+        metadata: {
+          sql: skipRemindersSql,
+          params: skipRemindersParams,
+          durationMs: Date.now() - startSkip
+        }
+      });
     }
 
     return this.getInvoiceById(id);
@@ -174,9 +189,9 @@ export class InvoicePaymentService {
         id: receiptRecord.id,
         receiptNumber: receiptRecord.receiptNumber
       };
-      console.log(`[PaymentService] Receipt ${receiptRecord.receiptNumber} generated for payment ${payment.id}`);
+      logger.info(`[PaymentService] Receipt ${receiptRecord.receiptNumber} generated for payment ${payment.id}`);
     } catch (receiptError) {
-      console.error('[PaymentService] Failed to generate receipt:', receiptError);
+      logger.error('[PaymentService] Failed to generate receipt', { error: receiptError instanceof Error ? receiptError : undefined });
       // Don't fail the payment if receipt generation fails
     }
 

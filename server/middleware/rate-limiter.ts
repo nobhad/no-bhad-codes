@@ -11,6 +11,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { getDatabase } from '../database/init.js';
 import { errorResponseWithPayload } from '../utils/api-response.js';
+import { logger } from '../services/logger.js';
 
 // Rate limit configuration
 export interface RateLimitConfig {
@@ -23,10 +24,12 @@ export interface RateLimitConfig {
 
 // Default configurations for different endpoint types
 export const RATE_LIMIT_PRESETS = {
-  // Strict limit for public form submissions
+  // Strict limit for public form submissions (anti-spam)
+  // Intentionally low to prevent bot spam while allowing legitimate users
+  // 10 req/min is enough for form submissions with retries
   publicForm: {
     windowMs: 60 * 1000,        // 1 minute
-    maxRequests: 5,             // 5 requests per minute
+    maxRequests: 10,            // 10 requests per minute (relaxed from 5)
     blockDurationMs: 5 * 60 * 1000  // Block for 5 minutes
   },
   // Standard API limit
@@ -135,7 +138,7 @@ async function logRateLimitEvent(
       ]
     );
   } catch (error) {
-    console.error('Failed to log rate limit event:', error);
+    logger.error('Failed to log rate limit event', { error: error instanceof Error ? error : undefined });
   }
 }
 

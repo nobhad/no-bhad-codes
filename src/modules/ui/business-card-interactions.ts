@@ -57,8 +57,8 @@ export class BusinessCardInteractions extends BaseModule {
   private cardContainer: HTMLElement | null = null;
 
   // Animation timelines
-  private cardFlipTimeline: any = null;
-  private hoverTimeline: any = null;
+  private cardFlipTimeline: gsap.core.Timeline | null = null;
+  private hoverTimeline: gsap.core.Timeline | null = null;
 
   // Callback functions
   private onCardFlip: ((flipped: boolean) => void) | null = null;

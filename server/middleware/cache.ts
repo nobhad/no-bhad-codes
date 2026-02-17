@@ -10,6 +10,7 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { cacheService } from '../services/cache-service.js';
+import { logger } from '../services/logger.js';
 
 export interface CacheMiddlewareOptions {
   ttl?: number; // Time to live in seconds
@@ -93,7 +94,7 @@ export function cache(
       const cached = await cacheService.get(cacheKey);
 
       if (cached && typeof cached === 'object' && cached.body && cached.headers) {
-        console.log(`📋 Cache HIT: ${cacheKey}`);
+        logger.info(`Cache HIT: ${cacheKey}`);
 
         // Set cached headers
         Object.entries(cached.headers as Record<string, string>).forEach(([key, value]) => {
@@ -108,7 +109,7 @@ export function cache(
         return;
       }
 
-      console.log(`📋 Cache MISS: ${cacheKey}`);
+      logger.info(`Cache MISS: ${cacheKey}`);
       res.set('X-Cache', 'MISS');
       res.set('X-Cache-Key', cacheKey);
 
@@ -137,7 +138,7 @@ export function cache(
               req,
               onlySuccessfulResponses
             ).catch((error) => {
-              console.error('Error caching response:', error);
+              logger.error('Error caching response', { error });
             });
           });
         }
@@ -164,7 +165,7 @@ export function cache(
               req,
               onlySuccessfulResponses
             ).catch((error) => {
-              console.error('Error caching response:', error);
+              logger.error('Error caching response', { error });
             });
           });
         }
@@ -174,7 +175,7 @@ export function cache(
 
       next();
     } catch (error) {
-      console.error('Cache middleware error:', error);
+      logger.error('Cache middleware error', { error: error instanceof Error ? error : undefined });
       // Continue without caching on error
       next();
     }
@@ -214,9 +215,9 @@ async function cacheResponse(
       }
     );
 
-    console.log(`📋 Cached response: ${key} (TTL: ${ttl}s, status: ${status})`);
+    logger.info(`Cached response: ${key} (TTL: ${ttl}s, status: ${status})`);
   } else {
-    console.log(`📋 Skipped caching non-successful response: ${key} (status: ${status})`);
+    logger.info(`Skipped caching non-successful response: ${key} (status: ${status})`);
   }
 }
 
@@ -267,9 +268,9 @@ export function invalidateCache(
         for (const tag of tagsToInvalidate) {
           try {
             const count = await cacheService.invalidateByTag(tag);
-            console.log(`🗑️  Invalidated ${count} cached entries for tag: ${tag}`);
+            logger.info(`Invalidated ${count} cached entries for tag: ${tag}`);
           } catch (error) {
-            console.error(`Error invalidating cache tag ${tag}:`, error);
+            logger.error(`Error invalidating cache tag ${tag}`, { error: error instanceof Error ? error : undefined });
           }
         }
       }

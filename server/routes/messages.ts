@@ -1,9 +1,3 @@
-/**
- * ===============================================
- * MESSAGING ROUTES
- * ===============================================
- * Enhanced messaging system with threads, general messages, and notifications
- */
 
 import express from 'express';
 import multer from 'multer';
@@ -525,7 +519,7 @@ router.post(
         timestamp: new Date()
       });
     } catch (emailError) {
-      console.error('Failed to send admin notification:', emailError);
+      await logger.error('Failed to send admin notification:', { error: emailError instanceof Error ? emailError : undefined, category: 'MESSAGES' });
     }
 
     sendCreated(res, { threadId }, 'Inquiry sent successfully');

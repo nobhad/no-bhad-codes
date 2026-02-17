@@ -15,6 +15,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { logger } from './logger.js';
 
 /**
  * Priority levels in ascending order of urgency
@@ -184,7 +185,7 @@ export async function escalateTaskPriorities(projectId?: number): Promise<Escala
 
     if (escalatedTasks.length > 0) {
       const scope = projectId !== undefined ? `project ${projectId}` : 'all projects';
-      console.log(`[PriorityEscalation] Escalated ${escalatedTasks.length} tasks for ${scope}`);
+      logger.info(`[PriorityEscalation] Escalated ${escalatedTasks.length} tasks for ${scope}`);
     }
 
     return {
@@ -192,7 +193,7 @@ export async function escalateTaskPriorities(projectId?: number): Promise<Escala
       escalatedTasks
     };
   } catch (error) {
-    console.error('[PriorityEscalation] Error escalating priorities:', error);
+    logger.error('[PriorityEscalation] Error escalating priorities', { error: error instanceof Error ? error : undefined });
     throw error;
   }
 }
@@ -258,7 +259,7 @@ export async function previewEscalation(projectId?: number): Promise<EscalationR
       escalatedTasks
     };
   } catch (error) {
-    console.error('[PriorityEscalation] Error previewing escalation:', error);
+    logger.error('[PriorityEscalation] Error previewing escalation', { error: error instanceof Error ? error : undefined });
     throw error;
   }
 }

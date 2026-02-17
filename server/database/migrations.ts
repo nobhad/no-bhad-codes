@@ -10,6 +10,7 @@
 import Database from 'sqlite3';
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join, resolve as pathResolve } from 'path';
+import { logger } from '../services/logger.js';
 
 export interface Migration {
   id: number;
@@ -65,7 +66,7 @@ export class MigrationManager {
    */
   getMigrationFiles(): MigrationFile[] {
     if (!existsSync(this.migrationsDir)) {
-      console.warn(`Migrations directory does not exist: ${this.migrationsDir}`);
+      logger.warn(`Migrations directory does not exist: ${this.migrationsDir}`);
       return [];
     }
 
@@ -158,7 +159,7 @@ export class MigrationManager {
                 if (commitErr) {
                   reject(new Error(`Failed to commit migration: ${commitErr.message}`));
                 } else {
-                  console.log(`✅ Executed migration: ${migration.filename}`);
+                  logger.info(`Executed migration: ${migration.filename}`);
                   resolve();
                 }
               });
@@ -177,17 +178,17 @@ export class MigrationManager {
     const pendingMigrations = await this.getPendingMigrations();
 
     if (pendingMigrations.length === 0) {
-      console.log('✅ No pending migrations');
+      logger.info('No pending migrations');
       return;
     }
 
-    console.log(`🔄 Running ${pendingMigrations.length} pending migration(s)...`);
+    logger.info(`Running ${pendingMigrations.length} pending migration(s)...`);
 
     for (const migration of pendingMigrations) {
       await this.executeMigration(migration);
     }
 
-    console.log(`🎉 Successfully executed ${pendingMigrations.length} migration(s)`);
+    logger.info(`Successfully executed ${pendingMigrations.length} migration(s)`);
   }
 
   /**
@@ -197,7 +198,7 @@ export class MigrationManager {
     const executedMigrations = await this.getExecutedMigrations();
 
     if (executedMigrations.length === 0) {
-      console.log('No migrations to rollback');
+      logger.info('No migrations to rollback');
       return;
     }
 
@@ -233,7 +234,7 @@ export class MigrationManager {
               if (commitErr) {
                 reject(new Error(`Failed to commit rollback: ${commitErr.message}`));
               } else {
-                console.log(`⏪ Rolled back migration: ${migrationFile.filename}`);
+                logger.info(`Rolled back migration: ${migrationFile.filename}`);
                 resolve();
               }
             });
@@ -293,7 +294,7 @@ export class MigrationManager {
 `;
 
     require('fs').writeFileSync(filepath, template);
-    console.log(`📝 Created migration: ${filepath}`);
+    logger.info(`Created migration: ${filepath}`);
 
     return filepath;
   }

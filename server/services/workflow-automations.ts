@@ -64,7 +64,7 @@ interface _MilestoneData {
 async function handleProposalAccepted(data: { entityId?: number | null; triggeredBy?: string }): Promise<void> {
   const proposalId = data.entityId;
   if (!proposalId) {
-    console.warn('[WorkflowAutomation] proposal.accepted: No proposalId provided');
+    logger.warn('[WorkflowAutomation] proposal.accepted: No proposalId provided');
     return;
   }
 
@@ -80,7 +80,7 @@ async function handleProposalAccepted(data: { entityId?: number | null; triggere
     );
 
     if (!proposalRow) {
-      console.warn(`[WorkflowAutomation] proposal.accepted: Proposal ${proposalId} not found`);
+      logger.warn(`[WorkflowAutomation] proposal.accepted: Proposal ${proposalId} not found`);
       return;
     }
 
@@ -165,7 +165,7 @@ async function handleProposalAccepted(data: { entityId?: number | null; triggere
         }
       });
     } catch (milestoneError) {
-      console.error('[WorkflowAutomation] proposal.accepted: Failed to generate milestones:', milestoneError);
+      logger.error('[WorkflowAutomation] proposal.accepted: Failed to generate milestones', { error: milestoneError instanceof Error ? milestoneError : undefined });
       // Don't fail the automation if milestone generation fails
     }
 
@@ -179,7 +179,7 @@ async function handleProposalAccepted(data: { entityId?: number | null; triggere
     });
 
   } catch (error) {
-    console.error('[WorkflowAutomation] proposal.accepted: Error creating project:', error);
+    logger.error('[WorkflowAutomation] proposal.accepted: Error creating project', { error: error instanceof Error ? error : undefined });
     throw error;
   }
 }
@@ -216,7 +216,7 @@ async function handleContractSigned(data: {
   }
 
   if (!projectId) {
-    console.warn('[WorkflowAutomation] contract.signed: No projectId available');
+    logger.warn('[WorkflowAutomation] contract.signed: No projectId available');
     return;
   }
 
@@ -286,7 +286,7 @@ async function handleContractSigned(data: {
     });
 
   } catch (error) {
-    console.error('[WorkflowAutomation] contract.signed: Error updating project status:', error);
+    logger.error('[WorkflowAutomation] contract.signed: Error updating project status', { error: error instanceof Error ? error : undefined });
     throw error;
   }
 }
@@ -307,7 +307,7 @@ async function handleMilestoneCompleted(data: {
 }): Promise<void> {
   const milestoneId = data.entityId;
   if (!milestoneId) {
-    console.warn('[WorkflowAutomation] project.milestone_completed: No milestoneId provided');
+    logger.warn('[WorkflowAutomation] project.milestone_completed: No milestoneId provided');
     return;
   }
 
@@ -325,7 +325,7 @@ async function handleMilestoneCompleted(data: {
     ) as Record<string, unknown> | undefined;
 
     if (!milestone) {
-      console.warn(`[WorkflowAutomation] project.milestone_completed: Milestone ${milestoneId} not found`);
+      logger.warn(`[WorkflowAutomation] project.milestone_completed: Milestone ${milestoneId} not found`);
       return;
     }
 
@@ -427,7 +427,7 @@ async function handleMilestoneCompleted(data: {
     });
 
   } catch (error) {
-    console.error('[WorkflowAutomation] project.milestone_completed: Error creating invoice:', error);
+    logger.error('[WorkflowAutomation] project.milestone_completed: Error creating invoice', { error: error instanceof Error ? error : undefined });
     throw error;
   }
 }

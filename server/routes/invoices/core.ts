@@ -23,6 +23,7 @@ import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } fro
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { receiptService } from '../../services/receipt-service.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -81,105 +82,111 @@ router.get(
   })
 );
 
-/**
- * @swagger
- * /api/invoices/test:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Test invoice endpoint
- *     responses:
- *       200:
- *         description: Invoice system is working
- */
-router.get('/test', (req: express.Request, res: express.Response) => {
-  sendSuccess(res, { timestamp: new Date().toISOString() }, 'Invoice system is operational');
-});
+// ============================================
+// DEVELOPMENT-ONLY TEST ENDPOINTS
+// ============================================
+// These endpoints are only available in development mode
+if (process.env.NODE_ENV === 'development') {
+  /**
+   * @swagger
+   * /api/invoices/test:
+   *   get:
+   *     tags:
+   *       - Invoices
+   *     summary: Test invoice endpoint (development only)
+   *     responses:
+   *       200:
+   *         description: Invoice system is working
+   */
+  router.get('/test', (req: express.Request, res: express.Response) => {
+    sendSuccess(res, { timestamp: new Date().toISOString() }, 'Invoice system is operational');
+  });
 
-/**
- * @swagger
- * /api/invoices/test-create:
- *   post:
- *     tags:
- *       - Invoices
- *     summary: Test invoice creation (development only)
- *     description: Creates a test invoice without authentication for development testing
- *     responses:
- *       201:
- *         description: Test invoice created successfully
- */
-router.post(
-  '/test-create',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const testInvoiceData: InvoiceCreateData = {
-      projectId: 1,
-      clientId: 1,
-      lineItems: [
-        {
-          description: 'Website Design & Development',
-          quantity: 1,
-          rate: 3500,
-          amount: 3500
-        },
-        {
-          description: 'Content Management System Setup',
-          quantity: 1,
-          rate: 1000,
-          amount: 1000
-        }
-      ],
-      notes: 'Test invoice created for development testing',
-      terms: 'Payment due within 30 days'
-    };
+  /**
+   * @swagger
+   * /api/invoices/test-create:
+   *   post:
+   *     tags:
+   *       - Invoices
+   *     summary: Test invoice creation (development only)
+   *     description: Creates a test invoice without authentication for development testing
+   *     responses:
+   *       201:
+   *         description: Test invoice created successfully
+   */
+  router.post(
+    '/test-create',
+    asyncHandler(async (req: express.Request, res: express.Response) => {
+      const testInvoiceData: InvoiceCreateData = {
+        projectId: 1,
+        clientId: 1,
+        lineItems: [
+          {
+            description: 'Website Design & Development',
+            quantity: 1,
+            rate: 3500,
+            amount: 3500
+          },
+          {
+            description: 'Content Management System Setup',
+            quantity: 1,
+            rate: 1000,
+            amount: 1000
+          }
+        ],
+        notes: 'Test invoice created for development testing',
+        terms: 'Payment due within 30 days'
+      };
 
-    try {
-      const invoice = await getInvoiceService().createInvoice(testInvoiceData);
+      try {
+        const invoice = await getInvoiceService().createInvoice(testInvoiceData);
 
-      sendCreated(res, { invoice }, 'Test invoice created successfully');
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      errorResponseWithPayload(res, 'Failed to create test invoice', 500, 'TEST_CREATION_FAILED', { message });
-    }
-  })
-);
-
-/**
- * @swagger
- * /api/invoices/test-get/{id}:
- *   get:
- *     tags:
- *       - Invoices
- *     summary: Test get invoice by ID (development only)
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- */
-router.get(
-  '/test-get/:id',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
-
-    if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
-    }
-
-    try {
-      const invoice = await getInvoiceService().getInvoiceById(invoiceId);
-      sendSuccess(res, { invoice });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        sendCreated(res, { invoice }, 'Test invoice created successfully');
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        errorResponseWithPayload(res, 'Failed to create test invoice', 500, 'TEST_CREATION_FAILED', { message });
       }
-      errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  })
-);
+    })
+  );
+
+  /**
+   * @swagger
+   * /api/invoices/test-get/{id}:
+   *   get:
+   *     tags:
+   *       - Invoices
+   *     summary: Test get invoice by ID (development only)
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   */
+  router.get(
+    '/test-get/:id',
+    asyncHandler(async (req: express.Request, res: express.Response) => {
+      const invoiceId = parseInt(req.params.id);
+
+      if (isNaN(invoiceId)) {
+        return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      }
+
+      try {
+        const invoice = await getInvoiceService().getInvoiceById(invoiceId);
+        sendSuccess(res, { invoice });
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        if (message.includes('not found')) {
+          return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        }
+        errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED', {
+          message: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    })
+  );
+} // End development-only test endpoints
 
 /**
  * @swagger
@@ -369,7 +376,7 @@ router.post(
         disposition: 'inline'
       });
     } catch (error) {
-      console.error('[Invoices] Preview PDF generation error:', error);
+      logger.error('[Invoices] Preview PDF generation error:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to generate preview', 500, 'PDF_GENERATION_FAILED');
     }
   })
@@ -716,9 +723,9 @@ router.post(
       // Schedule payment reminders
       try {
         await getInvoiceService().scheduleReminders(invoiceId);
-        console.log(`[Invoices] Scheduled reminders for invoice #${invoiceId}`);
+        logger.info(`[Invoices] Scheduled reminders for invoice #${invoiceId}`);
       } catch (reminderError) {
-        console.error('[Invoices] Failed to schedule reminders:', reminderError);
+        logger.error('[Invoices] Failed to schedule reminders:', { error: reminderError instanceof Error ? reminderError : undefined });
         // Don't fail the send operation if reminders fail
       }
 
@@ -796,9 +803,9 @@ router.post(
           `
         });
 
-        console.log(`Invoice email sent to ${client.email} for invoice #${invoiceId}`);
+        logger.info(`Invoice email sent to ${client.email} for invoice #${invoiceId}`);
       } catch (emailError) {
-        console.error('Failed to send invoice email:', emailError);
+        logger.error('Failed to send invoice email:', { error: emailError instanceof Error ? emailError : undefined });
         // Don't fail the request if email fails
       }
 
@@ -872,9 +879,9 @@ router.post(
             paymentReference
           }
         );
-        console.log(`[Invoices] Receipt ${receipt.receiptNumber} generated for invoice ${invoice.invoiceNumber}`);
+        logger.info(`[Invoices] Receipt ${receipt.receiptNumber} generated for invoice ${invoice.invoiceNumber}`);
       } catch (receiptError) {
-        console.error('[Invoices] Failed to generate receipt:', receiptError);
+        logger.error('[Invoices] Failed to generate receipt:', { error: receiptError instanceof Error ? receiptError : undefined });
         // Don't fail the payment if receipt generation fails
       }
 

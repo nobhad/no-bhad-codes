@@ -196,8 +196,7 @@ class AdminDashboard {
   private projectDetails: AdminProjectDetails;
 
   // Clients module reference for breadcrumbs
-
-  private clientsModule: any = null;
+  private clientsModule: { getCurrentClientName?: () => string | null } | null = null;
 
   // DOM element cache
   private domCache = createDOMCache<DashboardDOMKeys>();
@@ -2410,18 +2409,9 @@ class AdminDashboard {
       }
 
       if (dashboardContainer) {
-        const { createPerformanceDashboard } = await import('../../components');
-        await createPerformanceDashboard(
-          {
-            position: 'top-left',
-            minimized: false,
-            autoHide: false,
-            updateInterval: 3000,
-            showAlerts: true,
-            showRecommendations: true
-          },
-          dashboardContainer
-        );
+        // Performance dashboard component not yet implemented
+        // TODO: Add performance dashboard component when available
+        dashboardContainer.innerHTML = '<div class="empty-state">Performance dashboard coming soon</div>';
       }
     } catch (error) {
       console.warn('[AdminDashboard] Failed to initialize performance dashboard component:', error);

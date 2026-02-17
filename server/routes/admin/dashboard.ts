@@ -8,6 +8,7 @@ import { auditLogger } from '../../services/audit-logger.js';
 import { getDatabase } from '../../database/init.js';
 import { projectService } from '../../services/project-service.js';
 import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -89,7 +90,7 @@ router.get(
 
       res.json(systemStatus);
     } catch (error) {
-      console.error('Error getting system status:', error);
+      logger.error('Error getting system status:', { error: error instanceof Error ? error : undefined });
 
       errorTracker.captureException(error as Error, {
         tags: { component: 'admin-status' },
@@ -183,7 +184,7 @@ router.get(
         count: logs.length
       });
     } catch (error) {
-      console.error('Error fetching audit log:', error);
+      logger.error('Error fetching audit log:', { error: error instanceof Error ? error : undefined });
       errorTracker.captureException(error as Error, {
         tags: { component: 'admin-audit' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
@@ -238,7 +239,7 @@ router.get(
         messages: messagesCount?.count || 0
       });
     } catch (error) {
-      console.error('Error fetching sidebar counts:', error);
+      logger.error('Error fetching sidebar counts:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to fetch sidebar counts', 500, 'INTERNAL_ERROR');
     }
   })
@@ -299,7 +300,7 @@ router.get(
         count: tasks.length
       });
     } catch (error) {
-      console.error('Error fetching global tasks:', error);
+      logger.error('Error fetching global tasks:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to fetch tasks', 500, 'INTERNAL_ERROR');
     }
   })

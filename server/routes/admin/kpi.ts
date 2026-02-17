@@ -3,6 +3,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { queryStats } from '../../services/query-stats.js';
 import { errorResponse } from '../../utils/api-response.js';
+import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -56,7 +57,7 @@ router.get(
         cssFiles: cssFiles.slice(0, 5).map(f => ({ ...f, sizeFormatted: formatBytes(f.size) }))
       });
     } catch (error) {
-      console.error('Error reading bundle stats:', error);
+      logger.error('Error reading bundle stats:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to read bundle stats', 500, 'INTERNAL_ERROR');
     }
   })
