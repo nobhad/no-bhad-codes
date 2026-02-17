@@ -1,9 +1,9 @@
 # Database Schema Documentation
 
-**Last Updated:** February 10, 2026
+**Last Updated:** February 17, 2026
 **Database:** SQLite (`data/client_portal.db`)
 **Total Tables:** 118 (includes new `users` table)
-**Total Migrations:** 72
+**Total Migrations:** 89
 
 ## Table of Contents
 
@@ -35,7 +35,7 @@ This database supports a comprehensive freelance business management system incl
 
 | Metric | Value |
 |--------|-------|
-| Total Tables | 117 |
+| Total Tables | 118 |
 | High-complexity tables (40+ cols) | 3 (invoices, clients, projects) |
 | Total Indexes | 150+ |
 | JSON fields | 30+ (templates, configs, metadata) |

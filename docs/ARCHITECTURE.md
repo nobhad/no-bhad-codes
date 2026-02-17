@@ -81,22 +81,41 @@ no-bhad-codes/
 │   │   │   │   ├── admin-project-details.ts
 │   │   │   │   ├── admin-security.ts
 │   │   │   │   ├── admin-types.ts
-│   │   │   │   ├── modules/                # 14 extracted admin modules
+│   │   │   │   ├── modules/                # 28 admin modules
 │   │   │   │   │   ├── index.ts            # Module exports
+│   │   │   │   │   ├── admin-ad-hoc-analytics.ts
+│   │   │   │   │   ├── admin-ad-hoc-requests.ts
 │   │   │   │   │   ├── admin-analytics.ts
-│   │   │   │   │   ├── admin-clients.ts
 │   │   │   │   │   ├── admin-client-details.ts
+│   │   │   │   │   ├── admin-clients.ts
 │   │   │   │   │   ├── admin-contacts.ts
+│   │   │   │   │   ├── admin-contracts.ts
+│   │   │   │   │   ├── admin-deleted-items.ts
+│   │   │   │   │   ├── admin-deliverables.ts
+│   │   │   │   │   ├── admin-design-review.ts
+│   │   │   │   │   ├── admin-document-requests.ts
+│   │   │   │   │   ├── admin-email-templates.ts
 │   │   │   │   │   ├── admin-files.ts
+│   │   │   │   │   ├── admin-global-tasks.ts
+│   │   │   │   │   ├── admin-invoices.ts
+│   │   │   │   │   ├── admin-knowledge-base.ts
 │   │   │   │   │   ├── admin-leads.ts
 │   │   │   │   │   ├── admin-messaging.ts
 │   │   │   │   │   ├── admin-overview.ts
 │   │   │   │   │   ├── admin-performance.ts
 │   │   │   │   │   ├── admin-projects.ts
 │   │   │   │   │   ├── admin-proposals.ts
+│   │   │   │   │   ├── admin-questionnaires.ts
 │   │   │   │   │   ├── admin-system-status.ts
 │   │   │   │   │   ├── admin-tasks.ts
-│   │   │   │   │   └── admin-time-tracking.ts
+│   │   │   │   │   ├── admin-time-tracking.ts
+│   │   │   │   │   └── admin-workflows.ts
+│   │   │   │   ├── project-details/        # Project detail components (12 files)
+│   │   │   │   │   ├── index.ts, types.ts, dom-cache.ts
+│   │   │   │   │   ├── actions.ts, documents.ts, files.ts
+│   │   │   │   │   ├── invoices.ts, invoice-actions.ts
+│   │   │   │   │   ├── invoice-modals.ts, invoice-scheduling.ts
+│   │   │   │   │   ├── messages.ts, milestones.ts
 │   │   │   │   ├── services/               # Extracted services
 │   │   │   │   │   ├── admin-data.service.ts
 │   │   │   │   │   ├── admin-chart.service.ts
@@ -113,18 +132,20 @@ no-bhad-codes/
 │   │   │
 │   │   ├── 🧩 MODULES (Reusable UI — under src/modules/)
 │   │   │   ├── core/base.ts         # Base module class
-│   │   │   ├── ui/                  # navigation, footer, contact-form, business-card*
-│   │   │   ├── animation/           # intro, hero, page-transition, text-animation
+│   │   │   ├── ui/                  # 7 files: navigation, footer, contact-form, business-card*, projects, submenu
+│   │   │   ├── animation/           # 8 files: intro, intro-mobile, about-hero, base-hero, contact, page-hero, page-transition, text-animation
 │   │   │   └── utilities/theme.ts  # Theme switching
 │   │   │
-│   │   ├── ⚙️ SERVICES (Business Logic)
-│   │   │   ├── data-service.ts      # Data management
-│   │   │   ├── contact-service.ts   # Communication
-│   │   │   ├── performance-service.ts
+│   │   ├── ⚙️ SERVICES (Business Logic — 9 files)
 │   │   │   ├── auth-service.ts      # Authentication
-│   │   │   ├── visitor-tracking.ts  # Analytics/consent
+│   │   │   ├── base-service.ts      # Base service class
 │   │   │   ├── bundle-analyzer.ts   # Build analysis
-│   │   │   └── code-protection-service.ts
+│   │   │   ├── code-protection-service.ts
+│   │   │   ├── contact-service.ts   # Communication
+│   │   │   ├── data-service.ts      # Data management
+│   │   │   ├── performance-service.ts
+│   │   │   ├── router-service.ts    # Routing
+│   │   │   └── visitor-tracking.ts  # Analytics/consent
 │   │   │
 │   │   ├── 🎨 COMPONENTS (UI Building Blocks — src/components/)
 │   │   │   ├── index.ts                # Central registry (now modular)
@@ -1450,7 +1471,7 @@ npm run audit              # Security audit
 
 ## 🔍 CODEBASE HEALTH
 
-### Last Code Review: February 6, 2026
+### Last Code Review: February 17, 2026
 
 ### Critical Issues
 
@@ -1473,7 +1494,7 @@ npm run audit              # Security audit
 |`src/core/state/`|4 files|FIXED - Split Dec 19 (was 824 lines in state.ts)|
 |`src/services/visitor-tracking.ts`|730|Pending - Split by tracking concern|
 |`src/features/admin/admin-dashboard.ts`|~200|FIXED - Split Jan 20, 2026 (was 1886 lines)|
-|`src/features/admin/modules/`|14 files|FIXED - Extracted from admin-dashboard.ts|
+|`src/features/admin/modules/`|28 files|FIXED - Extracted from admin-dashboard.ts|
 |`src/styles/components/nav-*.css`|4 files|FIXED - Split Dec 19 (was 1792 lines)|
 |`src/styles/client-portal/`|10 files|FIXED - Split into modular directory|
 |`src/modules/animation/intro-animation.ts`|1569|Large but organized|

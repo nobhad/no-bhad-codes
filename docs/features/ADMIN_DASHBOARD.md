@@ -1,6 +1,6 @@
 # Admin Dashboard
 
-**Last Updated:** February 15, 2026 (Portal Rebuild complete - all 19 modules render dynamically)
+**Last Updated:** February 17, 2026 (Portal Rebuild complete - all 28 modules render dynamically)
 
 > **Part of "The Backend"** - The portal system consisting of both the Admin Dashboard and Client Portal.
 
@@ -58,8 +58,8 @@ admin/
 └── index.html                    # Admin HTML entry point
 
 src/features/admin/
-├── admin-dashboard.ts            # Main dashboard coordinator (~2562 lines)
-├── admin-project-details.ts      # Project detail view handler (~1300 lines)
+├── admin-dashboard.ts            # Main dashboard coordinator (~2749 lines)
+├── admin-project-details.ts      # Project detail view handler (~1642 lines)
 ├── admin-auth.ts                 # Admin authentication
 └── admin-security.ts             # Rate limiting and security
 
@@ -73,7 +73,7 @@ src/features/admin/renderers/     # Extracted UI renderers (January 2026 refacto
 ├── admin-messaging.renderer.ts   # Messaging UI and thread rendering
 └── admin-performance.renderer.ts # Performance monitoring UI
 
-src/features/admin/modules/       # Extracted modules (27 modules)
+src/features/admin/modules/       # Extracted modules (28 modules)
 ├── admin-ad-hoc-analytics.ts     # Ad hoc request analytics
 ├── admin-ad-hoc-requests.ts      # Ad hoc requests management
 ├── admin-analytics.ts            # Analytics and charts

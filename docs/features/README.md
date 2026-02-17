@@ -22,7 +22,6 @@ This folder contains feature-level documentation. Use this index to jump to the 
 - [KNOWLEDGE_BASE.md](KNOWLEDGE_BASE.md)
 - [LEADS.md](LEADS.md)
 - [MESSAGING.md](MESSAGING.md)
-- [MESSAGES.md](MESSAGES.md)
 - [MILESTONES.md](MILESTONES.md)
 - [NEW_PROJECT.md](NEW_PROJECT.md)
 - [PDF_GENERATION.md](PDF_GENERATION.md)

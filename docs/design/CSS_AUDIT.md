@@ -1,27 +1,27 @@
 # CSS Architecture Audit
 
-**Last Updated:** 2026-02-08
+**Last Updated:** 2026-02-17
 
 ## Current State
 
 | Metric | Value |
 | ------ | ----- |
-| Total CSS Files | 93 (styles) + 11 (design-system) = 104 |
-| Total Lines | ~36,600 (styles) + ~4,300 (design-system) = ~40,900 |
-| Largest File | `pages/admin.css` (3,224 lines) |
+| Total CSS Files | 109 (styles) + 11 (design-system) = 120 |
+| Total Lines | ~42,000 (styles) + ~4,300 (design-system) = ~46,300 |
+| Largest File | `pages/admin.css` (~3,750 lines) |
 
 ### Directory Breakdown
 
 | Directory | Files | Lines |
 | --------- | ----- | ----- |
-| `src/styles/admin/` | 22 | ~9,900 |
-| `src/styles/pages/` | 11 | ~9,500 |
-| `src/styles/shared/` | 19 | ~5,400 |
-| `src/styles/components/` | 14 | ~4,800 |
-| `src/styles/client-portal/` | 12 | ~3,500 |
+| `src/styles/admin/` | 31 | ~12,000 |
+| `src/styles/pages/` | 11 | ~10,000 |
+| `src/styles/shared/` | 21 | ~6,000 |
+| `src/styles/components/` | 16 | ~5,500 |
+| `src/styles/client-portal/` | 16 | ~4,500 |
 | `src/styles/base/` | 6 | ~2,000 |
 | `src/styles/bundles/` | 4 | ~500 |
-| `src/styles/mobile/` | 3 | ~800 |
+| `src/styles/mobile/` | 4 | ~1,000 |
 | `src/design-system/` | 11 | ~4,300 |
 
 ---

@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** February 15, 2026 (Portal Rebuild Phase 3 - 165+ hardcoded values replaced with design tokens)
+**Last Updated:** February 17, 2026 (Documentation audit - file counts updated)
 
 ## Table of Contents
 
@@ -132,11 +132,11 @@ Overlay/backdrop tokens are defined **only** in `design-system/tokens/colors.css
 
 | Metric | Value |
 | ------ | ----- |
-| Total CSS Files | 94 |
-| Total Lines | ~34,200 |
+| Total CSS Files | 112 |
+| Total Lines | ~38,000 |
 | Design System | `src/design-system/` (11 files, ~3,600 lines) |
-| Styles Directory | `src/styles/` (91 files, ~34,200 lines) |
-| Largest File | admin.css (2,064 lines) |
+| Styles Directory | `src/styles/` (112 files, ~38,000 lines) |
+| Largest File | admin.css (~3,750 lines) |
 
 ---
 
@@ -1332,18 +1332,18 @@ On mobile (≤600px), login containers use transparent backgrounds and no shadow
 
 ```text
 src/styles/
-├── admin/           # Admin portal (22 files)
+├── admin/           # Admin portal (31 files)
 ├── base/            # Foundation (6 files)
 ├── bundles/         # Entry points (4 files)
-├── client-portal/   # Client portal (12 files)
+├── client-portal/   # Client portal (16 files)
 ├── components/      # Reusable (14 files)
 ├── mobile/          # Mobile-specific (3 files)
-├── pages/           # Page-specific (9 files)
+├── pages/           # Page-specific (11 files)
 ├── shared/          # Shared portal (19 files)
 └── variables.css    # CSS variables
 ```
 
-### Client Portal Files (`src/styles/client-portal/`) — 12 files
+### Client Portal Files (`src/styles/client-portal/`) — 16 files
 
 | File | Purpose |
 | ---- | ------- |
@@ -1360,7 +1360,7 @@ src/styles/
 | `projects.css` | Project navigation, details |
 | `settings.css` | Settings, account views |
 
-### Admin Files (`src/styles/admin/`) — 22 files
+### Admin Files (`src/styles/admin/`) — 31 files
 
 | File | Purpose |
 | ---- | ------- |
