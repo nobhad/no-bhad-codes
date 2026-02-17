@@ -12,7 +12,7 @@ Complete frontend implementation for the Deliverables and Design Review system. 
 
 ### 1. Admin Deliverables Manager Module
 
-**File:** [`src/features/admin/modules/admin-deliverables.ts`](../src/features/admin/modules/admin-deliverables.ts) (360 lines)
+**File:** [`src/features/admin/modules/admin-deliverables.ts`](../src/features/admin/modules/admin-deliverables.ts) (373 lines)
 
 #### Main Functions
 
@@ -70,7 +70,7 @@ openDeliverablesManager(projectId);
 
 ### 2. Design Review Module
 
-**File:** [`src/features/admin/modules/admin-design-review.ts`](../src/features/admin/modules/admin-design-review.ts) (490 lines)
+**File:** [`src/features/admin/modules/admin-design-review.ts`](../src/features/admin/modules/admin-design-review.ts) (508 lines)
 
 #### Main Functions
 
