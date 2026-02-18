@@ -336,56 +336,86 @@
               <img src="/images/avatar.svg" alt="No Bhad Codes" class="sidebar-logo-img" />
             </a>
 
-            <!-- Admin Navigation Buttons -->
-            <div class="sidebar-buttons">
-              <!-- Sidebar Toggle (first button) -->
-              <button class="btn btn-secondary sidebar-toggle-btn" id="btn-sidebar-toggle" aria-label="Toggle sidebar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true">
+            <!-- Admin Navigation -->
+            <nav class="sidebar-nav" aria-label="Admin navigation">
+              <!-- Sidebar Toggle -->
+              <button class="sidebar-toggle-btn" id="btn-sidebar-toggle" aria-label="Toggle sidebar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" aria-hidden="true">
                   <rect x="3" y="3" width="7" height="18" rx="1"/>
                   <path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/>
                 </svg>
-                <span class="btn-text">TOGGLE</span>
               </button>
-              <button class="btn btn-secondary active" id="btn-overview" data-tab="overview" aria-label="Dashboard">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
-              <span class="btn-text">DASHBOARD</span>
-            </button>
-            <button class="btn btn-secondary" id="btn-work" data-tab="work" aria-label="Work">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-              <span class="btn-text">WORK</span>
-            </button>
-            <button class="btn btn-secondary" id="btn-crm" data-tab="crm" aria-label="CRM">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span class="btn-text">CRM</span>
-              <span class="sidebar-badge" id="crm-badge" style="display: none;"></span>
-            </button>
-            <button class="btn btn-secondary" id="btn-documents" data-tab="documents" aria-label="Documents">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
-              <span class="btn-text">DOCUMENTS</span>
-            </button>
-            <button class="btn btn-secondary" id="btn-workflows" data-tab="workflows" aria-label="Workflows">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-              <span class="btn-text">WORKFLOWS</span>
-            </button>
-            <button class="btn btn-secondary" id="btn-analytics" data-tab="analytics" aria-label="Analytics">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-              <span class="btn-text">ANALYTICS</span>
-            </button>
-            <button class="btn btn-secondary" id="btn-support" data-tab="support" aria-label="Knowledge Base">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="10"/><path d="M8.5 8.5a4 4 0 0 1 7 3c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-              <span class="btn-text">KNOWLEDGE BASE</span>
-            </button>
-            <button class="btn btn-secondary" id="btn-system" data-tab="system" aria-label="System Status">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10"/><path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/><path d="M1 12h6m6 0h10"/><path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
-              <span class="btn-text">SYSTEM</span>
-            </button>
-          </div>
 
-          <!-- Sign Out Button -->
+              <!-- Overview (standalone) -->
+              <div class="sidebar-section">
+                <button class="sidebar-nav-item active" id="btn-overview" data-tab="overview" data-shortcut="1" aria-label="Overview">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" aria-hidden="true"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                  <span class="nav-label">Overview</span>
+                  <kbd class="sidebar-shortcut">1</kbd>
+                </button>
+              </div>
+
+              <!-- WORK Section -->
+              <div class="sidebar-section">
+                <span class="sidebar-section-label">Work</span>
+                <button class="sidebar-nav-item" id="btn-work" data-tab="work" data-shortcut="2" aria-label="Projects">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h16Z"/></svg>
+                  <span class="nav-label">Projects</span>
+                  <kbd class="sidebar-shortcut">2</kbd>
+                </button>
+                <button class="sidebar-nav-item" id="btn-workflows" data-tab="workflows" data-shortcut="3" aria-label="Workflows">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                  <span class="nav-label">Workflows</span>
+                  <kbd class="sidebar-shortcut">3</kbd>
+                </button>
+              </div>
+
+              <!-- CRM Section -->
+              <div class="sidebar-section">
+                <span class="sidebar-section-label">CRM</span>
+                <button class="sidebar-nav-item" id="btn-crm" data-tab="crm" data-shortcut="4" aria-label="Clients & Leads">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <span class="nav-label">Clients & Leads</span>
+                  <kbd class="sidebar-shortcut">4</kbd>
+                </button>
+              </div>
+
+              <!-- FINANCE Section -->
+              <div class="sidebar-section">
+                <span class="sidebar-section-label">Finance</span>
+                <button class="sidebar-nav-item" id="btn-documents" data-tab="documents" data-shortcut="5" aria-label="Documents">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                  <span class="nav-label">Documents</span>
+                  <kbd class="sidebar-shortcut">5</kbd>
+                </button>
+                <button class="sidebar-nav-item" id="btn-analytics" data-tab="analytics" data-shortcut="6" aria-label="Analytics">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  <span class="nav-label">Analytics</span>
+                  <kbd class="sidebar-shortcut">6</kbd>
+                </button>
+              </div>
+
+              <!-- SYSTEM Section -->
+              <div class="sidebar-section">
+                <span class="sidebar-section-label">System</span>
+                <button class="sidebar-nav-item" id="btn-support" data-tab="support" data-shortcut="7" aria-label="Knowledge Base">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                  <span class="nav-label">Knowledge</span>
+                  <kbd class="sidebar-shortcut">7</kbd>
+                </button>
+                <button class="sidebar-nav-item" id="btn-system" data-tab="system" data-shortcut="8" aria-label="System Status">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <span class="nav-label">Settings</span>
+                  <kbd class="sidebar-shortcut">8</kbd>
+                </button>
+              </div>
+            </nav>
+
+          <!-- Sign Out Button (separated) -->
           <div class="sidebar-footer">
-            <button type="button" class="btn btn-secondary btn-logout" id="btn-logout" aria-label="Sign out">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
-              <span class="btn-text">SIGN OUT</span>
+            <button type="button" class="sidebar-signout" id="btn-logout" aria-label="Sign out">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span class="nav-label">Sign Out</span>
             </button>
           </div>
         </div>
@@ -447,6 +477,27 @@
                 <!-- Knowledge Base view toggle -->
                 <div class="header-controls header-subtab-group" data-for-tab="knowledge-base">
                   <div id="kb-section-toggle-mount"></div>
+                </div>
+                <!-- Project Detail subtabs -->
+                <div class="portal-subtabs header-subtab-group" data-for-tab="project-detail" id="project-detail-header-tabs">
+                  <button class="portal-subtab active" data-pd-tab="overview">Overview</button>
+                  <button class="portal-subtab" data-pd-tab="files">Files</button>
+                  <button class="portal-subtab" data-pd-tab="deliverables">Deliverables</button>
+                  <button class="portal-subtab" data-pd-tab="messages">Messages</button>
+                  <button class="portal-subtab" data-pd-tab="invoices">Invoices</button>
+                  <button class="portal-subtab" data-pd-tab="tasks">Tasks</button>
+                  <button class="portal-subtab" data-pd-tab="time">Time</button>
+                  <button class="portal-subtab" data-pd-tab="contract">Contract</button>
+                  <button class="portal-subtab" data-pd-tab="notes">Notes</button>
+                </div>
+                <!-- Client Detail subtabs -->
+                <div class="portal-subtabs header-subtab-group" data-for-tab="client-detail" id="client-detail-header-tabs">
+                  <button class="portal-subtab active" data-cd-tab="overview">Overview</button>
+                  <button class="portal-subtab" data-cd-tab="contacts">Contacts</button>
+                  <button class="portal-subtab" data-cd-tab="activity">Activity</button>
+                  <button class="portal-subtab" data-cd-tab="projects">Projects</button>
+                  <button class="portal-subtab" data-cd-tab="invoices">Invoices</button>
+                  <button class="portal-subtab" data-cd-tab="notes">Notes</button>
                 </div>
               </div>
             </div>
@@ -897,5 +948,7 @@
     <script>
       document.getElementById('admin-copyright-year').textContent = new Date().getFullYear();
     </script>
+    <!-- Mobile sidebar overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
   </body>
 </html>

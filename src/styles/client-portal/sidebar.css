@@ -411,6 +411,236 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 /* =====================================================
+   ADMIN SIDEBAR NAVIGATION (Linear-style)
+   Section groups with labels and active accent bar
+   ===================================================== */
+
+/* Admin Sidebar Navigation Container */
+[data-page="admin"] .sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+[data-page="admin"] .sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* Sidebar Toggle Button (icon only, no label) */
+[data-page="admin"] .sidebar-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 8px;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-sm, 6px);
+  color: var(--portal-text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+[data-page="admin"] .sidebar-toggle-btn:hover {
+  background: var(--portal-bg-hover);
+  color: var(--portal-text-light);
+}
+
+[data-page="admin"] .sidebar-toggle-btn .nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Sidebar Section Groups */
+[data-page="admin"] .sidebar-section {
+  display: flex;
+  flex-direction: column;
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+
+/* Section Labels (WORK, CRM, FINANCE, SYSTEM) */
+[data-page="admin"] .sidebar-section-label {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--portal-text-muted);
+  padding: 12px 8px 4px;
+  user-select: none;
+}
+
+/* Navigation Items */
+[data-page="admin"] .sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 8px;
+  margin: 1px 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-sm, 6px);
+  color: var(--portal-text-muted);
+  font-family: var(--font-family-sans);
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  position: relative;
+  width: 100%;
+}
+
+[data-page="admin"] .sidebar-nav-item:hover {
+  background: var(--portal-bg-hover);
+  color: var(--portal-text-light);
+}
+
+[data-page="admin"] .sidebar-nav-item:hover .nav-icon {
+  opacity: 1;
+}
+
+/* Active State - left accent bar + hover background */
+[data-page="admin"] .sidebar-nav-item.active {
+  background: var(--portal-bg-hover);
+  color: var(--portal-text-light);
+  font-weight: 500;
+}
+
+[data-page="admin"] .sidebar-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--color-primary);
+  border-radius: 0 2px 2px 0;
+}
+
+[data-page="admin"] .sidebar-nav-item.active .nav-icon {
+  opacity: 1;
+}
+
+/* Navigation Icon */
+[data-page="admin"] .sidebar-nav-item .nav-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.65;
+  transition: opacity var(--transition-fast);
+}
+
+/* Navigation Label */
+[data-page="admin"] .sidebar-nav-item .nav-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Keyboard Shortcut Badge */
+[data-page="admin"] .sidebar-nav-item .sidebar-shortcut {
+  display: none; /* Hidden by default, show on hover if needed */
+  font-family: var(--font-family-mono);
+  font-size: 9px;
+  color: var(--portal-text-muted);
+  background: var(--portal-bg-darker);
+  border: 1px solid var(--portal-border-dark);
+  border-radius: 3px;
+  padding: 1px 4px;
+  margin-left: auto;
+}
+
+/* Sign Out Button (muted, separated) */
+[data-page="admin"] .sidebar-footer {
+  margin-top: auto;
+  padding: 12px 8px 16px;
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+[data-page="admin"] .sidebar-signout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-sm, 6px);
+  color: var(--portal-text-muted);
+  font-family: var(--font-family-sans);
+  font-size: 12px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+[data-page="admin"] .sidebar-signout:hover {
+  opacity: 1;
+  background: var(--portal-bg-hover);
+  color: var(--color-error-400, #f87171);
+}
+
+[data-page="admin"] .sidebar-signout .nav-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   COLLAPSED STATE - Admin Sidebar Navigation
+   ===================================================== */
+
+[data-page="admin"] .sidebar.collapsed .sidebar-section-label,
+[data-page="admin"] .sidebar.collapsed .sidebar-nav-item .nav-label,
+[data-page="admin"] .sidebar.collapsed .sidebar-signout .nav-label,
+[data-page="admin"] .sidebar.collapsed .sidebar-shortcut {
+  display: none;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-section {
+  padding: 0 4px;
+  align-items: center;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-nav-item {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin: 2px auto;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-toggle-btn {
+  margin-bottom: 4px;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-footer {
+  padding: 8px 4px;
+  display: flex;
+  justify-content: center;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-signout {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+/* =====================================================
    INTERMEDIATE BREAKPOINT AUTO-COLLAPSE
    Auto-collapse sidebar when viewport is constrained (zoom or narrow screens)
    1300px triggers at ~150% zoom on 1920px screens (1920/1.5 = 1280px)
@@ -529,6 +759,34 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     justify-content: center;
     line-height: 1;
   }
+
+  /* Admin sidebar navigation auto-collapse */
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-section-label,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav-item .nav-label,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-signout .nav-label,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-shortcut {
+    display: none;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-section {
+    padding: 0 4px;
+    align-items: center;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav-item {
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 2px auto;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-signout {
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
 }
 
 /* =====================================================
@@ -632,5 +890,27 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   [data-page="client-portal"] .sidebar:not(.collapsed) .account-list,
   [data-page="admin"] .sidebar:not(.collapsed) .project-subitems {
     display: none;
+  }
+
+  /* Admin sidebar navigation mobile auto-collapse */
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-section-label,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav-item .nav-label,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-signout .nav-label,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-shortcut {
+    display: none;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-section {
+    padding: 0 4px;
+    align-items: center;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav-item,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-signout {
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 2px auto;
   }
 }
