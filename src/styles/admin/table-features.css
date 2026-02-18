@@ -530,3 +530,61 @@
     height: 14px;
   }
 }
+
+/* ===============================================
+   KEYBOARD NAVIGATION (J/K)
+   Linear-style keyboard row navigation
+   =============================================== */
+
+/* Focused row - subtle highlight */
+[data-page="admin"] .admin-table tbody tr.row-focused,
+[data-page="admin"] .admin-table tbody tr[data-focused="true"] {
+  background: var(--portal-bg-hover) !important;
+  outline: none;
+}
+
+/* Focus indicator - subtle left border */
+[data-page="admin"] .admin-table tbody tr.row-focused td:first-child,
+[data-page="admin"] .admin-table tbody tr[data-focused="true"] td:first-child {
+  box-shadow: inset 2px 0 0 var(--color-primary);
+}
+
+/* Selected row (X/Space to toggle) */
+[data-page="admin"] .admin-table tbody tr.row-selected,
+[data-page="admin"] .admin-table tbody tr[data-selected="true"] {
+  background: var(--color-primary-alpha, rgba(0, 111, 238, 0.1)) !important;
+}
+
+/* Combined focused + selected */
+[data-page="admin"] .admin-table tbody tr.row-focused.row-selected,
+[data-page="admin"] .admin-table tbody tr[data-focused="true"][data-selected="true"] {
+  background: var(--color-primary-alpha, rgba(0, 111, 238, 0.15)) !important;
+}
+
+/* Keyboard hint in table header (optional) */
+[data-page="admin"] .table-keyboard-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-1);
+  margin-left: var(--space-2);
+  border-radius: var(--border-radius-sm);
+  background: var(--portal-bg-darker);
+  border: 1px solid var(--portal-border);
+  color: var(--portal-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+[data-page="admin"] .table-keyboard-hint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  padding: 0 var(--space-0-5);
+  border-radius: 3px;
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border);
+  font-family: inherit;
+  font-size: inherit;
+}

@@ -19,7 +19,7 @@ const SHORTCUTS: ShortcutSection[] = [
     shortcuts: [
       { action: 'Open command palette', keys: ['⌘', 'K'] },
       { action: 'Show keyboard shortcuts', keys: ['?'] },
-      { action: 'Close modal/panel', keys: ['Esc'] },
+      { action: 'Close modal/panel', keys: ['Esc'] }
     ]
   },
   {
@@ -32,7 +32,7 @@ const SHORTCUTS: ShortcutSection[] = [
       { action: 'Workflows', keys: ['5'] },
       { action: 'Analytics', keys: ['6'] },
       { action: 'Knowledge', keys: ['7'] },
-      { action: 'System', keys: ['8'] },
+      { action: 'System', keys: ['8'] }
     ]
   },
   {
@@ -42,7 +42,7 @@ const SHORTCUTS: ShortcutSection[] = [
       { action: 'Move up', keys: ['K', '↑'] },
       { action: 'Open item', keys: ['Enter'] },
       { action: 'Toggle select', keys: ['X', 'Space'] },
-      { action: 'Select all', keys: ['⌘', 'A'] },
+      { action: 'Select all', keys: ['⌘', 'A'] }
     ]
   },
   {
@@ -50,7 +50,7 @@ const SHORTCUTS: ShortcutSection[] = [
     shortcuts: [
       { action: 'Save', keys: ['⌘', 'S'] },
       { action: 'Edit', keys: ['E'] },
-      { action: 'Delete', keys: ['⌫'] },
+      { action: 'Delete', keys: ['⌫'] }
     ]
   }
 ];

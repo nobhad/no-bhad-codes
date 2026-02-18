@@ -203,25 +203,6 @@
    and class="portal-tab-panel" on content divs.
    ============================================== */
 
-/* Remove individual card backgrounds and shadows inside tabs - content is now in unified container.
-   Applies to both project detail (pd-tab-*) and client detail (cd-tab-*) so both views look the same. */
-[data-page="admin"] [id^="pd-tab-"] .portal-project-card,
-[data-page="admin"] [id^="cd-tab-"] .portal-project-card,
-[data-page="admin"] [id^="pd-tab-"] .portal-shadow,
-[data-page="admin"] [id^="pd-tab-"] .files-upload-section,
-/* High specificity with body element selector */
-body[data-page="admin"] [id^="pd-tab-"] .files-list-section,
-body[data-page="admin"] [id^="pd-tab-"] .intake-form-section,
-body[data-page="admin"] [id^="pd-tab-"] .recent-activity,
-body[data-page="admin"] [id^="pd-tab-"] .settings-section {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  padding: 0;
-  margin: 0;
-  box-shadow: none;
-}
-
 /* Messages container keeps its light background styling */
 body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   background: var(--color-neutral-200);
@@ -242,7 +223,7 @@ body[data-page="admin"] [id^="pd-tab-"] .invoice-summary {
 }
 
 body[data-page="admin"] [id^="pd-tab-"] .summary-card {
-  background: var(--portal-bg-medium);
+  background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--portal-radius-md);
   padding: var(--space-3);
@@ -958,7 +939,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* Invoices tab - match files tab layout when active */
 /* Note: display is handled by [id^="pd-tab-"].active rule */
 [data-page="admin"] #pd-tab-invoices.active {
-  gap: 4rem;
+  gap: var(--space-3);
 }
 
 /* Invoices list section - match files-list-section layout */
@@ -1765,8 +1746,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
    ===================================================== */
 
 .pd-header-card {
-  margin-bottom: var(--space-3);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4);
 }
 
 .pd-header-card .detail-title-row {
@@ -1782,8 +1762,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-header-client {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
-  margin-top: var(--space-3);
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 .pd-client-item {
@@ -1816,10 +1796,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-header-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--portal-border-dark);
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 .pd-meta-item {
@@ -1835,9 +1813,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 /* Header Description */
 .pd-header-description {
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--portal-border-dark);
+  margin-top: var(--space-2);
 }
 
 .pd-header-description .pd-description {
@@ -1849,13 +1825,11 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 /* Header URLs */
 .pd-header-urls {
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--portal-border-dark);
+  margin-top: var(--space-2);
 }
 
 .pd-header-urls .pd-urls-row {
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
 }
 
 /* =====================================================
@@ -1865,8 +1839,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .pd-overview-grid {
   display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: var(--space-4);
+  grid-template-columns: 1fr 280px;
+  gap: var(--space-3);
   align-items: start;
 }
 
@@ -1884,7 +1858,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 /* Activity Card (Full Width, Last Section) */
 .pd-activity-card {
-  margin-top: var(--space-4);
+  /* No margin needed - flexbox gap handles spacing */
 }
 
 /* Project Details Card (Full Width at Top) */
@@ -1936,8 +1910,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 /* URL Links */
 .pd-urls-section {
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--portal-border-dark);
+  margin-top: var(--space-3);
 }
 
 .pd-urls-row {
@@ -1984,6 +1957,23 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
+}
+
+/* Horizontal progress layout (above milestones) */
+.pd-progress-display.pd-progress-horizontal {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.pd-progress-display.pd-progress-horizontal .pd-progress-ring {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+}
+
+.pd-progress-display.pd-progress-horizontal .progress-bar {
+  flex: 1;
 }
 
 .pd-progress-ring {

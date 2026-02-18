@@ -10,7 +10,7 @@
 
 /* Invoices tab - match files tab layout when active */
 [data-page="admin"] #pd-tab-invoices.active {
-  gap: 4rem;
+  gap: var(--space-3);
 }
 
 /* Invoices list section - match files-list-section layout */

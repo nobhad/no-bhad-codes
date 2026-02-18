@@ -126,113 +126,7 @@ const RENDER_ICONS = {
  */
 export function renderProjectDetailTab(container: HTMLElement): void {
   container.innerHTML = `
-    <!-- Project Header Card -->
-    <div class="portal-project-card portal-shadow pd-header-card">
-      <div class="pd-header-top">
-        <div class="pd-header-info">
-          <div class="detail-title-row">
-            <div class="detail-title-group">
-              <h2 class="detail-title" id="pd-project-name">Project Name</h2>
-              <span class="status-badge" id="pd-status">-</span>
-            </div>
-            <div class="detail-actions">
-              <button class="icon-btn" id="pd-btn-edit" title="Edit Project" aria-label="Edit project details">
-                ${RENDER_ICONS.EDIT}
-              </button>
-              <div class="table-dropdown detail-more-menu" id="pd-more-menu">
-                <button type="button" class="custom-dropdown-trigger" aria-label="More actions">
-                  ${RENDER_ICONS.MORE}
-                </button>
-                <ul class="custom-dropdown-menu">
-                  <li class="custom-dropdown-item" data-action="edit">${RENDER_ICONS.PEN} Edit Project</li>
-                  <li class="custom-dropdown-item" data-action="duplicate">${RENDER_ICONS.COPY} Duplicate Project</li>
-                  <li class="custom-dropdown-item" data-action="archive">${RENDER_ICONS.ARCHIVE} Archive Project</li>
-                  <li class="custom-dropdown-item" data-action="generate-docs">${RENDER_ICONS.DOC} Generate Documents</li>
-                  <li class="dropdown-divider"></li>
-                  <li class="custom-dropdown-item danger" data-action="delete">${RENDER_ICONS.TRASH} Delete Project</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <!-- Client Info -->
-          <div class="pd-header-client">
-            <div class="pd-client-item clickable-client" id="pd-client-link">
-              ${RENDER_ICONS.USER}
-              <span id="pd-client-name">-</span>
-            </div>
-            <div class="pd-client-item" id="pd-company-row">
-              ${RENDER_ICONS.BUILDING}
-              <span id="pd-company">-</span>
-            </div>
-            <div class="pd-client-item">
-              ${RENDER_ICONS.MAIL}
-              <span id="pd-client-email">-</span>
-            </div>
-          </div>
-          <!-- Project Meta -->
-          <div class="pd-header-meta">
-            <div class="pd-meta-item">
-              <span class="field-label">Type</span>
-              <span class="pd-meta-value" id="pd-type">-</span>
-            </div>
-            <div class="pd-meta-item">
-              <span class="field-label">Start</span>
-              <span class="pd-meta-value" id="pd-start-date">-</span>
-            </div>
-            <div class="pd-meta-item">
-              <span class="field-label">Target End</span>
-              <span class="pd-meta-value" id="pd-end-date">-</span>
-            </div>
-            <div class="pd-meta-item">
-              <span class="field-label">Budget</span>
-              <span class="pd-meta-value" id="pd-budget">-</span>
-            </div>
-          </div>
-          <!-- Description -->
-          <div class="pd-header-description">
-            <span class="field-label">Description</span>
-            <p class="pd-description" id="pd-description">-</p>
-          </div>
-          <!-- Financial Details -->
-          <div class="pd-header-meta">
-            <div class="pd-meta-item">
-              <span class="field-label">Timeline</span>
-              <span class="pd-meta-value" id="pd-timeline">-</span>
-            </div>
-            <div class="pd-meta-item">
-              <span class="field-label">Quoted Price</span>
-              <span class="pd-meta-value" id="pd-price">-</span>
-            </div>
-            <div class="pd-meta-item">
-              <span class="field-label">Deposit</span>
-              <span class="pd-meta-value" id="pd-deposit">-</span>
-            </div>
-          </div>
-          <!-- URLs -->
-          <div class="pd-header-urls" id="pd-urls-section">
-            <span class="field-label">Links</span>
-            <div class="pd-urls-row">
-              <a href="#" id="pd-preview-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
-                ${RENDER_ICONS.EYE} <span>Preview</span>
-              </a>
-              <a href="#" id="pd-repo-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
-                ${RENDER_ICONS.GITHUB} <span>Repository</span>
-              </a>
-              <a href="#" id="pd-production-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
-                ${RENDER_ICONS.GLOBE} <span>Production</span>
-              </a>
-            </div>
-          </div>
-          <!-- Admin Notes -->
-          <div class="pd-header-description" id="pd-admin-notes-section" style="display: none;">
-            <span class="field-label">Admin Notes (Internal)</span>
-            <p class="pd-description" id="pd-admin-notes">-</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab Navigation -->
+    <!-- Tab Navigation (hidden - tabs are in header) -->
     <div class="project-detail-tabs portal-tabs">
       <button class="active" data-pd-tab="overview">${RENDER_ICONS.OVERVIEW}<span>Overview</span></button>
       <button data-pd-tab="files">${RENDER_ICONS.FILE}<span>Files</span></button>
@@ -247,8 +141,124 @@ export function renderProjectDetailTab(container: HTMLElement): void {
 
     <!-- Overview Tab -->
     <div class="portal-tab-panel active" id="pd-tab-overview">
+      <!-- Project Header Card - Only in Overview -->
+      <div class="portal-project-card portal-shadow pd-header-card">
+        <div class="pd-header-top">
+          <div class="pd-header-info">
+            <div class="detail-title-row">
+              <div class="detail-title-group">
+                <h2 class="detail-title" id="pd-project-name">Project Name</h2>
+                <span class="status-badge" id="pd-status">-</span>
+              </div>
+              <div class="detail-actions">
+                <button class="icon-btn" id="pd-btn-edit" title="Edit Project" aria-label="Edit project details">
+                  ${RENDER_ICONS.EDIT}
+                </button>
+                <div class="table-dropdown detail-more-menu" id="pd-more-menu">
+                  <button type="button" class="custom-dropdown-trigger" aria-label="More actions">
+                    ${RENDER_ICONS.MORE}
+                  </button>
+                  <ul class="custom-dropdown-menu">
+                    <li class="custom-dropdown-item" data-action="edit">${RENDER_ICONS.PEN} Edit Project</li>
+                    <li class="custom-dropdown-item" data-action="duplicate">${RENDER_ICONS.COPY} Duplicate Project</li>
+                    <li class="custom-dropdown-item" data-action="archive">${RENDER_ICONS.ARCHIVE} Archive Project</li>
+                    <li class="custom-dropdown-item" data-action="generate-docs">${RENDER_ICONS.DOC} Generate Documents</li>
+                    <li class="dropdown-divider"></li>
+                    <li class="custom-dropdown-item danger" data-action="delete">${RENDER_ICONS.TRASH} Delete Project</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Client Info -->
+            <div class="pd-header-client">
+              <div class="pd-client-item clickable-client" id="pd-client-link">
+                ${RENDER_ICONS.USER}
+                <span id="pd-client-name">-</span>
+              </div>
+              <div class="pd-client-item" id="pd-company-row">
+                ${RENDER_ICONS.BUILDING}
+                <span id="pd-company">-</span>
+              </div>
+              <div class="pd-client-item">
+                ${RENDER_ICONS.MAIL}
+                <span id="pd-client-email">-</span>
+              </div>
+            </div>
+            <!-- Project Meta -->
+            <div class="pd-header-meta">
+              <div class="pd-meta-item">
+                <span class="field-label">Type</span>
+                <span class="pd-meta-value" id="pd-type">-</span>
+              </div>
+              <div class="pd-meta-item">
+                <span class="field-label">Start</span>
+                <span class="pd-meta-value" id="pd-start-date">-</span>
+              </div>
+              <div class="pd-meta-item">
+                <span class="field-label">Target End</span>
+                <span class="pd-meta-value" id="pd-end-date">-</span>
+              </div>
+              <div class="pd-meta-item">
+                <span class="field-label">Budget</span>
+                <span class="pd-meta-value" id="pd-budget">-</span>
+              </div>
+            </div>
+            <!-- Description -->
+            <div class="pd-header-description">
+              <span class="field-label">Description</span>
+              <p class="pd-description" id="pd-description">-</p>
+            </div>
+            <!-- Financial Details -->
+            <div class="pd-header-meta">
+              <div class="pd-meta-item">
+                <span class="field-label">Timeline</span>
+                <span class="pd-meta-value" id="pd-timeline">-</span>
+              </div>
+              <div class="pd-meta-item">
+                <span class="field-label">Quoted Price</span>
+                <span class="pd-meta-value" id="pd-price">-</span>
+              </div>
+              <div class="pd-meta-item">
+                <span class="field-label">Deposit</span>
+                <span class="pd-meta-value" id="pd-deposit">-</span>
+              </div>
+            </div>
+            <!-- URLs -->
+            <div class="pd-header-urls" id="pd-urls-section">
+              <span class="field-label">Links</span>
+              <div class="pd-urls-row">
+                <a href="#" id="pd-preview-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
+                  ${RENDER_ICONS.EYE} <span>Preview</span>
+                </a>
+                <a href="#" id="pd-repo-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
+                  ${RENDER_ICONS.GITHUB} <span>Repository</span>
+                </a>
+                <a href="#" id="pd-production-url-link" target="_blank" rel="noopener noreferrer" class="pd-url-link">
+                  ${RENDER_ICONS.GLOBE} <span>Production</span>
+                </a>
+              </div>
+            </div>
+            <!-- Admin Notes -->
+            <div class="pd-header-description" id="pd-admin-notes-section" style="display: none;">
+              <span class="field-label">Admin Notes (Internal)</span>
+              <p class="pd-description" id="pd-admin-notes">-</p>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="pd-overview-grid">
         <div class="pd-overview-main">
+          <div class="portal-project-card portal-shadow pd-progress-card">
+            <h3>Progress</h3>
+            <div class="pd-progress-display pd-progress-horizontal">
+              <div class="pd-progress-ring">
+                <span class="pd-progress-percent" id="pd-progress-percent">0%</span>
+              </div>
+              <div class="progress-bar" role="progressbar" id="pd-progress-bar-container" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Project completion progress">
+                <div class="progress-fill" id="pd-progress-bar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
           <div class="portal-project-card portal-shadow">
             <div class="card-header-with-action">
               <h3>Milestones</h3>
@@ -260,17 +270,6 @@ export function renderProjectDetailTab(container: HTMLElement): void {
           </div>
         </div>
         <div class="pd-overview-sidebar">
-          <div class="portal-project-card portal-shadow pd-progress-card">
-            <h3>Progress</h3>
-            <div class="pd-progress-display">
-              <div class="pd-progress-ring">
-                <span class="pd-progress-percent" id="pd-progress-percent">0%</span>
-              </div>
-              <div class="progress-bar" role="progressbar" id="pd-progress-bar-container" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Project completion progress">
-                <div class="progress-fill" id="pd-progress-bar" style="width: 0%"></div>
-              </div>
-            </div>
-          </div>
           <div class="portal-project-card portal-shadow">
             <h3>Financials</h3>
             <div class="pd-financial-stats">
@@ -301,122 +300,124 @@ export function renderProjectDetailTab(container: HTMLElement): void {
 
     <!-- Deliverables Tab -->
     <div class="portal-tab-panel" id="pd-tab-deliverables">
-      <h3 class="tab-section-heading">Deliverables</h3>
-      <div class="portal-project-card portal-shadow">
-        <div class="card-header-with-action">
-          <h3>Project Deliverables</h3>
-          <button class="btn btn-secondary btn-sm" id="btn-manage-deliverables" data-action="open-deliverables">Manage Deliverables</button>
-        </div>
-        <div id="pd-deliverables-list" class="deliverables-inline-list">
-          <p class="empty-state">No deliverables yet. Click "Manage Deliverables" to add and track project deliverables.</p>
+      <div class="tab-content-wrapper">
+        <div class="portal-project-card portal-shadow">
+          <div class="card-header-with-action">
+            <h3>Project Deliverables</h3>
+            <button class="btn btn-secondary btn-sm" id="btn-manage-deliverables" data-action="open-deliverables">Manage Deliverables</button>
+          </div>
+          <div id="pd-deliverables-list" class="deliverables-inline-list">
+            <p class="empty-state">No deliverables yet. Click "Manage Deliverables" to add and track project deliverables.</p>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Files Tab -->
     <div class="portal-tab-panel" id="pd-tab-files">
-      <div class="tab-section-header">
-        <h3 class="tab-section-heading">Files</h3>
-        <div class="table-dropdown generate-document-menu" id="pd-generate-document-menu">
-          <button type="button" class="btn btn-secondary custom-dropdown-trigger" aria-label="Generate document">
-            ${RENDER_ICONS.DOC} <span>Generate Document</span> ${RENDER_ICONS.CHEVRON_DOWN}
-          </button>
-          <ul class="custom-dropdown-menu">
-            <li class="custom-dropdown-item" data-action="generate-proposal">${RENDER_ICONS.DOC} Generate Proposal PDF</li>
-            <li class="custom-dropdown-item" data-action="generate-contract">${RENDER_ICONS.PEN} Generate Contract PDF</li>
-            <li class="custom-dropdown-item" data-action="generate-receipt">${RENDER_ICONS.CREDIT_CARD} Generate Receipt PDF</li>
-            <li class="custom-dropdown-item" data-action="generate-report">${RENDER_ICONS.DOC} Generate Project Report</li>
-            <li class="custom-dropdown-item" data-action="generate-sow">${RENDER_ICONS.LIST} Generate SOW</li>
-          </ul>
-        </div>
-      </div>
-      <div class="files-upload-section portal-shadow">
-        <h3>Upload Files for Client</h3>
-        <div class="upload-dropzone" id="pd-upload-dropzone">
-          <p>Drag and drop files here or</p>
-          <button class="btn btn-secondary" id="btn-pd-browse-files">Browse Files</button>
-          <input type="file" id="pd-file-input" multiple hidden accept=".jpeg,.jpg,.png,.gif,.pdf,.doc,.docx,.txt,.zip,.rar,image/*,application/pdf" />
-        </div>
-      </div>
-      <div class="admin-modal-overlay hidden" id="file-upload-modal" role="dialog" aria-modal="true" aria-labelledby="file-upload-modal-title">
-        <div class="admin-modal">
-          <div class="admin-modal-header">
-            <h2 id="file-upload-modal-title">Upload Files</h2>
-            <button type="button" class="btn-icon close-modal" id="file-upload-modal-close" aria-label="Close">${RENDER_ICONS.CLOSE}</button>
-          </div>
-          <div class="admin-modal-body">
-            <div class="upload-files-preview" id="upload-files-preview"></div>
-            <div class="form-group">
-              <label for="upload-file-type" class="field-label">File Type</label>
-              <div id="upload-file-type-mount"></div>
-            </div>
-            <div class="form-group" id="pd-upload-link-request" style="display: none;">
-              <label for="upload-request-select" class="field-label">Link to pending request (optional)</label>
-              <div id="upload-request-select-mount"></div>
+      <div class="tab-content-wrapper">
+        <div class="portal-project-card portal-shadow files-upload-section">
+          <div class="card-header-with-action">
+            <h3>Upload Files for Client</h3>
+            <div class="table-dropdown generate-document-menu" id="pd-generate-document-menu">
+              <button type="button" class="btn btn-secondary btn-sm custom-dropdown-trigger" aria-label="Generate document">
+                ${RENDER_ICONS.DOC} <span>Generate Document</span> ${RENDER_ICONS.CHEVRON_DOWN}
+              </button>
+              <ul class="custom-dropdown-menu">
+                <li class="custom-dropdown-item" data-action="generate-proposal">${RENDER_ICONS.DOC} Generate Proposal PDF</li>
+                <li class="custom-dropdown-item" data-action="generate-contract">${RENDER_ICONS.PEN} Generate Contract PDF</li>
+                <li class="custom-dropdown-item" data-action="generate-receipt">${RENDER_ICONS.CREDIT_CARD} Generate Receipt PDF</li>
+                <li class="custom-dropdown-item" data-action="generate-report">${RENDER_ICONS.DOC} Generate Project Report</li>
+                <li class="custom-dropdown-item" data-action="generate-sow">${RENDER_ICONS.LIST} Generate SOW</li>
+              </ul>
             </div>
           </div>
-          <div class="admin-modal-footer">
-            <button type="button" class="btn btn-secondary" id="file-upload-modal-cancel">Cancel</button>
-            <button type="button" class="btn btn-primary" id="file-upload-modal-confirm">Upload</button>
+          <div class="upload-dropzone" id="pd-upload-dropzone">
+            <p>Drag and drop files here or</p>
+            <button class="btn btn-secondary" id="btn-pd-browse-files">Browse Files</button>
+            <input type="file" id="pd-file-input" multiple hidden accept=".jpeg,.jpg,.png,.gif,.pdf,.doc,.docx,.txt,.zip,.rar,image/*,application/pdf" />
           </div>
         </div>
-      </div>
-      <div class="files-browser portal-shadow">
-        <div class="folder-panel">
-          <div class="folder-panel-header">
-            <h4>Folders</h4>
-            <button class="btn-icon" id="btn-create-folder" title="Create Folder" aria-label="Create folder">${RENDER_ICONS.FOLDER_PLUS}</button>
-          </div>
-          <div class="folder-tree" id="pd-folder-tree">
-            <div class="folder-item root active" data-folder-id="root">${RENDER_ICONS.FOLDER} <span>All Files</span></div>
-          </div>
-        </div>
-        <div class="files-panel">
-          <div class="files-panel-header">
-            <div class="files-path" id="pd-files-path"><span>All Files</span></div>
-            <div class="files-panel-controls">
-              <div id="files-source-toggle-mount"></div>
-              <div id="files-view-toggle-mount"></div>
+        <div class="admin-modal-overlay hidden" id="file-upload-modal" role="dialog" aria-modal="true" aria-labelledby="file-upload-modal-title">
+          <div class="admin-modal">
+            <div class="admin-modal-header">
+              <h2 id="file-upload-modal-title">Upload Files</h2>
+              <button type="button" class="btn-icon close-modal" id="file-upload-modal-close" aria-label="Close">${RENDER_ICONS.CLOSE}</button>
+            </div>
+            <div class="admin-modal-body">
+              <div class="upload-files-preview" id="upload-files-preview"></div>
+              <div class="form-group">
+                <label for="upload-file-type" class="field-label">File Type</label>
+                <div id="upload-file-type-mount"></div>
+              </div>
+              <div class="form-group" id="pd-upload-link-request" style="display: none;">
+                <label for="upload-request-select" class="field-label">Link to pending request (optional)</label>
+                <div id="upload-request-select-mount"></div>
+              </div>
+            </div>
+            <div class="admin-modal-footer">
+              <button type="button" class="btn btn-secondary" id="file-upload-modal-cancel">Cancel</button>
+              <button type="button" class="btn btn-primary" id="file-upload-modal-confirm">Upload</button>
             </div>
           </div>
-          <div class="files-list" id="pd-files-list"><p class="empty-state">No files uploaded yet.</p></div>
-          <div class="pending-requests-list hidden" id="pd-pending-requests-list"></div>
         </div>
-      </div>
-      <div class="file-detail-modal hidden" id="file-detail-modal">
-        <div class="file-detail-content portal-shadow">
-          <div class="file-detail-header">
-            <h2 id="file-detail-name">File Name</h2>
-            <button class="btn-icon close-modal" id="close-file-detail">${RENDER_ICONS.CLOSE}</button>
-          </div>
-          <div class="file-detail-tabs">
-            <button class="active" data-tab="info">Info</button>
-            <button data-tab="versions">Versions</button>
-            <button data-tab="comments">Comments</button>
-            <button data-tab="access">Access Log</button>
-          </div>
-          <div class="file-detail-tab-content active" data-tab-content="info">
-            <div class="file-info-grid" id="file-info-content"></div>
-          </div>
-          <div class="file-detail-tab-content" data-tab-content="versions">
-            <div class="file-versions-list" id="file-versions-list"></div>
-          </div>
-          <div class="file-detail-tab-content" data-tab-content="comments">
-            <div class="file-comments-list" id="file-comments-list"></div>
-            <div class="file-comment-form">
-              <label for="file-comment-input" class="sr-only">Add a comment</label>
-              <textarea id="file-comment-input" placeholder="Add a comment..." rows="2" aria-label="Add a comment"></textarea>
-              <button class="btn btn-secondary btn-sm" id="btn-add-file-comment">Add Comment</button>
+        <div class="portal-project-card portal-shadow files-browser">
+          <div class="folder-panel">
+            <div class="folder-panel-header">
+              <h4>Folders</h4>
+              <button class="btn-icon" id="btn-create-folder" title="Create Folder" aria-label="Create folder">${RENDER_ICONS.FOLDER_PLUS}</button>
+            </div>
+            <div class="folder-tree" id="pd-folder-tree">
+              <div class="folder-item root active" data-folder-id="root">${RENDER_ICONS.FOLDER} <span>All Files</span></div>
             </div>
           </div>
-          <div class="file-detail-tab-content" data-tab-content="access">
-            <div class="file-access-log" id="file-access-log"></div>
+          <div class="files-panel">
+            <div class="files-panel-header">
+              <div class="files-path" id="pd-files-path"><span>All Files</span></div>
+              <div class="files-panel-controls">
+                <div id="files-source-toggle-mount"></div>
+                <div id="files-view-toggle-mount"></div>
+              </div>
+            </div>
+            <div class="files-list" id="pd-files-list"><p class="empty-state">No files uploaded yet.</p></div>
+            <div class="pending-requests-list hidden" id="pd-pending-requests-list"></div>
           </div>
-          <div class="file-detail-actions">
-            <button class="btn btn-secondary" id="btn-download-file">${RENDER_ICONS.DOWNLOAD} Download</button>
-            <button class="btn btn-secondary" id="btn-lock-file">${RENDER_ICONS.LOCK} Lock</button>
-            <button class="btn btn-secondary" id="btn-share-file">${RENDER_ICONS.SHARE} Share with Client</button>
-            <button class="btn btn-danger" id="btn-delete-file">${RENDER_ICONS.TRASH} Delete</button>
+        </div>
+        <div class="file-detail-modal hidden" id="file-detail-modal">
+          <div class="file-detail-content portal-shadow">
+            <div class="file-detail-header">
+              <h2 id="file-detail-name">File Name</h2>
+              <button class="btn-icon close-modal" id="close-file-detail">${RENDER_ICONS.CLOSE}</button>
+            </div>
+            <div class="file-detail-tabs">
+              <button class="active" data-tab="info">Info</button>
+              <button data-tab="versions">Versions</button>
+              <button data-tab="comments">Comments</button>
+              <button data-tab="access">Access Log</button>
+            </div>
+            <div class="file-detail-tab-content active" data-tab-content="info">
+              <div class="file-info-grid" id="file-info-content"></div>
+            </div>
+            <div class="file-detail-tab-content" data-tab-content="versions">
+              <div class="file-versions-list" id="file-versions-list"></div>
+            </div>
+            <div class="file-detail-tab-content" data-tab-content="comments">
+              <div class="file-comments-list" id="file-comments-list"></div>
+              <div class="file-comment-form">
+                <label for="file-comment-input" class="sr-only">Add a comment</label>
+                <textarea id="file-comment-input" placeholder="Add a comment..." rows="2" aria-label="Add a comment"></textarea>
+                <button class="btn btn-secondary btn-sm" id="btn-add-file-comment">Add Comment</button>
+              </div>
+            </div>
+            <div class="file-detail-tab-content" data-tab-content="access">
+              <div class="file-access-log" id="file-access-log"></div>
+            </div>
+            <div class="file-detail-actions">
+              <button class="btn btn-secondary" id="btn-download-file">${RENDER_ICONS.DOWNLOAD} Download</button>
+              <button class="btn btn-secondary" id="btn-lock-file">${RENDER_ICONS.LOCK} Lock</button>
+              <button class="btn btn-secondary" id="btn-share-file">${RENDER_ICONS.SHARE} Share with Client</button>
+              <button class="btn btn-danger" id="btn-delete-file">${RENDER_ICONS.TRASH} Delete</button>
+            </div>
           </div>
         </div>
       </div>
@@ -424,95 +425,101 @@ export function renderProjectDetailTab(container: HTMLElement): void {
 
     <!-- Messages Tab -->
     <div class="portal-tab-panel" id="pd-tab-messages">
-      <h3 class="tab-section-heading">Messages</h3>
-      <div class="messages-container portal-shadow">
-        <div class="messages-thread" id="pd-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Project messages thread">
-          <p class="empty-state">No messages yet. Start the conversation with your client.</p>
-        </div>
-        <div class="message-compose">
-          <div class="message-input-wrapper">
-            <label for="pd-message-input" class="sr-only">Message</label>
-            <textarea id="pd-message-input" class="form-textarea" placeholder="Type your message to the client..." aria-label="Type your message to the client"></textarea>
+      <div class="tab-content-wrapper">
+        <div class="messages-container portal-shadow">
+          <div class="messages-thread" id="pd-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Project messages thread">
+            <p class="empty-state">No messages yet. Start the conversation with your client.</p>
           </div>
-          <button class="btn btn-secondary" id="btn-pd-send-message">Send Message</button>
+          <div class="message-compose">
+            <div class="message-input-wrapper">
+              <label for="pd-message-input" class="sr-only">Message</label>
+              <textarea id="pd-message-input" class="form-textarea" placeholder="Type your message to the client..." aria-label="Type your message to the client"></textarea>
+            </div>
+            <button class="btn btn-secondary" id="btn-pd-send-message">Send Message</button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Invoices Tab -->
     <div class="portal-tab-panel" id="pd-tab-invoices">
-      <h3 class="tab-section-heading">Invoices</h3>
-      <div class="invoice-summary">
-        <div class="summary-card portal-shadow"><span class="summary-label">Total Outstanding</span><span class="summary-value" id="pd-outstanding">$0.00</span></div>
-        <div class="summary-card portal-shadow"><span class="summary-label">Total Paid</span><span class="summary-value" id="pd-paid">$0.00</span></div>
-      </div>
-      <div class="portal-project-card portal-shadow">
-        <div class="card-header-with-action">
-          <h3>Invoices</h3>
-          <div class="invoice-action-buttons">
-            <div id="pd-invoices-filter" class="invoice-filter-container"></div>
-            <button class="btn btn-outline" id="btn-process-late-fees" title="Apply late fees to overdue invoices">Apply Late Fees</button>
-            <button class="btn btn-secondary" id="btn-create-invoice">+ Create Invoice</button>
-          </div>
+      <div class="tab-content-wrapper">
+        <div class="invoice-summary">
+          <div class="portal-project-card portal-shadow summary-card"><h4>Total Outstanding</h4><span class="summary-value" id="pd-outstanding">$0.00</span></div>
+          <div class="portal-project-card portal-shadow summary-card"><h4>Total Paid</h4><span class="summary-value" id="pd-paid">$0.00</span></div>
         </div>
-        <div class="invoices-list" id="pd-invoices-list"><p class="empty-state">No invoices created yet.</p></div>
-      </div>
-      <div class="portal-project-card portal-shadow">
-        <div class="card-header-with-action">
-          <h3>Payment Plans & Recurring</h3>
-          <div class="invoice-action-buttons">
-            <button class="btn btn-outline" id="btn-schedule-invoice">Schedule Invoice</button>
-            <button class="btn btn-outline" id="btn-setup-recurring">Setup Recurring</button>
+        <div class="portal-project-card portal-shadow">
+          <div class="card-header-with-action">
+            <h3>Invoices</h3>
+            <div class="invoice-action-buttons">
+              <div id="pd-invoices-filter" class="invoice-filter-container"></div>
+              <button class="btn btn-outline" id="btn-process-late-fees" title="Apply late fees to overdue invoices">Apply Late Fees</button>
+              <button class="btn btn-secondary" id="btn-create-invoice">+ Create Invoice</button>
+            </div>
           </div>
+          <div class="invoices-list" id="pd-invoices-list"><p class="empty-state">No invoices created yet.</p></div>
         </div>
-        <div class="payment-plans-section">
-          <h4>Scheduled Invoices</h4>
-          <div id="pd-scheduled-invoices" class="scheduled-list"><p class="empty-state">No scheduled invoices.</p></div>
-          <h4>Recurring Invoices</h4>
-          <div id="pd-recurring-invoices" class="recurring-list"><p class="empty-state">No recurring invoices configured.</p></div>
+        <div class="portal-project-card portal-shadow">
+          <div class="card-header-with-action">
+            <h3>Payment Plans & Recurring</h3>
+            <div class="invoice-action-buttons">
+              <button class="btn btn-outline" id="btn-schedule-invoice">Schedule Invoice</button>
+              <button class="btn btn-outline" id="btn-setup-recurring">Setup Recurring</button>
+            </div>
+          </div>
+          <div class="payment-plans-section">
+            <h4>Scheduled Invoices</h4>
+            <div id="pd-scheduled-invoices" class="scheduled-list"><p class="empty-state">No scheduled invoices.</p></div>
+            <h4>Recurring Invoices</h4>
+            <div id="pd-recurring-invoices" class="recurring-list"><p class="empty-state">No recurring invoices configured.</p></div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Tasks Tab -->
     <div class="portal-tab-panel" id="pd-tab-tasks">
-      <h3 class="tab-section-heading">Tasks</h3>
-      <div class="portal-project-card portal-shadow">
-        <div class="card-header-with-action">
-          <div class="view-toggle-container">
-            <div id="tasks-view-toggle-mount"></div>
-            <button class="btn btn-secondary" id="btn-add-task">+ Add Task</button>
+      <div class="tab-content-wrapper">
+        <div class="portal-project-card portal-shadow">
+          <div class="card-header-with-action">
+            <div class="view-toggle-container">
+              <div id="tasks-view-toggle-mount"></div>
+              <button class="btn btn-secondary" id="btn-add-task">+ Add Task</button>
+            </div>
           </div>
+          <div id="tasks-kanban-container"></div>
+          <div id="tasks-list-container" style="display: none;"></div>
         </div>
-        <div id="tasks-kanban-container"></div>
-        <div id="tasks-list-container" style="display: none;"></div>
       </div>
     </div>
 
     <!-- Time Tracking Tab -->
     <div class="portal-tab-panel" id="pd-tab-time">
-      <h3 class="tab-section-heading">Time Tracking</h3>
-      <div class="time-tracking-header">
-        <div>
-          <button class="btn btn-secondary" id="btn-log-time">+ Log Time</button>
-          <button class="btn btn-outline" id="btn-export-time">Export CSV</button>
+      <div class="tab-content-wrapper">
+        <div class="portal-project-card portal-shadow">
+          <div class="card-header-with-action">
+            <h3>Time Tracking</h3>
+            <div class="time-tracking-actions">
+              <button class="btn btn-secondary btn-sm" id="btn-log-time">+ Log Time</button>
+              <button class="btn btn-outline btn-sm" id="btn-export-time">Export CSV</button>
+            </div>
+          </div>
+          <div class="time-tracking-summary" id="time-tracking-summary"></div>
         </div>
-      </div>
-      <div class="time-tracking-summary" id="time-tracking-summary"></div>
-      <div class="time-weekly-chart">
-        <h4>This Week</h4>
-        <div id="time-weekly-chart-container"></div>
-      </div>
-      <div class="portal-project-card portal-shadow">
-        <h3>Time Entries</h3>
-        <div id="time-entries-list"><p class="empty-state">No time entries yet.</p></div>
+        <div class="portal-project-card portal-shadow time-weekly-chart">
+          <h3>This Week</h3>
+          <div id="time-weekly-chart-container"></div>
+        </div>
+        <div class="portal-project-card portal-shadow">
+          <h3>Time Entries</h3>
+          <div id="time-entries-list"><p class="empty-state">No time entries yet.</p></div>
+        </div>
       </div>
     </div>
 
     <!-- Contract Tab -->
     <div class="portal-tab-panel" id="pd-tab-contract">
-      <h3 class="tab-section-heading">Contract</h3>
-      <div class="contract-tab-content">
+      <div class="tab-content-wrapper">
         <div class="portal-project-card portal-shadow">
           <div class="contract-status-display">
             <div class="contract-status-info">
@@ -569,14 +576,15 @@ export function renderProjectDetailTab(container: HTMLElement): void {
 
     <!-- Notes Tab -->
     <div class="portal-tab-panel" id="pd-tab-notes">
-      <h3 class="tab-section-heading">Project Notes</h3>
-      <div class="portal-project-card portal-shadow">
-        <div class="card-header-with-action">
-          <h3>Admin Notes (Internal)</h3>
-          <button class="btn btn-secondary btn-sm" id="btn-edit-project-notes">Edit Notes</button>
-        </div>
-        <div id="pd-notes-display" class="notes-display">
-          <p class="empty-state">No notes yet. Click "Edit Notes" to add internal notes about this project.</p>
+      <div class="tab-content-wrapper">
+        <div class="portal-project-card portal-shadow">
+          <div class="card-header-with-action">
+            <h3>Admin Notes (Internal)</h3>
+            <button class="btn btn-secondary btn-sm" id="btn-edit-project-notes">Edit Notes</button>
+          </div>
+          <div id="pd-notes-display" class="notes-display">
+            <p class="empty-state">No notes yet. Click "Edit Notes" to add internal notes about this project.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -788,10 +796,52 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Handle tab change from secondary sidebar
    */
   private handleSecondaryTabChange(tabId: string): void {
-    // Find the corresponding tab button and click it
-    const tabBtn = document.querySelector(`.project-detail-tabs button[data-pd-tab="${tabId}"]`) as HTMLButtonElement;
-    if (tabBtn) {
-      tabBtn.click();
+    this.switchToProjectDetailTab(tabId);
+  }
+
+  /**
+   * Switch to a specific project detail tab - syncs both inline and header tabs
+   */
+  private async switchToProjectDetailTab(tabName: string): Promise<void> {
+    // Query fresh each time to ensure we have current DOM
+    const inlineTabBtns = document.querySelectorAll('.project-detail-tabs button');
+    const headerTabBtns = document.querySelectorAll('#project-detail-header-tabs .portal-subtab');
+    const tabContents = document.querySelectorAll('[id^="pd-tab-"]');
+
+    // Update inline tabs (hidden)
+    inlineTabBtns.forEach((b) => {
+      const btnEl = b as HTMLElement;
+      b.classList.toggle('active', btnEl.dataset.pdTab === tabName);
+    });
+
+    // Update header tabs
+    headerTabBtns.forEach((b) => {
+      const btnEl = b as HTMLElement;
+      b.classList.toggle('active', btnEl.dataset.pdTab === tabName);
+    });
+
+    // Update tab content panels
+    tabContents.forEach((content) => {
+      content.classList.toggle('active', content.id === `pd-tab-${tabName}`);
+    });
+
+    // Sync secondary sidebar active state
+    if (this.secondarySidebar) {
+      this.secondarySidebar.setActiveTab(tabName);
+    }
+
+    // Initialize modules for specific tabs
+    if (this.currentProjectId) {
+      if (tabName === 'tasks') {
+        const { initTasksModule } = await import('./modules/admin-tasks');
+        await initTasksModule(this.currentProjectId);
+      } else if (tabName === 'time') {
+        const { initTimeTrackingModule } = await import('./modules/admin-time-tracking');
+        await initTimeTrackingModule(this.currentProjectId);
+      } else if (tabName === 'files') {
+        const { initFilesModule } = await import('./modules/admin-files');
+        await initFilesModule(this.currentProjectId);
+      }
     }
   }
 
@@ -1118,45 +1168,32 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Set up project detail sub-tab navigation
    */
   private setupProjectDetailTabs(): void {
-    const tabBtns = document.querySelectorAll('.project-detail-tabs button');
-    const tabContents = document.querySelectorAll('[id^="pd-tab-"]');
-
-    tabBtns.forEach((btn) => {
+    // Set up inline tab buttons (hidden)
+    const inlineTabBtns = document.querySelectorAll('.project-detail-tabs button');
+    inlineTabBtns.forEach((btn) => {
       const btnEl = btn as HTMLElement;
       if (btnEl.dataset.listenerAdded) return;
       btnEl.dataset.listenerAdded = 'true';
 
-      btn.addEventListener('click', async () => {
+      btn.addEventListener('click', () => {
         const tabName = btnEl.dataset.pdTab;
-        if (!tabName) return;
-
-        tabBtns.forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        tabContents.forEach((content) => {
-          content.classList.toggle('active', content.id === `pd-tab-${tabName}`);
-        });
-
-        // Sync secondary sidebar active state
-        if (this.secondarySidebar) {
-          this.secondarySidebar.setActiveTab(tabName);
-        }
-
-        // Initialize modules for specific tabs
-        if (this.currentProjectId) {
-          if (tabName === 'tasks') {
-            const { initTasksModule } = await import('./modules/admin-tasks');
-            await initTasksModule(this.currentProjectId);
-          } else if (tabName === 'time') {
-            const { initTimeTrackingModule } = await import('./modules/admin-time-tracking');
-            await initTimeTrackingModule(this.currentProjectId);
-          } else if (tabName === 'files') {
-            const { initFilesModule } = await import('./modules/admin-files');
-            await initFilesModule(this.currentProjectId);
-          }
-        }
+        if (tabName) this.switchToProjectDetailTab(tabName);
       });
     });
+
+    // Set up header tab buttons using event delegation (once per container)
+    const headerTabsContainer = document.getElementById('project-detail-header-tabs');
+    if (headerTabsContainer && !headerTabsContainer.dataset.listenerAdded) {
+      headerTabsContainer.dataset.listenerAdded = 'true';
+
+      headerTabsContainer.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest('.portal-subtab') as HTMLElement;
+        if (!btn) return;
+
+        const tabName = btn.dataset.pdTab;
+        if (tabName) this.switchToProjectDetailTab(tabName);
+      });
+    }
 
     this.setupMoreMenuDelegation();
     this.setupEventHandlers();

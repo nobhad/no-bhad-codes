@@ -1,0 +1,89 @@
+/**
+ * ===============================================
+ * INLINE EDIT STYLES
+ * ===============================================
+ * @file src/styles/components/inline-edit.css
+ *
+ * Styles for inline-editable table cells.
+ */
+
+/* Editable cell indicator */
+[data-page="admin"] .inline-editable {
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+/* Hover state - subtle edit hint */
+[data-page="admin"] .inline-editable:hover:not(.is-editing) {
+  background: var(--portal-bg-hover);
+}
+
+/* Edit icon on hover (optional - uses ::after) */
+[data-page="admin"] .inline-editable:hover:not(.is-editing)::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/%3E%3Cpath d='m15 5 4 4'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.5;
+}
+
+/* Editing state */
+[data-page="admin"] .inline-editable.is-editing {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* Input field styling */
+[data-page="admin"] .inline-edit-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 2px solid var(--color-primary);
+  border-radius: 4px;
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+[data-page="admin"] .inline-edit-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.2);
+}
+
+[data-page="admin"] .inline-edit-input::placeholder {
+  color: var(--portal-text-muted);
+  opacity: 0.6;
+}
+
+/* Placeholder text for empty values */
+[data-page="admin"] .inline-editable.placeholder {
+  color: var(--portal-text-muted);
+  font-style: italic;
+}
+
+/* Date input specific styling */
+[data-page="admin"] .inline-edit-input[type="date"] {
+  color-scheme: dark;
+}
+
+/* Number input specific styling */
+[data-page="admin"] .inline-edit-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+[data-page="admin"] .inline-edit-input[type="number"]::-webkit-outer-spin-button,
+[data-page="admin"] .inline-edit-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

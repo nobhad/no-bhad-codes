@@ -46,6 +46,8 @@ import { showTableError } from '../../../utils/error-utils';
 import { exportToCsv, LEADS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { createViewToggle } from '../../../components/view-toggle';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { makeEditable } from '../../../components/inline-edit';
 
 interface LeadsData {
   leads: Lead[];
@@ -636,9 +638,9 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
     // Column order: ☐ | Lead | Type | Status | Budget | Date | Actions
     row.innerHTML = `
       ${createRowCheckbox('leads', lead.id)}
-      <td class="identity-cell">
-        ${primaryContent ? `<span class="identity-name">${primaryContent}</span>` : ''}
-        ${secondaryContent ? `<span class="identity-contact">${secondaryContent}</span>` : ''}
+      <td class="identity-cell inline-editable-cell" data-lead-id="${lead.id}">
+        ${primaryContent ? `<span class="identity-name" data-field="primary-name">${primaryContent}</span>` : '<span class="identity-name" data-field="primary-name" style="display:none;"></span>'}
+        ${secondaryContent ? `<span class="identity-contact" data-field="secondary-name">${secondaryContent}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
         <span class="identity-email">${safeEmail}</span>
       </td>
       <td class="type-cell">
@@ -706,12 +708,84 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
       });
     }
 
-    // Add click handler for row (excluding status cell, buttons, links, and checkbox)
+    // Add click handler for row (excluding status cell, buttons, links, checkbox, and inline-editable cells)
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown') || target.closest('button') || target.closest('.lead-link') || target.closest('.bulk-select-cell') || target.tagName === 'INPUT') return;
+      if (target.closest('.table-dropdown') || target.closest('button') || target.closest('.lead-link') || target.closest('.bulk-select-cell') || target.closest('.inline-editable-cell') || target.tagName === 'INPUT') return;
       showLeadDetails(lead.id);
     });
+
+    // Setup inline editing for name and company fields
+    const identityCell = row.querySelector('.identity-cell.inline-editable-cell') as HTMLElement;
+    if (identityCell) {
+      // Primary field: company_name if exists, otherwise contact_name
+      const hasBothNames = lead.company_name && lead.contact_name;
+      const isPrimaryCompany = !!lead.company_name;
+
+      // Setup primary name editing (identity-name span)
+      const primaryNameEl = identityCell.querySelector('.identity-name') as HTMLElement;
+      if (primaryNameEl) {
+        makeEditable(
+          primaryNameEl,
+          () => isPrimaryCompany ? (lead.company_name || '') : (lead.contact_name || ''),
+          async (newValue) => {
+            const fieldToUpdate = isPrimaryCompany ? 'company_name' : 'contact_name';
+            const response = await apiPut(`/api/admin/leads/${lead.id}`, { [fieldToUpdate]: newValue || null });
+            if (response.ok) {
+              if (isPrimaryCompany) {
+                lead.company_name = newValue || '';
+              } else {
+                lead.contact_name = newValue || '';
+              }
+              const displayName = newValue
+                ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(newValue)))
+                : '';
+              primaryNameEl.innerHTML = hasClient && displayName
+                ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${displayName}</a>`
+                : displayName;
+              primaryNameEl.style.display = displayName ? '' : 'none';
+              showToast(`${isPrimaryCompany ? 'Company' : 'Name'} updated`, 'success');
+            } else {
+              showToast('Failed to update lead', 'error');
+              throw new Error('Update failed');
+            }
+          },
+          { placeholder: isPrimaryCompany ? 'Enter company' : 'Enter name' }
+        );
+      }
+
+      // Setup secondary name editing (identity-contact span) - only if company exists (so contact is secondary)
+      const secondaryNameEl = identityCell.querySelector('.identity-contact') as HTMLElement;
+      if (secondaryNameEl && hasBothNames) {
+        makeEditable(
+          secondaryNameEl,
+          () => isPrimaryCompany ? (lead.contact_name || '') : (lead.company_name || ''),
+          async (newValue) => {
+            const fieldToUpdate = isPrimaryCompany ? 'contact_name' : 'company_name';
+            const response = await apiPut(`/api/admin/leads/${lead.id}`, { [fieldToUpdate]: newValue || null });
+            if (response.ok) {
+              if (isPrimaryCompany) {
+                lead.contact_name = newValue || '';
+              } else {
+                lead.company_name = newValue || '';
+              }
+              const displayName = newValue
+                ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(newValue)))
+                : '';
+              secondaryNameEl.innerHTML = hasClient && displayName
+                ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${displayName}</a>`
+                : displayName;
+              secondaryNameEl.style.display = displayName ? '' : 'none';
+              showToast(`${isPrimaryCompany ? 'Name' : 'Company'} updated`, 'success');
+            } else {
+              showToast('Failed to update lead', 'error');
+              throw new Error('Update failed');
+            }
+          },
+          { placeholder: isPrimaryCompany ? 'Enter name' : 'Enter company' }
+        );
+      }
+    }
 
     tableBody.appendChild(row);
   });
@@ -726,6 +800,18 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
 
   // Render pagination
   renderLeadsPaginationUI(filteredLeads.length, ctx);
+
+  // Initialize keyboard navigation (J/K to move, Enter to view)
+  initTableKeyboardNav({
+    tableSelector: '.leads-table',
+    rowSelector: 'tbody tr[data-lead-id]',
+    onRowSelect: (row) => {
+      const leadId = parseInt(row.dataset.leadId || '0');
+      if (leadId) showLeadDetails(leadId);
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 /**

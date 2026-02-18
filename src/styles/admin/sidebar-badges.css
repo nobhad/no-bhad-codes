@@ -108,3 +108,55 @@
     box-shadow: 0 0 0 2px var(--portal-bg-dark);
   }
 }
+
+/* ================================================
+   SIDEBAR KEYBOARD SHORTCUTS
+   Linear-style shortcut hints (1-9 for navigation)
+   Subtle, only visible on hover
+   ================================================ */
+
+/* Base shortcut style - very subtle */
+[data-page="admin"] .sidebar-shortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0;
+  border-radius: 3px;
+  background: transparent;
+  border: none;
+  color: var(--portal-text-muted, #555);
+  font-family: inherit;
+  font-size: 0.625rem;
+  font-weight: 400;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* Only show shortcuts on sidebar hover - very subtle reveal */
+[data-page="admin"] .sidebar:hover .sidebar-shortcut,
+[data-page="admin"] .sidebar:focus-within .sidebar-shortcut {
+  opacity: 0.5;
+}
+
+/* Even more subtle on active button */
+[data-page="admin"] .sidebar .btn.active .sidebar-shortcut {
+  opacity: 0.3;
+}
+
+/* Collapsed sidebar - hide shortcuts */
+[data-page="admin"] .sidebar.collapsed .sidebar-shortcut {
+  display: none;
+}
+
+/* Mobile - hide shortcuts */
+@media (max-width: 768px) {
+  [data-page="admin"] .sidebar-shortcut {
+    display: none;
+  }
+}

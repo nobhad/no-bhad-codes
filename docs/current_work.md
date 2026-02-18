@@ -6,165 +6,233 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ---
 
-**Concern:** Duplicate headers showing on admin page ("NO BHAD CODES" appears twice). Needs investigation and fix to ensure only one header is rendered.
+## Session Summary - February 17, 2026
 
-**Concern:** This localhost page can't be found
-No webpage was found for the web address: http://localhost:4000/admin?username=admin%40nobhad.codes&password=0wgo2nbDvMsR2Rz
-HTTP ERROR 404
+Major admin portal redesign session. All changes awaiting testing.
 
-## COMPLETED
+### Files Added This Session
 
-### Task 1.55: Document Component Library
+| File | Purpose |
+|------|---------|
+| `src/styles/admin/overview-layout.css` | Overview tab layout redesign |
+| `src/styles/admin/page-header-refinements.css` | Breadcrumb, header tab styling |
+| `src/styles/admin/sidebar-refinements.css` | Mobile drawer, tooltips, accent bar |
+| `src/styles/admin/stat-card-refinements.css` | Top accent line on cards |
+| `src/styles/admin/visual-fixes.css` | Shadow reduction, page header fix, task priority fix |
+| `src/styles/shared/modal-system.css` | Unified modal system |
 
-**Status:** COMPLETE
+### Files Modified This Session
 
-Location: `docs/design/COMPONENT_LIBRARY.md`
-
-- [x] Component inventory with visual examples
-- [x] API reference for each component
-- [x] CSS variable dependencies
-- [x] Accessibility notes (ARIA, keyboard)
-- [x] Migration guide from inline patterns
-
-**Note:** All items documented and visual examples are now markdownlint-compliant. See COMPONENT_LIBRARY.md for details.
-
-### Component Library Visual Previews (February 15, 2026)
-
-Embedded visual previews for core UI components in COMPONENT_LIBRARY.md using mockup HTML files. Initially used **img** tags for minimal input and direct referencing. On February 15, 2026, fixed MD033 markdownlint violations by replacing inline HTML **img** tags with Markdown image syntax. All requested visual examples are now present and markdownlint-compliant.
-
----
-
-### i18n/Localization — COMPLETE (February 17, 2026)
-
-- [x] Frontend: `src/i18n.ts` with browser locale detection, translation lookup, and common UI strings
-- [x] Backend: `server/middleware/i18n-middleware.ts` for Express locale detection
-- [x] Frontend initialized in `src/core/app.ts` via `initI18n()`
-- [x] Backend middleware registered in `server/app.ts`
-- Supports: English (en), Spanish (es), French (fr)
-- Usage: `t('loading')` returns localized string based on detected locale
+| File | Changes |
+|------|---------|
+| `src/styles/admin/index.css` | Added 6 new CSS imports |
+| `src/styles/client-portal/index.css` | Added modal-system.css import |
+| `src/styles/admin/detail-header.css` | Fixed dropdown focus state |
+| `src/features/admin/modules/admin-projects.ts` | Fixed dropdown click handlers |
+| `src/features/admin/admin-dashboard.ts` | Added mobile drawer toggle logic |
+| `admin/index.html` | Added sidebar overlay div |
 
 ---
 
-### Global Error Handler — COMPLETE (February 17, 2026)
+## Integrated - Awaiting Testing
 
-- [x] `src/portal-global-error-handler.ts` with `initGlobalErrorHandler()` function
-- [x] Catches `window.onerror` (uncaught sync errors)
-- [x] Catches `unhandledrejection` (unhandled promise rejections)
-- [x] Initialized in `src/core/app.ts` at startup
-- [x] Uses centralized logger from `src/utils/logger.ts`
+### 1. Overview Tab Layout Redesign
+
+Compact stats strip + side-by-side tasks/activity panels.
+
+**Before:**
+
+```text
+[STAT][STAT][STAT][STAT]     <- row 1
+[STAT][STAT][STAT][STAT]     <- row 2
+─────────────────────────
+UPCOMING TASKS               <- scroll
+─────────────────────────
+RECENT ACTIVITY              <- scroll more
+```
+
+**After:**
+
+```text
+[S][S][S][S][S][S][S][S]     <- compact single row
+┌──────────────┬─────────────┐
+│ TASKS        │ ACTIVITY    │
+│ (scrolls)    │ (scrolls)   │
+└──────────────┴─────────────┘
+```
+
+- Responsive: stacks on tablet/mobile
+- Both panels scroll independently
 
 ---
 
-### Optional Utility Extractions (LOW PRIORITY)
+### 2. Sidebar Refinements
 
-**Status:** COMPLETE
-
-Could extract these common patterns but not blocking:
-
-| Utility | Current Usage | Notes |
-|---------|---------------|-------|
-| `classNames()`/`cx()` | 68 inline uses | `.filter(Boolean).join(' ')` works fine |
-| `onClickOutside()` | 8 handlers | Simple pattern, not worth abstracting |
-| `debounce()` | 28 uses | Components already handle inline |
+- Mobile drawer pattern (<768px): slides in as overlay
+- Dim overlay behind drawer, closes on click or navigation
+- Tooltips on collapsed sidebar items (using `aria-label`)
+- Left accent bar on active nav item
+- Smooth collapse transitions
 
 ---
 
-## Backend/Portal Audit Findings (February 15, 2026)
+### 3. Stat Card Refinements
 
-### CRITICAL - All Fixed (February 15, 2026)
+- Subtle top accent line (becomes red on hover)
+- Better typography hierarchy
+- `.stat-secondary`, `.stat-change`, `.stat-meta` classes
 
-| Issue | Status | Resolution |
-|-------|--------|------------|
-| Test endpoints in production | FIXED | Wrapped in `NODE_ENV === 'development'` guard |
-| Unescaped message in innerHTML | FIXED | Added `SanitizationUtils.escapeHtml()` to all messages |
-| XSS risk in error messages | FALSE POSITIVE | `showToast()` and `alertDialog()` already sanitize |
-| Missing JSON parsing error handling | FALSE POSITIVE | All calls use `.catch()` or are in try-catch blocks |
+---
 
-### HIGH PRIORITY - Fixed (February 15, 2026)
+### 4. Page Header Refinements
 
-| Issue | Status | Resolution |
-|-------|--------|------------|
-| Empty catch blocks | FIXED | Added `logger.error()` calls to webhooks.ts and deliverables.ts |
-| Bulk action validation | ALREADY DONE | `table-bulk-actions.ts` validates at lines 145 and 172 |
-| Email service failure fallback | ALREADY DONE | `email-service.ts` has graceful fallback at lines 132-138 |
-| 67 files using `console.log/error` | FIXED | Migrated all server routes to centralized logger service |
-| 199 `any` type usages | FIXED | Migrated all usages to proper interfaces/types |
+- Breadcrumb styling (lighter, navigational feel)
+- Tab refinements with red underline
+- Mobile: header stacks, tabs scroll horizontally
 
-### MEDIUM PRIORITY - Fixed (February 15, 2026)
+---
 
-| Issue | Status | Resolution |
-|-------|--------|------------|
-| Logging sensitive headers | FIXED | Added case-insensitive matching and cookie/x-api-key to redact list |
-| Global mutable state | FIXED | Added `cleanupMessages()` export to clear pendingAttachments |
-| No MIME type verification | FIXED | Added MIME-to-extension mapping and validation in uploads.ts |
-| Rate limit too strict | FIXED | Relaxed publicForm limit to 10 req/min (was 5) |
-| Missing database indexes | FIXED | Created migration 089 with indexes for ad_hoc_requests, document_requests, deliverables, etc. |
+### 5. Unified Modal System
 
-### LOW PRIORITY - Nice to Have
+Unified `.modal-overlay` and `.admin-modal-overlay` into single consistent system.
 
-- Standardized error handling patterns across modules — COMPLETE (see docs/ERROR_HANDLING_STANDARD.md)
-- Global error handler for portal — COMPLETE (see above)
-- Split `/src/components/index.ts` (77+ exports) into logical groups — COMPLETE (barrel exports in utility-components.ts, ui-components.ts, etc.)
-- Query execution logging for performance analysis — COMPLETE (see logger usage in server/services/invoice/payment-service.ts)
+**Size scale (via contentClassName):**
 
-### Code Quality Metrics
+| Class | Max Width | Use Case |
+|-------|-----------|----------|
+| (none) | 560px | Default forms |
+| `modal-content-sm` | 400px | Confirms, quick actions |
+| `modal-content-lg` | 760px | Invoice view, task detail |
+| `modal-content-xl` | 960px | Workflows, KB articles |
+| `modal-content-full` | 100% - 4rem | Large previews |
 
-| Aspect | Score | Notes |
-|--------|-------|-------|
-| Error Handling | 9/10 | Global error handler + proper logging |
-| Type Safety | 8/10 | Fixed `any` types, proper interfaces |
-| Security | 9/10 | All critical XSS risks fixed, test endpoints guarded, sensitive headers redacted |
-| Code Organization | 8/10 | Well-structured |
-| Performance | 8/10 | Added indexes, fixed N+1 query in invoice service |
+**Features:**
+
+- Consistent header/body/footer padding
+- Red top accent border (brand consistency)
+- Mobile: bottom sheets that slide up
+- Existing `contentClassName` values mapped to size scale
+
+---
+
+### 6. Project Detail Dropdown Fixes
+
+- **Focus state**: Changed from red border to subtle `--portal-border-light`
+- **Click handling**: Direct listeners on each item (was event delegation)
+
+---
+
+### 7. Visual Fixes
+
+**Shadow reduction:**
+
+- `--shadow-panel` overridden to single subtle shadow (was 6 layered shadows)
+- `--shadow-card` lightened
+- Stat cards and content panels: no box-shadow (background color difference sufficient)
+
+**Page header:**
+
+- Title + subtabs unified as one row
+- h1 title size reduced (1.4rem)
+- Subtab groups: only 4 groups have subtabs (work, crm, documents, support)
+
+**Task priority:**
+
+- Left border instead of solid background (readable text)
+- Priority badges: subtle background with colored border
+
+---
+
+## Linear-Style Admin Portal Redesign - Full Plan
+
+**Goal:** Transform the admin portal to match Linear's design philosophy - fast, keyboard-driven, minimal, opinionated.
+
+**Full spec:** `docs/design/ADMIN_PORTAL_LINEAR_REDESIGN.md`
+
+---
+
+### Phase 1: Foundation - COMPLETE
+
+- [x] Command palette component (Cmd+K / Ctrl+K)
+- [x] Fuzzy search across navigation items
+- [x] Keyboard navigation (arrows, Enter, Escape)
+- [x] Sidebar keyboard shortcuts (1-8 keys)
+- [x] Subtle hover-reveal shortcut hints
+- [x] Table keyboard navigation module (J/K, Enter, X/Space, G/Shift+G)
+- [x] Focused/selected row CSS styles
+
+**Files created:**
+
+- `src/components/command-palette.ts`
+- `src/styles/components/command-palette.css`
+- `src/features/admin/admin-command-palette.ts`
+- `src/components/table-keyboard-nav.ts`
+
+---
+
+### Phase 2: Tables - COMPLETE
+
+- [x] Compact table rows (40px instead of 48px)
+- [x] Minimal header borders (subtle bottom border only)
+- [x] Action buttons hidden by default, shown on row hover
+- [x] J/K keyboard navigation on all 5 main tables
+- [x] Shift+Click bulk selection (select range of rows)
+- [x] Inline editing component
+- [x] Inline editing across all admin tables (budget, names, dates)
+
+**Note:** Red dropdown borders are intentional design - do not change.
+
+**Files created:**
+
+- `src/components/inline-edit.ts`
+- `src/styles/components/inline-edit.css`
+
+**Files modified:**
+
+- `src/styles/pages/admin.css` - Compact rows, hover-reveal actions
+- `src/features/admin/modules/admin-clients.ts` - J/K nav + inline editing
+- `src/features/admin/modules/admin-projects.ts` - J/K nav + inline budget/timeline edit
+- `src/features/admin/modules/admin-invoices.ts` - J/K nav + inline due_date edit
+- `src/features/admin/modules/admin-leads.ts` - J/K nav + inline name/company edit
+- `src/features/admin/modules/admin-contracts.ts` - J/K nav + inline expires_at edit
+- `src/utils/table-bulk-actions.ts` - Shift+Click range selection
+
+---
+
+### Phase 3: Detail Views - PENDING
+
+- [ ] Refactor detail page layouts (metadata sidebar + main content)
+- [ ] Implement inline editing throughout detail views
+- [ ] Add keyboard shortcuts for common actions
+- [ ] Remove unnecessary modals (prefer inline editing)
+
+---
+
+### Phase 4: Polish - PENDING
+
+- [ ] Performance audit and optimization
+- [ ] Skeleton loading states (no spinners)
+- [ ] Animation refinement (subtle, fast)
+- [ ] Keyboard shortcut help panel (`?` key)
+
+---
+
+### Success Metrics
+
+| Metric | Target |
+|--------|--------|
+| Clicks to create client | 2 (Cmd+K -> "create client" -> Enter) |
+| Time to navigate sections | < 500ms with keyboard |
+| Mouse usage | < 50% for power users |
+| Loading spinners shown | Zero (skeleton states only) |
 
 ---
 
 ## TODOs
 
-### Message Features (PARTIAL)
+### Future Considerations (Low Priority)
 
-**Backend:** COMPLETE - `server/routes/messages.ts` has:
-
-- [x] Read receipts (`markAsRead()`, `getReadReceipts()`)
-- [x] Message editing (`editMessage()`)
-- [x] Message deletion (`deleteMessage()`)
-
-**Frontend:** INCOMPLETE - `portal-messages.ts` needs:
-
-- [x] Basic message display and sending
-- [x] Marks thread as read on view
-- [ ] Edit message UI (no edit button in message render)
-- [ ] Delete message UI (no delete button in message render)
-- [ ] Typing indicators (not implemented)
-
-### View Toggle Pattern
-
-**Component:** COMPLETE - `src/components/view-toggle.ts` with proper ARIA, types, and SVG icons
-
-**Usage:**
-
-- [x] Admin modules (leads, proposals, files, tasks, overview, knowledge-base)
-- [ ] Client portal projects (NOT implemented despite previous claim)
-
-### Other TODOs
-
-- Projects assigned_to FK migration (solo freelancer - no team assignments)
-- Large file splitting
-- Payment terms snapshot migration
-- Row-level security / multi-tenancy
-- ~~Client portal innerHTML→DOM component conversion~~ COMPLETE
 - Comprehensive WCAG accessibility audit
-- ~~Component library documentation (COMPONENT_LIBRARY.md)~~ COMPLETE
-- UX/UI Implementation Plan items (see `docs/design/UX_UI_IMPLEMENTATION_PLAN.md`)
-  - ~~Skip links for intake/set-password pages~~ COMPLETE
-  - ~~Tab scrolling on mobile~~ COMPLETE
-  - ~~Heading structure improvements (H3 for tab sections)~~ COMPLETE
-  - ~~Breadcrumb updates (client portal)~~ COMPLETE
-  - ~~Empty state standardization~~ COMPLETE
-  - ~~Messages split-view redesign~~ COMPLETE
-  - Badge design review
-  - ~~Rich text editor for contract templates~~ COMPLETE
-  - ~~Button/Modal component standardization~~ COMPLETE
 
 ---
 

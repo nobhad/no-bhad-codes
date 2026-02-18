@@ -205,9 +205,9 @@
 
 [data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:focus,
 [data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:focus-visible {
-  outline: none !important;
-  border-color: var(--color-primary);
-  box-shadow: none !important;
+  outline: none;
+  border-color: var(--portal-border-light);
+  box-shadow: 0 0 0 1px var(--portal-border-light);
 }
 
 [data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger svg {
