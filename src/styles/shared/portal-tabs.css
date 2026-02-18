@@ -64,76 +64,76 @@
 
 /* =====================================================
    TAB STRIP (.portal-tabs)
+   Matches header subtab styling - simple text links
    ===================================================== */
 .portal-tabs {
   display: flex;
   gap: var(--space-1);
-  margin-bottom: 0;
+  margin-bottom: var(--space-3);
   overflow: visible;
   position: relative;
+  padding: 0;
+  border-bottom: 1px solid var(--portal-border);
+}
+
+/* Hide inline tabs for project/client detail - tabs are now in header */
+.project-detail-tabs.portal-tabs,
+.client-detail-tabs.portal-tabs {
+  display: none;
 }
 
 .portal-tabs button {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-1-5) var(--space-3);
-  background: var(--portal-bg-readonly);
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
   border: none;
-  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
+  border-radius: 0;
   color: var(--portal-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-mouse) ease;
   white-space: nowrap;
   position: relative;
   z-index: 0;
   box-shadow: none;
 }
 
+/* Hide icons in tabs - use text only like header subtabs */
 .portal-tabs button .tab-icon {
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  display: none;
 }
 
 .portal-tabs button:hover:not(.active) {
-  color: var(--portal-text-light);
-  background: var(--color-primary);
+  color: var(--portal-text-primary);
+  background: transparent;
 }
 
 .portal-tabs button.active {
   position: relative;
-  color: var(--portal-text-light);
-  background: var(--portal-bg-dark);
-  font-weight: 700;
+  color: var(--color-primary);
+  background: transparent;
+  font-weight: 500;
   z-index: 10;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
   margin-bottom: 0;
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
+  border-bottom: 2px solid var(--color-primary);
 }
 
+/* Remove the pseudo-element overlay */
 .portal-tabs button.active::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  width: 100%;
-  height: 15px;
-  background: var(--portal-bg-dark);
-  z-index: 11;
-  box-shadow: none;
+  display: none;
 }
 
 .portal-tabs button.active:hover,
 .portal-tabs button.active:focus,
 .portal-tabs button.active:active {
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
+  background: transparent;
+  color: var(--color-primary);
   outline: none;
 }
 
@@ -142,19 +142,26 @@
    ===================================================== */
 .portal-tab-panel {
   display: none;
-  background: var(--portal-bg-dark);
-  border-radius: 0 var(--portal-radius-lg) var(--portal-radius-lg) var(--portal-radius-lg);
-  padding: 4rem 2rem;
+  background: transparent;
+  border-radius: 0;
+  padding: var(--space-3) 0;
   position: relative;
   z-index: 2;
   margin-top: 0 !important;
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
 .portal-tab-panel.active {
   display: flex;
   flex-direction: column;
-  gap: 4rem;
+  gap: var(--space-3);
+}
+
+/* Tab content wrapper - contains each tab's content */
+.tab-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 /* =====================================================
@@ -245,23 +252,22 @@
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: var(--portal-bg-light) transparent;
-    padding-bottom: 4px;
     /* Prevent momentum scroll from going too far */
     overscroll-behavior-x: contain;
   }
 
   .portal-tabs::-webkit-scrollbar {
-    height: 6px;
+    height: 4px;
   }
 
   .portal-tabs::-webkit-scrollbar-track {
-    background: var(--portal-bg-readonly, rgba(0, 0, 0, 0.1));
-    border-radius: 3px;
+    background: transparent;
+    border-radius: 2px;
   }
 
   .portal-tabs::-webkit-scrollbar-thumb {
     background: var(--portal-bg-light);
-    border-radius: 3px;
+    border-radius: 2px;
   }
 
   .portal-tabs::-webkit-scrollbar-thumb:hover {
@@ -270,15 +276,15 @@
 
   .portal-tabs button {
     padding: var(--space-1) var(--space-1-5);
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
   }
 
   .portal-tab-panel {
-    padding: 2rem 1rem;
+    padding: var(--space-2) 0;
   }
 
   .portal-tab-panel.active {
-    gap: 2rem;
+    gap: var(--space-3);
   }
 
   .portal-subtabs,
@@ -294,16 +300,11 @@
   }
 }
 
-/* Tablet - reduce icon visibility */
+/* Tablet - smaller text */
 @media (max-width: 600px) {
   .portal-tabs button {
     padding: var(--space-0-5) var(--space-1);
-    font-size: 0.7rem;
-  }
-
-  /* Hide tab icons on smaller screens to save space */
-  .portal-tabs button .tab-icon {
-    display: none;
+    font-size: var(--font-size-xs);
   }
 }
 
@@ -311,15 +312,14 @@
 @media (--small-mobile) {
   .portal-tabs button {
     padding: var(--space-0-5) var(--space-1);
-    font-size: 0.65rem;
-    letter-spacing: 0.3px;
+    font-size: 0.7rem;
   }
 
   .portal-tab-panel {
-    padding: 1.5rem 0.75rem;
+    padding: var(--space-1-5) 0;
   }
 
   .portal-tab-panel.active {
-    gap: 1.5rem;
+    gap: var(--space-2);
   }
 }

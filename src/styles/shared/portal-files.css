@@ -41,8 +41,7 @@
   background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--portal-radius-md);
-  padding: var(--space-4);
-  margin-bottom: var(--space-4);
+  padding: var(--space-3);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
 }
@@ -50,7 +49,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .files-upload-section h3 {
   font-family: var(--font-family-acme);
   font-size: 1.1rem;
-  margin: 0 0 var(--space-2) 0;
+  margin: 0;
   text-transform: uppercase;
   color: var(--portal-text-light);
 }
@@ -136,7 +135,8 @@
   background: var(--portal-border);
   border-radius: var(--portal-radius-md);
   overflow: hidden;
-  min-height: 400px;
+  min-height: 300px;
+  padding: 0;
 }
 
 /* Folder Panel (Left) */

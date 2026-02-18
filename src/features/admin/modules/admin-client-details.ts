@@ -176,22 +176,40 @@ export async function initClientDetailView(
  * Set up tab navigation event listeners
  */
 function setupTabNavigation(): void {
+  // Set up inline tabs (hidden but kept for compatibility)
   const tabsContainer = document.getElementById('client-detail-tabs');
-  if (!tabsContainer) return;
+  if (tabsContainer) {
+    // Remove existing listeners by replacing with clone
+    const newTabsContainer = tabsContainer.cloneNode(true) as HTMLElement;
+    tabsContainer.parentNode?.replaceChild(newTabsContainer, tabsContainer);
 
-  // Remove existing listeners by replacing with clone
-  const newTabsContainer = tabsContainer.cloneNode(true) as HTMLElement;
-  tabsContainer.parentNode?.replaceChild(newTabsContainer, tabsContainer);
+    newTabsContainer.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('button[data-cd-tab]') as HTMLButtonElement;
+      if (!btn) return;
 
-  newTabsContainer.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest('button[data-cd-tab]') as HTMLButtonElement;
-    if (!btn) return;
+      const tabName = btn.dataset.cdTab;
+      if (tabName) {
+        switchToTab(tabName);
+      }
+    });
+  }
 
-    const tabName = btn.dataset.cdTab;
-    if (tabName) {
-      switchToTab(tabName);
-    }
-  });
+  // Set up header tabs
+  const headerTabs = document.getElementById('client-detail-header-tabs');
+  if (headerTabs) {
+    headerTabs.querySelectorAll('.portal-subtab').forEach((btn) => {
+      const btnEl = btn as HTMLElement;
+      if (btnEl.dataset.listenerAdded) return;
+      btnEl.dataset.listenerAdded = 'true';
+
+      btn.addEventListener('click', () => {
+        const tabName = btnEl.dataset.cdTab;
+        if (tabName) {
+          switchToTab(tabName);
+        }
+      });
+    });
+  }
 }
 
 /**
@@ -200,8 +218,13 @@ function setupTabNavigation(): void {
 function switchToTab(tabName: string): void {
   _currentTab = tabName;
 
-  // Update tab buttons
+  // Update inline tab buttons (hidden)
   document.querySelectorAll('.client-detail-tabs button').forEach(btn => {
+    btn.classList.toggle('active', (btn as HTMLButtonElement).dataset.cdTab === tabName);
+  });
+
+  // Update header tab buttons
+  document.querySelectorAll('#client-detail-header-tabs .portal-subtab').forEach(btn => {
     btn.classList.toggle('active', (btn as HTMLButtonElement).dataset.cdTab === tabName);
   });
 

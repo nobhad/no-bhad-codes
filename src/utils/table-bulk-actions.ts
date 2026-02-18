@@ -36,6 +36,8 @@ export interface BulkActionConfig {
 export interface BulkSelectionState {
   selectedIds: Set<number>;
   allSelected: boolean;
+  /** Last clicked row index for Shift+Click range selection */
+  lastClickedIndex: number;
 }
 
 // ===============================================
@@ -51,7 +53,8 @@ export function getSelectionState(tableId: string): BulkSelectionState {
   if (!selectionStates.has(tableId)) {
     selectionStates.set(tableId, {
       selectedIds: new Set(),
-      allSelected: false
+      allSelected: false,
+      lastClickedIndex: -1
     });
   }
   return selectionStates.get(tableId)!;
@@ -64,6 +67,7 @@ export function resetSelection(tableId: string): void {
   const state = getSelectionState(tableId);
   state.selectedIds.clear();
   state.allSelected = false;
+  state.lastClickedIndex = -1;
 
   // Update UI
   const headerCheckbox = document.querySelector(`#${tableId}-select-all`) as HTMLInputElement;
@@ -337,9 +341,45 @@ export function setupBulkSelectionHandlers(
     });
   }
 
-  // Individual row checkboxes
+  // Individual row checkboxes with Shift+Click support
   const rowCheckboxes = document.querySelectorAll(`.${tableId}-row-select`) as NodeListOf<HTMLInputElement>;
-  rowCheckboxes.forEach(checkbox => {
+  const checkboxArray = Array.from(rowCheckboxes);
+
+  rowCheckboxes.forEach((checkbox, index) => {
+    // Use click event to capture shift key state
+    checkbox.addEventListener('click', (e: MouseEvent) => {
+      const rowId = parseInt(checkbox.dataset.rowId || '0');
+      if (!rowId) return;
+
+      // Shift+Click: select range from last clicked to current
+      if (e.shiftKey && state.lastClickedIndex !== -1 && state.lastClickedIndex !== index) {
+        e.preventDefault(); // Prevent default toggle
+
+        const start = Math.min(state.lastClickedIndex, index);
+        const end = Math.max(state.lastClickedIndex, index);
+
+        // Select all rows in range
+        for (let i = start; i <= end; i++) {
+          const cb = checkboxArray[i];
+          const id = parseInt(cb.dataset.rowId || '0');
+          if (id) {
+            state.selectedIds.add(id);
+            cb.checked = true;
+          }
+        }
+
+        // Update header checkbox state
+        updateHeaderCheckbox(tableId, allRowIds.length);
+        updateToolbarVisibility(tableId, state.selectedIds.size);
+        onSelectionChange?.(Array.from(state.selectedIds));
+        return;
+      }
+
+      // Normal click - update last clicked index
+      state.lastClickedIndex = index;
+    });
+
+    // Handle actual selection state change
     checkbox.addEventListener('change', () => {
       const rowId = parseInt(checkbox.dataset.rowId || '0');
       if (!rowId) return;

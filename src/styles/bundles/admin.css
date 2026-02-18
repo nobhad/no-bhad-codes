@@ -27,6 +27,16 @@
 @import "../components/nav-portal.css" layer(components);
 
 /* ============================================
+ * COMMAND PALETTE (Linear-style ⌘K)
+ * ============================================ */
+@import "../components/command-palette.css" layer(components);
+
+/* ============================================
+ * INLINE EDIT (Linear-style click-to-edit)
+ * ============================================ */
+@import "../components/inline-edit.css" layer(components);
+
+/* ============================================
  * ADMIN-SPECIFIC STYLES
  * ============================================ */
 @import "../pages/admin.css" layer(admin);

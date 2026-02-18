@@ -14,8 +14,8 @@
   overflow: visible;
   position: relative;
   vertical-align: middle;
-  height: 48px;
-  padding: var(--space-2) var(--space-4);
+  height: 40px;
+  padding: var(--space-2) var(--space-3);
   box-sizing: border-box;
 }
 

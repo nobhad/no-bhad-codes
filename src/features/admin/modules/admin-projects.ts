@@ -58,6 +58,8 @@ import { setupFileUploadHandlers, loadPendingRequestsDropdown, loadProjectFiles 
 import { createSecondarySidebar, SECONDARY_TAB_ICONS, type SecondarySidebarController } from '../../../components/secondary-sidebar';
 import { createPortalModal } from '../../../components/portal-modal';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { makeEditable } from '../../../components/inline-edit';
 
 // ============================================
 // UTILITY HELPERS
@@ -568,11 +570,13 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
         <span class="budget-stacked">${formatDisplayValue(project.budget_range)}</span>
       </td>
       <td class="status-cell"></td>
-      <td class="budget-cell">
+      <td class="budget-cell inline-editable-cell" data-field="budget_range" data-project-id="${project.id}">
         <span class="budget-value">${formatDisplayValue(project.budget_range)}</span>
         <span class="timeline-stacked">${formatDisplayValue(project.timeline)}</span>
       </td>
-      <td class="timeline-cell">${formatDisplayValue(project.timeline)}</td>
+      <td class="timeline-cell inline-editable-cell" data-field="timeline" data-project-id="${project.id}">
+        <span class="timeline-value">${formatDisplayValue(project.timeline)}</span>
+      </td>
       <td class="date-cell start-cell">
         <span class="date-value">${formatDate(project.start_date)}</span>
         <span class="target-stacked">${formatDate(project.end_date)}</span>
@@ -601,10 +605,10 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       statusCell.appendChild(dropdown);
     }
 
-    // Add click handler for row (excluding status cell, checkbox, and actions)
+    // Add click handler for row (excluding status cell, checkbox, actions, and inline-editable cells)
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown') || target.closest('.bulk-select-cell') || target.closest('.actions-cell') || target.tagName === 'INPUT') return;
+      if (target.closest('.table-dropdown') || target.closest('.bulk-select-cell') || target.closest('.actions-cell') || target.closest('.inline-editable-cell') || target.tagName === 'INPUT') return;
       showProjectDetails(project.id, ctx);
     });
 
@@ -615,6 +619,54 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
         e.stopPropagation();
         showProjectDetails(project.id, ctx);
       });
+    }
+
+    // Setup inline editing for budget cell
+    const budgetCell = row.querySelector('.budget-cell.inline-editable-cell') as HTMLElement;
+    if (budgetCell) {
+      makeEditable(
+        budgetCell,
+        () => project.budget_range || '',
+        async (newValue) => {
+          // Update via API
+          const response = await apiPut(`/api/projects/${project.id}`, { budget_range: newValue });
+          if (response.ok) {
+            project.budget_range = newValue;
+            // Update display
+            const budgetValue = budgetCell.querySelector('.budget-value');
+            if (budgetValue) budgetValue.textContent = formatDisplayValue(newValue);
+            showToast('Budget updated', 'success');
+          } else {
+            showToast('Failed to update budget', 'error');
+            throw new Error('Update failed');
+          }
+        },
+        { placeholder: 'Enter budget' }
+      );
+    }
+
+    // Setup inline editing for timeline cell
+    const timelineCell = row.querySelector('.timeline-cell.inline-editable-cell') as HTMLElement;
+    if (timelineCell) {
+      makeEditable(
+        timelineCell,
+        () => project.timeline || '',
+        async (newValue) => {
+          // Update via API
+          const response = await apiPut(`/api/projects/${project.id}`, { timeline: newValue });
+          if (response.ok) {
+            project.timeline = newValue;
+            // Update display
+            const timelineValue = timelineCell.querySelector('.timeline-value');
+            if (timelineValue) timelineValue.textContent = formatDisplayValue(newValue);
+            showToast('Timeline updated', 'success');
+          } else {
+            showToast('Failed to update timeline', 'error');
+            throw new Error('Update failed');
+          }
+        },
+        { placeholder: 'Enter timeline' }
+      );
     }
 
     tableBody.appendChild(row);
@@ -630,6 +682,18 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
 
   // Render pagination
   renderPaginationUI(filteredProjects.length, ctx);
+
+  // Initialize keyboard navigation (J/K to move, Enter to open)
+  initTableKeyboardNav({
+    tableSelector: '.projects-table',
+    rowSelector: 'tbody tr[data-project-id]',
+    onRowSelect: (row) => {
+      const projectId = parseInt(row.dataset.projectId || '0');
+      if (projectId) showProjectDetails(projectId, ctx);
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 /**
@@ -743,10 +807,49 @@ function _initSecondarySidebar(projectName: string): void {
  * Handle tab change from secondary sidebar
  */
 function handleSecondaryTabChange(tabId: string): void {
-  // Find and click the corresponding horizontal tab button
-  const tabBtn = document.querySelector(`.project-detail-tabs button[data-pd-tab="${tabId}"]`) as HTMLButtonElement;
-  if (tabBtn) {
-    tabBtn.click();
+  switchProjectDetailTab(tabId);
+}
+
+/**
+ * Reset header tabs to Overview when entering project detail view
+ */
+function resetHeaderTabsToOverview(): void {
+  const headerTabs = document.querySelectorAll('#project-detail-header-tabs .portal-subtab');
+  headerTabs.forEach((btn) => {
+    const btnEl = btn as HTMLElement;
+    btn.classList.toggle('active', btnEl.dataset.pdTab === 'overview');
+  });
+}
+
+/**
+ * Switch to a specific project detail tab - syncs both inline and header tabs
+ */
+function switchProjectDetailTab(tabName: string): void {
+  // Query fresh each time to ensure we have current DOM
+  const inlineTabBtns = document.querySelectorAll('.project-detail-tabs button');
+  const headerTabBtns = document.querySelectorAll('#project-detail-header-tabs .portal-subtab');
+  const tabContents = document.querySelectorAll('[id^="pd-tab-"]');
+
+  // Update inline tabs (hidden but still functional)
+  inlineTabBtns.forEach((b) => {
+    const btnEl = b as HTMLElement;
+    b.classList.toggle('active', btnEl.dataset.pdTab === tabName);
+  });
+
+  // Update header tabs
+  headerTabBtns.forEach((b) => {
+    const btnEl = b as HTMLElement;
+    b.classList.toggle('active', btnEl.dataset.pdTab === tabName);
+  });
+
+  // Update tab content panels
+  tabContents.forEach((content) => {
+    content.classList.toggle('active', content.id === `pd-tab-${tabName}`);
+  });
+
+  // Sync secondary sidebar with tab
+  if (secondarySidebar) {
+    secondarySidebar.setActiveTab(tabName);
   }
 }
 
@@ -791,6 +894,9 @@ export function showProjectDetails(
 
   // Switch to project-detail tab
   ctx.switchTab('project-detail');
+
+  // Reset header tabs to Overview
+  resetHeaderTabsToOverview();
 
   // Render the project detail tab HTML structure first
   const tabContainer = document.getElementById('tab-project-detail');
@@ -1340,32 +1446,32 @@ async function saveProjectChanges(projectId: number): Promise<void> {
 }
 
 function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
-  const tabBtns = document.querySelectorAll('.project-detail-tabs button');
-  const tabContents = document.querySelectorAll('[id^="pd-tab-"]');
-
-  tabBtns.forEach((btn) => {
+  // Set up inline tab buttons (hidden, but keep for compatibility)
+  const inlineTabBtns = document.querySelectorAll('.project-detail-tabs button');
+  inlineTabBtns.forEach((btn) => {
     const btnEl = btn as HTMLElement;
-    // Skip if already set up
     if (btnEl.dataset.listenerAdded) return;
     btnEl.dataset.listenerAdded = 'true';
 
     btn.addEventListener('click', () => {
       const tabName = btnEl.dataset.pdTab;
-      if (!tabName) return;
-
-      tabBtns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      tabContents.forEach((content) => {
-        content.classList.toggle('active', content.id === `pd-tab-${tabName}`);
-      });
-
-      // Sync secondary sidebar with horizontal tab
-      if (secondarySidebar) {
-        secondarySidebar.setActiveTab(tabName);
-      }
+      if (tabName) switchProjectDetailTab(tabName);
     });
   });
+
+  // Set up header tab buttons using event delegation (once per container)
+  const headerTabsContainer = document.getElementById('project-detail-header-tabs');
+  if (headerTabsContainer && !headerTabsContainer.dataset.listenerAdded) {
+    headerTabsContainer.dataset.listenerAdded = 'true';
+
+    headerTabsContainer.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('.portal-subtab') as HTMLElement;
+      if (!btn) return;
+
+      const tabName = btn.dataset.pdTab;
+      if (tabName) switchProjectDetailTab(tabName);
+    });
+  }
 
   // Back button handler (use cached ref)
   const backBtn = domCache.get('backBtn');
@@ -1527,20 +1633,23 @@ function setupGenerateDocumentMenu(): void {
     menu.classList.toggle('open');
   });
 
-  // Handle menu item clicks
-  menu.addEventListener('click', async (e) => {
-    const target = e.target as HTMLElement;
-    const item = target.closest('.custom-dropdown-item') as HTMLElement | null;
-    if (!item) return;
+  // Handle menu item clicks - attach directly to each item for reliability
+  const items = menu.querySelectorAll('.custom-dropdown-item');
+  items.forEach((item) => {
+    const itemEl = item as HTMLElement;
+    if (itemEl.dataset.listenerAdded === 'true') return;
+    itemEl.dataset.listenerAdded = 'true';
 
-    e.preventDefault();
-    e.stopPropagation();
-    const action = item.dataset.action;
-    menu.classList.remove('open');
+    itemEl.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const action = itemEl.dataset.action;
+      menu.classList.remove('open');
 
-    if (!currentProjectId || !action) return;
+      if (!currentProjectId || !action) return;
 
-    await handleGenerateDocument(action, currentProjectId);
+      await handleGenerateDocument(action, currentProjectId);
+    });
   });
 
   // Close on outside click

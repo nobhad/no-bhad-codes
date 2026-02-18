@@ -7,7 +7,7 @@
  * Admin dashboard contracts list + detail modal.
  */
 
-import { apiFetch, apiPost } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import { formatDate, formatDateTime } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { confirmDialog, alertError } from '../../../utils/confirm-dialog';
@@ -32,6 +32,8 @@ import {
   type PaginationState,
   type PaginationConfig
 } from '../../../utils/table-pagination';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { makeEditable } from '../../../components/inline-edit';
 
 interface ContractListItem {
   id: number;
@@ -154,7 +156,7 @@ function renderContractsTable(ctx: AdminDashboardContext): void {
       const amendmentLabel = contract.parentContractId ? ' · Amendment' : '';
 
       return `
-        <tr>
+        <tr data-contract-id="${contract.id}">
           <td>
             <div class="table-primary">${title}</div>
             <div class="table-subtext">${typeLabel}${amendmentLabel}</div>
@@ -167,7 +169,9 @@ function renderContractsTable(ctx: AdminDashboardContext): void {
           <td>${getStatusBadge(contract.status)}</td>
           <td>${formatDateSafe(contract.sentAt)}</td>
           <td>${formatDateSafe(contract.signedAt)}</td>
-          <td>${formatDateSafe(contract.expiresAt)}</td>
+          <td class="date-col inline-editable-cell" data-contract-id="${contract.id}" data-field="expires_at">
+            <span class="expires-at-value">${formatDateSafe(contract.expiresAt)}</span>
+          </td>
           <td class="actions-col">
             <button class="icon-btn" data-action="view" data-id="${contract.id}" title="View details" aria-label="View contract">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -184,7 +188,46 @@ function renderContractsTable(ctx: AdminDashboardContext): void {
     })
     .join('');
 
+  // Setup inline editing for expires_at cells
+  body.querySelectorAll('.date-col.inline-editable-cell').forEach((cell) => {
+    const cellEl = cell as HTMLElement;
+    const contractId = parseInt(cellEl.dataset.contractId || '0');
+    const contract = paginatedContracts.find(c => c.id === contractId);
+    if (!contract) return;
+
+    makeEditable(
+      cellEl,
+      () => contract.expiresAt ? contract.expiresAt.split('T')[0] : '',
+      async (newValue) => {
+        const response = await apiPut(`/api/contracts/${contractId}`, { expires_at: newValue || null });
+        if (response.ok) {
+          contract.expiresAt = newValue || null;
+          const expiresAtValue = cellEl.querySelector('.expires-at-value');
+          if (expiresAtValue) expiresAtValue.textContent = formatDateSafe(newValue);
+          showToast('Expiration date updated', 'success');
+        } else {
+          showToast('Failed to update expiration date', 'error');
+          throw new Error('Update failed');
+        }
+      },
+      { type: 'date', placeholder: 'Select date' }
+    );
+  });
+
   renderPaginationUI(filteredContracts.length, ctx);
+
+  // Initialize keyboard navigation (J/K to move, Enter to view)
+  initTableKeyboardNav({
+    tableSelector: '.contracts-table',
+    rowSelector: 'tbody tr[data-contract-id]',
+    onRowSelect: (row) => {
+      const contractId = parseInt(row.dataset.contractId || '0');
+      const contract = contractsCache.find((c) => c.id === contractId);
+      if (contract) openContractDetail(contract);
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 function updateContractStats(contracts: ContractListItem[]): void {

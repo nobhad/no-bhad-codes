@@ -56,6 +56,8 @@ import { getStatusDotHTML } from '../../../components/status-badge';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { makeEditable } from '../../../components/inline-edit';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -608,9 +610,9 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
       return `
         <tr data-client-id="${client.id}" class="clickable-row">
           ${createRowCheckbox('clients', client.id)}
-          <td class="identity-cell contact-cell">
-            <span class="identity-name">${safeName}</span>
-            ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
+          <td class="identity-cell contact-cell inline-editable-cell" data-client-id="${client.id}">
+            <span class="identity-name" data-field="primary-name">${safeName}</span>
+            ${safeCompany ? `<span class="identity-contact" data-field="secondary-name">${safeCompany}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
             <span class="identity-email">${safeEmail}</span>
           </td>
           <td class="type-cell">${typeLabel}</td>
@@ -634,14 +636,15 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
     })
     .join('');
 
-  // Row click to view details (but not on checkbox or invite button)
+  // Row click to view details (but not on checkbox, invite button, or inline-editable cells)
   tableBody.querySelectorAll('tr[data-client-id]').forEach((row) => {
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      // Don't navigate if clicking the checkbox, invite button, or bulk select cell
+      // Don't navigate if clicking the checkbox, invite button, bulk select cell, or inline-editable cell
       if (target.closest('.bulk-select-cell') ||
           target.closest('.btn-invite-inline') ||
           target.closest('.icon-btn-invite') ||
+          target.closest('.inline-editable-cell') ||
           target.tagName === 'INPUT') {
         return;
       }
@@ -661,12 +664,94 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
     });
   });
 
+  // Setup inline editing for contact_name and company_name
+  tableBody.querySelectorAll('.identity-cell.inline-editable-cell').forEach((cell) => {
+    const clientId = parseInt((cell as HTMLElement).dataset.clientId || '0');
+    const client = paginatedClients.find(c => c.id === clientId);
+    if (!client) return;
+
+    const cellEl = cell as HTMLElement;
+    const clientType = client.client_type || 'business';
+    const isBusinessWithCompany = clientType === 'business' && client.company_name;
+
+    // For business: company_name is primary, contact_name is secondary
+    // For personal: contact_name is primary, company_name is secondary
+    const primaryNameEl = cellEl.querySelector('.identity-name') as HTMLElement;
+    const secondaryNameEl = cellEl.querySelector('.identity-contact') as HTMLElement;
+
+    if (primaryNameEl) {
+      makeEditable(
+        primaryNameEl,
+        () => isBusinessWithCompany ? (client.company_name || '') : (client.contact_name || ''),
+        async (newValue) => {
+          const fieldToUpdate = isBusinessWithCompany ? 'company_name' : 'contact_name';
+          const response = await apiPut(`/api/clients/${clientId}`, { [fieldToUpdate]: newValue || null });
+          if (response.ok) {
+            if (isBusinessWithCompany) {
+              client.company_name = newValue || null;
+            } else {
+              client.contact_name = newValue || null;
+            }
+            primaryNameEl.textContent = newValue
+              ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(newValue))
+              : '';
+            showToast(`${isBusinessWithCompany ? 'Company name' : 'Contact name'} updated`, 'success');
+          } else {
+            showToast('Failed to update client', 'error');
+            throw new Error('Update failed');
+          }
+        },
+        { placeholder: isBusinessWithCompany ? 'Enter company name' : 'Enter contact name' }
+      );
+    }
+
+    // Setup secondary field editing (contact span)
+    if (secondaryNameEl) {
+      makeEditable(
+        secondaryNameEl,
+        () => isBusinessWithCompany ? (client.contact_name || '') : (client.company_name || ''),
+        async (newValue) => {
+          const fieldToUpdate = isBusinessWithCompany ? 'contact_name' : 'company_name';
+          const response = await apiPut(`/api/clients/${clientId}`, { [fieldToUpdate]: newValue || null });
+          if (response.ok) {
+            if (isBusinessWithCompany) {
+              client.contact_name = newValue || null;
+            } else {
+              client.company_name = newValue || null;
+            }
+            secondaryNameEl.textContent = newValue
+              ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(newValue))
+              : '';
+            secondaryNameEl.style.display = newValue ? '' : 'none';
+            showToast(`${isBusinessWithCompany ? 'Contact name' : 'Company name'} updated`, 'success');
+          } else {
+            showToast('Failed to update client', 'error');
+            throw new Error('Update failed');
+          }
+        },
+        { placeholder: isBusinessWithCompany ? 'Enter contact name' : 'Enter company name' }
+      );
+    }
+  });
+
   // Setup bulk selection handlers
   const allRowIds = paginatedClients.map(c => c.id);
   setupBulkSelectionHandlers(CLIENTS_BULK_CONFIG, allRowIds);
 
   // Render pagination
   renderPaginationUI(filteredClients.length, ctx);
+
+  // Initialize keyboard navigation (J/K to move, Enter to open)
+  initTableKeyboardNav({
+    tableSelector: '.clients-table',
+    rowSelector: 'tbody tr[data-client-id]',
+    onRowSelect: (row) => {
+      const clientId = parseInt(row.dataset.clientId || '0');
+      if (clientId) showClientDetails(clientId);
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 export async function showClientDetails(clientId: number, ctx?: AdminDashboardContext): Promise<void> {

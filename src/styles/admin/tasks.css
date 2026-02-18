@@ -538,19 +538,23 @@
   margin-bottom: var(--space-1-5);
 }
 
+.time-tracking-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
 .time-tracking-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: var(--space-1-5);
-  margin-bottom: var(--space-2);
 }
 
 .time-summary-card {
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
-  padding: var(--space-1-5);
+  padding: var(--space-2);
   text-align: center;
-  border: 1px solid var(--portal-border);
+  border: none;
 }
 
 .time-summary-value {
@@ -658,19 +662,15 @@
 }
 
 /* Weekly chart container */
-.time-weekly-chart {
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-1-5);
-  margin-bottom: var(--space-2);
-  border: 1px solid var(--portal-border);
-}
-
-.time-weekly-chart h4 {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--portal-text-secondary);
-  margin-bottom: var(--space-1-5);
+/* time-weekly-chart now uses portal-project-card for base styling */
+.time-weekly-chart h3 {
+  font-family: var(--font-family-acme);
+  font-size: 1.1rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-light);
+  margin: 0 0 var(--space-2) 0;
 }
 
 /* ============================================

@@ -248,7 +248,7 @@ async function loadRecentLeads(ctx: AdminDashboardContext): Promise<void> {
           <span class="leads-avatar" style="background: ${color}">${initials}</span>
           <div class="leads-info">
             <span class="leads-name">${SanitizationUtils.escapeHtml(lead.name)}</span>
-            <span class="leads-context">${SanitizationUtils.escapeHtml(lead.company || '')}${lead.project_type ? ' · ' + lead.project_type : ''}</span>
+            <span class="leads-context">${SanitizationUtils.escapeHtml(lead.company || '')}${lead.project_type ? ` · ${  lead.project_type}` : ''}</span>
           </div>
           <div class="leads-meta">
             <span class="leads-budget">${lead.budget || ''}</span>

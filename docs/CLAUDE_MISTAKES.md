@@ -200,3 +200,37 @@ import { escapeHtml } from '../../../../shared/validation/validators';
 **Impact:** TypeScript build failure, wasted user time debugging.
 
 ---
+
+## February 17, 2026
+
+### 1. Removed wrong sidebar element when asked to remove counter — 3:45 PM EST
+
+**Violation:** When user said "maybe we just get rid of the counter", I removed the keyboard shortcut hints (1-8) we had JUST ADDED, instead of removing the CRM message counter badge (the red notification "1").
+
+**Context:**
+- User said "count is hiding number" - meaning the CRM badge was blocking the shortcut number
+- User then said "maybe we just get rid of the counter"
+- I incorrectly interpreted "counter" as the keyboard shortcut numbers
+- User clarified: "NO THE MESSAGE COUNTER NOT WHAT WE JUST ADDED"
+
+**What I Did Wrong:**
+
+1. Did not carefully parse which "counter" the user meant
+2. The CRM badge shows a COUNT of messages - that's the "counter"
+3. The keyboard shortcuts (1-8) are SHORTCUT HINTS, not "counters"
+4. I removed the wrong thing without asking for clarification
+
+**What I Should Have Done:**
+
+1. Recognize "counter" likely means the notification COUNT badge
+2. ASK: "Do you mean remove the red CRM notification badge, or the keyboard shortcut numbers?"
+3. When in doubt about which element to remove, ALWAYS ASK
+
+**Files Affected:**
+
+- `admin/index.html` - incorrectly removed `<kbd class="sidebar-shortcut">` elements
+- `src/styles/admin/sidebar-badges.css` - incorrectly removed sidebar-shortcut CSS
+
+**Fix Required:** Restore all `<kbd class="sidebar-shortcut">` elements and their CSS styles.
+
+---

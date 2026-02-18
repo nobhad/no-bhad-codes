@@ -41,6 +41,8 @@ import {
   type PaginationState,
   type PaginationConfig
 } from '../../../utils/table-pagination';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { makeEditable } from '../../../components/inline-edit';
 
 // ============================================
 // TYPES
@@ -509,7 +511,9 @@ function renderInvoicesTable(ctx: AdminDashboardContext): void {
           ${statusIndicator}
           <span class="date-stacked">${dueDate}</span>
         </td>
-        <td class="date-cell">${dueDate}</td>
+        <td class="date-cell inline-editable-cell" data-invoice-id="${invoice.id}" data-field="due_date">
+          <span class="due-date-value">${dueDate}</span>
+        </td>
         <td class="actions-cell">
           <div class="table-actions">
             ${actionButtons}
@@ -519,6 +523,33 @@ function renderInvoicesTable(ctx: AdminDashboardContext): void {
     `;
   }).join('');
 
+  // Setup inline editing for due_date cells
+  tableBody.querySelectorAll('.date-cell.inline-editable-cell').forEach((cell) => {
+    const cellEl = cell as HTMLElement;
+    const invoiceId = parseInt(cellEl.dataset.invoiceId || '0');
+    const invoice = paginatedInvoices.find(inv => inv.id === invoiceId);
+    if (!invoice) return;
+
+    makeEditable(
+      cellEl,
+      () => invoice.due_date ? invoice.due_date.split('T')[0] : '',
+      async (newValue) => {
+        const response = await apiPut(`/api/invoices/${invoiceId}`, { due_date: newValue || null });
+        if (response.ok) {
+          // Update the cached value (use empty string as fallback for type safety)
+          (invoice as { due_date: string }).due_date = newValue || '';
+          const dueDateValue = cellEl.querySelector('.due-date-value');
+          if (dueDateValue) dueDateValue.textContent = newValue ? formatDate(newValue) : '-';
+          showToast('Due date updated', 'success');
+        } else {
+          showToast('Failed to update due date', 'error');
+          throw new Error('Update failed');
+        }
+      },
+      { type: 'date', placeholder: 'Select date' }
+    );
+  });
+
   // Wire bulk selection handlers for current rows
   const allRowIds = paginatedInvoices.map(inv => inv.id);
   const bulkConfig: BulkActionConfig = { tableId: 'invoices', actions: [] };
@@ -526,6 +557,18 @@ function renderInvoicesTable(ctx: AdminDashboardContext): void {
 
   // Render pagination
   renderPaginationUI(filteredInvoices.length, ctx);
+
+  // Initialize keyboard navigation (J/K to move, Enter to view)
+  initTableKeyboardNav({
+    tableSelector: '.invoices-table',
+    rowSelector: 'tbody tr[data-invoice-id]',
+    onRowSelect: (row) => {
+      const invoiceId = parseInt(row.dataset.invoiceId || '0');
+      if (invoiceId) showViewInvoiceModal(invoiceId, ctx);
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 /**
