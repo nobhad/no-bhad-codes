@@ -210,6 +210,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .stat-label {
   display: block;
+  font-family: var(--font-family-sans);
   font-size: 0.85rem;
   color: var(--portal-text-secondary);
   margin-top: var(--space-1);

@@ -51,6 +51,11 @@ body:has([data-page="client-portal"]) {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Admin backend: no shadow on global header */
+[data-page="admin"] .portal-global-header {
+  box-shadow: none;
+}
+
 .portal-global-header-left {
   display: flex;
   align-items: center;

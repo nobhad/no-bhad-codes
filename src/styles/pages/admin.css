@@ -15,6 +15,41 @@ body[data-page="admin"] {
 }
 
 /* ================================================
+   GLOBAL SHADOW REMOVAL — Admin backend
+   Override all shadow variables to none.
+   ================================================ */
+[data-page="admin"] {
+  --shadow-panel: none;
+  --shadow-card: none;
+  --shadow-card-rest: none;
+  --shadow-nav: none;
+  --shadow-elevated-sm: none;
+  --shadow-elevated-md: none;
+  --shadow-elevated-lg: none;
+  --shadow-dropdown-xl: none;
+  --shadow-sidebar: none;
+  --shadow-lg: none;
+  --shadow-md: none;
+  --shadow-modal: none;
+  --shadow-inset: none;
+  --shadow-inset-light: none;
+  --shadow-button-dark: none;
+  --shadow-button-focus: none;
+  --btn-portal-shadow: none;
+  --btn-portal-shadow-hover: none;
+  --btn-portal-shadow-focus: none;
+  --portal-shadow: none;
+}
+
+[data-page="admin"] .sidebar,
+[data-page="admin"] .portal-header,
+[data-page="admin"] .admin-header,
+[data-page="admin"] .portal-page-header,
+body[data-page="admin"] .portal-page-header {
+  box-shadow: none;
+}
+
+/* ================================================
    ADMIN LOGIN PAGE - THEME TOGGLE SUPPORT
    Override --color-neutral-300 in dark mode to match main site
    ================================================ */
@@ -551,19 +586,22 @@ body[data-page="admin"] .project-detail-overview {
 .admin-table th {
   color: var(--portal-text-secondary);
   font-weight: 500;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
-  border-top: 1px solid var(--portal-border-medium);
-  border-bottom: 1px solid var(--portal-border-medium);
-  min-height: 48px;
+  /* Linear-style: subtle single bottom border only */
+  border-top: none;
+  border-bottom: 1px solid var(--portal-border-dark);
+  min-height: 36px;
+  height: 36px;
   box-sizing: border-box;
   vertical-align: middle;
 }
 
 .admin-table thead tr {
-  min-height: 48px;
+  min-height: 36px;
+  height: 36px;
 }
 
 /* First header row inherits table's top border radius */
@@ -588,22 +626,25 @@ body[data-page="admin"] .project-detail-overview {
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   border: none;
-  height: 48px;
+  /* Linear-style: more compact rows */
+  height: 40px;
   vertical-align: middle;
 }
 
 .admin-table tbody tr {
   cursor: pointer;
-  transition: background-color 0.15s ease;
-  height: 48px;
+  transition: background-color 0.1s ease;
+  /* Linear-style: more compact rows */
+  height: 40px;
 }
 
+/* Linear-style: more visible hover background */
 .admin-table tbody tr:hover td {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--portal-bg-hover, rgba(255, 255, 255, 0.06));
 }
 
 .admin-table tbody tr:active td {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--portal-bg-active, rgba(255, 255, 255, 0.08));
 }
 
 /* Border radius on cells (above) for tables without pagination; pagination handles bottom radius otherwise */
@@ -981,11 +1022,17 @@ body.modal-open .dashboard-content {
 }
 
 .stat-label {
+  font-family: var(--font-family-sans);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* Admin page title - system font */
+[data-page="admin"] #admin-page-title {
+  font-family: var(--font-family-sans);
 }
 
 .stat-value {
@@ -2583,6 +2630,22 @@ body.modal-open .dashboard-content {
   align-items: center;
   gap: var(--space-1);
   justify-content: flex-start;
+  /* Linear-style: hidden by default, reveal on row hover */
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+/* Show actions on row hover or when row is focused (keyboard nav) */
+.admin-table tbody tr:hover .table-actions,
+.admin-table tbody tr.row-focused .table-actions,
+.admin-table tbody tr[data-focused="true"] .table-actions {
+  opacity: 1;
+}
+
+/* Also show when a dropdown inside is open */
+.table-actions:has(.table-dropdown.open),
+.table-actions:focus-within {
+  opacity: 1;
 }
 
 /* Table action icon buttons - neutral color, red on hover */
