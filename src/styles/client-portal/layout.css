@@ -325,6 +325,11 @@ body[data-page="client-portal"] {
   z-index: 10;
 }
 
+/* Admin backend: no shadows */
+[data-page="admin"] .portal-page-header {
+  box-shadow: none;
+}
+
 /* Admin portal header - same spacing as client portal (shared values) */
 /* Keeping this selector for specificity if admin needs different values in future */
 
@@ -399,6 +404,12 @@ body[data-page="client-portal"] {
 [data-page="admin"][data-active-tab="tasks"] .header-controls[data-for-tab="tasks"],
 [data-page="admin"][data-active-tab="leads"] .header-controls[data-for-tab="leads"],
 [data-page="admin"][data-active-tab="knowledge-base"] .header-controls[data-for-tab="knowledge-base"] {
+  display: flex;
+}
+
+/* Show project/client detail subtabs when those tabs are active */
+[data-page="admin"][data-active-tab="project-detail"] .header-subtab-group[data-for-tab="project-detail"],
+[data-page="admin"][data-active-tab="client-detail"] .header-subtab-group[data-for-tab="client-detail"] {
   display: flex;
 }
 
