@@ -57,3 +57,12 @@
 @import "./workflows.css";
 @import "./questionnaires.css";
 @import "../deliverables.css";
+
+/* Layout refinements */
+@import "./overview-layout.css";
+@import "./page-header-refinements.css";
+@import "./sidebar-refinements.css";
+@import "./keyboard-help.css";
+
+/* Unified modal system */
+@import "../shared/modal-system.css";

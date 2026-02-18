@@ -1,0 +1,128 @@
+/**
+ * Keyboard Shortcut Help Panel
+ * Press ? to show all available shortcuts
+ */
+
+.keyboard-help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.keyboard-help-overlay.open {
+  display: flex;
+}
+
+.keyboard-help-panel {
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-bg-light);
+  border-radius: var(--portal-radius-lg);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.keyboard-help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--portal-bg-medium);
+}
+
+.keyboard-help-title {
+  font-family: var(--font-family-sans);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  margin: 0;
+}
+
+.keyboard-help-close {
+  background: transparent;
+  border: none;
+  color: var(--portal-text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: var(--space-1);
+  line-height: 1;
+}
+
+.keyboard-help-close:hover {
+  color: var(--portal-text-light);
+}
+
+.keyboard-help-section {
+  margin-bottom: var(--space-4);
+}
+
+.keyboard-help-section:last-child {
+  margin-bottom: 0;
+}
+
+.keyboard-help-section-title {
+  font-family: var(--font-family-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-muted);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.keyboard-help-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.keyboard-help-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1-5) 0;
+  border-bottom: 1px solid var(--portal-bg-medium);
+}
+
+.keyboard-help-item:last-child {
+  border-bottom: none;
+}
+
+.keyboard-help-action {
+  font-size: 0.875rem;
+  color: var(--portal-text-secondary);
+}
+
+.keyboard-help-keys {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.keyboard-help-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 var(--space-1-5);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-bg-light);
+  border-radius: 4px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--portal-text-light);
+}
+
+.keyboard-help-separator {
+  color: var(--portal-text-muted);
+  font-size: 0.75rem;
+}

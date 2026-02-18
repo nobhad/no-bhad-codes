@@ -35,6 +35,8 @@ import { createTableDropdown } from '../../utils/table-dropdown';
 import { getStatusDotHTML } from '../../components/status-badge';
 import { initCopyEmailDelegation, getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../utils/copy-email';
 import { closeAllModalOverlays } from '../../utils/modal-utils';
+import { initAdminCommandPalette, destroyAdminCommandPalette } from './admin-command-palette';
+import { initKeyboardHelp } from '../../components/keyboard-help';
 
 // DOM element keys for caching
 type DashboardDOMKeys = Record<string, string>;
@@ -322,6 +324,12 @@ class AdminDashboard {
     // Initialize navigation and theme modules
     await this.initializeModules();
 
+    // Initialize command palette (Linear-style ⌘K)
+    this.initializeCommandPalette();
+
+    // Initialize keyboard shortcut help (press ?)
+    initKeyboardHelp();
+
     // Set up the dashboard
     logger.log('Setting up dashboard');
     this.setupEventListeners();
@@ -424,6 +432,24 @@ class AdminDashboard {
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  /**
+   * Initialize the command palette (Linear-style ⌘K)
+   */
+  private initializeCommandPalette(): void {
+    initAdminCommandPalette({
+      switchTab: (tab: string) => this.switchTab(tab),
+      logout: () => this.handleLogout()
+    });
+    logger.log('Command palette initialized');
+  }
+
+  /**
+   * Clean up command palette on logout/destroy
+   */
+  private cleanupCommandPalette(): void {
+    destroyAdminCommandPalette();
   }
 
   private async checkAuthentication(): Promise<boolean> {
@@ -708,6 +734,19 @@ class AdminDashboard {
       });
     }
 
+    // Mobile sidebar overlay - close on click
+    const overlay = document.getElementById('sidebar-overlay');
+    overlay?.addEventListener('click', () => this.closeMobileSidebar());
+
+    // Close mobile drawer on nav to any tab
+    document.querySelectorAll('.sidebar-buttons .btn[data-tab]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+          this.closeMobileSidebar();
+        }
+      });
+    });
+
     // Theme toggle in global header
     const headerThemeToggle = document.getElementById('header-toggle-theme');
     if (headerThemeToggle) {
@@ -815,7 +854,24 @@ class AdminDashboard {
 
   private toggleSidebar(): void {
     const sidebar = this.domCache.get('sidebar');
-    sidebar?.classList.toggle('collapsed');
+    const overlay = document.getElementById('sidebar-overlay');
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      // Mobile: toggle drawer open/close
+      sidebar?.classList.toggle('mobile-open');
+      overlay?.classList.toggle('open');
+    } else {
+      // Desktop: collapse/expand
+      sidebar?.classList.toggle('collapsed');
+    }
+  }
+
+  private closeMobileSidebar(): void {
+    const sidebar = this.domCache.get('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar?.classList.remove('mobile-open');
+    overlay?.classList.remove('open');
   }
 
   private async loadLeads(): Promise<void> {
@@ -1132,6 +1188,8 @@ class AdminDashboard {
    */
   public async handleLogout(): Promise<void> {
     logger.log('handleLogout() called via inline onclick');
+    // Clean up command palette before logout
+    this.cleanupCommandPalette();
     try {
       await AdminAuth.logout();
     } catch (error) {
