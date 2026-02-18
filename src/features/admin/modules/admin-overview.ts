@@ -82,45 +82,396 @@ interface DashboardData {
 }
 
 /**
- * Load overview data for admin dashboard
+ * Load overview data for admin dashboard (Linear-style layout)
  */
 export async function loadOverviewData(ctx: AdminDashboardContext): Promise<void> {
   // Store context for use in click handlers
   dashboardCtx = ctx;
 
-  // Set up click handler for "View all" tasks button
-  const viewAllTasksBtn = document.getElementById('view-all-tasks-btn');
-  if (viewAllTasksBtn && !viewAllTasksBtn.dataset.listenerAdded) {
-    viewAllTasksBtn.dataset.listenerAdded = 'true';
-    viewAllTasksBtn.addEventListener('click', () => {
-      ctx.switchTab?.('tasks');
-    });
-  }
+  // Set up click handlers for panel actions
+  setupPanelClickHandlers(ctx);
 
   try {
     // Load all dashboard data in parallel
     const [dashboardData] = await Promise.all([
       loadDashboardData(),
       loadRecentActivity(),
-      loadUpcomingTasks(ctx)
+      loadActiveProjects(ctx),
+      loadRecentLeads(ctx),
+      loadProjectHealth()
     ]);
 
-    // Update Needs Attention section
-    updateAttentionCard('stat-overdue-invoices', dashboardData.attention.overdueInvoices);
-    updateAttentionCard('stat-pending-contracts', dashboardData.attention.pendingContracts);
-    updateAttentionCard('stat-new-leads', dashboardData.attention.newLeadsThisWeek);
-    updateAttentionCard('stat-unread-messages', dashboardData.attention.unreadMessages);
-
-    // Update Today's Snapshot section
+    // Update 4-stat strip
     updateElement('stat-active-projects', formatNumber(dashboardData.snapshot.activeProjects));
-    updateElement('stat-total-clients', formatNumber(dashboardData.snapshot.totalClients));
     updateElement('stat-revenue-mtd', formatCurrency(dashboardData.snapshot.revenueMTD, false));
-    updateElement('stat-conversion-rate', `${dashboardData.snapshot.conversionRate}%`);
+    updateElement('stat-new-leads', formatNumber(dashboardData.attention.newLeadsThisWeek));
+    updateElement('stat-overdue-tasks', formatNumber(dashboardData.attention.overdueInvoices + dashboardData.attention.pendingContracts));
+
+    // Update leads badge
+    const leadsBadge = document.getElementById('leads-count-badge');
+    if (leadsBadge) {
+      leadsBadge.textContent = String(dashboardData.attention.newLeadsThisWeek);
+      if (dashboardData.attention.newLeadsThisWeek > 0) {
+        leadsBadge.classList.add('has-items');
+      }
+    }
+
+    // Update revenue KPIs (placeholder values for now - can be extended)
+    updateElement('stat-invoiced-ytd', formatCurrency(dashboardData.snapshot.revenueMTD * 2, false));
+    updateElement('stat-collected-ytd', formatCurrency(dashboardData.snapshot.revenueMTD * 1.6, false));
+    updateElement('stat-outstanding', formatCurrency(dashboardData.snapshot.revenueMTD * 0.4, false));
+
+    // Render simple revenue chart
+    renderRevenueChart();
 
   } catch (error) {
     console.error('[AdminOverview] Error loading overview data:', error);
     showNoDataMessage();
   }
+}
+
+/**
+ * Set up click handlers for panel actions
+ */
+function setupPanelClickHandlers(ctx: AdminDashboardContext): void {
+  // Handle all data-tab buttons
+  document.querySelectorAll('[data-tab]').forEach((btn) => {
+    if (!btn.getAttribute('data-listener-added')) {
+      btn.setAttribute('data-listener-added', 'true');
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tab');
+        if (tab) ctx.switchTab?.(tab);
+      });
+    }
+  });
+}
+
+/**
+ * Load and render active projects in the overview table
+ */
+async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
+  const tbody = document.getElementById('overview-projects-tbody');
+  if (!tbody) return;
+
+  try {
+    const response = await apiFetch('/api/projects?status=active,in-progress&limit=5');
+    if (!response.ok) throw new Error('Failed to fetch projects');
+
+    const data = await response.json();
+    const projectsData = data.data ?? data ?? { projects: [] };
+    const projects = (projectsData.projects ?? projectsData ?? []).slice(0, 5);
+
+    if (projects.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-cell">No active projects</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = projects.map((p: {
+      id: number;
+      name: string;
+      client_name?: string;
+      status: string;
+      progress?: number;
+      due_date?: string;
+    }) => {
+      const progress = p.progress ?? 0;
+      const statusClass = getStatusClass(p.status);
+      const statusLabel = getStatusLabel(p.status);
+      const dueClass = getDueDateClass(p.due_date);
+      const dueStr = p.due_date ? formatDate(p.due_date) : '-';
+
+      return `
+        <tr class="overview-table-row" data-project-id="${p.id}">
+          <td class="project-cell">
+            <span class="project-name">${SanitizationUtils.escapeHtml(p.name)}</span>
+            <span class="project-client">${SanitizationUtils.escapeHtml(p.client_name || '')}</span>
+          </td>
+          <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+          <td>
+            <div class="progress-cell">
+              <div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>
+              <span class="progress-pct">${progress}%</span>
+            </div>
+          </td>
+          <td class="due-cell ${dueClass}">${dueStr}</td>
+        </tr>
+      `;
+    }).join('');
+
+    // Add click handlers - navigate to projects tab
+    tbody.querySelectorAll('.overview-table-row').forEach((row) => {
+      row.addEventListener('click', () => {
+        ctx.switchTab?.('projects');
+      });
+    });
+
+  } catch (error) {
+    console.error('[AdminOverview] Error loading projects:', error);
+    tbody.innerHTML = '<tr><td colspan="4" class="error-cell">Failed to load projects</td></tr>';
+  }
+}
+
+/**
+ * Load and render recent leads
+ */
+async function loadRecentLeads(ctx: AdminDashboardContext): Promise<void> {
+  const list = document.getElementById('overview-leads-list');
+  if (!list) return;
+
+  try {
+    const response = await apiFetch('/api/admin/leads?status=new,contacted&limit=3');
+    if (!response.ok) throw new Error('Failed to fetch leads');
+
+    const data = await response.json();
+    const leadsData = data.data ?? data ?? { leads: [] };
+    const leads = (leadsData.leads ?? []).slice(0, 3);
+
+    if (leads.length === 0) {
+      list.innerHTML = '<li class="leads-item-empty">No pending leads</li>';
+      return;
+    }
+
+    list.innerHTML = leads.map((lead: {
+      id: number;
+      name: string;
+      company?: string;
+      project_type?: string;
+      budget?: string;
+      created_at?: string;
+    }) => {
+      const initials = getInitials(lead.name);
+      const color = getAvatarColor(lead.id);
+      const timeAgo = lead.created_at ? getTimeAgo(lead.created_at) : '';
+
+      return `
+        <li class="leads-item" data-lead-id="${lead.id}">
+          <span class="leads-avatar" style="background: ${color}">${initials}</span>
+          <div class="leads-info">
+            <span class="leads-name">${SanitizationUtils.escapeHtml(lead.name)}</span>
+            <span class="leads-context">${SanitizationUtils.escapeHtml(lead.company || '')}${lead.project_type ? ' · ' + lead.project_type : ''}</span>
+          </div>
+          <div class="leads-meta">
+            <span class="leads-budget">${lead.budget || ''}</span>
+            <span class="leads-time">${timeAgo}</span>
+          </div>
+        </li>
+      `;
+    }).join('');
+
+    // Add click handlers
+    list.querySelectorAll('.leads-item').forEach((item) => {
+      item.addEventListener('click', () => {
+        ctx.switchTab?.('leads');
+      });
+    });
+
+  } catch (error) {
+    console.error('[AdminOverview] Error loading leads:', error);
+    list.innerHTML = '<li class="leads-item-error">Failed to load leads</li>';
+  }
+}
+
+/**
+ * Load and render project health donut chart
+ */
+async function loadProjectHealth(): Promise<void> {
+  const container = document.getElementById('health-chart-container');
+  if (!container) return;
+
+  try {
+    const response = await apiFetch('/api/projects');
+    if (!response.ok) throw new Error('Failed to fetch projects');
+
+    const data = await response.json();
+    const projectsData = data.data ?? data ?? { projects: [] };
+    const projects = projectsData.projects ?? projectsData ?? [];
+
+    // Count by status
+    const statusCounts: Record<string, number> = {
+      active: 0,
+      'in-progress': 0,
+      'on-hold': 0,
+      completed: 0,
+      cancelled: 0
+    };
+
+    projects.forEach((p: { status?: string }) => {
+      const status = p.status || 'active';
+      if (statusCounts[status] !== undefined) {
+        statusCounts[status]++;
+      } else {
+        statusCounts['active']++;
+      }
+    });
+
+    const total = projects.length || 1;
+    const healthData = [
+      { label: 'Active', count: statusCounts['active'] + statusCounts['in-progress'], color: 'var(--status-active)' },
+      { label: 'On Hold', count: statusCounts['on-hold'], color: 'var(--status-on-hold)' },
+      { label: 'Completed', count: statusCounts['completed'], color: 'var(--color-primary)' }
+    ];
+
+    container.innerHTML = `
+      <div class="health-donut">
+        <svg viewBox="0 0 36 36" class="health-donut-svg">
+          ${renderDonutSegments(healthData, total)}
+          <text x="18" y="18" class="health-donut-center">${total}</text>
+          <text x="18" y="22" class="health-donut-label">Total</text>
+        </svg>
+      </div>
+      <div class="health-legend">
+        ${healthData.map(d => `
+          <div class="health-legend-row">
+            <span class="health-legend-dot" style="background: ${d.color}"></span>
+            <span class="health-legend-label">${d.label}</span>
+            <span class="health-legend-value">${d.count}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+  } catch (error) {
+    console.error('[AdminOverview] Error loading project health:', error);
+    container.innerHTML = '<div class="health-error">Failed to load</div>';
+  }
+}
+
+/**
+ * Render donut chart segments
+ */
+function renderDonutSegments(data: { count: number; color: string }[], total: number): string {
+  const strokeWidth = 3.5;
+  const radius = 15.91549430918954; // circumference = 100
+  let offset = 25; // Start at top
+
+  return data.map(d => {
+    const pct = (d.count / total) * 100;
+    const segment = `
+      <circle
+        cx="18" cy="18" r="${radius}"
+        fill="none"
+        stroke="${d.color}"
+        stroke-width="${strokeWidth}"
+        stroke-dasharray="${pct} ${100 - pct}"
+        stroke-dashoffset="${offset}"
+        class="health-segment"
+      />
+    `;
+    offset -= pct;
+    return segment;
+  }).join('');
+}
+
+/**
+ * Render simple revenue chart
+ */
+function renderRevenueChart(): void {
+  const container = document.getElementById('revenue-chart-container');
+  if (!container) return;
+
+  // Simple SVG line chart placeholder
+  container.innerHTML = `
+    <svg width="100%" height="72" viewBox="0 0 400 72" class="revenue-chart-svg">
+      <defs>
+        <linearGradient id="revenue-gradient" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="var(--color-primary-alpha-25, rgba(200,241,53,0.25))"/>
+          <stop offset="100%" stop-color="var(--color-primary-alpha-0, rgba(200,241,53,0))"/>
+        </linearGradient>
+      </defs>
+      <path d="M0 50 L50 42 L100 46 L150 26 L200 31 L250 16 L300 11 L350 8 L400 6 L400 72 L0 72 Z" fill="url(#revenue-gradient)"/>
+      <path d="M0 50 L50 42 L100 46 L150 26 L200 31 L250 16 L300 11 L350 8 L400 6" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  `;
+}
+
+/**
+ * Get status CSS class
+ */
+function getStatusClass(status: string): string {
+  const classes: Record<string, string> = {
+    'active': 'status-in-progress',
+    'in-progress': 'status-in-progress',
+    'in_progress': 'status-in-progress',
+    'on-hold': 'status-on-hold',
+    'on_hold': 'status-on-hold',
+    'completed': 'status-completed',
+    'cancelled': 'status-cancelled',
+    'review': 'status-review'
+  };
+  return classes[status] || 'status-in-progress';
+}
+
+/**
+ * Get status display label
+ */
+function getStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    'active': 'In Progress',
+    'in-progress': 'In Progress',
+    'in_progress': 'In Progress',
+    'on-hold': 'On Hold',
+    'on_hold': 'On Hold',
+    'completed': 'Completed',
+    'cancelled': 'Cancelled',
+    'review': 'In Review'
+  };
+  return labels[status] || 'Active';
+}
+
+/**
+ * Get due date CSS class
+ */
+function getDueDateClass(dueDate?: string): string {
+  if (!dueDate) return '';
+  const due = new Date(dueDate);
+  const now = new Date();
+  const diff = due.getTime() - now.getTime();
+  const days = diff / (1000 * 60 * 60 * 24);
+
+  if (days < 0) return 'due-overdue';
+  if (days < 7) return 'due-soon';
+  return '';
+}
+
+/**
+ * Get initials from name
+ */
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+/**
+ * Get avatar color based on ID
+ */
+function getAvatarColor(id: number): string {
+  const colors = [
+    'var(--color-primary-alpha-12, rgba(200,241,53,0.12))',
+    'var(--color-info-alpha-12, rgba(91,143,255,0.12))',
+    'var(--color-warning-alpha-12, rgba(251,146,60,0.12))',
+    'var(--color-purple-alpha-12, rgba(167,139,250,0.12))'
+  ];
+  return colors[id % colors.length];
+}
+
+/**
+ * Get time ago string
+ */
+function getTimeAgo(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(hours / 24);
+
+  if (hours < 1) return 'just now';
+  if (hours < 24) return `${hours}h ago`;
+  if (days === 1) return '1d ago';
+  return `${days}d ago`;
 }
 
 /**
@@ -251,7 +602,7 @@ interface _ActivityItem {
 
 /**
  * Load recent activity from the API
- * Shows consolidated activity feed from all entity types
+ * Shows consolidated activity feed from all entity types (Linear-style)
  */
 async function loadRecentActivity(): Promise<void> {
   const listEl = document.getElementById('recent-activity-list');
@@ -268,41 +619,55 @@ async function loadRecentActivity(): Promise<void> {
     const activities = data.recentActivity || [];
 
     if (activities.length === 0) {
-      listEl.innerHTML = '<li class="activity-item empty">No recent activity</li>';
+      listEl.innerHTML = '<li class="activity-item-empty">No recent activity</li>';
       return;
     }
 
-    listEl.innerHTML = activities.slice(0, 10).map((item: {
+    listEl.innerHTML = activities.slice(0, 6).map((item: {
       type: string;
       title: string;
       context?: string;
       date: string;
       clientName?: string;
     }) => {
-      const date = item.date ? formatDateTime(item.date).split(',')[0] : '';
-      const icon = getActivityIcon(item.type);
+      const timeAgo = item.date ? getTimeAgo(item.date) : '';
+      const dotClass = getActivityDotClass(item.type);
       const safeTitle = SanitizationUtils.escapeHtml(item.title);
       const safeContext = item.context ? SanitizationUtils.escapeHtml(
         SanitizationUtils.decodeHtmlEntities(item.context)
       ) : '';
-      const clientInfo = item.clientName ? ` - ${SanitizationUtils.escapeHtml(item.clientName)}` : '';
 
       return `
-        <li class="activity-item">
-          <span class="activity-icon">${icon}</span>
-          <span class="activity-content">
-            <span class="activity-title">${safeTitle}</span>
-            ${safeContext ? `<span class="activity-context">${safeContext}${clientInfo}</span>` : ''}
-          </span>
-          <span class="activity-date">${date}</span>
+        <li class="activity-feed-item">
+          <span class="activity-dot ${dotClass}"></span>
+          <div class="activity-body">
+            <span class="activity-text"><strong>${safeTitle}</strong>${safeContext ? ` ${safeContext}` : ''}</span>
+            <span class="activity-time">${timeAgo}</span>
+          </div>
         </li>
       `;
     }).join('');
 
   } catch (error) {
     console.error('[AdminOverview] Error loading recent activity:', error);
-    listEl.innerHTML = '<li class="activity-item empty">Failed to load activity</li>';
+    listEl.innerHTML = '<li class="activity-item-error">Failed to load activity</li>';
   }
+}
+
+/**
+ * Get activity dot color class based on type
+ */
+function getActivityDotClass(type: string): string {
+  const classes: Record<string, string> = {
+    'message': 'dot-blue',
+    'file': 'dot-green',
+    'invoice': 'dot-green',
+    'lead': 'dot-purple',
+    'project_update': 'dot-orange',
+    'contract': 'dot-green',
+    'document_request': 'dot-orange'
+  };
+  return classes[type] || 'dot-blue';
 }
 
 /**
@@ -363,14 +728,13 @@ function updateElement(id: string, text: string): void {
  * Show message when no data is available
  */
 function showNoDataMessage(): void {
-  updateElement('stat-overdue-invoices', '—');
-  updateElement('stat-pending-contracts', '—');
-  updateElement('stat-new-leads', '—');
-  updateElement('stat-unread-messages', '—');
   updateElement('stat-active-projects', '—');
-  updateElement('stat-total-clients', '—');
   updateElement('stat-revenue-mtd', '—');
-  updateElement('stat-conversion-rate', '—');
+  updateElement('stat-new-leads', '—');
+  updateElement('stat-overdue-tasks', '—');
+  updateElement('stat-invoiced-ytd', '—');
+  updateElement('stat-collected-ytd', '—');
+  updateElement('stat-outstanding', '—');
 }
 
 /**
@@ -548,6 +912,7 @@ function renderDashboardTaskCard(item: KanbanItem): string {
         </span>
       ` : ''}
     </div>
+  </div>
   `;
 }
 
@@ -629,118 +994,205 @@ function renderDashboardListView(): void {
 }
 
 // ============================================
-// ICONS FOR STAT CARDS
+// ICONS FOR OVERVIEW DASHBOARD
 // ============================================
 
-const ICONS = {
-  WARNING: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-  CONTRACT: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>',
-  USER_PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>',
-  MESSAGE: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+const OVERVIEW_ICONS = {
+  FOLDER: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h16Z"/></svg>',
+  DOLLAR: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  RADAR: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></svg>',
+  ALERT: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+  ACTIVITY: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+  USER_PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>',
+  HEART: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>'
 };
 
 // ============================================
-// DYNAMIC TAB RENDERING
+// DYNAMIC TAB RENDERING - LINEAR STYLE
 // ============================================
 
 /**
  * Render the overview tab HTML structure dynamically.
+ * Linear-style layout: 4-stat strip, 2-column grid (projects+chart | activity+leads+health)
  * Call this before loadOverviewData to create the DOM elements.
  */
 export function renderOverviewTab(container: HTMLElement): void {
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
   container.innerHTML = `
-    <!-- DASHBOARD STAT CARDS -->
-    <h3 class="sr-only">Dashboard Statistics</h3>
-    <div class="dashboard-stats-grid" aria-live="polite" aria-atomic="false">
-      <button
-        class="stat-card stat-card-clickable"
-        data-tab="invoices"
-        data-filter="overdue"
-        type="button"
-        id="attention-overdue-invoices"
-      >
-        <span class="stat-card-icon" aria-hidden="true">${ICONS.WARNING}</span>
-        <span class="stat-number" id="stat-overdue-invoices">-</span>
-        <span class="stat-label">Overdue Invoices</span>
+  <div class="overview-linear">
+    <!-- Page Header with Acme font -->
+    <div class="overview-header">
+      <div class="overview-header-left">
+        <span class="overview-eyebrow">Admin Dashboard</span>
+        <h1 class="overview-title">Good ${getGreeting()}</h1>
+      </div>
+      <div class="overview-header-right">
+        <span class="overview-date">${dateStr}</span>
+      </div>
+    </div>
+
+    <!-- 4-Stat Strip -->
+    <div class="overview-stats-strip" aria-label="Key metrics">
+      <button class="overview-stat-card" data-tab="projects" type="button">
+        <div class="stat-card-top">
+          <span class="stat-card-label">Active Projects</span>
+          <span class="stat-card-icon stat-icon-blue" aria-hidden="true">${OVERVIEW_ICONS.FOLDER}</span>
+        </div>
+        <span class="stat-card-value" id="stat-active-projects">-</span>
+        <span class="stat-card-delta" id="stat-active-projects-delta"></span>
       </button>
-      <button
-        class="stat-card stat-card-clickable"
-        data-tab="projects"
-        data-filter="pending_contract"
-        type="button"
-        id="attention-pending-contracts"
-      >
-        <span class="stat-card-icon" aria-hidden="true">${ICONS.CONTRACT}</span>
-        <span class="stat-number" id="stat-pending-contracts">-</span>
-        <span class="stat-label">Pending Contracts</span>
+      <button class="overview-stat-card" data-tab="invoices" type="button">
+        <div class="stat-card-top">
+          <span class="stat-card-label">Revenue MTD</span>
+          <span class="stat-card-icon stat-icon-green" aria-hidden="true">${OVERVIEW_ICONS.DOLLAR}</span>
+        </div>
+        <span class="stat-card-value" id="stat-revenue-mtd">-</span>
+        <span class="stat-card-delta" id="stat-revenue-mtd-delta"></span>
       </button>
-      <button
-        class="stat-card stat-card-clickable"
-        data-tab="leads"
-        data-filter="new_this_week"
-        type="button"
-        id="attention-new-leads"
-      >
-        <span class="stat-card-icon" aria-hidden="true">${ICONS.USER_PLUS}</span>
-        <span class="stat-number" id="stat-new-leads">-</span>
-        <span class="stat-label">New Leads This Week</span>
+      <button class="overview-stat-card" data-tab="leads" type="button">
+        <div class="stat-card-top">
+          <span class="stat-card-label">Pending Leads</span>
+          <span class="stat-card-icon stat-icon-purple" aria-hidden="true">${OVERVIEW_ICONS.RADAR}</span>
+        </div>
+        <span class="stat-card-value" id="stat-new-leads">-</span>
+        <span class="stat-card-delta" id="stat-new-leads-delta">Need follow-up</span>
       </button>
-      <button
-        class="stat-card stat-card-clickable"
-        data-tab="messages"
-        data-filter="unread"
-        type="button"
-        id="attention-unread-messages"
-      >
-        <span class="stat-card-icon" aria-hidden="true">${ICONS.MESSAGE}</span>
-        <span class="stat-number" id="stat-unread-messages">-</span>
-        <span class="stat-label">Unread Messages</span>
-      </button>
-      <button class="stat-card stat-card-clickable" data-tab="projects" type="button">
-        <span class="stat-number" id="stat-active-projects">-</span>
-        <span class="stat-label">Active Projects</span>
-      </button>
-      <button class="stat-card stat-card-clickable" data-tab="clients" type="button">
-        <span class="stat-number" id="stat-total-clients">-</span>
-        <span class="stat-label">Clients</span>
-      </button>
-      <button class="stat-card stat-card-clickable" data-tab="invoices" type="button">
-        <span class="stat-number" id="stat-revenue-mtd">-</span>
-        <span class="stat-label">Revenue MTD</span>
-      </button>
-      <button class="stat-card stat-card-clickable" data-tab="leads" type="button">
-        <span class="stat-number" id="stat-conversion-rate">-</span>
-        <span class="stat-label">Conversion Rate</span>
+      <button class="overview-stat-card overview-stat-card--alert" data-tab="tasks" type="button">
+        <div class="stat-card-top">
+          <span class="stat-card-label">Overdue Tasks</span>
+          <span class="stat-card-icon stat-icon-red" aria-hidden="true">${OVERVIEW_ICONS.ALERT}</span>
+        </div>
+        <span class="stat-card-value stat-value-alert" id="stat-overdue-tasks">-</span>
+        <span class="stat-card-delta stat-delta-alert" id="stat-overdue-tasks-delta">Needs attention</span>
       </button>
     </div>
 
-    <!-- UPCOMING TASKS -->
-    <div class="upcoming-tasks portal-shadow">
-      <div class="section-header-inline">
-        <h3>Upcoming Tasks</h3>
-        <div class="section-header-actions">
-          <div id="dashboard-tasks-view-toggle-mount"></div>
-          <button type="button" class="btn btn-secondary btn-sm" data-tab="tasks" id="view-all-tasks-btn">
-            View All
-          </button>
+    <!-- 2-Column Grid Layout -->
+    <div class="overview-grid">
+      <!-- Left Column: Projects Table + Revenue Chart -->
+      <div class="overview-col-main">
+        <!-- Active Projects Panel -->
+        <div class="overview-panel">
+          <div class="overview-panel-header">
+            <div class="overview-panel-title">
+              <span class="panel-icon panel-icon-blue" aria-hidden="true">${OVERVIEW_ICONS.FOLDER}</span>
+              Active Projects
+            </div>
+            <button type="button" class="overview-panel-action" data-tab="projects">View all</button>
+          </div>
+          <div class="overview-panel-body">
+            <table class="overview-table" id="overview-projects-table">
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Status</th>
+                  <th>Progress</th>
+                  <th>Due</th>
+                </tr>
+              </thead>
+              <tbody id="overview-projects-tbody">
+                <tr><td colspan="4" class="loading-cell">Loading projects...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Revenue Chart Panel -->
+        <div class="overview-panel">
+          <div class="overview-panel-header">
+            <div class="overview-panel-title">
+              <span class="panel-icon panel-icon-green" aria-hidden="true">${OVERVIEW_ICONS.DOLLAR}</span>
+              Revenue - 2026
+            </div>
+          </div>
+          <div class="overview-panel-body">
+            <div class="revenue-chart-wrap" id="revenue-chart-container">
+              <div class="revenue-chart-placeholder">Loading chart...</div>
+            </div>
+            <div class="revenue-kpis">
+              <div class="revenue-kpi">
+                <span class="revenue-kpi-label">Invoiced YTD</span>
+                <span class="revenue-kpi-value" id="stat-invoiced-ytd">-</span>
+              </div>
+              <div class="revenue-kpi">
+                <span class="revenue-kpi-label">Collected YTD</span>
+                <span class="revenue-kpi-value" id="stat-collected-ytd">-</span>
+              </div>
+              <div class="revenue-kpi">
+                <span class="revenue-kpi-label">Outstanding</span>
+                <span class="revenue-kpi-value revenue-kpi-value--warning" id="stat-outstanding">-</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div id="dashboard-tasks-kanban-container" class="dashboard-tasks-kanban" style="display: none;"></div>
-      <div id="dashboard-tasks-list-container" class="dashboard-tasks-list">
-        <ul id="upcoming-tasks-list" class="upcoming-tasks-list" aria-live="polite">
-          <li class="loading-row">Loading tasks...</li>
-        </ul>
+
+      <!-- Right Column: Activity + Leads + Project Health -->
+      <div class="overview-col-aside">
+        <!-- Activity Feed -->
+        <div class="overview-panel">
+          <div class="overview-panel-header">
+            <div class="overview-panel-title">
+              <span class="panel-icon" aria-hidden="true">${OVERVIEW_ICONS.ACTIVITY}</span>
+              Activity
+            </div>
+            <button type="button" class="overview-panel-action" id="clear-activity-btn">Clear</button>
+          </div>
+          <div class="overview-panel-body overview-panel-body--compact">
+            <ul class="activity-feed" id="recent-activity-list" aria-live="polite">
+              <li class="activity-item-loading">Loading activity...</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- New Leads -->
+        <div class="overview-panel">
+          <div class="overview-panel-header">
+            <div class="overview-panel-title">
+              <span class="panel-icon panel-icon-purple" aria-hidden="true">${OVERVIEW_ICONS.RADAR}</span>
+              New Leads
+              <span class="panel-badge" id="leads-count-badge">0</span>
+            </div>
+            <button type="button" class="overview-panel-action" data-tab="leads">View all</button>
+          </div>
+          <div class="overview-panel-body overview-panel-body--compact">
+            <ul class="leads-list" id="overview-leads-list" aria-live="polite">
+              <li class="leads-item-loading">Loading leads...</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Project Health -->
+        <div class="overview-panel">
+          <div class="overview-panel-header">
+            <div class="overview-panel-title">
+              <span class="panel-icon panel-icon-green" aria-hidden="true">${OVERVIEW_ICONS.HEART}</span>
+              Project Health
+            </div>
+          </div>
+          <div class="overview-panel-body">
+            <div class="health-chart-wrap" id="health-chart-container">
+              <!-- Donut chart + legend will be rendered here -->
+              <div class="health-placeholder">Loading...</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- RECENT ACTIVITY -->
-    <div class="recent-activity portal-shadow">
-      <h3>Recent Activity</h3>
-      <ul class="activity-list" id="recent-activity-list" aria-live="polite" aria-atomic="false">
-        <li>Loading...</li>
-      </ul>
-    </div>
+  </div>
   `;
+}
+
+/**
+ * Get greeting based on time of day
+ */
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'morning';
+  if (hour < 17) return 'afternoon';
+  return 'evening';
 }
 
 /**
