@@ -11,6 +11,7 @@ import { apiPost } from '../../../utils/api-client';
 import { alertError, alertSuccess, alertWarning } from '../../../utils/confirm-dialog';
 import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { createPortalModal } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import type { ProjectResponse } from '../../../types/api';
 import type { InvoiceLineItem } from './types';
 
@@ -32,6 +33,7 @@ export function showCreateInvoicePrompt(
     id: 'create-invoice-modal',
     titleId: 'create-invoice-modal-title',
     title: 'Create Invoice',
+    icon: ICONS.RECEIPT,
     contentClassName: 'invoice-modal-content',
     onClose: () => modal.hide()
   });

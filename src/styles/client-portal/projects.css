@@ -31,10 +31,9 @@
   background-color: var(--portal-bg-hover);
 }
 
+/* h3 styling from unified rule in portal-cards.css - only layout here */
 .projects-header h3 {
   margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
 }
 
 .section-icon {
@@ -170,10 +169,9 @@
   background-color: var(--portal-bg-hover);
 }
 
+/* h3 styling from unified rule in portal-cards.css - only layout here */
 .account-header h3 {
   margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
 }
 
 /* File tree vertical line from account folder */
@@ -360,7 +358,6 @@
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-3);
 }
 
 /* Overview cards use shared .overview-card styles */

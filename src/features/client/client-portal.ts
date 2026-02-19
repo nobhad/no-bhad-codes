@@ -1080,7 +1080,7 @@ export class ClientPortalModule extends BaseModule {
   }): Promise<void> {
     // Show loading state
     if (this.projectsList) {
-      this.projectsList.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading projects...</p></div>';
+      this.projectsList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading projects...</span></div>';
     }
 
     try {

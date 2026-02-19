@@ -1,11 +1,8 @@
 /* =====================================================
    ADMIN - KNOWLEDGE BASE TAB
    Uses portal theme tokens per STYLE_CONSISTENCY_REPORT
+   Tab content spacing handled by shared/portal-tabs.css (flex + gap)
    ===================================================== */
-
-[data-page="admin"] #tab-knowledge-base .admin-table-card + .admin-table-card {
-  margin-top: var(--space-3);
-}
 
 [data-page="admin"] .modal-content.kb-article-modal-content {
   max-width: 36rem;

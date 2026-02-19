@@ -12,66 +12,74 @@
 
 /* =====================================================
    OVERVIEW CONTAINER
+   Uses flex column + gap to space greeting, stats strip, and grid
    ===================================================== */
 
 .overview-linear {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 18px 22px 24px;
+  gap: var(--portal-section-gap);
+  padding-bottom: 24px;
   max-width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: var(--portal-bg-hover) transparent;
 }
 
-.overview-linear::-webkit-scrollbar {
-  width: 3px;
+/* Overview greeting - negative margins to override parent gaps */
+[data-page="admin"] .overview-greeting {
+  font-family: var(--font-family-acme, sans-serif);
+  font-size: 1.25rem;
+  color: var(--portal-text-light);
+  letter-spacing: 0.01em;
+  line-height: var(--portal-header-height-line, 32px);
+  margin-top: calc(-1 * var(--space-3));
+  margin-bottom: calc(var(--space-2) - var(--portal-section-gap));
 }
 
-.overview-linear::-webkit-scrollbar-thumb {
-  background: var(--portal-bg-hover);
-  border-radius: 2px;
+[data-page="admin"] .overview-greeting b {
+  font-style: normal;
+  font-weight: inherit;
+  color: var(--color-primary);
+  font-family: var(--font-mono, monospace);
+  font-size: 1.125rem;
+  letter-spacing: -0.5px;
+  margin-left: 8px;
 }
 
 /* =====================================================
-   PAGE HEADER
+   PAGE HEADER - Balanced with main content
    ===================================================== */
 
 .overview-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  padding-bottom: 4px;
+  padding: 0;
+  margin-bottom: var(--space-1);
 }
 
 .overview-header-left {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
 }
 
+/* Hide redundant eyebrow - portal header already shows "Dashboard" */
 .overview-eyebrow {
-  font-family: var(--font-family-mono);
-  font-size: 9.5px;
-  color: var(--portal-text-muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  display: none;
 }
 
+/* Smaller, subtle greeting that complements the page title */
 .overview-title {
-  font-family: var(--font--acme, var(--font-family-sans));
-  font-size: 21px;
-  font-weight: 400;
-  color: var(--portal-text-light);
-  letter-spacing: -0.2px;
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  letter-spacing: 0;
   margin: 0;
 }
 
 .overview-date {
-  font-family: var(--font-family-mono);
-  font-size: 11px;
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.8125rem;
+  font-weight: 400;
   color: var(--portal-text-muted);
 }
 
@@ -82,16 +90,16 @@
 .overview-stats-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: var(--portal-section-gap);
 }
 
 .overview-stat-card {
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-dark);
+  background: var(--portal-bg-darker);
+  border: none;
   border-radius: var(--portal-radius-sm, 8px);
   padding: 13px 14px;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: background 0.15s;
   position: relative;
   overflow: hidden;
   text-align: left;
@@ -102,13 +110,12 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.015) 0%, transparent 50%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%);
   pointer-events: none;
 }
 
 .overview-stat-card:hover {
-  border-color: var(--portal-border-light);
-  background: var(--portal-bg-hover);
+  background: var(--portal-bg-dark);
 }
 
 .stat-card-top {
@@ -118,10 +125,7 @@
   margin-bottom: 10px;
 }
 
-.stat-card-label {
-  font-size: 11px;
-  color: var(--portal-text-muted);
-}
+/* .stat-card-label removed - using .field-label from unified rule in portal-cards.css */
 
 .stat-card-icon {
   width: 22px;
@@ -132,39 +136,15 @@
   justify-content: center;
 }
 
-.stat-icon-blue {
-  background: var(--color-info-alpha-12, rgba(91,143,255,0.1));
-  color: var(--color-info-500, #5b8fff);
-}
-
-.stat-icon-green {
-  background: var(--status-active-alpha, rgba(74,222,128,0.08));
-  color: var(--status-active, #4ade80);
-}
-
-.stat-icon-purple {
-  background: var(--color-purple-alpha-12, rgba(167,139,250,0.1));
-  color: var(--color-purple, #a78bfa);
-}
-
-.stat-icon-red {
-  background: var(--color-error-alpha-12, rgba(248,113,113,0.1));
-  color: var(--color-error-400, #f87171);
-}
+/* Icon colors from unified rule in portal-cards.css */
+/* .stat-card-value styling from unified rule in portal-cards.css */
 
 .stat-card-value {
-  font-family: var(--font-family-mono);
-  font-size: 28px;
-  font-weight: 300;
-  color: var(--portal-text-light);
-  letter-spacing: -1.5px;
-  line-height: 1;
   margin-bottom: 5px;
-  display: block;
 }
 
 .stat-value-alert {
-  color: var(--color-error-400, #f87171);
+  color: var(--status-cancelled);
 }
 
 .stat-card-delta {
@@ -184,14 +164,13 @@
 .overview-grid {
   display: grid;
   grid-template-columns: 1fr 320px;
-  gap: 14px;
+  gap: var(--portal-section-gap);
 }
 
 .overview-col-main,
 .overview-col-aside {
   display: flex;
   flex-direction: column;
-  gap: 14px;
 }
 
 /* =====================================================
@@ -199,8 +178,8 @@
    ===================================================== */
 
 .overview-panel {
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-dark);
+  background: var(--portal-bg-darker);
+  border: none;
   border-radius: var(--portal-radius-sm, 8px);
   overflow: hidden;
 }
@@ -210,16 +189,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 14px 11px;
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: none;
 }
 
+/* Typography from unified h3 rule in portal-cards.css - layout only here */
 .overview-panel-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--portal-text-light);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--icon-gap-sm); /* 6px - from design-system/tokens/spacing.css */
+  margin: 0;
 }
 
 .panel-icon {
@@ -232,20 +210,7 @@
   background: var(--portal-bg-hover);
 }
 
-.panel-icon-blue {
-  background: var(--color-info-alpha-12, rgba(91,143,255,0.1));
-  color: var(--color-info-500, #5b8fff);
-}
-
-.panel-icon-green {
-  background: var(--status-active-alpha, rgba(74,222,128,0.08));
-  color: var(--status-active, #4ade80);
-}
-
-.panel-icon-purple {
-  background: var(--color-purple-alpha-12, rgba(167,139,250,0.1));
-  color: var(--color-purple, #a78bfa);
-}
+/* Panel icon colors from unified rule in portal-cards.css */
 
 .panel-badge {
   font-family: var(--font-family-mono);
@@ -262,9 +227,9 @@
 }
 
 .panel-badge.has-items {
-  background: var(--color-error-alpha-12, rgba(248,113,113,0.1));
-  border-color: rgba(248,113,113,0.25);
-  color: var(--color-error-400, #f87171);
+  background: var(--status-cancelled-bg);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: var(--status-cancelled);
 }
 
 .overview-panel-action {
@@ -294,51 +259,14 @@
 
 /* =====================================================
    PROJECTS TABLE
+   Base table styles (row hover, cursor) in shared/portal-tables.css
    ===================================================== */
 
-.overview-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.overview-table thead tr {
-  font-size: 10.5px;
-  color: var(--portal-text-muted);
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  height: 32px;
-}
-
-.overview-table th {
-  text-align: left;
-  padding: 0 14px;
-  font-weight: 500;
-}
-
-.overview-table-row {
-  height: 42px;
-  cursor: pointer;
-  transition: background 0.1s;
-  border-bottom: 1px solid var(--portal-border-dark);
-}
-
-.overview-table-row:last-child {
-  border-bottom: none;
-}
-
-.overview-table-row:hover {
-  background: var(--portal-bg-hover);
-}
-
-.overview-table td {
-  padding: 0 14px;
-  font-size: 12px;
-}
-
-.project-cell {
+/* Project cell - stacked name/client (reusable pattern) */
+.overview-table td.project-cell {
   display: flex;
   flex-direction: column;
-  gap: 1.5px;
+  gap: 1px;
   min-width: 0;
 }
 
@@ -348,18 +276,20 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: var(--table-cell-font-size);
 }
 
 .project-client {
   font-size: 10.5px;
   color: var(--portal-text-muted);
+  line-height: 1.3;
 }
 
 /* Status Pills */
 .status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--icon-gap-xs);
   height: 19px;
   padding: 0 7px;
   border-radius: 99px;
@@ -368,42 +298,43 @@
   white-space: nowrap;
 }
 
+/* Status colors from design-system/tokens/colors.css */
 .status-in-progress {
-  background: var(--color-info-alpha-12, rgba(91,143,255,0.1));
-  color: var(--color-info-500, #5b8fff);
+  background: var(--status-active-bg);
+  color: var(--status-active);
 }
 
 .status-on-hold {
-  background: var(--color-warning-alpha-12, rgba(251,146,60,0.1));
-  color: var(--color-warning, #fb923c);
+  background: var(--status-pending-bg);
+  color: var(--status-pending);
 }
 
 .status-completed {
-  background: var(--status-active-alpha, rgba(74,222,128,0.08));
-  color: var(--status-active, #4ade80);
+  background: var(--status-completed-bg);
+  color: var(--status-completed);
 }
 
 .status-review {
-  background: var(--color-purple-alpha-12, rgba(167,139,250,0.1));
-  color: var(--color-purple, #a78bfa);
+  background: var(--status-qualified-bg);
+  color: var(--status-qualified);
 }
 
 .status-cancelled {
-  background: var(--color-error-alpha-12, rgba(248,113,113,0.1));
-  color: var(--color-error-400, #f87171);
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled);
 }
 
 /* Progress Bar */
 .progress-cell {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--icon-gap-sm);
 }
 
 .progress-bar {
   flex: 1;
   height: 3px;
-  background: var(--portal-bg-hover);
+  background: var(--portal-border-dark);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -432,22 +363,14 @@
 }
 
 .due-soon {
-  color: var(--color-warning, #fb923c);
+  color: var(--status-pending);
 }
 
 .due-overdue {
-  color: var(--color-error-400, #f87171);
+  color: var(--status-cancelled);
 }
 
-/* Loading/Empty/Error states */
-.loading-cell,
-.empty-cell,
-.error-cell {
-  text-align: center;
-  color: var(--portal-text-muted);
-  font-size: 12px;
-  padding: 24px 14px;
-}
+/* Loading/Empty/Error states - uses centralized styles from loading.css */
 
 /* =====================================================
    REVENUE CHART
@@ -475,9 +398,9 @@
 .revenue-kpis {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  background: var(--portal-border-dark);
+  background: var(--portal-bg-dark);
   gap: 1px;
-  border-top: 1px solid var(--portal-border-dark);
+  border-top: none;
 }
 
 .revenue-kpi {
@@ -485,11 +408,10 @@
   padding: 11px 14px;
 }
 
-.revenue-kpi-label {
-  font-size: 10px;
-  color: var(--portal-text-muted);
-  margin-bottom: 3px;
+/* Layout only - typography from unified .field-label rule */
+.revenue-kpi .field-label {
   display: block;
+  margin-bottom: 3px;
 }
 
 .revenue-kpi-value {
@@ -501,7 +423,7 @@
 }
 
 .revenue-kpi-value--warning {
-  color: var(--color-warning, #fb923c);
+  color: var(--status-pending);
 }
 
 /* =====================================================
@@ -519,7 +441,7 @@
   align-items: flex-start;
   gap: 9px;
   padding: 8px 14px;
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: none;
   transition: background 0.1s;
   cursor: default;
 }
@@ -541,24 +463,25 @@
   flex-shrink: 0;
 }
 
+/* Activity dot colors from design-system/tokens/colors.css */
 .dot-blue {
-  border-color: var(--color-info-500, #5b8fff);
-  background: rgba(91,143,255,0.25);
+  border-color: var(--status-active);
+  background: var(--status-active-bg);
 }
 
 .dot-green {
-  border-color: var(--color-primary);
-  background: var(--color-primary-alpha-25, rgba(200,241,53,0.2));
+  border-color: var(--status-completed);
+  background: var(--status-completed-bg);
 }
 
 .dot-purple {
-  border-color: var(--color-purple, #a78bfa);
-  background: rgba(167,139,250,0.2);
+  border-color: var(--status-qualified);
+  background: var(--status-qualified-bg);
 }
 
 .dot-orange {
-  border-color: var(--color-warning, #fb923c);
-  background: rgba(251,146,60,0.2);
+  border-color: var(--status-pending);
+  background: var(--status-pending-bg);
 }
 
 .activity-body {
@@ -610,7 +533,7 @@
   align-items: center;
   gap: 9px;
   padding: 8px 14px;
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: none;
   cursor: pointer;
   transition: background 0.1s;
 }
@@ -714,13 +637,16 @@
   font-size: 10px;
   fill: var(--portal-text-light);
   text-anchor: middle;
-  dominant-baseline: middle;
+  dominant-baseline: auto;
 }
 
 .health-donut-label {
-  font-size: 4px;
+  font-size: 3.5px;
   fill: var(--portal-text-muted);
   text-anchor: middle;
+  dominant-baseline: hanging;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .health-legend {
@@ -744,8 +670,8 @@
   flex-shrink: 0;
 }
 
-.health-legend-label {
-  color: var(--portal-text-muted);
+/* Layout only - typography from unified .field-label rule */
+.health-legend-row .field-label {
   flex: 1;
 }
 
@@ -780,13 +706,12 @@
   .overview-col-aside {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
   }
 }
 
 @media (max-width: 640px) {
   .overview-linear {
-    padding: 12px 16px 20px;
+    padding-bottom: 20px;
   }
 
   .overview-stats-strip {
@@ -800,16 +725,14 @@
   .overview-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: var(--space-0-5);
   }
 
   .overview-header-right {
     align-self: flex-start;
   }
 
-  .stat-card-value {
-    font-size: 22px;
-  }
+  /* .stat-card-value font-size controlled by portal-cards.css */
 
   .revenue-kpis {
     grid-template-columns: 1fr;

@@ -177,7 +177,7 @@ function renderCategoriesAccordion(categories: KBCategory[], _ctx: ClientPortalC
       </button>
       <div class="help-accordion-content" id="accordion-content-${c.slug}">
         <div class="help-accordion-articles">
-          <div class="loading-row">Loading articles...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading articles...</span></div>
         </div>
       </div>
     `;

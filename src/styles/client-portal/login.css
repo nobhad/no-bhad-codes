@@ -412,6 +412,22 @@ body[data-page="client-portal"] .auth-divider {
   border-color: var(--color-primary);
 }
 
+/* Override browser autofill styling to keep dark background */
+.login-form .form-input:-webkit-autofill,
+.login-form .form-input:-webkit-autofill:hover,
+.login-form .form-input:-webkit-autofill:focus,
+.login-form .form-input:-webkit-autofill:active,
+body[data-page="client-portal"] .auth-gate-form .form-input:-webkit-autofill,
+body[data-page="client-portal"] .auth-gate-form .form-input:-webkit-autofill:hover,
+body[data-page="client-portal"] .auth-gate-form .form-input:-webkit-autofill:focus,
+body[data-page="client-portal"] .auth-gate-form .form-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--portal-bg-darkest) inset !important;
+  -webkit-text-fill-color: var(--portal-text-light) !important;
+  background-color: var(--portal-bg-darkest) !important;
+  caret-color: var(--portal-text-light) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .login-form .btn {
   padding: clamp(10px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
   border: var(--portal-border);

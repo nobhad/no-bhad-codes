@@ -8,58 +8,30 @@
  * 1. Main tab strip: .portal-tabs + .portal-tab-panel (project detail, client detail).
  * 2. Sub-tabs (horizontal button strip): .portal-subtabs + .portal-subtab + .portal-subtab-content.
  *    Use for in-page sections (e.g. Analytics Overview | Business | Visitors | Reports).
- *    Analytics also uses .analytics-subtabs / .analytics-subtab for the same look.
+ *    All subtabs use .portal-subtab class - styling in shared/portal-layout.css
  */
 
 /* =====================================================
    SUB-TABS (reusable horizontal button strip)
-   Use .portal-subtabs on container, .portal-subtab on buttons,
-   .portal-subtab-content on content panels. Same styles apply to
-   .analytics-subtabs / .analytics-subtab for backward compatibility.
+   Button styling is in shared/portal-layout.css
+   Only container and content panel visibility here
    ===================================================== */
-.portal-subtabs,
-.analytics-subtabs {
-  display: flex;
-  gap: var(--space-1);
-  margin-bottom: var(--space-2);
-  padding-bottom: var(--space-1-5);
-  border-bottom: 1px solid var(--portal-border);
-}
 
-.portal-subtab,
-.analytics-subtab {
-  padding: var(--space-1) var(--space-2);
-  background: transparent;
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-md);
-  color: var(--portal-text-secondary);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-mouse) ease;
-}
-
-.portal-subtab:hover,
-.analytics-subtab:hover {
-  background: var(--portal-bg-medium);
-  color: var(--portal-text-primary);
-}
-
-.portal-subtab.active,
-.analytics-subtab.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: white;
-}
-
+/* Content panel visibility - hidden by default */
 .portal-subtab-content,
 .analytics-subtab-content {
   display: none;
 }
 
+/* Consistent spacing between sections within ALL tab/subtab content panels
+   Using flex + gap instead of margin so hidden elements don't affect spacing
+   Uses --portal-section-gap from variables.css as single source of truth */
+.tab-content.active,
+.portal-tab-panel.active,
 .portal-subtab-content.active,
 .analytics-subtab-content.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
 
 /* =====================================================
@@ -154,14 +126,12 @@
 .portal-tab-panel.active {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 /* Tab content wrapper - contains each tab's content */
 .tab-content-wrapper {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 /* =====================================================
@@ -171,10 +141,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
-  margin: var(--space-4) 0 var(--space-3);
-  padding-left: var(--space-2);
-  padding-right: var(--space-2);
+  margin: 0;
+  /* Use same padding as admin-table-header for alignment */
+  padding: var(--portal-section-heading-padding);
 }
 
 .tab-section-header .tab-section-heading {
@@ -183,14 +152,16 @@
 }
 
 .tab-section-heading {
-  font-family: var(--font-family-acme);
-  font-size: 0.875rem;
-  font-weight: 400;
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: var(--font-size-base);
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label, 0.05em);
+  letter-spacing: 0.05em;
   color: var(--portal-text-secondary);
-  margin: var(--space-4) 0 var(--space-3);
-  padding-left: var(--space-2);
+  margin: 0;
+  /* Use same padding as admin-table-header for alignment */
+  padding: var(--portal-section-heading-padding);
+  line-height: 1.25;
 }
 
 /* Hide heading on first tab (overview) since it's the main content */
@@ -283,20 +254,12 @@
     padding: var(--space-2) 0;
   }
 
-  .portal-tab-panel.active {
-    gap: var(--space-3);
-  }
-
-  .portal-subtabs,
-  .analytics-subtabs {
-    flex-wrap: wrap;
-  }
-
-  .portal-subtab,
-  .analytics-subtab {
-    flex: 1;
-    min-width: calc(50% - var(--space-1));
-    text-align: center;
+  /* Mobile: tighter gap for all content panels */
+  .tab-content.active,
+  .portal-tab-panel.active,
+  .portal-subtab-content.active,
+  .analytics-subtab-content.active {
+    gap: var(--space-2);
   }
 }
 

@@ -14,6 +14,7 @@
 @import "../shared/portal-messages.css";
 @import "../shared/search-bar.css";
 @import "../shared/portal-cards.css";
+@import "../shared/portal-tables.css";
 @import "../shared/details-card.css";
 @import "../shared/portal-forms.css";
 @import "../shared/portal-files.css";
@@ -40,6 +41,7 @@
 @import "./pd-contract.css";
 @import "./pd-invoices.css";
 @import "./client-detail.css";
+@import "./cd-crm.css";
 @import "./tasks.css";
 @import "./leads-pipeline.css";
 @import "./files.css";
@@ -60,9 +62,8 @@
 
 /* Layout refinements */
 @import "./overview-layout.css";
-@import "./page-header-refinements.css";
-@import "./sidebar-refinements.css";
 @import "./keyboard-help.css";
+/* page-header-refinements.css and stat-card-refinements.css moved to shared */
 
 /* Unified modal system */
 @import "../shared/modal-system.css";

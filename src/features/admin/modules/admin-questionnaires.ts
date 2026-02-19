@@ -161,24 +161,27 @@ function renderQuestionnairesTable(questionnaires: Questionnaire[]): void {
 
   tbody.innerHTML = questionnaires.map(q => `
     <tr data-questionnaire-id="${q.id}">
-      <td>${escapeHtml(q.name)}</td>
-      <td>${escapeHtml(q.description || '—')}</td>
-      <td>${q.project_type ? escapeHtml(q.project_type) : 'All'}</td>
-      <td>
-        <span class="status-badge ${q.is_active ? 'status-badge--success' : 'status-badge--muted'}">
-          ${q.is_active ? 'Active' : 'Inactive'}
+      <td class="name-cell" data-label="Name">${escapeHtml(q.name)}</td>
+      <td class="name-cell" data-label="Description">${escapeHtml(q.description || '—')}</td>
+      <td class="type-cell" data-label="Project Type">${q.project_type ? escapeHtml(q.project_type) : 'All'}</td>
+      <td class="status-cell" data-label="Status">
+        <span class="status-indicator ${q.is_active ? 'status-active' : 'status-inactive'}">
+          <span class="status-dot"></span>
+          <span class="status-text">${q.is_active ? 'Active' : 'Inactive'}</span>
         </span>
       </td>
-      <td class="actions-cell">
-        <button type="button" class="icon-btn questionnaire-edit" data-id="${q.id}" title="Edit" aria-label="Edit">
-          ${ICONS.EDIT}
-        </button>
-        <button type="button" class="icon-btn icon-btn-primary questionnaire-send" data-id="${q.id}" title="Send to client" aria-label="Send to client">
-          ${ICONS.SEND}
-        </button>
-        <button type="button" class="icon-btn icon-btn-danger questionnaire-delete" data-id="${q.id}" data-name="${escapeHtml(q.name)}" title="Delete" aria-label="Delete">
-          ${ICONS.TRASH}
-        </button>
+      <td class="actions-cell" data-label="Actions">
+        <div class="table-actions">
+          <button type="button" class="icon-btn questionnaire-edit" data-id="${q.id}" title="Edit" aria-label="Edit">
+            ${ICONS.EDIT}
+          </button>
+          <button type="button" class="icon-btn icon-btn-primary questionnaire-send" data-id="${q.id}" title="Send to client" aria-label="Send to client">
+            ${ICONS.SEND}
+          </button>
+          <button type="button" class="icon-btn icon-btn-danger questionnaire-delete" data-id="${q.id}" data-name="${escapeHtml(q.name)}" title="Delete" aria-label="Delete">
+            ${ICONS.TRASH}
+          </button>
+        </div>
       </td>
     </tr>
   `).join('');
@@ -201,24 +204,27 @@ function renderResponsesTable(responses: QuestionnaireResponse[]): void {
 
   tbody.innerHTML = responses.map(r => `
     <tr data-response-id="${r.id}">
-      <td>${escapeHtml(r.questionnaire_name || `#${r.questionnaire_id}`)}</td>
-      <td>${escapeHtml(SanitizationUtils.decodeHtmlEntities(r.client_name || String(r.client_id)))}</td>
-      <td>
-        <span class="status-badge status-badge--${r.status === 'completed' ? 'success' : r.status === 'in_progress' ? 'warning' : 'muted'}">
-          ${statusLabel(r.status)}
+      <td class="name-cell" data-label="Questionnaire">${escapeHtml(r.questionnaire_name || `#${r.questionnaire_id}`)}</td>
+      <td class="name-cell" data-label="Client">${escapeHtml(SanitizationUtils.decodeHtmlEntities(r.client_name || String(r.client_id)))}</td>
+      <td class="status-cell" data-label="Status">
+        <span class="status-indicator status-${r.status === 'completed' ? 'completed' : r.status === 'in_progress' ? 'in-progress' : 'pending'}">
+          <span class="status-dot"></span>
+          <span class="status-text">${statusLabel(r.status)}</span>
         </span>
       </td>
-      <td>${formatDate(r.due_date)}</td>
-      <td class="actions-cell">
-        <button type="button" class="icon-btn response-view" data-id="${r.id}" title="View" aria-label="View response">
-          ${ICONS.EYE}
-        </button>
-        <button type="button" class="icon-btn response-remind" data-id="${r.id}" title="Send reminder" aria-label="Send reminder">
-          ${ICONS.BELL}
-        </button>
-        <button type="button" class="icon-btn icon-btn-danger response-delete" data-id="${r.id}" title="Delete" aria-label="Delete response">
-          ${ICONS.TRASH}
-        </button>
+      <td class="date-cell" data-label="Due Date">${formatDate(r.due_date)}</td>
+      <td class="actions-cell" data-label="Actions">
+        <div class="table-actions">
+          <button type="button" class="icon-btn response-view" data-id="${r.id}" title="View" aria-label="View response">
+            ${ICONS.EYE}
+          </button>
+          <button type="button" class="icon-btn response-remind" data-id="${r.id}" title="Send reminder" aria-label="Send reminder">
+            ${ICONS.BELL}
+          </button>
+          <button type="button" class="icon-btn icon-btn-danger response-delete" data-id="${r.id}" title="Delete" aria-label="Delete response">
+            ${ICONS.TRASH}
+          </button>
+        </div>
       </td>
     </tr>
   `).join('');
@@ -333,7 +339,7 @@ function renderQuestionsBuilder(): void {
   if (!container) return;
 
   if (questionsData.length === 0) {
-    container.innerHTML = '<p class="empty-message">No questions added yet. Click "Add Question" to start.</p>';
+    container.innerHTML = '<div class="empty-state">No questions added yet. Click "Add Question" to start.</div>';
     return;
   }
 
@@ -541,7 +547,7 @@ async function openViewResponseModal(responseId: number): Promise<void> {
   const bodyEl = el('view-response-body');
   if (!modal || !bodyEl) return;
 
-  bodyEl.innerHTML = '<p class="loading-message">Loading response...</p>';
+  bodyEl.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   openModalOverlay(modal);
   viewResponseModalFocusCleanup = manageFocusTrap(modal, {});
@@ -567,7 +573,6 @@ async function openViewResponseModal(responseId: number): Promise<void> {
           ${response.completed_at ? `<dt>Completed</dt><dd>${formatDate(response.completed_at)}</dd>` : ''}
         </dl>
       </div>
-      <hr />
       <div class="response-answers">
         <h4>Answers</h4>
         ${questionnaire.questions.map(q => {
@@ -588,7 +593,7 @@ async function openViewResponseModal(responseId: number): Promise<void> {
       </div>
     `;
   } catch (err) {
-    bodyEl.innerHTML = `<p class="error-message">${(err as Error).message}</p>`;
+    bodyEl.innerHTML = `<div class="error-state"><span class="error-message">${(err as Error).message}</span></div>`;
   }
 }
 
@@ -870,16 +875,21 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
         <table class="admin-table" aria-label="Questionnaires">
           <thead>
             <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Description</th>
+              <th scope="col" class="name-col">Name</th>
+              <th scope="col" class="name-col">Description</th>
               <th scope="col" class="type-col">Project Type</th>
               <th scope="col" class="status-col">Status</th>
               <th scope="col" class="actions-col">Actions</th>
             </tr>
           </thead>
           <tbody id="questionnaires-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr>
-              <td colspan="5" class="loading-row">Loading questionnaires...</td>
+            <tr class="loading-row">
+              <td colspan="5">
+                <div class="loading-state">
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span class="loading-message">Loading questionnaires...</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -889,7 +899,7 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
     </div>
 
     <!-- Pending Responses Card -->
-    <div class="admin-table-card portal-shadow" style="margin-top: var(--space-3);">
+    <div class="admin-table-card portal-shadow">
       <div class="admin-table-header">
         <h3>Pending Responses</h3>
         <div class="admin-table-actions">
@@ -903,16 +913,21 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
         <table class="admin-table" aria-label="Pending questionnaire responses">
           <thead>
             <tr>
-              <th scope="col">Questionnaire</th>
-              <th scope="col" class="contact-col">Client</th>
+              <th scope="col" class="name-col">Questionnaire</th>
+              <th scope="col" class="name-col">Client</th>
               <th scope="col" class="status-col">Status</th>
               <th scope="col" class="date-col">Due Date</th>
               <th scope="col" class="actions-col">Actions</th>
             </tr>
           </thead>
           <tbody id="responses-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr>
-              <td colspan="5" class="loading-row">Loading responses...</td>
+            <tr class="loading-row">
+              <td colspan="5">
+                <div class="loading-state">
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span class="loading-message">Loading responses...</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -966,7 +981,6 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
                 </label>
               </div>
             </div>
-            <hr />
             <div class="form-group">
               <label>Questions</label>
               <div id="questions-builder">

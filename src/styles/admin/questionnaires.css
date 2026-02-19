@@ -7,7 +7,6 @@
 [data-page="admin"] #questions-builder {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
   margin-bottom: var(--space-4);
   min-height: 100px;
 }
@@ -34,7 +33,6 @@
 [data-page="admin"] .question-item-header {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
 
@@ -125,7 +123,6 @@
 [data-page="admin"] .response-answers {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 [data-page="admin"] .response-answers h4 {
@@ -159,21 +156,8 @@
   font-style: italic;
 }
 
-/* Status badges for questionnaires */
-[data-page="admin"] #tab-questionnaires .status-badge--success {
-  background-color: var(--color-success-bg);
-  color: var(--color-success);
-}
-
-[data-page="admin"] #tab-questionnaires .status-badge--warning {
-  background-color: var(--color-warning-bg);
-  color: var(--color-warning);
-}
-
-[data-page="admin"] #tab-questionnaires .status-badge--muted {
-  background-color: var(--color-surface);
-  color: var(--color-text-muted);
-}
+/* Status badges for questionnaires use standard .status-badge.status-* classes
+   from shared/portal-badges.css - no table-specific overrides needed */
 
 /* Form row for side-by-side fields */
 [data-page="admin"] #questionnaire-form .form-row {

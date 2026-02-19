@@ -92,7 +92,7 @@ export function renderSystemStatusTab(container: HTMLElement): void {
     <div class="portal-project-card portal-shadow">
       <h3>Recent Errors</h3>
       <div class="recent-errors-list" id="recent-errors-list">
-        <p class="empty-state">No recent errors</p>
+        <div class="empty-state">No recent errors</div>
       </div>
     </div>
 
@@ -692,7 +692,7 @@ function showSystemError(): void {
   const modulesContainer = document.getElementById('modules-status');
   const servicesContainer = document.getElementById('services-status');
 
-  const errorHtml = '<p class="status-error">Unable to retrieve system status</p>';
+  const errorHtml = '<div class="error-state"><span class="error-message">Unable to retrieve system status</span></div>';
 
   if (modulesContainer) {
     modulesContainer.innerHTML = errorHtml;

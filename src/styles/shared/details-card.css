@@ -26,20 +26,12 @@
   border-radius: var(--portal-radius-lg, 12px);
 }
 
+/* Summary base styles (display, gap, cursor, list-style) are in base/reset.css */
 :is([data-page="admin"], [data-page="client-portal"]) .details-card summary,
 :is([data-page="admin"], [data-page="client-portal"]) .system-details summary {
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
   padding: var(--space-4);
   margin: 0;
   border-radius: var(--portal-radius-lg, 12px);
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .details-card summary::-webkit-details-marker,
-:is([data-page="admin"], [data-page="client-portal"]) .system-details summary::-webkit-details-marker {
-  display: none;
 }
 
 /* Caret: aligned with first line of heading */
@@ -64,9 +56,6 @@
 :is([data-page="admin"], [data-page="client-portal"]) .system-details summary h3 {
   margin: 0;
   flex: 1;
-  color: var(--portal-text-primary);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
 }
 
 /* Child grid: same horizontal padding as summary */

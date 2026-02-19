@@ -7,6 +7,7 @@
  */
 
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { openDesignReview } from './admin-design-review';
 import { showToast } from '../../../utils/toast-notifications';
@@ -71,6 +72,7 @@ function createDeliverablesModal(): void {
     id: 'deliverables-manager-modal',
     titleId: 'deliverables-modal-title',
     title: 'Deliverables & Design Review',
+    icon: ICONS.PACKAGE,
     contentClassName: 'deliverables-modal-content modal-content-wide',
     onClose: () => deliverablesModal?.hide()
   });
@@ -107,12 +109,15 @@ function createDeliverablesModal(): void {
       <!-- Deliverables list -->
       <div class="deliverables-list-wrapper">
         <div id="deliverables-list" class="deliverables-list">
-          <div class="loading-message">Loading deliverables...</div>
+          <div class="loading-state">
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <span class="loading-message">Loading...</span>
+          </div>
         </div>
       </div>
 
       <!-- Empty state -->
-      <div id="deliverables-empty" class="empty-message" style="display: none;">
+      <div id="deliverables-empty" class="empty-state" style="display: none;">
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
         <p>No deliverables yet</p>
         <button id="deliverables-empty-upload" class="btn btn-primary btn-sm">
@@ -275,6 +280,7 @@ function openUploadModal(): void {
     id: 'deliverable-upload-modal',
     titleId: 'deliverable-upload-modal-title',
     title: 'Upload Deliverable',
+    icon: ICONS.UPLOAD,
     contentClassName: 'deliverable-upload-modal-content',
     onClose: () => modal.hide()
   });

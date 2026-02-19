@@ -16,6 +16,7 @@ import { getStatusDotHTML } from '../../../components/status-badge';
 import { adminDataService, type Contact, type ContactStats } from '../services/admin-data.service';
 import { APP_CONSTANTS } from '../../../config/constants';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
+import { showTableEmpty } from '../../../utils/loading-utils';
 
 /** Contact status options for renderer (API uses 'replied', not 'responded') */
 const RENDERER_CONTACT_STATUS_OPTIONS = [
@@ -67,8 +68,7 @@ class AdminContactsRenderer {
     if (!tableBody) return;
 
     if (submissions.length === 0) {
-      tableBody.innerHTML =
-        '<tr><td colspan="4" class="loading-row">No contact form submissions yet</td></tr>';
+      showTableEmpty(tableBody, 4, 'No contact form submissions yet');
       return;
     }
 
@@ -97,17 +97,17 @@ class AdminContactsRenderer {
 
     return `
       <tr data-contact-id="${submission.id}">
-        <td class="identity-cell">
+        <td class="identity-cell" data-label="Contact">
           <span class="identity-name">${safeName}</span>
           ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
           <span class="identity-email">${safeEmail}</span>
         </td>
-        <td class="message-cell" title="${safeTitleMessage}">${truncatedMessage}</td>
-        <td class="status-cell">
+        <td class="message-cell" data-label="Message" title="${safeTitleMessage}">${truncatedMessage}</td>
+        <td class="status-cell" data-label="Status">
           <div class="contact-status-dropdown-container" data-contact-id="${submission.id}" data-status="${submission.status || 'new'}"></div>
           <span class="date-stacked">${date}</span>
         </td>
-        <td class="date-cell">${date}</td>
+        <td class="date-cell" data-label="Date">${date}</td>
       </tr>
     `;
   }

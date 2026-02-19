@@ -15,6 +15,7 @@ import { confirmDanger } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -159,28 +160,14 @@ function renderTemplatesTable(): void {
 
   tbody.innerHTML = filtered.map(template => `
     <tr data-template-id="${template.id}">
-      <td>
-        <div class="template-name-cell">
-          <strong>${escapeHtml(template.name)}</strong>
-          ${template.is_system ? '<span class="system-badge">System</span>' : ''}
-          ${template.description ? `<div class="template-description">${escapeHtml(template.description)}</div>` : ''}
-        </div>
+      <td class="name-cell" data-label="Name">
+        ${escapeHtml(template.name)}${template.is_system ? ' <span class="badge badge-muted">System</span>' : ''}
       </td>
-      <td>
-        <span class="category-badge category-${template.category}">
-          ${CATEGORY_LABELS[template.category] || template.category}
-        </span>
-      </td>
-      <td>
-        <span class="template-subject">${escapeHtml(template.subject)}</span>
-      </td>
-      <td>
-        ${getStatusDotHTML(template.is_active ? 'active' : 'inactive')}
-      </td>
-      <td>
-        <span class="date-cell">${formatDate(template.updated_at, 'short')}</span>
-      </td>
-      <td>
+      <td class="type-cell" data-label="Category">${CATEGORY_LABELS[template.category] || template.category}</td>
+      <td class="subject-cell" data-label="Subject">${escapeHtml(template.subject)}</td>
+      <td class="status-cell" data-label="Status">${getStatusDotHTML(template.is_active ? 'active' : 'inactive')}</td>
+      <td class="date-cell" data-label="Updated">${formatDate(template.updated_at, 'short')}</td>
+      <td class="actions-cell" data-label="Actions">
         <div class="table-actions">
           <button class="icon-btn template-preview" data-id="${template.id}" title="Preview" aria-label="Preview template">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -279,6 +266,7 @@ async function openTemplateModal(id?: number): Promise<void> {
       id: 'email-template-modal',
       titleId: 'email-template-modal-title',
       title: 'Create Email Template',
+      icon: ICONS.MAIL,
       contentClassName: 'email-template-modal-content modal-content-wide',
       onClose: () => templateModal?.hide()
     });
@@ -490,6 +478,7 @@ async function openPreviewModal(id: number): Promise<void> {
       id: 'email-preview-modal',
       titleId: 'email-preview-modal-title',
       title: 'Email Preview',
+      icon: ICONS.EYE,
       contentClassName: 'email-preview-modal-content modal-content-wide',
       onClose: () => previewModal?.hide()
     });
@@ -501,7 +490,7 @@ async function openPreviewModal(id: number): Promise<void> {
     el('preview-close-btn')?.addEventListener('click', () => previewModal?.hide());
   }
 
-  previewModal.body.innerHTML = '<div class="loading-message">Generating preview...</div>';
+  previewModal.body.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   previewModal.setTitle(`Preview: ${escapeHtml(template.name)}`);
   previewModal.show();
   manageFocusTrap(previewModal.overlay);
@@ -556,7 +545,7 @@ async function openPreviewModal(id: number): Promise<void> {
     }
   } catch (error) {
     console.error('[AdminEmailTemplates] Preview error:', error);
-    previewModal.body.innerHTML = '<div class="error-message">Error generating preview</div>';
+    previewModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error generating preview</span></div>';
   }
 }
 
@@ -586,6 +575,7 @@ async function previewFromForm(): Promise<void> {
       id: 'email-preview-modal',
       titleId: 'email-preview-modal-title',
       title: 'Email Preview',
+      icon: ICONS.EYE,
       contentClassName: 'email-preview-modal-content modal-content-wide',
       onClose: () => previewModal?.hide()
     });
@@ -597,7 +587,7 @@ async function previewFromForm(): Promise<void> {
     el('preview-close-btn')?.addEventListener('click', () => previewModal?.hide());
   }
 
-  previewModal.body.innerHTML = '<div class="loading-message">Generating preview...</div>';
+  previewModal.body.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   previewModal.setTitle('Preview (Unsaved)');
   previewModal.show();
 
@@ -646,7 +636,7 @@ async function previewFromForm(): Promise<void> {
     }
   } catch (error) {
     console.error('[AdminEmailTemplates] Preview error:', error);
-    previewModal.body.innerHTML = '<div class="error-message">Error generating preview</div>';
+    previewModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error generating preview</span></div>';
   }
 }
 
@@ -664,12 +654,13 @@ async function openVersionsModal(id: number): Promise<void> {
       id: 'email-versions-modal',
       titleId: 'email-versions-modal-title',
       title: 'Version History',
+      icon: ICONS.REFRESH,
       contentClassName: 'email-versions-modal-content modal-content-wide',
       onClose: () => versionsModal?.hide()
     });
   }
 
-  versionsModal.body.innerHTML = '<div class="loading-message">Loading versions...</div>';
+  versionsModal.body.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   versionsModal.setTitle(`Versions: ${escapeHtml(template.name)}`);
   versionsModal.show();
   manageFocusTrap(versionsModal.overlay);
@@ -682,7 +673,7 @@ async function openVersionsModal(id: number): Promise<void> {
     const versions = data.versions || [];
 
     if (versions.length === 0) {
-      versionsModal.body.innerHTML = '<div class="empty-message">No version history available</div>';
+      versionsModal.body.innerHTML = '<div class="empty-state">No version history available</div>';
       return;
     }
 
@@ -718,7 +709,7 @@ async function openVersionsModal(id: number): Promise<void> {
     });
   } catch (error) {
     console.error('[AdminEmailTemplates] Versions error:', error);
-    versionsModal.body.innerHTML = '<div class="error-message">Error loading versions</div>';
+    versionsModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error loading versions</span></div>';
   }
 }
 

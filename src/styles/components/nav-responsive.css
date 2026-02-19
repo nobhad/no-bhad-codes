@@ -41,7 +41,7 @@
   .nav-logo-row {
     width: auto;
     font-size: 20px;
-    gap: 6px;
+    gap: var(--icon-gap-sm);
   }
 }
 
@@ -76,7 +76,7 @@
 
   .nav-logo-row {
     font-size: 20px;
-    gap: 4px;
+    gap: var(--icon-gap-xs);
     min-width: auto;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }

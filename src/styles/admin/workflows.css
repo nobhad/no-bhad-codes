@@ -17,7 +17,6 @@
 [data-page="admin"] .step-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
@@ -75,13 +74,14 @@
   letter-spacing: 0.05em;
 }
 
-/* Form labels in steps modal - match portal form styling */
+/* Form labels in steps modal - match unified label styling */
 [data-page="admin"] .add-step-form .form-group > label:not(.portal-checkbox-label),
 [data-page="admin"] .modal-body .form-group > label:not(.portal-checkbox-label) {
   display: block;
   margin-bottom: var(--field-label-value-gap, 0.125rem);
-  font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.6875rem; /* 11px - matches table column headers */
+  font-weight: 400;
   color: var(--portal-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -122,7 +122,6 @@
 [data-page="admin"] .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
 }
 
 @media (max-width: 576px) {
@@ -182,18 +181,7 @@
   font-size: var(--font-size-xs);
 }
 
-/* =====================================================
-   TABLE OUTER COLUMN PADDING
-   ===================================================== */
-[data-page="admin"] #tab-workflows .admin-table th:first-child,
-[data-page="admin"] #tab-workflows .admin-table td:first-child {
-  padding-left: var(--space-4);
-}
-
-[data-page="admin"] #tab-workflows .admin-table th:last-child,
-[data-page="admin"] #tab-workflows .admin-table td:last-child {
-  padding-right: var(--space-4);
-}
+/* Table outer column padding from shared/portal-tables.css */
 
 /* =====================================================
    DEFAULT INDICATOR (purple star icon)
@@ -230,8 +218,7 @@
 [data-page="admin"] .approval-dashboard-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
+  gap: var(--portal-section-gap);
 }
 
 [data-page="admin"] .approval-dashboard-section.hidden {
@@ -421,30 +408,8 @@
   padding: var(--space-0-5) var(--space-1);
 }
 
-[data-page="admin"] .status-badge--success {
-  background-color: var(--color-success-bg);
-  color: var(--color-success);
-}
-
-[data-page="admin"] .status-badge--danger {
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
-}
-
-[data-page="admin"] .status-badge--warning {
-  background-color: var(--color-warning-bg);
-  color: var(--color-warning);
-}
-
-[data-page="admin"] .status-badge--info {
-  background-color: var(--color-info-bg);
-  color: var(--color-info);
-}
-
-[data-page="admin"] .status-badge--muted {
-  background-color: var(--portal-bg-dark);
-  color: var(--portal-text-muted);
-}
+/* Status badge variants (--success, --danger, --warning, --info, --muted)
+   moved to shared/portal-badges.css for universal use */
 
 /* =====================================================
    TRIGGER EXECUTION LOGS MODAL
@@ -458,7 +423,6 @@
 [data-page="admin"] .trigger-logs-controls {
   display: flex;
   align-items: flex-end;
-  gap: var(--space-3);
   margin-bottom: var(--space-3);
   padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--portal-border-dark);
@@ -890,7 +854,6 @@
 [data-page="admin"] .email-preview {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 [data-page="admin"] .preview-subject {

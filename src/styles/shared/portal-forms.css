@@ -3,6 +3,8 @@
    @file src/styles/shared/portal-forms.css
    Single source of truth for admin and client portal forms
    Matches dropdown styling: same border, radius, bg, font
+
+   NOTE: Unified label styles are in portal-cards.css
    ===================================================== */
 
 /* =====================================================
@@ -72,19 +74,7 @@
   margin-bottom: 0;
 }
 
-/* =====================================================
-   MODAL FORM LABELS - Uppercase, proper spacing
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .modal-body .form-group > label:not(.portal-checkbox-label),
-:is([data-page="admin"], [data-page="client-portal"]) .modal-body label:not(.portal-checkbox-label):not([class*="checkbox"]) {
-  display: block;
-  margin-bottom: var(--space-1);
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+/* Modal label styles moved to portal-cards.css */
 
 /* =====================================================
    PLACEHOLDER TEXT - matches dropdown text styling
@@ -153,17 +143,13 @@
    FIELD-LABEL - Labels positioned ABOVE inputs
    This is the standard/default pattern for modals
    ===================================================== */
+/* Label styling from unified rule above - only layout here */
 :is([data-page="admin"], [data-page="client-portal"]) .form-group label.field-label,
 :is([data-page="admin"], [data-page="client-portal"]) label.field-label,
 :is([data-page="admin"], [data-page="client-portal"]) .field-label {
   position: static;
   display: block;
   margin-bottom: var(--field-label-value-gap);
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   pointer-events: auto;
 }
 

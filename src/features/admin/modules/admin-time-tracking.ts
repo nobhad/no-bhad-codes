@@ -217,12 +217,12 @@ function renderEntriesTable(): void {
     <table class="time-entries-table">
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Task</th>
-          <th>Duration</th>
-          <th>Billable</th>
-          <th>Actions</th>
+          <th scope="col" class="date-col">Date</th>
+          <th scope="col" class="name-col">Description</th>
+          <th scope="col" class="name-col">Task</th>
+          <th scope="col" class="type-col">Duration</th>
+          <th scope="col" class="status-col">Billable</th>
+          <th scope="col" class="actions-col">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -254,22 +254,24 @@ function renderEntriesTable(): void {
 function renderEntryRow(entry: TimeEntry): string {
   return `
     <tr>
-      <td>${formatDate(entry.date)}</td>
-      <td>${SanitizationUtils.escapeHtml(entry.description)}</td>
-      <td>${entry.task_title ? SanitizationUtils.escapeHtml(entry.task_title) : '-'}</td>
-      <td class="time-entry-duration">${formatDuration(entry.duration_minutes)}</td>
-      <td>
+      <td class="date-cell">${formatDate(entry.date)}</td>
+      <td class="name-cell">${SanitizationUtils.escapeHtml(entry.description)}</td>
+      <td class="name-cell">${entry.task_title ? SanitizationUtils.escapeHtml(entry.task_title) : '-'}</td>
+      <td class="type-cell">${formatDuration(entry.duration_minutes)}</td>
+      <td class="status-cell">
         <span class="time-entry-billable ${entry.is_billable ? 'yes' : 'no'}">
           ${entry.is_billable ? 'Yes' : 'No'}
         </span>
       </td>
       <td class="actions-cell">
-        <button class="icon-btn btn-edit-entry" data-entry-id="${entry.id}" title="Edit" aria-label="Edit entry">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-        </button>
-        <button class="icon-btn icon-btn-danger btn-delete-entry" data-entry-id="${entry.id}" title="Delete" aria-label="Delete entry">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        </button>
+        <div class="table-actions">
+          <button class="icon-btn btn-edit-entry" data-entry-id="${entry.id}" title="Edit" aria-label="Edit entry">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          </button>
+          <button class="icon-btn icon-btn-danger btn-delete-entry" data-entry-id="${entry.id}" title="Delete" aria-label="Delete entry">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
       </td>
     </tr>
   `;

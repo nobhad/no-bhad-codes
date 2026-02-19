@@ -17,15 +17,10 @@
   box-shadow: var(--shadow-panel);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-section-container h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
   margin: 0;
-  text-transform: uppercase;
-  color: var(--portal-text-light);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-section-container .files-browser {
@@ -47,11 +42,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-upload-section h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
   margin: 0;
-  text-transform: uppercase;
-  color: var(--portal-text-light);
 }
 
 /* =====================================================
@@ -116,11 +107,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-list-section h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
   margin: 0 0 var(--space-2) 0;
-  text-transform: uppercase;
-  color: var(--portal-text-light);
 }
 
 /* =====================================================
@@ -155,7 +142,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .folder-panel-header h4 {
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 0.875rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -279,13 +266,7 @@
   min-width: 120px;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .filter-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--portal-text-secondary);
-}
+/* Label styling from unified rule in portal-forms.css */
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-select,
 :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-input {
@@ -333,15 +314,15 @@
 
 /* =====================================================
    FILES TABLE
-   Table layout for file list (matching admin)
+   Base styling from shared/portal-tables.css
+   Only page-specific overrides here
    ===================================================== */
+
+/* Background and radius overrides for files table */
 :is([data-page="admin"], [data-page="client-portal"]) .files-table {
-  width: 100%;
-  border-collapse: collapse;
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
   overflow: hidden;
-  font-family: var(--font-family-primary);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-table thead {
@@ -349,30 +330,10 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-table th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-weight: 500;
-  color: var(--portal-text-secondary);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-family: var(--font-family-primary);
-  border: none;
   background: var(--portal-bg-dark);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-table td {
-  padding: 0.75rem 1rem;
-  color: var(--portal-text-light);
-  border-top: 1px solid var(--portal-bg-dark);
-  font-size: 0.875rem;
-  vertical-align: middle;
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .files-table tbody tr:hover {
-  background: var(--portal-bg-light);
-}
-
+/* File actions container */
 :is([data-page="admin"], [data-page="client-portal"]) .files-table .file-actions {
   display: flex;
   flex-wrap: wrap;

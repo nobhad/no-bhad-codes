@@ -15,7 +15,7 @@
    ============================================================================ */
 
 .templates-panel {
-  background-color: var(--portal-bg-primary);
+  background-color: var(--portal-bg-darker);
   border-radius: var(--portal-radius-md);
   padding: var(--space-2);
 }
@@ -52,7 +52,7 @@
 }
 
 .template-card {
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
@@ -150,7 +150,7 @@
 
 .template-editor-modal .modal-content {
   position: relative;
-  background-color: var(--portal-bg-primary);
+  background-color: var(--portal-bg-darker);
   border-radius: var(--portal-radius-lg);
   width: 100%;
   max-width: 960px;
@@ -169,10 +169,9 @@
   border-bottom: 1px solid var(--portal-border-color);
 }
 
+/* h3 styling from unified rule in portal-cards.css - only layout here */
 .template-editor-modal .modal-header h3 {
   margin: 0;
-  font-size: var(--font-size-lg);
-  font-weight: 600;
 }
 
 .template-editor-modal .btn-close {
@@ -188,7 +187,7 @@
 }
 
 .template-editor-modal .btn-close:hover {
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
 }
 
 .template-editor-modal .modal-body {
@@ -200,12 +199,16 @@
   margin-bottom: var(--space-1-5);
 }
 
+/* Label styling matches unified rule in portal-forms.css */
 .template-editor-modal .form-group label {
   display: block;
   margin-bottom: var(--space-0-5);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--portal-text-primary);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.6875rem; /* 11px - matches table column headers */
+  font-weight: 400;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .template-editor-modal .form-input {
@@ -214,7 +217,7 @@
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-sm);
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
   color: var(--portal-text-primary);
   transition: border-color var(--transition-fast);
 }
@@ -255,7 +258,7 @@
 }
 
 .template-editor-section {
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
@@ -290,7 +293,7 @@
   display: grid;
   gap: var(--space-1);
   align-items: center;
-  background-color: var(--portal-bg-primary);
+  background-color: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-sm);
   padding: var(--space-1);
@@ -335,7 +338,7 @@
 }
 
 .template-preview {
-  background-color: var(--portal-bg-primary);
+  background-color: var(--portal-bg-darker);
   border: 1px dashed var(--portal-border-color);
   border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
@@ -352,7 +355,7 @@
   flex-direction: column;
   gap: var(--space-0-5);
   padding: var(--space-1);
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
   border-radius: var(--portal-radius-sm);
 }
 
@@ -392,7 +395,7 @@
    ============================================================================ */
 
 .version-history {
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
@@ -422,7 +425,7 @@
   flex-direction: column;
   gap: var(--space-0-5);
   padding: var(--space-1);
-  background-color: var(--portal-bg-primary);
+  background-color: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-sm);
 }
@@ -483,7 +486,7 @@
    ============================================================================ */
 
 .signature-status {
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
@@ -561,7 +564,7 @@
    ============================================================================ */
 
 .custom-items-section {
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
@@ -578,7 +581,7 @@
   align-items: center;
   gap: var(--space-1-5);
   padding: var(--space-1);
-  background-color: var(--portal-bg-primary);
+  background-color: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-sm);
 }
@@ -593,7 +596,7 @@
 .item-type-badge {
   font-size: var(--font-size-2xs);
   padding: var(--space-0-5) var(--space-1);
-  background: var(--portal-bg-secondary);
+  background: var(--portal-bg-dark);
   color: var(--portal-text-secondary);
   border-radius: var(--portal-radius-sm);
   text-transform: uppercase;
@@ -636,7 +639,7 @@
    ============================================================================ */
 
 .discount-section {
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
@@ -665,7 +668,7 @@
    ============================================================================ */
 
 .comments-section {
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
@@ -681,7 +684,7 @@
 
 .comment-item {
   padding: var(--space-1);
-  background-color: var(--portal-bg-primary);
+  background-color: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-sm);
 }
@@ -707,7 +710,7 @@
 .comment-type {
   font-size: var(--font-size-2xs);
   padding: var(--space-0-5) var(--space-1);
-  background: var(--portal-bg-secondary);
+  background: var(--portal-bg-dark);
   color: var(--portal-text-secondary);
   border-radius: var(--portal-radius-sm);
   text-transform: uppercase;
@@ -744,7 +747,7 @@
   padding: var(--space-1);
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-sm);
-  background: var(--portal-bg-primary);
+  background: var(--portal-bg-darker);
   color: var(--portal-text-primary);
   font-size: var(--font-size-sm);
   resize: vertical;
@@ -776,7 +779,7 @@
    ============================================================================ */
 
 .activity-section {
-  background-color: var(--portal-bg-secondary);
+  background-color: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }

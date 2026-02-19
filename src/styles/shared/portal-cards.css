@@ -5,6 +5,157 @@
    ===================================================== */
 
 /* =====================================================
+   UNIFIED H3 HEADING STYLES
+   Single source of truth for ALL h3 headings in portals
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) h3 {
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.25;
+}
+
+/* =====================================================
+   UNIFIED FIELD LABEL STYLES
+   Single source of truth for ALL field labels in portals
+   Matches table column headers: grey, thin, uppercase, 11px
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .field-label,
+:is([data-page="admin"], [data-page="client-portal"]) .meta-label,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-label,
+:is([data-page="admin"], [data-page="client-portal"]) .kpi-card-label,
+:is([data-page="admin"], [data-page="client-portal"]) .summary-label,
+:is([data-page="admin"], [data-page="client-portal"]) .filter-label,
+:is([data-page="admin"], [data-page="client-portal"]) .form-label,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-stat-label,
+:is([data-page="admin"], [data-page="client-portal"]) .pd-stat-label,
+:is([data-page="admin"], [data-page="client-portal"]) .health-label,
+:is([data-page="admin"], [data-page="client-portal"]) .attention-label,
+:is([data-page="admin"], [data-page="client-portal"]) .bar-chart-label,
+:is([data-page="admin"], [data-page="client-portal"]) .pie-chart-legend-label,
+:is([data-page="admin"], [data-page="client-portal"]) .funnel-stage-label,
+:is([data-page="admin"], [data-page="client-portal"]) .custom-field-label,
+:is([data-page="admin"], [data-page="client-portal"]) .client-stat-label,
+:is([data-page="admin"], [data-page="client-portal"]) .health-factor-label,
+:is([data-page="admin"], [data-page="client-portal"]) .filter-section-label,
+:is([data-page="admin"], [data-page="client-portal"]) .documents-upload-label,
+:is([data-page="admin"], [data-page="client-portal"]) .client-selector-label,
+:is([data-page="admin"], [data-page="client-portal"]) .kpi-card-change-label,
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-section-label,
+:is([data-page="admin"], [data-page="client-portal"]) .prompt-dialog-label {
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.6875rem; /* 11px - matches table column headers */
+  font-weight: 400;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* =====================================================
+   MODAL FORM LABELS - Same styling as unified labels
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .modal-body .form-group > label:not(.portal-checkbox-label),
+:is([data-page="admin"], [data-page="client-portal"]) .modal-body label:not(.portal-checkbox-label):not([class*="checkbox"]) {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.6875rem; /* 11px - matches table column headers */
+  font-weight: 400;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* =====================================================
+   UNIFIED ICON COLOR STYLES
+   Single source of truth for status-colored icons
+   Uses design-system/tokens/colors.css status variables
+   Transparent backgrounds - color only
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .icon-blue,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-icon-blue,
+:is([data-page="admin"], [data-page="client-portal"]) .panel-icon-blue {
+  background: transparent;
+  color: var(--status-active);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .icon-green,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-icon-green,
+:is([data-page="admin"], [data-page="client-portal"]) .panel-icon-green {
+  background: transparent;
+  color: var(--status-completed);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .icon-purple,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-icon-purple,
+:is([data-page="admin"], [data-page="client-portal"]) .panel-icon-purple {
+  background: transparent;
+  color: var(--status-qualified);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .icon-red,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-icon-red,
+:is([data-page="admin"], [data-page="client-portal"]) .panel-icon-red {
+  background: transparent;
+  color: var(--status-cancelled);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .icon-yellow,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-icon-yellow,
+:is([data-page="admin"], [data-page="client-portal"]) .panel-icon-yellow {
+  background: transparent;
+  color: var(--status-pending);
+}
+
+/* =====================================================
+   UNIFIED HEADING ICON STYLES
+   Single source of truth for icons next to headings
+   Uses --icon-gap variables from design-system/tokens/spacing.css
+   Icons match the height of their adjacent heading
+   ===================================================== */
+
+/* Icons next to h2 headings (modals, sections) - larger gap */
+:is([data-page="admin"], [data-page="client-portal"]) h2 > .heading-icon,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-header .heading-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25em;
+  height: 1.25em;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-right: var(--icon-gap-md); /* 8px - for larger icons */
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) h2 > .heading-icon svg,
+:is([data-page="admin"], [data-page="client-portal"]) .modal-header .heading-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Icons next to h3 headings (panels, cards) - standard gap */
+:is([data-page="admin"], [data-page="client-portal"]) h3 > .heading-icon,
+:is([data-page="admin"], [data-page="client-portal"]) .panel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-right: var(--icon-gap-sm); /* 6px - default icon gap */
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) h3 > .heading-icon svg,
+:is([data-page="admin"], [data-page="client-portal"]) .panel-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* =====================================================
    BASE CARD SYSTEM
    Provides consistent card styling across all portal pages.
    Use these base classes to reduce custom CSS per page.
@@ -30,7 +181,7 @@
 
 /* Card header - ACME font, uppercase */
 :is([data-page="admin"], [data-page="client-portal"]) .portal-card-header {
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 1.1rem;
   font-weight: 400;
   color: var(--portal-text-light);
@@ -56,12 +207,6 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .portal-card-header-row h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
-  font-weight: 400;
-  color: var(--portal-text-light);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
   margin: 0;
 }
 
@@ -91,7 +236,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-3);
+  gap: var(--portal-section-gap);
   max-width: 100%;
 }
 
@@ -125,7 +270,6 @@
 :is([data-page="admin"], [data-page="client-portal"]) .dashboard-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-3);
   max-width: 100%;
 }
 
@@ -153,68 +297,114 @@
 
 /* =====================================================
    STAT CARD
+   Clean, minimal stat cards inspired by Linear.
+   No accent bars, no visual noise - just clear hierarchy.
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .stat-card {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-4);
-  min-height: 88px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  align-items: flex-start;
   gap: var(--space-1);
-  color: var(--portal-text-light);
-  font-family: inherit;
-  box-shadow: var(--shadow-panel);
-  transition: background var(--transition-mouse) ease;
+  padding: var(--space-4);
+  background: var(--portal-bg-darker);
+  border: 1px solid var(--portal-bg-darker);
+  border-radius: var(--portal-radius-md);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-icon {
+/* Remove any accent lines - keep it clean */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card::before {
+  display: none;
+}
+
+/* Stat number - the big value (unified)
+   Single source of truth for all stat/kpi value styling.
+   Must be smaller than page title to maintain hierarchy.
+   Aliases: .stat-value, .stat-card-value, .kpi-card-value, .kpi-value */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-number,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-value,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card-value,
+:is([data-page="admin"], [data-page="client-portal"]) .kpi-card-value,
+:is([data-page="admin"], [data-page="client-portal"]) .kpi-value {
+  display: block;
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--portal-text-light);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+/* Label styling from unified rule in portal-forms.css - only layout here */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-label,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card .field-label {
+  display: block;
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* Stat icon */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card-icon,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-icon,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card svg:not(.btn-icon) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  color: var(--portal-text-secondary);
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-icon svg {
   width: 18px;
   height: 18px;
+  color: var(--portal-text-muted);
+  opacity: 0.5;
+  flex-shrink: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable {
+/* Clickable stat cards */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable,
+:is([data-page="admin"], [data-page="client-portal"]) a.stat-card {
   cursor: pointer;
-  transition: all var(--transition-fast);
+  text-decoration: none;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable:hover {
-  background: var(--portal-bg-readonly);
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable:hover,
+:is([data-page="admin"], [data-page="client-portal"]) a.stat-card:hover {
+  background: var(--portal-bg-dark);
+  border-color: var(--portal-bg-medium);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable:hover .stat-number {
   color: var(--color-primary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stat-number {
-  display: block;
-  font-family: var(--font-family-acme);
-  font-size: 2rem;
-  color: var(--color-primary);
-  line-height: 1;
-  font-weight: 700;
+/* Active/selected state - subtle primary accent */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable.active,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card.active {
+  border-color: var(--color-primary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stat-label {
-  display: block;
-  font-family: var(--font-family-sans);
-  font-size: 0.85rem;
-  color: var(--portal-text-secondary);
-  margin-top: var(--space-1);
-  text-transform: uppercase;
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable.active .stat-number,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card.active .stat-number {
+  color: var(--color-primary);
+}
+
+/* Stat card secondary text */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-secondary,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-change,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-meta {
+  font-size: 0.7rem;
+  color: var(--portal-text-muted);
+  letter-spacing: 0.02em;
+  margin: 0;
+  line-height: 1.3;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-change.positive {
+  color: var(--color-success);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-change.negative {
+  color: var(--color-danger);
 }
 
 /* =====================================================
@@ -230,7 +420,6 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .overview-card h3 {
-  color: var(--portal-text-light);
   margin-bottom: var(--space-2);
 }
 
@@ -255,11 +444,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .milestones-section h3,
 :is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section h3,
 :is([data-page="admin"], [data-page="client-portal"]) .analytics-overview h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
-  color: var(--portal-text-light);
   margin: 0 0 var(--space-2) 0;
-  text-transform: uppercase;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .activity-list {
@@ -296,7 +481,6 @@
 :is([data-page="admin"], [data-page="client-portal"]) .activity-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .activity-icon {
@@ -370,12 +554,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-inline h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
-  color: var(--portal-text-light);
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-actions {
@@ -467,7 +646,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-due-date {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--icon-gap-xs);
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
@@ -608,9 +787,7 @@
     gap: var(--space-1);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-inline h3 {
-    font-size: 1rem;
-  }
+  /* h3 styling in unified rule at top of file */
 
   :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-actions {
     gap: var(--space-1);
@@ -633,8 +810,8 @@
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card {
   display: block;
-  background: var(--portal-bg-dark);
-  border: none;
+  background: var(--portal-bg-darker);
+  border: 1px solid var(--portal-bg-darker);
   border-radius: var(--portal-radius-lg, 12px);
   padding: var(--space-3);
   color: var(--portal-text-light);
@@ -642,13 +819,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
-  font-weight: 400;
-  color: var(--portal-text-light);
-  text-transform: uppercase;
-  margin: 0 0 1rem 0;
-  letter-spacing: var(--letter-spacing-label);
+  margin: 0 0 var(--space-2) 0;
 }
 
 /* =====================================================
@@ -692,17 +863,15 @@
   box-shadow: var(--shadow-panel);
 }
 
+/* Label styling from unified rule in portal-forms.css - only layout here */
 :is([data-page="admin"], [data-page="client-portal"]) .summary-card .summary-label {
   display: block;
-  font-size: 0.9rem;
-  color: var(--portal-text-secondary);
   margin-bottom: var(--space-1);
-  text-transform: uppercase;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .summary-card .summary-value {
   display: block;
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 1.8rem;
   color: var(--portal-text-light);
 }
@@ -721,12 +890,6 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action h3,
 :is([data-page="admin"], [data-page="client-portal"]) .section-header-with-actions h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
-  font-weight: 400;
-  color: var(--portal-text-light);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
   margin: 0;
 }
 
@@ -744,11 +907,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .invoices-list h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
-  color: var(--portal-text-light);
   margin: 0 0 var(--space-2) 0;
-  text-transform: uppercase;
 }
 
 /* =====================================================
@@ -789,7 +948,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .content-section-card .section-title {
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 1rem;
   font-weight: 400;
   text-transform: uppercase;
@@ -832,7 +991,6 @@
   :is([data-page="admin"], [data-page="client-portal"]) .recent-activity h3,
   :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks h3 {
     margin-bottom: var(--space-2);
-    font-size: 1rem;
   }
 }
 
@@ -900,7 +1058,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .dashboard-section-title {
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 0.9rem;
   font-weight: 400;
   color: var(--portal-text-muted);
@@ -968,7 +1126,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .attention-count {
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 2rem;
   font-weight: 700;
   line-height: 1;
@@ -976,12 +1134,7 @@
   margin-bottom: var(--space-0-5);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .attention-label {
-  font-size: 0.85rem;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-}
+/* Label styling from unified rule in portal-forms.css */
 
 /* Highlight attention cards with values > 0 */
 :is([data-page="admin"], [data-page="client-portal"]) .attention-card.has-items .attention-count {

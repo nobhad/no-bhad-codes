@@ -68,13 +68,13 @@
   padding: 10px 16px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--icon-gap-xl);
 }
 
 /* Traffic light buttons */
 .terminal-buttons {
   display: flex;
-  gap: 8px;
+  gap: var(--space-1);
 }
 
 .terminal-btn {
@@ -170,7 +170,7 @@
   background: var(--color-terminal-bg-panel);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--icon-gap-xl);
 }
 
 .terminal-prompt {
@@ -354,7 +354,7 @@ input.terminal-input:-webkit-autofill,
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 12px;
+  gap: var(--icon-gap-xl);
 }
 
 .terminal-progress .progress-label {

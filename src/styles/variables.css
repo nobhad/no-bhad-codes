@@ -230,7 +230,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
   /* Portal text colors */
   --portal-text-light: #f5f5f5;
   --portal-text-primary: #f5f5f5;
-  --portal-text-secondary: #cccccc;
+  --portal-text-secondary: #A3A3A3;
   --portal-text-muted: #999999;
   --portal-text-dark: #1a1a1a;
 
@@ -277,13 +277,17 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --label-font-weight: 500;
   --label-text-transform: uppercase;
   --label-letter-spacing: 0.05em;
+
+  /* Portal layout - section spacing (single source of truth) */
+  --portal-section-gap: var(--space-3);
+  --portal-section-heading-padding: var(--space-1-5) var(--table-cell-padding-x, 14px);
 }
 
 /* Admin-specific overrides */
 [data-page="admin"] {
   --color-text-primary: var(--color-gray-100);
   --color-text-secondary: var(--color-gray-300);
-  --portal-text-secondary: var(--color-gray-400);
+  --portal-text-secondary: #A3A3A3;
 }
 
 /* ============================================

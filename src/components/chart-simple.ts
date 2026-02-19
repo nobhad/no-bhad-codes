@@ -447,7 +447,7 @@ export function getChartStyles(): string {
     .kpi-card-change {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: var(--icon-gap-xs);
       font-size: 0.75rem;
       font-weight: 600;
     }

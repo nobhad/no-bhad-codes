@@ -16,19 +16,20 @@
 
 /* Pagination container - handles bottom corners of table card */
 [data-page="admin"] .table-pagination {
+  --pagination-text-color: var(--portal-text-secondary);
   margin-top: 0;
   background: var(--portal-bg-dark);
   border-bottom-left-radius: var(--border-radius-card, 8px);
   border-bottom-right-radius: var(--border-radius-card, 8px);
-  overflow: hidden;
+  overflow: visible; /* Must be visible for dropdown menus to escape */
+  position: relative; /* Establish stacking context for dropdowns */
 }
 
 .table-pagination .pagination-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-1-5) var(--table-cell-padding-x, var(--space-4));
   background: var(--portal-bg-dark);
 }
 
@@ -36,45 +37,84 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
+  font-size: var(--table-cell-font-size, 12px);
+  color: var(--portal-text-secondary);
 }
 
 .pagination-info strong {
-  color: var(--portal-text-light);
-  font-weight: 600;
+  color: var(--portal-text-secondary);
+  font-weight: 500;
 }
 
 .pagination-controls {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
 }
 
 .pagination-size {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
+  font-size: var(--table-cell-font-size, 12px);
+  color: var(--portal-text-secondary);
 }
 
-/* Per-page dropdown: same width when closed and open; ensure menu and items display correctly (no red on all items) */
+.pagination-size label {
+  color: var(--portal-text-secondary);
+  font-weight: 400;
+  font-size: var(--table-cell-font-size, 12px);
+}
+
+/* Per-page dropdown: match pagination button styling */
 .pagination-page-size-dropdown .table-dropdown {
-  min-width: 100px;
+  min-width: 70px;
 }
 
-[data-page="admin"] .pagination-page-size-dropdown .table-dropdown .custom-dropdown-menu {
-  background-color: var(--portal-bg-dark);
-  z-index: var(--z-index-portal-dropdown);
+/* Trigger - border like arrow buttons, lighter bg */
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown .custom-dropdown-trigger {
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--portal-border-medium) !important;
+  border-radius: var(--portal-radius-sm);
+  background-color: var(--portal-bg-darker);
+  color: var(--portal-text-secondary);
+  font-size: var(--table-cell-font-size, 12px);
 }
 
-[data-page="admin"] .pagination-page-size-dropdown .table-dropdown .custom-dropdown-item {
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown .custom-dropdown-trigger:hover {
+  border-color: var(--color-primary) !important;
+}
+
+/* Focus/open state - red border around whole dropdown */
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown.open .custom-dropdown-trigger {
+  border: 1px solid var(--color-primary) !important;
+  border-bottom-color: transparent !important;
+  border-radius: var(--portal-radius-sm) var(--portal-radius-sm) 0 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Menu - darker bg, connected to trigger */
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown .custom-dropdown-menu {
+  background-color: var(--color-surface-primary, #1a1a1a);
+  border: 1px solid var(--color-primary);
+  border-top: none;
+  border-radius: 0 0 var(--portal-radius-sm) var(--portal-radius-sm);
+  margin-top: 0;
+  position: relative;
+  top: -1px;
+  z-index: 1;
+}
+
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown .custom-dropdown-item {
   background-color: transparent;
-  color: var(--portal-text-light);
+  color: var(--portal-text-secondary);
+  font-size: var(--table-cell-font-size, 12px);
+  height: 28px;
+  padding: 0 var(--space-2);
 }
 
-[data-page="admin"] .pagination-page-size-dropdown .table-dropdown .custom-dropdown-item:hover {
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown .custom-dropdown-item:hover {
   background-color: var(--color-primary);
   color: var(--portal-text-light);
 }
@@ -106,13 +146,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: 1px solid var(--portal-border-light);
   border-radius: var(--portal-radius-sm);
   background: var(--portal-bg-darker);
-  color: var(--portal-text-light);
+  color: var(--portal-text-secondary);
   cursor: pointer;
   transition: all var(--transition-faster);
 }
@@ -120,6 +160,7 @@
 .pagination-btn:hover:not(:disabled) {
   background: var(--portal-bg-hover);
   border-color: var(--portal-border-medium);
+  color: var(--portal-text-light);
 }
 
 .pagination-btn:disabled {
@@ -128,8 +169,8 @@
 }
 
 .pagination-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   stroke: currentColor;
   fill: none;
 }
@@ -145,14 +186,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  height: 32px;
-  padding: 0 var(--space-2);
+  min-width: 28px;
+  height: 28px;
+  padding: 0 var(--space-1-5);
   border: 1px solid transparent;
   border-radius: var(--portal-radius-sm);
   background: transparent;
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+  font-size: var(--table-cell-font-size, 12px);
   cursor: pointer;
   transition: all var(--transition-faster);
 }
@@ -160,6 +201,7 @@
 .pagination-page-btn:hover:not(.active) {
   background: var(--portal-bg-hover);
   border-color: var(--portal-border-dark);
+  color: var(--portal-text-light);
 }
 
 .pagination-page-btn.active {
@@ -173,10 +215,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  height: 32px;
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm);
+  min-width: 28px;
+  height: 28px;
+  color: var(--portal-text-secondary);
+  font-size: var(--table-cell-font-size, 12px);
 }
 
 /* ===============================================
@@ -218,7 +260,6 @@
 .bulk-toolbar-left {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
 }
 
 .bulk-selection-count {
@@ -374,7 +415,7 @@
 .btn-export {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--icon-gap-sm);
   padding: var(--space-1) var(--space-3);
   border: 1px solid var(--portal-border-dark);
   border-radius: var(--portal-radius-sm);
@@ -536,11 +577,10 @@
    Linear-style keyboard row navigation
    =============================================== */
 
-/* Focused row - subtle highlight */
-[data-page="admin"] .admin-table tbody tr.row-focused,
-[data-page="admin"] .admin-table tbody tr[data-focused="true"] {
+/* Focused row - subtle highlight (apply to cells for border-collapse compatibility) */
+[data-page="admin"] .admin-table tbody tr.row-focused td,
+[data-page="admin"] .admin-table tbody tr[data-focused="true"] td {
   background: var(--portal-bg-hover) !important;
-  outline: none;
 }
 
 /* Focus indicator - subtle left border */
@@ -550,14 +590,14 @@
 }
 
 /* Selected row (X/Space to toggle) */
-[data-page="admin"] .admin-table tbody tr.row-selected,
-[data-page="admin"] .admin-table tbody tr[data-selected="true"] {
+[data-page="admin"] .admin-table tbody tr.row-selected td,
+[data-page="admin"] .admin-table tbody tr[data-selected="true"] td {
   background: var(--color-primary-alpha, rgba(0, 111, 238, 0.1)) !important;
 }
 
 /* Combined focused + selected */
-[data-page="admin"] .admin-table tbody tr.row-focused.row-selected,
-[data-page="admin"] .admin-table tbody tr[data-focused="true"][data-selected="true"] {
+[data-page="admin"] .admin-table tbody tr.row-focused.row-selected td,
+[data-page="admin"] .admin-table tbody tr[data-focused="true"][data-selected="true"] td {
   background: var(--color-primary-alpha, rgba(0, 111, 238, 0.15)) !important;
 }
 

@@ -60,7 +60,6 @@
 .confirm-dialog-header {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   margin-bottom: var(--space-4);
 }
 
@@ -114,7 +113,7 @@
 .confirm-dialog-title {
   margin: 0;
   color: var(--portal-text-light);
-  font-family: var(--font-family-acme, inherit);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: var(--font-size-lg);
   font-weight: 600;
   letter-spacing: var(--letter-spacing-label);
@@ -130,7 +129,6 @@
 
 .confirm-dialog-actions {
   display: flex;
-  gap: var(--space-3);
   justify-content: flex-end;
 }
 
@@ -140,7 +138,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-1-5) var(--space-3);
-  font-family: var(--font-family-acme, inherit);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: var(--letter-spacing-label);
@@ -229,12 +227,10 @@
   margin-bottom: var(--space-4);
 }
 
+/* Label styling from unified rule in portal-forms.css - only layout here */
 .prompt-dialog-label {
   display: block;
   margin-bottom: var(--space-2);
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
 }
 
 .prompt-dialog-input {

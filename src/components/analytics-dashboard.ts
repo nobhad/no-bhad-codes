@@ -352,7 +352,7 @@ export class AnalyticsDashboard extends BaseComponent<
       .analytics-dashboard__title {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: var(--icon-gap-md);
         font-weight: 600;
       }
 
@@ -362,7 +362,7 @@ export class AnalyticsDashboard extends BaseComponent<
 
       .analytics-dashboard__controls {
         display: flex;
-        gap: 4px;
+        gap: var(--icon-gap-xs);
       }
 
       .analytics-dashboard__btn {
@@ -405,7 +405,7 @@ export class AnalyticsDashboard extends BaseComponent<
       .analytics-metrics {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        gap: var(--space-1);
       }
 
       .analytics-metric {
@@ -419,7 +419,7 @@ export class AnalyticsDashboard extends BaseComponent<
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
+        gap: var(--icon-gap-xs);
         font-weight: 600;
         font-size: 14px;
         color: #333;
@@ -448,7 +448,7 @@ export class AnalyticsDashboard extends BaseComponent<
       .analytics-list {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: var(--icon-gap-xs);
       }
 
       .analytics-list__item {

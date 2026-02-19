@@ -203,34 +203,36 @@ function renderDeletedItemsTable(
 
     return `
       <tr data-id="${item.id}" data-type="${item.type}">
-        <td>
+        <td class="type-cell">
           <span class="entity-type-badge entity-type-${item.type}">${item.type}</span>
         </td>
-        <td class="item-name">${escapeHtml(item.name)}</td>
-        <td>${formatDate(item.deleted_at)}</td>
-        <td>${item.deleted_by || 'System'}</td>
-        <td class="${urgencyClass}">
+        <td class="name-cell">${escapeHtml(item.name)}</td>
+        <td class="date-cell">${formatDate(item.deleted_at)}</td>
+        <td class="name-cell">${item.deleted_by || 'System'}</td>
+        <td class="count-cell ${urgencyClass}">
           <strong>${daysUntilPermanent}</strong> days
         </td>
         <td class="actions-cell">
-          <button
-            class="btn-icon restore-btn"
-            title="Restore item"
-            data-action="restore"
-            data-id="${item.id}"
-            data-type="${item.type}"
-          >
-            ${ICONS.ROTATE_CCW}
-          </button>
-          <button
-            class="btn-icon btn-danger permanent-delete-btn"
-            title="Permanently delete"
-            data-action="permanent-delete"
-            data-id="${item.id}"
-            data-type="${item.type}"
-          >
-            ${ICONS.TRASH}
-          </button>
+          <div class="table-actions">
+            <button
+              class="icon-btn restore-btn"
+              title="Restore item"
+              data-action="restore"
+              data-id="${item.id}"
+              data-type="${item.type}"
+            >
+              ${ICONS.ROTATE_CCW}
+            </button>
+            <button
+              class="icon-btn icon-btn-danger permanent-delete-btn"
+              title="Permanently delete"
+              data-action="permanent-delete"
+              data-id="${item.id}"
+              data-type="${item.type}"
+            >
+              ${ICONS.TRASH}
+            </button>
+          </div>
         </td>
       </tr>
     `;

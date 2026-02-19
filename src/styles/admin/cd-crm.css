@@ -25,7 +25,6 @@
 .health-score-container {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
 }
 
 .health-score-badge {
@@ -73,10 +72,7 @@
   gap: var(--space-1);
 }
 
-.health-factor-label {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-}
+/* Label styling from unified rule in portal-forms.css */
 
 .health-factor-bar {
   height: 6px;
@@ -146,7 +142,7 @@
 .client-tag-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--icon-gap-xs);
   padding: 4px 10px;
   border-radius: var(--portal-radius-lg);
   font-size: var(--font-size-xs);
@@ -222,7 +218,6 @@
 .contact-details {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
   margin-top: var(--space-1);
 }
 
@@ -311,7 +306,6 @@
 .notes-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 .note-card {
@@ -375,7 +369,6 @@
 .custom-fields-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-3);
   margin-top: var(--space-3);
 }
 
@@ -385,12 +378,7 @@
   gap: var(--space-1);
 }
 
-.custom-field-label {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+/* Label styling from unified rule in portal-forms.css */
 
 .custom-field-value {
   font-size: var(--font-size-sm);
@@ -401,7 +389,6 @@
 .client-stats-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: var(--space-3);
   margin-top: var(--space-3);
 }
 
@@ -418,9 +405,8 @@
   color: var(--portal-text-light);
 }
 
+/* Label styling from unified rule in portal-forms.css - only layout here */
 .client-stat-label {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
   margin-top: var(--space-1);
 }
 
@@ -455,7 +441,7 @@
 .table-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--icon-gap-xs);
   margin-top: 4px;
 }
 

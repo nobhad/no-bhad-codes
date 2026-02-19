@@ -1732,7 +1732,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
               <button class="btn btn-sm btn-secondary" data-action="view-projects">View All</button>
             </div>
             <div class="cd-projects-summary" id="cd-overview-projects">
-              <p class="empty-state">Loading...</p>
+              <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
             </div>
           </div>
 
@@ -1780,7 +1780,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
           <div class="portal-project-card portal-shadow cd-health-stats-card">
             <h3>Client Health</h3>
             <div id="cd-health-score-container">
-              <p class="empty-state">Loading...</p>
+              <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
             </div>
             <div class="cd-stats-compact" id="cd-stats-container">
               <!-- Stats rendered by JS -->
@@ -1792,7 +1792,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
         <div class="portal-project-card portal-shadow cd-recent-activity-full">
           <h3>Recent Activity</h3>
           <div id="cd-recent-activity">
-            <p class="empty-state">Loading...</p>
+            <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
       </div>
@@ -1803,7 +1803,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
       <div class="portal-project-card portal-shadow">
         <h3>Contacts</h3>
         <div id="cd-contacts-list">
-          <p class="empty-state">Loading contacts...</p>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       </div>
     </div>
@@ -1813,7 +1813,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
       <div class="portal-project-card portal-shadow">
         <h3>Activity Timeline</h3>
         <div id="cd-activity-list">
-          <p class="empty-state">Loading activity...</p>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       </div>
     </div>
@@ -1823,7 +1823,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
       <div class="portal-project-card portal-shadow">
         <h3>Projects</h3>
         <div class="client-projects-list" id="cd-projects-list">
-          <p class="empty-state">No projects found for this client.</p>
+          <div class="empty-state">No projects found for this client.</div>
         </div>
       </div>
     </div>
@@ -1891,7 +1891,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
       <div class="portal-project-card portal-shadow">
         <h3>Invoice History</h3>
         <div class="client-invoices-list" id="cd-invoices-list">
-          <p class="empty-state">No invoices found for this client.</p>
+          <div class="empty-state">No invoices found for this client.</div>
         </div>
       </div>
     </div>
@@ -1901,7 +1901,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
       <div class="portal-project-card portal-shadow">
         <h3>Notes</h3>
         <div id="cd-notes-list">
-          <p class="empty-state">Loading notes...</p>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       </div>
     </div>

@@ -96,9 +96,9 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: b
 
   // Show loading state
   if (threadList) {
-    threadList.innerHTML = '<div class="loading-state"><p>Loading...</p></div>';
+    threadList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   }
-  messagesContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading messages...</p></div>';
+  messagesContainer.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading messages...</span></div>';
 
   try {
     // Add cache-busting parameter when needed (e.g., after sending a message)
@@ -271,7 +271,7 @@ async function loadThreadMessages(threadId: number, ctx: ClientPortalContext, bu
   }
 
   // Show loading
-  messagesContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading messages...</p></div>';
+  messagesContainer.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading messages...</span></div>';
 
   try {
     const messagesUrl = bustCache

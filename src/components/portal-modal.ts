@@ -36,6 +36,8 @@ export interface PortalModalConfig {
   titleId: string;
   /** Initial title text */
   title: string;
+  /** Optional icon SVG string to display before title */
+  icon?: string;
   /** Extra class on .modal-content (e.g. kb-article-modal-content) */
   contentClassName?: string;
   /** Called when close button clicked or overlay backdrop */
@@ -64,7 +66,7 @@ export interface PortalModalInstance {
  * - aria-describedby points to modal body
  */
 export function createPortalModal(config: PortalModalConfig): PortalModalInstance {
-  const { id, titleId, title, contentClassName = '', onClose } = config;
+  const { id, titleId, title, icon, contentClassName = '', onClose } = config;
 
   // Generate unique ID for body (aria-describedby)
   const bodyId = `${id}-body`;
@@ -85,7 +87,19 @@ export function createPortalModal(config: PortalModalConfig): PortalModalInstanc
 
   const titleEl = document.createElement('h2');
   titleEl.id = titleId;
-  titleEl.textContent = title;
+
+  // Add icon if provided
+  if (icon) {
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'heading-icon';
+    iconSpan.setAttribute('aria-hidden', 'true');
+    iconSpan.innerHTML = icon;
+    titleEl.appendChild(iconSpan);
+  }
+
+  // Add title text
+  const titleText = document.createTextNode(title);
+  titleEl.appendChild(titleText);
 
   const closeBtn = createIconButton({
     iconSvg: ICONS.CLOSE.replace('width="24"', 'width="20"').replace('height="24"', 'height="20"'),
@@ -169,7 +183,15 @@ export function createPortalModal(config: PortalModalConfig): PortalModalInstanc
     footer,
     titleEl,
     setTitle: (t: string) => {
-      titleEl.textContent = t;
+      // Preserve icon if present, update only the text
+      const iconEl = titleEl.querySelector('.heading-icon');
+      if (iconEl) {
+        titleEl.textContent = '';
+        titleEl.appendChild(iconEl);
+        titleEl.appendChild(document.createTextNode(t));
+      } else {
+        titleEl.textContent = t;
+      }
     },
     show: () => {
       // Store current focus to restore later

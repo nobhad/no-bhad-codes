@@ -16,6 +16,7 @@ import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { createViewToggle } from '../../../components/view-toggle';
 import { createPortalModal } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import type { AdminDashboardContext } from '../admin-types';
 
 // View toggle icons
@@ -433,34 +434,36 @@ function renderListItem(task: GlobalTask): string {
 
   return `
     <tr data-task-id="${task.id}" class="clickable-row" tabindex="0" role="button" aria-label="View task: ${SanitizationUtils.escapeHtml(task.title)}">
-      <td class="identity-cell">
+      <td class="identity-cell" data-label="Task">
         <div class="task-list-title">
           <span class="identity-name">${SanitizationUtils.escapeHtml(task.title)}</span>
           ${task.description ? `<small class="identity-contact text-muted">${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</small>` : ''}
         </div>
       </td>
-      <td class="project-cell">
+      <td class="project-cell" data-label="Project">
         <button type="button" class="project-link-btn" data-action="view-project" data-project-id="${task.projectId}" title="View project">
           ${SanitizationUtils.escapeHtml(task.projectName)}
         </button>
       </td>
-      <td class="milestone-cell">
+      <td class="milestone-cell" data-label="Milestone">
         ${task.milestoneTitle ? `
           <span class="task-milestone-tag">${SanitizationUtils.escapeHtml(task.milestoneTitle)}</span>
         ` : `
           <span class="task-standalone-tag">Standalone</span>
         `}
       </td>
-      <td class="type-cell"><span class="task-priority ${priorityClass}">${priorityLabel}</span></td>
-      <td class="status-cell">${getStatusDotHTML(task.status)}</td>
-      <td class="date-cell ${isOverdue ? 'overdue' : ''}">${task.dueDate ? formatDate(task.dueDate) : ''}</td>
-      <td class="actions-cell">
-        <button type="button" class="btn-icon-sm btn-danger-ghost" data-action="delete-task" data-task-id="${task.id}" title="Delete task">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-          </svg>
-        </button>
+      <td class="type-cell" data-label="Priority"><span class="task-priority ${priorityClass}">${priorityLabel}</span></td>
+      <td class="status-cell" data-label="Status">${getStatusDotHTML(task.status)}</td>
+      <td class="date-cell ${isOverdue ? 'overdue' : ''}" data-label="Due Date">${task.dueDate ? formatDate(task.dueDate) : ''}</td>
+      <td class="actions-cell" data-label="Actions">
+        <div class="table-actions">
+          <button type="button" class="icon-btn icon-btn-danger" data-action="delete-task" data-task-id="${task.id}" title="Delete task">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
       </td>
     </tr>
   `;
@@ -526,6 +529,7 @@ function showTaskDetailModal(task: GlobalTask): void {
     id: 'global-task-detail-modal',
     titleId: 'global-task-modal-title',
     title: task.title,
+    icon: ICONS.CHECK_SQUARE,
     contentClassName: 'task-detail-modal-content',
     onClose: () => modal.hide()
   });
@@ -555,7 +559,7 @@ function showTaskDetailModal(task: GlobalTask): void {
 
     <div class="task-detail-section">
       <h4>Details</h4>
-      <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-1);">
         <div><strong>Status:</strong> ${statusLabel}</div>
         <div class="${isOverdue ? 'overdue' : ''}"><strong>Due:</strong> ${task.dueDate ? formatDate(task.dueDate) : ''}</div>
         <div><strong>Est. Hours:</strong> ${task.estimatedHours || ''}</div>

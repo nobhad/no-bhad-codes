@@ -780,7 +780,7 @@
 .summary-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--icon-gap-sm);
   font-size: 0.75rem;
   color: var(--proposal-text-muted);
 }
@@ -799,7 +799,7 @@
 .summary-adjustment {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--icon-gap-sm);
 }
 
 .summary-label {

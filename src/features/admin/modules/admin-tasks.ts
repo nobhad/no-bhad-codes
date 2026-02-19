@@ -11,6 +11,7 @@ import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client'
 import { confirmDanger, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { formatDate } from '../../../utils/format-utils';
 import { createPortalModal } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
 import { getStatusDotHTML } from '../../../components/status-badge';
@@ -435,6 +436,7 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
     id: 'task-detail-modal',
     titleId: 'task-detail-modal-title',
     title: fullTask.title,
+    icon: ICONS.CHECK_SQUARE,
     contentClassName: 'task-detail-modal-content',
     onClose: () => modal.hide()
   });
@@ -454,7 +456,7 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
 
     <div class="task-detail-section">
       <h4>Details</h4>
-      <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-1);">
         <div><strong>Status:</strong> ${STATUS_CONFIG[fullTask.status]?.label || fullTask.status}</div>
         <div><strong>Due:</strong> ${fullTask.due_date ? formatDate(fullTask.due_date) : ''}</div>
         <div><strong>Est. Hours:</strong> ${fullTask.estimated_hours || ''}</div>
@@ -547,6 +549,7 @@ export async function showCreateTaskModal(): Promise<void> {
     id: 'create-task-modal',
     titleId: 'create-task-modal-title',
     title: 'Create Task',
+    icon: ICONS.PLUS,
     onClose: () => modal.hide()
   });
 

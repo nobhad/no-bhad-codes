@@ -269,7 +269,7 @@ export function createStatCard(config: StatCardConfig): HTMLElement {
   valueEl.textContent = String(value);
 
   const labelEl = document.createElement('div');
-  labelEl.className = 'stat-card-label';
+  labelEl.className = 'field-label';
   labelEl.textContent = label;
 
   content.appendChild(valueEl);

@@ -25,9 +25,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap-md);
   padding: var(--space-1-5) var(--space-3);
-  font-family: var(--font-family-acme, inherit);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: var(--btn-portal-letter-spacing, 0.5px);
@@ -50,7 +50,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap-md);
 }
 
 /* Icon before text: consistent order for ALL icon buttons (not just .btn) */

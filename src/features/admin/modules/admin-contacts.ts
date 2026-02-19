@@ -209,7 +209,7 @@ export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
 
   // Show loading state
   const tableBody = getElement('contacts-table-body');
-  if (tableBody) showTableLoading(tableBody, 6, 'Loading contacts...');
+  if (tableBody) showTableLoading(tableBody, 7, 'Loading contacts...');
 
   try {
     const response = await apiFetch('/api/admin/contact-submissions');
@@ -318,7 +318,7 @@ function renderContactsTable(
   const filteredSubmissions = applyFilters(submissions, filterState, CONTACTS_FILTER_CONFIG);
 
   if (filteredSubmissions.length === 0) {
-    showTableEmpty(tableBody, 6, 'No contacts match the current filters.');
+    showTableEmpty(tableBody, 7, 'No contacts match the current filters.');
     renderContactsPaginationUI(0, ctx);
     return;
   }
@@ -886,8 +886,13 @@ export function renderContactsTab(container: HTMLElement): void {
             </tr>
           </thead>
           <tbody id="contacts-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr>
-              <td colspan="7" class="loading-row">Loading contact submissions...</td>
+            <tr class="loading-row">
+              <td colspan="7">
+                <div class="loading-state">
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span class="loading-message">Loading contact submissions...</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>

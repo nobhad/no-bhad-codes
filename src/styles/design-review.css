@@ -162,7 +162,7 @@
 .tool-buttons {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: var(--space-1);
 }
 
 .tool-btn {
@@ -208,7 +208,7 @@
 .color-buttons {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: var(--space-1);
 }
 
 .color-btn {
@@ -286,7 +286,7 @@
 .design-element-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--icon-gap-sm);
   padding: var(--space-1);
   background: var(--portal-bg-medium);
   border-radius: 6px;
@@ -307,7 +307,7 @@
 
 .element-approval {
   display: flex;
-  gap: 4px;
+  gap: var(--icon-gap-xs);
 }
 
 .approval-btn {

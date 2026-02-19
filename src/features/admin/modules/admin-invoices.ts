@@ -21,6 +21,7 @@ import { exportToCsv, INVOICES_EXPORT_CONFIG } from '../../../utils/table-export
 import { createBulkActionToolbar, setupBulkSelectionHandlers, type BulkActionConfig } from '../../../utils/table-bulk-actions';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
+import { ICONS as GLOBAL_ICONS } from '../../../constants/icons';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { withButtonLoading } from '../../../utils/button-loading';
 import {
@@ -230,8 +231,7 @@ export function renderInvoicesTab(container: HTMLElement): void {
                   </div>
                 </th>
                 <th scope="col">Invoice #</th>
-                <th scope="col" class="contact-col">Client</th>
-                <th scope="col">Project</th>
+                <th scope="col" class="name-col">Client / Project</th>
                 <th scope="col" class="budget-col">Amount</th>
                 <th scope="col" class="status-col">Status</th>
                 <th scope="col" class="date-col">Due Date</th>
@@ -239,8 +239,13 @@ export function renderInvoicesTab(container: HTMLElement): void {
               </tr>
             </thead>
             <tbody id="invoices-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-              <tr>
-                <td colspan="8" class="loading-row">Loading invoices...</td>
+              <tr class="loading-row">
+                <td colspan="7">
+                  <div class="loading-state">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span class="loading-message">Loading invoices...</span>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -274,7 +279,7 @@ export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void
     filterUIInitialized = true;
   }
 
-  showTableLoading(tableBody, 8, 'Loading invoices...');
+  showTableLoading(tableBody, 7, 'Loading invoices...');
 
   try {
     const response = await apiFetch('/api/invoices');
@@ -296,7 +301,7 @@ export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void
 
   } catch (error) {
     console.error('[AdminInvoices] Error loading invoices:', error);
-    showTableError(tableBody, 8, 'Failed to load invoices');
+    showTableError(tableBody, 7, 'Failed to load invoices');
   }
 }
 
@@ -466,7 +471,7 @@ function renderInvoicesTable(ctx: AdminDashboardContext): void {
     const message = cachedInvoices.length === 0
       ? 'No invoices yet.'
       : 'No invoices match the current filters.';
-    showTableEmpty(tableBody, 8, message);
+    showTableEmpty(tableBody, 7, message);
     renderPaginationUI(0, ctx);
     return;
   }
@@ -502,19 +507,23 @@ function renderInvoicesTable(ctx: AdminDashboardContext): void {
 
     return `
       <tr data-invoice-id="${invoice.id}">
-        <td class="bulk-select-cell">${checkboxHTML}</td>
-        <td><strong>${safeInvoiceNumber}</strong></td>
-        <td class="contact-cell">${safeClientName}</td>
-        <td>${safeProjectName}</td>
-        <td class="budget-cell">${amount}</td>
-        <td class="status-cell">
+        <td class="bulk-select-cell" data-label="">${checkboxHTML}</td>
+        <td class="type-cell" data-label="Invoice"><strong>${safeInvoiceNumber}</strong></td>
+        <td class="name-cell" data-label="Client/Project">
+          <div class="identity-cell">
+            <span class="identity-primary">${safeClientName}</span>
+            <span class="identity-secondary">${safeProjectName}</span>
+          </div>
+        </td>
+        <td class="budget-cell" data-label="Amount">${amount}</td>
+        <td class="status-cell" data-label="Status">
           ${statusIndicator}
           <span class="date-stacked">${dueDate}</span>
         </td>
-        <td class="date-cell inline-editable-cell" data-invoice-id="${invoice.id}" data-field="due_date">
+        <td class="date-cell inline-editable-cell" data-invoice-id="${invoice.id}" data-field="due_date" data-label="Due Date">
           <span class="due-date-value">${dueDate}</span>
         </td>
-        <td class="actions-cell">
+        <td class="actions-cell" data-label="Actions">
           <div class="table-actions">
             ${actionButtons}
           </div>
@@ -736,6 +745,7 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
     id: 'view-invoice-modal',
     titleId: 'view-invoice-title',
     title: `Invoice ${SanitizationUtils.escapeHtml(invoice.invoice_number || `#${invoice.id}`)}`,
+    icon: GLOBAL_ICONS.RECEIPT,
     contentClassName: 'invoice-modal-content',
     onClose: () => {
       if (cleanupFocusTrap) cleanupFocusTrap();
@@ -932,6 +942,7 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
     id: 'edit-invoice-modal',
     titleId: 'edit-invoice-title',
     title: `Edit Invoice ${SanitizationUtils.escapeHtml(invoice.invoice_number || `#${invoice.id}`)}`,
+    icon: GLOBAL_ICONS.PENCIL,
     contentClassName: 'invoice-modal-content invoice-edit-modal',
     onClose: () => {
       if (cleanupFocusTrap) cleanupFocusTrap();

@@ -80,7 +80,7 @@ export function renderDashboardView(): void {
           <span class="milestones-summary" id="milestones-summary"></span>
         </div>
         <div class="milestones-list" id="milestones-list">
-          <div class="loading-row">Loading...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
         <p class="milestones-empty" id="milestones-empty" style="display: none;">
           No milestones yet.
@@ -95,7 +95,7 @@ export function renderDashboardView(): void {
         <span class="approval-count" id="approval-count"></span>
       </div>
       <div class="approvals-list" id="client-approvals-list">
-        <div class="loading-row">Loading...</div>
+        <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
       </div>
     </div>
 
@@ -152,7 +152,7 @@ export function renderFilesView(): void {
           </div>
         </div>
         <div class="files-list" id="files-list">
-          <div class="loading-row">Loading files...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading files...</span></div>
         </div>
       </div>
     </div>
@@ -265,7 +265,7 @@ export function renderInvoicesView(): void {
     <div class="invoices-list portal-shadow">
       <h3>Invoice History</h3>
       <div id="invoices-list-content">
-        <div class="loading-row">Loading invoices...</div>
+        <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading invoices...</span></div>
       </div>
       <p class="no-invoices-message" id="no-invoices-message" style="display: none;">
         No invoices yet. Your first invoice will appear here once your project begins.
@@ -286,7 +286,7 @@ export function renderDocumentsView(): void {
     <p id="documents-intro" class="documents-intro">Documents we need from you. Open a request to view details and upload.</p>
     <div id="documents-list-wrap" class="documents-list-wrap portal-shadow">
       <div id="documents-list" class="documents-list">
-        <div class="loading-row">Loading document requests...</div>
+        <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading document requests...</span></div>
       </div>
       <p id="documents-empty" class="documents-empty" style="display: none;">No document requests.</p>
       <p id="documents-load-error" class="documents-error" style="display: none;"></p>
@@ -398,7 +398,7 @@ export function renderRequestsView(): void {
           </button>
         </div>
         <div id="ad-hoc-requests-list" class="requests-list-body">
-          <div class="loading-row">Loading requests...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading requests...</span></div>
         </div>
         <p id="ad-hoc-requests-empty" class="requests-empty" style="display: none;">No requests yet.</p>
         <p id="ad-hoc-requests-error" class="requests-error" style="display: none;"></p>
@@ -417,7 +417,7 @@ export function renderQuestionnairesView(): void {
 
   container.innerHTML = `
     <div id="questionnaires-list-container" class="questionnaires-list-container portal-shadow">
-      <div class="loading-row">Loading questionnaires...</div>
+      <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading questionnaires...</span></div>
     </div>
   `;
 }
@@ -463,7 +463,7 @@ export function renderHelpView(): void {
       <section class="help-left-column" id="help-categories-section" aria-label="Browse by category">
         <h3 class="help-section-title">Browse by Category</h3>
         <div id="help-categories-accordion" class="help-accordion">
-          <div class="loading-row">Loading categories...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading categories...</span></div>
         </div>
         <p id="help-categories-empty" class="help-empty" style="display: none;">No categories available.</p>
       </section>
@@ -477,7 +477,7 @@ export function renderHelpView(): void {
             Quick Start
           </h3>
           <div id="help-featured-list" class="help-featured-list">
-            <div class="loading-row">Loading featured articles...</div>
+            <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading featured articles...</span></div>
           </div>
           <p id="help-featured-empty" class="help-empty" style="display: none;">No featured articles.</p>
         </section>

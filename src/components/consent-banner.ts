@@ -324,13 +324,13 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       .consent-banner__actions {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: var(--icon-gap-xl);
         flex-shrink: 0;
       }
 
       .consent-banner__buttons {
         display: flex;
-        gap: 8px;
+        gap: var(--icon-gap-md);
       }
 
       .consent-banner__btn {
@@ -436,7 +436,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
 
         .consent-banner__content {
           flex-direction: column;
-          gap: 12px;
+          gap: var(--icon-gap-xl);
         }
 
         .consent-banner__actions {

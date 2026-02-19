@@ -16,6 +16,7 @@ import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import { createViewToggle } from '../../../components/view-toggle';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -127,17 +128,19 @@ function renderCategoriesTable(categories: KBCategory[], _ctx: AdminDashboardCon
     .map(
       (c) => `
     <tr>
-      <td>${escapeHtml(c.name)}</td>
-      <td><code>${escapeHtml(c.slug)}</code></td>
-      <td>${c.article_count ?? 0}</td>
-      <td>${c.is_active ? 'Yes' : 'No'}</td>
+      <td class="name-cell">${escapeHtml(c.name)}</td>
+      <td class="slug-cell"><code>${escapeHtml(c.slug)}</code></td>
+      <td class="count-cell">${c.article_count ?? 0}</td>
+      <td class="status-cell">${c.is_active ? 'Yes' : 'No'}</td>
       <td class="actions-cell">
-        <button type="button" class="icon-btn kb-edit-category" data-id="${c.id}" title="Edit" aria-label="Edit category">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-        </button>
-        <button type="button" class="icon-btn icon-btn-danger kb-delete-category" data-id="${c.id}" data-name="${escapeHtml(c.name)}" title="Delete" aria-label="Delete category">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        </button>
+        <div class="table-actions">
+          <button type="button" class="icon-btn kb-edit-category" data-id="${c.id}" title="Edit" aria-label="Edit category">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          </button>
+          <button type="button" class="icon-btn icon-btn-danger kb-delete-category" data-id="${c.id}" data-name="${escapeHtml(c.name)}" title="Delete" aria-label="Delete category">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
       </td>
     </tr>
   `
@@ -164,22 +167,21 @@ function renderArticlesTable(articles: KBArticle[], _ctx: AdminDashboardContext)
     .map(
       (a) => `
     <tr>
-      <td class="title-cell">${escapeHtml(a.title)}</td>
+      <td class="name-cell">${escapeHtml(a.title)}</td>
       <td class="type-cell">${escapeHtml(a.category_name || '')}</td>
       <td class="slug-cell"><code>${escapeHtml(a.slug)}</code></td>
-      <td class="status-cell featured-cell">${a.is_featured ? 'Yes' : 'No'}</td>
-      <td class="status-cell published-cell">
-        ${a.is_published ? 'Yes' : 'No'}
-        <span class="date-stacked">${formatDate(a.updated_at)}</span>
-      </td>
+      <td class="status-cell">${a.is_featured ? 'Yes' : 'No'}</td>
+      <td class="status-cell">${a.is_published ? 'Yes' : 'No'}</td>
       <td class="date-cell">${formatDate(a.updated_at)}</td>
       <td class="actions-cell">
-        <button type="button" class="icon-btn kb-edit-article" data-id="${a.id}" title="Edit" aria-label="Edit article">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-        </button>
-        <button type="button" class="icon-btn icon-btn-danger kb-delete-article" data-id="${a.id}" data-title="${escapeHtml(a.title)}" title="Delete" aria-label="Delete article">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        </button>
+        <div class="table-actions">
+          <button type="button" class="icon-btn kb-edit-article" data-id="${a.id}" title="Edit" aria-label="Edit article">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          </button>
+          <button type="button" class="icon-btn icon-btn-danger kb-delete-article" data-id="${a.id}" data-title="${escapeHtml(a.title)}" title="Delete" aria-label="Delete article">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
       </td>
     </tr>
   `
@@ -412,6 +414,7 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
       id: 'kb-category-modal',
       titleId: 'kb-category-modal-title',
       title: 'Category',
+      icon: ICONS.FOLDER,
       onClose: closeCategoryModal
     });
     kbCategoryModalInstance.body.innerHTML = CATEGORY_FORM_HTML;
@@ -425,6 +428,7 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
       id: 'kb-article-modal',
       titleId: 'kb-article-modal-title',
       title: 'Article',
+      icon: ICONS.FILE_TEXT,
       contentClassName: 'kb-article-modal-content',
       onClose: closeArticleModal
     });
@@ -708,16 +712,21 @@ export function renderKnowledgeBaseTab(container: HTMLElement): void {
         <table class="admin-table" aria-label="Knowledge base categories">
           <thead>
             <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Slug</th>
+              <th scope="col" class="name-col">Name</th>
+              <th scope="col" class="slug-col">Slug</th>
               <th scope="col" class="count-col">Articles</th>
               <th scope="col" class="status-col">Active</th>
               <th scope="col" class="actions-col">Actions</th>
             </tr>
           </thead>
           <tbody id="kb-categories-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr>
-              <td colspan="4" class="loading-row">Loading categories...</td>
+            <tr class="loading-row">
+              <td colspan="5">
+                <div class="loading-state">
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span class="loading-message">Loading categories...</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -744,9 +753,9 @@ export function renderKnowledgeBaseTab(container: HTMLElement): void {
         <table class="admin-table" aria-label="Knowledge base articles">
           <thead>
             <tr>
-              <th scope="col">Title</th>
+              <th scope="col" class="title-col">Title</th>
               <th scope="col" class="type-col">Category</th>
-              <th scope="col">Slug</th>
+              <th scope="col" class="slug-col">Slug</th>
               <th scope="col" class="status-col">Featured</th>
               <th scope="col" class="status-col">Published</th>
               <th scope="col" class="date-col">Updated</th>
@@ -754,8 +763,13 @@ export function renderKnowledgeBaseTab(container: HTMLElement): void {
             </tr>
           </thead>
           <tbody id="kb-articles-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr>
-              <td colspan="5" class="loading-row">Loading articles...</td>
+            <tr class="loading-row">
+              <td colspan="7">
+                <div class="loading-state">
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span class="loading-message">Loading articles...</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>

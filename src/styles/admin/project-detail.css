@@ -44,7 +44,7 @@
 #tab-project-detail .page-title h2,
 #tab-client-detail .page-title h1,
 #tab-client-detail .page-title h2 {
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: clamp(1.5rem, 4vw, 2rem);
   color: var(--portal-text-light);
   margin: 0;
@@ -60,7 +60,6 @@
   color: var(--portal-text-light);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 .project-detail-overview .overview-header {
@@ -69,25 +68,13 @@
   align-items: center;
 }
 
-.project-detail-overview h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--portal-text-light);
-  font-family: var(--font-family-acme);
-}
+/* h3 styling centralized in admin.css */
 
-/* Overview labels: recede so values read as primary content */
-/* Use high specificity to override inherited color from parent */
+/* Label styling from unified rule in portal-forms.css - only layout here */
 [data-page="admin"] .project-detail-overview .field-label,
 [data-page="admin"] .project-detail-overview .meta-label,
 [data-page="client-portal"] .project-detail-overview .field-label,
 [data-page="client-portal"] .project-detail-overview .meta-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   margin-bottom: 0;
 }
 
@@ -113,21 +100,7 @@
   gap: var(--field-label-value-gap);
 }
 
-/* Field label styling - match client detail (portal-text-secondary for labels on dark bg)
- * .meta-label kept as alias for backward compatibility
- * Prefer using .field-label in new code (defined in form-fields.css)
- * Use high specificity to override inherited colors from parent containers
- */
-[data-page="admin"] .meta-label,
-[data-page="admin"] .field-label,
-[data-page="client-portal"] .meta-label,
-[data-page="client-portal"] .field-label {
-  font-size: var(--label-font-size, 0.75rem);
-  color: var(--portal-text-secondary);
-  text-transform: var(--label-text-transform, uppercase);
-  letter-spacing: var(--label-letter-spacing, 0.05em);
-  font-weight: var(--label-font-weight, 500);
-}
+/* Label styling from unified rule in portal-forms.css */
 
 /* Hint text within field labels - same styling but not uppercase */
 [data-page="admin"] .field-label-hint,
@@ -174,7 +147,6 @@
 .project-detail-client-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-3);
 }
 
 /* Invite icon button inline with client name in project detail */
@@ -193,7 +165,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   row-gap: var(--field-group-gap);
-  column-gap: var(--space-3);
+  column-gap: var(--portal-section-gap);
 }
 
 /* ==============================================
@@ -216,7 +188,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 /* High specificity with body element selector */
 body[data-page="admin"] [id^="pd-tab-"] .invoice-summary {
   display: flex;
-  gap: var(--space-3);
   margin: 0;
   background: transparent;
   box-shadow: none;
@@ -266,22 +237,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   margin-top: 0;
 }
 
-/* Unified heading style for all sections inside tab content (both detail views) */
-[id^="pd-tab-"] h3,
-[id^="cd-tab-"] h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.2rem;
-  font-weight: 400;
-  color: var(--portal-text-light);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0 0 var(--space-2) 0;
-}
+/* h3 styling centralized in admin.css */
 
 /* Invoice summary within tab - keep flex layout */
 [id^="pd-tab-"] .invoice-summary {
   display: flex;
-  gap: var(--space-3);
   margin: 0;
 }
 
@@ -554,7 +514,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Acme font for main name heading in each detail view */
 #tab-project-detail #pd-project-name,
 #tab-client-detail #cd-client-name {
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
 }
 
 /* Secondary/muted text in detail views */
@@ -575,14 +535,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   margin-bottom: var(--space-2);
 }
 
-.card-header-with-action h3 {
-  margin: 0;
-  color: var(--portal-text-light);
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-  letter-spacing: 0.05em;
-}
+/* h3 styling centralized in admin.css */
 
 /* Progress Display */
 .project-progress-display {
@@ -685,7 +638,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   font-weight: 600;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-1) 0;
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -717,7 +670,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .project-description-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
   margin-top: var(--space-2);
 }
 
@@ -753,7 +705,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   color: var(--portal-text-light);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 .project-detail-overview .project-notes:empty {
@@ -813,14 +764,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   text-transform: capitalize;
 }
 
-/* Empty State (component: createEmptyState returns div.empty-state > p) */
-.empty-state {
-  text-align: center;
-  color: var(--portal-text-secondary);
-  padding: var(--space-3);
-  font-style: italic;
-}
-
+/* Empty State - base styles in components/loading.css
+   Only add project-detail specific overrides here */
 .empty-state p {
   margin: 0;
 }
@@ -868,19 +813,19 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 /* Project Detail Tables (Files, Invoices) - Scoped to detail pages only */
-/* IMPORTANT: These styles are for sub-tables within project/client detail, NOT the main invoices tab */
+/* Base table styling from shared/portal-tables.css
+   Only page-specific overrides here */
+
+/* Detail sub-tables have medium background and contained radius */
 #tab-project-detail .files-table,
 #tab-project-detail .invoices-table,
 #tab-client-detail .invoices-table {
-  width: 100%;
-  border-collapse: collapse;
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
   overflow: hidden;
-  font-family: var(--font-family-primary);
-  margin-top: 0;
 }
 
+/* thead background override for detail sub-tables */
 #tab-project-detail .files-table thead,
 #tab-project-detail .invoices-table thead,
 #tab-client-detail .invoices-table thead {
@@ -890,42 +835,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 #tab-project-detail .files-table th,
 #tab-project-detail .invoices-table th,
 #tab-client-detail .invoices-table th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-weight: 500;
-  color: var(--portal-text-secondary);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-family: var(--font-family-primary);
-  border: none;
   background: var(--portal-bg-dark);
-}
-
-#tab-project-detail .files-table td,
-#tab-project-detail .invoices-table td,
-#tab-client-detail .invoices-table td {
-  padding: 0.75rem 1rem;
-  color: var(--portal-text-light);
-  border-top: 1px solid var(--portal-bg-dark);
-  font-size: 0.875rem;
-  vertical-align: middle;
-}
-
-#tab-project-detail .files-table tbody tr:hover,
-#tab-project-detail .invoices-table tbody tr:hover,
-#tab-client-detail .invoices-table tbody tr:hover {
-  background: var(--portal-bg-light);
-}
-
-#tab-project-detail .files-table .file-actions,
-#tab-project-detail .invoices-table .actions-cell,
-#tab-client-detail .invoices-table .actions-cell {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: flex-end;
 }
 
 /* Compact action buttons for detail tables */
@@ -939,7 +849,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* Invoices tab - match files tab layout when active */
 /* Note: display is handled by [id^="pd-tab-"].active rule */
 [data-page="admin"] #pd-tab-invoices.active {
-  gap: var(--space-3);
 }
 
 /* Invoices list section - match files-list-section layout */
@@ -1043,7 +952,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .milestone-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
@@ -1078,7 +986,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .btn-milestone-tasks {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap-md);
   background: transparent;
   border: 1px solid var(--portal-border);
   color: var(--portal-text-light);
@@ -1185,12 +1093,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin-top: var(--space-2);
 }
 
-.analytics-overview h3 {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin: 0 0 var(--space-4) 0;
-}
+/* h3 styling centralized in admin.css */
 
 /* Recent activity - Base styles in shared/portal-cards.css */
 /* Admin-specific margin overrides */
@@ -1228,11 +1131,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-weight: var(--font-weight-bold);
 }
 
-.overview-stat .stat-label {
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
+/* Label styling from unified rule in portal-forms.css */
 
 /* Spacing for stacked cards now handled by shared/portal-layout.css */
 
@@ -1247,9 +1146,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   box-shadow: none;
 }
 
+/* Label styling from unified rule in portal-forms.css - only layout here */
 [data-page="admin"] .client-selector-label {
-  font-weight: 600;
-  color: var(--color-text-primary);
   margin-bottom: var(--space-1);
 }
 
@@ -1462,12 +1360,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin-bottom: var(--space-4);
 }
 
-.details-panel .details-header h3 {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin: 0;
-}
+/* h3 styling centralized in admin.css */
 
 .details-panel .close-btn {
   background: none;
@@ -1510,7 +1403,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .details-panel .actions {
   margin-top: var(--space-6);
   display: flex;
-  gap: var(--space-3);
 }
 
 /* Details panel meta grid - single column for consistent layout */
@@ -1529,7 +1421,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-3);
   margin-top: 0;
   margin-bottom: var(--space-3);
 }
@@ -1557,7 +1448,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .status-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 .status-list .loading-text {
@@ -1568,7 +1458,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .status-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   padding: var(--space-1-5) var(--space-2);
   background: var(--portal-bg-medium);
   border: none;
@@ -1762,7 +1651,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-header-client {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
   margin-top: var(--space-2);
 }
 
@@ -1796,7 +1684,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-header-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
   margin-top: var(--space-2);
 }
 
@@ -1840,20 +1727,17 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-overview-grid {
   display: grid;
   grid-template-columns: 1fr 280px;
-  gap: var(--space-3);
   align-items: start;
 }
 
 .pd-overview-main {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 .pd-overview-sidebar {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 /* Activity Card (Full Width, Last Section) */
@@ -1893,7 +1777,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-detail-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
 
@@ -1916,7 +1799,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-urls-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
   margin-top: var(--space-2);
 }
 
@@ -1956,7 +1838,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
 }
 
 /* Horizontal progress layout (above milestones) */
@@ -1991,7 +1872,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--portal-text-light);
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
 }
 
 .pd-progress-card .progress-bar {
@@ -2015,13 +1896,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   border-radius: var(--portal-radius-sm);
 }
 
-.pd-stat-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--portal-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+/* Label styling from unified rule in portal-forms.css */
 
 .pd-stat-value {
   font-size: var(--font-size-base);
@@ -2050,7 +1925,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   .pd-overview-sidebar {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-3);
   }
 }
 
@@ -2061,7 +1935,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   }
 
   .pd-header-meta {
-    gap: var(--space-3);
   }
 
   .pd-overview-sidebar {
@@ -2209,12 +2082,10 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 .document-header {
   display: flex;
-  gap: var(--space-3);
   align-items: flex-start;
 }
 
@@ -2258,12 +2129,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
-}
-
-.document-actions .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
 }
 
 .document-actions .btn svg {

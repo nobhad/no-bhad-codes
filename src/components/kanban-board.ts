@@ -376,7 +376,7 @@ export function getKanbanStyles(): string {
     .kanban-card-badges {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: var(--icon-gap-xs);
     }
 
     .kanban-badge {

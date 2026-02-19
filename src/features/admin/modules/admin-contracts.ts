@@ -13,6 +13,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { confirmDialog, alertError } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import {
   applyFilters,
   createFilterUI,
@@ -34,6 +35,7 @@ import {
 } from '../../../utils/table-pagination';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
+import { showTableEmpty } from '../../../utils/loading-utils';
 
 interface ContractListItem {
   id: number;
@@ -138,7 +140,7 @@ function renderContractsTable(ctx: AdminDashboardContext): void {
     const message = contractsCache.length === 0
       ? 'No contracts found.'
       : 'No contracts match the current filters.';
-    body.innerHTML = `<tr><td colspan="8" class="empty-row">${message}</td></tr>`;
+    showTableEmpty(body, 8, message);
     renderPaginationUI(0, ctx);
     return;
   }
@@ -157,31 +159,37 @@ function renderContractsTable(ctx: AdminDashboardContext): void {
 
       return `
         <tr data-contract-id="${contract.id}">
-          <td>
-            <div class="table-primary">${title}</div>
-            <div class="table-subtext">${typeLabel}${amendmentLabel}</div>
+          <td class="name-cell" data-label="Contract">
+            <div class="identity-cell">
+              <span class="identity-primary">${title}</span>
+              <span class="identity-secondary">${typeLabel}${amendmentLabel}</span>
+            </div>
           </td>
-          <td>${projectName}</td>
-          <td>
-            <div class="table-primary">${clientName}</div>
-            <div class="table-subtext">${clientEmail}</div>
+          <td class="name-cell" data-label="Project">${projectName}</td>
+          <td class="name-cell" data-label="Client">
+            <div class="identity-cell">
+              <span class="identity-primary">${clientName}</span>
+              <span class="identity-secondary">${clientEmail}</span>
+            </div>
           </td>
-          <td>${getStatusBadge(contract.status)}</td>
-          <td>${formatDateSafe(contract.sentAt)}</td>
-          <td>${formatDateSafe(contract.signedAt)}</td>
-          <td class="date-col inline-editable-cell" data-contract-id="${contract.id}" data-field="expires_at">
+          <td class="status-cell" data-label="Status">${getStatusBadge(contract.status)}</td>
+          <td class="date-cell" data-label="Sent">${formatDateSafe(contract.sentAt)}</td>
+          <td class="date-cell" data-label="Signed">${formatDateSafe(contract.signedAt)}</td>
+          <td class="date-cell inline-editable-cell" data-contract-id="${contract.id}" data-field="expires_at" data-label="Expires">
             <span class="expires-at-value">${formatDateSafe(contract.expiresAt)}</span>
           </td>
-          <td class="actions-col">
-            <button class="icon-btn" data-action="view" data-id="${contract.id}" title="View details" aria-label="View contract">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-            <button class="icon-btn" data-action="remind" data-id="${contract.id}" title="Resend reminder" aria-label="Resend reminder">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-            </button>
-            <button class="icon-btn" data-action="expire" data-id="${contract.id}" title="Expire contract" aria-label="Expire contract">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            </button>
+          <td class="actions-cell" data-label="Actions">
+            <div class="table-actions">
+              <button class="icon-btn" data-action="view" data-id="${contract.id}" title="View details" aria-label="View contract">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <button class="icon-btn" data-action="remind" data-id="${contract.id}" title="Resend reminder" aria-label="Resend reminder">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              </button>
+              <button class="icon-btn" data-action="expire" data-id="${contract.id}" title="Expire contract" aria-label="Expire contract">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </button>
+            </div>
           </td>
         </tr>
       `;
@@ -355,6 +363,7 @@ async function openContractDetail(contract: ContractListItem): Promise<void> {
     id: 'contract-detail-modal',
     titleId: 'contract-detail-title',
     title: 'Contract Details',
+    icon: ICONS.FILE_SIGNATURE,
     contentClassName: 'contract-detail-modal',
     onClose: () => {
       modal.hide();
@@ -644,8 +653,13 @@ export function renderContractsTab(container: HTMLElement): void {
               </tr>
             </thead>
             <tbody id="contracts-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-              <tr>
-                <td colspan="8" class="loading-row">Loading contracts...</td>
+              <tr class="loading-row">
+                <td colspan="8">
+                  <div class="loading-state">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span class="loading-message">Loading contracts...</span>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>

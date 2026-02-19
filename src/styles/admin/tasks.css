@@ -9,12 +9,10 @@
 
 /* ============================================
    Tasks Main Container
+   Uses .admin-table-card background from shared/portal-cards.css
    ============================================ */
 
 .tasks-main-container {
-  background: transparent;
-  border-radius: var(--portal-radius-md);
-  padding: 0;
   min-height: calc(100vh - 200px);
 }
 
@@ -38,7 +36,6 @@
   flex-direction: row !important;
   flex-wrap: nowrap;
   width: 100%;
-  gap: var(--space-3);
 }
 
 #global-tasks-kanban-container .kanban-column,
@@ -88,17 +85,6 @@
     flex: 0 0 auto !important;
     min-width: 100%;
   }
-}
-
-/* ============================================
-   View Toggle
-   ============================================ */
-
-.view-toggle-container {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-  margin-bottom: var(--space-1-5);
 }
 
 /* View toggle: use shared .view-toggle (see shared/view-toggle.css) */
@@ -570,40 +556,20 @@
   margin-top: var(--space-0-5);
 }
 
+/* Time Entries Table - Base styling from shared/portal-tables.css
+   Only page-specific overrides here */
 .time-entries-table {
-  width: 100%;
-  border-collapse: collapse;
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   overflow: hidden;
 }
 
-.time-entries-table th,
-.time-entries-table td {
-  padding: var(--space-1) var(--space-1-5);
-  text-align: left;
-  border-bottom: 1px solid var(--portal-border);
-}
-
 .time-entries-table th {
   background: var(--portal-bg-medium);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-}
-
-.time-entries-table td {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
 }
 
 .time-entries-table tr:last-child td {
   border-bottom: none;
-}
-
-.time-entries-table tr:hover td {
-  background: var(--portal-bg-medium);
 }
 
 .time-entry-duration {
@@ -663,15 +629,7 @@
 
 /* Weekly chart container */
 /* time-weekly-chart now uses portal-project-card for base styling */
-.time-weekly-chart h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--portal-text-light);
-  margin: 0 0 var(--space-2) 0;
-}
+/* h3 styling centralized in admin.css */
 
 /* ============================================
    Responsive
@@ -812,11 +770,7 @@
   color: var(--app-color-primary);
 }
 
-/* Table Actions Column */
-.actions-cell {
-  text-align: center;
-  width: 60px;
-}
+/* .actions-cell styling from shared/portal-tables.css */
 
 .milestone-col {
   width: 150px;
