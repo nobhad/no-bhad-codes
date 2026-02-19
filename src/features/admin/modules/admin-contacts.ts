@@ -357,16 +357,16 @@ function renderContactsTable(
     // Column order: ☐ | Contact | Email | Message | Status | Date | Actions
     row.innerHTML = `
       ${createRowCheckbox('contacts', submission.id)}
-      <td class="identity-cell contact-cell">
+      <td class="identity-cell contact-cell" data-label="Contact">
         <span class="identity-name">${safeName}</span>
         ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
         <span class="email-stacked">${safeEmail}</span>
       </td>
-      <td class="email-cell">${safeEmail}</td>
-      <td class="message-cell" title="${safeTitleMessage}">${truncatedMessage}</td>
-      <td class="status-cell"></td>
-      <td class="date-cell">${date}</td>
-      <td class="actions-cell">
+      <td class="email-cell" data-label="Email">${safeEmail}</td>
+      <td class="message-cell" data-label="Message" title="${safeTitleMessage}">${truncatedMessage}</td>
+      <td class="status-cell" data-label="Status"></td>
+      <td class="date-cell" data-label="Date">${date}</td>
+      <td class="actions-cell" data-label="Actions">
         <div class="table-actions">
           ${canConvert ? `<button class="icon-btn btn-convert-contact" data-id="${submission.id}" data-email="${safeEmail}" data-name="${safeName}" title="Convert to Client" aria-label="Convert to Client">${ICONS.USER_PLUS}</button>` : ''}
           ${!isArchived ? `<button class="icon-btn btn-archive-contact" data-id="${submission.id}" title="Archive" aria-label="Archive">${ICONS.ARCHIVE}</button>` : ''}

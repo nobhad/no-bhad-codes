@@ -194,20 +194,24 @@ function setupTabNavigation(): void {
     });
   }
 
-  // Set up header tabs
-  const headerTabs = document.getElementById('client-detail-header-tabs');
-  if (headerTabs) {
-    headerTabs.querySelectorAll('.portal-subtab').forEach((btn) => {
-      const btnEl = btn as HTMLElement;
-      if (btnEl.dataset.listenerAdded) return;
-      btnEl.dataset.listenerAdded = 'true';
+  // Listen for universal tab change events from admin-dashboard
+  const body = document.body;
+  if (!body.dataset.cdTabListenerAdded) {
+    body.dataset.cdTabListenerAdded = 'true';
+    document.addEventListener('clientDetailTabChange', ((e: CustomEvent<{ tabName: string }>) => {
+      switchToTab(e.detail.tabName);
+    }) as EventListener);
+  }
 
-      btn.addEventListener('click', () => {
-        const tabName = btnEl.dataset.cdTab;
-        if (tabName) {
-          switchToTab(tabName);
-        }
-      });
+  // Header tab buttons are now handled by the universal handler in admin-dashboard.ts
+  // via the clientDetailTabChange custom event above
+
+  // Set up "Log Activity" button (in activity tab header)
+  const logActivityBtn = document.getElementById('btn-log-activity');
+  if (logActivityBtn && !logActivityBtn.dataset.listenerAdded) {
+    logActivityBtn.dataset.listenerAdded = 'true';
+    logActivityBtn.addEventListener('click', () => {
+      logActivity();
     });
   }
 }
@@ -229,7 +233,7 @@ function switchToTab(tabName: string): void {
   });
 
   // Update tab content
-  document.querySelectorAll('.client-detail-tab-content').forEach(content => {
+  document.querySelectorAll('#tab-client-detail [id^="cd-tab-"]').forEach(content => {
     content.classList.toggle('active', content.id === `cd-tab-${tabName}`);
   });
 
@@ -610,21 +614,21 @@ function renderStatsCompact(): void {
   const outstanding = clientStats?.totalOutstanding ?? 0;
 
   container.innerHTML = `
-    <div class="cd-stat-item">
-      <div class="cd-stat-value">${activeProjects}</div>
-      <div class="cd-stat-label">Active Projects</div>
+    <div class="stat-item">
+      <div class="stat-value">${activeProjects}</div>
+      <div class="field-label">Active Projects</div>
     </div>
-    <div class="cd-stat-item">
-      <div class="cd-stat-value">${totalProjects}</div>
-      <div class="cd-stat-label">Total Projects</div>
+    <div class="stat-item">
+      <div class="stat-value">${totalProjects}</div>
+      <div class="field-label">Total Projects</div>
     </div>
-    <div class="cd-stat-item">
-      <div class="cd-stat-value">${formatCurrency(totalPaid)}</div>
-      <div class="cd-stat-label">Total Paid</div>
+    <div class="stat-item">
+      <div class="stat-value">${formatCurrency(totalPaid)}</div>
+      <div class="field-label">Total Paid</div>
     </div>
-    <div class="cd-stat-item">
-      <div class="cd-stat-value">${formatCurrency(outstanding)}</div>
-      <div class="cd-stat-label">Outstanding</div>
+    <div class="stat-item">
+      <div class="stat-value">${formatCurrency(outstanding)}</div>
+      <div class="field-label">Outstanding</div>
     </div>
   `;
 }
@@ -649,16 +653,16 @@ function renderProjectsSummary(): void {
   }
 
   container.innerHTML = `
-    <div class="cd-projects-list">
+    <div class="projects-list-compact">
       ${recentProjects.map(project => `
-        <div class="cd-project-item" data-project-id="${project.id}">
-          <div class="cd-project-info">
-            <span class="cd-project-name">${escapeHtml(project.project_name)}</span>
-            <span class="cd-project-status status-badge status-${project.status}">${project.status}</span>
+        <div class="project-item-compact" data-project-id="${project.id}">
+          <div class="project-item-info">
+            <span class="project-item-name">${escapeHtml(project.project_name)}</span>
+            <span class="status-badge status-${project.status}">${project.status}</span>
           </div>
           ${project.progress !== undefined ? `
-            <div class="cd-project-progress">
-              <div class="cd-project-progress-bar" style="width: ${project.progress}%"></div>
+            <div class="project-progress-bar-wrapper">
+              <div class="project-progress-bar-fill" style="width: ${project.progress}%"></div>
             </div>
           ` : ''}
         </div>
@@ -667,7 +671,7 @@ function renderProjectsSummary(): void {
   `;
 
   // Add click handlers
-  container.querySelectorAll('.cd-project-item').forEach(item => {
+  container.querySelectorAll('.project-item-compact').forEach(item => {
     item.addEventListener('click', () => {
       const projectId = parseInt((item as HTMLElement).dataset.projectId || '0');
       if (projectId && storedContext) {
@@ -739,18 +743,18 @@ function renderRecentActivity(): void {
   };
 
   container.innerHTML = `
-    <div class="cd-recent-activity-list">
+    <div class="recent-activity-list">
       ${recentActivities.map(activity => `
-        <div class="cd-activity-item">
-          <div class="cd-activity-icon">${getActivityIcon(activity.type)}</div>
-          <div class="cd-activity-content">
-            <div class="cd-activity-title">${escapeHtml(activity.title)}</div>
-            <div class="cd-activity-time">${formatRelativeTime(activity.created_at)}</div>
+        <div class="activity-item">
+          <div class="activity-icon">${getActivityIcon(activity.type)}</div>
+          <div class="activity-content">
+            <div class="activity-title">${escapeHtml(activity.title)}</div>
+            <div class="activity-time">${formatRelativeTime(activity.created_at)}</div>
           </div>
         </div>
       `).join('')}
     </div>
-    <div class="cd-activity-view-all" data-action="view-all-activity">View all activity</div>
+    <div class="activity-view-all" data-action="view-all-activity">View all activity</div>
   `;
 
   // Add click handler for "View all activity"
@@ -1285,7 +1289,7 @@ async function setContactPrimary(contactId: number): Promise<void> {
 // ============================================
 
 function renderActivityTab(): void {
-  const container = document.getElementById('cd-tab-activity');
+  const container = document.getElementById('cd-activity-list');
   if (!container) return;
 
   // Destroy existing timeline
@@ -1295,19 +1299,14 @@ function renderActivityTab(): void {
   }
 
   container.innerHTML = `
-    <div class="activity-tab-content">
-      <div class="activity-filters">
-        <button class="activity-filter-btn active" data-filter="all">All</button>
-        <button class="activity-filter-btn" data-filter="note">Notes</button>
-        <button class="activity-filter-btn" data-filter="email">Emails</button>
-        <button class="activity-filter-btn" data-filter="call">Calls</button>
-        <button class="activity-filter-btn" data-filter="meeting">Meetings</button>
-      </div>
-      <div id="cd-activity-timeline"></div>
+    <div class="activity-filters">
+      <button class="activity-filter-btn active" data-filter="all">All</button>
+      <button class="activity-filter-btn" data-filter="note">Notes</button>
+      <button class="activity-filter-btn" data-filter="email">Emails</button>
+      <button class="activity-filter-btn" data-filter="call">Calls</button>
+      <button class="activity-filter-btn" data-filter="meeting">Meetings</button>
     </div>
-    <div class="add-note-form">
-      <button class="btn btn-secondary" id="btn-log-activity">Log Activity</button>
-    </div>
+    <div id="cd-activity-timeline"></div>
   `;
 
   // Setup filter buttons
@@ -1318,11 +1317,6 @@ function renderActivityTab(): void {
       const filter = (btn as HTMLElement).dataset.filter || 'all';
       filterActivities(filter);
     });
-  });
-
-  // Setup log activity button
-  document.getElementById('btn-log-activity')?.addEventListener('click', () => {
-    logActivity();
   });
 
   // Initial render
@@ -1405,7 +1399,7 @@ async function logActivity(): Promise<void> {
 // ============================================
 
 function renderNotesTab(): void {
-  const container = document.getElementById('cd-tab-notes');
+  const container = document.getElementById('cd-notes-list');
   if (!container) return;
 
   // Sort: pinned first, then by date
@@ -1423,17 +1417,11 @@ function renderNotesTab(): void {
       </div>
     </div>
     <div class="notes-section" id="cd-notes-section">
-      ${sortedNotes.map(note => renderNoteCard(note)).join('')}
+      ${sortedNotes.length > 0
+    ? sortedNotes.map(note => renderNoteCard(note)).join('')
+    : '<div class="empty-state" role="status"><p>No notes yet.</p></div>'}
     </div>
   `;
-
-  // Render empty state for notes if none exist
-  if (sortedNotes.length === 0) {
-    const notesSection = document.getElementById('cd-notes-section');
-    if (notesSection) {
-      renderEmptyState(notesSection, 'No notes yet.');
-    }
-  }
 
   setupNoteEventListeners();
 }
@@ -1630,86 +1618,6 @@ const RENDER_ICONS = {
  */
 export function renderClientDetailTab(container: HTMLElement): void {
   container.innerHTML = `
-    <!-- Client Header Card -->
-    <div class="portal-project-card portal-shadow cd-header-card">
-      <div class="cd-header-top">
-        <div class="cd-header-info">
-          <div class="detail-title-row">
-            <div class="detail-title-group">
-              <h2 class="detail-title" id="cd-client-name">Client Name</h2>
-              <span class="status-badge" id="cd-status-badge">Active</span>
-            </div>
-            <div class="detail-actions">
-              <!-- Quick Action Buttons -->
-              <button class="icon-btn" id="cd-btn-send-invite" title="Send Invitation" aria-label="Send invitation to client">
-                ${RENDER_ICONS.SEND}
-              </button>
-              <button class="icon-btn" id="cd-btn-edit" title="Edit Client" aria-label="Edit client details">
-                ${RENDER_ICONS.EDIT}
-              </button>
-              <!-- More Menu -->
-              <div class="table-dropdown detail-more-menu" id="cd-more-menu">
-                <button class="custom-dropdown-trigger" aria-label="More actions">
-                  ${RENDER_ICONS.MORE}
-                </button>
-                <ul class="custom-dropdown-menu">
-                  <li class="custom-dropdown-item" data-action="resend-invite">
-                    ${RENDER_ICONS.SEND}
-                    Resend Invitation
-                  </li>
-                  <li class="custom-dropdown-item" data-action="reset-password">
-                    ${RENDER_ICONS.KEY}
-                    Reset Password
-                  </li>
-                  <li class="custom-dropdown-item" data-action="archive">
-                    ${RENDER_ICONS.ARCHIVE}
-                    Archive Client
-                  </li>
-                  <li class="dropdown-divider"></li>
-                  <li class="custom-dropdown-item danger" data-action="delete">
-                    ${RENDER_ICONS.TRASH}
-                    Delete Client
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <!-- Contact Info in Header -->
-          <div class="cd-header-contact">
-            <div class="cd-contact-item">
-              ${RENDER_ICONS.MAIL}
-              <span id="cd-email">-</span>
-            </div>
-            <div class="cd-contact-item">
-              ${RENDER_ICONS.PHONE}
-              <span id="cd-phone">-</span>
-            </div>
-            <div class="cd-contact-item">
-              ${RENDER_ICONS.BUILDING}
-              <span id="cd-company">-</span>
-            </div>
-          </div>
-          <!-- Account Details in Header -->
-          <div class="cd-header-account">
-            <div class="cd-account-item">
-              <span class="cd-account-label">Type</span>
-              <span class="cd-account-value" id="cd-client-type">-</span>
-            </div>
-            <div class="cd-account-item">
-              <span class="cd-account-label">Since</span>
-              <span class="cd-account-value" id="cd-created">-</span>
-            </div>
-            <div class="cd-account-item">
-              <span class="cd-account-label">Last Login</span>
-              <span class="cd-account-value" id="cd-last-login">-</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Tags in header card -->
-      <div id="cd-header-tags" class="cd-header-tags"></div>
-    </div>
-
     <!-- Client Detail Tabs -->
     <div class="client-detail-tabs portal-tabs" id="client-detail-tabs">
       <button class="active" data-cd-tab="overview">Overview</button>
@@ -1721,10 +1629,89 @@ export function renderClientDetailTab(container: HTMLElement): void {
     </div>
 
     <!-- Overview Tab - Two Column Layout -->
-    <div class="client-detail-tab-content portal-tab-panel active" id="cd-tab-overview">
-      <div class="cd-overview-grid">
+    <div class="portal-tab-panel active" id="cd-tab-overview">
+      <!-- Client Header Card - Only on Overview -->
+      <div class="portal-project-card portal-shadow cd-header-card">
+        <div class="header-card-top">
+          <div class="header-card-info">
+            <div class="detail-title-row">
+              <div class="detail-title-group">
+                <h2 class="detail-title" id="cd-client-name">Client Name</h2>
+                <span class="status-badge" id="cd-status-badge">Active</span>
+              </div>
+              <div class="detail-actions">
+                <!-- Quick Action Buttons -->
+                <button class="icon-btn" id="cd-btn-send-invite" title="Send Invitation" aria-label="Send invitation to client">
+                  ${RENDER_ICONS.SEND}
+                </button>
+                <button class="icon-btn" id="cd-btn-edit" title="Edit Client" aria-label="Edit client details">
+                  ${RENDER_ICONS.EDIT}
+                </button>
+                <!-- More Menu -->
+                <div class="table-dropdown detail-more-menu" id="cd-more-menu">
+                  <button class="custom-dropdown-trigger" aria-label="More actions">
+                    ${RENDER_ICONS.MORE}
+                  </button>
+                  <ul class="custom-dropdown-menu">
+                    <li class="custom-dropdown-item" data-action="resend-invite">
+                      ${RENDER_ICONS.SEND}
+                      Resend Invitation
+                    </li>
+                    <li class="custom-dropdown-item" data-action="reset-password">
+                      ${RENDER_ICONS.KEY}
+                      Reset Password
+                    </li>
+                    <li class="custom-dropdown-item" data-action="archive">
+                      ${RENDER_ICONS.ARCHIVE}
+                      Archive Client
+                    </li>
+                    <li class="dropdown-divider"></li>
+                    <li class="custom-dropdown-item danger" data-action="delete">
+                      ${RENDER_ICONS.TRASH}
+                      Delete Client
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Contact Info in Header -->
+            <div class="header-contact-row">
+              <div class="contact-inline-item">
+                ${RENDER_ICONS.MAIL}
+                <span id="cd-email">-</span>
+              </div>
+              <div class="contact-inline-item">
+                ${RENDER_ICONS.PHONE}
+                <span id="cd-phone">-</span>
+              </div>
+              <div class="contact-inline-item">
+                ${RENDER_ICONS.BUILDING}
+                <span id="cd-company">-</span>
+              </div>
+            </div>
+            <!-- Account Details in Header -->
+            <div class="header-account-row">
+              <div class="meta-item">
+                <span class="field-label">Type</span>
+                <span class="meta-value" id="cd-client-type">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="field-label">Since</span>
+                <span class="meta-value" id="cd-created">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="field-label">Last Login</span>
+                <span class="meta-value" id="cd-last-login">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Tags in header card -->
+        <div id="cd-header-tags" class="header-tags-container"></div>
+      </div>
+      <div class="overview-grid">
         <!-- LEFT COLUMN -->
-        <div class="cd-overview-main">
+        <div class="overview-col-main">
           <!-- Projects Summary -->
           <div class="portal-project-card portal-shadow">
             <div class="card-header-with-action">
@@ -1775,14 +1762,14 @@ export function renderClientDetailTab(container: HTMLElement): void {
         </div>
 
         <!-- RIGHT COLUMN (Sidebar) -->
-        <div class="cd-overview-sidebar">
+        <div class="overview-col-aside">
           <!-- Health & Stats Combined -->
           <div class="portal-project-card portal-shadow cd-health-stats-card">
             <h3>Client Health</h3>
             <div id="cd-health-score-container">
               <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
             </div>
-            <div class="cd-stats-compact" id="cd-stats-container">
+            <div class="stats-compact" id="cd-stats-container">
               <!-- Stats rendered by JS -->
             </div>
           </div>
@@ -1799,7 +1786,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
     </div>
 
     <!-- Contacts Tab -->
-    <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-contacts">
+    <div class="portal-tab-panel" id="cd-tab-contacts">
       <div class="portal-project-card portal-shadow">
         <h3>Contacts</h3>
         <div id="cd-contacts-list">
@@ -1809,9 +1796,12 @@ export function renderClientDetailTab(container: HTMLElement): void {
     </div>
 
     <!-- Activity Tab -->
-    <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-activity">
+    <div class="portal-tab-panel" id="cd-tab-activity">
       <div class="portal-project-card portal-shadow">
-        <h3>Activity Timeline</h3>
+        <div class="card-header-with-action">
+          <h3>Activity Timeline</h3>
+          <button class="btn btn-secondary btn-sm" id="btn-log-activity">Log Activity</button>
+        </div>
         <div id="cd-activity-list">
           <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
@@ -1819,17 +1809,17 @@ export function renderClientDetailTab(container: HTMLElement): void {
     </div>
 
     <!-- Projects Tab -->
-    <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-projects">
+    <div class="portal-tab-panel" id="cd-tab-projects">
       <div class="portal-project-card portal-shadow">
         <h3>Projects</h3>
         <div class="client-projects-list" id="cd-projects-list">
-          <div class="empty-state">No projects found for this client.</div>
+          <div class="empty-state" role="status"><p>No projects found for this client.</p></div>
         </div>
       </div>
     </div>
 
     <!-- Invoices Tab -->
-    <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-invoices">
+    <div class="portal-tab-panel" id="cd-tab-invoices">
       <!-- Billing Summary -->
       <div class="portal-project-card portal-shadow">
         <h3>Billing Summary</h3>
@@ -1891,13 +1881,13 @@ export function renderClientDetailTab(container: HTMLElement): void {
       <div class="portal-project-card portal-shadow">
         <h3>Invoice History</h3>
         <div class="client-invoices-list" id="cd-invoices-list">
-          <div class="empty-state">No invoices found for this client.</div>
+          <div class="empty-state" role="status"><p>No invoices found for this client.</p></div>
         </div>
       </div>
     </div>
 
     <!-- Notes Tab -->
-    <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-notes">
+    <div class="portal-tab-panel" id="cd-tab-notes">
       <div class="portal-project-card portal-shadow">
         <h3>Notes</h3>
         <div id="cd-notes-list">

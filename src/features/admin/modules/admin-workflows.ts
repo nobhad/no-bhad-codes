@@ -197,40 +197,47 @@ export async function loadWorkflowsData(ctx: AdminDashboardContext): Promise<voi
 // SUBTAB NAVIGATION
 // ============================================
 
-function setupSubtabNavigation(): void {
+async function switchWorkflowsSubtab(subtab: 'approvals' | 'triggers' | 'email-templates'): Promise<void> {
+  if (subtab === currentSubtab) return;
+
   const container = el('workflows-subtabs');
-  if (!container || container.dataset.initialized === 'true') return;
-
-  container.dataset.initialized = 'true';
-
-  container.addEventListener('click', async (e) => {
-    const btn = (e.target as HTMLElement).closest('[data-subtab]') as HTMLElement;
-    if (!btn) return;
-
-    const subtab = btn.dataset.subtab as 'approvals' | 'triggers' | 'email-templates';
-    if (subtab === currentSubtab) return;
-
+  if (container) {
     // Update active state
     container.querySelectorAll('[data-subtab]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    container.querySelector(`[data-subtab="${subtab}"]`)?.classList.add('active');
+  }
 
-    // Show/hide content
-    el('pending-approvals-section')?.classList.toggle('hidden', subtab !== 'approvals');
-    el('workflows-approvals-content')?.classList.toggle('hidden', subtab !== 'approvals');
-    el('workflows-triggers-content')?.classList.toggle('hidden', subtab !== 'triggers');
-    el('workflows-email-templates-content')?.classList.toggle('hidden', subtab !== 'email-templates');
+  // Show/hide content
+  el('pending-approvals-section')?.classList.toggle('hidden', subtab !== 'approvals');
+  el('workflows-approvals-content')?.classList.toggle('hidden', subtab !== 'approvals');
+  el('workflows-triggers-content')?.classList.toggle('hidden', subtab !== 'triggers');
+  el('workflows-email-templates-content')?.classList.toggle('hidden', subtab !== 'email-templates');
 
-    currentSubtab = subtab;
+  currentSubtab = subtab;
 
-    // Load data
-    if (subtab === 'approvals') {
-      await loadApprovalWorkflows();
-    } else if (subtab === 'triggers') {
-      await loadTriggers();
-    } else if (subtab === 'email-templates' && _storedContext) {
-      await loadEmailTemplatesData(_storedContext);
-    }
-  });
+  // Load data
+  if (subtab === 'approvals') {
+    await loadApprovalWorkflows();
+  } else if (subtab === 'triggers') {
+    await loadTriggers();
+  } else if (subtab === 'email-templates' && _storedContext) {
+    await loadEmailTemplatesData(_storedContext);
+  }
+}
+
+function setupSubtabNavigation(): void {
+  // Listen for universal subtab change events from admin-dashboard
+  const body = document.body;
+  if (!body.dataset.workflowsSubtabListenerAdded) {
+    body.dataset.workflowsSubtabListenerAdded = 'true';
+    document.addEventListener('workflowsSubtabChange', ((e: CustomEvent<{ subtab: string }>) => {
+      const subtab = e.detail.subtab as 'approvals' | 'triggers' | 'email-templates';
+      switchWorkflowsSubtab(subtab);
+    }) as EventListener);
+  }
+
+  // Header subtab clicks are now handled by the universal handler in admin-dashboard.ts
+  // via the workflowsSubtabChange custom event above
 }
 
 // ============================================

@@ -203,16 +203,16 @@ function renderDeletedItemsTable(
 
     return `
       <tr data-id="${item.id}" data-type="${item.type}">
-        <td class="type-cell">
+        <td class="type-cell" data-label="Type">
           <span class="entity-type-badge entity-type-${item.type}">${item.type}</span>
         </td>
-        <td class="name-cell">${escapeHtml(item.name)}</td>
-        <td class="date-cell">${formatDate(item.deleted_at)}</td>
-        <td class="name-cell">${item.deleted_by || 'System'}</td>
-        <td class="count-cell ${urgencyClass}">
+        <td class="name-cell" data-label="Name">${escapeHtml(item.name)}</td>
+        <td class="date-cell" data-label="Deleted">${formatDate(item.deleted_at)}</td>
+        <td class="name-cell" data-label="Deleted By">${item.deleted_by || 'System'}</td>
+        <td class="count-cell ${urgencyClass}" data-label="Days Left">
           <strong>${daysUntilPermanent}</strong> days
         </td>
-        <td class="actions-cell">
+        <td class="actions-cell" data-label="Actions">
           <div class="table-actions">
             <button
               class="icon-btn restore-btn"

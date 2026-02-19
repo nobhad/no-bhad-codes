@@ -173,13 +173,13 @@ function renderRequestsTable(ctx: AdminDashboardContext): void {
 
       return `
         <tr>
-          <td class="name-cell">${title} <span class="badge badge-muted">${typeLabel}</span></td>
-          <td class="name-cell">${clientName}</td>
-          <td class="name-cell">${projectName}</td>
-          <td class="type-cell">${priorityLabel}</td>
-          <td class="status-cell">${getStatusIndicator(request.status)}</td>
-          <td class="date-cell">${formatDate(request.createdAt)}</td>
-          <td class="actions-cell">
+          <td class="name-cell" data-label="Request">${title} <span class="badge badge-muted">${typeLabel}</span></td>
+          <td class="name-cell" data-label="Client">${clientName}</td>
+          <td class="name-cell" data-label="Project">${projectName}</td>
+          <td class="type-cell" data-label="Priority">${priorityLabel}</td>
+          <td class="status-cell" data-label="Status">${getStatusIndicator(request.status)}</td>
+          <td class="date-cell" data-label="Date">${formatDate(request.createdAt)}</td>
+          <td class="actions-cell" data-label="Actions">
             <div class="table-actions">
               <button class="icon-btn" data-action="view" data-id="${request.id}" title="View request" aria-label="View request">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>

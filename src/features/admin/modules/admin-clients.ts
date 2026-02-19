@@ -615,20 +615,20 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
       return `
         <tr data-client-id="${client.id}" class="clickable-row">
           ${createRowCheckbox('clients', client.id)}
-          <td class="identity-cell contact-cell inline-editable-cell" data-client-id="${client.id}">
+          <td class="identity-cell contact-cell inline-editable-cell" data-client-id="${client.id}" data-label="Client">
             <span class="identity-name" data-field="primary-name">${safeName}</span>
             ${safeCompany ? `<span class="identity-contact" data-field="secondary-name">${safeCompany}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
             <span class="identity-email">${safeEmail}</span>
           </td>
-          <td class="type-cell">${typeLabel}</td>
-          <td class="status-cell">${statusCell}</td>
-          <td class="count-cell">${projectCount}</td>
-          <td class="date-cell created-cell">
+          <td class="type-cell" data-label="Type">${typeLabel}</td>
+          <td class="status-cell" data-label="Status">${statusCell}</td>
+          <td class="count-cell" data-label="Projects">${projectCount}</td>
+          <td class="date-cell created-cell" data-label="Created">
             <span class="date-value">${date}</span>
             <span class="last-active-stacked">${lastActive}</span>
           </td>
-          <td class="date-cell last-active-cell">${lastActive}</td>
-          <td class="actions-cell">
+          <td class="date-cell last-active-cell" data-label="Last Active">${lastActive}</td>
+          <td class="actions-cell" data-label="Actions">
             <div class="table-actions">
               ${inviteBtn}
               <button class="icon-btn btn-view-client" data-client-id="${client.id}" title="View Client" aria-label="View client details">
