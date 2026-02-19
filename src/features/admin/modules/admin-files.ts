@@ -349,7 +349,7 @@ async function loadFiles(): Promise<void> {
   const filesList = document.getElementById('pd-files-list');
   if (!filesList) return;
 
-  filesList.innerHTML = '<p class="loading-text">Loading files...</p>';
+  filesList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     let url = `/api/projects/${currentProjectId}/files`;
@@ -619,7 +619,7 @@ async function loadFileVersions(fileId: number): Promise<void> {
   const container = document.getElementById('file-versions-list');
   if (!container) return;
 
-  container.innerHTML = '<p class="loading-text">Loading versions...</p>';
+  container.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     const response = await apiFetch(`/api/projects/files/${fileId}/versions`);
@@ -704,7 +704,7 @@ async function loadFileComments(fileId: number): Promise<void> {
   const container = document.getElementById('file-comments-list');
   if (!container) return;
 
-  container.innerHTML = '<p class="loading-text">Loading comments...</p>';
+  container.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     const response = await apiFetch(`/api/projects/files/${fileId}/comments`);
@@ -772,7 +772,7 @@ async function loadFileAccessLog(fileId: number): Promise<void> {
   const container = document.getElementById('file-access-log');
   if (!container) return;
 
-  container.innerHTML = '<p class="loading-text">Loading access log...</p>';
+  container.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     const response = await apiFetch(`/api/projects/files/${fileId}/access-log`);
@@ -963,7 +963,7 @@ async function loadPendingRequests(): Promise<void> {
   const pendingList = document.getElementById('pd-pending-requests-list');
   if (!pendingList) return;
 
-  pendingList.innerHTML = '<p class="loading-text">Loading pending requests...</p>';
+  pendingList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     const response = await apiFetch(`/api/document-requests/project/${currentProjectId}/pending`);

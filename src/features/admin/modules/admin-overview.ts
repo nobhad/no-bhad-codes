@@ -16,6 +16,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createViewToggle } from '../../../components/view-toggle';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
 import { getStatusDotHTML as _getStatusDotHTML } from '../../../components/status-badge';
+import { showTableEmpty } from '../../../utils/loading-utils';
 
 // View toggle icons
 const BOARD_ICON =
@@ -154,46 +155,63 @@ async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
   if (!tbody) return;
 
   try {
-    const response = await apiFetch('/api/projects?status=active,in-progress&limit=5');
+    const response = await apiFetch('/api/projects');
     if (!response.ok) throw new Error('Failed to fetch projects');
 
     const data = await response.json();
     const projectsData = data.data ?? data ?? { projects: [] };
-    const projects = (projectsData.projects ?? projectsData ?? []).slice(0, 5);
+    const allProjects = projectsData.projects ?? projectsData ?? [];
+
+    // Filter for active/in-progress projects and limit to 5
+    const projects = allProjects
+      .filter((p: { status?: string }) =>
+        p.status === 'active' || p.status === 'in-progress' || p.status === 'in_progress'
+      )
+      .slice(0, 5);
 
     if (projects.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" class="empty-cell">No active projects</td></tr>';
+      showTableEmpty(tbody, 4, 'No active projects');
       return;
     }
 
     tbody.innerHTML = projects.map((p: {
       id: number;
-      name: string;
+      project_name?: string;
+      name?: string;
+      company_name?: string;
+      contact_name?: string;
       client_name?: string;
       status: string;
       progress?: number;
+      estimated_end_date?: string;
       due_date?: string;
     }) => {
       const progress = p.progress ?? 0;
       const statusClass = getStatusClass(p.status);
       const statusLabel = getStatusLabel(p.status);
-      const dueClass = getDueDateClass(p.due_date);
-      const dueStr = p.due_date ? formatDate(p.due_date) : '-';
+      // Use correct field names from API
+      const projectName = p.project_name || p.name || 'Unnamed Project';
+      const clientName = p.company_name || p.contact_name || p.client_name || '';
+      const dueDate = p.estimated_end_date || p.due_date;
+      const dueClass = getDueDateClass(dueDate);
+      const dueStr = dueDate ? formatDate(dueDate) : '-';
 
       return `
         <tr class="overview-table-row" data-project-id="${p.id}">
-          <td class="project-cell">
-            <span class="project-name">${SanitizationUtils.escapeHtml(p.name)}</span>
-            <span class="project-client">${SanitizationUtils.escapeHtml(p.client_name || '')}</span>
+          <td class="name-cell" data-label="Project">
+            <div class="identity-cell">
+              <span class="identity-primary">${SanitizationUtils.escapeHtml(projectName)}</span>
+              <span class="identity-secondary">${SanitizationUtils.escapeHtml(clientName)}</span>
+            </div>
           </td>
-          <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
-          <td>
+          <td class="status-cell" data-label="Status"><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+          <td class="type-cell" data-label="Progress">
             <div class="progress-cell">
               <div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>
               <span class="progress-pct">${progress}%</span>
             </div>
           </td>
-          <td class="due-cell ${dueClass}">${dueStr}</td>
+          <td class="date-cell ${dueClass}" data-label="Due Date">${dueStr}</td>
         </tr>
       `;
     }).join('');
@@ -219,12 +237,19 @@ async function loadRecentLeads(ctx: AdminDashboardContext): Promise<void> {
   if (!list) return;
 
   try {
-    const response = await apiFetch('/api/admin/leads?status=new,contacted&limit=3');
+    const response = await apiFetch('/api/admin/leads');
     if (!response.ok) throw new Error('Failed to fetch leads');
 
     const data = await response.json();
     const leadsData = data.data ?? data ?? { leads: [] };
-    const leads = (leadsData.leads ?? []).slice(0, 3);
+    const allLeads = leadsData.leads ?? [];
+
+    // Filter for new/contacted leads and limit to 3
+    const leads = allLeads
+      .filter((lead: { status?: string }) =>
+        lead.status === 'new' || lead.status === 'contacted'
+      )
+      .slice(0, 3);
 
     if (leads.length === 0) {
       list.innerHTML = '<li class="leads-item-empty">No pending leads</li>';
@@ -233,13 +258,20 @@ async function loadRecentLeads(ctx: AdminDashboardContext): Promise<void> {
 
     list.innerHTML = leads.map((lead: {
       id: number;
-      name: string;
+      contact_name?: string;
+      name?: string;
+      company_name?: string;
       company?: string;
       project_type?: string;
+      budget_range?: string;
       budget?: string;
       created_at?: string;
     }) => {
-      const initials = getInitials(lead.name);
+      // Use correct field names from API
+      const leadName = lead.contact_name || lead.name;
+      const company = lead.company_name || lead.company || '';
+      const budget = lead.budget_range || lead.budget || '';
+      const initials = getInitials(leadName);
       const color = getAvatarColor(lead.id);
       const timeAgo = lead.created_at ? getTimeAgo(lead.created_at) : '';
 
@@ -247,11 +279,11 @@ async function loadRecentLeads(ctx: AdminDashboardContext): Promise<void> {
         <li class="leads-item" data-lead-id="${lead.id}">
           <span class="leads-avatar" style="background: ${color}">${initials}</span>
           <div class="leads-info">
-            <span class="leads-name">${SanitizationUtils.escapeHtml(lead.name)}</span>
-            <span class="leads-context">${SanitizationUtils.escapeHtml(lead.company || '')}${lead.project_type ? ` · ${  lead.project_type}` : ''}</span>
+            <span class="leads-name">${SanitizationUtils.escapeHtml(leadName || 'Unknown')}</span>
+            <span class="leads-context">${SanitizationUtils.escapeHtml(company)}${lead.project_type ? ` · ${lead.project_type}` : ''}</span>
           </div>
           <div class="leads-meta">
-            <span class="leads-budget">${lead.budget || ''}</span>
+            <span class="leads-budget">${budget}</span>
             <span class="leads-time">${timeAgo}</span>
           </div>
         </li>
@@ -286,36 +318,36 @@ async function loadProjectHealth(): Promise<void> {
     const projectsData = data.data ?? data ?? { projects: [] };
     const projects = projectsData.projects ?? projectsData ?? [];
 
-    // Count by status
-    const statusCounts: Record<string, number> = {
-      active: 0,
-      'in-progress': 0,
-      'on-hold': 0,
-      completed: 0,
-      cancelled: 0
-    };
+    // Count by status - normalize status values (handle both hyphen and underscore formats)
+    let activeCount = 0;
+    let onHoldCount = 0;
+    let completedCount = 0;
 
     projects.forEach((p: { status?: string }) => {
-      const status = p.status || 'active';
-      if (statusCounts[status] !== undefined) {
-        statusCounts[status]++;
-      } else {
-        statusCounts['active']++;
+      const status = (p.status || 'active').toLowerCase().replace(/_/g, '-');
+      if (status === 'active' || status === 'in-progress') {
+        activeCount++;
+      } else if (status === 'on-hold') {
+        onHoldCount++;
+      } else if (status === 'completed') {
+        completedCount++;
       }
+      // cancelled and other statuses are not counted in health
     });
 
     const total = projects.length || 1;
+    // Status colors from design-system/tokens/colors.css
     const healthData = [
-      { label: 'Active', count: statusCounts['active'] + statusCounts['in-progress'], color: 'var(--status-active)' },
-      { label: 'On Hold', count: statusCounts['on-hold'], color: 'var(--status-on-hold)' },
-      { label: 'Completed', count: statusCounts['completed'], color: 'var(--color-primary)' }
+      { label: 'Active', count: activeCount, color: 'var(--status-active)' },
+      { label: 'On Hold', count: onHoldCount, color: 'var(--status-pending)' },
+      { label: 'Completed', count: completedCount, color: 'var(--status-completed)' }
     ];
 
     container.innerHTML = `
       <div class="health-donut">
         <svg viewBox="0 0 36 36" class="health-donut-svg">
           ${renderDonutSegments(healthData, total)}
-          <text x="18" y="18" class="health-donut-center">${total}</text>
+          <text x="18" y="16" class="health-donut-center">${total}</text>
           <text x="18" y="22" class="health-donut-label">Total</text>
         </svg>
       </div>
@@ -323,7 +355,7 @@ async function loadProjectHealth(): Promise<void> {
         ${healthData.map(d => `
           <div class="health-legend-row">
             <span class="health-legend-dot" style="background: ${d.color}"></span>
-            <span class="health-legend-label">${d.label}</span>
+            <span class="field-label">${d.label}</span>
             <span class="health-legend-value">${d.count}</span>
           </div>
         `).join('')}
@@ -436,13 +468,15 @@ function getDueDateClass(dueDate?: string): string {
 /**
  * Get initials from name
  */
-function getInitials(name: string): string {
+function getInitials(name: string | undefined | null): string {
+  if (!name) return '?';
   return name
     .split(' ')
     .map(n => n[0])
+    .filter(Boolean)
     .join('')
     .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2) || '?';
 }
 
 /**
@@ -529,9 +563,10 @@ async function loadDashboardData(): Promise<DashboardData> {
     : 0;
 
   // Calculate pending contracts (projects with contract not signed)
+  // Database field is contract_signed_at (datetime), not contract_signed (boolean)
   const pendingContracts = Array.isArray(projects)
-    ? projects.filter((p: { contract_signed?: boolean; status?: string }) =>
-      !p.contract_signed && p.status !== 'completed' && p.status !== 'cancelled'
+    ? projects.filter((p: { contract_signed_at?: string | null; contract_signed_date?: string | null; status?: string }) =>
+      !p.contract_signed_at && !p.contract_signed_date && p.status !== 'completed' && p.status !== 'cancelled'
     ).length
     : 0;
 
@@ -753,16 +788,17 @@ async function loadUpcomingTasks(ctx: AdminDashboardContext): Promise<void> {
     }
 
     const data = await response.json();
+    // API returns snake_case fields, map to camelCase for frontend
     dashboardTasks = (data.tasks || []).map((t: Record<string, unknown>) => ({
       id: t.id as number,
       title: t.title as string,
       description: t.description as string | undefined,
-      projectId: t.projectId as number,
-      projectName: t.projectName as string,
+      projectId: (t.project_id ?? t.projectId) as number,
+      projectName: (t.project_name ?? t.projectName) as string,
       priority: t.priority as UpcomingTask['priority'],
       status: t.status as UpcomingTask['status'],
-      dueDate: t.dueDate as string | undefined,
-      assignedTo: t.assignedTo as string | undefined
+      dueDate: (t.due_date ?? t.dueDate) as string | undefined,
+      assignedTo: (t.assigned_to ?? t.assignedTo) as string | undefined
     }));
 
     // Setup view toggle
@@ -1022,22 +1058,14 @@ export function renderOverviewTab(container: HTMLElement): void {
 
   container.innerHTML = `
   <div class="overview-linear">
-    <!-- Page Header with Acme font -->
-    <div class="overview-header">
-      <div class="overview-header-left">
-        <span class="overview-eyebrow">Admin Dashboard</span>
-        <h1 class="overview-title">Good ${getGreeting()}</h1>
-      </div>
-      <div class="overview-header-right">
-        <span class="overview-date">${dateStr}</span>
-      </div>
-    </div>
+    <!-- Greeting -->
+    <div class="overview-greeting">Good ${getGreeting()},<b>Noelle</b></div>
 
     <!-- 4-Stat Strip -->
     <div class="overview-stats-strip" aria-label="Key metrics">
       <button class="overview-stat-card" data-tab="projects" type="button">
         <div class="stat-card-top">
-          <span class="stat-card-label">Active Projects</span>
+          <span class="field-label">Active Projects</span>
           <span class="stat-card-icon stat-icon-blue" aria-hidden="true">${OVERVIEW_ICONS.FOLDER}</span>
         </div>
         <span class="stat-card-value" id="stat-active-projects">-</span>
@@ -1045,7 +1073,7 @@ export function renderOverviewTab(container: HTMLElement): void {
       </button>
       <button class="overview-stat-card" data-tab="invoices" type="button">
         <div class="stat-card-top">
-          <span class="stat-card-label">Revenue MTD</span>
+          <span class="field-label">Revenue MTD</span>
           <span class="stat-card-icon stat-icon-green" aria-hidden="true">${OVERVIEW_ICONS.DOLLAR}</span>
         </div>
         <span class="stat-card-value" id="stat-revenue-mtd">-</span>
@@ -1053,7 +1081,7 @@ export function renderOverviewTab(container: HTMLElement): void {
       </button>
       <button class="overview-stat-card" data-tab="leads" type="button">
         <div class="stat-card-top">
-          <span class="stat-card-label">Pending Leads</span>
+          <span class="field-label">Pending Leads</span>
           <span class="stat-card-icon stat-icon-purple" aria-hidden="true">${OVERVIEW_ICONS.RADAR}</span>
         </div>
         <span class="stat-card-value" id="stat-new-leads">-</span>
@@ -1061,7 +1089,7 @@ export function renderOverviewTab(container: HTMLElement): void {
       </button>
       <button class="overview-stat-card overview-stat-card--alert" data-tab="tasks" type="button">
         <div class="stat-card-top">
-          <span class="stat-card-label">Overdue Tasks</span>
+          <span class="field-label">Overdue Tasks</span>
           <span class="stat-card-icon stat-icon-red" aria-hidden="true">${OVERVIEW_ICONS.ALERT}</span>
         </div>
         <span class="stat-card-value stat-value-alert" id="stat-overdue-tasks">-</span>
@@ -1076,10 +1104,10 @@ export function renderOverviewTab(container: HTMLElement): void {
         <!-- Active Projects Panel -->
         <div class="overview-panel">
           <div class="overview-panel-header">
-            <div class="overview-panel-title">
+            <h3 class="overview-panel-title">
               <span class="panel-icon panel-icon-blue" aria-hidden="true">${OVERVIEW_ICONS.FOLDER}</span>
               Active Projects
-            </div>
+            </h3>
             <button type="button" class="overview-panel-action" data-tab="projects">View all</button>
           </div>
           <div class="overview-panel-body">
@@ -1102,10 +1130,10 @@ export function renderOverviewTab(container: HTMLElement): void {
         <!-- Revenue Chart Panel -->
         <div class="overview-panel">
           <div class="overview-panel-header">
-            <div class="overview-panel-title">
+            <h3 class="overview-panel-title">
               <span class="panel-icon panel-icon-green" aria-hidden="true">${OVERVIEW_ICONS.DOLLAR}</span>
               Revenue - 2026
-            </div>
+            </h3>
           </div>
           <div class="overview-panel-body">
             <div class="revenue-chart-wrap" id="revenue-chart-container">
@@ -1113,15 +1141,15 @@ export function renderOverviewTab(container: HTMLElement): void {
             </div>
             <div class="revenue-kpis">
               <div class="revenue-kpi">
-                <span class="revenue-kpi-label">Invoiced YTD</span>
+                <span class="field-label">Invoiced YTD</span>
                 <span class="revenue-kpi-value" id="stat-invoiced-ytd">-</span>
               </div>
               <div class="revenue-kpi">
-                <span class="revenue-kpi-label">Collected YTD</span>
+                <span class="field-label">Collected YTD</span>
                 <span class="revenue-kpi-value" id="stat-collected-ytd">-</span>
               </div>
               <div class="revenue-kpi">
-                <span class="revenue-kpi-label">Outstanding</span>
+                <span class="field-label">Outstanding</span>
                 <span class="revenue-kpi-value revenue-kpi-value--warning" id="stat-outstanding">-</span>
               </div>
             </div>
@@ -1134,10 +1162,10 @@ export function renderOverviewTab(container: HTMLElement): void {
         <!-- Activity Feed -->
         <div class="overview-panel">
           <div class="overview-panel-header">
-            <div class="overview-panel-title">
-              <span class="panel-icon" aria-hidden="true">${OVERVIEW_ICONS.ACTIVITY}</span>
+            <h3 class="overview-panel-title">
+              <span class="panel-icon panel-icon-blue" aria-hidden="true">${OVERVIEW_ICONS.ACTIVITY}</span>
               Activity
-            </div>
+            </h3>
             <button type="button" class="overview-panel-action" id="clear-activity-btn">Clear</button>
           </div>
           <div class="overview-panel-body overview-panel-body--compact">
@@ -1150,11 +1178,11 @@ export function renderOverviewTab(container: HTMLElement): void {
         <!-- New Leads -->
         <div class="overview-panel">
           <div class="overview-panel-header">
-            <div class="overview-panel-title">
+            <h3 class="overview-panel-title">
               <span class="panel-icon panel-icon-purple" aria-hidden="true">${OVERVIEW_ICONS.RADAR}</span>
               New Leads
               <span class="panel-badge" id="leads-count-badge">0</span>
-            </div>
+            </h3>
             <button type="button" class="overview-panel-action" data-tab="leads">View all</button>
           </div>
           <div class="overview-panel-body overview-panel-body--compact">
@@ -1167,15 +1195,15 @@ export function renderOverviewTab(container: HTMLElement): void {
         <!-- Project Health -->
         <div class="overview-panel">
           <div class="overview-panel-header">
-            <div class="overview-panel-title">
+            <h3 class="overview-panel-title">
               <span class="panel-icon panel-icon-green" aria-hidden="true">${OVERVIEW_ICONS.HEART}</span>
               Project Health
-            </div>
+            </h3>
           </div>
           <div class="overview-panel-body">
             <div class="health-chart-wrap" id="health-chart-container">
               <!-- Donut chart + legend will be rendered here -->
-              <div class="health-placeholder">Loading...</div>
+              <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@
  */
 
 import { createPortalModal } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import {
   AnnotationCanvas,
@@ -104,6 +105,7 @@ async function showDesignReviewModal(): Promise<void> {
     id: 'design-review-modal',
     titleId: 'design-review-modal-title',
     title: `Design Review: ${currentDeliverable.title}`,
+    icon: ICONS.IMAGE,
     contentClassName: 'design-review-modal-content modal-content-wide',
     onClose: () => modal.hide()
   });
@@ -228,7 +230,7 @@ async function setupDesignViewer(): Promise<void> {
     // Fetch latest version
     const res = await fetch(`${API_BASE}/${currentDeliverable.id}/versions/latest`);
     if (!res.ok) {
-      container.innerHTML = '<div class="error-message">No design files uploaded</div>';
+      container.innerHTML = '<div class="empty-state">No design files uploaded</div>';
       return;
     }
 
@@ -258,7 +260,7 @@ async function setupDesignViewer(): Promise<void> {
     console.error('Failed to setup design viewer:', error);
     const fallbackContainer = el('design-canvas-container');
     if (fallbackContainer) {
-      fallbackContainer.innerHTML = '<div class="error-message">Failed to load design file</div>';
+      fallbackContainer.innerHTML = '<div class="error-state"><span class="error-message">Failed to load design file</span></div>';
     }
   }
 }

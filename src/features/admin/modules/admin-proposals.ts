@@ -18,6 +18,7 @@ import { initModalDropdown } from '../../../utils/modal-dropdown';
 import type { AdminDashboardContext } from '../admin-types';
 import { confirmDialog, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { createPortalModal } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import { showToast } from '../../../utils/toast-notifications';
 import { createViewToggle } from '../../../components/view-toggle';
 import {
@@ -53,7 +54,7 @@ import {
   type PaginationConfig
 } from '../../../utils/table-pagination';
 import { showTableError } from '../../../utils/error-utils';
-import { showTableLoading } from '../../../utils/loading-utils';
+import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 
 // ============================================================================
 // TYPES
@@ -464,17 +465,17 @@ function renderProposalsLayout(): string {
                   <input type="checkbox" id="proposals-select-all" class="bulk-select-all" aria-label="Select all proposals" />
                 </div>
               </th>
-              <th>Client</th>
-              <th>Project</th>
-              <th>Tier</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Actions</th>
+              <th scope="col" class="name-col">Client</th>
+              <th scope="col" class="name-col">Project</th>
+              <th scope="col" class="type-col">Tier</th>
+              <th scope="col" class="budget-col">Price</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="date-col">Date</th>
+              <th scope="col" class="actions-col">Actions</th>
             </tr>
           </thead>
           <tbody id="proposals-table-body">
-            <tr><td colspan="8" class="loading-row">Loading proposals...</td></tr>
+            <tr class="loading-row"><td colspan="8"><div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading proposals...</span></div></td></tr>
           </tbody>
         </table>
       </div>
@@ -498,7 +499,7 @@ function renderProposalsLayout(): string {
         </button>
       </div>
       <div class="templates-list" id="templates-list">
-        <div class="loading-row">Loading templates...</div>
+        <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading templates...</span></div>
       </div>
     </div>
   `;
@@ -512,7 +513,7 @@ function renderProposalsTable(proposals: Proposal[], ctx: AdminDashboardContext)
     const message = proposalsData.length === 0
       ? 'No proposals yet.'
       : 'No proposals match the current filters.';
-    tableBody.innerHTML = `<tr><td colspan="8" class="empty-row">${message}</td></tr>`;
+    showTableEmpty(tableBody, 8, message);
     return;
   }
 
@@ -538,38 +539,40 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
   return `
     <tr data-proposal-id="${proposal.id}">
       ${createRowCheckbox('proposals', proposal.id)}
-      <td>
+      <td data-label="Client">
         <div class="client-info">
           <span class="client-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.name))}</span>
           ${proposal.client.company ? `<span class="client-company">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.company))}</span>` : ''}
         </div>
       </td>
-      <td>
+      <td data-label="Project">
         <span class="project-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.project.name))}</span>
         <span class="project-type">${formatProjectType(proposal.projectType)}</span>
       </td>
-      <td>
+      <td data-label="Tier">
         <span class="tier-badge tier-${proposal.selectedTier}">${tierLabel}</span>
       </td>
-      <td class="price-cell">
+      <td class="price-cell" data-label="Price">
         <span class="price-value">${formatPrice(proposal.finalPrice)}</span>
         ${proposal.maintenanceOption && proposal.maintenanceOption !== 'diy'
     ? `<span class="maintenance-badge">+${proposal.maintenanceOption}</span>`
     : ''}
       </td>
-      <td>
+      <td data-label="Status">
         <div class="status-dropdown-container" data-proposal-id="${proposal.id}"></div>
       </td>
-      <td class="date-cell">${formattedDate}</td>
-      <td class="actions-cell">
-        <button class="icon-btn btn-view" data-proposal-id="${proposal.id}" title="View Details" aria-label="View proposal details">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-        ${proposal.status === 'accepted' ? `
-          <button class="icon-btn btn-convert" data-proposal-id="${proposal.id}" title="Convert to Invoice" aria-label="Convert to invoice">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <td class="date-cell" data-label="Date">${formattedDate}</td>
+      <td class="actions-cell" data-label="Actions">
+        <div class="table-actions">
+          <button class="icon-btn btn-view" data-proposal-id="${proposal.id}" title="View Details" aria-label="View proposal details">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
-        ` : ''}
+          ${proposal.status === 'accepted' ? `
+            <button class="icon-btn btn-convert" data-proposal-id="${proposal.id}" title="Convert to Invoice" aria-label="Convert to invoice">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </button>
+          ` : ''}
+        </div>
       </td>
     </tr>
   `;
@@ -767,7 +770,7 @@ async function loadTemplates(ctx: AdminDashboardContext): Promise<void> {
   const templatesList = document.getElementById('templates-list');
   if (!templatesList) return;
 
-  templatesList.innerHTML = '<div class="loading-row">Loading templates...</div>';
+  templatesList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading templates...</span></div>';
 
   try {
     const response = await apiFetch('/api/proposals/templates');
@@ -965,6 +968,7 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
     id: 'template-editor-modal',
     titleId: 'template-modal-title',
     title: template ? 'Edit Template' : 'New Template',
+    icon: ICONS.DOCUMENT,
     contentClassName: 'template-editor-modal-content',
     onClose: () => {
       activeTemplateModal = null;
@@ -2109,42 +2113,42 @@ function renderProposalDetailsContent(proposal: Proposal): string {
       <div class="details-section">
         <h4>Custom Line Items</h4>
         <div class="custom-items-section" id="custom-items-section">
-          <div class="loading-row">Loading custom items...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading custom items...</span></div>
         </div>
       </div>
 
       <div class="details-section">
         <h4>Discount</h4>
         <div class="discount-section" id="discount-section">
-          <div class="loading-row">Loading discount info...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading discount info...</span></div>
         </div>
       </div>
 
       <div class="details-section">
         <h4>Comments</h4>
         <div class="comments-section" id="comments-section">
-          <div class="loading-row">Loading comments...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading comments...</span></div>
         </div>
       </div>
 
       <div class="details-section">
         <h4>Activity Log</h4>
         <div class="activity-section" id="activity-section">
-          <div class="loading-row">Loading activity...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading activity...</span></div>
         </div>
       </div>
 
       <div class="details-section">
         <h4>Version History</h4>
         <div class="version-history" id="version-history">
-          <div class="loading-row">Loading versions...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading versions...</span></div>
         </div>
       </div>
 
       <div class="details-section">
         <h4>Signature Status</h4>
         <div class="signature-status" id="signature-status">
-          <div class="loading-row">Loading signature status...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading signature status...</span></div>
         </div>
       </div>
 

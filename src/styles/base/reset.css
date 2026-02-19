@@ -229,6 +229,39 @@ details {
   border-radius: var(--portal-radius-lg, 12px);
 }
 
+summary {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  cursor: pointer;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* ============================================
+ * UNIVERSAL ICON-TEXT GAP - SINGLE SOURCE OF TRUTH
+ * Applies standard icon gap to ALL interactive elements
+ * with icons across admin and client portals
+ * ============================================ */
+
+/* Navigation items, dropdown items, logout buttons - all icon+text patterns */
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .sidebar-nav-item,
+  .sidebar-signout,
+  .dropdown-item,
+  .logout-btn,
+  .nav-item,
+  .sidebar-collapsed-logo,
+  .sidebar-toggle-btn
+) {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+}
+
 details:focus-within {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
@@ -244,9 +277,15 @@ details > summary:focus-visible {
   border-radius: var(--portal-radius-lg, 12px);
 }
 
-.custom-dropdown.open:focus-within {
+/* Modal/form dropdowns - wrapper outline when open */
+.custom-dropdown.open:not(.table-dropdown):focus-within {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
+}
+
+/* Table dropdowns use border-based focus (defined in portal-dropdown.css) */
+.table-dropdown.open:focus-within {
+  outline: none;
 }
 
 .custom-dropdown.open .custom-dropdown-trigger:focus,
@@ -255,17 +294,7 @@ details > summary:focus-visible {
   box-shadow: none;
 }
 
-/* Table dropdowns */
-.table-dropdown.open:focus-within {
-  outline: 2px solid var(--color-primary);
-  outline-offset: -2px;
-}
-
-.table-dropdown.open .custom-dropdown-trigger:focus,
-.table-dropdown.open .custom-dropdown-trigger:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
+/* Table dropdowns - focus handled in portal-dropdown.css */
 
 /* Export dropdowns */
 .export-dropdown.open:focus-within {

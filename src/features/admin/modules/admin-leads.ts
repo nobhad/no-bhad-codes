@@ -638,19 +638,19 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
     // Column order: ☐ | Lead | Type | Status | Budget | Date | Actions
     row.innerHTML = `
       ${createRowCheckbox('leads', lead.id)}
-      <td class="identity-cell inline-editable-cell" data-lead-id="${lead.id}">
+      <td class="identity-cell inline-editable-cell" data-lead-id="${lead.id}" data-label="Lead">
         ${primaryContent ? `<span class="identity-name" data-field="primary-name">${primaryContent}</span>` : '<span class="identity-name" data-field="primary-name" style="display:none;"></span>'}
         ${secondaryContent ? `<span class="identity-contact" data-field="secondary-name">${secondaryContent}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
         <span class="identity-email">${safeEmail}</span>
       </td>
-      <td class="type-cell">
+      <td class="type-cell" data-label="Type">
         <span class="type-value">${SanitizationUtils.escapeHtml(displayType)}</span>
         <span class="budget-stacked">${SanitizationUtils.escapeHtml(displayBudget)}</span>
       </td>
-      <td class="status-cell"><span class="date-stacked">${date}</span></td>
-      <td class="budget-cell">${SanitizationUtils.escapeHtml(displayBudget)}</td>
-      <td class="date-cell">${date}</td>
-      <td class="actions-cell">
+      <td class="status-cell" data-label="Status"><span class="date-stacked">${date}</span></td>
+      <td class="budget-cell" data-label="Budget">${SanitizationUtils.escapeHtml(displayBudget)}</td>
+      <td class="date-cell" data-label="Date">${date}</td>
+      <td class="actions-cell" data-label="Actions">
         <div class="table-actions">
           ${showConvertBtn ? `<button class="icon-btn btn-convert-lead" data-lead-id="${lead.id}" title="Convert to Project" aria-label="Convert to Project">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -932,6 +932,7 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
       id: 'cancel-dialog-modal',
       titleId: 'cancel-dialog-title',
       title: 'Cancellation Details',
+      icon: ICONS.X,
       onClose: () => {
         if (!resolved) {
           resolved = true;
@@ -2067,8 +2068,13 @@ export function renderLeadsTab(container: HTMLElement): void {
             </tr>
           </thead>
           <tbody id="leads-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr>
-              <td colspan="7" class="loading-row">Loading leads...</td>
+            <tr class="loading-row">
+              <td colspan="7">
+                <div class="loading-state">
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span class="loading-message">Loading leads...</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>

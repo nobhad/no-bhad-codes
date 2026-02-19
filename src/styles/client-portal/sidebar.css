@@ -50,10 +50,7 @@
   align-items: center;
 }
 
-/* Hide regular logo when collapsed - show collapsed logo instead */
-.sidebar.collapsed .sidebar-logo {
-  display: none;
-}
+/* Sidebar logo styles in shared/portal-layout.css */
 
 /* Sidebar Footer */
 .sidebar-footer {
@@ -74,13 +71,7 @@
   z-index: 101;
 }
 
-/* Invert logos to white for portal dark sidebar */
-[data-page="client-portal"] .sidebar-logo-img,
-[data-page="admin"] .sidebar-logo-img,
-[data-page="client-portal"] .sidebar-collapsed-logo-img,
-[data-page="admin"] .sidebar-collapsed-logo-img {
-  filter: invert(1);
-}
+/* Logo invert filter in shared/portal-layout.css */
 
 /* Sidebar Footer Buttons */
 .sidebar-footer {
@@ -116,34 +107,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   display: block;
 }
 
-/* Sidebar Logo - Hidden when using global header */
-/* Logo is now in .portal-global-header */
-/* Use !important to override responsive breakpoint rules */
-.portal-body .sidebar .sidebar-logo,
-.portal-body .sidebar .sidebar-collapsed-logo,
-.portal-body .sidebar.collapsed .sidebar-collapsed-logo {
-  display: none !important;
-}
-
-/* Legacy sidebar logo (when not using global header) */
-.sidebar-logo {
-  display: flex;
-  justify-content: center;
-  padding-bottom: 1rem;
-  position: relative;
-}
-
-.sidebar-logo-img {
-  width: 120px;
-  height: auto;
-  transition: transform var(--transition-fast);
-  position: relative;
-  z-index: 2;
-}
-
-.sidebar-logo:hover .sidebar-logo-img {
-  transform: scale(1.1);
-}
+/* Sidebar logo/branding styles in shared/portal-layout.css */
 
 /* Sidebar Buttons */
 .sidebar-buttons {
@@ -214,22 +178,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   transform: rotate(180deg);
 }
 
-/* Collapsed State Logo */
-.sidebar-collapsed-logo {
-  display: none;
-}
-
-.sidebar.collapsed .sidebar-collapsed-logo {
-  display: flex;
-  justify-content: center;
-  padding-top: 1rem;
-}
-
-.sidebar-collapsed-logo-img {
-  width: 32px;
-  height: 40px;
-  object-fit: contain;
-}
+/* Collapsed state logo styles in shared/portal-layout.css */
 
 /* Hide content when collapsed */
 .sidebar.collapsed .client-name,
@@ -260,7 +209,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   align-items: center;
   margin: 0 0 1.5rem 0;
   padding: 0 1.5rem 1rem 1.5rem;
-  border-bottom: 2px solid var(--portal-border-dark);
+  border-bottom: none;
 }
 
 .client-name {
@@ -309,6 +258,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   z-index: 1000;
 }
 
+/* Base display/alignment/gap from reset.css universal icon-text rule */
 .dropdown-item {
   width: 100%;
   padding: var(--space-1-5) var(--space-2);
@@ -318,9 +268,6 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   border-bottom: 1px solid var(--portal-border-dark);
   cursor: pointer;
   transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
   font-weight: 600;
   text-align: left;
 }
@@ -339,10 +286,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 /* Logout Button (sidebar footer) */
+/* Base display/alignment/gap from reset.css universal icon-text rule */
 .logout-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
   background: transparent;
   color: var(--portal-text-light);
   border: var(--portal-border);
@@ -465,23 +410,17 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   margin-bottom: 4px;
 }
 
+/* Label styling from unified rule in portal-forms.css - only layout here */
 /* Section Labels (WORK, CRM, FINANCE, SYSTEM) */
 [data-page="admin"] .sidebar-section-label {
   display: block;
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--portal-text-muted);
   padding: 12px 8px 4px;
   user-select: none;
 }
 
 /* Navigation Items */
+/* Base display/alignment/gap from reset.css universal icon-text rule */
 [data-page="admin"] .sidebar-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   height: 32px;
   padding: 0 8px;
   margin: 1px 0;
@@ -564,13 +503,11 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 [data-page="admin"] .sidebar-footer {
   margin-top: auto;
   padding: 12px 8px 16px;
-  border-top: 1px solid var(--portal-border-dark);
+  border-top: none;
 }
 
+/* Base display/alignment/gap from reset.css universal icon-text rule */
 [data-page="admin"] .sidebar-signout {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   width: 100%;
   height: 32px;
   padding: 0 8px;
@@ -699,19 +636,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     display: none;
   }
 
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-logo,
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-logo {
-    display: none;
-  }
-
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-collapsed-logo,
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-collapsed-logo {
-    display: flex;
-    justify-content: center;
-    padding: 0.5rem 0;
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
+  /* Sidebar logo styles in shared/portal-layout.css */
 
   :is([data-page="client-portal"], [data-page="admin"]) .sidebar:not(.collapsed) .sidebar-footer {
     position: sticky;
@@ -813,18 +738,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     align-items: center;
   }
 
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-logo,
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-logo {
-    display: none;
-  }
-
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-collapsed-logo,
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-collapsed-logo {
-    display: flex;
-    justify-content: center;
-    padding-top: 1rem;
-    margin-bottom: 0.5rem;
-  }
+  /* Sidebar logo styles in shared/portal-layout.css */
 
   /* Sidebar buttons layout - button styles in shared/portal-buttons.css */
   [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons,

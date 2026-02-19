@@ -16,6 +16,7 @@ import { confirmDanger } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -282,18 +283,18 @@ function renderWorkflowsTable(): void {
 
     return `
       <tr data-id="${w.id}">
-        <td class="name-cell"><span class="workflow-name">${escapeHtml(w.name)}</span>${defaultIcon}</td>
-        <td class="type-cell entity-type-cell">
+        <td class="name-cell" data-label="Name"><span class="workflow-name">${escapeHtml(w.name)}</span>${defaultIcon}</td>
+        <td class="type-cell entity-type-cell" data-label="Entity Type">
           ${entityLabel}
           <span class="type-stacked">${typeLabel}</span>
         </td>
-        <td class="type-cell workflow-type-cell">${typeLabel}</td>
-        <td class="status-cell">
+        <td class="type-cell workflow-type-cell" data-label="Type">${typeLabel}</td>
+        <td class="status-cell" data-label="Status">
           ${statusBadge}
           <span class="date-stacked">${formatDate(w.updated_at)}</span>
         </td>
-        <td class="date-cell">${formatDate(w.updated_at)}</td>
-        <td class="actions-cell">
+        <td class="date-cell" data-label="Updated">${formatDate(w.updated_at)}</td>
+        <td class="actions-cell" data-label="Actions">
           <div class="table-actions">
             <button type="button" class="icon-btn workflow-edit" data-id="${w.id}" title="Edit workflow" aria-label="Edit workflow">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
@@ -373,6 +374,7 @@ async function openWorkflowModal(id?: number): Promise<void> {
       id: 'workflow-modal',
       titleId: 'workflow-modal-title',
       title: 'Create Workflow',
+      icon: ICONS.WORKFLOW,
       onClose: () => workflowModal?.hide()
     });
 
@@ -521,13 +523,14 @@ async function previewWorkflow(): Promise<void> {
       id: 'workflow-preview-modal',
       titleId: 'workflow-preview-modal-title',
       title: 'Workflow Preview',
+      icon: ICONS.EYE,
       contentClassName: 'workflow-preview-modal-content modal-content-wide',
       onClose: () => workflowPreviewModal?.hide()
     });
   }
 
   // Show loading state
-  workflowPreviewModal.body.innerHTML = '<div class="loading-message">Loading preview...</div>';
+  workflowPreviewModal.body.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   workflowPreviewModal.setTitle(`Preview: ${escapeHtml(name)}`);
   workflowPreviewModal.show();
   manageFocusTrap(workflowPreviewModal.overlay);
@@ -578,8 +581,6 @@ async function previewWorkflow(): Promise<void> {
         </div>
       </div>
 
-      <hr class="modal-divider" />
-
       <div class="preview-section">
         <h4>Workflow Type Behavior</h4>
         <div class="preview-behavior">
@@ -587,20 +588,16 @@ async function previewWorkflow(): Promise<void> {
         </div>
       </div>
 
-      <hr class="modal-divider" />
-
       <div class="preview-section">
         <h4>Approval Steps (${steps.length})</h4>
         ${steps.length > 0 ? renderPreviewSteps(steps, workflowType) : `
-          <div class="empty-message">
+          <div class="empty-state">
             ${workflowId ? 'No steps configured yet. Add steps after saving.' : 'Save the workflow first, then add approval steps.'}
           </div>
         `}
       </div>
 
       ${steps.length > 0 ? `
-        <hr class="modal-divider" />
-
         <div class="preview-section">
           <h4>Simulation</h4>
           <div class="preview-simulation">
@@ -768,6 +765,7 @@ async function openStepsModal(workflowId: number): Promise<void> {
         id: 'steps-modal',
         titleId: 'steps-modal-title',
         title: 'Approval Steps',
+        icon: ICONS.LIST_TODO,
         contentClassName: 'modal-content-wide',
         onClose: () => stepModal?.hide()
       });
@@ -786,7 +784,7 @@ async function openStepsModal(workflowId: number): Promise<void> {
     const steps = data.steps || [];
     stepModal.body.innerHTML = `
       <div class="steps-list">
-        ${steps.length === 0 ? '<p class="empty-message">No steps defined. Add steps below.</p>' : ''}
+        ${steps.length === 0 ? '<div class="empty-state">No steps defined. Add steps below.</div>' : ''}
         ${steps.map((s, i) => `
           <div class="step-item" data-id="${s.id}">
             <div class="step-order">${i + 1}</div>
@@ -959,15 +957,15 @@ function renderTriggersTable(): void {
 
     return `
       <tr data-id="${t.id}">
-        <td class="name-cell">${escapeHtml(t.name)}</td>
-        <td class="type-cell"><code>${escapeHtml(t.event_type)}</code></td>
-        <td class="type-cell">${actionLabel}</td>
-        <td class="status-cell">
+        <td class="name-cell" data-label="Name">${escapeHtml(t.name)}</td>
+        <td class="type-cell" data-label="Event Type"><code>${escapeHtml(t.event_type)}</code></td>
+        <td class="type-cell" data-label="Action">${actionLabel}</td>
+        <td class="status-cell" data-label="Status">
           ${statusBadge}
           <span class="date-stacked">${formatDate(t.updated_at)}</span>
         </td>
-        <td class="date-cell">${formatDate(t.updated_at)}</td>
-        <td class="actions-cell">
+        <td class="date-cell" data-label="Updated">${formatDate(t.updated_at)}</td>
+        <td class="actions-cell" data-label="Actions">
           <div class="table-actions">
             <button type="button" class="icon-btn trigger-toggle" data-id="${t.id}" title="${t.is_active ? 'Disable' : 'Enable'}" aria-label="${t.is_active ? 'Disable' : 'Enable'} trigger">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1050,6 +1048,7 @@ async function openTriggerModal(id?: number): Promise<void> {
       id: 'trigger-modal',
       titleId: 'trigger-modal-title',
       title: 'Create Trigger',
+      icon: ICONS.ZAPPY,
       contentClassName: 'modal-content-wide',
       onClose: () => triggerModal?.hide()
     });
@@ -1428,6 +1427,7 @@ async function openTriggerLogsModal(triggerId?: number): Promise<void> {
       id: 'trigger-logs-modal',
       titleId: 'trigger-logs-modal-title',
       title: 'Trigger Execution Logs',
+      icon: ICONS.FILE_TEXT,
       contentClassName: 'trigger-logs-modal-content modal-content-wide',
       onClose: () => triggerLogsModal?.hide()
     });
@@ -1448,7 +1448,7 @@ async function openTriggerLogsModal(triggerId?: number): Promise<void> {
           </button>
         </div>
         <div class="trigger-logs-list" id="trigger-logs-list">
-          <div class="loading-message">Loading logs...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       `;
 
@@ -1506,7 +1506,7 @@ async function loadTriggerLogs(): Promise<void> {
   const listEl = el('trigger-logs-list');
   if (!listEl) return;
 
-  listEl.innerHTML = '<div class="loading-message">Loading logs...</div>';
+  listEl.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     const triggerFilter = (el('logs-trigger-filter') as HTMLElement)?.dataset.value || '';
@@ -1532,7 +1532,7 @@ async function loadTriggerLogs(): Promise<void> {
   } catch (error) {
     console.error('[AdminWorkflows] Error loading trigger logs:', error);
     if (listEl) {
-      listEl.innerHTML = '<div class="empty-message">Error loading logs</div>';
+      listEl.innerHTML = '<div class="empty-state">Error loading logs</div>';
     }
   }
 }
@@ -1542,7 +1542,7 @@ function renderTriggerLogs(logs: TriggerExecutionLog[]): void {
   if (!listEl) return;
 
   if (logs.length === 0) {
-    listEl.innerHTML = '<div class="empty-message">No execution logs found</div>';
+    listEl.innerHTML = '<div class="empty-state">No execution logs found</div>';
     return;
   }
 
@@ -1605,7 +1605,7 @@ async function loadPendingApprovals(): Promise<void> {
   const tbody = el('pending-approvals-table-body');
   if (!tbody) return;
 
-  showTableLoading(tbody, 6, 'Loading pending approvals...');
+  showTableLoading(tbody, 7, 'Loading pending approvals...');
 
   try {
     const res = await apiFetch(`${APPROVALS_API}/active`);
@@ -1619,7 +1619,7 @@ async function loadPendingApprovals(): Promise<void> {
   } catch (error) {
     console.error('[AdminWorkflows] Error loading pending approvals:', error);
     if (tbody) {
-      showTableError(tbody, 6, 'Error loading approvals', loadPendingApprovals);
+      showTableError(tbody, 7, 'Error loading approvals', loadPendingApprovals);
     }
   }
 }
@@ -1701,25 +1701,25 @@ function renderPendingApprovalsTable(): void {
 
     return `
       <tr data-id="${a.id}">
-        <td class="checkbox-cell">
+        <td class="checkbox-cell" data-label="">
           ${getPortalCheckboxHTML({
     ariaLabel: `Select approval ${a.id}`,
     inputClassName: 'approval-checkbox',
     dataAttributes: { id: a.id }
   })}
         </td>
-        <td class="name-cell">
+        <td class="name-cell" data-label="Workflow">
           ${escapeHtml(a.workflow_name)}${urgentBadge}
           <span class="type-stacked">${entityLabel} #${a.entity_id}</span>
         </td>
-        <td class="type-cell entity-type-cell">${entityLabel}</td>
-        <td class="type-cell">#${a.entity_id}</td>
-        <td class="status-cell">
+        <td class="type-cell entity-type-cell" data-label="Entity Type">${entityLabel}</td>
+        <td class="type-cell" data-label="Entity ID">#${a.entity_id}</td>
+        <td class="status-cell" data-label="Status">
           ${statusBadge}
           <span class="date-stacked">Step ${a.current_step}</span>
         </td>
-        <td class="date-cell">${formatDate(a.initiated_at)}</td>
-        <td class="actions-cell">
+        <td class="date-cell" data-label="Initiated">${formatDate(a.initiated_at)}</td>
+        <td class="actions-cell" data-label="Actions">
           <div class="table-actions">
             <button type="button" class="icon-btn approval-history" data-entity-type="${a.entity_type}" data-entity-id="${a.entity_id}" title="View History" aria-label="View approval history">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -2034,6 +2034,7 @@ async function openApprovalHistoryModal(entityType: EntityType, entityId: string
       id: 'approval-history-modal',
       titleId: 'approval-history-modal-title',
       title: 'Approval History',
+      icon: ICONS.REFRESH,
       contentClassName: 'modal-content-wide',
       onClose: () => historyModal?.hide()
     });
@@ -2046,7 +2047,7 @@ async function openApprovalHistoryModal(entityType: EntityType, entityId: string
   }
 
   historyModal.setTitle(`${entityLabel} #${entityId} - Approval History`);
-  historyModal.body.innerHTML = '<div class="loading-row">Loading history...</div>';
+  historyModal.body.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading history...</span></div>';
   historyModal.show();
   manageFocusTrap(historyModal.overlay);
 
@@ -2062,7 +2063,7 @@ async function openApprovalHistoryModal(entityType: EntityType, entityId: string
 
     if (!data.instance) {
       historyModal.body.innerHTML = `
-        <div class="empty-message">
+        <div class="empty-state">
           <p>No approval workflow found for this ${entityLabel.toLowerCase()}.</p>
         </div>
       `;
@@ -2072,7 +2073,7 @@ async function openApprovalHistoryModal(entityType: EntityType, entityId: string
     historyModal.body.innerHTML = renderApprovalHistoryContent(data.instance, data.requests, data.history);
   } catch (error) {
     console.error('[AdminWorkflows] Error loading history:', error);
-    historyModal.body.innerHTML = '<div class="error-message">Error loading approval history.</div>';
+    historyModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error loading approval history</span></div>';
   }
 }
 
@@ -2118,7 +2119,7 @@ function renderApprovalHistoryContent(
   `;
 
   // Requests section
-  const requestsHtml = requests.length === 0 ? '<p class="empty-message">No approval requests.</p>' : `
+  const requestsHtml = requests.length === 0 ? '<div class="empty-state">No approval requests.</div>' : `
     <div class="history-requests-list">
       ${requests.map(r => {
     const reqStatusClass = r.status === 'pending' ? 'warning'
@@ -2140,7 +2141,7 @@ function renderApprovalHistoryContent(
   `;
 
   // History section
-  const historyHtml = history.length === 0 ? '<p class="empty-message">No history entries.</p>' : `
+  const historyHtml = history.length === 0 ? '<div class="empty-state">No history entries.</div>' : `
     <div class="history-timeline">
       ${history.map(h => {
     const actionIcon = h.action === 'approved' ? '&#10003;'
@@ -2172,12 +2173,10 @@ function renderApprovalHistoryContent(
         <h4>Workflow Details</h4>
         ${instanceSection}
       </section>
-      <hr class="modal-divider" />
       <section class="history-section">
         <h4>Approval Requests</h4>
         ${requestsHtml}
       </section>
-      <hr class="modal-divider" />
       <section class="history-section">
         <h4>Activity Timeline</h4>
         ${historyHtml}
@@ -2275,7 +2274,7 @@ export function renderWorkflowsTab(container: HTMLElement): void {
                 </tr>
               </thead>
               <tbody id="pending-approvals-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-                <tr><td colspan="7" class="loading-row">Loading approvals...</td></tr>
+                <tr class="loading-row"><td colspan="7"><div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading approvals...</span></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -2311,7 +2310,7 @@ export function renderWorkflowsTab(container: HTMLElement): void {
                 </tr>
               </thead>
               <tbody id="workflows-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-                <tr><td colspan="6" class="loading-row">Loading workflows...</td></tr>
+                <tr class="loading-row"><td colspan="6"><div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading workflows...</span></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -2350,7 +2349,7 @@ export function renderWorkflowsTab(container: HTMLElement): void {
                 </tr>
               </thead>
               <tbody id="triggers-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-                <tr><td colspan="6" class="loading-row">Loading triggers...</td></tr>
+                <tr class="loading-row"><td colspan="6"><div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading triggers...</span></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -2395,7 +2394,7 @@ export function renderWorkflowsTab(container: HTMLElement): void {
                 </tr>
               </thead>
               <tbody id="email-templates-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-                <tr><td colspan="6" class="loading-row">Loading templates...</td></tr>
+                <tr class="loading-row"><td colspan="6"><div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading templates...</span></div></td></tr>
               </tbody>
             </table>
           </div>

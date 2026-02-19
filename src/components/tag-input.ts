@@ -341,7 +341,7 @@ export function getTagInputStyles(): string {
     .tag-input-wrapper {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: var(--icon-gap-sm);
       padding: 8px;
       background: var(--portal-bg-dark);
       border: 1px solid var(--portal-border);
@@ -357,13 +357,13 @@ export function getTagInputStyles(): string {
     .tag-input-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: var(--icon-gap-sm);
     }
 
     .tag-pill {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: var(--icon-gap-xs);
       padding: 4px 8px;
       border-radius: 4px;
       font-size: 0.75rem;
@@ -422,7 +422,7 @@ export function getTagInputStyles(): string {
     .tag-dropdown-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--icon-gap-md);
       width: 100%;
       padding: 8px 12px;
       background: transparent;

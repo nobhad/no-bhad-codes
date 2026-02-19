@@ -15,6 +15,7 @@ import type { InvoiceResponse, InvoiceLineItem } from '../../../types/api';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { createPortalModal } from '../../../components/portal-modal';
 import { showToast } from '../../../utils/toast-notifications';
+import { ICONS } from '../../../constants/icons';
 
 // Extended invoice type for deposit fields
 export type ExtendedInvoice = InvoiceResponse & { invoice_type?: string };
@@ -400,6 +401,7 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
     id: 'view-project-invoice-modal',
     titleId: 'view-project-invoice-title',
     title: `Invoice ${SanitizationUtils.escapeHtml(invoice.invoice_number || `#${invoice.id}`)}`,
+    icon: ICONS.RECEIPT,
     contentClassName: 'invoice-modal-content',
     onClose: () => {
       modal.hide();

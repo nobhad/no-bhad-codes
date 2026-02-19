@@ -66,11 +66,9 @@
   margin-bottom: var(--space-1-5);
 }
 
+/* h3 styling from unified rule in portal-cards.css - only layout here */
 [data-page="client-portal"] .documents-detail-wrap h3 {
   margin: 0 0 var(--space-1) 0;
-  font-family: var(--font-family-acme);
-  font-size: var(--font-size-lg);
-  color: var(--portal-text-light);
 }
 
 [data-page="client-portal"] .documents-detail-description,
@@ -86,12 +84,10 @@
   border-top: 1px solid var(--portal-border-light);
 }
 
+/* Label styling from unified rule in portal-forms.css - only layout here */
 [data-page="client-portal"] .documents-upload-label {
   display: block;
   margin-bottom: var(--space-0-5);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--portal-text-light);
 }
 
 [data-page="client-portal"] .documents-dropzone {

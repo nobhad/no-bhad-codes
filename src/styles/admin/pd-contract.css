@@ -32,7 +32,6 @@
 
 .contract-status-info {
   display: flex;
-  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
@@ -77,7 +76,6 @@
 .contract-builder-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
   margin-top: var(--space-2);
 }
 

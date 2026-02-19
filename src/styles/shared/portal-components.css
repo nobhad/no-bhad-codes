@@ -18,7 +18,6 @@
 .kanban-board {
   display: flex;
   flex-direction: row;
-  gap: var(--space-3);
   overflow-x: auto;
   padding: var(--space-2) 0;
   min-height: 400px;
@@ -212,7 +211,7 @@
 .tag-input-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--icon-gap-sm);
   padding: 8px;
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border);
@@ -228,13 +227,13 @@
 .tag-input-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--icon-gap-sm);
 }
 
 .tag-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--icon-gap-xs);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -293,7 +292,7 @@
 .tag-dropdown-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--icon-gap-md);
   width: 100%;
   padding: 8px 12px;
   background: transparent;
@@ -446,9 +445,8 @@
   margin-bottom: var(--space-1);
 }
 
+/* Label styling from unified rule in portal-forms.css - only layout here */
 .bar-chart-label {
-  font-size: 0.75rem;
-  color: var(--portal-text-secondary);
   margin-bottom: 4px;
 }
 
@@ -500,9 +498,8 @@
   flex-shrink: 0;
 }
 
+/* Label styling from unified rule in portal-forms.css - only layout here */
 .pie-chart-legend-label {
-  font-size: 0.75rem;
-  color: var(--portal-text-secondary);
   flex: 1;
 }
 
@@ -545,24 +542,14 @@
   flex-direction: column;
 }
 
-.kpi-card-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--portal-text-primary);
-  line-height: 1.2;
-}
+/* .kpi-card-value styling from unified rule in portal-cards.css */
 
-.kpi-card-label {
-  font-size: 0.75rem;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+/* Label styling from unified rule in portal-forms.css */
 
 .kpi-card-change {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--icon-gap-xs);
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -575,10 +562,7 @@
   color: var(--status-cancelled);
 }
 
-.kpi-card-change-label {
-  color: var(--portal-text-secondary);
-  font-weight: 400;
-}
+/* Label styling from unified rule in portal-forms.css */
 
 @media (--mobile) {
   .pie-chart-wrapper {
@@ -590,6 +574,48 @@
 /* =====================================================
    UTILITY CLASSES
    ===================================================== */
+
+/* Layout utilities - USE INSTEAD OF INLINE STYLES */
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Text alignment */
+.text-center {
+  text-align: center;
+}
+
+/* Loading/empty state - USE INSTEAD OF inline style="text-align: center; padding: 2rem;" */
+.loading-message,
+.empty-state-message {
+  text-align: center;
+  padding: var(--space-4);
+  color: var(--portal-text-muted);
+}
+
+/* Spacing utilities - USE INSTEAD OF inline margin */
+.mt-sm { margin-top: var(--space-2); }
+.mt-md { margin-top: var(--space-3); }
+.mt-lg { margin-top: var(--space-4); }
+.mb-sm { margin-bottom: var(--space-2); }
+.mb-md { margin-bottom: var(--space-3); }
+.mb-lg { margin-bottom: var(--space-4); }
+
+/* Danger text */
 .text-danger,
 a.text-danger,
 a.text-danger:visited {

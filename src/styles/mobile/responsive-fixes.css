@@ -383,7 +383,6 @@
 /* Table scroll wrapper utility class */
 .table-scroll-wrapper {
   width: 100%;
-  overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -401,7 +400,6 @@
   .table-container,
   .data-table-container {
     width: 100%;
-    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -414,7 +412,6 @@
 
   /* Invoice line items table */
   .invoice-line-items-section {
-    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -424,26 +421,22 @@
 
   /* Messages table */
   .messages-table-wrapper {
-    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
   /* Files table */
   .files-table-wrapper,
   .portal-files-table {
-    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
   /* Analytics tables */
   .analytics-table-wrapper {
-    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
   /* Detail grid tables in modals */
   .detail-grid {
-    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 }

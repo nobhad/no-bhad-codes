@@ -138,12 +138,10 @@
   font-weight: 700;
 }
 
+/* Label styling from unified rule in portal-forms.css - only layout here */
 .portal-stat-label {
   display: block;
-  font-size: 0.85rem;
-  color: var(--portal-text-muted);
   margin-top: var(--space-1);
-  text-transform: uppercase;
 }
 
 /* ----- COMPONENT: Empty State Message ----- */
@@ -171,12 +169,9 @@
   background: var(--portal-bg-hover);
 }
 
-.portal-project-card h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.2rem;
-  color: var(--portal-text-light);
+/* h3 styling from unified rule in portal-cards.css - only layout here */
+[data-page="client-portal"] .portal-project-card h3 {
   margin: 0 0 var(--space-2) 0;
-  text-transform: uppercase;
   padding-right: 120px;
   white-space: nowrap;
 }
@@ -248,12 +243,10 @@
   border-bottom: 1px solid var(--portal-border);
 }
 
+/* h3 styling from unified rule in portal-cards.css - only layout here */
 .upload-request-modal-content .modal-header h2,
 .upload-request-modal-content .modal-header h3 {
   margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--portal-text-primary);
 }
 
 .upload-request-modal-content .modal-body {

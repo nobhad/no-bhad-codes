@@ -19,7 +19,7 @@ import type {
   AdminDashboardContext
 } from '../admin-types';
 import { formatDateTime, formatCurrencyCompact } from '../../../utils/format-utils';
-import { showTableLoading, getChartSkeletonHTML } from '../../../utils/loading-utils';
+import { showTableLoading, showTableEmpty, getChartSkeletonHTML } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { multiPromptDialog, alertDialog, confirmDialog } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
@@ -83,7 +83,7 @@ function setupAnalyticsEventListeners(): void {
  * Setup analytics sub-tab navigation
  */
 function setupAnalyticsSubtabs(): void {
-  const subtabButtons = document.querySelectorAll('.analytics-subtab');
+  const subtabButtons = document.querySelectorAll('.header-subtab-group[data-for-tab="analytics"] .portal-subtab');
   const subtabContents = document.querySelectorAll('.analytics-subtab-content');
 
   if (subtabButtons.length === 0) return;
@@ -1334,8 +1334,7 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
     const sessions = data.sessions || [];
 
     if (sessions.length === 0) {
-      container.innerHTML =
-        '<tr><td colspan="6" class="loading-row">No visitor sessions recorded</td></tr>';
+      showTableEmpty(container, 6, 'No visitor sessions recorded');
       return;
     }
 
@@ -1358,12 +1357,12 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
 
         return `
           <tr>
-            <td>${session.session_id.substring(0, 8)}...</td>
-            <td>${startTime}</td>
-            <td>${duration}</td>
-            <td>${session.page_views || 0}</td>
-            <td>${capitalizeFirst(session.device_type || 'desktop')}</td>
-            <td>${location}</td>
+            <td class="slug-cell">${session.session_id.substring(0, 8)}...</td>
+            <td class="date-cell">${startTime}</td>
+            <td class="type-cell">${duration}</td>
+            <td class="count-cell">${session.page_views || 0}</td>
+            <td class="type-cell">${capitalizeFirst(session.device_type || 'desktop')}</td>
+            <td class="name-cell">${location}</td>
           </tr>
         `;
       })
@@ -2236,7 +2235,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
       <!-- Ad Hoc Revenue Widget -->
       <div class="portal-project-card portal-shadow">
         <h3>Ad Hoc Revenue Analytics</h3>
-        <div id="ad-hoc-analytics-widget" class="loading-text">Loading ad hoc analytics...</div>
+        <div id="ad-hoc-analytics-widget" class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
       </div>
 
       <!-- Lead Analytics & Scoring -->
@@ -2246,13 +2245,13 @@ export function renderAnalyticsTab(container: HTMLElement): void {
           <div class="analytics-column" id="conversion-funnel-card">
             <span class="field-label">Conversion Funnel</span>
             <div class="funnel-container" id="leads-conversion-funnel">
-              <div class="loading-text">Loading funnel data...</div>
+              <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
             </div>
           </div>
           <div class="analytics-column" id="source-performance-card">
             <span class="field-label">Lead Sources</span>
             <div class="source-list" id="leads-source-performance">
-              <div class="loading-text">Loading source data...</div>
+              <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
             </div>
           </div>
         </div>
@@ -2264,7 +2263,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
             </button>
           </div>
           <div class="scoring-rules-list" id="scoring-rules-list">
-            <div class="loading-text">Loading scoring rules...</div>
+            <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
       </div>
@@ -2338,25 +2337,25 @@ export function renderAnalyticsTab(container: HTMLElement): void {
         <div class="portal-project-card portal-shadow">
           <h3>Popular Pages</h3>
           <div class="data-list" id="popular-pages">
-            <div class="data-item"><span class="data-label">Loading...</span></div>
+            <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
         <div class="portal-project-card portal-shadow">
           <h3>Device Breakdown</h3>
           <div class="data-list" id="device-breakdown">
-            <div class="data-item"><span class="data-label">Loading...</span></div>
+            <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
         <div class="portal-project-card portal-shadow">
           <h3>Geographic Distribution</h3>
           <div class="data-list" id="geo-distribution">
-            <div class="data-item"><span class="data-label">Loading...</span></div>
+            <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
         <div class="portal-project-card portal-shadow">
           <h3>Engagement Events</h3>
           <div class="data-list" id="engagement-events">
-            <div class="data-item"><span class="data-label">Loading...</span></div>
+            <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
       </div>
@@ -2372,17 +2371,22 @@ export function renderAnalyticsTab(container: HTMLElement): void {
               <table class="admin-table visitors-table">
                 <thead>
                   <tr>
-                    <th scope="col">Session ID</th>
-                    <th scope="col">Started</th>
-                    <th scope="col">Duration</th>
-                    <th scope="col">Pages</th>
-                    <th scope="col">Device</th>
-                    <th scope="col">Location</th>
+                    <th scope="col" class="slug-col">Session ID</th>
+                    <th scope="col" class="date-col">Started</th>
+                    <th scope="col" class="type-col">Duration</th>
+                    <th scope="col" class="count-col">Pages</th>
+                    <th scope="col" class="type-col">Device</th>
+                    <th scope="col" class="name-col">Location</th>
                   </tr>
                 </thead>
                 <tbody id="visitors-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-                  <tr>
-                    <td colspan="6" class="loading-row">Loading visitor data...</td>
+                  <tr class="loading-row">
+                    <td colspan="6" class="loading-row">
+                      <div class="loading-state">
+                        <span class="loading-spinner" aria-hidden="true"></span>
+                        <span class="loading-message">Loading...</span>
+                      </div>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -2404,7 +2408,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
           </button>
         </div>
         <div class="reports-list" id="saved-reports-list">
-          <div class="loading-text">Loading reports...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       </div>
 
@@ -2414,7 +2418,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
           <h3>Scheduled Reports</h3>
         </div>
         <div class="reports-list" id="scheduled-reports-list">
-          <div class="loading-text">Loading scheduled reports...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       </div>
 
@@ -2427,7 +2431,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
           </button>
         </div>
         <div class="alerts-list" id="metric-alerts-list">
-          <div class="loading-text">Loading alerts...</div>
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       </div>
 

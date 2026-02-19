@@ -317,21 +317,23 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
       (r) => `
     <tr data-request-id="${r.id}">
       ${createRowCheckbox('document-requests', r.id)}
-      <td>${escapeHtml(r.title)}</td>
-      <td>${escapeHtml(SanitizationUtils.decodeHtmlEntities(r.client_name ?? String(r.client_id)))}</td>
-      <td>${SanitizationUtils.capitalizeName(r.document_type || '')}</td>
-      <td>${statusLabel(r.status)}</td>
-      <td>${formatDate(r.due_date)}</td>
-      <td class="actions-cell">
-        <button type="button" class="icon-btn dr-view" data-id="${r.id}" title="View" aria-label="View">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-        ${r.status === 'uploaded' ? `<button type="button" class="icon-btn dr-start-review" data-id="${r.id}" title="Start review" aria-label="Start review"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>` : ''}
-        ${r.status === 'under_review' ? `<button type="button" class="icon-btn icon-btn-success dr-approve" data-id="${r.id}" title="Approve" aria-label="Approve"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></button><button type="button" class="icon-btn icon-btn-danger dr-reject" data-id="${r.id}" title="Reject" aria-label="Reject"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></button>` : ''}
-        ${r.status !== 'approved' && r.status !== 'rejected' ? `<button type="button" class="icon-btn dr-remind" data-id="${r.id}" title="Send reminder" aria-label="Send reminder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>` : ''}
-        <button type="button" class="icon-btn icon-btn-danger dr-delete" data-id="${r.id}" data-title="${escapeHtml(r.title)}" title="Delete" aria-label="Delete">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        </button>
+      <td class="name-cell" data-label="Title">${escapeHtml(r.title)}</td>
+      <td class="name-cell" data-label="Client">${escapeHtml(SanitizationUtils.decodeHtmlEntities(r.client_name ?? String(r.client_id)))}</td>
+      <td class="type-cell" data-label="Type">${SanitizationUtils.capitalizeName(r.document_type || '')}</td>
+      <td class="status-cell" data-label="Status">${statusLabel(r.status)}</td>
+      <td class="date-cell" data-label="Due">${formatDate(r.due_date)}</td>
+      <td class="actions-cell" data-label="Actions">
+        <div class="table-actions">
+          <button type="button" class="icon-btn dr-view" data-id="${r.id}" title="View" aria-label="View">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          ${r.status === 'uploaded' ? `<button type="button" class="icon-btn dr-start-review" data-id="${r.id}" title="Start review" aria-label="Start review"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>` : ''}
+          ${r.status === 'under_review' ? `<button type="button" class="icon-btn icon-btn-success dr-approve" data-id="${r.id}" title="Approve" aria-label="Approve"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></button><button type="button" class="icon-btn icon-btn-danger dr-reject" data-id="${r.id}" title="Reject" aria-label="Reject"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></button>` : ''}
+          ${r.status !== 'approved' && r.status !== 'rejected' ? `<button type="button" class="icon-btn dr-remind" data-id="${r.id}" title="Send reminder" aria-label="Send reminder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>` : ''}
+          <button type="button" class="icon-btn icon-btn-danger dr-delete" data-id="${r.id}" data-title="${escapeHtml(r.title)}" title="Delete" aria-label="Delete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
       </td>
     </tr>
   `
@@ -401,10 +403,10 @@ function openCreateModal(_ctx: AdminDashboardContext): void {
   // Load templates for templates tab
   const listEl = el('dr-templates-list');
   if (listEl) {
-    listEl.innerHTML = '<p class="loading-message">Loading templates...</p>';
+    listEl.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
     loadTemplates().then((templates) => {
       if (templates.length === 0) {
-        listEl.innerHTML = '<p class="empty-message">No templates available. Use Single Request tab.</p>';
+        listEl.innerHTML = '<div class="empty-state">No templates available. Use Single Request tab.</div>';
         return;
       }
       listEl.innerHTML = templates
@@ -557,7 +559,7 @@ function openDetailModal(requestId: number, ctx: AdminDashboardContext): void {
   if (!modal || !titleEl || !bodyEl || !footerEl) return;
 
   titleEl.textContent = 'Document Request';
-  bodyEl.innerHTML = '<p class="loading-message">Loading...</p>';
+  bodyEl.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   footerEl.innerHTML = '';
   openModalOverlay(modal);
   drDetailModalFocusCleanup = manageFocusTrap(modal, {});
@@ -966,8 +968,13 @@ export function renderDocumentRequestsTab(container: HTMLElement): void {
             </tr>
           </thead>
           <tbody id="document-requests-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr>
-              <td colspan="7" class="loading-row">Loading requests...</td>
+            <tr class="loading-row">
+              <td colspan="7">
+                <div class="loading-state">
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span class="loading-message">Loading requests...</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>

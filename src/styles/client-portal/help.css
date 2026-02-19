@@ -174,13 +174,11 @@
 [data-page="client-portal"] .help-content-layout {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 [data-page="client-portal"] .help-main-grid {
   display: grid;
   grid-template-columns: minmax(220px, 280px) 1fr;
-  gap: var(--space-3);
   padding: var(--space-3);
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
@@ -512,11 +510,9 @@
   margin-bottom: var(--space-2);
 }
 
+/* h3 styling from unified rule in portal-cards.css - only layout here */
 [data-page="client-portal"] .help-results-header h3 {
   margin: 0;
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
-  color: var(--portal-text-light);
 }
 
 [data-page="client-portal"] .help-results-list {
@@ -610,11 +606,11 @@
   margin: 0 0 var(--space-1-5) 0;
 }
 
+/* h3 styling from unified rule in portal-cards.css - only layout here */
 [data-page="client-portal"] .help-article-body h2,
 [data-page="client-portal"] .help-article-body h3,
 [data-page="client-portal"] .help-article-body h4 {
   margin: var(--space-2) 0 var(--space-1) 0;
-  color: var(--portal-text-light);
 }
 
 [data-page="client-portal"] .help-article-body ul,

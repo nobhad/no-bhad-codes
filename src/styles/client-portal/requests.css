@@ -4,7 +4,6 @@
 
 [data-page="client-portal"] .requests-grid {
   display: grid;
-  gap: var(--space-3);
 }
 
 @media (min-width: 960px) {

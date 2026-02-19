@@ -295,40 +295,235 @@ button[aria-busy="true"] .loading-spinner {
 }
 
 /* ========================================
-   Error States
+   Error States - UNIVERSAL for all tables
    ======================================== */
 
-/* Error state in table row */
-.error-row {
-  text-align: center;
-  padding: 2rem 1rem;
+/* ========================================
+   LOADING/ERROR/EMPTY STATES - UNIVERSAL
+   Single source of truth for ALL table and container states
+   ======================================== */
+
+/* Error/Loading/Empty row in tables - spans full width, content centered */
+/* Use high specificity to override any table cell styles */
+tr.error-row td,
+tr.loading-row td,
+tr.empty-row td,
+td.error-row,
+td.loading-row,
+td.empty-row,
+td.empty-cell,
+td.loading-cell,
+td.error-cell,
+div.empty-row,
+div.loading-row,
+div.error-row,
+[data-page="admin"] .admin-table td.error-row,
+[data-page="admin"] .admin-table td.loading-row,
+[data-page="admin"] .admin-table td.empty-row,
+[data-page="admin"] .admin-table td.empty-cell,
+[data-page="admin"] .admin-table tr.error-row td,
+[data-page="admin"] .admin-table tr.loading-row td,
+[data-page="admin"] .admin-table tr.empty-row td,
+[data-page="admin"] .admin-table tbody td[colspan],
+[data-page="client-portal"] table td[colspan] {
+  text-align: center !important;
+  color: var(--portal-text-secondary);
+  padding: var(--space-4);
+  background: transparent;
+}
+
+/* Loading row should span full table width using colspan */
+/* The .loading-state inside should be centered */
+tr.loading-row,
+tr.error-row,
+tr.empty-row {
+  width: 100%;
+}
+
+tr.loading-row > td,
+tr.error-row > td,
+tr.empty-row > td {
+  /* Ensure the cell takes full width */
+  width: 100%;
 }
 
 /* Error row should have rounded bottom corners to match card */
-td.error-row {
+td.error-row,
+td.loading-row,
+td.empty-row {
   border-bottom-left-radius: var(--portal-radius-lg, 12px);
   border-bottom-right-radius: var(--portal-radius-lg, 12px);
 }
 
-.error-state {
+/* Error/Loading/Empty state container - UNIVERSAL centering for ALL contexts */
+.error-state,
+.loading-state,
+.empty-state,
+.empty-message,
+.empty-state-message,
+.empty-state-small,
+.task-list-empty,
+.leads-item-empty,
+.activity-item-empty,
+.version-empty,
+.discount-empty,
+.signature-empty,
+.empty-hint,
+[class*="-empty"] {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
+  padding: var(--space-4);
+  /* Fill parent width so centering works in table cells */
+  width: 100%;
+  min-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  /* Ensure it's centered if parent doesn't use flex */
+  margin: 0 auto;
+  color: var(--portal-text-secondary, var(--color-text-muted, #888));
+  font-size: var(--font-size-sm, 0.875rem);
 }
 
-.error-icon {
+/* Loading/Error/Empty state inside table cells - fill the cell completely */
+td .loading-state,
+td .error-state,
+td .empty-state,
+td[colspan] .loading-state,
+td[colspan] .error-state,
+td[colspan] .empty-state {
+  width: 100%;
+  /* Override base padding for balanced symmetric spacing in tables */
+  padding: var(--space-4);
+}
+
+/* Ensure p tags inside loading/error/empty states don't affect centering */
+.loading-state p,
+.error-state p,
+.empty-state p {
+  margin: 0;
+  text-align: center;
+}
+
+/* Handle loading-state directly on td (initial HTML pattern) */
+/* Override flex display - td elements should not be flex containers */
+td.loading-state,
+td.loading-row.loading-state {
+  display: table-cell !important;
+  text-align: center !important;
+  vertical-align: middle;
+}
+
+td.loading-state p,
+td.loading-row.loading-state p {
+  margin: 0;
+  display: inline-block;
+}
+
+/* Paragraph empty states - simpler display, no flex needed */
+p.empty-state,
+p.empty-message,
+p.empty-state-message {
+  display: block;
+  padding: var(--space-4);
+}
+
+/* List containers with empty/loading/error states - ensure proper display */
+.files-list:has(.empty-state, .loading-state, .error-state),
+.invoices-list:has(.empty-state, .loading-state, .error-state),
+.milestones-list:has(.empty-state, .loading-state, .error-state),
+.deliverables-list:has(.empty-state, .loading-state, .error-state),
+.messages-thread:has(.empty-state, .loading-state, .error-state),
+.scheduled-list:has(.empty-state, .loading-state, .error-state),
+.recurring-list:has(.empty-state, .loading-state, .error-state),
+.activity-list:has(.empty-state, .loading-state, .error-state),
+.notes-list:has(.empty-state, .loading-state, .error-state),
+.client-projects-list:has(.empty-state, .loading-state, .error-state),
+.client-invoices-list:has(.empty-state, .loading-state, .error-state),
+[id$="-list"]:has(.empty-state, .loading-state, .error-state) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+/* Empty state inside list containers - ensure consistent sizing */
+.files-list > .empty-state,
+.invoices-list > .empty-state,
+.milestones-list > .empty-state,
+.deliverables-list > .empty-state,
+.messages-thread > .empty-state,
+.scheduled-list > .empty-state,
+.recurring-list > .empty-state,
+[id$="-list"] > .empty-state {
+  min-height: 80px;
+  padding: var(--space-4);
+}
+
+/* Loading state with automatic spinner */
+.loading-state::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--portal-border-dark, rgba(255, 255, 255, 0.2));
+  border-top-color: var(--color-primary, #ef4444);
+  border-radius: 50%;
+  animation: loading-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Skip spinner if loading-state already has a spinner child */
+.loading-state:has(.loading-spinner)::before,
+.loading-state:has(svg)::before {
+  display: none;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error state with automatic icon */
+.error-state::before {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 48px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/%3E%3Cline x1='12' y1='9' x2='12' y2='13'/%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+/* Skip icon if error-state already has an icon child */
+.error-state:has(.error-state-icon)::before,
+.error-state:has(.error-icon)::before,
+.error-state:has(svg)::before {
+  display: none;
+}
+
+.error-icon,
+.error-state-icon {
   font-size: 1.25rem;
-  color: var(--color-danger, #dc2626);
+  color: var(--color-warning, var(--color-danger, #dc2626));
 }
 
-.error-icon--large {
+.error-icon--large,
+.error-state-icon--large {
   font-size: 2rem;
 }
 
-.error-message {
-  color: var(--color-text-muted, #888);
-  font-size: 0.875rem;
+.error-message,
+.error-state-message,
+.empty-state-message {
+  color: var(--portal-text-secondary, var(--color-text-muted, #888));
+  font-size: var(--font-size-sm, 0.875rem);
   margin: 0;
 }
 
@@ -338,31 +533,38 @@ td.error-row {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: var(--space-4, 2rem);
   min-height: 150px;
   gap: 0.75rem;
   text-align: center;
 }
 
-/* Retry button */
-.btn-retry {
-  margin-top: 0.5rem;
-  padding: 0.375rem 0.75rem;
-  font-size: 0.75rem;
-  background: var(--color-bg-tertiary, #3a3a3a);
-  color: var(--color-text, #f5f5f5);
-  border: 1px solid var(--color-border, #555);
-  border-radius: 4px;
+/* Retry button - universal for all error states */
+.btn-retry,
+.error-state-retry {
+  margin-top: var(--space-1, 0.5rem);
+  padding: var(--space-0-5, 0.375rem) var(--space-1-5, 0.75rem);
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: transparent;
+  color: var(--portal-text-primary, var(--color-text, #f5f5f5));
+  border: 1px solid var(--portal-border, var(--color-border, #555));
+  border-radius: var(--portal-radius-sm, 4px);
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: all var(--transition-fast, 0.2s ease);
 }
 
-.btn-retry:hover {
-  background: var(--color-bg-hover, #444);
+.btn-retry:hover,
+.error-state-retry:hover {
+  background: var(--portal-bg-hover, rgba(255, 255, 255, 0.1));
   border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
-.btn-retry:focus {
+.btn-retry:focus,
+.error-state-retry:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }

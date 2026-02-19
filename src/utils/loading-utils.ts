@@ -15,10 +15,12 @@
  */
 export function getTableLoadingRow(colspan: number, message: string = 'Loading...'): string {
   return `
-    <tr>
-      <td colspan="${colspan}" class="loading-row loading-state">
-        <span class="loading-spinner" aria-hidden="true"></span>
-        <span>${message}</span>
+    <tr class="loading-row">
+      <td colspan="${colspan}" class="loading-row">
+        <div class="loading-state">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <span class="loading-message">${message}</span>
+        </div>
       </td>
     </tr>
   `;
@@ -57,9 +59,11 @@ function escapeHtml(text: string): string {
  */
 export function getTableEmptyRow(colspan: number, message: string): string {
   return `
-    <tr>
-      <td colspan="${colspan}" class="loading-row empty-state">
-        <span>${escapeHtml(message)}</span>
+    <tr class="empty-row">
+      <td colspan="${colspan}" class="empty-row">
+        <div class="empty-state">
+          <span class="empty-state-message">${escapeHtml(message)}</span>
+        </div>
       </td>
     </tr>
   `;

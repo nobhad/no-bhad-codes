@@ -7,67 +7,8 @@
  * Charts, performance metrics, vitals, and analytics dashboard.
  */
 
-/* ============================================
-   Analytics Sub-Tabs
-   ============================================ */
-
-/* Analytics subtabs are now in the portal-page-header
-   Visibility controlled by :has() selector in client-portal/layout.css */
-
-.analytics-subtab {
-  padding: var(--space-1) var(--space-2);
-  background: transparent;
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-md);
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.analytics-subtab:hover {
-  background: var(--portal-bg-medium);
-  color: var(--portal-text-primary);
-}
-
-.analytics-subtab.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-white);
-}
-
-.analytics-subtab-content {
-  display: none;
-}
-
-.analytics-subtab-content.active {
-  display: block;
-}
-
-/* Consistent spacing between sections within sub-tabs */
-.analytics-subtab-content > .analytics-section,
-/* Spacing in analytics subtab content controlled by > * + * rule */
-.analytics-subtab-content > * + * {
-  margin-top: var(--space-3);
-}
-
-/* ============================================
-   Unified Analytics Card Styling
-   Match System tab pattern for consistency
-   ============================================ */
-
-/* Standardized heading for all analytics cards */
-[data-page="admin"] #tab-analytics .portal-project-card > h3:first-child,
-[data-page="admin"] #tab-analytics .portal-project-card > .section-header-with-actions h3 {
-  font-family: var(--font-family-acme);
-  font-size: 1.1rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--portal-text-light);
-  margin: 0 0 var(--space-1-5) 0;
-}
+/* Analytics subtab styling moved to shared/portal-layout.css and portal-tabs.css */
+/* h3 styling centralized in admin.css */
 
 /* Unified 2-column grid for analytics cards */
 .analytics-card-grid {
@@ -115,12 +56,7 @@
   padding: var(--space-4);
 }
 
-.chart-container h3 {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin: 0 0 var(--space-3) 0;
-}
+/* h3 styling centralized in admin.css */
 
 /* Legacy .chart class - remove nested shadow when inside portal-project-card */
 .chart {
@@ -158,12 +94,7 @@
   margin-top: var(--space-2);
 }
 
-.metric-group h3 {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--space-2);
-}
+/* h3 styling centralized in admin.css */
 
 .vitals-grid {
   display: grid;
@@ -245,7 +176,6 @@
 .bundle-info {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 .bundle-item {
@@ -294,8 +224,7 @@
 .analytics-breakdown {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--portal-section-gap);
 }
 
 /* Match portal card styling (overview-card, portal-project-card) */
@@ -309,7 +238,7 @@
 }
 
 .analytics-breakdown-title {
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--portal-text-light);
@@ -344,12 +273,7 @@
   box-shadow: var(--shadow-panel);
 }
 
-.analytics-section h3 {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin: 0 0 var(--space-3) 0;
-}
+/* h3 styling centralized in admin.css */
 
 .data-list {
   display: flex;
@@ -393,7 +317,6 @@
 .kpi-cards-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-3);
 }
 
 /* Same styling as .stat-card (portal-cards.css) */
@@ -429,23 +352,16 @@
   gap: var(--space-0-5);
 }
 
-/* Match .stat-number */
+/* .kpi-card-value base styling from unified rule in portal-cards.css */
+/* Analytics-specific: use primary color for emphasis */
 .kpi-card-value {
-  display: block;
-  font-family: var(--font-family-acme);
-  font-size: 2rem;
-  font-weight: 700;
   color: var(--color-primary);
-  line-height: 1;
 }
 
-/* Match .stat-label */
+/* Label styling from unified rule in portal-forms.css - only layout here */
 .kpi-card-label {
   display: block;
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
   margin-top: var(--space-1);
-  text-transform: uppercase;
 }
 
 .kpi-card-change {
@@ -470,9 +386,7 @@
   color: var(--status-cancelled);
 }
 
-.kpi-card-change-label {
-  color: var(--portal-text-muted);
-}
+/* Label styling from unified rule in portal-forms.css */
 
 /* ============================================
    Analytics Section Headers
@@ -484,12 +398,7 @@
   border-bottom: 1px solid var(--portal-border);
 }
 
-.analytics-section-header h3 {
-  color: var(--portal-text-primary);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin: 0;
-}
+/* h3 styling centralized in admin.css */
 
 /* ============================================
    Business Charts Grid
@@ -521,7 +430,7 @@
   align-items: center;
   gap: var(--space-0-5);
   padding: var(--space-1-5);
-  background: var(--portal-bg-light);
+  background: transparent;
   border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-md);
   min-width: 110px;
@@ -529,23 +438,23 @@
 }
 
 .funnel-stage[data-stage="new"] {
-  border-color: var(--status-new);
+  border: 1px solid var(--status-new);
 }
 
 .funnel-stage[data-stage="contacted"] {
-  border-color: var(--status-pending);
+  border: 1px solid var(--status-pending);
 }
 
 .funnel-stage[data-stage="qualified"] {
-  border-color: var(--status-active);
+  border: 1px solid var(--status-active);
 }
 
 .funnel-stage[data-stage="proposal"] {
-  border-color: var(--status-on-hold);
+  border: 1px solid var(--status-qualified);
 }
 
 .funnel-stage-value {
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--portal-text-primary);
@@ -564,19 +473,13 @@
 }
 
 .funnel-stage[data-stage="proposal"] .funnel-stage-value {
-  color: var(--status-on-hold);
+  color: var(--status-qualified);
 }
 
-.funnel-stage-label {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-}
+/* Label styling from unified rule in portal-forms.css */
 
 .funnel-stage-success {
-  background: var(--portal-bg-light);
+  background: transparent;
   border: 1px solid var(--status-completed);
 }
 
@@ -622,13 +525,7 @@
   margin-bottom: var(--space-1-5);
 }
 
-.section-header-with-actions h3 {
-  color: var(--portal-text-primary);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin: 0;
-  line-height: 1;
-}
+/* h3 styling centralized in admin.css */
 
 .section-header-with-actions .icon-btn {
   flex-shrink: 0;
@@ -743,18 +640,9 @@
     gap: var(--space-2);
   }
 
-  .kpi-card-value {
-    font-size: 1.25rem;
-  }
+  /* .kpi-card-value font-size controlled by portal-cards.css */
 
-  /* Consistent spacing between analytics sections - use margin-top like tab-content */
-  .analytics-subtab-content > * {
-    margin-bottom: 0;
-  }
-
-  .analytics-subtab-content > * + * {
-    margin-top: var(--space-2);
-  }
+  /* Subtab content spacing moved to shared/portal-tabs.css */
 
   .business-charts-grid {
     grid-template-columns: 1fr;
@@ -842,10 +730,8 @@
   50% { opacity: 1; }
 }
 
+/* Label styling from unified rule in portal-forms.css - only layout here */
 .health-label {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--portal-text-primary);
   flex: 1;
 }
 
@@ -859,12 +745,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1-5);
-}
-
-.quick-actions-grid .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
 }
 
 .quick-actions-grid .btn svg {

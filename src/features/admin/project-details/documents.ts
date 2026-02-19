@@ -10,6 +10,7 @@
 import { apiFetch, apiPost, parseApiResponse } from '../../../utils/api-client';
 import { showToast } from '../../../utils/toast-notifications';
 import { alertError, alertSuccess, confirmDialog } from '../../../utils/confirm-dialog';
+import { ICONS } from '../../../constants/icons';
 
 // ============================================
 // Project Report Functions
@@ -222,6 +223,7 @@ export async function showDocumentGenerationModal(
     id: 'document-generation-modal',
     titleId: 'document-generation-title',
     title: 'Generate Documents',
+    icon: ICONS.DOCUMENT,
     contentClassName: 'document-generation-modal',
     onClose: () => {
       modal.hide();

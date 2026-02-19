@@ -1,8 +1,56 @@
 # Current Work
 
-**Last Updated:** February 17, 2026
+**Last Updated:** February 18, 2026
 
 This file tracks active development work and TODOs. Completed items are archived in `archive/ARCHIVED_WORK_2026-02-12.md`.
+
+---
+
+## Session Summary - February 18, 2026 (Continued)
+
+Extended CSS consolidation session. Fixed spacing, row hover, sidebar nav, inline styles, and viewport height issues.
+
+**Key Fixes:**
+
+- **Spacing consistency**: Removed conflicting margin rules in workflows.css, admin.css (visitors-dashboard, overview-grid), admin-questionnaires.ts
+- **Sidebar nav highlight**: Fixed selector mismatch (`.sidebar-buttons .btn` → `.sidebar-nav-item`)
+- **Avatar size**: Added min/max dimensions to prevent size change when sidebar collapses
+- **Row hover consolidation**: Created `shared/portal-tables.css` with universal hover styles, removed duplicates from 6 files
+- **Inline styles cleanup**: Added utility classes (`.loading-message`, `.empty-state-message`, `.grid-2col`) to portal-components.css
+- **Grey bar at bottom fix**: Separated admin/client-portal height rules - admin uses full 100vh (no global header), client-portal uses calc(100vh - 56px)
+- **Collapsed avatar alignment**: Fixed centering with proper margin auto and width: 100%
+
+**Files Created:**
+
+- `src/styles/shared/portal-tables.css` - Universal table row hover/active/focused styles
+
+**Files Modified:**
+
+- `src/styles/admin/workflows.css` - Removed margin-bottom from approval-dashboard-section
+- `src/styles/pages/admin.css` - Removed margin-top from visitors-dashboard, margin-bottom from overview-grid, duplicate hover rules, fixed collapsed avatar alignment
+- `src/styles/admin/project-detail.css` - Removed duplicate hover rules
+- `src/styles/admin/tasks.css` - Removed duplicate hover rule
+- `src/styles/admin/pd-invoices.css` - Removed duplicate hover rule
+- `src/styles/shared/portal-files.css` - Removed duplicate hover rule
+- `src/styles/shared/portal-layout.css` - Added min/max dimensions to logo img, separated admin/client-portal height rules for sidebar and dashboard-content
+- `src/styles/shared/portal-components.css` - Added utility classes
+- `src/styles/bundles/admin.css` - Added height: 100vh and overflow: hidden to body for admin logged-in state
+- `src/features/admin/admin-dashboard.ts` - Fixed sidebar nav selector, replaced inline styles
+- `src/features/admin/modules/admin-messaging.ts` - Replaced inline styles with CSS classes
+- `src/features/admin/modules/admin-questionnaires.ts` - Removed inline margin-top style
+
+---
+
+## Session Summary - February 18, 2026 (Earlier)
+
+CSS consolidation session. Moved admin-specific overrides to shared stylesheets, fixed spacing inconsistencies between tabs.
+
+**Key Changes:**
+
+- Consolidated stat-card and page-header styles to shared files
+- Fixed flex gap vs margin-top conflicts causing double spacing
+- Removed duplicate breadcrumb, grid gap, and typography rules
+- Identified Tasks tab as needing design review (not cohesive with rest)
 
 ---
 
@@ -15,11 +63,16 @@ Major admin portal redesign session. All changes awaiting testing.
 | File | Purpose |
 |------|---------|
 | `src/styles/admin/overview-layout.css` | Overview tab layout redesign |
-| `src/styles/admin/page-header-refinements.css` | Breadcrumb, header tab styling |
 | `src/styles/admin/sidebar-refinements.css` | Mobile drawer, tooltips, accent bar |
-| `src/styles/admin/stat-card-refinements.css` | Top accent line on cards |
 | `src/styles/admin/visual-fixes.css` | Shadow reduction, page header fix, task priority fix |
 | `src/styles/shared/modal-system.css` | Unified modal system |
+
+### Files Deleted (Consolidated to Shared)
+
+| File | Moved To |
+|------|----------|
+| `src/styles/admin/page-header-refinements.css` | `shared/portal-layout.css` |
+| `src/styles/admin/stat-card-refinements.css` | `shared/portal-cards.css` |
 
 ### Files Modified This Session
 
@@ -225,6 +278,31 @@ Unified `.modal-overlay` and `.admin-modal-overlay` into single consistent syste
 | Time to navigate sections | < 500ms with keyboard |
 | Mouse usage | < 50% for power users |
 | Loading spinners shown | Zero (skeleton states only) |
+
+---
+
+## Active Concerns
+
+### Tasks Tab Styling Not Cohesive with Rest of Admin Portal
+
+**Status:** Needs Design Review
+**Priority:** Medium
+
+The Tasks tab (Work > Tasks) has a visually different layout compared to other tabs:
+
+1. **No stat cards** - Projects/Leads/Clients have stat cards at top; Tasks jumps straight to kanban
+2. **Kanban board takes full width** - Other tabs use table layouts with consistent card styling
+3. **Colored top borders on columns** - Red/yellow/green borders feel visually different from the rest of the portal
+4. **"ALL TASKS" heading style** - Different from other section headings
+
+**Possible solutions:**
+
+- [ ] Add stat cards to Tasks tab (To Do, In Progress, Blocked, Done counts) for consistency
+- [ ] Review kanban column styling to match portal card system
+- [ ] Consider if Tasks should have same structure as other Work subtabs
+- [ ] Evaluate if colored column borders align with Linear-inspired design
+
+**Reference:** Screenshot shows the visual disconnect between Tasks kanban and other tabs.
 
 ---
 

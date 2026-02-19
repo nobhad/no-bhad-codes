@@ -305,8 +305,13 @@ export function renderClientsTab(container: HTMLElement): void {
             </tr>
           </thead>
           <tbody id="clients-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr>
-              <td colspan="8" class="loading-row">Loading clients...</td>
+            <tr class="loading-row">
+              <td colspan="8">
+                <div class="loading-state">
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span class="loading-message">Loading clients...</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -511,7 +516,7 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
   if (!tableBody) return;
 
   if (!clients || clients.length === 0) {
-    showTableEmpty(tableBody, 7, 'No clients yet.');
+    showTableEmpty(tableBody, 8, 'No clients yet.');
     renderPaginationUI(0, ctx);
     return;
   }
@@ -520,7 +525,7 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
   const filteredClients = applyFilters(clients, filterState, CLIENTS_FILTER_CONFIG);
 
   if (filteredClients.length === 0) {
-    showTableEmpty(tableBody, 7, 'No clients match the current filters. Try adjusting your filters.');
+    showTableEmpty(tableBody, 8, 'No clients match the current filters. Try adjusting your filters.');
     renderPaginationUI(0, ctx);
     return;
   }

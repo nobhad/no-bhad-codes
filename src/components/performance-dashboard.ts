@@ -309,7 +309,7 @@ export class PerformanceDashboard extends BaseComponent<
       .perf-dashboard__title {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: var(--icon-gap-md);
         font-weight: 600;
       }
 
@@ -344,7 +344,7 @@ export class PerformanceDashboard extends BaseComponent<
 
       .perf-dashboard__controls {
         display: flex;
-        gap: 4px;
+        gap: var(--icon-gap-xs);
       }
 
       .perf-dashboard__btn {

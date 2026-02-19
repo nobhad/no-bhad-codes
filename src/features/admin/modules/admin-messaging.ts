@@ -151,7 +151,7 @@ export function renderMessagesTab(container: HTMLElement): void {
 
         <!-- Messages Thread -->
         <div class="messages-thread" id="admin-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
-          <p class="empty-state">No conversation selected</p>
+          <div class="empty-state">No conversation selected</div>
         </div>
 
         <!-- Compose Message -->
@@ -189,7 +189,7 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
   if (!threadList) return;
 
   // Show loading state
-  threadList.innerHTML = '<div class="loading-state"><p>Loading...</p></div>';
+  threadList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     // Fetch both clients and threads in parallel
@@ -452,7 +452,7 @@ export async function loadThreadMessages(
   container.setAttribute('aria-live', 'polite');
 
   container.innerHTML =
-    '<div style="text-align: center; padding: 2rem;">Loading messages...</div>';
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     // Add cache-busting parameter when needed (e.g., after sending a message)
@@ -469,12 +469,12 @@ export async function loadThreadMessages(
       await apiPut(`/api/messages/threads/${threadId}/read`);
     } else {
       container.innerHTML =
-        '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">Failed to load messages</div>';
+        '<div class="empty-state">Failed to load messages</div>';
     }
   } catch (error) {
     console.error('[AdminMessaging] Failed to load messages:', error);
     container.innerHTML =
-      '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">Error loading messages</div>';
+      '<div class="empty-state">Error loading messages</div>';
   }
 }
 
@@ -509,7 +509,7 @@ function renderAdminMessageAttachments(attachments: { filename: string; original
 function renderMessages(messages: Message[], container: HTMLElement): void {
   if (messages.length === 0) {
     container.innerHTML =
-      '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">No messages yet. Start the conversation!</div>';
+      '<div class="empty-state">No messages yet. Start the conversation!</div>';
     return;
   }
 

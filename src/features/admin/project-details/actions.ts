@@ -21,6 +21,7 @@ import type { ProjectResponse } from '../../../types/api';
 import { initProjectModalDropdowns, setupEditProjectModalHandlers } from '../modules/admin-projects';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { createRichTextEditor, htmlToPlainText, plainTextToHTML, type RichTextEditorInstance } from '../../../components/rich-text-editor';
+import { ICONS } from '../../../constants/icons';
 
 /** Base project type for action functions - compatible with both LeadProject and ProjectResponse */
 interface ProjectBase {
@@ -394,6 +395,7 @@ export async function handleContractCountersign(
     id: 'contract-countersign-modal',
     titleId: 'contract-countersign-title',
     title: 'Countersign Contract',
+    icon: ICONS.PENCIL,
     contentClassName: 'contract-countersign-modal',
     onClose: () => {
       modal.hide();
@@ -562,6 +564,7 @@ export async function showContractBuilder(
     id: 'contract-builder-modal',
     titleId: 'contract-builder-title',
     title: 'Contract Builder',
+    icon: ICONS.FILE,
     onClose: () => modal.hide()
   });
 

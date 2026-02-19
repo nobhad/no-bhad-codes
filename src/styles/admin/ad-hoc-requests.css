@@ -98,12 +98,7 @@
   align-items: center;
 }
 
-[data-page="admin"] .ad-hoc-time-entries-header h3 {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--portal-text-light);
-}
+/* h3 styling centralized in admin.css */
 
 [data-page="admin"] .ad-hoc-time-total {
   font-size: var(--font-size-xs);

@@ -82,11 +82,18 @@
    Layered styles cannot beat unlayered styles regardless of specificity. */
 body.admin-logged-in[data-page="admin"] {
   background-color: var(--portal-bg-medium);
+  /* Fixed height prevents body from growing beyond viewport */
+  height: 100vh;
+  height: 100dvh;
+  /* Prevent body scrolling - dashboard-content handles scroll */
+  overflow: hidden;
 }
 
 /* html background needs fallback since portal variables are scoped to body */
 html:has(body.admin-logged-in[data-page="admin"]) {
   background-color: var(--portal-bg-dark, #333333);
+  /* Fixed height to constrain body */
+  height: 100%;
 }
 
 /* Scrollbar styling */

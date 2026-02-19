@@ -13,6 +13,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import {
@@ -33,6 +34,7 @@ import {
   type PaginationState,
   type PaginationConfig
 } from '../../../utils/table-pagination';
+import { showTableEmpty } from '../../../utils/loading-utils';
 
 const REQUESTS_API = '/api/ad-hoc-requests';
 
@@ -153,7 +155,7 @@ function renderRequestsTable(ctx: AdminDashboardContext): void {
   const filtered = applyFilters(requestsCache, filterState, AD_HOC_REQUESTS_FILTER_CONFIG);
 
   if (filtered.length === 0) {
-    body.innerHTML = '<tr><td colspan="8" class="empty-row">No ad hoc requests found.</td></tr>';
+    showTableEmpty(body, 7, 'No ad hoc requests found.');
     renderPagination(0, ctx);
     return;
   }
@@ -171,22 +173,18 @@ function renderRequestsTable(ctx: AdminDashboardContext): void {
 
       return `
         <tr>
-          <td>
-            <div class="table-primary">${title}</div>
-            <div class="table-subtext">${typeLabel}</div>
-          </td>
-          <td>
-            <div class="table-primary">${clientName}</div>
-            <div class="table-subtext">${SanitizationUtils.escapeHtml(request.clientEmail || '')}</div>
-          </td>
-          <td>${projectName}</td>
-          <td>${priorityLabel}</td>
-          <td>${getStatusIndicator(request.status)}</td>
-          <td>${formatDate(request.createdAt)}</td>
-          <td class="actions-col">
-            <button class="icon-btn" data-action="view" data-id="${request.id}" title="View request" aria-label="View request">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
+          <td class="name-cell">${title} <span class="badge badge-muted">${typeLabel}</span></td>
+          <td class="name-cell">${clientName}</td>
+          <td class="name-cell">${projectName}</td>
+          <td class="type-cell">${priorityLabel}</td>
+          <td class="status-cell">${getStatusIndicator(request.status)}</td>
+          <td class="date-cell">${formatDate(request.createdAt)}</td>
+          <td class="actions-cell">
+            <div class="table-actions">
+              <button class="icon-btn" data-action="view" data-id="${request.id}" title="View request" aria-label="View request">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
           </td>
         </tr>
       `;
@@ -369,6 +367,7 @@ async function openInvoiceGenerationModal(request: AdHocRequest, onSuccess: () =
     id: 'ad-hoc-invoice-modal',
     titleId: 'ad-hoc-invoice-title',
     title: 'Generate Invoice',
+    icon: ICONS.RECEIPT,
     contentClassName: 'ad-hoc-invoice-modal',
     onClose: () => {
       modal.hide();
@@ -550,6 +549,7 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
     id: 'ad-hoc-request-modal',
     titleId: 'ad-hoc-request-title',
     title: 'Ad Hoc Request',
+    icon: ICONS.CLIPBOARD,
     contentClassName: 'ad-hoc-request-modal',
     onClose: () => {
       modal.hide();
@@ -866,18 +866,23 @@ export function renderAdHocRequestsTab(container: HTMLElement): void {
           <table class="admin-table ad-hoc-requests-table">
             <thead>
               <tr>
-                <th scope="col">Request</th>
-                <th scope="col" class="contact-col">Client</th>
-                <th scope="col">Project</th>
-                <th scope="col">Priority</th>
+                <th scope="col" class="name-col">Request</th>
+                <th scope="col" class="name-col">Client</th>
+                <th scope="col" class="name-col">Project</th>
+                <th scope="col" class="type-col">Priority</th>
                 <th scope="col" class="status-col">Status</th>
                 <th scope="col" class="date-col">Submitted</th>
                 <th scope="col" class="actions-col">Actions</th>
               </tr>
             </thead>
             <tbody id="ad-hoc-requests-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-              <tr>
-                <td colspan="7" class="loading-row">Loading requests...</td>
+              <tr class="loading-row">
+                <td colspan="7">
+                  <div class="loading-state">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span class="loading-message">Loading requests...</span>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>

@@ -19,7 +19,7 @@
 .toast {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--icon-gap-md);
   padding: var(--space-3) var(--space-4);
   background: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-dark);

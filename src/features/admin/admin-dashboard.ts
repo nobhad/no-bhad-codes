@@ -37,6 +37,7 @@ import { initCopyEmailDelegation, getCopyEmailButtonHtml, getEmailWithCopyHtml }
 import { closeAllModalOverlays } from '../../utils/modal-utils';
 import { initAdminCommandPalette, destroyAdminCommandPalette } from './admin-command-palette';
 import { initKeyboardHelp } from '../../components/keyboard-help';
+import { showTableEmpty } from '../../utils/loading-utils';
 
 // DOM element keys for caching
 type DashboardDOMKeys = Record<string, string>;
@@ -321,6 +322,9 @@ class AdminDashboard {
     // User is authenticated - show dashboard
     this.showDashboard();
 
+    // Update time-of-day greeting
+    this.updateGreeting();
+
     // Initialize navigation and theme modules
     await this.initializeModules();
 
@@ -578,6 +582,37 @@ class AdminDashboard {
     // Show initial breadcrumb (Dashboard)
     this.updateAdminBreadcrumbs(this.currentTab);
     this.updateActiveGroupState(getAdminGroupForTab(this.currentTab), this.currentTab);
+  }
+
+  /**
+   * Update the page header greeting based on time of day
+   * Only shown on the Overview tab
+   */
+  private updateGreeting(tab?: string): void {
+    const greetingEl = document.getElementById('page-header-greeting');
+    if (!greetingEl) return;
+
+    const currentTab = tab || this.currentTab;
+
+    // Only show greeting on Overview tab
+    if (currentTab !== 'overview') {
+      greetingEl.style.display = 'none';
+      return;
+    }
+
+    const hour = new Date().getHours();
+    let greeting: string;
+
+    if (hour < 12) {
+      greeting = 'Good morning';
+    } else if (hour < 17) {
+      greeting = 'Good afternoon';
+    } else {
+      greeting = 'Good evening';
+    }
+
+    greetingEl.innerHTML = `${greeting}, <b>Noelle</b>`;
+    greetingEl.style.display = '';
   }
 
   private async initializeModules(): Promise<void> {
@@ -915,8 +950,7 @@ class AdminDashboard {
     const tableBody = this.domCache.get('contactsTableBody');
     if (tableBody && data.submissions) {
       if (data.submissions.length === 0) {
-        tableBody.innerHTML =
-          '<tr><td colspan="6" class="loading-row">No contact form submissions yet</td></tr>';
+        showTableEmpty(tableBody, 6, 'No contact form submissions yet');
       } else {
         tableBody.innerHTML = data.submissions
           .map((submission: ContactSubmission) => {
@@ -1342,7 +1376,7 @@ class AdminDashboard {
     if (!container) return;
 
     container.innerHTML =
-      '<div style="text-align: center; padding: 2rem;">Loading messages...</div>';
+      '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
     try {
       // Backend endpoint: /api/messages/threads/:threadId/messages
@@ -1356,12 +1390,12 @@ class AdminDashboard {
         await apiPut(`/api/messages/threads/${threadId}/read`);
       } else {
         container.innerHTML =
-          '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">Failed to load messages</div>';
+          '<div class="empty-state-message">Failed to load messages</div>';
       }
     } catch (error) {
       console.error('[AdminDashboard] Failed to load messages:', error);
       container.innerHTML =
-        '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">Error loading messages</div>';
+        '<div class="empty-state-message">Error loading messages</div>';
     }
   }
 
@@ -1373,7 +1407,7 @@ class AdminDashboard {
 
     if (messages.length === 0) {
       container.innerHTML =
-        '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">No messages yet. Start the conversation!</div>';
+        '<div class="empty-state-message">No messages yet. Start the conversation!</div>';
       return;
     }
 
@@ -1539,7 +1573,8 @@ class AdminDashboard {
     document.body.dataset.activeGroup = activeGroup;
     document.body.dataset.activeTab = tabName;
 
-    document.querySelectorAll('.sidebar-buttons .btn[data-tab]').forEach((btn) => {
+    // Update sidebar nav items - match the actual HTML element class
+    document.querySelectorAll('.sidebar-nav-item[data-tab]').forEach((btn) => {
       const isActive = (btn as HTMLElement).dataset.tab === activeGroup;
       btn.classList.toggle('active', isActive);
       if (isActive) {
@@ -1579,6 +1614,9 @@ class AdminDashboard {
 
     // Update page title in unified header
     this.updateAdminPageTitle(activeTab);
+
+    // Update greeting (only shown on Overview tab)
+    this.updateGreeting(activeTab);
 
     // Update breadcrumb to match active section
     this.updateAdminBreadcrumbs(activeTab);

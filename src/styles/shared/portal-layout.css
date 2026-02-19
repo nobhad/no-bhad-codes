@@ -78,7 +78,7 @@ body:has([data-page="client-portal"]) {
   align-items: center;
   text-decoration: none;
   color: var(--portal-text-light);
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-weight: 400; /* ACME font doesn't need bold weight */
   font-size: 18px;
   text-transform: uppercase;
@@ -214,15 +214,188 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   margin-top: var(--portal-header-height, 56px);
 }
 
+/* =====================================================
+   SHARED HEADER ALIGNMENT
+   Ensures page title aligns with sidebar branding
+   Use --portal-header-top for consistent spacing
+   ===================================================== */
+
+:root {
+  --portal-header-top: 20px;
+  --portal-header-height-line: 32px;
+  --portal-nav-gap: 24px; /* Gap from branding/title to first nav item - aligns with sidebar Overview tab */
+}
+
+/* Dashboard content - top padding matches sidebar branding position */
+/* NO gap here - gap is applied inside tab-content to avoid extra space between header and content */
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-content {
+  display: flex;
+  flex-direction: column;
+  padding: var(--portal-header-top, 20px) 24px var(--space-3) 24px !important;
+}
+
+/* Page header - no extra spacing */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-page-header {
+  display: block;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent;
+}
+
+/* Page title - consistent height to match sidebar branding */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-page-header h1 {
+  line-height: var(--portal-header-height-line);
+  margin: 0;
+  padding: 0;
+}
+
+/* Portal header title - column layout, title on top, subtabs below */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+/* Header subtabs - align with first nav item in sidebar, LEFT aligned */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtabs {
+  display: flex;
+  align-items: center;
+  margin-top: var(--portal-nav-gap, 16px);
+  margin-left: 0;
+}
+
+/* Hide all header subtab groups by default */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtabs .header-subtab-group {
+  display: none;
+}
+
+/* Show header subtab groups based on active group - UNIVERSAL styling */
+[data-page="admin"][data-active-group="work"] .header-subtab-group[data-for-tab="work"],
+[data-page="admin"][data-active-group="crm"] .header-subtab-group[data-for-tab="crm"],
+[data-page="admin"][data-active-group="documents"] .header-subtab-group[data-for-tab="documents"],
+[data-page="admin"][data-active-group="support"] .header-subtab-group[data-for-tab="support"],
+[data-page="admin"][data-active-group="analytics"] .header-subtab-group[data-for-tab="analytics"],
+[data-page="admin"][data-active-group="workflows"] .header-subtab-group[data-for-tab="workflows"],
+[data-page="client-portal"][data-active-group="work"] .header-subtab-group[data-for-tab="work"],
+[data-page="client-portal"][data-active-group="docs"] .header-subtab-group[data-for-tab="docs"],
+[data-page="client-portal"][data-active-group="support"] .header-subtab-group[data-for-tab="support"],
+[data-page="admin"][data-active-tab="project-detail"] .header-subtab-group[data-for-tab="project-detail"],
+[data-page="admin"][data-active-tab="client-detail"] .header-subtab-group[data-for-tab="client-detail"] {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-bottom: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Show header controls based on active tab */
+[data-page="admin"][data-active-tab="tasks"] .header-controls[data-for-tab="tasks"],
+[data-page="admin"][data-active-tab="leads"] .header-controls[data-for-tab="leads"],
+[data-page="admin"][data-active-tab="knowledge-base"] .header-controls[data-for-tab="knowledge-base"] {
+  display: flex;
+}
+
+/* Header subtab groups - shared container styling (fallback) */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group {
+  gap: var(--space-1);
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-bottom: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Header subtab buttons - UNIVERSAL styling for ALL subtab types */
+/* All subtabs use .portal-subtab class - single source of truth */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group > button,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group .portal-subtab,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group .view-toggle button {
+  padding: var(--space-0-5) var(--space-1-5);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  margin: 0;
+  margin-bottom: 0;
+  box-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group > button:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group .portal-subtab:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group .view-toggle button:hover {
+  background: transparent;
+  color: var(--portal-text-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group > button.active,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group .portal-subtab.active,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group .view-toggle button.active {
+  background: transparent;
+  border-bottom: 2px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* View toggle in header - reset container styling */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group .view-toggle {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: none;
+}
+
+/* Tab content - UNIVERSAL top spacing below header subtabs */
+/* Gap between sections applied inside tab-content (single source of truth) */
+:is([data-page="admin"], [data-page="client-portal"]) .tab-content.active {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
+  padding-top: var(--space-3);
+}
+
+/* Subtab content panels inside tab-content - no additional padding (already inherited) */
+:is([data-page="admin"], [data-page="client-portal"]) .tab-content .portal-subtab-content,
+:is([data-page="admin"], [data-page="client-portal"]) .tab-content .analytics-subtab-content {
+  padding-top: 0;
+}
+
 /* Adjust dashboard container when using new layout */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-body .sidebar {
+/* Client portal: subtract header height since global header is visible */
+[data-page="client-portal"] .portal-body .sidebar {
   height: calc(100vh - var(--portal-header-height, 56px));
   min-height: calc(100vh - var(--portal-header-height, 56px));
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .portal-body .dashboard-content {
+[data-page="client-portal"] .portal-body .dashboard-content {
   height: calc(100vh - var(--portal-header-height, 56px));
   min-height: calc(100vh - var(--portal-header-height, 56px));
+}
+
+/* Admin: full viewport height (no global header visible) */
+[data-page="admin"] .portal-body .sidebar {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+[data-page="admin"] .portal-body .dashboard-content {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* =====================================================
@@ -258,12 +431,33 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* =====================================================
-   CONSISTENT SECTION SPACING
+   CONSISTENT SECTION SPACING - SINGLE SOURCE OF TRUTH
    Standard gap between major content sections
+   Applies to ALL portal pages universally
    ===================================================== */
 
-/* Base spacing for content sections - uniform 1.5rem gap */
-/* Spacing between containers is controlled by .tab-content.active > * + * in admin.css */
+/* UNIVERSAL SECTION GAP - applies to all flex-column and grid containers */
+:is([data-page="admin"], [data-page="client-portal"]) .tab-content.active,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-tab-panel.active,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-subtab-content.active,
+:is([data-page="admin"], [data-page="client-portal"]) .analytics-subtab-content.active,
+:is([data-page="admin"], [data-page="client-portal"]) .overview-linear,
+:is([data-page="admin"], [data-page="client-portal"]) .overview-grid,
+:is([data-page="admin"], [data-page="client-portal"]) .overview-col-main,
+:is([data-page="admin"], [data-page="client-portal"]) .overview-col-aside,
+:is([data-page="admin"], [data-page="client-portal"]) .overview-stats-strip,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-view-content,
+:is([data-page="admin"], [data-page="client-portal"]) #portal-view-content,
+:is([data-page="admin"], [data-page="client-portal"]) .content-cards,
+:is([data-page="admin"], [data-page="client-portal"]) .analytics-dashboard,
+:is([data-page="admin"], [data-page="client-portal"]) .analytics-breakdown,
+:is([data-page="admin"], [data-page="client-portal"]) .workflows-content,
+:is([data-page="admin"], [data-page="client-portal"]) .admin-table-card + .admin-table-card,
+:is([data-page="admin"], [data-page="client-portal"]) [class*="-grid"],
+:is([data-page="admin"], [data-page="client-portal"]) [class*="-stack"],
+:is([data-page="admin"], [data-page="client-portal"]) [class*="-layout"] {
+  gap: var(--portal-section-gap);
+}
 
 /* =====================================================
    BASE SECTION SYSTEM
@@ -292,7 +486,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 /* Section title - secondary heading within a page */
 :is([data-page="admin"], [data-page="client-portal"]) .portal-section-title {
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 0.9rem;
   font-weight: 400;
   color: var(--portal-text-muted);
@@ -304,7 +498,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 /* Content row - flex row with standard gap */
 :is([data-page="admin"], [data-page="client-portal"]) .portal-content-row {
   display: flex;
-  gap: var(--space-3);
   align-items: flex-start;
 }
 
@@ -312,14 +505,12 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 :is([data-page="admin"], [data-page="client-portal"]) .portal-content-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 /* Two-column layout - common for pages with sidebar */
 :is([data-page="admin"], [data-page="client-portal"]) .portal-two-column {
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: var(--space-3);
   align-items: start;
 }
 
@@ -332,6 +523,134 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   :is([data-page="admin"], [data-page="client-portal"]) .portal-content-row {
     flex-direction: column;
   }
+
+  /* Header subtabs wrap on mobile */
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group {
+    flex-wrap: wrap;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group > button,
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group .portal-subtab,
+  :is([data-page="admin"], [data-page="client-portal"]) .portal-header-title .header-subtab-group .view-toggle button {
+    font-size: var(--font-size-xs);
+    padding: var(--space-0-5) var(--space-1-5);
+  }
+}
+
+/* =====================================================
+   BREADCRUMB STYLING
+   Navigation breadcrumb trail styling
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb,
+:is([data-page="admin"], [data-page="client-portal"]) .page-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-muted);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb a,
+:is([data-page="admin"], [data-page="client-portal"]) .page-breadcrumb a {
+  color: var(--portal-text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb a:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .page-breadcrumb a:hover {
+  color: var(--color-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-separator {
+  color: var(--portal-bg-light);
+  font-size: 0.6rem;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-current,
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb li:last-child {
+  color: var(--portal-text-secondary);
+}
+
+/* Breadcrumb list pattern (client portal style) */
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-list {
+  color: var(--portal-text-secondary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-link {
+  color: var(--portal-text-secondary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-link:hover {
+  color: var(--portal-text-light);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-current {
+  color: var(--portal-text-light);
+  font-weight: 600;
+}
+
+/* =====================================================
+   PAGE HEADER TABS
+   Secondary tab navigation in page headers
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .page-header-tabs,
+:is([data-page="admin"], [data-page="client-portal"]) .tab-nav {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  border-bottom: 1px solid var(--portal-bg-medium);
+  flex-shrink: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .page-header-tabs .tab-btn,
+:is([data-page="admin"], [data-page="client-portal"]) .tab-nav .tab-btn {
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--portal-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .page-header-tabs .tab-btn:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .tab-nav .tab-btn:hover {
+  color: var(--portal-text-light);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .page-header-tabs .tab-btn.active,
+:is([data-page="admin"], [data-page="client-portal"]) .tab-nav .tab-btn.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* =====================================================
+   PAGE HEADER ACTIONS
+   Action buttons in page headers
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .page-header-actions,
+:is([data-page="admin"], [data-page="client-portal"]) .admin-table-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
 }
 
 /* =====================================================
@@ -343,14 +662,12 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 :is([data-page="admin"], [data-page="client-portal"]) .portal-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
 }
 
 /* 3-column grid */
 :is([data-page="admin"], [data-page="client-portal"]) .portal-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-3);
 }
 
 /* Responsive grids */
@@ -365,4 +682,387 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   :is([data-page="admin"], [data-page="client-portal"]) .portal-grid-3 {
     grid-template-columns: 1fr;
   }
+}
+
+/* =====================================================
+   SIDEBAR REFINEMENTS
+   Toggle button, collapsed states, tooltips, branding
+   ===================================================== */
+
+/* Sidebar width transition - smooth collapse */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar {
+  transition:
+    width var(--transition-medium),
+    min-width var(--transition-medium);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Toggle button styling */
+/* Base display/alignment/gap from reset.css universal icon-text rule */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-toggle-btn {
+  padding: var(--space-1-5) var(--space-2);
+  margin-bottom: var(--space-3);
+  min-height: 30px;
+  color: var(--portal-text-secondary);
+  opacity: 0.7;
+  justify-content: flex-start;
+  font-size: 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-sm);
+  cursor: pointer;
+  transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-toggle-btn:hover {
+  opacity: 1;
+  color: var(--portal-text-light);
+  background: var(--portal-bg-hover, rgba(255, 255, 255, 0.04));
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-toggle-btn.active,
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-toggle-btn:focus {
+  background: transparent;
+  color: var(--portal-text-secondary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-toggle-btn .btn-text {
+  display: inline;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+/* Collapsed toggle button */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-toggle-btn {
+  justify-content: center;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-toggle-btn .btn-text {
+  display: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-toggle-btn .btn-icon {
+  transform: scaleX(-1);
+  transition: transform var(--transition-medium);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-toggle-btn .btn-icon {
+  transform: scaleX(1);
+  transition: transform var(--transition-medium);
+}
+
+/* Keyboard shortcut badges */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-shortcut {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: transparent;
+  border: 1px solid var(--portal-bg-medium);
+  border-radius: 4px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--portal-text-muted);
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast), border-color var(--transition-fast);
+  opacity: 0.5;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn:hover .sidebar-shortcut {
+  opacity: 0.9;
+  border-color: var(--portal-bg-light);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn.active .sidebar-shortcut {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-shortcut {
+  display: none;
+}
+
+/* Collapsed state - center icons, hide text */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+  position: relative;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn .btn-text {
+  display: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn .btn-text {
+  display: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Tooltips on collapsed nav items */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--portal-bg-darker, #2a2a2a);
+  color: var(--portal-text-light);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--portal-radius-sm);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: var(--z-nav, 100);
+  box-shadow: var(--shadow-elevated-sm);
+  transition:
+    opacity var(--transition-faster),
+    visibility var(--transition-faster);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-toggle-btn::after {
+  display: none;
+}
+
+/* Logo transitions */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-logo,
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-collapsed-logo {
+  transition: opacity var(--transition-medium);
+}
+
+/* Nav item active state - left accent bar */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn.active {
+  position: relative;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  background: var(--color-primary);
+  border-radius: 0 2px 2px 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn.active::before {
+  display: none;
+}
+
+/* Sidebar branding - small avatar + text */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-body .sidebar .sidebar-logo,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-body .sidebar-logo,
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-logo {
+  display: none;
+}
+
+/* Base display/alignment/gap from reset.css universal icon-text rule */
+:is([data-page="admin"], [data-page="client-portal"]) .portal-body .sidebar .sidebar-collapsed-logo,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-body .sidebar.collapsed .sidebar-collapsed-logo,
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-collapsed-logo {
+  flex-direction: row;
+  height: var(--portal-header-height-line, 32px);
+  margin: var(--portal-header-top, 20px) 8px var(--portal-nav-gap, 24px) 36px;
+  padding: 0;
+  text-decoration: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-collapsed-logo-img {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  filter: invert(1);
+  flex-shrink: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-collapsed-logo::after {
+  content: 'NO BHAD CODES';
+  font-family: var(--font-family-acme, sans-serif);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-collapsed-logo::after {
+  display: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-collapsed-logo {
+  justify-content: center;
+  padding: 0;
+  margin: var(--portal-header-top, 20px) auto var(--portal-nav-gap, 24px);
+}
+
+/* Label styling from unified rule in portal-forms.css - only layout here */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-section-label {
+  padding: var(--space-2) 0 var(--space-1);
+  margin-bottom: 0;
+}
+
+/* Sidebar nav layout - toggle button at bottom */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-nav > .sidebar-section {
+  order: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-nav > .sidebar-toggle-btn {
+  order: 100;
+  margin-top: auto;
+}
+
+/* =====================================================
+   SIDEBAR RESPONSIVE
+   Mobile drawer, tablet auto-collapse
+   ===================================================== */
+
+@media (max-width: 767px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: var(--z-nav, 100);
+    transform: translateX(-100%);
+    transition: transform var(--transition-medium);
+    width: 240px;
+    min-width: 240px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed {
+    width: 240px;
+    min-width: 240px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn {
+    justify-content: flex-start;
+    padding: var(--space-1-5) var(--space-3);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn .btn-text {
+    display: inline;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-shortcut {
+    display: inline-flex;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: calc(var(--z-nav, 100) - 1);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-overlay.open {
+    display: block;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-container {
+    flex-direction: column;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-content {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) {
+    width: 56px;
+    min-width: 56px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-buttons .btn {
+    justify-content: center;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-buttons .btn .btn-text {
+    display: none;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-shortcut {
+    display: none;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-logo {
+    display: none;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-collapsed-logo {
+    display: flex;
+  }
+}
+
+@media (max-width: 1280px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-collapsed-logo::after {
+    display: none;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-collapsed-logo {
+    justify-content: center;
+    padding: 0;
+    margin: var(--portal-header-top, 20px) auto var(--portal-nav-gap, 24px);
+  }
+}
+
+/* Prevent horizontal scrolling in tables and force content to wrap */
+table {
+  width: 100%;
+  table-layout: auto; /* Use 'fixed' and set th/td widths for stricter alignment if needed */
+  border-collapse: collapse;
+}
+
+th, td {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  padding: clamp(0.25rem, 2vw, 1rem) clamp(0.5rem, 3vw, 2rem);
 }

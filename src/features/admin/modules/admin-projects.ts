@@ -57,6 +57,7 @@ import { deleteProject, archiveProject, duplicateProject } from '../project-deta
 import { setupFileUploadHandlers, loadPendingRequestsDropdown, loadProjectFiles as loadProjectFilesFromModule } from '../project-details';
 import { createSecondarySidebar, SECONDARY_TAB_ICONS, type SecondarySidebarController } from '../../../components/secondary-sidebar';
 import { createPortalModal } from '../../../components/portal-modal';
+import { ICONS } from '../../../constants/icons';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
@@ -339,8 +340,13 @@ export function renderProjectsTab(container: HTMLElement): void {
             </tr>
           </thead>
           <tbody id="projects-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr>
-              <td colspan="9" class="loading-row">Loading projects...</td>
+            <tr class="loading-row">
+              <td colspan="9">
+                <div class="loading-state">
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span class="loading-message">Loading projects...</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -396,7 +402,7 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
       if (tableBody) {
         showTableError(
           tableBody,
-          6,
+          9,
           `Error loading projects (${response.status})`,
           () => loadProjects(ctx)
         );
@@ -407,7 +413,7 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
     if (tableBody) {
       showTableError(
         tableBody,
-        6,
+        9,
         'Network error loading projects',
         () => loadProjects(ctx)
       );
@@ -513,7 +519,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
   if (!tableBody) return;
 
   if (projects.length === 0) {
-    showTableEmpty(tableBody, 8, 'No projects yet.');
+    showTableEmpty(tableBody, 9, 'No projects yet.');
     renderPaginationUI(0, ctx);
     return;
   }
@@ -522,7 +528,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
   const filteredProjects = applyFilters(projects, filterState, PROJECTS_FILTER_CONFIG);
 
   if (filteredProjects.length === 0) {
-    showTableEmpty(tableBody, 8, 'No projects match the current filters.');
+    showTableEmpty(tableBody, 9, 'No projects match the current filters.');
     renderPaginationUI(0, ctx);
     return;
   }
@@ -1945,10 +1951,10 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
     <table class="files-table" aria-label="Project files">
       <thead>
         <tr>
-          <th scope="col">File</th>
-          <th scope="col">Size</th>
-          <th scope="col">Uploaded</th>
-          <th scope="col">Actions</th>
+          <th scope="col" class="name-col">File</th>
+          <th scope="col" class="type-col">Size</th>
+          <th scope="col" class="date-col">Uploaded</th>
+          <th scope="col" class="actions-col">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -1974,13 +1980,15 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
       const deleteBtn = `<button type="button" class="icon-btn icon-btn-danger btn-delete-file" data-file-id="${file.id}" data-file-name="${safeName}" aria-label="Delete ${safeName}" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>`;
       return `
               <tr>
-                <td data-label="File">${safeName}</td>
-                <td data-label="Size">${size}</td>
-                <td data-label="Uploaded">${date}</td>
-                <td class="file-actions" data-label="Actions">
-                  ${previewBtn}
-                  ${downloadBtn}
-                  ${deleteBtn}
+                <td class="name-cell" data-label="File">${safeName}</td>
+                <td class="type-cell" data-label="Size">${size}</td>
+                <td class="date-cell" data-label="Uploaded">${date}</td>
+                <td class="actions-cell" data-label="Actions">
+                  <div class="table-actions">
+                    ${previewBtn}
+                    ${downloadBtn}
+                    ${deleteBtn}
+                  </div>
                 </td>
               </tr>
             `;
@@ -2208,6 +2216,7 @@ function showPreviewModal(options: PreviewModalOptions): void {
     id: 'file-preview-modal',
     titleId: 'preview-modal-title',
     title: title,
+    icon: ICONS.FILE,
     contentClassName: contentClasses.join(' '),
     onClose: () => {
       onClose?.();
@@ -2587,11 +2596,11 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
     <table class="invoices-table" aria-label="Project invoices">
       <thead>
         <tr>
-          <th scope="col">Invoice #</th>
-          <th scope="col">Amount</th>
-          <th scope="col">Due Date</th>
-          <th scope="col">Status</th>
-          <th scope="col">Actions</th>
+          <th scope="col" class="type-col">Invoice #</th>
+          <th scope="col" class="budget-col">Amount</th>
+          <th scope="col" class="date-col">Due Date</th>
+          <th scope="col" class="status-col">Status</th>
+          <th scope="col" class="actions-col">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -2619,16 +2628,18 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
         : '';
       return `
               <tr>
-                <td>${invoice.invoice_number}</td>
-                <td>${amount}</td>
-                <td>${dueDate}</td>
-                <td>${getStatusDotHTML(invoice.status)}</td>
+                <td class="type-cell">${invoice.invoice_number}</td>
+                <td class="budget-cell">${amount}</td>
+                <td class="date-cell">${dueDate}</td>
+                <td class="status-cell">${getStatusDotHTML(invoice.status)}</td>
                 <td class="actions-cell">
-                  ${sendBtn}
-                  ${editBtn}
-                  ${paidBtn}
-                  ${previewBtn}
-                  ${downloadBtn}
+                  <div class="table-actions">
+                    ${sendBtn}
+                    ${editBtn}
+                    ${paidBtn}
+                    ${previewBtn}
+                    ${downloadBtn}
+                  </div>
                 </td>
               </tr>
             `;

@@ -265,7 +265,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
               <button class="btn btn-secondary btn-sm" id="btn-add-milestone">+ Add Milestone</button>
             </div>
             <div class="milestones-list" id="pd-milestones-list">
-              <p class="empty-state">No milestones yet. Add milestones to track project progress.</p>
+              <div class="empty-state">No milestones yet. Add milestones to track project progress.</div>
             </div>
           </div>
         </div>
@@ -307,7 +307,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
             <button class="btn btn-secondary btn-sm" id="btn-manage-deliverables" data-action="open-deliverables">Manage Deliverables</button>
           </div>
           <div id="pd-deliverables-list" class="deliverables-inline-list">
-            <p class="empty-state">No deliverables yet. Click "Manage Deliverables" to add and track project deliverables.</p>
+            <div class="empty-state">No deliverables yet. Click "Manage Deliverables" to add and track project deliverables.</div>
           </div>
         </div>
       </div>
@@ -379,7 +379,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
                 <div id="files-view-toggle-mount"></div>
               </div>
             </div>
-            <div class="files-list" id="pd-files-list"><p class="empty-state">No files uploaded yet.</p></div>
+            <div class="files-list" id="pd-files-list"><div class="empty-state">No files uploaded yet.</div></div>
             <div class="pending-requests-list hidden" id="pd-pending-requests-list"></div>
           </div>
         </div>
@@ -428,7 +428,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
       <div class="tab-content-wrapper">
         <div class="messages-container portal-shadow">
           <div class="messages-thread" id="pd-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Project messages thread">
-            <p class="empty-state">No messages yet. Start the conversation with your client.</p>
+            <div class="empty-state">No messages yet. Start the conversation with your client.</div>
           </div>
           <div class="message-compose">
             <div class="message-input-wrapper">
@@ -457,7 +457,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
               <button class="btn btn-secondary" id="btn-create-invoice">+ Create Invoice</button>
             </div>
           </div>
-          <div class="invoices-list" id="pd-invoices-list"><p class="empty-state">No invoices created yet.</p></div>
+          <div class="invoices-list" id="pd-invoices-list"><div class="empty-state">No invoices created yet.</div></div>
         </div>
         <div class="portal-project-card portal-shadow">
           <div class="card-header-with-action">
@@ -469,9 +469,9 @@ export function renderProjectDetailTab(container: HTMLElement): void {
           </div>
           <div class="payment-plans-section">
             <h4>Scheduled Invoices</h4>
-            <div id="pd-scheduled-invoices" class="scheduled-list"><p class="empty-state">No scheduled invoices.</p></div>
+            <div id="pd-scheduled-invoices" class="scheduled-list"><div class="empty-state">No scheduled invoices.</div></div>
             <h4>Recurring Invoices</h4>
-            <div id="pd-recurring-invoices" class="recurring-list"><p class="empty-state">No recurring invoices configured.</p></div>
+            <div id="pd-recurring-invoices" class="recurring-list"><div class="empty-state">No recurring invoices configured.</div></div>
           </div>
         </div>
       </div>
@@ -512,7 +512,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
         </div>
         <div class="portal-project-card portal-shadow">
           <h3>Time Entries</h3>
-          <div id="time-entries-list"><p class="empty-state">No time entries yet.</p></div>
+          <div id="time-entries-list"><div class="empty-state">No time entries yet.</div></div>
         </div>
       </div>
     </div>
@@ -583,7 +583,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
             <button class="btn btn-secondary btn-sm" id="btn-edit-project-notes">Edit Notes</button>
           </div>
           <div id="pd-notes-display" class="notes-display">
-            <p class="empty-state">No notes yet. Click "Edit Notes" to add internal notes about this project.</p>
+            <div class="empty-state">No notes yet. Click "Edit Notes" to add internal notes about this project.</div>
           </div>
         </div>
       </div>

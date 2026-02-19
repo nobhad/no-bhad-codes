@@ -139,7 +139,7 @@ li {
 .nav-logo-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--icon-gap-md);
   text-decoration: none;
   color: var(--color-nav-text);
   font-weight: 600;
@@ -540,7 +540,7 @@ html[data-theme="dark"] .coming-soon-banner {
 .menu-button {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--icon-gap-xl);
   background: none;
   border: none;
   cursor: pointer;

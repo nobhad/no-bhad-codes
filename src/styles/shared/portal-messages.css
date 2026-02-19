@@ -96,15 +96,10 @@
   border-bottom: 1px solid var(--portal-border);
 }
 
+/* h3 styling from unified rule in portal-cards.css - only layout here */
 [data-page="client-portal"] .messages-clients-column .messages-contact-card h3,
 [data-page="client-portal"] .messages-clients-column .messages-tips-card h3 {
   margin: 0 0 var(--space-1-5) 0;
-  font-family: var(--font-family-acme);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-gray-900);
 }
 
 [data-page="client-portal"] .messages-clients-column .messages-contact-info {

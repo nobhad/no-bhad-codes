@@ -109,6 +109,36 @@
 }
 
 /* =====================================================
+   BEM-STYLE STATUS BADGE MODIFIERS
+   Alternative naming convention: .status-badge--{variant}
+   Used by questionnaires, workflows, and other tables
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge--success {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge--danger {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge--warning {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge--info {
+  background-color: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge--muted {
+  background-color: var(--portal-bg-dark);
+  color: var(--portal-text-muted);
+}
+
+/* =====================================================
    SYSTEM STATUS BADGES
    Used for health indicators (healthy, warning, error)
    ===================================================== */
@@ -179,6 +209,11 @@
   font-size: var(--font-size-sm);
   color: var(--portal-text-light);
   white-space: nowrap;
+}
+
+/* Status indicator in tables - match table cell font size */
+:is([data-page="admin"], [data-page="client-portal"]) .admin-table .status-indicator {
+  font-size: var(--table-cell-font-size, 12px);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .status-indicator .status-dot {
