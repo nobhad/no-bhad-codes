@@ -228,11 +228,7 @@
   /* No padding/background - inside .help-main-section */
 }
 
-[data-page="client-portal"] .help-accordion {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* .help-accordion flex layout from shared/portal-components.css */
 
 [data-page="client-portal"] .help-accordion-item {
   background: var(--portal-bg-medium);
@@ -369,11 +365,7 @@
   /* No padding - inside .help-main-grid */
 }
 
-[data-page="client-portal"] .help-featured-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* .help-featured-list flex layout from shared/portal-components.css */
 
 [data-page="client-portal"] .help-featured-card {
   display: flex;
@@ -515,11 +507,7 @@
   margin: 0;
 }
 
-[data-page="client-portal"] .help-results-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* .help-results-list flex layout from shared/portal-components.css */
 
 [data-page="client-portal"] .help-result-item {
   display: flex;

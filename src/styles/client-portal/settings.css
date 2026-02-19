@@ -153,11 +153,8 @@
   gap: var(--space-2);
 }
 
-/* Checkbox Group (generic) */
+/* Checkbox Group - flex layout from shared/portal-components.css */
 .checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1-5);
   flex: 1;
 }
 
