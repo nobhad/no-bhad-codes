@@ -1,0 +1,9 @@
+<!-- Footer - Only visible on login page -->
+<footer class="footer <%= portalType %>-footer">
+  <div class="footer-content">
+    <p>&copy; <span id="<%= portalType %>-copyright-year"></span> No Bhad Codes. All rights reserved.</p>
+  </div>
+</footer>
+<script>
+  document.getElementById('<%= portalType %>-copyright-year').textContent = new Date().getFullYear();
+</script>

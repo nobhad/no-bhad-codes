@@ -5,7 +5,8 @@ import { createObfuscationPlugin } from './src/utils/obfuscation-plugin';
 
 /**
  * Custom plugin to handle MPA routing in development
- * Rewrites URLs like /admin to /admin/index.html
+ * Rewrites URLs for static HTML pages (non-EJS routes)
+ * Note: /admin and /client are now served by Express EJS
  */
 function mpaRoutingPlugin(): Plugin {
   return {
@@ -14,23 +15,11 @@ function mpaRoutingPlugin(): Plugin {
       server.middlewares.use((req, res, next) => {
         const url = req.url || '';
 
-        // Rewrite /admin to /admin/index.html
-        if (url === '/admin' || url === '/admin/') {
-          req.url = '/admin/index.html';
-        }
-        // Rewrite /client to /client/index.html
-        else if (url === '/client' || url === '/client/') {
-          req.url = '/client/index.html';
-        }
-        // Rewrite /client/intake to /client/intake.html
-        else if (url === '/client/intake' || url === '/client/intake/') {
+        // Rewrite /client/intake to /client/intake.html (static page)
+        if (url === '/client/intake' || url === '/client/intake/') {
           req.url = '/client/intake.html';
         }
-        // Rewrite /client/portal to /client/index.html (portal is the main client page)
-        else if (url === '/client/portal' || url === '/client/portal/') {
-          req.url = '/client/index.html';
-        }
-        // Rewrite /client/set-password to /client/set-password.html
+        // Rewrite /client/set-password to /client/set-password.html (static page)
         else if (url.startsWith('/client/set-password')) {
           req.url = url.replace('/client/set-password', '/client/set-password.html');
         }
@@ -61,7 +50,6 @@ export default defineConfig({
         client: resolve(__dirname, 'client/index.html'),
         'client-intake': resolve(__dirname, 'client/intake.html'),
         'client-set-password': resolve(__dirname, 'client/set-password.html'),
-        admin: resolve(__dirname, 'admin/index.html'),
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
@@ -99,6 +87,27 @@ export default defineConfig({
 
     // Proxy API requests to backend server
     proxy: {
+      // Portal routes - served by Express EJS
+      '/admin': {
+        target: 'http://localhost:4001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/client': {
+        target: 'http://localhost:4001',
+        changeOrigin: true,
+        secure: false,
+        // Only proxy main client portal, not static pages (intake, set-password)
+        bypass: (req) => {
+          const url = req.url || '';
+          // Skip proxy for static HTML pages - let Vite serve them
+          if (url.includes('/intake') || url.includes('/set-password')) {
+            return url;
+          }
+          return null; // Proxy to Express for EJS rendering
+        },
+      },
+      // API routes
       '/api': {
         target: 'http://localhost:4001',
         changeOrigin: true,

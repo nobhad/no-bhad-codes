@@ -52,6 +52,7 @@ import integrationsRouter from './routes/integrations.js';
 import dataQualityRouter from './routes/data-quality.js';
 import settingsRouter from './routes/settings.js';
 import receiptsRouter from './routes/receipts.js';
+import { portalRoutes } from './routes/portal.js';
 import { errorResponseWithPayload } from './utils/api-response.js';
 import { setupSwagger } from './config/swagger.js';
 import { logger as requestLoggerMiddleware } from './middleware/logger.js';
@@ -71,6 +72,10 @@ const __dirname = dirname(__filename);
 const app = express();
 app.use(i18nMiddleware);
 const PORT = process.env.PORT || 4001;
+
+// Configure EJS view engine for server-side rendered portal shells
+app.set('view engine', 'ejs');
+app.set('views', resolve(__dirname, 'views'));
 
 // Initialize Sentry for error tracking
 errorTracker.init({
@@ -263,6 +268,10 @@ app.get('/health', async (_req, res) => {
 
 // Setup API documentation
 setupSwagger(app);
+
+// Portal routes (EJS server-rendered shells)
+// These render the admin and client portal HTML shells
+app.use(portalRoutes);
 
 // Global rate limiting for all API routes
 // Standard rate limit: 60 requests per minute
