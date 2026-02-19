@@ -128,11 +128,11 @@ function renderCategoriesTable(categories: KBCategory[], _ctx: AdminDashboardCon
     .map(
       (c) => `
     <tr>
-      <td class="name-cell">${escapeHtml(c.name)}</td>
-      <td class="slug-cell"><code>${escapeHtml(c.slug)}</code></td>
-      <td class="count-cell">${c.article_count ?? 0}</td>
-      <td class="status-cell">${c.is_active ? 'Yes' : 'No'}</td>
-      <td class="actions-cell">
+      <td class="name-cell" data-label="Name">${escapeHtml(c.name)}</td>
+      <td class="slug-cell" data-label="Slug"><code>${escapeHtml(c.slug)}</code></td>
+      <td class="count-cell" data-label="Articles">${c.article_count ?? 0}</td>
+      <td class="status-cell" data-label="Active">${c.is_active ? 'Yes' : 'No'}</td>
+      <td class="actions-cell" data-label="Actions">
         <div class="table-actions">
           <button type="button" class="icon-btn kb-edit-category" data-id="${c.id}" title="Edit" aria-label="Edit category">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
@@ -167,13 +167,13 @@ function renderArticlesTable(articles: KBArticle[], _ctx: AdminDashboardContext)
     .map(
       (a) => `
     <tr>
-      <td class="name-cell">${escapeHtml(a.title)}</td>
-      <td class="type-cell">${escapeHtml(a.category_name || '')}</td>
-      <td class="slug-cell"><code>${escapeHtml(a.slug)}</code></td>
-      <td class="status-cell">${a.is_featured ? 'Yes' : 'No'}</td>
-      <td class="status-cell">${a.is_published ? 'Yes' : 'No'}</td>
-      <td class="date-cell">${formatDate(a.updated_at)}</td>
-      <td class="actions-cell">
+      <td class="name-cell" data-label="Title">${escapeHtml(a.title)}</td>
+      <td class="type-cell" data-label="Category">${escapeHtml(a.category_name || '')}</td>
+      <td class="slug-cell" data-label="Slug"><code>${escapeHtml(a.slug)}</code></td>
+      <td class="status-cell" data-label="Featured">${a.is_featured ? 'Yes' : 'No'}</td>
+      <td class="status-cell" data-label="Published">${a.is_published ? 'Yes' : 'No'}</td>
+      <td class="date-cell" data-label="Updated">${formatDate(a.updated_at)}</td>
+      <td class="actions-cell" data-label="Actions">
         <div class="table-actions">
           <button type="button" class="icon-btn kb-edit-article" data-id="${a.id}" title="Edit" aria-label="Edit article">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
@@ -733,7 +733,7 @@ export function renderKnowledgeBaseTab(container: HTMLElement): void {
         </div>
       </div>
     </div>
-    <div class="admin-table-card portal-shadow" id="kb-articles-card">
+    <div class="admin-table-card portal-shadow" id="kb-articles-card" style="display: none">
       <div class="admin-table-header">
         <h3>Articles</h3>
         <div class="admin-table-actions" id="kb-articles-filter-container">

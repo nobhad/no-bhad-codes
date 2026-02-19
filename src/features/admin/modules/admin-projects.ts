@@ -566,29 +566,29 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
     // Standard column order: ☐ | Project (+Client) | Type | Status | Budget | Timeline | Start | Target | Actions
     row.innerHTML = `
       ${createRowCheckbox('projects', project.id)}
-      <td class="identity-cell">
+      <td class="identity-cell" data-label="Project">
         <span class="identity-name">${safeName}</span>
         ${(safeContact || safeCompany) ? `<span class="identity-contact">${safeContact}${safeCompany ? ` - ${safeCompany}` : ''}</span>` : ''}
         <span class="type-budget-stacked">${formatProjectType(project.project_type)} · ${formatDisplayValue(project.budget_range)}</span>
       </td>
-      <td class="type-cell">
+      <td class="type-cell" data-label="Type">
         <span class="type-value">${formatProjectType(project.project_type)}</span>
         <span class="budget-stacked">${formatDisplayValue(project.budget_range)}</span>
       </td>
-      <td class="status-cell"></td>
-      <td class="budget-cell inline-editable-cell" data-field="budget_range" data-project-id="${project.id}">
+      <td class="status-cell" data-label="Status"></td>
+      <td class="budget-cell inline-editable-cell" data-field="budget_range" data-project-id="${project.id}" data-label="Budget">
         <span class="budget-value">${formatDisplayValue(project.budget_range)}</span>
         <span class="timeline-stacked">${formatDisplayValue(project.timeline)}</span>
       </td>
-      <td class="timeline-cell inline-editable-cell" data-field="timeline" data-project-id="${project.id}">
+      <td class="timeline-cell inline-editable-cell" data-field="timeline" data-project-id="${project.id}" data-label="Timeline">
         <span class="timeline-value">${formatDisplayValue(project.timeline)}</span>
       </td>
-      <td class="date-cell start-cell">
+      <td class="date-cell start-cell" data-label="Start">
         <span class="date-value">${formatDate(project.start_date)}</span>
         <span class="target-stacked">${formatDate(project.end_date)}</span>
       </td>
-      <td class="date-cell target-cell">${formatDate(project.end_date)}</td>
-      <td class="actions-cell">
+      <td class="date-cell target-cell" data-label="Target">${formatDate(project.end_date)}</td>
+      <td class="actions-cell" data-label="Actions">
         <div class="table-actions">
           <button class="icon-btn btn-view-project" data-project-id="${project.id}" title="View Project" aria-label="View project details">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1465,19 +1465,17 @@ function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
     });
   });
 
-  // Set up header tab buttons using event delegation (once per container)
-  const headerTabsContainer = document.getElementById('project-detail-header-tabs');
-  if (headerTabsContainer && !headerTabsContainer.dataset.listenerAdded) {
-    headerTabsContainer.dataset.listenerAdded = 'true';
-
-    headerTabsContainer.addEventListener('click', (e) => {
-      const btn = (e.target as HTMLElement).closest('.portal-subtab') as HTMLElement;
-      if (!btn) return;
-
-      const tabName = btn.dataset.pdTab;
-      if (tabName) switchProjectDetailTab(tabName);
-    });
+  // Listen for universal tab change events from admin-dashboard
+  const body = document.body;
+  if (!body.dataset.pdTabListenerAdded) {
+    body.dataset.pdTabListenerAdded = 'true';
+    document.addEventListener('projectDetailTabChange', ((e: CustomEvent<{ tabName: string }>) => {
+      switchProjectDetailTab(e.detail.tabName);
+    }) as EventListener);
   }
+
+  // Header tab buttons are now handled by the universal handler in admin-dashboard.ts
+  // via the projectDetailTabChange custom event above
 
   // Back button handler (use cached ref)
   const backBtn = domCache.get('backBtn');
@@ -2578,7 +2576,7 @@ export async function loadProjectInvoices(
       const data = await response.json();
       renderProjectInvoices(data.invoices || [], container);
     } else {
-      renderEmptyState(container, 'No invoices yet. Create one in the Invoices tab.');
+      renderEmptyState(container, 'No invoices yet. Create one above.');
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load invoices:', error);
@@ -2628,11 +2626,11 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
         : '';
       return `
               <tr>
-                <td class="type-cell">${invoice.invoice_number}</td>
-                <td class="budget-cell">${amount}</td>
-                <td class="date-cell">${dueDate}</td>
-                <td class="status-cell">${getStatusDotHTML(invoice.status)}</td>
-                <td class="actions-cell">
+                <td class="type-cell" data-label="Invoice">${invoice.invoice_number}</td>
+                <td class="budget-cell" data-label="Amount">${amount}</td>
+                <td class="date-cell" data-label="Due Date">${dueDate}</td>
+                <td class="status-cell" data-label="Status">${getStatusDotHTML(invoice.status)}</td>
+                <td class="actions-cell" data-label="Actions">
                   <div class="table-actions">
                     ${sendBtn}
                     ${editBtn}

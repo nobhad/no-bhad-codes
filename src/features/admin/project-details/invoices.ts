@@ -233,14 +233,14 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
 
     return `
             <tr data-invoice-id="${inv.id}" class="${isDeposit ? 'invoice-deposit-row' : ''}">
-              <td>
+              <td data-label="Invoice">
                 <strong>${SanitizationUtils.escapeHtml(inv.invoice_number || `INV-${inv.id}`)}</strong>
                 ${isDeposit ? '<span class="invoice-type-badge">DEPOSIT</span>' : ''}
               </td>
-              <td>${formatCurrency(typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0))}</td>
-              <td>${inv.due_date ? formatDate(inv.due_date) : '-'}</td>
-              <td>${getStatusDotHTML(effectiveStatus)}</td>
-              <td class="actions-cell">
+              <td data-label="Amount">${formatCurrency(typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0))}</td>
+              <td data-label="Due Date">${inv.due_date ? formatDate(inv.due_date) : '-'}</td>
+              <td data-label="Status">${getStatusDotHTML(effectiveStatus)}</td>
+              <td class="actions-cell" data-label="Actions">
                 <div class="table-actions">
                   ${viewBtn}
                   ${editBtn}
@@ -424,10 +424,10 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
         <tbody>
           ${lineItems.map((item: InvoiceLineItem) => `
             <tr>
-              <td>${SanitizationUtils.escapeHtml(item.description || '')}</td>
-              <td class="text-right">${item.quantity || 1}</td>
-              <td class="text-right">${formatCurrency(item.rate || 0)}</td>
-              <td class="text-right">${formatCurrency(item.amount || 0)}</td>
+              <td data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
+              <td class="text-right" data-label="Qty">${item.quantity || 1}</td>
+              <td class="text-right" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
+              <td class="text-right" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
             </tr>
           `).join('')}
         </tbody>

@@ -80,34 +80,35 @@ function setupAnalyticsEventListeners(): void {
 }
 
 /**
+ * Switch to an analytics subtab
+ */
+function switchAnalyticsSubtab(subtab: string): void {
+  const group = document.querySelector('.header-subtab-group[data-for-tab="analytics"]');
+  if (group) {
+    // Update button active states
+    group.querySelectorAll('.portal-subtab').forEach(btn => btn.classList.remove('active'));
+    group.querySelector(`[data-subtab="${subtab}"]`)?.classList.add('active');
+  }
+
+  // Update content visibility
+  document.querySelectorAll('.analytics-subtab-content').forEach(content => {
+    content.classList.toggle('active', content.id === `analytics-subtab-${subtab}`);
+  });
+}
+
+/**
  * Setup analytics sub-tab navigation
+ * Listens for universal subtab change events from admin-dashboard.ts
  */
 function setupAnalyticsSubtabs(): void {
-  const subtabButtons = document.querySelectorAll('.header-subtab-group[data-for-tab="analytics"] .portal-subtab');
-  const subtabContents = document.querySelectorAll('.analytics-subtab-content');
-
-  if (subtabButtons.length === 0) return;
-
-  subtabButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const targetTab = btn.getAttribute('data-subtab');
-      if (!targetTab) return;
-
-      // Update button states
-      subtabButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Update content visibility
-      subtabContents.forEach(content => {
-        const contentId = content.id;
-        if (contentId === `analytics-subtab-${targetTab}`) {
-          content.classList.add('active');
-        } else {
-          content.classList.remove('active');
-        }
-      });
-    });
-  });
+  // Listen for universal subtab change events from admin-dashboard
+  const body = document.body;
+  if (!body.dataset.analyticsSubtabListenerAdded) {
+    body.dataset.analyticsSubtabListenerAdded = 'true';
+    document.addEventListener('analyticsSubtabChange', ((e: CustomEvent<{ subtab: string }>) => {
+      switchAnalyticsSubtab(e.detail.subtab);
+    }) as EventListener);
+  }
 }
 
 // =====================================================
@@ -1357,12 +1358,12 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
 
         return `
           <tr>
-            <td class="slug-cell">${session.session_id.substring(0, 8)}...</td>
-            <td class="date-cell">${startTime}</td>
-            <td class="type-cell">${duration}</td>
-            <td class="count-cell">${session.page_views || 0}</td>
-            <td class="type-cell">${capitalizeFirst(session.device_type || 'desktop')}</td>
-            <td class="name-cell">${location}</td>
+            <td class="slug-cell" data-label="Session ID">${session.session_id.substring(0, 8)}...</td>
+            <td class="date-cell" data-label="Started">${startTime}</td>
+            <td class="type-cell" data-label="Duration">${duration}</td>
+            <td class="count-cell" data-label="Pages">${session.page_views || 0}</td>
+            <td class="type-cell" data-label="Device">${capitalizeFirst(session.device_type || 'desktop')}</td>
+            <td class="name-cell" data-label="Location">${location}</td>
           </tr>
         `;
       })
@@ -2139,7 +2140,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
     <div class="analytics-subtab-content active" id="analytics-subtab-overview">
       <h3 class="tab-section-heading">Overview</h3>
       <!-- Business KPI Cards -->
-      <div class="card-grid-4" id="business-kpi-section">
+      <div class="kpi-cards-row" id="business-kpi-section">
         <div class="stat-card" id="kpi-revenue">
           <div class="kpi-card-icon">${RENDER_ICONS.DOLLAR}</div>
           <span class="stat-number" id="kpi-revenue-value">$0</span>
@@ -2179,7 +2180,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
       </div>
 
       <!-- Lead Funnel -->
-      <div class="portal-project-card portal-shadow" id="lead-funnel-section">
+      <div class="analytics-section" id="lead-funnel-section">
         <h3>Lead Conversion Funnel</h3>
         <div class="funnel-container" id="lead-funnel">
           <div class="funnel-stage" data-stage="new">
@@ -2218,13 +2219,13 @@ export function renderAnalyticsTab(container: HTMLElement): void {
     <div class="analytics-subtab-content" id="analytics-subtab-business">
       <h3 class="tab-section-heading">Business</h3>
       <div class="analytics-card-grid">
-        <div class="portal-project-card portal-shadow">
+        <div class="analytics-section">
           <h3>Revenue by Month</h3>
           <div class="chart-canvas-wrapper" id="revenue-chart-container">
             <canvas id="revenue-chart"></canvas>
           </div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="analytics-section">
           <h3>Project Status</h3>
           <div class="chart-canvas-wrapper" id="project-status-chart-container">
             <canvas id="project-status-chart"></canvas>
@@ -2233,13 +2234,13 @@ export function renderAnalyticsTab(container: HTMLElement): void {
       </div>
 
       <!-- Ad Hoc Revenue Widget -->
-      <div class="portal-project-card portal-shadow">
+      <div class="analytics-section">
         <h3>Ad Hoc Revenue Analytics</h3>
         <div id="ad-hoc-analytics-widget" class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
       </div>
 
       <!-- Lead Analytics & Scoring -->
-      <div class="portal-project-card portal-shadow leads-analytics-section" id="leads-analytics-section">
+      <div class="analytics-section leads-analytics-section" id="leads-analytics-section">
         <h3>Lead Analytics</h3>
         <div class="analytics-columns-2col">
           <div class="analytics-column" id="conversion-funnel-card">
@@ -2274,7 +2275,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
       <h3 class="tab-section-heading">Visitors</h3>
       <!-- Site Breakdown -->
       <div class="analytics-card-grid">
-        <div class="portal-project-card portal-shadow">
+        <div class="analytics-section">
           <h3>Main Portfolio Site</h3>
           <div class="quick-stats analytics-breakdown-stats">
             <div class="stat-card">
@@ -2291,7 +2292,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
             </div>
           </div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="analytics-section">
           <h3>The Backend (Client Portal)</h3>
           <div class="quick-stats analytics-breakdown-stats">
             <div class="stat-card">
@@ -2318,13 +2319,13 @@ export function renderAnalyticsTab(container: HTMLElement): void {
 
       <!-- Visitor Charts -->
       <div class="analytics-card-grid">
-        <div class="portal-project-card portal-shadow">
+        <div class="analytics-section">
           <h3>Visitors Over Time</h3>
           <div class="chart-canvas-wrapper">
             <canvas id="visitors-chart"></canvas>
           </div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="analytics-section">
           <h3>Traffic Sources</h3>
           <div class="chart-canvas-wrapper">
             <canvas id="sources-chart"></canvas>
@@ -2334,25 +2335,25 @@ export function renderAnalyticsTab(container: HTMLElement): void {
 
       <!-- Analytics Data Grid -->
       <div class="analytics-card-grid">
-        <div class="portal-project-card portal-shadow">
+        <div class="analytics-section">
           <h3>Popular Pages</h3>
           <div class="data-list" id="popular-pages">
             <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="analytics-section">
           <h3>Device Breakdown</h3>
           <div class="data-list" id="device-breakdown">
             <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="analytics-section">
           <h3>Geographic Distribution</h3>
           <div class="data-list" id="geo-distribution">
             <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="analytics-section">
           <h3>Engagement Events</h3>
           <div class="data-list" id="engagement-events">
             <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
@@ -2400,7 +2401,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
     <div class="analytics-subtab-content" id="analytics-subtab-reports">
       <h3 class="tab-section-heading">Reports & Alerts</h3>
       <!-- Saved Reports Section -->
-      <div class="portal-project-card portal-shadow" id="saved-reports-section">
+      <div class="analytics-section" id="saved-reports-section">
         <div class="section-header-with-actions">
           <h3>Saved Reports</h3>
           <button type="button" class="icon-btn" id="create-report-btn" title="New report" aria-label="Create new report">
@@ -2413,7 +2414,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
       </div>
 
       <!-- Scheduled Reports Section -->
-      <div class="portal-project-card portal-shadow" id="scheduled-reports-section">
+      <div class="analytics-section" id="scheduled-reports-section">
         <div class="section-header-with-actions">
           <h3>Scheduled Reports</h3>
         </div>
@@ -2423,7 +2424,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
       </div>
 
       <!-- Metric Alerts Section -->
-      <div class="portal-project-card portal-shadow" id="metric-alerts-section">
+      <div class="analytics-section" id="metric-alerts-section">
         <div class="section-header-with-actions">
           <h3>Metric Alerts</h3>
           <button type="button" class="icon-btn" id="create-alert-btn" title="New alert" aria-label="Create new metric alert">
@@ -2436,7 +2437,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
       </div>
 
       <!-- Performance Metrics -->
-      <div class="portal-project-card portal-shadow">
+      <div class="analytics-section">
         <h3>Core Web Vitals</h3>
         <div class="vitals-grid">
           <div class="vital-card">
@@ -2463,7 +2464,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
       </div>
 
       <!-- Bundle Analysis -->
-      <div class="portal-project-card portal-shadow">
+      <div class="analytics-section">
         <h3>Bundle Analysis</h3>
         <div class="bundle-info">
           <div class="bundle-item">

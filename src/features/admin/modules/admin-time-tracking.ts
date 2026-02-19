@@ -254,16 +254,16 @@ function renderEntriesTable(): void {
 function renderEntryRow(entry: TimeEntry): string {
   return `
     <tr>
-      <td class="date-cell">${formatDate(entry.date)}</td>
-      <td class="name-cell">${SanitizationUtils.escapeHtml(entry.description)}</td>
-      <td class="name-cell">${entry.task_title ? SanitizationUtils.escapeHtml(entry.task_title) : '-'}</td>
-      <td class="type-cell">${formatDuration(entry.duration_minutes)}</td>
-      <td class="status-cell">
+      <td class="date-cell" data-label="Date">${formatDate(entry.date)}</td>
+      <td class="name-cell" data-label="Description">${SanitizationUtils.escapeHtml(entry.description)}</td>
+      <td class="name-cell" data-label="Task">${entry.task_title ? SanitizationUtils.escapeHtml(entry.task_title) : '-'}</td>
+      <td class="type-cell" data-label="Duration">${formatDuration(entry.duration_minutes)}</td>
+      <td class="status-cell" data-label="Billable">
         <span class="time-entry-billable ${entry.is_billable ? 'yes' : 'no'}">
           ${entry.is_billable ? 'Yes' : 'No'}
         </span>
       </td>
-      <td class="actions-cell">
+      <td class="actions-cell" data-label="Actions">
         <div class="table-actions">
           <button class="icon-btn btn-edit-entry" data-entry-id="${entry.id}" title="Edit" aria-label="Edit entry">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>

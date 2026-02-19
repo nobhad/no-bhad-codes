@@ -769,10 +769,10 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
         <tbody>
           ${lineItems.map((item: InvoiceLineItem) => `
             <tr>
-              <td>${SanitizationUtils.escapeHtml(item.description || '')}</td>
-              <td class="text-right">${item.quantity || 1}</td>
-              <td class="text-right">${formatCurrency(item.rate || 0)}</td>
-              <td class="text-right">${formatCurrency(item.amount || 0)}</td>
+              <td data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
+              <td class="text-right" data-label="Qty">${item.quantity || 1}</td>
+              <td class="text-right" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
+              <td class="text-right" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -958,20 +958,20 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
   function buildLineItemRow(item: InvoiceLineItem, index: number): string {
     return `
       <tr class="line-item-row" data-index="${index}">
-        <td>
+        <td data-label="Description">
           <input type="text" class="form-input line-item-desc" name="line_items[${index}][description]"
             value="${SanitizationUtils.escapeHtml(item.description || '')}" placeholder="Description" required>
         </td>
-        <td>
+        <td data-label="Qty">
           <input type="number" class="form-input line-item-qty" name="line_items[${index}][quantity]"
             value="${item.quantity || 1}" min="1" step="1" required>
         </td>
-        <td>
+        <td data-label="Rate">
           <input type="number" class="form-input line-item-rate" name="line_items[${index}][rate]"
             value="${item.rate || 0}" min="0" step="0.01" required>
         </td>
-        <td class="line-item-amount">${formatCurrency(item.amount || 0)}</td>
-        <td>
+        <td class="line-item-amount" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
+        <td data-label="">
           <button type="button" class="icon-btn btn-danger remove-line-item" data-index="${index}" title="Remove">
             ${ICONS.VIEW.replace('M1 12s4-8 11-8', 'M18 6 6 18M6 6l12 12').replace('circle cx="12" cy="12" r="3"', '')}
           </button>
@@ -1065,20 +1065,20 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
     row.className = 'line-item-row';
     row.dataset.index = String(lineItemIndex);
     row.innerHTML = `
-      <td>
+      <td data-label="Description">
         <input type="text" class="form-input line-item-desc" name="line_items[${lineItemIndex}][description]"
           value="" placeholder="Description" required>
       </td>
-      <td>
+      <td data-label="Qty">
         <input type="number" class="form-input line-item-qty" name="line_items[${lineItemIndex}][quantity]"
           value="1" min="1" step="1" required>
       </td>
-      <td>
+      <td data-label="Rate">
         <input type="number" class="form-input line-item-rate" name="line_items[${lineItemIndex}][rate]"
           value="0" min="0" step="0.01" required>
       </td>
-      <td class="line-item-amount">${formatCurrency(0)}</td>
-      <td>
+      <td class="line-item-amount" data-label="Amount">${formatCurrency(0)}</td>
+      <td data-label="">
         <button type="button" class="icon-btn btn-danger remove-line-item" data-index="${lineItemIndex}" title="Remove">
           ${ICONS.VIEW.replace('M1 12s4-8 11-8', 'M18 6 6 18M6 6l12 12').replace('circle cx="12" cy="12" r="3"', '')}
         </button>
