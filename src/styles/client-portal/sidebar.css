@@ -356,12 +356,158 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 /* =====================================================
-   ADMIN SIDEBAR - Uses shared .btn.btn-secondary pattern
-   Same as client portal for consistency
+   ADMIN SIDEBAR NAVIGATION
+   Uses same behavior as client portal .sidebar-buttons .btn
    ===================================================== */
 
-/* Admin sidebar uses same .sidebar-buttons structure as client portal */
-/* All button styles defined in shared/portal-buttons.css */
+/* Admin Sidebar Navigation Container */
+[data-page="admin"] .sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+[data-page="admin"] .sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* Navigation Items - matches .sidebar-buttons .btn behavior */
+[data-page="admin"] .sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: clamp(0.55rem, 1.3vw, 0.75rem) clamp(0.65rem, 1.6vw, 0.9rem);
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-xs);
+  color: var(--portal-text-secondary);
+  font-family: var(--font-family-sans);
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  font-weight: 500;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  position: relative;
+  overflow: visible;
+}
+
+[data-page="admin"] .sidebar-nav-item:hover {
+  background: transparent;
+  color: var(--color-primary);
+}
+
+[data-page="admin"] .sidebar-nav-item:hover .nav-icon {
+  color: var(--color-primary);
+}
+
+[data-page="admin"] .sidebar-nav-item.active {
+  background: transparent;
+  color: var(--color-primary);
+}
+
+[data-page="admin"] .sidebar-nav-item.active .nav-icon {
+  color: var(--color-primary);
+}
+
+/* Navigation Icon - matches .btn-icon sizing */
+[data-page="admin"] .sidebar-nav-item .nav-icon {
+  flex-shrink: 0;
+  width: 1.2em;
+  height: 1.2em;
+}
+
+[data-page="admin"] .sidebar-nav-item .nav-icon svg {
+  stroke-width: 2.5;
+}
+
+/* Navigation Label - matches .btn-text */
+[data-page="admin"] .sidebar-nav-item .nav-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sign Out Button in footer */
+[data-page="admin"] .sidebar-footer {
+  margin-top: auto;
+  padding: var(--space-3);
+}
+
+[data-page="admin"] .sidebar-footer .btn-logout:hover {
+  color: var(--color-error-400, #f87171);
+}
+
+[data-page="admin"] .sidebar-footer .btn-logout:hover .nav-icon {
+  color: var(--color-error-400, #f87171);
+}
+
+/* =====================================================
+   COLLAPSED STATE - Admin Sidebar Navigation
+   ===================================================== */
+
+[data-page="admin"] .sidebar.collapsed .sidebar-nav {
+  gap: 0.5rem;
+  align-items: center;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-nav-item {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  margin: 0 auto;
+  overflow: visible;
+  position: relative;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-nav-item .nav-label {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-nav-item .nav-icon {
+  margin: 0;
+  width: 22px;
+  height: 22px;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-nav-item .nav-icon svg {
+  stroke-width: 2;
+  transition: stroke-width var(--transition-faster);
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-nav-item.active .nav-icon svg,
+[data-page="admin"] .sidebar.collapsed .sidebar-nav-item:hover .nav-icon svg {
+  stroke-width: 2.5;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-footer {
+  padding: var(--space-2);
+  display: flex;
+  justify-content: center;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-footer .btn-logout {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+}
 
 /* =====================================================
    INTERMEDIATE BREAKPOINT AUTO-COLLAPSE
@@ -403,8 +549,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   }
 
   /* Buttons section should grow but allow scroll */
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons,
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -417,9 +562,45 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     -ms-overflow-style: none;
   }
 
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons::-webkit-scrollbar,
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons::-webkit-scrollbar {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Admin sidebar-nav auto-collapse */
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav-item {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    overflow: visible;
+    position: relative;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav-item .nav-label {
+    display: none !important;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav-item .nav-icon {
+    margin: 0;
+    width: 22px;
+    height: 22px;
   }
 
   /* Sidebar logo styles in shared/portal-layout.css */
@@ -501,12 +682,30 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   /* Sidebar logo styles in shared/portal-layout.css */
 
   /* Sidebar buttons layout - button styles in shared/portal-buttons.css */
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons,
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons {
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  /* Admin sidebar-nav mobile */
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav-item {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-nav-item .nav-label {
+    display: none !important;
   }
 
   /* Badge positioning on mobile - client portal only */

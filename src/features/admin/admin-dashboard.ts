@@ -1574,7 +1574,7 @@ class AdminDashboard {
     document.body.dataset.activeTab = tabName;
 
     // Update sidebar nav items - match the actual HTML element class
-    document.querySelectorAll('.sidebar-buttons .btn[data-tab]').forEach((btn) => {
+    document.querySelectorAll('.sidebar-nav-item[data-tab]').forEach((btn) => {
       const isActive = (btn as HTMLElement).dataset.tab === activeGroup;
       btn.classList.toggle('active', isActive);
       if (isActive) {
