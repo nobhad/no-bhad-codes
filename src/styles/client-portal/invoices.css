@@ -16,13 +16,7 @@
   text-align: center;
 }
 
-/* Invoices List - Base styles in shared/portal-cards.css */
-/* Only client-portal specific layout overrides here */
-[data-page="client-portal"] .invoices-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1-5);
-}
+/* Invoices List - flex layout from shared/portal-components.css :has() rule */
 
 /* Invoice Item */
 .invoice-item {
