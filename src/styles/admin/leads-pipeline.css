@@ -303,7 +303,7 @@
 .analytics-columns {
   display: grid;
   grid-template-columns: 2fr 1.5fr 2fr;
-  gap: var(--space-1);
+  gap: var(--portal-section-gap);
   align-items: start;
 }
 
@@ -311,9 +311,9 @@
 .analytics-columns-2col {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-1-5);
+  gap: var(--portal-section-gap);
   align-items: start;
-  margin-bottom: var(--space-1-5);
+  margin-bottom: var(--portal-section-gap);
 }
 
 /* Full-width column for Scoring Rules */
@@ -323,9 +323,9 @@
 
 .analytics-column,
 .analytics-column-full {
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-1) var(--space-3) var(--space-3);
+  background: var(--portal-bg-darker);
+  border-radius: var(--portal-radius-sm, 8px);
+  padding: 13px 14px;
   min-width: 0;
   color: var(--portal-text-light);
 }
@@ -348,6 +348,7 @@
   margin-bottom: 0;
 }
 
+/* Empty state: base styles from components/loading.css, only overrides here */
 .leads-analytics-section .empty-state {
   color: var(--portal-text-light);
   padding: var(--space-1) 0;
@@ -367,16 +368,21 @@
   overflow: visible;
 }
 
+.leads-analytics-section .funnel-stage:last-child {
+  margin-bottom: 0;
+}
+
 .leads-analytics-section .funnel-stage {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: var(--space-0-5);
-  padding: var(--space-0-5) 0;
-  background: none;
-  border-radius: 0;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
   min-width: 0;
   text-align: left;
+  margin-bottom: var(--space-1);
 }
 
 .leads-analytics-section .funnel-stage-label {
@@ -435,7 +441,7 @@
 .leads-analytics-section .source-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--space-1);
   padding: 0;
 }
 
@@ -443,13 +449,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-0-5) 0;
-  border-bottom: 1px solid var(--portal-border-light);
-  border-radius: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  margin-bottom: var(--space-1);
 }
 
 .leads-analytics-section .source-item:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .source-name {
@@ -492,17 +499,26 @@
 .scoring-rules-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding: var(--space-2);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
+  gap: var(--space-1);
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
 }
 
 /* When full-width, display scoring rules in a 3-column grid */
-.analytics-column-full .scoring-rules-list {
+/* Higher specificity to override loading.css generic flex rule */
+[data-page="admin"] .analytics-column-full .scoring-rules-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0 var(--space-2);
+  gap: var(--space-1);
+}
+
+/* Loading state: base styles from components/loading.css, grid-specific overrides here */
+[data-page="admin"] .analytics-column-full .scoring-rules-list .loading-state {
+  grid-column: 1 / -1;
+  width: auto;
+  justify-self: center;
+  align-self: center;
 }
 
 /* Border handled in mobile media query */
@@ -522,23 +538,14 @@
 .scoring-rule-item {
   display: flex;
   align-items: center;
-  gap: var(--space-0-5);
-  padding: var(--space-0-5) 0;
-  background: transparent;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
   border: none;
-  border-radius: 0;
+  border-radius: var(--portal-radius-sm);
 }
 
-/* Only show border on mobile (single column) */
-@media (--mobile) {
-  .scoring-rule-item {
-    border-bottom: 1px solid var(--portal-border-light);
-  }
-
-  .scoring-rule-item:last-child {
-    border-bottom: none;
-  }
-}
+/* Mobile: no border changes needed since we use card backgrounds */
 
 .scoring-rule-item.rule-inactive {
   opacity: 0.5;
@@ -758,12 +765,7 @@
   border-color: var(--portal-border-medium);
 }
 
-/* Tasks/Notes tab section: header row with title + add button */
-.lead-tab-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1-5);
-}
+/* Tasks/Notes tab section - flex layout from shared/portal-components.css */
 
 .lead-tab-section-header {
   display: flex;

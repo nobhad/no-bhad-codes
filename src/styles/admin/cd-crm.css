@@ -453,17 +453,7 @@
 
 /* Responsive */
 @media (--mobile) {
-  /* Tab strip mobile behavior is in shared/portal-tabs.css (.portal-tabs) */
-
-  #tab-client-detail .client-detail-tab-content.portal-tab-panel {
-    padding: 2rem 1rem;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-
-  #tab-client-detail .client-detail-tab-content.portal-tab-panel.active {
-    gap: 2rem;
-  }
+  /* Tab panels use base .portal-tab-panel from portal-tabs.css */
 
   /* Ensure cards are contained on mobile */
   #tab-client-detail .portal-project-card {

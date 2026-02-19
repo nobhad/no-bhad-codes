@@ -52,7 +52,7 @@
 
 /* Project Overview Card (shared by client detail and project detail) */
 .project-detail-overview {
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--portal-radius-lg);
   padding: var(--space-3);
@@ -188,13 +188,14 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 /* High specificity with body element selector */
 body[data-page="admin"] [id^="pd-tab-"] .invoice-summary {
   display: flex;
+  gap: var(--space-3);
   margin: 0;
   background: transparent;
   box-shadow: none;
 }
 
 body[data-page="admin"] [id^="pd-tab-"] .summary-card {
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--portal-radius-md);
   padding: var(--space-3);
@@ -206,13 +207,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   flex: 1;
 }
 
-/* Summary card labels - match overview stat labels */
+/* Summary card labels - styling from unified rule in portal-cards.css */
 [data-page="admin"] [id^="pd-tab-"] .summary-card h4 {
-  color: var(--portal-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   margin: 0;
 }
 
@@ -242,6 +238,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Invoice summary within tab - keep flex layout */
 [id^="pd-tab-"] .invoice-summary {
   display: flex;
+  gap: var(--space-3);
   margin: 0;
 }
 
@@ -380,16 +377,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-/* Settings tab - override ALL floating label styles to match meta-label */
+/* Settings tab labels - styling from unified rule in portal-cards.css */
 #pd-tab-settings label {
   position: static;
   top: auto;
   left: auto;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  color: var(--portal-text-secondary);
-  letter-spacing: 0.05em;
   margin: 0;
   pointer-events: auto;
 }
@@ -566,12 +558,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   transition: width var(--transition-medium);
 }
 
-/* Milestones List */
-.milestones-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1-5);
-}
+/* Milestones List - flex layout from shared/portal-components.css :has() rule */
 
 .milestone-item,
 [data-page="admin"] .milestone-item {
@@ -634,13 +621,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 .milestone-title,
+/* Milestone title - styling from unified rule in portal-cards.css */
 [data-page="admin"] .milestone-title {
-  font-weight: 600;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-1) 0;
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .milestone-item.completed .milestone-title {
@@ -731,14 +716,9 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   margin: 0 0 var(--space-1-5) 0;
 }
 
-/* High specificity with body and ID selectors */
+/* Project notes h4 - styling from unified rule in portal-cards.css */
 body[data-page="admin"] .project-notes h4,
 body[data-page="admin"] #tab-project-detail .project-notes h4 {
-  font-size: 0.75rem;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 500;
   font-family: inherit;
   margin: var(--space-2) 0 var(--space-1) 0;
 }
@@ -851,12 +831,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 [data-page="admin"] #pd-tab-invoices.active {
 }
 
-/* Invoices list section - match files-list-section layout */
-[data-page="admin"] #pd-tab-invoices .portal-project-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1-5);
-}
+/* Invoices list section - flex layout from pd-invoices.css */
 
 /* Card header spacing in invoices tab - match files section h3 */
 [data-page="admin"] #pd-tab-invoices .card-header-with-action {
@@ -1086,7 +1061,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
    Overview Stats Grid
    ================================================ */
 .analytics-overview {
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--portal-radius-md);
   padding: var(--space-4);
@@ -1455,6 +1430,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-style: italic;
 }
 
+/* Auto gap for .status-item children - moved to shared/portal-components.css :has() rules */
+
 .status-item {
   display: flex;
   align-items: center;
@@ -1598,13 +1575,14 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
     border: none;
   }
 
+  /* Mobile table labels - match unified label styling from portal-cards.css */
   #tab-project-detail .files-table td::before,
   #tab-project-detail .invoices-table td::before,
   #tab-client-detail .invoices-table td::before {
     content: attr(data-label);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--portal-text-secondary);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -1651,6 +1629,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-header-client {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--space-4);
   margin-top: var(--space-2);
 }
 
@@ -1684,6 +1663,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-header-meta {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--space-4);
   margin-top: var(--space-2);
 }
 
@@ -1727,17 +1707,20 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-overview-grid {
   display: grid;
   grid-template-columns: 1fr 280px;
+  gap: var(--space-3);
   align-items: start;
 }
 
 .pd-overview-main {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
 }
 
 .pd-overview-sidebar {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
 }
 
 /* Activity Card (Full Width, Last Section) */

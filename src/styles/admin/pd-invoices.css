@@ -12,12 +12,7 @@
 [data-page="admin"] #pd-tab-invoices.active {
 }
 
-/* Invoices list section - match files-list-section layout */
-[data-page="admin"] #pd-tab-invoices .portal-project-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1-5);
-}
+/* Invoices list section - flex layout from shared/portal-components.css :has() rule */
 
 /* Card header spacing in invoices tab - match files section h3 */
 [data-page="admin"] #pd-tab-invoices .card-header-with-action {
@@ -25,11 +20,28 @@
 }
 
 [data-page="admin"] #pd-tab-invoices .invoices-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
   margin-top: 0;
-  padding: 0;
+  padding: var(--space-1);
   background: transparent;
   border-radius: 0;
   box-shadow: none;
+  min-height: 80px;
+}
+
+/* Center empty/loading/error states - override higher specificity of above rule */
+[data-page="admin"] #pd-tab-invoices .invoices-list:has(.empty-state, .loading-state, .error-state) {
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+/* Empty state text styling - match other empty states in project detail */
+[data-page="admin"] #pd-tab-invoices .empty-state {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 /* Invoice summary cards - consistent spacing */
@@ -300,13 +312,9 @@
   padding: var(--space-3);
 }
 
+/* Payment plans section h4 - styling from unified rule in portal-cards.css */
 .payment-plans-section h4 {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-secondary);
   margin: 0 0 var(--space-2) 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .payment-plans-section h4:not(:first-child) {
@@ -440,13 +448,9 @@
   font-size: var(--font-size-base);
 }
 
+/* Section title - styling from unified rule in portal-cards.css */
 #view-project-invoice-modal .section-title {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-secondary);
   margin: 0 0 var(--space-1-5) 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 #view-project-invoice-modal .invoice-line-items-section {

@@ -4,133 +4,185 @@
  * ===============================================
  * @file src/styles/admin/analytics.css
  *
- * Charts, performance metrics, vitals, and analytics dashboard.
+ * Analytics-specific layouts and components.
+ * Common card/item patterns in shared/portal-cards.css
  */
 
-/* Analytics subtab styling moved to shared/portal-layout.css and portal-tabs.css */
-/* h3 styling centralized in admin.css */
+/* ============================================
+   Grid Layouts
+   ============================================ */
 
-/* Unified 2-column grid for analytics cards */
 .analytics-card-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-2);
+  gap: var(--portal-section-gap);
 }
 
-@media (--mobile) {
-  .analytics-card-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Charts - canvas wrapper */
-:is([data-page="admin"], [data-page="client-portal"]) .chart-canvas-wrapper {
-  height: 320px;
-  background: var(--portal-bg-medium);
-  border: none;
-  border-radius: var(--border-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--portal-text-secondary);
-  font-style: italic;
-  padding: var(--space-2);
-  box-sizing: border-box;
-}
-
-.chart-canvas-wrapper canvas {
-  padding: var(--space-1);
-}
-
-/* Legacy .charts-grid - use .analytics-card-grid for new code */
-.charts-grid {
+.analytics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: var(--space-2);
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: var(--portal-section-gap);
+  margin-top: var(--portal-section-gap);
 }
 
-.chart-container {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-4);
+.kpi-cards-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--portal-section-gap);
 }
-
-/* h3 styling centralized in admin.css */
-
-/* Legacy .chart class - remove nested shadow when inside portal-project-card */
-.chart {
-  height: 320px;
-  background: var(--portal-bg-medium);
-  border: none;
-  border-radius: var(--border-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--portal-text-secondary);
-  font-style: italic;
-  padding: var(--space-2);
-  box-sizing: border-box;
-}
-
-.chart canvas,
-#visitors-chart,
-#sources-chart {
-  padding: var(--space-1);
-}
-
-/* Performance Tab */
-.performance-metrics {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-}
-
-.metric-group {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-4);
-  margin-top: var(--space-2);
-}
-
-/* h3 styling centralized in admin.css */
 
 .vitals-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--space-4);
+  gap: var(--portal-section-gap);
 }
 
-.vital-card,
-[data-page="admin"] .vital-card {
+.health-check-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--portal-section-gap);
+}
+
+.quick-actions-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* ============================================
+   Analytics Section Container
+   ============================================ */
+
+.analytics-section {
+  background: var(--portal-bg-darker);
+  border: none;
+  border-radius: var(--portal-radius-sm, 8px);
+  padding: 13px 14px;
+  overflow: hidden;
+}
+
+/* ============================================
+   Charts
+   ============================================ */
+
+.chart-canvas-wrapper,
+.chart,
+.timeline-chart {
+  height: 320px;
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--portal-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--portal-text-muted);
+  font-style: italic;
+  padding: 12px 14px;
+  box-sizing: border-box;
+}
+
+.timeline-chart {
+  height: 200px;
+}
+
+.chart-canvas-wrapper canvas,
+.chart canvas {
+  padding: var(--space-1);
+}
+
+.chart-container {
+  background: var(--portal-bg-darker);
+  border: none;
+  border-radius: var(--portal-radius-sm, 8px);
+  padding: 13px 14px;
+  overflow: hidden;
+}
+
+/* ============================================
+   KPI Cards
+   ============================================ */
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-1);
+  padding: 13px 14px;
+  background: var(--portal-bg-darker);
+  border: none;
+  border-radius: var(--portal-radius-sm, 8px);
+  color: var(--portal-text-light);
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.kpi-card:hover {
+  background: var(--portal-bg-dark);
+}
+
+.kpi-card-icon {
+  color: var(--portal-text-secondary);
+  opacity: 0.8;
+}
+
+.kpi-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.kpi-card-value {
+  color: var(--color-primary);
+}
+
+.kpi-card-change {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-0-5);
+  font-size: var(--font-size-xs);
+  margin-top: auto;
+}
+
+.kpi-card-change .change-value {
+  font-weight: 600;
+  color: var(--portal-text-secondary);
+}
+
+.kpi-card-change.positive .change-value {
+  color: var(--status-active);
+}
+
+.kpi-card-change.negative .change-value {
+  color: var(--status-cancelled);
+}
+
+/* ============================================
+   Vital Cards
+   ============================================ */
+
+.vital-card {
   background: var(--portal-bg-medium);
   border: none;
-  border-radius: var(--border-radius-md);
-  padding: var(--space-1-5) var(--space-2);
+  border-radius: var(--portal-radius-sm);
+  padding: 11px 14px;
   text-align: center;
   position: relative;
+  transition: background 0.15s;
 }
 
-/* Position info icon in top right corner of vital cards */
-[data-page="admin"] .vital-card .info-icon-wrapper {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  margin-left: 0;
-}
-
-/* Position tooltip to the left for vital card icons */
-[data-page="admin"] .vital-card .info-icon-wrapper[data-tooltip]::after {
-  left: auto;
-  right: 0;
-  transform: none;
-}
-
-[data-page="admin"] .vital-card .info-icon-wrapper[data-tooltip]::before {
-  left: auto;
-  right: 4px;
-  transform: none;
+.vital-card:hover {
+  background: var(--portal-bg-light);
 }
 
 .vital-card h4 {
@@ -173,242 +225,23 @@
   color: var(--color-danger);
 }
 
-.bundle-info {
-  display: flex;
-  flex-direction: column;
+/* Info icon positioning for vital cards */
+[data-page="admin"] .vital-card .info-icon-wrapper {
+  position: absolute;
+  top: 8px;
+  right: 8px;
 }
 
-.bundle-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-3) var(--space-4);
-  background: var(--portal-bg-medium);
-  border-radius: var(--border-radius-md);
-  border: none;
-  color: var(--portal-text-light);
+[data-page="admin"] .vital-card .info-icon-wrapper[data-tooltip]::after {
+  left: auto;
+  right: 0;
+  transform: none;
 }
 
-.timeline-chart {
-  height: 200px;
-  background: var(--portal-bg-dark);
-  border-radius: var(--border-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--portal-text-secondary);
-  font-style: italic;
-}
-
-/* Analytics Tab */
-.analytics-dashboard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.analytics-controls {
-  display: flex;
-  gap: var(--space-4);
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-/* Visitor breakdown: main portfolio site vs THE BACKEND (client portal) */
-.analytics-breakdown-intro {
-  margin: 0.25rem 0 0 0;
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-}
-
-.analytics-breakdown {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  margin-bottom: var(--portal-section-gap);
-}
-
-/* Match portal card styling (overview-card, portal-project-card) */
-.analytics-breakdown-block {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-4);
-  color: var(--portal-text-light);
-  box-shadow: var(--shadow-panel);
-}
-
-.analytics-breakdown-title {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--portal-text-light);
-  margin: 0 0 var(--space-2) 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.analytics-breakdown-stats {
-  margin-bottom: 0;
-}
-
-/* Breakdown stat cards: medium bg, no shadow when inside portal-project-card */
-.analytics-breakdown-stats .stat-card {
-  background: var(--portal-bg-medium);
-  box-shadow: none;
-}
-
-/* Analytics data grid: 2x2 like other admin grids; fill content width; match portal card styling */
-.analytics-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(260px, 1fr));
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-}
-
-.analytics-section {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-4);
-  box-shadow: var(--shadow-panel);
-}
-
-/* h3 styling centralized in admin.css */
-
-.data-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* Empty state: centered muted message when no data (replaces single "No data available" row) */
-.data-list-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100px;
-  padding: var(--space-4);
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm);
-  text-align: center;
-  background: var(--portal-bg-medium);
-  border-radius: var(--border-radius-sm);
-  border: 1px dashed var(--portal-border);
-}
-
-.data-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-medium);
-  border-radius: var(--border-radius-sm);
-  border: none;
-  /* No shadow - match other light grey cards in portal */
-  color: var(--portal-text-light);
-  font-size: var(--font-size-xs);
-}
-
-/* ============================================
-   Business KPI Cards (match stat-card styling)
-   ============================================ */
-
-/* KPI row: 4 in one row on desktop; stack to 1 column on narrow (no 2x2 like other cards) */
-.kpi-cards-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* Same styling as .stat-card (portal-cards.css) */
-.kpi-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--space-1);
-  padding: var(--space-4);
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-md);
-  box-shadow: var(--shadow-card);
-  color: var(--portal-text-light);
-  font-family: inherit;
-}
-
-.kpi-card-icon {
-  color: var(--portal-text-secondary);
-  opacity: 0.8;
-}
-
-.kpi-card-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.kpi-card-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-0-5);
-}
-
-/* .kpi-card-value base styling from unified rule in portal-cards.css */
-/* Analytics-specific: use primary color for emphasis */
-.kpi-card-value {
-  color: var(--color-primary);
-}
-
-/* Label styling from unified rule in portal-forms.css - only layout here */
-.kpi-card-label {
-  display: block;
-  margin-top: var(--space-1);
-}
-
-.kpi-card-change {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-0-5);
-  font-size: var(--font-size-xs);
-  margin-top: auto;
-}
-
-.kpi-card-change .change-value {
-  font-weight: 600;
-  color: var(--portal-text-secondary);
-}
-
-.kpi-card-change.positive .change-value {
-  color: var(--status-active);
-}
-
-.kpi-card-change.negative .change-value {
-  color: var(--status-cancelled);
-}
-
-/* Label styling from unified rule in portal-forms.css */
-
-/* ============================================
-   Analytics Section Headers
-   ============================================ */
-
-.analytics-section-header {
-  margin: var(--space-2) 0 var(--space-1-5) 0;
-  padding-bottom: var(--space-1);
-  border-bottom: 1px solid var(--portal-border);
-}
-
-/* h3 styling centralized in admin.css */
-
-/* ============================================
-   Business Charts Grid
-   ============================================ */
-
-.business-charts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
+[data-page="admin"] .vital-card .info-icon-wrapper[data-tooltip]::before {
+  left: auto;
+  right: 4px;
+  transform: none;
 }
 
 /* ============================================
@@ -429,58 +262,39 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-0-5);
-  padding: var(--space-1-5);
-  background: transparent;
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-md);
+  padding: 11px 14px;
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-sm);
   min-width: 110px;
   text-align: center;
+  transition: background 0.15s;
 }
 
-.funnel-stage[data-stage="new"] {
-  border: 1px solid var(--status-new);
+.funnel-stage:hover {
+  background: var(--portal-bg-hover);
 }
 
-.funnel-stage[data-stage="contacted"] {
-  border: 1px solid var(--status-pending);
-}
-
-.funnel-stage[data-stage="qualified"] {
-  border: 1px solid var(--status-active);
-}
-
-.funnel-stage[data-stage="proposal"] {
-  border: 1px solid var(--status-qualified);
-}
+.funnel-stage[data-stage="new"] { border-color: var(--status-new); }
+.funnel-stage[data-stage="contacted"] { border-color: var(--status-pending); }
+.funnel-stage[data-stage="qualified"] { border-color: var(--status-active); }
+.funnel-stage[data-stage="proposal"] { border-color: var(--status-qualified); }
 
 .funnel-stage-value {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--portal-text-primary);
 }
 
-.funnel-stage[data-stage="new"] .funnel-stage-value {
-  color: var(--status-new);
-}
-
-.funnel-stage[data-stage="contacted"] .funnel-stage-value {
-  color: var(--status-pending);
-}
-
-.funnel-stage[data-stage="qualified"] .funnel-stage-value {
-  color: var(--status-active);
-}
-
-.funnel-stage[data-stage="proposal"] .funnel-stage-value {
-  color: var(--status-qualified);
-}
-
-/* Label styling from unified rule in portal-forms.css */
+.funnel-stage[data-stage="new"] .funnel-stage-value { color: var(--status-new); }
+.funnel-stage[data-stage="contacted"] .funnel-stage-value { color: var(--status-pending); }
+.funnel-stage[data-stage="qualified"] .funnel-stage-value { color: var(--status-active); }
+.funnel-stage[data-stage="proposal"] .funnel-stage-value { color: var(--status-qualified); }
 
 .funnel-stage-success {
   background: transparent;
-  border: 1px solid var(--status-completed);
+  border-color: var(--status-completed);
 }
 
 .funnel-stage-success .funnel-stage-value {
@@ -490,7 +304,6 @@
 .funnel-arrow {
   color: var(--portal-text-muted);
   flex-shrink: 0;
-  padding: 0;
   opacity: 0.7;
 }
 
@@ -515,40 +328,28 @@
 }
 
 /* ============================================
-   Saved Reports
+   Data Lists
    ============================================ */
 
-.section-header-with-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-1-5);
-}
-
-/* h3 styling centralized in admin.css */
-
-.section-header-with-actions .icon-btn {
-  flex-shrink: 0;
-}
-
-.reports-list {
+.data-list,
+.reports-list,
+.alerts-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
 }
 
-.report-item {
+.data-list-empty {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: var(--space-1) var(--space-1-5);
-  background: var(--portal-bg-medium);
+  justify-content: center;
+  min-height: 100px;
+  padding: 16px 14px;
+  color: var(--portal-text-muted);
+  font-size: 12px;
+  text-align: center;
+  background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-sm);
-  border: 1px solid var(--portal-border);
-}
-
-.report-item:hover {
-  border-color: var(--color-primary);
 }
 
 .report-info {
@@ -571,62 +372,71 @@
 .report-actions {
   display: flex;
   gap: var(--space-0-5);
-}
-
-.report-actions button {
-  padding: var(--space-0-5) var(--space-1-5);
-  font-size: var(--font-size-xs);
+  align-items: center;
 }
 
 .report-empty {
   text-align: center;
-  padding: var(--space-2);
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
+  padding: 16px 14px;
+  color: var(--portal-text-muted);
+  font-size: 12px;
 }
 
 /* ============================================
-   Alerts List (reuses reports styling)
+   Health Check
    ============================================ */
 
-.alerts-list {
+.health-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  transition: background 0.15s;
+}
+
+.health-item:hover {
+  background: var(--portal-bg-light);
+}
+
+.health-indicator {
+  width: var(--space-1-5);
+  height: var(--space-1-5);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.health-indicator.health-loading {
+  background: var(--portal-text-muted);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.health-indicator.health-ok { background: var(--status-active); }
+.health-indicator.health-warning { background: var(--color-warning); }
+.health-indicator.health-error { background: var(--status-cancelled); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.health-label {
+  flex: 1;
+}
+
+.health-status {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-secondary);
+}
+
+/* ============================================
+   Bundle Info (uses common .bundle-item from portal-cards.css)
+   ============================================ */
+
+.bundle-info {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-}
-
-.alert-item .badge-muted {
-  display: inline-block;
-  padding: var(--space-0-5) var(--space-0-5);
-  font-size: var(--font-size-2xs);
-  font-weight: 500;
-  background: var(--portal-bg-medium);
-  color: var(--portal-text-muted);
-  border-radius: var(--portal-radius-sm);
-  margin-right: var(--space-0-5);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-/* Report/Alert action buttons spacing */
-.report-actions {
-  display: flex;
-  gap: var(--space-0-5);
-  align-items: center;
-}
-
-.report-actions .btn-sm {
-  padding: var(--space-0-5) var(--space-1);
-  font-size: var(--font-size-2xs);
-}
-
-.report-actions .btn-danger {
-  padding: var(--space-0-5);
-}
-
-.report-actions .btn-danger svg {
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
 }
 
 /* ============================================
@@ -634,17 +444,10 @@
    ============================================ */
 
 @media (--mobile) {
-  /* Stack KPI cards in single column with consistent spacing */
-  .kpi-cards-row {
-    grid-template-columns: 1fr;
-    gap: var(--space-2);
-  }
-
-  /* .kpi-card-value font-size controlled by portal-cards.css */
-
-  /* Subtab content spacing moved to shared/portal-tabs.css */
-
-  .business-charts-grid {
+  .analytics-card-grid,
+  .analytics-grid,
+  .kpi-cards-row,
+  .health-check-grid {
     grid-template-columns: 1fr;
   }
 
@@ -666,161 +469,35 @@
     flex-direction: column;
     gap: var(--space-1);
   }
+
+  .quick-actions-grid {
+    flex-direction: column;
+  }
 }
 
 @media (--small-mobile) {
-  .kpi-cards-row {
-    grid-template-columns: 1fr;
-  }
-
-  /* Only stack header+actions in analytics tab */
   #tab-analytics .section-header-with-actions {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-1);
   }
+
+  #tab-system .section-header-with-actions {
+    padding: 0;
+  }
+
+  #tab-system .section-header-with-actions h3 {
+    line-height: 36px;
+  }
+
+  #tab-system .section-header-with-actions .icon-btn {
+    margin: 0;
+  }
 }
-
-/* ============================================
-   System Status Tab
-   ============================================ */
-
-/* Health Check Grid - always 2x2 or 1 column, never 3+1 */
-.health-check-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-1-5);
-}
-
-.health-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1-5);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
-}
-
-.health-indicator {
-  width: var(--space-1-5);
-  height: var(--space-1-5);
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.health-indicator.health-loading {
-  background: var(--portal-text-muted);
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-.health-indicator.health-ok {
-  background: var(--status-active);
-}
-
-.health-indicator.health-warning {
-  background: var(--color-warning);
-}
-
-.health-indicator.health-error {
-  background: var(--status-cancelled);
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-/* Label styling from unified rule in portal-forms.css - only layout here */
-.health-label {
-  flex: 1;
-}
-
-.health-status {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-}
-
-/* Quick Actions Grid */
-.quick-actions-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1-5);
-}
-
-.quick-actions-grid .btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* Recent Errors List */
-.recent-errors-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.error-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-  padding: var(--space-1) var(--space-1-5);
-  background: rgba(var(--color-error-rgb), 0.1);
-  border: 1px solid rgba(var(--color-error-rgb), 0.2);
-  border-radius: var(--portal-radius-sm);
-}
-
-.error-item-message {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
-  font-family: var(--font-family-mono);
-}
-
-.error-item-time {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-}
-
-.empty-state-text {
-  text-align: center;
-  padding: var(--space-2);
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-  margin: 0;
-}
-
-/* System tab uses shared .system-details, .system-info-grid, .system-info-row from details-card.css */
 
 .truncate-text {
   max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-@media (--mobile) {
-  .health-check-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .quick-actions-grid {
-    flex-direction: column;
-  }
-
-  .quick-actions-grid .btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Health check header - align button with h3 on mobile */
-  #tab-system .section-header-with-actions {
-    padding: 0;
-  }
-
-  #tab-system .section-header-with-actions h3 {
-    line-height: 36px; /* Match icon-btn height for perfect alignment */
-  }
-
-  #tab-system .section-header-with-actions .icon-btn {
-    margin: 0;
-  }
 }
