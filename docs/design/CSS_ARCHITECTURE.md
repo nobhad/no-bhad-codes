@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** February 17, 2026 (Documentation audit - file counts updated)
+**Last Updated:** February 19, 2026 (Added comprehensive layout utility classes)
 
 ## Table of Contents
 
@@ -961,6 +961,219 @@ Project cards in the client portal use scoped classes to avoid conflicts with `.
 ---
 
 ## Utility Classes
+
+**Location:** `src/styles/shared/portal-components.css`
+
+All layout utility classes are defined as single sources of truth. Use these instead of repeating flex/grid patterns in page-specific CSS.
+
+### Flex Column Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.flex-col` | `display: flex; flex-direction: column; gap: var(--space-2)` |
+| `.flex-col-gap-0` | `display: flex; flex-direction: column; gap: 0` |
+| `.flex-col-gap-0-5` | `display: flex; flex-direction: column; gap: var(--space-0-5)` |
+| `.flex-col-gap-1` | `display: flex; flex-direction: column; gap: var(--space-1)` |
+| `.flex-col-gap-1-5` | `display: flex; flex-direction: column; gap: var(--space-1-5)` |
+| `.flex-col-gap-2` | `display: flex; flex-direction: column; gap: var(--space-2)` |
+| `.flex-col-gap-3` | `display: flex; flex-direction: column; gap: var(--space-3)` |
+| `.flex-col-gap-4` | `display: flex; flex-direction: column; gap: var(--space-4)` |
+
+### Flex Row Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.flex-row` | `display: flex; flex-direction: row; gap: var(--space-2)` |
+| `.flex-row-gap-0-5` | `display: flex; flex-direction: row; gap: var(--space-0-5)` |
+| `.flex-row-gap-1` | `display: flex; flex-direction: row; gap: var(--space-1)` |
+| `.flex-row-gap-1-5` | `display: flex; flex-direction: row; gap: var(--space-1-5)` |
+| `.flex-row-gap-2` | `display: flex; flex-direction: row; gap: var(--space-2)` |
+| `.flex-row-gap-3` | `display: flex; flex-direction: row; gap: var(--space-3)` |
+
+### Flex Wrap Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.flex-wrap` | `display: flex; flex-wrap: wrap; gap: var(--space-2)` |
+| `.flex-wrap-gap-0-5` | `display: flex; flex-wrap: wrap; gap: var(--space-0-5)` |
+| `.flex-wrap-gap-1` | `display: flex; flex-wrap: wrap; gap: var(--space-1)` |
+| `.flex-wrap-gap-1-5` | `display: flex; flex-wrap: wrap; gap: var(--space-1-5)` |
+| `.flex-wrap-gap-2` | `display: flex; flex-wrap: wrap; gap: var(--space-2)` |
+| `.flex-wrap-gap-3` | `display: flex; flex-wrap: wrap; gap: var(--space-3)` |
+
+### Flex Alignment Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.flex-center` | `display: flex; align-items: center; justify-content: center` |
+| `.flex-between` | `display: flex; align-items: center; justify-content: space-between` |
+| `.flex-start` | `display: flex; align-items: flex-start` |
+| `.items-center` | `align-items: center` |
+| `.items-start` | `align-items: flex-start` |
+| `.items-end` | `align-items: flex-end` |
+| `.justify-between` | `justify-content: space-between` |
+| `.justify-end` | `justify-content: flex-end` |
+
+### Grid Utilities - Fixed Columns
+
+| Class | CSS |
+| ----- | --- |
+| `.grid-2col` | `display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2)` |
+| `.grid-3col` | `display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2)` |
+| `.grid-4col` | `display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2)` |
+
+### Grid Utilities - Auto-Fit (Responsive)
+
+These grids automatically wrap items based on minimum width:
+
+| Class | Min Item Width | CSS |
+| ----- | -------------- | --- |
+| `.grid-auto-150` | 150px | `grid-template-columns: repeat(auto-fit, minmax(150px, 1fr))` |
+| `.grid-auto-180` | 180px | `grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))` |
+| `.grid-auto-200` | 200px | `grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))` |
+| `.grid-auto-220` | 220px | `grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))` |
+| `.grid-auto-250` | 250px | `grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))` |
+| `.grid-auto-280` | 280px | `grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))` |
+| `.grid-auto-300` | 300px | `grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))` |
+| `.grid-auto-350` | 350px | `grid-template-columns: repeat(auto-fit, minmax(350px, 1fr))` |
+
+### Gap Utilities
+
+Use to override default gap on flex/grid containers:
+
+| Class | CSS |
+| ----- | --- |
+| `.gap-0` | `gap: 0` |
+| `.gap-0-5` | `gap: var(--space-0-5)` |
+| `.gap-1` | `gap: var(--space-1)` |
+| `.gap-1-5` | `gap: var(--space-1-5)` |
+| `.gap-2` | `gap: var(--space-2)` |
+| `.gap-3` | `gap: var(--space-3)` |
+| `.gap-4` | `gap: var(--space-4)` |
+
+### :has() Automatic Styling Rules
+
+These `:has()` rules automatically apply styling based on child elements (no class needed on parent):
+
+| Child Element | Auto Styling |
+| ------------- | ------------ |
+| `.status-item` | Parent gets `gap: var(--space-2)` |
+| `.meta-item` | Parent gets `gap: var(--space-2)` |
+| `.form-group` | Parent gets `flex-direction: column; gap: var(--space-1-5)` |
+| `.badge` | Parent gets `flex-wrap: wrap; gap: var(--space-0-5)` |
+| `[class$="-item"]` in `[class$="-list"]` | Auto flex-column gap-1-5 |
+| `li` in `.activity-list`, `.notes-list`, etc. | Auto padding, background, radius |
+
+### Text Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.truncate` | `white-space: nowrap; overflow: hidden; text-overflow: ellipsis` |
+| `.truncate-2` | 2-line clamp with ellipsis |
+| `.truncate-3` | 3-line clamp with ellipsis |
+
+### Font Weight Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.font-semibold` | `font-weight: 600` |
+| `.font-medium` | `font-weight: 500` |
+| `.font-bold` | `font-weight: 700` |
+| `.font-normal` | `font-weight: 400` |
+
+### Transition Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.transition-colors` | `transition: color, background-color var(--transition-fast)` |
+| `.transition-opacity` | `transition: opacity var(--transition-fast)` |
+| `.transition-transform` | `transition: transform var(--transition-fast)` |
+| `.transition-all` | `transition: all var(--transition-fast)` |
+
+### Border Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.border-bottom` | `border-bottom: 1px solid var(--portal-border-color)` |
+| `.border-bottom-dark` | `border-bottom: 1px solid var(--portal-border-dark)` |
+| `.border-bottom-light` | `border-bottom: 1px solid var(--portal-border-light)` |
+| `.border-top` | `border-top: 1px solid var(--portal-border-color)` |
+| `.border-all` | `border: 1px solid var(--portal-border-color)` |
+| `.border-none` | `border: none` |
+
+### Icon Size Utilities
+
+| Class | Size |
+| ----- | ---- |
+| `.icon-xs` | 12px |
+| `.icon-sm` | 16px |
+| `.icon-md` | 20px |
+| `.icon-lg` | 24px |
+| `.icon-xl` | 32px |
+
+### Focus & Interactive Utilities
+
+| Class | Usage |
+| ----- | ----- |
+| `.focus-primary` | Focus state with primary border color |
+| `.focus-ring` | Focus state with primary ring shadow |
+| `.hover-primary` | Hover changes text to primary color |
+| `.hover-bg-light` | Hover changes background to light |
+| `.hover-bg-medium` | Hover changes background to medium |
+| `.interactive` | Combines cursor, transition, and hover |
+
+### Disabled State
+
+| Class | CSS |
+| ----- | --- |
+| `.disabled` | `opacity: 0.5; cursor: not-allowed; pointer-events: none` |
+
+### Position Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.relative` | `position: relative` |
+| `.absolute` | `position: absolute` |
+| `.fixed` | `position: fixed` |
+| `.sticky` | `position: sticky` |
+| `.absolute-fill` | Fills parent with `top/right/bottom/left: 0` |
+| `.absolute-center` | Centers with `top/left: 50%` + transform |
+
+### Overflow Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.overflow-hidden` | `overflow: hidden` |
+| `.overflow-auto` | `overflow: auto` |
+| `.overflow-x-auto` | `overflow-x: auto` |
+| `.overflow-y-auto` | `overflow-y: auto` |
+
+### Spacer Utilities
+
+| Class | CSS |
+| ----- | --- |
+| `.spacer-left` | `margin-left: auto` |
+| `.spacer-right` | `margin-right: auto` |
+| `.spacer-top` | `margin-top: auto` |
+| `.spacer-bottom` | `margin-bottom: auto` |
+
+### Header/Footer Section Components
+
+| Class | Usage |
+| ----- | ----- |
+| `.header-section` | Flex row with space-between, border-bottom |
+| `.header-section-compact` | Smaller padding variant |
+| `.header-section-title` | Title styling within header |
+| `.header-section-actions` | Actions container within header |
+| `.footer-section` | Flex row with justify-end, border-top |
+| `.footer-section-spread` | Footer with space-between |
+
+### List Item Component
+
+| Class | Usage |
+| ----- | ----- |
+| `.list-item` | Clickable list item with padding, bg, hover |
+| `.list-item-compact` | Smaller padding variant |
 
 ### Button Classes
 

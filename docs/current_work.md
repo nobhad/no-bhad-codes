@@ -1,8 +1,180 @@
 # Current Work
 
-**Last Updated:** February 18, 2026
+**Last Updated:** February 19, 2026
 
 This file tracks active development work and TODOs. Completed items are archived in `archive/ARCHIVED_WORK_2026-02-12.md`.
+
+---
+
+## Session Summary - February 19, 2026 (Continued)
+
+Comprehensive card styling consolidation to match overview-layout design pattern.
+
+**Card Styling Consolidation:**
+
+Updated all card components to use consistent flat design matching `overview-layout.css`:
+
+- Removed shadows from all cards (`.portal-project-card`, `.stat-card`, `.summary-card`, etc.)
+- Changed border-radius from `--portal-radius-lg/md` to `--portal-radius-sm, 8px`
+- Changed padding to compact `13px 14px` (outer) and `11px 14px` (nested)
+- Added `overflow: hidden` and `transition: background 0.15s` to cards
+- Changed nested items to use `--portal-bg-medium` with hover to `--portal-bg-light`
+
+**Analytics HTML Update:**
+
+Updated `admin-analytics.ts` to use proper class names:
+
+- Changed `card-grid-4` → `kpi-cards-row`
+- Changed `portal-project-card portal-shadow` → `analytics-section`
+- Applied to all 16+ sections in analytics tab
+
+**Health Check Fix:**
+
+Fixed styling mismatch in System Status → Health Check section:
+
+- Changed `.health-item` from `--portal-bg-dark` to `--portal-bg-medium`
+- Now matches `.system-info-row` styling in Build Information
+
+**CSS Consolidation:**
+
+Added common list-item pattern to `portal-cards.css`:
+
+- `.list-item`, `.data-item`, `.report-item`, `.alert-item`, `.bundle-item`
+- All use `--portal-bg-medium` base with `--portal-bg-light` hover
+- Stripped down `analytics.css` from 870+ lines to ~380 lines
+- Removed duplicate card/item patterns now in shared files
+
+**Files Modified:**
+
+- `src/styles/shared/portal-cards.css` - Updated card bases, added common list-item pattern
+- `src/styles/pages/admin.css` - Removed shadows, updated overview tab styling
+- `src/styles/admin/analytics.css` - Major cleanup, stripped to essentials
+- `src/features/admin/modules/admin-analytics.ts` - Updated HTML class names
+
+---
+
+## Session Summary - February 19, 2026 (Earlier)
+
+CSS consolidation session - added comprehensive utility classes and `:has()` rules, then removed duplicates from 15+ files.
+
+**Project Tasks Page Button Fix:**
+
+Fixed button not appearing in top right of Tasks tab in project details:
+
+- Added CSS rule for `.view-toggle-container` when it's the only child of `.card-header-with-action`
+- Rule makes container take `width: 100%` with `justify-content: space-between`
+- File: `src/styles/shared/portal-cards.css`
+
+**Analytics → Overview Styling Alignment:**
+
+Updated analytics pages to match the Linear-inspired `overview-layout.css` styling:
+
+- Changed backgrounds from `--portal-bg-dark` to `--portal-bg-darker` for cards/panels
+- Changed border-radius from `--portal-radius-md` to `--portal-radius-sm, 8px`
+- Changed padding from `var(--space-4)` to compact `13px 14px`
+- Removed `box-shadow: var(--shadow-panel)` and `box-shadow: var(--shadow-card)`
+- Changed gaps from `var(--space-*)` to `var(--portal-section-gap)` for consistency
+- Added hover states with `transition: background 0.15s` and `background: var(--portal-bg-hover)`
+- Added subtle gradient overlay to KPI cards (matching stat-card styling)
+- Changed nested items (data-item, health-item, etc.) to use `--portal-bg-dark` with hover
+- Updated chart containers to use `--portal-bg-dark` for nested elements
+- Fixed font sizes to match overview (11.5px, 12px patterns)
+
+**Chart Visual Alignment:**
+
+Updated chart elements across analytics to match overview panels:
+
+- `.chart-canvas-wrapper` and `.chart`: Changed from `--portal-bg-medium` to `--portal-bg-dark`
+- Updated ad-hoc analytics widgets in `ad-hoc-requests.css`
+- Updated lead analytics columns in `leads-pipeline.css`
+- All chart containers now use consistent `--portal-bg-darker` outer / `--portal-bg-dark` inner pattern
+
+**Key Changes:**
+
+- **Comprehensive audit** - Found 54 files with duplicated `display: flex; flex-direction: column; gap:` pattern
+- **Utility classes added to portal-components.css:**
+  - Flex column: `.flex-col-gap-0` through `.flex-col-gap-4`
+  - Flex row: `.flex-row-gap-0-5` through `.flex-row-gap-3`
+  - Flex wrap: `.flex-wrap-gap-0-5` through `.flex-wrap-gap-3`
+  - Flex alignment: `.flex-center`, `.flex-between`, `.flex-start`, `.items-center`, etc.
+  - Grid fixed columns: `.grid-2col`, `.grid-3col`, `.grid-4col`
+  - Grid auto-fit: `.grid-auto-150` through `.grid-auto-350`
+  - Gap utilities: `.gap-0` through `.gap-4`
+  - Spacing utilities: `.mt-0`, `.pt-sm`, `.pb-lg`, etc.
+  - Text utilities: `.text-muted`, `.text-secondary`, `.text-primary`, etc.
+- **`:has()` rules for automatic styling:**
+  - `:has(> .status-item)` - auto gap
+  - `:has(> .meta-item)` - auto gap
+  - `:has(> .form-group)` - auto column layout
+  - `:has(> .badge)` - auto row wrap
+  - `[class$="-list"]:has(> [class$="-item"])` - auto flex-column gap-1-5
+  - `[class$="-cards"]:has(> [class$="-card"])` - auto flex-column gap-2
+  - Named containers: `.signature-details`, `.signature-info`, `.lead-tab-section`, `.time-entry-form`, `.contract-tab-content`, `.checkbox-group`, `.modal-form`, `.deliverables-modal-content`, `.deliverables-container`
+  - Tighter gap-1 lists: `.help-accordion`, `.help-featured-list`, `.help-results-list`, `.notes-list`, `.tasks-list`, `.activity-list`
+- **Removed duplicate CSS from 15 files:**
+  - `admin/project-detail.css` - removed `.milestones-list`, `#pd-tab-invoices .portal-project-card`
+  - `admin/pd-contract.css` - removed `.contract-tab-content`, `.signature-details`
+  - `admin/pd-invoices.css` - removed `#pd-tab-invoices .portal-project-card`
+  - `admin/leads-pipeline.css` - removed `.lead-tab-section`
+  - `admin/proposals.css` - removed `.signature-info`
+  - `admin/tasks.css` - removed `.time-entry-form`
+  - `client-portal/dashboard.css` - removed `.milestones-list`
+  - `client-portal/invoices.css` - removed `.invoices-list`
+  - `client-portal/settings.css` - removed `.checkbox-group` (kept `flex: 1`)
+  - `client-portal/help.css` - removed `.help-accordion`, `.help-featured-list`, `.help-results-list`
+  - `deliverables.css` - removed `.deliverables-modal-content`, `.deliverables-container`, `.modal-form`
+
+**Files Modified:**
+
+- `src/styles/shared/portal-components.css` - Added comprehensive utility classes and :has() rules
+- `src/styles/admin/project-detail.css` - Removed 2 duplicate flex rules
+- `src/styles/admin/pd-contract.css` - Removed 2 duplicate flex rules
+- `src/styles/admin/pd-invoices.css` - Removed 1 duplicate flex rule
+- `src/styles/admin/leads-pipeline.css` - Removed 1 duplicate flex rule
+- `src/styles/admin/proposals.css` - Removed 1 duplicate flex rule
+- `src/styles/admin/tasks.css` - Removed 1 duplicate flex rule
+- `src/styles/client-portal/dashboard.css` - Removed 1 duplicate flex rule
+- `src/styles/client-portal/invoices.css` - Removed 1 duplicate flex rule
+- `src/styles/client-portal/settings.css` - Simplified `.checkbox-group`
+- `src/styles/client-portal/help.css` - Removed 3 duplicate flex rules
+- `src/styles/deliverables.css` - Removed 3 duplicate flex rules
+- `docs/design/CSS_ARCHITECTURE.md` - Documented all new utility classes
+
+**Additional Consolidation (Phase 2):**
+
+Added more universal patterns for cohesive design:
+
+- **Text utilities:** `.truncate`, `.truncate-2`, `.truncate-3`
+- **List utilities:** `.list-reset`, universal list reset for `[class$="-list"]`
+- **List item styling:** Universal `li` styling for `.activity-list`, `.notes-list`, `.files-list`, `.tasks-list`
+- **Padding utilities:** `.pad-compact`, `.pad-standard`, `.pad-card`, `.pad-section`
+- **Border radius utilities:** `.rounded-sm`, `.rounded-md`, `.rounded-lg`, `.rounded-full`
+- **Background utilities:** `.bg-darker`, `.bg-dark`, `.bg-medium`, `.bg-light`
+- **List item component:** `.list-item`, `.list-item-compact` with hover states
+
+**Removed more duplicates:**
+
+- `shared/portal-cards.css` - Removed `.activity-list` reset, `.activity-list li` styling, clickable states
+
+**Additional Consolidation (Phase 3):**
+
+Deep analysis found 15 more patterns. Added to portal-components.css:
+
+- **Font weight:** `.font-semibold`, `.font-medium`, `.font-bold`, `.font-normal` (300+ instances)
+- **Transitions:** `.transition-colors`, `.transition-opacity`, `.transition-transform`, `.transition-all` (31+ instances)
+- **Borders:** `.border-bottom`, `.border-top`, `.border-all`, `.border-none` + variants (87+ instances)
+- **Icon sizes:** `.icon-xs/sm/md/lg/xl` (12-32px) (20+ instances)
+- **Focus states:** `.focus-primary`, `.focus-ring` (87+ instances)
+- **Hover states:** `.hover-primary`, `.hover-bg-light`, `.hover-bg-medium` (20+ instances)
+- **Interactive:** `.interactive` (combines cursor + transition + hover)
+- **Disabled:** `.disabled` with pointer-events: none
+- **Position:** `.relative`, `.absolute`, `.fixed`, `.sticky`, `.absolute-fill`, `.absolute-center`
+- **Overflow:** `.overflow-hidden/auto`, `.overflow-x-auto`, `.overflow-y-auto`
+- **Spacers:** `.spacer-left/right/top/bottom` (margin auto)
+- **Header section:** `.header-section`, `.header-section-compact`, `.header-section-title`, `.header-section-actions`
+- **Footer section:** `.footer-section`, `.footer-section-spread`
+
+`portal-components.css` now has 1417 lines - single source of truth for all common patterns.
 
 ---
 
