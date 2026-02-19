@@ -970,12 +970,12 @@ class AdminDashboard {
             const safeTitleMessage = SanitizationUtils.escapeHtml(decodedMessage);
             return `
             <tr data-contact-id="${submission.id}">
-              <td>${date}</td>
-              <td>${safeName}</td>
-              <td class="meta-value-with-copy">${safeEmail} ${getCopyEmailButtonHtml(submission.email || '')}</td>
-              <td>${safeSubject}</td>
-              <td class="message-cell" title="${safeTitleMessage}">${truncatedMessage}</td>
-              <td class="status-cell">
+              <td data-label="Date">${date}</td>
+              <td data-label="Name">${safeName}</td>
+              <td class="meta-value-with-copy" data-label="Email">${safeEmail} ${getCopyEmailButtonHtml(submission.email || '')}</td>
+              <td data-label="Subject">${safeSubject}</td>
+              <td class="message-cell" data-label="Message" title="${safeTitleMessage}">${truncatedMessage}</td>
+              <td class="status-cell" data-label="Status">
                 <div class="contact-status-dropdown-container" data-contact-id="${submission.id}"></div>
               </td>
             </tr>
@@ -1574,7 +1574,7 @@ class AdminDashboard {
     document.body.dataset.activeTab = tabName;
 
     // Update sidebar nav items - match the actual HTML element class
-    document.querySelectorAll('.sidebar-nav-item[data-tab]').forEach((btn) => {
+    document.querySelectorAll('.sidebar-buttons .btn[data-tab]').forEach((btn) => {
       const isActive = (btn as HTMLElement).dataset.tab === activeGroup;
       btn.classList.toggle('active', isActive);
       if (isActive) {
