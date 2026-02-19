@@ -457,7 +457,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
               <button class="btn btn-secondary" id="btn-create-invoice">+ Create Invoice</button>
             </div>
           </div>
-          <div class="invoices-list" id="pd-invoices-list"><div class="empty-state">No invoices created yet.</div></div>
+          <div class="invoices-list" id="pd-invoices-list"><div class="empty-state">No invoices yet. Create one above.</div></div>
         </div>
         <div class="portal-project-card portal-shadow">
           <div class="card-header-with-action">
@@ -1168,7 +1168,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Set up project detail sub-tab navigation
    */
   private setupProjectDetailTabs(): void {
-    // Set up inline tab buttons (hidden)
+    // Set up inline tab buttons (hidden) - kept for compatibility
     const inlineTabBtns = document.querySelectorAll('.project-detail-tabs button');
     inlineTabBtns.forEach((btn) => {
       const btnEl = btn as HTMLElement;
@@ -1181,19 +1181,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
     });
 
-    // Set up header tab buttons using event delegation (once per container)
-    const headerTabsContainer = document.getElementById('project-detail-header-tabs');
-    if (headerTabsContainer && !headerTabsContainer.dataset.listenerAdded) {
-      headerTabsContainer.dataset.listenerAdded = 'true';
-
-      headerTabsContainer.addEventListener('click', (e) => {
-        const btn = (e.target as HTMLElement).closest('.portal-subtab') as HTMLElement;
-        if (!btn) return;
-
-        const tabName = btn.dataset.pdTab;
-        if (tabName) this.switchToProjectDetailTab(tabName);
-      });
-    }
+    // Header tab buttons are handled by the universal handler in admin-dashboard.ts
+    // which dispatches projectDetailTabChange events caught by admin-projects.ts
 
     this.setupMoreMenuDelegation();
     this.setupEventHandlers();
