@@ -890,6 +890,7 @@ class AdminDashboard {
   private toggleSidebar(): void {
     const sidebar = this.domCache.get('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
+    const page = document.querySelector('[data-page="admin"]');
     const isMobile = window.innerWidth < 768;
 
     if (isMobile) {
@@ -899,6 +900,9 @@ class AdminDashboard {
     } else {
       // Desktop: collapse/expand
       sidebar?.classList.toggle('collapsed');
+      // Update data attribute for CSS icon flip
+      const isCollapsed = sidebar?.classList.contains('collapsed');
+      page?.setAttribute('data-sidebar-collapsed', isCollapsed ? 'true' : 'false');
     }
   }
 
@@ -1534,35 +1538,90 @@ class AdminDashboard {
   }
 
   private setupHeaderGroupNavigation(): void {
-    const groups = document.querySelectorAll('.header-subtab-group[data-mode="primary"]');
-    groups.forEach((group) => {
-      const groupEl = group as HTMLElement;
-      if (groupEl.dataset.initialized === 'true') return;
-      groupEl.dataset.initialized = 'true';
+    // UNIVERSAL RULE: Single document-level event delegation for ALL header subtabs
+    // SINGLE SOURCE OF TRUTH for subtab click handling and active state management
 
-      groupEl.addEventListener('click', (e) => {
-        const target = (e.target as HTMLElement).closest('.portal-subtab') as HTMLElement | null;
-        if (!target) return;
+    logger.log('setupHeaderGroupNavigation called');
+
+    // Use a unique ID on body to track if handlers are attached (resets on hard refresh)
+    if (document.body.dataset.subtabHandlersV2) {
+      logger.log('Handlers already attached (body dataset), skipping');
+      return;
+    }
+    document.body.dataset.subtabHandlersV2 = 'true';
+    logger.log('Attaching subtab handlers');
+
+    // Store reference to this dashboard instance for the click handler
+    const dashboard = this;
+
+    /**
+     * UNIVERSAL: Update active state for any subtab group
+     * This is the SINGLE SOURCE OF TRUTH for subtab active state management
+     */
+    const updateSubtabActiveState = (group: HTMLElement, activeValue: string, dataAttr: string): void => {
+      group.querySelectorAll('.portal-subtab').forEach((btn) => {
+        const btnValue = (btn as HTMLElement).dataset[dataAttr];
+        btn.classList.toggle('active', btnValue === activeValue);
+      });
+    };
+
+    // UNIVERSAL click handler for ALL header subtab types
+    document.addEventListener('click', (e) => {
+      const target = (e.target as HTMLElement).closest('.header-subtab-group .portal-subtab') as HTMLElement | null;
+      if (!target) return;
+
+      // Get the parent group to check its type
+      const group = target.closest('.header-subtab-group') as HTMLElement | null;
+      if (!group) return;
+
+      const forTab = group.dataset.forTab;
+      // Strip any quotes from mode value (handles malformed HTML attributes)
+      const mode = group.dataset.mode?.replace(/["']/g, '');
+
+      // PRIMARY subtabs (work, CRM, documents): switch main tabs
+      if (mode === 'primary') {
+        const subtab = target.dataset.subtab;
+        if (!subtab || subtab === dashboard.currentTab) return;
+        // Update active state immediately (single source of truth)
+        updateSubtabActiveState(group, subtab, 'subtab');
+        dashboard.switchTab(subtab);
+        return;
+      }
+
+      // ANALYTICS subtabs
+      if (forTab === 'analytics') {
         const subtab = target.dataset.subtab;
         if (!subtab) return;
-        if (subtab === this.currentTab) return;
-        this.switchTab(subtab);
-      });
-    });
+        updateSubtabActiveState(group, subtab, 'subtab');
+        document.dispatchEvent(new CustomEvent('analyticsSubtabChange', { detail: { subtab } }));
+        return;
+      }
 
-    const body = document.body as HTMLElement | null;
-    if (!body || body.dataset.subtabListenerAttached === 'true') return;
-    body.dataset.subtabListenerAttached = 'true';
+      // WORKFLOWS subtabs
+      if (forTab === 'workflows') {
+        const subtab = target.dataset.subtab;
+        if (!subtab) return;
+        updateSubtabActiveState(group, subtab, 'subtab');
+        document.dispatchEvent(new CustomEvent('workflowsSubtabChange', { detail: { subtab } }));
+        return;
+      }
 
-    // Fallback: delegate on document in case header DOM is re-rendered.
-    document.addEventListener('click', (e) => {
-      const target = (e.target as HTMLElement).closest(
-        '.header-subtab-group[data-mode="primary"] .portal-subtab'
-      ) as HTMLElement | null;
-      if (!target) return;
-      const subtab = target.dataset.subtab;
-      if (!subtab || subtab === this.currentTab) return;
-      this.switchTab(subtab);
+      // PROJECT DETAIL subtabs
+      if (forTab === 'project-detail') {
+        const tabName = target.dataset.pdTab;
+        if (!tabName) return;
+        updateSubtabActiveState(group, tabName, 'pdTab');
+        document.dispatchEvent(new CustomEvent('projectDetailTabChange', { detail: { tabName } }));
+        return;
+      }
+
+      // CLIENT DETAIL subtabs
+      if (forTab === 'client-detail') {
+        const tabName = target.dataset.cdTab;
+        if (!tabName) return;
+        updateSubtabActiveState(group, tabName, 'cdTab');
+        document.dispatchEvent(new CustomEvent('clientDetailTabChange', { detail: { tabName } }));
+      }
     });
   }
 
@@ -1574,7 +1633,7 @@ class AdminDashboard {
     document.body.dataset.activeTab = tabName;
 
     // Update sidebar nav items - match the actual HTML element class
-    document.querySelectorAll('.sidebar-nav-item[data-tab]').forEach((btn) => {
+    document.querySelectorAll('.sidebar-buttons .btn[data-tab]').forEach((btn) => {
       const isActive = (btn as HTMLElement).dataset.tab === activeGroup;
       btn.classList.toggle('active', isActive);
       if (isActive) {
@@ -1584,9 +1643,15 @@ class AdminDashboard {
       }
     });
 
-    const subtabGroup = document.querySelector(`.header-subtab-group[data-for-tab="${activeGroup}"]`);
-    if (subtabGroup && (subtabGroup as HTMLElement).dataset.mode === 'primary') {
-      subtabGroup.querySelectorAll('.portal-subtab').forEach((btn) => {
+    // Update subtab active states for PRIMARY subtab groups only
+    // Analytics and Workflows manage their own subtab states
+    const subtabGroup = document.querySelector(
+      `.header-subtab-group[data-for-tab="${activeGroup}"]`
+    ) as HTMLElement | null;
+    // Check if it's a primary group (strip quotes from mode value)
+    const groupMode = subtabGroup?.dataset.mode?.replace(/["']/g, '');
+    if (subtabGroup && groupMode === 'primary') {
+      subtabGroup.querySelectorAll('.portal-subtab[data-subtab]').forEach((btn) => {
         btn.classList.toggle('active', (btn as HTMLElement).dataset.subtab === tabName);
       });
     }
