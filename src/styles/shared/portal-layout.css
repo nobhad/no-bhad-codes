@@ -703,9 +703,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   flex: 1;
 }
 
-/* Toggle button styling */
+/* Toggle button styling - for toggle buttons inside sidebar-nav (not direct sidebar children) */
 /* Base display/alignment/gap from reset.css universal icon-text rule */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-toggle-btn {
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-nav .sidebar-toggle-btn {
   padding: var(--space-1-5) var(--space-2);
   margin-bottom: var(--space-3);
   min-height: 30px;
@@ -720,19 +720,19 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-toggle-btn:hover {
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-nav .sidebar-toggle-btn:hover {
   opacity: 1;
   color: var(--portal-text-light);
   background: var(--portal-bg-hover, rgba(255, 255, 255, 0.04));
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-toggle-btn.active,
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-toggle-btn:focus {
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-nav .sidebar-toggle-btn.active,
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-nav .sidebar-toggle-btn:focus {
   background: transparent;
   color: var(--portal-text-secondary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-toggle-btn .btn-text {
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-nav .sidebar-toggle-btn .btn-text {
   display: inline;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -740,20 +740,20 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Collapsed toggle button */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-toggle-btn {
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-nav .sidebar-toggle-btn {
   justify-content: center;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-toggle-btn .btn-text {
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-nav .sidebar-toggle-btn .btn-text {
   display: none;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-toggle-btn .btn-icon {
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-nav .sidebar-toggle-btn .btn-icon {
   transform: scaleX(-1);
   transition: transform var(--transition-medium);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-toggle-btn .btn-icon {
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-nav .sidebar-toggle-btn .btn-icon {
   transform: scaleX(1);
   transition: transform var(--transition-medium);
 }
@@ -888,24 +888,39 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: none;
 }
 
-/* Base display/alignment/gap from reset.css universal icon-text rule */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-body .sidebar .sidebar-collapsed-logo,
-:is([data-page="admin"], [data-page="client-portal"]) .portal-body .sidebar.collapsed .sidebar-collapsed-logo,
+/* =====================================================
+   SIDEBAR ICON ALIGNMENT - Single source of truth
+   All sidebar icons (avatar, nav, logout) align to same position
+   ===================================================== */
+:root {
+  --sidebar-icon-indent: 18px; /* Left position of all sidebar icons */
+  --sidebar-icon-size: 20px;   /* Standard icon size */
+}
+
+/* Sidebar branding - avatar + "NO BHAD CODES" text */
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-collapsed-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   flex-direction: row;
   height: var(--portal-header-height-line, 32px);
-  margin: var(--portal-header-top, 20px) 8px var(--portal-nav-gap, 24px) 36px;
-  padding: 0;
+  margin: var(--portal-header-top, 20px) 0 var(--portal-nav-gap, 24px) 0;
+  padding: 0 var(--space-3) 0 var(--sidebar-icon-indent);
   text-decoration: none;
 }
 
+/* When sidebar is OPEN - move avatar slightly left */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-collapsed-logo {
+  padding-left: 8px;
+}
+
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-collapsed-logo-img {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  min-height: 24px;
-  max-width: 24px;
-  max-height: 24px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 32px;
+  max-height: 32px;
   filter: invert(1);
   flex-shrink: 0;
 }
@@ -928,7 +943,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-collapsed-logo {
   justify-content: center;
   padding: 0;
-  margin: var(--portal-header-top, 20px) auto var(--portal-nav-gap, 24px);
+  margin: var(--portal-header-top, 20px) auto var(--space-3);
 }
 
 /* Label styling from unified rule in portal-forms.css - only layout here */

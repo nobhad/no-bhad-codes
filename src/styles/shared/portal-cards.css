@@ -28,6 +28,11 @@
 :is([data-page="admin"], [data-page="client-portal"]) .stat-label,
 :is([data-page="admin"], [data-page="client-portal"]) .kpi-card-label,
 :is([data-page="admin"], [data-page="client-portal"]) .summary-label,
+:is([data-page="admin"], [data-page="client-portal"]) .summary-card h4,
+:is([data-page="admin"], [data-page="client-portal"]) .payment-plans-section h4,
+:is([data-page="admin"], [data-page="client-portal"]) .project-notes h4,
+:is([data-page="admin"], [data-page="client-portal"]) .milestone-title,
+:is([data-page="admin"], [data-page="client-portal"]) #pd-tab-settings label,
 :is([data-page="admin"], [data-page="client-portal"]) .filter-label,
 :is([data-page="admin"], [data-page="client-portal"]) .form-label,
 :is([data-page="admin"], [data-page="client-portal"]) .portal-stat-label,
@@ -45,6 +50,11 @@
 :is([data-page="admin"], [data-page="client-portal"]) .client-selector-label,
 :is([data-page="admin"], [data-page="client-portal"]) .kpi-card-change-label,
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-section-label,
+:is([data-page="admin"], [data-page="client-portal"]) .section-title,
+:is([data-page="admin"], [data-page="client-portal"]) .cd-account-label,
+:is([data-page="admin"], [data-page="client-portal"]) .cd-stat-label,
+:is([data-page="admin"], [data-page="client-portal"]) .billing-label,
+:is([data-page="admin"], [data-page="client-portal"]) .template-editor-modal .form-group label,
 :is([data-page="admin"], [data-page="client-portal"]) .prompt-dialog-label {
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 0.6875rem; /* 11px - matches table column headers */
@@ -305,13 +315,11 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1);
-  padding: var(--space-4);
+  padding: 11px 14px;
   background: var(--portal-bg-darker);
-  border: 1px solid var(--portal-bg-darker);
-  border-radius: var(--portal-radius-md);
-  transition:
-    background var(--transition-fast),
-    border-color var(--transition-fast);
+  border: none;
+  border-radius: var(--portal-radius-sm, 8px);
+  transition: background 0.15s;
 }
 
 /* Remove any accent lines - keep it clean */
@@ -370,7 +378,6 @@
 :is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable:hover,
 :is([data-page="admin"], [data-page="client-portal"]) a.stat-card:hover {
   background: var(--portal-bg-dark);
-  border-color: var(--portal-bg-medium);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable:hover .stat-number {
@@ -411,12 +418,13 @@
    OVERVIEW CARD
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .overview-card {
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-darker);
   border: none;
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-3);
+  border-radius: var(--portal-radius-sm, 8px);
+  padding: 13px 14px;
   color: var(--portal-text-light);
-  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+  transition: background 0.15s;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .overview-card h3 {
@@ -425,18 +433,19 @@
 
 /* =====================================================
    CONSISTENT CARD STYLING
-   All main content sections use identical card styling
+   All main content sections use identical flat card styling
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .recent-activity,
 :is([data-page="admin"], [data-page="client-portal"]) .project-progress-section,
 :is([data-page="admin"], [data-page="client-portal"]) .milestones-section,
 :is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section {
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-darker);
   border: none;
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-3);
+  border-radius: var(--portal-radius-sm, 8px);
+  padding: 13px 14px;
   color: var(--portal-text-light);
-  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+  transition: background 0.15s;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .recent-activity h3,
@@ -447,35 +456,7 @@
   margin: 0 0 var(--space-2) 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .activity-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* Activity list items use main content background color */
-:is([data-page="admin"], [data-page="client-portal"]) .activity-list li {
-  padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
-  border: none;
-  margin-bottom: var(--space-0-5);
-  color: var(--portal-text-light);
-}
-
-/* Clickable activity items */
-:is([data-page="admin"], [data-page="client-portal"]) .activity-list li.clickable-activity {
-  cursor: pointer;
-  transition: background-color var(--transition-mouse) ease;
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .activity-list li.clickable-activity:hover {
-  background: var(--portal-bg-light);
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .activity-list li:last-child {
-  margin-bottom: 0;
-}
+/* .activity-list and .activity-list li styling from shared/portal-components.css */
 
 /* Activity item with icon, content, and time */
 :is([data-page="admin"], [data-page="client-portal"]) .activity-item {
@@ -662,11 +643,7 @@
   font-style: italic;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+/* .upcoming-tasks-list reset from shared/portal-components.css */
 
 :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item {
   display: flex;
@@ -811,11 +788,12 @@
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card {
   display: block;
   background: var(--portal-bg-darker);
-  border: 1px solid var(--portal-bg-darker);
-  border-radius: var(--portal-radius-lg, 12px);
-  padding: var(--space-3);
+  border: none;
+  border-radius: var(--portal-radius-sm, 8px);
+  padding: 13px 14px;
   color: var(--portal-text-light);
-  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+  transition: background 0.15s;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card h3 {
@@ -824,19 +802,17 @@
 
 /* =====================================================
    CARD SHADOWS - Consolidated
-   Main containers get shadows; child elements do not.
+   Minimal shadows for depth; cards use flat design
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .overview-card,
 :is([data-page="admin"], [data-page="client-portal"]) .recent-activity,
 :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks,
-:is([data-page="admin"], [data-page="client-portal"]) .portal-project-card,
 :is([data-page="admin"], [data-page="client-portal"]) .messages-container,
-:is([data-page="admin"], [data-page="client-portal"]) .summary-card,
 :is([data-page="admin"], [data-page="client-portal"]) .invoices-list,
 :is([data-page="admin"], [data-page="client-portal"]) .settings-section,
 :is([data-page="admin"], [data-page="client-portal"]) .project-progress-section,
 :is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section {
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
 /* No shadows on child divs inside main containers */
@@ -857,10 +833,10 @@
 :is([data-page="admin"], [data-page="client-portal"]) .summary-card {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-3);
+  border-radius: var(--portal-radius-sm, 8px);
+  padding: 11px 14px;
   color: var(--portal-text-light);
-  box-shadow: var(--shadow-panel);
+  transition: background 0.15s;
 }
 
 /* Label styling from unified rule in portal-forms.css - only layout here */
@@ -893,17 +869,58 @@
   margin: 0;
 }
 
+/* When a container is the only child, make it take full width and push actions to the right */
+:is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action > .view-toggle-container,
+:is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action > .header-actions-container,
+:is([data-page="admin"], [data-page="client-portal"]) .section-header-with-actions > .view-toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--space-2);
+}
+
+/* =====================================================
+   COMMON LIST ITEM PATTERN
+   Shared styling for all list items (reports, alerts, data, etc.)
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .list-item,
+:is([data-page="admin"], [data-page="client-portal"]) .data-item,
+:is([data-page="admin"], [data-page="client-portal"]) .report-item,
+:is([data-page="admin"], [data-page="client-portal"]) .alert-item,
+:is([data-page="admin"], [data-page="client-portal"]) .bundle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  border: none;
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  transition: background 0.15s;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .list-item:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .data-item:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .report-item:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .alert-item:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .bundle-item:hover {
+  background: var(--portal-bg-light);
+}
+
 /* =====================================================
    INVOICES LIST
    Container for invoice history items
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .invoices-list {
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-darker);
   border: none;
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-4);
+  border-radius: var(--portal-radius-sm, 8px);
+  padding: 13px 14px;
   color: var(--portal-text-light);
-  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+  transition: background 0.15s;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .invoices-list h3 {

@@ -126,12 +126,14 @@
 .portal-tab-panel.active {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
 }
 
 /* Tab content wrapper - contains each tab's content */
 .tab-content-wrapper {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
 }
 
 /* =====================================================

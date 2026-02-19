@@ -346,19 +346,12 @@
   position: relative;
 }
 
-/* Empty/error state text */
+/* Empty/error state: base styles in components/loading.css, only overrides here */
 [data-page="client-portal"] .messages-container .messages-thread .empty-state,
 [data-page="client-portal"] .messages-container .messages-thread .no-messages,
-[data-page="client-portal"] .messages-container .messages-thread .no-messages p,
-[data-page="client-portal"] .messages-container .messages-thread > p,
 [data-page="admin"] .messages-container .messages-thread .empty-state,
-[data-page="admin"] .messages-container .messages-thread .no-messages,
-[data-page="admin"] .messages-container .messages-thread .no-messages p,
-[data-page="admin"] .messages-container .messages-thread > p {
-  text-align: center;
+[data-page="admin"] .messages-container .messages-thread .no-messages {
   font-style: italic;
-  padding: var(--space-3);
-  margin: 0;
 }
 
 /* =====================================================
