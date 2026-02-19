@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <%- include('../partials/head', { config, portalType }) %>
+</head>
+<body data-page="<%= bodyPage %>">
+  <!-- Skip to main content link for accessibility -->
+  <a href="#dashboard-content" class="skip-link">Skip to main content</a>
+
+  <!-- Pre-auth Header -->
+  <%- include('../partials/header', { portalType }) %>
+
+  <!-- Mobile/Overlay Navigation -->
+  <%- include('../partials/mobile-nav', { portalType }) %>
+
+  <!-- Auth Gate - Login Form -->
+  <%- include('../partials/auth-gate', { config, portalType }) %>
+
+  <!-- Dashboard Layout (hidden until auth) -->
+  <div class="dashboard-container hidden" id="<%= config.dashboardId %>">
+
+    <!-- Full-Width Global Header -->
+    <%- include('../partials/portal-header', { config, portalType }) %>
+
+    <!-- Portal Body: Sidebar + Content -->
+    <div class="portal-body">
+      <!-- Sidebar Navigation -->
+      <%- include('../partials/sidebar', { config, portalType, icons }) %>
+
+      <% if (config.features.secondarySidebar) { %>
+        <!-- Secondary Sidebar (shown for multi-tab detail pages) -->
+        <aside id="secondary-sidebar">
+          <!-- Populated dynamically by createSecondarySidebar() -->
+        </aside>
+
+        <!-- Horizontal Tabs Fallback (mobile, when secondary sidebar is hidden) -->
+        <div id="secondary-tabs-horizontal">
+          <!-- Populated dynamically by createSecondarySidebar() -->
+        </div>
+      <% } %>
+
+      <!-- Content Area -->
+      <div class="dashboard-content" id="dashboard-content">
+        <div class="content-wrapper">
+          <!-- Portal Page Header -->
+          <header class="portal-page-header">
+            <div class="portal-header-title">
+              <% if (config.features.mobileMenuToggle) { %>
+                <!-- Mobile menu toggle - visible only on mobile when sidebar is hidden -->
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Open menu" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="7" height="18" rx="1"/>
+                    <path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/>
+                  </svg>
+                </button>
+              <% } %>
+              <h1 id="<%= config.pageTitleId %>">
+                <% if (portalType === 'client') { %>
+                  Welcome Back, <span id="client-name">Client</span>!
+                <% } else { %>
+                  <%= config.pageTitle %>
+                <% } %>
+              </h1>
+
+              <% if (config.features.subtabs && config.subtabGroups) { %>
+                <!-- Header Subtabs -->
+                <div class="header-subtabs">
+                  <% config.subtabGroups.forEach(group => { %>
+                    <div class="portal-subtabs header-subtab-group" data-for-tab="<%= group.forTab %>"<%= group.mode ? ` data-mode="${group.mode}"` : '' %><% if (group.forTab === 'project-detail') { %> id="project-detail-header-tabs"<% } else if (group.forTab === 'client-detail') { %> id="client-detail-header-tabs"<% } else if (group.forTab === 'workflows') { %> id="workflows-subtabs"<% } %>>
+                      <% group.subtabs.forEach(subtab => { %>
+                        <button class="portal-subtab<%= subtab.active ? ' active' : '' %>" data-<% if (group.forTab === 'project-detail') { %>pd-tab<% } else if (group.forTab === 'client-detail') { %>cd-tab<% } else { %>subtab<% } %>="<%= subtab.id %>"><%= subtab.label %></button>
+                      <% }) %>
+                    </div>
+                  <% }) %>
+                  <!-- Knowledge Base view toggle -->
+                  <div class="header-controls header-subtab-group" data-for-tab="knowledge-base">
+                    <div id="kb-section-toggle-mount"></div>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </header>
+
+          <% if (portalType === 'admin' && tabIds && tabIds.length > 0) { %>
+            <!-- Tab Content Containers -->
+            <% tabIds.forEach((tabId, index) => { %>
+              <div class="tab-content<%= index === 0 ? ' active' : '' %>" id="tab-<%= tabId %>">
+                <!-- Content rendered dynamically -->
+              </div>
+            <% }) %>
+          <% } else { %>
+            <!-- Dynamic View Content Container -->
+            <div class="portal-view-content" id="portal-view-content">
+              <div class="loading-row">Loading...</div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div> <!-- Close portal-body -->
+  </div>
+
+  <% if (portalType === 'admin') { %>
+    <%- include('../partials/modals/admin-modals') %>
+  <% } %>
+
+  <!-- Footer - Only visible on login page -->
+  <%- include('../partials/footer', { portalType }) %>
+
+  <!-- Mobile sidebar overlay -->
+  <% if (portalType === 'admin') { %>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <% } %>
+
+  <% if (isDev) { %>
+    <!-- Vite client for HMR in development -->
+    <script type="module" src="/@vite/client"></script>
+  <% } %>
+
+  <!-- Entry script -->
+  <script type="module" src="<%= entryScript %>"></script>
+</body>
+</html>
