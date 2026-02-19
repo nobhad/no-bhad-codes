@@ -4,12 +4,12 @@
  * ===============================================
  * @file src/portal.ts
  *
- * Entry point for the client portal (client/portal.html, client/set-password.html).
- * Loads portal-specific CSS bundle (no main site/admin styles).
+ * Entry point for the client portal.
+ * Loads unified portal CSS bundle (shared with admin).
  */
 
-// Import portal-specific CSS bundle
-import './styles/bundles/portal.css';
+// Import unified portal CSS bundle (covers both admin + client)
+import './styles/bundles/unified-portal.css';
 
 // Vercel Analytics (privacy-focused, no cookies)
 import { inject } from '@vercel/analytics';

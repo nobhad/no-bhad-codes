@@ -6,18 +6,13 @@
  * and related UI components
  */
 
-/* Deliverables Modal Container */
+/* Deliverables Modal Container - flex layout from shared/portal-components.css */
 .deliverables-modal-content {
   min-height: 600px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
 }
 
+/* flex layout from shared, keep additional properties */
 .deliverables-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   height: 100%;
   flex: 1;
 }
@@ -191,30 +186,14 @@
   height: 16px;
 }
 
-/* Empty State */
-.empty-message {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  color: var(--portal-text-secondary);
-  text-align: center;
-  min-height: 250px;
+/* Empty/Loading states: base styles in components/loading.css
+   Only deliverables-specific overrides here */
+.deliverables-list .empty-message {
+  display: none; /* Hidden by default, shown via JS */
 }
 
-.empty-message p {
-  margin: 0;
-  font-size: 14px;
-  margin-top: var(--space-1);
-}
-
-.loading-message {
-  padding: var(--space-4);
-  text-align: center;
-  color: var(--portal-text-muted);
-  font-size: 13px;
+.deliverables-list .empty-message.visible {
+  display: flex;
 }
 
 /* Upload Modal */
@@ -222,11 +201,7 @@
   min-width: 450px;
 }
 
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* .modal-form flex layout from shared/portal-components.css */
 
 .form-group {
   display: flex;
