@@ -34,8 +34,8 @@
   color: var(--portal-text-primary);
 }
 
+/* Empty state: base styles from components/loading.css, only overrides here */
 .templates-list .empty-state {
-  text-align: center;
   padding: var(--space-3);
   color: var(--portal-text-muted);
 }
@@ -199,16 +199,10 @@
   margin-bottom: var(--space-1-5);
 }
 
-/* Label styling matches unified rule in portal-forms.css */
+/* Label styling from unified rule in portal-cards.css */
 .template-editor-modal .form-group label {
   display: block;
   margin-bottom: var(--space-0-5);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.6875rem; /* 11px - matches table column headers */
-  font-weight: 400;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .template-editor-modal .form-input {
@@ -501,11 +495,7 @@
   margin: 0 0 var(--space-1);
 }
 
-.signature-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1-5);
-}
+/* .signature-info flex layout from shared/portal-components.css */
 
 .signature-badge {
   display: inline-flex;

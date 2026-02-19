@@ -85,11 +85,11 @@
 [data-page="admin"] .ad-hoc-time-entries-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-2);
+  gap: var(--portal-section-gap);
+  padding: 12px 14px;
   border-top: 1px solid var(--portal-border-light);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-sm);
 }
 
 [data-page="admin"] .ad-hoc-time-entries-header {
@@ -311,26 +311,29 @@
   flex: 1;
 }
 
-/* Ad hoc analytics widget */
+/* Ad hoc analytics widget - match overview panel styling */
 [data-page="admin"] #ad-hoc-analytics-widget {
-  padding: var(--space-3);
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
+  /* Container inside analytics-section - no extra padding/bg needed */
 }
 
 [data-page="admin"] .ad-hoc-metrics-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
+  gap: var(--portal-section-gap);
+  margin-bottom: var(--portal-section-gap);
 }
 
 [data-page="admin"] .ad-hoc-metric-card {
-  padding: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
-  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  border: none;
   text-align: center;
+  transition: background 0.15s;
+}
+
+[data-page="admin"] .ad-hoc-metric-card:hover {
+  background: var(--portal-bg-hover);
 }
 
 [data-page="admin"] .ad-hoc-metric-value {
@@ -378,10 +381,10 @@
 }
 
 [data-page="admin"] .ad-hoc-monthly-section {
-  margin-bottom: var(--space-3);
-  padding: var(--space-2);
+  margin-bottom: var(--portal-section-gap);
+  padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-sm);
   border-left: 3px solid var(--color-brand-primary);
 }
 
@@ -432,9 +435,9 @@
 }
 
 [data-page="admin"] .ad-hoc-clients-section {
-  padding: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-sm);
   border-left: 3px solid var(--color-brand-primary);
 }
 

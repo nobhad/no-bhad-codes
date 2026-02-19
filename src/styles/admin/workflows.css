@@ -74,17 +74,11 @@
   letter-spacing: 0.05em;
 }
 
-/* Form labels in steps modal - match unified label styling */
+/* Form labels - styling from unified rule in portal-cards.css */
 [data-page="admin"] .add-step-form .form-group > label:not(.portal-checkbox-label),
 [data-page="admin"] .modal-body .form-group > label:not(.portal-checkbox-label) {
   display: block;
   margin-bottom: var(--field-label-value-gap, 0.125rem);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.6875rem; /* 11px - matches table column headers */
-  font-weight: 400;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 /* Checkbox wrapper in modals - align with other form elements */
@@ -155,13 +149,10 @@
 }
 
 /* =====================================================
-   EMPTY MESSAGE
+   EMPTY MESSAGE - base styles in components/loading.css
    ===================================================== */
 [data-page="admin"] .empty-message {
-  color: var(--portal-text-muted);
   font-style: italic;
-  text-align: center;
-  padding: var(--space-3);
 }
 
 /* =====================================================
@@ -527,12 +518,10 @@
   height: 12px;
 }
 
+/* Loading/empty state: base styles in components/loading.css, only overrides here */
 [data-page="admin"] .trigger-logs-list .loading-message,
 [data-page="admin"] .trigger-logs-list .empty-message {
-  color: var(--portal-text-muted);
   font-style: italic;
-  text-align: center;
-  padding: var(--space-4);
 }
 
 /* =====================================================

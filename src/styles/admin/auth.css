@@ -35,6 +35,17 @@
   display: none;
 }
 
+/* Hide dashboard container when not logged in */
+body[data-page="admin"] #admin-dashboard.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
 /* Override portal label positioning for auth form */
 body[data-page="admin"] .auth-gate .auth-form-group {
   position: relative;

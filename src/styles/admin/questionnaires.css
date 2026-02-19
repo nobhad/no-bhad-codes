@@ -11,13 +11,9 @@
   min-height: 100px;
 }
 
-/* Empty state message */
+/* Empty state: base styles in components/loading.css, unique dashed border here */
 [data-page="admin"] #questions-builder .empty-message {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
   font-style: italic;
-  padding: var(--space-4);
-  text-align: center;
   border: 1px dashed var(--color-border);
   border-radius: var(--portal-radius-md);
 }

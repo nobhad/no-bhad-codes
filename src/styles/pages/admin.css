@@ -184,11 +184,11 @@ body[data-page="admin"]:not(.admin-logged-in) {
   height: 100vh;
 }
 
-/* Sidebar */
+/* Sidebar - darkest background */
 [data-page="admin"] .sidebar {
   width: 240px;
   min-width: 240px;
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-darkest);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -202,14 +202,14 @@ body[data-page="admin"]:not(.admin-logged-in) {
   min-width: 56px;
 }
 
-/* Sidebar Content
-   NOTE: Uses tighter spacing to prevent button overflow.
-   This is intentional - do not standardize. */
+/* Sidebar Content - flex container for nav and footer (logo is outside) */
 [data-page="admin"] .sidebar-content {
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
-  height: 100%;
+  padding: 0;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Sidebar Logo - symmetric spacing: margin-bottom matches padding-top (1.5rem) */
@@ -225,17 +225,16 @@ body[data-page="admin"]:not(.admin-logged-in) {
   filter: invert(1);
 }
 
-/* Collapsed logo */
+/* Sidebar logo - always visible */
 [data-page="admin"] .sidebar-collapsed-logo {
-  display: none;
+  display: flex;
+  align-items: center;
 }
 
+/* Collapsed sidebar - center the logo */
 [data-page="admin"] .sidebar.collapsed .sidebar-collapsed-logo {
-  display: flex;
   justify-content: center;
-  align-items: center;
-  /* Center horizontally within collapsed sidebar (56px width) */
-  margin: var(--portal-header-top, 20px) auto var(--portal-nav-gap, 24px) auto;
+  margin: var(--portal-header-top, 20px) auto var(--space-3) auto;
   padding: 0;
   width: 100%;
 }
@@ -376,34 +375,27 @@ body[data-page="admin"] #tab-analytics .stat-card {
   }
 }
 
-/* Portal Shadow utility - base in shared/portal-cards.css */
+/* Portal Shadow utility - flat design, no shadows */
 [data-page="admin"] .portal-shadow {
-  box-shadow: var(--shadow-panel);
-}
-
-[data-page="admin"] .stat-card {
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
 /* =====================================================
-   OVERVIEW TAB - Elevation Hierarchy
-   Canvas is darkest; cards float above with lighter backgrounds
+   OVERVIEW TAB - Flat design, dark canvas with lighter cards
    ===================================================== */
 [data-page="admin"] #tab-overview .dashboard-stats-grid {
   background: var(--portal-bg-darker);
-  border: 1px solid var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-3);
-  box-shadow: var(--shadow-panel);
+  border: none;
+  border-radius: var(--portal-radius-sm, 8px);
+  padding: 13px 14px;
 }
 
 [data-page="admin"] #tab-overview .attention-card,
 [data-page="admin"] #tab-overview .stat-card {
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-sm);
-  padding: var(--space-3);
+  border-radius: var(--portal-radius-sm, 8px);
+  padding: 11px 14px;
   min-height: 72px;
-  box-shadow: none;
 }
 
 [data-page="admin"] #tab-overview .attention-card:hover,
@@ -931,19 +923,13 @@ body.modal-open .dashboard-content {
    ================================================ */
 .admin-table-card {
   background: var(--portal-bg-darker);
-  border: 1px solid var(--portal-bg-dark);
-  border-radius: var(--border-radius-card);
+  border: none;
+  border-radius: var(--portal-radius-sm, 8px);
   overflow: visible; /* Allow dropdowns to overflow */
-  transition: background 0.2s ease;
+  transition: background 0.15s;
   /* Allow table card to shrink below content width for horizontal scroll */
   min-width: 0;
   /* Spacing handled by shared/portal-layout.css */
-}
-
-#intake-submissions-card,
-#contact-submissions-card,
-#projects-card {
-  border: none;
 }
 
 /* Border overrides removed - base .admin-table-header now has no borders */
@@ -969,10 +955,15 @@ body.modal-open .dashboard-content {
   order: 2;
 }
 
-/* h3 styling from unified rule in portal-cards.css - only layout here */
+/* Table card header h3 - match table column header typography */
 .admin-table-header h3 {
   order: 0;
   margin: 0;
+  font-size: var(--table-header-font-size, 0.6875rem);
+  font-weight: var(--table-header-font-weight, 500);
+  letter-spacing: var(--table-header-letter-spacing, 0.05em);
+  text-transform: uppercase;
+  color: var(--portal-text-secondary);
 }
 
 /* Default: show full titles, hide mobile titles */
