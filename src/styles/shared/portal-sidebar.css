@@ -1,0 +1,650 @@
+/* =====================================================
+   SHARED PORTAL SIDEBAR
+   Main navigation sidebar with collapse states
+   Used by both admin and client portal
+
+   NOTE: This file is in the 'portals' CSS layer which has higher
+   priority than 'components' layer, so most !important is not needed.
+   ===================================================== */
+
+/* Base sidebar - applies to client portal and admin */
+[data-page="client-portal"] .sidebar,
+[data-page="admin"] .sidebar {
+  width: clamp(200px, 18vw, 240px);
+  min-width: 56px; /* Allow collapse to icon-only at breakpoints */
+  background: var(--portal-bg-darkest);
+  border-right: none;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.15s ease-out, transform 0.15s ease-out; /* Smooth, no bounce */
+  position: relative;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+  min-height: 100vh;
+  min-height: 100dvh;
+  z-index: 60;
+  box-shadow: var(--shadow-sidebar);
+  flex-shrink: 0;
+  overflow: visible; /* Allow toggle button to show outside sidebar bounds */
+}
+
+.sidebar.collapsed {
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+  border-right: none;
+}
+
+/* Sidebar Content - flex child, takes remaining space after logo */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+  flex: 1;
+  min-height: 0; /* Allow flex shrinking */
+  overflow: hidden;
+}
+
+.sidebar.collapsed .sidebar-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Sidebar logo styles in shared/portal-layout.css */
+
+/* Sidebar Footer - no left padding, buttons handle their own alignment */
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  margin-top: auto;
+  border-top: none;
+}
+
+.sidebar-footer .btn-logout,
+.sidebar-footer button {
+  cursor: pointer;
+}
+
+/* Logout Button */
+.btn-logout {
+  width: 100%;
+}
+
+/* Theme Toggle Button in Sidebar */
+.btn-theme-toggle {
+  width: 100%;
+}
+
+/* Theme icons - show/hide based on current theme */
+.btn-theme-toggle .sun-icon {
+  display: block;
+}
+
+.btn-theme-toggle .moon-icon {
+  display: none;
+}
+
+html[data-theme="dark"] .btn-theme-toggle .sun-icon {
+  display: none;
+}
+
+html[data-theme="dark"] .btn-theme-toggle .moon-icon {
+  display: block;
+}
+
+/* Sidebar logo/branding styles in shared/portal-layout.css */
+
+/* Sidebar Buttons - consistent padding in both open and collapsed states */
+.sidebar-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: visible;
+  padding: var(--space-2) 0;
+  flex: 1;
+}
+
+/* Sidebar button and icon styles now in shared/portal-buttons.css */
+
+/* Badge color on hover - match text color (client portal only) */
+[data-page="client-portal"] .sidebar-buttons .btn:hover .sidebar-badge {
+  color: var(--portal-bg-dark);
+}
+
+/* Badge color when active - match text color (client portal only) */
+[data-page="client-portal"] .sidebar-buttons .btn.active .sidebar-badge {
+  color: var(--portal-bg-dark);
+}
+
+/* Collapsed state - layout only (button styles in shared/portal-buttons.css) */
+.sidebar.collapsed .sidebar-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--space-2) 0;
+}
+
+/* Focus indicators inherited from global :focus-visible rule in reset.css */
+
+/* Collapsed footer positioning */
+.sidebar.collapsed .sidebar-footer {
+  padding: var(--space-2);
+  display: flex;
+  justify-content: center;
+}
+
+/* Footer button styling - base styles in shared/portal-buttons.css */
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+  position: absolute;
+  top: var(--space-1);
+  right: -12px;
+  background: var(--portal-bg-light);
+  border: var(--portal-border);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xs);
+  transition: background var(--transition-fast);
+}
+
+.sidebar-toggle:hover {
+  background: var(--color-primary);
+}
+
+.sidebar-toggle .toggle-icon {
+  transition: transform var(--transition-fast);
+}
+
+.sidebar.collapsed .sidebar-toggle .toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* Collapsed state logo styles in shared/portal-layout.css */
+
+/* Hide content when collapsed */
+.sidebar.collapsed .client-name,
+.sidebar.collapsed .project-name,
+.sidebar.collapsed .subitem-name,
+.sidebar.collapsed .account-item-title,
+.sidebar.collapsed .logout-text,
+.sidebar.collapsed h3 {
+  display: none;
+}
+
+.sidebar.collapsed .project-subitems,
+.sidebar.collapsed .account-list {
+  display: none;
+}
+
+.sidebar.collapsed .client-header,
+.sidebar.collapsed .account-header,
+.sidebar.collapsed .projects-header {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+/* Client Header */
+.client-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 1.5rem 0;
+  padding: 0 1.5rem 1rem 1.5rem;
+  border-bottom: none;
+}
+
+.client-name {
+  font-family: var(--font-family-acme);
+  font-size: 1.4rem;
+  color: var(--portal-text-light);
+  margin: 0;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+/* Client Dropdown */
+.client-dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: var(--portal-bg-light);
+  color: var(--portal-text-light);
+  border: var(--portal-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-btn:hover {
+  background: var(--color-primary);
+}
+
+.dropdown-icon {
+  font-size: 1.2rem;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--portal-bg-dark);
+  border: var(--portal-border);
+  min-width: 180px;
+  z-index: 1000;
+}
+
+/* Base display/alignment/gap from reset.css universal icon-text rule */
+.dropdown-item {
+  width: 100%;
+  padding: var(--space-1-5) var(--space-2);
+  background: transparent;
+  color: var(--portal-text-light);
+  border: none;
+  border-bottom: 1px solid var(--portal-border-dark);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-weight: 600;
+  text-align: left;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+}
+
+.item-icon {
+  font-size: 1rem;
+}
+
+/* Logout Button (sidebar footer) */
+/* Base display/alignment/gap from reset.css universal icon-text rule */
+.logout-btn {
+  background: transparent;
+  color: var(--portal-text-light);
+  border: var(--portal-border);
+  border-radius: var(--portal-radius-xs);
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  transform: translateY(-1px);
+}
+
+.logout-icon {
+  font-size: 0.9rem;
+}
+
+/* Sidebar footer for projects sidebar */
+.projects-sidebar.collapsed .logout-text {
+  display: none;
+}
+
+.projects-sidebar.collapsed .logout-btn {
+  padding: 0.5rem;
+  min-width: 2rem;
+  height: 2rem;
+  justify-content: center;
+}
+
+.projects-sidebar.collapsed .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.projects-sidebar.collapsed .client-header {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.projects-sidebar.collapsed .account-header {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.projects-sidebar.collapsed .projects-header {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.projects-sidebar.collapsed .client-name,
+.projects-sidebar.collapsed .project-name,
+.projects-sidebar.collapsed .subitem-name,
+.projects-sidebar.collapsed .account-item-title,
+.projects-sidebar.collapsed h3 {
+  display: none;
+}
+
+.projects-sidebar.collapsed .project-subitems {
+  display: none;
+}
+
+.projects-sidebar.collapsed .account-list {
+  display: none;
+}
+
+/* =====================================================
+   ADMIN SIDEBAR - Uses shared .sidebar-buttons .btn pattern
+   All button styles are in portal-buttons.css
+   ===================================================== */
+
+/* Admin sidebar footer - proper positioning at bottom */
+[data-page="admin"] .sidebar-footer {
+  position: relative;
+  margin-top: auto;
+  bottom: auto;
+  left: 0;
+  right: 0;
+  padding: var(--space-3) 0;
+}
+
+/* Logout button hover - red color */
+[data-page="admin"] .sidebar-footer .btn-logout:hover,
+[data-page="admin"] .sidebar-footer .btn-logout:hover .btn-icon {
+  color: var(--color-error-400, #f87171);
+}
+
+/* =====================================================
+   SIDEBAR TOGGLE BUTTON - ON SIDEBAR EDGE
+   Toggle positioned on the right edge of sidebar, peeking into content
+   Same vertical position whether sidebar is expanded or collapsed
+   ===================================================== */
+
+/* Toggle button positioned on sidebar's right edge, vertically centered with header line */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar > .sidebar-toggle-btn {
+  position: absolute;
+  right: 0;
+  top: calc(var(--portal-header-top, 20px) + 6px);
+  left: auto;
+  transform: translateX(75%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sidebar-icon-size, 20px);
+  height: var(--sidebar-icon-size, 20px);
+  min-height: auto;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  color: var(--portal-text-muted);
+  opacity: 1;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  z-index: 70;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar > .sidebar-toggle-btn:hover {
+  color: var(--color-primary);
+  background: transparent;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar > .sidebar-toggle-btn svg {
+  width: var(--sidebar-icon-size, 20px);
+  height: var(--sidebar-icon-size, 20px);
+  display: block;
+}
+
+/* Flip icon when sidebar is collapsed */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed > .sidebar-toggle-btn svg {
+  transform: scaleX(-1);
+}
+
+/* =====================================================
+   INTERMEDIATE BREAKPOINT AUTO-COLLAPSE
+   Auto-collapse sidebar when viewport is constrained (zoom or narrow screens)
+   1300px triggers at ~150% zoom on 1920px screens (1920/1.5 = 1280px)
+
+   IMPORTANT: Use :not(.collapsed) so manually collapsed sidebars
+   maintain consistent appearance regardless of viewport size.
+   ===================================================== */
+@media (--wide-down) {
+  /* Only auto-collapse sidebars that aren't manually collapsed */
+  [data-page="client-portal"] .sidebar:not(.collapsed),
+  [data-page="admin"] .sidebar:not(.collapsed) {
+    width: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+    overflow: hidden;
+  }
+
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-content,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-content {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 0.5rem;
+    padding-bottom: 0.5rem;
+    gap: 0.5rem;
+    align-items: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+  }
+
+  /* Hide scrollbar for Chrome/Safari */
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-content::-webkit-scrollbar,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Buttons section should grow but allow scroll */
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-height: 0; /* Allow shrinking for scroll */
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Admin sidebar auto-collapse - uses .sidebar-buttons pattern (same as client portal) */
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Sidebar logo styles in shared/portal-layout.css */
+
+  :is([data-page="client-portal"], [data-page="admin"]) .sidebar:not(.collapsed) .sidebar-footer {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    background: var(--portal-bg-dark);
+    padding: 0.75rem 0;
+    margin-top: auto; /* Push to bottom */
+    flex-shrink: 0;
+  }
+
+  /* Hide text elements - only for non-collapsed auto-collapse */
+  [data-page="client-portal"] .sidebar:not(.collapsed) .client-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .project-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .subitem-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .account-item-title,
+  [data-page="client-portal"] .sidebar:not(.collapsed) h3,
+  [data-page="admin"] .sidebar:not(.collapsed) .client-name,
+  [data-page="admin"] .sidebar:not(.collapsed) .project-name,
+  [data-page="admin"] .sidebar:not(.collapsed) h3 {
+    display: none;
+  }
+
+  [data-page="client-portal"] .sidebar:not(.collapsed) .project-subitems,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .account-list,
+  [data-page="admin"] .sidebar:not(.collapsed) .project-subitems {
+    display: none;
+  }
+
+  /* Badge positioning when sidebar auto-collapses - client portal only */
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 14px;
+    height: 14px;
+    font-size: 9px;
+    padding: 0 3px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  /* Admin sidebar now uses same .sidebar-buttons pattern as client portal */
+}
+
+/* =====================================================
+   SMALL SCREEN AUTO-COLLAPSE
+   Auto-collapse sidebar on small screens (no hamburger menu)
+
+   IMPORTANT: Use :not(.collapsed) so manually collapsed sidebars
+   maintain consistent appearance regardless of viewport size.
+   ===================================================== */
+@media (--compact-mobile) {
+  /* Only auto-collapse sidebars that aren't manually collapsed */
+  [data-page="client-portal"] .sidebar:not(.collapsed),
+  [data-page="admin"] .sidebar:not(.collapsed) {
+    width: 56px;
+    min-width: 56px;
+  }
+
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-content,
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-content {
+    display: flex;
+    padding: 0.5rem;
+    padding-top: 1rem;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  /* Sidebar logo styles in shared/portal-layout.css */
+
+  /* Sidebar buttons layout - button styles in shared/portal-buttons.css */
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Admin sidebar mobile - uses .sidebar-buttons pattern (same as client portal) */
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Badge positioning on mobile - client portal only */
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 14px;
+    height: 14px;
+    font-size: 9px;
+    padding: 0 3px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  /* Footer positioning - for non-collapsed */
+  :is([data-page="client-portal"], [data-page="admin"]) .sidebar:not(.collapsed) .sidebar-footer {
+    left: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  :is([data-page="client-portal"], [data-page="admin"]) .sidebar:not(.collapsed) .sidebar-toggle {
+    display: flex;
+  }
+
+  /* Collapsed on mobile = completely hidden
+     Must use !important to override the 1300px auto-collapse query */
+  [data-page="client-portal"] .sidebar.collapsed,
+  [data-page="admin"] .sidebar.collapsed {
+    transform: translateX(-100%);
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    overflow: hidden;
+  }
+
+  /* Hide text elements in auto-collapsed state (not manually collapsed) */
+  [data-page="client-portal"] .sidebar:not(.collapsed) .client-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .project-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .subitem-name,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .account-item-title,
+  [data-page="client-portal"] .sidebar:not(.collapsed) h3,
+  [data-page="admin"] .sidebar:not(.collapsed) .client-name,
+  [data-page="admin"] .sidebar:not(.collapsed) .project-name,
+  [data-page="admin"] .sidebar:not(.collapsed) h3 {
+    display: none;
+  }
+
+  [data-page="client-portal"] .sidebar:not(.collapsed) .project-subitems,
+  [data-page="client-portal"] .sidebar:not(.collapsed) .account-list,
+  [data-page="admin"] .sidebar:not(.collapsed) .project-subitems {
+    display: none;
+  }
+
+  /* Admin sidebar now uses same .sidebar-buttons pattern as client portal */
+}

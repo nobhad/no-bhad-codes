@@ -375,6 +375,22 @@
   border-bottom-right-radius: var(--portal-radius-lg, 8px);
 }
 
+/* Remove bottom corners when pagination is present (pagination provides its own corners) */
+/* Using :has() to detect pagination sibling - works universally */
+:has(+ .table-pagination) tbody tr:last-child td:first-child,
+:has(~ .table-pagination) tbody tr:last-child td:first-child,
+.has-pagination tbody tr:last-child td:first-child,
+.table-with-pagination tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 0;
+}
+
+:has(+ .table-pagination) tbody tr:last-child td:last-child,
+:has(~ .table-pagination) tbody tr:last-child td:last-child,
+.has-pagination tbody tr:last-child td:last-child,
+.table-with-pagination tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 0;
+}
+
 /* ==============================================
    TABLE LINKS - UNIVERSAL
    ============================================== */
@@ -761,30 +777,7 @@
   text-align: center !important;
 }
 
-/* Ensure error/loading/empty states inside colspanned cells are centered */
-.admin-table td[colspan] .error-state,
-.admin-table td[colspan] .loading-state,
-.admin-table td[colspan] .empty-state,
-.overview-table td[colspan] .error-state,
-.overview-table td[colspan] .loading-state,
-.overview-table td[colspan] .empty-state,
-.files-table td[colspan] .error-state,
-.files-table td[colspan] .loading-state,
-.files-table td[colspan] .empty-state,
-.invoices-table td[colspan] .error-state,
-.invoices-table td[colspan] .loading-state,
-.invoices-table td[colspan] .empty-state,
-.time-entries-table td[colspan] .error-state,
-.time-entries-table td[colspan] .loading-state,
-.time-entries-table td[colspan] .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  text-align: center;
-  margin: 0 auto;
-}
+/* Loading/empty/error states in table cells: see components/loading.css */
 
 /* ==============================================
    RESPONSIVE TABLE - Mobile horizontal scroll

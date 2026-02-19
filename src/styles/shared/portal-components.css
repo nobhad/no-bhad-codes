@@ -573,49 +573,592 @@
 
 /* =====================================================
    UTILITY CLASSES
+   Single source of truth for common layout patterns
+   Use these instead of repeating CSS in page-specific files
    ===================================================== */
 
-/* Layout utilities - USE INSTEAD OF INLINE STYLES */
-.grid-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-}
-
-.flex-row {
-  display: flex;
-  flex-direction: row;
-  gap: var(--space-2);
-}
-
+/* =====================================================
+   FLEX COLUMN UTILITIES
+   display: flex; flex-direction: column; gap: X
+   ===================================================== */
 .flex-col {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-/* Text alignment */
+.flex-col-gap-0 {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.flex-col-gap-0-5 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.flex-col-gap-1 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.flex-col-gap-1-5 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+.flex-col-gap-2 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.flex-col-gap-3 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.flex-col-gap-4 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* =====================================================
+   FLEX ROW UTILITIES
+   display: flex; flex-direction: row; gap: X
+   ===================================================== */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+}
+
+.flex-row-gap-0-5 {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-0-5);
+}
+
+.flex-row-gap-1 {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-1);
+}
+
+.flex-row-gap-1-5 {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-1-5);
+}
+
+.flex-row-gap-2 {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+}
+
+.flex-row-gap-3 {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-3);
+}
+
+/* =====================================================
+   FLEX WRAP UTILITIES
+   display: flex; flex-wrap: wrap; gap: X
+   ===================================================== */
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.flex-wrap-gap-0-5 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5);
+}
+
+.flex-wrap-gap-1 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.flex-wrap-gap-1-5 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1-5);
+}
+
+.flex-wrap-gap-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.flex-wrap-gap-3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* =====================================================
+   FLEX ALIGNMENT UTILITIES
+   ===================================================== */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-start {
+  display: flex;
+  align-items: flex-start;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+/* =====================================================
+   GRID UTILITIES - FIXED COLUMNS
+   ===================================================== */
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.grid-4col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+/* =====================================================
+   GRID UTILITIES - AUTO-FIT (RESPONSIVE)
+   grid-template-columns: repeat(auto-fit, minmax(Xpx, 1fr))
+   ===================================================== */
+.grid-auto-150 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-2);
+}
+
+.grid-auto-180 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-2);
+}
+
+.grid-auto-200 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-2);
+}
+
+.grid-auto-220 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-2);
+}
+
+.grid-auto-250 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-2);
+}
+
+.grid-auto-280 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-2);
+}
+
+.grid-auto-300 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-2);
+}
+
+.grid-auto-350 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--space-2);
+}
+
+/* Grid gap variations */
+.grid-gap-1 { gap: var(--space-1); }
+.grid-gap-1-5 { gap: var(--space-1-5); }
+.grid-gap-2 { gap: var(--space-2); }
+.grid-gap-3 { gap: var(--space-3); }
+.grid-gap-4 { gap: var(--space-4); }
+
+/* =====================================================
+   :HAS() AUTOMATIC STYLING
+   Apply styles automatically based on child elements
+   Single source of truth - no per-page overrides needed
+   ===================================================== */
+
+/* Containers with .status-item children get automatic gap */
+:is([data-page="admin"], [data-page="client-portal"]) :has(> .status-item) {
+  gap: var(--space-2);
+}
+
+/* Containers with .meta-item children get automatic gap */
+:is([data-page="admin"], [data-page="client-portal"]) :has(> .meta-item) {
+  gap: var(--space-2);
+}
+
+/* Containers with .form-group children get automatic column layout */
+:is([data-page="admin"], [data-page="client-portal"]) :has(> .form-group):not(.form-row) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+/* Containers with .badge children get automatic row wrap */
+:is([data-page="admin"], [data-page="client-portal"]) :has(> .badge):not([class*="flex"]) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5);
+}
+
+/* =====================================================
+   LIST CONTAINER AUTO-LAYOUT
+   Lists ending in -list with children ending in -item
+   get automatic flex-column gap styling
+   ===================================================== */
+
+/* Universal list containers with -item children: flex-column gap-1-5 */
+:is([data-page="admin"], [data-page="client-portal"]) [class$="-list"]:has(> [class$="-item"]) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+/* Specific list containers with tighter gap-1 */
+:is([data-page="admin"], [data-page="client-portal"]) .help-accordion,
+:is([data-page="admin"], [data-page="client-portal"]) .help-featured-list,
+:is([data-page="admin"], [data-page="client-portal"]) .help-results-list,
+:is([data-page="admin"], [data-page="client-portal"]) .notes-list,
+:is([data-page="admin"], [data-page="client-portal"]) .tasks-list,
+:is([data-page="admin"], [data-page="client-portal"]) .activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Containers with -card children: flex-column gap-2 */
+:is([data-page="admin"], [data-page="client-portal"]) [class$="-cards"]:has(> [class$="-card"]),
+:is([data-page="admin"], [data-page="client-portal"]) [class$="-grid"]:has(> [class$="-card"]) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Section containers: flex-column gap-1-5 */
+:is([data-page="admin"], [data-page="client-portal"]) .signature-details,
+:is([data-page="admin"], [data-page="client-portal"]) .signature-info,
+:is([data-page="admin"], [data-page="client-portal"]) .lead-tab-section,
+:is([data-page="admin"], [data-page="client-portal"]) .time-entry-form,
+:is([data-page="admin"], [data-page="client-portal"]) .contract-tab-content,
+:is([data-page="admin"], [data-page="client-portal"]) .checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+/* Modal/form containers: flex-column gap-2 */
+:is([data-page="admin"], [data-page="client-portal"]) .modal-form,
+:is([data-page="admin"], [data-page="client-portal"]) .deliverables-modal-content,
+:is([data-page="admin"], [data-page="client-portal"]) .deliverables-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* =====================================================
+   TEXT ALIGNMENT
+   ===================================================== */
 .text-center {
   text-align: center;
 }
 
-/* Loading/empty state - USE INSTEAD OF inline style="text-align: center; padding: 2rem;" */
-.loading-message,
-.empty-state-message {
-  text-align: center;
-  padding: var(--space-4);
-  color: var(--portal-text-muted);
+.text-left {
+  text-align: left;
 }
 
-/* Spacing utilities - USE INSTEAD OF inline margin */
+.text-right {
+  text-align: right;
+}
+
+/* =====================================================
+   TEXT UTILITIES
+   ===================================================== */
+
+/* Truncate text with ellipsis - used 119+ times across codebase */
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Multi-line truncate (2 lines) */
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Multi-line truncate (3 lines) */
+.truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* =====================================================
+   LIST UTILITIES
+   ===================================================== */
+
+/* Reset list styles - used 29+ times across codebase */
+.list-reset {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Universal list reset for portal contexts */
+/* All lists ending in -list get automatic reset */
+:is([data-page="admin"], [data-page="client-portal"]) [class$="-list"],
+:is([data-page="admin"], [data-page="client-portal"]) .activity-list,
+:is([data-page="admin"], [data-page="client-portal"]) .tasks-list,
+:is([data-page="admin"], [data-page="client-portal"]) .notes-list,
+:is([data-page="admin"], [data-page="client-portal"]) .files-list,
+:is([data-page="admin"], [data-page="client-portal"]) .invoices-list,
+:is([data-page="admin"], [data-page="client-portal"]) .milestones-list,
+:is([data-page="admin"], [data-page="client-portal"]) .messages-list,
+:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list {
+  list-style: none;
+}
+
+/* Universal list item styling for portal lists */
+/* List items (li) in common list containers get consistent styling */
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .activity-list,
+  .notes-list,
+  .files-list,
+  .tasks-list
+) > li {
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
+  color: var(--portal-text-light);
+  margin-bottom: var(--space-0-5);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .activity-list,
+  .notes-list,
+  .files-list,
+  .tasks-list
+) > li:last-child {
+  margin-bottom: 0;
+}
+
+/* Clickable list items */
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .activity-list,
+  .notes-list,
+  .files-list,
+  .tasks-list
+) > li.clickable,
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .activity-list,
+  .notes-list,
+  .files-list,
+  .tasks-list
+) > li.clickable-activity {
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .activity-list,
+  .notes-list,
+  .files-list,
+  .tasks-list
+) > li.clickable:hover,
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .activity-list,
+  .notes-list,
+  .files-list,
+  .tasks-list
+) > li.clickable-activity:hover {
+  background: var(--portal-bg-light);
+}
+
+/* =====================================================
+   LIST ITEM COMPONENT
+   Universal styling for clickable list items
+   (activity items, task items, file items, etc.)
+   ===================================================== */
+
+:is([data-page="admin"], [data-page="client-portal"]) .list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .list-item:hover {
+  background: var(--portal-bg-light);
+}
+
+/* Compact list item variant */
+:is([data-page="admin"], [data-page="client-portal"]) .list-item-compact {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1-5) var(--space-2);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .list-item-compact:hover {
+  background: var(--portal-bg-light);
+}
+
+/* =====================================================
+   PADDING UTILITIES
+   Common padding patterns used throughout portal
+   ===================================================== */
+
+/* Compact field padding (8px 12px) - used 30+ times */
+.pad-compact {
+  padding: var(--space-1) var(--space-1-5);
+}
+
+/* Standard field padding (16px 24px) - used 40+ times */
+.pad-standard {
+  padding: var(--space-2) var(--space-3);
+}
+
+/* Card padding (24px) - used for card interiors */
+.pad-card {
+  padding: var(--space-3);
+}
+
+/* Section padding (32px) - used for major sections */
+.pad-section {
+  padding: var(--space-4);
+}
+
+/* =====================================================
+   BORDER RADIUS UTILITIES
+   ===================================================== */
+
+.rounded-sm { border-radius: var(--portal-radius-sm); }
+.rounded-md { border-radius: var(--portal-radius-md); }
+.rounded-lg { border-radius: var(--portal-radius-lg); }
+.rounded-full { border-radius: 9999px; }
+
+/* =====================================================
+   BACKGROUND UTILITIES
+   ===================================================== */
+
+.bg-darker { background: var(--portal-bg-darker); }
+.bg-dark { background: var(--portal-bg-dark); }
+.bg-medium { background: var(--portal-bg-medium); }
+.bg-light { background: var(--portal-bg-light); }
+
+/* =====================================================
+   SPACING UTILITIES
+   Use instead of inline margin
+   ===================================================== */
+.mt-0 { margin-top: 0; }
 .mt-sm { margin-top: var(--space-2); }
 .mt-md { margin-top: var(--space-3); }
 .mt-lg { margin-top: var(--space-4); }
+
+.mb-0 { margin-bottom: 0; }
 .mb-sm { margin-bottom: var(--space-2); }
 .mb-md { margin-bottom: var(--space-3); }
 .mb-lg { margin-bottom: var(--space-4); }
 
-/* Danger text */
+.pt-0 { padding-top: 0; }
+.pt-sm { padding-top: var(--space-2); }
+.pt-md { padding-top: var(--space-3); }
+.pt-lg { padding-top: var(--space-4); }
+
+.pb-0 { padding-bottom: 0; }
+.pb-sm { padding-bottom: var(--space-2); }
+.pb-md { padding-bottom: var(--space-3); }
+.pb-lg { padding-bottom: var(--space-4); }
+
+/* Gap utilities - for use with flex/grid containers */
+.gap-0 { gap: 0; }
+.gap-0-5 { gap: var(--space-0-5); }
+.gap-1 { gap: var(--space-1); }
+.gap-1-5 { gap: var(--space-1-5); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+
+/* =====================================================
+   WIDTH UTILITIES
+   ===================================================== */
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+.min-w-0 { min-width: 0; }
+
+/* =====================================================
+   TEXT COLOR UTILITIES
+   ===================================================== */
 .text-danger,
 a.text-danger,
 a.text-danger:visited {
@@ -626,3 +1169,249 @@ a.text-danger:hover {
   color: var(--color-danger);
   opacity: 0.8;
 }
+
+.text-muted {
+  color: var(--portal-text-muted);
+}
+
+.text-secondary {
+  color: var(--portal-text-secondary);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+/* =====================================================
+   FONT WEIGHT UTILITIES
+   Used 300+ times across codebase
+   ===================================================== */
+
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+.font-bold { font-weight: 700; }
+.font-normal { font-weight: 400; }
+
+/* =====================================================
+   TRANSITION UTILITIES
+   Common transition patterns
+   ===================================================== */
+
+.transition-colors {
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.transition-opacity {
+  transition: opacity var(--transition-fast);
+}
+
+.transition-transform {
+  transition: transform var(--transition-fast);
+}
+
+.transition-all {
+  transition: all var(--transition-fast);
+}
+
+/* =====================================================
+   BORDER UTILITIES
+   Border patterns used 87+ times
+   ===================================================== */
+
+.border-bottom {
+  border-bottom: 1px solid var(--portal-border-color);
+}
+
+.border-bottom-dark {
+  border-bottom: 1px solid var(--portal-border-dark);
+}
+
+.border-bottom-light {
+  border-bottom: 1px solid var(--portal-border-light);
+}
+
+.border-top {
+  border-top: 1px solid var(--portal-border-color);
+}
+
+.border-all {
+  border: 1px solid var(--portal-border-color);
+}
+
+.border-none {
+  border: none;
+}
+
+/* =====================================================
+   ICON SIZING UTILITIES
+   Consistent icon dimensions
+   ===================================================== */
+
+.icon-xs { width: 12px; height: 12px; }
+.icon-sm { width: 16px; height: 16px; }
+.icon-md { width: 20px; height: 20px; }
+.icon-lg { width: 24px; height: 24px; }
+.icon-xl { width: 32px; height: 32px; }
+
+/* Flex shrink prevention for icons */
+.icon-xs, .icon-sm, .icon-md, .icon-lg, .icon-xl {
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   FOCUS & INTERACTIVE UTILITIES
+   ===================================================== */
+
+.focus-primary:focus,
+.focus-primary:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.focus-ring:focus,
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.25);
+}
+
+/* Hover state utilities */
+.hover-primary:hover {
+  color: var(--color-primary);
+}
+
+.hover-bg-light:hover {
+  background: var(--portal-bg-light);
+}
+
+.hover-bg-medium:hover {
+  background: var(--portal-bg-medium);
+}
+
+/* Interactive element (combines common patterns) */
+.interactive {
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.interactive:hover {
+  color: var(--color-primary);
+}
+
+/* =====================================================
+   DISABLED STATE UTILITIES
+   ===================================================== */
+
+.disabled,
+[disabled],
+:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* =====================================================
+   POSITION UTILITIES
+   ===================================================== */
+
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+
+/* Common absolute patterns */
+.absolute-fill {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* =====================================================
+   OVERFLOW UTILITIES
+   ===================================================== */
+
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-scroll { overflow: scroll; }
+.overflow-x-auto { overflow-x: auto; }
+.overflow-y-auto { overflow-y: auto; }
+
+/* =====================================================
+   SPACER UTILITIES
+   Push content with auto margins
+   ===================================================== */
+
+.spacer-left { margin-left: auto; }
+.spacer-right { margin-right: auto; }
+.spacer-top { margin-top: auto; }
+.spacer-bottom { margin-bottom: auto; }
+
+/* =====================================================
+   HEADER SECTION COMPONENT
+   Common header pattern for modals/cards/sections
+   ===================================================== */
+
+:is([data-page="admin"], [data-page="client-portal"]) .header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--portal-border-color);
+  flex-shrink: 0;
+  width: 100%;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .header-section-compact {
+  padding: var(--space-2) var(--space-3);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .header-section-title {
+  flex: 1;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--portal-text-light);
+  margin: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .header-section-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   FOOTER SECTION COMPONENT
+   Common footer pattern for modals/cards
+   ===================================================== */
+
+:is([data-page="admin"], [data-page="client-portal"]) .footer-section {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--portal-border-color);
+  flex-shrink: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .footer-section-spread {
+  justify-content: space-between;
+}
+
+/* Loading/empty states: see components/loading.css */

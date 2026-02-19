@@ -220,7 +220,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn {
   width: 100%;
-  padding: clamp(0.55rem, 1.3vw, 0.75rem) clamp(0.65rem, 1.6vw, 0.9rem);
+  padding: clamp(0.55rem, 1.3vw, 0.75rem) var(--space-3) clamp(0.55rem, 1.3vw, 0.75rem) var(--sidebar-icon-indent, 18px);
   font-size: clamp(0.9rem, 1.6vw, 1.05rem);
   font-weight: 500;
   text-align: left;
@@ -244,11 +244,11 @@
   box-shadow: none;
 }
 
-/* Button icon styling - slightly larger than text for clarity */
+/* Button icon styling - uses sidebar icon size variable for alignment */
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn .btn-icon {
   flex-shrink: 0;
-  width: 1.2em;
-  height: 1.2em;
+  width: var(--sidebar-icon-size, 20px);
+  height: var(--sidebar-icon-size, 20px);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn .btn-icon svg {
@@ -282,7 +282,7 @@
 /* Logout: same link-style as sidebar nav for consistency */
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout {
   width: 100%;
-  padding: clamp(0.55rem, 1.3vw, 0.75rem) clamp(0.65rem, 1.6vw, 0.9rem);
+  padding: clamp(0.55rem, 1.3vw, 0.75rem) var(--space-3) clamp(0.55rem, 1.3vw, 0.75rem) var(--sidebar-icon-indent, 18px);
   font-size: clamp(0.9rem, 1.6vw, 1.05rem);
   font-weight: 500;
   text-align: left;
@@ -300,11 +300,11 @@
   box-shadow: none;
 }
 
-/* Logout button icon styling - slightly larger than text */
+/* Logout button icon styling - uses sidebar icon size variable for alignment */
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout .btn-icon {
   flex-shrink: 0;
-  width: 1.2em;
-  height: 1.2em;
+  width: var(--sidebar-icon-size, 20px);
+  height: var(--sidebar-icon-size, 20px);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout .btn-icon svg {
