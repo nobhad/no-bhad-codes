@@ -238,16 +238,8 @@
 }
 
 /* -----------------------------------------------------
-   EMPTY STATE
+   EMPTY STATE - Uses universal styles from loading.css
    ----------------------------------------------------- */
-.command-palette-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4, 32px);
-  color: var(--portal-text-muted, #888);
-  font-size: var(--font-size-sm, 14px);
-}
 
 /* -----------------------------------------------------
    MOBILE ADJUSTMENTS

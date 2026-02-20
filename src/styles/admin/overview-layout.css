@@ -509,14 +509,7 @@
   display: block;
 }
 
-.activity-item-loading,
-.activity-item-empty,
-.activity-item-error {
-  padding: 16px 14px;
-  text-align: center;
-  color: var(--portal-text-muted);
-  font-size: 12px;
-}
+/* Uses universal empty/loading/error state from loading.css */
 
 /* =====================================================
    LEADS LIST
@@ -596,14 +589,7 @@
   color: var(--portal-text-muted);
 }
 
-.leads-item-loading,
-.leads-item-empty,
-.leads-item-error {
-  padding: 16px 14px;
-  text-align: center;
-  color: var(--portal-text-muted);
-  font-size: 12px;
-}
+/* Uses universal empty/loading/error state from loading.css */
 
 /* =====================================================
    PROJECT HEALTH DONUT

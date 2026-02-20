@@ -160,12 +160,7 @@
   color: var(--portal-text-secondary);
 }
 
-[data-page="client-portal"] .help-suggestions-empty {
-  padding: var(--space-2);
-  text-align: center;
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-}
+/* Uses universal empty state from loading.css */
 
 /* ==============================================
    MAIN CONTENT LAYOUT
@@ -349,12 +344,9 @@
   color: var(--portal-text-secondary);
 }
 
+/* Uses universal empty state from loading.css, only custom padding-left for accordion indent */
 [data-page="client-portal"] .help-accordion-empty {
-  padding: var(--space-1) var(--space-1-5);
   padding-left: calc(32px + var(--space-1));
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-  font-style: italic;
 }
 
 /* ==============================================

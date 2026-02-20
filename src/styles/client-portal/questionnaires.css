@@ -110,8 +110,8 @@
    EMPTY STATE
    ============================================================================ */
 
+/* Uses universal empty state from loading.css, only unique padding for full-page empty */
 .cp-questionnaires-empty {
-  text-align: center;
   padding: var(--space-8) var(--space-4);
 }
 

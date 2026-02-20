@@ -388,18 +388,16 @@ td.empty-row {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--icon-gap-sm, 6px); /* Gap between spinner/icon and text */
-  padding: var(--space-4);
-  /* Fill parent completely so centering works */
+  gap: 4px;
+  padding: var(--space-3) var(--space-4);
   width: 100%;
   height: 100%;
-  min-height: 120px;
+  min-height: 60px;
   box-sizing: border-box;
   text-align: center;
-  /* Ensure it's centered if parent doesn't use flex */
   margin: 0 auto;
-  color: var(--portal-text-secondary, var(--color-text-muted, #888));
-  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--portal-text-muted, var(--color-text-muted, #888));
+  font-size: var(--font-size-xs);
 }
 
 /* Cards need position relative for loading state positioning */
@@ -409,12 +407,12 @@ td.empty-row {
   position: relative;
 }
 
-/* Portal-specific adjustments - inherit base styles, only override what's needed */
+/* Portal-specific adjustments - compact styling */
 :is([data-page="admin"], [data-page="client-portal"]) .loading-state,
 :is([data-page="admin"], [data-page="client-portal"]) .empty-state,
 :is([data-page="admin"], [data-page="client-portal"]) .error-state {
-  min-height: 100px;
-  padding: var(--space-3);
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
 }
 
 /* Specific containers that need flex for loading/empty state centering */
@@ -433,8 +431,7 @@ td[colspan] .loading-state,
 td[colspan] .error-state,
 td[colspan] .empty-state {
   width: 100%;
-  /* Override base padding for balanced symmetric spacing in tables */
-  padding: var(--space-4);
+  padding: var(--space-2) var(--space-3);
 }
 
 /* Ensure p tags inside loading/error/empty states don't affect centering */

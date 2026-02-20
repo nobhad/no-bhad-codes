@@ -183,13 +183,7 @@
   letter-spacing: 0.03em;
 }
 
-.kanban-empty {
-  color: var(--portal-text-muted);
-  font-size: 0.875rem;
-  text-align: center;
-  padding: var(--space-4) var(--space-2);
-  font-style: italic;
-}
+/* Uses universal empty state from loading.css */
 
 @media (--mobile) {
   .kanban-board {
@@ -322,12 +316,7 @@
   color: var(--color-primary);
 }
 
-.tag-dropdown-empty {
-  padding: 12px;
-  text-align: center;
-  color: var(--portal-text-secondary);
-  font-size: 0.875rem;
-}
+/* Uses universal empty state from loading.css */
 
 /* ============================================
    TIMELINE COMPONENT
@@ -417,12 +406,7 @@
   margin-top: 4px;
 }
 
-.timeline-empty {
-  text-align: center;
-  padding: var(--space-3);
-  color: var(--portal-text-secondary);
-  font-size: 0.875rem;
-}
+/* Uses universal empty state from loading.css */
 
 .timeline-load-more {
   text-align: center;
@@ -512,11 +496,7 @@
   color: var(--portal-text-primary);
 }
 
-.pie-chart-empty {
-  text-align: center;
-  color: var(--portal-text-secondary);
-  padding: var(--space-2);
-}
+/* Uses universal empty state from loading.css */
 
 /* Sparkline */
 .sparkline-svg {

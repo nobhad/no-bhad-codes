@@ -362,10 +362,9 @@
   margin: 2px 0;
 }
 
+/* Uses universal empty state from loading.css, only unique margin */
 [data-page="client-portal"] .milestones-empty {
   margin: var(--space-2) 0 0 0;
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm);
 }
 
 /* Mobile responsive */
