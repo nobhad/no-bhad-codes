@@ -148,12 +148,7 @@
   font-size: var(--font-size-sm);
 }
 
-/* =====================================================
-   EMPTY MESSAGE - base styles in components/loading.css
-   ===================================================== */
-[data-page="admin"] .empty-message {
-  font-style: italic;
-}
+/* .empty-message styling from unified rule in components/loading.css */
 
 /* =====================================================
    STATUS BADGE ADJUSTMENTS

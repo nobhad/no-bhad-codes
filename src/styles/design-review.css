@@ -32,7 +32,7 @@
   flex-direction: column;
   gap: var(--space-2);
   background: var(--portal-bg-dark);
-  border-radius: 8px;
+  border-radius: var(--portal-radius-md);
   padding: var(--space-2);
   overflow: hidden;
   border: 1px solid var(--portal-bg-medium);
@@ -78,7 +78,7 @@
   justify-content: center;
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-bg-light);
-  border-radius: 6px;
+  border-radius: var(--portal-radius-sm);
   cursor: pointer;
   color: var(--portal-text-light);
   font-weight: 600;
@@ -102,7 +102,7 @@
   flex: 1;
   overflow: auto;
   background: var(--portal-bg-medium);
-  border-radius: 6px;
+  border-radius: var(--portal-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,7 +113,7 @@
   max-width: 100%;
   max-height: 100%;
   border: 2px solid var(--portal-bg-light);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   cursor: crosshair;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -132,7 +132,7 @@
   flex-direction: column;
   gap: var(--space-2);
   background: var(--portal-bg-dark);
-  border-radius: 8px;
+  border-radius: var(--portal-radius-md);
   padding: var(--space-2);
   border: 1px solid var(--portal-bg-medium);
   overflow-y: auto;
@@ -257,13 +257,7 @@
     height: 250px;
   }
 
-  .tool-buttons {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .design-elements-list {
-    max-height: 150px;
-  }
+  /* .tool-buttons and .design-elements-list responsive in deliverables.css */
 }
 
 /* ============================================

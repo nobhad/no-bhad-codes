@@ -120,7 +120,7 @@
 .status-badge {
   display: inline-block;
   padding: var(--space-1) calc(var(--space-1) * 1.5);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   font-size: 12px;
   font-weight: 500;
 }
@@ -169,7 +169,7 @@
   padding: 0;
   background: var(--portal-bg-light);
   border: 1px solid var(--portal-bg-medium);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   color: var(--portal-text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -211,7 +211,7 @@
   gap: var(--space-2);
   padding: var(--space-3);
   border: 2px dashed var(--portal-bg-medium);
-  border-radius: 8px;
+  border-radius: var(--portal-radius-md);
   background-color: var(--portal-bg-dark);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -360,7 +360,7 @@
   max-height: 100%;
   height: auto;
   border: 1px solid var(--portal-bg-medium);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   cursor: crosshair;
 }
@@ -408,7 +408,7 @@
   justify-content: center;
   background: var(--portal-bg-light);
   border: 1px solid var(--portal-bg-medium);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   color: var(--portal-text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -441,7 +441,7 @@
 .color-btn {
   width: 100%;
   aspect-ratio: 1;
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   border: 2px solid transparent;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -477,7 +477,7 @@
   padding: var(--space-1) var(--space-2);
   background: var(--portal-bg-light);
   border: 1px solid var(--portal-bg-medium);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   color: var(--portal-text-secondary);
   font-size: 12px;
   cursor: pointer;
@@ -531,7 +531,7 @@
   gap: var(--space-1);
   padding: var(--space-1);
   background: var(--portal-bg-light);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   border: 1px solid var(--portal-bg-medium);
   transition: all var(--transition-fast);
 }
@@ -601,7 +601,7 @@
 .action-btn {
   width: 100%;
   padding: var(--space-1) var(--space-2);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   border: 1px solid transparent;
   font-size: 13px;
   font-weight: 500;

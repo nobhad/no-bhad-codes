@@ -11,9 +11,8 @@
   min-height: 100px;
 }
 
-/* Empty state: base styles in components/loading.css, unique dashed border here */
+/* Empty state: base styles + italic in components/loading.css, unique dashed border here */
 [data-page="admin"] #questions-builder .empty-message {
-  font-style: italic;
   border: 1px dashed var(--color-border);
   border-radius: var(--portal-radius-md);
 }
