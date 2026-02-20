@@ -429,14 +429,7 @@
   }
 }
 
-/* Empty and loading states (match project detail .empty-state) */
-#tab-client-detail .empty-state,
-#tab-client-detail .portal-project-card .empty-state,
-#tab-client-detail .portal-project-card .loading-text {
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-  margin: 0;
-}
+/* .empty-state, .loading-state, .error-state styling from components/loading.css */
 
 /* Clickable links in meta values - scoped to admin */
 [data-page="admin"] .clickable-link {

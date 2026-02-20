@@ -512,12 +512,10 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Secondary/muted text in detail views */
 #tab-project-detail .file-meta,
 #tab-project-detail .invoice-date,
-#tab-project-detail .empty-state,
-#tab-client-detail .empty-state,
-#tab-client-detail .portal-project-card .empty-state,
 #tab-client-detail .portal-project-card .loading-text {
   color: var(--portal-text-secondary);
 }
+/* .empty-state, .loading-state, .error-state styling from components/loading.css */
 
 /* Card Header with Action - base in portal-cards.css, override margin */
 .card-header-with-action {
@@ -739,12 +737,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-size: 0.85rem;
   display: inline-block;
   text-transform: capitalize;
-}
-
-/* Empty State - base styles in components/loading.css
-   Only add project-detail specific overrides here */
-.empty-state p {
-  margin: 0;
 }
 
 /* Files List in Project Detail */

@@ -34,11 +34,7 @@
   color: var(--portal-text-primary);
 }
 
-/* Empty state: base styles from components/loading.css, only overrides here */
-.templates-list .empty-state {
-  padding: var(--space-3);
-  color: var(--portal-text-muted);
-}
+/* .empty-state styling from components/loading.css */
 
 .templates-list .empty-hint {
   font-size: var(--font-size-sm);

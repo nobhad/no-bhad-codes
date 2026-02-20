@@ -38,11 +38,7 @@
   min-height: 120px;
 }
 
-/* Empty state text styling - match other empty states in project detail */
-[data-page="admin"] #pd-tab-invoices .empty-state {
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-}
+/* .empty-state styling from components/loading.css */
 
 /* Invoice summary cards - consistent spacing */
 [data-page="admin"] #pd-tab-invoices .invoice-summary {
