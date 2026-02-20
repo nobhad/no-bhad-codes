@@ -418,6 +418,57 @@ border-radius: var(--portal-radius-lg);
 
 **Key Difference:** Table dropdowns are compact (32px) with transparent background. Modal dropdowns are taller (48px) with black background to match form input styling.
 
+**Filter Dropdowns** (36px controls, for table filtering):
+
+Filter dropdowns are distinct from table and modal dropdowns. They're part of the table filter control system and use icon buttons as triggers.
+
+```css
+/* Filter controls container */
+.table-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 36px;
+}
+
+/* Search dropdown */
+.filter-search-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  width: 280px;
+  box-shadow: var(--shadow-elevated-md);
+}
+
+/* Filter options menu */
+.filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  min-width: 240px;
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-md);
+  box-shadow: var(--shadow-dropdown-xl);
+}
+```
+
+**Filter Dropdown Features:**
+
+- Icon button triggers (`.filter-search-trigger`, `.filter-dropdown-trigger`)
+- Active state indicator (`.has-value::after` red dot on trigger)
+- Count badge for active filters (`.filter-count-badge`)
+- Animated open/close with opacity and transform transitions
+- Sections with labels, checkbox groups, date ranges
+
+**CSS File:** `src/styles/admin/table-filters.css`
+
+### Dropdown System Summary
+
+| System | Height | Trigger | Background | Purpose |
+|--------|--------|---------|------------|---------|
+| Table Dropdowns | 32px | Click cell | Transparent | Status in table cells |
+| Modal Dropdowns | 48px | Click input | `--color-black` | Form inputs in modals |
+| Filter Dropdowns | 36px | Icon button | `--portal-bg-dark` | Table filter controls |
+
 ### Section Headings (h3 in tabs)
 
 ```css

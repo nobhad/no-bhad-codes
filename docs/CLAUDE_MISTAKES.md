@@ -208,6 +208,7 @@ import { escapeHtml } from '../../../../shared/validation/validators';
 **Violation:** When user said "maybe we just get rid of the counter", I removed the keyboard shortcut hints (1-8) we had JUST ADDED, instead of removing the CRM message counter badge (the red notification "1").
 
 **Context:**
+
 - User said "count is hiding number" - meaning the CRM badge was blocking the shortcut number
 - User then said "maybe we just get rid of the counter"
 - I incorrectly interpreted "counter" as the keyboard shortcut numbers

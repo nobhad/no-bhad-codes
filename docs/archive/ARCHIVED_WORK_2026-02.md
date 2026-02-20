@@ -4124,3 +4124,160 @@ Fixed quoted price showing as $0.00 when saved with comma formatting.
 - `src/features/admin/modules/admin-projects.ts` - Added parseNumericValue helper, fixed save logic
 
 ---
+
+---
+
+## Completed - February 19-20, 2026
+
+### DAL (Data Access Layer) Implementation
+
+Implemented a Data Access Layer to eliminate ~400 lines of duplicate row-to-object mapping code across backend services.
+
+**Problem Solved:**
+
+The backend had 43 service files with ~30% duplicated boilerplate:
+
+- 20+ `to*()` functions scattered across services doing identical snake_case → camelCase transformations
+- Each function manually mapped every field with `Boolean(row.is_*)`, `JSON.parse(row.metadata)`, etc.
+- Services defined duplicate `type SqlValue` instead of importing shared types
+- Existing `row-helpers.ts` utilities were NOT being used
+
+**Solution: Entity Mapper Layer**
+
+Created a centralized entity mapper layer that:
+
+1. Provides generic snake_case → camelCase transformation
+2. Leverages existing `row-helpers.ts` utilities
+3. Defines entity schemas in one location
+4. Creates reusable mapper functions from schemas
+
+**Files Created:**
+
+| File | Purpose |
+|------|---------|
+| `server/database/entity-mapper.ts` | Core mapping utilities (~220 lines) |
+| `server/database/entities/index.ts` | Re-exports all entity schemas |
+| `server/database/entities/client.ts` | Client-related entity schemas (6 entities) |
+| `server/database/entities/lead.ts` | Lead-related entity schemas (7 entities) |
+| `server/database/entities/project.ts` | Project-related entity schemas (6 entities) |
+| `server/database/entities/contract.ts` | Contract-related entity schemas (2 entities) |
+| `server/database/entities/proposal.ts` | Proposal-related entity schemas (7 entities) |
+| `server/database/entities/invoice.ts` | Invoice-related entity schemas (8 entities) |
+| `server/database/entities/message.ts` | Message-related entity schemas (5 entities) |
+| `server/database/entities/settings.ts` | Settings entity schema (1 entity) |
+| `server/database/entities/ad-hoc-request.ts` | Ad hoc request entity schema (1 entity) |
+
+**Services Migrated:**
+
+| Service | To Functions Removed | Lines Saved |
+|---------|---------------------|-------------|
+| `client-service.ts` | 6 | ~80 lines |
+| `lead-service.ts` | 7 | ~100 lines |
+| `project-service.ts` | 6 | ~90 lines |
+| `contract-service.ts` | 2 | ~60 lines |
+| `proposal-service.ts` | 7 | ~100 lines |
+| `message-service.ts` | 5 | ~60 lines |
+| `settings-service.ts` | 1 | ~15 lines |
+| `ad-hoc-request-service.ts` | 1 | ~30 lines |
+
+Total: 35 mapper functions centralized, ~535 lines eliminated from services.
+
+---
+
+### Table Module Factory Migration
+
+Created `src/utils/table-module-factory.ts` - a factory function that eliminates duplicated initialization code across admin modules.
+
+**Impact:**
+
+- ~200 lines eliminated per module
+- Single source of truth for initialization patterns
+- Easier maintenance and consistent behavior
+
+**Modules Migrated:**
+
+| Module | Lines Reduced |
+|--------|---------------|
+| `admin-contacts.ts` | 904 → 738 (-166) |
+| `admin-leads.ts` | 2,086 → 1,575 (-511) |
+| `admin-clients.ts` | 1,726 → 1,542 (-184) |
+| `admin-invoices.ts` | 1,209 → 1,057 (-152) |
+| `admin-contracts.ts` | 690 → 652 (-38) |
+| `admin-ad-hoc-requests.ts` | 917 → 835 (-82) |
+
+Total lines saved: 1,133 lines across 6 modules
+
+**Modules NOT migrated (incompatible patterns):**
+
+- `admin-projects.ts` - Complex secondary sidebar detail system
+- `admin-proposals.ts` - Dual-panel view toggle
+- `admin-knowledge-base.ts` - Categories/articles toggle
+- `admin-document-requests.ts` - Custom multi-endpoint loading
+
+---
+
+### CSS Consolidation
+
+**Utility Classes Added to portal-components.css:**
+
+- Flex column/row/wrap utilities
+- Grid fixed and auto-fit utilities
+- Gap, spacing, text, and position utilities
+- Transitions, borders, icon sizes, focus/hover states
+- Header and footer section patterns
+
+**CSS Files Split:**
+
+- `project-detail.css` split: Created `details-panel.css` (141 lines) and `system-status.css` (101 lines)
+- `analytics.css` stripped from 870+ to ~380 lines
+
+**Row Hover Consolidation:**
+
+- Created `shared/portal-tables.css` with universal hover styles
+- Removed duplicates from 6 files
+
+---
+
+### Tasks Tab Styling Fixes
+
+- Added stat cards (To Do, In Progress, Blocked, Done) to Tasks tab header
+- Changed kanban column styling from bold top border to subtle left accent
+- Updated `admin-global-tasks.ts` with stat card rendering and count updates
+- Added `tasks-stats-strip` CSS (~85 lines)
+
+---
+
+### Linear-Style Admin Portal Redesign - COMPLETE
+
+**Phase 1: Foundation** ✅
+
+- Command palette (Cmd+K)
+- Fuzzy search navigation
+- Keyboard navigation module
+- Sidebar shortcuts (1-8 keys)
+
+**Phase 2: Tables** ✅
+
+- Compact 40px rows
+- Hover-reveal action buttons
+- J/K keyboard navigation all tables
+- Shift+Click bulk selection
+- Inline editing component
+
+**Files created:**
+
+- `src/components/command-palette.ts`
+- `src/components/table-keyboard-nav.ts`
+- `src/components/inline-edit.ts`
+- `src/components/keyboard-help.ts`
+- `src/styles/admin/overview-layout.css`
+- `src/styles/admin/sidebar-refinements.css`
+- `src/styles/shared/modal-system.css`
+
+---
+
+### Other Fixes
+
+- Fixed ESLint warnings in `admin-overview.ts` (5 unused variables)
+- Fixed markdown violations in docs (MD032, MD036)
+- Documented Filter Dropdown system in CSS_ARCHITECTURE.md
