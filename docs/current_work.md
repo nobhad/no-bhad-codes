@@ -8,17 +8,27 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ## Active TODOs
 
-### CSS DRY Reduction - COMPLETE
+### CSS DRY Reduction - ONGOING
 
 Reduced CSS codebase using utility classes and consolidation patterns.
 
-**Final Status:**
+**Current Status:**
 
-- Total CSS: ~52,058 lines (src/styles: 50,448 + src/design-system: 1,610)
+- Total CSS: ~51,836 lines (src/styles: 50,226 + src/design-system: 1,610)
 - Created `src/styles/base/utilities.css` with atomic utility classes
 - Consolidated portal-tables.css using `:is()` selector (886→652 lines)
 - Migrated 39+ pure utility patterns to utility classes
 - Documented two-tier utility system in CSS_ARCHITECTURE.md
+
+**February 20, 2026 Consolidation:**
+
+- [x] Unified stat-card/content-card patterns (portal-cards.css)
+- [x] Consolidated empty-message italic rule (loading.css)
+- [x] Replaced hardcoded border-radius with CSS variables (design-review.css, deliverables.css)
+- [x] Replaced hardcoded colors with semantic tokens (deliverables.css, design-review.css)
+- [x] Consolidated .tab-content base rule (portal-tabs.css)
+- [x] Removed duplicate annotation tool styles from design-review.css
+- [x] Removed duplicate utility classes (.sr-only, .truncate-text)
 
 **Design System Token Cleanup:**
 
