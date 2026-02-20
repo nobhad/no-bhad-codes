@@ -39,6 +39,7 @@
 ### 2. Command Palette (⌘K) ✅ IMPLEMENTED
 
 Features implemented:
+
 - [x] Navigate to any section (Dashboard, Clients, Projects, etc.)
 - [x] Search across entities
 - [x] Quick actions (Create client, New invoice, etc.)
@@ -94,6 +95,7 @@ Features implemented:
 ### Tables ✅ COMPLETE
 
 All tables (Clients, Projects, Invoices, Leads, Contracts):
+
 - [x] Minimal borders (row dividers only)
 - [x] Compact rows with good typography
 - [x] Hover actions (action buttons appear on hover)
