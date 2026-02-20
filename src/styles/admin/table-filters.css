@@ -140,11 +140,7 @@
 }
 
 /* Checkbox group */
-.filter-checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 .filter-checkbox {
   display: flex;
@@ -172,11 +168,7 @@
 }
 
 /* Date range inputs - stacked vertically */
-.filter-date-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 .filter-date-input {
   width: 100%;

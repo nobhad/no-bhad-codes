@@ -247,7 +247,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
         </div>
       </div>
       <div class="pd-overview-grid">
-        <div class="pd-overview-main">
+        <div class="pd-overview-main flex flex-col gap-3">
           <div class="portal-project-card portal-shadow pd-progress-card">
             <h3>Progress</h3>
             <div class="pd-progress-display pd-progress-horizontal">
@@ -269,7 +269,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
             </div>
           </div>
         </div>
-        <div class="pd-overview-sidebar">
+        <div class="pd-overview-sidebar flex flex-col gap-3">
           <div class="portal-project-card portal-shadow">
             <h3>Financials</h3>
             <div class="pd-financial-stats">
@@ -399,18 +399,18 @@ export function renderProjectDetailTab(container: HTMLElement): void {
               <div class="file-info-grid" id="file-info-content"></div>
             </div>
             <div class="file-detail-tab-content" data-tab-content="versions">
-              <div class="file-versions-list" id="file-versions-list"></div>
+              <div class="file-versions-list flex flex-col gap-1" id="file-versions-list"></div>
             </div>
             <div class="file-detail-tab-content" data-tab-content="comments">
               <div class="file-comments-list" id="file-comments-list"></div>
-              <div class="file-comment-form">
+              <div class="file-comment-form flex flex-col gap-1">
                 <label for="file-comment-input" class="sr-only">Add a comment</label>
                 <textarea id="file-comment-input" placeholder="Add a comment..." rows="2" aria-label="Add a comment"></textarea>
                 <button class="btn btn-secondary btn-sm" id="btn-add-file-comment">Add Comment</button>
               </div>
             </div>
             <div class="file-detail-tab-content" data-tab-content="access">
-              <div class="file-access-log" id="file-access-log"></div>
+              <div class="file-access-log flex flex-col gap-0-5" id="file-access-log"></div>
             </div>
             <div class="file-detail-actions">
               <button class="btn btn-secondary" id="btn-download-file">${RENDER_ICONS.DOWNLOAD} Download</button>
@@ -469,9 +469,9 @@ export function renderProjectDetailTab(container: HTMLElement): void {
           </div>
           <div class="payment-plans-section">
             <h4>Scheduled Invoices</h4>
-            <div id="pd-scheduled-invoices" class="scheduled-list"><div class="empty-state">No scheduled invoices.</div></div>
+            <div id="pd-scheduled-invoices" class="scheduled-list flex flex-col gap-2"><div class="empty-state">No scheduled invoices.</div></div>
             <h4>Recurring Invoices</h4>
-            <div id="pd-recurring-invoices" class="recurring-list"><div class="empty-state">No recurring invoices configured.</div></div>
+            <div id="pd-recurring-invoices" class="recurring-list flex flex-col gap-2"><div class="empty-state">No recurring invoices configured.</div></div>
           </div>
         </div>
       </div>

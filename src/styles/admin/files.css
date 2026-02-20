@@ -405,11 +405,7 @@
   gap: var(--space-1-5);
 }
 
-.file-info-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-}
+/* Uses utility classes: flex flex-col gap-0-5 */
 
 .file-info-label {
   font-size: var(--font-size-xs);
@@ -424,11 +420,7 @@
 }
 
 /* Version List */
-.file-versions-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 .version-item {
   display: flex;
@@ -444,11 +436,7 @@
   border-color: var(--color-primary);
 }
 
-.version-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-}
+/* Uses utility classes: flex flex-col gap-0-5 */
 
 .version-label {
   font-size: var(--font-size-sm);
@@ -518,11 +506,7 @@
   line-height: 1.5;
 }
 
-.file-comment-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 .file-comment-form textarea {
   background: var(--portal-bg-medium);
@@ -544,11 +528,7 @@
 }
 
 /* Access Log */
-.file-access-log {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-}
+/* Uses utility classes: flex flex-col gap-0-5 */
 
 .access-log-item {
   display: flex;

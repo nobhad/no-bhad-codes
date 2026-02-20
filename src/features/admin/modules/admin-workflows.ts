@@ -561,27 +561,27 @@ async function previewWorkflow(): Promise<void> {
   const typeLabel = WORKFLOW_TYPE_LABELS[workflowType] || workflowType;
 
   workflowPreviewModal.body.innerHTML = `
-    <div class="workflow-preview">
+    <div class="workflow-preview flex flex-col gap-1">
       <div class="preview-section">
         <h4>Workflow Configuration</h4>
         <div class="preview-info-grid">
-          <div class="preview-info-item">
+          <div class="preview-info-item flex flex-col gap-0-5">
             <span class="preview-label">Name</span>
             <span class="preview-value">${escapeHtml(name)}</span>
           </div>
-          <div class="preview-info-item">
+          <div class="preview-info-item flex flex-col gap-0-5">
             <span class="preview-label">Description</span>
             <span class="preview-value">${escapeHtml(description)}</span>
           </div>
-          <div class="preview-info-item">
+          <div class="preview-info-item flex flex-col gap-0-5">
             <span class="preview-label">Entity Type</span>
             <span class="preview-value">${entityLabel}</span>
           </div>
-          <div class="preview-info-item">
+          <div class="preview-info-item flex flex-col gap-0-5">
             <span class="preview-label">Workflow Type</span>
             <span class="preview-value">${typeLabel}</span>
           </div>
-          <div class="preview-info-item">
+          <div class="preview-info-item flex flex-col gap-0-5">
             <span class="preview-label">Default</span>
             <span class="preview-value">${isDefault ? 'Yes' : 'No'}</span>
           </div>
@@ -666,7 +666,7 @@ function renderPreviewSteps(steps: WorkflowStep[], workflowType: WorkflowType): 
   const sortedSteps = [...steps].sort((a, b) => a.step_order - b.step_order);
 
   return `
-    <div class="preview-steps-list ${workflowType === 'sequential' ? 'sequential' : 'parallel'}">
+    <div class="preview-steps-list flex flex-col gap-1 ${workflowType === 'sequential' ? 'sequential' : 'parallel'}">
       ${sortedSteps.map((step, index) => `
         <div class="preview-step-item">
           <div class="preview-step-order">${step.step_order}</div>

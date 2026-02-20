@@ -245,11 +245,7 @@
   border-top: 1px solid var(--portal-border-color);
 }
 
-.template-editor {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-col gap-2 */
 
 .template-editor-section {
   background-color: var(--portal-bg-dark);
@@ -277,11 +273,7 @@
   gap: var(--space-1-5);
 }
 
-.template-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 .template-row {
   display: grid;
@@ -408,11 +400,7 @@
   margin-bottom: var(--space-1-5);
 }
 
-.version-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 .version-item {
   display: flex;
@@ -726,11 +714,7 @@
   line-height: 1.5;
 }
 
-.add-comment-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 .add-comment-form textarea {
   width: 100%;
@@ -774,11 +758,7 @@
   padding: var(--space-1-5);
 }
 
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-}
+/* Uses utility classes: flex flex-col gap-0-5 */
 
 .activity-item {
   display: flex;

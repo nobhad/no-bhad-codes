@@ -63,11 +63,7 @@
   margin: 0;
 }
 
-[data-page="admin"] .question-item-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-col gap-2 */
 
 [data-page="admin"] .question-text {
   width: 100%;
@@ -83,11 +79,7 @@
   color: var(--color-text-muted);
 }
 
-[data-page="admin"] .question-options {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 [data-page="admin"] .question-options label {
   font-size: var(--font-size-sm);

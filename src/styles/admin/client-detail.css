@@ -138,11 +138,7 @@
 }
 
 /* Compact Projects List - reusable pattern */
-:is([data-page="admin"], [data-page="client-portal"]) .projects-list-compact {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-col gap-2 */
 
 :is([data-page="admin"], [data-page="client-portal"]) .project-item-compact {
   display: flex;
@@ -296,11 +292,7 @@
    =============================================== */
 
 /* Compact activity list - reusable pattern */
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-col gap-2 */
 
 /* Smaller activity items for compact lists */
 :is([data-page="admin"], [data-page="client-portal"]) .recent-activity-list .activity-item {
@@ -500,11 +492,7 @@
 }
 
 /* Client projects list in client detail - scoped to admin */
-[data-page="admin"] .client-projects-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-col gap-2 */
 
 [data-page="admin"] .client-project-item {
   display: flex;
@@ -523,11 +511,7 @@
   background: var(--portal-bg-darker);
 }
 
-[data-page="admin"] .client-project-item .project-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 [data-page="admin"] .client-project-item .project-name {
   color: var(--portal-text-light);
@@ -610,11 +594,7 @@
   gap: 0.25rem;
 }
 
-[data-page="admin"] .billing-stat {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 /* Billing label - styling from unified rule in portal-cards.css */
 
@@ -625,11 +605,7 @@
 }
 
 /* Client invoices list - scoped to admin */
-[data-page="admin"] .client-invoices-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-col gap-2 */
 
 [data-page="admin"] .client-invoice-item {
   display: flex;
@@ -647,11 +623,7 @@
   background: var(--portal-bg-darker);
 }
 
-[data-page="admin"] .client-invoice-item .invoice-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 [data-page="admin"] .client-invoice-item .invoice-number {
   color: var(--portal-text-light);

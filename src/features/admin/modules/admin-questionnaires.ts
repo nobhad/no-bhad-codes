@@ -362,10 +362,10 @@ function renderQuestionsBuilder(): void {
           ${ICONS.TRASH}
         </button>
       </div>
-      <div class="question-item-body">
+      <div class="question-item-body flex flex-col gap-2">
         <input type="text" class="question-text" data-index="${index}" value="${escapeHtml(q.question)}" placeholder="Enter your question..." />
         ${['select', 'multiselect'].includes(q.type) ? `
-          <div class="question-options">
+          <div class="question-options flex flex-col gap-1">
             <label>Options (one per line)</label>
             <textarea class="question-options-input" data-index="${index}" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3">${(q.options || []).join('\n')}</textarea>
           </div>

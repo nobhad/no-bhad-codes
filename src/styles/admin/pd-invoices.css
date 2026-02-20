@@ -322,12 +322,7 @@
 }
 
 /* Scheduled Invoice Items */
-.scheduled-list,
-.recurring-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-col gap-2 */
 
 .scheduled-item,
 .recurring-item {

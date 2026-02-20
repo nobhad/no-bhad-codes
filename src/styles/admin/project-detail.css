@@ -1479,17 +1479,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   align-items: start;
 }
 
-.pd-overview-main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.pd-overview-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
+/* Uses utility classes: flex flex-col gap-3 */
+/* Uses utility classes: flex flex-col gap-3 */
 
 /* Activity Card (Full Width, Last Section) */
 .pd-activity-card {
