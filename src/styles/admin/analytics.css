@@ -33,7 +33,7 @@
 
 .vitals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: var(--portal-section-gap);
 }
 
@@ -197,18 +197,18 @@
 
 .vital-card h4 {
   color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: 0.6875rem;
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 .vital-value {
   color: var(--portal-text-light);
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
-  margin-bottom: var(--space-1);
+  margin-bottom: 4px;
 }
 
 .vital-status {
