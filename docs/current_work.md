@@ -14,7 +14,7 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 
 **Final Status:**
 
-- Total CSS: ~52,105 lines (src/styles: 50,495 + src/design-system: 1,610)
+- Total CSS: ~52,058 lines (src/styles: 50,448 + src/design-system: 1,610)
 - Created `src/styles/base/utilities.css` with atomic utility classes
 - Consolidated portal-tables.css using `:is()` selector (886→652 lines)
 - Migrated 39+ pure utility patterns to utility classes
@@ -36,6 +36,15 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 - [x] Consolidated duplicate @keyframes spin definitions (84 lines across 4 files)
 - [x] Consolidated loading-spin → spin in loading.css
 - [x] Consolidated cp-spin → spin in questionnaires.css
+
+**Component Pattern Consolidation:**
+
+- [x] Created shared .toggle-group/.toggle-btn in portal-buttons.css
+- [x] Consolidated .kpi-card with .stat-card pattern in portal-cards.css
+- [x] Consolidated list-item patterns (.history-request-item, etc.) in portal-cards.css
+- [x] Created modal scroll utilities (.modal-scroll-sm/md/lg) in modal-system.css
+- [x] Moved badge patterns (.system-badge, .category-badge) to portal-badges.css
+- [x] Consolidated .tier-select-btn/.maintenance-select-btn in proposal-builder.css
 
 **Previous Cleanup:**
 
