@@ -17,7 +17,7 @@
   <%- include('../partials/auth-gate', { config, portalType }) %>
 
   <!-- Dashboard Layout (hidden until auth) -->
-  <div class="dashboard-container hidden" id="<%= config.dashboardId %>">
+  <div class="dashboard-container portal hidden" id="<%= config.dashboardId %>">
 
     <!-- Full-Width Global Header -->
     <%- include('../partials/portal-header', { config, portalType }) %>

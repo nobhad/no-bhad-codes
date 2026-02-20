@@ -1,0 +1,124 @@
+/**
+ * ===============================================
+ * GENERIC REUSABLE COMPONENT CLASSES
+ * ===============================================
+ * @file src/styles/base/components.css
+ *
+ * Common utility classes shared across all portals.
+ * These replace duplicated code blocks throughout the codebase.
+ */
+
+/* ============================================
+ * ACCESSIBILITY UTILITIES
+ * ============================================ */
+
+/**
+ * Visually hidden - screen reader only
+ * Hide content visually while keeping it accessible to screen readers
+ */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ============================================
+ * COLLAPSED STATE UTILITIES
+ * ============================================ */
+
+/**
+ * Collapsed text hidden - sidebar text hiding
+ * Used when sidebar is collapsed to completely hide text elements
+ * Replaces 4 duplicated blocks in portal-buttons.css
+ */
+.collapsed-text-hidden {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* ============================================
+ * PORTAL LABEL SYSTEM
+ * ============================================ */
+
+/**
+ * Portal label - unified label styling
+ * Replaces 32+ enumerated class selectors with a single base class
+ * Applied to: field-label, meta-label, stat-label, kpi-card-label, etc.
+ */
+.portal-label {
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================
+ * ICON STATUS COLORS
+ * ============================================ */
+
+/**
+ * Icon color utilities - status-based coloring
+ * Use these on icons to indicate status
+ */
+.icon-success {
+  color: var(--status-completed);
+  background: transparent;
+}
+
+.icon-warning {
+  color: var(--status-pending);
+  background: transparent;
+}
+
+.icon-danger {
+  color: var(--status-cancelled);
+  background: transparent;
+}
+
+.icon-info {
+  color: var(--status-active);
+  background: transparent;
+}
+
+/* ============================================
+ * TEXT UTILITIES
+ * ============================================ */
+
+/**
+ * Text truncation with ellipsis
+ */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/**
+ * Multi-line text truncation (line clamp)
+ */
+.text-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.text-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

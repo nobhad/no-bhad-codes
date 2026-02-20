@@ -2,13 +2,15 @@
    SHARED PORTAL CARDS
    @file src/styles/shared/portal-cards.css
    Single source of truth for admin and client portal cards
+
+   Uses .portal class on dashboard-container for scoping.
    ===================================================== */
 
 /* =====================================================
    UNIFIED H3 HEADING STYLES
    Single source of truth for ALL h3 headings in portals
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) h3 {
+.portal h3 {
   margin: 0;
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: var(--font-size-base);
@@ -24,39 +26,41 @@
    Single source of truth for ALL field labels in portals
    Matches table column headers: grey, thin, uppercase, 11px
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .field-label,
-:is([data-page="admin"], [data-page="client-portal"]) .meta-label,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-label,
-:is([data-page="admin"], [data-page="client-portal"]) .kpi-card-label,
-:is([data-page="admin"], [data-page="client-portal"]) .summary-label,
-:is([data-page="admin"], [data-page="client-portal"]) .summary-card h4,
-:is([data-page="admin"], [data-page="client-portal"]) .payment-plans-section h4,
-:is([data-page="admin"], [data-page="client-portal"]) .project-notes h4,
-:is([data-page="admin"], [data-page="client-portal"]) .milestone-title,
-:is([data-page="admin"], [data-page="client-portal"]) #pd-tab-settings label,
-:is([data-page="admin"], [data-page="client-portal"]) .filter-label,
-:is([data-page="admin"], [data-page="client-portal"]) .form-label,
-:is([data-page="admin"], [data-page="client-portal"]) .portal-stat-label,
-:is([data-page="admin"], [data-page="client-portal"]) .pd-stat-label,
-:is([data-page="admin"], [data-page="client-portal"]) .health-label,
-:is([data-page="admin"], [data-page="client-portal"]) .attention-label,
-:is([data-page="admin"], [data-page="client-portal"]) .bar-chart-label,
-:is([data-page="admin"], [data-page="client-portal"]) .pie-chart-legend-label,
-:is([data-page="admin"], [data-page="client-portal"]) .funnel-stage-label,
-:is([data-page="admin"], [data-page="client-portal"]) .custom-field-label,
-:is([data-page="admin"], [data-page="client-portal"]) .client-stat-label,
-:is([data-page="admin"], [data-page="client-portal"]) .health-factor-label,
-:is([data-page="admin"], [data-page="client-portal"]) .filter-section-label,
-:is([data-page="admin"], [data-page="client-portal"]) .documents-upload-label,
-:is([data-page="admin"], [data-page="client-portal"]) .client-selector-label,
-:is([data-page="admin"], [data-page="client-portal"]) .kpi-card-change-label,
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-section-label,
-:is([data-page="admin"], [data-page="client-portal"]) .section-title,
-:is([data-page="admin"], [data-page="client-portal"]) .cd-account-label,
-:is([data-page="admin"], [data-page="client-portal"]) .cd-stat-label,
-:is([data-page="admin"], [data-page="client-portal"]) .billing-label,
-:is([data-page="admin"], [data-page="client-portal"]) .template-editor-modal .form-group label,
-:is([data-page="admin"], [data-page="client-portal"]) .prompt-dialog-label {
+.portal :is(
+  .field-label,
+  .meta-label,
+  .stat-label,
+  .kpi-card-label,
+  .summary-label,
+  .summary-card h4,
+  .payment-plans-section h4,
+  .project-notes h4,
+  .milestone-title,
+  #pd-tab-settings label,
+  .filter-label,
+  .form-label,
+  .portal-stat-label,
+  .pd-stat-label,
+  .health-label,
+  .attention-label,
+  .bar-chart-label,
+  .pie-chart-legend-label,
+  .funnel-stage-label,
+  .custom-field-label,
+  .client-stat-label,
+  .health-factor-label,
+  .filter-section-label,
+  .documents-upload-label,
+  .client-selector-label,
+  .kpi-card-change-label,
+  .sidebar-section-label,
+  .section-title,
+  .cd-account-label,
+  .cd-stat-label,
+  .billing-label,
+  .template-editor-modal .form-group label,
+  .prompt-dialog-label
+) {
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 0.6875rem; /* 11px - matches table column headers */
   font-weight: 400;
@@ -68,8 +72,8 @@
 /* =====================================================
    MODAL FORM LABELS - Same styling as unified labels
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .modal-body .form-group > label:not(.portal-checkbox-label),
-:is([data-page="admin"], [data-page="client-portal"]) .modal-body label:not(.portal-checkbox-label):not([class*="checkbox"]) {
+.portal .modal-body .form-group > label:not(.portal-checkbox-label),
+.portal .modal-body label:not(.portal-checkbox-label):not([class*="checkbox"]) {
   display: block;
   margin-bottom: var(--space-1);
   font-family: var(--font-family-sans, system-ui, sans-serif);
@@ -86,37 +90,27 @@
    Uses design-system/tokens/colors.css status variables
    Transparent backgrounds - color only
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .icon-blue,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-icon-blue,
-:is([data-page="admin"], [data-page="client-portal"]) .panel-icon-blue {
+.portal :is(.icon-blue, .stat-icon-blue, .panel-icon-blue) {
   background: transparent;
   color: var(--status-active);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .icon-green,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-icon-green,
-:is([data-page="admin"], [data-page="client-portal"]) .panel-icon-green {
+.portal :is(.icon-green, .stat-icon-green, .panel-icon-green) {
   background: transparent;
   color: var(--status-completed);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .icon-purple,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-icon-purple,
-:is([data-page="admin"], [data-page="client-portal"]) .panel-icon-purple {
+.portal :is(.icon-purple, .stat-icon-purple, .panel-icon-purple) {
   background: transparent;
   color: var(--status-qualified);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .icon-red,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-icon-red,
-:is([data-page="admin"], [data-page="client-portal"]) .panel-icon-red {
+.portal :is(.icon-red, .stat-icon-red, .panel-icon-red) {
   background: transparent;
   color: var(--status-cancelled);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .icon-yellow,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-icon-yellow,
-:is([data-page="admin"], [data-page="client-portal"]) .panel-icon-yellow {
+.portal :is(.icon-yellow, .stat-icon-yellow, .panel-icon-yellow) {
   background: transparent;
   color: var(--status-pending);
 }
@@ -129,8 +123,8 @@
    ===================================================== */
 
 /* Icons next to h2 headings (modals, sections) - larger gap */
-:is([data-page="admin"], [data-page="client-portal"]) h2 > .heading-icon,
-:is([data-page="admin"], [data-page="client-portal"]) .modal-header .heading-icon {
+.portal h2 > .heading-icon,
+.portal .modal-header .heading-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -141,15 +135,15 @@
   margin-right: var(--icon-gap-md); /* 8px - for larger icons */
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) h2 > .heading-icon svg,
-:is([data-page="admin"], [data-page="client-portal"]) .modal-header .heading-icon svg {
+.portal h2 > .heading-icon svg,
+.portal .modal-header .heading-icon svg {
   width: 100%;
   height: 100%;
 }
 
 /* Icons next to h3 headings (panels, cards) - standard gap */
-:is([data-page="admin"], [data-page="client-portal"]) h3 > .heading-icon,
-:is([data-page="admin"], [data-page="client-portal"]) .panel-icon {
+.portal h3 > .heading-icon,
+.portal .panel-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -160,8 +154,8 @@
   margin-right: var(--icon-gap-sm); /* 6px - default icon gap */
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) h3 > .heading-icon svg,
-:is([data-page="admin"], [data-page="client-portal"]) .panel-icon svg {
+.portal h3 > .heading-icon svg,
+.portal .panel-icon svg {
   width: 100%;
   height: 100%;
 }
@@ -173,7 +167,7 @@
    ===================================================== */
 
 /* Base card container - main content containers */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-card {
+.portal .portal-card {
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-panel);
@@ -181,17 +175,17 @@
 }
 
 /* First child in card - typically header, no top margin */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-card > *:first-child {
+.portal .portal-card > *:first-child {
   margin-top: 0;
 }
 
 /* Subsequent children - consistent spacing */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-card > * + * {
+.portal .portal-card > * + * {
   margin-top: var(--space-3);
 }
 
 /* Card header - ACME font, uppercase */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-card-header {
+.portal .portal-card-header {
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 1.1rem;
   font-weight: 400;
@@ -202,7 +196,7 @@
 }
 
 /* Inner card - nested content with lighter background, no shadow */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-card-inner {
+.portal .portal-card-inner {
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
   padding: var(--space-3);
@@ -210,39 +204,35 @@
 }
 
 /* Card with header and actions on same line */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-card-header-row {
+.portal .portal-card-header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-2);
 }
 
-/* h3 margin: 0 in base rule */
-
 /* Card body - standard content area */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-card-body {
+.portal .portal-card-body {
   color: var(--portal-text-light);
 }
 
 /* Mobile responsive for base cards */
 @media (--mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .portal-card {
+  .portal .portal-card {
     padding: var(--space-2);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .portal-card-inner {
+  .portal .portal-card-inner {
     padding: var(--space-2);
   }
 }
 
 /* =====================================================
    4-CARD GRID RULE (GLOBAL)
-   All grids with 4 cards: 4 across → 2x2 → 1 column
+   All grids with 4 cards: 4 across -> 2x2 -> 1 column
    NEVER 3+1 split
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .quick-stats,
-:is([data-page="admin"], [data-page="client-portal"]) .attention-grid,
-:is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 {
+.portal :is(.quick-stats, .attention-grid, .card-grid-4) {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--portal-section-gap);
@@ -250,24 +240,18 @@
 }
 
 /* Ensure grid children don't overflow */
-:is([data-page="admin"], [data-page="client-portal"]) .quick-stats > *,
-:is([data-page="admin"], [data-page="client-portal"]) .attention-grid > *,
-:is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 > * {
+.portal :is(.quick-stats, .attention-grid, .card-grid-4) > * {
   min-width: 0;
 }
 
 @media (--tablet-landscape) {
-  :is([data-page="admin"], [data-page="client-portal"]) .quick-stats,
-  :is([data-page="admin"], [data-page="client-portal"]) .attention-grid,
-  :is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 {
+  .portal :is(.quick-stats, .attention-grid, .card-grid-4) {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 500px) {
-  :is([data-page="admin"], [data-page="client-portal"]) .quick-stats,
-  :is([data-page="admin"], [data-page="client-portal"]) .attention-grid,
-  :is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 {
+  .portal :is(.quick-stats, .attention-grid, .card-grid-4) {
     grid-template-columns: 1fr;
   }
 }
@@ -276,30 +260,30 @@
    8-CARD GRID (Dashboard overview)
    8 cards in single row: 4 across (all 8 visible in 2 rows)
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-stats-grid {
+.portal .dashboard-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   max-width: 100%;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-stats-grid > * {
+.portal .dashboard-stats-grid > * {
   min-width: 0;
 }
 
 @media (--tablet-landscape) {
-  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-stats-grid {
+  .portal .dashboard-stats-grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
 @media (--tablet) {
-  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-stats-grid {
+  .portal .dashboard-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 500px) {
-  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-stats-grid {
+  .portal .dashboard-stats-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -310,13 +294,7 @@
    No accent bars, no visual noise - just clear hierarchy.
    ALL stat cards use this pattern for consistency.
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .stat-card,
-  .kpi-card,
-  .tasks-stat-card,
-  .overview-stat-card,
-  .vital-card
-) {
+.portal :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card) {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -331,13 +309,7 @@
 }
 
 /* Subtle gradient overlay for depth */
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .stat-card,
-  .kpi-card,
-  .tasks-stat-card,
-  .overview-stat-card,
-  .vital-card
-)::after {
+.portal :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card)::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -346,24 +318,12 @@
 }
 
 /* Remove any accent lines - keep it clean */
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .stat-card,
-  .kpi-card,
-  .tasks-stat-card,
-  .overview-stat-card,
-  .vital-card
-)::before {
+.portal :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card)::before {
   display: none;
 }
 
 /* Hover state for clickable stat cards */
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .stat-card,
-  .kpi-card,
-  .tasks-stat-card,
-  .overview-stat-card,
-  .vital-card
-):hover {
+.portal :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card):hover {
   background: var(--portal-bg-dark);
 }
 
@@ -372,11 +332,7 @@
    Bordered cards for templates, previews, selections.
    Hover effect with border color change.
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .content-card,
-  .template-card,
-  .preview-card
-) {
+.portal :is(.content-card, .template-card, .preview-card) {
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border-color);
   border-radius: var(--portal-radius-md);
@@ -384,11 +340,7 @@
   transition: border-color var(--transition-fast);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .content-card,
-  .template-card,
-  .preview-card
-):hover {
+.portal :is(.content-card, .template-card, .preview-card):hover {
   border-color: var(--color-primary);
 }
 
@@ -396,11 +348,7 @@
    Single source of truth for all stat/kpi value styling.
    Must be smaller than page title to maintain hierarchy.
    Aliases: .stat-value, .stat-card-value, .kpi-card-value, .kpi-value */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-number,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-value,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-value,
-:is([data-page="admin"], [data-page="client-portal"]) .kpi-card-value,
-:is([data-page="admin"], [data-page="client-portal"]) .kpi-value {
+.portal :is(.stat-number, .stat-value, .stat-card-value, .kpi-card-value, .kpi-value) {
   display: block;
   font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-xl, 1.25rem);
@@ -412,17 +360,17 @@
 }
 
 /* Label styling from unified rule in portal-forms.css - only layout here */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-label,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card .field-label {
+.portal .stat-label,
+.portal .stat-card .field-label {
   display: block;
   line-height: 1.3;
   margin: 0;
 }
 
 /* Stat icon */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-icon,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-icon,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card svg:not(.btn-icon) {
+.portal .stat-card-icon,
+.portal .stat-card .stat-icon,
+.portal .stat-card svg:not(.btn-icon) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -434,36 +382,34 @@
 }
 
 /* Clickable stat cards */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable,
-:is([data-page="admin"], [data-page="client-portal"]) a.stat-card {
+.portal .stat-card-clickable,
+.portal a.stat-card {
   cursor: pointer;
   text-decoration: none;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable:hover,
-:is([data-page="admin"], [data-page="client-portal"]) a.stat-card:hover {
+.portal .stat-card-clickable:hover,
+.portal a.stat-card:hover {
   background: var(--portal-bg-dark);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable:hover .stat-number {
+.portal .stat-card-clickable:hover .stat-number {
   color: var(--color-primary);
 }
 
 /* Active/selected state - subtle primary accent */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable.active,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card.active {
+.portal .stat-card-clickable.active,
+.portal .stat-card.active {
   border-color: var(--color-primary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card-clickable.active .stat-number,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card.active .stat-number {
+.portal .stat-card-clickable.active .stat-number,
+.portal .stat-card.active .stat-number {
   color: var(--color-primary);
 }
 
 /* Stat card secondary text */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-secondary,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-change,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-meta {
+.portal .stat-card :is(.stat-secondary, .stat-change, .stat-meta) {
   font-size: 0.7rem;
   color: var(--portal-text-muted);
   letter-spacing: 0.02em;
@@ -471,55 +417,44 @@
   line-height: 1.3;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-change.positive {
+.portal .stat-card .stat-change.positive {
   color: var(--color-success);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-change.negative {
+.portal .stat-card .stat-change.negative {
   color: var(--color-danger);
 }
 
 /* Alert state for stat values (overdue, blocked, etc.) */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-value-alert,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert .stat-number,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert .stat-value,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert .stat-card-value,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert.has-items .stat-number,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert.has-items .stat-value,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert.has-items .stat-card-value {
+.portal .stat-value-alert,
+.portal .stat-card--alert :is(.stat-number, .stat-value, .stat-card-value),
+.portal .stat-card--alert.has-items :is(.stat-number, .stat-value, .stat-card-value) {
   color: var(--status-cancelled);
 }
 
 /* Warning state for stat values */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-value-warning,
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert) .stat-number,
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert) .stat-value,
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert) .stat-card-value,
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert).has-items .stat-number,
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert).has-items .stat-value,
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert).has-items .stat-card-value {
+.portal .stat-value-warning,
+.portal :is(.stat-card--warning, .tasks-stat-card--alert) :is(.stat-number, .stat-value, .stat-card-value),
+.portal :is(.stat-card--warning, .tasks-stat-card--alert).has-items :is(.stat-number, .stat-value, .stat-card-value) {
   color: var(--color-warning-500);
 }
 
 /* Success state for stat values */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-value-success,
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--success, .stat-card-success) .stat-number,
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--success, .stat-card-success) .stat-value,
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--success, .stat-card-success) .stat-card-value {
+.portal .stat-value-success,
+.portal :is(.stat-card--success, .stat-card-success) :is(.stat-number, .stat-value, .stat-card-value) {
   color: var(--status-completed);
 }
 
 /* Primary color for KPI values (analytics, dashboards) */
-:is([data-page="admin"], [data-page="client-portal"]) .kpi-card .kpi-card-value,
-:is([data-page="admin"], [data-page="client-portal"]) .kpi-card .kpi-value,
-:is([data-page="admin"], [data-page="client-portal"]) .stat-value-primary {
+.portal .kpi-card :is(.kpi-card-value, .kpi-value),
+.portal .stat-value-primary {
   color: var(--color-primary);
 }
 
 /* =====================================================
    OVERVIEW CARD
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .overview-card {
+.portal .overview-card {
   background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--portal-radius-sm, 8px);
@@ -529,7 +464,7 @@
   transition: background 0.15s;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .overview-card h3 {
+.portal .overview-card h3 {
   margin-bottom: var(--space-2);
 }
 
@@ -537,10 +472,7 @@
    CONSISTENT CARD STYLING
    All main content sections use identical flat card styling
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity,
-:is([data-page="admin"], [data-page="client-portal"]) .project-progress-section,
-:is([data-page="admin"], [data-page="client-portal"]) .milestones-section,
-:is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section {
+.portal :is(.recent-activity, .project-progress-section, .milestones-section, .pending-approvals-section) {
   background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--portal-radius-sm, 8px);
@@ -550,23 +482,17 @@
   transition: background 0.15s;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity h3,
-:is([data-page="admin"], [data-page="client-portal"]) .project-progress-section h3,
-:is([data-page="admin"], [data-page="client-portal"]) .milestones-section h3,
-:is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section h3,
-:is([data-page="admin"], [data-page="client-portal"]) .analytics-overview h3 {
+.portal :is(.recent-activity, .project-progress-section, .milestones-section, .pending-approvals-section, .analytics-overview) h3 {
   margin: 0 0 var(--space-2) 0;
 }
 
-/* .activity-list and .activity-list li styling from shared/portal-components.css */
-
 /* Activity item with icon, content, and time */
-:is([data-page="admin"], [data-page="client-portal"]) .activity-item {
+.portal .activity-item {
   display: flex;
   align-items: center;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .activity-icon {
+.portal .activity-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -578,12 +504,12 @@
   color: var(--portal-text-muted);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .activity-icon svg {
+.portal .activity-icon svg {
   width: 16px;
   height: 16px;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .activity-content {
+.portal .activity-content {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -591,7 +517,7 @@
   gap: 2px;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .activity-title {
+.portal .activity-title {
   font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-light);
@@ -600,19 +526,18 @@
   text-overflow: ellipsis;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .activity-client {
+.portal .activity-client {
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .activity-time,
-:is([data-page="admin"], [data-page="client-portal"]) .activity-date {
+.portal :is(.activity-time, .activity-date) {
   font-size: var(--font-size-sm);
   color: var(--portal-text-muted);
   white-space: nowrap;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .activity-item.empty {
+.portal .activity-item.empty {
   justify-content: center;
   color: var(--portal-text-muted);
   font-style: italic;
@@ -621,14 +546,14 @@
 /* =====================================================
    UPCOMING TASKS WIDGET
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks {
+.portal .upcoming-tasks {
   background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--portal-radius-md);
   padding: var(--space-3);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-inline {
+.portal .upcoming-tasks .section-header-inline {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -636,20 +561,18 @@
   margin-bottom: var(--space-2);
 }
 
-/* h3 margin: 0 in base rule */
-
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-actions {
+.portal .upcoming-tasks .section-header-actions {
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
 
 /* Dashboard Kanban View */
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban {
+.portal .dashboard-tasks-kanban {
   min-height: 200px;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-board {
+.portal .dashboard-tasks-kanban .kanban-board {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: nowrap;
@@ -657,28 +580,28 @@
   width: 100%;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-column {
+.portal .dashboard-tasks-kanban .kanban-column {
   min-width: 180px;
   flex: 1 1 0 !important;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-column-header {
+.portal .dashboard-tasks-kanban .kanban-column-header {
   padding: var(--space-1) var(--space-2);
   font-size: 0.75rem;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-card {
+.portal .dashboard-tasks-kanban .kanban-card {
   padding: var(--space-2);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-card-header {
+.portal .dashboard-tasks-kanban .task-card-header {
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin-bottom: var(--space-1);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-card-title {
+.portal .dashboard-tasks-kanban .task-card-title {
   font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-light);
@@ -687,19 +610,19 @@
   text-overflow: ellipsis;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-card-project {
+.portal .dashboard-tasks-kanban .task-card-project {
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-meta {
+.portal .dashboard-tasks-kanban .task-meta {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   flex-wrap: wrap;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-priority {
+.portal .dashboard-tasks-kanban .task-priority {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -709,22 +632,22 @@
   color: var(--portal-text-muted);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-priority.task-priority-urgent {
+.portal .dashboard-tasks-kanban .task-priority.task-priority-urgent {
   background: var(--status-cancelled);
   color: var(--portal-text-light);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-priority.task-priority-high {
+.portal .dashboard-tasks-kanban .task-priority.task-priority-high {
   background: var(--status-on-hold);
   color: var(--portal-text-dark);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-priority.task-priority-medium {
+.portal .dashboard-tasks-kanban .task-priority.task-priority-medium {
   background: var(--app-color-primary);
   color: var(--portal-text-dark);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-due-date {
+.portal .dashboard-tasks-kanban .task-due-date {
   display: flex;
   align-items: center;
   gap: var(--icon-gap-xs);
@@ -732,15 +655,11 @@
   color: var(--portal-text-muted);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-due-date.overdue {
+.portal .dashboard-tasks-kanban .task-due-date.overdue {
   color: var(--status-cancelled);
 }
 
-/* Uses universal empty state from loading.css */
-
-/* .upcoming-tasks-list reset from shared/portal-components.css */
-
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item {
+.portal .upcoming-tasks-list .task-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -753,26 +672,26 @@
   transition: background-color var(--transition-mouse) ease;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item:hover {
+.portal .upcoming-tasks-list .task-item:hover {
   background: var(--portal-bg-light);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item:last-child {
+.portal .upcoming-tasks-list .task-item:last-child {
   margin-bottom: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item.empty {
+.portal .upcoming-tasks-list .task-item.empty {
   justify-content: center;
   color: var(--portal-text-muted);
   font-style: italic;
   cursor: default;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item.empty:hover {
+.portal .upcoming-tasks-list .task-item.empty:hover {
   background: var(--portal-bg-medium);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-item-content {
+.portal .task-item-content {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -780,7 +699,7 @@
   min-width: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-item .task-title {
+.portal .task-item .task-title {
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   font-weight: 500;
@@ -789,29 +708,29 @@
   text-overflow: ellipsis;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-item .task-project {
+.portal .task-item .task-project {
   color: var(--portal-text-muted);
   font-size: var(--font-size-xs);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-item-meta {
+.portal .task-item-meta {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   flex-shrink: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-item .task-due {
+.portal .task-item .task-due {
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   white-space: nowrap;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-item.task-overdue .task-due {
+.portal .task-item.task-overdue .task-due {
   color: var(--status-cancelled);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-priority-badge {
+.portal .task-priority-badge {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -821,27 +740,27 @@
   color: var(--portal-text-muted);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-priority-badge.task-priority-urgent {
+.portal .task-priority-badge.task-priority-urgent {
   background: var(--status-cancelled);
   color: var(--portal-text-light);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-priority-badge.task-priority-high {
+.portal .task-priority-badge.task-priority-high {
   background: var(--status-on-hold);
   color: var(--portal-text-dark);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-priority-badge.task-priority-medium {
+.portal .task-priority-badge.task-priority-medium {
   background: var(--app-color-primary);
   color: var(--portal-text-dark);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .task-priority-badge.task-priority-low {
+.portal .task-priority-badge.task-priority-low {
   background: var(--portal-bg-darker);
   color: var(--portal-text-secondary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .loading-row {
+.portal .upcoming-tasks-list .loading-row {
   padding: var(--space-2) var(--space-3);
   color: var(--portal-text-muted);
   font-style: italic;
@@ -849,28 +768,25 @@
 
 /* Responsive for upcoming tasks */
 @media (max-width: 480px) {
-  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks {
+  .portal .upcoming-tasks {
     padding: 0.75rem;
   }
 
-  /* Section header - allow wrapping on small screens */
-  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-inline {
+  .portal .upcoming-tasks .section-header-inline {
     flex-wrap: wrap;
     gap: var(--space-1);
   }
 
-  /* h3 styling in unified rule at top of file */
-
-  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-actions {
+  .portal .upcoming-tasks .section-header-actions {
     gap: var(--space-1);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list .task-item {
+  .portal .upcoming-tasks-list .task-item {
     flex-wrap: wrap;
     padding: 0.5rem 0.75rem;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .task-item-meta {
+  .portal .task-item-meta {
     width: 100%;
     margin-top: var(--space-1);
     justify-content: flex-end;
@@ -880,7 +796,7 @@
 /* =====================================================
    PORTAL PROJECT CARD
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-project-card {
+.portal .portal-project-card {
   display: block;
   background: var(--portal-bg-darker);
   border: none;
@@ -891,7 +807,7 @@
   transition: background 0.15s;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .portal-project-card h3 {
+.portal .portal-project-card h3 {
   margin: 0 0 var(--space-2) 0;
 }
 
@@ -899,25 +815,29 @@
    CARD SHADOWS - Consolidated
    Minimal shadows for depth; cards use flat design
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .overview-card,
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity,
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks,
-:is([data-page="admin"], [data-page="client-portal"]) .messages-container,
-:is([data-page="admin"], [data-page="client-portal"]) .invoices-list,
-:is([data-page="admin"], [data-page="client-portal"]) .settings-section,
-:is([data-page="admin"], [data-page="client-portal"]) .project-progress-section,
-:is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section {
+.portal :is(
+  .overview-card,
+  .recent-activity,
+  .upcoming-tasks,
+  .messages-container,
+  .invoices-list,
+  .settings-section,
+  .project-progress-section,
+  .pending-approvals-section
+) {
   box-shadow: none;
 }
 
 /* No shadows on child divs inside main containers */
-:is([data-page="admin"], [data-page="client-portal"]) .overview-card > div,
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity > div,
-:is([data-page="admin"], [data-page="client-portal"]) .portal-project-card > div,
-:is([data-page="admin"], [data-page="client-portal"]) .messages-container > div,
-:is([data-page="admin"], [data-page="client-portal"]) .summary-card > div,
-:is([data-page="admin"], [data-page="client-portal"]) .invoices-list > div,
-:is([data-page="admin"], [data-page="client-portal"]) .settings-section > div {
+.portal :is(
+  .overview-card,
+  .recent-activity,
+  .portal-project-card,
+  .messages-container,
+  .summary-card,
+  .invoices-list,
+  .settings-section
+) > div {
   box-shadow: none;
 }
 
@@ -925,7 +845,7 @@
    SUMMARY CARD
    Used for invoice totals, stats summaries
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .summary-card {
+.portal .summary-card {
   background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--portal-radius-sm, 8px);
@@ -934,13 +854,12 @@
   transition: background 0.15s;
 }
 
-/* Label styling from unified rule in portal-forms.css - only layout here */
-:is([data-page="admin"], [data-page="client-portal"]) .summary-card .summary-label {
+.portal .summary-card .summary-label {
   display: block;
   margin-bottom: var(--space-1);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .summary-card .summary-value {
+.portal .summary-card .summary-value {
   display: block;
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 1.8rem;
@@ -951,21 +870,15 @@
    CARD HEADER WITH ACTIONS
    Consistent header layout for cards with action buttons
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action,
-:is([data-page="admin"], [data-page="client-portal"]) .section-header-with-actions {
+.portal :is(.card-header-with-action, .section-header-with-actions) {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-1-5);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action h3,
-/* h3 margin: 0 in base rule */
-
-/* When a container is the only child, make it take full width and push actions to the right */
-:is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action > .view-toggle-container,
-:is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action > .header-actions-container,
-:is([data-page="admin"], [data-page="client-portal"]) .section-header-with-actions > .view-toggle-container {
+/* When a container is the only child, make it take full width */
+.portal :is(.card-header-with-action, .section-header-with-actions) > :is(.view-toggle-container, .header-actions-container) {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -977,14 +890,7 @@
    COMMON LIST ITEM PATTERN
    Shared styling for all list items (reports, alerts, data, etc.)
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .list-item,
-  .data-item,
-  .report-item,
-  .alert-item,
-  .bundle-item,
-  .history-request-item
-) {
+.portal :is(.list-item, .data-item, .report-item, .alert-item, .bundle-item, .history-request-item) {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -997,14 +903,7 @@
   transition: background 0.15s;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .list-item,
-  .data-item,
-  .report-item,
-  .alert-item,
-  .bundle-item,
-  .history-request-item
-):hover {
+.portal :is(.list-item, .data-item, .report-item, .alert-item, .bundle-item, .history-request-item):hover {
   background: var(--portal-bg-light);
 }
 
@@ -1012,7 +911,7 @@
    INVOICES LIST
    Container for invoice history items
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .invoices-list {
+.portal .invoices-list {
   background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--portal-radius-sm, 8px);
@@ -1022,14 +921,14 @@
   transition: background 0.15s;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .invoices-list h3 {
+.portal .invoices-list h3 {
   margin: 0 0 var(--space-2) 0;
 }
 
 /* =====================================================
    PROGRESS CARD
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .progress-card .progress-bar {
+.portal .progress-card .progress-bar {
   width: 100%;
   height: 16px;
   background: var(--portal-bg-light);
@@ -1039,14 +938,14 @@
   overflow: hidden;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .progress-card .progress-fill {
+.portal .progress-card .progress-fill {
   height: 100%;
   background: var(--color-primary);
   border-radius: var(--portal-radius-md);
   transition: width var(--transition-normal) ease;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .progress-card .progress-text {
+.portal .progress-card .progress-text {
   font-weight: 600;
   color: var(--portal-text-light);
 }
@@ -1055,7 +954,7 @@
    CONTENT SECTION CARD
    Generic wrapper for content groups that need containment
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .content-section-card {
+.portal .content-section-card {
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   padding: var(--space-4);
@@ -1063,7 +962,7 @@
   box-shadow: var(--shadow-panel);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .content-section-card .section-title {
+.portal .content-section-card .section-title {
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 1rem;
   font-weight: 400;
@@ -1078,40 +977,42 @@
    ===================================================== */
 @media (--mobile) {
   /* Tighter padding for main container cards on mobile */
-  :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card,
-  :is([data-page="admin"], [data-page="client-portal"]) .admin-table-card,
-  :is([data-page="admin"], [data-page="client-portal"]) .overview-card,
-  :is([data-page="admin"], [data-page="client-portal"]) .recent-activity,
-  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks,
-  :is([data-page="admin"], [data-page="client-portal"]) .summary-card,
-  :is([data-page="admin"], [data-page="client-portal"]) .invoices-list,
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-container,
-  :is([data-page="admin"], [data-page="client-portal"]) .settings-section,
-  :is([data-page="admin"], [data-page="client-portal"]) .project-progress-section,
-  :is([data-page="admin"], [data-page="client-portal"]) .pending-approvals-section {
+  .portal :is(
+    .portal-project-card,
+    .admin-table-card,
+    .overview-card,
+    .recent-activity,
+    .upcoming-tasks,
+    .summary-card,
+    .invoices-list,
+    .messages-container,
+    .settings-section,
+    .project-progress-section,
+    .pending-approvals-section
+  ) {
     padding: var(--space-2);
     border-radius: var(--portal-radius-md);
   }
 
   /* Tighter gap on grids for mobile */
-  :is([data-page="admin"], [data-page="client-portal"]) .quick-stats,
-  :is([data-page="admin"], [data-page="client-portal"]) .attention-grid,
-  :is([data-page="admin"], [data-page="client-portal"]) .card-grid-4,
-  :is([data-page="admin"], [data-page="client-portal"]) .kpi-cards-row,
-  :is([data-page="admin"], [data-page="client-portal"]) .analytics-card-grid,
-  :is([data-page="admin"], [data-page="client-portal"]) .vitals-grid {
+  .portal :is(
+    .quick-stats,
+    .attention-grid,
+    .card-grid-4,
+    .kpi-cards-row,
+    .analytics-card-grid,
+    .vitals-grid
+  ) {
     gap: var(--space-2);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card h3,
-  :is([data-page="admin"], [data-page="client-portal"]) .recent-activity h3,
-  :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks h3 {
+  .portal :is(.portal-project-card, .recent-activity, .upcoming-tasks) h3 {
     margin-bottom: var(--space-2);
   }
 }
 
 @media (--small-mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .stat-card {
+  .portal .stat-card {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -1119,38 +1020,36 @@
     gap: 0.5rem;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-number,
-  :is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-value,
-  :is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-card-value {
+  .portal .stat-card :is(.stat-number, .stat-value, .stat-card-value) {
     font-size: var(--font-size-lg);
     margin: 0;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-label {
+  .portal .stat-card .stat-label {
     font-size: var(--font-size-xs);
     text-align: right;
     margin-top: 0;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .recent-activity {
+  .portal .recent-activity {
     padding: 0.75rem;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .activity-list li {
+  .portal .activity-list li {
     padding: 0.5rem 0.75rem;
   }
 
   /* Kanban board - enable horizontal scroll on very small screens */
-  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban {
+  .portal .dashboard-tasks-kanban {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-board {
+  .portal .dashboard-tasks-kanban .kanban-board {
     min-width: max-content;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .kanban-column {
+  .portal .dashboard-tasks-kanban .kanban-column {
     min-width: 140px;
   }
 }
@@ -1158,7 +1057,7 @@
 /* =====================================================
    DASHBOARD OVERVIEW CARD (wraps all dashboard sections)
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-overview-card {
+.portal .dashboard-overview-card {
   padding: var(--space-6);
   border-radius: var(--portal-radius-md);
   background: var(--portal-bg-medium);
@@ -1167,15 +1066,15 @@
 /* =====================================================
    DASHBOARD SECTIONS
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-section {
+.portal .dashboard-section {
   margin-bottom: var(--space-3);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-section:last-child {
+.portal .dashboard-section:last-child {
   margin-bottom: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-section-title {
+.portal .dashboard-section-title {
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 0.9rem;
   font-weight: 400;
@@ -1188,8 +1087,7 @@
 /* =====================================================
    ATTENTION CARD
    ===================================================== */
-
-:is([data-page="admin"], [data-page="client-portal"]) .attention-card {
+.portal .attention-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1208,12 +1106,12 @@
   box-shadow: var(--shadow-panel);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .attention-card:hover {
+.portal .attention-card:hover {
   background: var(--portal-bg-readonly);
 }
 
 /* Attention icon container - no background, just colored icon */
-:is([data-page="admin"], [data-page="client-portal"]) .attention-icon {
+.portal .attention-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1223,27 +1121,27 @@
   background: none;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .attention-icon-warning {
+.portal .attention-icon-warning {
   color: var(--portal-text-secondary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .attention-icon-info {
+.portal .attention-icon-info {
   color: var(--portal-text-secondary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .attention-icon-danger {
+.portal .attention-icon-danger {
   color: var(--portal-text-secondary);
 }
 
 /* Attention content */
-:is([data-page="admin"], [data-page="client-portal"]) .attention-content {
+.portal .attention-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .attention-count {
+.portal .attention-count {
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 2rem;
   font-weight: 700;
@@ -1252,10 +1150,8 @@
   margin-bottom: var(--space-0-5);
 }
 
-/* Label styling from unified rule in portal-forms.css */
-
 /* Highlight attention cards with values > 0 */
-:is([data-page="admin"], [data-page="client-portal"]) .attention-card.has-items .attention-count {
+.portal .attention-card.has-items .attention-count {
   color: var(--color-primary);
 }
 
@@ -1263,15 +1159,15 @@
    DASHBOARD MOBILE RESPONSIVE
    ===================================================== */
 @media (--small-mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-overview-card {
+  .portal .dashboard-overview-card {
     padding: var(--space-4);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .attention-card {
+  .portal .attention-card {
     padding: var(--space-3);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .attention-count {
+  .portal .attention-count {
     font-size: 1.25rem;
   }
 }

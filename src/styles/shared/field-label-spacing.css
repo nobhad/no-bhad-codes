@@ -6,7 +6,15 @@
 
 /* Single field block: tight gap between label and value */
 .meta-item {
+  display: flex;
+  flex-direction: column;
   gap: var(--field-label-value-gap);
+}
+
+.meta-value {
+  font-size: 1rem;
+  color: var(--portal-text-light);
+  font-weight: 400;
 }
 
 .meta-item .field-label,
