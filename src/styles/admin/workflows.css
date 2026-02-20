@@ -492,11 +492,7 @@
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* spin keyframe defined in loading.css (shared bundle) */
 
 /* =====================================================
    WORKFLOW PREVIEW MODAL
