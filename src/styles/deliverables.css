@@ -164,11 +164,11 @@
 
 /* Empty/Loading states: base styles in components/loading.css
    Only deliverables-specific overrides here */
-.deliverables-list .empty-message {
+.deliverables-list .empty-state {
   display: none; /* Hidden by default, shown via JS */
 }
 
-.deliverables-list .empty-message.visible {
+.deliverables-list .empty-state.visible {
   display: flex;
 }
 

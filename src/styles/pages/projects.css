@@ -353,15 +353,14 @@ div.page-hero-desktop[data-hero-page="projects"] {
   /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 
-.no-results {
-  text-align: center;
+/* Empty state: base styles in components/loading.css, project page overrides here */
+.projects-section .empty-state {
   padding: 3rem 0;
   color: var(--color-text-primary);
 }
 
-.no-results p {
+.projects-section .empty-state p {
   font-size: 1.125rem;
-  margin: 0;
 }
 
 /* ===============================================
