@@ -182,12 +182,6 @@
   color: var(--portal-text-secondary);
 }
 
-.lead-score-factors {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
 .lead-score-factor {
   display: flex;
   justify-content: space-between;
