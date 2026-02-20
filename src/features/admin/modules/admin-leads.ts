@@ -1402,7 +1402,7 @@ function renderLeadTasks(tasks: LeadTask[], leadId: number): string {
   const listBody = `<div class="lead-tasks-list">${tasks.map(task => `
     <div class="lead-task-item ${task.status === 'completed' ? 'task-completed' : ''}" data-task-id="${task.id}">
       <button class="task-checkbox ${task.status === 'completed' ? 'checked' : ''}" data-action="toggle-task">${task.status === 'completed' ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</button>
-      <div class="task-info"><span class="task-title">${SanitizationUtils.escapeHtml(task.title)}</span>${task.due_date ? `<span class="task-due">${formatDate(task.due_date)}</span>` : ''}</div>
+      <div class="task-info flex flex-col gap-0-5"><span class="task-title">${SanitizationUtils.escapeHtml(task.title)}</span>${task.due_date ? `<span class="task-due">${formatDate(task.due_date)}</span>` : ''}</div>
       <span class="task-type-badge">${task.task_type}</span>
     </div>
   `).join('')}</div>`;
