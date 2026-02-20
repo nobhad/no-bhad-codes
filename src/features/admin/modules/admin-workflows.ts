@@ -1454,7 +1454,7 @@ async function openTriggerLogsModal(triggerId?: number): Promise<void> {
             Refresh
           </button>
         </div>
-        <div class="trigger-logs-list" id="trigger-logs-list">
+        <div class="trigger-logs-list flex flex-col gap-2" id="trigger-logs-list">
           <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       `;
@@ -1578,7 +1578,7 @@ function renderTriggerLogs(logs: TriggerExecutionLog[]): void {
   listEl.innerHTML = logs.map(log => `
     <div class="trigger-log-entry trigger-log-entry--${log.action_result}">
       <div class="trigger-log-header">
-        <div class="trigger-log-title">
+        <div class="trigger-log-title flex items-center gap-2">
           <span class="trigger-log-name">${escapeHtml(log.trigger_name)}</span>
           <span class="status-badge ${getResultBadgeClass(log.action_result)}">
             ${getResultIcon(log.action_result)}
@@ -1590,7 +1590,7 @@ function renderTriggerLogs(logs: TriggerExecutionLog[]): void {
           <span class="trigger-log-duration">${log.execution_time_ms}ms</span>
         </div>
       </div>
-      <div class="trigger-log-details">
+      <div class="trigger-log-details flex flex-col gap-1">
         <div class="trigger-log-event">
           <code>${escapeHtml(log.event_type)}</code>
         </div>
@@ -2099,25 +2099,25 @@ function renderApprovalHistoryContent(
           : 'muted';
 
   const instanceSection = `
-    <div class="history-instance-info">
-      <div class="history-info-row">
+    <div class="history-instance-info flex flex-col gap-1">
+      <div class="history-info-row flex items-center gap-2">
         <span class="history-label">Workflow:</span>
         <span class="history-value">${escapeHtml(instance.workflow_name)}</span>
       </div>
-      <div class="history-info-row">
+      <div class="history-info-row flex items-center gap-2">
         <span class="history-label">Type:</span>
         <span class="history-value">${workflowTypeLabel}</span>
       </div>
-      <div class="history-info-row">
+      <div class="history-info-row flex items-center gap-2">
         <span class="history-label">Status:</span>
         <span class="status-badge status-badge--${statusClass}">${instance.status.replace('_', ' ')}</span>
       </div>
-      <div class="history-info-row">
+      <div class="history-info-row flex items-center gap-2">
         <span class="history-label">Started:</span>
         <span class="history-value">${formatDate(instance.initiated_at)}</span>
       </div>
       ${instance.completed_at ? `
-        <div class="history-info-row">
+        <div class="history-info-row flex items-center gap-2">
           <span class="history-label">Completed:</span>
           <span class="history-value">${formatDate(instance.completed_at)}</span>
         </div>
@@ -2127,7 +2127,7 @@ function renderApprovalHistoryContent(
 
   // Requests section
   const requestsHtml = requests.length === 0 ? '<div class="empty-state">No approval requests.</div>' : `
-    <div class="history-requests-list">
+    <div class="history-requests-list flex flex-col gap-2">
       ${requests.map(r => {
     const reqStatusClass = r.status === 'pending' ? 'warning'
       : r.status === 'approved' ? 'success'
@@ -2135,7 +2135,7 @@ function renderApprovalHistoryContent(
           : 'muted';
     return `
           <div class="history-request-item">
-            <div class="history-request-approver">
+            <div class="history-request-approver flex items-center justify-between gap-2 flex-wrap">
               <span class="approver-email">${escapeHtml(r.approver_email)}</span>
               <span class="status-badge status-badge--${reqStatusClass}">${r.status}</span>
             </div>
@@ -2149,7 +2149,7 @@ function renderApprovalHistoryContent(
 
   // History section
   const historyHtml = history.length === 0 ? '<div class="empty-state">No history entries.</div>' : `
-    <div class="history-timeline">
+    <div class="history-timeline flex flex-col gap-2">
       ${history.map(h => {
     const actionIcon = h.action === 'approved' ? '&#10003;'
       : h.action === 'rejected' ? '&#10007;'
@@ -2214,7 +2214,7 @@ const RENDER_ICONS = {
 export function renderWorkflowsTab(container: HTMLElement): void {
   container.innerHTML = `
     <!-- Pending Approvals Dashboard -->
-    <div id="pending-approvals-section" class="approval-dashboard-section">
+    <div id="pending-approvals-section" class="approval-dashboard-section flex flex-col gap-section">
       <div class="quick-stats">
         <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="all">
           <span class="stat-number" id="approvals-total">-</span>

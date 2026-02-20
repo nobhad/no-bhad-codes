@@ -208,11 +208,7 @@
 /* =====================================================
    PENDING APPROVALS SECTION
    ===================================================== */
-[data-page="admin"] .approval-dashboard-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-section-gap);
-}
+/* Uses utility classes: flex flex-col gap-section */
 
 [data-page="admin"] .approval-dashboard-section.hidden {
   display: none;
@@ -265,18 +261,7 @@
   color: var(--portal-text-light);
 }
 
-/* Instance info */
-[data-page="admin"] .history-instance-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-[data-page="admin"] .history-info-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
+/* Instance info - Uses utility classes: flex flex-col gap-1 / flex items-center gap-2 */
 
 [data-page="admin"] .history-label {
   color: var(--portal-text-muted);
@@ -289,12 +274,7 @@
   font-size: var(--font-size-sm);
 }
 
-/* Requests list */
-[data-page="admin"] .history-requests-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Requests list - Uses utility classes: flex flex-col gap-2 */
 
 [data-page="admin"] .history-request-item {
   padding: var(--space-2);
@@ -302,12 +282,7 @@
   border-radius: var(--portal-radius-md);
 }
 
-[data-page="admin"] .history-request-approver {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex items-center justify-between gap-2 flex-wrap */
 
 [data-page="admin"] .approver-email {
   font-size: var(--font-size-sm);
@@ -327,12 +302,7 @@
   margin-top: var(--space-1);
 }
 
-/* Timeline */
-[data-page="admin"] .history-timeline {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Timeline - Uses utility classes: flex flex-col gap-2 */
 
 [data-page="admin"] .history-entry {
   display: flex;
@@ -430,11 +400,7 @@
   flex-shrink: 0;
 }
 
-[data-page="admin"] .trigger-logs-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-col gap-2 */
 
 [data-page="admin"] .trigger-log-entry {
   padding: var(--space-2) var(--space-3);
@@ -463,11 +429,7 @@
   margin-bottom: var(--space-1);
 }
 
-[data-page="admin"] .trigger-log-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex items-center gap-2 */
 
 [data-page="admin"] .trigger-log-name {
   font-weight: var(--font-weight-medium);
@@ -486,11 +448,7 @@
   font-family: var(--font-family-mono, monospace);
 }
 
-[data-page="admin"] .trigger-log-details {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 [data-page="admin"] .trigger-log-event code {
   background: var(--portal-bg-dark);
