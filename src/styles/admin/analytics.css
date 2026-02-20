@@ -105,22 +105,14 @@
 }
 
 /* ============================================
-   KPI Cards
+   KPI Cards - extends shared .stat-card from portal-cards.css
    ============================================ */
 
+/* KPI-specific overrides: centered, clickable, gradient overlay */
 .kpi-card {
-  display: flex;
-  flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: var(--space-1);
-  padding: 13px 14px;
-  background: var(--portal-bg-darker);
-  border: none;
-  border-radius: var(--portal-radius-sm, 8px);
-  color: var(--portal-text-light);
   cursor: pointer;
-  transition: background 0.15s;
   position: relative;
   overflow: hidden;
 }

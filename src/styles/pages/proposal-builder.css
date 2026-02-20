@@ -277,29 +277,33 @@
   flex-shrink: 0;
 }
 
-.tier-select-btn {
+/* Proposal select buttons - shared pattern for tier and maintenance selection */
+.tier-select-btn,
+.maintenance-select-btn {
   width: 100%;
-  padding: var(--proposal-spacing-md) var(--proposal-spacing-lg);
+  padding: var(--proposal-spacing-md);
   border: 2px solid var(--proposal-accent);
   border-radius: var(--portal-radius-md);
   background: transparent;
   color: var(--proposal-accent);
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.tier-select-btn:hover {
+.tier-select-btn:hover,
+.maintenance-select-btn:hover,
+.tier-select-btn.selected,
+.maintenance-select-btn.selected {
   background: var(--proposal-accent);
   color: var(--proposal-text);
 }
 
-.tier-select-btn.selected {
-  background: var(--proposal-accent);
-  color: var(--proposal-text);
+/* Tier button has extra horizontal padding */
+.tier-select-btn {
+  padding: var(--proposal-spacing-md) var(--proposal-spacing-lg);
+  font-size: 1rem;
 }
 
 /* ============================================================================
@@ -620,30 +624,7 @@
   margin-top: 2px;
 }
 
-.maintenance-select-btn {
-  width: 100%;
-  padding: var(--proposal-spacing-md);
-  border: 2px solid var(--proposal-accent);
-  border-radius: var(--portal-radius-md);
-  background: transparent;
-  color: var(--proposal-accent);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
-}
-
-.maintenance-select-btn:hover {
-  background: var(--proposal-accent);
-  color: var(--proposal-text);
-}
-
-.maintenance-select-btn.selected {
-  background: var(--proposal-accent);
-  color: var(--proposal-text);
-}
+/* maintenance-select-btn styles consolidated above with tier-select-btn */
 
 /* ============================================================================
    SUMMARY VIEW

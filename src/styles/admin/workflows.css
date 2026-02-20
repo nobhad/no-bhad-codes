@@ -245,10 +245,7 @@
    APPROVAL HISTORY MODAL
    ===================================================== */
 
-[data-page="admin"] .approval-history-modal-content {
-  max-height: 60vh;
-  overflow-y: auto;
-}
+/* .approval-history-modal-content - uses .modal-scroll-sm from modal-system.css */
 
 [data-page="admin"] .history-section {
   margin-bottom: var(--space-2);
@@ -276,9 +273,8 @@
 
 /* Requests list - Uses utility classes: flex flex-col gap-2 */
 
+/* .history-request-item - base styles in portal-cards.css, override border-radius */
 [data-page="admin"] .history-request-item {
-  padding: var(--space-2);
-  background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
 }
 
@@ -378,10 +374,7 @@
    TRIGGER EXECUTION LOGS MODAL
    ===================================================== */
 
-[data-page="admin"] .trigger-logs-modal-content {
-  max-height: 70vh;
-  overflow-y: auto;
-}
+/* .trigger-logs-modal-content - uses .modal-scroll-md from modal-system.css */
 
 [data-page="admin"] .trigger-logs-controls {
   display: flex;
@@ -498,10 +491,7 @@
    WORKFLOW PREVIEW MODAL
    ===================================================== */
 
-[data-page="admin"] .workflow-preview-modal-content {
-  max-height: 70vh;
-  overflow-y: auto;
-}
+/* .workflow-preview-modal-content - uses .modal-scroll-md from modal-system.css */
 
 /* Uses utility classes: flex flex-col gap-1 */
 
@@ -724,31 +714,7 @@
   color: var(--portal-text-muted);
 }
 
-[data-page="admin"] .system-badge {
-  display: inline-block;
-  margin-left: var(--space-1);
-  padding: var(--space-0-5) var(--space-1);
-  background: rgba(var(--color-admin-purple-rgb), 0.1);
-  color: var(--color-admin-purple);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--portal-radius-sm);
-}
-
-/* Category badges */
-[data-page="admin"] .category-badge {
-  display: inline-block;
-  padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-}
-
-[data-page="admin"] .category-notification { background: var(--color-info-bg); color: var(--color-info); }
-[data-page="admin"] .category-invoice { background: var(--color-success-bg); color: var(--color-success); }
-[data-page="admin"] .category-contract { background: var(--color-warning-bg); color: var(--color-warning); }
-[data-page="admin"] .category-project { background: rgba(var(--color-primary-rgb), 0.1); color: var(--color-primary); }
-[data-page="admin"] .category-reminder { background: var(--color-danger-bg); color: var(--color-danger); }
+/* System and category badges - styles in portal-badges.css */
 [data-page="admin"] .category-general { background: var(--portal-bg-medium); color: var(--portal-text-secondary); }
 
 /* Template subject */
@@ -762,11 +728,7 @@
 }
 
 /* Email template and preview modals */
-[data-page="admin"] .email-template-modal-content,
-[data-page="admin"] .email-preview-modal-content {
-  max-height: 80vh;
-  overflow-y: auto;
-}
+/* .email-template-modal-content, .email-preview-modal-content - uses .modal-scroll-lg from modal-system.css */
 
 [data-page="admin"] .email-preview {
   display: flex;
@@ -819,10 +781,7 @@
 }
 
 /* Version history modal */
-[data-page="admin"] .email-versions-modal-content {
-  max-height: 70vh;
-  overflow-y: auto;
-}
+/* .email-versions-modal-content - uses .modal-scroll-md from modal-system.css */
 
 /* Uses utility classes: flex flex-col gap-2 */
 

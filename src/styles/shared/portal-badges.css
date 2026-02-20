@@ -367,3 +367,29 @@
     line-height: 14px !important;
   }
 }
+
+/* =====================================================
+   INLINE TAG BADGES
+   Small inline badges for tags, categories, systems
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) :is(.tag-badge, .system-badge, .category-badge) {
+  display: inline-block;
+  padding: var(--space-0-5) var(--space-1);
+  border-radius: var(--portal-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+/* System badge variant - purple */
+:is([data-page="admin"], [data-page="client-portal"]) .system-badge {
+  margin-left: var(--space-1);
+  background: rgba(var(--color-admin-purple-rgb), 0.1);
+  color: var(--color-admin-purple);
+}
+
+/* Category badge color variants */
+:is([data-page="admin"], [data-page="client-portal"]) .category-notification { background: var(--color-info-bg); color: var(--color-info); }
+:is([data-page="admin"], [data-page="client-portal"]) .category-invoice { background: var(--color-success-bg); color: var(--color-success); }
+:is([data-page="admin"], [data-page="client-portal"]) .category-contract { background: var(--color-warning-bg); color: var(--color-warning); }
+:is([data-page="admin"], [data-page="client-portal"]) .category-project { background: rgba(var(--color-primary-rgb), 0.1); color: var(--color-primary); }
+:is([data-page="admin"], [data-page="client-portal"]) .category-reminder { background: var(--color-danger-bg); color: var(--color-danger); }

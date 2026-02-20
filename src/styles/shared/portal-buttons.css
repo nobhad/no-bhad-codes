@@ -816,3 +816,43 @@
     margin: 0 !important;
   }
 }
+
+/* ============================================
+ * TOGGLE BUTTON GROUP
+ * ============================================
+ * Reusable segmented button group pattern.
+ * Use: .toggle-group > .toggle-btn
+ */
+
+.toggle-group {
+  display: flex;
+  border: 2px solid var(--color-border);
+  background: var(--color-neutral-200);
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: none;
+  font-family: var(--font-family-acme);
+  font-size: 0.9rem;
+  font-weight: normal;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.toggle-btn:not(:last-child) {
+  border-right: 1px solid var(--color-border);
+}
+
+.toggle-btn:hover:not(.active) {
+  background: var(--color-neutral-300);
+}
+
+.toggle-btn.active {
+  background: var(--color-primary);
+  color: var(--color-dark);
+}

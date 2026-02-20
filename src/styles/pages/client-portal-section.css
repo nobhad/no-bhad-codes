@@ -52,47 +52,18 @@ section.client-portal-section {
 }
 
 /* Auth Method Toggle - matches client landing page */
+/* Portal Auth Toggle - extends shared .toggle-group pattern with size overrides */
 .portal-auth-toggle {
-  display: flex;
   width: 100%;
   max-width: 400px;
   height: 60px;
-  border: 3px solid var(--color-border);
+  border-width: 3px;
   margin-bottom: 1rem;
-  box-sizing: border-box;
 }
 
 .portal-toggle-btn {
-  flex: 1;
-  height: 100%;
-  padding: 0 1.5rem;
-  background: transparent;
-  border: none;
-  font-family: var(--font-family-acme);
-  font-size: 0.9rem;
-  font-weight: normal;
   line-height: 54px;
-  text-transform: uppercase;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.portal-toggle-btn:first-child {
-  border-right: 1.5px solid var(--color-border);
-}
-
-.portal-toggle-btn:last-child {
-  border-left: 1.5px solid var(--color-border);
-}
-
-.portal-toggle-btn:hover:not(.active) {
-  background: var(--color-neutral-400);
-}
-
-.portal-toggle-btn.active {
-  background: var(--color-primary);
-  color: var(--color-black);
+  padding: 0 1.5rem;
 }
 
 /* Portal Login Form - matches contact form structure */
