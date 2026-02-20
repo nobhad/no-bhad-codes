@@ -87,7 +87,7 @@
   justify-content: center;
   color: var(--portal-text-muted);
   font-style: italic;
-  padding: 12px 14px;
+  padding: 13px 14px;
   box-sizing: border-box;
 }
 
@@ -360,12 +360,23 @@
   align-items: center;
   justify-content: center;
   min-height: 100px;
-  padding: 16px 14px;
+  padding: var(--space-3) var(--space-4);
   color: var(--portal-text-muted);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   text-align: center;
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-sm);
+}
+
+.data-label {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+.data-value {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--portal-text-light);
 }
 
 .report-info {
@@ -393,9 +404,9 @@
 
 .report-empty {
   text-align: center;
-  padding: 16px 14px;
+  padding: var(--space-3) var(--space-4);
   color: var(--portal-text-muted);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 /* ============================================
@@ -405,7 +416,7 @@
 .health-item {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--space-1-5);
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
