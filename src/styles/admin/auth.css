@@ -116,12 +116,6 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   font-size: var(--font-size-base);
 }
 
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
 .auth-error {
   background: rgba(var(--color-error-rgb), 0.1);
   border: 1px solid rgba(var(--color-error-rgb), 0.3);

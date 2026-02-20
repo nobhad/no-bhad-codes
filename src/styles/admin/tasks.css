@@ -569,13 +569,6 @@
   color: var(--status-cancelled);
 }
 
-/* Task comments */
-.task-comments {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
 .task-comment {
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-sm);
