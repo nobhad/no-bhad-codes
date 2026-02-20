@@ -6,6 +6,183 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ---
 
+## Session Summary - February 19, 2026 (Code Audit)
+
+Comprehensive codebase audit to identify CSS and rendering consolidation opportunities.
+
+### Code Audit Findings
+
+**Overall Architecture Score: 7.5/10**
+
+| Area | Status | Notes |
+|------|--------|-------|
+| CSS Organization | Good (7/10) | Well-structured, some large files |
+| Design Token Usage | Excellent (9/10) | Comprehensive system, 85% utilized |
+| Component Extraction | Good (7/10) | Major components extracted |
+| Rendering Patterns | Fair (5/10) | 28 modules repeat 80% identical code |
+| Entry Points | Excellent (10/10) | Unified portal bundle approach |
+
+### Critical Issue: Module Initialization Duplication
+
+**28 admin modules** repeat ~140 lines of identical initialization code:
+
+- Filter UI creation (~60 lines)
+- Pagination state management (~25 lines)
+- Bulk action toolbar setup (~20 lines)
+- Export button wiring (~15 lines)
+- DOM element caching (~8 lines)
+
+**Total duplicated code:** ~3,920 lines across modules
+
+### Solution: Table Module Factory
+
+Created `src/utils/table-module-factory.ts` - a factory function that eliminates the duplicated initialization code.
+
+**Before (per module):**
+
+```typescript
+// ~140 lines of boilerplate per module
+let data: T[] = [];
+let storedContext: AdminDashboardContext | null = null;
+let filterState = loadFilterState(CONFIG.storageKey);
+let paginationState = { ... };
+const cachedElements = new Map();
+
+function initializeFilterUI(ctx) { /* 60 lines */ }
+function renderPaginationUI(total, ctx) { /* 25 lines */ }
+// ... more boilerplate
+```
+
+**After (using factory):**
+
+```typescript
+const module = createTableModule({
+  moduleId: 'contacts',
+  filterConfig: CONTACTS_FILTER_CONFIG,
+  paginationConfig: createPaginationConfig('contacts'),
+  columnCount: 7,
+  apiEndpoint: '/api/admin/contact-submissions',
+  extractData: (json) => ({ data: json.submissions, stats: json.stats }),
+  renderRow: (item, ctx, helpers) => { /* module-specific row */ },
+  renderStats: (stats, ctx) => { /* module-specific stats */ }
+});
+
+export const loadContacts = module.load;
+export const getContactsData = module.getData;
+```
+
+**Impact:**
+
+- ~200 lines eliminated per module
+- 28 modules × 200 lines = ~5,600 lines reduction potential
+- Single source of truth for initialization patterns
+- Easier maintenance and consistent behavior
+
+### Files Created
+
+- `src/utils/table-module-factory.ts` - Factory function (380 lines)
+
+### Other Findings
+
+**Dropdown Systems (3 separate implementations):**
+
+| System | Height | Purpose |
+|--------|--------|---------|
+| Table dropdowns | 32px | Status in table cells |
+| Modal dropdowns | 48px | Form inputs |
+| Filter dropdowns | varies | Search/filter controls |
+
+**Recommendation:** Keep table/modal separate (intentional size difference), document in CSS_ARCHITECTURE.md
+
+**Large CSS Files:**
+
+- `project-detail.css` - 1,500+ lines (should split)
+- `modals.css` - 730 lines (review for consolidation)
+
+### Migrations Complete
+
+#### 1. admin-contacts.ts
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Lines of code | 904 | 738 | **-166 (18%)** |
+| Import statements | 18 | 13 | -5 |
+| State variables | 5 | 0 (in factory) | -5 |
+
+#### 2. admin-leads.ts
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Lines of code | 2,086 | 1,575 | **-511 (24.5%)** |
+| Import statements | 21 | 16 | -5 |
+| State variables | 6 | 2 (view-specific only) | -4 |
+
+This module is more complex (table + pipeline view toggle, analytics, scoring rules, tasks, notes), but the factory still eliminated significant boilerplate.
+
+#### 3. admin-clients.ts
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Lines of code | 1,726 | 1,542 | **-184 (10.7%)** |
+| Import statements | 20 | 15 | -5 |
+| State variables | 5 | 1 (currentClientId only) | -4 |
+
+Smaller reduction because this module has significant module-specific code for client detail views (projects, billing, invoices), multiple modal handlers (edit info, edit billing, add client), inline editing, and invitation handling.
+
+#### 4. admin-invoices.ts
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Lines of code | 1,209 | 1,057 | **-152 (12.6%)** |
+| Import statements | 15 | 11 | -4 |
+| State variables | 4 | 0 (in factory) | -4 |
+
+This module has view/edit invoice modals, PDF download, inline due date editing - all module-specific code preserved.
+
+#### 5. admin-contracts.ts
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Lines of code | 690 | 652 | **-38 (5.5%)** |
+| Import statements | 11 | 10 | -1 |
+| State variables | 3 | 2 (listenersInitialized, filterContainerEl) | -1 |
+
+Smaller reduction because admin-contracts.ts was already lean - primarily detail modal and activity features, less boilerplate to eliminate.
+
+#### 6. admin-ad-hoc-requests.ts
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Lines of code | 917 | 835 | **-82 (8.9%)** |
+| Import statements | 13 | 7 | -6 |
+| State variables | 5 | 1 (listenersInitialized only) | -4 |
+
+This module has detail modals, time entry UI, invoice generation modal - all module-specific code preserved.
+
+**Total lines saved:** 1,133 lines across 6 modules
+
+**Files Modified:**
+
+- `src/utils/table-module-factory.ts` - Created (380 lines)
+- `src/features/admin/modules/admin-contacts.ts` - Refactored (904 → 738)
+- `src/features/admin/modules/admin-leads.ts` - Refactored (2,086 → 1,575)
+- `src/features/admin/modules/admin-clients.ts` - Refactored (1,726 → 1,542)
+- `src/features/admin/modules/admin-invoices.ts` - Refactored (1,209 → 1,057)
+- `src/features/admin/modules/admin-contracts.ts` - Refactored (690 → 652)
+- `src/features/admin/modules/admin-ad-hoc-requests.ts` - Refactored (917 → 835)
+
+### Next Steps
+
+- [x] Migrate admin-contacts.ts to use factory
+- [x] Migrate admin-leads.ts to use factory
+- [x] Migrate admin-clients.ts to use factory
+- [x] Migrate admin-invoices.ts to use factory
+- [ ] Migrate remaining modules (optional - can be done incrementally)
+- [ ] Consider splitting `project-detail.css` into smaller files
+- [ ] Document dropdown systems in CSS_ARCHITECTURE.md
+
+---
+
 ## Session Summary - February 19, 2026 (Continued)
 
 Comprehensive card styling consolidation to match overview-layout design pattern.
