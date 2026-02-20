@@ -9,6 +9,7 @@
    Single source of truth for ALL h3 headings in portals
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) h3 {
+  margin: 0;
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: var(--font-size-base);
   font-weight: 500;
@@ -216,9 +217,7 @@
   margin-bottom: var(--space-2);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .portal-card-header-row h3 {
-  margin: 0;
-}
+/* h3 margin: 0 in base rule */
 
 /* Card body - standard content area */
 :is([data-page="admin"], [data-page="client-portal"]) .portal-card-body {
@@ -480,6 +479,43 @@
   color: var(--color-danger);
 }
 
+/* Alert state for stat values (overdue, blocked, etc.) */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-value-alert,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert .stat-number,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert .stat-value,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert .stat-card-value,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert.has-items .stat-number,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert.has-items .stat-value,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card--alert.has-items .stat-card-value {
+  color: var(--status-cancelled);
+}
+
+/* Warning state for stat values */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-value-warning,
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert) .stat-number,
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert) .stat-value,
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert) .stat-card-value,
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert).has-items .stat-number,
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert).has-items .stat-value,
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--warning, .tasks-stat-card--alert).has-items .stat-card-value {
+  color: var(--color-warning-500);
+}
+
+/* Success state for stat values */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-value-success,
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--success, .stat-card-success) .stat-number,
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--success, .stat-card-success) .stat-value,
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card--success, .stat-card-success) .stat-card-value {
+  color: var(--status-completed);
+}
+
+/* Primary color for KPI values (analytics, dashboards) */
+:is([data-page="admin"], [data-page="client-portal"]) .kpi-card .kpi-card-value,
+:is([data-page="admin"], [data-page="client-portal"]) .kpi-card .kpi-value,
+:is([data-page="admin"], [data-page="client-portal"]) .stat-value-primary {
+  color: var(--color-primary);
+}
+
 /* =====================================================
    OVERVIEW CARD
    ===================================================== */
@@ -600,9 +636,7 @@
   margin-bottom: var(--space-2);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-inline h3 {
-  margin: 0;
-}
+/* h3 margin: 0 in base rule */
 
 :is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks .section-header-actions {
   display: flex;
@@ -926,9 +960,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action h3,
-:is([data-page="admin"], [data-page="client-portal"]) .section-header-with-actions h3 {
-  margin: 0;
-}
+/* h3 margin: 0 in base rule */
 
 /* When a container is the only child, make it take full width and push actions to the right */
 :is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action > .view-toggle-container,
@@ -1087,13 +1119,15 @@
     gap: 0.5rem;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-number {
-    font-size: 1.5rem;
+  :is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-number,
+  :is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-value,
+  :is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-card-value {
+    font-size: var(--font-size-lg);
     margin: 0;
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .stat-card .stat-label {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     text-align: right;
     margin-top: 0;
   }

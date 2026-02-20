@@ -125,9 +125,7 @@
   margin-bottom: 5px;
 }
 
-.stat-value-alert {
-  color: var(--status-cancelled);
-}
+/* .stat-value-alert color from unified rule in portal-cards.css */
 
 .stat-card-delta {
   font-size: 10.5px;
