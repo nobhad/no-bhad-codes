@@ -8,12 +8,26 @@
  * templates, dependencies, and project health metrics.
  */
 
-import { getDatabase } from '../database/init.js';
+import { getDatabase, type SqlParam } from '../database/init.js';
 import { checkAndUpdateMilestoneCompletion, updateProjectProgress } from './progress-calculator.js';
 import { userService } from './user-service.js';
+import {
+  toProjectTask as toTask,
+  toTaskDependency as toDependency,
+  toTaskComment as toComment,
+  toChecklistItem,
+  toTimeEntry,
+  toProjectTemplate as toTemplate,
+  type TaskRow,
+  type DependencyRow,
+  type CommentRow,
+  type ChecklistRow,
+  type TimeEntryRow,
+  type TemplateRow
+} from '../database/entities/index.js';
 
-// Type definitions
-type SqlValue = string | number | boolean | null;
+// Type alias for backward compatibility
+type SqlValue = SqlParam;
 
 // =====================================================
 // INTERFACES - Tasks
@@ -56,25 +70,7 @@ export interface TaskCreateData {
   parentTaskId?: number;
 }
 
-interface TaskRow {
-  id: number;
-  project_id: number;
-  milestone_id?: number;
-  title: string;
-  description?: string;
-  status: string;
-  priority: string;
-  assigned_to_user_id?: number;
-  assigned_to_name?: string; // From JOIN with users table
-  due_date?: string;
-  estimated_hours?: number | string;
-  actual_hours?: number | string;
-  sort_order: number;
-  parent_task_id?: number;
-  completed_at?: string;
-  created_at: string;
-  updated_at: string;
-}
+// TaskRow imported from entities
 
 // =====================================================
 // INTERFACES - Dependencies
@@ -88,13 +84,7 @@ export interface TaskDependency {
   createdAt: string;
 }
 
-interface DependencyRow {
-  id: number;
-  task_id: number;
-  depends_on_task_id: number;
-  dependency_type: string;
-  created_at: string;
-}
+// DependencyRow imported from entities
 
 // =====================================================
 // INTERFACES - Comments
@@ -109,15 +99,7 @@ export interface TaskComment {
   updatedAt: string;
 }
 
-interface CommentRow {
-  id: number;
-  task_id: number;
-  author_user_id: number | null;
-  author_name: string | null; // From JOIN with users table
-  content: string;
-  created_at: string;
-  updated_at: string;
-}
+// CommentRow imported from entities
 
 // =====================================================
 // INTERFACES - Checklist
@@ -133,15 +115,7 @@ export interface ChecklistItem {
   createdAt: string;
 }
 
-interface ChecklistRow {
-  id: number;
-  task_id: number;
-  content: string;
-  is_completed: number;
-  completed_at?: string;
-  sort_order: number;
-  created_at: string;
-}
+// ChecklistRow imported from entities
 
 // =====================================================
 // INTERFACES - Time Tracking
@@ -174,21 +148,7 @@ export interface TimeEntryData {
   hourlyRate?: number;
 }
 
-interface TimeEntryRow {
-  id: number;
-  project_id: number;
-  task_id?: number;
-  user_id: number | null;
-  user_name: string | null; // From JOIN with users table
-  description?: string;
-  hours: number | string;
-  date: string;
-  billable: number;
-  hourly_rate?: number | string;
-  created_at: string;
-  updated_at: string;
-  task_title?: string;
-}
+// TimeEntryRow imported from entities
 
 export interface TimeStats {
   totalHours: number;
@@ -258,19 +218,7 @@ export interface TemplateData {
   defaultHourlyRate?: number;
 }
 
-interface TemplateRow {
-  id: number;
-  name: string;
-  description?: string;
-  project_type?: string;
-  default_milestones?: string;
-  default_tasks?: string;
-  estimated_duration_days?: number;
-  default_hourly_rate?: number | string;
-  is_active: number;
-  created_at: string;
-  updated_at: string;
-}
+// TemplateRow imported from entities
 
 // =====================================================
 // INTERFACES - Project Health
@@ -304,98 +252,11 @@ export interface VelocityData {
 }
 
 // =====================================================
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS - Imported from database/entities
 // =====================================================
-
-function toTask(row: TaskRow): ProjectTask {
-  return {
-    id: row.id,
-    projectId: row.project_id,
-    milestoneId: row.milestone_id,
-    title: row.title,
-    description: row.description,
-    status: row.status as ProjectTask['status'],
-    priority: row.priority as ProjectTask['priority'],
-    assignedTo: row.assigned_to_name,
-    dueDate: row.due_date,
-    estimatedHours: row.estimated_hours ? parseFloat(String(row.estimated_hours)) : undefined,
-    actualHours: row.actual_hours ? parseFloat(String(row.actual_hours)) : undefined,
-    sortOrder: row.sort_order,
-    parentTaskId: row.parent_task_id,
-    completedAt: row.completed_at,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  };
-}
-
-function toDependency(row: DependencyRow): TaskDependency {
-  return {
-    id: row.id,
-    taskId: row.task_id,
-    dependsOnTaskId: row.depends_on_task_id,
-    dependencyType: row.dependency_type as TaskDependency['dependencyType'],
-    createdAt: row.created_at
-  };
-}
-
-function toComment(row: CommentRow): TaskComment {
-  return {
-    id: row.id,
-    taskId: row.task_id,
-    author: row.author_name || 'Unknown',
-    content: row.content,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  };
-}
-
-function toChecklistItem(row: ChecklistRow): ChecklistItem {
-  return {
-    id: row.id,
-    taskId: row.task_id,
-    content: row.content,
-    isCompleted: Boolean(row.is_completed),
-    completedAt: row.completed_at,
-    sortOrder: row.sort_order,
-    createdAt: row.created_at
-  };
-}
-
-function toTimeEntry(row: TimeEntryRow): TimeEntry {
-  const hours = parseFloat(String(row.hours));
-  const hourlyRate = row.hourly_rate ? parseFloat(String(row.hourly_rate)) : undefined;
-  return {
-    id: row.id,
-    projectId: row.project_id,
-    taskId: row.task_id,
-    userName: row.user_name || 'Unknown',
-    description: row.description,
-    hours,
-    date: row.date,
-    billable: Boolean(row.billable),
-    hourlyRate,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    amount: hourlyRate ? hours * hourlyRate : undefined,
-    taskTitle: row.task_title
-  };
-}
-
-function toTemplate(row: TemplateRow): ProjectTemplate {
-  return {
-    id: row.id,
-    name: row.name,
-    description: row.description,
-    projectType: row.project_type,
-    defaultMilestones: row.default_milestones ? JSON.parse(row.default_milestones) : [],
-    defaultTasks: row.default_tasks ? JSON.parse(row.default_tasks) : [],
-    estimatedDurationDays: row.estimated_duration_days,
-    defaultHourlyRate: row.default_hourly_rate ? parseFloat(String(row.default_hourly_rate)) : undefined,
-    isActive: Boolean(row.is_active),
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  };
-}
+// toTask (as toProjectTask), toDependency (as toTaskDependency),
+// toComment (as toTaskComment), toChecklistItem, toTimeEntry,
+// toTemplate (as toProjectTemplate) are imported from '../database/entities/index.js'
 
 // =====================================================
 // PROJECT SERVICE CLASS

@@ -20,118 +20,33 @@ import { getString, getNumber } from '../database/row-helpers.js';
 import crypto from 'crypto';
 import {
   validateJsonSchema,
-  validateFeaturesData,
   validateLineItems,
-  tierDataSchema,
-  pricingDataSchema,
   tierStructureSchema
 } from '../../shared/validation/validators.js';
 import { emailService, type ProposalSignedData, type ProposalSignedClientData } from './email-service.js';
-
-// =====================================================
-// TYPES
-// =====================================================
-
-interface ProposalTemplate {
-  id: number;
-  name: string;
-  description?: string;
-  projectType?: string;
-  tierStructure?: object;
-  defaultLineItems?: object[];
-  termsAndConditions?: string;
-  validityDays: number;
-  isDefault: boolean;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface ProposalVersion {
-  id: number;
-  proposalId: number;
-  versionNumber: number;
-  tierData?: object;
-  featuresData?: object[];
-  pricingData?: object;
-  notes?: string;
-  createdBy?: string;
-  createdAt: string;
-}
-
-interface ProposalSignature {
-  id: number;
-  proposalId: number;
-  signerName: string;
-  signerEmail: string;
-  signerTitle?: string;
-  signerCompany?: string;
-  signatureMethod: string;
-  signatureData?: string;
-  ipAddress?: string;
-  userAgent?: string;
-  signedAt: string;
-}
-
-interface ProposalComment {
-  id: number;
-  proposalId: number;
-  authorType: 'admin' | 'client';
-  authorName: string;
-  authorEmail?: string;
-  content: string;
-  isInternal: boolean;
-  parentCommentId?: number;
-  createdAt: string;
-  updatedAt: string;
-  replies?: ProposalComment[];
-}
-
-interface ProposalActivity {
-  id: number;
-  proposalId: number;
-  activityType: string;
-  actor?: string;
-  actorType?: string;
-  metadata?: object;
-  ipAddress?: string;
-  userAgent?: string;
-  createdAt: string;
-}
-
-interface ProposalCustomItem {
-  id: number;
-  proposalId: number;
-  itemType: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  unitLabel?: string;
-  category?: string;
-  isTaxable: boolean;
-  isOptional: boolean;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface SignatureRequest {
-  id: number;
-  proposalId: number;
-  signerEmail: string;
-  signerName?: string;
-  requestToken: string;
-  status: string;
-  sentAt?: string;
-  viewedAt?: string;
-  signedAt?: string;
-  declinedAt?: string;
-  declineReason?: string;
-  expiresAt?: string;
-  reminderCount: number;
-  lastReminderAt?: string;
-  createdAt: string;
-}
+import {
+  type ProposalTemplate,
+  type ProposalVersion,
+  type ProposalSignature,
+  type ProposalComment,
+  type ProposalActivity,
+  type ProposalCustomItem,
+  type SignatureRequest,
+  type ProposalTemplateRow,
+  type ProposalVersionRow,
+  type ProposalSignatureRow,
+  type ProposalCommentRow,
+  type ProposalActivityRow,
+  type ProposalCustomItemRow,
+  type SignatureRequestRow,
+  toProposalTemplate,
+  toProposalVersion,
+  toProposalSignature,
+  toProposalComment,
+  toProposalActivity,
+  toProposalCustomItem,
+  toSignatureRequest
+} from '../database/entities/index.js';
 
 interface TemplateCreateData {
   name: string;
@@ -173,120 +88,6 @@ interface CustomItemData {
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString('hex');
-}
-
-function mapTemplate(row: Record<string, unknown>): ProposalTemplate {
-  return {
-    id: getNumber(row, 'id'),
-    name: getString(row, 'name'),
-    description: row.description as string | undefined,
-    projectType: row.project_type as string | undefined,
-    tierStructure: row.tier_structure ? JSON.parse(row.tier_structure as string) : undefined,
-    defaultLineItems: row.default_line_items ? JSON.parse(row.default_line_items as string) : undefined,
-    termsAndConditions: row.terms_and_conditions as string | undefined,
-    validityDays: getNumber(row, 'validity_days') || 30,
-    isDefault: Boolean(row.is_default),
-    isActive: Boolean(row.is_active),
-    createdAt: getString(row, 'created_at'),
-    updatedAt: getString(row, 'updated_at')
-  };
-}
-
-function mapVersion(row: Record<string, unknown>): ProposalVersion {
-  return {
-    id: getNumber(row, 'id'),
-    proposalId: getNumber(row, 'proposal_id'),
-    versionNumber: getNumber(row, 'version_number'),
-    tierData: row.tier_data ? JSON.parse(row.tier_data as string) : undefined,
-    featuresData: row.features_data ? JSON.parse(row.features_data as string) : undefined,
-    pricingData: row.pricing_data ? JSON.parse(row.pricing_data as string) : undefined,
-    notes: row.notes as string | undefined,
-    createdBy: row.created_by as string | undefined,
-    createdAt: getString(row, 'created_at')
-  };
-}
-
-function mapSignature(row: Record<string, unknown>): ProposalSignature {
-  return {
-    id: getNumber(row, 'id'),
-    proposalId: getNumber(row, 'proposal_id'),
-    signerName: getString(row, 'signer_name'),
-    signerEmail: getString(row, 'signer_email'),
-    signerTitle: row.signer_title as string | undefined,
-    signerCompany: row.signer_company as string | undefined,
-    signatureMethod: getString(row, 'signature_method'),
-    signatureData: row.signature_data as string | undefined,
-    ipAddress: row.ip_address as string | undefined,
-    userAgent: row.user_agent as string | undefined,
-    signedAt: getString(row, 'signed_at')
-  };
-}
-
-function mapComment(row: Record<string, unknown>): ProposalComment {
-  return {
-    id: getNumber(row, 'id'),
-    proposalId: getNumber(row, 'proposal_id'),
-    authorType: getString(row, 'author_type') as 'admin' | 'client',
-    authorName: getString(row, 'author_name'),
-    authorEmail: row.author_email as string | undefined,
-    content: getString(row, 'content'),
-    isInternal: Boolean(row.is_internal),
-    parentCommentId: row.parent_comment_id ? getNumber(row, 'parent_comment_id') : undefined,
-    createdAt: getString(row, 'created_at'),
-    updatedAt: getString(row, 'updated_at')
-  };
-}
-
-function mapActivity(row: Record<string, unknown>): ProposalActivity {
-  return {
-    id: getNumber(row, 'id'),
-    proposalId: getNumber(row, 'proposal_id'),
-    activityType: getString(row, 'activity_type'),
-    actor: row.actor as string | undefined,
-    actorType: row.actor_type as string | undefined,
-    metadata: row.metadata ? JSON.parse(row.metadata as string) : undefined,
-    ipAddress: row.ip_address as string | undefined,
-    userAgent: row.user_agent as string | undefined,
-    createdAt: getString(row, 'created_at')
-  };
-}
-
-function mapCustomItem(row: Record<string, unknown>): ProposalCustomItem {
-  return {
-    id: getNumber(row, 'id'),
-    proposalId: getNumber(row, 'proposal_id'),
-    itemType: getString(row, 'item_type'),
-    description: getString(row, 'description'),
-    quantity: getNumber(row, 'quantity') || 1,
-    unitPrice: getNumber(row, 'unit_price'),
-    unitLabel: row.unit_label as string | undefined,
-    category: row.category as string | undefined,
-    isTaxable: Boolean(row.is_taxable),
-    isOptional: Boolean(row.is_optional),
-    sortOrder: getNumber(row, 'sort_order') || 0,
-    createdAt: getString(row, 'created_at'),
-    updatedAt: getString(row, 'updated_at')
-  };
-}
-
-function mapSignatureRequest(row: Record<string, unknown>): SignatureRequest {
-  return {
-    id: getNumber(row, 'id'),
-    proposalId: getNumber(row, 'proposal_id'),
-    signerEmail: getString(row, 'signer_email'),
-    signerName: row.signer_name as string | undefined,
-    requestToken: getString(row, 'request_token'),
-    status: getString(row, 'status'),
-    sentAt: row.sent_at as string | undefined,
-    viewedAt: row.viewed_at as string | undefined,
-    signedAt: row.signed_at as string | undefined,
-    declinedAt: row.declined_at as string | undefined,
-    declineReason: row.decline_reason as string | undefined,
-    expiresAt: row.expires_at as string | undefined,
-    reminderCount: getNumber(row, 'reminder_count') || 0,
-    lastReminderAt: row.last_reminder_at as string | undefined,
-    createdAt: getString(row, 'created_at')
-  };
 }
 
 // =====================================================
@@ -361,7 +162,7 @@ class ProposalService {
     query += ' ORDER BY is_default DESC, name ASC';
 
     const rows = await db.all(query, params);
-    return rows.map((row) => mapTemplate(row as Record<string, unknown>));
+    return rows.map((row) => toProposalTemplate(row as ProposalTemplateRow));
   }
 
   /**
@@ -375,7 +176,7 @@ class ProposalService {
       throw new Error('Template not found');
     }
 
-    return mapTemplate(row as Record<string, unknown>);
+    return toProposalTemplate(row as ProposalTemplateRow);
   }
 
   /**
@@ -517,7 +318,7 @@ class ProposalService {
       'SELECT * FROM proposal_versions WHERE proposal_id = ? ORDER BY version_number DESC',
       [proposalId]
     );
-    return rows.map((row) => mapVersion(row as Record<string, unknown>));
+    return rows.map((row) => toProposalVersion(row as ProposalVersionRow));
   }
 
   /**
@@ -531,7 +332,7 @@ class ProposalService {
       throw new Error('Version not found');
     }
 
-    return mapVersion(row as Record<string, unknown>);
+    return toProposalVersion(row as ProposalVersionRow);
   }
 
   /**
@@ -698,7 +499,7 @@ class ProposalService {
       throw new Error('Signature request not found');
     }
 
-    return mapSignatureRequest(row as Record<string, unknown>);
+    return toSignatureRequest(row as SignatureRequestRow);
   }
 
   /**
@@ -712,7 +513,7 @@ class ProposalService {
       return null;
     }
 
-    return mapSignatureRequest(row as Record<string, unknown>);
+    return toSignatureRequest(row as SignatureRequestRow);
   }
 
   /**
@@ -895,7 +696,7 @@ class ProposalService {
       throw new Error('Signature not found');
     }
 
-    return mapSignature(row as Record<string, unknown>);
+    return toProposalSignature(row as ProposalSignatureRow);
   }
 
   /**
@@ -907,7 +708,7 @@ class ProposalService {
       'SELECT * FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC',
       [proposalId]
     );
-    return rows.map((row) => mapSignature(row as Record<string, unknown>));
+    return rows.map((row) => toProposalSignature(row as ProposalSignatureRow));
   }
 
   /**
@@ -930,7 +731,7 @@ class ProposalService {
       'SELECT * FROM signature_requests WHERE proposal_id = ? AND status IN (\'pending\', \'viewed\')',
       [proposalId]
     );
-    const pendingRequests = pendingRows.map((row) => mapSignatureRequest(row as Record<string, unknown>));
+    const pendingRequests = pendingRows.map((row) => toSignatureRequest(row as SignatureRequestRow));
 
     return {
       requiresSignature: Boolean(p.requires_signature),
@@ -1024,7 +825,7 @@ class ProposalService {
       throw new Error('Comment not found');
     }
 
-    return mapComment(row as Record<string, unknown>);
+    return toProposalComment(row as ProposalCommentRow);
   }
 
   /**
@@ -1040,7 +841,7 @@ class ProposalService {
     query += ' ORDER BY created_at ASC';
 
     const rows = await db.all(query, [proposalId]);
-    const comments = rows.map((row) => mapComment(row as Record<string, unknown>));
+    const comments = rows.map((row) => toProposalComment(row as ProposalCommentRow));
 
     // Build threaded structure
     const rootComments: ProposalComment[] = [];
@@ -1117,7 +918,7 @@ class ProposalService {
       'SELECT * FROM proposal_activities WHERE proposal_id = ? ORDER BY created_at DESC LIMIT ?',
       [proposalId, limit]
     );
-    return rows.map((row) => mapActivity(row as Record<string, unknown>));
+    return rows.map((row) => toProposalActivity(row as ProposalActivityRow));
   }
 
   /**
@@ -1186,7 +987,7 @@ class ProposalService {
       throw new Error('Custom item not found');
     }
 
-    return mapCustomItem(row as Record<string, unknown>);
+    return toProposalCustomItem(row as ProposalCustomItemRow);
   }
 
   /**
@@ -1198,7 +999,7 @@ class ProposalService {
       'SELECT * FROM proposal_custom_items WHERE proposal_id = ? ORDER BY sort_order ASC',
       [proposalId]
     );
-    return rows.map((row) => mapCustomItem(row as Record<string, unknown>));
+    return rows.map((row) => toProposalCustomItem(row as ProposalCustomItemRow));
   }
 
   /**

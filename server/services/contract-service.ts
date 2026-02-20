@@ -8,28 +8,28 @@
  */
 
 import { getDatabase } from '../database/init.js';
-import { getNumber, getString } from '../database/row-helpers.js';
+import { getString } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
 import {
   applyContractVariables,
   getDefaultContractVariables,
   resolveContractVariables
 } from '../utils/contract-variables.js';
+import {
+  type ContractTemplate,
+  type Contract,
+  type ContractTemplateType,
+  type ContractStatus,
+  type ContractTemplateRow,
+  type ContractRow,
+  toContractTemplate,
+  toContract
+} from '../database/entities/index.js';
+
+// Re-export types for external usage
+export type { ContractTemplateType, ContractStatus };
 
 const CONTRACT_TEMPLATE_TYPES = ['standard', 'custom', 'amendment', 'nda', 'maintenance'] as const;
-export type ContractTemplateType = typeof CONTRACT_TEMPLATE_TYPES[number];
-
-interface ContractTemplate {
-  id: number;
-  name: string;
-  type: ContractTemplateType;
-  content: string;
-  variables?: string[];
-  isDefault: boolean;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface ContractTemplateCreateData {
   name: string;
@@ -37,52 +37,6 @@ interface ContractTemplateCreateData {
   content: string;
   variables?: string[];
   isDefault?: boolean;
-}
-
-export type ContractStatus = 'draft' | 'sent' | 'viewed' | 'signed' | 'expired' | 'cancelled';
-
-interface Contract {
-  id: number;
-  templateId?: number | null;
-  projectId: number;
-  clientId: number;
-  content: string;
-  status: ContractStatus;
-  variables?: Record<string, string>;
-  templateName?: string;
-  templateType?: ContractTemplateType | null;
-  projectName?: string;
-  clientName?: string;
-  clientEmail?: string;
-  parentContractId?: number | null;
-  renewalAt?: string | null;
-  renewalReminderSentAt?: string | null;
-  lastReminderAt?: string | null;
-  reminderCount?: number | null;
-  // Signature request tracking (Phase 3.3)
-  signatureToken?: string | null;
-  signatureRequestedAt?: string | null;
-  signatureExpiresAt?: string | null;
-  // Signer info
-  signerName?: string | null;
-  signerEmail?: string | null;
-  signerIp?: string | null;
-  signerUserAgent?: string | null;
-  signatureData?: string | null;
-  signedPdfPath?: string | null;
-  // Countersigner info
-  countersignedAt?: string | null;
-  countersignerName?: string | null;
-  countersignerEmail?: string | null;
-  countersignerIp?: string | null;
-  countersignerUserAgent?: string | null;
-  countersignatureData?: string | null;
-  // Timestamps
-  sentAt?: string | null;
-  signedAt?: string | null;
-  expiresAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
 }
 
 interface ContractCreateData {
@@ -103,66 +57,6 @@ interface ContractCreateData {
 }
 
 const CONTRACT_STATUSES: ContractStatus[] = ['draft', 'sent', 'viewed', 'signed', 'expired', 'cancelled'];
-
-function mapTemplate(row: Record<string, unknown>): ContractTemplate {
-  return {
-    id: getNumber(row, 'id'),
-    name: getString(row, 'name'),
-    type: getString(row, 'type') as ContractTemplateType,
-    content: getString(row, 'content'),
-    variables: row.variables ? (JSON.parse(row.variables as string) as string[]) : undefined,
-    isDefault: Boolean(row.is_default),
-    isActive: Boolean(row.is_active),
-    createdAt: getString(row, 'created_at'),
-    updatedAt: getString(row, 'updated_at')
-  };
-}
-
-function mapContract(row: Record<string, unknown>): Contract {
-  return {
-    id: getNumber(row, 'id'),
-    templateId: row.template_id ? getNumber(row, 'template_id') : null,
-    projectId: getNumber(row, 'project_id'),
-    clientId: getNumber(row, 'client_id'),
-    content: getString(row, 'content'),
-    status: getString(row, 'status') as ContractStatus,
-    variables: row.variables ? (JSON.parse(row.variables as string) as Record<string, string>) : undefined,
-    templateName: row.template_name ? getString(row, 'template_name') : undefined,
-    templateType: row.template_type ? (getString(row, 'template_type') as ContractTemplateType) : null,
-    projectName: row.project_name ? getString(row, 'project_name') : undefined,
-    clientName: row.client_name ? getString(row, 'client_name') : undefined,
-    clientEmail: row.client_email ? getString(row, 'client_email') : undefined,
-    parentContractId: row.parent_contract_id ? getNumber(row, 'parent_contract_id') : null,
-    renewalAt: row.renewal_at as string | null,
-    renewalReminderSentAt: row.renewal_reminder_sent_at as string | null,
-    lastReminderAt: row.last_reminder_at as string | null,
-    reminderCount: row.reminder_count as number | null,
-    // Signature request tracking (Phase 3.3)
-    signatureToken: row.signature_token as string | null,
-    signatureRequestedAt: row.signature_requested_at as string | null,
-    signatureExpiresAt: row.signature_expires_at as string | null,
-    // Signer info
-    signerName: row.signer_name as string | null,
-    signerEmail: row.signer_email as string | null,
-    signerIp: row.signer_ip as string | null,
-    signerUserAgent: row.signer_user_agent as string | null,
-    signatureData: row.signature_data as string | null,
-    signedPdfPath: row.signed_pdf_path as string | null,
-    // Countersigner info
-    countersignedAt: row.countersigned_at as string | null,
-    countersignerName: row.countersigner_name as string | null,
-    countersignerEmail: row.countersigner_email as string | null,
-    countersignerIp: row.countersigner_ip as string | null,
-    countersignerUserAgent: row.countersigner_user_agent as string | null,
-    countersignatureData: row.countersignature_data as string | null,
-    // Timestamps
-    sentAt: row.sent_at as string | null,
-    signedAt: row.signed_at as string | null,
-    expiresAt: row.expires_at as string | null,
-    createdAt: getString(row, 'created_at'),
-    updatedAt: getString(row, 'updated_at')
-  };
-}
 
 class ContractService {
   private async getContractVariableSource(projectId: number, clientId: number) {
@@ -231,7 +125,7 @@ class ContractService {
     query += ' ORDER BY is_default DESC, name ASC';
 
     const rows = await db.all(query, params);
-    return rows.map((row) => mapTemplate(row as Record<string, unknown>));
+    return rows.map((row) => toContractTemplate(row as ContractTemplateRow));
   }
 
   async getTemplate(templateId: number): Promise<ContractTemplate> {
@@ -242,7 +136,7 @@ class ContractService {
       throw new Error('Template not found');
     }
 
-    return mapTemplate(row as Record<string, unknown>);
+    return toContractTemplate(row as ContractTemplateRow);
   }
 
   async createTemplate(data: ContractTemplateCreateData): Promise<ContractTemplate> {
@@ -362,7 +256,7 @@ class ContractService {
     query += ' ORDER BY created_at DESC';
 
     const rows = await db.all(query, params);
-    return rows.map((row) => mapContract(row as Record<string, unknown>));
+    return rows.map((row) => toContract(row as ContractRow));
   }
 
   async getContract(contractId: number): Promise<Contract> {
@@ -387,7 +281,7 @@ class ContractService {
       throw new Error('Contract not found');
     }
 
-    return mapContract(row as Record<string, unknown>);
+    return toContract(row as ContractRow);
   }
 
   async createContract(data: ContractCreateData): Promise<Contract> {
@@ -588,7 +482,7 @@ class ContractService {
       return null;
     }
 
-    return mapContract(row as Record<string, unknown>);
+    return toContract(row as ContractRow);
   }
 
   /**
