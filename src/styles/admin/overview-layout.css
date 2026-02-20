@@ -93,29 +93,11 @@
   gap: var(--portal-section-gap);
 }
 
+/* .overview-stat-card - base styles in portal-cards.css */
 .overview-stat-card {
-  background: var(--portal-bg-darker);
-  border: none;
-  border-radius: var(--portal-radius-sm, 8px);
-  padding: 13px 14px;
   cursor: pointer;
-  transition: background 0.15s;
-  position: relative;
-  overflow: hidden;
   text-align: left;
   font-family: inherit;
-}
-
-.overview-stat-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.overview-stat-card:hover {
-  background: var(--portal-bg-dark);
 }
 
 .stat-card-top {

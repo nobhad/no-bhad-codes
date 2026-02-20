@@ -170,34 +170,34 @@
   gap: var(--tier-card-gap);
 }
 
-.tier-card {
+/* Proposal selection cards - shared base for tier and maintenance */
+.tier-card,
+.maintenance-card {
   background: var(--proposal-card-bg);
   border: 2px solid var(--proposal-card-border);
   border-radius: var(--portal-radius-lg);
   padding: var(--proposal-spacing-lg);
   position: relative;
-  transition:
-    border-color 0.3s ease,
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: border-color 0.3s ease, transform 0.3s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
 }
 
-.tier-card:hover {
+.tier-card:hover,
+.maintenance-card:hover {
   border-color: var(--proposal-accent);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-elevated-md);
 }
 
-.tier-card--selected {
+.tier-card--selected,
+.maintenance-card--selected {
   border-color: var(--proposal-accent);
   background: var(--proposal-highlight);
-  box-shadow: 0 0 0 1px var(--proposal-accent);
 }
 
-.tier-card--recommended {
+.tier-card--recommended,
+.maintenance-card--recommended {
   border-color: var(--proposal-accent);
 }
 
@@ -529,33 +529,7 @@
   gap: var(--tier-card-gap);
 }
 
-.maintenance-card {
-  background: var(--proposal-card-bg);
-  border: 2px solid var(--proposal-card-border);
-  border-radius: var(--portal-radius-lg);
-  padding: var(--proposal-spacing-lg);
-  position: relative;
-  transition:
-    border-color 0.3s ease,
-    transform 0.3s ease;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-}
-
-.maintenance-card:hover {
-  border-color: var(--proposal-accent);
-  transform: translateY(-2px);
-}
-
-.maintenance-card--selected {
-  border-color: var(--proposal-accent);
-  background: var(--proposal-highlight);
-}
-
-.maintenance-card--recommended {
-  border-color: var(--proposal-accent);
-}
+/* .maintenance-card styles consolidated above with .tier-card */
 
 .maintenance-badge {
   position: absolute;
