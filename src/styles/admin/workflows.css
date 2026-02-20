@@ -830,13 +830,8 @@
   white-space: nowrap;
 }
 
-/* Email template modal */
-[data-page="admin"] .email-template-modal-content {
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-/* Email preview modal */
+/* Email template and preview modals */
+[data-page="admin"] .email-template-modal-content,
 [data-page="admin"] .email-preview-modal-content {
   max-height: 80vh;
   overflow-y: auto;

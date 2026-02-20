@@ -11,7 +11,7 @@
 /* ============================================
  * CASCADE LAYER ORDER DECLARATION
  * ============================================ */
-@layer reset, tokens, base, components;
+@layer reset, tokens, base, utilities, components;
 
 /* ============================================
  * 0. FONT FACE DEFINITIONS (MUST BE FIRST, NO LAYER)
@@ -34,6 +34,11 @@
  * ============================================ */
 @import "../base/typography.css" layer(base);
 @import "../base/layout.css" layer(base);
+
+/* ============================================
+ * 3.5 UTILITIES LAYER
+ * ============================================ */
+@import "../base/utilities.css" layer(utilities);
 
 /* ============================================
  * 4. SHARED COMPONENTS LAYER

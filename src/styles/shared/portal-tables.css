@@ -43,34 +43,19 @@
    .files-table, .invoices-table, .time-entries-table
    ============================================== */
 
-.admin-table,
-.overview-table,
-.files-table,
-.invoices-table,
-.time-entries-table {
+/* Use :is() to reduce selector repetition - all portal tables share these styles */
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) {
   width: 100%;
   border-collapse: collapse;
   background: transparent;
-  /* Use auto layout - columns size based on content */
-  /* Only use table-layout: fixed when ALL columns have explicit widths */
   table-layout: auto;
 }
 
-/* Table header row */
-.admin-table thead tr,
-.overview-table thead tr,
-.files-table thead tr,
-.invoices-table thead tr,
-.time-entries-table thead tr {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) thead tr {
   height: var(--table-header-height);
 }
 
-/* Table header cells */
-.admin-table th,
-.overview-table th,
-.files-table th,
-.invoices-table th,
-.time-entries-table th {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) th {
   text-align: left;
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   color: var(--portal-text-secondary);
@@ -84,23 +69,13 @@
   background: transparent;
 }
 
-/* Table body rows */
-.admin-table tbody tr,
-.overview-table tbody tr,
-.files-table tbody tr,
-.invoices-table tbody tr,
-.time-entries-table tbody tr {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) tbody tr {
   height: var(--table-row-height);
   cursor: pointer;
   transition: background 0.1s;
 }
 
-/* Table body cells */
-.admin-table td,
-.overview-table td,
-.files-table td,
-.invoices-table td,
-.time-entries-table td {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) td {
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   color: var(--table-cell-color);
   font-size: var(--table-cell-font-size);
@@ -114,29 +89,11 @@
    First and last columns get extra padding for visual breathing room
    ============================================== */
 
-.admin-table th:first-child,
-.admin-table td:first-child,
-.overview-table th:first-child,
-.overview-table td:first-child,
-.files-table th:first-child,
-.files-table td:first-child,
-.invoices-table th:first-child,
-.invoices-table td:first-child,
-.time-entries-table th:first-child,
-.time-entries-table td:first-child {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(th, td):first-child {
   padding-left: var(--table-outer-padding);
 }
 
-.admin-table th:last-child,
-.admin-table td:last-child,
-.overview-table th:last-child,
-.overview-table td:last-child,
-.files-table th:last-child,
-.files-table td:last-child,
-.invoices-table th:last-child,
-.invoices-table td:last-child,
-.time-entries-table th:last-child,
-.time-entries-table td:last-child {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(th, td):last-child {
   padding-right: var(--table-outer-padding);
 }
 
@@ -147,20 +104,12 @@
    ============================================== */
 
 /* Hover - apply to all cells in hovered row */
-.admin-table tbody tr:hover td,
-.overview-table tbody tr:hover td,
-.files-table tbody tr:hover td,
-.invoices-table tbody tr:hover td,
-.time-entries-table tbody tr:hover td {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) tbody tr:hover td {
   background: var(--portal-bg-hover);
 }
 
 /* Active/pressed state */
-.admin-table tbody tr:active td,
-.overview-table tbody tr:active td,
-.files-table tbody tr:active td,
-.invoices-table tbody tr:active td,
-.time-entries-table tbody tr:active td {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) tbody tr:active td {
   background: var(--portal-bg-active, rgba(255, 255, 255, 0.08));
 }
 
@@ -193,11 +142,7 @@
   - gap between action buttons shrinks as table gets smaller
   - prevents overflow in action columns
 */
-.admin-table .table-actions,
-.overview-table .table-actions,
-.files-table .table-actions,
-.invoices-table .table-actions,
-.time-entries-table .table-actions {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .table-actions {
   display: inline-flex;
   align-items: center;
   gap: var(--table-actions-gap);
@@ -206,41 +151,16 @@
 }
 
 /* Actions column - fixed width to prevent overflow */
-.admin-table th.actions-col,
-.admin-table td.actions-col,
-.overview-table th.actions-col,
-.overview-table td.actions-col,
-.files-table th.actions-col,
-.files-table td.actions-col,
-.invoices-table th.actions-col,
-.invoices-table td.actions-col,
-.time-entries-table th.actions-col,
-.time-entries-table td.actions-col,
-.admin-table th:last-child:has(.table-actions),
-.admin-table td:last-child:has(.table-actions) {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(th, td).actions-col,
+.admin-table :is(th, td):last-child:has(.table-actions) {
   width: auto;
   min-width: fit-content;
   white-space: nowrap;
   text-align: right;
-  /* padding-right handled by outer column padding rule */
-}
-
-/* Table actions container - prevent wrapping, handle overflow */
-.admin-table .table-actions,
-.overview-table .table-actions,
-.files-table .table-actions,
-.invoices-table .table-actions,
-.time-entries-table .table-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--table-actions-gap);
-  flex-wrap: nowrap;
-  justify-content: flex-end;
 }
 
 /* Actions header text */
-.admin-table th.actions-col,
-.overview-table th.actions-col {
+:is(.admin-table, .overview-table) th.actions-col {
   text-align: right;
 }
 
@@ -250,11 +170,7 @@
    Tight padding with gap between buttons, no margins
    ============================================== */
 
-.admin-table .actions-cell,
-.overview-table .actions-cell,
-.files-table .actions-cell,
-.invoices-table .actions-cell,
-.time-entries-table .actions-cell {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -264,24 +180,15 @@
   text-align: right;
   padding-top: var(--space-0-5);
   padding-bottom: var(--space-0-5);
-  /* padding-right handled by outer column padding rule */
 }
 
 /* Ensure no margins on action buttons - use gap only */
-.admin-table .actions-cell > *,
-.overview-table .actions-cell > *,
-.files-table .actions-cell > *,
-.invoices-table .actions-cell > *,
-.time-entries-table .actions-cell > * {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell > * {
   margin: 0;
 }
 
 /* Icon buttons in actions cell - consistent styling */
-.admin-table .actions-cell .icon-btn,
-.overview-table .actions-cell .icon-btn,
-.files-table .actions-cell .icon-btn,
-.invoices-table .actions-cell .icon-btn,
-.time-entries-table .actions-cell .icon-btn {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell .icon-btn {
   color: var(--portal-text-light);
   background: transparent;
   border: none;
@@ -290,38 +197,22 @@
   transition: color 0.15s ease;
 }
 
-.admin-table .actions-cell .icon-btn:hover,
-.overview-table .actions-cell .icon-btn:hover,
-.files-table .actions-cell .icon-btn:hover,
-.invoices-table .actions-cell .icon-btn:hover,
-.time-entries-table .actions-cell .icon-btn:hover {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell .icon-btn:hover {
   color: var(--color-primary);
 }
 
 /* Danger button variant in tables */
-.admin-table .actions-cell .icon-btn-danger:hover,
-.overview-table .actions-cell .icon-btn-danger:hover,
-.files-table .actions-cell .icon-btn-danger:hover,
-.invoices-table .actions-cell .icon-btn-danger:hover,
-.time-entries-table .actions-cell .icon-btn-danger:hover {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell .icon-btn-danger:hover {
   color: var(--color-danger);
 }
 
 /* Primary button variant in tables */
-.admin-table .actions-cell .icon-btn-primary:hover,
-.overview-table .actions-cell .icon-btn-primary:hover,
-.files-table .actions-cell .icon-btn-primary:hover,
-.invoices-table .actions-cell .icon-btn-primary:hover,
-.time-entries-table .actions-cell .icon-btn-primary:hover {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell .icon-btn-primary:hover {
   color: var(--color-primary);
 }
 
 /* Icon button SVG sizing in tables */
-.admin-table .actions-cell .icon-btn svg,
-.overview-table .actions-cell .icon-btn svg,
-.files-table .actions-cell .icon-btn svg,
-.invoices-table .actions-cell .icon-btn svg,
-.time-entries-table .actions-cell .icon-btn svg,
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell .icon-btn svg,
 .table-actions .icon-btn svg {
   width: 16px;
   height: 16px;
@@ -354,36 +245,20 @@
    ============================================== */
 
 /* First row header corners */
-.admin-table thead tr:first-child th:first-child,
-.overview-table thead tr:first-child th:first-child,
-.files-table thead tr:first-child th:first-child,
-.invoices-table thead tr:first-child th:first-child,
-.time-entries-table thead tr:first-child th:first-child {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) thead tr:first-child th:first-child {
   border-top-left-radius: var(--portal-radius-lg, 8px);
 }
 
-.admin-table thead tr:first-child th:last-child,
-.overview-table thead tr:first-child th:last-child,
-.files-table thead tr:first-child th:last-child,
-.invoices-table thead tr:first-child th:last-child,
-.time-entries-table thead tr:first-child th:last-child {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) thead tr:first-child th:last-child {
   border-top-right-radius: var(--portal-radius-lg, 8px);
 }
 
 /* Last row body corners */
-.admin-table tbody tr:last-child td:first-child,
-.overview-table tbody tr:last-child td:first-child,
-.files-table tbody tr:last-child td:first-child,
-.invoices-table tbody tr:last-child td:first-child,
-.time-entries-table tbody tr:last-child td:first-child {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) tbody tr:last-child td:first-child {
   border-bottom-left-radius: var(--portal-radius-lg, 8px);
 }
 
-.admin-table tbody tr:last-child td:last-child,
-.overview-table tbody tr:last-child td:last-child,
-.files-table tbody tr:last-child td:last-child,
-.invoices-table tbody tr:last-child td:last-child,
-.time-entries-table tbody tr:last-child td:last-child {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) tbody tr:last-child td:last-child {
   border-bottom-right-radius: var(--portal-radius-lg, 8px);
 }
 
@@ -407,20 +282,12 @@
    TABLE LINKS - UNIVERSAL
    ============================================== */
 
-.admin-table td a,
-.overview-table td a,
-.files-table td a,
-.invoices-table td a,
-.time-entries-table td a {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) td a {
   color: var(--portal-text-light);
   text-decoration: none;
 }
 
-.admin-table td a:hover,
-.overview-table td a:hover,
-.files-table td a:hover,
-.invoices-table td a:hover,
-.time-entries-table td a:hover {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) td a:hover {
   color: var(--color-primary);
   text-decoration: underline;
 }
@@ -430,20 +297,12 @@
    Stacked name/email/company pattern
    ============================================== */
 
-.admin-table .identity-cell,
-.overview-table .identity-cell,
-.files-table .identity-cell,
-.invoices-table .identity-cell,
-.time-entries-table .identity-cell {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-cell {
   min-width: 0;
   max-width: 220px;
 }
 
-.admin-table .identity-name,
-.overview-table .identity-name,
-.files-table .identity-name,
-.invoices-table .identity-name,
-.time-entries-table .identity-name {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-name {
   display: block;
   font-weight: 500;
   color: var(--portal-text-light);
@@ -453,11 +312,7 @@
   white-space: nowrap;
 }
 
-.admin-table .identity-email,
-.overview-table .identity-email,
-.files-table .identity-email,
-.invoices-table .identity-email,
-.time-entries-table .identity-email {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-email {
   display: block;
   font-size: 10.5px;
   color: var(--portal-text-muted);
@@ -467,11 +322,7 @@
   white-space: nowrap;
 }
 
-.admin-table .identity-contact,
-.overview-table .identity-contact,
-.files-table .identity-contact,
-.invoices-table .identity-contact,
-.time-entries-table .identity-contact {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-contact {
   display: block;
   font-size: 11px;
   color: var(--portal-text-muted);
@@ -481,11 +332,7 @@
   white-space: nowrap;
 }
 
-.admin-table .identity-company,
-.overview-table .identity-company,
-.files-table .identity-company,
-.invoices-table .identity-company,
-.time-entries-table .identity-company {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-company {
   display: block;
   font-size: 10px;
   color: var(--portal-text-secondary);
@@ -493,11 +340,7 @@
 }
 
 /* Generic primary/secondary pattern for stacked identity cells */
-.admin-table .identity-primary,
-.overview-table .identity-primary,
-.files-table .identity-primary,
-.invoices-table .identity-primary,
-.time-entries-table .identity-primary {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-primary {
   display: block;
   font-weight: 500;
   color: var(--portal-text-light);
@@ -507,11 +350,7 @@
   white-space: nowrap;
 }
 
-.admin-table .identity-secondary,
-.overview-table .identity-secondary,
-.files-table .identity-secondary,
-.invoices-table .identity-secondary,
-.time-entries-table .identity-secondary {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-secondary {
   display: block;
   font-size: 11px;
   color: var(--portal-text-muted);
@@ -532,124 +371,60 @@
    ============================================== */
 
 /* Name/Title columns - primary content headers, gets remaining space */
-.admin-table .name-col,
-.admin-table .title-col,
-.overview-table .name-col,
-.files-table .name-col,
-.invoices-table .name-col,
-.time-entries-table .name-col {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.name-col, .title-col) {
   width: auto;
 }
 
 /* Name/Title cells - primary content, allow natural expansion */
-.admin-table .name-cell,
-.admin-table .title-cell,
-.overview-table .name-cell,
-.files-table .name-cell,
-.invoices-table .name-cell,
-.time-entries-table .name-cell {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.name-cell, .title-cell) {
   width: auto;
   white-space: nowrap;
 }
 
 /* Slug column and cells - shrink to content */
-.admin-table .slug-col,
-.admin-table .slug-cell,
-.overview-table .slug-col,
-.overview-table .slug-cell,
-.files-table .slug-col,
-.files-table .slug-cell,
-.invoices-table .slug-col,
-.invoices-table .slug-cell,
-.time-entries-table .slug-col,
-.time-entries-table .slug-cell {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.slug-col, .slug-cell) {
   width: 1%;
   white-space: nowrap;
 }
 
 /* Subject column headers - auto width for email subjects */
-.admin-table .subject-col,
-.overview-table .subject-col {
+:is(.admin-table, .overview-table) .subject-col {
   width: auto;
 }
 
 /* Subject cells - allow natural expansion for short subjects */
-.admin-table .subject-cell,
-.overview-table .subject-cell {
+:is(.admin-table, .overview-table) .subject-cell {
   width: auto;
   white-space: nowrap;
 }
 
 /* Type/Category column and cells - shrink to content */
-.admin-table .type-col,
-.admin-table .type-cell,
-.overview-table .type-col,
-.overview-table .type-cell,
-.files-table .type-col,
-.files-table .type-cell,
-.invoices-table .type-col,
-.invoices-table .type-cell,
-.time-entries-table .type-col,
-.time-entries-table .type-cell {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.type-col, .type-cell) {
   width: 1%;
   white-space: nowrap;
 }
 
 /* Count column and cells - shrink to content, centered */
-.admin-table .count-col,
-.admin-table .count-cell,
-.overview-table .count-col,
-.overview-table .count-cell,
-.files-table .count-col,
-.files-table .count-cell,
-.invoices-table .count-col,
-.invoices-table .count-cell,
-.time-entries-table .count-col,
-.time-entries-table .count-cell {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.count-col, .count-cell) {
   width: 1%;
   text-align: center;
   white-space: nowrap;
 }
 
 /* Status column and cells - shrink to content */
-.admin-table .status-col,
-.admin-table .status-cell,
-.overview-table .status-col,
-.overview-table .status-cell,
-.files-table .status-col,
-.files-table .status-cell,
-.invoices-table .status-col,
-.invoices-table .status-cell,
-.time-entries-table .status-col,
-.time-entries-table .status-cell {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.status-col, .status-cell) {
   width: 1%;
   white-space: nowrap;
 }
 
 /* Date column and cells - shrink to content */
-.admin-table .date-col,
-.admin-table .date-cell,
-.overview-table .date-col,
-.overview-table .date-cell,
-.files-table .date-col,
-.files-table .date-cell,
-.invoices-table .date-col,
-.invoices-table .date-cell,
-.time-entries-table .date-col,
-.time-entries-table .date-cell {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.date-col, .date-cell) {
   width: 1%;
   white-space: nowrap;
 }
 
 /* Amount/currency column and cells - shrink to content, right-aligned */
-.admin-table .amount-col,
-.admin-table .amount-cell,
-.overview-table .amount-col,
-.overview-table .amount-cell,
-.invoices-table .amount-col,
-.invoices-table .amount-cell,
-.time-entries-table .amount-col,
-.time-entries-table .amount-cell {
+:is(.admin-table, .overview-table, .invoices-table, .time-entries-table) :is(.amount-col, .amount-cell) {
   width: 1%;
   text-align: right;
   white-space: nowrap;
@@ -657,16 +432,7 @@
 }
 
 /* Actions column and cells - shrink to content, right-aligned */
-.admin-table .actions-col,
-.admin-table .actions-cell,
-.overview-table .actions-col,
-.overview-table .actions-cell,
-.files-table .actions-col,
-.files-table .actions-cell,
-.invoices-table .actions-col,
-.invoices-table .actions-cell,
-.time-entries-table .actions-col,
-.time-entries-table .actions-cell {
+:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.actions-col, .actions-cell) {
   width: 1%;
   white-space: nowrap;
   text-align: right;
