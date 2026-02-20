@@ -461,7 +461,7 @@ function renderHealthScore(): void {
 
   if (!clientHealth) {
     container.innerHTML = `
-      <div class="health-score-container">
+      <div class="health-score-container flex items-center">
         <div class="health-score-badge at-risk">
           <span>No health data</span>
         </div>
@@ -490,32 +490,32 @@ function renderHealthScore(): void {
   const statusLabel = getHealthStatusLabel(clientHealth.score);
 
   container.innerHTML = `
-    <div class="health-score-container">
+    <div class="health-score-container flex items-center">
       <div class="health-score-badge ${statusClass}">
         <span class="health-score-value">${clientHealth.score}</span>
         <span>${statusLabel}</span>
       </div>
     </div>
     <div class="health-factors">
-      <div class="health-factor">
+      <div class="health-factor flex flex-col gap-1">
         <span class="health-factor-label">Engagement</span>
         <div class="health-factor-bar">
           <div class="health-factor-fill ${getFactorClass(clientHealth.factors.engagement)}" style="width: ${clientHealth.factors.engagement}%"></div>
         </div>
       </div>
-      <div class="health-factor">
+      <div class="health-factor flex flex-col gap-1">
         <span class="health-factor-label">Payment</span>
         <div class="health-factor-bar">
           <div class="health-factor-fill ${getFactorClass(clientHealth.factors.payment)}" style="width: ${clientHealth.factors.payment}%"></div>
         </div>
       </div>
-      <div class="health-factor">
+      <div class="health-factor flex flex-col gap-1">
         <span class="health-factor-label">Project Success</span>
         <div class="health-factor-bar">
           <div class="health-factor-fill ${getFactorClass(clientHealth.factors.project_success)}" style="width: ${clientHealth.factors.project_success}%"></div>
         </div>
       </div>
-      <div class="health-factor">
+      <div class="health-factor flex flex-col gap-1">
         <span class="health-factor-label">Communication</span>
         <div class="health-factor-bar">
           <div class="health-factor-fill ${getFactorClass(clientHealth.factors.communication)}" style="width: ${clientHealth.factors.communication}%"></div>
@@ -1020,7 +1020,7 @@ function renderContactsTab(): void {
   });
 
   container.innerHTML = `
-    <div class="contacts-list">
+    <div class="contacts-list flex flex-col gap-2">
       ${sortedContacts.map(contact => renderContactCard(contact)).join('')}
     </div>
     <button class="btn btn-secondary add-contact-btn" id="btn-add-contact">
