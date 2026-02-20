@@ -14,13 +14,13 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 
 **Current Status:**
 
-- Total CSS: ~51,704 lines (src/styles: 50,094 + src/design-system: 1,610)
+- Total CSS: ~51,493 lines (src/styles: 49,883 + src/design-system: 1,610)
 - Created `src/styles/base/utilities.css` with atomic utility classes
 - Consolidated portal-tables.css using `:is()` selector (886→652 lines)
 - Migrated 39+ pure utility patterns to utility classes
 - Documented two-tier utility system in CSS_ARCHITECTURE.md
 
-**February 20, 2026 Consolidation:**
+**February 20, 2026 Consolidation (Continued):**
 
 - [x] Unified stat-card/content-card patterns (portal-cards.css)
 - [x] Consolidated empty-message italic rule (loading.css)
@@ -37,6 +37,16 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 - [x] Removed duplicate .stat-card-icon from overview-layout.css
 - [x] Removed duplicate .panel-icon from overview-layout.css
 - [x] Removed duplicate .btn-sm/.btn-danger from admin.css (use portal-buttons.css)
+
+**Utility Class Consolidation (Feb 20):**
+
+- [x] Removed duplicate .status-badge from deliverables.css (use portal-badges.css)
+- [x] Removed duplicate status badge variants from admin.css
+- [x] Moved .status-not-invited to portal-badges.css
+- [x] Removed duplicate .truncate from typography.css and portal-components.css
+- [x] Added .truncate-2 and .truncate-3 to utilities.css
+- [x] Removed duplicate flex utilities from variables.css and layout.css
+- [x] Fixed hardcoded color in portal-dropdown.css (#1A1A1A → var(--portal-bg-darker))
 
 **Design System Token Cleanup:**
 
