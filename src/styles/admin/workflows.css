@@ -471,11 +471,8 @@
   height: 12px;
 }
 
-/* Loading/empty state: base styles in components/loading.css, only overrides here */
-[data-page="admin"] .trigger-logs-list .loading-message,
-[data-page="admin"] .trigger-logs-list .empty-message {
-  font-style: italic;
-}
+/* Loading/empty state: base styles in components/loading.css
+   .empty-message italic from general rule above */
 
 /* =====================================================
    TRIGGER TEST BUTTON
