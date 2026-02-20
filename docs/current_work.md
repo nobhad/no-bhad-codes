@@ -14,10 +14,11 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 
 **Final Status:**
 
-- Total CSS: ~51,058 lines (reduced from ~55,000)
+- Total CSS: ~51,028 lines (reduced from ~55,000)
 - Created `src/styles/base/utilities.css` with atomic utility classes
 - Consolidated portal-tables.css using `:is()` selector (886→652 lines)
 - Migrated 39+ pure utility patterns to utility classes
+- Removed orphaned CSS rules (auth-form, task-comments, lead-score-factors, template-name-cell)
 - Documented two-tier utility system in CSS_ARCHITECTURE.md
 
 **Completed Migrations:**
@@ -26,11 +27,7 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 - [x] Files, client-detail, cd-crm, proposals, modals
 - [x] Ad-hoc requests, pd-contract, leads-pipeline
 - [x] Email templates (versions-list)
-
-**Orphaned CSS Identified (not migrated - unused):**
-
-- `auth-form` (uses auth-gate-form instead)
-- `task-comments`, `lead-score-factors`, `template-name-cell`
+- [x] Removed orphaned/unused CSS rules
 
 ### Linear Admin Portal Redesign - COMPLETE
 
