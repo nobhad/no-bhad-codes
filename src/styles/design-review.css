@@ -70,26 +70,7 @@
   gap: var(--space-1);
 }
 
-.view-controls .icon-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-bg-light);
-  border-radius: var(--portal-radius-sm);
-  cursor: pointer;
-  color: var(--portal-text-light);
-  font-weight: 600;
-  font-size: 16px;
-  transition: var(--transition-fast);
-}
-
-.view-controls .icon-btn:hover {
-  background: var(--portal-bg-light);
-  color: var(--color-brand-primary);
-}
+/* .icon-btn base styles in shared/portal-buttons.css */
 
 #design-zoom-level {
   font-size: 12px;

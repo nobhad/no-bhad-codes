@@ -405,43 +405,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 
 /* Portal Project Card - Base styles in shared/portal-cards.css */
 
-/* Icon buttons - consistent styling (buttons and links) */
-[data-page="admin"] .icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: var(--portal-radius-lg, 12px);
-  color: var(--portal-text-light);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: color 0.2s ease, background-color 0.2s ease;
-  text-decoration: none;
-}
-
-[data-page="admin"] .icon-btn:hover {
-  color: var(--color-primary);
-}
-
-[data-page="admin"] .icon-btn.icon-btn-danger:hover {
-  color: var(--color-error-500);
-}
-
-[data-page="admin"] .icon-btn.icon-btn-success:hover {
-  color: var(--status-active);
-}
-
-[data-page="admin"] .icon-btn svg {
-  width: 18px;
-  height: 18px;
-  stroke-width: 2.5;
-}
+/* .icon-btn base styles in shared/portal-buttons.css */
 
 /* Ensure all admin text is light on dark backgrounds */
 [data-page="admin"] .stat-card,

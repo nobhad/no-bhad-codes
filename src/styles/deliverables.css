@@ -160,31 +160,7 @@
   border-top: 1px solid var(--portal-bg-light);
 }
 
-.icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: var(--portal-bg-light);
-  border: 1px solid var(--portal-bg-medium);
-  border-radius: var(--portal-radius-xs);
-  color: var(--portal-text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.icon-btn:hover {
-  background-color: var(--color-brand-primary);
-  color: white;
-  border-color: var(--color-brand-primary);
-}
-
-.icon-btn svg {
-  width: 16px;
-  height: 16px;
-}
+/* .icon-btn base styles in shared/portal-buttons.css */
 
 /* Empty/Loading states: base styles in components/loading.css
    Only deliverables-specific overrides here */
