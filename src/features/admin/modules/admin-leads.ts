@@ -747,7 +747,7 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
     modal.body.innerHTML = `
       <div class="form-group">
         <label class="form-label">Who cancelled?</label>
-        <div class="btn-group" style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+        <div class="btn-group flex gap-2 mb-4">
           <button type="button" class="btn btn-outline cancelled-by-btn" data-value="admin">I Cancelled</button>
           <button type="button" class="btn btn-outline cancelled-by-btn" data-value="client">Client Cancelled</button>
         </div>

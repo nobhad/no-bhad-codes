@@ -458,11 +458,11 @@ async function loadSavedReports(): Promise<void> {
       is_favorite?: boolean;
     }) => `
       <div class="report-item" data-report-id="${report.id}">
-        <div class="report-info">
+        <div class="report-info flex flex-col gap-0-5">
           <span class="report-name">${report.is_favorite ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> ' : ''}${escapeHtml(report.name)}</span>
           <span class="report-meta">${report.type} ${report.last_run_at ? `• Last run: ${formatDateTime(report.last_run_at)}` : ''}</span>
         </div>
-        <div class="report-actions">
+        <div class="report-actions flex items-center gap-0-5">
           <button class="btn btn-secondary btn-sm run-report-btn" data-report-id="${report.id}" title="Run Report">Run</button>
           <button class="btn btn-outline btn-sm schedule-report-btn" data-report-id="${report.id}" data-report-name="${escapeHtml(report.name)}" title="Schedule Report">Schedule</button>
           <button class="btn btn-danger btn-sm delete-report-btn" data-report-id="${report.id}" title="Delete Report">
@@ -725,11 +725,11 @@ async function loadScheduledReports(): Promise<void> {
 
     container.innerHTML = scheduledReports.map(sched => `
       <div class="report-item" data-schedule-id="${sched.id}">
-        <div class="report-info">
+        <div class="report-info flex flex-col gap-0-5">
           <span class="report-name">${escapeHtml(sched.reportName)}</span>
           <span class="report-meta">${sched.frequency} ${sched.next_run_at ? `• Next run: ${formatDateTime(sched.next_run_at)}` : ''}</span>
         </div>
-        <div class="report-actions">
+        <div class="report-actions flex items-center gap-0-5">
           <button class="icon-btn toggle-schedule-btn" data-schedule-id="${sched.id}" data-active="${sched.is_active}" title="${sched.is_active ? 'Pause' : 'Resume'}" aria-label="${sched.is_active ? 'Pause schedule' : 'Resume schedule'}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               ${sched.is_active
@@ -847,7 +847,7 @@ async function loadMetricAlerts(): Promise<void> {
       last_triggered_at?: string;
     }) => `
       <div class="report-item alert-item" data-alert-id="${alert.id}">
-        <div class="report-info">
+        <div class="report-info flex flex-col gap-0-5">
           <span class="report-name">
             ${alert.is_active ? '' : '<span class="badge badge-muted">Paused</span> '}
             ${escapeHtml(alert.name)}
@@ -857,7 +857,7 @@ async function loadMetricAlerts(): Promise<void> {
             ${alert.last_triggered_at ? `• Last triggered: ${formatDateTime(alert.last_triggered_at)}` : ''}
           </span>
         </div>
-        <div class="report-actions">
+        <div class="report-actions flex items-center gap-0-5">
           <button class="icon-btn toggle-alert-btn" data-alert-id="${alert.id}" data-active="${alert.is_active}" title="${alert.is_active ? 'Pause' : 'Resume'}" aria-label="${alert.is_active ? 'Pause alert' : 'Resume alert'}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               ${alert.is_active
@@ -2337,25 +2337,25 @@ export function renderAnalyticsTab(container: HTMLElement): void {
       <div class="analytics-card-grid">
         <div class="analytics-section">
           <h3>Popular Pages</h3>
-          <div class="data-list" id="popular-pages">
+          <div class="data-list flex flex-col gap-1" id="popular-pages">
             <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
         <div class="analytics-section">
           <h3>Device Breakdown</h3>
-          <div class="data-list" id="device-breakdown">
+          <div class="data-list flex flex-col gap-1" id="device-breakdown">
             <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
         <div class="analytics-section">
           <h3>Geographic Distribution</h3>
-          <div class="data-list" id="geo-distribution">
+          <div class="data-list flex flex-col gap-1" id="geo-distribution">
             <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
         <div class="analytics-section">
           <h3>Engagement Events</h3>
-          <div class="data-list" id="engagement-events">
+          <div class="data-list flex flex-col gap-1" id="engagement-events">
             <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
           </div>
         </div>
@@ -2408,7 +2408,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
             <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
           </button>
         </div>
-        <div class="reports-list" id="saved-reports-list">
+        <div class="reports-list flex flex-col gap-1" id="saved-reports-list">
           <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       </div>
@@ -2418,7 +2418,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
         <div class="section-header-with-actions">
           <h3>Scheduled Reports</h3>
         </div>
-        <div class="reports-list" id="scheduled-reports-list">
+        <div class="reports-list flex flex-col gap-1" id="scheduled-reports-list">
           <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       </div>
@@ -2431,7 +2431,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
             <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
           </button>
         </div>
-        <div class="alerts-list" id="metric-alerts-list">
+        <div class="alerts-list flex flex-col gap-1" id="metric-alerts-list">
           <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
         </div>
       </div>
@@ -2466,7 +2466,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
       <!-- Bundle Analysis -->
       <div class="analytics-section">
         <h3>Bundle Analysis</h3>
-        <div class="bundle-info">
+        <div class="bundle-info flex flex-col gap-1">
           <div class="bundle-item">
             <span>Total Bundle Size</span>
             <span id="total-bundle-size">-</span>

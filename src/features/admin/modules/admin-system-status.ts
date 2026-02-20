@@ -72,7 +72,7 @@ export function renderSystemStatusTab(container: HTMLElement): void {
     <!-- Quick Actions -->
     <div class="portal-project-card portal-shadow">
       <h3>Quick Actions</h3>
-      <div class="quick-actions-grid">
+      <div class="quick-actions-grid flex flex-wrap gap-2">
         <button type="button" class="btn btn-secondary" id="btn-clear-cache" title="Clear application cache">
           ${RENDER_ICONS.TRASH}
           Clear Cache
