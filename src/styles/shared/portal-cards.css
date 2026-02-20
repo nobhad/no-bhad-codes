@@ -306,25 +306,91 @@
 }
 
 /* =====================================================
-   STAT CARD
+   STAT CARD - UNIFIED
    Clean, minimal stat cards inspired by Linear.
    No accent bars, no visual noise - just clear hierarchy.
+   ALL stat cards use this pattern for consistency.
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card, .kpi-card) {
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .stat-card,
+  .kpi-card,
+  .tasks-stat-card,
+  .overview-stat-card,
+  .vital-card
+) {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1);
-  padding: 11px 14px;
+  padding: 13px 14px;
   background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--portal-radius-sm, 8px);
   transition: background 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle gradient overlay for depth */
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .stat-card,
+  .kpi-card,
+  .tasks-stat-card,
+  .overview-stat-card,
+  .vital-card
+)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 /* Remove any accent lines - keep it clean */
-:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card, .kpi-card)::before {
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .stat-card,
+  .kpi-card,
+  .tasks-stat-card,
+  .overview-stat-card,
+  .vital-card
+)::before {
   display: none;
+}
+
+/* Hover state for clickable stat cards */
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .stat-card,
+  .kpi-card,
+  .tasks-stat-card,
+  .overview-stat-card,
+  .vital-card
+):hover {
+  background: var(--portal-bg-dark);
+}
+
+/* =====================================================
+   CONTENT CARD - UNIFIED
+   Bordered cards for templates, previews, selections.
+   Hover effect with border color change.
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .content-card,
+  .template-card,
+  .preview-card
+) {
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-color);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-2);
+  transition: border-color var(--transition-fast);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .content-card,
+  .template-card,
+  .preview-card
+):hover {
+  border-color: var(--color-primary);
 }
 
 /* Stat number - the big value (unified)

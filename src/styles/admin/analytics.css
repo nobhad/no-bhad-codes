@@ -105,28 +105,14 @@
 }
 
 /* ============================================
-   KPI Cards - extends shared .stat-card from portal-cards.css
+   KPI Cards - base styles in portal-cards.css
    ============================================ */
 
-/* KPI-specific overrides: centered, clickable, gradient overlay */
+/* KPI-specific overrides: centered, clickable */
 .kpi-card {
   align-items: center;
   text-align: center;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.kpi-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.kpi-card:hover {
-  background: var(--portal-bg-dark);
 }
 
 .kpi-card-icon {
@@ -169,18 +155,9 @@
    Vital Cards
    ============================================ */
 
+/* .vital-card - base styles in portal-cards.css */
 .vital-card {
-  background: var(--portal-bg-medium);
-  border: none;
-  border-radius: var(--portal-radius-sm);
-  padding: 11px 14px;
   text-align: center;
-  position: relative;
-  transition: background 0.15s;
-}
-
-.vital-card:hover {
-  background: var(--portal-bg-light);
 }
 
 .vital-card h4 {
