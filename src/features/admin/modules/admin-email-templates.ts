@@ -678,7 +678,7 @@ async function openVersionsModal(id: number): Promise<void> {
     }
 
     versionsModal.body.innerHTML = `
-      <div class="versions-list">
+      <div class="versions-list flex flex-col gap-2">
         ${versions.map(v => `
           <div class="version-item">
             <div class="version-header">

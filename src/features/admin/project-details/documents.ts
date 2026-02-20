@@ -232,7 +232,7 @@ export async function showDocumentGenerationModal(
   });
 
   modal.body.innerHTML = `
-    <div class="document-generation-content">
+    <div class="document-generation-content flex flex-col gap-4">
       <p class="modal-description">Generate and export project documents. Preview before downloading or save directly to project files.</p>
 
       <div class="document-section">

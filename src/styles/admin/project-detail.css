@@ -1804,11 +1804,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   min-width: min(600px, 90vw);
 }
 
-.document-generation-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
+/* Uses utility classes: flex flex-col gap-4 */
 
 .document-generation-content .modal-description {
   color: var(--portal-text-secondary);
