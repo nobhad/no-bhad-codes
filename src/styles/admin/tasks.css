@@ -114,37 +114,20 @@
   margin: 0;
 }
 
-.tasks-stat-card .stat-card-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--portal-radius-sm);
-}
-
-.tasks-stat-card .stat-card-icon svg {
-  width: 18px;
-  height: 18px;
-}
-
+/* Stat card icons - colors only, no backgrounds (unified with portal-cards.css) */
 .tasks-stat-card .stat-icon-muted {
-  background: var(--color-neutral-700);
   color: var(--portal-text-secondary);
 }
 
 .tasks-stat-card .stat-icon-blue {
-  background: color-mix(in srgb, var(--app-color-primary) 20%, transparent);
   color: var(--app-color-primary);
 }
 
 .tasks-stat-card .stat-icon-warning {
-  background: color-mix(in srgb, var(--color-warning-500) 20%, transparent);
   color: var(--color-warning-500);
 }
 
 .tasks-stat-card .stat-icon-green {
-  background: color-mix(in srgb, var(--status-active) 20%, transparent);
   color: var(--status-active);
 }
 
