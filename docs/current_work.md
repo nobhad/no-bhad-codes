@@ -14,7 +14,7 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 
 **Current Status:**
 
-- Total CSS: ~51,836 lines (src/styles: 50,226 + src/design-system: 1,610)
+- Total CSS: ~51,719 lines (src/styles: 50,109 + src/design-system: 1,610)
 - Created `src/styles/base/utilities.css` with atomic utility classes
 - Consolidated portal-tables.css using `:is()` selector (886→652 lines)
 - Migrated 39+ pure utility patterns to utility classes
@@ -29,6 +29,13 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 - [x] Consolidated .tab-content base rule (portal-tabs.css)
 - [x] Removed duplicate annotation tool styles from design-review.css
 - [x] Removed duplicate utility classes (.sr-only, .truncate-text)
+
+**Icon Styling Unification (Feb 20):**
+
+- [x] Consolidated .icon-btn definitions to portal-buttons.css (82 lines removed)
+- [x] Removed stat-icon background colors from tasks.css (transparent icons)
+- [x] Removed duplicate .stat-card-icon from overview-layout.css
+- [x] Removed duplicate .panel-icon from overview-layout.css
 
 **Design System Token Cleanup:**
 
