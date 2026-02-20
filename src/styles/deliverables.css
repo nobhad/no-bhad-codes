@@ -201,40 +201,7 @@
   min-width: 450px;
 }
 
-/* .modal-form flex layout from shared/portal-components.css */
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.form-group label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--portal-text-light);
-}
-
-.form-input {
-  padding: var(--space-1) var(--space-2);
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-bg-medium);
-  border-radius: 4px;
-  color: var(--portal-text-light);
-  font-size: 13px;
-  transition: border-color var(--transition-fast);
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--color-brand-primary);
-}
-
-textarea.form-input {
-  resize: vertical;
-  min-height: 80px;
-  font-family: inherit;
-}
+/* .form-group and .form-input styling from shared/portal-forms.css */
 
 .file-upload-area {
   display: flex;
@@ -342,7 +309,7 @@ textarea.form-input {
   color: var(--portal-text-light);
   cursor: pointer;
   transition: all var(--transition-fast);
-  font-size: 11px;
+  font-size: var(--font-size-xs);
 }
 
 .zoom-btn:hover {
@@ -351,7 +318,7 @@ textarea.form-input {
 }
 
 .zoom-display {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
   min-width: 50px;
   text-align: center;
@@ -592,7 +559,7 @@ textarea.form-input {
   background: var(--portal-bg-dark);
   border-radius: 3px;
   color: var(--portal-text-secondary);
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;

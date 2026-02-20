@@ -613,7 +613,7 @@
   background: var(--portal-bg-darker);
   border: 1px solid var(--portal-border);
   color: var(--portal-text-muted);
-  font-size: 0.6875rem;
+  font-size: var(--font-size-xs);
   font-weight: 500;
 }
 

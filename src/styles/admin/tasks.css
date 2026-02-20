@@ -148,21 +148,14 @@
   color: var(--status-active);
 }
 
-.tasks-stat-card .stat-card-value {
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-  color: var(--portal-text-light);
-  line-height: 1;
-}
+/* .stat-card-value styling from unified rule in portal-cards.css */
 
 /* Blocked card highlight when has items */
 .tasks-stat-card--alert.has-items {
   background: color-mix(in srgb, var(--color-warning-500) 10%, var(--portal-bg-medium));
 }
 
-.tasks-stat-card--alert.has-items .stat-card-value {
-  color: var(--color-warning-500);
-}
+/* .stat-card-value alert color from unified rule in portal-cards.css */
 
 /* Responsive: stack on smaller screens */
 @media (max-width: 900px) {

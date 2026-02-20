@@ -18,10 +18,8 @@
   margin-bottom: var(--space-6);
 }
 
-/* Stat cards use shared .stat-card styles */
-.cp-questionnaires-stats .stat-card-success .stat-number {
-  color: var(--color-success);
-}
+/* Stat cards use shared .stat-card styles from portal-cards.css */
+/* .stat-card-success color from unified rule */
 
 /* ============================================================================
    QUESTIONNAIRES SECTIONS

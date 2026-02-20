@@ -464,9 +464,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 [data-page="admin"] .metric-group h3,
 [data-page="admin"] .analytics-section h3,
 [data-page="admin"] .analytics-overview h3,
-[data-page="admin"] .recent-activity h3 {
-  margin-bottom: var(--space-1-5);
-}
+/* h3 margin handled by parent container gap */
 
 /* ================================================
    ADMIN PORTAL - GLOBAL BUTTON STYLES
@@ -711,9 +709,7 @@ body.modal-open .dashboard-content {
 }
 
 /* h3 styling from unified rule in portal-cards.css - only layout here */
-[data-page="admin"] .metric-card h3 {
-  margin-bottom: var(--space-2);
-}
+/* h3 margin handled by parent container gap */
 
 [data-page="admin"] .metric-value {
   color: var(--portal-text-light);
@@ -956,13 +952,9 @@ body.modal-open .dashboard-content {
 }
 
 /* Table card header h3 - match table column header typography */
+/* .admin-table-header h3 - uses unified h3 from portal-cards.css */
 .admin-table-header h3 {
   order: 0;
-  margin: 0;
-  font-size: var(--table-header-font-size, 0.6875rem);
-  font-weight: var(--table-header-font-weight, 500);
-  letter-spacing: var(--table-header-letter-spacing, 0.05em);
-  text-transform: uppercase;
   color: var(--portal-text-secondary);
 }
 
@@ -1496,9 +1488,7 @@ body.modal-open .dashboard-content {
 }
 
 /* h3 styling from unified rule in portal-cards.css - only layout here */
-.system-section h3 {
-  margin-bottom: var(--space-3);
-}
+/* h3 margin handled by parent container gap */
 
 .status-grid {
   display: grid;
@@ -1838,16 +1828,7 @@ body.modal-open .dashboard-content {
     gap: 0.5rem;
   }
 
-  [data-page="admin"] .stat-card .stat-number {
-    font-size: 1.5rem;
-    margin: 0;
-  }
-
-  [data-page="admin"] .stat-card .field-label,
-  [data-page="admin"] .stat-card .stat-label {
-    font-size: 0.75rem;
-    text-align: right;
-  }
+  /* .stat-card mobile responsiveness in portal-cards.css */
 
   /* ================================================
      MOBILE TABLE - Single column card layout

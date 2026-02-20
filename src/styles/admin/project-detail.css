@@ -1097,11 +1097,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   box-shadow: var(--shadow-card);
 }
 
-.overview-stat .stat-number {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-}
+/* .stat-number styling from unified rule in portal-cards.css */
 
 /* Label styling from unified rule in portal-forms.css */
 

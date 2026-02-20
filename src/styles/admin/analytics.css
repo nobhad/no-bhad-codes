@@ -125,9 +125,7 @@
   height: 24px;
 }
 
-.kpi-card-value {
-  color: var(--color-primary);
-}
+/* .kpi-card-value color from unified rule in portal-cards.css */
 
 .kpi-card-change {
   display: flex;
