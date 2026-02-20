@@ -108,17 +108,7 @@
 }
 
 /* .stat-card-label removed - using .field-label from unified rule in portal-cards.css */
-
-.stat-card-icon {
-  width: 22px;
-  height: 22px;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Icon colors from unified rule in portal-cards.css */
+/* .stat-card-icon sizing in shared/portal-cards.css */
 /* .stat-card-value styling from unified rule in portal-cards.css */
 
 .stat-card-value {
@@ -180,17 +170,7 @@
   margin: 0;
 }
 
-.panel-icon {
-  width: 17px;
-  height: 17px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--portal-bg-hover);
-}
-
-/* Panel icon colors from unified rule in portal-cards.css */
+/* .panel-icon base styles in shared/portal-cards.css */
 
 .panel-badge {
   font-family: var(--font-family-mono);
