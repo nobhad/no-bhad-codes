@@ -8,23 +8,18 @@
  */
 
 import { getDatabase } from '../database/init.js';
-import { getNumber, getString } from '../database/row-helpers.js';
 import { userService } from './user-service.js';
+import {
+  type AdHocRequest,
+  type AdHocRequestStatus,
+  type AdHocRequestType,
+  type AdHocRequestPriority,
+  type AdHocRequestUrgency,
+  type AdHocRequestRow,
+  toAdHocRequest
+} from '../database/entities/index.js';
 
-export type AdHocRequestStatus =
-  | 'submitted'
-  | 'reviewing'
-  | 'quoted'
-  | 'approved'
-  | 'in_progress'
-  | 'completed'
-  | 'declined';
-
-export type AdHocRequestType = 'feature' | 'change' | 'bug_fix' | 'enhancement' | 'support';
-
-export type AdHocRequestPriority = 'low' | 'normal' | 'high' | 'urgent';
-
-export type AdHocRequestUrgency = 'normal' | 'priority' | 'urgent' | 'emergency';
+export type { AdHocRequestStatus, AdHocRequestType, AdHocRequestPriority, AdHocRequestUrgency, AdHocRequest };
 
 const REQUEST_STATUSES: AdHocRequestStatus[] = [
   'submitted',
@@ -47,33 +42,6 @@ const REQUEST_TYPES: AdHocRequestType[] = [
 const REQUEST_PRIORITIES: AdHocRequestPriority[] = ['low', 'normal', 'high', 'urgent'];
 
 const REQUEST_URGENCY: AdHocRequestUrgency[] = ['normal', 'priority', 'urgent', 'emergency'];
-
-export interface AdHocRequest {
-  id: number;
-  projectId: number;
-  clientId: number;
-  title: string;
-  description: string;
-  status: AdHocRequestStatus;
-  requestType: AdHocRequestType;
-  priority: AdHocRequestPriority;
-  urgency: AdHocRequestUrgency;
-  estimatedHours: number | null;
-  flatRate: number | null;
-  hourlyRate: number | null;
-  quotedPrice: number | null;
-  attachmentFileId?: number | null;
-  taskId?: number | null;
-  convertedAt?: string | null;
-  convertedBy?: string | null;
-  clientName?: string | null;
-  clientEmail?: string | null;
-  projectName?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
-  deletedBy?: string | null;
-}
 
 export interface AdHocRequestCreateData {
   projectId: number;
@@ -120,40 +88,6 @@ interface AdHocRequestFilters {
   includeDeleted?: boolean;
 }
 
-function toNumber(value: unknown): number | null {
-  if (value === null || value === undefined || value === '') return null;
-  const parsed = Number(value);
-  return Number.isNaN(parsed) ? null : parsed;
-}
-
-function mapRequest(row: Record<string, unknown>): AdHocRequest {
-  return {
-    id: getNumber(row, 'id'),
-    projectId: getNumber(row, 'project_id'),
-    clientId: getNumber(row, 'client_id'),
-    title: getString(row, 'title'),
-    description: getString(row, 'description'),
-    status: getString(row, 'status') as AdHocRequestStatus,
-    requestType: getString(row, 'request_type') as AdHocRequestType,
-    priority: getString(row, 'priority') as AdHocRequestPriority,
-    urgency: getString(row, 'urgency') as AdHocRequestUrgency,
-    estimatedHours: toNumber(row.estimated_hours),
-    flatRate: toNumber(row.flat_rate),
-    hourlyRate: toNumber(row.hourly_rate),
-    quotedPrice: toNumber(row.quoted_price),
-    attachmentFileId: toNumber(row.attachment_file_id),
-    taskId: toNumber(row.task_id),
-    convertedAt: row.converted_at ? getString(row, 'converted_at') : null,
-    convertedBy: row.converted_by ? getString(row, 'converted_by') : null,
-    clientName: row.client_name ? getString(row, 'client_name') : null,
-    clientEmail: row.client_email ? getString(row, 'client_email') : null,
-    projectName: row.project_name ? getString(row, 'project_name') : null,
-    createdAt: getString(row, 'created_at'),
-    updatedAt: getString(row, 'updated_at'),
-    deletedAt: row.deleted_at as string | null,
-    deletedBy: row.deleted_by as string | null
-  };
-}
 
 class AdHocRequestService {
   async getRequests(filters: AdHocRequestFilters = {}): Promise<AdHocRequest[]> {
@@ -213,7 +147,7 @@ class AdHocRequestService {
     query += ' ORDER BY created_at DESC';
 
     const rows = await db.all(query, params);
-    return rows.map((row) => mapRequest(row as Record<string, unknown>));
+    return rows.map((row) => toAdHocRequest(row as AdHocRequestRow));
   }
 
   async getRequest(requestId: number, includeDeleted: boolean = false): Promise<AdHocRequest> {
@@ -236,7 +170,7 @@ class AdHocRequestService {
       throw new Error('Ad hoc request not found');
     }
 
-    return mapRequest(row as Record<string, unknown>);
+    return toAdHocRequest(row as AdHocRequestRow);
   }
 
   async createRequest(data: AdHocRequestCreateData): Promise<AdHocRequest> {

@@ -8,11 +8,27 @@
  * duplicate detection, and bulk operations.
  */
 
-import { getDatabase } from '../database/init.js';
+import { getDatabase, type SqlParam } from '../database/init.js';
 import { userService } from './user-service.js';
+import {
+  toScoringRule,
+  toPipelineStage,
+  toLeadTask as toTask,
+  toLeadNote as toNote,
+  toLeadSource,
+  toLeadSummary,
+  toDuplicateResult,
+  type ScoringRuleRow,
+  type PipelineStageRow,
+  type LeadTaskRow as TaskRow,
+  type LeadNoteRow as NoteRow,
+  type LeadSourceRow,
+  type ProjectRow,
+  type DuplicateRow
+} from '../database/entities/index.js';
 
-// Type definitions
-type SqlValue = string | number | boolean | null;
+// Type alias for backward compatibility
+type SqlValue = SqlParam;
 
 // =====================================================
 // INTERFACES - Scoring Rules
@@ -41,18 +57,7 @@ export interface ScoringRuleData {
   isActive?: boolean;
 }
 
-interface ScoringRuleRow {
-  id: number;
-  name: string;
-  description?: string;
-  field_name: string;
-  operator: string;
-  threshold_value: string;
-  points: number;
-  is_active: number;
-  created_at: string;
-  updated_at: string;
-}
+// ScoringRuleRow imported from entities
 
 // =====================================================
 // INTERFACES - Pipeline
@@ -71,18 +76,7 @@ export interface PipelineStage {
   createdAt: string;
 }
 
-interface PipelineStageRow {
-  id: number;
-  name: string;
-  description?: string;
-  color: string;
-  sort_order: number;
-  win_probability: number | string;
-  is_won: number;
-  is_lost: number;
-  auto_convert_to_project: number;
-  created_at: string;
-}
+// PipelineStageRow imported from entities
 
 export interface PipelineView {
   stages: (PipelineStage & { leads: LeadSummary[] })[];
@@ -136,24 +130,7 @@ export interface TaskData {
   reminderAt?: string;
 }
 
-interface TaskRow {
-  id: number;
-  project_id: number;
-  title: string;
-  description?: string;
-  task_type: string;
-  due_date?: string;
-  due_time?: string;
-  status: string;
-  assigned_to_user_id?: number;
-  assigned_to_name?: string; // From JOIN with users table
-  priority: string;
-  reminder_at?: string;
-  completed_at?: string;
-  completed_by?: string;
-  created_at: string;
-  updated_at: string;
-}
+// TaskRow imported from entities (as LeadTaskRow)
 
 // =====================================================
 // INTERFACES - Notes
@@ -169,16 +146,7 @@ export interface LeadNote {
   updatedAt: string;
 }
 
-interface NoteRow {
-  id: number;
-  project_id: number;
-  author_user_id: number | null;
-  author_name: string | null; // From JOIN with users table
-  content: string;
-  is_pinned: number;
-  created_at: string;
-  updated_at: string;
-}
+// NoteRow imported from entities (as LeadNoteRow)
 
 // =====================================================
 // INTERFACES - Lead Sources
@@ -192,13 +160,7 @@ export interface LeadSource {
   createdAt: string;
 }
 
-interface LeadSourceRow {
-  id: number;
-  name: string;
-  description?: string;
-  is_active: number;
-  created_at: string;
-}
+// LeadSourceRow imported from entities
 
 // =====================================================
 // INTERFACES - Duplicates
@@ -218,17 +180,7 @@ export interface DuplicateResult {
   lead2?: LeadSummary;
 }
 
-interface DuplicateRow {
-  id: number;
-  lead_id_1: number;
-  lead_id_2: number;
-  similarity_score: number | string;
-  match_fields?: string;
-  status: string;
-  resolved_at?: string;
-  resolved_by?: string;
-  created_at: string;
-}
+// DuplicateRow imported from entities
 
 // =====================================================
 // INTERFACES - Analytics
@@ -276,142 +228,14 @@ export interface LeadAnalytics {
 // INTERFACES - Project/Lead
 // =====================================================
 
-interface ProjectRow {
-  id: number;
-  client_id: number;
-  project_name: string;
-  description?: string;
-  status: string;
-  priority: string;
-  budget_range?: string;
-  project_type?: string;
-  lead_score?: number;
-  lead_score_breakdown?: string;
-  pipeline_stage_id?: number;
-  lead_source_id?: number;
-  assigned_to?: string;
-  expected_value?: number | string;
-  expected_close_date?: string;
-  lost_reason?: string;
-  lost_at?: string;
-  won_at?: string;
-  competitor?: string;
-  last_activity_at?: string;
-  next_follow_up_at?: string;
-  created_at: string;
-  updated_at: string;
-  // Joined fields
-  contact_name?: string;
-  company_name?: string;
-  client_email?: string;
-  stage_name?: string;
-  source_name?: string;
-}
+// ProjectRow imported from entities
 
 // =====================================================
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS - Imported from database/entities
 // =====================================================
-
-function toScoringRule(row: ScoringRuleRow): ScoringRule {
-  return {
-    id: row.id,
-    name: row.name,
-    description: row.description,
-    fieldName: row.field_name,
-    operator: row.operator as ScoringRule['operator'],
-    thresholdValue: row.threshold_value,
-    points: row.points,
-    isActive: Boolean(row.is_active),
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  };
-}
-
-function toPipelineStage(row: PipelineStageRow): PipelineStage {
-  return {
-    id: row.id,
-    name: row.name,
-    description: row.description,
-    color: row.color,
-    sortOrder: row.sort_order,
-    winProbability: parseFloat(String(row.win_probability)),
-    isWon: Boolean(row.is_won),
-    isLost: Boolean(row.is_lost),
-    autoConvertToProject: Boolean(row.auto_convert_to_project),
-    createdAt: row.created_at
-  };
-}
-
-function toTask(row: TaskRow): LeadTask {
-  return {
-    id: row.id,
-    projectId: row.project_id,
-    title: row.title,
-    description: row.description,
-    taskType: row.task_type as LeadTask['taskType'],
-    dueDate: row.due_date,
-    dueTime: row.due_time,
-    status: row.status as LeadTask['status'],
-    assignedTo: row.assigned_to_name,
-    priority: row.priority as LeadTask['priority'],
-    reminderAt: row.reminder_at,
-    completedAt: row.completed_at,
-    completedBy: row.completed_by,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  };
-}
-
-function toNote(row: NoteRow): LeadNote {
-  return {
-    id: row.id,
-    projectId: row.project_id,
-    author: row.author_name || 'Unknown',
-    content: row.content,
-    isPinned: Boolean(row.is_pinned),
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  };
-}
-
-function toLeadSource(row: LeadSourceRow): LeadSource {
-  return {
-    id: row.id,
-    name: row.name,
-    description: row.description,
-    isActive: Boolean(row.is_active),
-    createdAt: row.created_at
-  };
-}
-
-function toLeadSummary(row: ProjectRow): LeadSummary {
-  return {
-    id: row.id,
-    projectName: row.project_name,
-    clientName: row.contact_name,
-    companyName: row.company_name,
-    budgetRange: row.budget_range,
-    leadScore: row.lead_score || 0,
-    expectedValue: row.expected_value ? parseFloat(String(row.expected_value)) : undefined,
-    expectedCloseDate: row.expected_close_date,
-    assignedTo: row.assigned_to,
-    createdAt: row.created_at
-  };
-}
-
-function toDuplicateResult(row: DuplicateRow): DuplicateResult {
-  return {
-    id: row.id,
-    leadId1: row.lead_id_1,
-    leadId2: row.lead_id_2,
-    similarityScore: parseFloat(String(row.similarity_score)),
-    matchFields: row.match_fields ? JSON.parse(row.match_fields) : [],
-    status: row.status as DuplicateResult['status'],
-    resolvedAt: row.resolved_at,
-    resolvedBy: row.resolved_by,
-    createdAt: row.created_at
-  };
-}
+// toScoringRule, toPipelineStage, toTask (as toLeadTask),
+// toNote (as toLeadNote), toLeadSource, toLeadSummary,
+// toDuplicateResult are imported from '../database/entities/index.js'
 
 // =====================================================
 // LEAD SERVICE CLASS

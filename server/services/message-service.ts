@@ -17,64 +17,32 @@
 
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
+import {
+  type Mention,
+  type Reaction,
+  type Subscription,
+  type ReadReceipt,
+  type PinnedMessage,
+  type MentionRow,
+  type ReactionRow,
+  type SubscriptionRow,
+  type ReadReceiptRow,
+  type PinnedMessageRow,
+  toMention,
+  toReaction,
+  toSubscription,
+  toReadReceipt,
+  toPinnedMessage
+} from '../database/entities/index.js';
 
 // =====================================================
 // TYPES
 // =====================================================
 
-interface Mention {
-  id: number;
-  messageId: number;
-  mentionedType: 'user' | 'team' | 'all';
-  mentionedId?: string;
-  notified: boolean;
-  notifiedAt?: string;
-  createdAt: string;
-}
-
-interface Reaction {
-  id: number;
-  messageId: number;
-  userEmail: string;
-  userType: string;
-  reaction: string;
-  createdAt: string;
-}
-
 interface ReactionSummary {
   reaction: string;
   count: number;
   users: { email: string; type: string }[];
-}
-
-interface Subscription {
-  id: number;
-  projectId: number;
-  userEmail: string;
-  userType: string;
-  notifyAll: boolean;
-  notifyMentions: boolean;
-  notifyReplies: boolean;
-  mutedUntil?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface ReadReceipt {
-  id: number;
-  messageId: number;
-  userEmail: string;
-  userType: string;
-  readAt: string;
-}
-
-interface PinnedMessage {
-  id: number;
-  threadId: number;
-  messageId: number;
-  pinnedBy: string;
-  pinnedAt: string;
-  message?: object;
 }
 
 interface MessageWithDetails {
@@ -112,64 +80,6 @@ interface SearchResult {
 // =====================================================
 // HELPER FUNCTIONS
 // =====================================================
-
-function mapMention(row: Record<string, unknown>): Mention {
-  return {
-    id: getNumber(row, 'id'),
-    messageId: getNumber(row, 'message_id'),
-    mentionedType: getString(row, 'mentioned_type') as 'user' | 'team' | 'all',
-    mentionedId: row.mentioned_id as string | undefined,
-    notified: Boolean(row.notified),
-    notifiedAt: row.notified_at as string | undefined,
-    createdAt: getString(row, 'created_at')
-  };
-}
-
-function mapReaction(row: Record<string, unknown>): Reaction {
-  return {
-    id: getNumber(row, 'id'),
-    messageId: getNumber(row, 'message_id'),
-    userEmail: getString(row, 'user_email'),
-    userType: getString(row, 'user_type'),
-    reaction: getString(row, 'reaction'),
-    createdAt: getString(row, 'created_at')
-  };
-}
-
-function mapSubscription(row: Record<string, unknown>): Subscription {
-  return {
-    id: getNumber(row, 'id'),
-    projectId: getNumber(row, 'project_id'),
-    userEmail: getString(row, 'user_email'),
-    userType: getString(row, 'user_type'),
-    notifyAll: Boolean(row.notify_all),
-    notifyMentions: Boolean(row.notify_mentions),
-    notifyReplies: Boolean(row.notify_replies),
-    mutedUntil: row.muted_until as string | undefined,
-    createdAt: getString(row, 'created_at'),
-    updatedAt: getString(row, 'updated_at')
-  };
-}
-
-function mapReadReceipt(row: Record<string, unknown>): ReadReceipt {
-  return {
-    id: getNumber(row, 'id'),
-    messageId: getNumber(row, 'message_id'),
-    userEmail: getString(row, 'user_email'),
-    userType: getString(row, 'user_type'),
-    readAt: getString(row, 'read_at')
-  };
-}
-
-function mapPinnedMessage(row: Record<string, unknown>): PinnedMessage {
-  return {
-    id: getNumber(row, 'id'),
-    threadId: getNumber(row, 'thread_id'),
-    messageId: getNumber(row, 'message_id'),
-    pinnedBy: getString(row, 'pinned_by'),
-    pinnedAt: getString(row, 'pinned_at')
-  };
-}
 
 /**
  * Parse mentions from message content
@@ -231,7 +141,7 @@ class MessageService {
 
       const row = await db.get('SELECT * FROM message_mentions WHERE id = ?', [result.lastID]);
       if (row) {
-        savedMentions.push(mapMention(row as Record<string, unknown>));
+        savedMentions.push(toMention(row as MentionRow));
       }
     }
 
@@ -253,7 +163,7 @@ class MessageService {
       'SELECT * FROM message_mentions WHERE message_id = ?',
       [messageId]
     );
-    return rows.map((row) => mapMention(row as Record<string, unknown>));
+    return rows.map((row) => toMention(row as MentionRow));
   }
 
   /**
@@ -321,7 +231,7 @@ class MessageService {
     );
 
     const row = await db.get('SELECT * FROM message_reactions WHERE id = ?', [result.lastID]);
-    return mapReaction(row as Record<string, unknown>);
+    return toReaction(row as ReactionRow);
   }
 
   /**
@@ -401,7 +311,7 @@ class MessageService {
       );
     }
 
-    return mapSubscription(row as Record<string, unknown>);
+    return toSubscription(row as SubscriptionRow);
   }
 
   /**
@@ -445,7 +355,7 @@ class MessageService {
       [projectId, userEmail]
     );
 
-    return mapSubscription(row as Record<string, unknown>);
+    return toSubscription(row as SubscriptionRow);
   }
 
   /**
@@ -493,7 +403,7 @@ class MessageService {
       return true; // Default to notify
     }
 
-    const sub = mapSubscription(row as Record<string, unknown>);
+    const sub = toSubscription(row as SubscriptionRow);
 
     // Check if muted
     if (sub.mutedUntil && new Date(sub.mutedUntil) > new Date()) {
@@ -560,7 +470,7 @@ class MessageService {
       'SELECT * FROM message_read_receipts WHERE message_id = ? ORDER BY read_at DESC',
       [messageId]
     );
-    return rows.map((row) => mapReadReceipt(row as Record<string, unknown>));
+    return rows.map((row) => toReadReceipt(row as ReadReceiptRow));
   }
 
   /**
@@ -625,7 +535,7 @@ class MessageService {
       [threadId, messageId]
     );
 
-    return mapPinnedMessage(row as Record<string, unknown>);
+    return toPinnedMessage(row as PinnedMessageRow);
   }
 
   /**
@@ -664,7 +574,7 @@ class MessageService {
 
     return rows.map((row) => {
       const r = row as Record<string, unknown>;
-      const pinned = mapPinnedMessage(r);
+      const pinned = toPinnedMessage(r as PinnedMessageRow);
       pinned.message = {
         senderName: getString(r, 'sender_name'),
         message: getString(r, 'message'),

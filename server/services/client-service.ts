@@ -8,11 +8,25 @@
  * custom fields, tags, and health scoring.
  */
 
-import { getDatabase } from '../database/init.js';
+import { getDatabase, type SqlParam } from '../database/init.js';
 import { userService } from './user-service.js';
+import {
+  toContact,
+  toActivity,
+  toCustomField,
+  toCustomFieldValue,
+  toTag,
+  toClientNote,
+  type ContactRow,
+  type ActivityRow,
+  type CustomFieldRow,
+  type CustomFieldValueRow,
+  type TagRow,
+  type ClientNoteRow
+} from '../database/entities/index.js';
 
-// Type definitions
-type SqlValue = string | number | boolean | null;
+// Type alias for backward compatibility
+type SqlValue = SqlParam;
 
 // =====================================================
 // INTERFACES - Contacts
@@ -46,21 +60,7 @@ export interface ContactCreateData {
   notes?: string;
 }
 
-interface ContactRow {
-  id: number;
-  client_id: number;
-  first_name: string;
-  last_name: string;
-  email?: string;
-  phone?: string;
-  title?: string;
-  department?: string;
-  role: string;
-  is_primary: number;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
+// ContactRow imported from entities
 
 // =====================================================
 // INTERFACES - Activities
@@ -93,16 +93,7 @@ export interface ActivityFilters {
   offset?: number;
 }
 
-interface ActivityRow {
-  id: number;
-  client_id: number;
-  activity_type: string;
-  title: string;
-  description?: string;
-  metadata?: string;
-  created_by?: string;
-  created_at: string;
-}
+// ActivityRow imported from entities
 
 // =====================================================
 // INTERFACES - Custom Fields
@@ -146,32 +137,7 @@ export interface CustomFieldValue {
   updatedAt: string;
 }
 
-interface CustomFieldRow {
-  id: number;
-  field_name: string;
-  field_label: string;
-  field_type: string;
-  options?: string;
-  is_required: number;
-  placeholder?: string;
-  default_value?: string;
-  display_order: number;
-  is_active: number;
-  created_at: string;
-  updated_at: string;
-}
-
-interface CustomFieldValueRow {
-  id: number;
-  client_id: number;
-  field_id: number;
-  field_name: string;
-  field_label: string;
-  field_type: string;
-  field_value?: string;
-  created_at: string;
-  updated_at: string;
-}
+// CustomFieldRow and CustomFieldValueRow imported from entities
 
 // =====================================================
 // INTERFACES - Tags
@@ -193,14 +159,7 @@ export interface TagData {
   tagType?: string;
 }
 
-interface TagRow {
-  id: number;
-  name: string;
-  color: string;
-  description?: string;
-  tag_type: string;
-  created_at: string;
-}
+// TagRow imported from entities
 
 // =====================================================
 // INTERFACES - Health Scoring & Stats
@@ -241,16 +200,7 @@ export interface ClientNote {
   updatedAt: string;
 }
 
-interface ClientNoteRow {
-  id: number;
-  client_id: number;
-  author_user_id: number | null;
-  author_name: string | null; // From JOIN with users table
-  content: string;
-  is_pinned: number;
-  created_at: string;
-  updated_at: string;
-}
+// ClientNoteRow imported from entities
 
 interface ClientRow {
   id: number;
@@ -275,93 +225,10 @@ interface ClientRow {
 }
 
 // =====================================================
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS - Imported from database/entities
 // =====================================================
-
-function toContact(row: ContactRow): ClientContact {
-  return {
-    id: row.id,
-    clientId: row.client_id,
-    firstName: row.first_name,
-    lastName: row.last_name,
-    email: row.email,
-    phone: row.phone,
-    title: row.title,
-    department: row.department,
-    role: row.role as ClientContact['role'],
-    isPrimary: Boolean(row.is_primary),
-    notes: row.notes,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  };
-}
-
-function toActivity(row: ActivityRow): ClientActivity {
-  return {
-    id: row.id,
-    clientId: row.client_id,
-    activityType: row.activity_type,
-    title: row.title,
-    description: row.description,
-    metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
-    createdBy: row.created_by,
-    createdAt: row.created_at
-  };
-}
-
-function toCustomField(row: CustomFieldRow): CustomField {
-  return {
-    id: row.id,
-    fieldName: row.field_name,
-    fieldLabel: row.field_label,
-    fieldType: row.field_type as CustomField['fieldType'],
-    options: row.options ? JSON.parse(row.options) : undefined,
-    isRequired: Boolean(row.is_required),
-    placeholder: row.placeholder,
-    defaultValue: row.default_value,
-    displayOrder: row.display_order,
-    isActive: Boolean(row.is_active),
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  };
-}
-
-function toCustomFieldValue(row: CustomFieldValueRow): CustomFieldValue {
-  return {
-    id: row.id,
-    clientId: row.client_id,
-    fieldId: row.field_id,
-    fieldName: row.field_name,
-    fieldLabel: row.field_label,
-    fieldType: row.field_type,
-    fieldValue: row.field_value,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  };
-}
-
-function toTag(row: TagRow): Tag {
-  return {
-    id: row.id,
-    name: row.name,
-    color: row.color,
-    description: row.description,
-    tagType: row.tag_type,
-    createdAt: row.created_at
-  };
-}
-
-function toClientNote(row: ClientNoteRow): ClientNote {
-  return {
-    id: row.id,
-    clientId: row.client_id,
-    author: row.author_name || 'Unknown',
-    content: row.content,
-    isPinned: Boolean(row.is_pinned),
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  };
-}
+// toContact, toActivity, toCustomField, toCustomFieldValue,
+// toTag, toClientNote are imported from '../database/entities/index.js'
 
 // =====================================================
 // CLIENT SERVICE CLASS

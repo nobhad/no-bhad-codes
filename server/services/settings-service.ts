@@ -12,20 +12,14 @@
  */
 
 import { getDatabase } from '../database/init.js';
-import { getString, getNumber, getBoolean } from '../database/row-helpers.js';
+import {
+  type SettingType,
+  type SystemSetting,
+  type SettingRow,
+  toSystemSetting
+} from '../database/entities/index.js';
 
-export type SettingType = 'string' | 'number' | 'boolean' | 'json';
-
-export interface SystemSetting {
-  id: number;
-  key: string;
-  value: string;
-  type: SettingType;
-  description?: string;
-  isSensitive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+export type { SettingType, SystemSetting };
 
 export interface BusinessInfo {
   name: string;
@@ -49,32 +43,6 @@ export interface InvoiceSettings {
   nextSequence: number;
 }
 
-interface SettingRow {
-  id: number;
-  setting_key: string;
-  setting_value: string;
-  setting_type: string;
-  description: string | null;
-  is_sensitive: number;
-  created_at: string;
-  updated_at: string;
-}
-
-/**
- * Map database row to SystemSetting
- */
-function mapSetting(row: Record<string, unknown>): SystemSetting {
-  return {
-    id: getNumber(row, 'id'),
-    key: getString(row, 'setting_key'),
-    value: getString(row, 'setting_value'),
-    type: getString(row, 'setting_type') as SettingType,
-    description: row.description as string | undefined,
-    isSensitive: getBoolean(row, 'is_sensitive'),
-    createdAt: getString(row, 'created_at'),
-    updatedAt: getString(row, 'updated_at')
-  };
-}
 
 /**
  * Parse setting value based on type
@@ -143,7 +111,7 @@ class SettingsService {
 
     this.cache.clear();
     for (const row of rows) {
-      const setting = mapSetting(row as Record<string, unknown>);
+      const setting = toSystemSetting(row as SettingRow);
       this.cache.set(setting.key, setting);
     }
     this.cacheExpiry = Date.now() + this.CACHE_TTL;
@@ -167,7 +135,7 @@ class SettingsService {
       return null;
     }
 
-    const setting = mapSetting(row as Record<string, unknown>);
+    const setting = toSystemSetting(row as SettingRow);
     this.cache.set(key, setting);
     return setting;
   }
