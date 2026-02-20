@@ -18,6 +18,7 @@
    ===================================================== */
 
 /* Content panel visibility - hidden by default */
+.tab-content,
 .portal-subtab-content,
 .analytics-subtab-content {
   display: none;

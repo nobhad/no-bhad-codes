@@ -679,12 +679,11 @@ body.modal-open .dashboard-content {
   overflow: hidden !important;
 }
 
+/* .tab-content base display:none in portal-tabs.css */
 .tab-content {
-  display: none;
   animation: fadeIn var(--duration-normal) var(--easing-decelerated);
 }
 
-/* Tab content uses block layout - NOT flex - to prevent children from expanding */
 /* Tab content uses flex + gap from shared/portal-tabs.css */
 
 /* Less space below Leads heading */
