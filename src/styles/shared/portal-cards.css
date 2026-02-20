@@ -636,12 +636,7 @@
   color: var(--status-cancelled);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-tasks-kanban .task-list-empty {
-  padding: var(--space-4);
-  text-align: center;
-  color: var(--portal-text-muted);
-  font-style: italic;
-}
+/* Uses universal empty state from loading.css */
 
 /* .upcoming-tasks-list reset from shared/portal-components.css */
 

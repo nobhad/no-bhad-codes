@@ -140,11 +140,9 @@
   max-height: 360px;
 }
 
+/* Uses universal empty state from loading.css, only unique padding for dropdown */
 .notification-empty {
   padding: var(--space-8) var(--space-4);
-  text-align: center;
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm);
 }
 
 /* ============================================================================

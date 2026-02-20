@@ -355,15 +355,8 @@
   gap: var(--space-1);
 }
 
+/* Uses universal empty state from loading.css, only add background */
 .data-list-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100px;
-  padding: var(--space-3) var(--space-4);
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm);
-  text-align: center;
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-sm);
 }
@@ -402,12 +395,7 @@
   align-items: center;
 }
 
-.report-empty {
-  text-align: center;
-  padding: var(--space-3) var(--space-4);
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm);
-}
+/* Uses universal empty state from loading.css */
 
 /* ============================================
    Health Check

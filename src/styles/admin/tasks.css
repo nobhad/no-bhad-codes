@@ -448,11 +448,7 @@
   color: var(--portal-text-secondary);
 }
 
-.task-list-empty {
-  padding: var(--space-3);
-  text-align: center;
-  color: var(--portal-text-secondary);
-}
+/* Uses universal empty state from loading.css */
 
 /* ============================================
    Task Detail Modal
@@ -694,11 +690,7 @@
   color: var(--color-white);
 }
 
-.time-entries-empty {
-  text-align: center;
-  padding: var(--space-3);
-  color: var(--portal-text-secondary);
-}
+/* Uses universal empty state from loading.css */
 
 /* Time entry modal - flex layout from shared/portal-components.css */
 

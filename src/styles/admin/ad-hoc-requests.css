@@ -121,14 +121,7 @@
   border-radius: var(--portal-radius-sm);
 }
 
-[data-page="admin"] .ad-hoc-time-entries-empty {
-  text-align: center;
-  padding: var(--space-3);
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
-  font-style: italic;
-  margin: 0;
-}
+/* Uses universal empty state from loading.css */
 
 [data-page="admin"] .ad-hoc-time-entry {
   display: flex;
