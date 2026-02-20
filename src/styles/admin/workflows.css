@@ -839,11 +839,7 @@
   overflow-y: auto;
 }
 
-[data-page="admin"] .versions-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-col gap-2 */
 
 [data-page="admin"] .version-item {
   padding: var(--space-2);
