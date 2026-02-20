@@ -50,6 +50,16 @@
 }
 
 /* ============================================
+   Analytics Subtab Content Container
+   ============================================ */
+
+.analytics-subtab-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
+}
+
+/* ============================================
    Analytics Section Container
    ============================================ */
 
@@ -250,9 +260,10 @@
 
 .funnel-container {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  gap: 0;
+  justify-content: flex-start;
+  gap: var(--space-2);
   padding: var(--space-1-5) 0;
   overflow-x: auto;
 }
@@ -302,6 +313,9 @@
 }
 
 .funnel-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--portal-text-muted);
   flex-shrink: 0;
   opacity: 0.7;
@@ -310,6 +324,8 @@
 .funnel-arrow svg {
   width: 20px;
   height: 20px;
+  /* Ensure arrow points right (horizontal) */
+  transform: rotate(0deg);
 }
 
 .funnel-stats {
@@ -437,6 +453,7 @@
 .bundle-info {
   display: flex;
   flex-direction: column;
+  gap: var(--space-1);
 }
 
 /* ============================================
@@ -452,17 +469,21 @@
   }
 
   .funnel-container {
-    flex-wrap: wrap;
+    flex-direction: row;
+    flex-wrap: nowrap;
     gap: var(--space-1);
-    justify-content: center;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .funnel-arrow {
-    display: none;
+    display: flex;
   }
 
   .funnel-stage {
-    min-width: calc(50% - var(--space-1));
+    min-width: 90px;
+    flex-shrink: 0;
   }
 
   .funnel-stats {

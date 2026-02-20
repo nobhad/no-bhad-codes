@@ -78,12 +78,52 @@ const RENDER_ICONS = {
 // DYNAMIC TAB RENDERING
 // ============================================
 
+// Stat card icons
+const STAT_ICONS = {
+  TODO: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>',
+  IN_PROGRESS: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>',
+  BLOCKED: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>',
+  DONE: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+};
+
 /**
  * Renders the Global Tasks tab structure dynamically.
  * Called by admin-dashboard before loading data.
  */
 export function renderGlobalTasksTab(container: HTMLElement): void {
   container.innerHTML = `
+    <!-- Task Stats Strip -->
+    <div class="tasks-stats-strip" aria-label="Task statistics">
+      <div class="tasks-stat-card">
+        <div class="stat-card-top">
+          <span class="field-label">To Do</span>
+          <span class="stat-card-icon stat-icon-muted" aria-hidden="true">${STAT_ICONS.TODO}</span>
+        </div>
+        <span class="stat-card-value" id="stat-tasks-todo">-</span>
+      </div>
+      <div class="tasks-stat-card">
+        <div class="stat-card-top">
+          <span class="field-label">In Progress</span>
+          <span class="stat-card-icon stat-icon-blue" aria-hidden="true">${STAT_ICONS.IN_PROGRESS}</span>
+        </div>
+        <span class="stat-card-value" id="stat-tasks-in-progress">-</span>
+      </div>
+      <div class="tasks-stat-card tasks-stat-card--alert">
+        <div class="stat-card-top">
+          <span class="field-label">Blocked</span>
+          <span class="stat-card-icon stat-icon-warning" aria-hidden="true">${STAT_ICONS.BLOCKED}</span>
+        </div>
+        <span class="stat-card-value" id="stat-tasks-blocked">-</span>
+      </div>
+      <div class="tasks-stat-card">
+        <div class="stat-card-top">
+          <span class="field-label">Done</span>
+          <span class="stat-card-icon stat-icon-green" aria-hidden="true">${STAT_ICONS.DONE}</span>
+        </div>
+        <span class="stat-card-value" id="stat-tasks-done">-</span>
+      </div>
+    </div>
+
     <div class="admin-table-card portal-shadow tasks-main-container" id="global-tasks-card">
       <div class="admin-table-header">
         <h3>All Tasks</h3>
@@ -105,11 +145,44 @@ export function renderGlobalTasksTab(container: HTMLElement): void {
 }
 
 /**
+ * Update task stat cards with current counts
+ */
+function updateTaskStats(): void {
+  const counts = {
+    pending: currentTasks.filter(t => t.status === 'pending').length,
+    in_progress: currentTasks.filter(t => t.status === 'in_progress').length,
+    blocked: currentTasks.filter(t => t.status === 'blocked').length,
+    completed: currentTasks.filter(t => t.status === 'completed').length
+  };
+
+  const todoEl = document.getElementById('stat-tasks-todo');
+  const inProgressEl = document.getElementById('stat-tasks-in-progress');
+  const blockedEl = document.getElementById('stat-tasks-blocked');
+  const doneEl = document.getElementById('stat-tasks-done');
+
+  if (todoEl) todoEl.textContent = String(counts.pending);
+  if (inProgressEl) inProgressEl.textContent = String(counts.in_progress);
+  if (blockedEl) blockedEl.textContent = String(counts.blocked);
+  if (doneEl) doneEl.textContent = String(counts.completed);
+
+  // Highlight blocked card if there are blocked tasks
+  const blockedCard = blockedEl?.closest('.tasks-stat-card');
+  if (blockedCard) {
+    if (counts.blocked > 0) {
+      blockedCard.classList.add('has-items');
+    } else {
+      blockedCard.classList.remove('has-items');
+    }
+  }
+}
+
+/**
  * Load global tasks and render the view
  */
 export async function loadGlobalTasks(ctx: AdminDashboardContext): Promise<void> {
   moduleContext = ctx;
   await fetchTasks();
+  updateTaskStats();
   setupViewToggle();
   renderCurrentView();
   setupRefreshHandler();
@@ -217,6 +290,7 @@ function setupRefreshHandler(): void {
   refreshBtn.dataset.listenerAttached = 'true';
   refreshBtn.addEventListener('click', async () => {
     await fetchTasks();
+    updateTaskStats();
     renderCurrentView();
   });
 }

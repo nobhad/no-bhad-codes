@@ -1,0 +1,141 @@
+/**
+ * ===============================================
+ * DETAILS PANEL COMPONENT
+ * ===============================================
+ * @file src/styles/admin/details-panel.css
+ *
+ * Slide-in panel for viewing details (leads, contacts, etc.)
+ * Includes overlay backdrop and panel structure.
+ */
+
+/* ================================================
+   Details Overlay (darkens page behind panel)
+   ================================================ */
+.details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-overlay-light);
+  z-index: 999;
+  animation: fadeIn var(--transition-fast);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.details-overlay.hidden {
+  display: none;
+}
+
+/* ================================================
+   Details Panel (for Leads/Contacts)
+   Dark background with light text
+   ================================================ */
+.details-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 500px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--portal-bg-readonly);
+  border-left: none;
+  box-shadow: var(--shadow-2xl);
+  z-index: 1000;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-6) var(--space-6) var(--space-6);
+}
+
+.details-panel.hidden {
+  display: none;
+}
+
+.details-panel .details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+/* h3 styling centralized in admin.css */
+
+.details-panel .close-btn {
+  background: none;
+  border: none;
+  font-size: var(--font-size-2xl);
+  color: var(--portal-text-secondary);
+  cursor: pointer;
+  padding: var(--space-2);
+  line-height: 1;
+}
+
+.details-panel .close-btn:hover {
+  color: var(--portal-text-light);
+}
+
+.details-panel .details-content p {
+  color: var(--portal-text-light);
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.details-panel .details-content strong {
+  color: var(--color-primary);
+}
+
+.details-panel .details-divider {
+  border: none;
+  border-top: 1px solid var(--portal-border-light);
+  margin: var(--space-4) 0;
+}
+
+.details-panel .message-box {
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-light);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.details-panel .actions {
+  margin-top: var(--space-6);
+  display: flex;
+}
+
+/* Details panel meta grid - single column for consistent layout */
+.details-panel .project-detail-meta {
+  grid-template-columns: 1fr;
+  row-gap: var(--field-group-gap);
+  column-gap: var(--space-4);
+}
+
+.details-panel .project-description-row {
+  margin-top: var(--space-2);
+}
+
+/* Action buttons: below Created, above Name/metadata, right-aligned */
+.details-panel .details-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 0;
+  margin-bottom: var(--space-3);
+}
+
+/* Contact details panel: created under heading (same as leads panel) */
+#contact-details-panel .details-header {
+  margin-bottom: 0;
+}
+
+#contact-details-panel .details-actions {
+  justify-content: flex-start;
+}
+
+#contact-details-panel .contact-details-created {
+  font-size: 0.8125rem;
+  color: var(--portal-text-muted);
+  margin-top: -0.5rem;
+  margin-bottom: var(--space-2);
+  padding-top: 0;
+}
