@@ -987,7 +987,7 @@ export function renderDocumentRequestsTab(container: HTMLElement): void {
     <div class="admin-modal-overlay hidden" id="dr-create-modal" role="dialog" aria-modal="true" aria-labelledby="dr-create-modal-title">
       <div class="admin-modal">
         <div class="admin-modal-header">
-          <div class="admin-modal-title">
+          <div class="admin-modal-title flex items-center">
             ${RENDER_ICONS.DOCUMENT}
             <h2 id="dr-create-modal-title">New Document Request</h2>
           </div>
@@ -1049,7 +1049,7 @@ export function renderDocumentRequestsTab(container: HTMLElement): void {
     <div class="admin-modal-overlay hidden" id="dr-detail-modal" role="dialog" aria-modal="true" aria-labelledby="dr-detail-modal-title">
       <div class="admin-modal admin-modal--wide">
         <div class="admin-modal-header">
-          <div class="admin-modal-title">
+          <div class="admin-modal-title flex items-center">
             ${RENDER_ICONS.DOCUMENT}
             <h2 id="dr-detail-modal-title">Document Request</h2>
           </div>

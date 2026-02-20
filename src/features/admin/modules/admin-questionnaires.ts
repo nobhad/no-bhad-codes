@@ -939,7 +939,7 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
     <div class="admin-modal-overlay hidden" id="questionnaire-modal" role="dialog" aria-modal="true" aria-labelledby="questionnaire-modal-title">
       <div class="admin-modal admin-modal--lg">
         <div class="admin-modal-header">
-          <div class="admin-modal-title">
+          <div class="admin-modal-title flex items-center">
             <h2 id="questionnaire-modal-title">Create Questionnaire</h2>
           </div>
           <button class="admin-modal-close" id="questionnaire-modal-close" aria-label="Close modal">&times;</button>
@@ -1004,7 +1004,7 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
     <div class="admin-modal-overlay hidden" id="send-questionnaire-modal" role="dialog" aria-modal="true" aria-labelledby="send-questionnaire-modal-title">
       <div class="admin-modal">
         <div class="admin-modal-header">
-          <div class="admin-modal-title">
+          <div class="admin-modal-title flex items-center">
             <h2 id="send-questionnaire-modal-title">Send Questionnaire</h2>
           </div>
           <button class="admin-modal-close" id="send-questionnaire-modal-close" aria-label="Close modal">&times;</button>
@@ -1035,7 +1035,7 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
     <div class="admin-modal-overlay hidden" id="view-response-modal" role="dialog" aria-modal="true" aria-labelledby="view-response-modal-title">
       <div class="admin-modal admin-modal--lg">
         <div class="admin-modal-header">
-          <div class="admin-modal-title">
+          <div class="admin-modal-title flex items-center">
             <h2 id="view-response-modal-title">Questionnaire Response</h2>
           </div>
           <button class="admin-modal-close" id="view-response-modal-close" aria-label="Close modal">&times;</button>
