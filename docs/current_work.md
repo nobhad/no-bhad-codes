@@ -8,6 +8,24 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ## Active TODOs
 
+### CSS DRY Reduction - IN PROGRESS
+
+Reducing CSS codebase size using utility classes and consolidation patterns.
+
+**Current Status:**
+
+- Total CSS: ~51,226 lines (reduced from ~55,000)
+- Created `src/styles/base/utilities.css` with atomic utility classes
+- Consolidated portal-tables.css using `:is()` selector (886→652 lines)
+- Migrated admin-analytics.ts, admin-workflows.ts to use utilities
+- Documented two-tier utility system in CSS_ARCHITECTURE.md
+
+**Remaining Opportunities:**
+
+- [ ] More component migrations to utility classes
+- [ ] Identify and remove additional pure utility CSS rules
+- [ ] Continue consolidating duplicate selector patterns
+
 ### Linear Admin Portal Redesign - COMPLETE
 
 All phases of the Linear-inspired admin portal redesign are complete:
