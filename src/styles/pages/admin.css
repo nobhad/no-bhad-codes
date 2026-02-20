@@ -465,7 +465,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 [data-page="admin"] .analytics-section h3,
 [data-page="admin"] .analytics-overview h3,
 [data-page="admin"] .recent-activity h3 {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-1-5);
 }
 
 /* ================================================
