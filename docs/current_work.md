@@ -14,7 +14,7 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 
 **Final Status:**
 
-- Total CSS: ~52,197 lines (src/styles: 50,514 + src/design-system: 1,683)
+- Total CSS: ~52,105 lines (src/styles: 50,495 + src/design-system: 1,610)
 - Created `src/styles/base/utilities.css` with atomic utility classes
 - Consolidated portal-tables.css using `:is()` selector (886→652 lines)
 - Migrated 39+ pure utility patterns to utility classes
@@ -30,6 +30,12 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 - [x] Removed orphaned utilities from z-index.css (128 lines)
 - [x] Removed orphaned utilities from shadows.css (120 lines)
 - [x] Removed orphaned utilities from borders.css (141 lines)
+
+**Keyframe Consolidation:**
+
+- [x] Consolidated duplicate @keyframes spin definitions (84 lines across 4 files)
+- [x] Consolidated loading-spin → spin in loading.css
+- [x] Consolidated cp-spin → spin in questionnaires.css
 
 **Previous Cleanup:**
 
@@ -48,7 +54,7 @@ All phases of the Linear-inspired admin portal redesign are complete:
 
 ### Future Considerations (Low Priority)
 
-- Animation refinement (29 CSS keyframes exist, most are simple/appropriate)
+- Animation refinement (24 CSS keyframes exist, most are simple/appropriate)
 - Modal consolidation (current UX works well)
 - Comprehensive WCAG accessibility audit
 - Bundle optimization via `manualChunks` (642KB dashboard chunk is acceptable)
