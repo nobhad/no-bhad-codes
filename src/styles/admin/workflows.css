@@ -164,12 +164,14 @@
 
 /* =====================================================
    TABLE CODE CELLS
+   Event column uses code tags - match table cell font size
+   Slug column keeps monospace font styling
    ===================================================== */
 [data-page="admin"] #tab-workflows code {
   background: var(--portal-bg-medium);
   padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-sm);
-  font-size: var(--font-size-xs);
+  font-size: var(--table-cell-font-size, 12px);
 }
 
 /* Table outer column padding from shared/portal-tables.css */

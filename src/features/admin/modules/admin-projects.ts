@@ -61,6 +61,7 @@ import { ICONS } from '../../../constants/icons';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
+import { initDetailKeyboardNav, cleanupDetailKeyboardNav } from '../../../components/detail-keyboard-nav';
 
 // ============================================
 // UTILITY HELPERS
@@ -868,6 +869,9 @@ function cleanupSecondarySidebar(): void {
     secondarySidebar = null;
   }
 
+  // Clean up detail view keyboard shortcuts
+  cleanupDetailKeyboardNav();
+
   // Remove has-secondary-sidebar class
   const container = document.querySelector('.dashboard-container');
   container?.classList.remove('has-secondary-sidebar');
@@ -914,6 +918,7 @@ export function showProjectDetails(
       domCache.clear();
       // Now populate with project data
       populateProjectDetailView(project);
+      setupDetailInlineEditing(project);
       setupProjectDetailTabs(ctx);
 
       // Load project-specific data
@@ -929,11 +934,20 @@ export function showProjectDetails(
         loadProjectFiles(projectId, ctx);
         loadProjectFilesFromModule(projectId);
       });
+
+      // Initialize keyboard shortcuts for detail view (E=edit, Esc=back, 1-9=tabs)
+      initDetailKeyboardNav({
+        editButtonSelector: '#pd-btn-edit',
+        onBack: () => ctx.switchTab('projects'),
+        tabContainerSelector: '.project-detail-tabs',
+        containerSelector: '#tab-project-detail'
+      });
     });
     return;
   }
 
   populateProjectDetailView(project);
+  setupDetailInlineEditing(project);
   setupProjectDetailTabs(ctx);
 
   // Load project-specific data
@@ -948,6 +962,14 @@ export function showProjectDetails(
   setupFileUploadHandlers(projectId, () => {
     loadProjectFiles(projectId, ctx);
     loadProjectFilesFromModule(projectId);
+  });
+
+  // Initialize keyboard shortcuts for detail view (E=edit, Esc=back, 1-9=tabs)
+  initDetailKeyboardNav({
+    editButtonSelector: '#pd-btn-edit',
+    onBack: () => ctx.switchTab('projects'),
+    tabContainerSelector: '.project-detail-tabs',
+    containerSelector: '#tab-project-detail'
   });
 }
 
@@ -1175,6 +1197,111 @@ function parseFeatures(featuresStr: string): string[] {
   }
 
   return found;
+}
+
+/**
+ * Setup inline editing for project detail view fields
+ * Allows clicking on key fields to edit them in place
+ */
+function setupDetailInlineEditing(project: LeadProject): void {
+  // Budget field - inline editable
+  const budgetEl = document.getElementById('pd-budget');
+  if (budgetEl) {
+    const budgetContainer = budgetEl.closest('.pd-meta-item') as HTMLElement;
+    if (budgetContainer && !budgetContainer.dataset.inlineEditSetup) {
+      budgetContainer.dataset.inlineEditSetup = 'true';
+      budgetContainer.classList.add('inline-editable-cell');
+      makeEditable(
+        budgetContainer,
+        () => project.budget_range || '',
+        async (newValue) => {
+          const response = await apiPut(`/api/projects/${project.id}`, { budget_range: newValue });
+          if (response.ok) {
+            const result = await response.json();
+            // Update local data
+            const idx = projectsData.findIndex(p => p.id === project.id);
+            if (idx !== -1) {
+              projectsData[idx] = { ...projectsData[idx], ...result.project };
+            }
+            project.budget_range = newValue;
+            budgetEl.textContent = formatDisplayValue(newValue);
+            // Update sidebar budget too
+            const sidebarBudget = document.getElementById('pd-sidebar-budget');
+            if (sidebarBudget) sidebarBudget.textContent = formatDisplayValue(newValue);
+            storedContext?.showNotification('Budget updated', 'success');
+          } else {
+            throw new Error('Failed to update budget');
+          }
+        },
+        { placeholder: 'Enter budget' }
+      );
+    }
+  }
+
+  // Timeline field - inline editable
+  const timelineEl = document.getElementById('pd-timeline');
+  if (timelineEl) {
+    const timelineContainer = timelineEl.closest('.pd-meta-item') as HTMLElement;
+    if (timelineContainer && !timelineContainer.dataset.inlineEditSetup) {
+      timelineContainer.dataset.inlineEditSetup = 'true';
+      timelineContainer.classList.add('inline-editable-cell');
+      makeEditable(
+        timelineContainer,
+        () => project.timeline || '',
+        async (newValue) => {
+          const response = await apiPut(`/api/projects/${project.id}`, { timeline: newValue });
+          if (response.ok) {
+            const result = await response.json();
+            // Update local data
+            const idx = projectsData.findIndex(p => p.id === project.id);
+            if (idx !== -1) {
+              projectsData[idx] = { ...projectsData[idx], ...result.project };
+            }
+            project.timeline = newValue;
+            timelineEl.textContent = formatDisplayValue(newValue);
+            storedContext?.showNotification('Timeline updated', 'success');
+          } else {
+            throw new Error('Failed to update timeline');
+          }
+        },
+        { placeholder: 'Enter timeline' }
+      );
+    }
+  }
+
+  // Project name - inline editable
+  const nameEl = document.getElementById('pd-project-name');
+  if (nameEl) {
+    const nameContainer = nameEl.closest('.detail-title-group') as HTMLElement;
+    if (nameContainer && !nameContainer.dataset.inlineEditSetup) {
+      nameContainer.dataset.inlineEditSetup = 'true';
+      nameContainer.classList.add('inline-editable-cell');
+      makeEditable(
+        nameContainer,
+        () => project.project_name || '',
+        async (newValue) => {
+          if (!newValue.trim()) {
+            throw new Error('Project name cannot be empty');
+          }
+          const response = await apiPut(`/api/projects/${project.id}`, { project_name: newValue });
+          if (response.ok) {
+            const result = await response.json();
+            // Update local data
+            const idx = projectsData.findIndex(p => p.id === project.id);
+            if (idx !== -1) {
+              projectsData[idx] = { ...projectsData[idx], ...result.project };
+            }
+            project.project_name = newValue;
+            nameEl.textContent = newValue;
+            storedContext?.showNotification('Project name updated', 'success');
+          } else {
+            throw new Error('Failed to update project name');
+          }
+        },
+        { placeholder: 'Enter project name' }
+      );
+    }
+  }
 }
 
 /**

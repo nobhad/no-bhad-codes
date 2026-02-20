@@ -247,6 +247,7 @@
 /* ==============================================
    ACTIONS CELL - UNIVERSAL
    Single source of truth for .actions-cell in all tables
+   Tight padding with gap between buttons, no margins
    ============================================== */
 
 .admin-table .actions-cell,
@@ -261,7 +262,18 @@
   width: 1%;
   white-space: nowrap;
   text-align: right;
+  padding-top: var(--space-0-5);
+  padding-bottom: var(--space-0-5);
   /* padding-right handled by outer column padding rule */
+}
+
+/* Ensure no margins on action buttons - use gap only */
+.admin-table .actions-cell > *,
+.overview-table .actions-cell > *,
+.files-table .actions-cell > *,
+.invoices-table .actions-cell > *,
+.time-entries-table .actions-cell > * {
+  margin: 0;
 }
 
 /* Icon buttons in actions cell - consistent styling */
@@ -529,7 +541,7 @@
   width: auto;
 }
 
-/* Name/Title cells - primary content, truncate with ellipsis for consistency */
+/* Name/Title cells - primary content, allow natural expansion */
 .admin-table .name-cell,
 .admin-table .title-cell,
 .overview-table .name-cell,
@@ -537,9 +549,6 @@
 .invoices-table .name-cell,
 .time-entries-table .name-cell {
   width: auto;
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -564,13 +573,10 @@
   width: auto;
 }
 
-/* Subject cells - truncate with ellipsis for consistency */
+/* Subject cells - allow natural expansion for short subjects */
 .admin-table .subject-cell,
 .overview-table .subject-cell {
   width: auto;
-  max-width: 250px;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -680,6 +686,9 @@
 
 /* ==============================================
    TEXT TRUNCATION - UNIVERSAL
+   Use .truncate for unbounded user-generated content
+   (notes, descriptions) that may be very long.
+   Prefer letting columns expand naturally elsewhere.
    ============================================== */
 
 .admin-table .truncate,
@@ -687,7 +696,22 @@
 .files-table .truncate,
 .invoices-table .truncate,
 .time-entries-table .truncate {
-  max-width: 200px;
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Notes/description cells - capped truncation for long user content */
+.admin-table .notes-cell,
+.admin-table .description-cell,
+.overview-table .notes-cell,
+.overview-table .description-cell,
+.files-table .notes-cell,
+.invoices-table .notes-cell,
+.time-entries-table .notes-cell,
+.time-entries-table .description-cell {
+  max-width: 300px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

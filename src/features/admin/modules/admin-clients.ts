@@ -35,6 +35,7 @@ import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
+import { initDetailKeyboardNav } from '../../../components/detail-keyboard-nav';
 import {
   createTableModule,
   createPaginationConfig,
@@ -633,6 +634,9 @@ export async function showClientDetails(clientId: number, ctx?: AdminDashboardCo
   // Populate the detail view
   populateClientDetailView(client);
 
+  // Setup inline editing for detail fields
+  setupClientDetailInlineEditing(client, context);
+
   // Setup event handlers
   setupClientDetailHandlers(client, context);
 
@@ -647,6 +651,14 @@ export async function showClientDetails(clientId: number, ctx?: AdminDashboardCo
   } catch (error) {
     console.error('[AdminClients] Failed to load CRM features:', error);
   }
+
+  // Initialize keyboard shortcuts for detail view (E=edit, Esc=back, 1-6=tabs)
+  initDetailKeyboardNav({
+    editButtonSelector: '#cd-btn-edit-client',
+    onBack: () => context.switchTab('clients'),
+    tabContainerSelector: '#client-detail-tabs',
+    containerSelector: '#tab-client-detail'
+  });
 }
 
 function populateClientDetailView(client: Client): void {
@@ -741,6 +753,124 @@ function populateClientDetailView(client: Client): void {
       }
     } else {
       statusEl.textContent = statusDisplay;
+    }
+  }
+}
+
+/**
+ * Setup inline editing for client detail view fields
+ * Allows clicking on key fields to edit them in place
+ */
+function setupClientDetailInlineEditing(client: Client, ctx: AdminDashboardContext): void {
+  const clientType = client.client_type || 'business';
+  const isBusinessClient = clientType === 'business';
+
+  // Phone field - inline editable
+  const phoneEl = document.getElementById('cd-phone');
+  if (phoneEl) {
+    const phoneContainer = phoneEl.closest('.contact-inline-item') as HTMLElement;
+    if (phoneContainer && !phoneContainer.dataset.inlineEditSetup) {
+      phoneContainer.dataset.inlineEditSetup = 'true';
+      phoneContainer.classList.add('inline-editable-cell');
+      makeEditable(
+        phoneContainer,
+        () => client.phone || '',
+        async (newValue) => {
+          const response = await apiPut(`/api/admin/clients/${client.id}`, { phone: newValue });
+          if (response.ok) {
+            const result = await response.json();
+            // Update local data
+            clientsModule.updateItem(client.id, result.client);
+            client.phone = newValue;
+            phoneEl.textContent = SanitizationUtils.formatPhone(newValue);
+            ctx.showNotification('Phone updated', 'success');
+          } else {
+            throw new Error('Failed to update phone');
+          }
+        },
+        { placeholder: 'Enter phone number' }
+      );
+    }
+  }
+
+  // Company field - inline editable (for business clients, this is secondary)
+  const companyEl = document.getElementById('cd-company');
+  if (companyEl) {
+    const companyContainer = companyEl.closest('.contact-inline-item') as HTMLElement;
+    if (companyContainer && !companyContainer.dataset.inlineEditSetup) {
+      companyContainer.dataset.inlineEditSetup = 'true';
+      companyContainer.classList.add('inline-editable-cell');
+
+      // For business clients: editing company edits contact_name (secondary display)
+      // For personal clients: editing company edits company_name
+      const fieldToUpdate = isBusinessClient ? 'contact_name' : 'company_name';
+      const currentValue = isBusinessClient ? (client.contact_name || '') : (client.company_name || '');
+
+      makeEditable(
+        companyContainer,
+        () => currentValue,
+        async (newValue) => {
+          const response = await apiPut(`/api/admin/clients/${client.id}`, { [fieldToUpdate]: newValue });
+          if (response.ok) {
+            const result = await response.json();
+            clientsModule.updateItem(client.id, result.client);
+            if (isBusinessClient) {
+              client.contact_name = newValue;
+            } else {
+              client.company_name = newValue;
+            }
+            companyEl.textContent = SanitizationUtils.escapeHtml(
+              SanitizationUtils.capitalizeName(newValue)
+            );
+            ctx.showNotification(`${isBusinessClient ? 'Contact' : 'Company'} updated`, 'success');
+          } else {
+            throw new Error('Failed to update');
+          }
+        },
+        { placeholder: isBusinessClient ? 'Enter contact name' : 'Enter company name' }
+      );
+    }
+  }
+
+  // Client name (header) - inline editable
+  const nameEl = document.getElementById('cd-client-name');
+  if (nameEl) {
+    const nameContainer = nameEl.closest('.detail-title-group') as HTMLElement;
+    if (nameContainer && !nameContainer.dataset.inlineEditSetup) {
+      nameContainer.dataset.inlineEditSetup = 'true';
+      nameContainer.classList.add('inline-editable-cell');
+
+      // For business clients: header shows company_name
+      // For personal clients: header shows contact_name
+      const fieldToUpdate = isBusinessClient ? 'company_name' : 'contact_name';
+      const currentValue = isBusinessClient ? (client.company_name || '') : (client.contact_name || '');
+
+      makeEditable(
+        nameContainer,
+        () => currentValue,
+        async (newValue) => {
+          if (!newValue.trim()) {
+            throw new Error('Name cannot be empty');
+          }
+          const response = await apiPut(`/api/admin/clients/${client.id}`, { [fieldToUpdate]: newValue });
+          if (response.ok) {
+            const result = await response.json();
+            clientsModule.updateItem(client.id, result.client);
+            if (isBusinessClient) {
+              client.company_name = newValue;
+            } else {
+              client.contact_name = newValue;
+            }
+            nameEl.textContent = SanitizationUtils.escapeHtml(
+              SanitizationUtils.capitalizeName(newValue)
+            );
+            ctx.showNotification(`${isBusinessClient ? 'Company' : 'Contact'} name updated`, 'success');
+          } else {
+            throw new Error('Failed to update name');
+          }
+        },
+        { placeholder: isBusinessClient ? 'Enter company name' : 'Enter contact name' }
+      );
     }
   }
 }

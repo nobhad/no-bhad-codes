@@ -11,7 +11,7 @@
 
 import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch } from '../../../utils/api-client';
-import { formatDateTime, formatDate, formatCurrency } from '../../../utils/format-utils';
+import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createViewToggle } from '../../../components/view-toggle';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
@@ -707,8 +707,9 @@ function getActivityDotClass(type: string): string {
 
 /**
  * Get icon for activity type
+ * @internal Reserved for future use
  */
-function getActivityIcon(activityType: string): string {
+function _getActivityIcon(activityType: string): string {
   const icons: Record<string, string> = {
     'lead': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>',
     'invoice': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>',
@@ -724,8 +725,9 @@ function getActivityIcon(activityType: string): string {
 
 /**
  * Update attention card with count and highlight if > 0
+ * @internal Reserved for future use
  */
-function updateAttentionCard(id: string, count: number): void {
+function _updateAttentionCard(id: string, count: number): void {
   const element = document.getElementById(id);
   if (element) {
     element.textContent = formatNumber(count);
@@ -775,8 +777,9 @@ function showNoDataMessage(): void {
 /**
  * Load upcoming tasks for dashboard widget
  * Shows the most urgent/near-due tasks across all projects with Board/List toggle
+ * @internal Reserved for future use
  */
-async function loadUpcomingTasks(ctx: AdminDashboardContext): Promise<void> {
+async function _loadUpcomingTasks(ctx: AdminDashboardContext): Promise<void> {
   dashboardCtx = ctx;
 
   try {
@@ -1054,7 +1057,8 @@ const OVERVIEW_ICONS = {
  */
 export function renderOverviewTab(container: HTMLElement): void {
   const today = new Date();
-  const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  // Date string reserved for future use in overview display
+  const _dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   container.innerHTML = `
   <div class="overview-linear">
