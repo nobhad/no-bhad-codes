@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** February 19, 2026 (Added comprehensive layout utility classes)
+**Last Updated:** February 20, 2026 (Added atomic utility classes for DRY CSS reduction)
 
 ## Table of Contents
 
@@ -1013,9 +1013,67 @@ Project cards in the client portal use scoped classes to avoid conflicts with `.
 
 ## Utility Classes
 
+The project uses a two-tier utility system for DRY CSS:
+
+### Tier 1: Atomic Utilities (Tailwind-style)
+
+**Location:** `src/styles/base/utilities.css`
+
+Single-property utility classes for maximum composability. Use these in HTML class attributes to avoid writing repetitive CSS.
+
+**Usage Pattern:**
+
+```html
+<!-- Instead of writing CSS: display: flex; align-items: center; gap: 8px; -->
+<div class="flex items-center gap-1">...</div>
+
+<!-- Instead of writing CSS: display: flex; flex-direction: column; gap: 16px; -->
+<div class="flex flex-col gap-2">...</div>
+```
+
+| Category | Classes |
+| -------- | ------- |
+| Display | `.flex`, `.grid`, `.block`, `.hidden`, `.inline-flex` |
+| Flex Direction | `.flex-row`, `.flex-col`, `.flex-row-reverse`, `.flex-col-reverse` |
+| Flex Wrap | `.flex-wrap`, `.flex-nowrap` |
+| Flex Sizing | `.flex-1`, `.flex-auto`, `.flex-none`, `.grow`, `.shrink-0` |
+| Align Items | `.items-start`, `.items-center`, `.items-end`, `.items-baseline` |
+| Justify | `.justify-start`, `.justify-center`, `.justify-end`, `.justify-between` |
+| Gap | `.gap-0`, `.gap-0-5`, `.gap-1`, `.gap-1-5`, `.gap-2`, `.gap-3`, `.gap-4`, `.gap-section` |
+| Padding | `.p-1` thru `.p-4`, `.px-1` thru `.px-4`, `.py-1` thru `.py-4` |
+| Margin | `.m-0`, `.m-auto`, `.mx-auto`, `.mt-1` thru `.mt-3`, `.mb-1` thru `.mb-4` |
+| Width/Height | `.w-full`, `.w-auto`, `.h-full`, `.h-auto`, `.min-w-0` |
+| Text Align | `.text-left`, `.text-center`, `.text-right` |
+| Text Size | `.text-xs`, `.text-sm`, `.text-base`, `.text-lg`, `.text-xl` |
+| Text Color | `.text-primary`, `.text-secondary`, `.text-muted`, `.text-light` |
+| Font Weight | `.font-normal`, `.font-medium`, `.font-semibold`, `.font-bold` |
+| Background | `.bg-transparent`, `.bg-darker`, `.bg-dark`, `.bg-medium`, `.bg-light` |
+| Border Radius | `.rounded-none`, `.rounded-sm`, `.rounded-md`, `.rounded-lg`, `.rounded-full` |
+| Border | `.border`, `.border-dark`, `.border-none`, `.border-t`, `.border-b` |
+| Overflow | `.overflow-hidden`, `.overflow-auto`, `.overflow-x-auto`, `.overflow-y-auto` |
+| Text Overflow | `.truncate`, `.whitespace-nowrap`, `.whitespace-normal` |
+| Position | `.relative`, `.absolute`, `.fixed`, `.sticky` |
+| Cursor | `.cursor-pointer`, `.cursor-default`, `.cursor-not-allowed` |
+| Opacity | `.opacity-0`, `.opacity-50`, `.opacity-75`, `.opacity-100` |
+| Transition | `.transition-fast`, `.transition-base`, `.transition-none` |
+
+**Semantic Utilities (Common Patterns):**
+
+| Class | CSS |
+| ----- | --- |
+| `.flex-center` | `display: flex; align-items: center` |
+| `.flex-center-gap` | `display: flex; align-items: center; gap: var(--space-1)` |
+| `.flex-between` | `display: flex; align-items: center; justify-content: space-between` |
+| `.flex-stack` | `display: flex; flex-direction: column` |
+| `.flex-stack-gap` | `display: flex; flex-direction: column; gap: var(--space-1)` |
+| `.flex-center-all` | `display: flex; align-items: center; justify-content: center` |
+| `.sr-only` | Screen reader only (visually hidden but accessible) |
+
+### Tier 2: Compound Layout Utilities
+
 **Location:** `src/styles/shared/portal-components.css`
 
-All layout utility classes are defined as single sources of truth. Use these instead of repeating flex/grid patterns in page-specific CSS.
+Higher-level layout utilities that combine multiple properties. Use these for grid layouts and complex flex patterns.
 
 ### Flex Column Utilities
 
