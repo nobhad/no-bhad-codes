@@ -105,11 +105,7 @@
   visibility: visible;
 }
 
-.auth-form .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+/* .form-group base styles in portal-forms.css */
 
 .auth-form label {
   font-weight: 600;
@@ -381,11 +377,7 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
   border-color: var(--color-border);
 }
 
-.login-form .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+/* .login-form .form-group - base styles in portal-forms.css */
 
 .login-form label {
   font-weight: 600;
