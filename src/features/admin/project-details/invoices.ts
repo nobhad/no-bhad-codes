@@ -456,25 +456,25 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
 
   // Build modal body
   modal.body.innerHTML = `
-    <div class="invoice-view-content">
+    <div class="invoice-view-content flex flex-col gap-4">
       <div class="invoice-header-info">
         <div class="invoice-info-row">
-          <div class="invoice-info-item">
+          <div class="invoice-info-item flex flex-col gap-1">
             <span class="field-label">Status</span>
             <span class="field-value">${getStatusDotHTML(effectiveStatus)}</span>
           </div>
-          <div class="invoice-info-item">
+          <div class="invoice-info-item flex flex-col gap-1">
             <span class="field-label">Due Date</span>
             <span class="field-value">${invoice.due_date ? formatDate(invoice.due_date) : '-'}</span>
           </div>
         </div>
         <div class="invoice-info-row">
-          <div class="invoice-info-item">
+          <div class="invoice-info-item flex flex-col gap-1">
             <span class="field-label">Created</span>
             <span class="field-value">${invoice.created_at ? formatDate(invoice.created_at) : '-'}</span>
           </div>
           ${invoice.paid_date ? `
-            <div class="invoice-info-item">
+            <div class="invoice-info-item flex flex-col gap-1">
               <span class="field-label">Paid</span>
               <span class="field-value">${formatDate(invoice.paid_date)}</span>
             </div>
@@ -482,7 +482,7 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
         </div>
         ${invoice.invoice_type === 'deposit' ? `
           <div class="invoice-info-row">
-            <div class="invoice-info-item">
+            <div class="invoice-info-item flex flex-col gap-1">
               <span class="field-label">Type</span>
               <span class="field-value"><span class="invoice-type-badge">DEPOSIT</span></span>
             </div>

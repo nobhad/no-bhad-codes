@@ -404,13 +404,13 @@ export async function handleContractCountersign(
   });
 
   const form = document.createElement('form');
-  form.className = 'contract-countersign-form';
+  form.className = 'contract-countersign-form flex flex-col gap-2';
   form.innerHTML = `
     <div class="portal-form-group">
       <label for="contract-countersign-name">Signer Name</label>
       <input class="portal-input" id="contract-countersign-name" name="signerName" placeholder="Your name" required />
     </div>
-    <div class="contract-signature-pad">
+    <div class="contract-signature-pad flex flex-col gap-1">
       <div class="signature-canvas-wrap">
         <canvas id="contract-countersign-canvas" width="520" height="180"></canvas>
       </div>
