@@ -341,8 +341,9 @@ div.error-row,
 [data-page="admin"] .admin-table tbody td[colspan],
 [data-page="client-portal"] table td[colspan] {
   text-align: center !important;
-  color: var(--portal-text-secondary);
-  padding: var(--space-4);
+  color: var(--portal-text-muted);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-xs);
   background: transparent;
 }
 
