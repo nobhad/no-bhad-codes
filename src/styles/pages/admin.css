@@ -784,24 +784,8 @@ body.modal-open .dashboard-content {
 /* Leads and Clients tables use .admin-table-container and .admin-table base classes */
 /* See table-specific styles in ADMIN TABLE section above */
 
-/* Base .status-badge and color variants are in shared/portal-badges.css */
-
-/* Not Invited status badge - Gray/muted for clients who haven't been invited yet */
-/* Scoped to .status-badge to avoid conflict with .status-indicator */
-.status-badge.status-not-invited {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  text-transform: capitalize;
-  border: 1px solid var(--portal-border-medium);
-  background: var(--portal-bg-medium);
-  color: var(--portal-text-muted);
-  white-space: nowrap;
-}
+/* Base .status-badge and all color variants including .status-not-invited
+   are in shared/portal-badges.css */
 
 /* Status cell wrapper for inline status + action button */
 .status-cell-wrapper {
@@ -1495,28 +1479,8 @@ body.modal-open .dashboard-content {
   margin-left: 0.75rem;
 }
 
-.status-item .status-badge {
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--portal-radius-md, 8px);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.status-item .status-badge.healthy {
-  background: var(--color-success);
-  color: white;
-}
-
-.status-item .status-badge.unknown {
-  background: var(--color-warning);
-  color: var(--portal-bg-dark);
-}
-
-.status-item .status-badge.error {
-  background: var(--color-danger);
-  color: white;
-}
+/* .status-badge and color variants (.status-healthy, .status-unknown, .status-error)
+   are in shared/portal-badges.css */
 
 .status-indicator {
   width: 8px;

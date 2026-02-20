@@ -346,17 +346,7 @@ p.empty-state {
 }
 
 /* List containers with empty/loading/error states - ensure proper display */
-.files-list:has(.empty-state, .loading-state, .error-state),
-.invoices-list:has(.empty-state, .loading-state, .error-state),
-.milestones-list:has(.empty-state, .loading-state, .error-state),
-.deliverables-list:has(.empty-state, .loading-state, .error-state),
-.messages-thread:has(.empty-state, .loading-state, .error-state),
-.scheduled-list:has(.empty-state, .loading-state, .error-state),
-.recurring-list:has(.empty-state, .loading-state, .error-state),
-.activity-list:has(.empty-state, .loading-state, .error-state),
-.notes-list:has(.empty-state, .loading-state, .error-state),
-.client-projects-list:has(.empty-state, .loading-state, .error-state),
-.client-invoices-list:has(.empty-state, .loading-state, .error-state),
+[class$="-list"]:has(.empty-state, .loading-state, .error-state),
 [id$="-list"]:has(.empty-state, .loading-state, .error-state) {
   display: flex;
   flex-direction: column;
@@ -365,14 +355,8 @@ p.empty-state {
   min-height: 120px;
 }
 
-/* Empty state inside list containers - ensure consistent sizing */
-.files-list > .empty-state,
-.invoices-list > .empty-state,
-.milestones-list > .empty-state,
-.deliverables-list > .empty-state,
-.messages-thread > .empty-state,
-.scheduled-list > .empty-state,
-.recurring-list > .empty-state,
+/* Empty state inside list containers */
+[class$="-list"] > .empty-state,
 [id$="-list"] > .empty-state {
   min-height: 80px;
   padding: var(--space-4);
