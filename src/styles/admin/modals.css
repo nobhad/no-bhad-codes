@@ -335,11 +335,7 @@
 }
 
 /* Nested form group containers (e.g., new client fields) */
-#new-client-fields {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
+/* Uses utility classes: flex flex-col gap-4 */
 
 /* Modal inputs inherit base styling from portal-forms.css */
 
@@ -735,12 +731,7 @@
   max-width: var(--modal-width-lg, 700px);
 }
 
-.invoice-view-content,
-.invoice-edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
+/* Uses utility classes: flex flex-col gap-4 */
 
 .invoice-header-info {
   display: flex;
@@ -755,11 +746,7 @@
   gap: var(--space-4);
 }
 
-.invoice-info-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 .invoice-info-item .field-value {
   color: var(--portal-text-light);

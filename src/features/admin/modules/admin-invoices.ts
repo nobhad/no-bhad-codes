@@ -638,35 +638,35 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
 
   // Build modal body
   modal.body.innerHTML = `
-    <div class="invoice-view-content">
+    <div class="invoice-view-content flex flex-col gap-4">
       <div class="invoice-header-info">
         <div class="invoice-info-row">
-          <div class="invoice-info-item">
+          <div class="invoice-info-item flex flex-col gap-1">
             <span class="field-label">Client</span>
             <span class="field-value">${SanitizationUtils.escapeHtml(invoice.client_name || 'Unknown')}</span>
           </div>
-          <div class="invoice-info-item">
+          <div class="invoice-info-item flex flex-col gap-1">
             <span class="field-label">Project</span>
             <span class="field-value">${SanitizationUtils.escapeHtml(invoice.project_name || '-')}</span>
           </div>
         </div>
         <div class="invoice-info-row">
-          <div class="invoice-info-item">
+          <div class="invoice-info-item flex flex-col gap-1">
             <span class="field-label">Status</span>
             <span class="field-value">${getStatusDotHTML(invoice.status || 'pending')}</span>
           </div>
-          <div class="invoice-info-item">
+          <div class="invoice-info-item flex flex-col gap-1">
             <span class="field-label">Due Date</span>
             <span class="field-value">${invoice.due_date ? formatDate(invoice.due_date) : '-'}</span>
           </div>
         </div>
         <div class="invoice-info-row">
-          <div class="invoice-info-item">
+          <div class="invoice-info-item flex flex-col gap-1">
             <span class="field-label">Created</span>
             <span class="field-value">${invoice.created_at ? formatDate(invoice.created_at) : '-'}</span>
           </div>
           ${invoice.paid_date ? `
-            <div class="invoice-info-item">
+            <div class="invoice-info-item flex flex-col gap-1">
               <span class="field-label">Paid</span>
               <span class="field-value">${formatDate(invoice.paid_date)}</span>
             </div>
@@ -831,7 +831,7 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
 
   // Build modal body form
   modal.body.innerHTML = `
-    <form id="edit-invoice-form" class="invoice-edit-form">
+    <form id="edit-invoice-form" class="invoice-edit-form flex flex-col gap-4">
       <div class="form-row">
         <div class="form-group">
           <label class="field-label" for="invoice-due-date">Due Date</label>

@@ -189,17 +189,9 @@
 }
 
 /* Countersign Modal */
-.contract-countersign-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-col gap-2 */
 
-.contract-signature-pad {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 .signature-canvas-wrap {
   background: var(--portal-bg-darker);

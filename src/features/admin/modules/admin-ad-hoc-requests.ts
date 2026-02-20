@@ -315,7 +315,7 @@ async function openInvoiceGenerationModal(request: AdHocRequest, onSuccess: () =
     <div class="ad-hoc-invoice-intro">
       <p>Create an invoice for completed ad hoc work. You can invoice a single request or bundle multiple requests.</p>
     </div>
-    <form id="ad-hoc-invoice-form" class="ad-hoc-invoice-form">
+    <form id="ad-hoc-invoice-form" class="ad-hoc-invoice-form flex flex-col gap-2">
       <div class="form-group">
         <label for="invoice-type">Invoice Type</label>
         <select id="invoice-type" class="form-input" required>
