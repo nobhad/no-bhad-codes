@@ -310,7 +310,7 @@
    Clean, minimal stat cards inspired by Linear.
    No accent bars, no visual noise - just clear hierarchy.
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card {
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card, .kpi-card) {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -323,7 +323,7 @@
 }
 
 /* Remove any accent lines - keep it clean */
-:is([data-page="admin"], [data-page="client-portal"]) .stat-card::before {
+:is([data-page="admin"], [data-page="client-portal"]) :is(.stat-card, .kpi-card)::before {
   display: none;
 }
 
@@ -879,11 +879,14 @@
    COMMON LIST ITEM PATTERN
    Shared styling for all list items (reports, alerts, data, etc.)
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .list-item,
-:is([data-page="admin"], [data-page="client-portal"]) .data-item,
-:is([data-page="admin"], [data-page="client-portal"]) .report-item,
-:is([data-page="admin"], [data-page="client-portal"]) .alert-item,
-:is([data-page="admin"], [data-page="client-portal"]) .bundle-item {
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .list-item,
+  .data-item,
+  .report-item,
+  .alert-item,
+  .bundle-item,
+  .history-request-item
+) {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -896,11 +899,14 @@
   transition: background 0.15s;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .list-item:hover,
-:is([data-page="admin"], [data-page="client-portal"]) .data-item:hover,
-:is([data-page="admin"], [data-page="client-portal"]) .report-item:hover,
-:is([data-page="admin"], [data-page="client-portal"]) .alert-item:hover,
-:is([data-page="admin"], [data-page="client-portal"]) .bundle-item:hover {
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .list-item,
+  .data-item,
+  .report-item,
+  .alert-item,
+  .bundle-item,
+  .history-request-item
+):hover {
   background: var(--portal-bg-light);
 }
 

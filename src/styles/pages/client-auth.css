@@ -81,41 +81,9 @@
   letter-spacing: 0.05em;
 }
 
-/* Auth Method Toggle */
+/* Auth Method Toggle - uses shared .toggle-group and .toggle-btn from portal-buttons.css */
 .auth-toggle {
-  display: flex;
-  border: 2px solid var(--color-border);
   margin-bottom: 1rem;
-}
-
-.auth-toggle-btn {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  background: var(--color-neutral-200);
-  border: none;
-  font-family: var(--font-family-acme);
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  color: var(--color-dark);
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.auth-toggle-btn:first-child {
-  border-right: 1px solid var(--color-border);
-}
-
-.auth-toggle-btn:last-child {
-  border-left: 1px solid var(--color-border);
-}
-
-.auth-toggle-btn:hover:not(.active) {
-  background: var(--color-neutral-300);
-}
-
-.auth-toggle-btn.active {
-  background: var(--color-primary);
-  color: var(--color-dark);
 }
 
 /* Auth Forms - Matches contact form styling */

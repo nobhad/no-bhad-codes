@@ -7,4 +7,25 @@
  * Shared modal styles used across admin and client portals.
  */
 
-/* Currently empty - modal styles are in admin/modals.css */
+/* =====================================================
+   MODAL CONTENT SCROLLABLE PATTERNS
+   Reusable max-height + overflow patterns for modal bodies.
+   ===================================================== */
+
+/* Standard scrollable modal content (60vh) */
+.modal-scroll-sm {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Medium scrollable modal content (70vh) */
+.modal-scroll-md {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Large scrollable modal content (80vh) */
+.modal-scroll-lg {
+  max-height: 80vh;
+  overflow-y: auto;
+}
