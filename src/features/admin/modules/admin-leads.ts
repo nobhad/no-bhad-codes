@@ -6,6 +6,10 @@
  *
  * Lead management functionality for admin dashboard.
  * Dynamically imported for code splitting.
+ *
+ * REFACTORED: Uses createTableModule factory for core table
+ * functionality while preserving custom features (pipeline view,
+ * analytics, scoring rules, tasks, notes).
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -14,115 +18,46 @@ import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client'
 import { ICONS } from '../../../constants/icons';
 import { createTableDropdown, LEAD_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { initModalDropdown } from '../../../utils/modal-dropdown';
-import {
-  createFilterUI,
-  createSortableHeaders,
-  applyFilters,
-  loadFilterState,
-  saveFilterState,
-  LEADS_FILTER_CONFIG,
-  type FilterState
-} from '../../../utils/table-filter';
+import { LEADS_FILTER_CONFIG } from '../../../utils/table-filter';
 import type { Lead, AdminDashboardContext } from '../admin-types';
-// Note: admin-projects imports moved to dynamic to break circular dependency
 import { confirmDialog, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { getCopyEmailButtonHtml } from '../../../utils/copy-email';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
 import { createPortalModal } from '../../../components/portal-modal';
-import { createRowCheckbox, createBulkActionToolbar, setupBulkSelectionHandlers, resetSelection, type BulkActionConfig } from '../../../utils/table-bulk-actions';
-import {
-  createPaginationUI,
-  applyPagination,
-  getDefaultPaginationState,
-  loadPaginationState,
-  savePaginationState,
-  type PaginationState,
-  type PaginationConfig
-} from '../../../utils/table-pagination';
-import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
-import { showTableError } from '../../../utils/error-utils';
-import { exportToCsv, LEADS_EXPORT_CONFIG } from '../../../utils/table-export';
+import { createRowCheckbox, setupBulkSelectionHandlers, resetSelection, type BulkActionConfig } from '../../../utils/table-bulk-actions';
+import { LEADS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { createViewToggle } from '../../../components/view-toggle';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
+import {
+  createTableModule,
+  createPaginationConfig,
+  type TableModuleHelpers
+} from '../../../utils/table-module-factory';
 
-interface LeadsData {
-  leads: Lead[];
-  stats: {
-    total: number;
-    new: number;
-    inProgress: number;
-    converted: number;
-  };
+// ============================================================================
+// TYPES
+// ============================================================================
+
+interface LeadsStats {
+  total: number;
+  new: number;
+  inProgress: number;
+  converted: number;
 }
 
-let leadsData: Lead[] = [];
-let storedContext: AdminDashboardContext | null = null;
-// Load filter state with default sort by status (NEW on top)
-let filterState: FilterState = (() => {
-  const loaded = loadFilterState(LEADS_FILTER_CONFIG.storageKey);
-  // If no sort set, default to status descending (NEW at top)
-  if (!loaded.sortColumn) {
-    loaded.sortColumn = 'status';
-    loaded.sortDirection = 'asc';
-  }
-  return loaded;
-})();
-let filterUIInitialized = false;
+// ============================================================================
+// MODULE STATE (view-specific, not handled by factory)
+// ============================================================================
+
 let currentView: 'table' | 'pipeline' = 'table';
 let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
 let pipelineLinkHandlersAttached = false;
 
-// Pagination configuration and state
-const LEADS_PAGINATION_CONFIG: PaginationConfig = {
-  tableId: 'leads',
-  pageSizeOptions: [10, 25, 50, 100],
-  defaultPageSize: 25,
-  storageKey: 'admin_leads_pagination'
-};
-
-let paginationState: PaginationState = {
-  ...getDefaultPaginationState(LEADS_PAGINATION_CONFIG),
-  ...loadPaginationState(LEADS_PAGINATION_CONFIG.storageKey!)
-};
-
-// Bulk action configuration for leads table
-const LEADS_BULK_CONFIG: BulkActionConfig = {
-  tableId: 'leads',
-  actions: [
-    {
-      id: 'update-status',
-      label: 'Update status',
-      icon: ICONS.PENCIL,
-      variant: 'default',
-      dropdownOptions: LEAD_STATUS_OPTIONS,
-      handler: async (ids: number[], selectedStatus?: string) => {
-        if (!selectedStatus || !storedContext) return;
-        try {
-          const response = await apiPost('/api/admin/leads/bulk/status', {
-            projectIds: ids,
-            status: selectedStatus
-          });
-          if (response.ok) {
-            storedContext.showNotification(`Updated ${ids.length} lead${ids.length > 1 ? 's' : ''}`, 'success');
-            resetSelection('leads');
-            await loadLeads(storedContext);
-          } else {
-            storedContext.showNotification('Failed to update leads', 'error');
-          }
-        } catch (error) {
-          console.error('[AdminLeads] Bulk status update error:', error);
-          storedContext.showNotification('Error updating leads', 'error');
-        }
-      }
-    }
-  ]
-};
-
-// Pipeline stage configuration - simplified lead funnel
+// Pipeline stage configuration
 const PIPELINE_STAGES = [
   { id: 'new', label: 'New', statuses: ['new'], color: 'var(--portal-text-secondary)' },
   { id: 'contacted', label: 'Contacted', statuses: ['contacted'], color: 'var(--app-color-primary)' },
@@ -133,144 +68,362 @@ const PIPELINE_STAGES = [
 ];
 
 // ============================================================================
-// CACHED DOM REFERENCES
+// BULK ACTIONS
 // ============================================================================
 
-const cachedElements: Map<string, HTMLElement | null> = new Map();
-
-/** Get cached element by ID */
-function getElement(id: string): HTMLElement | null {
-  if (!cachedElements.has(id)) {
-    cachedElements.set(id, document.getElementById(id));
-  }
-  return cachedElements.get(id) ?? null;
-}
-
-export function getLeadsData(): Lead[] {
-  return leadsData;
-}
-
-export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
-  // Store context for global functions (activate from details panel)
-  setLeadsContext(ctx);
-
-  // Initialize filter UI once
-  if (!filterUIInitialized) {
-    initializeFilterUI(ctx);
-    filterUIInitialized = true;
-  }
-
-  // Show loading state
-  const tableBody = getElement('leads-table-body');
-  if (tableBody) showTableLoading(tableBody, 7, 'Loading leads...');
-
-  try {
-    const response = await apiFetch('/api/admin/leads');
-
-    if (response.ok) {
-      const json = await response.json();
-      // Handle canonical API format { success: true, data: {...} }
-      const data: LeadsData = json.data ?? json;
-      leadsData = data.leads || [];
-      updateLeadsDisplay(data, ctx);
-
-    } else if (response.status !== 401) {
-      // Don't show error for 401 - handled by apiFetch
-      const errorText = await response.text();
-      console.error('[AdminLeads] API error:', response.status, errorText);
-      const errorTableBody = getElement('leads-table-body');
-      if (errorTableBody) {
-        showTableError(errorTableBody, 7, `Error loading leads: ${response.status}`, () => loadLeads(ctx));
+const LEADS_BULK_CONFIG: BulkActionConfig = {
+  tableId: 'leads',
+  actions: [
+    {
+      id: 'update-status',
+      label: 'Update status',
+      icon: ICONS.PENCIL,
+      variant: 'default',
+      dropdownOptions: LEAD_STATUS_OPTIONS,
+      handler: async (ids: number[], selectedStatus?: string) => {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        const ctx = leadsModule.getContext();
+        if (!selectedStatus || !ctx) return;
+        try {
+          const response = await apiPost('/api/admin/leads/bulk/status', {
+            projectIds: ids,
+            status: selectedStatus
+          });
+          if (response.ok) {
+            ctx.showNotification(`Updated ${ids.length} lead${ids.length > 1 ? 's' : ''}`, 'success');
+            resetSelection('leads');
+            // eslint-disable-next-line @typescript-eslint/no-use-before-define
+            await leadsModule.load(ctx);
+          } else {
+            ctx.showNotification('Failed to update leads', 'error');
+          }
+        } catch (error) {
+          console.error('[AdminLeads] Bulk status update error:', error);
+          ctx.showNotification('Error updating leads', 'error');
+        }
       }
     }
-  } catch (error) {
-    console.error('[AdminLeads] Failed to load leads:', error);
-    const catchTableBody = getElement('leads-table-body');
-    if (catchTableBody) {
-      showTableError(catchTableBody, 7, 'Network error loading leads', () => loadLeads(ctx));
-    }
+  ]
+};
+
+// ============================================================================
+// ROW RENDERING
+// ============================================================================
+
+function buildLeadRow(
+  lead: Lead,
+  ctx: AdminDashboardContext,
+  helpers: TableModuleHelpers<Lead>
+): HTMLTableRowElement {
+  const date = formatDate(lead.created_at);
+  const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '');
+  const decodedCompany = SanitizationUtils.decodeHtmlEntities(lead.company_name || '');
+  const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact));
+  const safeCompanyName = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
+  const safeEmail = SanitizationUtils.escapeHtml(lead.email || '');
+  const leadAny = lead as unknown as Record<string, string>;
+  const projectType = leadAny.project_type || '';
+  const displayType = projectType ? projectType.charAt(0).toUpperCase() + projectType.slice(1) : '';
+  const displayBudget = formatDisplayValue(leadAny.budget_range);
+  const status = lead.status || 'new';
+  const hasClient = typeof lead.client_id === 'number';
+
+  const showConvertBtn = ['new', 'contacted', 'qualified', 'in-progress'].includes(status);
+
+  const row = document.createElement('tr');
+  row.dataset.leadId = String(lead.id);
+
+  const wrapWithClientLink = (text: string) => hasClient
+    ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${text}</a>`
+    : text;
+
+  const primaryName = safeCompanyName || safeContactName;
+  const primaryContent = primaryName ? wrapWithClientLink(primaryName) : '';
+  const secondaryContent = safeCompanyName && safeContactName ? wrapWithClientLink(safeContactName) : '';
+
+  row.innerHTML = `
+    ${createRowCheckbox('leads', lead.id)}
+    <td class="identity-cell inline-editable-cell" data-lead-id="${lead.id}" data-label="Lead">
+      ${primaryContent ? `<span class="identity-name" data-field="primary-name">${primaryContent}</span>` : '<span class="identity-name" data-field="primary-name" style="display:none;"></span>'}
+      ${secondaryContent ? `<span class="identity-contact" data-field="secondary-name">${secondaryContent}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
+      <span class="identity-email">${safeEmail}</span>
+    </td>
+    <td class="type-cell" data-label="Type">
+      <span class="type-value">${SanitizationUtils.escapeHtml(displayType)}</span>
+      <span class="budget-stacked">${SanitizationUtils.escapeHtml(displayBudget)}</span>
+    </td>
+    <td class="status-cell" data-label="Status"><span class="date-stacked">${date}</span></td>
+    <td class="budget-cell" data-label="Budget">${SanitizationUtils.escapeHtml(displayBudget)}</td>
+    <td class="date-cell" data-label="Date">${date}</td>
+    <td class="actions-cell" data-label="Actions">
+      <div class="table-actions">
+        ${showConvertBtn ? `<button class="icon-btn btn-convert-lead" data-lead-id="${lead.id}" title="Convert to Project" aria-label="Convert to Project">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            <line x1="12" y1="11" x2="12" y2="17"></line>
+            <line x1="9" y1="14" x2="15" y2="14"></line>
+          </svg>
+        </button>` : ''}
+      </div>
+    </td>
+  `;
+
+  // Status dropdown
+  const statusCell = row.querySelector('.status-cell');
+  if (statusCell) {
+    const dropdown = createTableDropdown({
+      options: LEAD_STATUS_OPTIONS,
+      currentValue: status,
+      onChange: async (newStatus) => {
+        await updateLeadStatus(lead.id, newStatus, ctx);
+        helpers.updateItem(lead.id, { status: newStatus as Lead['status'] });
+        helpers.rerender();
+      }
+    });
+    statusCell.appendChild(dropdown);
   }
+
+  // Convert button handler
+  const convertBtn = row.querySelector('.btn-convert-lead');
+  if (convertBtn) {
+    convertBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const confirmed = await confirmDialog({
+        title: 'Convert to Project',
+        message: `Convert "${decodedContact}" to an active project?`,
+        confirmText: 'Convert',
+        icon: 'folder-plus'
+      });
+      if (confirmed) {
+        await activateLead(lead.id, ctx);
+      }
+    });
+  }
+
+  // Client link handlers
+  if (lead.client_id) {
+    row.querySelectorAll('.lead-link-client').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openClientDetails(lead.client_id!, ctx);
+      });
+    });
+  }
+
+  // Row click handler
+  row.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.table-dropdown') || target.closest('button') || target.closest('.lead-link') || target.closest('.bulk-select-cell') || target.closest('.inline-editable-cell') || target.tagName === 'INPUT') return;
+    showLeadDetails(lead.id);
+  });
+
+  // Inline editing
+  setupInlineEditing(row, lead, hasClient, helpers);
+
+  return row;
 }
 
 /**
- * Initialize filter UI for leads table
+ * Setup inline editing for lead name/company fields
  */
-function initializeFilterUI(ctx: AdminDashboardContext): void {
-  const container = getElement('leads-filter-container');
-  if (!container) return;
+function setupInlineEditing(
+  row: HTMLTableRowElement,
+  lead: Lead,
+  hasClient: boolean,
+  helpers: TableModuleHelpers<Lead>
+): void {
+  const identityCell = row.querySelector('.identity-cell.inline-editable-cell') as HTMLElement;
+  if (!identityCell) return;
 
-  // Create filter UI
-  const filterUI = createFilterUI(
-    LEADS_FILTER_CONFIG,
-    filterState,
-    (newState) => {
-      filterState = newState;
-      // Re-render table with new filters
-      if (leadsData.length > 0) {
-        renderLeadsTable(leadsData, ctx);
-      }
-    }
-  );
+  const hasBothNames = lead.company_name && lead.contact_name;
+  const isPrimaryCompany = !!lead.company_name;
 
-  // Insert before the export button (Search → Filter → Export → Refresh order)
-  const exportBtnRef = container.querySelector('#export-leads-btn');
-  if (exportBtnRef) {
-    container.insertBefore(filterUI, exportBtnRef);
-  } else {
-    container.appendChild(filterUI);
+  // Primary name editing
+  const primaryNameEl = identityCell.querySelector('.identity-name') as HTMLElement;
+  if (primaryNameEl) {
+    makeEditable(
+      primaryNameEl,
+      () => isPrimaryCompany ? (lead.company_name || '') : (lead.contact_name || ''),
+      async (newValue) => {
+        const fieldToUpdate = isPrimaryCompany ? 'company_name' : 'contact_name';
+        const response = await apiPut(`/api/admin/leads/${lead.id}`, { [fieldToUpdate]: newValue || null });
+        if (response.ok) {
+          if (isPrimaryCompany) {
+            helpers.updateItem(lead.id, { company_name: newValue || '' });
+          } else {
+            helpers.updateItem(lead.id, { contact_name: newValue || '' });
+          }
+          const displayName = newValue
+            ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(newValue)))
+            : '';
+          primaryNameEl.innerHTML = hasClient && displayName
+            ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${displayName}</a>`
+            : displayName;
+          primaryNameEl.style.display = displayName ? '' : 'none';
+          showToast(`${isPrimaryCompany ? 'Company' : 'Name'} updated`, 'success');
+        } else {
+          showToast('Failed to update lead', 'error');
+          throw new Error('Update failed');
+        }
+      },
+      { placeholder: isPrimaryCompany ? 'Enter company' : 'Enter name' }
+    );
   }
 
-  // Setup sortable headers after table is rendered
-  setTimeout(() => {
-    createSortableHeaders(LEADS_FILTER_CONFIG, filterState, (column, direction) => {
-      filterState = { ...filterState, sortColumn: column, sortDirection: direction };
-      saveFilterState(LEADS_FILTER_CONFIG.storageKey, filterState);
-      if (leadsData.length > 0) {
-        renderLeadsTable(leadsData, ctx);
-      }
-    });
-  }, 100);
-
-  // Setup view toggle
-  setupViewToggle(ctx);
-
-  // Create bulk action toolbar (selection count + Clear + Update status)
-  const bulkToolbarEl = document.getElementById('leads-bulk-toolbar');
-  if (bulkToolbarEl) {
-    const toolbar = createBulkActionToolbar({
-      ...LEADS_BULK_CONFIG,
-      onSelectionChange: () => {}
-    });
-    bulkToolbarEl.replaceWith(toolbar);
-  }
-
-  // Wire export button
-  const exportBtn = container.querySelector('#export-leads-btn');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', () => {
-      const filtered = applyFilters(leadsData, filterState, LEADS_FILTER_CONFIG);
-      exportToCsv(filtered as unknown as Record<string, unknown>[], LEADS_EXPORT_CONFIG);
-    });
+  // Secondary name editing
+  const secondaryNameEl = identityCell.querySelector('.identity-contact') as HTMLElement;
+  if (secondaryNameEl && hasBothNames) {
+    makeEditable(
+      secondaryNameEl,
+      () => isPrimaryCompany ? (lead.contact_name || '') : (lead.company_name || ''),
+      async (newValue) => {
+        const fieldToUpdate = isPrimaryCompany ? 'contact_name' : 'company_name';
+        const response = await apiPut(`/api/admin/leads/${lead.id}`, { [fieldToUpdate]: newValue || null });
+        if (response.ok) {
+          if (isPrimaryCompany) {
+            helpers.updateItem(lead.id, { contact_name: newValue || '' });
+          } else {
+            helpers.updateItem(lead.id, { company_name: newValue || '' });
+          }
+          const displayName = newValue
+            ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(newValue)))
+            : '';
+          secondaryNameEl.innerHTML = hasClient && displayName
+            ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${displayName}</a>`
+            : displayName;
+          secondaryNameEl.style.display = displayName ? '' : 'none';
+          showToast(`${isPrimaryCompany ? 'Name' : 'Company'} updated`, 'success');
+        } else {
+          showToast('Failed to update lead', 'error');
+          throw new Error('Update failed');
+        }
+      },
+      { placeholder: isPrimaryCompany ? 'Enter name' : 'Enter company' }
+    );
   }
 }
+
+// ============================================================================
+// MODULE CREATION (FACTORY)
+// ============================================================================
+
+const leadsModule = createTableModule<Lead, LeadsStats>({
+  moduleId: 'leads',
+  filterConfig: LEADS_FILTER_CONFIG,
+  paginationConfig: createPaginationConfig('leads'),
+  columnCount: 7,
+  apiEndpoint: '/api/admin/leads',
+  bulkConfig: LEADS_BULK_CONFIG,
+  exportConfig: LEADS_EXPORT_CONFIG,
+  emptyMessage: 'No leads yet.',
+  filterEmptyMessage: 'No leads match the current filters.',
+  loadingMessage: 'Loading leads...',
+  defaultSort: { column: 'status', direction: 'asc' },
+
+  extractData: (json) => {
+    const data = json as { leads: Lead[]; stats: LeadsStats };
+    return {
+      data: data.leads || [],
+      stats: data.stats
+    };
+  },
+
+  renderStats: (stats, _ctx) => {
+    // Overview stats
+    const statTotal = document.getElementById('stat-total-leads');
+    const statNew = document.getElementById('stat-pending-leads');
+    const statVisitors = document.getElementById('stat-visitors');
+
+    // Leads tab stats
+    const leadsTotal = document.getElementById('leads-total');
+    const leadsNew = document.getElementById('leads-pending');
+    const leadsInProgress = document.getElementById('leads-active');
+    const leadsConverted = document.getElementById('leads-completed');
+
+    if (statTotal) statTotal.textContent = stats.total?.toString() || '0';
+    if (statNew) statNew.textContent = stats.new?.toString() || '0';
+    if (statVisitors) statVisitors.textContent = '0';
+    if (leadsTotal) leadsTotal.textContent = stats.total?.toString() || '0';
+    if (leadsNew) leadsNew.textContent = stats.new?.toString() || '0';
+    if (leadsInProgress) leadsInProgress.textContent = stats.inProgress?.toString() || '0';
+    if (leadsConverted) leadsConverted.textContent = stats.converted?.toString() || '0';
+  },
+
+  renderRow: buildLeadRow,
+
+  onDataLoaded: (leads, ctx) => {
+    // Update recent activity list
+    const recentList = document.getElementById('recent-activity-list');
+    if (recentList && leads) {
+      const recentLeads = leads.slice(0, 5);
+      if (recentLeads.length === 0) {
+        recentList.innerHTML = '<li>No recent activity</li>';
+      } else {
+        recentList.innerHTML = recentLeads
+          .map((lead) => {
+            const date = formatDate(lead.created_at);
+            const decoded = SanitizationUtils.decodeHtmlEntities(lead.contact_name || 'Unknown');
+            const safeName = SanitizationUtils.escapeHtml(decoded);
+            return `<li data-activity-type="lead" data-activity-id="${lead.id}" class="clickable-activity">${date} - New Lead: ${safeName}</li>`;
+          })
+          .join('');
+
+        recentList.querySelectorAll('li[data-activity-type]').forEach((li) => {
+          li.addEventListener('click', () => {
+            const activityType = (li as HTMLElement).dataset.activityType;
+            const activityId = parseInt((li as HTMLElement).dataset.activityId || '0');
+            if (activityType === 'lead' && activityId) {
+              showLeadDetails(activityId);
+            }
+          });
+        });
+      }
+    }
+
+    // Update view based on current mode
+    if (currentView === 'pipeline') {
+      renderPipelineView(ctx);
+    }
+  },
+
+  onTableRendered: (filteredLeads, _ctx) => {
+    // Initialize keyboard navigation
+    initTableKeyboardNav({
+      tableSelector: '.leads-table',
+      rowSelector: 'tbody tr[data-lead-id]',
+      onRowSelect: (row) => {
+        const leadId = parseInt(row.dataset.leadId || '0');
+        if (leadId) showLeadDetails(leadId);
+      },
+      focusClass: 'row-focused',
+      selectedClass: 'row-selected'
+    });
+
+    // Setup bulk selection
+    const allRowIds = filteredLeads.map(l => l.id);
+    setupBulkSelectionHandlers({ tableId: 'leads', actions: [] }, allRowIds);
+  }
+});
+
+// ============================================================================
+// VIEW TOGGLE SETUP
+// ============================================================================
 
 const LEADS_TABLE_ICON =
   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>';
 const LEADS_PIPELINE_ICON =
   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="15" y="5" width="6" height="16" rx="1"/></svg>';
 
-/**
- * Set up view toggle between table and pipeline (reusable view-toggle component)
- */
 function setupViewToggle(ctx: AdminDashboardContext): void {
-  const container = getElement('leads-filter-container');
-  const existingToggle = getElement('leads-view-toggle');
+  const container = leadsModule.getElement('leads-filter-container');
+  const existingToggle = leadsModule.getElement('leads-view-toggle');
   if (!container || !existingToggle || container.dataset.leadsViewToggleInit) return;
   container.dataset.leadsViewToggleInit = 'true';
 
   function applyView(view: 'table' | 'pipeline'): void {
-    const tableView = getElement('leads-table-view');
-    const pipelineView = getElement('leads-pipeline-container');
+    const tableView = leadsModule.getElement('leads-table-view');
+    const pipelineView = leadsModule.getElement('leads-pipeline-container');
     if (view === 'table') {
       if (tableView) tableView.style.display = 'block';
       if (pipelineView) pipelineView.classList.add('hidden');
@@ -288,20 +441,8 @@ function setupViewToggle(ctx: AdminDashboardContext): void {
   const toggleEl = createViewToggle({
     id: 'leads-view-toggle',
     options: [
-      {
-        value: 'table',
-        label: 'Table',
-        title: 'Table View',
-        ariaLabel: 'Table view',
-        iconSvg: LEADS_TABLE_ICON
-      },
-      {
-        value: 'pipeline',
-        label: 'Pipeline',
-        title: 'Pipeline View',
-        ariaLabel: 'Pipeline view',
-        iconSvg: LEADS_PIPELINE_ICON
-      }
+      { value: 'table', label: 'Table', title: 'Table View', ariaLabel: 'Table view', iconSvg: LEADS_TABLE_ICON },
+      { value: 'pipeline', label: 'Pipeline', title: 'Pipeline View', ariaLabel: 'Pipeline view', iconSvg: LEADS_PIPELINE_ICON }
     ],
     value: currentView,
     onChange: (value) => {
@@ -313,20 +454,21 @@ function setupViewToggle(ctx: AdminDashboardContext): void {
   existingToggle.replaceWith(toggleEl);
 }
 
-/**
- * Render pipeline (Kanban) view
- */
+// ============================================================================
+// PIPELINE VIEW
+// ============================================================================
+
 function renderPipelineView(ctx: AdminDashboardContext): void {
-  // Destroy existing board
   if (kanbanBoard) {
     kanbanBoard.destroy();
     kanbanBoard = null;
   }
 
-  const container = getElement('leads-pipeline-container');
+  const container = leadsModule.getElement('leads-pipeline-container');
   if (!container) return;
 
-  // Build columns from stages
+  const leadsData = leadsModule.getData();
+
   const columns: KanbanColumn[] = PIPELINE_STAGES.map(stage => ({
     id: stage.id,
     title: stage.label,
@@ -339,41 +481,38 @@ function renderPipelineView(ctx: AdminDashboardContext): void {
       .map(lead => leadToKanbanItem(lead))
   }));
 
-  // Create kanban board
   kanbanBoard = createKanbanBoard({
     containerId: 'leads-pipeline-container',
     columns,
     onItemMove: (itemId, _fromColumn, toColumn) => handleLeadStageChange(itemId, toColumn, ctx),
     onItemClick: (item) => {
-      const lead = leadsData.find(l => l.id === item.id);
+      const lead = leadsModule.findById(item.id as number);
       if (lead) showLeadDetails(lead.id);
     },
     renderItem: renderLeadCard,
     emptyColumnText: 'No leads'
   });
 
-  // One-time delegated handler for links inside cards (so link click doesn't open lead details)
+  // Pipeline link handlers
   if (!pipelineLinkHandlersAttached && container) {
     pipelineLinkHandlersAttached = true;
     container.addEventListener('click', async (e: Event) => {
       const target = (e.target as HTMLElement).closest?.('.lead-card-client-link, .lead-card-project-link');
-      if (!target || !storedContext) return;
+      const currentCtx = leadsModule.getContext();
+      if (!target || !currentCtx) return;
       e.preventDefault();
       e.stopPropagation();
       const clientId = target.getAttribute('data-client-id');
       const projectId = target.getAttribute('data-project-id');
-      if (clientId) openClientDetails(parseInt(clientId, 10), storedContext);
+      if (clientId) openClientDetails(parseInt(clientId, 10), currentCtx);
       else if (projectId) {
         const { showProjectDetails } = await import('./admin-projects');
-        showProjectDetails(parseInt(projectId, 10), storedContext);
+        showProjectDetails(parseInt(projectId, 10), currentCtx);
       }
     });
   }
 }
 
-/**
- * Convert lead to Kanban item
- */
 function leadToKanbanItem(lead: Lead): KanbanItem {
   return {
     id: lead.id,
@@ -392,28 +531,21 @@ function leadToKanbanItem(lead: Lead): KanbanItem {
   };
 }
 
-/**
- * Calculate a simple lead score
- */
 function calculateLeadScore(lead: Lead): number {
-  let score = 50; // Base score
+  let score = 50;
   const leadAny = lead as unknown as Record<string, string | number>;
 
-  // Budget factor
   const budget = String(leadAny.budget_range || '').toLowerCase();
   if (budget.includes('10000') || budget.includes('20000') || budget.includes('enterprise')) score += 20;
   else if (budget.includes('5000') || budget.includes('premium')) score += 15;
   else if (budget.includes('2500') || budget.includes('3000') || budget.includes('standard')) score += 10;
 
-  // Company name (indicates B2B)
   if (lead.company_name) score += 10;
 
-  // Timeline urgency
   const timeline = String(leadAny.timeline || '').toLowerCase();
   if (timeline.includes('asap') || timeline.includes('urgent') || timeline.includes('1 week')) score += 15;
   else if (timeline.includes('2 week') || timeline.includes('month')) score += 10;
 
-  // Source quality
   const source = (lead.source || '').toLowerCase();
   if (source.includes('referral')) score += 15;
   else if (source.includes('linkedin') || source.includes('google')) score += 5;
@@ -421,18 +553,12 @@ function calculateLeadScore(lead: Lead): number {
   return Math.min(100, Math.max(0, score));
 }
 
-/**
- * Get score class based on value
- */
 function getScoreClass(score: number): string {
   if (score >= 70) return 'score-hot';
   if (score >= 50) return 'score-warm';
   return 'score-cold';
 }
 
-/**
- * Custom render for lead cards in pipeline
- */
 function renderLeadCard(item: KanbanItem): string {
   const meta = item.metadata as {
     email?: string;
@@ -453,11 +579,9 @@ function renderLeadCard(item: KanbanItem): string {
     ? `<a href="/admin/clients/${meta.clientId}" class="lead-card-client-link" data-client-id="${meta.clientId}" title="View client">${titleEscaped}</a>`
     : titleEscaped;
   const projectName = meta.projectName ? SanitizationUtils.escapeHtml(String(meta.projectName)) : '';
-  // Link to project details only when lead is activated (converted)
   const projectContent = projectName && meta.isActivated
     ? `<a href="/admin/projects/${item.id}" class="lead-card-project-link" data-project-id="${item.id}" title="View project">${projectName}</a>`
     : projectName || '';
-  /* When has project name: show it first (link if activated), then client name */
   const titleBlock = projectContent
     ? `<div class="kanban-card-title">${projectContent}</div><div class="lead-card-client-name">${nameContent}</div>`
     : `<div class="kanban-card-title">${nameContent}</div>`;
@@ -477,19 +601,15 @@ function renderLeadCard(item: KanbanItem): string {
   `;
 }
 
-/**
- * Handle lead stage change from drag-drop
- */
 async function handleLeadStageChange(
   itemId: string | number,
   toStage: string,
   ctx: AdminDashboardContext
 ): Promise<void> {
   const leadId = typeof itemId === 'string' ? parseInt(itemId) : itemId;
-  const lead = leadsData.find(l => l.id === leadId);
+  const lead = leadsModule.findById(leadId);
   if (!lead) return;
 
-  // Map stage to status
   const stageToStatus: Record<string, string> = {
     'new': 'new',
     'contacted': 'contacted',
@@ -501,356 +621,45 @@ async function handleLeadStageChange(
 
   const newStatus = stageToStatus[toStage] || 'new';
   await updateLeadStatus(leadId, newStatus, ctx);
-
-  // Update local data
-  lead.status = newStatus as Lead['status'];
+  leadsModule.updateItem(leadId, { status: newStatus as Lead['status'] });
 }
 
-function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
-  // Update overview stats
-  const statTotal = getElement('stat-total-leads');
-  const statNew = getElement('stat-pending-leads'); // Reuse element, shows new leads
-  const statVisitors = getElement('stat-visitors');
+// ============================================================================
+// PUBLIC EXPORTS
+// ============================================================================
 
-  // Update leads tab stats
-  const leadsTotal = getElement('leads-total');
-  const leadsNew = getElement('leads-pending'); // Reuse element, shows new leads
-  const leadsInProgress = getElement('leads-active'); // Reuse element, shows in-progress
-  const leadsConverted = getElement('leads-completed'); // Reuse element, shows converted
-
-  if (statTotal) statTotal.textContent = data.stats?.total?.toString() || '0';
-  if (statNew) statNew.textContent = data.stats?.new?.toString() || '0';
-  if (statVisitors) statVisitors.textContent = '0';
-  if (leadsTotal) leadsTotal.textContent = data.stats?.total?.toString() || '0';
-  if (leadsNew) leadsNew.textContent = data.stats?.new?.toString() || '0';
-  if (leadsInProgress) leadsInProgress.textContent = data.stats?.inProgress?.toString() || '0';
-  if (leadsConverted) leadsConverted.textContent = data.stats?.converted?.toString() || '0';
-
-  // Update recent activity list (leads appear as activity items)
-  const recentList = getElement('recent-activity-list');
-  if (recentList && data.leads) {
-    const recentLeads = data.leads.slice(0, 5);
-    if (recentLeads.length === 0) {
-      recentList.innerHTML = '<li>No recent activity</li>';
-    } else {
-      recentList.innerHTML = recentLeads
-        .map((lead) => {
-          const date = formatDate(lead.created_at);
-          const decoded = SanitizationUtils.decodeHtmlEntities(lead.contact_name || 'Unknown');
-          const safeName = SanitizationUtils.escapeHtml(decoded);
-          return `<li data-activity-type="lead" data-activity-id="${lead.id}" class="clickable-activity">${date} - New Lead: ${safeName}</li>`;
-        })
-        .join('');
-
-      // Add click handlers to recent activity items
-      recentList.querySelectorAll('li[data-activity-type]').forEach((li) => {
-        li.addEventListener('click', () => {
-          const activityType = (li as HTMLElement).dataset.activityType;
-          const activityId = parseInt((li as HTMLElement).dataset.activityId || '0');
-          if (activityType === 'lead' && activityId) {
-            showLeadDetails(activityId);
-          }
-        });
-      });
-    }
-  }
-
-  // Update leads view based on current view mode
-  if (currentView === 'pipeline') {
-    renderPipelineView(ctx);
-  } else {
-    renderLeadsTable(data.leads, ctx);
-  }
+export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
+  setLeadsContext(ctx);
+  setupViewToggle(ctx);
+  await leadsModule.load(ctx);
 }
 
-/**
- * Open client details (dynamic import to avoid circular dependency)
- */
+export const getLeadsData = leadsModule.getData;
+
+export function setLeadsContext(ctx: AdminDashboardContext): void {
+  leadsModule.setContext(ctx);
+}
+
+// ============================================================================
+// CLIENT DETAILS NAVIGATION
+// ============================================================================
+
 async function openClientDetails(clientId: number, ctx: AdminDashboardContext): Promise<void> {
   ctx.switchTab('clients');
   const clientsModule = await import('./admin-clients');
   clientsModule.showClientDetails(clientId, ctx);
 }
 
-function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
-  const tableBody = getElement('leads-table-body');
-  if (!tableBody) return;
-
-  if (!leads || leads.length === 0) {
-    showTableEmpty(tableBody, 7, 'No leads yet.');
-    renderLeadsPaginationUI(0, ctx);
-    return;
-  }
-
-  // Apply filters
-  const filteredLeads = applyFilters(leads, filterState, LEADS_FILTER_CONFIG);
-
-  if (filteredLeads.length === 0) {
-    showTableEmpty(tableBody, 7, 'No leads match the current filters.');
-    renderLeadsPaginationUI(0, ctx);
-    return;
-  }
-
-  // Update pagination state with total items
-  paginationState.totalItems = filteredLeads.length;
-
-  // Apply pagination
-  const paginatedLeads = applyPagination(filteredLeads, paginationState);
-
-  // Reset bulk selection when data changes
-  resetSelection('leads');
-
-  // Clear and rebuild table
-  tableBody.innerHTML = '';
-
-  paginatedLeads.forEach((lead) => {
-    const date = formatDate(lead.created_at);
-    const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '');
-    const decodedCompany = SanitizationUtils.decodeHtmlEntities(lead.company_name || '');
-    const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact));
-    const safeCompanyName = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
-    const safeEmail = SanitizationUtils.escapeHtml(lead.email || '');
-    const leadAny = lead as unknown as Record<string, string>;
-    const projectType = leadAny.project_type || '';
-    const displayType = projectType ? projectType.charAt(0).toUpperCase() + projectType.slice(1) : '';
-    const displayBudget = formatDisplayValue(leadAny.budget_range);
-    const status = lead.status || 'new';
-    const hasClient = typeof lead.client_id === 'number';
-
-    // Show convert button for leads that can be converted (not yet converted/lost/cancelled)
-    const showConvertBtn = ['new', 'contacted', 'qualified', 'in-progress'].includes(status);
-
-    const row = document.createElement('tr');
-    row.dataset.leadId = String(lead.id);
-
-    // Lead column: Company name is primary (largest), then contact name, then email
-    // If no company, contact name becomes primary
-    const wrapWithClientLink = (text: string) => hasClient
-      ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${text}</a>`
-      : text;
-
-    // Primary name: company if exists, otherwise contact
-    const primaryName = safeCompanyName || safeContactName;
-    const primaryContent = primaryName ? wrapWithClientLink(primaryName) : '';
-    // Secondary name: contact (only if company exists as primary)
-    const secondaryContent = safeCompanyName && safeContactName ? wrapWithClientLink(safeContactName) : '';
-
-    // Column order: ☐ | Lead | Type | Status | Budget | Date | Actions
-    row.innerHTML = `
-      ${createRowCheckbox('leads', lead.id)}
-      <td class="identity-cell inline-editable-cell" data-lead-id="${lead.id}" data-label="Lead">
-        ${primaryContent ? `<span class="identity-name" data-field="primary-name">${primaryContent}</span>` : '<span class="identity-name" data-field="primary-name" style="display:none;"></span>'}
-        ${secondaryContent ? `<span class="identity-contact" data-field="secondary-name">${secondaryContent}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
-        <span class="identity-email">${safeEmail}</span>
-      </td>
-      <td class="type-cell" data-label="Type">
-        <span class="type-value">${SanitizationUtils.escapeHtml(displayType)}</span>
-        <span class="budget-stacked">${SanitizationUtils.escapeHtml(displayBudget)}</span>
-      </td>
-      <td class="status-cell" data-label="Status"><span class="date-stacked">${date}</span></td>
-      <td class="budget-cell" data-label="Budget">${SanitizationUtils.escapeHtml(displayBudget)}</td>
-      <td class="date-cell" data-label="Date">${date}</td>
-      <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          ${showConvertBtn ? `<button class="icon-btn btn-convert-lead" data-lead-id="${lead.id}" title="Convert to Project" aria-label="Convert to Project">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-              <line x1="12" y1="11" x2="12" y2="17"></line>
-              <line x1="9" y1="14" x2="15" y2="14"></line>
-            </svg>
-          </button>` : ''}
-        </div>
-      </td>
-    `;
-
-    // Create custom dropdown for status
-    const statusCell = row.querySelector('.status-cell');
-    if (statusCell) {
-      const dropdown = createTableDropdown({
-        options: LEAD_STATUS_OPTIONS,
-        currentValue: status,
-        onChange: async (newStatus) => {
-          await updateLeadStatus(lead.id, newStatus, ctx);
-          // Update local data
-          lead.status = newStatus as Lead['status'];
-          // Re-render to update convert button visibility
-          renderLeadsTable(leadsData, ctx);
-        }
-      });
-      statusCell.appendChild(dropdown);
-    }
-
-    // Add click handler for convert button
-    const convertBtn = row.querySelector('.btn-convert-lead');
-    if (convertBtn) {
-      convertBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const confirmed = await confirmDialog({
-          title: 'Convert to Project',
-          message: `Convert "${decodedContact}" to an active project?`,
-          confirmText: 'Convert',
-          icon: 'folder-plus'
-        });
-        if (confirmed) {
-          await activateLead(lead.id, ctx);
-        }
-      });
-    }
-
-    // Links: name and company -> client details page
-    if (lead.client_id) {
-      row.querySelectorAll('.lead-link-client').forEach((link) => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          openClientDetails(lead.client_id!, ctx);
-        });
-      });
-    }
-
-    // Add click handler for row (excluding status cell, buttons, links, checkbox, and inline-editable cells)
-    row.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown') || target.closest('button') || target.closest('.lead-link') || target.closest('.bulk-select-cell') || target.closest('.inline-editable-cell') || target.tagName === 'INPUT') return;
-      showLeadDetails(lead.id);
-    });
-
-    // Setup inline editing for name and company fields
-    const identityCell = row.querySelector('.identity-cell.inline-editable-cell') as HTMLElement;
-    if (identityCell) {
-      // Primary field: company_name if exists, otherwise contact_name
-      const hasBothNames = lead.company_name && lead.contact_name;
-      const isPrimaryCompany = !!lead.company_name;
-
-      // Setup primary name editing (identity-name span)
-      const primaryNameEl = identityCell.querySelector('.identity-name') as HTMLElement;
-      if (primaryNameEl) {
-        makeEditable(
-          primaryNameEl,
-          () => isPrimaryCompany ? (lead.company_name || '') : (lead.contact_name || ''),
-          async (newValue) => {
-            const fieldToUpdate = isPrimaryCompany ? 'company_name' : 'contact_name';
-            const response = await apiPut(`/api/admin/leads/${lead.id}`, { [fieldToUpdate]: newValue || null });
-            if (response.ok) {
-              if (isPrimaryCompany) {
-                lead.company_name = newValue || '';
-              } else {
-                lead.contact_name = newValue || '';
-              }
-              const displayName = newValue
-                ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(newValue)))
-                : '';
-              primaryNameEl.innerHTML = hasClient && displayName
-                ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${displayName}</a>`
-                : displayName;
-              primaryNameEl.style.display = displayName ? '' : 'none';
-              showToast(`${isPrimaryCompany ? 'Company' : 'Name'} updated`, 'success');
-            } else {
-              showToast('Failed to update lead', 'error');
-              throw new Error('Update failed');
-            }
-          },
-          { placeholder: isPrimaryCompany ? 'Enter company' : 'Enter name' }
-        );
-      }
-
-      // Setup secondary name editing (identity-contact span) - only if company exists (so contact is secondary)
-      const secondaryNameEl = identityCell.querySelector('.identity-contact') as HTMLElement;
-      if (secondaryNameEl && hasBothNames) {
-        makeEditable(
-          secondaryNameEl,
-          () => isPrimaryCompany ? (lead.contact_name || '') : (lead.company_name || ''),
-          async (newValue) => {
-            const fieldToUpdate = isPrimaryCompany ? 'contact_name' : 'company_name';
-            const response = await apiPut(`/api/admin/leads/${lead.id}`, { [fieldToUpdate]: newValue || null });
-            if (response.ok) {
-              if (isPrimaryCompany) {
-                lead.contact_name = newValue || '';
-              } else {
-                lead.company_name = newValue || '';
-              }
-              const displayName = newValue
-                ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(newValue)))
-                : '';
-              secondaryNameEl.innerHTML = hasClient && displayName
-                ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${displayName}</a>`
-                : displayName;
-              secondaryNameEl.style.display = displayName ? '' : 'none';
-              showToast(`${isPrimaryCompany ? 'Name' : 'Company'} updated`, 'success');
-            } else {
-              showToast('Failed to update lead', 'error');
-              throw new Error('Update failed');
-            }
-          },
-          { placeholder: isPrimaryCompany ? 'Enter name' : 'Enter company' }
-        );
-      }
-    }
-
-    tableBody.appendChild(row);
-  });
-
-  // Setup bulk selection handlers
-  const leadsBulkConfig: BulkActionConfig = {
-    tableId: 'leads',
-    actions: []
-  };
-  const allRowIds = paginatedLeads.map(l => l.id);
-  setupBulkSelectionHandlers(leadsBulkConfig, allRowIds);
-
-  // Render pagination
-  renderLeadsPaginationUI(filteredLeads.length, ctx);
-
-  // Initialize keyboard navigation (J/K to move, Enter to view)
-  initTableKeyboardNav({
-    tableSelector: '.leads-table',
-    rowSelector: 'tbody tr[data-lead-id]',
-    onRowSelect: (row) => {
-      const leadId = parseInt(row.dataset.leadId || '0');
-      if (leadId) showLeadDetails(leadId);
-    },
-    focusClass: 'row-focused',
-    selectedClass: 'row-selected'
-  });
-}
-
-/**
- * Render pagination UI for leads table
- */
-function renderLeadsPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
-  const container = document.getElementById('leads-pagination');
-  if (!container) return;
-
-  // Update state
-  paginationState.totalItems = totalItems;
-
-  // Create pagination UI
-  const paginationUI = createPaginationUI(
-    LEADS_PAGINATION_CONFIG,
-    paginationState,
-    (newState) => {
-      paginationState = newState;
-      savePaginationState(LEADS_PAGINATION_CONFIG.storageKey!, paginationState);
-      // Re-render table with new pagination
-      if (leadsData.length > 0) {
-        renderLeadsTable(leadsData, ctx);
-      }
-    }
-  );
-
-  // Replace container content
-  container.innerHTML = '';
-  container.appendChild(paginationUI);
-}
+// ============================================================================
+// STATUS UPDATE
+// ============================================================================
 
 async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardContext): Promise<void> {
   try {
     let cancelled_by: string | null = null;
     let cancellation_reason: string | null = null;
 
-    // If cancelling, ask who cancelled
     if (status === 'cancelled') {
-      // First confirm they want to cancel
       const confirmCancel = await confirmDialog({
         title: 'Cancel Project',
         message: 'Are you sure you want to cancel this project?',
@@ -862,22 +671,16 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
 
       if (!confirmCancel) return;
 
-      // Ask who initiated the cancellation and why
       const cancelInfo = await showCancelledByDialog();
-      if (!cancelInfo) return; // User cancelled the dialog
+      if (!cancelInfo) return;
       cancelled_by = cancelInfo.cancelled_by;
       cancellation_reason = cancelInfo.reason;
     }
 
-    // Normalize status to match API (hyphens; string)
     const normalizedStatus = String(status).trim().replace(/_/g, '-');
     const body: { status: string; cancelled_by?: string; cancellation_reason?: string } = { status: normalizedStatus };
-    if (cancelled_by) {
-      body.cancelled_by = cancelled_by;
-    }
-    if (cancellation_reason) {
-      body.cancellation_reason = cancellation_reason;
-    }
+    if (cancelled_by) body.cancelled_by = cancelled_by;
+    if (cancellation_reason) body.cancellation_reason = cancellation_reason;
 
     const response = await apiPut(`/api/admin/leads/${id}/status`, body);
     if (response.ok) {
@@ -890,7 +693,7 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
           message = data.error ?? data.message ?? message;
         }
       } catch {
-        // use default message
+        // use default
       }
       ctx.showNotification(message, 'error');
     }
@@ -899,6 +702,10 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
     ctx.showNotification('Failed to update status. Please try again.', 'error');
   }
 }
+
+// ============================================================================
+// CANCELLATION DIALOG
+// ============================================================================
 
 interface CancellationInfo {
   cancelled_by: string;
@@ -915,9 +722,6 @@ const CANCELLATION_REASONS = [
   { value: 'other', label: 'Other' }
 ];
 
-/**
- * Show dialog asking who cancelled and why
- */
 async function showCancelledByDialog(): Promise<CancellationInfo | null> {
   return new Promise((resolve) => {
     let selectedCancelledBy: string | null = null;
@@ -927,7 +731,6 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
       `<option value="${r.value}">${r.label}</option>`
     ).join('');
 
-    // Create modal using portal modal component
     const modal = createPortalModal({
       id: 'cancel-dialog-modal',
       titleId: 'cancel-dialog-title',
@@ -941,7 +744,6 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
       }
     });
 
-    // Build body content
     modal.body.innerHTML = `
       <div class="form-group">
         <label class="form-label">Who cancelled?</label>
@@ -950,7 +752,6 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
           <button type="button" class="btn btn-outline cancelled-by-btn" data-value="client">Client Cancelled</button>
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">Reason</label>
         <select id="cancel-reason" class="form-input">
@@ -958,24 +759,20 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
           ${reasonOptions}
         </select>
       </div>
-
       <div id="cancel-description-wrapper" class="form-group" style="display: none;">
         <label class="form-label">Description (optional)</label>
         <textarea id="cancel-description" class="form-input" rows="2" placeholder="Additional details..."></textarea>
       </div>
     `;
 
-    // Build footer with action buttons
     modal.footer.innerHTML = `
       <button type="button" class="btn btn-outline cancel-btn">Cancel</button>
       <button type="button" class="btn btn-danger confirm-btn" disabled>Confirm Cancellation</button>
     `;
 
-    // Append to DOM and show
     document.body.appendChild(modal.overlay);
     modal.show();
 
-    // Get element references
     const cancelledByBtns = modal.body.querySelectorAll('.cancelled-by-btn');
     const reasonSelect = modal.body.querySelector('#cancel-reason') as HTMLSelectElement;
     const descWrapper = modal.body.querySelector('#cancel-description-wrapper') as HTMLElement;
@@ -988,14 +785,10 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
       initModalDropdown(reasonSelect, { placeholder: 'Select a reason...' });
     }
 
-    // Update confirm button state
     const updateConfirmState = () => {
-      const hasWho = !!selectedCancelledBy;
-      const hasReason = !!reasonSelect.value;
-      confirmBtn.disabled = !(hasWho && hasReason);
+      confirmBtn.disabled = !(selectedCancelledBy && reasonSelect.value);
     };
 
-    // Who cancelled buttons
     cancelledByBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         cancelledByBtns.forEach(b => b.classList.remove('active'));
@@ -1005,20 +798,17 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
       });
     });
 
-    // Reason dropdown - show description for "other"
     reasonSelect.addEventListener('change', () => {
       descWrapper.style.display = reasonSelect.value === 'other' ? 'block' : 'none';
       updateConfirmState();
     });
 
-    // Cancel button
     cancelBtn.addEventListener('click', () => {
       resolved = true;
       modal.hide();
       resolve(null);
     });
 
-    // Confirm button
     confirmBtn.addEventListener('click', () => {
       if (!selectedCancelledBy || !reasonSelect.value) return;
 
@@ -1026,7 +816,6 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
       if (reason === 'other' && descTextarea.value.trim()) {
         reason = descTextarea.value.trim();
       } else {
-        // Get the label for the selected reason
         const selectedOption = CANCELLATION_REASONS.find(r => r.value === reason);
         if (selectedOption) {
           reason = selectedOption.label;
@@ -1038,13 +827,9 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
 
       resolved = true;
       modal.hide();
-      resolve({
-        cancelled_by: selectedCancelledBy,
-        reason
-      });
+      resolve({ cancelled_by: selectedCancelledBy, reason });
     });
 
-    // Close on Escape
     const escHandler = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {
         if (!resolved) {
@@ -1059,13 +844,19 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
   });
 }
 
+// ============================================================================
+// LEAD DETAILS PANEL
+// ============================================================================
+
 export async function showLeadDetails(leadId: number): Promise<void> {
-  const lead = leadsData.find((l) => l.id === leadId);
+  const lead = leadsModule.findById(leadId);
   if (!lead) return;
 
-  const detailsPanel = getElement('lead-details-panel');
-  const overlay = getElement('details-overlay');
+  const detailsPanel = leadsModule.getElement('lead-details-panel');
+  const overlay = leadsModule.getElement('details-overlay');
   if (!detailsPanel) return;
+
+  const storedContext = leadsModule.getContext();
 
   const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '');
   const decodedCompany = SanitizationUtils.decodeHtmlEntities(lead.company_name || '');
@@ -1074,45 +865,27 @@ export async function showLeadDetails(leadId: number): Promise<void> {
   const safeEmail = SanitizationUtils.escapeHtml(lead.email || '');
   const safePhone = SanitizationUtils.formatPhone(lead.phone || '');
   const safeProjectType = SanitizationUtils.escapeHtml(lead.project_type || '');
-  const safeDescription = SanitizationUtils.escapeHtml(
-    SanitizationUtils.decodeHtmlEntities(lead.description || 'No description')
-  );
+  const safeDescription = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(lead.description || 'No description'));
   const safeBudget = SanitizationUtils.escapeHtml(formatDisplayValue(lead.budget_range));
   const safeTimeline = SanitizationUtils.escapeHtml(formatDisplayValue(lead.timeline));
-  const safeFeatures = SanitizationUtils.escapeHtml(
-    SanitizationUtils.decodeHtmlEntities((lead.features || '').replace(/,/g, ', '))
-  );
+  const safeFeatures = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities((lead.features || '').replace(/,/g, ', ')));
   const safeSource = SanitizationUtils.escapeHtml(lead.source || '');
   const hasClient = typeof lead.client_id === 'number';
-  const safeProjectName = lead.project_name
-    ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(lead.project_name))
-    : '';
+  const safeProjectName = lead.project_name ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(lead.project_name)) : '';
 
-  // Calculate lead score
   const score = calculateLeadScore(lead);
   const scoreClass = getScoreClass(score);
-
-  // Show activate button only for leads not yet in progress or converted
   const showActivateBtn = !lead.status || ['new', 'contacted', 'qualified'].includes(lead.status);
-  // Make project name clickable for active/converted leads
   const isActiveProject = ['in-progress', 'converted'].includes(lead.status || '');
 
-  // Load tasks and notes
-  const [tasks, notes] = await Promise.all([
-    loadLeadTasks(leadId),
-    loadLeadNotes(leadId)
-  ]);
+  const [tasks, notes] = await Promise.all([loadLeadTasks(leadId), loadLeadNotes(leadId)]);
 
-  // Company and Name: link to client details page when converted
-  // Company comes first if it exists (business leads)
   const companyValue = safeCompanyName && hasClient
     ? `<a href="#" class="panel-link panel-link-client" data-client-id="${lead.client_id}" title="View client">${safeCompanyName}</a>`
     : safeCompanyName;
   const nameValue = hasClient
     ? `<a href="#" class="panel-link panel-link-client" data-client-id="${lead.client_id}" title="View client">${safeContactName}</a>`
     : safeContactName;
-  // Project: link to project details when lead is in-progress or converted
-  // The lead.id IS the project ID since leads and projects share the same table
   const projectValue = safeProjectName
     ? isActiveProject
       ? `<a href="#" class="panel-link panel-link-project" data-project-id="${lead.id}" title="View project">${safeProjectName}</a>`
@@ -1134,87 +907,35 @@ export async function showLeadDetails(leadId: number): Promise<void> {
       <span id="panel-lead-status-container"></span>
     </div>
     <div class="details-content">
-      <!-- Lead Details Tabs -->
       <div class="lead-details-tabs">
         <button class="lead-tab active" data-tab="overview">Overview</button>
         <button class="lead-tab" data-tab="tasks">Tasks (${tasks.length})</button>
         <button class="lead-tab" data-tab="notes">Notes (${notes.length})</button>
       </div>
-
-      <!-- Overview Tab -->
       <div class="lead-tab-content active" data-tab-content="overview">
         <div class="project-detail-meta">
           <div class="meta-item">
             <span class="field-label">Project</span>
             <span class="meta-value">${projectValue}</span>
           </div>
-          ${safeCompanyName ? `
-          <div class="meta-item">
-            <span class="field-label">Company</span>
-            <span class="meta-value">${companyValue}</span>
-          </div>
-          ` : ''}
-          <div class="meta-item">
-            <span class="field-label">Name</span>
-            <span class="meta-value">${nameValue}</span>
-          </div>
-          <div class="meta-item">
-            <span class="field-label">Email</span>
-            <span class="meta-value meta-value-with-copy">
-              ${safeEmail}
-              ${getCopyEmailButtonHtml(lead.email || '')}
-            </span>
-          </div>
-          <div class="meta-item">
-            <span class="field-label">Phone</span>
-            <span class="meta-value">${safePhone}</span>
-          </div>
-          ${lead.source?.trim() ? `
-          <div class="meta-item">
-            <span class="field-label">Source</span>
-            <span class="meta-value">${safeSource}</span>
-          </div>
-          ` : ''}
-          <div class="meta-item">
-            <span class="field-label">Project Type</span>
-            <span class="meta-value">${safeProjectType}</span>
-          </div>
-          <div class="meta-item">
-            <span class="field-label">Budget</span>
-            <span class="meta-value">${safeBudget}</span>
-          </div>
-          <div class="meta-item">
-            <span class="field-label">Timeline</span>
-            <span class="meta-value">${safeTimeline}</span>
-          </div>
+          ${safeCompanyName ? `<div class="meta-item"><span class="field-label">Company</span><span class="meta-value">${companyValue}</span></div>` : ''}
+          <div class="meta-item"><span class="field-label">Name</span><span class="meta-value">${nameValue}</span></div>
+          <div class="meta-item"><span class="field-label">Email</span><span class="meta-value meta-value-with-copy">${safeEmail}${getCopyEmailButtonHtml(lead.email || '')}</span></div>
+          <div class="meta-item"><span class="field-label">Phone</span><span class="meta-value">${safePhone}</span></div>
+          ${lead.source?.trim() ? `<div class="meta-item"><span class="field-label">Source</span><span class="meta-value">${safeSource}</span></div>` : ''}
+          <div class="meta-item"><span class="field-label">Project Type</span><span class="meta-value">${safeProjectType}</span></div>
+          <div class="meta-item"><span class="field-label">Budget</span><span class="meta-value">${safeBudget}</span></div>
+          <div class="meta-item"><span class="field-label">Timeline</span><span class="meta-value">${safeTimeline}</span></div>
         </div>
-        <div class="project-description-row">
-          <div class="meta-item description-item">
-            <span class="field-label">Description</span>
-            <span class="meta-value">${safeDescription}</span>
-          </div>
-        </div>
-        <div class="project-description-row">
-          <div class="meta-item description-item">
-            <span class="field-label">Features</span>
-            <span class="meta-value">${safeFeatures}</span>
-          </div>
-        </div>
+        <div class="project-description-row"><div class="meta-item description-item"><span class="field-label">Description</span><span class="meta-value">${safeDescription}</span></div></div>
+        <div class="project-description-row"><div class="meta-item description-item"><span class="field-label">Features</span><span class="meta-value">${safeFeatures}</span></div></div>
       </div>
-
-      <!-- Tasks Tab -->
-      <div class="lead-tab-content" data-tab-content="tasks">
-        ${renderLeadTasks(tasks, leadId)}
-      </div>
-
-      <!-- Notes Tab -->
-      <div class="lead-tab-content" data-tab-content="notes">
-        ${renderLeadNotes(notes, leadId)}
-      </div>
+      <div class="lead-tab-content" data-tab-content="tasks">${renderLeadTasks(tasks, leadId)}</div>
+      <div class="lead-tab-content" data-tab-content="notes">${renderLeadNotes(notes, leadId)}</div>
     </div>
   `;
 
-  // Setup tab switching
+  // Tab switching
   detailsPanel.querySelectorAll('.lead-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       const tabName = (tab as HTMLElement).dataset.tab;
@@ -1225,7 +946,7 @@ export async function showLeadDetails(leadId: number): Promise<void> {
     });
   });
 
-  // Setup task actions
+  // Task actions
   detailsPanel.querySelectorAll('[data-action="toggle-task"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const taskItem = btn.closest('.lead-task-item');
@@ -1233,12 +954,9 @@ export async function showLeadDetails(leadId: number): Promise<void> {
       if (taskId) completeTask(taskId, leadId);
     });
   });
+  detailsPanel.querySelector('.add-lead-task-btn')?.addEventListener('click', () => showAddTaskDialog(leadId));
 
-  detailsPanel.querySelector('.add-lead-task-btn')?.addEventListener('click', () => {
-    showAddTaskDialog(leadId);
-  });
-
-  // Setup note actions
+  // Note actions
   detailsPanel.querySelectorAll('[data-action="toggle-pin"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const noteItem = btn.closest('.lead-note-item');
@@ -1246,21 +964,17 @@ export async function showLeadDetails(leadId: number): Promise<void> {
       if (noteId) toggleNotePin(noteId, leadId);
     });
   });
+  detailsPanel.querySelector('.add-lead-note-btn')?.addEventListener('click', () => showAddNoteDialog(leadId));
 
-  detailsPanel.querySelector('.add-lead-note-btn')?.addEventListener('click', () => {
-    showAddNoteDialog(leadId);
-  });
-
-  // Add custom dropdown for status in panel
+  // Status dropdown
   const statusContainer = detailsPanel.querySelector('#panel-lead-status-container');
   if (statusContainer && storedContext) {
     const dropdown = createTableDropdown({
       options: LEAD_STATUS_OPTIONS,
       currentValue: lead.status || 'new',
       onChange: async (newStatus) => {
-        await updateLeadStatus(lead.id, newStatus, storedContext!);
-        lead.status = newStatus as Lead['status'];
-        // Update table row dropdown if visible
+        await updateLeadStatus(lead.id, newStatus, storedContext);
+        leadsModule.updateItem(lead.id, { status: newStatus as Lead['status'] });
         const tableDropdown = document.querySelector(`tr[data-lead-id="${lead.id}"] .table-dropdown`);
         if (tableDropdown) {
           const textEl = tableDropdown.querySelector('.custom-dropdown-text');
@@ -1275,7 +989,7 @@ export async function showLeadDetails(leadId: number): Promise<void> {
     statusContainer.appendChild(dropdown);
   }
 
-  // Add click handler for activate button
+  // Activate button
   const activateBtn = detailsPanel.querySelector('.details-activate-btn');
   if (activateBtn) {
     activateBtn.addEventListener('click', async () => {
@@ -1293,19 +1007,7 @@ export async function showLeadDetails(leadId: number): Promise<void> {
     });
   }
 
-  // Add click handler for view project button
-  const viewProjectBtn = detailsPanel.querySelector('.details-view-project-btn');
-  if (viewProjectBtn) {
-    viewProjectBtn.addEventListener('click', () => {
-      const id = (viewProjectBtn as HTMLElement).dataset.id;
-      if (id) {
-        window.closeDetailsPanel();
-        window.viewProjectFromLead(parseInt(id));
-      }
-    });
-  }
-
-  // Panel links: name -> client details, project name -> project details
+  // Panel links
   detailsPanel.querySelectorAll('.panel-link-client').forEach((el) => {
     el.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1328,16 +1030,14 @@ export async function showLeadDetails(leadId: number): Promise<void> {
     });
   });
 
-  // Show overlay and panel
   if (overlay) openModalOverlay(overlay);
   detailsPanel.classList.remove('hidden');
 }
 
-export function setLeadsContext(ctx: AdminDashboardContext): void {
-  storedContext = ctx;
-}
+// ============================================================================
+// GLOBAL FUNCTIONS
+// ============================================================================
 
-// Global functions for details panel
 declare global {
   interface Window {
     closeDetailsPanel: () => void;
@@ -1346,7 +1046,6 @@ declare global {
   }
 }
 
-// Event delegation for close panel button
 document.addEventListener('click', (e) => {
   const target = e.target as HTMLElement;
   if (target.matches('.btn-close-details-panel')) {
@@ -1355,42 +1054,40 @@ document.addEventListener('click', (e) => {
 });
 
 window.closeDetailsPanel = function (): void {
-  // Close lead details panel
-  const leadDetailsPanel = getElement('lead-details-panel');
+  const leadDetailsPanel = leadsModule.getElement('lead-details-panel');
   if (leadDetailsPanel) leadDetailsPanel.classList.add('hidden');
-  // Close contact details panel
-  const contactDetailsPanel = getElement('contact-details-panel');
+  const contactDetailsPanel = leadsModule.getElement('contact-details-panel');
   if (contactDetailsPanel) contactDetailsPanel.classList.add('hidden');
-  // Close overlay
-  const overlay = getElement('details-overlay');
+  const overlay = leadsModule.getElement('details-overlay');
   if (overlay) closeModalOverlay(overlay);
 };
 
 window.activateLeadFromPanel = function (leadId: number): void {
-  if (storedContext) {
-    activateLead(leadId, storedContext).then(() => {
+  const ctx = leadsModule.getContext();
+  if (ctx) {
+    activateLead(leadId, ctx).then(() => {
       window.closeDetailsPanel();
     });
   }
 };
 
 window.viewProjectFromLead = function (projectId: number): void {
-  if (storedContext) {
-    // Switch to projects tab
-    storedContext.switchTab('projects');
-    // Show project details after a brief delay to allow tab switch
+  const ctx = leadsModule.getContext();
+  if (ctx) {
+    ctx.switchTab('projects');
     setTimeout(() => {
       import('./admin-projects').then((module) => {
-        module.showProjectDetails(projectId, storedContext!);
+        module.showProjectDetails(projectId, ctx);
       });
     }, 100);
   }
 };
 
-export async function activateLead(
-  leadId: number,
-  ctx: AdminDashboardContext
-): Promise<void> {
+// ============================================================================
+// ACTIVATE LEAD
+// ============================================================================
+
+export async function activateLead(leadId: number, ctx: AdminDashboardContext): Promise<void> {
   try {
     const response = await apiPost(`/api/admin/leads/${leadId}/activate`);
 
@@ -1398,7 +1095,6 @@ export async function activateLead(
       const data = await response.json();
       ctx.showNotification('Lead activated successfully!', 'success');
 
-      // Load projects data and navigate to project detail page
       const { loadProjects, showProjectDetails } = await import('./admin-projects');
       await loadProjects(ctx);
       const projectId = data.projectId || leadId;
@@ -1412,11 +1108,7 @@ export async function activateLead(
   }
 }
 
-export async function inviteLead(
-  leadId: number,
-  email: string,
-  ctx: AdminDashboardContext
-): Promise<void> {
+export async function inviteLead(leadId: number, email: string, ctx: AdminDashboardContext): Promise<void> {
   try {
     const response = await apiPost(`/api/admin/leads/${leadId}/invite`, { email });
 
@@ -1435,38 +1127,21 @@ export async function inviteLead(
 // LEAD ANALYTICS
 // ============================================================================
 
-interface FunnelStage {
-  stage: string;
-  count: number;
-  percentage: number;
-}
+interface FunnelStage { stage: string; count: number; percentage: number; }
+interface SourcePerformance { source: string; total: number; converted: number; conversionRate: number; }
 
-interface SourcePerformance {
-  source: string;
-  total: number;
-  converted: number;
-  conversionRate: number;
-}
-
-/**
- * Load and display lead analytics (conversion funnel, source performance)
- */
 export async function loadLeadAnalytics(): Promise<void> {
-  await Promise.all([
-    loadConversionFunnel(),
-    loadSourcePerformance()
-  ]);
+  await Promise.all([loadConversionFunnel(), loadSourcePerformance()]);
 }
 
 async function loadConversionFunnel(): Promise<void> {
-  const container = getElement('leads-conversion-funnel');
+  const container = leadsModule.getElement('leads-conversion-funnel');
   if (!container) return;
 
   try {
     const response = await apiFetch('/api/admin/leads/conversion-funnel');
     if (response.ok) {
       const data = await response.json();
-      // API returns { success, funnel: { stages, overallConversionRate } }
       const raw = data?.funnel?.stages ?? data?.funnel;
       const stages = Array.isArray(raw) ? raw : [];
       const funnel: FunnelStage[] = stages.map((s: { name?: string; stage?: string; count: number; conversionRate?: number; percentage?: number }) => ({
@@ -1494,17 +1169,13 @@ function renderConversionFunnel(container: HTMLElement, funnel: FunnelStage[]): 
   const maxCount = Math.max(...safeFunnel.map(s => s.count), 1);
   const stageCount = safeFunnel.length;
   const allZero = safeFunnel.every(s => s.count === 0);
-  const _TAPER_FLOOR = 15; // Reserved for future use
   const TAPER_RANGE = 85;
 
   container.innerHTML = safeFunnel.map((stage, index) => {
     let barWidth: number;
     let barClass = 'funnel-bar';
     if (allZero) {
-      // Visual funnel taper even with no data
-      barWidth = stageCount > 1
-        ? 100 - (index * (TAPER_RANGE / (stageCount - 1)))
-        : 100;
+      barWidth = stageCount > 1 ? 100 - (index * (TAPER_RANGE / (stageCount - 1))) : 100;
       barClass = 'funnel-bar funnel-bar-empty';
     } else {
       barWidth = Math.max((stage.count / maxCount) * 100, 8);
@@ -1512,20 +1183,15 @@ function renderConversionFunnel(container: HTMLElement, funnel: FunnelStage[]): 
     return `
       <div class="funnel-stage">
         <div class="funnel-stage-label">${SanitizationUtils.escapeHtml(stage.stage)}</div>
-        <div class="funnel-bar-wrapper">
-          <div class="${barClass}" style="width: ${barWidth}%"></div>
-        </div>
-        <div class="funnel-stage-stats">
-          <span class="funnel-count">${stage.count}</span>
-          <span class="funnel-percentage">${stage.percentage.toFixed(0)}%</span>
-        </div>
+        <div class="funnel-bar-wrapper"><div class="${barClass}" style="width: ${barWidth}%"></div></div>
+        <div class="funnel-stage-stats"><span class="funnel-count">${stage.count}</span><span class="funnel-percentage">${stage.percentage.toFixed(0)}%</span></div>
       </div>
     `;
   }).join('');
 }
 
 async function loadSourcePerformance(): Promise<void> {
-  const container = getElement('leads-source-performance');
+  const container = leadsModule.getElement('leads-source-performance');
   if (!container) return;
 
   try {
@@ -1570,32 +1236,19 @@ function renderSourcePerformance(container: HTMLElement, sources: SourcePerforma
 }
 
 // ============================================================================
-// SCORING RULES MANAGEMENT
+// SCORING RULES
 // ============================================================================
 
-interface ScoringRule {
-  id: number;
-  name: string;
-  description?: string;
-  field_name: string;
-  operator: string;
-  threshold_value: string;
-  points: number;
-  is_active: boolean;
-}
-
+interface ScoringRule { id: number; name: string; description?: string; field_name: string; operator: string; threshold_value: string; points: number; is_active: boolean; }
 let scoringRulesInitialized = false;
 
-/**
- * Load and display scoring rules
- */
 export async function loadScoringRules(): Promise<void> {
   if (!scoringRulesInitialized) {
     setupScoringRulesListeners();
     scoringRulesInitialized = true;
   }
 
-  const container = getElement('scoring-rules-list');
+  const container = leadsModule.getElement('scoring-rules-list');
   if (!container) return;
 
   try {
@@ -1613,7 +1266,7 @@ export async function loadScoringRules(): Promise<void> {
 }
 
 function setupScoringRulesListeners(): void {
-  const addBtn = getElement('add-scoring-rule-btn');
+  const addBtn = leadsModule.getElement('add-scoring-rule-btn');
   if (addBtn && !addBtn.dataset.listenerAdded) {
     addBtn.dataset.listenerAdded = 'true';
     addBtn.addEventListener('click', () => showAddScoringRuleDialog());
@@ -1630,37 +1283,22 @@ function renderScoringRules(container: HTMLElement, rules: ScoringRule[]): void 
     <div class="scoring-rule-item ${rule.is_active ? '' : 'rule-inactive'}" data-rule-id="${rule.id}">
       <div class="rule-info">
         <div class="rule-name">${SanitizationUtils.escapeHtml(rule.name)}</div>
-        <div class="rule-condition">
-          <code>${SanitizationUtils.escapeHtml(rule.field_name)}</code>
-          <span class="rule-operator">${SanitizationUtils.escapeHtml(rule.operator)}</span>
-          <code>${SanitizationUtils.escapeHtml(rule.threshold_value)}</code>
-        </div>
+        <div class="rule-condition"><code>${SanitizationUtils.escapeHtml(rule.field_name)}</code><span class="rule-operator">${SanitizationUtils.escapeHtml(rule.operator)}</span><code>${SanitizationUtils.escapeHtml(rule.threshold_value)}</code></div>
       </div>
-      <div class="rule-points ${rule.points >= 0 ? 'points-positive' : 'points-negative'}">
-        ${rule.points >= 0 ? '+' : ''}${rule.points} pts
-      </div>
+      <div class="rule-points ${rule.points >= 0 ? 'points-positive' : 'points-negative'}">${rule.points >= 0 ? '+' : ''}${rule.points} pts</div>
       <div class="rule-actions">
         <button class="icon-btn" title="${rule.is_active ? 'Disable' : 'Enable'}" data-action="toggle" aria-label="${rule.is_active ? 'Disable rule' : 'Enable rule'}">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            ${rule.is_active
-    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
-    : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-}
-          </svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${rule.is_active ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>' : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'}</svg>
         </button>
         <button class="icon-btn icon-btn-danger" title="Delete" data-action="delete" aria-label="Delete rule">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
       </div>
     </div>
   `).join('');
 
-  // Add event listeners
   container.querySelectorAll('.scoring-rule-item').forEach(item => {
     const ruleId = parseInt((item as HTMLElement).dataset.ruleId || '0');
-
     item.querySelector('[data-action="toggle"]')?.addEventListener('click', () => toggleScoringRule(ruleId));
     item.querySelector('[data-action="delete"]')?.addEventListener('click', () => deleteScoringRule(ruleId));
   });
@@ -1672,18 +1310,13 @@ async function showAddScoringRuleDialog(): Promise<void> {
     fields: [
       { name: 'name', label: 'Rule Name', type: 'text', required: true },
       { name: 'field_name', label: 'Field', type: 'select', options: [
-        { value: 'budget_range', label: 'Budget Range' },
-        { value: 'project_type', label: 'Project Type' },
-        { value: 'timeline', label: 'Timeline' },
-        { value: 'source', label: 'Source' },
-        { value: 'company_name', label: 'Company Name' },
-        { value: 'description', label: 'Description' }
+        { value: 'budget_range', label: 'Budget Range' }, { value: 'project_type', label: 'Project Type' },
+        { value: 'timeline', label: 'Timeline' }, { value: 'source', label: 'Source' },
+        { value: 'company_name', label: 'Company Name' }, { value: 'description', label: 'Description' }
       ], required: true },
       { name: 'operator', label: 'Operator', type: 'select', options: [
-        { value: 'equals', label: 'Equals' },
-        { value: 'contains', label: 'Contains' },
-        { value: 'in', label: 'In (comma-separated)' },
-        { value: 'not_empty', label: 'Not Empty' },
+        { value: 'equals', label: 'Equals' }, { value: 'contains', label: 'Contains' },
+        { value: 'in', label: 'In (comma-separated)' }, { value: 'not_empty', label: 'Not Empty' },
         { value: 'greater_than', label: 'Greater Than' }
       ], required: true },
       { name: 'threshold_value', label: 'Value', type: 'text', required: true },
@@ -1696,13 +1329,9 @@ async function showAddScoringRuleDialog(): Promise<void> {
   if (result) {
     try {
       const response = await apiPost('/api/admin/leads/scoring-rules', {
-        name: result.name,
-        field_name: result.field_name,
-        operator: result.operator,
-        threshold_value: result.threshold_value,
-        points: parseInt(result.points) || 0
+        name: result.name, field_name: result.field_name, operator: result.operator,
+        threshold_value: result.threshold_value, points: parseInt(result.points) || 0
       });
-
       if (response.ok) {
         showToast('Scoring rule added', 'success');
         await loadScoringRules();
@@ -1718,10 +1347,7 @@ async function showAddScoringRuleDialog(): Promise<void> {
 
 async function toggleScoringRule(ruleId: number): Promise<void> {
   try {
-    const response = await apiPut(`/api/admin/leads/scoring-rules/${ruleId}`, {
-      toggleActive: true
-    });
-
+    const response = await apiPut(`/api/admin/leads/scoring-rules/${ruleId}`, { toggleActive: true });
     if (response.ok) {
       showToast('Rule updated', 'success');
       await loadScoringRules();
@@ -1735,17 +1361,10 @@ async function toggleScoringRule(ruleId: number): Promise<void> {
 }
 
 async function deleteScoringRule(ruleId: number): Promise<void> {
-  const confirmed = await confirmDialog({
-    title: 'Delete Scoring Rule',
-    message: 'Are you sure you want to delete this scoring rule?',
-    confirmText: 'Delete',
-    danger: true
-  });
-
+  const confirmed = await confirmDialog({ title: 'Delete Scoring Rule', message: 'Are you sure you want to delete this scoring rule?', confirmText: 'Delete', danger: true });
   if (confirmed) {
     try {
       const response = await apiDelete(`/api/admin/leads/scoring-rules/${ruleId}`);
-
       if (response.ok) {
         showToast('Rule deleted', 'success');
         await loadScoringRules();
@@ -1763,17 +1382,7 @@ async function deleteScoringRule(ruleId: number): Promise<void> {
 // LEAD TASKS
 // ============================================================================
 
-interface LeadTask {
-  id: number;
-  project_id: number;
-  title: string;
-  description?: string;
-  task_type: string;
-  due_date?: string;
-  status: string;
-  priority: string;
-  completed_at?: string;
-}
+interface LeadTask { id: number; project_id: number; title: string; description?: string; task_type: string; due_date?: string; status: string; priority: string; completed_at?: string; }
 
 async function loadLeadTasks(leadId: number): Promise<LeadTask[]> {
   try {
@@ -1790,33 +1399,14 @@ async function loadLeadTasks(leadId: number): Promise<LeadTask[]> {
 
 function renderLeadTasks(tasks: LeadTask[], leadId: number): string {
   const emptyBody = '<div class="empty-state-small">No tasks yet</div>';
-  const listBody = `
-    <div class="lead-tasks-list">
-      ${tasks.map(task => `
-        <div class="lead-task-item ${task.status === 'completed' ? 'task-completed' : ''}" data-task-id="${task.id}">
-          <button class="task-checkbox ${task.status === 'completed' ? 'checked' : ''}" data-action="toggle-task">
-            ${task.status === 'completed' ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
-          </button>
-          <div class="task-info">
-            <span class="task-title">${SanitizationUtils.escapeHtml(task.title)}</span>
-            ${task.due_date ? `<span class="task-due">${formatDate(task.due_date)}</span>` : ''}
-          </div>
-          <span class="task-type-badge">${task.task_type}</span>
-        </div>
-      `).join('')}
+  const listBody = `<div class="lead-tasks-list">${tasks.map(task => `
+    <div class="lead-task-item ${task.status === 'completed' ? 'task-completed' : ''}" data-task-id="${task.id}">
+      <button class="task-checkbox ${task.status === 'completed' ? 'checked' : ''}" data-action="toggle-task">${task.status === 'completed' ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</button>
+      <div class="task-info"><span class="task-title">${SanitizationUtils.escapeHtml(task.title)}</span>${task.due_date ? `<span class="task-due">${formatDate(task.due_date)}</span>` : ''}</div>
+      <span class="task-type-badge">${task.task_type}</span>
     </div>
-  `;
-  return `
-    <div class="lead-tab-section">
-      <div class="lead-tab-section-header">
-        <span class="field-label">Tasks</span>
-        <button type="button" class="icon-btn add-lead-task-btn" data-lead-id="${leadId}" title="Add Task" aria-label="Add Task">${ICONS.PLUS}</button>
-      </div>
-      <div class="lead-tab-section-body">
-        ${tasks.length === 0 ? emptyBody : listBody}
-      </div>
-    </div>
-  `;
+  `).join('')}</div>`;
+  return `<div class="lead-tab-section"><div class="lead-tab-section-header"><span class="field-label">Tasks</span><button type="button" class="icon-btn add-lead-task-btn" data-lead-id="${leadId}" title="Add Task" aria-label="Add Task">${ICONS.PLUS}</button></div><div class="lead-tab-section-body">${tasks.length === 0 ? emptyBody : listBody}</div></div>`;
 }
 
 async function showAddTaskDialog(leadId: number): Promise<void> {
@@ -1825,19 +1415,12 @@ async function showAddTaskDialog(leadId: number): Promise<void> {
     fields: [
       { name: 'title', label: 'Task Title', type: 'text', required: true },
       { name: 'task_type', label: 'Type', type: 'select', options: [
-        { value: 'follow_up', label: 'Follow Up' },
-        { value: 'call', label: 'Call' },
-        { value: 'email', label: 'Email' },
-        { value: 'meeting', label: 'Meeting' },
-        { value: 'proposal', label: 'Send Proposal' },
-        { value: 'other', label: 'Other' }
+        { value: 'follow_up', label: 'Follow Up' }, { value: 'call', label: 'Call' }, { value: 'email', label: 'Email' },
+        { value: 'meeting', label: 'Meeting' }, { value: 'proposal', label: 'Send Proposal' }, { value: 'other', label: 'Other' }
       ], required: true },
       { name: 'due_date', label: 'Due Date', type: 'date' },
       { name: 'priority', label: 'Priority', type: 'select', options: [
-        { value: 'low', label: 'Low' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'high', label: 'High' },
-        { value: 'urgent', label: 'Urgent' }
+        { value: 'low', label: 'Low' }, { value: 'medium', label: 'Medium' }, { value: 'high', label: 'High' }, { value: 'urgent', label: 'Urgent' }
       ] }
     ],
     confirmText: 'Add Task',
@@ -1846,16 +1429,9 @@ async function showAddTaskDialog(leadId: number): Promise<void> {
 
   if (result) {
     try {
-      const response = await apiPost(`/api/admin/leads/${leadId}/tasks`, {
-        title: result.title,
-        taskType: result.task_type,
-        dueDate: result.due_date || null,
-        priority: result.priority || 'medium'
-      });
-
+      const response = await apiPost(`/api/admin/leads/${leadId}/tasks`, { title: result.title, taskType: result.task_type, dueDate: result.due_date || null, priority: result.priority || 'medium' });
       if (response.ok) {
         showToast('Task added', 'success');
-        // Refresh lead details
         showLeadDetails(leadId);
       } else {
         showToast('Failed to add task', 'error');
@@ -1886,14 +1462,7 @@ async function completeTask(taskId: number, leadId: number): Promise<void> {
 // LEAD NOTES
 // ============================================================================
 
-interface LeadNote {
-  id: number;
-  project_id: number;
-  author: string;
-  content: string;
-  is_pinned: boolean;
-  created_at: string;
-}
+interface LeadNote { id: number; project_id: number; author: string; content: string; is_pinned: boolean; created_at: string; }
 
 async function loadLeadNotes(leadId: number): Promise<LeadNote[]> {
   try {
@@ -1910,59 +1479,24 @@ async function loadLeadNotes(leadId: number): Promise<LeadNote[]> {
 
 function renderLeadNotes(notes: LeadNote[], leadId: number): string {
   const emptyBody = '<div class="empty-state-small">No notes yet</div>';
-  // Sort: pinned first, then by date
   const sortedNotes = [...notes].sort((a, b) => {
     if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
-  const listBody = `
-    <div class="lead-notes-list">
-      ${sortedNotes.map(note => `
-        <div class="lead-note-item ${note.is_pinned ? 'note-pinned' : ''}" data-note-id="${note.id}">
-          <div class="note-header">
-            <span class="note-author">${SanitizationUtils.escapeHtml(note.author)}</span>
-            <span class="note-date">${formatDate(note.created_at)}</span>
-            <button class="icon-btn icon-btn-sm" data-action="toggle-pin" title="${note.is_pinned ? 'Unpin' : 'Pin'}" aria-label="${note.is_pinned ? 'Unpin note' : 'Pin note'}">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="${note.is_pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-                <path d="M12 2L12 12"/><circle cx="12" cy="16" r="4"/>
-              </svg>
-            </button>
-          </div>
-          <div class="note-content">${SanitizationUtils.escapeHtml(note.content)}</div>
-        </div>
-      `).join('')}
+  const listBody = `<div class="lead-notes-list">${sortedNotes.map(note => `
+    <div class="lead-note-item ${note.is_pinned ? 'note-pinned' : ''}" data-note-id="${note.id}">
+      <div class="note-header"><span class="note-author">${SanitizationUtils.escapeHtml(note.author)}</span><span class="note-date">${formatDate(note.created_at)}</span><button class="icon-btn icon-btn-sm" data-action="toggle-pin" title="${note.is_pinned ? 'Unpin' : 'Pin'}" aria-label="${note.is_pinned ? 'Unpin note' : 'Pin note'}"><svg width="12" height="12" viewBox="0 0 24 24" fill="${note.is_pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2L12 12"/><circle cx="12" cy="16" r="4"/></svg></button></div>
+      <div class="note-content">${SanitizationUtils.escapeHtml(note.content)}</div>
     </div>
-  `;
-  return `
-    <div class="lead-tab-section">
-      <div class="lead-tab-section-header">
-        <span class="field-label">Notes</span>
-        <button type="button" class="icon-btn add-lead-note-btn" data-lead-id="${leadId}" title="Add Note" aria-label="Add Note">${ICONS.PLUS}</button>
-      </div>
-      <div class="lead-tab-section-body">
-        ${notes.length === 0 ? emptyBody : listBody}
-      </div>
-    </div>
-  `;
+  `).join('')}</div>`;
+  return `<div class="lead-tab-section"><div class="lead-tab-section-header"><span class="field-label">Notes</span><button type="button" class="icon-btn add-lead-note-btn" data-lead-id="${leadId}" title="Add Note" aria-label="Add Note">${ICONS.PLUS}</button></div><div class="lead-tab-section-body">${notes.length === 0 ? emptyBody : listBody}</div></div>`;
 }
 
 async function showAddNoteDialog(leadId: number): Promise<void> {
-  const result = await multiPromptDialog({
-    title: 'Add Note',
-    fields: [
-      { name: 'content', label: 'Note', type: 'textarea', required: true }
-    ],
-    confirmText: 'Add Note',
-    cancelText: 'Cancel'
-  });
-
+  const result = await multiPromptDialog({ title: 'Add Note', fields: [{ name: 'content', label: 'Note', type: 'textarea', required: true }], confirmText: 'Add Note', cancelText: 'Cancel' });
   if (result && result.content) {
     try {
-      const response = await apiPost(`/api/admin/leads/${leadId}/notes`, {
-        content: result.content,
-        author: 'Admin'
-      });
-
+      const response = await apiPost(`/api/admin/leads/${leadId}/notes`, { content: result.content, author: 'Admin' });
       if (response.ok) {
         showToast('Note added', 'success');
         showLeadDetails(leadId);
@@ -1991,96 +1525,52 @@ async function toggleNotePin(noteId: number, leadId: number): Promise<void> {
   }
 }
 
-// ============================================
-// DYNAMIC TAB RENDERING
-// ============================================
+// ============================================================================
+// TAB RENDERING
+// ============================================================================
 
 const RENDER_ICONS = {
   EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
   REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
 };
 
-/**
- * Render the leads tab HTML structure dynamically.
- * Call this before loadLeads to create the DOM elements.
- */
 export function renderLeadsTab(container: HTMLElement): void {
-  // Reset cached elements and state when re-rendering
-  cachedElements.clear();
-  filterUIInitialized = false;
+  leadsModule.resetCache();
+  currentView = 'table';
+  kanbanBoard = null;
 
   container.innerHTML = `
-    <!-- Leads Stats -->
     <div class="quick-stats">
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="leads">
-        <span class="stat-number" id="leads-total">-</span>
-        <span class="stat-label">Total Leads</span>
-      </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="pending" data-table="leads">
-        <span class="stat-number" id="leads-pending">-</span>
-        <span class="stat-label">Pending</span>
-      </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="in_progress" data-table="leads">
-        <span class="stat-number" id="leads-active">-</span>
-        <span class="stat-label">In Progress</span>
-      </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="completed" data-table="leads">
-        <span class="stat-number" id="leads-completed">-</span>
-        <span class="stat-label">Completed</span>
-      </button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="leads"><span class="stat-number" id="leads-total">-</span><span class="stat-label">Total Leads</span></button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="pending" data-table="leads"><span class="stat-number" id="leads-pending">-</span><span class="stat-label">Pending</span></button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="in_progress" data-table="leads"><span class="stat-number" id="leads-active">-</span><span class="stat-label">In Progress</span></button>
+      <button class="stat-card stat-card-clickable portal-shadow" data-filter="completed" data-table="leads"><span class="stat-number" id="leads-completed">-</span><span class="stat-label">Completed</span></button>
     </div>
-
-    <!-- Leads Table -->
     <div class="admin-table-card" id="intake-submissions-card">
       <div class="admin-table-header">
         <h3><span class="title-full">Intake Submissions</span><span class="title-mobile">Leads</span></h3>
         <div class="admin-table-actions" id="leads-filter-container">
           <div id="leads-view-toggle"></div>
-          <button class="icon-btn" id="export-leads-btn" title="Export to CSV" aria-label="Export leads to CSV">
-            ${RENDER_ICONS.EXPORT}
-          </button>
-          <button class="icon-btn" id="refresh-leads-btn" title="Refresh" aria-label="Refresh leads">
-            ${RENDER_ICONS.REFRESH}
-          </button>
+          <button class="icon-btn" id="export-leads-btn" title="Export to CSV" aria-label="Export leads to CSV">${RENDER_ICONS.EXPORT}</button>
+          <button class="icon-btn" id="refresh-leads-btn" title="Refresh" aria-label="Refresh leads">${RENDER_ICONS.REFRESH}</button>
         </div>
       </div>
-      <!-- Bulk Action Toolbar (hidden initially) -->
       <div id="leads-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
-      <!-- Pipeline View Container -->
       <div class="leads-pipeline-container hidden" id="leads-pipeline-container"></div>
-      <!-- Table View -->
       <div class="admin-table-container leads-table-container" id="leads-table-view">
         <div class="admin-table-scroll-wrapper">
         <table class="admin-table leads-table">
-          <thead>
-            <tr>
-              <th scope="col" class="bulk-select-cell">
-                <div class="portal-checkbox">
-                  <input type="checkbox" id="leads-select-all" class="bulk-select-all" aria-label="Select all leads" />
-                </div>
-              </th>
-              <th scope="col">Lead</th>
-              <th scope="col" class="type-col">Type</th>
-              <th scope="col" class="status-col">Status</th>
-              <th scope="col" class="budget-col">Budget</th>
-              <th scope="col" class="date-col">Date</th>
-              <th scope="col" class="actions-col">Actions</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th scope="col" class="bulk-select-cell"><div class="portal-checkbox"><input type="checkbox" id="leads-select-all" class="bulk-select-all" aria-label="Select all leads" /></div></th>
+            <th scope="col">Lead</th><th scope="col" class="type-col">Type</th><th scope="col" class="status-col">Status</th>
+            <th scope="col" class="budget-col">Budget</th><th scope="col" class="date-col">Date</th><th scope="col" class="actions-col">Actions</th>
+          </tr></thead>
           <tbody id="leads-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr class="loading-row">
-              <td colspan="7">
-                <div class="loading-state">
-                  <span class="loading-spinner" aria-hidden="true"></span>
-                  <span class="loading-message">Loading leads...</span>
-                </div>
-              </td>
-            </tr>
+            <tr class="loading-row"><td colspan="7"><div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading leads...</span></div></td></tr>
           </tbody>
         </table>
         </div>
       </div>
-      <!-- Pagination -->
       <div id="leads-pagination" class="table-pagination"></div>
     </div>
   `;

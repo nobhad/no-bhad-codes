@@ -6,6 +6,8 @@
  *
  * Invoice management functionality for admin dashboard.
  * Dynamically imported for code splitting.
+ *
+ * Uses createTableModule factory for standardized table operations.
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -13,37 +15,23 @@ import type { AdminDashboardContext } from '../admin-types';
 import type { InvoiceResponse, InvoiceLineItem } from '../../../types/api';
 import { formatCurrency, formatDate } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
-import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
-import { showTableError } from '../../../utils/error-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
-import { exportToCsv, INVOICES_EXPORT_CONFIG } from '../../../utils/table-export';
-import { createBulkActionToolbar, setupBulkSelectionHandlers, type BulkActionConfig } from '../../../utils/table-bulk-actions';
+import { INVOICES_EXPORT_CONFIG } from '../../../utils/table-export';
+import { INVOICES_FILTER_CONFIG } from '../../../utils/table-filter';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS as GLOBAL_ICONS } from '../../../constants/icons';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { withButtonLoading } from '../../../utils/button-loading';
-import {
-  createFilterUI,
-  createSortableHeaders,
-  applyFilters,
-  loadFilterState,
-  saveFilterState,
-  INVOICES_FILTER_CONFIG,
-  type FilterState
-} from '../../../utils/table-filter';
-import {
-  createPaginationUI,
-  applyPagination,
-  getDefaultPaginationState,
-  loadPaginationState,
-  savePaginationState,
-  type PaginationState,
-  type PaginationConfig
-} from '../../../utils/table-pagination';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
+import { batchUpdateText } from '../../../utils/dom-cache';
+import {
+  createTableModule,
+  createPaginationConfig,
+  type TableModuleHelpers
+} from '../../../utils/table-module-factory';
 
 // ============================================
 // TYPES
@@ -63,106 +51,6 @@ interface InvoiceWithDetails extends InvoiceResponse {
 }
 
 // ============================================
-// STATE
-// ============================================
-
-let cachedInvoices: InvoiceWithDetails[] = [];
-let storedContext: AdminDashboardContext | null = null;
-let filterUIInitialized = false;
-
-// Filter state
-let filterState: FilterState = loadFilterState(INVOICES_FILTER_CONFIG.storageKey);
-
-// Pagination configuration and state
-const INVOICES_PAGINATION_CONFIG: PaginationConfig = {
-  tableId: 'invoices',
-  pageSizeOptions: [10, 25, 50, 100],
-  defaultPageSize: 25,
-  storageKey: 'admin_invoices_pagination'
-};
-
-let paginationState: PaginationState = {
-  ...getDefaultPaginationState(INVOICES_PAGINATION_CONFIG),
-  ...loadPaginationState(INVOICES_PAGINATION_CONFIG.storageKey!)
-};
-
-// Bulk action configuration for invoices table
-const INVOICES_BULK_CONFIG: BulkActionConfig = {
-  tableId: 'invoices',
-  actions: [
-    {
-      id: 'download-pdfs',
-      label: 'Download PDFs',
-      variant: 'default',
-      handler: async (ids: number[]) => {
-        showToast(`Generating ${ids.length} PDF(s)...`, 'info');
-        try {
-          const response = await apiPost('/api/invoices/export-batch', { invoiceIds: ids });
-          if (response.ok) {
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `invoices-${Date.now()}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast(`${ids.length} invoice(s) downloaded`, 'success');
-          } else {
-            const error = await response.json();
-            showToast(error.error || 'Failed to export invoices', 'error');
-          }
-        } catch (error) {
-          console.error('[AdminInvoices] Export error:', error);
-          showToast('Failed to export invoices', 'error');
-        }
-      },
-      confirmMessage: 'Download selected invoices as PDF?'
-    },
-    {
-      id: 'mark-paid',
-      label: 'Mark Paid',
-      variant: 'default',
-      handler: async (ids: number[]) => {
-        for (const id of ids) {
-          await apiPut(`/api/invoices/${id}`, { status: 'paid' });
-        }
-        showToast(`${ids.length} invoice(s) marked as paid`, 'success');
-        if (storedContext) loadInvoicesData(storedContext);
-      },
-      confirmMessage: 'Mark selected invoices as paid?'
-    },
-    {
-      id: 'send',
-      label: 'Send',
-      variant: 'default',
-      handler: async (ids: number[]) => {
-        for (const id of ids) {
-          await apiPut(`/api/invoices/${id}`, { status: 'sent' });
-        }
-        showToast(`${ids.length} invoice(s) sent`, 'success');
-        if (storedContext) loadInvoicesData(storedContext);
-      },
-      confirmMessage: 'Send selected invoices?'
-    },
-    {
-      id: 'delete',
-      label: 'Delete',
-      variant: 'danger',
-      handler: async (ids: number[]) => {
-        for (const id of ids) {
-          await apiDelete(`/api/invoices/${id}`);
-        }
-        showToast(`${ids.length} invoice(s) deleted`, 'success');
-        if (storedContext) loadInvoicesData(storedContext);
-      },
-      confirmMessage: 'Delete selected invoices? This cannot be undone.'
-    }
-  ]
-};
-
-// ============================================
 // SVG ICONS FOR DYNAMIC RENDERING
 // ============================================
 
@@ -171,6 +59,177 @@ const RENDER_ICONS = {
   REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
   PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>'
 };
+
+// ============================================
+// TABLE MODULE FACTORY
+// ============================================
+
+/**
+ * Invoices table module using factory pattern
+ */
+const invoicesModule = createTableModule<InvoiceWithDetails, InvoiceStats>({
+  moduleId: 'invoices',
+  filterConfig: INVOICES_FILTER_CONFIG,
+  paginationConfig: createPaginationConfig('invoices'),
+  columnCount: 7,
+  apiEndpoint: '/api/invoices',
+
+  bulkConfig: {
+    tableId: 'invoices',
+    actions: [
+      {
+        id: 'download-pdfs',
+        label: 'Download PDFs',
+        variant: 'default',
+        handler: async (ids: number[]) => {
+          showToast(`Generating ${ids.length} PDF(s)...`, 'info');
+          try {
+            const response = await apiPost('/api/invoices/export-batch', { invoiceIds: ids });
+            if (response.ok) {
+              const blob = await response.blob();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `invoices-${Date.now()}.zip`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              showToast(`${ids.length} invoice(s) downloaded`, 'success');
+            } else {
+              const error = await response.json();
+              showToast(error.error || 'Failed to export invoices', 'error');
+            }
+          } catch (error) {
+            console.error('[AdminInvoices] Export error:', error);
+            showToast('Failed to export invoices', 'error');
+          }
+        },
+        confirmMessage: 'Download selected invoices as PDF?'
+      },
+      {
+        id: 'mark-paid',
+        label: 'Mark Paid',
+        variant: 'default',
+        handler: async (ids: number[]) => {
+          for (const id of ids) {
+            await apiPut(`/api/invoices/${id}`, { status: 'paid' });
+          }
+          showToast(`${ids.length} invoice(s) marked as paid`, 'success');
+          const ctx = invoicesModule.getContext();
+          if (ctx) invoicesModule.load(ctx);
+        },
+        confirmMessage: 'Mark selected invoices as paid?'
+      },
+      {
+        id: 'send',
+        label: 'Send',
+        variant: 'default',
+        handler: async (ids: number[]) => {
+          for (const id of ids) {
+            await apiPut(`/api/invoices/${id}`, { status: 'sent' });
+          }
+          showToast(`${ids.length} invoice(s) sent`, 'success');
+          const ctx = invoicesModule.getContext();
+          if (ctx) invoicesModule.load(ctx);
+        },
+        confirmMessage: 'Send selected invoices?'
+      },
+      {
+        id: 'delete',
+        label: 'Delete',
+        variant: 'danger',
+        handler: async (ids: number[]) => {
+          for (const id of ids) {
+            await apiDelete(`/api/invoices/${id}`);
+          }
+          showToast(`${ids.length} invoice(s) deleted`, 'success');
+          const ctx = invoicesModule.getContext();
+          if (ctx) invoicesModule.load(ctx);
+        },
+        confirmMessage: 'Delete selected invoices? This cannot be undone.'
+      }
+    ]
+  },
+
+  exportConfig: INVOICES_EXPORT_CONFIG,
+  emptyMessage: 'No invoices yet.',
+  filterEmptyMessage: 'No invoices match the current filters.',
+
+  extractData: (response: unknown) => {
+    const invoices = response as InvoiceWithDetails[];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const stats: InvoiceStats = {
+      total: invoices.length,
+      pending: 0,
+      paid: 0,
+      overdue: 0
+    };
+
+    invoices.forEach((inv) => {
+      if (inv.status === 'paid') {
+        stats.paid++;
+      } else if (inv.status === 'pending' || inv.status === 'sent') {
+        if (inv.due_date) {
+          const dueDate = new Date(inv.due_date);
+          if (dueDate < today) {
+            stats.overdue++;
+          } else {
+            stats.pending++;
+          }
+        } else {
+          stats.pending++;
+        }
+      }
+    });
+
+    return { data: invoices, stats };
+  },
+
+  renderRow: (invoice: InvoiceWithDetails, ctx: AdminDashboardContext, _helpers: TableModuleHelpers<InvoiceWithDetails>) => {
+    return buildInvoiceRow(invoice, ctx);
+  },
+
+  renderStats: (stats: InvoiceStats) => {
+    batchUpdateText({
+      'invoices-total': stats.total.toLocaleString(),
+      'invoices-pending': stats.pending.toLocaleString(),
+      'invoices-paid': stats.paid.toLocaleString(),
+      'invoices-overdue': stats.overdue.toLocaleString()
+    });
+  },
+
+  onDataLoaded: (_data: InvoiceWithDetails[], ctx: AdminDashboardContext) => {
+    // Setup invoice action handlers
+    setupInvoiceHandlers(ctx);
+  },
+
+  onTableRendered: (filteredData: InvoiceWithDetails[], ctx: AdminDashboardContext) => {
+    const tableBody = invoicesModule.getElement('invoices-table-body');
+    if (!tableBody) return;
+
+    // Setup inline editing for due_date cells
+    setupInlineDateEditing(tableBody, filteredData);
+
+    // Initialize keyboard navigation
+    initTableKeyboardNav({
+      tableSelector: '.invoices-table',
+      rowSelector: 'tbody tr[data-invoice-id]',
+      onRowSelect: (row) => {
+        const invoiceId = parseInt(row.dataset.invoiceId || '0');
+        if (invoiceId) showViewInvoiceModal(invoiceId, ctx);
+      },
+      focusClass: 'row-focused',
+      selectedClass: 'row-selected'
+    });
+  }
+});
+
+// Export factory-provided functions
+export const loadInvoicesData = invoicesModule.load;
+export const getInvoicesData = invoicesModule.getData;
 
 // ============================================
 // DYNAMIC TAB RENDERING
@@ -256,160 +315,8 @@ export function renderInvoicesTab(container: HTMLElement): void {
     </div>
   `;
 
-  // Reset filter UI initialization flag so it gets re-initialized
-  filterUIInitialized = false;
-}
-
-// ============================================
-// MAIN FUNCTIONS
-// ============================================
-
-/**
- * Load invoices data
- */
-export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void> {
-  storedContext = ctx;
-
-  const tableBody = document.getElementById('invoices-table-body');
-  if (!tableBody) return;
-
-  // Initialize filter UI once
-  if (!filterUIInitialized) {
-    initializeFilterUI(ctx);
-    filterUIInitialized = true;
-  }
-
-  showTableLoading(tableBody, 7, 'Loading invoices...');
-
-  try {
-    const response = await apiFetch('/api/invoices');
-    if (!response.ok) {
-      throw new Error('Failed to fetch invoices');
-    }
-
-    const invoices: InvoiceWithDetails[] = await response.json();
-    cachedInvoices = invoices;
-
-    // Update stats
-    updateInvoiceStats(invoices);
-
-    // Render table with filters and pagination
-    renderInvoicesTable(ctx);
-
-    // Set up event handlers
-    setupInvoiceHandlers(ctx);
-
-  } catch (error) {
-    console.error('[AdminInvoices] Error loading invoices:', error);
-    showTableError(tableBody, 7, 'Failed to load invoices');
-  }
-}
-
-/**
- * Initialize filter UI for invoices table
- */
-function initializeFilterUI(ctx: AdminDashboardContext): void {
-  const container = document.getElementById('invoices-filter-container');
-  if (!container) return;
-
-  // Create filter UI
-  const filterUI = createFilterUI(
-    INVOICES_FILTER_CONFIG,
-    filterState,
-    (newState) => {
-      filterState = newState;
-      paginationState.currentPage = 1; // Reset to page 1 on filter change
-      renderInvoicesTable(ctx);
-    }
-  );
-
-  // Insert before the first button (Create Invoice)
-  const firstBtn = container.querySelector('button');
-  if (firstBtn) {
-    container.insertBefore(filterUI, firstBtn);
-  } else {
-    container.appendChild(filterUI);
-  }
-
-  // Setup sortable headers after table is rendered
-  setTimeout(() => {
-    createSortableHeaders(INVOICES_FILTER_CONFIG, filterState, (column, direction) => {
-      filterState = { ...filterState, sortColumn: column, sortDirection: direction };
-      saveFilterState(INVOICES_FILTER_CONFIG.storageKey, filterState);
-      renderInvoicesTable(ctx);
-    });
-  }, 100);
-
-  // Initialize bulk action toolbar
-  const bulkToolbarEl = document.getElementById('invoices-bulk-toolbar');
-  if (bulkToolbarEl) {
-    const toolbar = createBulkActionToolbar({
-      ...INVOICES_BULK_CONFIG,
-      onSelectionChange: () => {}
-    });
-    bulkToolbarEl.replaceWith(toolbar);
-  }
-
-  // Refresh button
-  const refreshBtn = document.getElementById('refresh-invoices-btn');
-  if (refreshBtn) {
-    refreshBtn.addEventListener('click', () => {
-      loadInvoicesData(ctx);
-    });
-  }
-
-  // Export button — use shared utility with filtered data
-  const exportBtn = document.getElementById('export-invoices-btn');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', () => {
-      const filtered = applyFilters(cachedInvoices, filterState, INVOICES_FILTER_CONFIG);
-      exportToCsv(filtered as unknown as Record<string, unknown>[], INVOICES_EXPORT_CONFIG);
-    });
-  }
-}
-
-/**
- * Update invoice statistics
- */
-function updateInvoiceStats(invoices: InvoiceWithDetails[]): void {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const stats: InvoiceStats = {
-    total: invoices.length,
-    pending: 0,
-    paid: 0,
-    overdue: 0
-  };
-
-  invoices.forEach((inv) => {
-    if (inv.status === 'paid') {
-      stats.paid++;
-    } else if (inv.status === 'pending' || inv.status === 'sent') {
-      // Check if overdue
-      if (inv.due_date) {
-        const dueDate = new Date(inv.due_date);
-        if (dueDate < today) {
-          stats.overdue++;
-        } else {
-          stats.pending++;
-        }
-      } else {
-        stats.pending++;
-      }
-    }
-  });
-
-  // Update DOM
-  const totalEl = document.getElementById('invoices-total');
-  const pendingEl = document.getElementById('invoices-pending');
-  const paidEl = document.getElementById('invoices-paid');
-  const overdueEl = document.getElementById('invoices-overdue');
-
-  if (totalEl) totalEl.textContent = stats.total.toLocaleString();
-  if (pendingEl) pendingEl.textContent = stats.pending.toLocaleString();
-  if (paidEl) paidEl.textContent = stats.paid.toLocaleString();
-  if (overdueEl) overdueEl.textContent = stats.overdue.toLocaleString();
+  // Reset factory cache so elements get re-queried after render
+  invoicesModule.resetCache();
 }
 
 /**
@@ -430,6 +337,10 @@ const ICONS = {
   CHECK: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
   DOWNLOAD: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>'
 };
+
+// ============================================
+// ROW BUILDING HELPERS
+// ============================================
 
 /**
  * Build contextual action buttons based on invoice status
@@ -458,85 +369,71 @@ function buildActionButtons(invoiceId: number, status: string): string {
 }
 
 /**
- * Render invoices table with filters and pagination
+ * Build a single invoice table row
  */
-function renderInvoicesTable(ctx: AdminDashboardContext): void {
-  const tableBody = document.getElementById('invoices-table-body');
-  if (!tableBody) return;
-
-  // Apply filters
-  const filteredInvoices = applyFilters(cachedInvoices, filterState, INVOICES_FILTER_CONFIG);
-
-  if (filteredInvoices.length === 0) {
-    const message = cachedInvoices.length === 0
-      ? 'No invoices yet.'
-      : 'No invoices match the current filters.';
-    showTableEmpty(tableBody, 7, message);
-    renderPaginationUI(0, ctx);
-    return;
-  }
-
-  // Apply pagination
-  paginationState.totalItems = filteredInvoices.length;
-  const paginatedInvoices = applyPagination(filteredInvoices, paginationState);
+function buildInvoiceRow(invoice: InvoiceWithDetails, _ctx: AdminDashboardContext): HTMLTableRowElement {
+  const row = document.createElement('tr');
+  row.dataset.invoiceId = String(invoice.id);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  tableBody.innerHTML = paginatedInvoices.map((invoice) => {
-    const safeInvoiceNumber = SanitizationUtils.escapeHtml(invoice.invoice_number || `INV-${invoice.id}`);
-    const safeClientName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(invoice.client_name || 'Unknown Client'));
-    const safeProjectName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(invoice.project_name || ''));
-    const amount = formatCurrency(getAmount(invoice));
-    const dueDate = invoice.due_date ? formatDate(invoice.due_date) : '-';
+  const safeInvoiceNumber = SanitizationUtils.escapeHtml(invoice.invoice_number || `INV-${invoice.id}`);
+  const safeClientName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(invoice.client_name || 'Unknown Client'));
+  const safeProjectName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(invoice.project_name || ''));
+  const amount = formatCurrency(getAmount(invoice));
+  const dueDate = invoice.due_date ? formatDate(invoice.due_date) : '-';
 
-    // Determine status (check for overdue)
-    let status = invoice.status || 'pending';
-    if (status !== 'paid' && invoice.due_date) {
-      const dueDateObj = new Date(invoice.due_date);
-      if (dueDateObj < today) {
-        status = 'overdue';
-      }
+  // Determine status (check for overdue)
+  let status = invoice.status || 'pending';
+  if (status !== 'paid' && invoice.due_date) {
+    const dueDateObj = new Date(invoice.due_date);
+    if (dueDateObj < today) {
+      status = 'overdue';
     }
+  }
 
-    const statusIndicator = getStatusDotHTML(status);
-    const checkboxHTML = getPortalCheckboxHTML({ id: `invoice-${invoice.id}`, checked: false, ariaLabel: `Select invoice ${safeInvoiceNumber}` });
+  const statusIndicator = getStatusDotHTML(status);
+  const checkboxHTML = getPortalCheckboxHTML({ id: `invoice-${invoice.id}`, checked: false, ariaLabel: `Select invoice ${safeInvoiceNumber}` });
 
-    // Build contextual action buttons based on status
-    const actionButtons = buildActionButtons(invoice.id, status);
+  // Build contextual action buttons based on status
+  const actionButtons = buildActionButtons(invoice.id, status);
 
-    return `
-      <tr data-invoice-id="${invoice.id}">
-        <td class="bulk-select-cell" data-label="">${checkboxHTML}</td>
-        <td class="type-cell" data-label="Invoice"><strong>${safeInvoiceNumber}</strong></td>
-        <td class="name-cell" data-label="Client/Project">
-          <div class="identity-cell">
-            <span class="identity-primary">${safeClientName}</span>
-            <span class="identity-secondary">${safeProjectName}</span>
-          </div>
-        </td>
-        <td class="budget-cell" data-label="Amount">${amount}</td>
-        <td class="status-cell" data-label="Status">
-          ${statusIndicator}
-          <span class="date-stacked">${dueDate}</span>
-        </td>
-        <td class="date-cell inline-editable-cell" data-invoice-id="${invoice.id}" data-field="due_date" data-label="Due Date">
-          <span class="due-date-value">${dueDate}</span>
-        </td>
-        <td class="actions-cell" data-label="Actions">
-          <div class="table-actions">
-            ${actionButtons}
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
+  row.innerHTML = `
+    <td class="bulk-select-cell" data-label="">${checkboxHTML}</td>
+    <td class="type-cell" data-label="Invoice"><strong>${safeInvoiceNumber}</strong></td>
+    <td class="name-cell" data-label="Client/Project">
+      <div class="identity-cell">
+        <span class="identity-primary">${safeClientName}</span>
+        <span class="identity-secondary">${safeProjectName}</span>
+      </div>
+    </td>
+    <td class="budget-cell" data-label="Amount">${amount}</td>
+    <td class="status-cell" data-label="Status">
+      ${statusIndicator}
+      <span class="date-stacked">${dueDate}</span>
+    </td>
+    <td class="date-cell inline-editable-cell" data-invoice-id="${invoice.id}" data-field="due_date" data-label="Due Date">
+      <span class="due-date-value">${dueDate}</span>
+    </td>
+    <td class="actions-cell" data-label="Actions">
+      <div class="table-actions">
+        ${actionButtons}
+      </div>
+    </td>
+  `;
 
-  // Setup inline editing for due_date cells
+  return row;
+}
+
+/**
+ * Setup inline editing for due_date cells
+ */
+function setupInlineDateEditing(tableBody: HTMLElement, invoices: InvoiceWithDetails[]): void {
   tableBody.querySelectorAll('.date-cell.inline-editable-cell').forEach((cell) => {
     const cellEl = cell as HTMLElement;
     const invoiceId = parseInt(cellEl.dataset.invoiceId || '0');
-    const invoice = paginatedInvoices.find(inv => inv.id === invoiceId);
+    const invoice = invoices.find(inv => inv.id === invoiceId);
     if (!invoice) return;
 
     makeEditable(
@@ -545,7 +442,7 @@ function renderInvoicesTable(ctx: AdminDashboardContext): void {
       async (newValue) => {
         const response = await apiPut(`/api/invoices/${invoiceId}`, { due_date: newValue || null });
         if (response.ok) {
-          // Update the cached value (use empty string as fallback for type safety)
+          // Update the cached value
           (invoice as { due_date: string }).due_date = newValue || '';
           const dueDateValue = cellEl.querySelector('.due-date-value');
           if (dueDateValue) dueDateValue.textContent = newValue ? formatDate(newValue) : '-';
@@ -558,54 +455,6 @@ function renderInvoicesTable(ctx: AdminDashboardContext): void {
       { type: 'date', placeholder: 'Select date' }
     );
   });
-
-  // Wire bulk selection handlers for current rows
-  const allRowIds = paginatedInvoices.map(inv => inv.id);
-  const bulkConfig: BulkActionConfig = { tableId: 'invoices', actions: [] };
-  setupBulkSelectionHandlers(bulkConfig, allRowIds);
-
-  // Render pagination
-  renderPaginationUI(filteredInvoices.length, ctx);
-
-  // Initialize keyboard navigation (J/K to move, Enter to view)
-  initTableKeyboardNav({
-    tableSelector: '.invoices-table',
-    rowSelector: 'tbody tr[data-invoice-id]',
-    onRowSelect: (row) => {
-      const invoiceId = parseInt(row.dataset.invoiceId || '0');
-      if (invoiceId) showViewInvoiceModal(invoiceId, ctx);
-    },
-    focusClass: 'row-focused',
-    selectedClass: 'row-selected'
-  });
-}
-
-/**
- * Render pagination UI
- */
-function renderPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
-  const container = document.getElementById('invoices-pagination');
-  if (!container) return;
-
-  if (totalItems === 0) {
-    container.innerHTML = '';
-    return;
-  }
-
-  paginationState.totalItems = totalItems;
-
-  const paginationUI = createPaginationUI(
-    INVOICES_PAGINATION_CONFIG,
-    paginationState,
-    (newState) => {
-      paginationState = newState;
-      savePaginationState(INVOICES_PAGINATION_CONFIG.storageKey!, newState);
-      renderInvoicesTable(ctx);
-    }
-  );
-
-  container.innerHTML = '';
-  container.appendChild(paginationUI);
 }
 
 /**
@@ -656,7 +505,7 @@ async function handleSendInvoice(invoiceId: number, ctx: AdminDashboardContext):
     const response = await apiPut(`/api/invoices/${invoiceId}`, { status: 'sent' });
     if (response.ok) {
       showToast('Invoice sent successfully', 'success');
-      loadInvoicesData(ctx);
+      invoicesModule.load(ctx);
     } else {
       const error = await response.json();
       showToast(error.error || 'Failed to send invoice', 'error');
@@ -675,7 +524,7 @@ async function handleMarkPaid(invoiceId: number, ctx: AdminDashboardContext): Pr
     const response = await apiPut(`/api/invoices/${invoiceId}`, { status: 'paid' });
     if (response.ok) {
       showToast('Invoice marked as paid', 'success');
-      loadInvoicesData(ctx);
+      invoicesModule.load(ctx);
     } else {
       const error = await response.json();
       showToast(error.error || 'Failed to update invoice', 'error');
@@ -720,7 +569,7 @@ async function handleDownloadPdf(invoiceId: number): Promise<void> {
  */
 async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardContext): Promise<void> {
   // Find invoice in cache or fetch from API
-  let invoice = cachedInvoices.find(inv => inv.id === invoiceId);
+  let invoice = invoicesModule.findById(invoiceId);
 
   if (!invoice) {
     try {
@@ -910,7 +759,7 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
  */
 async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContext): Promise<void> {
   // Find invoice in cache or fetch from API
-  let invoice = cachedInvoices.find(inv => inv.id === invoiceId);
+  let invoice = invoicesModule.findById(invoiceId);
 
   if (!invoice) {
     try {
@@ -1168,7 +1017,7 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
           if (cleanupFocusTrap) cleanupFocusTrap();
           modal.hide();
           modal.overlay.remove();
-          loadInvoicesData(ctx);
+          invoicesModule.load(ctx);
         } else {
           const error = await response.json();
           showToast(error.error || 'Failed to update invoice', 'error');
