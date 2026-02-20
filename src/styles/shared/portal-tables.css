@@ -755,20 +755,9 @@
 .col-50 { width: 50%; }
 
 /* ==============================================
-   EMPTY/LOADING/ERROR STATE - UNIVERSAL
-   Override ALL cell styles for rows with colspan
+   EMPTY/LOADING/ERROR STATE - Uses loading.css universal styles
+   Only override width/overflow for colspan cells
    ============================================== */
-
-.admin-table .empty-row td,
-.overview-table .empty-row td,
-.files-table .empty-row td,
-.invoices-table .empty-row td,
-.time-entries-table .empty-row td {
-  text-align: center;
-  padding: var(--space-4);
-  color: var(--portal-text-muted);
-  font-style: italic;
-}
 
 /* CRITICAL: Override ALL cell classes for colspanned cells (loading/error/empty rows) */
 /* This ensures error states are always centered regardless of cell classes */
