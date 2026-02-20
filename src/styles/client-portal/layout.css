@@ -266,12 +266,7 @@ body[data-page="client-portal"] {
   max-width: 100%;
 }
 
-/* Tab Content */
-.tab-content {
-  display: none;
-}
-
-/* Tab content uses flex + gap from shared/portal-tabs.css */
+/* .tab-content base display:none in shared/portal-tabs.css */
 
 /* ============================================
    Portal View Content Container
