@@ -416,27 +416,7 @@ section,
   }
 }
 
-/* Flexible Layout Utilities */
-.flex {
-  display: flex;
-  gap: var(--gap);
-}
-
-.flex-col {
-  flex-direction: column;
-}
-.flex-wrap {
-  flex-wrap: wrap;
-}
-.items-center {
-  align-items: center;
-}
-.justify-center {
-  justify-content: center;
-}
-.justify-between {
-  justify-content: space-between;
-}
+/* Flexible Layout Utilities defined in base/utilities.css */
 
 /* Responsive Text Utilities - defined in base/typography.css */
 

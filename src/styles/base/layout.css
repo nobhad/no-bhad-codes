@@ -230,55 +230,8 @@ section.about-section.page-active {
 }
 
 /* ============================================
- * FLEXBOX UTILITIES
+ * FLEXBOX UTILITIES - defined in base/utilities.css
  * ============================================ */
-
-.flex {
-  display: flex;
-  gap: var(--gap);
-}
-.inline-flex {
-  display: inline-flex;
-}
-.flex-col {
-  flex-direction: column;
-}
-.flex-row {
-  flex-direction: row;
-}
-.flex-wrap {
-  flex-wrap: wrap;
-}
-.flex-nowrap {
-  flex-wrap: nowrap;
-}
-.items-center {
-  align-items: center;
-}
-.items-start {
-  align-items: flex-start;
-}
-.items-end {
-  align-items: flex-end;
-}
-.justify-center {
-  justify-content: center;
-}
-.justify-start {
-  justify-content: flex-start;
-}
-.justify-end {
-  justify-content: flex-end;
-}
-.justify-between {
-  justify-content: space-between;
-}
-.justify-around {
-  justify-content: space-around;
-}
-.justify-evenly {
-  justify-content: space-evenly;
-}
 
 /* ============================================
  * GRID UTILITIES

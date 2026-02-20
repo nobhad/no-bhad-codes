@@ -244,6 +244,22 @@
   white-space: nowrap;
 }
 
+/* Multi-line truncate (2 lines) */
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Multi-line truncate (3 lines) */
+.truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .whitespace-nowrap { white-space: nowrap; }
 .whitespace-normal { white-space: normal; }
 

@@ -108,6 +108,13 @@
   color: var(--color-white);
 }
 
+/* Not Invited - special outline style for clients not yet invited */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-not-invited {
+  border: 1px solid var(--portal-border-medium);
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-muted);
+}
+
 /* =====================================================
    BEM-STYLE STATUS BADGE MODIFIERS
    Alternative naming convention: .status-badge--{variant}

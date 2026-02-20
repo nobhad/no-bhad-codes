@@ -116,36 +116,17 @@
   white-space: nowrap;
 }
 
-.round-badge,
-.status-badge {
+/* .status-badge base styles in shared/portal-badges.css */
+/* Use .status-badge.status-pending, .status-badge.status-active, etc. */
+
+.round-badge {
   display: inline-block;
   padding: var(--space-1) calc(var(--space-1) * 1.5);
   border-radius: var(--portal-radius-xs);
   font-size: 12px;
   font-weight: 500;
-}
-
-.round-badge {
   background-color: var(--portal-bg-medium);
   color: var(--portal-text-secondary);
-}
-
-.status-badge {
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.status-pending {
-  background-color: var(--color-warning-500);
-}
-
-.status-reviewing {
-  background-color: var(--color-info-500);
-}
-
-.status-approved {
-  background-color: var(--color-success-500);
 }
 
 .status-revisions_requested {

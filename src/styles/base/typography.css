@@ -188,12 +188,7 @@ section h2 + hr {
   text-transform: none;
 }
 
-/* Text overflow */
-.truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+/* Text overflow - .truncate is in base/utilities.css */
 
 .text-ellipsis {
   text-overflow: ellipsis;
