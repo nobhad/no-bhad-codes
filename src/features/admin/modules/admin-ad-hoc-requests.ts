@@ -491,7 +491,7 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
   });
 
   const body = document.createElement('div');
-  body.className = 'ad-hoc-request-body';
+  body.className = 'ad-hoc-request-body flex flex-col gap-2';
 
   const attachmentNote = request.attachmentFileId
     ? `<div class="ad-hoc-request-meta">Attachment ID: ${request.attachmentFileId}</div>`
