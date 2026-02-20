@@ -133,89 +133,11 @@
 }
 
 /* ============================================
- * TYPOGRAPHY UTILITY CLASSES
+ * NOTE: Most typography utility classes are in src/styles/base/utilities.css
+ * Only keeping the actively used ones here
  * ============================================ */
 
-/* Display */
-.text-display-lg {
-  font: var(--text-display-large);
-}
-.text-display-md {
-  font: var(--text-display-medium);
-}
-.text-display-sm {
-  font: var(--text-display-small);
-}
-
-/* Headings */
-.text-h1 {
-  font: var(--text-heading-1);
-}
-.text-h2 {
-  font: var(--text-heading-2);
-}
-.text-h3 {
-  font: var(--text-heading-3);
-}
-.text-h4 {
-  font: var(--text-heading-4);
-}
-.text-h5 {
-  font: var(--text-heading-5);
-}
-.text-h6 {
-  font: var(--text-heading-6);
-}
-
-/* Body */
-.text-body-lg {
-  font: var(--text-body-large);
-}
-.text-body-md {
-  font: var(--text-body-medium);
-}
-.text-body-sm {
-  font: var(--text-body-small);
-}
-
-/* Special */
-.text-caption {
-  font: var(--text-caption);
-}
-.text-label {
-  font: var(--text-label);
-}
-.text-button {
-  font: var(--text-button);
-}
-.text-code {
-  font: var(--text-code-inline);
-}
-
-/* Font Weight Utilities */
-.font-thin {
-  font-weight: var(--font-weight-thin);
-}
-.font-light {
-  font-weight: var(--font-weight-light);
-}
-.font-regular {
-  font-weight: var(--font-weight-regular);
-}
-.font-medium {
-  font-weight: var(--font-weight-medium);
-}
-.font-semibold {
-  font-weight: var(--font-weight-semibold);
-}
-.font-bold {
-  font-weight: var(--font-weight-bold);
-}
-.font-black {
-  font-weight: var(--font-weight-black);
-}
-
-/* Text Transform */
+/* Text Transform - used across components */
 .uppercase {
   text-transform: uppercase;
 }
@@ -225,51 +147,8 @@
 .capitalize {
   text-transform: capitalize;
 }
-.normal-case {
-  text-transform: none;
-}
 
-/* Letter Spacing */
-.tracking-tighter {
-  letter-spacing: var(--letter-spacing-tighter);
-}
-.tracking-tight {
-  letter-spacing: var(--letter-spacing-tight);
-}
-.tracking-normal {
-  letter-spacing: var(--letter-spacing-normal);
-}
-.tracking-wide {
-  letter-spacing: var(--letter-spacing-wide);
-}
-.tracking-wider {
-  letter-spacing: var(--letter-spacing-wider);
-}
-.tracking-widest {
-  letter-spacing: var(--letter-spacing-widest);
-}
-
-/* Line Height */
-.leading-none {
-  line-height: var(--line-height-none);
-}
-.leading-tight {
-  line-height: var(--line-height-tight);
-}
-.leading-snug {
-  line-height: var(--line-height-snug);
-}
-.leading-normal {
-  line-height: var(--line-height-normal);
-}
-.leading-relaxed {
-  line-height: var(--line-height-relaxed);
-}
-.leading-loose {
-  line-height: var(--line-height-loose);
-}
-
-/* Text Alignment */
+/* Text Alignment - used in tables and layouts */
 .text-left {
   text-align: left;
 }
@@ -278,7 +157,4 @@
 }
 .text-right {
   text-align: right;
-}
-.text-justify {
-  text-align: justify;
 }
