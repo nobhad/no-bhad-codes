@@ -6,6 +6,8 @@
  *
  * Client management functionality for admin dashboard.
  * Dynamically imported for code splitting.
+ *
+ * Uses createTableModule factory for standardized table operations.
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -17,35 +19,10 @@ import type {
 import { formatCurrency, formatDate, formatDateTime } from '../../../utils/format-utils';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
-import {
-  createFilterUI,
-  createSortableHeaders,
-  applyFilters,
-  loadFilterState,
-  saveFilterState,
-  CLIENTS_FILTER_CONFIG,
-  type FilterState
-} from '../../../utils/table-filter';
-import { exportToCsv, CLIENTS_EXPORT_CONFIG } from '../../../utils/table-export';
-import {
-  createPaginationUI,
-  applyPagination,
-  getDefaultPaginationState,
-  loadPaginationState,
-  savePaginationState,
-  type PaginationState,
-  type PaginationConfig
-} from '../../../utils/table-pagination';
-import {
-  createBulkActionToolbar,
-  setupBulkSelectionHandlers,
-  resetSelection,
-  createRowCheckbox,
-  type BulkActionConfig
-} from '../../../utils/table-bulk-actions';
-import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
+import { CLIENTS_FILTER_CONFIG } from '../../../utils/table-filter';
+import { CLIENTS_EXPORT_CONFIG } from '../../../utils/table-export';
+import { createRowCheckbox } from '../../../utils/table-bulk-actions';
 import { confirmDialog, confirmDanger } from '../../../utils/confirm-dialog';
-import { showTableError } from '../../../utils/error-utils';
 import { createDOMCache, batchUpdateText, getElement } from '../../../utils/dom-cache';
 import { withButtonLoading } from '../../../utils/button-loading';
 import { manageFocusTrap } from '../../../utils/focus-trap';
@@ -58,21 +35,18 @@ import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
+import {
+  createTableModule,
+  createPaginationConfig,
+  type TableModuleHelpers
+} from '../../../utils/table-module-factory';
 
 // ============================================
-// DOM CACHE - Cached element references
+// DOM CACHE - Cached element references for detail view
 // ============================================
 
-/** DOM element selector keys for the clients module */
+/** DOM element selector keys for client detail views and modals */
 type ClientsDOMKeys = {
-  // Table elements
-  tableBody: string;
-  filterContainer: string;
-  refreshBtn: string;
-  addBtn: string;
-  exportBtn: string;
-  bulkToolbar: string;
-  pagination: string;
   // Client detail buttons and elements
   editBillingBtn: string;
   moreMenu: string;
@@ -100,21 +74,16 @@ type ClientsDOMKeys = {
   addClientForm: string;
   addClientClose: string;
   addClientCancel: string;
+  // Table action buttons (for event delegation)
+  refreshBtn: string;
+  addBtn: string;
 };
 
-/** Cached DOM element references for performance */
+/** Cached DOM element references for detail views and modals */
 const domCache = createDOMCache<ClientsDOMKeys>();
 
-// Register all element selectors (called once when module loads)
+// Register element selectors for detail view and modals
 domCache.register({
-  // Table elements
-  tableBody: '#clients-table-body',
-  filterContainer: '#clients-filter-container',
-  refreshBtn: '#refresh-clients-btn',
-  addBtn: '#add-client-btn',
-  exportBtn: '#export-clients-btn',
-  bulkToolbar: '#clients-bulk-toolbar',
-  pagination: '#clients-pagination',
   // Client detail buttons and elements
   editBillingBtn: '#cd-btn-edit-billing',
   moreMenu: '#cd-more-menu',
@@ -141,7 +110,10 @@ domCache.register({
   addClientModal: '#add-client-modal',
   addClientForm: '#add-client-form',
   addClientClose: '#add-client-modal-close',
-  addClientCancel: '#add-client-cancel'
+  addClientCancel: '#add-client-cancel',
+  // Table action buttons
+  refreshBtn: '#refresh-clients-btn',
+  addBtn: '#add-client-btn'
 });
 
 export interface Client {
@@ -173,59 +145,15 @@ export interface Client {
   tags?: Array<{ id: number; name: string; color: string }>;
 }
 
-interface ClientsData {
-  clients: Client[];
-  stats: {
-    total: number;
-    active: number;
-    pending: number;
-    inactive: number;
-  };
+interface ClientsStats {
+  total: number;
+  active: number;
+  pending: number;
+  inactive: number;
 }
 
-let clientsData: Client[] = [];
-let storedContext: AdminDashboardContext | null = null;
+// Module-specific state (not handled by factory)
 let currentClientId: number | null = null;
-let filterState: FilterState = loadFilterState(CLIENTS_FILTER_CONFIG.storageKey);
-let filterUIInitialized = false;
-
-// Pagination configuration and state
-const CLIENTS_PAGINATION_CONFIG: PaginationConfig = {
-  tableId: 'clients',
-  pageSizeOptions: [10, 25, 50, 100],
-  defaultPageSize: 25,
-  storageKey: 'admin_clients_pagination'
-};
-
-let paginationState: PaginationState = {
-  ...getDefaultPaginationState(CLIENTS_PAGINATION_CONFIG),
-  ...loadPaginationState(CLIENTS_PAGINATION_CONFIG.storageKey!)
-};
-
-// Bulk action configuration
-const CLIENTS_BULK_CONFIG: BulkActionConfig = {
-  tableId: 'clients',
-  actions: [
-    {
-      id: 'archive',
-      label: 'Archive',
-      variant: 'warning',
-      confirmMessage: 'Archive {count} selected clients? They can be restored later.',
-      handler: async (ids) => {
-        await bulkArchiveClients(ids);
-      }
-    },
-    {
-      id: 'delete',
-      label: 'Delete',
-      variant: 'danger',
-      confirmMessage: 'Permanently delete {count} selected clients? This cannot be undone.',
-      handler: async (ids) => {
-        await bulkDeleteClients(ids);
-      }
-    }
-  ]
-};
 
 // ============================================
 // SVG ICONS FOR DYNAMIC RENDERING
@@ -236,6 +164,114 @@ const RENDER_ICONS = {
   REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
   USER_PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>'
 };
+
+// ============================================
+// TABLE MODULE FACTORY
+// ============================================
+
+/**
+ * Clients table module using factory pattern
+ * Handles: filter UI, pagination, bulk actions, export, loading states
+ */
+const clientsModule = createTableModule<Client, ClientsStats>({
+  moduleId: 'clients',
+  filterConfig: CLIENTS_FILTER_CONFIG,
+  paginationConfig: createPaginationConfig('clients'),
+  columnCount: 8,
+  apiEndpoint: '/api/clients',
+
+  bulkConfig: {
+    tableId: 'clients',
+    actions: [
+      {
+        id: 'archive',
+        label: 'Archive',
+        variant: 'warning',
+        confirmMessage: 'Archive {count} selected clients? They can be restored later.',
+        handler: async (ids) => {
+          await bulkArchiveClients(ids);
+        }
+      },
+      {
+        id: 'delete',
+        label: 'Delete',
+        variant: 'danger',
+        confirmMessage: 'Permanently delete {count} selected clients? This cannot be undone.',
+        handler: async (ids) => {
+          await bulkDeleteClients(ids);
+        }
+      }
+    ]
+  },
+
+  exportConfig: CLIENTS_EXPORT_CONFIG,
+  emptyMessage: 'No clients yet.',
+  filterEmptyMessage: 'No clients match the current filters. Try adjusting your filters.',
+
+  extractData: (response: unknown) => {
+    const data = response as { clients?: Client[] };
+    const clients = data.clients || [];
+    const stats: ClientsStats = {
+      total: clients.length,
+      active: clients.filter(c => c.status === 'active').length,
+      pending: clients.filter(c => c.status === 'pending').length,
+      inactive: clients.filter(c => c.status === 'inactive').length
+    };
+    return { data: clients, stats };
+  },
+
+  renderRow: (client: Client, _ctx: AdminDashboardContext, _helpers: TableModuleHelpers<Client>) => {
+    return buildClientRow(client);
+  },
+
+  renderStats: (stats: ClientsStats) => {
+    batchUpdateText({
+      'clients-total': stats.total.toString(),
+      'clients-active': stats.active.toString(),
+      'clients-pending': stats.pending.toString(),
+      'clients-inactive': stats.inactive.toString()
+    });
+  },
+
+  onDataLoaded: (data: Client[], ctx: AdminDashboardContext) => {
+    // Setup refresh and add buttons (only add listener once)
+    const refreshBtn = domCache.get('refreshBtn');
+    if (refreshBtn && !refreshBtn.dataset.listenerAdded) {
+      refreshBtn.dataset.listenerAdded = 'true';
+      refreshBtn.addEventListener('click', () => clientsModule.load(ctx));
+    }
+
+    const addBtn = domCache.get('addBtn');
+    if (addBtn && !addBtn.dataset.listenerAdded) {
+      addBtn.dataset.listenerAdded = 'true';
+      addBtn.addEventListener('click', () => addClient(ctx));
+    }
+  },
+
+  onTableRendered: (filteredData: Client[], _ctx: AdminDashboardContext) => {
+    const tableBody = clientsModule.getElement('clients-table-body');
+    if (!tableBody) return;
+
+    // Setup row click handlers
+    setupClientRowHandlers(tableBody, filteredData);
+
+    // Initialize keyboard navigation
+    initTableKeyboardNav({
+      tableSelector: '.clients-table',
+      rowSelector: 'tbody tr[data-client-id]',
+      onRowSelect: (row) => {
+        const clientId = parseInt(row.dataset.clientId || '0');
+        if (clientId) showClientDetails(clientId);
+      },
+      focusClass: 'row-focused',
+      selectedClass: 'row-selected'
+    });
+  }
+});
+
+// Export factory-provided functions
+export const loadClients = clientsModule.load;
+export const getClientsData = clientsModule.getData;
 
 // ============================================
 // DYNAMIC TAB RENDERING
@@ -322,8 +358,9 @@ export function renderClientsTab(container: HTMLElement): void {
     </div>
   `;
 
-  // Clear the DOM cache so elements get re-queried after render
+  // Clear caches so elements get re-queried after render
   domCache.clear();
+  clientsModule.resetCache();
 }
 
 export function getCurrentClientId(): number | null {
@@ -334,13 +371,9 @@ export function setCurrentClientId(id: number | null): void {
   currentClientId = id;
 }
 
-export function getClientsData(): Client[] {
-  return clientsData;
-}
-
 export function getCurrentClientName(): string | null {
   if (!currentClientId) return null;
-  const client = clientsData.find(c => c.id === currentClientId);
+  const client = clientsModule.findById(currentClientId);
   if (!client) return null;
 
   const contactName = client.contact_name || '';
@@ -358,289 +391,117 @@ export function getCurrentClientName(): string | null {
   return companyName || null;
 }
 
-export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
-  storedContext = ctx;
+// ============================================
+// ROW BUILDING HELPER
+// ============================================
 
-  // Initialize filter UI once
-  if (!filterUIInitialized) {
-    initializeFilterUI(ctx);
-    filterUIInitialized = true;
+/**
+ * Build a single client table row
+ */
+function buildClientRow(client: Client): HTMLTableRowElement {
+  const row = document.createElement('tr');
+  row.dataset.clientId = String(client.id);
+  row.className = 'clickable-row';
+
+  const date = formatDate(client.created_at);
+  const clientType = client.client_type || 'business';
+
+  const decodedContact = client.contact_name
+    ? SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(client.contact_name))
+    : '';
+  const decodedCompany = client.company_name
+    ? SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(client.company_name))
+    : '';
+
+  // For business clients with company, company is primary name; otherwise contact is primary
+  const isBusinessWithCompany = clientType === 'business' && decodedCompany;
+  const safeName = SanitizationUtils.escapeHtml(
+    isBusinessWithCompany ? decodedCompany : (decodedContact || '')
+  );
+  const safeEmail = SanitizationUtils.escapeHtml(client.email || '');
+  // Secondary info: contact for business, company for personal
+  const safeCompany = isBusinessWithCompany
+    ? (decodedContact ? SanitizationUtils.escapeHtml(decodedContact) : '')
+    : (decodedCompany ? SanitizationUtils.escapeHtml(decodedCompany) : '');
+  const projectCount = client.project_count || 0;
+
+  const typeLabel = clientType === 'personal' ? 'Personal' : 'Business';
+
+  // Determine invitation/status display
+  const status = client.status || 'pending';
+  const hasBeenInvited = !!client.invitation_sent_at;
+
+  let statusDisplay: string;
+  let statusClass: string;
+  let showInviteBtn = false;
+
+  if (status === 'active') {
+    statusDisplay = 'Active';
+    statusClass = 'status-active';
+  } else if (status === 'inactive') {
+    statusDisplay = 'Inactive';
+    statusClass = 'status-inactive';
+  } else if (hasBeenInvited) {
+    statusDisplay = 'Invited';
+    statusClass = 'status-pending';
+  } else {
+    statusDisplay = 'Not Invited';
+    statusClass = 'status-not-invited';
+    showInviteBtn = true;
   }
 
-  // Show loading state (use cached ref)
-  const tableBody = domCache.get('tableBody');
-  if (tableBody) {
-    showTableLoading(tableBody, 8, 'Loading clients...');
-  }
+  // Status cell (dot indicator only)
+  const statusVariant = statusClass.replace('status-', '');
+  const statusCell = getStatusDotHTML(statusVariant, { label: statusDisplay });
 
-  try {
-    const response = await apiFetch('/api/clients');
+  // Last active date
+  const clientAny = client as { last_login_at?: string };
+  const lastActive = clientAny.last_login_at ? formatDate(clientAny.last_login_at) : 'Never';
 
-    if (response.ok) {
-      const json = await response.json();
-      // Handle canonical API format { success: true, data: {...} }
-      const data = json.data ?? json;
-      clientsData = data.clients || [];
+  // Invite button for actions column (if not yet invited)
+  const inviteBtn = showInviteBtn
+    ? `<button class="icon-btn icon-btn-invite" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">
+         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+           <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+         </svg>
+       </button>`
+    : '';
 
-      // Calculate stats
-      const stats = {
-        total: clientsData.length,
-        active: clientsData.filter(c => c.status === 'active').length,
-        pending: clientsData.filter(c => c.status === 'pending').length,
-        inactive: clientsData.filter(c => c.status === 'inactive').length
-      };
+  // Health badge (available for future use)
+  const _healthBadge = getHealthBadgeHtml(client.health_score);
 
-      updateClientsDisplay({ clients: clientsData, stats }, ctx);
-    } else {
-      const errorText = await response.text();
-      console.error('[AdminClients] API error:', response.status, errorText);
-      if (tableBody) {
-        showTableError(
-          tableBody,
-          6,
-          `Error loading clients (${response.status})`,
-          () => loadClients(ctx)
-        );
-      }
-    }
-  } catch (error) {
-    console.error('[AdminClients] Failed to load clients:', error);
-    if (tableBody) {
-      showTableError(
-        tableBody,
-        6,
-        'Network error loading clients',
-        () => loadClients(ctx)
-      );
-    }
-  }
+  row.innerHTML = `
+    ${createRowCheckbox('clients', client.id)}
+    <td class="identity-cell contact-cell inline-editable-cell" data-client-id="${client.id}" data-label="Client">
+      <span class="identity-name" data-field="primary-name">${safeName}</span>
+      ${safeCompany ? `<span class="identity-contact" data-field="secondary-name">${safeCompany}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
+      <span class="identity-email">${safeEmail}</span>
+    </td>
+    <td class="type-cell" data-label="Type">${typeLabel}</td>
+    <td class="status-cell" data-label="Status">${statusCell}</td>
+    <td class="count-cell" data-label="Projects">${projectCount}</td>
+    <td class="date-cell created-cell" data-label="Created">
+      <span class="date-value">${date}</span>
+      <span class="last-active-stacked">${lastActive}</span>
+    </td>
+    <td class="date-cell last-active-cell" data-label="Last Active">${lastActive}</td>
+    <td class="actions-cell" data-label="Actions">
+      <div class="table-actions">
+        ${inviteBtn}
+        <button class="icon-btn btn-view-client" data-client-id="${client.id}" title="View Client" aria-label="View client details">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </td>
+  `;
+
+  return row;
 }
 
 /**
- * Initialize filter UI for clients table
+ * Setup event handlers for client table rows
  */
-function initializeFilterUI(ctx: AdminDashboardContext): void {
-  const container = domCache.get('filterContainer');
-  if (!container) return;
-
-  // Create filter UI
-  const filterUI = createFilterUI(
-    CLIENTS_FILTER_CONFIG,
-    filterState,
-    (newState) => {
-      filterState = newState;
-      // Reset to first page when filters change
-      paginationState.currentPage = 1;
-      // Re-render table with new filters
-      if (clientsData.length > 0) {
-        renderClientsTable(clientsData, ctx);
-      }
-    }
-  );
-
-  // Insert before export button (Search → Filter → Export → Refresh → Add order)
-  const exportBtn = domCache.get('exportBtn');
-  if (exportBtn) {
-    container.insertBefore(filterUI, exportBtn);
-  } else {
-    container.appendChild(filterUI);
-  }
-
-  // Setup sortable headers after table is rendered
-  setTimeout(() => {
-    createSortableHeaders(CLIENTS_FILTER_CONFIG, filterState, (column, direction) => {
-      filterState = { ...filterState, sortColumn: column, sortDirection: direction };
-      saveFilterState(CLIENTS_FILTER_CONFIG.storageKey, filterState);
-      if (clientsData.length > 0) {
-        renderClientsTable(clientsData, ctx);
-      }
-    });
-  }, 100);
-
-  // Setup export button
-  const exportBtnEl = domCache.get('exportBtn');
-  if (exportBtnEl && !exportBtnEl.dataset.listenerAdded) {
-    exportBtnEl.dataset.listenerAdded = 'true';
-    exportBtnEl.addEventListener('click', () => {
-      // Export filtered data
-      const filteredClients = applyFilters(clientsData, filterState, CLIENTS_FILTER_CONFIG);
-      exportToCsv(filteredClients as unknown as Record<string, unknown>[], CLIENTS_EXPORT_CONFIG);
-      showToast(`Exported ${filteredClients.length} clients to CSV`, 'success');
-    });
-  }
-
-  // Setup bulk action toolbar
-  const bulkToolbarContainer = domCache.get('bulkToolbar');
-  if (bulkToolbarContainer) {
-    const toolbar = createBulkActionToolbar({
-      ...CLIENTS_BULK_CONFIG,
-      onSelectionChange: () => {
-        // Selection change callback if needed
-      }
-    });
-    bulkToolbarContainer.replaceWith(toolbar);
-    // Re-register with new element
-    domCache.invalidate('bulkToolbar');
-  }
-}
-
-function updateClientsDisplay(data: ClientsData, ctx: AdminDashboardContext): void {
-  // Update stats using batch update
-  batchUpdateText({
-    'clients-total': data.stats.total.toString(),
-    'clients-active': data.stats.active.toString(),
-    'clients-pending': data.stats.pending.toString(),
-    'clients-inactive': data.stats.inactive.toString()
-  });
-
-  // Update table
-  renderClientsTable(data.clients, ctx);
-
-  // Setup refresh button (only add listener once, use cached ref)
-  const refreshBtn = domCache.get('refreshBtn');
-  if (refreshBtn && !refreshBtn.dataset.listenerAdded) {
-    refreshBtn.dataset.listenerAdded = 'true';
-    refreshBtn.addEventListener('click', () => loadClients(ctx));
-  }
-
-  // Setup add client button (only add listener once, use cached ref)
-  const addBtn = domCache.get('addBtn');
-  if (addBtn && !addBtn.dataset.listenerAdded) {
-    addBtn.dataset.listenerAdded = 'true';
-    addBtn.addEventListener('click', () => addClient(ctx));
-  }
-}
-
-function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void {
-  const tableBody = domCache.get('tableBody');
-  if (!tableBody) return;
-
-  if (!clients || clients.length === 0) {
-    showTableEmpty(tableBody, 8, 'No clients yet.');
-    renderPaginationUI(0, ctx);
-    return;
-  }
-
-  // Apply filters
-  const filteredClients = applyFilters(clients, filterState, CLIENTS_FILTER_CONFIG);
-
-  if (filteredClients.length === 0) {
-    showTableEmpty(tableBody, 8, 'No clients match the current filters. Try adjusting your filters.');
-    renderPaginationUI(0, ctx);
-    return;
-  }
-
-  // Update pagination state with total items
-  paginationState.totalItems = filteredClients.length;
-
-  // Apply pagination
-  const paginatedClients = applyPagination(filteredClients, paginationState);
-
-  // Reset bulk selection when data changes
-  resetSelection('clients');
-
-  tableBody.innerHTML = paginatedClients
-    .map((client) => {
-      const date = formatDate(client.created_at);
-      const clientType = client.client_type || 'business';
-
-      const decodedContact = client.contact_name
-        ? SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(client.contact_name))
-        : '';
-      const decodedCompany = client.company_name
-        ? SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(client.company_name))
-        : '';
-
-      // For business clients with company, company is primary name; otherwise contact is primary
-      const isBusinessWithCompany = clientType === 'business' && decodedCompany;
-      const safeName = SanitizationUtils.escapeHtml(
-        isBusinessWithCompany ? decodedCompany : (decodedContact || '')
-      );
-      const safeEmail = SanitizationUtils.escapeHtml(client.email || '');
-      // Secondary info: contact for business, company for personal
-      const safeCompany = isBusinessWithCompany
-        ? (decodedContact ? SanitizationUtils.escapeHtml(decodedContact) : '')
-        : (decodedCompany ? SanitizationUtils.escapeHtml(decodedCompany) : '');
-      const projectCount = client.project_count || 0;
-
-      const typeLabel = clientType === 'personal' ? 'Personal' : 'Business';
-
-      // Determine invitation/status display
-      // Status logic: active = activated, pending + invited = waiting, pending + not invited = not invited
-      const status = client.status || 'pending';
-      const hasBeenInvited = !!client.invitation_sent_at;
-
-      let statusDisplay: string;
-      let statusClass: string;
-      let showInviteBtn = false;
-
-      if (status === 'active') {
-        statusDisplay = 'Active';
-        statusClass = 'status-active';
-      } else if (status === 'inactive') {
-        statusDisplay = 'Inactive';
-        statusClass = 'status-inactive';
-      } else if (hasBeenInvited) {
-        // Pending but invitation was sent
-        statusDisplay = 'Invited';
-        statusClass = 'status-pending';
-      } else {
-        // Pending and never invited - show invite button
-        statusDisplay = 'Not Invited';
-        statusClass = 'status-not-invited';
-        showInviteBtn = true;
-      }
-
-      // Status cell (dot indicator only)
-      const statusVariant = statusClass.replace('status-', '');
-      const statusCell = getStatusDotHTML(statusVariant, { label: statusDisplay });
-
-      // Last active date
-      const clientAny = client as { last_login_at?: string };
-      const lastActive = clientAny.last_login_at ? formatDate(clientAny.last_login_at) : 'Never';
-
-      // Invite button for actions column (if not yet invited)
-      const inviteBtn = showInviteBtn
-        ? `<button class="icon-btn icon-btn-invite" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">
-             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-               <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-             </svg>
-           </button>`
-        : '';
-
-      // Health badge (available for future use)
-      const _healthBadge = getHealthBadgeHtml(client.health_score);
-
-      // Standard column order: ☐ | Client (name+email+company) | Type | Status | Projects | Created | Last Active | Actions
-      return `
-        <tr data-client-id="${client.id}" class="clickable-row">
-          ${createRowCheckbox('clients', client.id)}
-          <td class="identity-cell contact-cell inline-editable-cell" data-client-id="${client.id}" data-label="Client">
-            <span class="identity-name" data-field="primary-name">${safeName}</span>
-            ${safeCompany ? `<span class="identity-contact" data-field="secondary-name">${safeCompany}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
-            <span class="identity-email">${safeEmail}</span>
-          </td>
-          <td class="type-cell" data-label="Type">${typeLabel}</td>
-          <td class="status-cell" data-label="Status">${statusCell}</td>
-          <td class="count-cell" data-label="Projects">${projectCount}</td>
-          <td class="date-cell created-cell" data-label="Created">
-            <span class="date-value">${date}</span>
-            <span class="last-active-stacked">${lastActive}</span>
-          </td>
-          <td class="date-cell last-active-cell" data-label="Last Active">${lastActive}</td>
-          <td class="actions-cell" data-label="Actions">
-            <div class="table-actions">
-              ${inviteBtn}
-              <button class="icon-btn btn-view-client" data-client-id="${client.id}" title="View Client" aria-label="View client details">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    })
-    .join('');
-
+function setupClientRowHandlers(tableBody: HTMLElement, clients: Client[]): void {
   // Row click to view details (but not on checkbox, invite button, or inline-editable cells)
   tableBody.querySelectorAll('tr[data-client-id]').forEach((row) => {
     row.addEventListener('click', (e) => {
@@ -661,7 +522,7 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
   // Invite button click handlers (icon button next to status)
   tableBody.querySelectorAll('.icon-btn-invite').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
-      e.stopPropagation(); // Prevent row click
+      e.stopPropagation();
       const clientId = parseInt((btn as HTMLElement).dataset.clientId || '0');
       if (clientId) {
         await sendClientInvitation(clientId);
@@ -672,101 +533,85 @@ function renderClientsTable(clients: Client[], ctx: AdminDashboardContext): void
   // Setup inline editing for contact_name and company_name
   tableBody.querySelectorAll('.identity-cell.inline-editable-cell').forEach((cell) => {
     const clientId = parseInt((cell as HTMLElement).dataset.clientId || '0');
-    const client = paginatedClients.find(c => c.id === clientId);
+    const client = clients.find(c => c.id === clientId);
     if (!client) return;
 
-    const cellEl = cell as HTMLElement;
-    const clientType = client.client_type || 'business';
-    const isBusinessWithCompany = clientType === 'business' && client.company_name;
-
-    // For business: company_name is primary, contact_name is secondary
-    // For personal: contact_name is primary, company_name is secondary
-    const primaryNameEl = cellEl.querySelector('.identity-name') as HTMLElement;
-    const secondaryNameEl = cellEl.querySelector('.identity-contact') as HTMLElement;
-
-    if (primaryNameEl) {
-      makeEditable(
-        primaryNameEl,
-        () => isBusinessWithCompany ? (client.company_name || '') : (client.contact_name || ''),
-        async (newValue) => {
-          const fieldToUpdate = isBusinessWithCompany ? 'company_name' : 'contact_name';
-          const response = await apiPut(`/api/clients/${clientId}`, { [fieldToUpdate]: newValue || null });
-          if (response.ok) {
-            if (isBusinessWithCompany) {
-              client.company_name = newValue || null;
-            } else {
-              client.contact_name = newValue || null;
-            }
-            primaryNameEl.textContent = newValue
-              ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(newValue))
-              : '';
-            showToast(`${isBusinessWithCompany ? 'Company name' : 'Contact name'} updated`, 'success');
-          } else {
-            showToast('Failed to update client', 'error');
-            throw new Error('Update failed');
-          }
-        },
-        { placeholder: isBusinessWithCompany ? 'Enter company name' : 'Enter contact name' }
-      );
-    }
-
-    // Setup secondary field editing (contact span)
-    if (secondaryNameEl) {
-      makeEditable(
-        secondaryNameEl,
-        () => isBusinessWithCompany ? (client.contact_name || '') : (client.company_name || ''),
-        async (newValue) => {
-          const fieldToUpdate = isBusinessWithCompany ? 'contact_name' : 'company_name';
-          const response = await apiPut(`/api/clients/${clientId}`, { [fieldToUpdate]: newValue || null });
-          if (response.ok) {
-            if (isBusinessWithCompany) {
-              client.contact_name = newValue || null;
-            } else {
-              client.company_name = newValue || null;
-            }
-            secondaryNameEl.textContent = newValue
-              ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(newValue))
-              : '';
-            secondaryNameEl.style.display = newValue ? '' : 'none';
-            showToast(`${isBusinessWithCompany ? 'Contact name' : 'Company name'} updated`, 'success');
-          } else {
-            showToast('Failed to update client', 'error');
-            throw new Error('Update failed');
-          }
-        },
-        { placeholder: isBusinessWithCompany ? 'Enter contact name' : 'Enter company name' }
-      );
-    }
-  });
-
-  // Setup bulk selection handlers
-  const allRowIds = paginatedClients.map(c => c.id);
-  setupBulkSelectionHandlers(CLIENTS_BULK_CONFIG, allRowIds);
-
-  // Render pagination
-  renderPaginationUI(filteredClients.length, ctx);
-
-  // Initialize keyboard navigation (J/K to move, Enter to open)
-  initTableKeyboardNav({
-    tableSelector: '.clients-table',
-    rowSelector: 'tbody tr[data-client-id]',
-    onRowSelect: (row) => {
-      const clientId = parseInt(row.dataset.clientId || '0');
-      if (clientId) showClientDetails(clientId);
-    },
-    focusClass: 'row-focused',
-    selectedClass: 'row-selected'
+    setupInlineEditingForClient(cell as HTMLElement, client);
   });
 }
 
+/**
+ * Setup inline editing for a client cell
+ */
+function setupInlineEditingForClient(cellEl: HTMLElement, client: Client): void {
+  const clientType = client.client_type || 'business';
+  const isBusinessWithCompany = clientType === 'business' && client.company_name;
+
+  const primaryNameEl = cellEl.querySelector('.identity-name') as HTMLElement;
+  const secondaryNameEl = cellEl.querySelector('.identity-contact') as HTMLElement;
+
+  if (primaryNameEl) {
+    makeEditable(
+      primaryNameEl,
+      () => isBusinessWithCompany ? (client.company_name || '') : (client.contact_name || ''),
+      async (newValue) => {
+        const fieldToUpdate = isBusinessWithCompany ? 'company_name' : 'contact_name';
+        const response = await apiPut(`/api/clients/${client.id}`, { [fieldToUpdate]: newValue || null });
+        if (response.ok) {
+          if (isBusinessWithCompany) {
+            client.company_name = newValue || null;
+          } else {
+            client.contact_name = newValue || null;
+          }
+          primaryNameEl.textContent = newValue
+            ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(newValue))
+            : '';
+          showToast(`${isBusinessWithCompany ? 'Company name' : 'Contact name'} updated`, 'success');
+        } else {
+          showToast('Failed to update client', 'error');
+          throw new Error('Update failed');
+        }
+      },
+      { placeholder: isBusinessWithCompany ? 'Enter company name' : 'Enter contact name' }
+    );
+  }
+
+  if (secondaryNameEl) {
+    makeEditable(
+      secondaryNameEl,
+      () => isBusinessWithCompany ? (client.contact_name || '') : (client.company_name || ''),
+      async (newValue) => {
+        const fieldToUpdate = isBusinessWithCompany ? 'contact_name' : 'company_name';
+        const response = await apiPut(`/api/clients/${client.id}`, { [fieldToUpdate]: newValue || null });
+        if (response.ok) {
+          if (isBusinessWithCompany) {
+            client.contact_name = newValue || null;
+          } else {
+            client.company_name = newValue || null;
+          }
+          secondaryNameEl.textContent = newValue
+            ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(newValue))
+            : '';
+          secondaryNameEl.style.display = newValue ? '' : 'none';
+          showToast(`${isBusinessWithCompany ? 'Contact name' : 'Company name'} updated`, 'success');
+        } else {
+          showToast('Failed to update client', 'error');
+          throw new Error('Update failed');
+        }
+      },
+      { placeholder: isBusinessWithCompany ? 'Enter contact name' : 'Enter company name' }
+    );
+  }
+}
+
 export async function showClientDetails(clientId: number, ctx?: AdminDashboardContext): Promise<void> {
-  const context = ctx || storedContext;
+  const context = ctx || clientsModule.getContext();
   if (!context) {
     console.error('[AdminClients] No context available');
     return;
   }
 
-  const client = clientsData.find(c => c.id === clientId);
+  const client = clientsModule.findById(clientId);
   if (!client) {
     console.error('[AdminClients] Client not found:', clientId);
     return;
@@ -1034,12 +879,13 @@ function renderClientProjects(projects: ProjectResponse[], container: HTMLElemen
   container.querySelectorAll('.client-project-item').forEach((item) => {
     item.addEventListener('click', () => {
       const projectId = parseInt((item as HTMLElement).dataset.projectId || '0');
-      if (projectId && storedContext) {
-        storedContext.switchTab('projects');
+      const ctx = clientsModule.getContext();
+      if (projectId && ctx) {
+        ctx.switchTab('projects');
         // Delay to allow tab switch, then show project details
         setTimeout(() => {
           import('./admin-projects').then((module) => {
-            module.showProjectDetails(projectId, storedContext!);
+            module.showProjectDetails(projectId, ctx);
           });
         }, 100);
       }
@@ -1137,6 +983,10 @@ function renderClientInvoices(invoices: InvoiceResponse[], container: HTMLElemen
     .join('');
 }
 
+// ============================================
+// CLIENT ACTIONS
+// ============================================
+
 async function resetClientPassword(clientId: number): Promise<void> {
   const confirmed = await confirmDialog({
     title: 'Reset Password',
@@ -1189,7 +1039,7 @@ async function resendClientInvite(clientId: number): Promise<void> {
  * Called from the inline "Invite" button in the clients table
  */
 async function sendClientInvitation(clientId: number): Promise<void> {
-  const client = clientsData.find(c => c.id === clientId);
+  const client = clientsModule.findById(clientId);
   if (!client) {
     showToast('Client not found', 'error');
     return;
@@ -1209,15 +1059,8 @@ async function sendClientInvitation(clientId: number): Promise<void> {
 
     if (response.ok) {
       showToast('Invitation sent successfully', 'success');
-      // Update local client data to reflect invitation sent
-      const clientIndex = clientsData.findIndex(c => c.id === clientId);
-      if (clientIndex !== -1) {
-        clientsData[clientIndex].invitation_sent_at = new Date().toISOString();
-      }
-      // Re-render table to update status
-      if (storedContext) {
-        renderClientsTable(clientsData, storedContext);
-      }
+      // Update local client data and re-render
+      clientsModule.updateItem(clientId, { invitation_sent_at: new Date().toISOString() });
     } else {
       showToast('Failed to send invitation. Please try again.', 'error');
     }
@@ -1228,7 +1071,7 @@ async function sendClientInvitation(clientId: number): Promise<void> {
 }
 
 function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
-  const client = clientsData.find(c => c.id === clientId);
+  const client = clientsModule.findById(clientId);
   if (!client) {
     console.error('[AdminClients] Client not found:', clientId);
     return;
@@ -1330,17 +1173,13 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
         if (result.client) {
           showToast('Client info updated successfully', 'success');
           closeModal();
-          // Update local client data with response (no need to reload all clients)
-          const clientIndex = clientsData.findIndex(c => c.id === clientId);
-          if (clientIndex !== -1) {
-            // Preserve computed fields that the API might not return
-            const existingClient = clientsData[clientIndex];
-            clientsData[clientIndex] = {
-              ...existingClient,
+          // Update local client data via factory (preserves project_count)
+          const existingClient = clientsModule.findById(clientId);
+          if (existingClient) {
+            clientsModule.updateItem(clientId, {
               ...result.client,
-              // Preserve project_count which is computed
               project_count: existingClient.project_count
-            };
+            });
           }
           showClientDetails(clientId, ctx);
         } else {
@@ -1357,7 +1196,7 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
 }
 
 function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
-  const client = clientsData.find(c => c.id === clientId);
+  const client = clientsModule.findById(clientId);
   if (!client) {
     console.error('[AdminClients] Client not found:', clientId);
     return;
@@ -1451,7 +1290,7 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
       if (response.ok) {
         showToast('Billing details updated successfully', 'success');
         closeModal();
-        await loadClients(ctx);
+        await clientsModule.load(ctx);
         showClientDetails(clientId, ctx);
       } else {
         showToast('Failed to update billing details', 'error');
@@ -1463,7 +1302,7 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
 }
 
 async function archiveClient(clientId: number, ctx: AdminDashboardContext): Promise<void> {
-  const client = clientsData.find(c => c.id === clientId);
+  const client = clientsModule.findById(clientId);
   if (!client) {
     console.error('[AdminClients] Client not found:', clientId);
     return;
@@ -1483,7 +1322,7 @@ async function archiveClient(clientId: number, ctx: AdminDashboardContext): Prom
 
     if (response.ok) {
       showToast('Client archived', 'success');
-      await loadClients(ctx);
+      await clientsModule.load(ctx);
       showClientDetails(clientId, ctx);
     } else {
       showToast('Failed to archive client', 'error');
@@ -1495,7 +1334,7 @@ async function archiveClient(clientId: number, ctx: AdminDashboardContext): Prom
 }
 
 async function deleteClient(clientId: number): Promise<void> {
-  const client = clientsData.find(c => c.id === clientId);
+  const client = clientsModule.findById(clientId);
   if (!client) {
     console.error('[AdminClients] Client not found:', clientId);
     return;
@@ -1513,7 +1352,8 @@ async function deleteClient(clientId: number): Promise<void> {
 
     if (response.ok) {
       showToast('Client deleted successfully', 'success');
-      if (storedContext) loadClients(storedContext);
+      const ctx = clientsModule.getContext();
+      if (ctx) clientsModule.load(ctx);
     } else {
       showToast('Failed to delete client', 'error');
     }
@@ -1600,7 +1440,7 @@ function addClient(ctx: AdminDashboardContext): void {
         submitted = true;
         form.removeEventListener('submit', handleSubmit);
         closeModal();
-        await loadClients(ctx);
+        await clientsModule.load(ctx);
       } else {
         showToast('Failed to add client. Please try again.', 'error');
       }
@@ -1625,40 +1465,16 @@ function addClient(ctx: AdminDashboardContext): void {
   });
 }
 
-/**
- * Render pagination UI for clients table
- */
-function renderPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
-  const container = document.getElementById('clients-pagination');
-  if (!container) return;
-
-  // Update state
-  paginationState.totalItems = totalItems;
-
-  // Create pagination UI
-  const paginationUI = createPaginationUI(
-    CLIENTS_PAGINATION_CONFIG,
-    paginationState,
-    (newState) => {
-      paginationState = newState;
-      savePaginationState(CLIENTS_PAGINATION_CONFIG.storageKey!, paginationState);
-      // Re-render table with new pagination
-      if (clientsData.length > 0) {
-        renderClientsTable(clientsData, ctx);
-      }
-    }
-  );
-
-  // Replace container content
-  container.innerHTML = '';
-  container.appendChild(paginationUI);
-}
+// ============================================
+// BULK ACTIONS
+// ============================================
 
 /**
  * Bulk archive selected clients
  */
 async function bulkArchiveClients(clientIds: number[]): Promise<void> {
-  if (!storedContext) return;
+  const ctx = clientsModule.getContext();
+  if (!ctx) return;
 
   try {
     // Archive each client (set status to inactive)
@@ -1679,7 +1495,7 @@ async function bulkArchiveClients(clientIds: number[]): Promise<void> {
         failCount > 0 ? 'warning' : 'success'
       );
       // Reload clients
-      await loadClients(storedContext);
+      await clientsModule.load(ctx);
     } else {
       showToast('Failed to archive clients', 'error');
     }
@@ -1693,7 +1509,8 @@ async function bulkArchiveClients(clientIds: number[]): Promise<void> {
  * Bulk delete selected clients
  */
 async function bulkDeleteClients(clientIds: number[]): Promise<void> {
-  if (!storedContext) return;
+  const ctx = clientsModule.getContext();
+  if (!ctx) return;
 
   try {
     // Delete each client
@@ -1714,7 +1531,7 @@ async function bulkDeleteClients(clientIds: number[]): Promise<void> {
         failCount > 0 ? 'warning' : 'success'
       );
       // Reload clients
-      await loadClients(storedContext);
+      await clientsModule.load(ctx);
     } else {
       showToast('Failed to delete clients', 'error');
     }

@@ -6,6 +6,9 @@
  *
  * Contact submission management for admin dashboard.
  * Dynamically imported for code splitting.
+ *
+ * REFACTORED: Uses createTableModule factory to eliminate
+ * ~200 lines of boilerplate initialization code.
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -14,70 +17,34 @@ import { apiFetch, apiPut, apiPost } from '../../../utils/api-client';
 import { createTableDropdown, CONTACT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { ICONS } from '../../../constants/icons';
 import { APP_CONSTANTS } from '../../../config/constants';
-import {
-  createFilterUI,
-  createSortableHeaders,
-  applyFilters,
-  loadFilterState,
-  saveFilterState,
-  CONTACTS_FILTER_CONFIG,
-  type FilterState
-} from '../../../utils/table-filter';
-import { exportToCsv, CONTACTS_EXPORT_CONFIG } from '../../../utils/table-export';
+import { CONTACTS_FILTER_CONFIG } from '../../../utils/table-filter';
+import { CONTACTS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { confirmDialog } from '../../../utils/confirm-dialog';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import type { ContactSubmission, AdminDashboardContext } from '../admin-types';
-import {
-  createPaginationUI,
-  applyPagination,
-  getDefaultPaginationState,
-  loadPaginationState,
-  savePaginationState,
-  type PaginationState,
-  type PaginationConfig
-} from '../../../utils/table-pagination';
-import {
-  createBulkActionToolbar,
-  setupBulkSelectionHandlers,
-  resetSelection,
-  createRowCheckbox,
-  type BulkActionConfig
-} from '../../../utils/table-bulk-actions';
-import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
+import { createRowCheckbox, type BulkActionConfig } from '../../../utils/table-bulk-actions';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
 import { getStatusDotHTML } from '../../../components/status-badge';
-
-interface ContactsData {
-  submissions: ContactSubmission[];
-  stats: {
-    total: number;
-    new: number;
-    read: number;
-    responded: number;
-  };
-}
-
-let contactsData: ContactSubmission[] = [];
-let storedContext: AdminDashboardContext | null = null;
-let filterState: FilterState = loadFilterState(CONTACTS_FILTER_CONFIG.storageKey);
-let filterUIInitialized = false;
-
-// Pagination configuration and state
-const CONTACTS_PAGINATION_CONFIG: PaginationConfig = {
-  tableId: 'contacts',
-  pageSizeOptions: [10, 25, 50, 100],
-  defaultPageSize: 25,
-  storageKey: 'admin_contacts_pagination'
-};
-
-let paginationState: PaginationState = {
-  ...getDefaultPaginationState(CONTACTS_PAGINATION_CONFIG),
-  ...loadPaginationState(CONTACTS_PAGINATION_CONFIG.storageKey!)
-};
+import {
+  createTableModule,
+  createPaginationConfig,
+  type TableModuleHelpers
+} from '../../../utils/table-module-factory';
 
 // ============================================================================
-// BULK ACTION FUNCTIONS (must be defined before CONTACTS_BULK_CONFIG)
+// TYPES
+// ============================================================================
+
+interface ContactsStats {
+  total: number;
+  new: number;
+  read: number;
+  responded: number;
+}
+
+// ============================================================================
+// BULK ACTION FUNCTIONS
 // ============================================================================
 
 /**
@@ -90,20 +57,13 @@ async function bulkUpdateStatus(ids: number[], status: string): Promise<void> {
     );
     await Promise.all(promises);
 
-    // Update local data
+    // Update local data via module
     ids.forEach(id => {
-      const contact = contactsData.find(c => c.id === id);
-      if (contact) {
-        contact.status = status as ContactSubmission['status'];
-      }
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      contactsModule.updateItem(id, { status: status as ContactSubmission['status'] });
     });
 
     showToast(`Updated ${ids.length} contacts to ${status}`, 'success');
-
-    // Re-render table
-    if (storedContext) {
-      renderContactsTable(contactsData, storedContext);
-    }
   } catch (error) {
     console.error('[AdminContacts] Bulk status update failed:', error);
     showToast('Failed to update some contacts', 'error');
@@ -120,14 +80,14 @@ async function bulkDeleteContacts(ids: number[]): Promise<void> {
     );
     await Promise.all(promises);
 
-    // Remove from local data
-    contactsData = contactsData.filter(c => !ids.includes(c.id));
-
     showToast(`Deleted ${ids.length} contacts`, 'success');
 
-    // Re-render table
-    if (storedContext) {
-      renderContactsTable(contactsData, storedContext);
+    // Reload data to reflect deletions
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    const ctx = contactsModule.getContext();
+    if (ctx) {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      await contactsModule.load(ctx);
     }
   } catch (error) {
     console.error('[AdminContacts] Bulk delete failed:', error);
@@ -181,302 +141,175 @@ const CONTACTS_BULK_CONFIG: BulkActionConfig = {
 };
 
 // ============================================================================
-// CACHED DOM REFERENCES
+// MODULE CREATION (FACTORY PATTERN)
 // ============================================================================
 
-const cachedElements: Map<string, HTMLElement | null> = new Map();
-
-/** Get cached element by ID */
-function getElement(id: string): HTMLElement | null {
-  if (!cachedElements.has(id)) {
-    cachedElements.set(id, document.getElementById(id));
-  }
-  return cachedElements.get(id) ?? null;
-}
-
-export function getContactsData(): ContactSubmission[] {
-  return contactsData;
-}
-
-export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
-  storedContext = ctx;
-
-  // Initialize filter UI once
-  if (!filterUIInitialized) {
-    initializeFilterUI(ctx);
-    filterUIInitialized = true;
-  }
-
-  // Show loading state
-  const tableBody = getElement('contacts-table-body');
-  if (tableBody) showTableLoading(tableBody, 7, 'Loading contacts...');
-
-  try {
-    const response = await apiFetch('/api/admin/contact-submissions');
-
-    if (response.ok) {
-      const json = await response.json();
-      // Handle canonical API format { success: true, data: {...} }
-      const data: ContactsData = json.data ?? json;
-      contactsData = data.submissions || [];
-      updateContactsDisplay(data, ctx);
-    }
-    // 401 errors are handled by apiFetch
-  } catch (error) {
-    console.error('[AdminContacts] Failed to load contact submissions:', error);
-  }
-}
-
 /**
- * Initialize filter UI for contacts table
+ * Build a table row for a contact submission
  */
-function initializeFilterUI(ctx: AdminDashboardContext): void {
-  const container = getElement('contacts-filter-container');
-  if (!container) return;
+function buildContactRow(
+  submission: ContactSubmission,
+  ctx: AdminDashboardContext,
+  helpers: TableModuleHelpers<ContactSubmission>
+): HTMLTableRowElement {
+  const date = formatDate(submission.created_at);
+  const decodedName = SanitizationUtils.decodeHtmlEntities(submission.name || '');
+  const decodedCompany = SanitizationUtils.decodeHtmlEntities(submission.company || '');
+  const decodedMessage = SanitizationUtils.decodeHtmlEntities(submission.message || '');
+  const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedName));
+  const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || ''));
+  const safeCompany = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
+  const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);
+  const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
+  const truncatedMessage =
+    safeMessage.length > truncateLen ? `${safeMessage.substring(0, truncateLen)}...` : safeMessage;
+  const safeTitleMessage = SanitizationUtils.escapeHtml(decodedMessage);
+  const status = submission.status || 'new';
 
-  // Create filter UI
-  const filterUI = createFilterUI(
-    CONTACTS_FILTER_CONFIG,
-    filterState,
-    (newState) => {
-      filterState = newState;
-      // Re-render table with new filters
-      if (contactsData.length > 0) {
-        renderContactsTable(contactsData, ctx);
+  const row = document.createElement('tr');
+  row.dataset.contactId = String(submission.id);
+
+  const canConvert = !submission.client_id;
+  const isArchived = status === 'archived';
+
+  row.innerHTML = `
+    ${createRowCheckbox('contacts', submission.id)}
+    <td class="identity-cell contact-cell" data-label="Contact">
+      <span class="identity-name">${safeName}</span>
+      ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
+      <span class="email-stacked">${safeEmail}</span>
+    </td>
+    <td class="email-cell" data-label="Email">${safeEmail}</td>
+    <td class="message-cell" data-label="Message" title="${safeTitleMessage}">${truncatedMessage}</td>
+    <td class="status-cell" data-label="Status"></td>
+    <td class="date-cell" data-label="Date">${date}</td>
+    <td class="actions-cell" data-label="Actions">
+      <div class="table-actions">
+        ${canConvert ? `<button class="icon-btn btn-convert-contact" data-id="${submission.id}" data-email="${safeEmail}" data-name="${safeName}" title="Convert to Client" aria-label="Convert to Client">${ICONS.USER_PLUS}</button>` : ''}
+        ${!isArchived ? `<button class="icon-btn btn-archive-contact" data-id="${submission.id}" title="Archive" aria-label="Archive">${ICONS.ARCHIVE}</button>` : ''}
+        ${isArchived ? `<button class="icon-btn btn-restore-contact" data-id="${submission.id}" title="Restore" aria-label="Restore">${ICONS.ROTATE_CCW}</button>` : ''}
+      </div>
+    </td>
+  `;
+
+  // Create custom dropdown for status
+  const statusCell = row.querySelector('.status-cell');
+  if (statusCell) {
+    const dropdown = createTableDropdown({
+      options: CONTACT_STATUS_OPTIONS,
+      currentValue: status,
+      onChange: async (newStatus) => {
+        await updateContactStatus(submission.id, newStatus, ctx);
+        helpers.updateItem(submission.id, { status: newStatus as ContactSubmission['status'] });
       }
-    }
-  );
-
-  // Insert before export button (Search → Filter → Export → Refresh order)
-  const exportBtnRef = container.querySelector('#export-contacts-btn');
-  if (exportBtnRef) {
-    container.insertBefore(filterUI, exportBtnRef);
-  } else {
-    container.insertBefore(filterUI, container.firstChild);
-  }
-
-  // Setup export button
-  const exportBtn = getElement('export-contacts-btn');
-  if (exportBtn && !exportBtn.dataset.listenerAdded) {
-    exportBtn.dataset.listenerAdded = 'true';
-    exportBtn.addEventListener('click', () => {
-      const filtered = applyFilters(contactsData, filterState, CONTACTS_FILTER_CONFIG);
-      exportToCsv(filtered as unknown as Record<string, unknown>[], CONTACTS_EXPORT_CONFIG);
-      showToast(`Exported ${filtered.length} contact submissions to CSV`, 'success');
     });
+    statusCell.appendChild(dropdown);
   }
 
-  // Setup sortable headers after table is rendered
-  setTimeout(() => {
-    createSortableHeaders(CONTACTS_FILTER_CONFIG, filterState, (column, direction) => {
-      filterState = { ...filterState, sortColumn: column, sortDirection: direction };
-      saveFilterState(CONTACTS_FILTER_CONFIG.storageKey, filterState);
-      if (contactsData.length > 0) {
-        renderContactsTable(contactsData, ctx);
-      }
-    });
-  }, 100);
-
-  // Setup bulk action toolbar
-  const bulkToolbarContainer = document.getElementById('contacts-bulk-toolbar');
-  if (bulkToolbarContainer) {
-    const toolbar = createBulkActionToolbar({
-      ...CONTACTS_BULK_CONFIG,
-      onSelectionChange: () => {
-        // Selection change callback if needed
-      }
-    });
-    bulkToolbarContainer.replaceWith(toolbar);
-  }
-}
-
-function updateContactsDisplay(data: ContactsData, ctx: AdminDashboardContext): void {
-  // Update overview stat for messages
-  const statMessages = getElement('stat-messages');
-  if (statMessages) {
-    statMessages.textContent = data.stats?.total?.toString() || '0';
-  }
-
-  // Update contacts table
-  renderContactsTable(data.submissions, ctx);
-}
-
-function renderContactsTable(
-  submissions: ContactSubmission[],
-  ctx: AdminDashboardContext
-): void {
-  const tableBody = getElement('contacts-table-body');
-  if (!tableBody) return;
-
-  if (!submissions || submissions.length === 0) {
-    showTableEmpty(tableBody, 7, 'No contacts yet.');
-    renderContactsPaginationUI(0, ctx);
-    return;
-  }
-
-  // Apply filters
-  const filteredSubmissions = applyFilters(submissions, filterState, CONTACTS_FILTER_CONFIG);
-
-  if (filteredSubmissions.length === 0) {
-    showTableEmpty(tableBody, 7, 'No contacts match the current filters.');
-    renderContactsPaginationUI(0, ctx);
-    return;
-  }
-
-  // Update pagination state with total items
-  paginationState.totalItems = filteredSubmissions.length;
-
-  // Apply pagination
-  const paginatedSubmissions = applyPagination(filteredSubmissions, paginationState);
-
-  // Clear and rebuild table
-  tableBody.innerHTML = '';
-
-  paginatedSubmissions.forEach((submission) => {
-    const date = formatDate(submission.created_at);
-    const decodedName = SanitizationUtils.decodeHtmlEntities(submission.name || '');
-    const decodedCompany = SanitizationUtils.decodeHtmlEntities(submission.company || '');
-    const decodedMessage = SanitizationUtils.decodeHtmlEntities(submission.message || '');
-    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedName));
-    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || ''));
-    const safeCompany = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
-    const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);
-    const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
-    const truncatedMessage =
-      safeMessage.length > truncateLen ? `${safeMessage.substring(0, truncateLen)}...` : safeMessage;
-    const safeTitleMessage = SanitizationUtils.escapeHtml(decodedMessage);
-    const status = submission.status || 'new';
-
-    const row = document.createElement('tr');
-    row.dataset.contactId = String(submission.id);
-
-    // Check if can convert to client
-    const canConvert = !submission.client_id;
-    const isArchived = status === 'archived';
-
-    // Column order: ☐ | Contact | Email | Message | Status | Date | Actions
-    row.innerHTML = `
-      ${createRowCheckbox('contacts', submission.id)}
-      <td class="identity-cell contact-cell" data-label="Contact">
-        <span class="identity-name">${safeName}</span>
-        ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
-        <span class="email-stacked">${safeEmail}</span>
-      </td>
-      <td class="email-cell" data-label="Email">${safeEmail}</td>
-      <td class="message-cell" data-label="Message" title="${safeTitleMessage}">${truncatedMessage}</td>
-      <td class="status-cell" data-label="Status"></td>
-      <td class="date-cell" data-label="Date">${date}</td>
-      <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          ${canConvert ? `<button class="icon-btn btn-convert-contact" data-id="${submission.id}" data-email="${safeEmail}" data-name="${safeName}" title="Convert to Client" aria-label="Convert to Client">${ICONS.USER_PLUS}</button>` : ''}
-          ${!isArchived ? `<button class="icon-btn btn-archive-contact" data-id="${submission.id}" title="Archive" aria-label="Archive">${ICONS.ARCHIVE}</button>` : ''}
-          ${isArchived ? `<button class="icon-btn btn-restore-contact" data-id="${submission.id}" title="Restore" aria-label="Restore">${ICONS.ROTATE_CCW}</button>` : ''}
-        </div>
-      </td>
-    `;
-
-    // Create custom dropdown for status
-    const statusCell = row.querySelector('.status-cell');
-    if (statusCell) {
-      const dropdown = createTableDropdown({
-        options: CONTACT_STATUS_OPTIONS,
-        currentValue: status,
-        onChange: async (newStatus) => {
-          await updateContactStatus(submission.id, newStatus, ctx);
-          submission.status = newStatus as ContactSubmission['status'];
-        }
-      });
-      statusCell.appendChild(dropdown);
-    }
-
-    // Add click handler for row (excluding status cell, action buttons, and checkbox)
-    row.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown') || target.closest('.table-actions') || target.closest('button') || target.closest('.bulk-select-cell') || target.tagName === 'INPUT') return;
-      showContactDetails(submission.id);
-    });
-
-    // Action button handlers
-    const convertBtn = row.querySelector('.btn-convert-contact');
-    if (convertBtn) {
-      convertBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await handleConvertToClient(submission, row);
-      });
-    }
-
-    const archiveBtn = row.querySelector('.btn-archive-contact');
-    if (archiveBtn) {
-      archiveBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await updateContactStatus(submission.id, 'archived', ctx);
-        submission.status = 'archived';
-        // Refresh table to update button visibility
-        renderContactsTable(contactsData, ctx);
-      });
-    }
-
-    const restoreBtn = row.querySelector('.btn-restore-contact');
-    if (restoreBtn) {
-      restoreBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await updateContactStatus(submission.id, 'new', ctx);
-        submission.status = 'new';
-        // Refresh table to update button visibility
-        renderContactsTable(contactsData, ctx);
-      });
-    }
-
-    tableBody.appendChild(row);
+  // Row click handler
+  row.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.table-dropdown') || target.closest('.table-actions') || target.closest('button') || target.closest('.bulk-select-cell') || target.tagName === 'INPUT') return;
+    showContactDetails(submission.id);
   });
 
-  // Reset bulk selection when data changes
-  resetSelection('contacts');
+  // Action button handlers
+  setupRowActionHandlers(row, submission, ctx, helpers);
 
-  // Setup bulk selection handlers
-  const allRowIds = paginatedSubmissions.map(s => s.id);
-  setupBulkSelectionHandlers(CONTACTS_BULK_CONFIG, allRowIds);
-
-  // Render pagination
-  renderContactsPaginationUI(filteredSubmissions.length, ctx);
+  return row;
 }
 
 /**
- * Render pagination UI for contacts table
+ * Setup action button handlers for a row
  */
-function renderContactsPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
-  const container = document.getElementById('contacts-pagination');
-  if (!container) return;
+function setupRowActionHandlers(
+  row: HTMLTableRowElement,
+  submission: ContactSubmission,
+  ctx: AdminDashboardContext,
+  helpers: TableModuleHelpers<ContactSubmission>
+): void {
+  const convertBtn = row.querySelector('.btn-convert-contact');
+  if (convertBtn) {
+    convertBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await handleConvertToClient(submission, row);
+    });
+  }
 
-  // Update state
-  paginationState.totalItems = totalItems;
+  const archiveBtn = row.querySelector('.btn-archive-contact');
+  if (archiveBtn) {
+    archiveBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await updateContactStatus(submission.id, 'archived', ctx);
+      helpers.updateItem(submission.id, { status: 'archived' });
+      helpers.rerender();
+    });
+  }
 
-  // Create pagination UI
-  const paginationUI = createPaginationUI(
-    CONTACTS_PAGINATION_CONFIG,
-    paginationState,
-    (newState) => {
-      paginationState = newState;
-      savePaginationState(CONTACTS_PAGINATION_CONFIG.storageKey!, paginationState);
-      // Re-render table with new pagination
-      if (contactsData.length > 0) {
-        renderContactsTable(contactsData, ctx);
-      }
-    }
-  );
-
-  // Replace container content
-  container.innerHTML = '';
-  container.appendChild(paginationUI);
+  const restoreBtn = row.querySelector('.btn-restore-contact');
+  if (restoreBtn) {
+    restoreBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await updateContactStatus(submission.id, 'new', ctx);
+      helpers.updateItem(submission.id, { status: 'new' });
+      helpers.rerender();
+    });
+  }
 }
 
+/**
+ * Contacts module instance created via factory
+ */
+const contactsModule = createTableModule<ContactSubmission, ContactsStats>({
+  moduleId: 'contacts',
+  filterConfig: CONTACTS_FILTER_CONFIG,
+  paginationConfig: createPaginationConfig('contacts'),
+  columnCount: 7,
+  apiEndpoint: '/api/admin/contact-submissions',
+  bulkConfig: CONTACTS_BULK_CONFIG,
+  exportConfig: CONTACTS_EXPORT_CONFIG,
+  emptyMessage: 'No contacts yet.',
+  filterEmptyMessage: 'No contacts match the current filters.',
+  loadingMessage: 'Loading contacts...',
+
+  extractData: (json) => {
+    const data = json as { submissions: ContactSubmission[]; stats: ContactsStats };
+    return {
+      data: data.submissions || [],
+      stats: data.stats
+    };
+  },
+
+  renderStats: (stats, _ctx) => {
+    const statMessages = document.getElementById('stat-messages');
+    if (statMessages) {
+      statMessages.textContent = stats.total?.toString() || '0';
+    }
+  },
+
+  renderRow: buildContactRow
+});
+
+// ============================================================================
+// PUBLIC EXPORTS
+// ============================================================================
+
+export const loadContacts = contactsModule.load;
+export const getContactsData = contactsModule.getData;
+
+// ============================================================================
+// DETAIL PANEL (MODULE-SPECIFIC)
+// ============================================================================
+
 export function showContactDetails(contactId: number): void {
-  const contact = contactsData.find((c) => c.id === contactId);
+  const contact = contactsModule.findById(contactId);
   if (!contact) return;
 
-  const detailsPanel = getElement('contact-details-panel');
-  const overlay = getElement('details-overlay');
+  const detailsPanel = contactsModule.getElement('contact-details-panel');
+  const overlay = contactsModule.getElement('details-overlay');
   if (!detailsPanel) return;
+
+  const storedContext = contactsModule.getContext();
 
   const decodedName = SanitizationUtils.decodeHtmlEntities(contact.name || '');
   const decodedCompany = SanitizationUtils.decodeHtmlEntities(contact.company || '');
@@ -545,8 +378,8 @@ export function showContactDetails(contactId: number): void {
       options: CONTACT_STATUS_OPTIONS,
       currentValue: contact.status || 'new',
       onChange: async (newStatus) => {
-        await updateContactStatus(contact.id, newStatus, storedContext!);
-        contact.status = newStatus as ContactSubmission['status'];
+        await updateContactStatus(contact.id, newStatus, storedContext);
+        contactsModule.updateItem(contact.id, { status: newStatus as ContactSubmission['status'] });
         // Update table row dropdown if visible
         const tableDropdown = document.querySelector(`tr[data-contact-id="${contact.id}"] .table-dropdown`);
         if (tableDropdown) {
@@ -567,57 +400,49 @@ export function showContactDetails(contactId: number): void {
     statusContainer.appendChild(dropdown);
   }
 
-  // Add event listener for archive button
+  // Setup panel action button handlers
+  setupPanelActionHandlers(detailsPanel, contact, statusContainer);
+
+  // Show overlay and panel
+  if (overlay) openModalOverlay(overlay);
+  detailsPanel.classList.remove('hidden');
+}
+
+/**
+ * Setup action button handlers for the detail panel
+ */
+function setupPanelActionHandlers(
+  detailsPanel: HTMLElement,
+  contact: ContactSubmission,
+  statusContainer: Element | null
+): void {
+  const storedContext = contactsModule.getContext();
+
+  // Archive button
   const archiveBtn = detailsPanel.querySelector('#archive-contact-btn');
   if (archiveBtn) {
     archiveBtn.addEventListener('click', () => {
       const id = parseInt((archiveBtn as HTMLElement).dataset.id || '0');
       if (id && storedContext) {
         updateContactStatus(id, 'archived', storedContext);
-        contact.status = 'archived';
-        // Update panel dropdown
-        const panelDropdown = statusContainer?.querySelector('.table-dropdown');
-        if (panelDropdown) {
-          const textEl = panelDropdown.querySelector('.custom-dropdown-text');
-          if (textEl) textEl.textContent = 'Archived';
-          (panelDropdown as HTMLElement).dataset.status = 'archived';
-        }
-        // Update table row dropdown
-        const tableDropdown = document.querySelector(`tr[data-contact-id="${id}"] .table-dropdown`);
-        if (tableDropdown) {
-          const textEl = tableDropdown.querySelector('.custom-dropdown-text');
-          if (textEl) textEl.textContent = 'Archived';
-          (tableDropdown as HTMLElement).dataset.status = 'archived';
-        }
-        // Remove archive button
+        contactsModule.updateItem(id, { status: 'archived' });
+        updateDropdownStatus(statusContainer, contact.id, 'archived', 'Archived');
         archiveBtn.remove();
       }
     });
   }
 
-  // Add event listener for restore button
+  // Restore button
   const restoreBtn = detailsPanel.querySelector('#restore-contact-btn');
   if (restoreBtn) {
     restoreBtn.addEventListener('click', () => {
       const id = parseInt((restoreBtn as HTMLElement).dataset.id || '0');
       if (id && storedContext) {
         updateContactStatus(id, 'new', storedContext);
-        contact.status = 'new';
-        // Update panel dropdown
-        const panelDropdown = statusContainer?.querySelector('.table-dropdown');
-        if (panelDropdown) {
-          const textEl = panelDropdown.querySelector('.custom-dropdown-text');
-          if (textEl) textEl.textContent = 'New';
-          (panelDropdown as HTMLElement).dataset.status = 'new';
-        }
-        // Update table row dropdown
-        const tableDropdown = document.querySelector(`tr[data-contact-id="${id}"] .table-dropdown`);
-        if (tableDropdown) {
-          const textEl = tableDropdown.querySelector('.custom-dropdown-text');
-          if (textEl) textEl.textContent = 'New';
-          (tableDropdown as HTMLElement).dataset.status = 'new';
-        }
-        // Replace restore button with archive icon button
+        contactsModule.updateItem(id, { status: 'new' });
+        updateDropdownStatus(statusContainer, contact.id, 'new', 'New');
+
+        // Replace restore button with archive button
         const newArchiveBtn = document.createElement('button');
         newArchiveBtn.type = 'button';
         newArchiveBtn.className = 'icon-btn';
@@ -627,33 +452,24 @@ export function showContactDetails(contactId: number): void {
         newArchiveBtn.setAttribute('aria-label', 'Archive contact');
         newArchiveBtn.innerHTML = ICONS.ARCHIVE;
         restoreBtn.replaceWith(newArchiveBtn);
+
         // Re-attach archive handler
         newArchiveBtn.addEventListener('click', () => {
           const archiveId = parseInt((newArchiveBtn as HTMLElement).dataset.id || '0');
           if (archiveId && storedContext) {
             updateContactStatus(archiveId, 'archived', storedContext);
-            contact.status = 'archived';
-            const innerPanelDropdown = statusContainer?.querySelector('.table-dropdown');
-            if (innerPanelDropdown) {
-              const textEl = innerPanelDropdown.querySelector('.custom-dropdown-text');
-              if (textEl) textEl.textContent = 'Archived';
-              (innerPanelDropdown as HTMLElement).dataset.status = 'archived';
-            }
-            const innerTableDropdown = document.querySelector(`tr[data-contact-id="${archiveId}"] .table-dropdown`);
-            if (innerTableDropdown) {
-              const textEl = innerTableDropdown.querySelector('.custom-dropdown-text');
-              if (textEl) textEl.textContent = 'Archived';
-              (innerTableDropdown as HTMLElement).dataset.status = 'archived';
-            }
+            contactsModule.updateItem(archiveId, { status: 'archived' });
+            updateDropdownStatus(statusContainer, archiveId, 'archived', 'Archived');
             newArchiveBtn.remove();
           }
         });
+
         showToast('Contact restored', 'success');
       }
     });
   }
 
-  // Add event listener for convert to client button
+  // Convert to client button
   const convertBtn = detailsPanel.querySelector('#convert-to-client-btn');
   if (convertBtn) {
     convertBtn.addEventListener('click', async () => {
@@ -663,7 +479,6 @@ export function showContactDetails(contactId: number): void {
 
       if (!id || !storedContext) return;
 
-      // Confirm conversion with option to send invitation
       const confirmed = await confirmDialog({
         title: 'Convert to Client',
         message: `Convert "${name}" (${email}) to a client account?\n\nThis will create a client record and send an invitation email to set up their portal account.`,
@@ -672,16 +487,11 @@ export function showContactDetails(contactId: number): void {
         icon: 'folder-plus'
       });
 
-      if (!confirmed) {
-        return; // User cancelled
-      }
-
-      // Always send invitation when converting
-      const sendInvitation = true;
+      if (!confirmed) return;
 
       try {
         const response = await apiPost(`/api/admin/contact-submissions/${id}/convert-to-client`, {
-          sendInvitation
+          sendInvitation: true
         });
 
         if (response.ok) {
@@ -689,15 +499,15 @@ export function showContactDetails(contactId: number): void {
           showToast(
             data.isExisting
               ? 'Contact linked to existing client'
-              : sendInvitation
-                ? 'Client created and invitation sent'
-                : 'Client created successfully',
+              : 'Client created and invitation sent',
             'success'
           );
 
           // Update local data
-          contact.client_id = data.clientId;
-          contact.converted_at = new Date().toISOString();
+          contactsModule.updateItem(id, {
+            client_id: data.clientId,
+            converted_at: new Date().toISOString()
+          });
 
           // Replace button with badge
           const actionsDiv = convertBtn.parentElement;
@@ -708,12 +518,11 @@ export function showContactDetails(contactId: number): void {
             convertBtn.replaceWith(badge);
           }
 
-          // Update table row to show converted status
+          // Update table row
           const tableRow = document.querySelector(`tr[data-contact-id="${id}"]`);
           if (tableRow) {
             const actionsCell = tableRow.querySelector('.actions-cell');
             if (actionsCell) {
-              // Add a small indicator that this contact is converted
               const existingBadge = actionsCell.querySelector('.converted-badge');
               if (!existingBadge) {
                 const badge = document.createElement('span');
@@ -735,33 +544,36 @@ export function showContactDetails(contactId: number): void {
       }
     });
   }
-
-  // Show overlay and panel
-  if (overlay) openModalOverlay(overlay);
-  detailsPanel.classList.remove('hidden');
 }
 
-// Global function to close contact details panel
-declare global {
-  interface Window {
-    closeContactDetailsPanel?: () => void;
+/**
+ * Helper to update dropdown status in both panel and table
+ */
+function updateDropdownStatus(
+  statusContainer: Element | null,
+  contactId: number,
+  status: string,
+  label: string
+): void {
+  // Update panel dropdown
+  const panelDropdown = statusContainer?.querySelector('.table-dropdown');
+  if (panelDropdown) {
+    const textEl = panelDropdown.querySelector('.custom-dropdown-text');
+    if (textEl) textEl.textContent = label;
+    (panelDropdown as HTMLElement).dataset.status = status;
+  }
+  // Update table row dropdown
+  const tableDropdown = document.querySelector(`tr[data-contact-id="${contactId}"] .table-dropdown`);
+  if (tableDropdown) {
+    const textEl = tableDropdown.querySelector('.custom-dropdown-text');
+    if (textEl) textEl.textContent = label;
+    (tableDropdown as HTMLElement).dataset.status = status;
   }
 }
 
-// Event delegation for close contact panel button
-document.addEventListener('click', (e) => {
-  const target = e.target as HTMLElement;
-  if (target.matches('.btn-close-contact-panel')) {
-    window.closeContactDetailsPanel?.();
-  }
-});
-
-window.closeContactDetailsPanel = function (): void {
-  const detailsPanel = getElement('contact-details-panel');
-  const overlay = getElement('details-overlay');
-  if (detailsPanel) detailsPanel.classList.add('hidden');
-  if (overlay) closeModalOverlay(overlay);
-};
+// ============================================================================
+// STATUS UPDATE
+// ============================================================================
 
 export async function updateContactStatus(
   id: number,
@@ -773,11 +585,6 @@ export async function updateContactStatus(
 
     if (response.ok) {
       showToast('Status updated', 'success');
-      // Update local data
-      const contact = contactsData.find((c) => c.id === id);
-      if (contact) {
-        contact.status = status as ContactSubmission['status'];
-      }
     } else if (response.status !== 401) {
       showToast('Failed to update status. Please try again.', 'error');
     }
@@ -787,9 +594,10 @@ export async function updateContactStatus(
   }
 }
 
-/**
- * Handle convert to client action from table row
- */
+// ============================================================================
+// CONVERT TO CLIENT
+// ============================================================================
+
 async function handleConvertToClient(
   contact: ContactSubmission,
   row: HTMLElement
@@ -797,7 +605,6 @@ async function handleConvertToClient(
   const decodedName = SanitizationUtils.decodeHtmlEntities(contact.name || '');
   const safeName = SanitizationUtils.capitalizeName(decodedName);
 
-  // Confirm conversion
   const confirmed = await confirmDialog({
     title: 'Convert to Client',
     message: `Convert "${safeName}" (${contact.email}) to a client account?\n\nThis will create a client record and send an invitation email.`,
@@ -823,8 +630,10 @@ async function handleConvertToClient(
       );
 
       // Update local data
-      contact.client_id = data.clientId;
-      contact.converted_at = new Date().toISOString();
+      contactsModule.updateItem(contact.id, {
+        client_id: data.clientId,
+        converted_at: new Date().toISOString()
+      });
 
       // Remove convert button from row
       const convertBtn = row.querySelector('.btn-convert-contact');
@@ -839,9 +648,34 @@ async function handleConvertToClient(
   }
 }
 
-// ============================================
-// DYNAMIC TAB RENDERING
-// ============================================
+// ============================================================================
+// GLOBAL PANEL CLOSE
+// ============================================================================
+
+declare global {
+  interface Window {
+    closeContactDetailsPanel?: () => void;
+  }
+}
+
+// Event delegation for close contact panel button
+document.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement;
+  if (target.matches('.btn-close-contact-panel')) {
+    window.closeContactDetailsPanel?.();
+  }
+});
+
+window.closeContactDetailsPanel = function (): void {
+  const detailsPanel = contactsModule.getElement('contact-details-panel');
+  const overlay = contactsModule.getElement('details-overlay');
+  if (detailsPanel) detailsPanel.classList.add('hidden');
+  if (overlay) closeModalOverlay(overlay);
+};
+
+// ============================================================================
+// TAB RENDERING
+// ============================================================================
 
 const RENDER_ICONS = {
   EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
@@ -853,6 +687,9 @@ const RENDER_ICONS = {
  * Call this before loadContacts to create the DOM elements.
  */
 export function renderContactsTab(container: HTMLElement): void {
+  // Reset module cache when tab re-renders
+  contactsModule.resetCache();
+
   container.innerHTML = `
     <div class="admin-table-card" id="contact-submissions-card">
       <div class="admin-table-header">

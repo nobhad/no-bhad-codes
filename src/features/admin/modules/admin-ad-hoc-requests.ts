@@ -16,25 +16,11 @@ import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { getStatusDotHTML } from '../../../components/status-badge';
+import { AD_HOC_REQUESTS_FILTER_CONFIG } from '../../../utils/table-filter';
 import {
-  createFilterUI,
-  createSortableHeaders,
-  applyFilters,
-  loadFilterState,
-  saveFilterState,
-  AD_HOC_REQUESTS_FILTER_CONFIG,
-  type FilterState
-} from '../../../utils/table-filter';
-import {
-  createPaginationUI,
-  applyPagination,
-  getDefaultPaginationState,
-  loadPaginationState,
-  savePaginationState,
-  type PaginationState,
-  type PaginationConfig
-} from '../../../utils/table-pagination';
-import { showTableEmpty } from '../../../utils/loading-utils';
+  createTableModule,
+  createPaginationConfig
+} from '../../../utils/table-module-factory';
 
 const REQUESTS_API = '/api/ad-hoc-requests';
 
@@ -71,24 +57,8 @@ interface TimeEntry {
   billable?: boolean;
 }
 
-let requestsCache: AdHocRequest[] = [];
-let storedContext: AdminDashboardContext | null = null;
+// Module-specific state (not handled by factory)
 let listenersInitialized = false;
-let filterUIInitialized = false;
-
-let filterState: FilterState = loadFilterState(AD_HOC_REQUESTS_FILTER_CONFIG.storageKey);
-
-const REQUESTS_PAGINATION_CONFIG: PaginationConfig = {
-  tableId: 'ad-hoc-requests',
-  pageSizeOptions: [10, 25, 50, 100],
-  defaultPageSize: 25,
-  storageKey: 'admin_ad_hoc_requests_pagination'
-};
-
-let paginationState: PaginationState = {
-  ...getDefaultPaginationState(REQUESTS_PAGINATION_CONFIG),
-  ...loadPaginationState(REQUESTS_PAGINATION_CONFIG.storageKey!)
-};
 
 const STATUS_OPTIONS = [
   'submitted',
@@ -128,107 +98,70 @@ function getStatusIndicator(status: string): string {
   return getStatusDotHTML(variant, { label: formatLabel(status) });
 }
 
-function renderPagination(totalItems: number, ctx: AdminDashboardContext): void {
-  const container = document.getElementById('ad-hoc-requests-pagination');
-  if (!container) return;
+// ============================================
+// TABLE MODULE FACTORY
+// ============================================
 
-  if (totalItems === 0) {
-    container.innerHTML = '';
-    return;
+/**
+ * Ad Hoc Requests table module using factory pattern
+ */
+const adHocRequestsModule = createTableModule<AdHocRequest>({
+  moduleId: 'ad-hoc-requests',
+  filterConfig: AD_HOC_REQUESTS_FILTER_CONFIG,
+  paginationConfig: createPaginationConfig('ad-hoc-requests'),
+  columnCount: 7,
+  apiEndpoint: REQUESTS_API,
+
+  emptyMessage: 'No ad hoc requests yet.',
+  filterEmptyMessage: 'No ad hoc requests match the current filters.',
+
+  extractData: (response: unknown) => {
+    const data = response as { requests?: AdHocRequest[] };
+    const requests = Array.isArray(data.requests) ? data.requests : [];
+    return { data: requests };
+  },
+
+  renderRow: (request: AdHocRequest) => {
+    return buildRequestRow(request);
+  },
+
+  onDataLoaded: (_data: AdHocRequest[], ctx: AdminDashboardContext) => {
+    setupListeners(ctx);
   }
+});
 
-  paginationState.totalItems = totalItems;
-  const paginationUI = createPaginationUI(REQUESTS_PAGINATION_CONFIG, paginationState, (newState) => {
-    paginationState = newState;
-    savePaginationState(REQUESTS_PAGINATION_CONFIG.storageKey!, newState);
-    renderRequestsTable(ctx);
-  });
+// Export factory-provided functions
+export const loadAdHocRequests = adHocRequestsModule.load;
 
-  container.innerHTML = '';
-  container.appendChild(paginationUI);
-}
+/**
+ * Build a single ad hoc request table row
+ */
+function buildRequestRow(request: AdHocRequest): HTMLTableRowElement {
+  const row = document.createElement('tr');
 
-function renderRequestsTable(ctx: AdminDashboardContext): void {
-  const body = document.getElementById('ad-hoc-requests-table-body');
-  if (!body) return;
+  const title = SanitizationUtils.escapeHtml(request.title);
+  const clientName = SanitizationUtils.escapeHtml(request.clientName || 'Client');
+  const projectName = SanitizationUtils.escapeHtml(request.projectName || 'Project');
+  const typeLabel = SanitizationUtils.escapeHtml(formatLabel(request.requestType));
+  const priorityLabel = SanitizationUtils.escapeHtml(formatLabel(request.priority));
 
-  const filtered = applyFilters(requestsCache, filterState, AD_HOC_REQUESTS_FILTER_CONFIG);
+  row.innerHTML = `
+    <td class="name-cell" data-label="Request">${title} <span class="badge badge-muted">${typeLabel}</span></td>
+    <td class="name-cell" data-label="Client">${clientName}</td>
+    <td class="name-cell" data-label="Project">${projectName}</td>
+    <td class="type-cell" data-label="Priority">${priorityLabel}</td>
+    <td class="status-cell" data-label="Status">${getStatusIndicator(request.status)}</td>
+    <td class="date-cell" data-label="Date">${formatDate(request.createdAt)}</td>
+    <td class="actions-cell" data-label="Actions">
+      <div class="table-actions">
+        <button class="icon-btn" data-action="view" data-id="${request.id}" title="View request" aria-label="View request">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </td>
+  `;
 
-  if (filtered.length === 0) {
-    showTableEmpty(body, 7, 'No ad hoc requests found.');
-    renderPagination(0, ctx);
-    return;
-  }
-
-  paginationState.totalItems = filtered.length;
-  const paginated = applyPagination(filtered, paginationState);
-
-  body.innerHTML = paginated
-    .map((request) => {
-      const title = SanitizationUtils.escapeHtml(request.title);
-      const clientName = SanitizationUtils.escapeHtml(request.clientName || 'Client');
-      const projectName = SanitizationUtils.escapeHtml(request.projectName || 'Project');
-      const typeLabel = SanitizationUtils.escapeHtml(formatLabel(request.requestType));
-      const priorityLabel = SanitizationUtils.escapeHtml(formatLabel(request.priority));
-
-      return `
-        <tr>
-          <td class="name-cell" data-label="Request">${title} <span class="badge badge-muted">${typeLabel}</span></td>
-          <td class="name-cell" data-label="Client">${clientName}</td>
-          <td class="name-cell" data-label="Project">${projectName}</td>
-          <td class="type-cell" data-label="Priority">${priorityLabel}</td>
-          <td class="status-cell" data-label="Status">${getStatusIndicator(request.status)}</td>
-          <td class="date-cell" data-label="Date">${formatDate(request.createdAt)}</td>
-          <td class="actions-cell" data-label="Actions">
-            <div class="table-actions">
-              <button class="icon-btn" data-action="view" data-id="${request.id}" title="View request" aria-label="View request">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    })
-    .join('');
-
-  renderPagination(filtered.length, ctx);
-}
-
-function initializeFilterUI(ctx: AdminDashboardContext): void {
-  const container = document.getElementById('ad-hoc-requests-filter-container');
-  if (!container) return;
-
-  const filterUI = createFilterUI(AD_HOC_REQUESTS_FILTER_CONFIG, filterState, (newState) => {
-    filterState = newState;
-    paginationState.currentPage = 1;
-    saveFilterState(AD_HOC_REQUESTS_FILTER_CONFIG.storageKey, filterState);
-    renderRequestsTable(ctx);
-  });
-
-  const firstBtn = container.querySelector('button');
-  if (firstBtn) {
-    container.insertBefore(filterUI, firstBtn);
-  } else {
-    container.appendChild(filterUI);
-  }
-
-  createSortableHeaders(AD_HOC_REQUESTS_FILTER_CONFIG, filterState, (column, direction) => {
-    filterState = { ...filterState, sortColumn: column, sortDirection: direction };
-    saveFilterState(AD_HOC_REQUESTS_FILTER_CONFIG.storageKey, filterState);
-    renderRequestsTable(ctx);
-  });
-}
-
-async function fetchRequests(): Promise<AdHocRequest[]> {
-  const response = await apiFetch(REQUESTS_API);
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Failed to load ad hoc requests');
-  }
-
-  // Ensure we always return an array, even if API returns undefined
-  return Array.isArray(data.requests) ? data.requests : [];
+  return row;
 }
 
 async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTMLElement> {
@@ -359,7 +292,7 @@ async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTM
 
 async function openInvoiceGenerationModal(request: AdHocRequest, onSuccess: () => void): Promise<void> {
   // Get all completed requests for bundling option
-  const completedRequests = requestsCache.filter(
+  const completedRequests = adHocRequestsModule.getData().filter(
     (r) => r.status === 'completed' && r.projectId === request.projectId
   );
 
@@ -731,7 +664,8 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
       showToast('Request updated.', 'success');
       modal.hide();
       modal.overlay.remove();
-      if (storedContext) await loadAdHocRequests(storedContext);
+      const ctx = adHocRequestsModule.getContext();
+      if (ctx) await adHocRequestsModule.load(ctx);
     } catch (error) {
       showToast((error as Error).message, 'error');
     }
@@ -754,7 +688,8 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
       showToast('Quote sent to client.', 'success');
       modal.hide();
       modal.overlay.remove();
-      if (storedContext) await loadAdHocRequests(storedContext);
+      const ctx = adHocRequestsModule.getContext();
+      if (ctx) await adHocRequestsModule.load(ctx);
     } catch (error) {
       showToast((error as Error).message, 'error');
     }
@@ -786,8 +721,9 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
       } : undefined);
       modal.hide();
       modal.overlay.remove();
-      if (storedContext) await loadAdHocRequests(storedContext);
-      if (taskId && storedContext) {
+      const ctx = adHocRequestsModule.getContext();
+      if (ctx) await adHocRequestsModule.load(ctx);
+      if (taskId && ctx) {
         const url = new URL(window.location.href);
         url.searchParams.set('tab', 'tasks');
         url.searchParams.set('taskId', String(taskId));
@@ -795,7 +731,7 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
           url.searchParams.set('projectId', String(projectId));
         }
         window.history.replaceState({}, '', url.toString());
-        storedContext.switchTab('tasks');
+        ctx.switchTab('tasks');
       }
     } catch (error) {
       showToast((error as Error).message, 'error');
@@ -805,7 +741,8 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
   const generateInvoiceBtn = body.querySelector('#generate-ad-hoc-invoice') as HTMLButtonElement | null;
   generateInvoiceBtn?.addEventListener('click', async () => {
     await openInvoiceGenerationModal(request, async () => {
-      if (storedContext) await loadAdHocRequests(storedContext);
+      const ctx = adHocRequestsModule.getContext();
+      if (ctx) await adHocRequestsModule.load(ctx);
     });
   });
 }
@@ -815,7 +752,7 @@ function setupListeners(ctx: AdminDashboardContext): void {
   listenersInitialized = true;
 
   const refreshBtn = document.getElementById('refresh-ad-hoc-requests-btn');
-  refreshBtn?.addEventListener('click', () => loadAdHocRequests(ctx));
+  refreshBtn?.addEventListener('click', () => adHocRequestsModule.load(ctx));
 
   const tableBody = document.getElementById('ad-hoc-requests-table-body');
   tableBody?.addEventListener('click', (event) => {
@@ -825,7 +762,7 @@ function setupListeners(ctx: AdminDashboardContext): void {
 
     const action = button.dataset.action;
     const id = Number(button.dataset.id);
-    const request = requestsCache.find((item) => item.id === id);
+    const request = adHocRequestsModule.findById(id);
     if (!request) return;
 
     if (action === 'view') {
@@ -892,26 +829,7 @@ export function renderAdHocRequestsTab(container: HTMLElement): void {
     </div>
   `;
 
-  // Reset initialization flags so they get re-initialized
-  filterUIInitialized = false;
+  // Reset module cache when tab is re-rendered (DOM elements changed)
+  adHocRequestsModule.resetCache();
   listenersInitialized = false;
-}
-
-export async function loadAdHocRequests(ctx: AdminDashboardContext): Promise<void> {
-  storedContext = ctx;
-  setupListeners(ctx);
-
-  if (!filterUIInitialized) {
-    initializeFilterUI(ctx);
-    filterUIInitialized = true;
-  }
-
-  try {
-    const requests = await fetchRequests();
-    requestsCache = requests;
-    renderRequestsTable(ctx);
-  } catch (error) {
-    console.error('[AdminAdHocRequests] Failed to load requests:', error);
-    showToast('Failed to load ad hoc requests.', 'error');
-  }
 }

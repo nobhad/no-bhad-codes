@@ -5,6 +5,8 @@
  * @file src/features/admin/modules/admin-contracts.ts
  *
  * Admin dashboard contracts list + detail modal.
+ *
+ * Uses createTableModule factory for standardized table operations.
  */
 
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
@@ -15,27 +17,20 @@ import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
 import {
-  applyFilters,
-  createFilterUI,
-  loadFilterState,
   saveFilterState,
   updateFilterStatusOptions,
   CONTRACTS_FILTER_CONFIG,
   type FilterState
 } from '../../../utils/table-filter';
 import type { AdminDashboardContext } from '../admin-types';
-import {
-  createPaginationUI,
-  applyPagination,
-  getDefaultPaginationState,
-  loadPaginationState,
-  savePaginationState,
-  type PaginationState,
-  type PaginationConfig
-} from '../../../utils/table-pagination';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
-import { showTableEmpty } from '../../../utils/loading-utils';
+import { batchUpdateText } from '../../../utils/dom-cache';
+import {
+  createTableModule,
+  createPaginationConfig,
+  type TableModuleHelpers
+} from '../../../utils/table-module-factory';
 
 interface ContractListItem {
   id: number;
@@ -66,25 +61,17 @@ interface ContractActivityItem {
   created_at: string;
 }
 
-let contractsCache: ContractListItem[] = [];
+interface ContractStats {
+  total: number;
+  draft: number;
+  sent: number;
+  viewed: number;
+  signed: number;
+}
+
+// Module-specific state
 let listenersInitialized = false;
-let activeContext: AdminDashboardContext | null = null;
-let filterUIInitialized = false;
 let filterContainerEl: HTMLElement | null = null;
-
-let filterState: FilterState = loadFilterState(CONTRACTS_FILTER_CONFIG.storageKey);
-
-const CONTRACTS_PAGINATION_CONFIG: PaginationConfig = {
-  tableId: 'contracts',
-  pageSizeOptions: [10, 25, 50, 100],
-  defaultPageSize: 10,
-  storageKey: 'admin_contracts_pagination'
-};
-
-let paginationState: PaginationState = {
-  ...getDefaultPaginationState(CONTRACTS_PAGINATION_CONFIG),
-  ...loadPaginationState(CONTRACTS_PAGINATION_CONFIG.storageKey!)
-};
 
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Draft',
@@ -130,77 +117,145 @@ function formatDateTimeSafe(value?: string | null): string {
   return formatDateTime(value);
 }
 
-function renderContractsTable(ctx: AdminDashboardContext): void {
-  const body = document.getElementById('contracts-table-body');
-  if (!body) return;
+// ============================================
+// TABLE MODULE FACTORY
+// ============================================
 
-  const filteredContracts = applyFilters(contractsCache, filterState, CONTRACTS_FILTER_CONFIG);
+/**
+ * Contracts table module using factory pattern
+ */
+const contractsModule = createTableModule<ContractListItem, ContractStats>({
+  moduleId: 'contracts',
+  filterConfig: CONTRACTS_FILTER_CONFIG,
+  paginationConfig: { ...createPaginationConfig('contracts'), defaultPageSize: 10 },
+  columnCount: 8,
+  apiEndpoint: '/api/contracts',
 
-  if (filteredContracts.length === 0) {
-    const message = contractsCache.length === 0
-      ? 'No contracts found.'
-      : 'No contracts match the current filters.';
-    showTableEmpty(body, 8, message);
-    renderPaginationUI(0, ctx);
-    return;
+  emptyMessage: 'No contracts found.',
+  filterEmptyMessage: 'No contracts match the current filters.',
+
+  extractData: (response: unknown) => {
+    const data = response as { contracts?: ContractListItem[] };
+    const contracts = Array.isArray(data.contracts) ? data.contracts : [];
+    const stats: ContractStats = {
+      total: contracts.length,
+      draft: contracts.filter(c => c.status === 'draft').length,
+      sent: contracts.filter(c => c.status === 'sent').length,
+      viewed: contracts.filter(c => c.status === 'viewed').length,
+      signed: contracts.filter(c => c.status === 'signed').length
+    };
+    return { data: contracts, stats };
+  },
+
+  renderRow: (contract: ContractListItem, _ctx: AdminDashboardContext, _helpers: TableModuleHelpers<ContractListItem>) => {
+    return buildContractRow(contract);
+  },
+
+  renderStats: (stats: ContractStats) => {
+    batchUpdateText({
+      'contracts-total': stats.total.toString(),
+      'contracts-draft': stats.draft.toString(),
+      'contracts-sent': stats.sent.toString(),
+      'contracts-viewed': stats.viewed.toString(),
+      'contracts-signed': stats.signed.toString()
+    });
+  },
+
+  onDataLoaded: (_data: ContractListItem[], ctx: AdminDashboardContext) => {
+    // Setup event listeners
+    attachContractsListeners(ctx);
+  },
+
+  onTableRendered: (filteredData: ContractListItem[], _ctx: AdminDashboardContext) => {
+    const tableBody = contractsModule.getElement('contracts-table-body');
+    if (!tableBody) return;
+
+    // Setup inline editing for expires_at cells
+    setupInlineExpiresEditing(tableBody, filteredData);
+
+    // Initialize keyboard navigation
+    initTableKeyboardNav({
+      tableSelector: '.contracts-table',
+      rowSelector: 'tbody tr[data-contract-id]',
+      onRowSelect: (row) => {
+        const contractId = parseInt(row.dataset.contractId || '0');
+        const contract = contractsModule.findById(contractId);
+        if (contract) openContractDetail(contract);
+      },
+      focusClass: 'row-focused',
+      selectedClass: 'row-selected'
+    });
   }
+});
 
-  paginationState.totalItems = filteredContracts.length;
-  const paginatedContracts = applyPagination(filteredContracts, paginationState);
+// Export factory-provided functions
+export const loadContracts = contractsModule.load;
+export const getContractsData = contractsModule.getData;
 
-  body.innerHTML = paginatedContracts
-    .map((contract) => {
-      const title = SanitizationUtils.escapeHtml(contract.templateName || `Contract #${contract.id}`);
-      const projectName = SanitizationUtils.escapeHtml(contract.projectName || 'Project');
-      const clientName = SanitizationUtils.escapeHtml(contract.clientName || 'Client');
-      const clientEmail = SanitizationUtils.escapeHtml(contract.clientEmail || '');
-      const typeLabel = contract.templateType ? ` · ${contract.templateType}` : '';
-      const amendmentLabel = contract.parentContractId ? ' · Amendment' : '';
+// ============================================
+// ROW BUILDING HELPERS
+// ============================================
 
-      return `
-        <tr data-contract-id="${contract.id}">
-          <td class="name-cell" data-label="Contract">
-            <div class="identity-cell">
-              <span class="identity-primary">${title}</span>
-              <span class="identity-secondary">${typeLabel}${amendmentLabel}</span>
-            </div>
-          </td>
-          <td class="name-cell" data-label="Project">${projectName}</td>
-          <td class="name-cell" data-label="Client">
-            <div class="identity-cell">
-              <span class="identity-primary">${clientName}</span>
-              <span class="identity-secondary">${clientEmail}</span>
-            </div>
-          </td>
-          <td class="status-cell" data-label="Status">${getStatusBadge(contract.status)}</td>
-          <td class="date-cell" data-label="Sent">${formatDateSafe(contract.sentAt)}</td>
-          <td class="date-cell" data-label="Signed">${formatDateSafe(contract.signedAt)}</td>
-          <td class="date-cell inline-editable-cell" data-contract-id="${contract.id}" data-field="expires_at" data-label="Expires">
-            <span class="expires-at-value">${formatDateSafe(contract.expiresAt)}</span>
-          </td>
-          <td class="actions-cell" data-label="Actions">
-            <div class="table-actions">
-              <button class="icon-btn" data-action="view" data-id="${contract.id}" title="View details" aria-label="View contract">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-              <button class="icon-btn" data-action="remind" data-id="${contract.id}" title="Resend reminder" aria-label="Resend reminder">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-              </button>
-              <button class="icon-btn" data-action="expire" data-id="${contract.id}" title="Expire contract" aria-label="Expire contract">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    })
-    .join('');
+/**
+ * Build a single contract table row
+ */
+function buildContractRow(contract: ContractListItem): HTMLTableRowElement {
+  const row = document.createElement('tr');
+  row.dataset.contractId = String(contract.id);
 
-  // Setup inline editing for expires_at cells
-  body.querySelectorAll('.date-col.inline-editable-cell').forEach((cell) => {
+  const title = SanitizationUtils.escapeHtml(contract.templateName || `Contract #${contract.id}`);
+  const projectName = SanitizationUtils.escapeHtml(contract.projectName || 'Project');
+  const clientName = SanitizationUtils.escapeHtml(contract.clientName || 'Client');
+  const clientEmail = SanitizationUtils.escapeHtml(contract.clientEmail || '');
+  const typeLabel = contract.templateType ? ` · ${contract.templateType}` : '';
+  const amendmentLabel = contract.parentContractId ? ' · Amendment' : '';
+
+  row.innerHTML = `
+    <td class="name-cell" data-label="Contract">
+      <div class="identity-cell">
+        <span class="identity-primary">${title}</span>
+        <span class="identity-secondary">${typeLabel}${amendmentLabel}</span>
+      </div>
+    </td>
+    <td class="name-cell" data-label="Project">${projectName}</td>
+    <td class="name-cell" data-label="Client">
+      <div class="identity-cell">
+        <span class="identity-primary">${clientName}</span>
+        <span class="identity-secondary">${clientEmail}</span>
+      </div>
+    </td>
+    <td class="status-cell" data-label="Status">${getStatusBadge(contract.status)}</td>
+    <td class="date-cell" data-label="Sent">${formatDateSafe(contract.sentAt)}</td>
+    <td class="date-cell" data-label="Signed">${formatDateSafe(contract.signedAt)}</td>
+    <td class="date-cell inline-editable-cell" data-contract-id="${contract.id}" data-field="expires_at" data-label="Expires">
+      <span class="expires-at-value">${formatDateSafe(contract.expiresAt)}</span>
+    </td>
+    <td class="actions-cell" data-label="Actions">
+      <div class="table-actions">
+        <button class="icon-btn" data-action="view" data-id="${contract.id}" title="View details" aria-label="View contract">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <button class="icon-btn" data-action="remind" data-id="${contract.id}" title="Resend reminder" aria-label="Resend reminder">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </button>
+        <button class="icon-btn" data-action="expire" data-id="${contract.id}" title="Expire contract" aria-label="Expire contract">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </button>
+      </div>
+    </td>
+  `;
+
+  return row;
+}
+
+/**
+ * Setup inline editing for expires_at cells
+ */
+function setupInlineExpiresEditing(tableBody: HTMLElement, contracts: ContractListItem[]): void {
+  tableBody.querySelectorAll('.date-cell.inline-editable-cell').forEach((cell) => {
     const cellEl = cell as HTMLElement;
     const contractId = parseInt(cellEl.dataset.contractId || '0');
-    const contract = paginatedContracts.find(c => c.id === contractId);
+    const contract = contracts.find(c => c.id === contractId);
     if (!contract) return;
 
     makeEditable(
@@ -221,49 +276,17 @@ function renderContractsTable(ctx: AdminDashboardContext): void {
       { type: 'date', placeholder: 'Select date' }
     );
   });
-
-  renderPaginationUI(filteredContracts.length, ctx);
-
-  // Initialize keyboard navigation (J/K to move, Enter to view)
-  initTableKeyboardNav({
-    tableSelector: '.contracts-table',
-    rowSelector: 'tbody tr[data-contract-id]',
-    onRowSelect: (row) => {
-      const contractId = parseInt(row.dataset.contractId || '0');
-      const contract = contractsCache.find((c) => c.id === contractId);
-      if (contract) openContractDetail(contract);
-    },
-    focusClass: 'row-focused',
-    selectedClass: 'row-selected'
-  });
 }
 
-function updateContractStats(contracts: ContractListItem[]): void {
-  const totals = {
-    total: contracts.length,
-    draft: contracts.filter((c) => c.status === 'draft').length,
-    sent: contracts.filter((c) => c.status === 'sent').length,
-    viewed: contracts.filter((c) => c.status === 'viewed').length,
-    signed: contracts.filter((c) => c.status === 'signed').length
-  };
-
-  const totalEl = document.getElementById('contracts-total');
-  const draftEl = document.getElementById('contracts-draft');
-  const sentEl = document.getElementById('contracts-sent');
-  const viewedEl = document.getElementById('contracts-viewed');
-  const signedEl = document.getElementById('contracts-signed');
-
-  if (totalEl) totalEl.textContent = totals.total.toString();
-  if (draftEl) draftEl.textContent = totals.draft.toString();
-  if (sentEl) sentEl.textContent = totals.sent.toString();
-  if (viewedEl) viewedEl.textContent = totals.viewed.toString();
-  if (signedEl) signedEl.textContent = totals.signed.toString();
-}
+// ============================================
+// FILTER HELPERS
+// ============================================
 
 function updateFilterBadge(): void {
   if (!filterContainerEl) return;
   const badge = filterContainerEl.querySelector('.filter-count-badge');
   if (!badge) return;
+  const filterState = contractsModule.getFilterState();
   const count =
     filterState.statusFilters.length +
     (filterState.dateStart ? 1 : 0) +
@@ -274,77 +297,27 @@ function updateFilterBadge(): void {
 
 function applyStatusFilter(value: string): void {
   const nextFilters = STATUS_FILTER_MAP[value] ?? [];
-  filterState = { ...filterState, statusFilters: nextFilters };
-  saveFilterState(CONTRACTS_FILTER_CONFIG.storageKey, filterState);
+  const filterState = contractsModule.getFilterState();
+  const newState = { ...filterState, statusFilters: nextFilters };
+  saveFilterState(CONTRACTS_FILTER_CONFIG.storageKey, newState);
+
   if (filterContainerEl) {
     updateFilterStatusOptions(
       filterContainerEl,
       CONTRACTS_FILTER_CONFIG.statusOptions,
       'Status',
-      filterState,
+      newState,
       CONTRACTS_FILTER_CONFIG,
-      (newState) => {
-        filterState = newState;
-        saveFilterState(CONTRACTS_FILTER_CONFIG.storageKey, filterState);
-        paginationState.currentPage = 1;
-        if (activeContext) renderContractsTable(activeContext);
+      (updatedState: FilterState) => {
+        saveFilterState(CONTRACTS_FILTER_CONFIG.storageKey, updatedState);
+        contractsModule.rerender();
       }
     );
     updateFilterBadge();
   }
+  contractsModule.rerender();
 }
 
-function renderPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
-  const container = document.getElementById('contracts-pagination');
-  if (!container) return;
-
-  if (totalItems === 0) {
-    container.innerHTML = '';
-    return;
-  }
-
-  paginationState.totalItems = totalItems;
-  const paginationUI = createPaginationUI(CONTRACTS_PAGINATION_CONFIG, paginationState, (newState) => {
-    paginationState = newState;
-    savePaginationState(CONTRACTS_PAGINATION_CONFIG.storageKey!, newState);
-    renderContractsTable(ctx);
-  });
-
-  container.innerHTML = '';
-  container.appendChild(paginationUI);
-}
-
-function initializeFilterUI(ctx: AdminDashboardContext): void {
-  const container = document.getElementById('contracts-filter-container');
-  if (!container) return;
-  filterContainerEl = container;
-
-  const filterUI = createFilterUI(CONTRACTS_FILTER_CONFIG, filterState, (newState) => {
-    filterState = newState;
-    paginationState.currentPage = 1;
-    saveFilterState(CONTRACTS_FILTER_CONFIG.storageKey, filterState);
-    renderContractsTable(ctx);
-  });
-
-  const firstBtn = container.querySelector('button');
-  if (firstBtn) {
-    container.insertBefore(filterUI, firstBtn);
-  } else {
-    container.appendChild(filterUI);
-  }
-}
-
-async function fetchContracts(): Promise<ContractListItem[]> {
-  const response = await apiFetch('/api/contracts');
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Failed to load contracts');
-  }
-
-  // Ensure we always return an array, even if API returns undefined
-  return Array.isArray(data.contracts) ? data.contracts : [];
-}
 
 async function fetchContractActivity(contractId: number): Promise<ContractActivityItem[]> {
   const response = await apiFetch(`/api/contracts/${contractId}/activity`);
@@ -466,7 +439,8 @@ async function handleReminder(contractId: number): Promise<void> {
       return;
     }
     showToast('Reminder sent.', 'success');
-    if (activeContext) await loadContracts(activeContext);
+    const ctx = contractsModule.getContext();
+    if (ctx) await contractsModule.load(ctx);
   } catch (error) {
     console.error('[AdminContracts] Reminder failed:', error);
     alertError('Failed to send reminder.');
@@ -491,7 +465,8 @@ async function handleExpire(contractId: number): Promise<void> {
       return;
     }
     showToast('Contract expired.', 'success');
-    if (activeContext) await loadContracts(activeContext);
+    const ctx = contractsModule.getContext();
+    if (ctx) await contractsModule.load(ctx);
   } catch (error) {
     console.error('[AdminContracts] Expire failed:', error);
     alertError('Failed to expire contract.');
@@ -516,7 +491,8 @@ async function handleAmendment(contractId: number): Promise<void> {
       return;
     }
     showToast('Amendment created.', 'success');
-    if (activeContext) await loadContracts(activeContext);
+    const ctx = contractsModule.getContext();
+    if (ctx) await contractsModule.load(ctx);
   } catch (error) {
     console.error('[AdminContracts] Amendment failed:', error);
     alertError('Failed to create amendment.');
@@ -532,7 +508,8 @@ async function handleRenewalReminder(contractId: number): Promise<void> {
       return;
     }
     showToast('Renewal reminder sent.', 'success');
-    if (activeContext) await loadContracts(activeContext);
+    const ctx = contractsModule.getContext();
+    if (ctx) await contractsModule.load(ctx);
   } catch (error) {
     console.error('[AdminContracts] Renewal reminder failed:', error);
     alertError('Failed to send renewal reminder.');
@@ -543,25 +520,24 @@ function attachContractsListeners(context: AdminDashboardContext): void {
   if (listenersInitialized) return;
   listenersInitialized = true;
 
-  if (!filterUIInitialized) {
-    initializeFilterUI(context);
-    filterUIInitialized = true;
-  }
+  // Cache filter container reference
+  filterContainerEl = document.getElementById('contracts-filter-container');
 
+  // Stat card filter clicks
   document.querySelectorAll('[data-contract-filter]').forEach((card) => {
     card.addEventListener('click', () => {
       const filterValue = (card as HTMLElement).dataset.contractFilter || 'all';
       applyStatusFilter(filterValue);
-      paginationState.currentPage = 1;
-      renderContractsTable(context);
     });
   });
 
+  // Refresh button
   const refreshBtn = document.getElementById('refresh-contracts-btn');
   refreshBtn?.addEventListener('click', () => {
-    loadContracts(context);
+    contractsModule.load(context);
   });
 
+  // Table action buttons (view, remind, expire)
   const table = document.getElementById('contracts-table-body');
   table?.addEventListener('click', (event) => {
     const target = event.target as HTMLElement;
@@ -570,7 +546,7 @@ function attachContractsListeners(context: AdminDashboardContext): void {
 
     const action = button.dataset.action;
     const id = Number(button.dataset.id);
-    const contract = contractsCache.find((item) => item.id === id);
+    const contract = contractsModule.findById(id);
     if (!contract) return;
 
     switch (action) {
@@ -669,21 +645,8 @@ export function renderContractsTab(container: HTMLElement): void {
     </div>
   `;
 
-  // Reset filter UI initialization flag so it gets re-initialized
-  filterUIInitialized = false;
+  // Reset module cache when tab is re-rendered (DOM elements changed)
+  contractsModule.resetCache();
   listenersInitialized = false;
-}
-
-export async function loadContracts(context: AdminDashboardContext): Promise<void> {
-  try {
-    activeContext = context;
-    attachContractsListeners(context);
-    const contracts = await fetchContracts();
-    contractsCache = contracts;
-    updateContractStats(contractsCache);
-    renderContractsTable(context);
-  } catch (error) {
-    console.error('[AdminContracts] Failed to load contracts:', error);
-    alertError('Failed to load contracts. Please try again.');
-  }
+  filterContainerEl = null;
 }
