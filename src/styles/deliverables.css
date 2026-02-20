@@ -137,19 +137,19 @@
 }
 
 .status-pending {
-  background-color: #f59e0b;
+  background-color: var(--color-warning-500);
 }
 
 .status-reviewing {
-  background-color: #3b82f6;
+  background-color: var(--color-info-500);
 }
 
 .status-approved {
-  background-color: #10b981;
+  background-color: var(--color-success-500);
 }
 
 .status-revisions_requested {
-  background-color: #ef4444;
+  background-color: var(--color-error-500);
 }
 
 /* Deliverable Actions */
@@ -486,8 +486,8 @@
 }
 
 .clear-annotations-btn:hover {
-  background-color: #ef4444;
-  border-color: #ef4444;
+  background-color: var(--color-error-500);
+  border-color: var(--color-error-500);
   color: white;
 }
 
@@ -577,15 +577,15 @@
 }
 
 .approval-btn.pending.active {
-  background-color: #f59e0b;
+  background-color: var(--color-warning-500);
 }
 
 .approval-btn.approved.active {
-  background-color: #10b981;
+  background-color: var(--color-success-500);
 }
 
 .approval-btn.revisions.active {
-  background-color: #ef4444;
+  background-color: var(--color-error-500);
 }
 
 /* Action Buttons */
@@ -632,7 +632,7 @@
 }
 
 .action-btn.warning {
-  background-color: #f59e0b;
+  background-color: var(--color-warning-500);
   color: white;
 }
 
