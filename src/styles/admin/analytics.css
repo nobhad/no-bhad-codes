@@ -460,9 +460,4 @@
   }
 }
 
-.truncate-text {
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+/* .truncate-text styling in project-detail.css */
