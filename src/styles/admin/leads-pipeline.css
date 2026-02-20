@@ -897,11 +897,9 @@
   line-height: 1.5;
 }
 
-/* Empty State */
-.empty-state-small {
+/* Empty State - compact variant */
+.leads-pipeline-section .empty-state {
   padding: var(--space-1-5);
-  text-align: center;
-  color: var(--portal-text-muted);
   font-size: var(--font-size-sm);
 }
 

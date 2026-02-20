@@ -257,21 +257,11 @@ td.empty-row {
   border-bottom-right-radius: var(--portal-radius-lg, 12px);
 }
 
-/* Error/Loading/Empty state container - UNIVERSAL centering for ALL contexts */
+/* Error/Loading/Empty state container - UNIVERSAL centering for ALL contexts
+   USE .empty-state for all empty states - this is the canonical class */
 .error-state,
 .loading-state,
-.empty-state,
-.empty-message,
-.empty-state-message,
-.empty-state-small,
-.task-list-empty,
-.leads-item-empty,
-.activity-item-empty,
-.version-empty,
-.discount-empty,
-.signature-empty,
-.empty-hint,
-[class*="-empty"] {
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -326,8 +316,6 @@ td[colspan] .empty-state {
 .loading-state p,
 .error-state p,
 .empty-state p,
-[class*="-empty"] p,
-.empty-message,
 .loading-message {
   margin: 0;
   padding: 0;
@@ -352,9 +340,7 @@ td.loading-row.loading-state p {
 }
 
 /* Paragraph empty states - simpler display, no flex needed */
-p.empty-state,
-p.empty-message,
-p.empty-state-message {
+p.empty-state {
   display: block;
   padding: var(--space-4);
 }
