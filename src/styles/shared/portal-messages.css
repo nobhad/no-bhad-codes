@@ -346,13 +346,7 @@
   position: relative;
 }
 
-/* Empty/error state: base styles in components/loading.css, only overrides here */
-[data-page="client-portal"] .messages-container .messages-thread .empty-state,
-[data-page="client-portal"] .messages-container .messages-thread .no-messages,
-[data-page="admin"] .messages-container .messages-thread .empty-state,
-[data-page="admin"] .messages-container .messages-thread .no-messages {
-  font-style: italic;
-}
+/* .empty-state, .loading-state, .error-state styling from components/loading.css */
 
 /* =====================================================
    INDIVIDUAL MESSAGE

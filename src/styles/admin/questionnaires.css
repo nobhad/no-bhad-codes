@@ -11,11 +11,7 @@
   min-height: 100px;
 }
 
-/* Empty state: base styles in components/loading.css, unique dashed border here */
-[data-page="admin"] #questions-builder .empty-state {
-  border: 1px dashed var(--color-border);
-  border-radius: var(--portal-radius-md);
-}
+/* .empty-state styling from components/loading.css */
 
 /* Individual question item */
 [data-page="admin"] .question-item {

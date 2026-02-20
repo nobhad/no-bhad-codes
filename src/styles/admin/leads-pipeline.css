@@ -342,11 +342,7 @@
   margin-bottom: 0;
 }
 
-/* Empty state: base styles from components/loading.css, only overrides here */
-.leads-analytics-section .empty-state {
-  color: var(--portal-text-light);
-  padding: var(--space-1) 0;
-}
+/* .empty-state styling from components/loading.css */
 
 /* ---- Conversion Funnel ----
    Override analytics.css base .funnel-* styles which are
@@ -895,12 +891,6 @@
   font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
   line-height: 1.5;
-}
-
-/* Empty State - compact variant */
-.leads-pipeline-section .empty-state {
-  padding: var(--space-1-5);
-  font-size: var(--font-size-sm);
 }
 
 /* ============================================
