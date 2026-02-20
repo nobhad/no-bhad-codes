@@ -289,54 +289,8 @@
 .transition-none { transition: none; }
 
 /* ============================================
-   COMMON PATTERNS (Semantic Utilities)
+   ACCESSIBILITY
    ============================================ */
-
-/* Flex row with center alignment - most common pattern */
-.flex-center {
-  display: flex;
-  align-items: center;
-}
-
-/* Flex row with center + gap */
-.flex-center-gap {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-/* Flex row with space-between - second most common */
-.flex-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Flex column */
-.flex-stack {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Flex column with gap */
-.flex-stack-gap {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-/* Center everything (flex) */
-.flex-center-all {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Full width block */
-.full-width {
-  width: 100%;
-  box-sizing: border-box;
-}
 
 /* Visually hidden but accessible */
 .sr-only {
