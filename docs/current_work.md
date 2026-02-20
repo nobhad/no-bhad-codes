@@ -14,20 +14,25 @@ Reduced CSS codebase using utility classes and consolidation patterns.
 
 **Final Status:**
 
-- Total CSS: ~50,514 lines (reduced from ~55,000)
+- Total CSS: ~52,197 lines (src/styles: 50,514 + src/design-system: 1,683)
 - Created `src/styles/base/utilities.css` with atomic utility classes
 - Consolidated portal-tables.css using `:is()` selector (886→652 lines)
 - Migrated 39+ pure utility patterns to utility classes
-- Removed 500+ lines of orphaned CSS (channel-loading, grid utilities, semantic utilities, etc.)
 - Documented two-tier utility system in CSS_ARCHITECTURE.md
 
-**Completed Migrations:**
+**Design System Token Cleanup:**
 
-- [x] Table filters, questionnaires, workflows, project-detail
-- [x] Files, client-detail, cd-crm, proposals, modals
-- [x] Ad-hoc requests, pd-contract, leads-pipeline
-- [x] Email templates (versions-list)
-- [x] Removed orphaned/unused CSS rules
+- [x] Removed duplicate utilities from design-system/index.css (502 lines)
+- [x] Removed orphaned utilities from breakpoints.css (421 lines)
+- [x] Removed orphaned utilities from animations.css (219 lines)
+- [x] Removed orphaned utilities from spacing.css (394 lines)
+- [x] Removed orphaned utilities from typography.css (128 lines)
+- [x] Removed orphaned utilities from z-index.css (128 lines)
+- [x] Removed orphaned utilities from shadows.css (120 lines)
+- [x] Removed orphaned utilities from borders.css (141 lines)
+
+**Previous Cleanup:**
+
 - [x] Removed orphaned channel-loading code (113 lines)
 - [x] Removed orphaned grid/position/overflow utilities (258 lines)
 - [x] Removed orphaned semantic utilities (46 lines)
