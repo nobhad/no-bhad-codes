@@ -221,10 +221,7 @@
 }
 
 /* Modal title wrapper with icon */
-.admin-modal-title {
-  display: flex;
-  align-items: center;
-}
+/* Uses utility classes: flex items-center */
 
 .admin-modal-title svg {
   width: var(--icon-size-sm);
