@@ -2245,7 +2245,7 @@ export function renderWorkflowsTab(container: HTMLElement): void {
         </div>
         <!-- Bulk Action Toolbar -->
         <div class="bulk-action-toolbar hidden" id="approvals-bulk-toolbar">
-          <div class="bulk-toolbar-left">
+          <div class="bulk-toolbar-left flex items-center">
             <div class="bulk-selection-count">
               <strong id="approvals-selected-count">0</strong> selected
               <button type="button" class="bulk-clear-selection" id="bulk-clear-btn">Clear</button>

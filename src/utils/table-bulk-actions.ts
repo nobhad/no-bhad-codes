@@ -110,7 +110,7 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
   const dropdownActions = config.actions.filter(a => a.dropdownOptions);
 
   toolbar.innerHTML = `
-    <div class="bulk-toolbar-left">
+    <div class="bulk-toolbar-left flex items-center">
       <span class="bulk-selection-count">
         <strong id="${config.tableId}-selected-count">0</strong> selected
       </span>
