@@ -507,11 +507,7 @@
   overflow-y: auto;
 }
 
-[data-page="admin"] .workflow-preview {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 [data-page="admin"] .preview-section h4 {
   margin: 0 0 var(--space-2);
@@ -526,11 +522,7 @@
   gap: var(--space-2);
 }
 
-[data-page="admin"] .preview-info-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-}
+/* Uses utility classes: flex flex-col gap-0-5 */
 
 [data-page="admin"] .preview-label {
   font-size: var(--font-size-xs);
@@ -572,11 +564,7 @@
 }
 
 /* Preview steps list */
-[data-page="admin"] .preview-steps-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 [data-page="admin"] .preview-steps-list.parallel {
   gap: var(--space-2);

@@ -193,7 +193,7 @@ export function createFilterUI(
   const statusSectionHTML = hasStatusOptions ? `
       <div class="filter-section">
         <span class="filter-section-label">Status</span>
-        <div class="filter-checkbox-group">
+        <div class="filter-checkbox-group flex flex-col gap-1">
           <label class="filter-checkbox filter-all-option">
             ${getPortalCheckboxHTML({
     value: 'all',
@@ -224,7 +224,7 @@ export function createFilterUI(
       ${statusSectionHTML}
       <div class="filter-section">
         <span class="filter-section-label">Date Range</span>
-        <div class="filter-date-group">
+        <div class="filter-date-group flex flex-col gap-1">
           <input type="date" class="filter-date-input" data-filter="start" value="${state.dateStart}" />
           <span class="filter-date-separator">to</span>
           <input type="date" class="filter-date-input" data-filter="end" value="${state.dateEnd}" />
@@ -377,7 +377,7 @@ export function updateFilterStatusOptions(
   const statusHTML = `
     <div class="filter-section">
       <span class="filter-section-label">${label}</span>
-      <div class="filter-checkbox-group">
+      <div class="filter-checkbox-group flex flex-col gap-1">
         <label class="filter-checkbox filter-all-option">
           ${getPortalCheckboxHTML({
     value: 'all',

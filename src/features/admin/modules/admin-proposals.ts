@@ -989,7 +989,7 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
   };
 
   modal.body.innerHTML = `
-    <div class="template-editor">
+    <div class="template-editor flex flex-col gap-2">
       <section class="template-editor-section">
         <div class="template-section-header">
           <h4>Basics</h4>
@@ -1027,7 +1027,7 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
           <h4>Tier Configuration</h4>
           <button class="btn btn-secondary btn-sm" id="add-tier-btn" type="button">Add Tier</button>
         </div>
-        <div class="template-list" id="template-tier-list"></div>
+        <div class="template-list flex flex-col gap-1" id="template-tier-list"></div>
       </section>
 
       <section class="template-editor-section">
@@ -1035,7 +1035,7 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
           <h4>Feature Library</h4>
           <button class="btn btn-secondary btn-sm" id="add-feature-btn" type="button">Add Feature</button>
         </div>
-        <div class="template-list" id="template-feature-list"></div>
+        <div class="template-list flex flex-col gap-1" id="template-feature-list"></div>
       </section>
 
       <section class="template-editor-section">
@@ -1043,7 +1043,7 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
           <h4>Maintenance Options</h4>
           <button class="btn btn-secondary btn-sm" id="add-maintenance-btn" type="button">Add Maintenance</button>
         </div>
-        <div class="template-list" id="template-maintenance-list"></div>
+        <div class="template-list flex flex-col gap-1" id="template-maintenance-list"></div>
       </section>
 
       <section class="template-editor-section">
@@ -1051,7 +1051,7 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
           <h4>Default Line Items</h4>
           <button class="btn btn-secondary btn-sm" id="add-line-item-btn" type="button">Add Line Item</button>
         </div>
-        <div class="template-list" id="template-lineitem-list"></div>
+        <div class="template-list flex flex-col gap-1" id="template-lineitem-list"></div>
       </section>
 
       <section class="template-editor-section">
@@ -1614,7 +1614,7 @@ function renderVersionHistory(proposalId: number): void {
         Save Current as Version
       </button>
     </div>
-    <div class="version-list">
+    <div class="version-list flex flex-col gap-1">
       ${currentProposalVersions.map(version => `
         <div class="version-item" data-version-id="${version.id}">
           <div class="version-info">
@@ -2569,7 +2569,7 @@ function renderComments(proposalId: number, comments: ProposalComment[]): void {
         `).join('')}
       </div>
     ` : '<div class="empty-state-small">No comments yet</div>'}
-    <div class="add-comment-form">
+    <div class="add-comment-form flex flex-col gap-1">
       <textarea id="new-comment-input" placeholder="Add a comment..." rows="2"></textarea>
       <div class="comment-actions">
         <label class="checkbox-label">
@@ -2666,7 +2666,7 @@ function renderActivities(activities: ProposalActivity[]): void {
   };
 
   container.innerHTML = `
-    <div class="activity-list">
+    <div class="activity-list flex flex-col gap-0-5">
       ${activities.slice(0, 10).map(activity => `
         <div class="activity-item">
           <span class="activity-type">${activityLabels[activity.activityType] || activity.activityType}</span>

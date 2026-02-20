@@ -556,31 +556,31 @@ async function loadFileInfo(fileId: number): Promise<void> {
     }
 
     container.innerHTML = `
-      <div class="file-info-item">
+      <div class="file-info-item flex flex-col gap-0-5">
         <span class="file-info-label">File Name</span>
         <span class="file-info-value">${escapeHtml(file.original_name || file.filename)}</span>
       </div>
-      <div class="file-info-item">
+      <div class="file-info-item flex flex-col gap-0-5">
         <span class="file-info-label">Size</span>
         <span class="file-info-value">${formatFileSize(file.size)}</span>
       </div>
-      <div class="file-info-item">
+      <div class="file-info-item flex flex-col gap-0-5">
         <span class="file-info-label">Type</span>
         <span class="file-info-value">${file.mime_type}</span>
       </div>
-      <div class="file-info-item">
+      <div class="file-info-item flex flex-col gap-0-5">
         <span class="file-info-label">Uploaded</span>
         <span class="file-info-value">${formatDateTime(file.uploaded_at)}</span>
       </div>
-      <div class="file-info-item">
+      <div class="file-info-item flex flex-col gap-0-5">
         <span class="file-info-label">Uploaded By</span>
         <span class="file-info-value">${file.uploaded_by || 'Unknown'}</span>
       </div>
-      <div class="file-info-item">
+      <div class="file-info-item flex flex-col gap-0-5">
         <span class="file-info-label">Category</span>
         <span class="file-info-value">${file.category || 'Uncategorized'}</span>
       </div>
-      <div class="file-info-item">
+      <div class="file-info-item flex flex-col gap-0-5">
         <span class="file-info-label">Shared with Client</span>
         <span class="file-info-value">${file.shared_with_client ? `<span class="status-badge status-active">Yes</span> (${formatDateTime(file.shared_at || '')})` : '<span class="status-badge status-inactive">No</span>'}</span>
       </div>
@@ -638,7 +638,7 @@ async function loadFileVersions(fileId: number): Promise<void> {
 
     container.innerHTML = versions.map(version => `
       <div class="version-item ${version.is_current ? 'current' : ''}">
-        <div class="version-info">
+        <div class="version-info flex flex-col gap-0-5">
           <span class="version-label">
             Version ${version.version_number}
             ${version.is_current ? '<span class="badge">Current</span>' : ''}

@@ -653,7 +653,7 @@ function renderProjectsSummary(): void {
   }
 
   container.innerHTML = `
-    <div class="projects-list-compact">
+    <div class="projects-list-compact flex flex-col gap-2">
       ${recentProjects.map(project => `
         <div class="project-item-compact" data-project-id="${project.id}">
           <div class="project-item-info">
@@ -743,7 +743,7 @@ function renderRecentActivity(): void {
   };
 
   container.innerHTML = `
-    <div class="recent-activity-list">
+    <div class="recent-activity-list flex flex-col gap-2">
       ${recentActivities.map(activity => `
         <div class="activity-item">
           <div class="activity-icon">${getActivityIcon(activity.type)}</div>
@@ -1410,7 +1410,7 @@ function renderNotesTab(): void {
   });
 
   container.innerHTML = `
-    <div class="add-note-form">
+    <div class="add-note-form flex flex-col gap-2">
       <textarea id="new-note-content" class="form-textarea" placeholder="Add a quick note..." rows="3"></textarea>
       <div class="add-note-actions">
         <button class="btn btn-secondary" id="btn-add-note">Add Note</button>
@@ -1812,7 +1812,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
     <div class="portal-tab-panel" id="cd-tab-projects">
       <div class="portal-project-card portal-shadow">
         <h3>Projects</h3>
-        <div class="client-projects-list" id="cd-projects-list">
+        <div class="client-projects-list flex flex-col gap-2" id="cd-projects-list">
           <div class="empty-state" role="status"><p>No projects found for this client.</p></div>
         </div>
       </div>
@@ -1880,7 +1880,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
       <!-- Invoice List -->
       <div class="portal-project-card portal-shadow">
         <h3>Invoice History</h3>
-        <div class="client-invoices-list" id="cd-invoices-list">
+        <div class="client-invoices-list flex flex-col gap-2" id="cd-invoices-list">
           <div class="empty-state" role="status"><p>No invoices found for this client.</p></div>
         </div>
       </div>
