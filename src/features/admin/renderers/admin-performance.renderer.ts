@@ -250,7 +250,7 @@ class AdminPerformanceRenderer {
 
     container.innerHTML = sizes.map(item => `
       <div class="bundle-item">
-        <div class="bundle-info">
+        <div class="bundle-info flex flex-col gap-1">
           <span class="bundle-name">${SanitizationUtils.escapeHtml(item.name)}</span>
           <span class="bundle-size">${SanitizationUtils.escapeHtml(item.size)}</span>
         </div>

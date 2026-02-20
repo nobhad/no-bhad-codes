@@ -43,11 +43,7 @@
   gap: var(--portal-section-gap);
 }
 
-.quick-actions-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
+/* Uses utility classes: flex flex-wrap gap-2 */
 
 /* ============================================
    Analytics Subtab Content Container
@@ -347,13 +343,7 @@
    Data Lists
    ============================================ */
 
-.data-list,
-.reports-list,
-.alerts-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 /* Uses universal empty state from loading.css, only add background */
 .data-list-empty {
@@ -372,11 +362,7 @@
   color: var(--portal-text-light);
 }
 
-.report-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-}
+/* Uses utility classes: flex flex-col gap-0-5 */
 
 .report-name {
   font-size: var(--font-size-sm);
@@ -389,11 +375,7 @@
   color: var(--portal-text-muted);
 }
 
-.report-actions {
-  display: flex;
-  gap: var(--space-0-5);
-  align-items: center;
-}
+/* Uses utility classes: flex items-center gap-0-5 */
 
 /* Uses universal empty state from loading.css */
 
@@ -449,11 +431,7 @@
    Bundle Info (uses common .bundle-item from portal-cards.css)
    ============================================ */
 
-.bundle-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
+/* Uses utility classes: flex flex-col gap-1 */
 
 /* ============================================
    Responsive
