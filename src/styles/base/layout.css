@@ -340,9 +340,8 @@ section.about-section.page-active {
 .inline-block {
   display: inline-block;
 }
-.hidden {
-  display: none;
-}
+
+/* .hidden in utilities.css */
 
 /* ============================================
  * VISIBILITY UTILITIES
