@@ -519,11 +519,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   color: var(--portal-text-secondary);
 }
 
-/* Card Header with Action */
+/* Card Header with Action - base in portal-cards.css, override margin */
 .card-header-with-action {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: var(--space-2);
 }
 
