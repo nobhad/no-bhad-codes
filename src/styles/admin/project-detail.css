@@ -93,26 +93,12 @@
 
 /* Standalone .btn-icon styles now in shared/portal-buttons.css */
 
-/* Root meta-item styling - applies everywhere (label-value gap from shared/field-label-spacing.css) */
-.meta-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--field-label-value-gap);
-}
-
-/* Label styling from unified rule in portal-forms.css */
+/* .meta-item and .meta-value base styles in shared/field-label-spacing.css */
 
 /* Hint text within field labels - same styling but not uppercase */
 [data-page="admin"] .field-label-hint,
 [data-page="client-portal"] .field-label-hint {
   text-transform: none;
-}
-
-/* Root meta-value styling - match client detail (portal-text-light for body text) */
-.meta-value {
-  font-size: 1rem;
-  color: var(--portal-text-light);
-  font-weight: 400;
 }
 
 /* URL links in project details - match text by default, red on hover */
@@ -260,19 +246,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   min-width: 0;
 }
 
-/* Black form field backgrounds for admin */
-[data-page="admin"] .form-input,
-[data-page="admin"] input[type="text"],
-[data-page="admin"] input[type="email"],
-[data-page="admin"] input[type="password"],
-[data-page="admin"] input[type="tel"],
-[data-page="admin"] input[type="number"],
-[data-page="admin"] input[type="url"],
-[data-page="admin"] textarea,
-[data-page="admin"] select:not(.status-select),
-[data-page="admin"] .form-select {
-  background-color: var(--color-black);
-}
+/* Form input base styles (including background-color) in shared/portal-forms.css */
 
 /* Form row - two columns side by side */
 [data-page="admin"] .form-row {
