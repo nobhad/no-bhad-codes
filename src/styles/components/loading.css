@@ -400,7 +400,7 @@ p.empty-state-message {
   border: 3px solid var(--portal-border-dark, rgba(255, 255, 255, 0.2));
   border-top-color: var(--color-primary, #ef4444);
   border-radius: 50%;
-  animation: loading-spin 0.8s linear infinite;
+  animation: spin 0.8s linear infinite;
   flex-shrink: 0;
 }
 
@@ -410,11 +410,7 @@ p.empty-state-message {
   display: none;
 }
 
-@keyframes loading-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* spin keyframe defined at line 33 */
 
 /* Error state with automatic icon */
 .error-state::before {
