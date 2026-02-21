@@ -18,7 +18,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { ModuleOptions } from '../../types/modules';
 import { container } from '../../core/container';
 import type { IntroAnimationModule } from './intro-animation';
-import { debounce } from '../../utils/gsap-utilities';
+import { debounce } from '../../utils/dom-utils';
 import { ANIMATION_CONSTANTS, PAGE_ANIMATION } from '../../config/animation-constants';
 
 // Register ScrollTrigger plugin

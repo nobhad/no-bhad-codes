@@ -363,41 +363,5 @@ export function withWillChange(
   return tween;
 }
 
-/**
- * Throttle utility for event handlers
- * Ensures function is called at most once per specified limit
- * @param func - Function to throttle
- * @param limit - Time limit in milliseconds
- * @returns Throttled function
- */
-export function throttle<T extends(...args: any[]) => void>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
-  return function (this: any, ...args: Parameters<T>) {
-    if (!inThrottle) {
-      func.apply(this, args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
-}
-
-/**
- * Debounce utility for event handlers
- * Delays function execution until after specified delay since last call
- * @param func - Function to debounce
- * @param delay - Delay in milliseconds
- * @returns Debounced function
- */
-export function debounce<T extends(...args: any[]) => void>(
-  func: T,
-  delay: number
-): (...args: Parameters<T>) => void {
-  let timeoutId: NodeJS.Timeout;
-  return function (this: any, ...args: Parameters<T>) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
-  };
-}
+// NOTE: debounce and throttle utilities are in dom-utils.ts
+// Import from there: import { debounce, throttle } from './dom-utils';

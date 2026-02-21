@@ -7,7 +7,7 @@
  * Universal form validation utilities for all forms across the site.
  */
 
-import { debounce } from './gsap-utilities';
+import { debounce } from './dom-utils';
 
 /** Debounce delay for form validation (ms) */
 const VALIDATION_DEBOUNCE_MS = 150;
