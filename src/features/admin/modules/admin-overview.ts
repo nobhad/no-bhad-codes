@@ -872,7 +872,7 @@ function renderDashboardKanbanView(): void {
 
   if (dashboardTasks.length === 0) {
     if (kanbanContainer) {
-      kanbanContainer.innerHTML = '<div class="task-list-empty">No upcoming tasks</div>';
+      kanbanContainer.innerHTML = '<div class="empty-state">No upcoming tasks</div>';
     }
     return;
   }

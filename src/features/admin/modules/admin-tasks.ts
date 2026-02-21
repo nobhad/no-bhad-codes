@@ -309,7 +309,23 @@ function renderListView(): void {
   listContainer.style.display = 'block';
 
   if (currentTasks.length === 0) {
-    listContainer.innerHTML = '<div class="task-list-empty">No tasks yet. Create your first task above.</div>';
+    listContainer.innerHTML = `
+      <div class="admin-table-scroll-wrapper">
+        <table class="admin-table tasks-table">
+          <thead>
+            <tr>
+              <th scope="col" class="name-col">Task</th>
+              <th scope="col">Priority</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="date-col">Due Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="empty-row"><td colspan="4"><div class="empty-state">No tasks yet. Create your first task above.</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    `;
     return;
   }
 
@@ -325,24 +341,32 @@ function renderListView(): void {
   });
 
   listContainer.innerHTML = `
-    <div class="task-list-container">
-      <div class="task-list-header">
-        <span>Task</span>
-        <span>Priority</span>
-        <span>Status</span>
-        <span>Due Date</span>
-      </div>
-      ${sortedTasks.map(task => renderListItem(task)).join('')}
+    <div class="admin-table-scroll-wrapper">
+      <table class="admin-table tasks-table">
+        <thead>
+          <tr>
+            <th scope="col" class="name-col">Task</th>
+            <th scope="col">Priority</th>
+            <th scope="col" class="status-col">Status</th>
+            <th scope="col" class="date-col">Due Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sortedTasks.map(task => renderListItem(task)).join('')}
+        </tbody>
+      </table>
     </div>
   `;
 
-  // Add click handlers
-  listContainer.querySelectorAll('.task-list-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const taskId = parseInt((item as HTMLElement).dataset.taskId || '0');
+  // Add click handlers via event delegation
+  const tbody = listContainer.querySelector('tbody');
+  tbody?.addEventListener('click', (e) => {
+    const row = (e.target as HTMLElement).closest('tr[data-task-id]');
+    if (row) {
+      const taskId = parseInt(row.getAttribute('data-task-id') || '0');
       const task = currentTasks.find(t => t.id === taskId);
       if (task) handleTaskClick(taskToKanbanItem(task));
-    });
+    }
   });
 }
 
@@ -352,19 +376,20 @@ function renderListView(): void {
 function renderListItem(task: ProjectTask): string {
   const priorityClass = PRIORITY_CONFIG[task.priority]?.class || '';
   const priorityLabel = PRIORITY_CONFIG[task.priority]?.label || task.priority;
-  const _statusLabel = STATUS_CONFIG[task.status]?.label || task.status;
   const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed';
 
   return `
-    <div class="task-list-item" data-task-id="${task.id}">
-      <div class="task-list-title">
-        <span>${SanitizationUtils.escapeHtml(task.title)}</span>
-        ${task.description ? `<small>${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</small>` : ''}
-      </div>
-      <span class="task-priority ${priorityClass}">${priorityLabel}</span>
-      ${getStatusDotHTML(task.status)}
-      <span class="${isOverdue ? 'overdue' : ''}">${task.due_date ? formatDate(task.due_date) : '-'}</span>
-    </div>
+    <tr data-task-id="${task.id}">
+      <td class="name-cell" data-label="Task">
+        <div class="cell-content">
+          <span class="task-title">${SanitizationUtils.escapeHtml(task.title)}</span>
+          ${task.description ? `<small class="task-subtitle">${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</small>` : ''}
+        </div>
+      </td>
+      <td data-label="Priority"><span class="task-priority ${priorityClass}">${priorityLabel}</span></td>
+      <td class="status-cell" data-label="Status">${getStatusDotHTML(task.status)}</td>
+      <td class="date-cell ${isOverdue ? 'overdue' : ''}" data-label="Due Date">${task.due_date ? formatDate(task.due_date) : '-'}</td>
+    </tr>
   `;
 }
 

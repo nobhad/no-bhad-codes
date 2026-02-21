@@ -446,7 +446,7 @@ function renderListView(): void {
   if (activeTasks.length === 0) {
     listContainer.innerHTML = `
       <div class="admin-table-container">
-        <div class="task-list-empty">No tasks found across any projects.</div>
+        <div class="empty-state">No tasks found across any projects.</div>
       </div>
     `;
     return;
@@ -508,10 +508,10 @@ function renderListItem(task: GlobalTask): string {
 
   return `
     <tr data-task-id="${task.id}" class="clickable-row" tabindex="0" role="button" aria-label="View task: ${SanitizationUtils.escapeHtml(task.title)}">
-      <td class="identity-cell" data-label="Task">
-        <div class="task-list-title">
-          <span class="identity-name">${SanitizationUtils.escapeHtml(task.title)}</span>
-          ${task.description ? `<small class="identity-contact text-muted">${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</small>` : ''}
+      <td class="name-cell" data-label="Task">
+        <div class="cell-content">
+          <span class="task-title">${SanitizationUtils.escapeHtml(task.title)}</span>
+          ${task.description ? `<small class="task-subtitle">${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</small>` : ''}
         </div>
       </td>
       <td class="project-cell" data-label="Project">
