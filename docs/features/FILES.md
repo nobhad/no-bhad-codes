@@ -951,9 +951,9 @@ Generate all business document types from project details Files tab.
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
 - [Deliverables](./DELIVERABLES.md) - Design review and deliverable approval
 - [Document Requests](./DOCUMENT_REQUESTS.md) - Document request integration
-- [API Reference](../API_REFERENCE.md) - Complete API documentation
+- [API Reference](../API_DOCUMENTATION.md) - Complete API documentation
 - [Settings](./SETTINGS.md) - Storage preferences
-- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system
+- [CSS Architecture](../design/DESIGN_SYSTEM.md) - Styling system
 
 ---
 

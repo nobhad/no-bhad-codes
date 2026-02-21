@@ -496,8 +496,7 @@ constructor(options: ModuleOptions = {}) {
 ## Related Documentation
 
 - [Animations Guide](../design/ANIMATIONS.md) - General animation standards
-- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - CSS variables and structure
-- [Business Card](./BUSINESS_CARD.md) - Business card component (if exists)
+- [Design System](../design/DESIGN_SYSTEM.md) - CSS variables and structure
 
 ---
 

@@ -530,5 +530,5 @@ await emailService.sendAdminNotification({
 ## Related Documentation
 
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
-- [Messages](./MESSAGES.md) - Project discussions happen in messages
-- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Form styling system
+- [Messages](./MESSAGING.md) - Project discussions happen in messages
+- [CSS Architecture](../design/DESIGN_SYSTEM.md) - Form styling system

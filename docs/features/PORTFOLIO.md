@@ -201,7 +201,7 @@ Projects appear on the main projects page only when:
 }
 ```
 
-3. Verify the project appears at `#/projects` and detail page at `#/projects/new-project`
+1. Verify the project appears at `#/projects` and detail page at `#/projects/new-project`
 
 ## Writing Tips
 

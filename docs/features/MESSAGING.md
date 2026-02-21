@@ -982,4 +982,4 @@ await emailService.sendMessageNotification(clientEmail, {
 
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
 - [Settings](./SETTINGS.md) - Notification preferences
-- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system
+- [CSS Architecture](../design/DESIGN_SYSTEM.md) - Styling system

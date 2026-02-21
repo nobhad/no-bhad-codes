@@ -602,6 +602,6 @@ The main dashboard delegates to this module's `setupMessagingListeners()` for pr
 ## Related Documentation
 
 - [Client Portal](./CLIENT_PORTAL.md) - Client-facing portal
-- [Messages](./MESSAGES.md) - Messaging system
+- [Messages](./MESSAGING.md) - Messaging system
 - [Files](./FILES.md) - File management
 - [API Documentation](../API_DOCUMENTATION.md) - Full API reference
