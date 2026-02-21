@@ -2,27 +2,16 @@
    SHARED PORTAL FORMS
    @file src/styles/shared/portal-forms.css
    Single source of truth for admin and client portal forms
-   Matches dropdown styling: same border, radius, bg, font
-
    NOTE: Unified label styles are in portal-cards.css
    ===================================================== */
 
-/* =====================================================
-   PORTAL FORM INPUTS - BASE STYLES
-   Vertically centered text, matches dropdown styling
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .form-input,
-:is([data-page="admin"], [data-page="client-portal"]) .form-textarea,
-:is([data-page="admin"], [data-page="client-portal"]) .form-select,
-:is([data-page="admin"], [data-page="client-portal"]) input[type="text"],
-:is([data-page="admin"], [data-page="client-portal"]) input[type="email"],
-:is([data-page="admin"], [data-page="client-portal"]) input[type="password"],
-:is([data-page="admin"], [data-page="client-portal"]) input[type="tel"],
-:is([data-page="admin"], [data-page="client-portal"]) input[type="number"],
-:is([data-page="admin"], [data-page="client-portal"]) input[type="url"],
-:is([data-page="admin"], [data-page="client-portal"]) input[type="date"],
-:is([data-page="admin"], [data-page="client-portal"]) textarea,
-:is([data-page="admin"], [data-page="client-portal"]) select:not(.status-select) {
+/* Base input styles - all form controls */
+.portal :is(
+  .form-input, .form-textarea, .form-select,
+  input[type="text"], input[type="email"], input[type="password"],
+  input[type="tel"], input[type="number"], input[type="url"], input[type="date"],
+  textarea, select:not(.status-select)
+) {
   width: 100%;
   height: var(--space-6);
   padding: 0 var(--space-2);
@@ -39,130 +28,75 @@
   caret-color: var(--portal-text-light);
 }
 
-/* =====================================================
-   INPUT WITH LEFT ICON
-   When an icon is present (e.g. search bar), text must never overlap it.
-   Use .field-with-left-icon on the wrapper or .search-bar (has .search-bar-icon).
-   Single source of truth - no padding override needed in search-bar.css.
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .search-bar:has(.search-bar-icon) input,
-:is([data-page="admin"], [data-page="client-portal"]) .field-with-left-icon input {
+/* Input with left icon - text must not overlap */
+.portal :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input {
   --input-left-icon-padding: 2.25rem;
   padding: 0.4rem 16px 0.4rem var(--input-left-icon-padding);
 }
 
-/* Textarea specific - needs different height/padding */
-/* Padding matches dropdown trigger visually: 12px vertical, 16px horizontal */
-:is([data-page="admin"], [data-page="client-portal"]) textarea,
-:is([data-page="admin"], [data-page="client-portal"]) .form-textarea,
-:is([data-page="admin"], [data-page="client-portal"]) textarea.form-input {
-  height: auto !important;
+/* Textarea - different height/padding */
+.portal :is(textarea, .form-textarea, textarea.form-input) {
+  height: auto;
   min-height: calc(var(--space-6) * 2);
   padding: var(--space-1-5) var(--space-2);
-  line-height: 1.4 !important;
+  line-height: 1.4;
   resize: vertical;
 }
 
-/* =====================================================
-   MODAL FORM GROUPS - Proper spacing between groups
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .modal-body .form-group {
+/* Modal form groups */
+.portal .modal-body .form-group {
   margin-bottom: var(--space-4);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .modal-body .form-group:last-child {
+.portal .modal-body .form-group:last-child {
   margin-bottom: 0;
 }
 
-/* Modal label styles moved to portal-cards.css */
-
-/* =====================================================
-   PLACEHOLDER TEXT - matches dropdown text styling
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .form-input::placeholder,
-:is([data-page="admin"], [data-page="client-portal"]) .form-textarea::placeholder,
-:is([data-page="admin"], [data-page="client-portal"]) input::placeholder,
-:is([data-page="admin"], [data-page="client-portal"]) textarea::placeholder {
+/* Placeholder text */
+.portal :is(.form-input, .form-textarea, input, textarea)::placeholder {
   font-size: var(--font-size-base);
   font-weight: 400;
-  /* WCAG AA compliant: use muted text color instead of low opacity */
-  /* Ensures 4.5:1 contrast ratio for placeholder text */
   color: var(--portal-text-muted, rgba(255, 255, 255, 0.7));
   opacity: 1;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* =====================================================
-   HOVER STATES - matches dropdown hover
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .form-input:hover,
-:is([data-page="admin"], [data-page="client-portal"]) .form-textarea:hover,
-:is([data-page="admin"], [data-page="client-portal"]) .form-select:hover,
-:is([data-page="admin"], [data-page="client-portal"]) input:hover,
-:is([data-page="admin"], [data-page="client-portal"]) textarea:hover,
-:is([data-page="admin"], [data-page="client-portal"]) select:hover {
+/* Hover state */
+.portal :is(.form-input, .form-textarea, .form-select, input, textarea, select):hover {
   border-color: var(--color-primary);
 }
 
-/* =====================================================
-   FOCUS STATES - matches dropdown focus
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .form-input:focus,
-:is([data-page="admin"], [data-page="client-portal"]) .form-textarea:focus,
-:is([data-page="admin"], [data-page="client-portal"]) .form-select:focus,
-:is([data-page="admin"], [data-page="client-portal"]) input:focus,
-:is([data-page="admin"], [data-page="client-portal"]) textarea:focus,
-:is([data-page="admin"], [data-page="client-portal"]) select:focus,
-:is([data-page="admin"], [data-page="client-portal"]) .form-input:focus-visible,
-:is([data-page="admin"], [data-page="client-portal"]) .form-textarea:focus-visible,
-:is([data-page="admin"], [data-page="client-portal"]) .form-select:focus-visible,
-:is([data-page="admin"], [data-page="client-portal"]) input:focus-visible,
-:is([data-page="admin"], [data-page="client-portal"]) textarea:focus-visible,
-:is([data-page="admin"], [data-page="client-portal"]) select:focus-visible {
+/* Focus state */
+.portal :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible) {
   outline: none;
   outline-offset: 0;
   border-color: var(--color-primary);
   box-shadow: none;
 }
 
-/* =====================================================
-   FORM GROUP - Basic structure
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .form-group {
+/* Form group structure */
+.portal .form-group {
   position: relative;
   display: flex;
   flex-direction: column;
   margin-bottom: var(--space-2);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .form-group:last-child {
+.portal .form-group:last-child {
   margin-bottom: 0;
 }
 
-/* =====================================================
-   FIELD-LABEL - Labels positioned ABOVE inputs
-   This is the standard/default pattern for modals
-   ===================================================== */
-/* Label styling from unified rule above - only layout here */
-:is([data-page="admin"], [data-page="client-portal"]) .form-group label.field-label,
-:is([data-page="admin"], [data-page="client-portal"]) label.field-label,
-:is([data-page="admin"], [data-page="client-portal"]) .field-label {
+/* Field label - positioned above inputs */
+.portal :is(.form-group label.field-label, label.field-label, .field-label) {
   position: static;
   display: block;
   margin-bottom: var(--field-label-value-gap);
   pointer-events: auto;
 }
 
-/* =====================================================
-   LABEL-INSIDE PATTERN (opt-in)
-   For forms where labels appear inside the input
-   Add .label-inside class to .form-group
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside {
+/* Label-inside pattern (opt-in) */
+.portal .form-group.label-inside {
   position: relative;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside label {
+.portal .form-group.label-inside label {
   position: absolute;
   top: var(--space-1);
   left: var(--space-2);
@@ -175,25 +109,18 @@
   pointer-events: none;
   margin: 0;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside input,
-:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside select,
-:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside textarea {
+.portal .form-group.label-inside :is(input, select, textarea) {
   height: calc(var(--space-6) + var(--space-1-5));
   padding: var(--space-3) var(--space-2) var(--space-1) var(--space-2);
   line-height: normal;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside textarea {
+.portal .form-group.label-inside textarea {
   height: auto;
   min-height: 100px;
 }
 
-/* =====================================================
-   SELECT DROPDOWN
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) select:not(.status-select),
-:is([data-page="admin"], [data-page="client-portal"]) .form-select {
+/* Select dropdown arrow */
+.portal :is(select:not(.status-select), .form-select) {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -205,72 +132,41 @@
   cursor: pointer;
 }
 
-/* =====================================================
-   DISABLED STATE
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) input:disabled,
-:is([data-page="admin"], [data-page="client-portal"]) textarea:disabled,
-:is([data-page="admin"], [data-page="client-portal"]) select:disabled,
-:is([data-page="admin"], [data-page="client-portal"]) .form-input:disabled,
-:is([data-page="admin"], [data-page="client-portal"]) .form-textarea:disabled,
-:is([data-page="admin"], [data-page="client-portal"]) .form-select:disabled {
+/* Disabled state */
+.portal :is(input, textarea, select, .form-input, .form-textarea, .form-select):disabled {
   opacity: 0.5;
   cursor: not-allowed;
   background-color: var(--portal-bg-readonly);
 }
 
-/* =====================================================
-   READONLY STATE
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) input:read-only,
-:is([data-page="admin"], [data-page="client-portal"]) textarea:read-only,
-:is([data-page="admin"], [data-page="client-portal"]) .form-input:read-only,
-:is([data-page="admin"], [data-page="client-portal"]) .form-textarea:read-only {
+/* Readonly state */
+.portal :is(input, textarea, .form-input, .form-textarea):read-only {
   background-color: var(--portal-bg-readonly);
   cursor: default;
 }
 
-/* =====================================================
-   ERROR STATE
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .form-input.error,
-:is([data-page="admin"], [data-page="client-portal"]) .form-textarea.error,
-:is([data-page="admin"], [data-page="client-portal"]) input.error,
-:is([data-page="admin"], [data-page="client-portal"]) textarea.error,
-:is([data-page="admin"], [data-page="client-portal"]) select.error {
+/* Error state */
+.portal :is(.form-input, .form-textarea, input, textarea, select).error {
   border-color: var(--color-danger);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .form-error-message {
+.portal .form-error-message {
   color: var(--color-danger);
   font-size: var(--font-size-sm);
   margin-top: var(--space-0-5);
 }
 
-/* =====================================================
-   MOBILE RESPONSIVE
-   ===================================================== */
+/* Mobile responsive */
 @media (--small-mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .form-input,
-  :is([data-page="admin"], [data-page="client-portal"]) .form-textarea,
-  :is([data-page="admin"], [data-page="client-portal"]) .form-select,
-  :is([data-page="admin"], [data-page="client-portal"]) input,
-  :is([data-page="admin"], [data-page="client-portal"]) textarea,
-  :is([data-page="admin"], [data-page="client-portal"]) select {
+  .portal :is(.form-input, .form-textarea, .form-select, input, textarea, select) {
     height: calc(var(--space-5) + var(--space-0-5));
     padding: 0 var(--space-1-5);
     font-size: var(--font-size-sm);
     line-height: calc(var(--space-5) + var(--space-0-5));
   }
-
-  /* Keep left-icon padding so text never overlaps icon */
-  :is([data-page="admin"], [data-page="client-portal"]) .search-bar:has(.search-bar-icon) input,
-  :is([data-page="admin"], [data-page="client-portal"]) .field-with-left-icon input {
+  .portal :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input {
     padding-left: var(--input-left-icon-padding, 2.25rem);
   }
-
-  :is([data-page="admin"], [data-page="client-portal"]) textarea,
-  :is([data-page="admin"], [data-page="client-portal"]) .form-textarea {
+  .portal :is(textarea, .form-textarea) {
     height: auto;
     min-height: var(--space-10);
     padding: var(--space-1) var(--space-1-5);
@@ -278,13 +174,8 @@
   }
 }
 
-/* =====================================================
-   PORTAL CHECKBOX (reusable component, system-sized)
-   Same size as native checkbox (~16px). Darkest grey bg.
-   Use .portal-checkbox wrapper with input[type="checkbox"] inside.
-   See src/components/portal-checkbox.ts for getPortalCheckboxHTML().
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-checkbox {
+/* Portal checkbox */
+.portal .portal-checkbox {
   flex-shrink: 0;
   width: var(--space-2);
   height: var(--space-2);
@@ -297,8 +188,7 @@
   align-items: center;
   justify-content: center;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .portal-checkbox input[type="checkbox"] {
+.portal .portal-checkbox input[type="checkbox"] {
   position: absolute;
   opacity: 0;
   width: 100%;
@@ -308,13 +198,11 @@
   cursor: pointer;
   z-index: 1;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .portal-checkbox:has(input:checked) {
+.portal .portal-checkbox:has(input:checked) {
   background: var(--color-primary);
   border-color: var(--color-primary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .portal-checkbox:has(input:checked)::after {
+.portal .portal-checkbox:has(input:checked)::after {
   content: '';
   position: absolute;
   left: 5px;
@@ -326,23 +214,17 @@
   transform: rotate(45deg);
 }
 
-/* =====================================================
-   PASSWORD INPUT WRAPPER & TOGGLE
-   Base styles for password fields with visibility toggle.
-   Context-specific overrides can be added in component files.
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .password-input-wrapper {
+/* Password input wrapper & toggle */
+.portal .password-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
   width: 100%;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .password-input-wrapper input {
-  padding-right: 3rem; /* Space for toggle button */
+.portal .password-input-wrapper input {
+  padding-right: 3rem;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .password-toggle {
+.portal .password-toggle {
   position: absolute;
   right: 0.75rem;
   top: 50%;
@@ -357,34 +239,25 @@
   justify-content: center;
   transition: color var(--transition-fast);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .password-toggle:hover {
+.portal .password-toggle:hover {
   color: var(--color-primary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .password-toggle svg {
+.portal .password-toggle svg {
   width: 20px;
   height: 20px;
 }
-
-/* Toggle icon visibility states */
-:is([data-page="admin"], [data-page="client-portal"]) .password-toggle .password-icon-hide {
+.portal .password-toggle .password-icon-hide {
   display: none;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .password-toggle.showing .password-icon-show {
+.portal .password-toggle.showing .password-icon-show {
   display: none;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .password-toggle.showing .password-icon-hide {
+.portal .password-toggle.showing .password-icon-hide {
   display: block;
 }
 
-/* =====================================================
-   FILE INPUT WRAPPER
-   Custom styled file input with dashed border (dropzone style)
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .file-input-wrapper {
+/* File input wrapper */
+.portal .file-input-wrapper {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -395,13 +268,11 @@
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
   cursor: pointer;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .file-input-wrapper:hover {
+.portal .file-input-wrapper:hover {
   border-color: var(--color-primary);
   background: var(--portal-bg-light);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .file-input-wrapper input[type="file"] {
+.portal .file-input-wrapper input[type="file"] {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -412,8 +283,7 @@
   white-space: nowrap;
   border: 0;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .file-input-text {
+.portal .file-input-text {
   flex: 1;
   color: var(--portal-text-muted);
   font-size: var(--font-size-sm);
@@ -421,11 +291,24 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .file-input-text.has-file {
+.portal .file-input-text.has-file {
   color: var(--portal-text-light);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .file-input-btn {
+.portal .file-input-btn {
   flex-shrink: 0;
+}
+
+/* Form row - side-by-side fields */
+.portal .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+.portal .form-row .form-group {
+  margin-bottom: 0;
+}
+@media (max-width: 576px) {
+  .portal .form-row {
+    grid-template-columns: 1fr;
+  }
 }

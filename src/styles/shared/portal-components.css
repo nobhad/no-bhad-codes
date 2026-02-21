@@ -43,12 +43,11 @@
   align-items: center;
   background: var(--portal-bg-dark);
   border-bottom: 1px solid var(--portal-border);
-  /* Subtle left accent bar for status indication */
   border-left: 3px solid transparent;
   padding-left: calc(var(--space-3) - 3px);
 }
 
-/* Status-based column left accent - subtle Linear-style indicators */
+/* Status-based column left accent */
 .kanban-column[data-status="todo"] .kanban-column-header,
 .kanban-column[data-status="pending"] .kanban-column-header {
   border-left-color: var(--color-neutral-500);
@@ -183,8 +182,6 @@
   letter-spacing: 0.03em;
 }
 
-/* Uses universal empty state from loading.css */
-
 @media (--mobile) {
   .kanban-board {
     flex-direction: column;
@@ -316,8 +313,6 @@
   color: var(--color-primary);
 }
 
-/* Uses universal empty state from loading.css */
-
 /* ============================================
    TIMELINE COMPONENT
    ============================================ */
@@ -406,8 +401,6 @@
   margin-top: 4px;
 }
 
-/* Uses universal empty state from loading.css */
-
 .timeline-load-more {
   text-align: center;
   margin-top: var(--space-1-5);
@@ -432,7 +425,6 @@
   margin-bottom: var(--space-1);
 }
 
-/* Label styling from unified rule in portal-forms.css - only layout here */
 .bar-chart-label {
   margin-bottom: 4px;
 }
@@ -485,7 +477,6 @@
   flex-shrink: 0;
 }
 
-/* Label styling from unified rule in portal-forms.css - only layout here */
 .pie-chart-legend-label {
   flex: 1;
 }
@@ -495,8 +486,6 @@
   font-weight: 600;
   color: var(--portal-text-primary);
 }
-
-/* Uses universal empty state from loading.css */
 
 /* Sparkline */
 .sparkline-svg {
@@ -525,10 +514,6 @@
   flex-direction: column;
 }
 
-/* .kpi-card-value styling from unified rule in portal-cards.css */
-
-/* Label styling from unified rule in portal-forms.css */
-
 .kpi-card-change {
   display: flex;
   align-items: center;
@@ -545,8 +530,6 @@
   color: var(--status-cancelled);
 }
 
-/* Label styling from unified rule in portal-forms.css */
-
 @media (--mobile) {
   .pie-chart-wrapper {
     flex-direction: column;
@@ -557,28 +540,27 @@
 /* =====================================================
    :HAS() AUTOMATIC STYLING
    Apply styles automatically based on child elements
-   Single source of truth - no per-page overrides needed
    ===================================================== */
 
 /* Containers with .status-item children get automatic gap */
-:is([data-page="admin"], [data-page="client-portal"]) :has(> .status-item) {
+.portal :has(> .status-item) {
   gap: var(--space-2);
 }
 
 /* Containers with .meta-item children get automatic gap */
-:is([data-page="admin"], [data-page="client-portal"]) :has(> .meta-item) {
+.portal :has(> .meta-item) {
   gap: var(--space-2);
 }
 
 /* Containers with .form-group children get automatic column layout */
-:is([data-page="admin"], [data-page="client-portal"]) :has(> .form-group):not(.form-row) {
+.portal :has(> .form-group):not(.form-row) {
   display: flex;
   flex-direction: column;
   gap: var(--space-1-5);
 }
 
 /* Containers with .badge children get automatic row wrap */
-:is([data-page="admin"], [data-page="client-portal"]) :has(> .badge):not([class*="flex"]) {
+.portal :has(> .badge):not([class*="flex"]) {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-0-5);
@@ -587,52 +569,38 @@
 /* =====================================================
    LIST CONTAINER AUTO-LAYOUT
    Lists ending in -list with children ending in -item
-   get automatic flex-column gap styling
    ===================================================== */
 
 /* Universal list containers with -item children: flex-column gap-1-5 */
-:is([data-page="admin"], [data-page="client-portal"]) [class$="-list"]:has(> [class$="-item"]) {
+.portal [class$="-list"]:has(> [class$="-item"]) {
   display: flex;
   flex-direction: column;
   gap: var(--space-1-5);
 }
 
 /* Specific list containers with tighter gap-1 */
-:is([data-page="admin"], [data-page="client-portal"]) .help-accordion,
-:is([data-page="admin"], [data-page="client-portal"]) .help-featured-list,
-:is([data-page="admin"], [data-page="client-portal"]) .help-results-list,
-:is([data-page="admin"], [data-page="client-portal"]) .notes-list,
-:is([data-page="admin"], [data-page="client-portal"]) .tasks-list,
-:is([data-page="admin"], [data-page="client-portal"]) .activity-list {
+.portal :is(.help-accordion, .help-featured-list, .help-results-list, .notes-list, .tasks-list, .activity-list) {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
 }
 
 /* Containers with -card children: flex-column gap-2 */
-:is([data-page="admin"], [data-page="client-portal"]) [class$="-cards"]:has(> [class$="-card"]),
-:is([data-page="admin"], [data-page="client-portal"]) [class$="-grid"]:has(> [class$="-card"]) {
+.portal :is([class$="-cards"], [class$="-grid"]):has(> [class$="-card"]) {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
 /* Section containers: flex-column gap-1-5 */
-:is([data-page="admin"], [data-page="client-portal"]) .signature-details,
-:is([data-page="admin"], [data-page="client-portal"]) .signature-info,
-:is([data-page="admin"], [data-page="client-portal"]) .lead-tab-section,
-:is([data-page="admin"], [data-page="client-portal"]) .time-entry-form,
-:is([data-page="admin"], [data-page="client-portal"]) .contract-tab-content,
-:is([data-page="admin"], [data-page="client-portal"]) .checkbox-group {
+.portal :is(.signature-details, .signature-info, .lead-tab-section, .time-entry-form, .contract-tab-content, .checkbox-group) {
   display: flex;
   flex-direction: column;
   gap: var(--space-1-5);
 }
 
 /* Modal/form containers: flex-column gap-2 */
-:is([data-page="admin"], [data-page="client-portal"]) .modal-form,
-:is([data-page="admin"], [data-page="client-portal"]) .deliverables-modal-content,
-:is([data-page="admin"], [data-page="client-portal"]) .deliverables-container {
+.portal :is(.modal-form, .deliverables-modal-content, .deliverables-container) {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -654,15 +622,10 @@
 }
 
 /* =====================================================
-   TEXT UTILITIES
-   .truncate, .truncate-2, .truncate-3 are in base/utilities.css
-   ===================================================== */
-
-/* =====================================================
    LIST UTILITIES
    ===================================================== */
 
-/* Reset list styles - used 29+ times across codebase */
+/* Reset list styles */
 .list-reset {
   list-style: none;
   padding: 0;
@@ -670,27 +633,12 @@
 }
 
 /* Universal list reset for portal contexts */
-/* All lists ending in -list get automatic reset */
-:is([data-page="admin"], [data-page="client-portal"]) [class$="-list"],
-:is([data-page="admin"], [data-page="client-portal"]) .activity-list,
-:is([data-page="admin"], [data-page="client-portal"]) .tasks-list,
-:is([data-page="admin"], [data-page="client-portal"]) .notes-list,
-:is([data-page="admin"], [data-page="client-portal"]) .files-list,
-:is([data-page="admin"], [data-page="client-portal"]) .invoices-list,
-:is([data-page="admin"], [data-page="client-portal"]) .milestones-list,
-:is([data-page="admin"], [data-page="client-portal"]) .messages-list,
-:is([data-page="admin"], [data-page="client-portal"]) .upcoming-tasks-list {
+.portal :is([class$="-list"], .activity-list, .tasks-list, .notes-list, .files-list, .invoices-list, .milestones-list, .messages-list, .upcoming-tasks-list) {
   list-style: none;
 }
 
 /* Universal list item styling for portal lists */
-/* List items (li) in common list containers get consistent styling */
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .activity-list,
-  .notes-list,
-  .files-list,
-  .tasks-list
-) > li {
+.portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li {
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
@@ -698,54 +646,26 @@
   margin-bottom: var(--space-0-5);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .activity-list,
-  .notes-list,
-  .files-list,
-  .tasks-list
-) > li:last-child {
+.portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li:last-child {
   margin-bottom: 0;
 }
 
 /* Clickable list items */
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .activity-list,
-  .notes-list,
-  .files-list,
-  .tasks-list
-) > li.clickable,
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .activity-list,
-  .notes-list,
-  .files-list,
-  .tasks-list
-) > li.clickable-activity {
+.portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li:is(.clickable, .clickable-activity) {
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .activity-list,
-  .notes-list,
-  .files-list,
-  .tasks-list
-) > li.clickable:hover,
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .activity-list,
-  .notes-list,
-  .files-list,
-  .tasks-list
-) > li.clickable-activity:hover {
+.portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li:is(.clickable, .clickable-activity):hover {
   background: var(--portal-bg-light);
 }
 
 /* =====================================================
    LIST ITEM COMPONENT
    Universal styling for clickable list items
-   (activity items, task items, file items, etc.)
    ===================================================== */
 
-:is([data-page="admin"], [data-page="client-portal"]) .list-item {
+.portal .list-item {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
@@ -756,12 +676,12 @@
   transition: background-color var(--transition-fast);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .list-item:hover {
+.portal .list-item:hover {
   background: var(--portal-bg-light);
 }
 
 /* Compact list item variant */
-:is([data-page="admin"], [data-page="client-portal"]) .list-item-compact {
+.portal .list-item-compact {
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -772,31 +692,26 @@
   transition: background-color var(--transition-fast);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .list-item-compact:hover {
+.portal .list-item-compact:hover {
   background: var(--portal-bg-light);
 }
 
 /* =====================================================
    PADDING UTILITIES
-   Common padding patterns used throughout portal
    ===================================================== */
 
-/* Compact field padding (8px 12px) - used 30+ times */
 .pad-compact {
   padding: var(--space-1) var(--space-1-5);
 }
 
-/* Standard field padding (16px 24px) - used 40+ times */
 .pad-standard {
   padding: var(--space-2) var(--space-3);
 }
 
-/* Card padding (24px) - used for card interiors */
 .pad-card {
   padding: var(--space-3);
 }
 
-/* Section padding (32px) - used for major sections */
 .pad-section {
   padding: var(--space-4);
 }
@@ -821,7 +736,6 @@
 
 /* =====================================================
    SPACING UTILITIES
-   Use instead of inline margin
    ===================================================== */
 .mt-0 { margin-top: 0; }
 .mt-sm { margin-top: var(--space-2); }
@@ -895,7 +809,6 @@ a.text-danger:hover {
 
 /* =====================================================
    FONT WEIGHT UTILITIES
-   Used 300+ times across codebase
    ===================================================== */
 
 .font-semibold { font-weight: 600; }
@@ -905,7 +818,6 @@ a.text-danger:hover {
 
 /* =====================================================
    TRANSITION UTILITIES
-   Common transition patterns
    ===================================================== */
 
 .transition-colors {
@@ -926,7 +838,6 @@ a.text-danger:hover {
 
 /* =====================================================
    BORDER UTILITIES
-   Border patterns used 87+ times
    ===================================================== */
 
 .border-bottom {
@@ -955,7 +866,6 @@ a.text-danger:hover {
 
 /* =====================================================
    ICON SIZING UTILITIES
-   Consistent icon dimensions
    ===================================================== */
 
 .icon-xs { width: 12px; height: 12px; }
@@ -1019,5 +929,3 @@ a.text-danger:hover {
   cursor: not-allowed;
   pointer-events: none;
 }
-
-/* Loading/empty states: see components/loading.css */

@@ -387,7 +387,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
   background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--portal-radius-sm, 8px);
-  padding: 13px 14px;
+  padding: var(--portal-card-padding);
 }
 
 [data-page="admin"] #tab-overview .attention-card,

@@ -170,16 +170,9 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   box-shadow: var(--shadow-panel);
 }
 
-/* Invoice summary cards - styled like Weekly Overview cards */
-/* High specificity with body element selector */
-body[data-page="admin"] [id^="pd-tab-"] .invoice-summary {
-  display: flex;
-  gap: var(--space-3);
-  margin: 0;
-  background: transparent;
-  box-shadow: none;
-}
+/* Invoice summary moved to pd-invoices.css */
 
+/* Summary cards - styled like Weekly Overview cards */
 body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background: var(--portal-bg-darker);
   border: none;
@@ -221,13 +214,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* h3 styling centralized in admin.css */
 
-/* Invoice summary within tab - keep flex layout */
-[id^="pd-tab-"] .invoice-summary {
-  display: flex;
-  gap: var(--space-3);
-  margin: 0;
-}
-
 /* Settings tab sections - darker background and equal heights */
 [data-page="admin"] #pd-tab-settings .settings-grid {
   align-items: stretch;
@@ -248,26 +234,10 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Form input base styles (including background-color) in shared/portal-forms.css */
 
-/* Form row - two columns side by side */
-[data-page="admin"] .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-  background: transparent;
+/* .form-row base styling from shared/portal-forms.css */
+/* Project-detail specific: add margin-bottom */
+[data-page="admin"] .project-detail .form-row {
   margin-bottom: var(--space-1-5);
-}
-
-[data-page="admin"] .form-row .form-group {
-  background: transparent;
-  margin-bottom: 0;
-}
-
-[data-page="admin"] .form-row .form-group label {
-  text-align: left;
-  padding-left: 0;
-  display: block;
-  margin-bottom: var(--space-1);
-  position: relative;
 }
 
 /* Readonly form value display (no background) */
@@ -383,16 +353,13 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   font-weight: 400;
 }
 
-/* Form row for Account Status and Last Login */
+/* Form row for Account Status and Last Login - overrides from portal-forms.css */
 #pd-tab-settings .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 2rem;
   margin-bottom: 1rem;
 }
 
 #pd-tab-settings .form-row .form-group {
-  margin-bottom: 0;
   gap: var(--space-1);
 }
 
@@ -597,10 +564,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   font-family: var(--font-family-sans, system-ui, sans-serif);
 }
 
-.milestone-item.completed .milestone-title {
-  text-decoration: line-through;
-  color: var(--portal-text-secondary);
-}
+/* .milestone-item.completed styling consolidated in shared/portal-cards.css */
 
 .milestone-description,
 [data-page="admin"] .milestone-description {
@@ -789,11 +753,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-size: 0.75rem;
 }
 
-/* Invoices tab - match files tab layout when active */
-/* Note: display is handled by [id^="pd-tab-"].active rule */
-[data-page="admin"] #pd-tab-invoices.active {
-}
-
+/* Invoices tab display handled by [id^="pd-tab-"].active rule */
 /* Invoices list section - flex layout from pd-invoices.css */
 
 /* Card header spacing in invoices tab - match files section h3 */
@@ -801,18 +761,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin-bottom: 0;
 }
 
-[data-page="admin"] #pd-tab-invoices .invoices-list {
-  margin-top: 0;
-  padding: 0;
-  background: transparent;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-/* Invoice summary cards - consistent spacing */
-[data-page="admin"] #pd-tab-invoices .invoice-summary {
-  margin-bottom: 0;
-}
+/* Invoice styles consolidated in pd-invoices.css */
 
 /* Message styles now in client-portal/messages.css (unified for all portals) */
 
@@ -979,10 +928,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   background: var(--portal-bg-dark);
 }
 
-.milestone-task-item.completed .milestone-task-title {
-  text-decoration: line-through;
-  opacity: 0.6;
-}
+/* .milestone-task-item.completed styling consolidated in shared/portal-cards.css */
 
 .milestone-task-item input[type="checkbox"] {
   width: 18px;
@@ -1633,9 +1579,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 @media (--tablet-down) {
   .pd-header-card {
     padding: var(--space-3) var(--space-4);
-  }
-
-  .pd-header-meta {
   }
 
   .pd-overview-sidebar {

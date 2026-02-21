@@ -381,7 +381,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
    ===================================================== */
 
 /* Toggle button positioned on sidebar's right edge, vertically centered with header line */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar > .sidebar-toggle-btn {
+.portal .sidebar > .sidebar-toggle-btn {
   position: absolute;
   right: 0;
   top: calc(var(--portal-header-top, 20px) + 6px);
@@ -404,19 +404,19 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   z-index: 70;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar > .sidebar-toggle-btn:hover {
+.portal .sidebar > .sidebar-toggle-btn:hover {
   color: var(--color-primary);
   background: transparent;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar > .sidebar-toggle-btn svg {
+.portal .sidebar > .sidebar-toggle-btn svg {
   width: var(--sidebar-icon-size, 20px);
   height: var(--sidebar-icon-size, 20px);
   display: block;
 }
 
 /* Flip icon when sidebar is collapsed */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed > .sidebar-toggle-btn svg {
+.portal .sidebar.collapsed > .sidebar-toggle-btn svg {
   transform: scaleX(-1);
 }
 
@@ -497,7 +497,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
   /* Sidebar logo styles in shared/portal-layout.css */
 
-  :is([data-page="client-portal"], [data-page="admin"]) .sidebar:not(.collapsed) .sidebar-footer {
+  .portal .sidebar:not(.collapsed) .sidebar-footer {
     position: sticky;
     bottom: 0;
     left: 0;
@@ -506,7 +506,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     justify-content: center;
     background: var(--portal-bg-dark);
     padding: 0.75rem 0;
-    margin-top: auto; /* Push to bottom */
+    margin-top: auto;
     flex-shrink: 0;
   }
 
@@ -606,14 +606,14 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   }
 
   /* Footer positioning - for non-collapsed */
-  :is([data-page="client-portal"], [data-page="admin"]) .sidebar:not(.collapsed) .sidebar-footer {
+  .portal .sidebar:not(.collapsed) .sidebar-footer {
     left: 0.5rem;
     right: 0.5rem;
     display: flex;
     justify-content: center;
   }
 
-  :is([data-page="client-portal"], [data-page="admin"]) .sidebar:not(.collapsed) .sidebar-toggle {
+  .portal .sidebar:not(.collapsed) .sidebar-toggle {
     display: flex;
   }
 

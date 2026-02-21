@@ -98,8 +98,6 @@
 @import "../admin/proposals.css" layer(portal);
 @import "../admin/contracts.css" layer(portal);
 @import "../admin/table-features.css" layer(portal);
-@import "../admin/table-dropdowns.css" layer(portal);
-@import "../admin/modal-dropdown.css" layer(portal);
 @import "../admin/table-filters.css" layer(portal);
 @import "../admin/sidebar-badges.css" layer(portal);
 @import "../admin/tooltips.css" layer(portal);
