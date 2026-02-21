@@ -174,37 +174,7 @@
   flex-shrink: 0;
 }
 
-/* Task priority badges */
-.task-priority {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-0-5) var(--space-1-5);
-  border-radius: var(--portal-radius-sm);
-  font-size: var(--font-size-2xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.task-priority-urgent {
-  background-color: var(--status-cancelled);
-  color: var(--color-white);
-}
-
-.task-priority-high {
-  background-color: var(--color-warning-500);
-  color: var(--color-neutral-900);
-}
-
-.task-priority-medium {
-  background-color: var(--app-color-primary);
-  color: var(--color-neutral-900);
-}
-
-.task-priority-low {
-  background-color: var(--portal-bg-medium);
-  color: var(--portal-text-secondary);
-}
+/* Task priority badges - consolidated in shared/portal-cards.css */
 
 /* Priority indicator for dropdowns */
 .priority-indicator {
@@ -230,86 +200,7 @@
   background-color: var(--portal-text-secondary);
 }
 
-/* Form dropdown styling for task modal */
-.form-dropdown {
-  position: relative;
-  width: 100%;
-}
-
-.form-dropdown .custom-dropdown-trigger {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  text-align: left;
-}
-
-.form-dropdown .dropdown-caret {
-  flex-shrink: 0;
-  transition: transform var(--transition-fast);
-}
-
-.form-dropdown.open .dropdown-caret {
-  transform: rotate(180deg);
-}
-
-.form-dropdown .custom-dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  margin-top: var(--space-0-5);
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
-  box-shadow: var(--portal-shadow);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(calc(-1 * var(--space-1)));
-  transition: opacity var(--transition-faster), transform var(--transition-faster), visibility var(--transition-faster);
-  list-style: none;
-  padding: var(--space-0-5) 0;
-  margin: var(--space-0-5) 0 0;
-}
-
-.form-dropdown.open .custom-dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.form-dropdown .custom-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-1-5);
-  cursor: pointer;
-  transition: background-color var(--transition-faster);
-}
-
-.form-dropdown .custom-dropdown-item:hover {
-  background: var(--portal-bg-medium);
-}
-
-.form-dropdown .custom-dropdown-item.selected {
-  background: var(--portal-bg-medium);
-  font-weight: 500;
-}
-
-/* Form row for side-by-side fields */
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-1-5);
-}
-
-@media (--mobile) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-}
+/* Dropdown styling: uses createModalDropdown from shared/modal-dropdown.ts */
 
 .task-meta {
   display: flex;
@@ -356,67 +247,36 @@
 }
 
 /* ============================================
-   Task List View
+   Task List View (uses standard .admin-table)
+   Only task-specific overrides here
    ============================================ */
 
-.task-list-container {
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
-  overflow: hidden;
-  width: 100%;
-  box-shadow: var(--portal-shadow);
-}
-
-.task-list-header {
-  display: grid;
-  grid-template-columns: minmax(200px, 2fr) 100px 120px 120px;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-medium);
-  border-bottom: 1px solid var(--portal-border);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.task-list-item {
-  display: grid;
-  grid-template-columns: minmax(200px, 2fr) 100px 120px 120px;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--portal-border);
-  align-items: center;
+/* Task table rows are clickable */
+.tasks-table tbody tr {
   cursor: pointer;
-  transition: background-color var(--transition-faster);
 }
 
-.task-list-item:hover {
-  background: var(--portal-bg-medium);
-}
-
-.task-list-item:last-child {
-  border-bottom: none;
-}
-
-.task-list-title {
+/* Task title with subtitle in name cell */
+.tasks-table .cell-content {
   display: flex;
   flex-direction: column;
-  gap: var(--space-px);
+  gap: 2px;
 }
 
-.task-list-title span {
+.tasks-table .task-title {
   font-weight: 500;
   color: var(--portal-text-primary);
 }
 
-.task-list-title small {
+.tasks-table .task-subtitle {
   font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
-/* Uses universal empty state from loading.css */
+/* Overdue date styling */
+.tasks-table .date-cell.overdue {
+  color: var(--status-cancelled);
+}
 
 /* ============================================
    Task Detail Modal
@@ -680,21 +540,6 @@
    ============================================ */
 
 @media (--mobile) {
-  .task-list-header,
-  .task-list-item {
-    grid-template-columns: 1fr;
-    gap: var(--space-0-5);
-  }
-
-  .task-list-header > *:not(:first-child) {
-    display: none;
-  }
-
-  .task-list-item > *:not(:first-child) {
-    display: inline-flex;
-    font-size: var(--font-size-xs);
-  }
-
   .time-entries-table {
     display: block;
     overflow-x: auto;
