@@ -2369,7 +2369,7 @@ export function renderWorkflowsTab(container: HTMLElement): void {
       <div class="admin-table-card portal-shadow">
         <div class="admin-table-header">
           <h3>Email Templates</h3>
-          <div class="admin-table-actions">
+          <div class="admin-table-actions" id="email-templates-filter-container">
             <button type="button" class="icon-btn" id="email-templates-refresh" title="Refresh" aria-label="Refresh templates">
               <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
             </button>
@@ -2377,15 +2377,6 @@ export function renderWorkflowsTab(container: HTMLElement): void {
               <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
             </button>
           </div>
-        </div>
-        <!-- Category filter tabs -->
-        <div class="template-category-tabs">
-          <button class="template-category-tab active" data-category="all">All</button>
-          <button class="template-category-tab" data-category="notification">Notification</button>
-          <button class="template-category-tab" data-category="invoice">Invoice</button>
-          <button class="template-category-tab" data-category="contract">Contract</button>
-          <button class="template-category-tab" data-category="project">Project</button>
-          <button class="template-category-tab" data-category="reminder">Reminder</button>
         </div>
         <div class="admin-table-container">
           <div class="admin-table-scroll-wrapper">

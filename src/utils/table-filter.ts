@@ -930,3 +930,25 @@ export const PROPOSALS_FILTER_CONFIG: TableFilterConfig = {
   ],
   storageKey: 'admin_proposals_filter'
 };
+
+export const EMAIL_TEMPLATES_FILTER_CONFIG: TableFilterConfig = {
+  tableId: 'email-templates',
+  searchFields: ['name', 'subject', 'description'],
+  // statusField uses category intentionally — Email templates filter by category, not status
+  statusField: 'category',
+  statusOptions: [
+    { value: 'notification', label: 'Notification' },
+    { value: 'invoice', label: 'Invoice' },
+    { value: 'contract', label: 'Contract' },
+    { value: 'project', label: 'Project' },
+    { value: 'reminder', label: 'Reminder' },
+    { value: 'general', label: 'General' }
+  ],
+  dateField: 'updated_at',
+  sortableColumns: [
+    { key: 'name', label: 'Name', type: 'string' },
+    { key: 'category', label: 'Category', type: 'string' },
+    { key: 'updated_at', label: 'Updated', type: 'date' }
+  ],
+  storageKey: 'admin_email_templates_filter'
+};
