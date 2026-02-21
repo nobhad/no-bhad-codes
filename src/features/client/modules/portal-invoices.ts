@@ -28,9 +28,9 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
 
   if (!invoicesContainer) return;
 
-  // Show loading state
-  const invoiceItems = invoicesContainer.querySelectorAll('.invoice-item');
-  invoiceItems.forEach((item) => item.remove());
+  // Show loading state - remove existing table or items
+  const existingTable = invoicesContainer.querySelector('.invoices-table');
+  if (existingTable) existingTable.remove();
   const noInvoicesMsg = invoicesContainer.querySelector('.no-invoices-message');
   if (noInvoicesMsg) noInvoicesMsg.remove();
 
@@ -82,15 +82,16 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
 
 
 /**
- * Render invoices list
+ * Render invoices list as a table (unified with admin portal)
  */
 function renderInvoicesList(
   container: HTMLElement,
   invoices: PortalInvoice[],
   ctx: ClientPortalContext
 ): void {
-  const existingItems = container.querySelectorAll('.invoice-item');
-  existingItems.forEach((item) => item.remove());
+  // Clear existing content
+  const existingTable = container.querySelector('.invoices-table');
+  if (existingTable) existingTable.remove();
 
   const noInvoicesMsg = container.querySelector('.no-invoices-message');
   if (noInvoicesMsg) noInvoicesMsg.remove();
@@ -104,48 +105,63 @@ function renderInvoicesList(
     return;
   }
 
-  invoices.forEach((invoice) => {
-    const invoiceElement = document.createElement('div');
-    invoiceElement.className = 'invoice-item';
-    invoiceElement.dataset.invoiceId = String(invoice.id);
-
+  // Build table rows
+  const tableRows = invoices.map((invoice) => {
     const statusLabel = getInvoiceStatusLabel(invoice.status);
-
-    // Show receipt button for paid/partial invoices
     const showReceiptBtn = invoice.status === 'paid' || invoice.status === 'partial';
 
-    invoiceElement.innerHTML = `
-      <div class="invoice-info">
-        <span class="invoice-number">${ctx.escapeHtml(invoice.invoice_number)}</span>
-        <span class="invoice-date">${ctx.formatDate(invoice.created_at)}</span>
-        <span class="invoice-project">${ctx.escapeHtml(invoice.project_name || 'Project')}</span>
-      </div>
-      <div class="invoice-amount">${formatCurrency(invoice.amount_total)}</div>
-      ${getStatusBadgeHTML(statusLabel, invoice.status)}
-      <div class="invoice-actions">
-        <button class="icon-btn btn-preview-invoice" data-invoice-id="${invoice.id}" aria-label="Preview invoice" title="Preview">
-          ${ICONS.EYE}
-        </button>
-        <button class="icon-btn btn-download-invoice"
-                data-invoice-id="${invoice.id}"
-                data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}"
-                aria-label="Download invoice" title="Download Invoice">
-          ${ICONS.DOWNLOAD}
-        </button>
-        ${showReceiptBtn ? `
-        <button class="icon-btn btn-download-receipt"
-                data-invoice-id="${invoice.id}"
-                data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}"
-                aria-label="Download receipt" title="Download Receipt">
-          ${ICONS.FILE_TEXT}
-        </button>
-        ` : ''}
-      </div>
+    const receiptBtnHtml = showReceiptBtn ? `
+      <button class="icon-btn btn-download-receipt"
+              data-invoice-id="${invoice.id}"
+              data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}"
+              aria-label="Download receipt" title="Download Receipt">
+        ${ICONS.FILE_TEXT}
+      </button>
+    ` : '';
+
+    return `
+      <tr data-invoice-id="${invoice.id}">
+        <td class="name-cell" data-label="Invoice">${ctx.escapeHtml(invoice.invoice_number)}</td>
+        <td data-label="Project">${ctx.escapeHtml(invoice.project_name || 'Project')}</td>
+        <td class="date-cell" data-label="Date">${ctx.formatDate(invoice.created_at)}</td>
+        <td class="amount-cell" data-label="Amount">${formatCurrency(invoice.amount_total)}</td>
+        <td class="status-cell" data-label="Status">${getStatusBadgeHTML(statusLabel, invoice.status)}</td>
+        <td class="actions-cell" data-label="Actions">
+          <button class="icon-btn btn-preview-invoice" data-invoice-id="${invoice.id}" aria-label="Preview invoice" title="Preview">
+            ${ICONS.EYE}
+          </button>
+          <button class="icon-btn btn-download-invoice"
+                  data-invoice-id="${invoice.id}"
+                  data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}"
+                  aria-label="Download invoice" title="Download Invoice">
+            ${ICONS.DOWNLOAD}
+          </button>
+          ${receiptBtnHtml}
+        </td>
+      </tr>
     `;
+  }).join('');
 
-    container.appendChild(invoiceElement);
-  });
+  // Create table HTML
+  const tableHtml = `
+    <table class="admin-table invoices-table" aria-label="Invoices">
+      <thead>
+        <tr>
+          <th scope="col" class="name-col">Invoice #</th>
+          <th scope="col">Project</th>
+          <th scope="col" class="date-col">Date</th>
+          <th scope="col" class="amount-col">Amount</th>
+          <th scope="col" class="status-col">Status</th>
+          <th scope="col" class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="portal-invoices-body">
+        ${tableRows}
+      </tbody>
+    </table>
+  `;
 
+  container.insertAdjacentHTML('beforeend', tableHtml);
   attachInvoiceActionListeners(container, ctx);
 }
 

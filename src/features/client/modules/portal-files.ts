@@ -429,11 +429,11 @@ function renderFilesList(
         : '';
 
       return `
-        <tr>
-          <td data-label="File">${safeName}</td>
+        <tr data-file-id="${file.id}">
+          <td class="name-cell" data-label="File">${safeName}</td>
           <td data-label="Size">${size}</td>
-          <td data-label="Uploaded">${date}</td>
-          <td class="file-actions" data-label="Actions">
+          <td class="date-cell" data-label="Uploaded">${date}</td>
+          <td class="actions-cell" data-label="Actions">
             ${previewBtn}
             ${downloadBtn}
             ${deleteBtn}
@@ -444,13 +444,13 @@ function renderFilesList(
     .join('');
 
   container.innerHTML = `
-    <table class="files-table" aria-label="Project files">
+    <table class="admin-table files-table" aria-label="Project files">
       <thead>
         <tr>
-          <th scope="col">File</th>
+          <th scope="col" class="name-col">File</th>
           <th scope="col">Size</th>
-          <th scope="col">Uploaded</th>
-          <th scope="col">Actions</th>
+          <th scope="col" class="date-col">Uploaded</th>
+          <th scope="col" class="actions-col">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -617,15 +617,20 @@ async function deleteFile(
       throw new Error(error.error || 'Failed to delete file');
     }
 
-    const fileItem = document.querySelector(`.file-item[data-file-id="${fileId}"]`);
-    if (fileItem) {
-      fileItem.remove();
+    // Remove the table row
+    const fileRow = document.querySelector(`tr[data-file-id="${fileId}"]`);
+    if (fileRow) {
+      fileRow.remove();
     }
 
-    const filesContainer = document.querySelector('.files-list-section .file-item');
-    if (!filesContainer) {
-      const container = document.querySelector('.files-list-section');
+    // Check if table is now empty
+    const filesTable = document.querySelector('.files-table tbody');
+    if (filesTable && filesTable.children.length === 0) {
+      const container = document.getElementById('files-list') || document.querySelector('.files-list-section');
       if (container) {
+        const table = container.querySelector('.files-table');
+        if (table) table.remove();
+
         const noFilesMsg = container.querySelector('.no-files');
         if (!noFilesMsg) {
           const msgEl = document.createElement('p');
