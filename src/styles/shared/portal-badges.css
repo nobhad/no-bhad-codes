@@ -8,7 +8,7 @@
    BASE STATUS BADGE
    Pill-shaped badge with colored background
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge {
+.portal .status-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -30,86 +30,59 @@
 /* =====================================================
    STANDARDIZED STATUS COLORS
    =====================================================
-   All status badges use these colors:
-
-   CYAN (#06b6d4) - New:
-     new
-
-   YELLOW (#fbbf24) - Awaiting Action:
-     pending, on_hold, on-hold
-
-   BLUE (#3b82f6) - In Progress:
-     active, in_progress, in-progress, contacted
-
-   GREEN (#10b981) - Success/Complete:
-     completed, converted, replied
-
-   RED (#ef4444) - Cancelled/Lost:
-     cancelled, lost, archived
-
-   PURPLE (#8b5cf6) - Qualified:
-     qualified
-
-   GRAY (#9ca3af) - Read/Inactive:
-     read
+   CYAN (#06b6d4) - New: new
+   YELLOW (#fbbf24) - Awaiting Action: pending, on_hold, on-hold
+   BLUE (#3b82f6) - In Progress: active, in_progress, in-progress, contacted
+   GREEN (#10b981) - Success/Complete: completed, converted, replied
+   RED (#ef4444) - Cancelled/Lost: cancelled, lost, archived
+   PURPLE (#8b5cf6) - Qualified: qualified
+   GRAY (#9ca3af) - Read/Inactive: read
    ===================================================== */
 
 /* Blue/Active status badges */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-active,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-in_progress,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-in-progress,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-contacted {
+.portal .status-badge:is(.status-active, .status-in_progress, .status-in-progress, .status-contacted) {
   background: var(--status-active);
   color: var(--color-black);
 }
 
 /* Cyan/New and Upcoming status badges */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-new,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-upcoming {
+.portal .status-badge:is(.status-new, .status-upcoming) {
   background: var(--status-new);
   color: var(--color-black);
 }
 
 /* Yellow/Pending status badges */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-pending,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-on_hold,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-on-hold {
+.portal .status-badge:is(.status-pending, .status-on_hold, .status-on-hold) {
   background: var(--status-pending);
   color: var(--color-black);
 }
 
 /* Green/Completed status badges */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-completed,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-converted,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-replied {
+.portal .status-badge:is(.status-completed, .status-converted, .status-replied) {
   background: var(--status-completed);
   color: var(--color-black);
 }
 
 /* Red/Cancelled status badges */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-cancelled,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-lost,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-archived {
+.portal .status-badge:is(.status-cancelled, .status-lost, .status-archived) {
   background: var(--status-cancelled);
   color: var(--color-white);
 }
 
 /* Purple/Qualified status badge */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-qualified,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-in-review {
+.portal .status-badge:is(.status-qualified, .status-in-review) {
   background: var(--status-qualified);
   color: var(--color-white);
 }
 
 /* Gray/Inactive status badges */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-read,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-inactive {
+.portal .status-badge:is(.status-read, .status-inactive) {
   background: var(--status-inactive);
   color: var(--color-white);
 }
 
 /* Not Invited - special outline style for clients not yet invited */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-not-invited {
+.portal .status-badge.status-not-invited {
   border: 1px solid var(--portal-border-medium);
   background: var(--portal-bg-medium);
   color: var(--portal-text-muted);
@@ -118,29 +91,28 @@
 /* =====================================================
    BEM-STYLE STATUS BADGE MODIFIERS
    Alternative naming convention: .status-badge--{variant}
-   Used by questionnaires, workflows, and other tables
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge--success {
+.portal .status-badge--success {
   background-color: var(--color-success-bg);
   color: var(--color-success);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge--danger {
+.portal .status-badge--danger {
   background-color: var(--color-danger-bg);
   color: var(--color-danger);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge--warning {
+.portal .status-badge--warning {
   background-color: var(--color-warning-bg);
   color: var(--color-warning);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge--info {
+.portal .status-badge--info {
   background-color: var(--color-info-bg);
   color: var(--color-info);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge--muted {
+.portal .status-badge--muted {
   background-color: var(--portal-bg-dark);
   color: var(--portal-text-muted);
 }
@@ -149,57 +121,55 @@
    SYSTEM STATUS BADGES
    Used for health indicators (healthy, warning, error)
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-healthy {
+.portal .status-badge.status-healthy {
   background: var(--color-success);
   color: var(--color-black);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-warning {
+.portal .status-badge.status-warning {
   background: var(--color-warning);
   color: var(--color-black);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-error {
+.portal .status-badge.status-error {
   background: var(--color-danger);
   color: var(--color-white);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-unknown {
+.portal .status-badge.status-unknown {
   background: var(--portal-text-muted);
   color: var(--color-black);
 }
 
 /* =====================================================
    INVOICE STATUS BADGES
-   Status badges specific to invoices
    ===================================================== */
 /* Draft - gray (not sent yet) */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-draft {
+.portal .status-badge.status-draft {
   background: var(--status-inactive);
   color: var(--color-white);
 }
 
 /* Sent/Viewed - blue (in progress) */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-sent,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-viewed {
+.portal .status-badge:is(.status-sent, .status-viewed) {
   background: var(--status-active);
   color: var(--color-black);
 }
 
 /* Partial - yellow (partially paid) */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-partial {
+.portal .status-badge.status-partial {
   background: var(--status-pending);
   color: var(--color-black);
 }
 
 /* Paid - green (fully paid) */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-paid {
+.portal .status-badge.status-paid {
   background: var(--status-completed);
   color: var(--color-black);
 }
 
 /* Overdue - red (past due) */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-overdue {
+.portal .status-badge.status-overdue {
   background: var(--status-cancelled);
   color: var(--color-white);
 }
@@ -207,9 +177,8 @@
 /* =====================================================
    STATUS INDICATOR (DOT STYLE)
    Minimal status display with colored dot + text
-   Use instead of badges for cleaner table displays
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator {
+.portal .status-indicator {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -219,11 +188,11 @@
 }
 
 /* Status indicator in tables - match table cell font size */
-:is([data-page="admin"], [data-page="client-portal"]) .admin-table .status-indicator {
+.portal .admin-table .status-indicator {
   font-size: var(--table-cell-font-size, 12px);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator .status-dot {
+.portal .status-indicator .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -231,68 +200,52 @@
   background-color: var(--portal-text-muted);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator .status-text {
+.portal .status-indicator .status-text {
   color: var(--portal-text-light);
 }
 
-/* Status indicator dot colors - same palette as badges */
-/* Cyan/New and Upcoming */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-new .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-upcoming .status-dot {
+/* Status indicator dot colors - Cyan/New and Upcoming */
+.portal .status-indicator:is(.status-new, .status-upcoming) .status-dot {
   background-color: var(--status-new);
 }
 
 /* Yellow/Pending */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-pending .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-on-hold .status-dot {
+.portal .status-indicator:is(.status-pending, .status-on-hold) .status-dot {
   background-color: var(--status-pending);
 }
 
 /* Blue/Active */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-active .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-in-progress .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-contacted .status-dot {
+.portal .status-indicator:is(.status-active, .status-in-progress, .status-contacted) .status-dot {
   background-color: var(--status-active);
 }
 
 /* Green/Completed */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-completed .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-converted .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-replied .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-paid .status-dot {
+.portal .status-indicator:is(.status-completed, .status-converted, .status-replied, .status-paid) .status-dot {
   background-color: var(--status-completed);
 }
 
 /* Red/Cancelled */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-cancelled .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-lost .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-archived .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-overdue .status-dot {
+.portal .status-indicator:is(.status-cancelled, .status-lost, .status-archived, .status-overdue) .status-dot {
   background-color: var(--status-cancelled);
 }
 
 /* Purple/Qualified */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-qualified .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-in-review .status-dot {
+.portal .status-indicator:is(.status-qualified, .status-in-review) .status-dot {
   background-color: var(--status-qualified);
 }
 
 /* Gray/Inactive */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-read .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-inactive .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-draft .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-not-invited .status-dot {
+.portal .status-indicator:is(.status-read, .status-inactive, .status-draft, .status-not-invited) .status-dot {
   background-color: var(--status-inactive);
 }
 
 /* Invoice status dots - Sent/Viewed (blue) */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-sent .status-dot,
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-viewed .status-dot {
+.portal .status-indicator:is(.status-sent, .status-viewed) .status-dot {
   background-color: var(--status-active);
 }
 
 /* Invoice status dots - Partial (yellow) */
-:is([data-page="admin"], [data-page="client-portal"]) .status-indicator.status-partial .status-dot {
+.portal .status-indicator.status-partial .status-dot {
   background-color: var(--status-pending);
 }
 
@@ -300,7 +253,7 @@
    SIDEBAR NOTIFICATION BADGES
    Small counter badges for sidebar nav items
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge {
+.portal .sidebar-badge {
   position: absolute;
   top: 2px;
   right: 2px;
@@ -319,23 +272,23 @@
 }
 
 /* Show badge when it has content */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge.has-count {
+.portal .sidebar-badge.has-count {
   display: block;
 }
 
 /* Adjust badge position for expanded sidebar */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-badge {
+.portal .sidebar:not(.collapsed) .sidebar-badge {
   top: 50%;
   right: 8px;
   transform: translateY(-50%);
 }
 
 /* Collapsed sidebar - only show badges with count > 0 */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-badge:not(.has-count) {
-  display: none !important;
+.portal .sidebar.collapsed .sidebar-badge:not(.has-count) {
+  display: none;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-badge.has-count {
+.portal .sidebar.collapsed .sidebar-badge.has-count {
   display: block;
   top: 0;
   right: 0;
@@ -344,11 +297,11 @@
 
 /* Mobile/compact view - only show badges with count > 0 */
 @media (--wide-down) {
-  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge:not(.has-count) {
-    display: none !important;
+  .portal .sidebar-badge:not(.has-count) {
+    display: none;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge.has-count {
+  .portal .sidebar-badge.has-count {
     display: block;
     top: 0;
     right: 0;
@@ -358,20 +311,20 @@
 
 /* FALLBACK: Standard media query - only show badges with count > 0 */
 @media (max-width: 1300px) {
-  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge:not(.has-count) {
-    display: none !important;
+  .portal .sidebar-badge:not(.has-count) {
+    display: none;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge.has-count {
-    display: block !important;
-    top: 0 !important;
-    right: 0 !important;
-    transform: none !important;
-    min-width: 14px !important;
-    height: 14px !important;
-    font-size: 9px !important;
-    padding: 0 3px !important;
-    line-height: 14px !important;
+  .portal .sidebar-badge.has-count {
+    display: block;
+    top: 0;
+    right: 0;
+    transform: none;
+    min-width: 14px;
+    height: 14px;
+    font-size: 9px;
+    padding: 0 3px;
+    line-height: 14px;
   }
 }
 
@@ -379,7 +332,7 @@
    INLINE TAG BADGES
    Small inline badges for tags, categories, systems
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) :is(.tag-badge, .system-badge, .category-badge) {
+.portal :is(.tag-badge, .system-badge, .category-badge) {
   display: inline-block;
   padding: var(--space-0-5) var(--space-1);
   border-radius: var(--portal-radius-sm);
@@ -388,15 +341,15 @@
 }
 
 /* System badge variant - purple */
-:is([data-page="admin"], [data-page="client-portal"]) .system-badge {
+.portal .system-badge {
   margin-left: var(--space-1);
   background: rgba(var(--color-admin-purple-rgb), 0.1);
   color: var(--color-admin-purple);
 }
 
 /* Category badge color variants */
-:is([data-page="admin"], [data-page="client-portal"]) .category-notification { background: var(--color-info-bg); color: var(--color-info); }
-:is([data-page="admin"], [data-page="client-portal"]) .category-invoice { background: var(--color-success-bg); color: var(--color-success); }
-:is([data-page="admin"], [data-page="client-portal"]) .category-contract { background: var(--color-warning-bg); color: var(--color-warning); }
-:is([data-page="admin"], [data-page="client-portal"]) .category-project { background: rgba(var(--color-primary-rgb), 0.1); color: var(--color-primary); }
-:is([data-page="admin"], [data-page="client-portal"]) .category-reminder { background: var(--color-danger-bg); color: var(--color-danger); }
+.portal .category-notification { background: var(--color-info-bg); color: var(--color-info); }
+.portal .category-invoice { background: var(--color-success-bg); color: var(--color-success); }
+.portal .category-contract { background: var(--color-warning-bg); color: var(--color-warning); }
+.portal .category-project { background: rgba(var(--color-primary-rgb), 0.1); color: var(--color-primary); }
+.portal .category-reminder { background: var(--color-danger-bg); color: var(--color-danger); }

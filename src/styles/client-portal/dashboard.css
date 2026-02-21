@@ -305,10 +305,7 @@
   flex-shrink: 0;
 }
 
-[data-page="client-portal"] .milestone-item.completed .milestone-title {
-  text-decoration: line-through;
-  color: var(--portal-text-secondary);
-}
+/* .milestone-item.completed styling consolidated in shared/portal-cards.css */
 
 [data-page="client-portal"] .milestone-description {
   color: var(--portal-text-light);

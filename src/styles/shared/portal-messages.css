@@ -1,18 +1,11 @@
 /* =====================================================
    SHARED PORTAL MESSAGES
    @file src/styles/shared/portal-messages.css
-   Single source of truth for admin and client portals
-
-   NOTE: This component uses non-standard styling intentionally.
-   The Messages UI has a unique two-panel layout with light backgrounds
-   that differs from the standard portal dark theme. Do not standardize
-   to match other portal components - this design is intentional.
+   NOTE: Uses non-standard light backgrounds intentionally.
    ===================================================== */
 
-/* =====================================================
-   MESSAGES LAYOUT (with thread list)
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-layout {
+/* Messages layout */
+.portal .messages-layout {
   display: grid;
   grid-template-columns: 280px 1fr;
   grid-template-rows: auto 1fr;
@@ -23,16 +16,8 @@
   overflow: hidden;
 }
 
-/* Client portal uses same layout as admin but with contact/tips instead of client list */
-[data-page="client-portal"] .messages-layout {
-  grid-template-columns: 280px 1fr;
-  grid-template-rows: auto 1fr;
-}
-
-/* =====================================================
-   GLOBAL SEARCH BAR (spans both columns)
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search {
+/* Global search bar */
+.portal .messages-global-search {
   grid-column: 1 / -1;
   padding: var(--space-2);
   background: var(--color-neutral-200);
@@ -41,36 +26,29 @@
   z-index: 5;
   overflow: visible;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar {
+.portal .messages-global-search .search-bar {
   width: 100%;
   max-width: none;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input {
+.portal .messages-global-search .search-bar-input {
   width: 100%;
   background: var(--color-black);
   border: 1px solid var(--portal-border);
   color: var(--portal-text-light);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input::placeholder {
+.portal .messages-global-search .search-bar-input::placeholder {
   color: var(--portal-text-light);
   opacity: 0.6;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input:focus,
-:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input:focus-visible {
+.portal .messages-global-search .search-bar-input:is(:focus, :focus-visible) {
   outline: none;
   border: 3px solid var(--color-primary);
   position: relative;
   z-index: 10;
 }
 
-/* =====================================================
-   LEFT COLUMN: CLIENTS LIST (admin) / CONTACT & TIPS (client)
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+/* Left column: clients list */
+.portal .messages-clients-column {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -79,35 +57,28 @@
   overflow: hidden;
 }
 
-/* Client portal: Contact and Tips cards in left column */
+/* Client portal contact/tips cards */
 [data-page="client-portal"] .messages-layout .messages-clients-column {
   gap: 0;
   overflow-y: auto;
   justify-content: flex-start;
   align-items: stretch;
 }
-
-[data-page="client-portal"] .messages-layout .messages-clients-column .messages-contact-card,
-[data-page="client-portal"] .messages-layout .messages-clients-column .messages-tips-card {
+[data-page="client-portal"] .messages-layout .messages-clients-column :is(.messages-contact-card, .messages-tips-card) {
   display: block;
   flex: 0 0 auto;
   padding: var(--space-2);
   background: var(--color-neutral-200);
   border-bottom: 1px solid var(--portal-border);
 }
-
-/* h3 styling from unified rule in portal-cards.css - only layout here */
-[data-page="client-portal"] .messages-clients-column .messages-contact-card h3,
-[data-page="client-portal"] .messages-clients-column .messages-tips-card h3 {
+[data-page="client-portal"] .messages-clients-column :is(.messages-contact-card, .messages-tips-card) h3 {
   margin: 0 0 var(--space-1-5) 0;
 }
-
 [data-page="client-portal"] .messages-clients-column .messages-contact-info {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
 }
-
 [data-page="client-portal"] .messages-clients-column .messages-contact-item {
   display: flex;
   align-items: center;
@@ -116,7 +87,6 @@
   color: var(--color-gray-700);
   font-size: var(--font-size-sm);
 }
-
 [data-page="client-portal"] .messages-clients-column .messages-contact-icon {
   display: flex;
   align-items: center;
@@ -125,18 +95,15 @@
   height: 20px;
   color: var(--color-primary);
 }
-
 [data-page="client-portal"] .messages-clients-column .messages-contact-icon svg {
   width: 16px;
   height: 16px;
 }
-
 [data-page="client-portal"] .messages-clients-column .messages-contact-note {
   margin: var(--space-1) 0 0 0;
   font-size: var(--font-size-xs);
   color: var(--color-gray-600);
 }
-
 [data-page="client-portal"] .messages-clients-column .messages-tips-list {
   margin: 0;
   padding: 0;
@@ -146,41 +113,32 @@
   font-size: var(--font-size-sm);
   line-height: 1.6;
 }
-
 [data-page="client-portal"] .messages-clients-column .messages-tips-list li {
   margin-bottom: var(--space-0-5);
 }
-
 [data-page="client-portal"] .messages-clients-column .messages-tips-list li:last-child {
   margin-bottom: 0;
 }
 
-/* =====================================================
-   RIGHT COLUMN: THREAD + COMPOSE
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-column {
+/* Right column: thread + compose */
+.portal .messages-thread-column {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-/* =====================================================
-   THREAD LIST SIDEBAR
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .thread-list-container,
-:is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+/* Thread list sidebar */
+.portal :is(.thread-list-container, .messages-clients-column) {
   display: flex;
   flex-direction: column;
   border-radius: var(--portal-radius-md);
   background: var(--color-neutral-200);
   overflow: hidden;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+.portal .messages-clients-column {
   border-radius: 0;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-list-header {
+.portal .thread-list-header {
   padding: var(--space-1-5) var(--space-2);
   font-weight: 600;
   font-size: var(--font-size-sm);
@@ -188,13 +146,11 @@
   border-bottom: 1px solid var(--portal-border);
   background: var(--color-neutral-200);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-list {
+.portal .thread-list {
   flex: 1;
   overflow-y: auto;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item {
+.portal .thread-item {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
@@ -204,24 +160,20 @@
   transition: background-color var(--transition-fast) ease;
   background: transparent;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item:hover {
+.portal .thread-item:hover {
   background: var(--color-neutral-100);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item.active {
+.portal .thread-item.active {
   background: var(--color-neutral-100);
   border-left: 3px solid var(--color-primary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item-header {
+.portal .thread-item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--space-1);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item-title {
+.portal .thread-item-title {
   font-weight: 500;
   font-size: var(--font-size-sm);
   color: var(--color-gray-900);
@@ -230,48 +182,30 @@
   text-overflow: ellipsis;
   flex: 1;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item.unread .thread-item-title {
+.portal .thread-item.unread .thread-item-title {
   font-weight: 700;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item-time {
+.portal :is(.thread-item-time, .thread-item-project) {
   font-size: var(--font-size-xs);
   color: var(--color-gray-600);
   white-space: nowrap;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item-preview {
+.portal :is(.thread-item-preview, .thread-item-contact) {
   font-size: var(--font-size-sm);
   color: var(--color-gray-700);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item-contact {
-  font-size: var(--font-size-sm);
+.portal .thread-item-contact {
   color: var(--color-gray-600);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item-meta {
+.portal .thread-item-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-item-project {
-  font-size: var(--font-size-xs);
-  color: var(--color-gray-600);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .thread-unread-badge {
+.portal .thread-unread-badge {
   background: var(--color-primary);
   color: var(--color-text-inverse);
   font-size: var(--font-size-xs);
@@ -282,11 +216,8 @@
   text-align: center;
 }
 
-/* =====================================================
-   MESSAGES CONTAINER
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-container,
-:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-column {
+/* Messages container */
+.portal :is(.messages-container, .messages-thread-column) {
   display: flex;
   flex-direction: column;
   border: none;
@@ -295,13 +226,11 @@
   overflow: hidden;
   box-shadow: var(--shadow-panel);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-column {
+.portal .messages-thread-column {
   border-radius: 0;
   box-shadow: none;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-header {
+.portal .messages-thread-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -313,27 +242,21 @@
   border-bottom: 1px solid var(--portal-border);
   background: var(--color-neutral-200);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-header .thread-title {
+.portal .messages-thread-header .thread-title {
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-header .messages-search {
+.portal .messages-thread-header .messages-search {
   flex-shrink: 0;
 }
-
-/* No shadows on child divs */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-container > div {
+.portal .messages-container > div {
   box-shadow: none;
 }
 
-/* =====================================================
-   MESSAGES THREAD
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-thread {
+/* Messages thread */
+.portal .messages-thread {
   flex: 1;
   min-height: 300px;
   overflow-y: auto;
@@ -346,12 +269,8 @@
   position: relative;
 }
 
-/* .empty-state, .loading-state, .error-state styling from components/loading.css */
-
-/* =====================================================
-   INDIVIDUAL MESSAGE
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message {
+/* Individual message */
+.portal .message {
   display: flex;
   flex-direction: row;
   align-items: flex-end;
@@ -362,47 +281,37 @@
   user-select: text;
   -webkit-touch-callout: none;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-received {
+.portal .message-received {
   align-self: flex-start;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-sent {
+.portal .message-sent {
   align-self: flex-end;
   flex-direction: row;
   justify-content: flex-end;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-sent .message-content {
+.portal .message-sent .message-content {
   order: 1;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-sent .message-avatar {
+.portal .message-sent .message-avatar {
   order: 2;
 }
 
-/* =====================================================
-   MESSAGE AVATAR
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message-avatar {
+/* Message avatar */
+.portal .message-avatar {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-0-5);
   flex-shrink: 0;
 }
-
-/* Admin avatar image - no border-radius, show natural shape */
-:is([data-page="admin"], [data-page="client-portal"]) .message-avatar .avatar-img {
+.portal .message-avatar .avatar-img {
   display: block;
   width: 48px;
   height: 48px;
   border-radius: 0;
   object-fit: contain;
 }
-
-/* Client avatar - dark background with light text */
-:is([data-page="admin"], [data-page="client-portal"]) .message-avatar .avatar-placeholder {
+.portal .message-avatar .avatar-placeholder {
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -415,19 +324,14 @@
   font-size: var(--font-size-xs);
   letter-spacing: 0.5px;
 }
-
-/* Hide any name below avatar - both element and data-name attribute */
-:is([data-page="admin"], [data-page="client-portal"]) .message-avatar .avatar-name,
-:is([data-page="admin"], [data-page="client-portal"]) .message-avatar::after,
-:is([data-page="admin"], [data-page="client-portal"]) .message-avatar[data-name]::after {
-  display: none !important;
-  content: none !important;
+.portal .message-avatar :is(.avatar-name, ::after),
+.portal .message-avatar[data-name]::after {
+  display: none;
+  content: none;
 }
 
-/* =====================================================
-   MESSAGE CONTENT (the bubble)
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message-content {
+/* Message content bubble */
+.portal .message-content {
   background: var(--color-surface-primary);
   border: var(--portal-border);
   border-radius: var(--portal-radius-pill);
@@ -437,52 +341,42 @@
   flex: 1;
   max-width: 80%;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-received .message-content {
+.portal .message-received .message-content {
   border-bottom-left-radius: var(--portal-radius-xs);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-sent .message-content {
+.portal .message-sent .message-content {
   background: var(--color-neutral-100);
   border-bottom-right-radius: var(--portal-radius-xs);
 }
 
-/* Client portal: match admin bubble colors by sender role */
+/* Client portal message alignment */
 [data-page="client-portal"] .message-admin .message-content {
   background: var(--color-neutral-100);
   border-bottom-right-radius: var(--portal-radius-xs);
   border-bottom-left-radius: var(--portal-radius-pill);
 }
-
 [data-page="client-portal"] .message-client .message-content {
   background: var(--color-surface-primary);
   border-bottom-left-radius: var(--portal-radius-xs);
   border-bottom-right-radius: var(--portal-radius-pill);
 }
-
-/* Client portal: align client-sent messages to the right, admin to the left */
 [data-page="client-portal"] .message-client {
   align-self: flex-end;
   flex-direction: row;
   justify-content: flex-end;
 }
-
 [data-page="client-portal"] .message-client .message-content {
   order: 1;
 }
-
 [data-page="client-portal"] .message-client .message-avatar {
   order: 2;
 }
-
 [data-page="client-portal"] .message-admin {
   align-self: flex-start;
 }
 
-/* =====================================================
-   MESSAGE HEADER (sender name + time)
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message-header {
+/* Message header */
+.portal .message-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -490,27 +384,22 @@
   font-size: var(--font-size-sm);
   gap: var(--space-2);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-sender {
+.portal .message-sender {
   font-weight: 600;
   color: var(--color-gray-900);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-time {
+.portal .message-time {
   font-size: var(--font-size-xs);
   color: var(--color-gray-600);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-body {
+.portal .message-body {
   color: var(--color-gray-900);
   line-height: 1.5;
   font-size: var(--font-size-sm);
 }
 
-/* =====================================================
-   MESSAGE COMPOSE AREA
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose {
+/* Message compose area */
+.portal .message-compose {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -520,21 +409,15 @@
   border: none;
   border-top: 1px solid var(--portal-border);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-input-wrapper {
+.portal .message-input-wrapper {
   position: relative;
   display: flex;
   align-items: flex-start;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-input-wrapper .form-textarea,
-:is([data-page="admin"], [data-page="client-portal"]) .message-input-wrapper textarea {
+.portal .message-input-wrapper :is(.form-textarea, textarea) {
   flex: 1;
 }
-
-/* Textarea - dark theme */
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose .form-textarea,
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose textarea {
+.portal .message-compose :is(.form-textarea, textarea) {
   width: 100%;
   box-sizing: border-box;
   background: var(--color-black);
@@ -549,53 +432,35 @@
   resize: vertical;
   caret-color: var(--portal-text-light);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose .form-textarea::placeholder,
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose textarea::placeholder {
+.portal .message-compose :is(.form-textarea, textarea)::placeholder {
   color: var(--portal-text-light);
   opacity: 0.5;
   font-weight: 400;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
-
-/* Focus state */
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose .form-textarea:focus,
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose textarea:focus,
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose .form-textarea:focus-visible,
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose textarea:focus-visible {
+.portal .message-compose :is(.form-textarea, textarea):is(:focus, :focus-visible) {
   outline: none;
   border: 3px solid var(--color-primary);
   box-shadow: none;
 }
-
-/* Send button - matches standard portal button styling */
-/* Inherits base styles from portal-buttons.css */
-
-/* Disabled state - only button shows disabled, textarea keeps normal appearance */
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose textarea:disabled {
+.portal .message-compose textarea:disabled {
   cursor: not-allowed;
-  /* Override portal-forms.css disabled styles - keep normal appearance */
   opacity: 1;
   background-color: var(--portal-bg-medium);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose button:disabled {
+.portal .message-compose button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* =====================================================
-   SYSTEM MESSAGE
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message-system {
+/* System message */
+.portal .message-system {
   background: var(--color-neutral-200);
   border-left: 4px solid var(--color-primary);
 }
 
-/* =====================================================
-   MESSAGE SEARCH
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-header {
+/* Message search */
+.portal .messages-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -603,29 +468,23 @@
   border-bottom: 1px solid var(--portal-border);
   background: var(--color-neutral-200);
 }
-
-/* Uses shared .search-bar, .search-bar-icon, .search-bar-input from search-bar.css */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-search.search-bar {
+.portal .messages-search.search-bar {
   min-width: 200px;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-search .search-bar-input {
+.portal .messages-search .search-bar-input {
   min-width: 200px;
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border-light);
 }
 
-/* =====================================================
-   MESSAGE REACTIONS
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message-reactions {
+/* Message reactions */
+.portal .message-reactions {
   display: flex;
   gap: var(--space-0-5);
   margin-top: var(--space-0-5);
   flex-wrap: wrap;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .reaction-badge {
+.portal .reaction-badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-0-5);
@@ -637,28 +496,21 @@
   transition: background-color var(--transition-fast) ease;
   border: 1px solid transparent;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .reaction-badge:hover {
+.portal .reaction-badge:hover {
   background: var(--color-shadow-lg);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .reaction-badge.active {
+.portal .reaction-badge.active {
   border-color: var(--color-primary);
   background: rgba(var(--color-primary-rgb), 0.1);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .reaction-badge .reaction-count {
+.portal .reaction-badge .reaction-count {
   color: var(--color-text-secondary);
   font-weight: 500;
 }
-
-/* Hide pin and + buttons when picker is open */
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions.picker-open .pin-message-btn,
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions.picker-open .add-reaction-btn {
+.portal .message-actions.picker-open :is(.pin-message-btn, .add-reaction-btn) {
   visibility: hidden;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions .add-reaction-btn {
+.portal .message-actions .add-reaction-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -674,21 +526,17 @@
   transition: color var(--transition-fast);
   outline: none;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions .add-reaction-btn:hover {
+.portal .message-actions .add-reaction-btn:hover {
   color: var(--color-text-secondary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions .add-reaction-btn:focus,
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions .add-reaction-btn:active {
+.portal .message-actions .add-reaction-btn:is(:focus, :active) {
   outline: none;
   border: none;
   box-shadow: none;
 }
 
-
-/* Reaction picker - absolutely positioned overlay */
-:is([data-page="admin"], [data-page="client-portal"]) .reaction-picker {
+/* Reaction picker */
+.portal .reaction-picker {
   position: absolute;
   top: 50%;
   right: 0;
@@ -703,12 +551,10 @@
   box-shadow: var(--shadow-lg);
   z-index: 100;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .reaction-picker.hidden {
+.portal .reaction-picker.hidden {
   display: none;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .reaction-picker button {
+.portal .reaction-picker button {
   padding: var(--space-0-5);
   background: transparent;
   border: none;
@@ -718,13 +564,10 @@
   transition: background-color var(--transition-fast);
   line-height: 1;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .reaction-picker button:hover {
+.portal .reaction-picker button:hover {
   background: var(--color-gray-200);
 }
-
-/* + icon inside picker - rotates to X, matches original button dimensions for alignment */
-:is([data-page="admin"], [data-page="client-portal"]) .reaction-picker .picker-plus {
+.portal .reaction-picker .picker-plus {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -739,10 +582,8 @@
   transition: transform var(--transition-fast) ease;
 }
 
-/* =====================================================
-   MESSAGE READ RECEIPTS
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message-status {
+/* Message read receipts */
+.portal .message-status {
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -750,20 +591,16 @@
   color: var(--portal-text-muted);
   margin-top: var(--space-1);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-status svg {
+.portal .message-status svg {
   width: 12px;
   height: 12px;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-status.read svg {
+.portal .message-status.read svg {
   color: var(--color-primary);
 }
 
-/* =====================================================
-   MESSAGE ACTIONS (pin, etc.)
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions {
+/* Message actions */
+.portal .message-actions {
   display: flex;
   gap: var(--space-0-5);
   margin-left: auto;
@@ -771,12 +608,10 @@
   transition: opacity var(--transition-fast);
   position: relative;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message:hover .message-actions {
+.portal .message:hover .message-actions {
   opacity: 1;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions button {
+.portal .message-actions button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -789,33 +624,26 @@
   color: var(--portal-text-muted);
   transition: all var(--transition-fast);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions button:hover {
+.portal .message-actions button:hover {
   background: var(--color-state-active);
   color: var(--color-text-secondary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions button.pinned {
+.portal .message-actions button.pinned {
   color: var(--color-primary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-actions button svg {
+.portal .message-actions button svg {
   width: 14px;
   height: 14px;
 }
-
-/* Pinned message indicator */
-:is([data-page="admin"], [data-page="client-portal"]) .message.pinned {
+.portal .message.pinned {
   border-left: 3px solid var(--color-primary);
   background: rgba(var(--color-primary-rgb), 0.05);
   padding-left: var(--space-2);
   margin-left: calc(-1 * var(--space-2));
 }
 
-/* =====================================================
-   MESSAGE EDIT/DELETE ACTIONS
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message-action-btn {
+/* Message edit/delete actions */
+.portal .message-action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -829,41 +657,33 @@
   color: var(--portal-text-muted);
   transition: all var(--transition-fast);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-action-btn:hover {
+.portal .message-action-btn:hover {
   background: var(--color-state-active);
   color: var(--color-text-secondary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-action-btn:focus {
+.portal .message-action-btn:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 1px;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-action-btn svg {
+.portal .message-action-btn svg {
   width: 14px;
   height: 14px;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-edit-btn:hover {
+.portal .message-edit-btn:hover {
   color: var(--color-primary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-delete-btn:hover {
+.portal .message-delete-btn:hover {
   color: var(--color-danger-500);
   background: rgba(var(--color-danger-rgb, 239, 68, 68), 0.1);
 }
 
-/* =====================================================
-   PINNED MESSAGES SECTION
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .pinned-messages {
+/* Pinned messages section */
+.portal .pinned-messages {
   padding: var(--space-1) var(--space-1-5);
   border-bottom: 1px solid var(--portal-border);
   background: rgba(var(--color-primary-rgb), 0.05);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .pinned-messages-header {
+.portal .pinned-messages-header {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
@@ -871,13 +691,11 @@
   color: var(--color-primary);
   margin-bottom: var(--space-1-5);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .pinned-messages-header svg {
+.portal .pinned-messages-header svg {
   width: 12px;
   height: 12px;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .pinned-message-preview {
+.portal .pinned-message-preview {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   white-space: nowrap;
@@ -885,71 +703,51 @@
   text-overflow: ellipsis;
   cursor: pointer;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .pinned-message-preview:hover {
+.portal .pinned-message-preview:hover {
   color: var(--color-primary);
 }
 
-/* =====================================================
-   SEARCH HIGHLIGHT
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .message-body mark,
-:is([data-page="admin"], [data-page="client-portal"]) .message-body .search-highlight {
+/* Search highlight */
+.portal .message-body :is(mark, .search-highlight) {
   background: rgba(255, 230, 0, 0.4);
   padding: 1px 2px;
   border-radius: 2px;
 }
 
-/* =====================================================
-   MOBILE RESPONSIVE
-   ===================================================== */
-
-/* Thread list collapses on tablet */
+/* Mobile responsive */
 @media (--tablet-landscape) {
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-layout {
+  .portal .messages-layout {
     grid-template-columns: 200px 1fr;
   }
 }
 
-/* =====================================================
-   MOBILE CLIENT DROPDOWN
-   ===================================================== */
-
-/* Hidden on desktop */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-mobile-select {
+/* Mobile client dropdown */
+.portal .messages-mobile-select {
   display: none;
 }
 
-/* Thread list becomes dropdown on mobile */
 @media (max-width: 700px) {
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-layout {
+  .portal .messages-layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto 1fr;
     gap: 0;
   }
-
   [data-page="client-portal"] .messages-layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
   }
-
-  /* Hide contact/tips column on mobile for client portal */
   [data-page="client-portal"] .messages-clients-column {
     display: none;
   }
-
   [data-page="client-portal"] .messages-thread-column {
     grid-column: 1;
     grid-row: 2;
   }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-global-search {
+  .portal .messages-global-search {
     grid-column: 1;
     grid-row: 1;
   }
-
-  /* Show mobile dropdown */
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-mobile-select {
+  .portal .messages-mobile-select {
     display: block;
     grid-column: 1;
     grid-row: 2;
@@ -957,8 +755,7 @@
     background: var(--color-neutral-200);
     border-bottom: 1px solid var(--portal-border);
   }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-mobile-select .form-select {
+  .portal .messages-mobile-select .form-select {
     width: 100%;
     background: var(--color-black);
     color: var(--portal-text-light);
@@ -967,41 +764,33 @@
     padding: var(--space-1-5) var(--space-2);
     font-size: var(--font-size-sm);
   }
-
-  /* Hide thread list column on mobile */
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+  .portal .messages-clients-column {
     display: none;
   }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-thread-column {
+  .portal .messages-thread-column {
     grid-column: 1;
     grid-row: 3;
   }
 }
 
 @media (--small-mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .messages-thread {
+  .portal .messages-thread {
     padding: var(--space-1-5);
     gap: var(--space-1);
   }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .message-compose {
+  .portal .message-compose {
     padding: var(--space-1-5);
     gap: var(--space-1);
   }
 }
 
-/* =====================================================
-   ATTACHMENT BUTTON & INPUT
-   ===================================================== */
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose-actions {
+/* Attachment button & input */
+.portal .message-compose-actions {
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .btn-attach {
+.portal .btn-attach {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1014,32 +803,25 @@
   cursor: pointer;
   transition: all var(--transition-mouse) ease;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .btn-attach:hover {
+.portal .btn-attach:hover {
   color: var(--color-primary);
   border-color: var(--color-primary);
   background: transparent;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .btn-attach:focus {
+.portal .btn-attach:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .btn-attach svg {
+.portal .btn-attach svg {
   width: 18px;
   height: 18px;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-input {
+.portal .attachment-input {
   display: none;
 }
 
-/* =====================================================
-   ATTACHMENT PREVIEW (pending attachments)
-   ===================================================== */
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-preview {
+/* Attachment preview */
+.portal .attachment-preview {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
@@ -1048,12 +830,10 @@
   border-radius: var(--portal-radius-md);
   margin-bottom: var(--space-2);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-preview.hidden {
+.portal .attachment-preview.hidden {
   display: none;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-chip {
+.portal .attachment-chip {
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -1064,30 +844,25 @@
   font-size: var(--font-size-xs);
   color: var(--portal-text-light);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-chip-icon {
+.portal .attachment-chip-icon {
   display: flex;
   align-items: center;
   color: var(--color-primary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-chip-icon svg {
+.portal .attachment-chip-icon svg {
   width: 14px;
   height: 14px;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-chip-name {
+.portal .attachment-chip-name {
   max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-chip-size {
+.portal .attachment-chip-size {
   color: var(--portal-text-muted);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-chip-remove {
+.portal .attachment-chip-remove {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1101,22 +876,17 @@
   cursor: pointer;
   transition: all var(--transition-fast) ease;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-chip-remove:hover {
+.portal .attachment-chip-remove:hover {
   color: var(--color-danger-500);
   background: rgba(var(--color-danger-rgb, 239, 68, 68), 0.1);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .attachment-chip-remove svg {
+.portal .attachment-chip-remove svg {
   width: 12px;
   height: 12px;
 }
 
-/* =====================================================
-   MESSAGE ATTACHMENTS (in message bubbles)
-   ===================================================== */
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-attachments {
+/* Message attachments */
+.portal .message-attachments {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -1124,8 +894,7 @@
   padding-top: var(--space-2);
   border-top: 1px solid var(--color-neutral-300);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-attachment {
+.portal .message-attachment {
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -1138,59 +907,47 @@
   text-decoration: none;
   transition: all var(--transition-fast) ease;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-attachment:hover {
+.portal .message-attachment:hover {
   background: var(--color-neutral-200);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-attachment-icon {
+.portal .message-attachment-icon {
   display: flex;
   align-items: center;
   color: var(--color-primary);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-attachment-icon svg {
+.portal .message-attachment-icon svg {
   width: 16px;
   height: 16px;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-attachment-name {
+.portal .message-attachment-name {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-attachment-size {
+.portal .message-attachment-size {
   color: var(--color-gray-500);
   font-size: var(--font-size-xs);
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-attachment-download {
+.portal .message-attachment-download {
   display: flex;
   align-items: center;
   color: var(--portal-text-muted);
   opacity: 0;
   transition: opacity var(--transition-fast) ease;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-attachment:hover .message-attachment-download {
+.portal .message-attachment:hover .message-attachment-download {
   opacity: 1;
 }
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-attachment-download svg {
+.portal .message-attachment-download svg {
   width: 14px;
   height: 14px;
 }
 
-/* =====================================================
-   DRAG & DROP INDICATOR
-   ===================================================== */
-
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose textarea.drag-over,
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose .form-textarea.drag-over {
-  border: 2px dashed var(--color-primary) !important;
-  background: rgba(var(--color-primary-rgb), 0.05) !important;
+/* Drag & drop indicator */
+.portal .message-compose :is(textarea, .form-textarea).drag-over {
+  border: 2px dashed var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.05);
 }

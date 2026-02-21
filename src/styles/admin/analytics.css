@@ -63,7 +63,7 @@
   background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--portal-radius-sm, 8px);
-  padding: 13px 14px;
+  padding: var(--portal-card-padding);
   overflow: hidden;
 }
 
@@ -83,7 +83,7 @@
   justify-content: center;
   color: var(--portal-text-muted);
   font-style: italic;
-  padding: 13px 14px;
+  padding: var(--portal-card-padding);
   box-sizing: border-box;
 }
 
@@ -100,7 +100,7 @@
   background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--portal-radius-sm, 8px);
-  padding: 13px 14px;
+  padding: var(--portal-card-padding);
   overflow: hidden;
 }
 

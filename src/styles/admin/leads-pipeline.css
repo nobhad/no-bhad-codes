@@ -319,7 +319,7 @@
 .analytics-column-full {
   background: var(--portal-bg-darker);
   border-radius: var(--portal-radius-sm, 8px);
-  padding: 13px 14px;
+  padding: var(--portal-card-padding);
   min-width: 0;
   color: var(--portal-text-light);
 }
