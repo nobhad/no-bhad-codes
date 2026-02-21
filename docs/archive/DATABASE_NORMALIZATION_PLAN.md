@@ -521,6 +521,6 @@ After all phases complete:
 
 ## Related Documentation
 
-- [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) - Full schema reference
+- [DATABASE_SCHEMA.md](../architecture/DATABASE_SCHEMA.md) - Full schema reference
 - [current_work.md](../current_work.md) - Active work tracking
 - Migration files: `server/database/migrations/`

@@ -103,14 +103,14 @@ Features available across both portals.
 
 ### Quick Links by Category
 
-**Client Management**
+#### Client Management
 
 - [Clients](./features/CLIENTS.md) - CRM, contacts, tags, health scoring
 - [Client Information](./features/CLIENT_INFORMATION.md) - Profile data
 - [Contacts](./features/CONTACTS.md) - Contact management
 - [Leads](./features/LEADS.md) - Lead pipeline
 
-**Project Management**
+#### Project Management
 
 - [Projects](./features/PROJECTS.md) - Tasks, milestones, templates
 - [Milestones](./features/MILESTONES.md) - Milestone tracking
@@ -118,27 +118,27 @@ Features available across both portals.
 - [Deliverables](./features/DELIVERABLES.md) - Deliverable tracking
 - [Time Tracking](./features/TIME_TRACKING.md) - Time entries
 
-**Financial**
+#### Financial
 
 - [Invoices](./features/INVOICES.md) - Invoicing, payments
 - [Proposals](./features/PROPOSALS.md) - Proposal system
 - [Contracts](./features/CONTRACTS.md) - Contracts, signatures
 - [PDF Generation](./features/PDF_GENERATION.md) - PDF exports
 
-**Communication**
+#### Communication
 
 - [Messaging](./features/MESSAGING.md) - Real-time messaging
 - [Document Requests](./features/DOCUMENT_REQUESTS.md) - Document collection
 - [Questionnaires](./features/QUESTIONNAIRES.md) - Client questionnaires
 
-**Administration**
+#### Administration
 
 - [Analytics](./features/ANALYTICS.md) - Business intelligence
 - [Settings](./features/SETTINGS.md) - Configuration
 - [Data Quality](./features/DATA_QUALITY.md) - Data validation
 - [Workflows](./features/WORKFLOWS.md) - Automation
 
-**Utilities**
+#### Utilities
 
 - [Files](./features/FILES.md) - File management
 - [Knowledge Base](./features/KNOWLEDGE_BASE.md) - Help articles

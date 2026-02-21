@@ -220,6 +220,7 @@ SECONDARY_TAB_ICONS = {
 ## Styling Customization
 
 The CSS matches the main sidebar styling:
+
 - Acme font, uppercase, letter-spacing
 - Red text on active, red background on hover
 - Shadow casting onto content area

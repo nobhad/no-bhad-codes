@@ -456,8 +456,7 @@ CREATE TABLE integration_status (
 
 ## Related Documentation
 
-- [Webhooks](./WEBHOOKS.md) - Core webhook system
-- [Workflows](./WORKFLOWS.md) - Event triggers
+- [Workflows](./WORKFLOWS.md) - Event triggers and webhooks
 - [Invoices](./INVOICES.md) - Invoice system
 - [Milestones](./MILESTONES.md) - Project milestones
 - [Tasks](./TASKS.md) - Task management

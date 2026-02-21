@@ -2035,8 +2035,8 @@ Migrated all PDF generation from PDFKit to pdf-lib for consistency and better co
 
 **Documentation:**
 
-- Created [PDF_GENERATION.md](./features/PDF_GENERATION.md) - Complete PDF system documentation
-- Updated [INVOICES.md](./features/INVOICES.md) - References new PDF docs
+- Created [PDF_GENERATION.md](../features/PDF_GENERATION.md) - Complete PDF system documentation
+- Updated [INVOICES.md](../features/INVOICES.md) - References new PDF docs
 
 ---
 
@@ -2054,7 +2054,7 @@ Implemented a wireframe preview system using screenshots uploaded via the existi
 
 **Documentation:**
 
-- Created [WIREFRAMES.md](./features/WIREFRAMES.md) feature documentation
+- Created [WIREFRAMES.md](../features/WIREFRAMES.md) feature documentation
 
 ---
 

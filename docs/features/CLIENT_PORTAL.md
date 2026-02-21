@@ -1083,9 +1083,9 @@ Settings grid adapts to viewport:
 
 ## Related Documentation
 
-- [Messages](./MESSAGES.md) - Messaging system details
+- [Messages](./MESSAGING.md) - Messaging system details
 - [Files](./FILES.md) - File upload and management
 - [Invoices](./INVOICES.md) - Invoice system
 - [Settings](./SETTINGS.md) - User settings
 - [New Project](./NEW_PROJECT.md) - Project request form
-- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system
+- [CSS Architecture](../design/DESIGN_SYSTEM.md) - Styling system

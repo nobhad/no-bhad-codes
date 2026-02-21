@@ -1593,6 +1593,6 @@ Full invoice management within project details view.
 
 - [PDF Generation](./PDF_GENERATION.md) - Complete PDF system documentation
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
-- [API Reference](../API_REFERENCE.md) - Complete API documentation
+- [API Reference](../API_DOCUMENTATION.md) - Complete API documentation
 - [Settings](./SETTINGS.md) - Billing information
-- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system
+- [CSS Architecture](../design/DESIGN_SYSTEM.md) - Styling system

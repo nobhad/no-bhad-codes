@@ -650,5 +650,5 @@ billing_country TEXT
 
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
 - [Invoices](./INVOICES.md) - Billing relates to invoices
-- [Messages](./MESSAGES.md) - Notification preferences affect messages
-- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system
+- [Messages](./MESSAGING.md) - Notification preferences affect messages
+- [CSS Architecture](../design/DESIGN_SYSTEM.md) - Styling system
