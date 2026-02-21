@@ -73,8 +73,7 @@ The Backend refers to the complete portal system with two interfaces:
 
 |Document|Description|
 |----------|-------------|
-|**[CSS Architecture](./design/CSS_ARCHITECTURE.md)**|Variables, themes, naming conventions|
-|**[UX Guidelines](./design/UX_GUIDELINES.md)**|Typography, icons, buttons, forms|
+|**[Design System](./design/DESIGN_SYSTEM.md)**|Variables, themes, typography, icons, components|
 |**[Animations](./design/ANIMATIONS.md)**|GSAP usage, animation tokens, performance|
 
 ### Architecture & Development

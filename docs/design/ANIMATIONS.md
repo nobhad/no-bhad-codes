@@ -562,5 +562,4 @@ if (!prefersReducedMotion) {
 
 ## Related Documentation
 
-- [CSS Architecture](./CSS_ARCHITECTURE.md) - CSS variables and tokens
-- [UX Guidelines](./UX_GUIDELINES.md) - General UX standards
+- [Design System](./DESIGN_SYSTEM.md) - CSS variables, tokens, and UX standards

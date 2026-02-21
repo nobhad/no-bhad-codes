@@ -1593,7 +1593,7 @@ Token system is excellent and now consistently used:
 - Client portal uses `.portal-` prefix for component classes
 - Client portal modularized into 10 files in `src/styles/client-portal/`
 - Shared portal components in `src/styles/shared/`
-- See `/docs/design/CSS_ARCHITECTURE.md` for detailed findings
+- See `/docs/design/DESIGN_SYSTEM.md` for detailed findings
 
 ---
 

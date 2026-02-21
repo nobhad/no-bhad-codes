@@ -10,7 +10,7 @@ This file tracks instances where Claude did not follow clearly documented guidel
 
 **Violation:** Added `border-bottom: 1px solid var(--portal-border-medium)` to `.portal-card-header`
 
-**Guideline Violated:** UX_GUIDELINES.md and CSS_ARCHITECTURE.md - Should have checked existing admin patterns before adding visual elements. Admin's `.admin-table-header` explicitly uses `border-bottom: none`.
+**Guideline Violated:** DESIGN_SYSTEM.md and DESIGN_SYSTEM.md - Should have checked existing admin patterns before adding visual elements. Admin's `.admin-table-header` explicitly uses `border-bottom: none`.
 
 **What I Should Have Done:**
 

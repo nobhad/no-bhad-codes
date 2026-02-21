@@ -36,7 +36,7 @@
 ## CSS Variable Dependencies
 
 - All components use CSS variables for color, spacing, and typography.
-- See `docs/design/CSS_ARCHITECTURE.md` for global variables.
+- See `docs/design/DESIGN_SYSTEM.md` for global variables.
 - Example variables:
   - `--color-primary`, `--color-accent`, `--spacing-xs`, `--font-size-base`
 - Component-specific variables are documented in each component's CSS or style file.
@@ -50,7 +50,7 @@
 - Modal: `role="dialog"`, focus trap, ESC to close
 - Dropdown: `role="menu"`, keyboard navigation
 - StatusBadge: `aria-label` for status
-- See [COMPONENT_ACCESSIBILITY.md](COMPONENT_ACCESSIBILITY.md) for detailed notes.
+- See [Design System - Accessibility](./DESIGN_SYSTEM.md#accessibility--states) for detailed guidelines.
 
 ---
 
