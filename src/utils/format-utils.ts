@@ -308,3 +308,24 @@ export function formatRelativeTime(dateString: string | Date | undefined | null)
     return '';
   }
 }
+
+// ============================================
+// TEXT UTILITIES
+// ============================================
+
+/**
+ * Truncate text to a maximum length with ellipsis
+ * @param text - Text to truncate
+ * @param maxLength - Maximum length before truncation (default: 50)
+ * @param suffix - Suffix to append when truncated (default: '...')
+ * @returns Truncated text with suffix, or original if shorter than maxLength
+ */
+export function truncateText(
+  text: string | null | undefined,
+  maxLength: number = 50,
+  suffix: string = '...'
+): string {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength - suffix.length) + suffix;
+}
