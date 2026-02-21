@@ -15,28 +15,24 @@
  * ===================================================== */
 
 /* Override card padding so summary and grid control spacing consistently */
-:is([data-page="admin"], [data-page="client-portal"]) .details-card.portal-project-card,
-:is([data-page="admin"], [data-page="client-portal"]) .system-details.portal-project-card {
+.portal :is(.details-card, .system-details).portal-project-card {
   padding: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .details-card,
-:is([data-page="admin"], [data-page="client-portal"]) .system-details {
+.portal :is(.details-card, .system-details) {
   cursor: pointer;
   border-radius: var(--portal-radius-lg, 12px);
 }
 
-/* Summary base styles (display, gap, cursor, list-style) are in base/reset.css */
-:is([data-page="admin"], [data-page="client-portal"]) .details-card summary,
-:is([data-page="admin"], [data-page="client-portal"]) .system-details summary {
+/* Summary base styles */
+.portal :is(.details-card, .system-details) summary {
   padding: var(--space-4);
   margin: 0;
   border-radius: var(--portal-radius-lg, 12px);
 }
 
 /* Caret: aligned with first line of heading */
-:is([data-page="admin"], [data-page="client-portal"]) .details-card summary::before,
-:is([data-page="admin"], [data-page="client-portal"]) .system-details summary::before {
+.portal :is(.details-card, .system-details) summary::before {
   content: '';
   flex-shrink: 0;
   width: 0;
@@ -47,22 +43,17 @@
   transition: transform var(--transition-mouse) ease;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .details-card[open] summary::before,
-:is([data-page="admin"], [data-page="client-portal"]) .system-details[open] summary::before {
+.portal :is(.details-card, .system-details)[open] summary::before {
   transform: rotate(90deg);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .details-card summary h3,
-:is([data-page="admin"], [data-page="client-portal"]) .system-details summary h3 {
+.portal :is(.details-card, .system-details) summary h3 {
   margin: 0;
   flex: 1;
 }
 
 /* Child grid: same horizontal padding as summary */
-:is([data-page="admin"], [data-page="client-portal"]) .details-card-grid,
-:is([data-page="admin"], [data-page="client-portal"]) .system-info-grid,
-:is([data-page="admin"], [data-page="client-portal"]) .details-card .details-card-grid,
-:is([data-page="admin"], [data-page="client-portal"]) .system-details .system-info-grid {
+.portal :is(.details-card-grid, .system-info-grid, .details-card .details-card-grid, .system-details .system-info-grid) {
   padding: 0 var(--space-4) var(--space-4);
   margin: 0;
   display: flex;
@@ -71,8 +62,7 @@
 }
 
 /* Rows: consistent padding, no double borders */
-:is([data-page="admin"], [data-page="client-portal"]) .details-card-row,
-:is([data-page="admin"], [data-page="client-portal"]) .system-info-row {
+.portal :is(.details-card-row, .system-info-row) {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -82,48 +72,45 @@
   font-size: var(--font-size-sm);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .details-card-row span:first-child,
-:is([data-page="admin"], [data-page="client-portal"]) .system-info-row span:first-child {
+/* Admin portal: use darker background to match admin table cells */
+[data-page="admin"] :is(.details-card-row, .system-info-row) {
+  background: var(--portal-bg-dark);
+}
+
+.portal :is(.details-card-row, .system-info-row) span:first-child {
   color: var(--portal-text-secondary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .details-card-row span:last-child,
-:is([data-page="admin"], [data-page="client-portal"]) .system-info-row span:last-child {
+.portal :is(.details-card-row, .system-info-row) span:last-child {
   color: var(--portal-text-primary);
   font-weight: 500;
 }
 
 /* Focus styles: border wraps entire card on keyboard focus */
-:is([data-page="admin"], [data-page="client-portal"]) .details-card:focus-within,
-:is([data-page="admin"], [data-page="client-portal"]) .system-details:focus-within {
+.portal :is(.details-card, .system-details):focus-within {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
 }
 
 /* Remove default focus from summary since parent handles it */
-:is([data-page="admin"], [data-page="client-portal"]) .details-card > summary:focus-visible,
-:is([data-page="admin"], [data-page="client-portal"]) .system-details > summary:focus-visible,
-:is([data-page="admin"], [data-page="client-portal"]) details.portal-project-card > summary:focus-visible {
+.portal :is(.details-card, .system-details, details.portal-project-card) > summary:focus-visible {
   outline: none;
   box-shadow: none;
 }
 
 /* Mobile responsive - tighter padding */
 @media (--mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .details-card summary,
-  :is([data-page="admin"], [data-page="client-portal"]) .system-details summary {
+  .portal :is(.details-card, .system-details) summary {
     padding: var(--space-2) var(--space-3);
     gap: var(--space-2);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .details-card-grid,
-  :is([data-page="admin"], [data-page="client-portal"]) .system-info-grid {
+  .portal :is(.details-card-grid, .system-info-grid) {
     padding: 0 var(--space-3) var(--space-2);
     gap: var(--space-1);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .details-card-row,
-  :is([data-page="admin"], [data-page="client-portal"]) .system-info-row {
+  .portal :is(.details-card-row, .system-info-row) {
     padding: var(--space-1-5) var(--space-2);
   }
 }

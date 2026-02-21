@@ -414,6 +414,16 @@ p.empty-state {
   font-size: 2rem;
 }
 
+/* Empty state icon - consistent visual indicator */
+.empty-state-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--portal-text-muted, var(--color-text-muted, #666));
+  opacity: 0.6;
+  margin-bottom: var(--space-1, 8px);
+  flex-shrink: 0;
+}
+
 .error-message,
 .error-state-message,
 .empty-state-message {
