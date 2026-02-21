@@ -20,6 +20,14 @@ import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
+import {
+  EMAIL_TEMPLATES_FILTER_CONFIG,
+  createFilterUI,
+  loadFilterState,
+  saveFilterState,
+  applyFilters,
+  type FilterState
+} from '../../../utils/table-filter';
 
 // ============================================
 // TYPES
@@ -86,7 +94,7 @@ const CATEGORY_LABELS: Record<EmailTemplateCategory, string> = {
 
 let _storedContext: AdminDashboardContext | null = null;
 let cachedTemplates: EmailTemplate[] = [];
-let currentCategoryFilter: string = 'all';
+let currentFilterState: FilterState = loadFilterState(EMAIL_TEMPLATES_FILTER_CONFIG.storageKey);
 
 // Modal instances
 let templateModal: PortalModalInstance | null = null;
@@ -145,15 +153,17 @@ function renderTemplatesTable(): void {
   const tbody = el('email-templates-table-body');
   if (!tbody) return;
 
-  // Filter by category
-  const filtered = currentCategoryFilter === 'all'
-    ? cachedTemplates
-    : cachedTemplates.filter(t => t.category === currentCategoryFilter);
+  // Apply filters using the standard filter utility
+  const filtered = applyFilters(cachedTemplates, currentFilterState, EMAIL_TEMPLATES_FILTER_CONFIG);
 
   if (filtered.length === 0) {
-    const message = currentCategoryFilter === 'all'
-      ? 'No email templates found.'
-      : `No ${CATEGORY_LABELS[currentCategoryFilter as EmailTemplateCategory] || currentCategoryFilter} templates found.`;
+    const hasFilters = currentFilterState.searchTerm ||
+      currentFilterState.statusFilters.length > 0 ||
+      currentFilterState.dateStart ||
+      currentFilterState.dateEnd;
+    const message = hasFilters
+      ? 'No templates match your filters.'
+      : 'No email templates found.';
     showTableEmpty(tbody, 6, message);
     return;
   }
@@ -193,18 +203,27 @@ function renderTemplatesTable(): void {
 }
 
 function setupEmailTemplatesHandlers(): void {
-  // Category filter tabs
-  const categoryTabs = document.querySelectorAll('.template-category-tab');
-  categoryTabs.forEach(tab => {
-    if (tab.getAttribute('data-bound')) return;
-    tab.setAttribute('data-bound', 'true');
-    tab.addEventListener('click', () => {
-      categoryTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentCategoryFilter = (tab as HTMLElement).dataset.category || 'all';
-      renderTemplatesTable();
-    });
-  });
+  // Set up filter UI in the admin-table-actions container
+  const filterContainer = el('email-templates-filter-container');
+  if (filterContainer && !filterContainer.dataset.filterBound) {
+    filterContainer.dataset.filterBound = 'true';
+
+    // Load persisted filter state
+    currentFilterState = loadFilterState(EMAIL_TEMPLATES_FILTER_CONFIG.storageKey);
+
+    const filterUI = createFilterUI(
+      EMAIL_TEMPLATES_FILTER_CONFIG,
+      currentFilterState,
+      (newState: FilterState) => {
+        currentFilterState = newState;
+        saveFilterState(EMAIL_TEMPLATES_FILTER_CONFIG.storageKey, newState);
+        renderTemplatesTable();
+      }
+    );
+
+    // Prepend filter UI so it appears before the action buttons
+    filterContainer.insertBefore(filterUI, filterContainer.firstChild);
+  }
 
   // Create button
   const createBtn = el('create-email-template-btn');
