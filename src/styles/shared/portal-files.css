@@ -8,7 +8,7 @@
    FILES SECTION CONTAINER
    Combined container for upload + files browser (matching admin)
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .files-section-container {
+.portal .files-section-container {
   background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--portal-radius-md);
@@ -19,11 +19,11 @@
   flex-direction: column;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-section-container h3 {
+.portal .files-section-container h3 {
   margin: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-section-container .files-browser {
+.portal .files-section-container .files-browser {
   box-shadow: none;
   border-radius: 0;
 }
@@ -32,7 +32,7 @@
    FILES UPLOAD SECTION
    Container for file upload area
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .files-upload-section {
+.portal .files-upload-section {
   background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--portal-radius-md);
@@ -41,7 +41,7 @@
   box-shadow: var(--shadow-panel);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-upload-section h3 {
+.portal .files-upload-section h3 {
   margin: 0;
 }
 
@@ -49,7 +49,7 @@
    UPLOAD DROPZONE
    Drag-and-drop file upload area
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone {
+.portal .upload-dropzone {
   border: 2px dashed var(--portal-text-light);
   border-radius: var(--portal-radius-md);
   padding: var(--space-4);
@@ -60,32 +60,31 @@
   transition: border-color var(--transition-mouse) ease, background-color var(--transition-mouse) ease;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone:hover,
-:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone.dragover {
+.portal .upload-dropzone:is(:hover, .dragover) {
   border-color: var(--color-primary);
   background: var(--portal-bg-light);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone p {
+.portal .upload-dropzone p {
   margin: 0 0 var(--space-2) 0;
   color: var(--portal-text-light);
 }
 
 /* Desktop/mobile text variants */
-:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone .dropzone-desktop {
+.portal .upload-dropzone .dropzone-desktop {
   display: block;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone .dropzone-mobile {
+.portal .upload-dropzone .dropzone-mobile {
   display: none;
 }
 
 @media (--mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone .dropzone-desktop {
+  .portal .upload-dropzone .dropzone-desktop {
     display: none;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone .dropzone-mobile {
+  .portal .upload-dropzone .dropzone-mobile {
     display: block;
   }
 }
@@ -94,7 +93,7 @@
    FILES LIST SECTION
    Container for file list
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .files-list-section {
+.portal .files-list-section {
   background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--portal-radius-md);
@@ -106,16 +105,15 @@
   box-shadow: var(--shadow-panel);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-list-section h3 {
+.portal .files-list-section h3 {
   margin: 0 0 var(--space-2) 0;
 }
 
 /* =====================================================
    FILES BROWSER
    Two-column layout: Folders panel + Files panel
-   Matches admin layout using CSS Grid
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .files-browser {
+.portal .files-browser {
   display: grid;
   grid-template-columns: 220px 1fr;
   gap: 1px;
@@ -127,13 +125,13 @@
 }
 
 /* Folder Panel (Left) */
-:is([data-page="admin"], [data-page="client-portal"]) .folder-panel {
+.portal .folder-panel {
   background: var(--portal-bg-dark);
   display: flex;
   flex-direction: column;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .folder-panel-header {
+.portal .folder-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -141,7 +139,7 @@
   border-bottom: 1px solid var(--portal-border);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .folder-panel-header h4 {
+.portal .folder-panel-header h4 {
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 0.875rem;
   font-weight: 500;
@@ -151,13 +149,13 @@
   margin: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .folder-tree {
+.portal .folder-tree {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-1);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .folder-item {
+.portal .folder-item {
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -170,30 +168,30 @@
   margin-bottom: 2px;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .folder-item:hover {
+.portal .folder-item:hover {
   background: var(--portal-bg-medium);
   color: var(--portal-text-primary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .folder-item.active {
+.portal .folder-item.active {
   background: var(--portal-bg-medium);
   color: var(--color-primary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .folder-item svg {
+.portal .folder-item svg {
   flex-shrink: 0;
   color: inherit;
 }
 
 /* Files Panel (Right) */
-:is([data-page="admin"], [data-page="client-portal"]) .files-panel {
+.portal .files-panel {
   background: var(--portal-bg-medium);
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-panel-header {
+.portal .files-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -202,12 +200,12 @@
   background: var(--portal-bg-dark);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-path {
+.portal .files-path {
   font-size: 0.875rem;
   color: var(--portal-text-secondary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-panel .files-list {
+.portal .files-panel .files-list {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-1);
@@ -215,22 +213,22 @@
 
 /* Files Browser Responsive */
 @media (--mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .files-browser {
+  .portal .files-browser {
     grid-template-columns: 1fr;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .folder-panel {
+  .portal .folder-panel {
     border-bottom: 1px solid var(--portal-border);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .folder-tree {
+  .portal .folder-tree {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);
     padding: var(--space-2);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .folder-item {
+  .portal .folder-item {
     flex: 0 0 auto;
   }
 }
@@ -239,7 +237,7 @@
    FILES FILTER BAR
    Filter controls for file list
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar {
+.portal .files-filter-bar {
   display: flex;
   flex-direction: column;
   gap: var(--space-1-5);
@@ -248,28 +246,25 @@
   border-bottom: 1px solid var(--portal-border);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-filter-row {
+.portal .files-filter-row {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1-5);
   align-items: flex-end;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .filter-group {
+.portal .files-filter-bar .filter-group {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
   min-width: 140px;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .filter-group.filter-date {
+.portal .files-filter-bar .filter-group.filter-date {
   min-width: 120px;
 }
 
-/* Label styling from unified rule in portal-forms.css */
-
-:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-select,
-:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-input {
+.portal .files-filter-bar :is(.form-select, .form-input) {
   font-size: 0.875rem;
   padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-medium);
@@ -279,24 +274,23 @@
   height: 36px;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-select:focus,
-:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-input:focus {
+.portal .files-filter-bar :is(.form-select, .form-input):focus {
   border-color: var(--color-primary);
   outline: none;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar #files-clear-filters {
+.portal .files-filter-bar #files-clear-filters {
   height: 36px;
   white-space: nowrap;
 }
 
 @media (--mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .filter-group {
+  .portal .files-filter-bar .filter-group {
     flex: 1 1 calc(50% - var(--space-1-5));
     min-width: 100px;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar #files-clear-filters {
+  .portal .files-filter-bar #files-clear-filters {
     width: 100%;
     margin-top: var(--space-1);
   }
@@ -306,7 +300,7 @@
    FILES LIST
    List container for file items
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .files-list {
+.portal .files-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -315,26 +309,19 @@
 /* =====================================================
    FILES TABLE
    Base styling from shared/portal-tables.css
-   Only page-specific overrides here
    ===================================================== */
-
-/* Background and radius overrides for files table */
-:is([data-page="admin"], [data-page="client-portal"]) .files-table {
+.portal .files-table {
   background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
   overflow: hidden;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .files-table thead {
-  background: var(--portal-bg-dark);
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .files-table th {
+.portal .files-table :is(thead, th) {
   background: var(--portal-bg-dark);
 }
 
 /* File actions container */
-:is([data-page="admin"], [data-page="client-portal"]) .files-table .file-actions {
+.portal .files-table .file-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -343,7 +330,7 @@
 }
 
 /* Compact action buttons for files table */
-:is([data-page="admin"], [data-page="client-portal"]) .files-table .btn {
+.portal .files-table .btn {
   padding: 0.375rem 0.75rem;
   font-size: 0.75rem;
 }
@@ -353,23 +340,23 @@
    Mobile card layout for table
    ===================================================== */
 @media (--mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .files-table {
+  .portal .files-table {
     display: block;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .files-table thead {
+  .portal .files-table thead {
     display: none;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .files-table tbody {
+  .portal .files-table tbody {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .files-table tr {
+  .portal .files-table tr {
     display: flex;
     flex-direction: column;
     padding: var(--space-1-5);
@@ -378,7 +365,7 @@
     gap: var(--space-1);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .files-table td {
+  .portal .files-table td {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -386,7 +373,7 @@
     border: none;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .files-table td::before {
+  .portal .files-table td::before {
     content: attr(data-label);
     font-weight: 500;
     color: var(--portal-text-secondary);
@@ -395,15 +382,15 @@
     letter-spacing: 0.05em;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .files-table td:last-child {
+  .portal .files-table td:last-child {
     justify-content: flex-end;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .files-table td:last-child::before {
+  .portal .files-table td:last-child::before {
     display: none;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .files-table .file-actions {
+  .portal .files-table .file-actions {
     width: 100%;
     justify-content: flex-end;
   }
@@ -413,7 +400,7 @@
    FILE ITEM
    Individual file entry
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .file-item {
+.portal .file-item {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
@@ -425,9 +412,7 @@
   transition: border-color var(--transition-fast) ease;
 }
 
-/* File items are not clickable - buttons inside handle actions */
-
-:is([data-page="admin"], [data-page="client-portal"]) .file-icon {
+.portal .file-icon {
   width: 36px;
   height: 36px;
   border-radius: var(--portal-radius-sm);
@@ -439,19 +424,19 @@
   color: var(--portal-text-secondary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-icon.image {
+.portal .file-icon.image {
   color: var(--status-active);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-icon.document {
+.portal .file-icon.document {
   color: var(--color-primary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-icon.archive {
+.portal .file-icon.archive {
   color: var(--color-warning-500);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-info {
+.portal .file-info {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
@@ -459,7 +444,7 @@
   min-width: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-name {
+.portal .file-name {
   flex: 1;
   font-weight: 500;
   color: var(--portal-text-light);
@@ -468,12 +453,12 @@
   text-overflow: ellipsis;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-date {
+.portal .file-date {
   font-size: 0.9rem;
   color: var(--portal-text-secondary);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-meta {
+.portal .file-meta {
   font-size: 0.85rem;
   color: var(--portal-text-secondary);
 }
@@ -482,7 +467,7 @@
    FILE ACTIONS
    Action buttons for files
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions {
+.portal .file-actions {
   display: flex;
   flex-direction: row;
   gap: var(--space-1);
@@ -490,38 +475,34 @@
   margin-left: auto;
 }
 
-/* Text buttons in file actions (exclude icon buttons so they match invoices tab) */
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview:not(.icon-btn),
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download:not(.icon-btn) {
+/* Text buttons in file actions (exclude icon buttons) */
+.portal .file-actions :is(.btn-preview, .btn-download):not(.icon-btn) {
   min-width: 90px;
   text-align: center;
   justify-content: center;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview:not(.icon-btn):hover,
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download:not(.icon-btn):hover {
+.portal .file-actions :is(.btn-preview, .btn-download):not(.icon-btn):hover {
   background: var(--color-primary);
   color: var(--color-dark);
 }
 
 /* =====================================================
    FILE DELETE BUTTON
-   Delete button in file actions
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-delete {
+.portal .file-actions .btn-delete {
   color: var(--portal-text-muted);
   transition: color var(--transition-mouse) ease;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-delete:hover {
+.portal .file-actions .btn-delete:hover {
   color: var(--color-error);
 }
 
 /* =====================================================
    FILE DOWNLOAD LINK
-   Styled download link
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .file-download {
+.portal .file-download {
   color: var(--color-primary);
   text-decoration: none;
   font-weight: 600;
@@ -531,16 +512,15 @@
   transition: all var(--transition-fast);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-download:hover {
+.portal .file-download:hover {
   background: var(--color-primary);
   color: var(--color-dark);
 }
 
 /* =====================================================
    NO FILES STATE
-   Empty state message
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .no-files {
+.portal .no-files {
   text-align: center;
   padding: var(--space-4);
   color: var(--portal-text-secondary);
@@ -550,14 +530,12 @@
 /* =====================================================
    CARD SHADOWS
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .files-upload-section,
-:is([data-page="admin"], [data-page="client-portal"]) .files-list-section {
+.portal :is(.files-upload-section, .files-list-section) {
   box-shadow: var(--shadow-panel);
 }
 
 /* No shadows on child divs */
-:is([data-page="admin"], [data-page="client-portal"]) .files-upload-section > div,
-:is([data-page="admin"], [data-page="client-portal"]) .files-list-section > div {
+.portal :is(.files-upload-section, .files-list-section) > div {
   box-shadow: none;
 }
 
@@ -565,19 +543,18 @@
    MOBILE RESPONSIVE
    ===================================================== */
 @media (--mobile) {
-  :is([data-page="admin"], [data-page="client-portal"]) .file-item {
+  .portal .file-item {
     flex-wrap: wrap;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .file-actions {
+  .portal .file-actions {
     width: 100%;
     margin-left: 0;
     margin-top: var(--space-1);
     justify-content: flex-end;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview:not(.icon-btn),
-  :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download:not(.icon-btn) {
+  .portal .file-actions :is(.btn-preview, .btn-download):not(.icon-btn) {
     flex: 1;
   }
 }
