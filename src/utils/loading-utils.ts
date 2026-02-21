@@ -46,11 +46,29 @@ export function getInlineLoadingHTML(): string {
   return '<span class="loading-spinner loading-spinner--small" aria-hidden="true"></span>';
 }
 
+/**
+ * Standard loading state HTML - matches pattern used throughout codebase
+ * Use this instead of inline HTML strings for consistency
+ * @param message Optional loading message (default: 'Loading...')
+ */
+export function getLoadingStateHTML(message: string = 'Loading...'): string {
+  return `<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">${message}</span></div>`;
+}
+
+/** Default loading state HTML constant for simple cases */
+export const LOADING_STATE_HTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+
 function escapeHtml(text: string): string {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 }
+
+/**
+ * Standard empty state icon (Lucide inbox icon)
+ * Used across all empty states for visual consistency
+ */
+const EMPTY_STATE_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-state-icon" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>';
 
 /**
  * HTML for table empty row (no data)
@@ -62,6 +80,7 @@ export function getTableEmptyRow(colspan: number, message: string): string {
     <tr class="empty-row">
       <td colspan="${colspan}" class="empty-row">
         <div class="empty-state">
+          ${EMPTY_STATE_ICON}
           <span class="empty-state-message">${escapeHtml(message)}</span>
         </div>
       </td>
@@ -78,6 +97,31 @@ export function showTableEmpty(
   message: string
 ): void {
   tableBody.innerHTML = getTableEmptyRow(colspan, message);
+}
+
+/**
+ * HTML for container empty state (non-table contexts)
+ * @param message Message to display
+ */
+export function getContainerEmptyHTML(message: string): string {
+  return `
+    <div class="empty-state">
+      ${EMPTY_STATE_ICON}
+      <span class="empty-state-message">${escapeHtml(message)}</span>
+    </div>
+  `;
+}
+
+/**
+ * Show empty state in a container (non-table context)
+ * @param container The container element
+ * @param message Message to display
+ */
+export function showContainerEmpty(
+  container: HTMLElement,
+  message: string
+): void {
+  container.innerHTML = getContainerEmptyHTML(message);
 }
 
 /**
