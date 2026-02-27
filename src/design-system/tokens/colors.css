@@ -12,17 +12,16 @@
   /* ============================================
    * PRIMITIVE COLOR PALETTE
    * ============================================
-   * DISCOTHÈQUE-inspired: High contrast black/white
-   * "The dancefloor aesthetic" - bold, minimal
+   * Global color primitives used by both main site and portals
    */
 
-  /* Brand Colors - Pure black/white high contrast */
-  --color-brand-primary: #ffffff; /* White as primary on dark backgrounds */
-  --color-brand-primary-rgb: 255, 255, 255;
-  --color-brand-secondary: #ffffff; /* White as secondary */
-  --color-brand-secondary-rgb: 255, 255, 255;
-  --color-brand-accent: #ffffff; /* White as accent */
-  --color-brand-accent-rgb: 255, 255, 255;
+  /* Brand Colors - Main site uses crimson red */
+  --color-brand-primary: #dc2626;
+  --color-brand-primary-rgb: 220, 38, 38;
+  --color-brand-secondary: #10b981;
+  --color-brand-secondary-rgb: 16, 185, 129;
+  --color-brand-accent: #dc2626;
+  --color-brand-accent-rgb: 220, 38, 38;
 
   /* Neutral Palette - Gray Scale */
   --color-gray-50: #fafafa;
@@ -48,10 +47,106 @@
   --color-info-600: #2563eb;
 
   /* ============================================
-   * SEMANTIC COLOR TOKENS - DISCOTHÈQUE THEME
+   * SEMANTIC COLOR TOKENS - MAIN SITE (LIGHT)
    * ============================================
-   * High contrast black/white - "dancefloor aesthetic"
+   * Light background, dark text for main site
    */
+
+  /* Background Colors - Light base (off-white) */
+  --color-bg-primary: #fffefd;
+  --color-bg-secondary: var(--color-gray-100);
+  --color-bg-tertiary: var(--color-gray-200);
+  --color-bg-inverse: var(--color-gray-900);
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Surface Colors - Light surfaces */
+  --color-surface-primary: #fffefd;
+  --color-surface-secondary: var(--color-gray-100);
+  --color-surface-tertiary: var(--color-gray-200);
+  --color-surface-elevated: #fffefd;
+
+  /* Form Field Background */
+  --color-form-input-bg: #333333;
+
+  /* Text Colors - Dark on light */
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-700);
+  --color-text-tertiary: var(--color-gray-500);
+  --color-text-disabled: var(--color-gray-400);
+  --color-text-inverse: #fffefd;
+  --color-text-brand: var(--color-brand-primary);
+
+  /* Header/Navigation Specific Text Color */
+  --color-nav-text: #333333;
+
+  /* Border Colors - Standard borders */
+  --color-border-primary: var(--color-gray-300);
+  --color-border-secondary: var(--color-gray-200);
+  --color-border-tertiary: var(--color-gray-100);
+  --color-border-focus: var(--color-brand-primary);
+  --color-border-error: var(--color-error-500);
+
+  /* Interactive Colors */
+  --color-interactive-primary: var(--color-brand-primary);
+  --color-interactive-primary-hover: #b91c1c;
+  --color-interactive-primary-active: #991b1b;
+  --color-interactive-secondary: var(--color-gray-500);
+  --color-interactive-secondary-hover: var(--color-gray-700);
+  --color-interactive-secondary-active: var(--color-gray-800);
+
+  /* State Colors */
+  --color-state-hover: rgba(0, 0, 0, 0.05);
+  --color-state-active: rgba(0, 0, 0, 0.1);
+  --color-state-selected: rgba(0, 0, 0, 0.08);
+  --color-state-disabled: var(--color-gray-400);
+
+  /* Shadow Colors */
+  --color-shadow-sm: rgba(0, 0, 0, 0.05);
+  --color-shadow-md: rgba(0, 0, 0, 0.1);
+  --color-shadow-lg: rgba(0, 0, 0, 0.15);
+  --color-shadow-xl: rgba(0, 0, 0, 0.25);
+  --color-shadow-2xl: rgba(0, 0, 0, 0.3);
+  --color-shadow-3xl: rgba(0, 0, 0, 0.5);
+
+  /* Overlay Colors (for backdrops/modals) */
+  --color-overlay-subtle: rgba(0, 0, 0, 0.05);
+  --color-overlay-muted: rgba(0, 0, 0, 0.25);
+  --color-overlay-light: rgba(0, 0, 0, 0.5);
+  --color-overlay-medium: rgba(0, 0, 0, 0.7);
+  --color-overlay-heavy: rgba(0, 0, 0, 0.8);
+  --color-overlay-dark: rgba(0, 0, 0, 0.85);
+
+  /* Annotation/Marker Colors - for design review, comments, highlights */
+  --color-annotation-red: #ef4444;
+  --color-annotation-yellow: #eab308;
+  --color-annotation-blue: #3b82f6;
+  --color-annotation-green: #22c55e;
+
+  /* Chart Colors - for data visualization */
+  --color-chart-primary: var(--color-brand-primary);
+  --color-chart-secondary: #22c55e;
+  --color-chart-tertiary: #f59e0b;
+  --color-chart-quaternary: #9ca3af;
+  --color-chart-text: var(--color-gray-700);
+  --color-chart-grid: var(--color-gray-300);
+}
+
+/* ============================================
+ * PORTAL THEME - DISCOTHÈQUE (Dark)
+ * ============================================
+ * High contrast black/white for admin and client portals
+ * This section ONLY applies to portal pages
+ */
+
+[data-page="admin"],
+[data-page="client-portal"] {
+  /* Brand Colors - White on black */
+  --color-brand-primary: #ffffff;
+  --color-brand-primary-rgb: 255, 255, 255;
+  --color-brand-secondary: #ffffff;
+  --color-brand-secondary-rgb: 255, 255, 255;
+  --color-brand-accent: #ffffff;
+  --color-brand-accent-rgb: 255, 255, 255;
 
   /* Background Colors - Pure black base */
   --color-bg-primary: #000000;
@@ -71,8 +166,8 @@
 
   /* Text Colors - White on black */
   --color-text-primary: #ffffff;
-  --color-text-secondary: #f4f4f4;
-  --color-text-tertiary: #a0a0a0;
+  --color-text-secondary: #ffffff;
+  --color-text-tertiary: #ffffff;
   --color-text-disabled: #787878;
   --color-text-inverse: #000000;
   --color-text-brand: #ffffff;
@@ -85,11 +180,10 @@
   --color-border-secondary: #787878;
   --color-border-tertiary: #24221b;
   --color-border-focus: #ffffff;
-  --color-border-error: var(--color-error-500);
 
   /* Interactive Colors - Inverted on hover */
   --color-interactive-primary: #ffffff;
-  --color-interactive-primary-hover: #000000; /* Inverts to black bg */
+  --color-interactive-primary-hover: #000000;
   --color-interactive-primary-active: #1a1a1a;
   --color-interactive-secondary: #787878;
   --color-interactive-secondary-hover: #ffffff;
@@ -101,88 +195,52 @@
   --color-state-selected: rgba(255, 255, 255, 0.2);
   --color-state-disabled: #787878;
 
-  /* Shadow Colors */
-  --color-shadow-sm: rgba(0, 0, 0, 0.05);
-  --color-shadow-md: rgba(0, 0, 0, 0.1);
-  --color-shadow-lg: rgba(0, 0, 0, 0.15);
-  --color-shadow-xl: rgba(0, 0, 0, 0.25);
-  --color-shadow-2xl: rgba(0, 0, 0, 0.3);
-  --color-shadow-3xl: rgba(0, 0, 0, 0.5);
+  /* Shadow Colors - Darker for dark theme */
+  --color-shadow-sm: rgba(0, 0, 0, 0.3);
+  --color-shadow-md: rgba(0, 0, 0, 0.5);
+  --color-shadow-lg: rgba(0, 0, 0, 0.7);
+  --color-shadow-xl: rgba(0, 0, 0, 0.9);
 
-  /* Overlay Colors (for backdrops/modals) - single source for all overlay tokens */
-  --color-overlay-subtle: rgba(0, 0, 0, 0.05);
-  --color-overlay-muted: rgba(0, 0, 0, 0.25);
-  --color-overlay-light: rgba(0, 0, 0, 0.5);
-  --color-overlay-medium: rgba(0, 0, 0, 0.7);
-  --color-overlay-heavy: rgba(0, 0, 0, 0.8);
-  --color-overlay-dark: rgba(0, 0, 0, 0.85);
-
-  /* Annotation/Marker Colors - for design review, comments, highlights */
-  --color-annotation-red: #ef4444;
-  --color-annotation-yellow: #eab308;
-  --color-annotation-blue: #3b82f6;
-  --color-annotation-green: #22c55e;
-
-  /* Chart Colors - for data visualization */
-  --color-chart-primary: var(--color-primary);
-  --color-chart-secondary: #22c55e;
-  --color-chart-tertiary: #f59e0b;
-  --color-chart-quaternary: #9ca3af;
+  /* Chart Colors for portals */
   --color-chart-text: var(--color-gray-100);
   --color-chart-grid: var(--color-gray-600);
 }
 
 /* ============================================
- * DARK THEME OVERRIDES
+ * DARK THEME OVERRIDES - MAIN SITE
  * ============================================
- * DISCOTHÈQUE style is dark-first, so dark theme
- * matches the base theme (pure black/white)
+ * Dark theme for the main site (not portals)
  */
 
-html[data-theme="dark"] {
-  /* Brand Colors - White on black */
-  --color-brand-primary: #ffffff;
-  --color-brand-primary-rgb: 255, 255, 255;
-  --color-brand-secondary: #ffffff;
-  --color-brand-secondary-rgb: 255, 255, 255;
-  --color-brand-accent: #ffffff;
-  --color-brand-accent-rgb: 255, 255, 255;
-
-  /* Background Colors - Pure black */
-  --color-bg-primary: #000000;
-  --color-bg-secondary: #0a0a0a;
-  --color-bg-tertiary: #1a1a1a;
-  --color-bg-inverse: #ffffff;
-  --color-bg-overlay: rgba(0, 0, 0, 0.85);
+html[data-theme="dark"]:not([data-page="admin"]):not([data-page="client-portal"]) {
+  /* Background Colors */
+  --color-bg-primary: var(--color-gray-900);
+  --color-bg-secondary: var(--color-gray-800);
+  --color-bg-tertiary: var(--color-gray-700);
+  --color-bg-inverse: var(--color-gray-50);
 
   /* Surface Colors */
-  --color-surface-primary: #000000;
-  --color-surface-secondary: #0a0a0a;
-  --color-surface-tertiary: #1a1a1a;
-  --color-surface-elevated: #1a1a1a;
+  --color-surface-primary: var(--color-gray-900);
+  --color-surface-secondary: var(--color-gray-800);
+  --color-surface-tertiary: var(--color-gray-700);
+  --color-surface-elevated: var(--color-gray-800);
 
-  /* Text Colors - Pure white */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #f4f4f4;
-  --color-text-tertiary: #a0a0a0;
-  --color-text-disabled: #787878;
-  --color-text-inverse: #000000;
+  /* Text Colors */
+  --color-text-primary: var(--color-gray-50);
+  --color-text-secondary: var(--color-gray-200);
+  --color-text-tertiary: var(--color-gray-400);
+  --color-text-inverse: var(--color-gray-900);
 
   /* Header/Navigation Specific Text Color */
-  --color-nav-text: #ffffff;
+  --color-nav-text: var(--color-gray-50);
 
   /* Form Field Background */
-  --color-form-input-bg: #000000;
+  --color-form-input-bg: var(--color-gray-800);
 
-  /* Border Colors - White borders */
-  --color-border-primary: #ffffff;
-  --color-border-secondary: #787878;
-  --color-border-tertiary: #24221b;
-
-  /* Interactive Colors - Inverted hover */
-  --color-interactive-primary: #ffffff;
-  --color-interactive-primary-hover: #000000;
-  --color-interactive-primary-active: #1a1a1a;
+  /* Border Colors */
+  --color-border-primary: var(--color-gray-600);
+  --color-border-secondary: var(--color-gray-700);
+  --color-border-tertiary: var(--color-gray-800);
 
   /* State Colors */
   --color-state-hover: rgba(255, 255, 255, 0.1);
@@ -225,33 +283,33 @@ html[data-theme="dark"] {
 
 :root,
 html[data-theme="light"] {
-  /* Legacy neutral colors → DISCOTHÈQUE dark scale */
-  --color-neutral-100: #1a1a1a;
-  --color-neutral-200: #0a0a0a;
-  --color-neutral-300: #000000; /* Base background - pure black */
-  --color-neutral-400: #787878;
-  --color-neutral-500: #a0a0a0;
-  --color-neutral-600: #c0c0c0;
-  --color-neutral-700: #e0e0e0;
-  --color-neutral-800: #f4f4f4;
-  --color-neutral-900: #ffffff;
+  /* Legacy neutral colors - Standard light scale */
+  --color-neutral-100: var(--color-gray-100);
+  --color-neutral-200: var(--color-gray-200);
+  --color-neutral-300: var(--color-gray-300);
+  --color-neutral-400: var(--color-gray-400);
+  --color-neutral-500: var(--color-gray-500);
+  --color-neutral-600: var(--color-gray-600);
+  --color-neutral-700: var(--color-gray-700);
+  --color-neutral-800: var(--color-gray-800);
+  --color-neutral-900: var(--color-gray-900);
 
-  /* Legacy semantic colors - DISCOTHÈQUE white-on-black */
-  --color-dark: #ffffff; /* Inverted - text on dark bg */
-  --color-light: #000000; /* Inverted - dark backgrounds */
+  /* Legacy semantic colors - Main site light theme */
+  --color-dark: var(--color-gray-900); /* Dark text on light bg */
+  --color-light: var(--color-gray-50); /* Light backgrounds */
   --color-primary: var(--color-brand-primary);
   --color-primary-rgb: var(--color-brand-primary-rgb);
   --color-secondary: var(--color-brand-secondary);
   --color-secondary-rgb: var(--color-brand-secondary-rgb);
   --color-accent: var(--color-brand-accent);
   --color-accent-rgb: var(--color-brand-accent-rgb);
-  --color-border: #ffffff; /* White borders on black */
-  --color-border-light: #787878;
-  --color-shadow: rgba(0, 0, 0, 0.5);
+  --color-border: var(--color-gray-300);
+  --color-border-light: var(--color-gray-200);
+  --color-shadow: rgba(0, 0, 0, 0.1);
 
   /* App-level aliases (for components that need a single variable) */
-  --app-color-primary: #ffffff;
-  --app-color-primary-hover: #000000; /* Inverts on hover */
+  --app-color-primary: var(--color-brand-primary);
+  --app-color-primary-hover: #b91c1c;
 
   /* Legacy base colors */
   --color-black: #000000;
@@ -428,8 +486,8 @@ html[data-theme="light"] {
   --form-btn-shadow: rgba(0, 0, 0, 0.2);
 }
 
-/* Dark theme legacy aliases */
-html[data-theme="dark"] {
+/* Dark theme legacy aliases - Main site only */
+html[data-theme="dark"]:not([data-page="admin"]):not([data-page="client-portal"]) {
   --color-neutral-300: #333333;
   --color-neutral-100: #3a3a3a;
   --color-neutral-200: #3a3a3a;
@@ -454,4 +512,37 @@ html[data-theme="dark"] {
   /* Business card - soft white */
   --color-card-bg: var(--color-gray-200);
   --color-card-bg-gradient-end: var(--color-gray-300);
+}
+
+/* Portal legacy aliases - DISCOTHÈQUE theme */
+[data-page="admin"],
+[data-page="client-portal"] {
+  /* Legacy neutral colors → DISCOTHÈQUE dark scale */
+  --color-neutral-100: #1a1a1a;
+  --color-neutral-200: #0a0a0a;
+  --color-neutral-300: #000000;
+  --color-neutral-400: #787878;
+  --color-neutral-500: #a0a0a0;
+  --color-neutral-600: #c0c0c0;
+  --color-neutral-700: #e0e0e0;
+  --color-neutral-800: #f4f4f4;
+  --color-neutral-900: #ffffff;
+
+  /* Legacy semantic colors - DISCOTHÈQUE white-on-black */
+  --color-dark: #ffffff;
+  --color-light: #000000;
+  --color-border: #ffffff;
+  --color-border-light: #787878;
+  --color-shadow: rgba(0, 0, 0, 0.5);
+
+  /* App-level aliases for portal */
+  --app-color-primary: #ffffff;
+  --app-color-primary-hover: #000000;
+
+  /* Form variables for portal */
+  --form-input-border: #ffffff;
+  --form-input-placeholder: #787878;
+  --form-btn-bg: #ffffff;
+  --form-btn-fg: #000000;
+  --form-btn-shadow: rgba(0, 0, 0, 0.3);
 }
