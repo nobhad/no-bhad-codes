@@ -119,18 +119,8 @@ async function loadReactProposalsTable(): Promise<boolean> {
   }
 }
 
-/** Feature flag for React proposals table */
+/** Check if React proposals table should be used - always true */
 function shouldUseReactProposalsTable(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_proposals') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_proposals_table');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }
 
