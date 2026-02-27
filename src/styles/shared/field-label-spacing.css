@@ -108,6 +108,10 @@
 .meta-grid--3col { grid-template-columns: repeat(3, 1fr); }
 .meta-grid--4col { grid-template-columns: repeat(4, 1fr); }
 
+/* Gap size variants */
+.meta-grid--gap-xs { gap: var(--space-1); }
+.meta-grid--gap-sm { gap: var(--space-2); }
+
 /* Responsive: stack on mobile */
 @media (--compact-mobile) {
   .meta-grid--2col,

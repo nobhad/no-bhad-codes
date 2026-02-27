@@ -2002,9 +2002,14 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   min-width: 150px;
 }
 
-.line-item-row .line-item-qty,
+.line-item-row .line-item-qty {
+  flex-shrink: 0;
+  width: 70px;
+}
+
 .line-item-row .line-item-rate {
   flex-shrink: 0;
+  width: 100px;
 }
 
 .line-item-amount {

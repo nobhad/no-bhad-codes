@@ -20,7 +20,8 @@
 /* Content panel visibility - hidden by default */
 .tab-content,
 .portal-subtab-content,
-.analytics-subtab-content {
+.analytics-subtab-content,
+.documents-subtab-content {
   display: none;
 }
 
@@ -38,9 +39,11 @@
 .tab-content.active,
 .portal-tab-panel.active,
 .portal-subtab-content.active,
-.analytics-subtab-content.active {
+.analytics-subtab-content.active,
+.documents-subtab-content.active {
   display: flex;
   flex-direction: column;
+  gap: var(--portal-section-gap);
 }
 
 /* =====================================================
@@ -267,7 +270,8 @@
   .tab-content.active,
   .portal-tab-panel.active,
   .portal-subtab-content.active,
-  .analytics-subtab-content.active {
+  .analytics-subtab-content.active,
+  .documents-subtab-content.active {
     gap: var(--space-2);
   }
 }
