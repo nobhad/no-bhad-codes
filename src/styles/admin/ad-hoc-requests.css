@@ -365,3 +365,126 @@
 .ad-hoc-invoice-actions button {
   flex: 1;
 }
+
+/* =====================================================
+   MOBILE RESPONSIVE STYLES
+   ===================================================== */
+
+@media (--mobile) {
+  /* Request summary grid - stack on mobile */
+  .ad-hoc-request-summary {
+    grid-template-columns: 1fr;
+    gap: var(--space-1-5);
+  }
+
+  /* Time entries section */
+  .ad-hoc-time-entries-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .ad-hoc-time-entry-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ad-hoc-time-entry-form {
+    padding: var(--space-1-5);
+  }
+
+  /* Metrics cards - stack on mobile */
+  .ad-hoc-metrics-cards {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .ad-hoc-metric-card {
+    padding: var(--space-2);
+  }
+
+  .ad-hoc-metric-value {
+    font-size: var(--font-size-2xl);
+  }
+
+  /* Monthly breakdown - stack layout */
+  .ad-hoc-monthly-section,
+  .ad-hoc-clients-section {
+    padding: var(--space-2);
+  }
+
+  .ad-hoc-monthly-row {
+    grid-template-columns: 1fr auto;
+    gap: var(--space-1);
+  }
+
+  .ad-hoc-monthly-label {
+    grid-column: 1 / -1;
+  }
+
+  /* Client row - stack on mobile */
+  .ad-hoc-client-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .ad-hoc-client-revenue {
+    text-align: left;
+  }
+
+  /* Invoice modal */
+  .ad-hoc-invoice-body {
+    padding: var(--space-2);
+  }
+
+  .ad-hoc-invoice-actions {
+    flex-direction: column;
+    gap: var(--space-1-5);
+  }
+
+  .ad-hoc-invoice-actions button {
+    width: 100%;
+  }
+}
+
+@media (--compact-mobile) {
+  .ad-hoc-request-summary {
+    padding: var(--space-1-5);
+  }
+
+  .ad-hoc-time-entries-section {
+    padding: var(--space-1);
+  }
+
+  .ad-hoc-time-entries-list {
+    max-height: 200px;
+    padding: var(--space-0-5);
+  }
+
+  .ad-hoc-time-entry {
+    padding: var(--space-0-5);
+  }
+
+  .ad-hoc-metric-card {
+    padding: var(--space-1-5);
+  }
+
+  .ad-hoc-monthly-section,
+  .ad-hoc-clients-section {
+    padding: var(--space-1-5);
+  }
+
+  .ad-hoc-invoice-body {
+    padding: var(--space-1-5);
+    gap: var(--space-1-5);
+  }
+
+  .invoice-section {
+    padding: var(--space-1-5);
+  }
+
+  .invoice-request-list {
+    max-height: 180px;
+  }
+}

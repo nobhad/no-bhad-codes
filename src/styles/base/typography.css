@@ -7,10 +7,8 @@
  * Typography foundation with responsive scaling
  * and consistent heading hierarchy.
  *
- * Dual-font system (DISCOTHÈQUE-inspired):
- * - Headings: Cormorant Garamond (classic serif)
- * - Body/UI: Inconsolata (monospace)
- * - Letter-spacing: -0.09em for tight tracking
+ * MAIN SITE uses Acme for headings.
+ * PORTAL overrides are in shared/portal-layout.css
  */
 
 /* ============================================
@@ -24,57 +22,51 @@
  * TYPOGRAPHY SCALE
  * ============================================ */
 
-/* Universal heading styling - Serif for visual hierarchy */
+/* Universal heading styling - Main site uses Acme */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-family-acme);
   line-height: 1.2;
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-tightest, -0.09em);
-  text-shadow: none;
+  text-shadow: 0 2px 4px var(--color-shadow);
   margin: 0;
-  color: var(--color-text-primary, #ffffff);
+  color: var(--color-dark);
 }
 
 /* Responsive heading sizes */
 h1,
 .h1 {
   font-size: clamp(2rem, 5vw, 4rem);
-  font-weight: 700;
 }
 
 h2,
 .h2 {
   font-size: clamp(1.5rem, 4vw, 3rem);
-  font-weight: 600;
+  letter-spacing: 0.10em; /* Match intro nav links spacing */
 }
 
 h3,
 .h3 {
   font-size: clamp(1.25rem, 3vw, 2rem);
-  font-weight: 600;
 }
 
 h4,
 .h4 {
   font-size: clamp(1.125rem, 2.5vw, 1.5rem);
-  font-weight: 500;
 }
 
 h5,
 .h5 {
   font-size: clamp(1rem, 2vw, 1.25rem);
-  font-weight: 500;
 }
 
 h6,
 .h6 {
   font-size: clamp(0.875rem, 1.5vw, 1rem);
-  font-weight: 500;
 }
 
 /* ============================================
@@ -87,12 +79,12 @@ p {
   margin: 0;
 }
 
-/* Horizontal rule styling - DISCOTHÈQUE: sharp corners, white on black */
+/* Horizontal rule styling */
 hr {
   border: none;
-  height: 2px;
-  border-radius: 0; /* Sharp corners */
-  background-color: var(--color-text-primary, #ffffff);
+  height: 4px;
+  border-radius: 2px 0 4px 2px;
+  background-color: var(--color-dark);
   margin: 0 0 1.5rem 0; /* No top margin, spacing below */
   width: 100%;
 }
@@ -244,7 +236,7 @@ p a::before {
   position: absolute;
   width: 100%;
   height: 33%;
-  border-radius: 0; /* DISCOTHÈQUE: sharp corners */
+  border-radius: 2px;
   background-color: currentColor;
   opacity: 0.3;
   bottom: 10%;
@@ -275,7 +267,7 @@ p a:focus::before {
   position: absolute;
   width: 100%;
   height: 33%;
-  border-radius: 0; /* DISCOTHÈQUE: sharp corners */
+  border-radius: 2px;
   background-color: currentColor;
   opacity: 0.3;
   bottom: 10%;

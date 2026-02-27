@@ -246,7 +246,7 @@ body[data-page="admin"]:not(.admin-logged-in) {
   flex: 1;
   padding: 0 clamp(0.75rem, 2vw, 1.5rem) clamp(0.75rem, 2vw, 1.5rem);
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
   background: var(--portal-bg-medium);
@@ -777,6 +777,51 @@ body.modal-open .dashboard-content {
   display: inline;
 }
 
+/* Stats summary - inline stats display in table headers */
+.stats-summary {
+  order: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: var(--space-3);
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.stats-summary-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Separator between stats items */
+.stats-summary-item:not(:last-child)::after {
+  content: "•";
+  margin-left: var(--space-2);
+  color: var(--portal-text-muted);
+}
+
+/* Stats variants */
+.stats-summary-item.stats-pending {
+  color: var(--app-color-warning);
+}
+
+.stats-summary-item.stats-active {
+  color: var(--app-color-info);
+}
+
+.stats-summary-item.stats-completed {
+  color: var(--app-color-success);
+}
+
+.stats-summary-item.stats-overdue {
+  color: var(--app-color-danger);
+}
+
+.stats-summary-item.stats-cancelled {
+  color: var(--portal-text-muted);
+}
+
 .admin-table-actions,
 .data-table-actions {
   display: flex;
@@ -1229,10 +1274,13 @@ body.modal-open .dashboard-content {
   }
 
   [data-page="admin"] .admin-table-scroll-wrapper,
-  [data-page="admin"] .admin-table-container {
+  [data-page="admin"] .admin-table-container,
+  [data-page="admin"] .data-table-container,
+  [data-page="admin"] .data-table-scroll-wrapper {
     padding: 0;
     max-width: 100%;
     background: transparent;
+    overflow: visible;
   }
 
   [data-page="admin"] .data-table tbody td:empty {
@@ -1391,6 +1439,15 @@ body.modal-open .dashboard-content {
   .admin-table-header > .status-badge,
   .data-table-header > .status-badge {
     display: none;
+  }
+
+  /* Stats on mobile - full width below title */
+  .stats-summary {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-left: 0;
+    margin-top: var(--space-1);
+    font-size: var(--font-size-xs);
   }
 
   .admin-table-actions > *,

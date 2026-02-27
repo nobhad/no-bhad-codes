@@ -149,18 +149,18 @@
     padding: var(--space-2);
   }
 
-  /* Pagination buttons */
+  /* Pagination buttons - uses touch size from portal-tables.css */
   .pagination-btn {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
+    width: var(--table-pagination-btn-size-touch);
+    height: var(--table-pagination-btn-size-touch);
+    min-width: var(--table-pagination-btn-size-touch);
+    min-height: var(--table-pagination-btn-size-touch);
   }
 
   .pagination-page-btn {
-    min-width: 44px;
-    height: 44px;
-    min-height: 44px;
+    min-width: var(--table-pagination-btn-size-touch);
+    height: var(--table-pagination-btn-size-touch);
+    min-height: var(--table-pagination-btn-size-touch);
   }
 
   /* Notification bell */
@@ -344,7 +344,7 @@
 
 /* Apply responsive behavior to admin tables on mobile */
 @media (--mobile) {
-  /* Table containers - responsive behavior */
+  /* Table containers - allow content to fit */
   .admin-table-container,
   .table-container,
   .data-table-container,
@@ -355,7 +355,7 @@
     overflow: visible;
   }
 
-  /* Tables collapse to fit - no minimum width */
+  /* Tables collapse to fit viewport */
   .admin-table-container > .data-table,
   .table-container > .data-table,
   .data-table-container > .data-table,
@@ -397,7 +397,7 @@
   }
 }
 
-/* Small mobile - responsive tables, no minimum width */
+/* Small mobile - tables collapse */
 @media (--small-mobile) {
   .table-scroll-wrapper > table,
   .table-scroll-wrapper > .data-table,

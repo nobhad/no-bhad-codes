@@ -433,12 +433,19 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   border-bottom: none;
 }
 
-/* Tab content - UNIVERSAL top spacing below header subtabs */
-.portal .tab-content.active {
+/* Tab content - UNIVERSAL top spacing below header subtabs (except messages) */
+.portal .tab-content.active:not(#tab-messages) {
   display: flex;
   flex-direction: column;
   gap: var(--portal-section-gap);
   padding-top: var(--space-3);
+}
+
+/* Messages tab - block display, no extra spacing (has own layout) */
+.portal #tab-messages.tab-content.active {
+  display: block;
+  padding: 0;
+  margin: 0;
 }
 
 /* Subtab content panels inside tab-content - no additional padding */

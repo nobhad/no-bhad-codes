@@ -6,59 +6,55 @@
  *
  * Styles for the system status list component
  * used in the admin system status tab.
+ *
+ * Base styles for health-check, quick-actions, and
+ * system-details are in shared/portal-cards.css.
  */
 
 /* ================================================
-   System Status List
+   System Status List (Legacy)
    ================================================ */
 .status-list {
   display: flex;
   flex-direction: column;
+  gap: var(--portal-section-gap);
 }
 
 .status-list .loading-text {
-  color: var(--color-text-secondary);
+  color: var(--portal-text-secondary);
   font-style: italic;
 }
 
-/* Auto gap for .status-item children - moved to shared/portal-components.css :has() rules */
-
+/* Status item - uses same pattern as health-item */
 .status-item {
   display: flex;
   align-items: center;
-  padding: var(--space-1-5) var(--space-2);
-  background: var(--portal-bg-medium);
-  border: none;
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-card);
+  gap: var(--icon-gap-lg);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: var(--portal-border);
 }
 
 .status-item .status-icon {
-  font-size: var(--font-size-lg);
-  width: 24px;
+  width: 20px;
+  flex-shrink: 0;
   text-align: center;
+  color: var(--portal-text-secondary);
 }
 
 .status-item .status-name {
   flex: 1;
   color: var(--portal-text-light);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Status badge in status-item context - smaller padding, uppercase */
-.status-item .status-badge {
-  padding: var(--space-1) var(--space-2);
-  text-transform: uppercase;
 }
 
 .status-item .status-message {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-xs);
 }
 
 /* Status item icons - color matches badge */
 .status-item.status-healthy .status-icon {
-  color: var(--color-success);
+  color: var(--status-active);
 }
 
 .status-item.status-warning .status-icon {
@@ -66,35 +62,23 @@
 }
 
 .status-item.status-error .status-icon {
-  color: var(--color-danger);
+  color: var(--status-cancelled);
 }
 
 .status-item.status-unknown .status-icon {
-  color: var(--color-danger);
+  color: var(--portal-text-muted);
 }
 
-/* Base .status-badge.status-* colors are in shared/portal-badges.css */
-
+/* Empty states */
 .no-status {
-  color: var(--color-text-secondary);
+  color: var(--portal-text-muted);
   font-style: italic;
   text-align: center;
-  padding: var(--space-4);
+  padding: var(--space-3);
 }
 
 .status-error {
-  color: var(--color-danger);
+  color: var(--status-cancelled);
   text-align: center;
-  padding: var(--space-4);
+  padding: var(--space-3);
 }
-
-/* Admin messages - height sizing for sidebar messages tab */
-[data-page="admin"] #tab-messages .messages-container {
-  height: 60vh;
-  min-height: 400px;
-  background: var(--color-neutral-200);
-  display: flex;
-  flex-direction: column;
-}
-
-/* Message styles now in client-portal/messages.css (unified for all portals) */

@@ -6,7 +6,7 @@
 
 /* =====================================================
    BASE STATUS BADGE
-   Brutalist badge with colored border
+   Minimal badge with colored text
    ===================================================== */
 .status-badge {
   display: inline-flex;
@@ -17,7 +17,7 @@
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border: 1px solid;
+  border: none;
   background: transparent;
   min-width: fit-content;
   width: auto;
@@ -41,49 +41,41 @@
 
 /* Blue/Active status badges */
 .status-badge:is(.status-active, .status-in_progress, .status-in-progress, .status-contacted) {
-  border-color: var(--status-active);
   color: var(--status-active);
 }
 
 /* Cyan/New and Upcoming status badges */
 .status-badge:is(.status-new, .status-upcoming) {
-  border-color: var(--status-new);
   color: var(--status-new);
 }
 
 /* Yellow/Pending status badges */
 .status-badge:is(.status-pending, .status-on_hold, .status-on-hold) {
-  border-color: var(--status-pending);
   color: var(--status-pending);
 }
 
 /* Green/Completed status badges */
 .status-badge:is(.status-completed, .status-converted, .status-replied) {
-  border-color: var(--status-completed);
   color: var(--status-completed);
 }
 
 /* Red/Cancelled status badges */
 .status-badge:is(.status-cancelled, .status-lost, .status-archived) {
-  border-color: var(--status-cancelled);
   color: var(--status-cancelled);
 }
 
 /* Purple/Qualified status badge */
 .status-badge:is(.status-qualified, .status-in-review) {
-  border-color: var(--status-qualified);
   color: var(--status-qualified);
 }
 
 /* Gray/Inactive status badges */
 .status-badge:is(.status-read, .status-inactive) {
-  border-color: var(--status-inactive);
   color: var(--status-inactive);
 }
 
-/* Not Invited - special outline style for clients not yet invited */
+/* Not Invited - muted text */
 .status-badge.status-not-invited {
-  border-color: var(--portal-border-medium);
   color: var(--portal-text-muted);
 }
 
@@ -391,19 +383,60 @@
 
 /* =====================================================
    STATUS DROPDOWN TRIGGER
-   Reset button styling for status badge dropdowns
+   Button wrapper for status badge dropdowns in tables
    ===================================================== */
 .status-dropdown-trigger {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  /* Fixed width to match longest status (e.g., "In Progress", "Not Invited") + caret + padding */
+  width: 160px;
+  /* Left padding matches gap between dot and text (--space-1) */
+  padding: var(--space-1);
+  padding-right: var(--space-6);
   background: transparent;
-  border: none;
-  padding: 0;
+  border: var(--portal-border);
   margin: 0;
   cursor: pointer;
   font: inherit;
   color: inherit;
-  text-align: inherit;
-  display: inline-flex;
-  align-items: center;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.status-dropdown-trigger:focus {
+  outline: none;
+}
+
+/* When open, remove bottom border to connect with menu */
+.status-dropdown-trigger[data-state="open"] {
+  border-bottom: none;
+}
+
+/* Status indicator inside trigger - align left */
+.status-dropdown-trigger > .status-indicator {
+  flex: 0 0 auto;
+  order: 0;
+}
+
+/* Caret icon in status dropdown - positioned absolutely on right */
+/* Uses --space-1 to match gap between dot and text */
+.status-dropdown-trigger > .status-dropdown-caret {
+  position: absolute;
+  right: var(--space-1);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  color: var(--portal-text-muted);
+  transition: transform var(--transition-fast);
+}
+
+/* Rotate caret when dropdown is open */
+[data-state="open"] > .status-dropdown-caret {
+  transform: translateY(-50%) rotate(180deg);
 }
 
 /* =====================================================

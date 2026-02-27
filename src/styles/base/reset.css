@@ -18,7 +18,6 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  border-radius: 0; /* Brutalist design: no rounded corners by default */
 }
 
 /* ============================================
@@ -155,6 +154,16 @@ object {
   vertical-align: middle;
   max-width: 100%;
   height: auto;
+}
+
+/* SVGs inside buttons inherit button's text color - ROOT LEVEL FIX
+   Ensures SVG icons match button text color instead of browser default.
+   Works with Lucide icons that use stroke="currentColor". */
+button svg,
+.btn svg,
+[type="button"] svg,
+[type="submit"] svg {
+  color: inherit;
 }
 
 img {
