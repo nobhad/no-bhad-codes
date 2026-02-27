@@ -11,8 +11,8 @@ import {
   Inbox,
   Send,
   Tag,
-  Download,
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -203,9 +203,7 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
             values={{ category: categoryFilter, status: statusFilter }}
             onChange={handleFilterChange}
           />
-          <button className="icon-btn" title="Export">
-            <Download size={18} />
-          </button>
+          <IconButton action="export" />
           <PortalButton variant="primary" size="sm">
             <Plus className="btn-icon" />
             New Template
@@ -318,9 +316,7 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
                   <div className="table-actions">
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
-                        <button className="icon-btn">
-                          <MoreHorizontal size={18} />
-                        </button>
+                        <IconButton action="more-horizontal" />
                       </PortalDropdownTrigger>
                       <PortalDropdownContent>
                         <PortalDropdownItem>

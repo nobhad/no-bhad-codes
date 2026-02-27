@@ -6,7 +6,6 @@ import {
   Circle,
   Clock,
   AlertTriangle,
-  MoreHorizontal,
   Calendar,
   User,
   Briefcase,
@@ -14,6 +13,7 @@ import {
   LayoutGrid,
   List,
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -462,9 +462,7 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
                   </AdminTableCell>
                   <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
-                      <button className="icon-btn">
-                        <MoreHorizontal size={18} />
-                      </button>
+                      <IconButton action="more-horizontal" />
                     </div>
                   </AdminTableCell>
                 </AdminTableRow>

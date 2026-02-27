@@ -2,11 +2,11 @@ import * as React from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import {
   Plus,
-  Clock,
   Play,
   Square,
   Inbox,
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -419,9 +419,7 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
-                    <button className="icon-btn" title="Edit entry">
-                      <Clock size={18} />
-                    </button>
+                    <IconButton action="edit" title="Edit entry" />
                   </div>
                 </AdminTableCell>
               </AdminTableRow>

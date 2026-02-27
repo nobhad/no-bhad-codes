@@ -6,12 +6,10 @@ import {
   MessageSquare,
   MoreHorizontal,
   Inbox,
-  Eye,
-  ThumbsUp,
-  ThumbsDown,
   Image,
   ExternalLink,
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -313,24 +311,16 @@ export function DesignReviewPanel({ projectId, onNavigate }: DesignReviewPanelPr
                 <AdminTableCell className="date-cell">{formatDate(review.submittedAt)}</AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
-                    <button className="icon-btn" title="View">
-                      <Eye size={18} />
-                    </button>
+                    <IconButton action="view" />
                     {review.status === 'in-review' && (
                       <>
-                        <button className="icon-btn" title="Approve">
-                          <ThumbsUp size={18} className="status-completed" />
-                        </button>
-                        <button className="icon-btn" title="Request Revision">
-                          <ThumbsDown size={18} className="status-cancelled" />
-                        </button>
+                        <IconButton action="approve" />
+                        <IconButton action="reject" title="Request Revision" />
                       </>
                     )}
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
-                        <button className="icon-btn">
-                          <MoreHorizontal size={18} />
-                        </button>
+                        <IconButton action="more-horizontal" />
                       </PortalDropdownTrigger>
                       <PortalDropdownContent>
                         <PortalDropdownItem>

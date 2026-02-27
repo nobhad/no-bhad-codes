@@ -4,8 +4,8 @@ import {
   Plus,
   ClipboardList,
   Inbox,
-  Send,
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -379,21 +379,15 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
-                    <button
-                      className="icon-btn"
-                      title="View"
+                    <IconButton
+                      action="view"
                       onClick={() => onNavigate?.('questionnaire-detail', questionnaire.id)}
-                    >
-                      View
-                    </button>
+                    />
                     {questionnaire.status === 'draft' && (
-                      <button
-                        className="icon-btn"
-                        title="Send"
+                      <IconButton
+                        action="send"
                         onClick={() => handleSendQuestionnaire(questionnaire.id)}
-                      >
-                        <Send size={18} />
-                      </button>
+                      />
                     )}
                   </div>
                 </AdminTableCell>

@@ -2,21 +2,16 @@ import * as React from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import {
   Upload,
-  Download,
-  Trash2,
-  Eye,
   Folder,
   File,
   FileText,
   FileImage,
   FileVideo,
   FileAudio,
-  Grid,
-  List,
   Inbox,
   FolderPlus,
 } from 'lucide-react';
-import { cn } from '@react/lib/utils';
+import { IconButton } from '@react/factories';
 import { formatDateShort } from '@react/utils/formatDate';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -277,20 +272,18 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
             values={{ type: typeFilter }}
             onChange={(key, value) => setTypeFilter(value)}
           />
-          <button
-            className={cn('icon-btn', viewMode === 'list' && 'active')}
-            onClick={() => setViewMode('list')}
+          <IconButton
+            icon="list"
             title="List view"
-          >
-            <List />
-          </button>
-          <button
-            className={cn('icon-btn', viewMode === 'grid' && 'active')}
-            onClick={() => setViewMode('grid')}
+            onClick={() => setViewMode('list')}
+            className={viewMode === 'list' ? 'active' : undefined}
+          />
+          <IconButton
+            icon="list"
             title="Grid view"
-          >
-            <Grid />
-          </button>
+            onClick={() => setViewMode('grid')}
+            className={viewMode === 'grid' ? 'active' : undefined}
+          />
           <PortalButton variant="secondary" size="sm">
             <FolderPlus className="btn-icon" />
             New Folder
@@ -402,21 +395,11 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
                     <div className="table-actions">
                       {file.type !== 'folder' && (
                         <>
-                          <button className="icon-btn" title="Preview">
-                            <Eye size={18} />
-                          </button>
-                          <button className="icon-btn" title="Download">
-                            <Download size={18} />
-                          </button>
+                          <IconButton action="preview" />
+                          <IconButton action="download" />
                         </>
                       )}
-                      <button
-                        className="icon-btn"
-                        title="Delete"
-                        onClick={() => handleDelete(file.id)}
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <IconButton action="delete" onClick={() => handleDelete(file.id)} />
                     </div>
                   </AdminTableCell>
                 </AdminTableRow>
@@ -485,15 +468,13 @@ function FilesGrid({
 
           {/* Hover Actions */}
           <div className="file-card-actions">
-            <button
-              className="icon-btn"
+            <IconButton
+              action="delete"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(file.id);
               }}
-            >
-              <Trash2 size={18} />
-            </button>
+            />
           </div>
         </div>
       ))}
