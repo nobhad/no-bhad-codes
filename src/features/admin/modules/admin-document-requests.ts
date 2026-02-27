@@ -78,18 +78,8 @@ async function loadReactDocumentRequestsTable(): Promise<boolean> {
   }
 }
 
-/** Feature flag for React document requests table */
+/** Check if React document requests table should be used - always true */
 function shouldUseReactDocumentRequestsTable(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_document_requests') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_document_requests_table');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }
 

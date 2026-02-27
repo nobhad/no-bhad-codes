@@ -72,18 +72,8 @@ async function loadReactAdHocRequestsTable(): Promise<boolean> {
   }
 }
 
-/** Feature flag for React ad hoc requests table */
+/** Check if React ad hoc requests table should be used - always true */
 function shouldUseReactAdHocRequestsTable(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_adhoc_requests') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_adhoc_requests_table');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }
 
