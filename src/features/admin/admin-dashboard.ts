@@ -152,12 +152,10 @@ const ADMIN_TAB_GROUPS = {
     label: 'Documents',
     tabs: ['invoices', 'contracts', 'document-requests', 'questionnaires'],
     defaultTab: 'invoices'
-  },
-  support: {
-    label: 'Knowledge Base',
-    tabs: ['categories', 'articles'],
-    defaultTab: 'categories'
   }
+  // Note: 'support' is NOT in ADMIN_TAB_GROUPS because it uses a single tab container
+  // with internal card switching (categories/articles), unlike other groups that have
+  // separate tab containers for each subtab.
 } as const;
 
 type AdminTabGroup = keyof typeof ADMIN_TAB_GROUPS;
