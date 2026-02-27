@@ -485,14 +485,26 @@ font-size: var(--font-size-sm);
 height: 48px;
 ```
 
-**Column Classes:**
+**Column Classes (Unified Standard):**
 
-| Class | Purpose | Width |
-|-------|---------|-------|
-| `.status-col` / `.status-cell` | Status dropdown | fit-content |
-| `.date-col` / `.date-cell` | Date columns | fit-content |
-| `.actions-col` / `.actions-cell` | Action buttons | 140px fixed |
-| `.name-col` / `.name-cell` | Name columns | auto |
+| Header Class | Cell Class | Purpose | Width | Alignment |
+|--------------|------------|---------|-------|-----------|
+| `.bulk-select-cell` | `.bulk-select-cell` | Checkbox column | 48px fixed | center |
+| `.identity-col` | `.identity-cell` | Stacked name/email (primary identity) | auto, min 140px | left |
+| `.name-col` | `.name-cell` | Simple name/title fields | auto | left |
+| `.type-col` | `.type-cell` | Type/category badges | fit-content | left |
+| `.status-col` | `.status-cell` | Status dropdown/badge | fit-content | left |
+| `.date-col` | `.date-cell` | Date values | fit-content | left |
+| `.amount-col` | `.amount-cell` | Currency/amounts (monospace) | fit-content | right |
+| `.count-col` | `.count-cell` | Numeric counts | fit-content | center |
+| `.email-col` | `.email-cell` | Standalone email | fit-content | left |
+| `.timeline-col` | `.timeline-cell` | Progress/timeline bars | min 100px | left |
+| `.actions-col` | `.actions-cell` | Action buttons | fit-content | right |
+
+**Aliases (backwards compatibility):**
+
+- `.budget-col` / `.budget-cell` → same as `.amount-col` / `.amount-cell`
+- `.contact-col` → same as `.identity-col`
 
 ### Dropdowns
 
