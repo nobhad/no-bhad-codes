@@ -151,6 +151,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
+      '@react': resolve(__dirname, 'src/react'),
       '@components': resolve(__dirname, 'src/components'),
       '@services': resolve(__dirname, 'src/services'),
       '@modules': resolve(__dirname, 'src/modules'),
@@ -161,11 +162,16 @@ export default defineConfig({
       '@config': resolve(__dirname, 'src/config'),
       '@styles': resolve(__dirname, 'src/styles'),
     },
-    extensions: ['.ts', '.js', '.json'],
+    extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
   },
 
   // Plugin configuration
   plugins: [
+    // NOTE: Not using @vitejs/plugin-react or @vitejs/plugin-react-swc
+    // because their Fast Refresh preamble detection fails with island architecture
+    // (mounting React components into vanilla TS pages via dynamic imports).
+    // Instead, we use esbuild's built-in JSX transformation configured below.
+
     // MPA routing for dev server
     mpaRoutingPlugin(),
 
@@ -226,7 +232,7 @@ export default defineConfig({
 
   // Optimization configuration
   optimizeDeps: {
-    include: ['gsap', 'gsap/all'],
+    include: ['gsap', 'gsap/all', 'react', 'react-dom', 'zustand'],
     exclude: [],
   },
 
@@ -237,9 +243,13 @@ export default defineConfig({
   },
 
   // ESBuild configuration
+  // Using esbuild for JSX transformation instead of React plugin
+  // to avoid Fast Refresh preamble detection issues with island architecture
   esbuild: {
     target: 'es2020',
     legalComments: 'none',
+    jsx: 'automatic',
+    jsxImportSource: 'react',
     logOverride: {
       'this-is-undefined-in-esm': 'silent',
     },
