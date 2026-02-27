@@ -19,6 +19,7 @@ import type {
   AdminDashboardContext
 } from '../admin-types';
 import { formatDateTime, formatCurrencyCompact } from '../../../utils/format-utils';
+import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { showTableLoading, showTableEmpty, getChartSkeletonHTML } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { multiPromptDialog, alertDialog, confirmDialog } from '../../../utils/confirm-dialog';
@@ -1909,8 +1910,8 @@ function populateDataList(containerId: string, items: AnalyticsDataItem[]): void
     .map(
       (item) => `
       <div class="data-item">
-        <span class="data-label">${item.label}</span>
-        <span class="data-value">${item.value}</span>
+        <span class="data-label">${SanitizationUtils.escapeHtml(item.label)}</span>
+        <span class="data-value">${SanitizationUtils.escapeHtml(String(item.value))}</span>
       </div>
     `
     )
