@@ -124,6 +124,12 @@ export interface AppConfig {
   TRUST_PROXY: boolean;
   HELMET_ENABLED: boolean;
   CLUSTER_WORKERS: string;
+
+  // OpenTelemetry
+  OTEL_ENABLED: boolean;
+  OTEL_SERVICE_NAME: string;
+  OTEL_EXPORTER_OTLP_ENDPOINT?: string;
+  OTEL_DEBUG: boolean;
 }
 
 /**
@@ -222,7 +228,13 @@ const configSchema: ConfigSchema = {
   FORCE_SSL: { required: false, default: false, type: 'boolean' },
   TRUST_PROXY: { required: false, default: false, type: 'boolean' },
   HELMET_ENABLED: { required: false, default: true, type: 'boolean' },
-  CLUSTER_WORKERS: { required: false, default: 'auto' }
+  CLUSTER_WORKERS: { required: false, default: 'auto' },
+
+  // OpenTelemetry
+  OTEL_ENABLED: { required: false, default: true, type: 'boolean' },
+  OTEL_SERVICE_NAME: { required: false, default: 'client-portal' },
+  OTEL_EXPORTER_OTLP_ENDPOINT: { required: false },
+  OTEL_DEBUG: { required: false, default: false, type: 'boolean' }
 };
 
 /**

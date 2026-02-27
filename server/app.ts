@@ -7,8 +7,11 @@
  * Main server application with middleware, routes, and error handling.
  */
 
-// IMPORTANT: Sentry must be imported FIRST before any other modules
-import { Sentry } from './instrument.js';
+// IMPORTANT: Instrumentation must be imported FIRST before any other modules
+import { Sentry, shutdownOpenTelemetry } from './instrument.js';
+
+// Import observability utilities after instrumentation
+import { initMetrics, registerDbStatsCallback, recordHttpRequest } from './observability/metrics.js';
 
 import express from 'express';
 import { i18nMiddleware } from './middleware/i18n-middleware';
@@ -23,7 +26,7 @@ import { emailService } from './services/email-service.js';
 import { cacheService } from './services/cache-service.js';
 import { getSchedulerService } from './services/scheduler-service.js';
 import { registerWorkflowAutomations } from './services/workflow-automations.js';
-import { initializeDatabase, getDatabase, closeDatabase } from './database/init.js';
+import { initializeDatabase, getDatabase, closeDatabase, getDatabaseStats } from './database/init.js';
 import { MigrationManager } from './database/migrations.js';
 import sqlite3 from 'sqlite3';
 import authRouter from './routes/auth.js';
@@ -52,6 +55,7 @@ import integrationsRouter from './routes/integrations.js';
 import dataQualityRouter from './routes/data-quality.js';
 import settingsRouter from './routes/settings.js';
 import receiptsRouter from './routes/receipts.js';
+import healthRouter from './routes/health.js';
 import { portalRoutes } from './routes/portal.js';
 import { errorResponseWithPayload } from './utils/api-response.js';
 import { setupSwagger } from './config/swagger.js';
@@ -230,46 +234,9 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check endpoint (includes DB ping for depth)
-app.get('/health', async (_req, res) => {
-  const health: Record<string, unknown> = {
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    uptime: process.uptime()
-  };
-
-  // Check database
-  try {
-    const db = getDatabase();
-    await db.get('SELECT 1');
-    health.database = { status: 'connected' };
-  } catch (err) {
-    health.status = 'degraded';
-    health.database = { status: 'error', error: (err as Error).message };
-  }
-
-  // Check email service
-  try {
-    const emailStatus = emailService.getStatus();
-    health.email = emailStatus.initialized ? 'configured' : 'not_configured';
-    health.services = { email: emailStatus.initialized };
-  } catch {
-    health.email = 'unknown';
-  }
-
-  // Check scheduler service
-  try {
-    const scheduler = getSchedulerService();
-    const schedulerStatus = scheduler.getStatus();
-    health.scheduler = schedulerStatus.isRunning ? 'Running' : 'Stopped';
-  } catch {
-    health.scheduler = 'unknown';
-  }
-
-  const statusCode = (health.status as string) === 'healthy' ? 200 : 503;
-  res.status(statusCode).json(health);
-});
+// Health check endpoints with comprehensive diagnostics
+// Provides: GET /health, /health/live, /health/ready, /health/db
+app.use('/health', healthRouter);
 
 // Setup API documentation
 setupSwagger(app);
@@ -362,6 +329,16 @@ async function startServer() {
     // Initialize database
     await initializeDatabase();
     logger.info('Database initialized');
+
+    // Initialize observability metrics and register database stats callback
+    initMetrics();
+    registerDbStatsCallback(() => {
+      const stats = getDatabaseStats();
+      return stats
+        ? { active: stats.activeConnections, idle: stats.idleConnections, queued: stats.queuedRequests }
+        : { active: 0, idle: 0, queued: 0 };
+    });
+    logger.info('Observability metrics initialized');
 
     // Run database migrations
     const dbPath = process.env.DATABASE_PATH || './data/client_portal.db';
@@ -490,6 +467,14 @@ async function startServer() {
           logger.info('Error tracking closed');
         } catch (error) {
           logger.error('Error closing error tracking:', { error: error instanceof Error ? error : undefined });
+        }
+
+        // Shutdown OpenTelemetry
+        try {
+          await shutdownOpenTelemetry();
+          logger.info('OpenTelemetry shutdown complete');
+        } catch (error) {
+          logger.error('Error shutting down OpenTelemetry:', { error: error instanceof Error ? error : undefined });
         }
 
         logger.info('Server shut down complete');
