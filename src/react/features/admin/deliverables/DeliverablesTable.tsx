@@ -12,6 +12,7 @@ import {
   Download,
   ExternalLink,
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -202,10 +203,7 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
             values={{ status: statusFilter }}
             onChange={(key, value) => setStatusFilter(value)}
           />
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            New Deliverable
-          </PortalButton>
+          <IconButton action="add" title="New Deliverable" />
         </>
       }
       error={
@@ -236,6 +234,7 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -364,6 +363,7 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

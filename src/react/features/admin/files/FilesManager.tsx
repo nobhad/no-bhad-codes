@@ -322,7 +322,7 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
         ) : undefined
       }
     >
-      {viewMode === 'list' ? (
+      {!error && (viewMode === 'list' ? (
         <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>
@@ -415,7 +415,7 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
           onDelete={handleDelete}
           hasActiveFilters={hasActiveFilters}
         />
-      )}
+      ))}
     </TableLayout>
   );
 }

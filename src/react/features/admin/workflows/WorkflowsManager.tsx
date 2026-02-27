@@ -200,10 +200,7 @@ export function WorkflowsManager({ onNavigate }: WorkflowsManagerProps) {
             onChange={(key, value) => setStatusFilter(value)}
           />
           <IconButton action="export" />
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            New Workflow
-          </PortalButton>
+          <IconButton action="add" title="New Workflow" />
         </>
       }
       error={
@@ -234,6 +231,7 @@ export function WorkflowsManager({ onNavigate }: WorkflowsManagerProps) {
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -358,6 +356,7 @@ export function WorkflowsManager({ onNavigate }: WorkflowsManagerProps) {
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

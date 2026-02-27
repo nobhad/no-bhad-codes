@@ -225,10 +225,7 @@ export function ProposalsTable({ onNavigate }: ProposalsTableProps) {
             onChange={(key, value) => setStatusFilter(value)}
           />
           <IconButton action="download" title="Export" />
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            New Proposal
-          </PortalButton>
+          <IconButton action="add" title="New Proposal" />
         </>
       }
       error={
@@ -259,6 +256,7 @@ export function ProposalsTable({ onNavigate }: ProposalsTableProps) {
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -392,6 +390,7 @@ export function ProposalsTable({ onNavigate }: ProposalsTableProps) {
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

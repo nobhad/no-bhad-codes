@@ -295,10 +295,7 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
               Start Timer
             </PortalButton>
           )}
-          <PortalButton variant="secondary" size="sm">
-            <Plus className="btn-icon" />
-            Add Entry
-          </PortalButton>
+          <IconButton action="add" title="Add Entry" />
         </>
       }
       bulkActions={
@@ -346,6 +343,7 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -427,6 +425,7 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

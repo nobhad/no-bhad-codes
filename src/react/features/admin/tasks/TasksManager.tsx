@@ -382,7 +382,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate }: Ta
         ) : undefined
       }
     >
-      {viewMode === 'list' ? (
+      {!error && (viewMode === 'list' ? (
         <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>
@@ -525,7 +525,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate }: Ta
         </AdminTable>
       ) : (
         renderBoardView()
-      )}
+      ))}
     </TableLayout>
   );
 }

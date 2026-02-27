@@ -246,10 +246,7 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
             values={{ status: statusFilter }}
             onChange={(key, value) => setStatusFilter(value)}
           />
-          <PortalButton variant="primary" size="sm" onClick={() => onNavigate?.('questionnaire-create')}>
-            <Plus className="btn-icon" />
-            Create Questionnaire
-          </PortalButton>
+          <IconButton action="add" title="Create Questionnaire" onClick={() => onNavigate?.('questionnaire-create')} />
         </>
       }
       error={
@@ -280,6 +277,7 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -396,6 +394,7 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

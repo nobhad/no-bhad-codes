@@ -197,10 +197,7 @@ export function DocumentRequestsTable({ onNavigate }: DocumentRequestsTableProps
             onChange={(key, value) => setStatusFilter(value)}
           />
           <IconButton action="export" />
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            New Request
-          </PortalButton>
+          <IconButton action="add" title="New Request" />
         </>
       }
       error={
@@ -231,6 +228,7 @@ export function DocumentRequestsTable({ onNavigate }: DocumentRequestsTableProps
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -287,27 +285,27 @@ export function DocumentRequestsTable({ onNavigate }: DocumentRequestsTableProps
                   </div>
                 </AdminTableCell>
                 <AdminTableCell>
-                  <button
+                  <span
                     onClick={(e) => {
                       e.stopPropagation();
                       onNavigate?.('clients', request.clientId);
                     }}
-                    className="link-btn"
+                    className="table-link"
                   >
                     {request.clientName}
-                  </button>
+                  </span>
                 </AdminTableCell>
                 <AdminTableCell>
                   {request.projectName ? (
-                    <button
+                    <span
                       onClick={(e) => {
                         e.stopPropagation();
                         onNavigate?.('projects', request.projectId);
                       }}
-                      className="link-btn"
+                      className="table-link"
                     >
                       {request.projectName}
-                    </button>
+                    </span>
                   ) : (
                     <span className="text-muted">-</span>
                   )}
@@ -379,6 +377,7 @@ export function DocumentRequestsTable({ onNavigate }: DocumentRequestsTableProps
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

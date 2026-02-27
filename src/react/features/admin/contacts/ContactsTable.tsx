@@ -255,10 +255,7 @@ export function ContactsTable({ onNavigate }: ContactsTableProps) {
               if (key === 'company') setCompanyFilter(value);
             }}
           />
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            Add Contact
-          </PortalButton>
+          <IconButton action="add" title="Add Contact" />
         </>
       }
       error={
@@ -289,6 +286,7 @@ export function ContactsTable({ onNavigate }: ContactsTableProps) {
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -423,6 +421,7 @@ export function ContactsTable({ onNavigate }: ContactsTableProps) {
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

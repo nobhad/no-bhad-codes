@@ -307,6 +307,7 @@ export function DeletedItemsTable({ onNavigate }: DeletedItemsTableProps) {
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -397,6 +398,7 @@ export function DeletedItemsTable({ onNavigate }: DeletedItemsTableProps) {
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }
