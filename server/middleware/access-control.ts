@@ -278,6 +278,28 @@ export async function canAccessContract(
 }
 
 /**
+ * Check if user can access a specific proposal
+ */
+export async function canAccessProposal(
+  req: AuthenticatedRequest,
+  proposalId: number
+): Promise<boolean> {
+  if (await isUserAdmin(req)) {
+    return true;
+  }
+
+  const db = getDatabase();
+  const row = await db.get(
+    `SELECT 1
+     FROM proposal_requests pr
+     WHERE pr.id = ? AND pr.client_id = ?`,
+    [proposalId, req.user?.id]
+  );
+
+  return !!row;
+}
+
+/**
  * Get client ID from various entity types
  */
 export async function getClientIdFromEntity(
