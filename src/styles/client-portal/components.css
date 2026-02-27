@@ -95,22 +95,7 @@
 }
 
 /* ----- COMPONENT: Status Badge ----- */
-.portal-badge {
-  padding: var(--space-0-5) var(--space-1-5);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.portal-badge-pending {
-  background: var(--color-warning);
-  color: var(--portal-border-dark);
-}
-
-.portal-badge-success {
-  background: var(--color-success);
-  color: var(--portal-text-light);
-}
+/* Use .status-badge from shared/portal-badges.css */
 
 /* ----- COMPONENT: Stat Card - Child element (no border per hierarchy) ----- */
 .portal-stat {
@@ -121,7 +106,7 @@
 
 .portal-stat-number {
   display: block;
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: 2rem;
   color: var(--color-primary);
   line-height: 1;
@@ -135,12 +120,7 @@
 }
 
 /* ----- COMPONENT: Empty State Message ----- */
-.portal-empty-message {
-  color: var(--portal-text-muted);
-  font-style: italic;
-  text-align: center;
-  padding: var(--space-4);
-}
+/* Use .empty-state from components/loading.css */
 
 /* ----- COMPONENT: Project Cards ----- */
 .portal-project-cards {
@@ -359,4 +339,3 @@
     max-height: 90vh;
   }
 }
-

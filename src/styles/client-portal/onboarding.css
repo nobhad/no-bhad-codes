@@ -80,7 +80,9 @@
   padding: var(--onboarding-spacing-sm) var(--onboarding-spacing-md);
   background: var(--portal-bg-medium);
   opacity: 0.5;
-  transition: opacity var(--transition-medium), background-color var(--transition-medium);
+  transition:
+    opacity var(--transition-medium),
+    background-color var(--transition-medium);
   cursor: default;
 }
 
@@ -250,7 +252,9 @@
   background: var(--onboarding-card-bg);
   border: 1px solid var(--onboarding-card-border);
   cursor: pointer;
-  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .onboarding-checkbox-label:hover {
@@ -296,7 +300,9 @@
   padding: var(--onboarding-spacing-lg);
   text-align: center;
   cursor: pointer;
-  transition: border-color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .onboarding-asset-card:hover {
@@ -470,7 +476,10 @@
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);

@@ -397,7 +397,9 @@ main {
 /* After intro finishes, disable opacity/visibility transitions to prevent flicker on navigation */
 /* But allow color transitions for smooth theme switching */
 .intro-complete.intro-finished .header {
-  transition: opacity 0s, visibility 0s;
+  transition:
+    opacity 0s,
+    visibility 0s;
 }
 
 /* During paw exit/entry animation, keep header visible without transitions */
@@ -502,7 +504,6 @@ main {
 .text-animation-section {
   overflow: hidden;
 }
-
 
 .text-animation-svg {
   width: 100%;

@@ -24,13 +24,8 @@
 /* Base hover states - active only on hover-capable devices */
 @media (hover: hover) {
   /* Portal buttons hover - uses token variables */
-  :is([data-page="admin"], [data-page="client-portal"]) :is(
-    .btn,
-    .btn-primary,
-    .btn-secondary,
-    .btn-outline,
-    button[type="submit"]
-  ):hover {
+  :is([data-page="admin"], [data-page="client-portal"])
+    :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):hover {
     background: var(--btn-portal-hover-bg);
     color: var(--btn-portal-hover-color);
     box-shadow: var(--btn-portal-shadow-hover);
@@ -114,13 +109,8 @@
 /* Touch device fallback - active states instead of hover */
 @media (hover: none) {
   /* Buttons show feedback on active/press - uses token variables */
-  :is([data-page="admin"], [data-page="client-portal"]) :is(
-    .btn,
-    .btn-primary,
-    .btn-secondary,
-    .btn-outline,
-    button[type="submit"]
-  ):active {
+  :is([data-page="admin"], [data-page="client-portal"])
+    :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):active {
     background: var(--btn-portal-hover-bg);
     color: var(--btn-portal-hover-color);
     transform: scale(0.98);
@@ -205,7 +195,10 @@
     min-height: 44px;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .sidebar-btn {
+  :is([data-page="admin"], [data-page="client-portal"])
+    .sidebar.collapsed
+    .sidebar-footer
+    .sidebar-btn {
     width: 44px;
     height: 44px;
     min-width: 44px;

@@ -291,7 +291,8 @@
   color: var(--portal-text-secondary);
 }
 
-.template-preview {
+/* Preview container styles - exclude buttons which may use .template-preview for action identification */
+.template-preview:not(button):not(.icon-btn) {
   background-color: var(--portal-bg-darker);
   border: 1px dashed var(--portal-border-color);
   padding: var(--space-1-5);

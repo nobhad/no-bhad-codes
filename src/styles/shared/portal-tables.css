@@ -7,6 +7,9 @@
   TABLE CLASS: .data-table
   All tables MUST use .data-table class.
   DO NOT use .admin-table - it is deprecated.
+
+  TEXT STYLING: All text inherits from root variables.
+  EXCEPTION: .slug-cell uses monospace font.
 */
 
 :root {
@@ -16,32 +19,31 @@
   --table-cell-padding-x: clamp(8px, 2vw, 16px);
   --table-cell-padding-y: clamp(4px, 1vw, 12px);
   --table-outer-padding: clamp(12px, 3vw, 24px);
-  --table-actions-gap: 8px;
+  --table-actions-gap: var(--table-actions-gap);
 
-  /* Table typography */
-  --table-header-font-size: 0.6875rem;
-  --table-cell-font-size: 12px;
-  --table-header-font-weight: 500;
+  /* Table typography - derived from design system */
+  --table-header-font-size: var(--font-size-xs, 0.6875rem);
+  --table-cell-font-size: var(--font-size-sm, 12px);
+  --table-header-font-weight: var(--font-weight-medium, 500);
   --table-header-letter-spacing: 0.05em;
 
-  /* Table colors - uses shared border from variables.css */
+  /* Table colors - from portal variables */
   --table-bg: transparent;
   --table-header-color: var(--portal-text-secondary);
-  --table-cell-color: var(--portal-text-light);
+  --table-cell-color: var(--portal-text-primary, var(--portal-text-light));
 
   /* Table column sizing */
   --table-identity-max-width: 220px;
   --table-truncate-max-width: 300px;
-  --table-checkbox-min-width: 40px;
-
-  /* Table identity typography - derived from base scale */
-  --table-identity-primary-size: var(--table-cell-font-size);
-  --table-identity-secondary-size: 11px;
-  --table-identity-tertiary-size: 10px;
+  --table-checkbox-width: 40px;
+  --table-cell-max-width: 200px;
+  --table-name-max-width: 250px;
+  --table-compact-max-width: 120px;
 
   /* Table icon sizing */
   --table-icon-size: 16px;
   --table-sort-indicator-size: 10px;
+  --table-pagination-btn-size: 28px;
 
   /* Table mobile layout */
   --table-mobile-label-width: 48%;
@@ -67,6 +69,9 @@
   table-layout: auto;
   border: var(--portal-border);
   border-radius: var(--portal-radius-lg, 8px);
+  font-family: inherit;
+  font-size: var(--table-cell-font-size);
+  color: var(--table-cell-color);
 }
 
 .data-table thead tr {
@@ -76,7 +81,7 @@
 .data-table th {
   text-align: left;
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
-  color: var(--portal-text-secondary);
+  color: var(--table-header-color);
   font-size: var(--table-header-font-size);
   font-weight: var(--table-header-font-weight);
   text-transform: uppercase;
@@ -95,8 +100,9 @@
 
 .data-table td {
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
-  color: var(--table-cell-color);
-  font-size: var(--table-cell-font-size);
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
   border: none;
   vertical-align: middle;
   background: transparent;
@@ -123,7 +129,7 @@
 }
 
 .data-table tbody tr:active td {
-  background: var(--portal-bg-active, rgba(255, 255, 255, 0.08));
+  background: var(--portal-bg-active);
 }
 
 .data-table tbody tr.row-focused td,
@@ -145,42 +151,33 @@
    TABLE ACTIONS
    ============================================== */
 
-/* ============================================
- * TABLE ACTIONS - UNIVERSAL LAYOUT RULE
- * ============================================
- * Gap: 8px (--space-1 per design system)
- * Button/icon sizing handled by portal-buttons.css
- *
- * MASTER RULE: All table action containers get 8px gap
- */
+/* Table actions - use utilities layer for override priority */
+@layer utilities {
+  .table-actions,
+  .data-table .table-actions,
+  td .table-actions,
+  .actions-cell .table-actions,
+  [data-page="admin"] .table-actions,
+  [data-page="client-portal"] .table-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--table-actions-gap);
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
 
-/* Table actions wrapper - all possible selectors */
-.table-actions,
-.data-table .table-actions,
-td .table-actions,
-.actions-cell .table-actions,
-[data-page="admin"] .table-actions,
-[data-page="client-portal"] .table-actions {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  flex-wrap: nowrap !important;
-  justify-content: flex-end !important;
-}
-
-/* Action cell layout - all possible selectors */
-.actions-cell,
-td.actions-cell,
-.data-table .actions-cell,
-.data-table td.actions-cell,
-[data-page="admin"] .actions-cell,
-[data-page="admin"] td.actions-cell,
-[data-page="client-portal"] .actions-cell,
-[data-page="client-portal"] td.actions-cell {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 8px !important;
+  .actions-cell,
+  td.actions-cell,
+  .data-table .actions-cell,
+  .data-table td.actions-cell,
+  [data-page="admin"] .actions-cell,
+  [data-page="admin"] td.actions-cell,
+  [data-page="client-portal"] .actions-cell,
+  [data-page="client-portal"] td.actions-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
 }
 
 .data-table :is(th, td).actions-col,
@@ -201,15 +198,14 @@ td.actions-cell,
   text-align: right;
 }
 
-/* Action buttons: use .icon-btn .icon-btn-sm from portal-buttons.css
-   No table-specific overrides - base styles apply */
+.actions-cell:not(:has(.table-actions)) {
+  gap: var(--table-actions-gap);
+}
 
 /* ==============================================
    TABLE CONTAINERS
    ============================================== */
 
-/* Table card - outer wrapper with border
-   Note: .admin-table-card defined in pages/admin.css */
 .data-table-card {
   background: transparent;
   border: var(--portal-border);
@@ -218,7 +214,6 @@ td.actions-cell,
   min-width: 0;
 }
 
-/* Table containers - inner wrapper, no border */
 .admin-table-container,
 .table-container,
 .data-table-container {
@@ -228,7 +223,6 @@ td.actions-cell,
   min-width: 0;
 }
 
-/* Table scroll wrappers - border and background */
 .admin-table-scroll-wrapper,
 .table-scroll-wrapper,
 .data-table-scroll-wrapper {
@@ -240,7 +234,6 @@ td.actions-cell,
   border-radius: var(--portal-radius-lg, 8px);
 }
 
-/* Remove border from scroll wrapper when inside a card that already has border */
 .admin-table-card .admin-table-scroll-wrapper,
 .admin-table-card .data-table-scroll-wrapper,
 .data-table-card .data-table-scroll-wrapper {
@@ -268,7 +261,6 @@ td.actions-cell,
   border-bottom-right-radius: var(--portal-radius-lg, 8px);
 }
 
-/* Remove corners when pagination present */
 :has(+ .table-pagination) tbody tr:last-child td:first-child,
 :has(~ .table-pagination) tbody tr:last-child td:first-child,
 .has-pagination tbody tr:last-child td:first-child {
@@ -283,7 +275,6 @@ td.actions-cell,
 
 /* ==============================================
    TABLE PAGINATION
-   Same color as table cells - no overrides
    ============================================== */
 
 .table-pagination {
@@ -291,8 +282,8 @@ td.actions-cell,
   align-items: center;
   padding: var(--space-3);
   border-top: var(--portal-border);
-  color: var(--table-cell-color, var(--portal-text-secondary));
-  font-size: var(--table-cell-font-size, 12px);
+  color: inherit;
+  font-size: inherit;
 }
 
 .pagination-inner {
@@ -330,14 +321,16 @@ td.actions-cell,
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: var(--table-pagination-btn-size);
+  height: var(--table-pagination-btn-size);
   padding: 0;
   background: transparent;
   border: var(--portal-border);
   color: inherit;
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .pagination-btn:hover:not(:disabled) {
@@ -351,16 +344,16 @@ td.actions-cell,
 }
 
 .pagination-btn svg {
-  width: 16px;
-  height: 16px;
+  width: var(--table-icon-size);
+  height: var(--table-icon-size);
 }
 
 .pagination-page-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px;
-  height: 28px;
+  min-width: var(--table-pagination-btn-size);
+  height: var(--table-pagination-btn-size);
   padding: 0 var(--space-1);
   background: transparent;
   border: var(--portal-border);
@@ -377,7 +370,7 @@ td.actions-cell,
    ============================================== */
 
 .data-table td a {
-  color: var(--portal-text-light);
+  color: inherit;
   text-decoration: none;
 }
 
@@ -387,121 +380,30 @@ td.actions-cell,
 }
 
 /* ==============================================
-   IDENTITY CELL
+   ALL CELL TEXT - Inherit from table
+   Only .slug-cell has different styling
    ============================================== */
 
+/* Identity cell container */
 .data-table .identity-cell {
   min-width: 0;
   max-width: var(--table-identity-max-width);
 }
 
-.data-table .identity-name {
-  display: block;
-  font-size: var(--table-identity-primary-size);
-  font-weight: 500;
-  color: var(--portal-text-light);
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.data-table .identity-email {
-  display: block;
-  font-size: var(--table-identity-secondary-size);
-  color: var(--portal-text-muted);
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.data-table .identity-contact {
-  display: block;
-  font-size: var(--table-identity-secondary-size);
-  color: var(--portal-text-muted);
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.data-table .identity-company {
-  display: block;
-  font-size: var(--table-identity-tertiary-size);
-  color: var(--portal-text-secondary);
-  line-height: 1.4;
-}
-
-/* ==============================================
-   NAME CELL CONTENT
-   Standardized styling for name-cell content.
-   ============================================== */
-
-/* Invoice numbers should be bold/prominent */
-.data-table .invoice-number-cell {
-  font-weight: 600;
-}
-
-/* Days count in deleted items */
-.data-table .days-count {
-  font-weight: 600;
-}
-
-/* Slug/code cells - monospace font */
-.data-table .slug-cell {
-  font-family: var(--font-family-mono, monospace);
-  font-size: var(--table-identity-secondary-size);
-}
-
-.data-table .slug-cell code {
-  background: transparent;
-  padding: 0;
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-}
-
-/* ==============================================
-   CUSTOM CELL TYPE MODIFIERS
-   Additional specificity for cell subtypes.
-   These inherit from their base cell type.
-   ============================================== */
-
-/* Entity/workflow type cells - semantic modifiers for type-cell */
-.data-table .entity-type-cell,
-.data-table .workflow-type-cell {
-  /* Inherits from .type-cell - no additional styles needed */
-}
-
-/* Date cell variants - semantic modifiers for date-cell */
-.data-table .start-cell,
-.data-table .target-cell,
-.data-table .created-cell,
-.data-table .last-active-cell {
-  /* Inherits from .date-cell - no additional styles needed */
-}
-
-/* ==============================================
-   STACKED CELL CONTENT
-   Secondary content shown below primary content.
-   Used for mobile-first responsive display.
-   ============================================== */
-
-/* Primary value - same as standard cell text */
+/* ALL cell text elements inherit from table - NO visual differences */
+.data-table .cell-content,
+.data-table .cell-title,
+.data-table .cell-subtitle,
+.data-table .identity-name,
+.data-table .identity-email,
+.data-table .identity-contact,
+.data-table .identity-company,
 .data-table .type-value,
 .data-table .date-value,
 .data-table .due-date-value,
 .data-table .expires-at-value,
 .data-table .budget-value,
-.data-table .timeline-value {
-  display: block;
-  font-size: var(--table-cell-font-size);
-  color: var(--table-cell-color);
-  line-height: 1.4;
-}
-
-/* Stacked secondary content - smaller, muted */
+.data-table .timeline-value,
 .data-table .type-stacked,
 .data-table .date-stacked,
 .data-table .budget-stacked,
@@ -509,14 +411,50 @@ td.actions-cell,
 .data-table .target-stacked,
 .data-table .last-active-stacked,
 .data-table .type-budget-stacked {
-  display: none; /* Hidden on desktop - shown on mobile */
-  font-size: var(--table-identity-secondary-size);
-  color: var(--portal-text-muted);
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  font-family: inherit;
   line-height: 1.4;
 }
 
-/* Show stacked content on mobile when column is hidden */
-@media (max-width: 768px) {
+/* Layout helpers - flex/block display */
+.data-table .cell-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.data-table .cell-title,
+.data-table .cell-subtitle,
+.data-table .identity-name,
+.data-table .identity-email,
+.data-table .identity-contact,
+.data-table .identity-company,
+.data-table .type-value,
+.data-table .date-value,
+.data-table .due-date-value,
+.data-table .expires-at-value,
+.data-table .budget-value,
+.data-table .timeline-value {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Stacked content hidden on desktop */
+.data-table .type-stacked,
+.data-table .date-stacked,
+.data-table .budget-stacked,
+.data-table .timeline-stacked,
+.data-table .target-stacked,
+.data-table .last-active-stacked,
+.data-table .type-budget-stacked {
+  display: none;
+}
+
+@media (--mobile) {
   .data-table .type-stacked,
   .data-table .date-stacked,
   .data-table .budget-stacked,
@@ -527,72 +465,94 @@ td.actions-cell,
 }
 
 /* ==============================================
-   COLUMN TYPES
-   All columns truncate content to prevent overflow.
+   SLUG CELL - ONLY SPECIAL TEXT STYLING
+   Monospace font for code/slug display
    ============================================== */
 
-/* Checkbox column */
-.data-table .bulk-select-cell,
-.data-table .checkbox-col,
-.data-table th.checkbox-col {
-  width: 40px;
-  min-width: 40px;
-  max-width: 40px;
-  text-align: center;
-  padding-left: var(--table-outer-padding) !important;
-  padding-right: var(--space-1) !important;
+.data-table .slug-cell,
+.data-table .slug-cell code {
+  font-family: var(--font-family-mono, "Inconsolata", monospace);
 }
 
-/* All cells truncate by default */
+.data-table .slug-cell code {
+  background: transparent;
+  padding: 0;
+}
+
+/* ==============================================
+   COLUMN TYPES - Width and alignment only
+   ============================================== */
+
+/* Checkbox column - use utilities layer for padding override */
+@layer utilities {
+  .data-table .bulk-select-cell,
+  .data-table .checkbox-col,
+  .data-table th.checkbox-col {
+    width: var(--table-checkbox-width);
+    min-width: var(--table-checkbox-width);
+    max-width: var(--table-checkbox-width);
+    text-align: center;
+    padding-left: var(--table-outer-padding);
+    padding-right: var(--space-1);
+  }
+}
+
 .data-table th,
 .data-table td {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 200px;
+  max-width: var(--table-cell-max-width);
 }
 
-/* Flexible width columns (primary content) */
-.data-table :is(
-  .name-col, .name-cell,
-  .title-col, .title-cell,
-  .subject-col, .subject-cell,
-  .message-col, .message-cell
-) {
-  max-width: 250px;
+.data-table
+  :is(
+    .name-col,
+    .name-cell,
+    .title-col,
+    .title-cell,
+    .subject-col,
+    .subject-cell,
+    .message-col,
+    .message-cell
+  ) {
+  max-width: var(--table-name-max-width);
 }
 
-/* Identity columns (stacked name/email) */
 .data-table :is(.identity-col, .identity-cell) {
-  max-width: 200px;
+  max-width: var(--table-identity-max-width);
 }
 
-/* Compact columns */
-.data-table :is(
-  .type-col, .type-cell,
-  .status-col, .status-cell,
-  .date-col, .date-cell,
-  .timeline-col, .timeline-cell,
-  .budget-col, .budget-cell,
-  .amount-col, .amount-cell,
-  .count-col, .count-cell,
-  .slug-col, .slug-cell
-) {
-  max-width: 120px;
+.data-table
+  :is(
+    .type-col,
+    .type-cell,
+    .status-col,
+    .status-cell,
+    .date-col,
+    .date-cell,
+    .timeline-col,
+    .timeline-cell,
+    .budget-col,
+    .budget-cell,
+    .amount-col,
+    .amount-cell,
+    .count-col,
+    .count-cell,
+    .slug-col,
+    .slug-cell
+  ) {
+  max-width: var(--table-compact-max-width);
 }
 
-/* Centered columns */
 .data-table :is(.count-col, .count-cell) {
   text-align: center;
 }
 
-/* Right-aligned columns */
 .data-table :is(.amount-col, .amount-cell) {
   text-align: right;
-  font-family: var(--font-family-mono, monospace);
 }
 
-/* Actions column - no truncation, shrink to fit */
 .data-table :is(.actions-col, .actions-cell) {
   max-width: none;
   overflow: visible;
@@ -628,42 +588,68 @@ td.actions-cell,
    COLUMN WIDTH UTILITIES
    ============================================== */
 
-.col-xs { width: var(--table-col-xs); }
-.col-sm { width: var(--table-col-sm); }
-.col-md { width: var(--table-col-md); }
-.col-lg { width: var(--table-col-lg); }
-.col-xl { width: var(--table-col-xl); }
-.col-auto { width: auto; }
-.col-fill { width: 100%; }
+.col-xs {
+  width: var(--table-col-xs);
+}
+.col-sm {
+  width: var(--table-col-sm);
+}
+.col-md {
+  width: var(--table-col-md);
+}
+.col-lg {
+  width: var(--table-col-lg);
+}
+.col-xl {
+  width: var(--table-col-xl);
+}
+.col-auto {
+  width: auto;
+}
+.col-fill {
+  width: 100%;
+}
 
-.col-10 { width: 10%; }
-.col-15 { width: 15%; }
-.col-20 { width: 20%; }
-.col-25 { width: 25%; }
-.col-30 { width: 30%; }
-.col-40 { width: 40%; }
-.col-50 { width: 50%; }
+.col-10 {
+  width: 10%;
+}
+.col-15 {
+  width: 15%;
+}
+.col-20 {
+  width: 20%;
+}
+.col-25 {
+  width: 25%;
+}
+.col-30 {
+  width: 30%;
+}
+.col-40 {
+  width: 40%;
+}
+.col-50 {
+  width: 50%;
+}
 
 /* ==============================================
-   EMPTY/LOADING/ERROR STATES
+   EMPTY/LOADING/ERROR STATES - utilities layer for override
    ============================================== */
 
-.data-table td[colspan],
-.data-table :is(td.error-row, td.loading-row, td.empty-row) {
-  width: 100% !important;
-  max-width: none !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  white-space: normal !important;
-  text-align: center !important;
+@layer utilities {
+  .data-table td[colspan],
+  .data-table :is(td.error-row, td.loading-row, td.empty-row) {
+    width: 100%;
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    text-align: center;
+  }
 }
 
 /* ==============================================
    SORTABLE TABLE HEADERS
-   Unified styles for all sorting patterns:
-   - .sort-header-btn (table-builder.ts)
-   - .sort-icon (table-filter.ts)
-   - .data-table-sort-icon (complex-components.ts)
    ============================================== */
 
 .data-table th.sortable {
@@ -678,7 +664,6 @@ td.actions-cell,
   background: var(--portal-bg-hover);
 }
 
-/* Sort button pattern (table-builder.ts) */
 .sort-header-btn {
   display: inline-flex;
   align-items: center;
@@ -704,7 +689,6 @@ td.actions-cell,
   color: var(--color-primary);
 }
 
-/* Sort icon pattern (table-filter.ts, admin.css) */
 .data-table th.sortable .sort-icon,
 .data-table th.sortable .data-table-sort-icon {
   display: inline-flex;
@@ -739,37 +723,28 @@ td.actions-cell,
    RESPONSIVE - Mobile
    ============================================== */
 
-/* Tablet: columns collapse and wrap */
 @media (--mobile) {
   .data-table {
     min-width: 0;
     table-layout: auto;
   }
 
-  /* Allow text wrapping in cells */
   .data-table th,
   .data-table td {
     white-space: normal;
     word-wrap: break-word;
   }
 
-  /* Shrink less important columns */
-  .data-table :is(
-    .type-col, .type-cell,
-    .date-col, .date-cell,
-    .status-col, .status-cell
-  ) {
+  .data-table :is(.type-col, .type-cell, .date-col, .date-cell, .status-col, .status-cell) {
     width: auto;
   }
 
-  /* Hide bulk select on tablet */
   .data-table .bulk-select-cell,
   .data-table th.checkbox-col {
     display: none;
   }
 }
 
-/* Mid-mobile: label/value stacking */
 @media (--mid-mobile) {
   .data-table,
   .data-table thead,
@@ -804,8 +779,7 @@ td.actions-cell,
     width: var(--table-mobile-label-width);
     padding-left: var(--table-mobile-label-padding);
     white-space: nowrap;
-    font-weight: 600;
-    color: var(--portal-text-secondary);
+    font-weight: var(--font-weight-semibold);
     content: attr(data-label);
     box-sizing: border-box;
   }
@@ -815,7 +789,6 @@ td.actions-cell,
   }
 }
 
-/* Small mobile: card layout with typography adjustments */
 @media (--small-mobile) {
   .data-table tbody tr {
     background: var(--portal-bg-medium);
@@ -843,44 +816,23 @@ td.actions-cell,
     padding-left: 0;
     padding-right: 0;
   }
+}
 
-  /* Hide checkbox column on mobile */
-  .data-table .bulk-select-cell,
-  .data-table th.checkbox-col {
-    display: none !important;
+/* Small mobile checkbox hidden - utilities layer for override */
+@layer utilities {
+  @media (--small-mobile) {
+    .data-table .bulk-select-cell,
+    .data-table th.checkbox-col {
+      display: none;
+    }
   }
 
-  /* Identity cell - prominent display */
   .data-table tbody td.identity-cell {
     order: -2;
     padding-bottom: var(--space-2);
     margin-bottom: var(--space-1);
   }
 
-  .data-table tbody td.identity-cell .identity-name {
-    font-size: var(--table-mobile-identity-name-size);
-    font-weight: 600;
-  }
-
-  .data-table tbody td.identity-cell .identity-contact {
-    font-size: var(--table-mobile-identity-secondary-size);
-  }
-
-  .data-table tbody td.identity-cell .identity-email,
-  .data-table tbody td.identity-cell .identity-company {
-    font-size: var(--table-mobile-identity-tertiary-size);
-  }
-
-  /* Standard cell typography */
-  .data-table tbody td.type-cell,
-  .data-table tbody td.status-cell,
-  .data-table tbody td.date-cell,
-  .data-table tbody td.amount-cell,
-  .data-table tbody td.count-cell {
-    font-size: var(--table-mobile-cell-size);
-  }
-
-  /* Actions cell */
   .data-table tbody td.actions-cell {
     order: 10;
     display: flex;

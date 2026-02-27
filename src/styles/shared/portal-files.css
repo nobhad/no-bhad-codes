@@ -53,7 +53,9 @@
   background: transparent;
   color: var(--portal-text-light);
   cursor: pointer;
-  transition: border-color var(--transition-mouse) ease, background-color var(--transition-mouse) ease;
+  transition:
+    border-color var(--transition-mouse) ease,
+    background-color var(--transition-mouse) ease;
 }
 
 .portal .upload-dropzone:is(:hover, .dragover) {

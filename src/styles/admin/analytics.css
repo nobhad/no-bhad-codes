@@ -247,10 +247,18 @@
   border-color: var(--portal-alpha-white-30);
 }
 
-.funnel-stage[data-stage="new"] { border-color: var(--status-new); }
-.funnel-stage[data-stage="contacted"] { border-color: var(--status-pending); }
-.funnel-stage[data-stage="qualified"] { border-color: var(--status-active); }
-.funnel-stage[data-stage="proposal"] { border-color: var(--status-qualified); }
+.funnel-stage[data-stage="new"] {
+  border-color: var(--status-new);
+}
+.funnel-stage[data-stage="contacted"] {
+  border-color: var(--status-pending);
+}
+.funnel-stage[data-stage="qualified"] {
+  border-color: var(--status-active);
+}
+.funnel-stage[data-stage="proposal"] {
+  border-color: var(--status-qualified);
+}
 
 .funnel-stage-value {
   font-family: var(--font-family-sans);
@@ -259,10 +267,18 @@
   color: var(--portal-text-primary);
 }
 
-.funnel-stage[data-stage="new"] .funnel-stage-value { color: var(--status-new); }
-.funnel-stage[data-stage="contacted"] .funnel-stage-value { color: var(--status-pending); }
-.funnel-stage[data-stage="qualified"] .funnel-stage-value { color: var(--status-active); }
-.funnel-stage[data-stage="proposal"] .funnel-stage-value { color: var(--status-qualified); }
+.funnel-stage[data-stage="new"] .funnel-stage-value {
+  color: var(--status-new);
+}
+.funnel-stage[data-stage="contacted"] .funnel-stage-value {
+  color: var(--status-pending);
+}
+.funnel-stage[data-stage="qualified"] .funnel-stage-value {
+  color: var(--status-active);
+}
+.funnel-stage[data-stage="proposal"] .funnel-stage-value {
+  color: var(--status-qualified);
+}
 
 .funnel-stage-success {
   background: transparent;
@@ -373,13 +389,24 @@
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-.health-indicator.health-ok { background: var(--status-active); }
-.health-indicator.health-warning { background: var(--color-warning); }
-.health-indicator.health-error { background: var(--status-cancelled); }
+.health-indicator.health-ok {
+  background: var(--status-active);
+}
+.health-indicator.health-warning {
+  background: var(--color-warning);
+}
+.health-indicator.health-error {
+  background: var(--status-cancelled);
+}
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .health-label {

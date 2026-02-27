@@ -88,7 +88,9 @@
   border-radius: var(--portal-radius-pill);
   background: var(--portal-bg-medium);
   opacity: 0.5;
-  transition: opacity 0.3s ease, background-color 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    background-color 0.3s ease;
 }
 
 .step-indicator.step--active {
@@ -178,7 +180,9 @@
   border-radius: var(--portal-radius-lg);
   padding: var(--proposal-spacing-lg);
   position: relative;
-  transition: border-color 0.3s ease, transform 0.3s ease;
+  transition:
+    border-color 0.3s ease,
+    transform 0.3s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -289,7 +293,9 @@
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .tier-select-btn:hover,

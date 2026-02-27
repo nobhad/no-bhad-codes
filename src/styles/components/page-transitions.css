@@ -207,7 +207,10 @@ section.business-card-section.page-hidden .intro-nav {
   }
 
   /* Other virtual page sections - centered */
-  main[data-virtual-pages] > section[data-page]:not(.tech-stack-section):not(.contact-section):not(.about-section):not(.business-card-section):not(.projects-section):not(.project-detail-section) {
+  main[data-virtual-pages]
+    > section[data-page]:not(.tech-stack-section):not(.contact-section):not(.about-section):not(
+      .business-card-section
+    ):not(.projects-section):not(.project-detail-section) {
     position: absolute;
     top: 0;
     left: 0;
@@ -333,7 +336,6 @@ section.business-card-section.page-hidden .intro-nav {
     display: none;
   }
 
-
   /* Page content wrapper for animations */
   section[data-page] > * {
     will-change: transform, opacity, filter;
@@ -397,4 +399,3 @@ section[data-page].page-hidden {
     animation: none !important;
   }
 }
-

@@ -5,19 +5,27 @@
  * @file src/styles/admin-dashboard.css
  *
  * Secure admin dashboard for performance and analytics.
+ *
+ * SHARED STYLES - DO NOT DUPLICATE HERE:
+ * - Status badges: shared/portal-badges.css
+ * - Dropdowns: shared/portal-dropdown.css
+ * - Buttons: shared/portal-buttons.css
+ * - Tables: shared/portal-tables.css
+ * - Cards: shared/portal-cards.css
+ * - Tabs: shared/portal-tabs.css
  */
 
 /* Portal theme variables and admin overrides are in variables.css */
 
 /* ================================================
-   DARK MODE HIERARCHY (Linear-inspired)
+   DISCOTHÈQUE COLOR HIERARCHY
    ================================================
-   Canvas (body): --portal-bg-pitch (#0a0a0a) - base layer (almost black)
-   Sidebar:       --portal-bg-pitch (#0a0a0a) - matches canvas
-   Cards/Panels:  --portal-bg-darkest (#1a1a1a) - float above canvas
-   Nested:        --portal-bg-darker (#2a2a2a) - inside cards
-   Hover:         --portal-bg-dark (#333) - interactive
-   Inputs:        --portal-bg-pitch (#0a0a0a) - recessed
+   Canvas (body): --portal-bg-pitch (#000000) - pure black base
+   Sidebar:       --portal-bg-pitch (#000000) - matches canvas
+   Cards/Panels:  --portal-bg-darker (#0a0a0a) - subtle elevation
+   Nested:        --portal-bg-dark (#1a1a1a) - inside cards
+   Hover:         --portal-bg-hover (#1a1a1a) - interactive
+   Inputs:        --portal-bg-pitch (#000000) - recessed
    ================================================ */
 
 /* Page background - pitch black as base canvas */
@@ -32,10 +40,8 @@ body[data-page="admin"] {
 
 /* ================================================
    GLOBAL SHADOW & BORDER REMOVAL — Admin backend
-   Override all shadow and border variables to match pitch black theme.
    ================================================ */
 [data-page="admin"] {
-  /* Remove all shadows */
   --shadow-panel: none;
   --shadow-card: none;
   --shadow-card-rest: none;
@@ -68,7 +74,6 @@ body[data-page="admin"] .portal-page-header {
 
 /* ================================================
    ADMIN LOGIN PAGE - THEME TOGGLE SUPPORT
-   Override --color-neutral-300 in dark mode to match main site
    ================================================ */
 html[data-theme="dark"] body[data-page="admin"] {
   --color-neutral-300: var(--color-dark);
@@ -76,11 +81,8 @@ html[data-theme="dark"] body[data-page="admin"] {
 
 /* ================================================
    ADMIN LOGIN PAGE - HEADER & FOOTER
-   Show header and footer only on login page (before logged in)
-   Login page header MUST match main site styling exactly.
    ================================================ */
 
-/* Show header on admin login page - above auth-gate */
 [data-page="admin"] .admin-header {
   display: flex;
   position: fixed;
@@ -92,16 +94,14 @@ html[data-theme="dark"] body[data-page="admin"] {
   height: var(--header-height, 60px);
 }
 
-/* CRITICAL: Admin login page header must use main site text colors, NOT portal colors */
-/* Override portal theme variables for header elements on login page */
-/* Transition must match body (0.2s) so all elements change simultaneously */
 body[data-page="admin"]:not(.admin-logged-in) .admin-header,
 body[data-page="admin"]:not(.admin-logged-in) .admin-header * {
   color: var(--color-nav-text);
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 }
 
-/* Nav logo and buttons inherit proper color */
 body[data-page="admin"]:not(.admin-logged-in) .nav-logo-row {
   color: var(--color-nav-text);
 }
@@ -112,7 +112,6 @@ body[data-page="admin"]:not(.admin-logged-in) .portal-button {
   color: var(--color-nav-text);
 }
 
-/* Hover states should still turn primary color */
 body[data-page="admin"]:not(.admin-logged-in) .nav-logo-row:hover,
 body[data-page="admin"]:not(.admin-logged-in) .theme-button:hover,
 body[data-page="admin"]:not(.admin-logged-in) .menu-button:hover,
@@ -120,14 +119,10 @@ body[data-page="admin"]:not(.admin-logged-in) .portal-button:hover {
   color: var(--color-primary);
 }
 
-/* Hide header when logged in */
 body.admin-logged-in[data-page="admin"] .admin-header {
   display: none;
 }
 
-/* Show footer on admin login page - override the global hide rule */
-/* Match main site footer styling exactly */
-/* Transition must match body (0.2s) so all elements change simultaneously */
 body[data-page="admin"]:not(.admin-logged-in) .admin-footer {
   display: flex !important;
   position: fixed;
@@ -143,10 +138,11 @@ body[data-page="admin"]:not(.admin-logged-in) .admin-footer {
   z-index: 50;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
-/* Footer links should match main site */
 body[data-page="admin"]:not(.admin-logged-in) .admin-footer a {
   color: var(--color-nav-text);
 }
@@ -155,29 +151,24 @@ body[data-page="admin"]:not(.admin-logged-in) .admin-footer a:hover {
   color: var(--color-primary);
 }
 
-/* Hide footer when logged in */
 body.admin-logged-in[data-page="admin"] .admin-footer {
   display: none;
 }
 
-/* Adjust auth-gate position to account for header/footer */
 [data-page="admin"]:not(.admin-logged-in) .auth-gate {
   top: var(--header-height, 60px);
   bottom: var(--footer-height, 40px);
   min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 40px));
 }
 
-/* Match main site background for login page (before logged in) */
 body[data-page="admin"]:not(.admin-logged-in) {
   background: var(--color-neutral-300) !important;
 }
 
 /* ================================================
    ADMIN SIDEBAR LAYOUT
-   Core layout styles for sidebar + content flex container
    ================================================ */
 
-/* Dashboard Layout - Flex Container */
 [data-page="admin"] .dashboard-container {
   display: flex;
   width: 100%;
@@ -185,7 +176,6 @@ body[data-page="admin"]:not(.admin-logged-in) {
   height: 100vh;
 }
 
-/* Sidebar - pitch black to match page */
 [data-page="admin"] .sidebar {
   width: 240px;
   min-width: 240px;
@@ -203,7 +193,6 @@ body[data-page="admin"]:not(.admin-logged-in) {
   min-width: 56px;
 }
 
-/* Sidebar Content - flex container for nav and footer (logo is outside) */
 [data-page="admin"] .sidebar-content {
   display: flex;
   flex-direction: column;
@@ -213,7 +202,6 @@ body[data-page="admin"]:not(.admin-logged-in) {
   overflow: hidden;
 }
 
-/* Sidebar Logo - symmetric spacing: margin-bottom matches padding-top (1.5rem) */
 [data-page="admin"] .sidebar-logo {
   display: flex;
   justify-content: center;
@@ -226,13 +214,11 @@ body[data-page="admin"]:not(.admin-logged-in) {
   filter: invert(1);
 }
 
-/* Sidebar logo - always visible */
 [data-page="admin"] .sidebar-collapsed-logo {
   display: flex;
   align-items: center;
 }
 
-/* Collapsed sidebar - center the logo */
 [data-page="admin"] .sidebar.collapsed .sidebar-collapsed-logo {
   justify-content: center;
   margin: var(--portal-header-top, 20px) auto var(--space-3) auto;
@@ -240,24 +226,16 @@ body[data-page="admin"]:not(.admin-logged-in) {
   width: 100%;
 }
 
-/* Logo img size defined in shared/portal-layout.css - do not override */
-
 [data-page="admin"] .sidebar.collapsed .sidebar-logo {
   display: none;
 }
 
-/* Sidebar Buttons - Vertical layout
-   NOTE: Uses tighter spacing (0.5rem) than standard (1rem) to fit all nav items
-   without overflow. This is intentional - do not standardize. */
 [data-page="admin"] .sidebar-buttons {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-/* Sidebar button styles consolidated in buttons.css */
-
-/* Sidebar Footer - uses same 0.5rem gap as nav buttons for consistent spacing */
 [data-page="admin"] .sidebar-footer {
   margin-top: auto;
   padding-top: 0.5rem;
@@ -266,7 +244,6 @@ body[data-page="admin"]:not(.admin-logged-in) {
 /* Dashboard Content Area */
 [data-page="admin"] .dashboard-content {
   flex: 1;
-  /* No top padding - header sits at the very top */
   padding: 0 clamp(0.75rem, 2vw, 1.5rem) clamp(0.75rem, 2vw, 1.5rem);
   overflow-y: auto;
   overflow-x: hidden;
@@ -276,41 +253,29 @@ body[data-page="admin"]:not(.admin-logged-in) {
   color: var(--portal-text-light);
   height: 100vh;
   min-height: 100vh;
-  /* Allow flex child to shrink for horizontal table scroll on mobile */
   min-width: 0;
 }
 
-/* Quick Stats Grid - Base styles in shared/portal-cards.css */
-/* Admin-specific column overrides below */
+/* ================================================
+   QUICK STATS GRID - Admin-specific overrides
+   Base styles in shared/portal-cards.css
+   ================================================ */
 
-/* Analytics tab has 3 cards - force 3 columns */
 body[data-page="admin"] #tab-analytics .quick-stats {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
 
-/* Smaller stat cards on Analytics page */
 body[data-page="admin"] #tab-analytics .stat-card {
   padding: 1rem 1.25rem;
   min-width: 0;
 }
 
 /* ================================================
-   CRITICAL: SUMMARY CARD GRID RESPONSIVE BEHAVIOR
-   ================================================
-   DO NOT REMOVE OR MODIFY THESE BREAKPOINTS!
-
-   4-card tabs (Overview, Leads, Projects, Clients) MUST wrap:
-   - Desktop (992px+): 4 columns (1 row of 4)
-   - Tablet (768-991px): 2 columns (2 rows of 2) - NOT 3+1!
-   - Mobile (<768px): 1 column (4 rows of 1)
-
-   This has been fixed MULTIPLE TIMES. Do not let auto-fit
-   override these explicit column counts.
+   SUMMARY CARD GRID RESPONSIVE BEHAVIOR
    ================================================ */
 
-/* Desktop wide: 4 cards in one row */
 @media (min-width: 1025px) {
   [data-page="admin"] #tab-overview .dashboard-stats-grid,
   [data-page="admin"] #tab-leads .quick-stats,
@@ -320,7 +285,6 @@ body[data-page="admin"] #tab-analytics .stat-card {
   }
 }
 
-/* Contracts tab has 5 stat cards - always fit in one row on desktop */
 [data-page="admin"] #tab-contracts .quick-stats {
   grid-template-columns: repeat(5, 1fr);
 }
@@ -329,17 +293,32 @@ body[data-page="admin"] #tab-analytics .stat-card {
   [data-page="admin"] #tab-contracts .quick-stats {
     grid-template-columns: repeat(5, 1fr);
   }
+  [data-page="admin"] #tab-overview .dashboard-stats-grid,
+  [data-page="admin"] #tab-leads .quick-stats,
+  [data-page="admin"] #tab-projects .quick-stats,
+  [data-page="admin"] #tab-clients .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (--tablet-down) {
   [data-page="admin"] #tab-contracts .quick-stats {
     grid-template-columns: repeat(3, 1fr);
   }
+  [data-page="admin"] #tab-overview .dashboard-stats-grid,
+  [data-page="admin"] #tab-leads .quick-stats,
+  [data-page="admin"] #tab-projects .quick-stats,
+  [data-page="admin"] #tab-clients .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 600px) {
   [data-page="admin"] #tab-contracts .quick-stats {
     grid-template-columns: repeat(2, 1fr);
+  }
+  [data-page="admin"] #tab-overview .dashboard-stats-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -349,41 +328,13 @@ body[data-page="admin"] #tab-analytics .stat-card {
   }
 }
 
-/* Intermediate: 2x2 when sidebar collapses (zoom-friendly) */
-@media (--laptop) {
-  [data-page="admin"] #tab-overview .dashboard-stats-grid,
-  [data-page="admin"] #tab-leads .quick-stats,
-  [data-page="admin"] #tab-projects .quick-stats,
-  [data-page="admin"] #tab-clients .quick-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Tablet: 4-card tabs MUST be 2x2, NEVER 3+1 */
-@media (--tablet-down) {
-  [data-page="admin"] #tab-overview .dashboard-stats-grid,
-  [data-page="admin"] #tab-leads .quick-stats,
-  [data-page="admin"] #tab-projects .quick-stats,
-  [data-page="admin"] #tab-clients .quick-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Mobile: single column for overview grids */
-@media (max-width: 600px) {
-  [data-page="admin"] #tab-overview .dashboard-stats-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Portal Shadow utility - flat design, no shadows */
 [data-page="admin"] .portal-shadow {
   box-shadow: none;
 }
 
-/* =====================================================
-   OVERVIEW TAB - Flat design, dark canvas with lighter cards
-   ===================================================== */
+/* ================================================
+   OVERVIEW TAB - Card styling
+   ================================================ */
 [data-page="admin"] #tab-overview .dashboard-stats-grid {
   background: var(--portal-bg-darker);
   border: none;
@@ -404,44 +355,20 @@ body[data-page="admin"] #tab-analytics .stat-card {
   background: var(--portal-bg-hover);
 }
 
-/* Portal Project Card - Base styles in shared/portal-cards.css */
-
-/* .icon-btn base styles in shared/portal-buttons.css */
-
-/* Ensure all admin text is light on dark backgrounds */
+/* Ensure admin text is light on dark backgrounds */
 [data-page="admin"] .stat-card,
 [data-page="admin"] .admin-table-card,
+[data-page="admin"] .data-table-card,
 [data-page="admin"] .chart-container,
 [data-page="admin"] .metric-group,
 [data-page="admin"] .analytics-section,
 [data-page="admin"] .analytics-overview,
 [data-page="admin"] .projects-table-container,
 [data-page="admin"] .admin-table-header,
+[data-page="admin"] .data-table-header,
 [data-page="admin"] #tab-client-detail .portal-project-card {
   color: var(--portal-text-light);
 }
-
-/* Small uppercase section headers (match across Overview, Analytics).
-   Client detail overview card h3s match project detail tab h3s - see client-detail.css */
-[data-page="admin"] .stat-label,
-/* h3 styling from unified rule in portal-cards.css - only layout here */
-[data-page="admin"] .chart-container h3,
-[data-page="admin"] .metric-group h3,
-[data-page="admin"] .analytics-section h3,
-[data-page="admin"] .analytics-overview h3,
-/* h3 margin handled by parent container gap */
-
-/* ================================================
-   ADMIN PORTAL - GLOBAL BUTTON STYLES
-   ================================================ */
-/* All portal button styles consolidated in buttons.css */
-
-/* ================================================
-   ADMIN PORTAL - FORM INPUT STYLES
-   ================================================
-   Base form styles now in shared/portal-forms.css
-   Admin-specific overrides below
-   ================================================ */
 
 /* ================================================
    ADMIN PORTAL - DATE INPUT STYLING
@@ -451,14 +378,15 @@ body[data-page="admin"] #tab-analytics .stat-card {
   position: relative;
 }
 
-/* Style the calendar picker icon for webkit browsers */
 [data-page="admin"] input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   filter: invert(1);
   opacity: 0.7;
   padding: 4px;
   border-radius: var(--portal-radius-xs);
-  transition: opacity var(--duration-faster) ease, background-color var(--duration-faster) ease;
+  transition:
+    opacity var(--duration-faster) ease,
+    background-color var(--duration-faster) ease;
 }
 
 [data-page="admin"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
@@ -466,7 +394,6 @@ body[data-page="admin"] #tab-analytics .stat-card {
   background-color: rgba(var(--color-primary-rgb), 0.2);
 }
 
-/* Firefox date input styling */
 [data-page="admin"] input[type="date"]::-moz-calendar-picker-indicator {
   cursor: pointer;
   filter: invert(1);
@@ -474,10 +401,9 @@ body[data-page="admin"] #tab-analytics .stat-card {
 
 /* ================================================
    ADMIN PORTAL - CARD SHADOWS
-   Base shadows in shared/portal-cards.css
-   Admin-specific sections below
    ================================================ */
 body[data-page="admin"] .admin-table-card,
+body[data-page="admin"] .data-table-card,
 body[data-page="admin"] .chart-container,
 body[data-page="admin"] .metric-group,
 body[data-page="admin"] .analytics-section,
@@ -486,56 +412,39 @@ body[data-page="admin"] .project-detail-overview {
   box-shadow: var(--shadow-panel);
 }
 
-/* Client detail cards use --shadow-card (match pd-tab-invoices summary-card) - set in client-detail.css */
-
-/* Light grey cards (--portal-bg-medium) should have NO shadow - consistent across portal */
-
 /* ================================================
-   ADMIN TABLE - Reusable base class
-   ================================================
-   Apply .admin-table to: leads-table, visitors-table,
-   clients-table, contacts-table, projects-table
+   ADMIN TABLE LAYOUT
+   Base table styles in shared/portal-tables.css
    ================================================ */
 
-/* =====================================================
-   ADMIN TABLE LAYOUT & VARIATIONS
-   Base table styles in shared/portal-tables.css
-   ===================================================== */
-
-/* Table containers, border radius, and links from shared/portal-tables.css */
-
-/* When pagination exists, remove scroll-wrapper bottom radius */
-.admin-table-card:has(.table-pagination) .admin-table-scroll-wrapper {
+.admin-table-card:has(.table-pagination) .admin-table-scroll-wrapper,
+.admin-table-card:has(.table-pagination) .data-table-scroll-wrapper,
+.data-table-card:has(.table-pagination) .data-table-scroll-wrapper {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-/* Add bottom padding to tables without pagination */
-.admin-table-card:not(:has(.table-pagination)) .data-table tbody tr:last-child td {
+.admin-table-card:not(:has(.table-pagination)) .data-table tbody tr:last-child td,
+.data-table-card:not(:has(.table-pagination)) .data-table tbody tr:last-child td {
   padding-bottom: var(--space-1-5);
 }
 
-/* All tables use base .data-table from shared/portal-tables.css
-   Table-specific class names (leads-table, clients-table, etc.) kept for
-   semantic purposes but styling is unified via base class.
-   See shared/portal-tables.css for all table styles. */
-
-/* Bulk select cell styles from shared/portal-tables.css */
-
 /* Base Admin Styles */
 .admin-body {
-  background: linear-gradient(135deg, var(--color-admin-bg-start) 0%, var(--color-admin-bg-end) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-admin-bg-start) 0%,
+    var(--color-admin-bg-end) 100%
+  );
   color: var(--portal-text-light);
   min-height: 100vh;
   font-family: "Inter", sans-serif;
 }
 
-/* Admin Dashboard Content - Pitch black as canvas */
 [data-page="admin"] .dashboard-content {
   background: var(--portal-bg-pitch);
 }
 
-/* Admin Page Header - Red heading and toggle button */
 [data-page="admin"] .page-header h2 {
   color: var(--color-primary);
 }
@@ -613,21 +522,16 @@ body[data-page="admin"] .project-detail-overview {
   overflow-y: auto;
 }
 
-/* Lock scroll when modal is open */
 body.modal-open,
 body.modal-open .admin-content,
 body.modal-open .dashboard-content {
   overflow: hidden !important;
 }
 
-/* .tab-content base display:none in portal-tabs.css */
 .tab-content {
   animation: fadeIn var(--duration-normal) var(--easing-decelerated);
 }
 
-/* Tab content uses flex + gap from shared/portal-tabs.css */
-
-/* Less space below Leads heading */
 [data-page="admin"] #tab-leads .page-title + .quick-stats {
   margin-top: var(--space-1-5);
 }
@@ -636,7 +540,6 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  /* margin-bottom removed - parent flex gap handles spacing */
 }
 
 [data-page="admin"] .metric-card {
@@ -647,9 +550,6 @@ body.modal-open .dashboard-content {
   box-shadow: var(--shadow-card-rest);
   transition: var(--animation-card-hover);
 }
-
-/* h3 styling from unified rule in portal-cards.css - only layout here */
-/* h3 margin handled by parent container gap */
 
 [data-page="admin"] .metric-value {
   color: var(--portal-text-light);
@@ -666,11 +566,9 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .metric-change.positive {
   color: var(--color-success);
 }
-
 [data-page="admin"] .metric-change.negative {
   color: var(--color-danger);
 }
-
 [data-page="admin"] .metric-change.neutral {
   color: var(--portal-text-secondary);
 }
@@ -680,7 +578,6 @@ body.modal-open .dashboard-content {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  /* margin-top removed - parent flex gap handles spacing */
 }
 
 .visitors-controls {
@@ -689,8 +586,6 @@ body.modal-open .dashboard-content {
   align-items: center;
   flex-wrap: wrap;
 }
-
-/* Visitors table uses standard .data-table base class from portal-tables.css */
 
 .visitors-pagination {
   display: flex;
@@ -728,13 +623,10 @@ body.modal-open .dashboard-content {
 }
 
 /* Base .stat-card styles are in shared/portal-cards.css */
-/* Only clickable stat cards (links/buttons) get hover; non-links must not have bg hover */
-
 [data-page="admin"] .stat-card-clickable:hover {
   background: var(--portal-bg-readonly);
 }
 
-/* Active filter card stays dark */
 [data-page="admin"] .stat-card-clickable.active {
   background: var(--portal-bg-readonly);
 }
@@ -748,18 +640,9 @@ body.modal-open .dashboard-content {
   letter-spacing: 0.05em;
 }
 
-/* Admin page title - system font */
 [data-page="admin"] #admin-page-title {
   font-family: var(--font-family-sans);
 }
-
-/* .stat-value styling from unified rule in portal-cards.css */
-
-/* Leads and Clients tables use .admin-table-container and .admin-table base classes */
-/* See table-specific styles in ADMIN TABLE section above */
-
-/* Base .status-badge and all color variants including .status-not-invited
-   are in shared/portal-badges.css */
 
 /* Status cell wrapper for inline status + action button */
 .status-cell-wrapper {
@@ -768,7 +651,7 @@ body.modal-open .dashboard-content {
   gap: var(--space-2);
 }
 
-/* Invite icon button - matches .icon-btn pattern (36x36, 18x18 svg) */
+/* Invite icon button - matches .icon-btn pattern */
 [data-page="admin"] .icon-btn-invite {
   display: inline-flex;
   align-items: center;
@@ -784,7 +667,9 @@ body.modal-open .dashboard-content {
   color: var(--portal-text-light);
   cursor: pointer;
   flex-shrink: 0;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 [data-page="admin"] .icon-btn-invite:hover {
@@ -802,13 +687,9 @@ body.modal-open .dashboard-content {
   stroke-width: 2.5;
 }
 
-
 /* ================================================
    CLIENT TYPE BADGES
-   ================================================
-   Used to distinguish personal vs business clients
    ================================================ */
-
 .client-type-badge {
   display: inline-block;
   padding: var(--space-1) var(--space-2);
@@ -833,26 +714,20 @@ body.modal-open .dashboard-content {
 }
 
 /* ================================================
-   Admin Table Card - Consistent styling for data tables
-   ================================================
-   Cards must NOT expand beyond their content.
-   DO NOT ADD flex-grow, height:100%, or margin-bottom hacks!
+   Admin Table Card - Consistent styling
    ================================================ */
-.admin-table-card {
+.admin-table-card,
+.data-table-card {
   background: transparent;
   border: var(--portal-border);
   border-radius: var(--portal-radius-sm, 8px);
-  overflow: visible; /* Allow dropdowns to overflow */
+  overflow: visible;
   transition: background 0.15s;
-  /* Allow table card to shrink below content width for horizontal scroll */
   min-width: 0;
-  /* Spacing handled by shared/portal-layout.css */
 }
 
-/* Border overrides removed - base .admin-table-header now has no borders */
-
-/* Horizontal padding matches table cells for alignment */
-.admin-table-header {
+.admin-table-header,
+.data-table-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -863,34 +738,47 @@ body.modal-open .dashboard-content {
   border-radius: 0;
 }
 
-/* Badge hidden - status visible in table rows via colored dots */
-.admin-table-header > .status-badge {
+.admin-table-header > .status-badge,
+.data-table-header > .status-badge {
   display: none;
 }
 
-.admin-table-header .admin-table-actions {
+.admin-table-header .admin-table-actions,
+.data-table-header .data-table-actions {
   order: 2;
 }
 
-/* Table card header h3 - match table column header typography */
-/* .admin-table-header h3 - uses unified h3 from portal-cards.css */
-.admin-table-header h3 {
+.admin-table-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-width: 0;
+}
+
+.admin-table-header h3,
+.data-table-header h3 {
   order: 0;
+  margin: 0;
   color: var(--portal-text-secondary);
 }
 
 /* Default: show full titles, hide mobile titles */
 [data-page="admin"] .admin-table-header h3 .title-mobile,
-.admin-table-header h3 .title-mobile {
+[data-page="admin"] .data-table-header h3 .title-mobile,
+.admin-table-header h3 .title-mobile,
+.data-table-header h3 .title-mobile {
   display: none !important;
 }
 
 [data-page="admin"] .admin-table-header h3 .title-full,
-.admin-table-header h3 .title-full {
+[data-page="admin"] .data-table-header h3 .title-full,
+.admin-table-header h3 .title-full,
+.data-table-header h3 .title-full {
   display: inline;
 }
 
-.admin-table-actions {
+.admin-table-actions,
+.data-table-actions {
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -898,11 +786,12 @@ body.modal-open .dashboard-content {
 }
 
 .admin-table-actions .admin-filter-select,
-.admin-table-actions .view-toggle {
+.admin-table-actions .view-toggle,
+.data-table-actions .admin-filter-select,
+.data-table-actions .view-toggle {
   align-self: center;
 }
 
-/* Reusable filter select: padding matches .table-dropdown .custom-dropdown-trigger so alignment when open is consistent */
 [data-page="admin"] .admin-filter-select {
   min-width: 10rem;
   padding: var(--space-2) var(--space-3);
@@ -914,345 +803,34 @@ body.modal-open .dashboard-content {
   box-sizing: border-box;
 }
 
-/* Icon button group - tighter spacing */
-.admin-table-actions .icon-btn {
+.admin-table-actions .icon-btn,
+.data-table-actions .icon-btn {
   flex-shrink: 0;
 }
 
-/* Table header action buttons - red on hover */
-[data-page="admin"] .admin-table-actions .icon-btn:hover {
+[data-page="admin"] .admin-table-actions .icon-btn:hover,
+[data-page="admin"] .data-table-actions .icon-btn:hover {
   color: var(--color-danger) !important;
   background: transparent !important;
 }
 
-.admin-table-actions .status-badge {
+.admin-table-actions .status-badge,
+.data-table-actions .status-badge {
   display: none;
 }
 
-/* Badge removed - status visible in table rows via colored dots */
-
-/* Contacts table uses .admin-table-container and .admin-table base classes */
-/* See table-specific message-cell style in ADMIN TABLE section above */
-
 /* ================================================
-   STATUS SELECT DROPDOWNS
-   ================================================
-   Styled to match status badges. Uses .admin-table base.
+   File action buttons container
    ================================================ */
-
-/* Base status select styles */
-[data-page="admin"] .data-table select.status-select,
-[data-page="admin"] select.status-select {
-  padding: var(--space-2) var(--space-8) var(--space-2) var(--space-6);
-  border: var(--portal-border);
-  border-radius: var(--portal-radius-pill);
-  background-color: var(--portal-bg-medium);
-  color: var(--portal-text-light);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23f5f5f5'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  width: 160px;
-  min-width: 160px;
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  cursor: pointer;
-  text-transform: capitalize;
-  appearance: none;
-  height: auto;
-  line-height: 1.2;
-  box-sizing: border-box;
-}
-
-[data-page="admin"] select.status-select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-[data-page="admin"] select.status-select option {
-  background-color: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  padding: var(--space-2);
-}
-
-/* Yellow - Awaiting Action (pending, new, on_hold) */
-[data-page="admin"] select.status-select.status-pending,
-[data-page="admin"] select.status-select.status-new,
-[data-page="admin"] select.status-select.status-on_hold,
-[data-page="admin"] select.status-select.status-on-hold {
-  background-color: var(--color-warning);
-  color: var(--color-black);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-}
-
-/* Blue - In Progress (active, in_progress, contacted) */
-[data-page="admin"] select.status-select.status-active,
-[data-page="admin"] select.status-select.status-in_progress,
-[data-page="admin"] select.status-select.status-in-progress,
-[data-page="admin"] select.status-select.status-contacted {
-  background-color: var(--color-info);
-  color: var(--color-black);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-}
-
-/* Green - Success (completed, converted, replied) */
-[data-page="admin"] select.status-select.status-completed,
-[data-page="admin"] select.status-select.status-converted,
-[data-page="admin"] select.status-select.status-replied {
-  background-color: var(--color-success);
-  color: var(--color-black);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-}
-
-/* Red - Cancelled/Lost (cancelled, lost, archived) */
-[data-page="admin"] select.status-select.status-cancelled,
-[data-page="admin"] select.status-select.status-lost,
-[data-page="admin"] select.status-select.status-archived {
-  background-color: var(--color-danger);
-  color: var(--color-white);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-}
-
-/* Purple - Qualified */
-[data-page="admin"] select.status-select.status-qualified {
-  background-color: var(--color-status-review-border);
-  color: var(--color-white);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-}
-
-/* Gray - Read */
-[data-page="admin"] select.status-select.status-read {
-  background-color: var(--portal-text-muted);
-  color: var(--color-black);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-}
-
-/* Clickable rows covered by .admin-table base class */
-
-/* Projects table uses .admin-table-container and .admin-table base classes */
-/* See table-specific column widths in ADMIN TABLE section above */
-
-/* ================================================
-   Custom Status Dropdown (Projects Table)
-   ================================================ */
-.custom-status-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.custom-status-dropdown .status-dropdown-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: none;
-  border-radius: var(--portal-radius-xs);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  line-height: 1.5;
-  cursor: pointer;
-  transition: opacity var(--transition-fast);
-  width: 160px;
-  min-width: 160px;
-  justify-content: space-between;
-  box-sizing: border-box;
-  height: 32px;
-}
-
-.status-dropdown-trigger:hover {
-  opacity: 0.9;
-}
-
-.status-dropdown-trigger .status-arrow {
-  font-size: var(--table-mobile-identity-name-size);
-  transition: transform var(--transition-fast);
-}
-
-.custom-status-dropdown.open .status-arrow {
-  transform: rotate(180deg);
-}
-
-.custom-status-dropdown.open .status-dropdown-trigger {
-  border-radius: var(--portal-radius-xs) var(--portal-radius-xs) 0 0;
-}
-
-/* Status trigger colors */
-.status-dropdown-trigger.status-pending {
-  background-color: var(--color-warning);
-  color: var(--color-black);
-}
-
-.status-dropdown-trigger.status-active,
-.status-dropdown-trigger.status-in-progress,
-.status-dropdown-trigger.status-in_progress {
-  background-color: var(--color-info);
-  color: var(--color-white);
-}
-
-.status-dropdown-trigger.status-on-hold,
-.status-dropdown-trigger.status-on_hold {
-  background-color: var(--color-warning);
-  color: var(--color-black);
-}
-
-.status-dropdown-trigger.status-completed {
-  background-color: var(--color-success);
-  color: var(--color-white);
-}
-
-.status-dropdown-trigger.status-cancelled {
-  background-color: var(--color-danger);
-  color: var(--color-white);
-}
-
-/* Dropdown menu */
-.status-dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 0;
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: 0 0 6px 6px;
-  box-shadow: var(--shadow-elevated-sm);
-  z-index: 100;
-  width: 140px;
-  display: none;
-  overflow: hidden;
-}
-
-.custom-status-dropdown.open .status-dropdown-menu {
-  display: block;
-}
-
-/* Status options */
-.status-option {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: none;
-  background: transparent;
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  font-weight: 400;
-  line-height: 1.5;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-  box-sizing: border-box;
-  height: 32px;
-  min-height: 32px;
-}
-
-.status-option:hover {
-  background: var(--portal-bg-hover);
-}
-
-/* Status option left border colors - only left border, no other borders */
-[data-page="admin"] .status-dropdown-menu .status-option.status-pending {
-  border: none;
-  border-left: 3px solid var(--color-warning);
-  background: transparent;
-  color: var(--portal-text-light);
-}
-
-[data-page="admin"] .status-dropdown-menu .status-option.status-active {
-  border: none;
-  border-left: 3px solid var(--color-info);
-  background: transparent;
-}
-
-[data-page="admin"] .status-dropdown-menu .status-option.status-in-progress,
-[data-page="admin"] .status-dropdown-menu .status-option.status-in_progress {
-  border: none;
-  border-left: 3px solid var(--color-info);
-  background: transparent;
-}
-
-[data-page="admin"] .status-dropdown-menu .status-option.status-on-hold,
-[data-page="admin"] .status-dropdown-menu .status-option.status-on_hold {
-  border: none;
-  border-left: 3px solid var(--color-warning);
-  background: transparent;
-}
-
-[data-page="admin"] .status-dropdown-menu .status-option.status-completed {
-  border: none;
-  border-left: 3px solid var(--color-success);
-  background: transparent;
-}
-
-[data-page="admin"] .status-dropdown-menu .status-option.status-cancelled {
-  border: none;
-  border-left: 3px solid var(--color-danger);
-  background: transparent;
-}
-
-/* Action buttons in tables */
-/* Unified action button styles for dark theme */
-.action-btn {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--portal-text-muted);
-  border-radius: var(--portal-radius-pill);
-  background: var(--portal-bg-medium);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-faster);
-  height: auto;
-  line-height: 1.2;
-  box-sizing: border-box;
-}
-
-.action-btn:hover {
-  background: var(--portal-bg-light);
-  border-color: var(--portal-text-secondary);
-}
-
-.action-btn.action-convert {
-  background: var(--color-success);
-  border-color: var(--color-success);
-  color: var(--color-white);
-}
-
-.action-btn.action-convert:hover {
-  background: var(--color-success-dark);
-  border-color: var(--color-success-dark);
-}
-
-.action-btn.action-edit {
-  background: var(--portal-bg-medium);
-  border-color: var(--portal-text-muted);
-  color: var(--portal-text-light);
-}
-
-.action-btn.action-edit:hover {
-  background: var(--portal-bg-light);
-  border-color: var(--portal-text-secondary);
-}
-
-.action-btn.action-invite {
-  background: var(--color-admin-purple);
-  border-color: var(--color-admin-purple);
-  color: var(--color-white);
-}
-
-.action-btn.action-invite:hover {
-  background: var(--color-admin-purple-dark);
-  border-color: var(--color-admin-purple-dark);
-}
-
-/* File action buttons container */
 .file-actions {
   display: flex;
   gap: var(--space-2);
   justify-content: flex-end;
 }
 
-/* Icon button base styles are scoped at [data-page="admin"] .icon-btn above */
-
-/* Set Password Page Styles */
+/* ================================================
+   Set Password Page Styles
+   ================================================ */
 .set-password-page {
   min-height: 100vh;
   display: flex;
@@ -1375,9 +953,9 @@ body.modal-open .dashboard-content {
   margin-bottom: var(--space-4);
 }
 
-/* Set password form buttons should use .btn-full .btn-filled classes */
-
-/* System Tab */
+/* ================================================
+   System Tab
+   ================================================ */
 .system-info {
   display: flex;
   flex-direction: column;
@@ -1390,9 +968,6 @@ body.modal-open .dashboard-content {
   padding: var(--space-4);
   box-shadow: var(--shadow-card-rest);
 }
-
-/* h3 styling from unified rule in portal-cards.css - only layout here */
-/* h3 margin handled by parent container gap */
 
 .status-grid {
   display: grid;
@@ -1420,8 +995,6 @@ body.modal-open .dashboard-content {
   border: none;
 }
 
-/* System info grid/rows: see shared/details-card.css */
-
 .status-item .status-icon {
   flex-shrink: 0;
   width: 20px;
@@ -1436,27 +1009,7 @@ body.modal-open .dashboard-content {
   margin-left: 0.75rem;
 }
 
-/* .status-badge and color variants (.status-healthy, .status-unknown, .status-error)
-   are in shared/portal-badges.css */
-
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.status-indicator.healthy {
-  background: var(--color-success);
-}
-
-.status-indicator.warning {
-  background: var(--color-warning);
-}
-
-.status-indicator.error {
-  background: var(--color-danger);
-}
+/* .status-badge and .status-indicator styles in shared/portal-badges.css */
 
 .export-controls,
 .data-controls {
@@ -1464,8 +1017,6 @@ body.modal-open .dashboard-content {
   gap: var(--space-4);
   flex-wrap: wrap;
 }
-
-/* Button variants (.btn-sm, .btn-danger) in shared/portal-buttons.css */
 
 /* Loading Indicator */
 .loading-indicator {
@@ -1498,36 +1049,30 @@ body.modal-open .dashboard-content {
 }
 
 /* Utility Classes */
-/* NOTE: .hidden is defined in base/layout.css - do not duplicate here */
-
 .text-success {
   color: var(--color-success);
 }
-
 .text-warning {
   color: var(--color-warning);
 }
-
 .text-danger {
   color: var(--color-danger);
 }
 
-/* Responsive Design */
+/* ================================================
+   Responsive Design
+   ================================================ */
 
-/* Vitals grid - 2x2 layout */
 [data-page="admin"] .vitals-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
 }
 
-/* Analytics grid uses base centered 2-col from analytics.css */
-
 [data-page="admin"] .quick-stats > * {
   height: 100%;
 }
 
-/* Groups of 3 should go to 1 column on small screens */
 @media (--mobile) {
   [data-page="admin"] .overview-stats-grid,
   [data-page="admin"] .charts-grid {
@@ -1535,10 +1080,9 @@ body.modal-open .dashboard-content {
   }
 
   [data-page="admin"] #tab-analytics > .quick-stats {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr;
   }
 
-  /* All tab quick-stats should be single column on mobile */
   [data-page="admin"] #tab-overview .dashboard-stats-grid,
   [data-page="admin"] #tab-leads .quick-stats,
   [data-page="admin"] #tab-projects .quick-stats,
@@ -1547,28 +1091,22 @@ body.modal-open .dashboard-content {
     grid-template-columns: 1fr;
   }
 
-  /* Tab content mobile gap from shared/portal-tabs.css */
-
-  /* Reset margin-bottom on all tab-specific containers to ensure consistent spacing */
   [data-page="admin"] #tab-overview .upcoming-tasks,
   [data-page="admin"] #tab-overview .recent-activity {
     margin-bottom: 0;
   }
-  /* Reduce dashboard content padding on mobile - no top padding */
+
   [data-page="admin"] .dashboard-content {
     padding: 0 0.75rem 0.75rem;
   }
 }
 
-/* Small screens - stack grids with tighter spacing */
 @media (--compact-mobile) {
-  /* Reset margins - let tab-content > * + * control spacing */
   body[data-page="admin"] .tab-content > *,
   body[data-page="admin"] .content-wrapper > * {
     margin-bottom: 0;
   }
 
-  /* Non-card grids can go to single column at 600px */
   body[data-page="admin"] .analytics-grid,
   body[data-page="admin"] .vitals-grid,
   body[data-page="admin"] .charts-grid,
@@ -1577,10 +1115,6 @@ body.modal-open .dashboard-content {
     gap: 0.5rem;
   }
 
-  /* 4-card grids (.quick-stats) stay 2x2 until 500px - handled by portal-cards.css */
-  /* DO NOT override .quick-stats here - let base rules handle 4→2→1 transitions */
-
-  /* Tighter card padding on mobile */
   body[data-page="admin"] .stat-card,
   body[data-page="admin"] .portal-project-card,
   body[data-page="admin"] .chart-container,
@@ -1590,16 +1124,13 @@ body.modal-open .dashboard-content {
   }
 }
 
-/* Mobile - reduce padding on all dark grey cards */
 @media (--small-mobile) {
-  /* Ensure dashboard content scrolls on mobile */
   [data-page="admin"] .dashboard-content {
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
   }
 
-  /* Cards: 0.75rem (12px) padding on mobile */
   [data-page="admin"] .portal-project-card,
   [data-page="admin"] .admin-table-card,
   [data-page="admin"] .attention-card,
@@ -1611,7 +1142,6 @@ body.modal-open .dashboard-content {
     box-sizing: border-box;
   }
 
-  /* Status items - single row on mobile */
   [data-page="admin"] #tab-system .status-item {
     background: transparent;
     padding: 0.5rem 0;
@@ -1632,9 +1162,9 @@ body.modal-open .dashboard-content {
   [data-page="admin"] #tab-system .status-badge {
     flex-shrink: 0;
     width: fit-content;
-    font-size: 0.625rem;
-    font-weight: 700;
-    padding: 0.25rem 0.5rem;
+    font-size: var(--font-size-2xs, 0.625rem);
+    font-weight: var(--font-weight-bold);
+    padding: var(--space-0-5) var(--space-1);
     white-space: nowrap;
   }
 
@@ -1646,7 +1176,6 @@ body.modal-open .dashboard-content {
     overflow: visible;
   }
 
-  /* Allow text to wrap in system info rows */
   [data-page="admin"] #tab-system .system-info-row {
     flex-wrap: wrap;
   }
@@ -1657,7 +1186,6 @@ body.modal-open .dashboard-content {
     max-width: 100%;
   }
 
-  /* Analytics - reduce chart padding on smallest screens */
   [data-page="admin"] #tab-analytics .chart-container {
     padding: 0.5rem;
   }
@@ -1666,7 +1194,6 @@ body.modal-open .dashboard-content {
     padding: 0.5rem;
   }
 
-  /* Reduce chart height and inner padding on mobile */
   [data-page="admin"] #tab-analytics .chart {
     height: 200px;
     padding: 0.25rem;
@@ -1676,19 +1203,17 @@ body.modal-open .dashboard-content {
     padding: 0;
   }
 
-  /* Chart.js legend - 2x2 grid on mobile */
   [data-page="admin"] #tab-analytics .chart-container ul {
-    display: grid !important;
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.25rem;
     justify-items: start;
   }
 
   [data-page="admin"] #tab-analytics .chart-container ul li {
-    margin: 0 !important;
+    margin: 0;
   }
 
-  /* Stat cards - horizontal layout on mobile (number + label on same row) */
   [data-page="admin"] .stat-card {
     flex-direction: row;
     align-items: center;
@@ -1697,15 +1222,6 @@ body.modal-open .dashboard-content {
     gap: 0.5rem;
   }
 
-
-  /* .stat-card mobile responsiveness in portal-cards.css */
-
-  /* ================================================
-     MOBILE TABLE - Admin-specific container adjustments
-     Base card layout is in shared/portal-tables.css
-     ================================================ */
-
-  /* Table card container padding */
   [data-page="admin"] .admin-table-card {
     padding: var(--table-mobile-card-padding);
     max-width: 100%;
@@ -1719,7 +1235,6 @@ body.modal-open .dashboard-content {
     background: transparent;
   }
 
-  /* Status dropdown - full width on mobile */
   [data-page="admin"] .data-table tbody td.status-cell .table-dropdown {
     width: 100%;
   }
@@ -1734,146 +1249,10 @@ body.modal-open .dashboard-content {
     min-width: 100%;
   }
 
-  /* Hide truly empty cells */
   [data-page="admin"] .data-table tbody td:empty {
-    display: none !important;
+    display: none;
   }
 }
-
-/* ================================================
-   SIDEBAR NOTIFICATION COUNTS
-   ================================================
-   Expanded: inline red text matching button font.
-   Collapsed: small red badge at top-right of icon.
-   Used for Leads (new intakes/contacts) and Messages (unread).
-   ================================================ */
-
-/* Ensure sidebar buttons have relative positioning for badge; allow badge to sit outside without clipping */
-[data-page="admin"] .sidebar-buttons .btn {
-  position: relative;
-  overflow: visible;
-}
-
-/* ================================================
-   SIDEBAR BADGE - SEPARATE COUNT (LEADS / MESSAGES)
-   Badge is always absolutely positioned so it never affects icon/button
-   position; it only overlays on top.
-   ================================================ */
-
-/* Base: badge is a pill/circle, absolutely positioned so it never shifts layout */
-[data-page="admin"] .sidebar-badge {
-  position: absolute;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.35rem;
-  height: 1.35rem;
-  padding: 0 0.4rem;
-  border-radius: var(--border-radius-full, 9999px);
-  background: var(--color-danger);
-  color: var(--color-text-inverse);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  pointer-events: none;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-/* No tail or notch from pseudo-elements */
-[data-page="admin"] .sidebar-badge::before,
-[data-page="admin"] .sidebar-badge::after {
-  display: none !important;
-  content: none !important;
-}
-
-/* Expanded sidebar: overlay on right edge of button, vertically centered */
-[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn .sidebar-badge {
-  top: 50%;
-  right: 0.5rem;
-  margin: 0;
-  transform: translateY(-50%);
-}
-
-/* Active button in expanded sidebar - badge stays red pill */
-[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn.active .sidebar-badge {
-  background: var(--color-danger);
-  color: var(--color-text-inverse);
-}
-
-/* Collapsed sidebar: small circle at top-right of button; ring so it stays visible and not clipped */
-[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn .sidebar-badge {
-  top: 2px;
-  right: 2px;
-  margin: 0;
-  min-width: 16px;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  font-size: 0.5625rem;
-  font-weight: 700;
-  line-height: 1;
-  transform: none;
-  border-radius: var(--portal-radius-full);
-  background: var(--color-danger);
-  color: var(--color-white);
-  box-shadow: 0 0 0 2px var(--portal-bg-dark);
-}
-
-/* Collapsed - no scale on hover so badge stays inside button and is not clipped */
-[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn:hover .sidebar-badge {
-  transform: none;
-}
-
-/* Intermediate breakpoint - badge at top-right of button so it's never clipped */
-@media (--laptop) {
-  [data-page="admin"] .sidebar .sidebar-buttons .btn .sidebar-badge {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    margin: 0;
-    min-width: 16px;
-    width: 16px;
-    height: 16px;
-    padding: 0;
-    font-size: 0.5625rem;
-    font-weight: 700;
-    background: var(--color-danger);
-    color: var(--color-white);
-    box-shadow: 0 0 0 2px var(--portal-bg-dark);
-  }
-}
-
-/* ================================================
-   INLINE TABLE DROPDOWNS
-   ================================================
-   Compact custom dropdowns for use in table cells.
-   Should not change row height.
-   ================================================ */
-
-/* Ensure status cells allow dropdown overflow and maintain consistent height */
-[data-page="admin"] .data-table td.status-cell {
-  overflow: visible;
-  position: relative;
-  vertical-align: middle;
-  height: 48px;
-  padding: var(--space-2);
-  box-sizing: border-box;
-}
-
-/* Column styles moved to shared/portal-tables.css for consistency */
-
-/* ================================================
-   STACKED ELEMENTS - COMMENTED OUT
-   Part of table-specific responsive behavior.
-   Re-enable with table-responsive-rules.css
-   ================================================ */
-
-/* Actions column, .actions-cell, and icon button styles from shared/portal-tables.css */
-
-/* All dropdown styles consolidated in shared/portal-dropdown.css */
 
 /* ================================================
    INFO ICONS
@@ -1908,12 +1287,10 @@ body.modal-open .dashboard-content {
    FAST CUSTOM TOOLTIPS
    ================================================ */
 
-/* Tooltip container - elements with data-tooltip attribute */
 [data-page="admin"] [data-tooltip] {
   position: relative;
 }
 
-/* Tooltip pseudo-element */
 [data-page="admin"] [data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
@@ -1921,12 +1298,12 @@ body.modal-open .dashboard-content {
   left: 50%;
   transform: translateX(-50%);
   padding: var(--space-1) var(--space-1-5);
-  background: var(--portal-bg-darker, #2a2a2a);
+  background: var(--portal-bg-darker);
   color: var(--portal-text-light);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
-  font-weight: 400;
-  line-height: 1.4;
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal, 1.4);
   text-transform: none;
   letter-spacing: normal;
   white-space: pre-line;
@@ -1939,18 +1316,18 @@ body.modal-open .dashboard-content {
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--duration-faster) ease, visibility var(--duration-faster) ease;
+  transition:
+    opacity var(--duration-faster) ease,
+    visibility var(--duration-faster) ease;
 }
 
-/* Show tooltip on hover - instant appearance */
 [data-page="admin"] [data-tooltip]:hover::after {
   opacity: 1;
   visibility: visible;
 }
 
-/* Tooltip arrow */
 [data-page="admin"] [data-tooltip]::before {
-  content: '';
+  content: "";
   position: absolute;
   bottom: calc(100% + 2px);
   left: 50%;
@@ -1961,7 +1338,9 @@ body.modal-open .dashboard-content {
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--duration-faster) ease, visibility var(--duration-faster) ease;
+  transition:
+    opacity var(--duration-faster) ease,
+    visibility var(--duration-faster) ease;
 }
 
 [data-page="admin"] [data-tooltip]:hover::before {
@@ -1969,7 +1348,6 @@ body.modal-open .dashboard-content {
   visibility: visible;
 }
 
-/* For table cells, position tooltip to avoid overflow */
 [data-page="admin"] td[data-tooltip]::after,
 [data-page="admin"] .table-cell[data-tooltip]::after {
   left: 0;
@@ -1984,268 +1362,11 @@ body.modal-open .dashboard-content {
   transform: none;
 }
 
-/* ===============================================
-   TABLE FILTER CONTROLS
-   =============================================== */
-
-/* Filter controls container */
-.table-filter-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 36px;
-}
-
-/* Search dropdown wrapper */
-.filter-search-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 36px;
-}
-
-/* Search trigger button */
-.filter-search-trigger {
-  position: relative;
-}
-
-/* Show indicator when has value */
-.filter-search-trigger.has-value::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  background: var(--color-primary);
-  border-radius: 50%;
-  z-index: 1;
-}
-
-/* Search dropdown - higher specificity to override .search-bar display:flex */
-.filter-search-dropdown,
-.filter-search-dropdown.search-bar {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
-  display: none;
-  width: 280px;
-  z-index: 100;
-  box-shadow: var(--shadow-elevated-md);
-}
-
-.filter-search-wrapper.open .filter-search-dropdown,
-.filter-search-wrapper.open .filter-search-dropdown.search-bar {
-  display: flex;
-}
-
-/* Filter dropdown wrapper */
-.filter-dropdown-wrapper {
-  position: relative;
-}
-
-/* Filter dropdown trigger inherits from icon-btn */
-.filter-dropdown-trigger {
-  position: relative;
-}
-
-.filter-dropdown-trigger svg {
-  width: 18px;
-  height: 18px;
-}
-
-.filter-count-badge {
-  display: none;
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  background: var(--color-primary);
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 600;
-  border-radius: var(--portal-radius-md);
-  line-height: 16px;
-  text-align: center;
-  z-index: 1;
-}
-
-.filter-count-badge.visible {
-  display: inline-block;
-}
-
-/* Filter dropdown menu */
-.filter-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  z-index: 1000;
-  min-width: 240px;
-  padding: 1rem 0.75rem 0.75rem 0.75rem;
-  background: var(--portal-bg-dark);
-  border: var(--portal-border);
-  border-radius: var(--portal-radius-md);
-  box-shadow: var(--shadow-dropdown-xl);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-8px);
-  transition: opacity var(--duration-fast) ease, visibility var(--duration-fast) ease, transform var(--duration-fast) ease;
-}
-
-.filter-dropdown-wrapper.open .filter-dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-/* Filter sections */
-.filter-section {
-  margin-bottom: 0.75rem;
-}
-
-.filter-section:last-of-type {
-  margin-bottom: 0.5rem;
-}
-
-.filter-section-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--portal-text-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-}
-
-/* Checkbox group */
-.filter-checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.filter-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.5rem;
-  margin: 0 -0.5rem;
-  border-radius: var(--portal-radius-xs);
-  cursor: pointer;
-  transition: background-color var(--transition-faster);
-}
-
-.filter-checkbox:hover {
-  background: var(--portal-bg-medium);
-}
-
-/* .portal-checkbox base styles (16px, system size) live in portal-forms.css */
-.filter-checkbox .portal-checkbox {
-  flex-shrink: 0;
-}
-
-.filter-checkbox span {
-  color: var(--portal-text-light);
-  font-size: var(--table-mobile-identity-secondary-size);
-}
-
-/* Date range inputs - stacked vertically */
-.filter-date-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filter-date-input {
-  width: 100%;
-  padding: 0.35rem 0.5rem;
-  background: var(--portal-bg-medium);
-  border: var(--portal-border);
-  border-radius: var(--portal-radius-xs);
-  color: var(--portal-text-light);
-  font-size: var(--table-mobile-identity-tertiary-size);
-  height: 32px;
-}
-
-.filter-date-input:focus {
-  outline: none;
-  border-color: var(--portal-accent);
-}
-
-.filter-date-separator {
-  display: none;
-}
-
-/* Clear button */
-.filter-clear-btn {
-  width: 100%;
-  padding: 0.5rem 1rem;
-  background: transparent;
-  border: var(--portal-border);
-  border-radius: var(--portal-radius-xs);
-  color: var(--portal-text-muted);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: color var(--duration-fast) ease, border-color var(--duration-fast) ease;
-}
-
-.filter-clear-btn:hover {
-  color: var(--portal-accent);
-  border-color: var(--portal-accent);
-}
-
-/* Sortable table headers - unified styles in shared/portal-tables.css */
-
-/* ===============================================
-   TABLE FILTER MOBILE RESPONSIVE
-   =============================================== */
-
-@media (--mobile) {
-  .table-filter-controls {
-    flex-wrap: wrap;
-    width: 100%;
-    margin-top: 0.75rem;
-  }
-
-  .filter-search {
-    flex: 1;
-    min-width: 150px;
-  }
-
-  .filter-search-input {
-    width: 100%;
-  }
-
-  .filter-dropdown-menu {
-    left: 0;
-    right: 0;
-    min-width: unset;
-  }
-
-  .filter-date-group {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-date-separator {
-    text-align: center;
-  }
-}
-
-/* ================================================
-   TABLE RESPONSIVE BEHAVIOR - COMMENTED OUT
-   All tables should behave the same first.
-   Re-enable when ready to add responsive adjustments.
-   All tables should behave the same first.
-   Re-enable when ready to add table-specific responsive behavior.
-   Lines 2362-2614 moved to: docs/archive/table-responsive-rules.css
-   ================================================ */
+/* Table filter controls - see admin/table-filters.css for all styles */
 
 @media (--small-mobile) {
-  /* Table header - grid layout: row 1 = title + icons, row 2 = badge */
-  .admin-table-header {
+  .admin-table-header,
+  .data-table-header {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto;
@@ -2254,24 +1375,25 @@ body.modal-open .dashboard-content {
     padding: 0.5rem 0.75rem;
   }
 
-  /* Title in first column */
-  .admin-table-header h3 {
+  .admin-table-header h3,
+  .data-table-header h3 {
     grid-column: 1;
     grid-row: 1;
-    font-size: 1.125rem;
+    font-size: var(--font-size-lg);
   }
 
-  /* Show short mobile titles, hide full titles */
-  .admin-table-header h3 .title-full {
+  .admin-table-header h3 .title-full,
+  .data-table-header h3 .title-full {
     display: none;
   }
 
-  .admin-table-header h3 .title-mobile {
+  .admin-table-header h3 .title-mobile,
+  .data-table-header h3 .title-mobile {
     display: inline;
   }
 
-  /* Actions in second column */
-  .admin-table-header .admin-table-actions {
+  .admin-table-header .admin-table-actions,
+  .data-table-header .data-table-actions {
     grid-column: 2;
     grid-row: 1;
     display: flex;
@@ -2280,41 +1402,24 @@ body.modal-open .dashboard-content {
     gap: 0.5rem;
   }
 
-  /* Badge hidden on mobile too */
-  .admin-table-header > .status-badge {
+  .admin-table-header > .status-badge,
+  .data-table-header > .status-badge {
     display: none;
   }
 
-  /* All direct children of table actions must align vertically */
-  .admin-table-actions > * {
+  .admin-table-actions > *,
+  .data-table-actions > * {
     align-self: center;
   }
 
+  /* Filter controls responsive - see admin/table-filters.css */
 
-  /* Wrapper containers must have consistent height */
-  /* Override width: 100% from 768px media query */
-  .table-filter-controls,
-  .filter-search-wrapper,
-  .filter-dropdown-wrapper {
-    display: flex;
-    align-items: center;
-    height: 28px;
-    width: auto;
-    margin: 0;
-    padding: 0;
-  }
-
-  .table-filter-controls {
-    gap: 0.5rem;
-    flex-wrap: nowrap;
-    margin-top: 0;
-  }
-
-  /* UNIFIED icon button styling for ALL buttons in table header */
-  /* Override all sizing from base rules to ensure consistency */
   .admin-table-actions .icon-btn,
   .admin-table-actions > .icon-btn,
-  .admin-table-actions button.icon-btn {
+  .admin-table-actions button.icon-btn,
+  .data-table-actions .icon-btn,
+  .data-table-actions > .icon-btn,
+  .data-table-actions button.icon-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2336,27 +1441,19 @@ body.modal-open .dashboard-content {
     vertical-align: middle;
   }
 
-  /* ALL icon SVGs same size on mobile */
-  .admin-table-actions .icon-btn svg {
+  .admin-table-actions .icon-btn svg,
+  .data-table-actions .icon-btn svg {
     width: 16px;
     height: 16px;
     display: block;
     margin: 0;
   }
-
-  /* NOTE: Mobile table card layout styles are in the first @media (--small-mobile) block.
-     The card layout transforms rows into stacked blocks, so nth-child column
-     hiding and horizontal scroll indicators don't apply - all cells are visible
-     as block elements within each card. */
 }
 
-/* Overview styles are in src/styles/admin/overview-layout.css */
-
 /* ============================================
- * LAYOUT OVERHAUL - Unified styling from layout-overhaul.css
+ * LAYOUT OVERHAUL
  * ============================================ */
 
-/* Show global header on admin */
 [data-page="admin"] .portal-body {
   margin-top: var(--portal-header-height, 56px);
   height: calc(100vh - var(--portal-header-height, 56px));
@@ -2369,83 +1466,80 @@ body.modal-open .dashboard-content {
   background: transparent;
 }
 
-/* Page title font - admin uses system font */
 [data-page="admin"] .portal-page-header h1,
 [data-page="admin"] #admin-page-title {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 1.25rem;
-  letter-spacing: 0.01em;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-xl);
+  letter-spacing: var(--letter-spacing-tight, 0.01em);
 }
 
-/* Remove all divider lines globally */
 [data-page="admin"] .sidebar-section {
-  border: none !important;
+  border: none;
 }
 
 [data-page="admin"] .sidebar-section + .sidebar-section {
-  border-top: none !important;
+  border-top: none;
 }
 
 [data-page="admin"] .sidebar-section-label {
-  border: none !important;
+  border: none;
 }
 
 [data-page="admin"] .sidebar-nav {
-  border: none !important;
+  border: none;
 }
 
 [data-page="admin"] .sidebar-footer {
-  border-top: none !important;
+  border-top: none;
 }
 
-/* Table header separator */
-[data-page="admin"] .admin-table-header {
+[data-page="admin"] .admin-table-header,
+[data-page="admin"] .data-table-header {
   border-bottom: var(--portal-border);
 }
 
-/* Card and panel borders - consistent styling */
 [data-page="admin"] .admin-table-card,
+[data-page="admin"] .data-table-card,
 [data-page="admin"] .stat-card,
 [data-page="admin"] .tw-stat-card,
 [data-page="admin"] .panel {
   border: var(--portal-border);
 }
 
-/* Table header/cell borders defined in shared/portal-tables.css */
+/* Table transparency - using @layer utilities for proper cascade */
+@layer utilities {
+  [data-page="admin"] .admin-table-container,
+  [data-page="admin"] .data-table-container,
+  [data-page="admin"] .admin-table-scroll-wrapper,
+  [data-page="admin"] .data-table-scroll-wrapper,
+  [data-page="admin"] .data-table,
+  [data-page="admin"] .data-table thead,
+  [data-page="admin"] .data-table tbody,
+  [data-page="admin"] .data-table thead tr,
+  [data-page="admin"] .data-table tbody tr,
+  [data-page="admin"] .data-table thead th,
+  [data-page="admin"] .data-table tbody td {
+    background: transparent;
+  }
 
-/* Transparent table inner elements - admin theme */
-[data-page="admin"] .admin-table-container,
-[data-page="admin"] .admin-table-scroll-wrapper,
-[data-page="admin"] .data-table,
-[data-page="admin"] .data-table thead,
-[data-page="admin"] .data-table tbody,
-[data-page="admin"] .data-table thead tr,
-[data-page="admin"] .data-table tbody tr,
-[data-page="admin"] .data-table thead th,
-[data-page="admin"] .data-table tbody td {
-  background: transparent !important;
+  [data-page="admin"] .table-pagination,
+  [data-page="admin"] .pagination,
+  [data-page="admin"] .admin-table-pagination,
+  [data-page="admin"] .pagination-inner {
+    background: transparent;
+  }
 }
 
-/* Pagination - transparent */
-[data-page="admin"] .table-pagination,
-[data-page="admin"] .pagination,
-[data-page="admin"] .admin-table-pagination,
-[data-page="admin"] .pagination-inner {
-  background: transparent !important;
+/* Modal z-index - using @layer utilities for proper cascade */
+@layer utilities {
+  [data-page="admin"] .details-panel,
+  [data-page="admin"] .admin-modal-overlay,
+  [data-page="admin"] #lead-details-panel,
+  [data-page="admin"] #contact-details-panel {
+    z-index: 9200;
+  }
+
+  [data-page="admin"] .details-overlay {
+    z-index: 9150;
+  }
 }
-
-/* Row hover moved to shared/portal-tables.css */
-
-/* Panels z-index above header */
-[data-page="admin"] .details-panel,
-[data-page="admin"] .admin-modal-overlay,
-[data-page="admin"] #lead-details-panel,
-[data-page="admin"] #contact-details-panel {
-  z-index: 9200 !important;
-}
-
-[data-page="admin"] .details-overlay {
-  z-index: 9150 !important;
-}
-
-/* h3 styling moved to shared/portal-cards.css for both admin and client-portal */

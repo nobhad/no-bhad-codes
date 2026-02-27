@@ -367,7 +367,7 @@ li {
   line-height: 0.9;
   position: relative;
   font-size: var(--menu-heading-size);
-  letter-spacing: 0.10em;
+  letter-spacing: 0.1em;
   display: inline-block;
   transform: translateY(-100%);
   transition: transform 0.4s var(--cubic-menu);
@@ -511,7 +511,7 @@ html[data-theme="dark"] .coming-soon-banner {
 /* Underline hover effect for text links */
 @media (hover: hover) {
   .text-link::after {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     bottom: 0;
@@ -779,14 +779,7 @@ html[data-theme="dark"] .coming-soon-banner {
    21. UTILITY CLASSES
    ===================================================== */
 
-/* Animation utilities */
-.no-transition {
-  transition: none !important;
-}
-
-.force-transition {
-  transition: all 0.3s var(--cubic-default) !important;
-}
+/* Animation utilities - moved to @layer utilities for cascade priority */
 
 /* =====================================================
    22. GSAP COMPATIBILITY
@@ -845,4 +838,3 @@ html[data-theme="dark"] .bg-panel.first {
 html[data-theme="dark"] .bg-panel.second {
   background-color: var(--color-neutral-100);
 }
-

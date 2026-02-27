@@ -278,7 +278,7 @@ body[data-page="client-portal"] {
 
 /* Page title in unified global header - client portal uses Sans-serif */
 [data-page="client-portal"] .portal-global-header .header-page-title {
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: clamp(1rem, 3vw, 1.25rem);
   color: var(--portal-text-light);
   margin: 0;
@@ -316,7 +316,9 @@ body[data-page="client-portal"] {
   border: none;
   cursor: pointer;
   color: var(--portal-text-secondary);
-  transition: color var(--transition-fast), background var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
   flex-shrink: 0;
 }
 
@@ -377,7 +379,7 @@ body[data-page="client-portal"] {
 
 .page-title h1,
 .page-title h2 {
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: clamp(1.5rem, 4vw, 2rem);
   color: var(--portal-text-light);
   margin: 0;
@@ -387,7 +389,7 @@ body[data-page="client-portal"] {
 /* Legacy: page-header with h2 only (when not primary row) */
 .page-header:not(.primary-header-row) h1,
 .page-header:not(.primary-header-row) h2 {
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: clamp(1.5rem, 4vw, 2rem);
   color: var(--portal-text-light);
   margin: 0;

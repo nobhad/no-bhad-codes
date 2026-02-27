@@ -1,10 +1,16 @@
-/* =====================================================
-   SHARED PORTAL CARDS
-   @file src/styles/shared/portal-cards.css
-   Single source of truth for admin and client portal cards
-
-   Uses .portal class on dashboard-container for scoping.
-   ===================================================== */
+/**
+ * ===============================================
+ * SHARED PORTAL CARDS
+ * ===============================================
+ * @file src/styles/shared/portal-cards.css
+ *
+ * Single source of truth for admin and client portal cards.
+ * Uses .portal class on dashboard-container for scoping.
+ *
+ * Related files:
+ * - portal-stat-cards.css - Stat/KPI card system
+ * - portal-dashboard-widgets.css - Dashboard widgets (activity, tasks)
+ */
 
 /* =====================================================
    UNIFIED H3 HEADING STYLES
@@ -321,161 +327,7 @@
   }
 }
 
-/* =====================================================
-   STAT CARD - UNIFIED
-   Clean, minimal stat cards inspired by Linear.
-   No accent bars, no visual noise - just clear hierarchy.
-   ALL stat cards use this pattern for consistency.
-   ===================================================== */
-.portal :is(.stat-card, .tw-stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card) {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-1);
-  padding: var(--portal-card-padding);
-  background: transparent;
-  border: var(--portal-border);
-  transition: border-color 0.15s;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Remove gradient overlay - brutalist flat design */
-.portal :is(.stat-card, .tw-stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card)::after {
-  display: none;
-}
-
-/* Remove any accent lines - keep it clean */
-.portal :is(.stat-card, .tw-stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card)::before {
-  display: none;
-}
-
-/* Hover state for clickable stat cards */
-.portal :is(.stat-card, .tw-stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card):hover {
-  border-color: var(--portal-border-color);
-}
-
-/* =====================================================
-   CONTENT CARD - UNIFIED
-   Bordered cards for templates, previews, selections.
-   Hover effect with border color change.
-   ===================================================== */
-.portal :is(.content-card, .template-card, .preview-card) {
-  background: transparent;
-  border: var(--portal-border);
-  padding: var(--space-2);
-  transition: border-color var(--transition-fast);
-}
-
-.portal :is(.content-card, .template-card, .preview-card):hover {
-  border-color: var(--color-primary);
-}
-
-/* Stat number - the big value (unified)
-   Single source of truth for all stat/kpi value styling.
-   Must be smaller than page title to maintain hierarchy.
-   Aliases: .stat-value, .stat-card-value, .kpi-card-value, .kpi-value */
-.portal :is(.stat-number, .stat-value, .stat-card-value, .kpi-card-value, .kpi-value) {
-  display: block;
-  font-family: var(--font-family-mono, monospace);
-  font-size: var(--font-size-xl, 1.25rem);
-  font-weight: 500;
-  line-height: 1;
-  color: var(--portal-text-light);
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-/* Layout-only styling for stat labels (typography from unified label system) */
-.portal :is(.stat-label, .stat-card .field-label, .tw-stat-card .field-label) {
-  display: block;
-  line-height: 1.3;
-  margin: 0;
-}
-
-/* Stat icon */
-.portal .stat-card-icon,
-.portal :is(.stat-card, .tw-stat-card) .stat-icon,
-.portal :is(.stat-card, .tw-stat-card) svg:not(.btn-icon) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  color: var(--portal-text-muted);
-  opacity: 0.5;
-  flex-shrink: 0;
-}
-
-/* Clickable stat cards */
-.portal .stat-card-clickable,
-.portal a:is(.stat-card, .tw-stat-card) {
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.portal .stat-card-clickable:hover,
-.portal a:is(.stat-card, .tw-stat-card):hover {
-  border-color: var(--portal-border-color);
-}
-
-.portal .stat-card-clickable:hover .stat-number {
-  color: var(--color-primary);
-}
-
-/* Active/selected state - subtle primary accent */
-.portal .stat-card-clickable.active,
-.portal :is(.stat-card, .tw-stat-card).active {
-  border-color: var(--color-primary);
-}
-
-.portal .stat-card-clickable.active .stat-number,
-.portal :is(.stat-card, .tw-stat-card).active .stat-number {
-  color: var(--color-primary);
-}
-
-/* Stat card secondary text */
-.portal :is(.stat-card, .tw-stat-card) :is(.stat-secondary, .stat-change, .stat-meta) {
-  font-size: 0.7rem;
-  color: var(--portal-text-muted);
-  letter-spacing: 0.02em;
-  margin: 0;
-  line-height: 1.3;
-}
-
-.portal :is(.stat-card, .tw-stat-card) .stat-change.positive {
-  color: var(--color-success);
-}
-
-.portal :is(.stat-card, .tw-stat-card) .stat-change.negative {
-  color: var(--color-danger);
-}
-
-/* Alert state for stat values (overdue, blocked, etc.) */
-.portal .stat-value-alert,
-.portal .stat-card--alert :is(.stat-number, .stat-value, .stat-card-value),
-.portal .stat-card--alert.has-items :is(.stat-number, .stat-value, .stat-card-value) {
-  color: var(--status-cancelled);
-}
-
-/* Warning state for stat values */
-.portal .stat-value-warning,
-.portal :is(.stat-card--warning, .tasks-stat-card--alert) :is(.stat-number, .stat-value, .stat-card-value),
-.portal :is(.stat-card--warning, .tasks-stat-card--alert).has-items :is(.stat-number, .stat-value, .stat-card-value) {
-  color: var(--color-warning-500);
-}
-
-/* Success state for stat values */
-.portal .stat-value-success,
-.portal :is(.stat-card--success, .stat-card-success) :is(.stat-number, .stat-value, .stat-card-value) {
-  color: var(--status-completed);
-}
-
-/* Primary color for KPI values (analytics, dashboards) */
-.portal .kpi-card :is(.kpi-card-value, .kpi-value),
-.portal .stat-value-primary {
-  color: var(--color-primary);
-}
+/* Stat card styles: see portal-stat-cards.css */
 
 /* =====================================================
    OVERVIEW CARD
@@ -497,7 +349,13 @@
    CONSISTENT CARD STYLING
    All main content sections use identical flat card styling
    ===================================================== */
-.portal :is(.recent-activity, .project-progress-section, .milestones-section, .pending-approvals-section) {
+.portal
+  :is(
+    .recent-activity,
+    .project-progress-section,
+    .milestones-section,
+    .pending-approvals-section
+  ) {
   background: transparent;
   border: var(--portal-border);
   padding: var(--portal-card-padding);
@@ -506,329 +364,19 @@
   transition: border-color 0.15s;
 }
 
-.portal :is(.recent-activity, .project-progress-section, .milestones-section, .pending-approvals-section, .analytics-overview) h3 {
+.portal
+  :is(
+    .recent-activity,
+    .project-progress-section,
+    .milestones-section,
+    .pending-approvals-section,
+    .analytics-overview
+  )
+  h3 {
   margin: 0 0 var(--space-2) 0;
 }
 
-/* Activity item with icon, content, and time */
-.portal .activity-item {
-  display: flex;
-  align-items: center;
-}
-
-.portal .activity-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--portal-text-muted);
-}
-
-.portal .activity-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.portal .activity-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.portal .activity-title {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--portal-text-light);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.portal .activity-client {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-}
-
-.portal :is(.activity-time, .activity-date) {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
-  white-space: nowrap;
-}
-
-.portal .activity-item.empty {
-  justify-content: center;
-  color: var(--portal-text-muted);
-  font-style: italic;
-}
-
-/* =====================================================
-   UPCOMING TASKS WIDGET
-   ===================================================== */
-.portal .upcoming-tasks {
-  background: transparent;
-  border: var(--portal-border);
-  padding: var(--space-3);
-}
-
-.portal .upcoming-tasks .section-header-inline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
-
-.portal .upcoming-tasks .section-header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* Dashboard Kanban View */
-.portal .dashboard-tasks-kanban {
-  min-height: 200px;
-}
-
-.portal .dashboard-tasks-kanban .kanban-board {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap;
-  gap: var(--space-2);
-  width: 100%;
-}
-
-.portal .dashboard-tasks-kanban .kanban-column {
-  min-width: 180px;
-  flex: 1 1 0 !important;
-}
-
-.portal .dashboard-tasks-kanban .kanban-column-header {
-  padding: var(--space-1) var(--space-2);
-  font-size: 0.75rem;
-}
-
-.portal .dashboard-tasks-kanban .kanban-card {
-  padding: var(--space-2);
-}
-
-.portal .dashboard-tasks-kanban .task-card-header {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: var(--space-1);
-}
-
-.portal .dashboard-tasks-kanban .task-card-title {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--portal-text-light);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.portal .dashboard-tasks-kanban .task-card-project {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-}
-
-.portal .dashboard-tasks-kanban .task-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  flex-wrap: wrap;
-}
-
-.portal .dashboard-tasks-kanban .task-priority {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  padding: var(--space-0-5) var(--space-1);
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--portal-text-muted);
-}
-
-.portal .dashboard-tasks-kanban .task-priority.task-priority-urgent {
-  background: transparent;
-  border-color: var(--status-cancelled);
-  color: var(--status-cancelled);
-}
-
-.portal .dashboard-tasks-kanban .task-priority.task-priority-high {
-  background: transparent;
-  border-color: var(--status-on-hold);
-  color: var(--status-on-hold);
-}
-
-.portal .dashboard-tasks-kanban .task-priority.task-priority-medium {
-  background: transparent;
-  border-color: var(--app-color-primary);
-  color: var(--app-color-primary);
-}
-
-.portal .dashboard-tasks-kanban .task-due-date {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap-xs);
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-}
-
-.portal .dashboard-tasks-kanban .task-due-date.overdue {
-  color: var(--status-cancelled);
-}
-
-.portal .upcoming-tasks-list .task-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  background: transparent;
-  border: var(--portal-border);
-  margin-bottom: var(--space-0-5);
-  cursor: pointer;
-  transition: border-color var(--transition-mouse) ease;
-}
-
-.portal .upcoming-tasks-list .task-item:hover {
-  border-color: var(--portal-border-color);
-}
-
-.portal .upcoming-tasks-list .task-item:last-child {
-  margin-bottom: 0;
-}
-
-.portal .upcoming-tasks-list .task-item.empty {
-  justify-content: center;
-  color: var(--portal-text-muted);
-  font-style: italic;
-  cursor: default;
-}
-
-.portal .upcoming-tasks-list .task-item.empty:hover {
-  border-color: var(--portal-border-color);
-}
-
-.portal .task-item-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-}
-
-.portal .task-item .task-title {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.portal .task-item .task-project {
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
-}
-
-.portal .task-item-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-shrink: 0;
-}
-
-.portal .task-item .task-due {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-  white-space: nowrap;
-}
-
-.portal .task-item.task-overdue .task-due {
-  color: var(--status-cancelled);
-}
-
-/* =====================================================
-   TASK PRIORITY BADGES - UNIFIED
-   Single source of truth for .task-priority and .task-priority-badge
-   ===================================================== */
-.portal :is(.task-priority, .task-priority-badge) {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: var(--space-0-5) var(--space-1);
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--portal-text-muted);
-}
-
-.portal :is(.task-priority, .task-priority-badge).task-priority-urgent {
-  background: transparent;
-  border-color: var(--status-cancelled);
-  color: var(--status-cancelled);
-}
-
-.portal :is(.task-priority, .task-priority-badge).task-priority-high {
-  background: transparent;
-  border-color: var(--status-on-hold);
-  color: var(--status-on-hold);
-}
-
-.portal :is(.task-priority, .task-priority-badge).task-priority-medium {
-  background: transparent;
-  border-color: var(--app-color-primary);
-  color: var(--app-color-primary);
-}
-
-.portal :is(.task-priority, .task-priority-badge).task-priority-low {
-  background: transparent;
-  border-color: var(--portal-text-secondary);
-  color: var(--portal-text-secondary);
-}
-
-.portal .upcoming-tasks-list .loading-row {
-  padding: var(--space-2) var(--space-3);
-  color: var(--portal-text-muted);
-  font-style: italic;
-}
-
-/* Responsive for upcoming tasks */
-@media (--small-mobile) {
-  .portal .upcoming-tasks {
-    padding: 0.75rem;
-  }
-
-  .portal .upcoming-tasks .section-header-inline {
-    flex-wrap: wrap;
-    gap: var(--space-1);
-  }
-
-  .portal .upcoming-tasks .section-header-actions {
-    gap: var(--space-1);
-  }
-
-  .portal .upcoming-tasks-list .task-item {
-    flex-wrap: wrap;
-    padding: 0.5rem 0.75rem;
-  }
-
-  .portal .task-item-meta {
-    width: 100%;
-    margin-top: var(--space-1);
-    justify-content: flex-end;
-  }
-}
+/* Activity and task widgets: see portal-dashboard-widgets.css */
 
 /* =====================================================
    PORTAL PROJECT CARD
@@ -851,29 +399,32 @@
    CARD SHADOWS - Consolidated
    Minimal shadows for depth; cards use flat design
    ===================================================== */
-.portal :is(
-  .overview-card,
-  .recent-activity,
-  .upcoming-tasks,
-  .messages-container,
-  .invoices-list,
-  .settings-section,
-  .project-progress-section,
-  .pending-approvals-section
-) {
+.portal
+  :is(
+    .overview-card,
+    .recent-activity,
+    .upcoming-tasks,
+    .messages-container,
+    .invoices-list,
+    .settings-section,
+    .project-progress-section,
+    .pending-approvals-section
+  ) {
   box-shadow: none;
 }
 
 /* No shadows on child divs inside main containers */
-.portal :is(
-  .overview-card,
-  .recent-activity,
-  .portal-project-card,
-  .messages-container,
-  .summary-card,
-  .invoices-list,
-  .settings-section
-) > div {
+.portal
+  :is(
+    .overview-card,
+    .recent-activity,
+    .portal-project-card,
+    .messages-container,
+    .summary-card,
+    .invoices-list,
+    .settings-section
+  )
+  > div {
   box-shadow: none;
 }
 
@@ -913,7 +464,9 @@
 }
 
 /* When a container is the only child, make it take full width */
-.portal :is(.card-header-with-action, .section-header-with-actions) > :is(.view-toggle-container, .header-actions-container) {
+.portal
+  :is(.card-header-with-action, .section-header-with-actions)
+  > :is(.view-toggle-container, .header-actions-container) {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -925,7 +478,9 @@
    MILESTONE COMPLETED STATE
    Single source of truth for completed milestone styling
    ===================================================== */
-.portal :is(.milestone-item, .milestone-task-item).completed :is(.milestone-title, .milestone-task-title) {
+.portal
+  :is(.milestone-item, .milestone-task-item).completed
+  :is(.milestone-title, .milestone-task-title) {
   text-decoration: line-through;
   color: var(--portal-text-secondary);
   opacity: 0.7;
@@ -935,7 +490,8 @@
    COMMON LIST ITEM PATTERN
    Shared styling for all list items (reports, alerts, data, etc.)
    ===================================================== */
-.portal :is(.list-item, .data-item, .report-item, .alert-item, .bundle-item, .history-request-item) {
+.portal
+  :is(.list-item, .data-item, .report-item, .alert-item, .bundle-item, .history-request-item) {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -947,7 +503,15 @@
   transition: border-color 0.15s;
 }
 
-.portal :is(.list-item, .data-item, .report-item, .alert-item, .bundle-item, .history-request-item):hover {
+.portal
+  :is(
+    .list-item,
+    .data-item,
+    .report-item,
+    .alert-item,
+    .bundle-item,
+    .history-request-item
+  ):hover {
   border-color: var(--portal-border-color);
 }
 
@@ -1018,31 +582,33 @@
    ===================================================== */
 @media (--mobile) {
   /* Tighter padding for main container cards on mobile */
-  .portal :is(
-    .portal-project-card,
-    .admin-table-card,
-    .overview-card,
-    .recent-activity,
-    .upcoming-tasks,
-    .summary-card,
-    .invoices-list,
-    .messages-container,
-    .settings-section,
-    .project-progress-section,
-    .pending-approvals-section
-  ) {
+  .portal
+    :is(
+      .portal-project-card,
+      .admin-table-card,
+      .overview-card,
+      .recent-activity,
+      .upcoming-tasks,
+      .summary-card,
+      .invoices-list,
+      .messages-container,
+      .settings-section,
+      .project-progress-section,
+      .pending-approvals-section
+    ) {
     padding: var(--space-2);
   }
 
   /* Tighter gap on grids for mobile */
-  .portal :is(
-    .quick-stats,
-    .attention-grid,
-    .card-grid-4,
-    .kpi-cards-row,
-    .analytics-card-grid,
-    .vitals-grid
-  ) {
+  .portal
+    :is(
+      .quick-stats,
+      .attention-grid,
+      .card-grid-4,
+      .kpi-cards-row,
+      .analytics-card-grid,
+      .vitals-grid
+    ) {
     gap: var(--space-2);
   }
 
@@ -1051,165 +617,9 @@
   }
 }
 
-@media (--small-mobile) {
-  .portal :is(.stat-card, .tw-stat-card) {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 0.75rem;
-    gap: 0.5rem;
-  }
+/* Stat card and dashboard widget mobile styles: see respective files */
 
-  .portal :is(.stat-card, .tw-stat-card) :is(.stat-number, .stat-value, .stat-card-value) {
-    font-size: var(--font-size-lg);
-    margin: 0;
-  }
-
-  .portal :is(.stat-card, .tw-stat-card) .stat-label {
-    font-size: var(--font-size-xs);
-    text-align: right;
-    margin-top: 0;
-  }
-
-  .portal .recent-activity {
-    padding: 0.75rem;
-  }
-
-  .portal .activity-list li {
-    padding: 0.5rem 0.75rem;
-  }
-
-  /* Kanban board - enable horizontal scroll on very small screens */
-  .portal .dashboard-tasks-kanban {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .portal .dashboard-tasks-kanban .kanban-board {
-    min-width: max-content;
-  }
-
-  .portal .dashboard-tasks-kanban .kanban-column {
-    min-width: 140px;
-  }
-}
-
-/* =====================================================
-   DASHBOARD OVERVIEW CARD (wraps all dashboard sections)
-   ===================================================== */
-.portal .dashboard-overview-card {
-  padding: var(--space-6);
-  background: transparent;
-  border: var(--portal-border);
-}
-
-/* =====================================================
-   DASHBOARD SECTIONS
-   ===================================================== */
-.portal .dashboard-section {
-  margin-bottom: var(--space-3);
-}
-
-.portal .dashboard-section:last-child {
-  margin-bottom: 0;
-}
-
-.portal .dashboard-section-title {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: var(--portal-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0 0 var(--space-1-5) 0;
-}
-
-/* =====================================================
-   ATTENTION CARD
-   ===================================================== */
-.portal .attention-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  padding: var(--space-4);
-  min-height: 88px;
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--portal-text-light);
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color var(--transition-fast);
-  text-align: center;
-  box-shadow: none;
-}
-
-.portal .attention-card:hover {
-  border-color: var(--portal-border-color);
-}
-
-/* Attention icon container - no background, just colored icon */
-.portal .attention-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  background: none;
-}
-
-.portal .attention-icon-warning {
-  color: var(--portal-text-secondary);
-}
-
-.portal .attention-icon-info {
-  color: var(--portal-text-secondary);
-}
-
-.portal .attention-icon-danger {
-  color: var(--portal-text-secondary);
-}
-
-/* Attention content */
-.portal .attention-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.portal .attention-count {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--color-primary);
-  margin-bottom: var(--space-0-5);
-}
-
-/* Highlight attention cards with values > 0 */
-.portal .attention-card.has-items .attention-count {
-  color: var(--color-primary);
-}
-
-/* =====================================================
-   DASHBOARD MOBILE RESPONSIVE
-   ===================================================== */
-@media (--small-mobile) {
-  .portal .dashboard-overview-card {
-    padding: var(--space-4);
-  }
-
-  .portal .attention-card {
-    padding: var(--space-3);
-  }
-
-  .portal .attention-count {
-    font-size: 1.25rem;
-  }
-}
+/* Dashboard widgets: see portal-dashboard-widgets.css */
 
 /* =====================================================
    INVOICE SUMMARY GRID

@@ -175,7 +175,7 @@
 
 /* .design-element-item, .element-approval, .approval-btn styling in deliverables.css */
 .approval-btn.active {
-  color: white;
+  color: var(--color-white);
   background: var(--color-brand-primary);
   border-color: var(--color-brand-primary);
 }

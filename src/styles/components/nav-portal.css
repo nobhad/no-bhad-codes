@@ -34,7 +34,9 @@
   font-size: inherit;
   line-height: inherit;
   text-shadow: 0 2px 4px var(--color-shadow);
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .portal-button:hover {
@@ -110,7 +112,10 @@
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
-  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s ease;
   box-shadow: 0 10px 40px var(--color-shadow-2xl);
   isolation: isolate;
 }
@@ -181,7 +186,9 @@ html[data-theme="dark"] .portal-dropdown-header {
   text-transform: uppercase;
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .portal-dropdown .portal-toggle-btn:first-child {
@@ -282,7 +289,10 @@ html[data-theme="dark"] .portal-dropdown-header {
   font-size: 1rem;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
   opacity: 0.6;
 }
 
@@ -463,7 +473,9 @@ html[data-theme="dark"] .portal-dropdown-header {
   justify-content: center;
   cursor: pointer;
   color: var(--color-text-tertiary);
-  transition: color 0.2s ease, background 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
 }
 
 .intake-modal-close:hover {
@@ -552,4 +564,3 @@ html[data-theme="dark"] .portal-dropdown-header {
     height: 44px;
   }
 }
-

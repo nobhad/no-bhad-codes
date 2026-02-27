@@ -10,12 +10,24 @@
 /* =====================================================
    TABLE COLUMN WIDTHS
    ===================================================== */
-.col-request { min-width: 200px; }
-.col-client { width: 130px; }
-.col-priority { width: 100px; }
-.col-status { width: 100px; }
-.col-hours { width: 80px; }
-.col-due { width: 110px; }
+.col-request {
+  min-width: 200px;
+}
+.col-client {
+  width: 130px;
+}
+.col-priority {
+  width: 100px;
+}
+.col-status {
+  width: 100px;
+}
+.col-hours {
+  width: 80px;
+}
+.col-due {
+  width: 110px;
+}
 
 /* =====================================================
    AD HOC SPECIFIC COMPONENTS

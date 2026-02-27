@@ -91,7 +91,6 @@
   grid-template-columns: 1fr 1fr;
 }
 
-
 .form-help {
   font-size: 0.875rem;
   color: var(--portal-text-secondary);
@@ -175,7 +174,7 @@
 }
 
 .settings-header h1 {
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: 2rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-1) 0;
@@ -203,7 +202,7 @@
 
 /* Alternate Settings Section (with h2) */
 .settings-section h2 {
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: 1.4rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-3) 0;
@@ -235,7 +234,7 @@
 .contact-view-header h1,
 .billing-view-header h1,
 .notifications-view-header h1 {
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: 2rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-1) 0;
@@ -271,7 +270,7 @@
 .contact-view-section h2,
 .billing-view-section h2,
 .notifications-view-section h2 {
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: 1.4rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-3) 0;

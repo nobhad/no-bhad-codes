@@ -30,19 +30,21 @@
 }
 
 /* Global Tasks Kanban - ensure horizontal layout */
-#global-tasks-kanban-container .kanban-board,
-.tasks-main-container .kanban-board {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap;
-  width: 100%;
-}
+@layer utilities {
+  #global-tasks-kanban-container .kanban-board,
+  .tasks-main-container .kanban-board {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
 
-#global-tasks-kanban-container .kanban-column,
-.tasks-main-container .kanban-column {
-  flex: 1 1 0 !important;
-  min-width: 200px;
-  max-width: none;
+  #global-tasks-kanban-container .kanban-column,
+  .tasks-main-container .kanban-column {
+    flex: 1 1 0;
+    min-width: 200px;
+    max-width: none;
+  }
 }
 
 /* Tasks table styling within main container */
@@ -55,16 +57,18 @@
 }
 
 /* Only stack columns on mobile */
-@media (--mobile) {
-  #global-tasks-kanban-container .kanban-board,
-  .tasks-main-container .kanban-board {
-    flex-direction: column !important;
-  }
+@layer responsive {
+  @media (--mobile) {
+    #global-tasks-kanban-container .kanban-board,
+    .tasks-main-container .kanban-board {
+      flex-direction: column;
+    }
 
-  #global-tasks-kanban-container .kanban-column,
-  .tasks-main-container .kanban-column {
-    flex: 0 0 auto !important;
-    min-width: 100%;
+    #global-tasks-kanban-container .kanban-column,
+    .tasks-main-container .kanban-column {
+      flex: 0 0 auto;
+      min-width: 100%;
+    }
   }
 }
 
@@ -442,8 +446,8 @@
 }
 
 .time-entry-duration {
-  font-weight: 600;
-  font-family: monospace;
+  font-weight: inherit;
+  font-family: inherit;
 }
 
 .time-entry-billable {
@@ -613,8 +617,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  font-size: inherit;
+  color: inherit;
   margin-bottom: var(--space-2);
 }
 
@@ -624,24 +628,12 @@
   gap: var(--space-1);
 }
 
-.tasks-stats-bar .stat-value {
-  color: var(--portal-text-primary);
-}
-
-.tasks-stats-bar .stat-pending {
-  color: var(--status-pending);
-}
-
-.tasks-stats-bar .stat-active {
-  color: var(--status-active);
-}
-
-.tasks-stats-bar .stat-completed {
-  color: var(--status-completed);
-}
-
+.tasks-stats-bar .stat-value,
+.tasks-stats-bar .stat-pending,
+.tasks-stats-bar .stat-active,
+.tasks-stats-bar .stat-completed,
 .tasks-stats-bar .stat-overdue {
-  color: var(--status-cancelled);
+  color: inherit;
 }
 
 /* Filter search expanded */
@@ -684,14 +676,14 @@
   color: var(--portal-text-muted);
 }
 
-/* Date value styling */
+/* Date value styling - inherits from table */
 .date-value {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
+  font-size: inherit;
+  color: inherit;
 }
 
 .date-value.overdue {
-  color: var(--status-cancelled);
+  color: inherit;
 }
 
 /* Kanban loading skeleton */
@@ -703,8 +695,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Kanban empty state */

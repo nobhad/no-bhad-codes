@@ -233,7 +233,9 @@ body:has(.portal) {
   border-radius: var(--portal-radius-sm, 4px);
   cursor: pointer;
   color: var(--portal-text-secondary);
-  transition: color var(--transition-mouse) ease, background var(--transition-mouse) ease;
+  transition:
+    color var(--transition-mouse) ease,
+    background var(--transition-mouse) ease;
 }
 
 /* Override nav-base.css absolute positioning for portal header icons */
@@ -348,9 +350,12 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 [data-page="admin"][data-active-group="workflows"] .header-subtab-group[data-for-tab="workflows"],
 [data-page="client-portal"][data-active-group="work"] .header-subtab-group[data-for-tab="work"],
 [data-page="client-portal"][data-active-group="docs"] .header-subtab-group[data-for-tab="docs"],
-[data-page="client-portal"][data-active-group="support"] .header-subtab-group[data-for-tab="support"],
-[data-page="admin"][data-active-tab="project-detail"] .header-subtab-group[data-for-tab="project-detail"],
-[data-page="admin"][data-active-tab="client-detail"] .header-subtab-group[data-for-tab="client-detail"] {
+[data-page="client-portal"][data-active-group="support"]
+  .header-subtab-group[data-for-tab="support"],
+[data-page="admin"][data-active-tab="project-detail"]
+  .header-subtab-group[data-for-tab="project-detail"],
+[data-page="admin"][data-active-tab="client-detail"]
+  .header-subtab-group[data-for-tab="client-detail"] {
   display: flex;
   gap: var(--space-1);
   align-items: center;
@@ -366,7 +371,8 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 /* Show header controls based on active tab */
 [data-page="admin"][data-active-tab="tasks"] .header-controls[data-for-tab="tasks"],
 [data-page="admin"][data-active-tab="leads"] .header-controls[data-for-tab="leads"],
-[data-page="admin"][data-active-tab="knowledge-base"] .header-controls[data-for-tab="knowledge-base"] {
+[data-page="admin"][data-active-tab="knowledge-base"]
+  .header-controls[data-for-tab="knowledge-base"] {
   display: flex;
 }
 
@@ -383,7 +389,10 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Header subtab buttons - UNIVERSAL styling for ALL subtab types */
-.portal .portal-header-subtabs .header-subtab-group :is(> button, .portal-subtab, .view-toggle button) {
+.portal
+  .portal-header-subtabs
+  .header-subtab-group
+  :is(> button, .portal-subtab, .view-toggle button) {
   padding: var(--space-0-5) var(--space-1-5);
   background: transparent;
   border: none;
@@ -400,12 +409,18 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   letter-spacing: normal;
 }
 
-.portal .portal-header-subtabs .header-subtab-group :is(> button, .portal-subtab, .view-toggle button):hover {
+.portal
+  .portal-header-subtabs
+  .header-subtab-group
+  :is(> button, .portal-subtab, .view-toggle button):hover {
   background: transparent;
   color: var(--portal-text-primary);
 }
 
-.portal .portal-header-subtabs .header-subtab-group :is(> button, .portal-subtab, .view-toggle button).active {
+.portal
+  .portal-header-subtabs
+  .header-subtab-group
+  :is(> button, .portal-subtab, .view-toggle button).active {
   background: transparent;
   border-bottom: 2px solid var(--color-primary);
   color: var(--color-primary);
@@ -473,15 +488,28 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
    ===================================================== */
 
 /* UNIVERSAL SECTION GAP - applies to all flex-column and grid containers */
-.portal :is(
-  .tab-content.active, .portal-tab-panel.active,
-  .portal-subtab-content.active, .analytics-subtab-content.active,
-  .overview-linear, .overview-grid, .overview-col-main, .overview-col-aside,
-  .overview-stats-strip, .portal-view-content, #portal-view-content,
-  .content-cards, .analytics-dashboard, .analytics-breakdown,
-  .workflows-content, .admin-table-card + .admin-table-card,
-  [class*="-grid"], [class*="-stack"], [class*="-layout"]
-) {
+.portal
+  :is(
+    .tab-content.active,
+    .portal-tab-panel.active,
+    .portal-subtab-content.active,
+    .analytics-subtab-content.active,
+    .overview-linear,
+    .overview-grid,
+    .overview-col-main,
+    .overview-col-aside,
+    .overview-stats-strip,
+    .portal-view-content,
+    #portal-view-content,
+    .content-cards,
+    .analytics-dashboard,
+    .analytics-breakdown,
+    .workflows-content,
+    .admin-table-card + .admin-table-card,
+    [class*="-grid"],
+    [class*="-stack"],
+    [class*="-layout"]
+  ) {
   gap: var(--portal-section-gap);
 }
 
@@ -554,7 +582,10 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
     flex-wrap: wrap;
   }
 
-  .portal .portal-header-subtabs .header-subtab-group :is(> button, .portal-subtab, .view-toggle button) {
+  .portal
+    .portal-header-subtabs
+    .header-subtab-group
+    :is(> button, .portal-subtab, .view-toggle button) {
     font-size: var(--font-size-xs);
     padding: var(--space-0-5) var(--space-1-5);
   }
@@ -642,7 +673,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   color: var(--portal-text-secondary);
   cursor: pointer;
   white-space: nowrap;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .portal :is(.page-header-tabs, .tab-nav) .tab-btn:hover {
@@ -658,7 +691,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
    PAGE HEADER ACTIONS
    Action buttons in page headers
    ===================================================== */
-.portal :is(.page-header-actions, .admin-table-actions) {
+.portal :is(.page-header-actions, .admin-table-actions, .data-table-actions) {
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -701,7 +734,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 /* Sidebar width transition - smooth collapse */
 .portal .sidebar {
-  transition: width var(--transition-medium), min-width var(--transition-medium);
+  transition:
+    width var(--transition-medium),
+    min-width var(--transition-medium);
 }
 
 .portal .sidebar-content {
@@ -724,7 +759,10 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   border: none;
   border-radius: var(--portal-radius-sm);
   cursor: pointer;
-  transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .portal .sidebar-nav .sidebar-toggle-btn:hover {
@@ -784,7 +822,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   text-transform: none;
   line-height: 1;
   flex-shrink: 0;
-  transition: opacity var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    border-color var(--transition-fast);
   opacity: 0.5;
 }
 
@@ -843,7 +883,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   pointer-events: none;
   z-index: var(--z-nav, 100);
   box-shadow: var(--shadow-elevated-sm);
-  transition: opacity var(--transition-faster), visibility var(--transition-faster);
+  transition:
+    opacity var(--transition-faster),
+    visibility var(--transition-faster);
 }
 
 .portal .sidebar.collapsed .sidebar-btn:hover::after {
@@ -866,7 +908,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 .portal .sidebar-buttons .btn.active::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 20%;
@@ -916,7 +958,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 .portal .sidebar-collapsed-logo::after {
-  content: 'NO BHAD CODES';
+  content: "NO BHAD CODES";
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 1.25rem;
   font-weight: 400;
@@ -1065,7 +1107,8 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   word-break: break-word;
   overflow-wrap: anywhere;
   white-space: normal;

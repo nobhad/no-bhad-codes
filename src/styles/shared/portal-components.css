@@ -321,7 +321,7 @@
 }
 
 .timeline-events::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 7px;
   top: 0;
@@ -571,7 +571,15 @@
 }
 
 /* Specific list containers with tighter gap-1 */
-.portal :is(.help-accordion, .help-featured-list, .help-results-list, .notes-list, .tasks-list, .activity-list) {
+.portal
+  :is(
+    .help-accordion,
+    .help-featured-list,
+    .help-results-list,
+    .notes-list,
+    .tasks-list,
+    .activity-list
+  ) {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -585,7 +593,15 @@
 }
 
 /* Section containers: flex-column gap-1-5 */
-.portal :is(.signature-details, .signature-info, .lead-tab-section, .time-entry-form, .contract-tab-content, .checkbox-group) {
+.portal
+  :is(
+    .signature-details,
+    .signature-info,
+    .lead-tab-section,
+    .time-entry-form,
+    .contract-tab-content,
+    .checkbox-group
+  ) {
   display: flex;
   flex-direction: column;
   gap: var(--space-1-5);
@@ -625,7 +641,18 @@
 }
 
 /* Universal list reset for portal contexts */
-.portal :is([class$="-list"], .activity-list, .tasks-list, .notes-list, .files-list, .invoices-list, .milestones-list, .messages-list, .upcoming-tasks-list) {
+.portal
+  :is(
+    [class$="-list"],
+    .activity-list,
+    .tasks-list,
+    .notes-list,
+    .files-list,
+    .invoices-list,
+    .milestones-list,
+    .messages-list,
+    .upcoming-tasks-list
+  ) {
   list-style: none;
 }
 
@@ -642,12 +669,16 @@
 }
 
 /* Clickable list items */
-.portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li:is(.clickable, .clickable-activity) {
+.portal
+  :is(.activity-list, .notes-list, .files-list, .tasks-list)
+  > li:is(.clickable, .clickable-activity) {
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 
-.portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li:is(.clickable, .clickable-activity):hover {
+.portal
+  :is(.activity-list, .notes-list, .files-list, .tasks-list)
+  > li:is(.clickable, .clickable-activity):hover {
   background: var(--portal-bg-light);
 }
 
@@ -709,58 +740,126 @@
    BORDER RADIUS UTILITIES
    ===================================================== */
 
-.rounded-sm { border-radius: 0; }
-.rounded-md { border-radius: 0; }
-.rounded-lg { border-radius: 0; }
-.rounded-full { border-radius: 9999px; }
+.rounded-sm {
+  border-radius: 0;
+}
+.rounded-md {
+  border-radius: 0;
+}
+.rounded-lg {
+  border-radius: 0;
+}
+.rounded-full {
+  border-radius: 9999px;
+}
 
 /* =====================================================
    BACKGROUND UTILITIES
    ===================================================== */
 
-.bg-darker { background: var(--portal-bg-darker); }
-.bg-dark { background: var(--portal-bg-dark); }
-.bg-medium { background: var(--portal-bg-medium); }
-.bg-light { background: var(--portal-bg-light); }
+.bg-darker {
+  background: var(--portal-bg-darker);
+}
+.bg-dark {
+  background: var(--portal-bg-dark);
+}
+.bg-medium {
+  background: var(--portal-bg-medium);
+}
+.bg-light {
+  background: var(--portal-bg-light);
+}
 
 /* =====================================================
    SPACING UTILITIES
    ===================================================== */
-.mt-0 { margin-top: 0; }
-.mt-sm { margin-top: var(--space-2); }
-.mt-md { margin-top: var(--space-3); }
-.mt-lg { margin-top: var(--space-4); }
+.mt-0 {
+  margin-top: 0;
+}
+.mt-sm {
+  margin-top: var(--space-2);
+}
+.mt-md {
+  margin-top: var(--space-3);
+}
+.mt-lg {
+  margin-top: var(--space-4);
+}
 
-.mb-0 { margin-bottom: 0; }
-.mb-sm { margin-bottom: var(--space-2); }
-.mb-md { margin-bottom: var(--space-3); }
-.mb-lg { margin-bottom: var(--space-4); }
+.mb-0 {
+  margin-bottom: 0;
+}
+.mb-sm {
+  margin-bottom: var(--space-2);
+}
+.mb-md {
+  margin-bottom: var(--space-3);
+}
+.mb-lg {
+  margin-bottom: var(--space-4);
+}
 
-.pt-0 { padding-top: 0; }
-.pt-sm { padding-top: var(--space-2); }
-.pt-md { padding-top: var(--space-3); }
-.pt-lg { padding-top: var(--space-4); }
+.pt-0 {
+  padding-top: 0;
+}
+.pt-sm {
+  padding-top: var(--space-2);
+}
+.pt-md {
+  padding-top: var(--space-3);
+}
+.pt-lg {
+  padding-top: var(--space-4);
+}
 
-.pb-0 { padding-bottom: 0; }
-.pb-sm { padding-bottom: var(--space-2); }
-.pb-md { padding-bottom: var(--space-3); }
-.pb-lg { padding-bottom: var(--space-4); }
+.pb-0 {
+  padding-bottom: 0;
+}
+.pb-sm {
+  padding-bottom: var(--space-2);
+}
+.pb-md {
+  padding-bottom: var(--space-3);
+}
+.pb-lg {
+  padding-bottom: var(--space-4);
+}
 
 /* Gap utilities - for use with flex/grid containers */
-.gap-0 { gap: 0; }
-.gap-0-5 { gap: var(--space-0-5); }
-.gap-1 { gap: var(--space-1); }
-.gap-1-5 { gap: var(--space-1-5); }
-.gap-2 { gap: var(--space-2); }
-.gap-3 { gap: var(--space-3); }
-.gap-4 { gap: var(--space-4); }
+.gap-0 {
+  gap: 0;
+}
+.gap-0-5 {
+  gap: var(--space-0-5);
+}
+.gap-1 {
+  gap: var(--space-1);
+}
+.gap-1-5 {
+  gap: var(--space-1-5);
+}
+.gap-2 {
+  gap: var(--space-2);
+}
+.gap-3 {
+  gap: var(--space-3);
+}
+.gap-4 {
+  gap: var(--space-4);
+}
 
 /* =====================================================
    WIDTH UTILITIES
    ===================================================== */
-.w-full { width: 100%; }
-.w-auto { width: auto; }
-.min-w-0 { min-width: 0; }
+.w-full {
+  width: 100%;
+}
+.w-auto {
+  width: auto;
+}
+.min-w-0 {
+  min-width: 0;
+}
 
 /* =====================================================
    TEXT COLOR UTILITIES
@@ -800,17 +899,27 @@ a.text-danger:hover {
    FONT WEIGHT UTILITIES
    ===================================================== */
 
-.font-semibold { font-weight: 600; }
-.font-medium { font-weight: 500; }
-.font-bold { font-weight: 700; }
-.font-normal { font-weight: 400; }
+.font-semibold {
+  font-weight: 600;
+}
+.font-medium {
+  font-weight: 500;
+}
+.font-bold {
+  font-weight: 700;
+}
+.font-normal {
+  font-weight: 400;
+}
 
 /* =====================================================
    TRANSITION UTILITIES
    ===================================================== */
 
 .transition-colors {
-  transition: color var(--transition-fast), background-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .transition-opacity {
@@ -857,14 +966,33 @@ a.text-danger:hover {
    ICON SIZING UTILITIES
    ===================================================== */
 
-.icon-xs { width: 12px; height: 12px; }
-.icon-sm { width: 16px; height: 16px; }
-.icon-md { width: 20px; height: 20px; }
-.icon-lg { width: 24px; height: 24px; }
-.icon-xl { width: 32px; height: 32px; }
+.icon-xs {
+  width: 12px;
+  height: 12px;
+}
+.icon-sm {
+  width: 16px;
+  height: 16px;
+}
+.icon-md {
+  width: 20px;
+  height: 20px;
+}
+.icon-lg {
+  width: 24px;
+  height: 24px;
+}
+.icon-xl {
+  width: 32px;
+  height: 32px;
+}
 
 /* Flex shrink prevention for icons */
-.icon-xs, .icon-sm, .icon-md, .icon-lg, .icon-xl {
+.icon-xs,
+.icon-sm,
+.icon-md,
+.icon-lg,
+.icon-xl {
   flex-shrink: 0;
 }
 
@@ -900,7 +1028,9 @@ a.text-danger:hover {
 /* Interactive element (combines common patterns) */
 .interactive {
   cursor: pointer;
-  transition: color var(--transition-fast), background-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .interactive:hover {
@@ -965,7 +1095,16 @@ a.text-danger:hover {
   padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-darker);
   color: var(--portal-text-light);
-  font-family: var(--font-family-system, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+  font-family: var(
+    --font-family-system,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif
+  );
   font-size: 0.75rem;
   font-weight: 400;
   line-height: 1.4;
@@ -980,7 +1119,9 @@ a.text-danger:hover {
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
 }
 
 /* Show tooltip on hover */
@@ -991,7 +1132,7 @@ a.text-danger:hover {
 
 /* Tooltip arrow */
 [data-page="admin"] [data-tooltip]::before {
-  content: '';
+  content: "";
   position: absolute;
   bottom: calc(100% + 2px);
   left: 50%;
@@ -1002,7 +1143,9 @@ a.text-danger:hover {
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
 }
 
 [data-page="admin"] [data-tooltip]:hover::before {

@@ -169,9 +169,15 @@
   font-weight: 700;
 }
 
-.lead-score-value.hot { color: var(--status-active); }
-.lead-score-value.warm { color: var(--color-warning-500); }
-.lead-score-value.cold { color: var(--portal-text-secondary); }
+.lead-score-value.hot {
+  color: var(--status-active);
+}
+.lead-score-value.warm {
+  color: var(--color-warning-500);
+}
+.lead-score-value.cold {
+  color: var(--portal-text-secondary);
+}
 
 .lead-score-label {
   font-size: var(--font-size-sm);
@@ -617,7 +623,7 @@
 
 /* Active indicator aligned with focus ring (outline: 2px, outline-offset: 2px) */
 .lead-tab.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -4px;
   left: 0;

@@ -6,10 +6,15 @@
  *
  * Styles for the project detail view including:
  * - Project header and navigation
- * - Tab content (Overview, Messages, Files, Invoices)
+ * - Tab content (Overview, Messages, Files)
  * - Message thread display
  * - File uploads and listing
- * - Invoice display
+ * - Milestones and progress
+ * - Document generation modal
+ *
+ * Related files:
+ * - pd-contract.css - Contract tab styles
+ * - pd-invoices.css - Invoices tab styles
  */
 
 /* =====================================================
@@ -495,7 +500,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Checkmark for checked state */
 .milestone-checkbox:has(input:checked)::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 6px;
   top: 2px;
@@ -927,9 +932,10 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   width: 100%;
 }
 
-
 /* Form/settings dropdowns only; table dropdowns use base in portal-dropdown.css */
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown) .custom-dropdown-trigger {
+[data-page="admin"]
+  .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
+  .custom-dropdown-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -946,11 +952,15 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   box-shadow: none;
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown) .custom-dropdown-trigger:hover {
+[data-page="admin"]
+  .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
+  .custom-dropdown-trigger:hover {
   border-color: var(--color-primary);
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown) .custom-dropdown-trigger:focus {
+[data-page="admin"]
+  .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
+  .custom-dropdown-trigger:focus {
   outline: none;
   border-color: var(--color-primary);
 }
@@ -975,7 +985,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 /* Exclude .table-dropdown so table status/per-page dropdowns use admin.css positioning (top of menu matches bottom of trigger) */
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown) .custom-dropdown-menu {
+[data-page="admin"]
+  .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
+  .custom-dropdown-menu {
   display: none;
   position: absolute;
   top: 100%;
@@ -994,7 +1006,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   box-shadow: none;
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open .custom-dropdown-menu {
+[data-page="admin"]
+  .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open
+  .custom-dropdown-menu {
   display: block;
   border-color: var(--color-primary);
   /* Only sides and bottom shadow - clip top shadow with clip-path */
@@ -1003,7 +1017,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin-top: -4px;
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open .custom-dropdown-trigger {
+[data-page="admin"]
+  .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open
+  .custom-dropdown-trigger {
   border-color: var(--color-primary);
   border-bottom: none;
   /* Only top and side shadows - clip bottom shadow */
@@ -1269,7 +1285,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   text-decoration: none;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .pd-url-link:hover {
@@ -1622,711 +1640,5 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   }
 }
 
-/* =====================================================
-   CONTRACT TAB (consolidated from pd-contract.css)
-   ===================================================== */
-
-#pd-tab-contract {
-  display: none;
-}
-
-#pd-tab-contract.active {
-  display: block;
-}
-
-/* .contract-tab-content flex layout from shared/portal-components.css */
-
-.contract-status-display {
-  padding: var(--space-1-5) 0;
-}
-
-.contract-status-info {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-/* Contract status items: match overview meta-item (label + value), no card box */
-.contract-status-info .status-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-  background: transparent;
-  padding: 0;
-  box-shadow: none;
-  align-items: flex-start;
-}
-
-.contract-status-info .field-label {
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.125rem;
-}
-
-/* Status badge in contract block: align with overview meta-value prominence */
-.contract-status-info .status-badge {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.contract-description {
-  color: var(--portal-text-secondary);
-  margin-bottom: var(--space-2);
-}
-
-.contract-actions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-1-5);
-}
-
-.contract-builder-meta {
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: var(--space-2);
-}
-
-.contract-builder-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-  gap: var(--space-2);
-}
-
-.contract-template-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-
-.contract-builder-textarea {
-  min-height: 96px;
-  resize: vertical;
-}
-
-.contract-builder-content {
-  min-height: 240px;
-  resize: vertical;
-}
-
-.contract-builder-preview {
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-color);
-  padding: var(--space-2);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-height: 100%;
-}
-
-.contract-preview-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-1);
-}
-
-.contract-preview-body {
-  background: var(--portal-bg-darker);
-  border: 1px dashed var(--portal-border-color);
-  padding: var(--space-2);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  white-space: pre-wrap;
-  min-height: 240px;
-}
-
-@media (--tablet-wide) {
-  .contract-builder-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.contract-action-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-2);
-  background: var(--portal-bg-darker);
-  border: 1px solid var(--portal-border-color);
-  color: var(--portal-text-light);
-  text-decoration: none;
-  transition: all var(--transition-fast);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: var(--font-size-sm);
-}
-
-.contract-action-card:hover {
-  background: var(--portal-bg-dark);
-  border-color: var(--color-primary);
-  transform: translateY(-2px);
-}
-
-.contract-action-card.primary {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: white;
-}
-
-.contract-action-card.primary:hover {
-  background: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
-}
-
-.contract-action-card svg {
-  opacity: 0.8;
-}
-
-.contract-action-card:hover svg {
-  opacity: 1;
-}
-
-/* Signature Details */
-/* .signature-details flex layout from shared/portal-components.css */
-
-.signature-info-row {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--space-1) 0;
-  border-bottom: 1px solid var(--portal-border-color);
-}
-
-.signature-info-row:last-child {
-  border-bottom: none;
-}
-
-/* Countersign Modal */
-/* Uses utility classes: flex flex-col gap-2 */
-
-/* Uses utility classes: flex flex-col gap-1 */
-
-.signature-canvas-wrap {
-  background: var(--portal-bg-darker);
-  border: 1px dashed var(--portal-border-color);
-  padding: var(--space-1);
-}
-
-.signature-canvas-wrap canvas {
-  width: 100%;
-  height: 160px;
-  display: block;
-  background: var(--color-black);
-}
-
-.signature-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.signature-hint {
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.signature-info-row .field-label {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-}
-
-.signature-info-row .meta-value {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
-}
-
-/* Contract status badge colors */
-#pd-contract-status-badge.status-signed {
-  background: var(--color-success);
-  color: white;
-}
-
-#pd-contract-status-badge.status-pending {
-  background: var(--color-warning);
-  color: var(--portal-bg-dark);
-}
-
-#pd-contract-status-badge.status-not-signed {
-  background: var(--portal-text-muted);
-  color: white;
-}
-
-/* =====================================================
-   INVOICES TAB (consolidated from pd-invoices.css)
-   ===================================================== */
-
-/* Invoices list section - flex layout from shared/portal-components.css :has() rule */
-/* .card-header-with-action margin in project-detail.css */
-
-[data-page="admin"] #pd-tab-invoices .invoices-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin-top: 0;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-  min-height: 80px;
-}
-
-/* Center empty/loading/error states - override higher specificity of above rule */
-[data-page="admin"] #pd-tab-invoices .invoices-list:has(.empty-state, .loading-state, .error-state) {
-  align-items: center;
-  justify-content: center;
-  min-height: 120px;
-}
-
-/* .empty-state styling from components/loading.css */
-
-/* Invoice summary cards - consolidated from project-detail.css */
-[data-page="admin"] #pd-tab-invoices .invoice-summary {
-  display: flex;
-  gap: var(--space-3);
-  margin: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-/* Invoice Items */
-.invoice-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-  padding: var(--space-1-5);
-  background: transparent;
-  border: none;
-  margin-bottom: var(--space-1);
-  box-shadow: var(--shadow-card);
-}
-
-.invoice-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.invoice-info strong {
-  display: block;
-  color: var(--portal-text-light);
-}
-
-.invoice-date {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-}
-
-/* Deposit Invoice Styling */
-.invoice-item.invoice-deposit {
-  border-left: 3px solid var(--color-info);
-}
-
-.invoice-type-badge {
-  display: inline-block;
-  font-size: 0.6rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: var(--space-0-5) var(--space-1);
-  background: var(--color-info);
-  color: var(--color-white);
-  margin-left: var(--space-0-5);
-  vertical-align: middle;
-}
-
-.invoice-amount {
-  font-weight: 700;
-  color: var(--color-primary);
-  min-width: 80px;
-  text-align: right;
-}
-
-.invoice-actions {
-  display: flex;
-  gap: var(--space-1);
-  flex-wrap: wrap;
-}
-
-/* Invoice Creation Modal */
-.invoice-modal {
-  max-width: 600px;
-  width: 90vw;
-}
-
-.invoice-modal-form {
-  text-align: left;
-  margin: var(--space-2) 0;
-}
-
-.invoice-modal-form .form-group {
-  margin-bottom: var(--space-1-5);
-}
-
-/* Label styling from unified rule in portal-forms.css - only layout here */
-.invoice-modal-form .form-label {
-  display: block;
-  margin-bottom: var(--space-0-5);
-}
-
-.invoice-modal-form .form-input {
-  width: 100%;
-  padding: var(--space-1) var(--space-1-5);
-  border: 1px solid var(--portal-border-color);
-  background: var(--portal-bg-medium);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-base);
-}
-
-.invoice-modal-form .form-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.invoice-modal-form select.form-input {
-  cursor: pointer;
-}
-
-/* Line Items */
-.line-items-container {
-  margin-bottom: var(--space-1);
-}
-
-.line-item-row {
-  display: flex;
-  gap: var(--space-1);
-  align-items: center;
-  margin-bottom: var(--space-1);
-}
-
-.line-item-row .line-item-desc {
-  flex: 1;
-  min-width: 150px;
-}
-
-.line-item-row .line-item-qty {
-  flex-shrink: 0;
-  width: 70px;
-}
-
-.line-item-row .line-item-rate {
-  flex-shrink: 0;
-  width: 100px;
-}
-
-.line-item-amount {
-  min-width: 80px;
-  text-align: right;
-  font-weight: 600;
-  color: var(--color-primary);
-}
-
-/* .btn-remove-line uses .icon-btn .icon-btn-danger .icon-btn-xs from portal-buttons.css */
-
-.invoice-total {
-  text-align: right;
-  padding-top: var(--space-1-5);
-  border-top: 1px solid var(--portal-border-color);
-  margin-top: var(--space-1-5);
-  font-size: 1.1rem;
-}
-
-.invoice-total strong {
-  color: var(--color-primary);
-}
-
-/* Invoice totals section with deposit credit */
-.invoice-totals-section {
-  text-align: right;
-  padding-top: var(--space-1-5);
-  border-top: 1px solid var(--portal-border-color);
-  margin-top: var(--space-1-5);
-}
-
-.invoice-subtotal {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-  margin-bottom: var(--space-0-5);
-}
-
-.invoice-credit {
-  font-size: var(--font-size-sm);
-  color: var(--color-success);
-  margin-bottom: var(--space-0-5);
-}
-
-.invoice-totals-section .invoice-total {
-  border-top: none;
-  padding-top: var(--space-1);
-  margin-top: 0;
-  font-size: 1.1rem;
-}
-
-/* Deposit credit section */
-.deposit-credit-section {
-  background: transparent;
-  padding: var(--space-1-5);
-  margin-top: var(--space-1);
-}
-
-.deposit-credit-section .form-label {
-  color: var(--color-success);
-}
-
-.deposit-credit-section .form-hint {
-  display: block;
-  margin-top: var(--space-0-5);
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-}
-
-/* Responsive line items */
-@media (--narrow-mobile) {
-  .line-item-row {
-    flex-wrap: wrap;
-  }
-
-  .line-item-row .line-item-desc {
-    width: 100%;
-    flex: none;
-  }
-
-  .line-item-row .line-item-qty {
-    width: 60px !important;
-  }
-
-  .line-item-row .line-item-rate {
-    width: 80px !important;
-  }
-}
-
-/* .invoice-summary styles scoped in rule above */
-/* .summary-card styles in project-detail.css */
-
-/* ================================================
-   Invoice Action Buttons
-   ================================================ */
-.invoice-action-buttons {
-  display: flex;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-}
-
-/* ================================================
-   Payment Plans Section
-   ================================================ */
-.payment-plans-section {
-  padding: var(--space-3);
-}
-
-/* Payment plans section h4 - styling from unified rule in portal-cards.css */
-.payment-plans-section h4 {
-  margin: 0 0 var(--space-2) 0;
-}
-
-.payment-plans-section h4:not(:first-child) {
-  margin-top: var(--space-4);
-}
-
-/* Scheduled Invoice Items */
-/* Uses utility classes: flex flex-col gap-2 */
-
-.scheduled-item,
-.recurring-item {
-  display: flex;
-  align-items: center;
-  padding: var(--space-2) var(--space-3);
-  background: transparent;
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-sm);
-}
-
-.scheduled-date,
-.recurring-next {
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
-  min-width: 80px;
-}
-
-.scheduled-desc,
-.recurring-desc {
-  flex: 1;
-  color: var(--portal-text-primary);
-}
-
-.scheduled-amount,
-.recurring-amount {
-  font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-primary);
-}
-
-.recurring-freq {
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
-  text-transform: capitalize;
-}
-
-.recurring-status {
-  font-size: var(--font-size-xs);
-  padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--border-radius-sm);
-}
-
-.recurring-status.active {
-  background: var(--status-active-bg);
-  color: var(--status-active);
-}
-
-.recurring-status.paused {
-  background: var(--status-pending-bg);
-  color: var(--status-pending);
-}
-
-/* ================================================
-   Invoice Filter Container
-   ================================================ */
-.invoice-filter-container {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.invoice-filter-container select {
-  min-width: 140px;
-  padding: var(--space-1) var(--space-1-5);
-  background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-color);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-}
-
-.invoice-filter-container select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-/* ================================================
-   Invoice Table (in project details)
-   Base styling from shared/portal-tables.css
-   Only page-specific overrides here
-   ================================================ */
-
-/* Deposit row highlight */
-#pd-invoices-list .data-table tr.invoice-deposit-row {
-  border-left: 3px solid var(--color-info);
-}
-
-/* ================================================
-   View Invoice Modal
-   ================================================ */
-#view-project-invoice-modal .invoice-view-content {
-  padding: var(--space-2) 0;
-}
-
-#view-project-invoice-modal .invoice-header-info {
-  margin-bottom: var(--space-3);
-}
-
-#view-project-invoice-modal .invoice-info-row {
-  display: flex;
-  gap: var(--space-4);
-  margin-bottom: var(--space-2);
-}
-
-#view-project-invoice-modal .invoice-info-item {
-  flex: 1;
-}
-
-/* Label styling from unified rule in portal-forms.css - only layout here */
-#view-project-invoice-modal .field-label {
-  display: block;
-  margin-bottom: var(--space-0-5);
-}
-
-#view-project-invoice-modal .field-value {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-base);
-}
-
-/* Section title - styling from unified rule in portal-cards.css */
-#view-project-invoice-modal .section-title {
-  margin: 0 0 var(--space-1-5) 0;
-}
-
-#view-project-invoice-modal .invoice-line-items-section {
-  margin-bottom: var(--space-3);
-}
-
-#view-project-invoice-modal .invoice-line-items {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-#view-project-invoice-modal .invoice-line-items th {
-  text-align: left;
-  padding: var(--space-1);
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-  border-bottom: 1px solid var(--portal-border-color);
-}
-
-#view-project-invoice-modal .invoice-line-items th.text-right {
-  text-align: right;
-}
-
-#view-project-invoice-modal .invoice-line-items td {
-  padding: var(--space-1);
-  border-bottom: 1px solid var(--portal-border-color-light);
-  color: var(--portal-text-light);
-}
-
-#view-project-invoice-modal .invoice-line-items td.text-right {
-  text-align: right;
-}
-
-#view-project-invoice-modal .invoice-totals {
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--portal-border-color);
-}
-
-#view-project-invoice-modal .total-row {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--space-1) 0;
-  font-size: var(--font-size-base);
-}
-
-#view-project-invoice-modal .total-row.total-main {
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-lg);
-  color: var(--color-primary);
-}
-
-#view-project-invoice-modal .total-row.balance-due {
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-warning);
-}
-
-#view-project-invoice-modal .invoice-notes-section {
-  margin-top: var(--space-3);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--portal-border-color);
-}
-
-#view-project-invoice-modal .invoice-notes-section p {
-  color: var(--portal-text-light);
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* Responsive adjustments for invoices */
-@media (--compact-mobile) {
-  #view-project-invoice-modal .invoice-info-row {
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  #pd-invoices-list .data-table th:nth-child(3),
-  #pd-invoices-list .data-table td:nth-child(3) {
-    display: none;
-  }
-}
+/* Contract tab styles: see pd-contract.css */
+/* Invoice tab styles: see pd-invoices.css */

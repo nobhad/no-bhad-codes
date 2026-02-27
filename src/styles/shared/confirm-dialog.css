@@ -193,7 +193,9 @@
 
 .confirm-dialog-confirm.danger:focus,
 .confirm-dialog-confirm.danger:focus-visible {
-  box-shadow: var(--shadow-panel), 0 0 0 3px var(--color-danger);
+  box-shadow:
+    var(--shadow-panel),
+    0 0 0 3px var(--color-danger);
 }
 
 /* Active state for selection buttons (e.g., who cancelled) */
@@ -238,7 +240,9 @@
   border: var(--portal-border);
   color: var(--portal-text-light);
   font-size: var(--font-size-base);
-  transition: border-color var(--transition-mouse) ease, box-shadow var(--transition-mouse) ease;
+  transition:
+    border-color var(--transition-mouse) ease,
+    box-shadow var(--transition-mouse) ease;
 }
 
 .prompt-dialog-input:focus {

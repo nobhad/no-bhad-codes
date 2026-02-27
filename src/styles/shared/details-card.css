@@ -31,7 +31,7 @@
 
 /* Caret: aligned with first line of heading */
 .portal :is(.details-card, .system-details) summary::before {
-  content: '';
+  content: "";
   flex-shrink: 0;
   width: 0;
   height: 0;
@@ -51,7 +51,13 @@
 }
 
 /* Child grid: same horizontal padding as summary */
-.portal :is(.details-card-grid, .system-info-grid, .details-card .details-card-grid, .system-details .system-info-grid) {
+.portal
+  :is(
+    .details-card-grid,
+    .system-info-grid,
+    .details-card .details-card-grid,
+    .system-details .system-info-grid
+  ) {
   padding: 0 var(--space-4) var(--space-4);
   margin: 0;
   display: flex;
