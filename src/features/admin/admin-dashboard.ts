@@ -916,6 +916,13 @@ class AdminDashboard {
   private async loadLeads(): Promise<void> {
     // Delegate to leads module for code splitting
     const leadsModule = await loadLeadsModule();
+
+    // Ensure tab structure is rendered first (needed for React mount container)
+    const tabContainer = document.getElementById('tab-leads');
+    if (tabContainer && !document.getElementById('react-leads-mount') && !document.getElementById('leads-table-body')) {
+      leadsModule.renderLeadsTab(tabContainer);
+    }
+
     await leadsModule.loadLeads(this.moduleContext);
   }
 
@@ -1606,6 +1613,15 @@ class AdminDashboard {
         return;
       }
 
+      // KNOWLEDGE BASE subtabs (support tab)
+      if (forTab === 'support') {
+        const subtab = target.dataset.subtab;
+        if (!subtab) return;
+        updateSubtabActiveState(group, subtab, 'subtab');
+        document.dispatchEvent(new CustomEvent('knowledgeBaseSubtabChange', { detail: { subtab } }));
+        return;
+      }
+
       // PROJECT DETAIL subtabs
       if (forTab === 'project-detail') {
         const tabName = target.dataset.pdTab;
@@ -1956,7 +1972,7 @@ class AdminDashboard {
       // Render the overview tab structure first (dynamic rendering)
       const tabContainer = document.getElementById('tab-overview');
       if (tabContainer) {
-        overviewModule.renderOverviewTab(tabContainer);
+        await overviewModule.renderOverviewTab(tabContainer, this.moduleContext);
       }
 
       await Promise.all([
@@ -1987,12 +2003,13 @@ class AdminDashboard {
           const tabContainer = document.getElementById('tab-overview');
           const overviewModule = await loadOverviewModule();
 
-          // Render the tab structure dynamically
+          // Render the tab structure dynamically (may mount React component)
           if (tabContainer) {
-            overviewModule.renderOverviewTab(tabContainer);
+            await overviewModule.renderOverviewTab(tabContainer, this.moduleContext);
           }
 
-          // Load overview stats (Active Projects, Clients, Revenue MTD, etc.)
+          // Load overview stats - only needed for vanilla rendering
+          // React component handles its own data loading
           await overviewModule.loadOverviewData(this.moduleContext);
 
           // Load analytics charts (Revenue chart, Project status, etc.)
