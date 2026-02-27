@@ -5,7 +5,7 @@
    ===================================================== */
 
 /* Split modules */
-@import './cd-crm.css';
+@import "./cd-crm.css";
 
 /* ==============================================
    HEADER CARD
@@ -16,8 +16,13 @@
   padding: var(--space-4) var(--space-5);
 }
 
-#tab-client-detail .cd-header-card .detail-title-row { margin-bottom: 0; }
-#tab-client-detail .cd-header-card .detail-title { margin: 0; font-size: var(--font-size-xl); }
+#tab-client-detail .cd-header-card .detail-title-row {
+  margin-bottom: 0;
+}
+#tab-client-detail .cd-header-card .detail-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+}
 
 .header-contact-row {
   display: flex;
@@ -34,7 +39,10 @@
   color: var(--portal-text-secondary);
 }
 
-.contact-inline-item svg { color: var(--portal-text-muted); flex-shrink: 0; }
+.contact-inline-item svg {
+  color: var(--portal-text-muted);
+  flex-shrink: 0;
+}
 
 .header-account-row {
   display: flex;
@@ -83,8 +91,12 @@
    OVERVIEW GRID
    ============================================== */
 
-#tab-client-detail .overview-grid { grid-template-columns: 1fr 300px; }
-#tab-client-detail .portal-project-card { padding: var(--space-4); }
+#tab-client-detail .overview-grid {
+  grid-template-columns: 1fr 300px;
+}
+#tab-client-detail .portal-project-card {
+  padding: var(--space-4);
+}
 
 .cd-contact-grid {
   display: grid;
@@ -92,7 +104,9 @@
   gap: var(--portal-section-gap) var(--space-4);
 }
 
-.cd-projects-summary { min-height: 60px; }
+.cd-projects-summary {
+  min-height: 60px;
+}
 
 /* ==============================================
    PROJECT ITEM COMPACT
@@ -109,7 +123,9 @@
   transition: background var(--transition-fast);
 }
 
-.project-item-compact:hover { background: var(--portal-bg-darker); }
+.project-item-compact:hover {
+  background: var(--portal-bg-darker);
+}
 
 .project-item-info {
   display: flex;
@@ -141,7 +157,9 @@
    HEALTH STATS CARD
    ============================================== */
 
-#tab-client-detail .cd-health-stats-card { padding: var(--space-4) !important; }
+#tab-client-detail .cd-health-stats-card {
+  padding: var(--space-4) !important;
+}
 
 .health-score-container {
   display: flex;
@@ -187,7 +205,9 @@
   border-radius: var(--border-radius-sm);
 }
 
-.health-factor-label { text-align: center; }
+.health-factor-label {
+  text-align: center;
+}
 
 .health-factor-bar {
   height: 4px;
@@ -195,7 +215,9 @@
   overflow: hidden;
 }
 
-.health-factor-fill { height: 100%; }
+.health-factor-fill {
+  height: 100%;
+}
 
 /* ==============================================
    COMPACT STATS
@@ -224,7 +246,9 @@
   line-height: 1.2;
 }
 
-.stats-compact .field-label { margin-top: 2px; }
+.stats-compact .field-label {
+  margin-top: 2px;
+}
 
 /* ==============================================
    RECENT ACTIVITY
@@ -236,9 +260,18 @@
   border-radius: var(--border-radius-sm);
 }
 
-.recent-activity-list .activity-icon { width: 24px; height: 24px; min-width: 24px; }
-.recent-activity-list .activity-icon svg { width: 12px; height: 12px; }
-.recent-activity-list .activity-title { font-size: var(--font-size-xs); }
+.recent-activity-list .activity-icon {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+}
+.recent-activity-list .activity-icon svg {
+  width: 12px;
+  height: 12px;
+}
+.recent-activity-list .activity-title {
+  font-size: var(--font-size-xs);
+}
 
 .activity-view-all {
   display: block;
@@ -252,18 +285,29 @@
   transition: color var(--transition-fast);
 }
 
-.activity-view-all:hover { color: var(--portal-accent-hover); }
+.activity-view-all:hover {
+  color: var(--portal-accent-hover);
+}
 
-#tab-client-detail .cd-recent-activity-full { grid-column: 1 / -1; }
+#tab-client-detail .cd-recent-activity-full {
+  grid-column: 1 / -1;
+}
 
 #tab-client-detail .cd-recent-activity-full .recent-activity-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-#tab-client-detail .cd-recent-activity-full .activity-item { padding: var(--space-3); }
-#tab-client-detail .cd-recent-activity-full .activity-title { white-space: normal; font-size: var(--font-size-sm); }
-#tab-client-detail .cd-recent-activity-full .activity-time { font-size: var(--font-size-xs); }
+#tab-client-detail .cd-recent-activity-full .activity-item {
+  padding: var(--space-3);
+}
+#tab-client-detail .cd-recent-activity-full .activity-title {
+  white-space: normal;
+  font-size: var(--font-size-sm);
+}
+#tab-client-detail .cd-recent-activity-full .activity-time {
+  font-size: var(--font-size-xs);
+}
 
 /* ==============================================
    CRM INFO GRID
@@ -295,8 +339,13 @@
   transition: opacity var(--transition-fast);
 }
 
-.clickable-client:hover { opacity: 0.8; }
-.clickable-client:hover .meta-value { color: var(--portal-accent); text-decoration: underline; }
+.clickable-client:hover {
+  opacity: 0.8;
+}
+.clickable-client:hover .meta-value {
+  color: var(--portal-accent);
+  text-decoration: underline;
+}
 
 /* .btn-back: portal-buttons.css - only layout overrides here */
 .client-detail .btn-back {
@@ -318,8 +367,13 @@
   transition: all var(--transition-fast);
 }
 
-.client-project-item:hover { background: var(--portal-bg-darker); }
-.client-project-item .project-name { color: var(--portal-text-light); font-weight: var(--font-weight-medium); }
+.client-project-item:hover {
+  background: var(--portal-bg-darker);
+}
+.client-project-item .project-name {
+  color: var(--portal-text-light);
+  font-weight: var(--font-weight-medium);
+}
 
 .client-project-item .project-status {
   display: inline-flex;
@@ -331,7 +385,7 @@
 }
 
 .client-project-item .project-status::before {
-  content: '';
+  content: "";
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -341,18 +395,29 @@
 
 /* Status dot colors */
 .client-project-item .project-status.status-active::before,
-.client-project-item .project-status.status-in-progress::before { background: var(--status-active); }
+.client-project-item .project-status.status-in-progress::before {
+  background: var(--status-active);
+}
 
 .client-project-item .project-status.status-pending::before,
 .client-project-item .project-status.status-new::before,
-.client-project-item .project-status.status-on-hold::before { background: var(--status-pending); }
+.client-project-item .project-status.status-on-hold::before {
+  background: var(--status-pending);
+}
 
-.client-project-item .project-status.status-completed::before { background: var(--status-completed); }
+.client-project-item .project-status.status-completed::before {
+  background: var(--status-completed);
+}
 
 .client-project-item .project-status.status-cancelled::before,
-.client-project-item .project-status.status-archived::before { background: var(--status-cancelled); }
+.client-project-item .project-status.status-archived::before {
+  background: var(--status-cancelled);
+}
 
-.client-project-item .project-date { color: var(--portal-text-secondary); font-size: var(--font-size-sm); }
+.client-project-item .project-date {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+}
 
 /* ==============================================
    BILLING
@@ -397,14 +462,34 @@
   transition: background var(--transition-fast);
 }
 
-.client-invoice-item:hover { background: var(--portal-bg-darker); }
-.client-invoice-item .invoice-number { color: var(--portal-text-light); font-weight: var(--font-weight-medium); }
-.client-invoice-item .invoice-date { color: var(--portal-text-secondary); font-size: var(--font-size-sm); }
-.client-invoice-item .invoice-amount { font-weight: var(--font-weight-semibold); color: var(--portal-text-light); }
-.client-invoice-item .invoice-status { font-size: var(--font-size-sm); text-transform: capitalize; }
-.client-invoice-item .invoice-status.status-paid { color: var(--color-success); }
-.client-invoice-item .invoice-status.status-pending { color: var(--color-warning); }
-.client-invoice-item .invoice-status.status-overdue { color: var(--color-danger); }
+.client-invoice-item:hover {
+  background: var(--portal-bg-darker);
+}
+.client-invoice-item .invoice-number {
+  color: var(--portal-text-light);
+  font-weight: var(--font-weight-medium);
+}
+.client-invoice-item .invoice-date {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.client-invoice-item .invoice-amount {
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-light);
+}
+.client-invoice-item .invoice-status {
+  font-size: var(--font-size-sm);
+  text-transform: capitalize;
+}
+.client-invoice-item .invoice-status.status-paid {
+  color: var(--color-success);
+}
+.client-invoice-item .invoice-status.status-pending {
+  color: var(--color-warning);
+}
+.client-invoice-item .invoice-status.status-overdue {
+  color: var(--color-danger);
+}
 
 .billing-info-grid {
   display: grid;
@@ -429,25 +514,54 @@
    ============================================== */
 
 @media (--tablet-landscape) {
-  #tab-client-detail .overview-grid { grid-template-columns: 1fr; }
-  #tab-client-detail .overview-col-aside { position: static; }
+  #tab-client-detail .overview-grid {
+    grid-template-columns: 1fr;
+  }
+  #tab-client-detail .overview-col-aside {
+    position: static;
+  }
   .cd-contact-grid,
-  .billing-summary { grid-template-columns: 1fr; }
+  .billing-summary {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (--mobile) {
-  .health-score-badge { width: 80px; height: 80px; }
-  .health-score-value { font-size: var(--font-size-2xl); }
+  .health-score-badge {
+    width: 80px;
+    height: 80px;
+  }
+  .health-score-value {
+    font-size: var(--font-size-2xl);
+  }
 
-  .stats-compact { gap: var(--space-1); }
-  .stats-compact .stat-item { padding: var(--space-1-5); }
-  .stats-compact .stat-value { font-size: var(--font-size-sm); }
+  .stats-compact {
+    gap: var(--space-1);
+  }
+  .stats-compact .stat-item {
+    padding: var(--space-1-5);
+  }
+  .stats-compact .stat-value {
+    font-size: var(--font-size-sm);
+  }
 
-  #tab-client-detail .cd-header-card { padding: var(--space-3); }
-  .header-contact-row { gap: var(--space-2); }
-  .header-account-row { gap: var(--space-2); }
+  #tab-client-detail .cd-header-card {
+    padding: var(--space-3);
+  }
+  .header-contact-row {
+    gap: var(--space-2);
+  }
+  .header-account-row {
+    gap: var(--space-2);
+  }
 
-  #tab-client-detail .crm-info-grid { grid-template-columns: 1fr; }
-  .billing-summary { flex-direction: column; }
-  .billing-info-grid { grid-template-columns: 1fr; }
+  #tab-client-detail .crm-info-grid {
+    grid-template-columns: 1fr;
+  }
+  .billing-summary {
+    flex-direction: column;
+  }
+  .billing-info-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -38,7 +38,7 @@
   /* Initial state - GSAP handles animation */
   opacity: 0;
   text-shadow: 0 2px 4px var(--color-shadow);
-  letter-spacing: 0.10em;
+  letter-spacing: 0.1em;
   color: var(--color-dark);
   text-decoration: none;
   padding: 1.5rem 0;

@@ -25,7 +25,7 @@
 
 /* Overview greeting - matches subtabs spacing exactly */
 [data-page="admin"] .overview-greeting {
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: 1.25rem;
   color: var(--portal-text-light);
   letter-spacing: 0.01em;

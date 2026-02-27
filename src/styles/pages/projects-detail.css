@@ -69,8 +69,9 @@
   transform: translate(-170%, -50%);
   opacity: 0;
   animation: back-button-slide-in var(--transition-long, 0.8s) 0.8s forwards;
-  transition: background-color var(--transition-theme, 0.4s),
-              box-shadow var(--transition-theme, 0.4s);
+  transition:
+    background-color var(--transition-theme, 0.4s),
+    box-shadow var(--transition-theme, 0.4s);
   z-index: 10;
 }
 
@@ -79,8 +80,9 @@
   height: 40px;
   stroke: var(--color-light);
   transform: rotate(9deg);
-  transition: transform var(--transition-mouse, 0.2s) cubic-bezier(0.25, 0.1, 0.25, 3.5),
-              stroke var(--transition-theme, 0.4s);
+  transition:
+    transform var(--transition-mouse, 0.2s) cubic-bezier(0.25, 0.1, 0.25, 3.5),
+    stroke var(--transition-theme, 0.4s);
 }
 
 .back-button:hover svg {
@@ -348,8 +350,9 @@
   border-radius: 4px;
   font-size: 0.85rem;
   font-weight: 500;
-  transition: background-color var(--transition-theme, 0.4s),
-              color var(--transition-theme, 0.4s);
+  transition:
+    background-color var(--transition-theme, 0.4s),
+    color var(--transition-theme, 0.4s);
 }
 
 /* Right column - description */
@@ -503,9 +506,10 @@
   border-radius: 30px;
   font-weight: 600;
   text-decoration: none;
-  transition: transform var(--transition-mouse, 0.2s),
-              background-color var(--transition-theme, 0.4s),
-              color var(--transition-theme, 0.4s);
+  transition:
+    transform var(--transition-mouse, 0.2s),
+    background-color var(--transition-theme, 0.4s),
+    color var(--transition-theme, 0.4s);
 }
 
 .worksub-links a:hover {
@@ -825,9 +829,10 @@
   background-color: transparent;
   border: 2px solid var(--color-dark);
   border-radius: 12px;
-  transition: background-color var(--transition-fast, 0.2s),
-              transform var(--transition-fast, 0.2s),
-              border-color var(--transition-fast, 0.2s);
+  transition:
+    background-color var(--transition-fast, 0.2s),
+    transform var(--transition-fast, 0.2s),
+    border-color var(--transition-fast, 0.2s);
   flex: 1;
   max-width: 45%;
 }

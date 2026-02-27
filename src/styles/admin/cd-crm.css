@@ -78,9 +78,15 @@
   transition: width var(--transition-normal);
 }
 
-.health-factor-fill.good { background: var(--color-success); }
-.health-factor-fill.warning { background: var(--color-warning); }
-.health-factor-fill.poor { background: var(--color-danger); }
+.health-factor-fill.good {
+  background: var(--color-success);
+}
+.health-factor-fill.warning {
+  background: var(--color-warning);
+}
+.health-factor-fill.poor {
+  background: var(--color-danger);
+}
 
 /* Tags Section */
 .client-tags-section {

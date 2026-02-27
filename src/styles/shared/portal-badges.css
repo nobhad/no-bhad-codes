@@ -220,12 +220,14 @@
 }
 
 /* Green/Completed */
-.status-indicator:is(.status-completed, .status-converted, .status-replied, .status-paid) .status-dot {
+.status-indicator:is(.status-completed, .status-converted, .status-replied, .status-paid)
+  .status-dot {
   background-color: var(--status-completed);
 }
 
 /* Red/Cancelled */
-.status-indicator:is(.status-cancelled, .status-lost, .status-archived, .status-overdue) .status-dot {
+.status-indicator:is(.status-cancelled, .status-lost, .status-archived, .status-overdue)
+  .status-dot {
   background-color: var(--status-cancelled);
 }
 
@@ -235,7 +237,8 @@
 }
 
 /* Gray/Inactive */
-.status-indicator:is(.status-read, .status-inactive, .status-draft, .status-not-invited) .status-dot {
+.status-indicator:is(.status-read, .status-inactive, .status-draft, .status-not-invited)
+  .status-dot {
   background-color: var(--status-inactive);
 }
 
@@ -374,11 +377,26 @@
 }
 
 /* Category badge color variants */
-.category-notification { border-color: var(--color-info); color: var(--color-info); }
-.category-invoice { border-color: var(--color-success); color: var(--color-success); }
-.category-contract { border-color: var(--color-warning); color: var(--color-warning); }
-.category-project { border-color: var(--color-primary); color: var(--color-primary); }
-.category-reminder { border-color: var(--color-danger); color: var(--color-danger); }
+.category-notification {
+  border-color: var(--color-info);
+  color: var(--color-info);
+}
+.category-invoice {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+.category-contract {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+.category-project {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.category-reminder {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
 
 /* =====================================================
    STATUS DROPDOWN TRIGGER

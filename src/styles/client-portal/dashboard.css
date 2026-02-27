@@ -56,7 +56,10 @@
   gap: var(--space-2);
 }
 
-[data-page="client-portal"] .project-progress-section .progress-overview .section-header-with-actions {
+[data-page="client-portal"]
+  .project-progress-section
+  .progress-overview
+  .section-header-with-actions {
   margin-bottom: 0;
 }
 
@@ -254,7 +257,7 @@
 }
 
 [data-page="client-portal"] .milestone-checkbox:has(input:checked)::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 6px;
   top: 2px;
@@ -278,7 +281,7 @@
 }
 
 [data-page="client-portal"] .milestone-title {
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;

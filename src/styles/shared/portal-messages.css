@@ -63,14 +63,20 @@
   justify-content: flex-start;
   align-items: stretch;
 }
-[data-page="client-portal"] .messages-layout .messages-clients-column :is(.messages-contact-card, .messages-tips-card) {
+[data-page="client-portal"]
+  .messages-layout
+  .messages-clients-column
+  :is(.messages-contact-card, .messages-tips-card) {
   display: block;
   flex: 0 0 auto;
   padding: var(--space-2);
   background: var(--color-neutral-200);
   border-bottom: 1px solid var(--portal-border);
 }
-[data-page="client-portal"] .messages-clients-column :is(.messages-contact-card, .messages-tips-card) h3 {
+[data-page="client-portal"]
+  .messages-clients-column
+  :is(.messages-contact-card, .messages-tips-card)
+  h3 {
   margin: 0 0 var(--space-1-5) 0;
 }
 [data-page="client-portal"] .messages-clients-column .messages-contact-info {
@@ -417,7 +423,13 @@
   border: none;
   min-height: 100px;
   padding: var(--space-2) var(--space-3);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   font-size: var(--font-size-base);
   font-weight: 400;
   resize: vertical;
@@ -427,7 +439,13 @@
   color: var(--portal-text-light);
   opacity: 0.5;
   font-weight: 400;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 .portal .message-compose :is(.form-textarea, textarea):is(:focus, :focus-visible) {
   outline: none;

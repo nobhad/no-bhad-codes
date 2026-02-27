@@ -8,30 +8,57 @@
 /* Base input styles - all form controls
    Uses data-page attribute to scope to admin/client-portal pages
    Also applies to .modal-overlay for modal compatibility */
-[data-page="admin"] :is(
-  .form-input, .form-textarea, .form-select,
-  input[type="text"], input[type="email"], input[type="password"],
-  input[type="tel"], input[type="number"], input[type="url"], input[type="date"],
-  textarea, select:not(.status-select)
-),
-[data-page="client-portal"] :is(
-  .form-input, .form-textarea, .form-select,
-  input[type="text"], input[type="email"], input[type="password"],
-  input[type="tel"], input[type="number"], input[type="url"], input[type="date"],
-  textarea, select:not(.status-select)
-),
-.modal-overlay :is(
-  .form-input, .form-textarea, .form-select,
-  input[type="text"], input[type="email"], input[type="password"],
-  input[type="tel"], input[type="number"], input[type="url"], input[type="date"],
-  textarea, select:not(.status-select)
-) {
+[data-page="admin"]
+  :is(
+    .form-input,
+    .form-textarea,
+    .form-select,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="url"],
+    input[type="date"],
+    textarea,
+    select:not(.status-select)
+  ),
+[data-page="client-portal"]
+  :is(
+    .form-input,
+    .form-textarea,
+    .form-select,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="url"],
+    input[type="date"],
+    textarea,
+    select:not(.status-select)
+  ),
+.modal-overlay
+  :is(
+    .form-input,
+    .form-textarea,
+    .form-select,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="url"],
+    input[type="date"],
+    textarea,
+    select:not(.status-select)
+  ) {
   width: 100%;
   height: var(--space-7, 2.75rem);
   padding: 0 var(--space-3, 0.75rem);
   border: 1px solid var(--color-white);
   font-size: var(--font-size-base, 14px);
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inconsolata", monospace;
   font-weight: 400;
   line-height: var(--space-7, 2.75rem);
   background-color: transparent;
@@ -76,22 +103,35 @@
   font-weight: 400;
   color: var(--portal-alpha-white-50);
   opacity: 1;
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inconsolata", monospace;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 /* Hover state */
 [data-page="admin"] :is(.form-input, .form-textarea, .form-select, input, textarea, select):hover,
-[data-page="client-portal"] :is(.form-input, .form-textarea, .form-select, input, textarea, select):hover,
+[data-page="client-portal"]
+  :is(.form-input, .form-textarea, .form-select, input, textarea, select):hover,
 .modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select):hover {
   border-color: var(--color-white);
 }
 
 /* Focus state */
-[data-page="admin"] :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
-[data-page="client-portal"] :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible),
-.modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(:focus, :focus-visible) {
+[data-page="admin"]
+  :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(
+    :focus,
+    :focus-visible
+  ),
+[data-page="client-portal"]
+  :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(
+    :focus,
+    :focus-visible
+  ),
+.modal-overlay
+  :is(.form-input, .form-textarea, .form-select, input, textarea, select):is(
+    :focus,
+    :focus-visible
+  ) {
   outline: none;
   outline-offset: 0;
   border-color: var(--color-white);
@@ -136,7 +176,8 @@
 }
 .form-group.label-inside :is(input, select, textarea) {
   height: calc(var(--space-6, 2.25rem) + var(--space-1-5, 0.375rem));
-  padding: var(--space-3, 0.75rem) var(--space-2, 0.5rem) var(--space-1, 0.25rem) var(--space-2, 0.5rem);
+  padding: var(--space-3, 0.75rem) var(--space-2, 0.5rem) var(--space-1, 0.25rem)
+    var(--space-2, 0.5rem);
   line-height: normal;
 }
 .form-group.label-inside textarea {
@@ -198,7 +239,8 @@
 /* Mobile responsive */
 @media (--small-mobile) {
   [data-page="admin"] :is(.form-input, .form-textarea, .form-select, input, textarea, select),
-  [data-page="client-portal"] :is(.form-input, .form-textarea, .form-select, input, textarea, select),
+  [data-page="client-portal"]
+    :is(.form-input, .form-textarea, .form-select, input, textarea, select),
   .modal-overlay :is(.form-input, .form-textarea, .form-select, input, textarea, select) {
     height: calc(var(--space-5, 2rem) + var(--space-0-5, 0.125rem));
     padding: 0 var(--space-1-5, 0.375rem);
@@ -248,7 +290,7 @@
   border-color: var(--color-primary);
 }
 .portal-checkbox:has(input:checked)::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 5px;
   top: 2px;
@@ -269,7 +311,9 @@
   border: 1px solid var(--portal-alpha-white-15);
   background: transparent;
   cursor: pointer;
-  transition: background-color var(--transition-fast, 150ms), border-color var(--transition-fast, 150ms);
+  transition:
+    background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms);
 }
 
 .table-checkbox:hover {
@@ -294,7 +338,7 @@
 .table-checkbox-indicator {
   display: grid;
   place-content: center;
-  color: white;
+  color: var(--color-white);
 }
 
 .table-checkbox-icon {

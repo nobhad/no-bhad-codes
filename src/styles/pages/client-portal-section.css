@@ -212,7 +212,6 @@ section.client-portal-section button[type="submit"] {
   text-align: left;
 }
 
-
 .portal-link {
   color: var(--color-text-primary);
   text-decoration: underline;
@@ -235,7 +234,6 @@ section.client-portal-section button[type="submit"] {
   .portal-login-fields--single {
     max-width: 100%;
   }
-
 }
 
 /* Reduced motion support */

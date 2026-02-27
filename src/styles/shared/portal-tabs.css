@@ -198,7 +198,7 @@
 /* Scroll fade indicators (shown when content is scrollable) */
 .portal-tabs-wrapper::before,
 .portal-tabs-wrapper::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   bottom: 4px;

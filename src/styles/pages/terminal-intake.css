@@ -14,7 +14,8 @@
 
 :root {
   /* Terminal font stack */
-  --terminal-font-family: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  --terminal-font-family:
+    "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
   --terminal-font-size: 16px;
   --terminal-line-height: 1.7;
 }
@@ -88,7 +89,9 @@
 .terminal-btn.close {
   background: var(--color-mac-close);
   cursor: pointer;
-  transition: transform 0.1s ease, filter 0.1s ease;
+  transition:
+    transform 0.1s ease,
+    filter 0.1s ease;
 }
 
 .terminal-btn.close:hover {

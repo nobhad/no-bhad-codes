@@ -9,7 +9,7 @@
  */
 
 /* Split modules */
-@import './client-auth.css';
+@import "./client-auth.css";
 
 /* ===============================================
    CLIENT LOGIN - MATCHES MAIN PAGE SECTIONS
@@ -162,44 +162,7 @@ body[data-page="client"] .projects-sidebar {
   color: var(--color-text-primary);
 }
 
-.project-item-status {
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-/* Status Badge Colors */
-.status-pending {
-  background-color: var(--color-status-pending-bg);
-  color: var(--color-status-pending-text);
-  border: 1px solid var(--color-status-pending-border);
-}
-
-.status-in-progress {
-  background-color: var(--color-status-progress-bg);
-  color: var(--color-status-progress-text);
-  border: 1px solid var(--color-status-progress-border);
-}
-
-.status-in-review {
-  background-color: var(--color-status-review-bg);
-  color: var(--color-status-review-text);
-  border: 1px solid var(--color-status-review-border);
-}
-
-.status-completed {
-  background-color: var(--color-status-completed-bg);
-  color: var(--color-status-completed-text);
-  border: 1px solid var(--color-status-completed-border);
-}
-
-.status-on-hold {
-  background-color: var(--color-status-hold-bg);
-  color: var(--color-status-hold-text);
-  border: 1px solid var(--color-status-hold-border);
-}
+/* Legacy .project-item-status removed - use .status-badge from shared/portal-badges.css */
 
 .project-item-progress {
   display: flex;
@@ -404,7 +367,6 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* Auth styles moved to client-auth.css */
-
 
 /* ===============================================
    FORM STYLING - MATCHES CONTACT FORM

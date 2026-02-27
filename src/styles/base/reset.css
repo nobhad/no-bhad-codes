@@ -249,15 +249,16 @@ summary::-webkit-details-marker {
  * ============================================ */
 
 /* Navigation items, dropdown items, logout buttons - all icon+text patterns */
-:is([data-page="admin"], [data-page="client-portal"]) :is(
-  .sidebar-nav-item,
-  .sidebar-signout,
-  .dropdown-item,
-  .logout-btn,
-  .nav-item,
-  .sidebar-collapsed-logo,
-  .sidebar-toggle-btn
-) {
+:is([data-page="admin"], [data-page="client-portal"])
+  :is(
+    .sidebar-nav-item,
+    .sidebar-signout,
+    .dropdown-item,
+    .logout-btn,
+    .nav-item,
+    .sidebar-collapsed-logo,
+    .sidebar-toggle-btn
+  ) {
   display: flex;
   align-items: center;
   gap: var(--icon-gap-md);

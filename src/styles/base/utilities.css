@@ -20,219 +20,462 @@
    DISPLAY
    ============================================ */
 
-.flex { display: flex; }
-.inline-flex { display: inline-flex; }
-.grid { display: grid; }
-.hidden { display: none; }
-.block { display: block; }
+.flex {
+  display: flex;
+}
+.inline-flex {
+  display: inline-flex;
+}
+.grid {
+  display: grid;
+}
+.hidden {
+  display: none;
+}
+.block {
+  display: block;
+}
 
 /* ============================================
    FLEX DIRECTION
    ============================================ */
 
-.flex-row { flex-direction: row; }
-.flex-col { flex-direction: column; }
-.flex-row-reverse { flex-direction: row-reverse; }
-.flex-col-reverse { flex-direction: column-reverse; }
+.flex-row {
+  flex-direction: row;
+}
+.flex-col {
+  flex-direction: column;
+}
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+.flex-col-reverse {
+  flex-direction: column-reverse;
+}
 
 /* ============================================
    FLEX WRAP
    ============================================ */
 
-.flex-wrap { flex-wrap: wrap; }
-.flex-nowrap { flex-wrap: nowrap; }
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
 
 /* ============================================
    FLEX GROW/SHRINK
    ============================================ */
 
-.flex-1 { flex: 1; }
-.flex-auto { flex: auto; }
-.flex-none { flex: none; }
-.grow { flex-grow: 1; }
-.grow-0 { flex-grow: 0; }
-.shrink { flex-shrink: 1; }
-.shrink-0 { flex-shrink: 0; }
+.flex-1 {
+  flex: 1;
+}
+.flex-auto {
+  flex: auto;
+}
+.flex-none {
+  flex: none;
+}
+.grow {
+  flex-grow: 1;
+}
+.grow-0 {
+  flex-grow: 0;
+}
+.shrink {
+  flex-shrink: 1;
+}
+.shrink-0 {
+  flex-shrink: 0;
+}
 
 /* ============================================
    ALIGN ITEMS
    ============================================ */
 
-.items-start { align-items: flex-start; }
-.items-center { align-items: center; }
-.items-end { align-items: flex-end; }
-.items-stretch { align-items: stretch; }
-.items-baseline { align-items: baseline; }
+.items-start {
+  align-items: flex-start;
+}
+.items-center {
+  align-items: center;
+}
+.items-end {
+  align-items: flex-end;
+}
+.items-stretch {
+  align-items: stretch;
+}
+.items-baseline {
+  align-items: baseline;
+}
 
 /* ============================================
    JUSTIFY CONTENT
    ============================================ */
 
-.justify-start { justify-content: flex-start; }
-.justify-center { justify-content: center; }
-.justify-end { justify-content: flex-end; }
-.justify-between { justify-content: space-between; }
-.justify-around { justify-content: space-around; }
-.justify-evenly { justify-content: space-evenly; }
+.justify-start {
+  justify-content: flex-start;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-around {
+  justify-content: space-around;
+}
+.justify-evenly {
+  justify-content: space-evenly;
+}
 
 /* ============================================
    ALIGN SELF
    ============================================ */
 
-.self-start { align-self: flex-start; }
-.self-center { align-self: center; }
-.self-end { align-self: flex-end; }
-.self-stretch { align-self: stretch; }
+.self-start {
+  align-self: flex-start;
+}
+.self-center {
+  align-self: center;
+}
+.self-end {
+  align-self: flex-end;
+}
+.self-stretch {
+  align-self: stretch;
+}
 
 /* ============================================
    GAP (uses --space-* variables)
    ============================================ */
 
-.gap-0 { gap: 0; }
-.gap-0-5 { gap: var(--space-0-5); }
-.gap-1 { gap: var(--space-1); }
-.gap-1-5 { gap: var(--space-1-5); }
-.gap-2 { gap: var(--space-2); }
-.gap-3 { gap: var(--space-3); }
-.gap-4 { gap: var(--space-4); }
-.gap-section { gap: var(--portal-section-gap); }
+.gap-0 {
+  gap: 0;
+}
+.gap-0-5 {
+  gap: var(--space-0-5);
+}
+.gap-1 {
+  gap: var(--space-1);
+}
+.gap-1-5 {
+  gap: var(--space-1-5);
+}
+.gap-2 {
+  gap: var(--space-2);
+}
+.gap-3 {
+  gap: var(--space-3);
+}
+.gap-4 {
+  gap: var(--space-4);
+}
+.gap-section {
+  gap: var(--portal-section-gap);
+}
 
 /* Row/Column gap */
-.gap-x-1 { column-gap: var(--space-1); }
-.gap-x-2 { column-gap: var(--space-2); }
-.gap-x-3 { column-gap: var(--space-3); }
-.gap-y-1 { row-gap: var(--space-1); }
-.gap-y-2 { row-gap: var(--space-2); }
-.gap-y-3 { row-gap: var(--space-3); }
+.gap-x-1 {
+  column-gap: var(--space-1);
+}
+.gap-x-2 {
+  column-gap: var(--space-2);
+}
+.gap-x-3 {
+  column-gap: var(--space-3);
+}
+.gap-y-1 {
+  row-gap: var(--space-1);
+}
+.gap-y-2 {
+  row-gap: var(--space-2);
+}
+.gap-y-3 {
+  row-gap: var(--space-3);
+}
 
 /* ============================================
    PADDING (uses --space-* variables)
    ============================================ */
 
-.p-0 { padding: 0; }
-.p-1 { padding: var(--space-1); }
-.p-1-5 { padding: var(--space-1-5); }
-.p-2 { padding: var(--space-2); }
-.p-3 { padding: var(--space-3); }
-.p-4 { padding: var(--space-4); }
+.p-0 {
+  padding: 0;
+}
+.p-1 {
+  padding: var(--space-1);
+}
+.p-1-5 {
+  padding: var(--space-1-5);
+}
+.p-2 {
+  padding: var(--space-2);
+}
+.p-3 {
+  padding: var(--space-3);
+}
+.p-4 {
+  padding: var(--space-4);
+}
 
 /* Horizontal padding */
-.px-1 { padding-left: var(--space-1); padding-right: var(--space-1); }
-.px-2 { padding-left: var(--space-2); padding-right: var(--space-2); }
-.px-3 { padding-left: var(--space-3); padding-right: var(--space-3); }
-.px-4 { padding-left: var(--space-4); padding-right: var(--space-4); }
+.px-1 {
+  padding-left: var(--space-1);
+  padding-right: var(--space-1);
+}
+.px-2 {
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+.px-3 {
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+}
+.px-4 {
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
 
 /* Vertical padding */
-.py-1 { padding-top: var(--space-1); padding-bottom: var(--space-1); }
-.py-2 { padding-top: var(--space-2); padding-bottom: var(--space-2); }
-.py-3 { padding-top: var(--space-3); padding-bottom: var(--space-3); }
-.py-4 { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+.py-1 {
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+}
+.py-2 {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+.py-3 {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+.py-4 {
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+}
 
 /* ============================================
    MARGIN (uses --space-* variables)
    ============================================ */
 
-.m-0 { margin: 0; }
-.m-auto { margin: auto; }
-.mx-auto { margin-left: auto; margin-right: auto; }
-.ml-auto { margin-left: auto; }
-.mr-auto { margin-right: auto; }
-.mt-1 { margin-top: var(--space-1); }
-.mt-2 { margin-top: var(--space-2); }
-.mt-3 { margin-top: var(--space-3); }
-.mb-1 { margin-bottom: var(--space-1); }
-.mb-2 { margin-bottom: var(--space-2); }
-.mb-3 { margin-bottom: var(--space-3); }
-.mb-4 { margin-bottom: var(--space-4); }
+.m-0 {
+  margin: 0;
+}
+.m-auto {
+  margin: auto;
+}
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+.ml-auto {
+  margin-left: auto;
+}
+.mr-auto {
+  margin-right: auto;
+}
+.mt-1 {
+  margin-top: var(--space-1);
+}
+.mt-2 {
+  margin-top: var(--space-2);
+}
+.mt-3 {
+  margin-top: var(--space-3);
+}
+.mb-1 {
+  margin-bottom: var(--space-1);
+}
+.mb-2 {
+  margin-bottom: var(--space-2);
+}
+.mb-3 {
+  margin-bottom: var(--space-3);
+}
+.mb-4 {
+  margin-bottom: var(--space-4);
+}
 
 /* ============================================
    WIDTH/HEIGHT
    ============================================ */
 
-.w-full { width: 100%; }
-.w-auto { width: auto; }
-.h-full { height: 100%; }
-.h-auto { height: auto; }
-.min-w-0 { min-width: 0; }
-.min-h-0 { min-height: 0; }
+.w-full {
+  width: 100%;
+}
+.w-auto {
+  width: auto;
+}
+.h-full {
+  height: 100%;
+}
+.h-auto {
+  height: auto;
+}
+.min-w-0 {
+  min-width: 0;
+}
+.min-h-0 {
+  min-height: 0;
+}
 
 /* ============================================
    TEXT ALIGNMENT
    ============================================ */
 
-.text-left { text-align: left; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
 
 /* ============================================
    TEXT SIZE (uses --font-size-* variables)
    ============================================ */
 
-.text-xs { font-size: var(--font-size-xs); }
-.text-sm { font-size: var(--font-size-sm); }
-.text-base { font-size: var(--font-size-base); }
-.text-lg { font-size: var(--font-size-lg); }
-.text-xl { font-size: var(--font-size-xl); }
+.text-xs {
+  font-size: var(--font-size-xs);
+}
+.text-sm {
+  font-size: var(--font-size-sm);
+}
+.text-base {
+  font-size: var(--font-size-base);
+}
+.text-lg {
+  font-size: var(--font-size-lg);
+}
+.text-xl {
+  font-size: var(--font-size-xl);
+}
 
 /* ============================================
    TEXT COLOR (uses portal variables)
    ============================================ */
 
-.text-primary { color: var(--portal-text-primary); }
-.text-secondary { color: var(--portal-text-secondary); }
-.text-muted { color: var(--portal-text-muted); }
-.text-light { color: var(--portal-text-light); }
+.text-primary {
+  color: var(--portal-text-primary);
+}
+.text-secondary {
+  color: var(--portal-text-secondary);
+}
+.text-muted {
+  color: var(--portal-text-muted);
+}
+.text-light {
+  color: var(--portal-text-light);
+}
 
 /* ============================================
    FONT WEIGHT
    ============================================ */
 
-.font-normal { font-weight: var(--font-weight-normal); }
-.font-medium { font-weight: var(--font-weight-medium); }
-.font-semibold { font-weight: var(--font-weight-semibold); }
-.font-bold { font-weight: var(--font-weight-bold); }
+.font-normal {
+  font-weight: var(--font-weight-normal);
+}
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
+.font-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
 
 /* ============================================
    BACKGROUND (uses portal variables)
    ============================================ */
 
-.bg-transparent { background: transparent; }
-.bg-darkest { background: var(--portal-bg-darkest); }
-.bg-darker { background: var(--portal-bg-darker); }
-.bg-dark { background: var(--portal-bg-dark); }
-.bg-medium { background: var(--portal-bg-medium); }
-.bg-light { background: var(--portal-bg-light); }
-.bg-hover { background: var(--portal-bg-hover); }
+.bg-transparent {
+  background: transparent;
+}
+.bg-darkest {
+  background: var(--portal-bg-darkest);
+}
+.bg-darker {
+  background: var(--portal-bg-darker);
+}
+.bg-dark {
+  background: var(--portal-bg-dark);
+}
+.bg-medium {
+  background: var(--portal-bg-medium);
+}
+.bg-light {
+  background: var(--portal-bg-light);
+}
+.bg-hover {
+  background: var(--portal-bg-hover);
+}
 
 /* ============================================
    BORDER RADIUS (uses portal variables)
    ============================================ */
 
-.rounded-none { border-radius: 0; }
-.rounded-sm { border-radius: var(--portal-radius-sm); }
-.rounded-md { border-radius: var(--portal-radius-md); }
-.rounded-lg { border-radius: var(--portal-radius-lg); }
-.rounded-full { border-radius: var(--border-radius-full); }
+.rounded-none {
+  border-radius: 0;
+}
+.rounded-sm {
+  border-radius: var(--portal-radius-sm);
+}
+.rounded-md {
+  border-radius: var(--portal-radius-md);
+}
+.rounded-lg {
+  border-radius: var(--portal-radius-lg);
+}
+.rounded-full {
+  border-radius: var(--border-radius-full);
+}
 
 /* ============================================
    BORDER
    ============================================ */
 
-.border { border: 1px solid var(--portal-border); }
-.border-dark { border: 1px solid var(--portal-border-dark); }
-.border-none { border: none; }
-.border-t { border-top: 1px solid var(--portal-border); }
-.border-b { border-bottom: 1px solid var(--portal-border); }
+.border {
+  border: 1px solid var(--portal-border);
+}
+.border-dark {
+  border: 1px solid var(--portal-border-dark);
+}
+.border-none {
+  border: none;
+}
+.border-t {
+  border-top: 1px solid var(--portal-border);
+}
+.border-b {
+  border-bottom: 1px solid var(--portal-border);
+}
 
 /* ============================================
    OVERFLOW
    ============================================ */
 
-.overflow-hidden { overflow: hidden; }
-.overflow-auto { overflow: auto; }
-.overflow-x-auto { overflow-x: auto; }
-.overflow-y-auto { overflow-y: auto; }
-.overflow-visible { overflow: visible; }
+.overflow-hidden {
+  overflow: hidden;
+}
+.overflow-auto {
+  overflow: auto;
+}
+.overflow-x-auto {
+  overflow-x: auto;
+}
+.overflow-y-auto {
+  overflow-y: auto;
+}
+.overflow-visible {
+  overflow: visible;
+}
 
 /* ============================================
    TEXT OVERFLOW
@@ -260,49 +503,85 @@
   overflow: hidden;
 }
 
-.whitespace-nowrap { white-space: nowrap; }
-.whitespace-normal { white-space: normal; }
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+.whitespace-normal {
+  white-space: normal;
+}
 
 /* ============================================
    POSITION
    ============================================ */
 
-.relative { position: relative; }
-.absolute { position: absolute; }
-.fixed { position: fixed; }
-.sticky { position: sticky; }
+.relative {
+  position: relative;
+}
+.absolute {
+  position: absolute;
+}
+.fixed {
+  position: fixed;
+}
+.sticky {
+  position: sticky;
+}
 
 /* ============================================
    CURSOR
    ============================================ */
 
-.cursor-pointer { cursor: pointer; }
-.cursor-default { cursor: default; }
-.cursor-not-allowed { cursor: not-allowed; }
+.cursor-pointer {
+  cursor: pointer;
+}
+.cursor-default {
+  cursor: default;
+}
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
 
 /* ============================================
    POINTER EVENTS
    ============================================ */
 
-.pointer-events-none { pointer-events: none; }
-.pointer-events-auto { pointer-events: auto; }
+.pointer-events-none {
+  pointer-events: none;
+}
+.pointer-events-auto {
+  pointer-events: auto;
+}
 
 /* ============================================
    OPACITY
    ============================================ */
 
-.opacity-0 { opacity: 0; }
-.opacity-50 { opacity: 0.5; }
-.opacity-75 { opacity: 0.75; }
-.opacity-100 { opacity: 1; }
+.opacity-0 {
+  opacity: 0;
+}
+.opacity-50 {
+  opacity: 0.5;
+}
+.opacity-75 {
+  opacity: 0.75;
+}
+.opacity-100 {
+  opacity: 1;
+}
 
 /* ============================================
    TRANSITIONS
    ============================================ */
 
-.transition-fast { transition: all var(--transition-fast) ease; }
-.transition-base { transition: all var(--transition-base) ease; }
-.transition-none { transition: none; }
+.transition-fast {
+  transition: all var(--transition-fast) ease;
+}
+.transition-base {
+  transition: all var(--transition-base) ease;
+}
+.transition-none {
+  transition: none;
+}
 
 /* ============================================
    ACCESSIBILITY

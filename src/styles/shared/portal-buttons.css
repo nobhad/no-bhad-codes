@@ -231,7 +231,8 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   align-items: center;
   gap: var(--icon-gap-md, 0.5rem);
   width: 100%;
-  padding: clamp(0.55rem, 1.3vw, 0.75rem) var(--space-3) clamp(0.55rem, 1.3vw, 0.75rem) var(--sidebar-icon-indent, 18px);
+  padding: clamp(0.55rem, 1.3vw, 0.75rem) var(--space-3) clamp(0.55rem, 1.3vw, 0.75rem)
+    var(--sidebar-icon-indent, 18px);
   font-size: clamp(0.9rem, 1.6vw, 1.05rem);
   font-weight: 500;
   text-align: left;
@@ -399,28 +400,32 @@ button > :is(.icon-wrap, .tab-icon, svg) {
     user-select: none;
     -webkit-tap-highlight-color: rgba(var(--color-primary-rgb, 255, 0, 0), 0.1);
   }
+}
 
-  /* Table action buttons stay compact (28px) even on touch devices */
-  .data-table .icon-btn,
-  .data-table .table-actions .icon-btn,
-  .data-table .actions-cell .icon-btn,
-  .data-table td .icon-btn,
-  .table-actions .icon-btn,
-  .actions-cell .icon-btn {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    min-height: 28px !important;
-  }
+/* Table action buttons stay compact (28px) even on touch devices - UTILITIES LAYER for override priority */
+@layer utilities {
+  @media (pointer: coarse) {
+    .data-table .icon-btn,
+    .data-table .table-actions .icon-btn,
+    .data-table .actions-cell .icon-btn,
+    .data-table td .icon-btn,
+    .table-actions .icon-btn,
+    .actions-cell .icon-btn {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      min-height: 28px;
+    }
 
-  .data-table .icon-btn svg,
-  .data-table .table-actions .icon-btn svg,
-  .data-table .actions-cell .icon-btn svg,
-  .data-table td .icon-btn svg,
-  .table-actions .icon-btn svg,
-  .actions-cell .icon-btn svg {
-    width: 16px !important;
-    height: 16px !important;
+    .data-table .icon-btn svg,
+    .data-table .table-actions .icon-btn svg,
+    .data-table .actions-cell .icon-btn svg,
+    .data-table td .icon-btn svg,
+    .table-actions .icon-btn svg,
+    .actions-cell .icon-btn svg {
+      width: 16px;
+      height: 16px;
+    }
   }
 }
 
@@ -439,70 +444,77 @@ button > :is(.icon-wrap, .tab-icon, svg) {
  * - Tables without .table-actions wrapper
  */
 
-/* MASTER SELECTOR: Every icon-btn in table contexts */
-td .icon-btn,
-td > .icon-btn,
-td button.icon-btn,
-.actions-cell .icon-btn,
-.actions-cell > .icon-btn,
-.actions-cell button.icon-btn,
-.table-actions .icon-btn,
-.table-actions > .icon-btn,
-.table-actions button.icon-btn,
-.data-table .icon-btn,
-.data-table td .icon-btn,
-.data-table .actions-cell .icon-btn,
-.data-table .table-actions .icon-btn,
-table .icon-btn,
-table td .icon-btn,
-[data-page="admin"] td .icon-btn,
-[data-page="admin"] .actions-cell .icon-btn,
-[data-page="admin"] .table-actions .icon-btn,
-[data-page="client-portal"] td .icon-btn,
-[data-page="client-portal"] .actions-cell .icon-btn,
-[data-page="client-portal"] .table-actions .icon-btn {
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
-  min-height: 36px !important;
-  max-width: 36px !important;
-  max-height: 36px !important;
-  padding: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-shrink: 0 !important;
-}
+/* ============================================
+ * TABLE ACTION BUTTONS - UTILITIES LAYER
+ * ============================================
+ * Using utilities layer for highest priority without !important
+ */
+@layer utilities {
+  /* MASTER SELECTOR: Every icon-btn in table contexts */
+  td .icon-btn,
+  td > .icon-btn,
+  td button.icon-btn,
+  .actions-cell .icon-btn,
+  .actions-cell > .icon-btn,
+  .actions-cell button.icon-btn,
+  .table-actions .icon-btn,
+  .table-actions > .icon-btn,
+  .table-actions button.icon-btn,
+  .data-table .icon-btn,
+  .data-table td .icon-btn,
+  .data-table .actions-cell .icon-btn,
+  .data-table .table-actions .icon-btn,
+  table .icon-btn,
+  table td .icon-btn,
+  [data-page="admin"] td .icon-btn,
+  [data-page="admin"] .actions-cell .icon-btn,
+  [data-page="admin"] .table-actions .icon-btn,
+  [data-page="client-portal"] td .icon-btn,
+  [data-page="client-portal"] .actions-cell .icon-btn,
+  [data-page="client-portal"] .table-actions .icon-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    max-width: 36px;
+    max-height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 
-/* MASTER SELECTOR: Every SVG in table icon buttons */
-td .icon-btn svg,
-td > .icon-btn svg,
-td button.icon-btn svg,
-.actions-cell .icon-btn svg,
-.actions-cell > .icon-btn svg,
-.actions-cell button.icon-btn svg,
-.table-actions .icon-btn svg,
-.table-actions > .icon-btn svg,
-.table-actions button.icon-btn svg,
-.data-table .icon-btn svg,
-.data-table td .icon-btn svg,
-.data-table .actions-cell .icon-btn svg,
-.data-table .table-actions .icon-btn svg,
-table .icon-btn svg,
-table td .icon-btn svg,
-[data-page="admin"] td .icon-btn svg,
-[data-page="admin"] .actions-cell .icon-btn svg,
-[data-page="admin"] .table-actions .icon-btn svg,
-[data-page="client-portal"] td .icon-btn svg,
-[data-page="client-portal"] .actions-cell .icon-btn svg,
-[data-page="client-portal"] .table-actions .icon-btn svg {
-  width: 18px !important;
-  height: 18px !important;
-  min-width: 18px !important;
-  min-height: 18px !important;
-  max-width: 18px !important;
-  max-height: 18px !important;
-  flex-shrink: 0 !important;
+  /* MASTER SELECTOR: Every SVG in table icon buttons */
+  td .icon-btn svg,
+  td > .icon-btn svg,
+  td button.icon-btn svg,
+  .actions-cell .icon-btn svg,
+  .actions-cell > .icon-btn svg,
+  .actions-cell button.icon-btn svg,
+  .table-actions .icon-btn svg,
+  .table-actions > .icon-btn svg,
+  .table-actions button.icon-btn svg,
+  .data-table .icon-btn svg,
+  .data-table td .icon-btn svg,
+  .data-table .actions-cell .icon-btn svg,
+  .data-table .table-actions .icon-btn svg,
+  table .icon-btn svg,
+  table td .icon-btn svg,
+  [data-page="admin"] td .icon-btn svg,
+  [data-page="admin"] .actions-cell .icon-btn svg,
+  [data-page="admin"] .table-actions .icon-btn svg,
+  [data-page="client-portal"] td .icon-btn svg,
+  [data-page="client-portal"] .actions-cell .icon-btn svg,
+  [data-page="client-portal"] .table-actions .icon-btn svg {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    max-width: 18px;
+    max-height: 18px;
+    flex-shrink: 0;
+  }
 }
 
 /* ============================================
@@ -531,7 +543,10 @@ table td .icon-btn svg,
   box-shadow: none;
 }
 
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn:is(.active, :hover, :focus) .btn-icon {
+.portal
+  :is(.sidebar.collapsed, .sidebar.icon-only)
+  .sidebar-btn:is(.active, :hover, :focus)
+  .btn-icon {
   color: var(--color-primary);
 }
 
@@ -568,7 +583,9 @@ table td .icon-btn svg,
  * ============================================ */
 
 @media (--wide-down) {
-  .portal .sidebar .sidebar-buttons { gap: 0.5rem; }
+  .portal .sidebar .sidebar-buttons {
+    gap: 0.5rem;
+  }
 
   /* Force icon-only appearance at this breakpoint */
   .portal .sidebar .sidebar-btn {
@@ -637,7 +654,9 @@ table td .icon-btn svg,
   text-transform: uppercase;
   color: var(--color-white);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 .toggle-btn:not(:last-child) {
   border-right: 1px solid var(--btn-portal-border-color);

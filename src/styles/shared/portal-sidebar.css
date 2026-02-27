@@ -15,7 +15,9 @@
   border-right: none;
   display: flex;
   flex-direction: column;
-  transition: width 0.15s ease-out, transform 0.15s ease-out;
+  transition:
+    width 0.15s ease-out,
+    transform 0.15s ease-out;
   position: relative;
   height: 100vh;
   height: 100dvh;
@@ -35,7 +37,9 @@
   border-right: none;
   display: flex;
   flex-direction: column;
-  transition: width 0.15s ease-out, transform 0.15s ease-out;
+  transition:
+    width 0.15s ease-out,
+    transform 0.15s ease-out;
   position: relative;
   height: 100vh;
   height: 100dvh;
@@ -222,7 +226,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 .client-name {
-  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
+  font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: 1.4rem;
   color: var(--portal-text-light);
   margin: 0;
@@ -438,16 +442,21 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
    IMPORTANT: Use :not(.collapsed) so manually collapsed sidebars
    maintain consistent appearance regardless of viewport size.
    ===================================================== */
-@media (--wide-down) {
-  /* Only auto-collapse sidebars that aren't manually collapsed */
-  [data-page="client-portal"] .sidebar:not(.collapsed),
-  [data-page="admin"] .sidebar:not(.collapsed) {
-    width: 56px !important;
-    min-width: 56px !important;
-    max-width: 56px !important;
-    overflow: hidden;
+/* Sidebar auto-collapse - uses responsive layer for priority */
+@layer responsive {
+  @media (--wide-down) {
+    /* Only auto-collapse sidebars that aren't manually collapsed */
+    [data-page="client-portal"] .sidebar:not(.collapsed),
+    [data-page="admin"] .sidebar:not(.collapsed) {
+      width: 56px;
+      min-width: 56px;
+      max-width: 56px;
+      overflow: hidden;
+    }
   }
+}
 
+@media (--wide-down) {
   [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-content,
   [data-page="admin"] .sidebar:not(.collapsed) .sidebar-content {
     display: flex;
@@ -641,18 +650,23 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   .portal .sidebar:not(.collapsed) .sidebar-toggle {
     display: flex;
   }
+}
 
-  /* Collapsed on mobile = completely hidden
-     Must use !important to override the 1300px auto-collapse query */
-  [data-page="client-portal"] .sidebar.collapsed,
-  [data-page="admin"] .sidebar.collapsed {
-    transform: translateX(-100%);
-    width: 0 !important;
-    min-width: 0 !important;
-    max-width: 0 !important;
-    overflow: hidden;
+/* Collapsed sidebar mobile - uses responsive layer for priority over auto-collapse */
+@layer responsive {
+  @media (--mobile) {
+    [data-page="client-portal"] .sidebar.collapsed,
+    [data-page="admin"] .sidebar.collapsed {
+      transform: translateX(-100%);
+      width: 0;
+      min-width: 0;
+      max-width: 0;
+      overflow: hidden;
+    }
   }
+}
 
+@media (--mobile) {
   /* Hide text elements in auto-collapsed state (not manually collapsed) */
   [data-page="client-portal"] .sidebar:not(.collapsed) .client-name,
   [data-page="client-portal"] .sidebar:not(.collapsed) .project-name,
@@ -697,7 +711,14 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   border-radius: var(--border-radius-full, 9999px);
   background: var(--color-danger);
   color: var(--color-text-inverse);
-  font-family: var(--font-family-system, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-family: var(
+    --font-family-system,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif
+  );
   font-size: 0.75rem;
   font-weight: 700;
   line-height: 1;

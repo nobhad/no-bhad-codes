@@ -361,7 +361,11 @@
   pointer-events: none;
 
   /* Visual styling - ALWAYS WHITE BACKGROUND (light theme colors) */
-  background: linear-gradient(135deg, var(--color-card-bg) 0%, var(--color-card-bg-gradient-end) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-card-bg) 0%,
+    var(--color-card-bg-gradient-end) 100%
+  );
   color: var(--color-card-text);
 
   /* Shadow on each face so it looks correct after flip */
@@ -649,4 +653,3 @@ html[data-theme="dark"] .intro-card-element {
 html[data-theme="dark"] .business-card-container {
   background: radial-gradient(circle at center, var(--portal-alpha-white-02), transparent);
 }
-

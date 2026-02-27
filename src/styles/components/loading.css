@@ -320,7 +320,7 @@ td.empty-row {
 
 /* Small variant icon - 16px */
 .empty-state-small::before {
-  content: '';
+  content: "";
   display: block;
   width: 16px;
   height: 16px;
@@ -402,7 +402,7 @@ p.empty-state {
 
 /* Loading state with automatic spinner */
 .loading-state::before {
-  content: '';
+  content: "";
   display: block;
   width: 24px;
   height: 24px;
@@ -423,7 +423,7 @@ p.empty-state {
 
 /* Error state with automatic icon */
 .error-state::before {
-  content: '';
+  content: "";
   display: block;
   width: 24px;
   height: 24px;
@@ -458,7 +458,7 @@ p.empty-state {
 
 /* Empty state with automatic icon (Lucide inbox icon) */
 .empty-state::before {
-  content: '';
+  content: "";
   display: block;
   width: 24px;
   height: 24px;

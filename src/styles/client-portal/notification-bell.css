@@ -31,7 +31,9 @@
   border: none;
   color: var(--portal-text-secondary);
   cursor: pointer;
-  transition: color var(--transition-fast), background-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .notification-bell-btn:hover {
@@ -64,7 +66,7 @@
   font-weight: var(--font-weight-semibold);
   line-height: 16px;
   text-align: center;
-  color: white;
+  color: var(--color-white);
   background: var(--color-danger-500);
 }
 
