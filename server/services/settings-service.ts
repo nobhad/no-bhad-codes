@@ -19,6 +19,14 @@ import {
   toSystemSetting,
 } from '../database/entities/index.js';
 
+// =====================================================
+// Column Constants - Explicit column lists for SELECT queries
+// =====================================================
+
+const SYSTEM_SETTINGS_COLUMNS = `
+  id, setting_key, setting_value, setting_type, description, is_sensitive, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 export type { SettingType, SystemSetting };
 
 export interface BusinessInfo {
@@ -106,7 +114,7 @@ class SettingsService {
    */
   private async loadCache(): Promise<void> {
     const db = getDatabase();
-    const rows = await db.all('SELECT * FROM system_settings');
+    const rows = await db.all(`SELECT ${SYSTEM_SETTINGS_COLUMNS} FROM system_settings`);
 
     this.cache.clear();
     for (const row of rows) {
@@ -125,7 +133,7 @@ class SettingsService {
     }
 
     const db = getDatabase();
-    const row = await db.get('SELECT * FROM system_settings WHERE setting_key = ?', [key]);
+    const row = await db.get(`SELECT ${SYSTEM_SETTINGS_COLUMNS} FROM system_settings WHERE setting_key = ?`, [key]);
 
     if (!row) {
       return null;

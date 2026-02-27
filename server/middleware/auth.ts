@@ -7,20 +7,13 @@
  */
 
 import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { COOKIE_CONFIG } from '../utils/auth-constants.js';
 import { errorResponse } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
+import type { JWTAuthRequest } from '../types/request.js';
 
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: number;
-    email: string;
-    type: 'client' | 'admin';
-  };
-}
-
-export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const authenticateToken = (req: JWTAuthRequest, res: Response, next: NextFunction) => {
   // Try Authorization header first (for API consumers), then HttpOnly cookie
   const authHeader = req.headers['authorization'];
   const headerToken = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
@@ -43,7 +36,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
     req.user = {
       id: decoded.id || decoded.clientId, // Support both id and clientId from tokens
       email: decoded.email,
-      type: decoded.type,
+      type: decoded.type
     };
     next();
   } catch (error) {
@@ -58,7 +51,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
   }
 };
 
-export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const requireAdmin = (req: JWTAuthRequest, res: Response, next: NextFunction) => {
   if (!req.user) {
     return errorResponse(res, 'Authentication required', 401, 'AUTH_REQUIRED');
   }
@@ -70,7 +63,7 @@ export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: Nex
   next();
 };
 
-export const requireClient = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const requireClient = (req: JWTAuthRequest, res: Response, next: NextFunction) => {
   if (!req.user) {
     return errorResponse(res, 'Authentication required', 401, 'AUTH_REQUIRED');
   }
@@ -82,4 +75,5 @@ export const requireClient = (req: AuthenticatedRequest, res: Response, next: Ne
   next();
 };
 
-export type { AuthenticatedRequest };
+// Re-export for backward compatibility - use JWTAuthRequest from types/request.ts for new code
+export type { JWTAuthRequest as AuthenticatedRequest };

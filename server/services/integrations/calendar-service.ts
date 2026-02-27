@@ -16,6 +16,26 @@
 
 import { getDatabase } from '../../database/init';
 
+// ============================================
+// Column Constants - Explicit column lists for SELECT queries
+// ============================================
+
+const PROJECT_COLUMNS_MINIMAL = 'id, project_name';
+
+const MILESTONE_COLUMNS = `
+  id, project_id, title, description, due_date, status, amount, is_billable, sort_order, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const PROJECT_TASK_COLUMNS = `
+  id, project_id, milestone_id, title, description, status, priority, assigned_to, due_date,
+  estimated_hours, actual_hours, sort_order, parent_task_id, created_at, updated_at, completed_at
+`.replace(/\s+/g, ' ').trim();
+
+const CALENDAR_SYNC_CONFIG_COLUMNS = `
+  id, user_id, calendar_id, access_token, refresh_token, expires_at, sync_milestones,
+  sync_tasks, sync_invoice_due_dates, last_sync_at, is_active, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 // Google Calendar configuration
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
@@ -488,8 +508,8 @@ export async function exportProjectToICal(projectId: number): Promise<string> {
   const db = getDatabase();
 
   // Get project details
-  const project = (await db.get('SELECT * FROM projects WHERE id = ?', [projectId])) as
-    | { name: string }
+  const project = (await db.get(`SELECT ${PROJECT_COLUMNS_MINIMAL} FROM projects WHERE id = ?`, [projectId])) as
+    | { project_name: string }
     | undefined;
   if (!project) {
     throw new Error(`Project ${projectId} not found`);
@@ -499,22 +519,22 @@ export async function exportProjectToICal(projectId: number): Promise<string> {
 
   // Get milestones
   const milestones = (await db.all(
-    'SELECT * FROM milestones WHERE project_id = ? AND due_date IS NOT NULL ORDER BY due_date',
+    `SELECT ${MILESTONE_COLUMNS} FROM milestones WHERE project_id = ? AND due_date IS NOT NULL ORDER BY due_date`,
     [projectId]
   )) as Record<string, unknown>[];
 
   for (const milestone of milestones) {
-    events.push(milestoneToCalendarEvent(milestone, project.name));
+    events.push(milestoneToCalendarEvent(milestone, project.project_name));
   }
 
   // Get tasks
   const tasks = (await db.all(
-    'SELECT * FROM project_tasks WHERE project_id = ? AND due_date IS NOT NULL ORDER BY due_date',
+    `SELECT ${PROJECT_TASK_COLUMNS} FROM project_tasks WHERE project_id = ? AND due_date IS NOT NULL ORDER BY due_date`,
     [projectId]
   )) as Record<string, unknown>[];
 
   for (const task of tasks) {
-    events.push(taskToCalendarEvent(task, project.name));
+    events.push(taskToCalendarEvent(task, project.project_name));
   }
 
   return generateICalExport(events);
@@ -644,7 +664,7 @@ export async function saveCalendarSyncConfig(
  */
 export async function getCalendarSyncConfig(userId: number): Promise<CalendarSyncConfig | null> {
   const db = getDatabase();
-  const row = (await db.get('SELECT * FROM calendar_sync_configs WHERE user_id = ?', [userId])) as
+  const row = (await db.get(`SELECT ${CALENDAR_SYNC_CONFIG_COLUMNS} FROM calendar_sync_configs WHERE user_id = ?`, [userId])) as
     | Record<string, unknown>
     | undefined;
 

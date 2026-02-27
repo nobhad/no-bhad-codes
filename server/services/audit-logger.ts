@@ -24,6 +24,16 @@ import { getDatabase } from '../database/init.js';
 import type { Request } from 'express';
 import { logger } from './logger.js';
 
+// =====================================================
+// Column Constants - Explicit column lists for SELECT queries
+// =====================================================
+
+const AUDIT_LOG_COLUMNS = `
+  id, user_id, user_email, user_type, action, entity_type, entity_id, entity_name,
+  old_value, new_value, changes, ip_address, user_agent, request_path, request_method,
+  metadata, created_at
+`.replace(/\s+/g, ' ').trim();
+
 // Audit action types - expandable string type
 export type AuditAction = string;
 
@@ -77,7 +87,7 @@ const SENSITIVE_FIELDS = [
   'credential',
   'access_token',
   'refresh_token',
-  'api_key',
+  'api_key'
 ];
 
 /**
@@ -141,7 +151,7 @@ function extractRequestContext(req?: Request): Partial<AuditLogEntry> {
     ipAddress: (req.ip || req.socket?.remoteAddress || '').replace('::ffff:', ''),
     userAgent: req.get('user-agent') || undefined,
     requestPath: req.path,
-    requestMethod: req.method,
+    requestMethod: req.method
   };
 
   // Extract user info from authenticated request
@@ -156,9 +166,24 @@ function extractRequestContext(req?: Request): Partial<AuditLogEntry> {
 }
 
 /**
- * Core function to create an audit log entry
+ * Custom error class for audit logging failures
  */
-async function createAuditLog(entry: AuditLogEntry): Promise<boolean> {
+export class AuditLogError extends Error {
+  constructor(
+    message: string,
+    public readonly entry: Partial<AuditLogEntry>,
+    public readonly cause?: Error
+  ) {
+    super(message);
+    this.name = 'AuditLogError';
+  }
+}
+
+/**
+ * Core function to create an audit log entry
+ * @throws {AuditLogError} When audit log creation fails - COMPLIANCE CRITICAL
+ */
+async function createAuditLog(entry: AuditLogEntry): Promise<void> {
   try {
     const db = getDatabase();
 
@@ -181,7 +206,7 @@ async function createAuditLog(entry: AuditLogEntry): Promise<boolean> {
       user_agent: entry.userAgent || null,
       request_path: entry.requestPath || null,
       request_method: entry.requestMethod || null,
-      metadata: entry.metadata ? JSON.stringify(entry.metadata) : null,
+      metadata: entry.metadata ? JSON.stringify(entry.metadata) : null
     };
 
     await db.run(
@@ -204,21 +229,32 @@ async function createAuditLog(entry: AuditLogEntry): Promise<boolean> {
         auditData.user_agent,
         auditData.request_path,
         auditData.request_method,
-        auditData.metadata,
+        auditData.metadata
       ]
     );
 
     logger.info(
       `[AUDIT] ${entry.action.toUpperCase()} ${entry.entityType}${entry.entityId ? `:${entry.entityId}` : ''} by ${entry.userEmail || 'system'}`
     );
-
-    return true;
   } catch (error) {
-    // Audit logging should never break the app
-    logger.error('[AUDIT] Failed to create audit log:', {
-      error: error instanceof Error ? error : undefined,
+    // COMPLIANCE CRITICAL: Audit failures must be visible, not silent
+    const auditError = new AuditLogError(
+      `Failed to create audit log for ${entry.action} on ${entry.entityType}`,
+      entry,
+      error instanceof Error ? error : undefined
+    );
+
+    logger.error('[AUDIT] CRITICAL - Audit log creation failed:', {
+      error: auditError,
+      metadata: {
+        action: entry.action,
+        entityType: entry.entityType,
+        entityId: entry.entityId,
+        userId: entry.userId
+      }
     });
-    return false;
+
+    throw auditError;
   }
 }
 
@@ -228,6 +264,7 @@ async function createAuditLog(entry: AuditLogEntry): Promise<boolean> {
 export const auditLogger = {
   /**
    * Log a create action
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logCreate(
     entityType: AuditEntityType,
@@ -236,20 +273,21 @@ export const auditLogger = {
     newValue?: Record<string, unknown>,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       action: 'create',
       entityType,
       entityId,
       entityName,
       newValue,
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log an update action
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logUpdate(
     entityType: AuditEntityType,
@@ -259,8 +297,8 @@ export const auditLogger = {
     newValue?: Record<string, unknown>,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       action: 'update',
       entityType,
@@ -268,12 +306,13 @@ export const auditLogger = {
       entityName,
       oldValue,
       newValue,
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log a delete action
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logDelete(
     entityType: AuditEntityType,
@@ -282,20 +321,21 @@ export const auditLogger = {
     oldValue?: Record<string, unknown>,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       action: 'delete',
       entityType,
       entityId,
       entityName,
       oldValue,
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log a successful login
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logLogin(
     userId: number,
@@ -303,8 +343,8 @@ export const auditLogger = {
     userType: AuditUserType,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       userId,
       userEmail,
@@ -313,32 +353,34 @@ export const auditLogger = {
       entityType: 'session',
       entityId: String(userId),
       entityName: userEmail,
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log a failed login attempt
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logLoginFailed(
     email: string,
     req?: Request,
     reason?: string,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       userEmail: email,
       userType: 'system',
       action: 'login_failed',
       entityType: 'session',
       entityName: email,
-      metadata: { ...metadata, reason },
+      metadata: { ...metadata, reason }
     });
   },
 
   /**
    * Log a logout
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logLogout(
     userId: number,
@@ -346,8 +388,8 @@ export const auditLogger = {
     userType: AuditUserType,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       userId,
       userEmail,
@@ -356,12 +398,13 @@ export const auditLogger = {
       entityType: 'session',
       entityId: String(userId),
       entityName: userEmail,
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log a status change
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logStatusChange(
     entityType: AuditEntityType,
@@ -371,8 +414,8 @@ export const auditLogger = {
     newStatus: string,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       action: 'status_change',
       entityType,
@@ -380,95 +423,100 @@ export const auditLogger = {
       entityName,
       oldValue: { status: oldStatus },
       newValue: { status: newStatus },
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log a file upload
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logUpload(
     entityId: string,
     fileName: string,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       action: 'upload',
       entityType: 'file',
       entityId,
       entityName: fileName,
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log a file download
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logDownload(
     entityId: string,
     fileName: string,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       action: 'download',
       entityType: 'file',
       entityId,
       entityName: fileName,
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log a message sent
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logMessageSent(
     messageId: string,
     subject: string,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       action: 'send_message',
       entityType: 'message',
       entityId: messageId,
       entityName: subject,
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log an email sent
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logEmailSent(
     recipientEmail: string,
     subject: string,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       action: 'send_email',
       entityType: 'message',
       entityName: subject,
-      metadata: { ...metadata, recipient: recipientEmail },
+      metadata: { ...metadata, recipient: recipientEmail }
     });
   },
 
   /**
    * Log a password reset request
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logPasswordReset(
     userId: number,
     userEmail: string,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       userId,
       userEmail,
@@ -476,12 +524,13 @@ export const auditLogger = {
       entityType: 'client',
       entityId: String(userId),
       entityName: userEmail,
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log a view action (for tracking access)
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logView(
     entityType: AuditEntityType,
@@ -489,19 +538,20 @@ export const auditLogger = {
     entityName?: string,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       action: 'view',
       entityType,
       entityId,
       entityName,
-      metadata,
+      metadata
     });
   },
 
   /**
    * Log an export operation
+   * @throws {AuditLogError} When audit log creation fails
    */
   async logExport(
     entityType: AuditEntityType,
@@ -509,21 +559,22 @@ export const auditLogger = {
     recordCount: number,
     req?: Request,
     metadata?: Record<string, unknown>
-  ): Promise<boolean> {
-    return createAuditLog({
+  ): Promise<void> {
+    await createAuditLog({
       ...extractRequestContext(req),
       action: 'export',
       entityType,
       entityName: `${recordCount} ${entityType}s to ${format}`,
-      metadata: { ...metadata, format, recordCount },
+      metadata: { ...metadata, format, recordCount }
     });
   },
 
   /**
    * Generic log function for custom actions
+   * @throws {AuditLogError} When audit log creation fails
    */
-  async log(entry: AuditLogEntry): Promise<boolean> {
-    return createAuditLog(entry);
+  async log(entry: AuditLogEntry): Promise<void> {
+    await createAuditLog(entry);
   },
 
   /**
@@ -578,7 +629,7 @@ export const auditLogger = {
     const offset = filters.offset || 0;
 
     const logs = await db.all(
-      `SELECT * FROM audit_logs ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      `SELECT ${AUDIT_LOG_COLUMNS} FROM audit_logs ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
       [...params, limit, offset]
     );
 
@@ -588,9 +639,9 @@ export const auditLogger = {
       old_value: log.old_value ? JSON.parse(log.old_value) : null,
       new_value: log.new_value ? JSON.parse(log.new_value) : null,
       changes: log.changes ? JSON.parse(log.changes) : null,
-      metadata: log.metadata ? JSON.parse(log.metadata) : null,
+      metadata: log.metadata ? JSON.parse(log.metadata) : null
     }));
-  },
+  }
 };
 
 export default auditLogger;

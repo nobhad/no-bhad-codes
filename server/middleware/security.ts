@@ -4,72 +4,25 @@
  * ===============================================
  * @file server/middleware/security.ts
  *
- * Security middleware for rate limiting, CSRF protection,
- * and other security measures.
+ * Security middleware for CSRF protection, IP filtering,
+ * request size limits, and suspicious activity detection.
+ *
+ * NOTE: Rate limiting is consolidated in rate-limiter.ts.
+ * The rateLimit function here is a wrapper for backward compatibility.
  */
 
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../services/logger.js';
-import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
-
-// Rate limiting store
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
-  blocked?: boolean;
-  blockExpiry?: number;
-}
-
-class RateLimitStore {
-  private store = new Map<string, RateLimitEntry>();
-  private cleanupInterval: NodeJS.Timeout;
-
-  constructor() {
-    // Clean up expired entries every 5 minutes
-    this.cleanupInterval = setInterval(
-      () => {
-        this.cleanup();
-      },
-      5 * 60 * 1000
-    );
-  }
-
-  get(key: string): RateLimitEntry | undefined {
-    return this.store.get(key);
-  }
-
-  set(key: string, entry: RateLimitEntry): void {
-    this.store.set(key, entry);
-  }
-
-  delete(key: string): void {
-    this.store.delete(key);
-  }
-
-  private cleanup(): void {
-    const now = Date.now();
-    for (const [key, entry] of this.store.entries()) {
-      if (
-        entry.resetTime < now &&
-        (!entry.blocked || (entry.blockExpiry && entry.blockExpiry < now))
-      ) {
-        this.store.delete(key);
-      }
-    }
-  }
-
-  destroy(): void {
-    if (this.cleanupInterval) {
-      clearInterval(this.cleanupInterval);
-    }
-    this.store.clear();
-  }
-}
-
-const rateLimitStore = new RateLimitStore();
+import { errorResponse } from '../utils/api-response.js';
+import { createRateLimiter, type RateLimitConfig } from './rate-limiter.js';
 
 /**
- * Rate limiting middleware
+ * Rate limiting middleware (wrapper for backward compatibility)
+ *
+ * @deprecated For new code, use createRateLimiter from rate-limiter.ts directly
+ *
+ * This function adapts the legacy API to use the consolidated rate limiter
+ * from rate-limiter.ts, which includes DB logging and IP blocking.
  */
 export function rateLimit(
   options: {
@@ -79,115 +32,32 @@ export function rateLimit(
     keyGenerator?: (req: Request) => string;
     skipIf?: (req: Request) => boolean;
     message?: string;
-    onLimitReached?: (req: Request, entry: RateLimitEntry) => void;
   } = {}
 ) {
   const {
     windowMs = 15 * 60 * 1000, // 15 minutes
     maxRequests = 100,
     blockDuration = 60 * 60 * 1000, // 1 hour
-    keyGenerator = (req) => req.ip || 'unknown',
-    skipIf = () => false,
-    message = 'Too many requests',
-    onLimitReached,
+    keyGenerator,
+    skipIf
   } = options;
 
+  // Create the underlying rate limiter
+  const config: RateLimitConfig = {
+    windowMs,
+    maxRequests,
+    blockDurationMs: blockDuration,
+    keyGenerator
+  };
+
+  const rateLimiter = createRateLimiter(config);
+
+  // Wrap to support skipIf option
   return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (skipIf(req)) {
-        return next();
-      }
-
-      const key = keyGenerator(req);
-      const now = Date.now();
-      const entry = rateLimitStore.get(key);
-
-      // Check if IP is blocked
-      if (entry?.blocked && entry.blockExpiry && entry.blockExpiry > now) {
-        const remainingTime = Math.ceil((entry.blockExpiry - now) / 1000);
-
-        await logger.logSecurity(
-          'rate_limit_blocked',
-          {
-            ip: req.ip,
-            path: req.path,
-            method: req.method,
-            userAgent: req.get('User-Agent'),
-            remainingBlockTime: remainingTime,
-          },
-          req
-        );
-
-        return errorResponseWithPayload(
-          res,
-          'IP blocked due to too many requests',
-          429,
-          'RATE_LIMIT_BLOCKED',
-          { retryAfter: remainingTime }
-        );
-      }
-
-      let currentEntry: RateLimitEntry;
-
-      if (!entry || entry.resetTime <= now) {
-        // Create new window
-        currentEntry = {
-          count: 1,
-          resetTime: now + windowMs,
-        };
-      } else {
-        // Increment existing window
-        currentEntry = {
-          ...entry,
-          count: entry.count + 1,
-        };
-      }
-
-      rateLimitStore.set(key, currentEntry);
-
-      // Set response headers
-      res.set({
-        'X-RateLimit-Limit': maxRequests.toString(),
-        'X-RateLimit-Remaining': Math.max(0, maxRequests - currentEntry.count).toString(),
-        'X-RateLimit-Reset': new Date(currentEntry.resetTime).toISOString(),
-      });
-
-      if (currentEntry.count > maxRequests) {
-        // Block IP for specified duration
-        currentEntry.blocked = true;
-        currentEntry.blockExpiry = now + blockDuration;
-        rateLimitStore.set(key, currentEntry);
-
-        await logger.logSecurity(
-          'rate_limit_exceeded',
-          {
-            ip: req.ip,
-            path: req.path,
-            method: req.method,
-            requestCount: currentEntry.count,
-            maxRequests,
-            blockDuration: blockDuration / 1000,
-            userAgent: req.get('User-Agent'),
-          },
-          req
-        );
-
-        if (onLimitReached) {
-          onLimitReached(req, currentEntry);
-        }
-
-        return errorResponseWithPayload(res, message, 429, 'RATE_LIMIT_EXCEEDED', {
-          retryAfter: Math.ceil(blockDuration / 1000),
-        });
-      }
-
-      next();
-    } catch (_error) {
-      await logger.error('Rate limit middleware error');
-
-      // On error, allow request through but log it
-      next();
+    if (skipIf && skipIf(req)) {
+      return next();
     }
+    return rateLimiter(req, res, next);
   };
 }
 
@@ -226,7 +96,7 @@ export function csrfProtection(
             method: req.method,
             hasHeaderToken: !!token,
             hasCookieToken: !!cookieToken,
-            userAgent: req.get('User-Agent'),
+            userAgent: req.get('User-Agent')
           },
           req
         );
@@ -265,7 +135,7 @@ export function ipFilter(
           {
             path: req.path,
             method: req.method,
-            headers: req.headers,
+            headers: req.headers
           },
           req
         );
@@ -281,7 +151,7 @@ export function ipFilter(
             ip,
             path: req.path,
             method: req.method,
-            userAgent: req.get('User-Agent'),
+            userAgent: req.get('User-Agent')
           },
           req
         );
@@ -298,7 +168,7 @@ export function ipFilter(
             path: req.path,
             method: req.method,
             whitelist: whitelist.length,
-            userAgent: req.get('User-Agent'),
+            userAgent: req.get('User-Agent')
           },
           req
         );
@@ -328,7 +198,7 @@ export function requestSizeLimit(
   const {
     maxBodySize = 10 * 1024 * 1024, // 10MB
     maxUrlLength = 2048,
-    maxHeaderSize = 8192,
+    maxHeaderSize = 8192
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -342,7 +212,7 @@ export function requestSizeLimit(
             urlLength: req.url.length,
             maxUrlLength,
             path: req.path,
-            method: req.method,
+            method: req.method
           },
           req
         );
@@ -360,7 +230,7 @@ export function requestSizeLimit(
             headerSize,
             maxHeaderSize,
             path: req.path,
-            method: req.method,
+            method: req.method
           },
           req
         );
@@ -379,7 +249,7 @@ export function requestSizeLimit(
             contentLength: parseInt(contentLength),
             maxBodySize,
             path: req.path,
-            method: req.method,
+            method: req.method
           },
           req
         );
@@ -411,7 +281,7 @@ export function suspiciousActivityDetector(
     maxPathTraversal = 3,
     maxSqlInjectionAttempts = 3,
     maxXssAttempts = 3,
-    blockDuration = 24 * 60 * 60 * 1000, // 24 hours
+    blockDuration = 24 * 60 * 60 * 1000 // 24 hours
   } = options;
 
   const suspiciousActivity = new Map<
@@ -434,7 +304,7 @@ export function suspiciousActivityDetector(
         pathTraversal: 0,
         sqlInjection: 0,
         xssAttempts: 0,
-        lastActivity: now,
+        lastActivity: now
       };
 
       // Check if IP is blocked
@@ -445,7 +315,7 @@ export function suspiciousActivityDetector(
             ip,
             path: req.path,
             method: req.method,
-            blockExpiry: activity.blockExpiry,
+            blockExpiry: activity.blockExpiry
           },
           req
         );
@@ -473,7 +343,7 @@ export function suspiciousActivityDetector(
             ip,
             path: req.path,
             fullUrl,
-            attempts: activity.pathTraversal,
+            attempts: activity.pathTraversal
           },
           req
         );
@@ -483,7 +353,7 @@ export function suspiciousActivityDetector(
       const sqlPatterns = [
         /(\b(select|insert|update|delete|drop|union|exec)\b)/gi,
         /('|(\\')|(;)|(--)|(\|\|))/g,
-        /(script|javascript|vbscript|onload|onerror)/gi,
+        /(script|javascript|vbscript|onload|onerror)/gi
       ];
 
       if (sqlPatterns.some((pattern) => pattern.test(fullUrl) || pattern.test(body))) {
@@ -495,7 +365,7 @@ export function suspiciousActivityDetector(
           {
             ip,
             path: req.path,
-            attempts: activity.sqlInjection,
+            attempts: activity.sqlInjection
           },
           req
         );
@@ -507,7 +377,7 @@ export function suspiciousActivityDetector(
         /javascript:/gi,
         /<iframe/gi,
         /onerror\s*=/gi,
-        /onload\s*=/gi,
+        /onload\s*=/gi
       ];
 
       if (xssPatterns.some((pattern) => pattern.test(fullUrl) || pattern.test(body))) {
@@ -519,7 +389,7 @@ export function suspiciousActivityDetector(
           {
             ip,
             path: req.path,
-            attempts: activity.xssAttempts,
+            attempts: activity.xssAttempts
           },
           req
         );
@@ -546,7 +416,7 @@ export function suspiciousActivityDetector(
               pathTraversal: activity.pathTraversal,
               sqlInjection: activity.sqlInjection,
               xssAttempts: activity.xssAttempts,
-              blockDuration: blockDuration / 1000,
+              blockDuration: blockDuration / 1000
             },
             req
           );
@@ -580,7 +450,7 @@ export function requestFingerprint(req: Request, res: Response, next: NextFuncti
       acceptLanguage: req.get('Accept-Language'),
       acceptEncoding: req.get('Accept-Encoding'),
       connection: req.get('Connection'),
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
 
     // Add fingerprint to request for use by other middleware
@@ -593,7 +463,8 @@ export function requestFingerprint(req: Request, res: Response, next: NextFuncti
   }
 }
 
-// Export cleanup function for graceful shutdown
+// Note: Rate limit cleanup is handled in rate-limiter.ts
+// This function is kept for API compatibility but does nothing
 export function cleanupSecurityMiddleware() {
-  rateLimitStore.destroy();
+  // No-op: Rate limiting state is now managed by rate-limiter.ts
 }

@@ -9,6 +9,33 @@
 import { getDatabase } from '../database/init.js';
 
 // ============================================
+// Column Constants - Explicit column lists for SELECT queries
+// ============================================
+
+const WORKFLOW_DEFINITION_COLUMNS = `
+  id, name, description, entity_type, workflow_type, is_active, is_default, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const WORKFLOW_STEP_COLUMNS = `
+  id, workflow_definition_id, step_order, approver_type, approver_value, is_optional,
+  auto_approve_after_hours, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const WORKFLOW_INSTANCE_COLUMNS = `
+  id, workflow_definition_id, entity_type, entity_id, status, current_step, initiated_by,
+  initiated_at, completed_at, notes
+`.replace(/\s+/g, ' ').trim();
+
+const APPROVAL_REQUEST_COLUMNS = `
+  id, workflow_instance_id, step_id, approver_email, status, decision_at, decision_comment,
+  reminder_sent_at, reminder_count, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const APPROVAL_HISTORY_COLUMNS = `
+  id, workflow_instance_id, action, actor_email, step_id, comment, created_at
+`.replace(/\s+/g, ' ').trim();
+
+// ============================================
 // Types
 // ============================================
 
@@ -82,12 +109,12 @@ class ApprovalService {
     const db = getDatabase();
     if (entityType) {
       return db.all(
-        'SELECT * FROM approval_workflow_definitions WHERE entity_type = ? ORDER BY is_default DESC, name',
+        `SELECT ${WORKFLOW_DEFINITION_COLUMNS} FROM approval_workflow_definitions WHERE entity_type = ? ORDER BY is_default DESC, name`,
         [entityType]
       ) as unknown as Promise<WorkflowDefinition[]>;
     }
     return db.all(
-      'SELECT * FROM approval_workflow_definitions ORDER BY entity_type, is_default DESC, name'
+      `SELECT ${WORKFLOW_DEFINITION_COLUMNS} FROM approval_workflow_definitions ORDER BY entity_type, is_default DESC, name`
     ) as unknown as Promise<WorkflowDefinition[]>;
   }
 
@@ -97,7 +124,7 @@ class ApprovalService {
   async getDefaultWorkflow(entityType: EntityType): Promise<WorkflowDefinition | null> {
     const db = getDatabase();
     const result = await db.get(
-      'SELECT * FROM approval_workflow_definitions WHERE entity_type = ? AND is_default = TRUE AND is_active = TRUE',
+      `SELECT ${WORKFLOW_DEFINITION_COLUMNS} FROM approval_workflow_definitions WHERE entity_type = ? AND is_default = TRUE AND is_active = TRUE`,
       [entityType]
     );
     return (result as unknown as WorkflowDefinition) || null;
@@ -108,7 +135,7 @@ class ApprovalService {
    */
   async getWorkflowDefinition(id: number): Promise<WorkflowDefinition | null> {
     const db = getDatabase();
-    const result = await db.get('SELECT * FROM approval_workflow_definitions WHERE id = ?', [id]);
+    const result = await db.get(`SELECT ${WORKFLOW_DEFINITION_COLUMNS} FROM approval_workflow_definitions WHERE id = ?`, [id]);
     return (result as unknown as WorkflowDefinition) || null;
   }
 
@@ -153,7 +180,7 @@ class ApprovalService {
   async getWorkflowSteps(definitionId: number): Promise<WorkflowStep[]> {
     const db = getDatabase();
     return db.all(
-      'SELECT * FROM approval_workflow_steps WHERE workflow_definition_id = ? ORDER BY step_order',
+      `SELECT ${WORKFLOW_STEP_COLUMNS} FROM approval_workflow_steps WHERE workflow_definition_id = ? ORDER BY step_order`,
       [definitionId]
     ) as unknown as Promise<WorkflowStep[]>;
   }
@@ -183,7 +210,7 @@ class ApprovalService {
         data.auto_approve_after_hours || null,
       ]
     );
-    const step = await db.get('SELECT * FROM approval_workflow_steps WHERE id = ?', [
+    const step = await db.get(`SELECT ${WORKFLOW_STEP_COLUMNS} FROM approval_workflow_steps WHERE id = ?`, [
       result.lastID,
     ]);
     return step as unknown as WorkflowStep;
@@ -252,7 +279,7 @@ class ApprovalService {
    */
   async getWorkflowInstance(id: number): Promise<WorkflowInstance | null> {
     const db = getDatabase();
-    const result = await db.get('SELECT * FROM approval_workflow_instances WHERE id = ?', [id]);
+    const result = await db.get(`SELECT ${WORKFLOW_INSTANCE_COLUMNS} FROM approval_workflow_instances WHERE id = ?`, [id]);
     return (result as unknown as WorkflowInstance) || null;
   }
 
@@ -265,7 +292,7 @@ class ApprovalService {
   ): Promise<WorkflowInstance | null> {
     const db = getDatabase();
     const result = await db.get(
-      'SELECT * FROM approval_workflow_instances WHERE entity_type = ? AND entity_id = ? ORDER BY id DESC LIMIT 1',
+      `SELECT ${WORKFLOW_INSTANCE_COLUMNS} FROM approval_workflow_instances WHERE entity_type = ? AND entity_id = ? ORDER BY id DESC LIMIT 1`,
       [entityType, entityId]
     );
     return (result as unknown as WorkflowInstance) || null;
@@ -316,7 +343,7 @@ class ApprovalService {
     const db = getDatabase();
 
     // Get request and verify
-    const requestRow = await db.get('SELECT * FROM approval_requests WHERE id = ?', [requestId]);
+    const requestRow = await db.get(`SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE id = ?`, [requestId]);
     if (!requestRow) throw new Error('Approval request not found');
     const request = requestRow as unknown as ApprovalRequest;
     if (request.status !== 'pending') throw new Error('Request already processed');
@@ -353,7 +380,7 @@ class ApprovalService {
     const db = getDatabase();
 
     // Get request and verify
-    const requestRow = await db.get('SELECT * FROM approval_requests WHERE id = ?', [requestId]);
+    const requestRow = await db.get(`SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE id = ?`, [requestId]);
     if (!requestRow) throw new Error('Approval request not found');
     const request = requestRow as unknown as ApprovalRequest;
     if (request.status !== 'pending') throw new Error('Request already processed');
@@ -452,7 +479,7 @@ class ApprovalService {
     )) as WorkflowDefinition;
     const steps = await this.getWorkflowSteps(definition.id);
     const requests = (await db.all(
-      'SELECT * FROM approval_requests WHERE workflow_instance_id = ?',
+      `SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE workflow_instance_id = ?`,
       [instanceId]
     )) as unknown as ApprovalRequest[];
 
@@ -541,7 +568,7 @@ class ApprovalService {
   async getApprovalHistory(instanceId: number): Promise<any[]> {
     const db = getDatabase();
     return db.all(
-      'SELECT * FROM approval_history WHERE workflow_instance_id = ? ORDER BY created_at DESC',
+      `SELECT ${APPROVAL_HISTORY_COLUMNS} FROM approval_history WHERE workflow_instance_id = ? ORDER BY created_at DESC`,
       [instanceId]
     );
   }
@@ -552,7 +579,7 @@ class ApprovalService {
   async getApprovalRequests(instanceId: number): Promise<ApprovalRequest[]> {
     const db = getDatabase();
     return db.all(
-      'SELECT * FROM approval_requests WHERE workflow_instance_id = ? ORDER BY created_at',
+      `SELECT ${APPROVAL_REQUEST_COLUMNS} FROM approval_requests WHERE workflow_instance_id = ? ORDER BY created_at`,
       [instanceId]
     ) as unknown as Promise<ApprovalRequest[]>;
   }

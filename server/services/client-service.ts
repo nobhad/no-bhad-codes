@@ -240,6 +240,39 @@ interface ClientRow {
 // toTag, toClientNote are imported from '../database/entities/index.js'
 
 // =====================================================
+// COLUMN CONSTANTS - Explicit column lists for SELECT queries
+// =====================================================
+
+const CLIENT_COLUMNS = `
+  id, email, password_hash, company_name, contact_name, phone, status, created_at, updated_at,
+  notification_messages, notification_status, notification_invoices, notification_weekly,
+  billing_company, billing_address, billing_address2, billing_city, billing_state, billing_zip, billing_country,
+  invitation_token, invitation_expires_at, invitation_sent_at, last_login_at, magic_link_token,
+  magic_link_token_expires_at, avatar_url, notes, tags, industry, website, account_manager, client_type,
+  lead_source, referral_source, tax_id, currency_preference, payment_terms, discount_percentage,
+  credit_limit, is_archived, archived_at, health_score, health_status, lifetime_value,
+  acquisition_source, company_size, last_contact_date, next_follow_up_date, preferred_contact_method
+`.replace(/\s+/g, ' ').trim();
+
+const CLIENT_CONTACT_COLUMNS = `
+  id, client_id, first_name, last_name, email, phone, title, department,
+  role, is_primary, notes, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const CLIENT_ACTIVITY_COLUMNS = `
+  id, client_id, activity_type, title, description, metadata, created_by, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const CLIENT_CUSTOM_FIELD_COLUMNS = `
+  id, field_name, field_label, field_type, options, is_required, placeholder,
+  default_value, display_order, is_active, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const TAG_COLUMNS = `
+  id, name, color, description, tag_type, created_at
+`.replace(/\s+/g, ' ').trim();
+
+// =====================================================
 // CLIENT SERVICE CLASS
 // =====================================================
 
@@ -278,7 +311,7 @@ class ClientService {
       ]
     );
 
-    const contact = (await db.get('SELECT * FROM client_contacts WHERE id = ?', [
+    const contact = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
       result.lastID,
     ])) as unknown as ContactRow | undefined;
 
@@ -303,7 +336,7 @@ class ClientService {
   async getContacts(clientId: number): Promise<ClientContact[]> {
     const db = getDatabase();
     const rows = (await db.all(
-      `SELECT * FROM client_contacts
+      `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts
        WHERE client_id = ?
        ORDER BY is_primary DESC, first_name ASC`,
       [clientId]
@@ -316,7 +349,7 @@ class ClientService {
    */
   async getContact(contactId: number): Promise<ClientContact | null> {
     const db = getDatabase();
-    const row = (await db.get('SELECT * FROM client_contacts WHERE id = ?', [
+    const row = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
       contactId,
     ])) as unknown as ContactRow | undefined;
     return row ? toContact(row) : null;
@@ -329,7 +362,7 @@ class ClientService {
     const db = getDatabase();
 
     // Get existing contact to know the client
-    const existing = (await db.get('SELECT * FROM client_contacts WHERE id = ?', [
+    const existing = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
       contactId,
     ])) as unknown as ContactRow | undefined;
 
@@ -392,7 +425,7 @@ class ClientService {
       await db.run(`UPDATE client_contacts SET ${updates.join(', ')} WHERE id = ?`, values);
     }
 
-    const updated = (await db.get('SELECT * FROM client_contacts WHERE id = ?', [
+    const updated = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
       contactId,
     ])) as unknown as ContactRow | undefined;
 
@@ -410,7 +443,7 @@ class ClientService {
     const db = getDatabase();
 
     // Get contact info for activity log
-    const contact = (await db.get('SELECT * FROM client_contacts WHERE id = ?', [
+    const contact = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
       contactId,
     ])) as unknown as ContactRow | undefined;
 
@@ -477,7 +510,7 @@ class ClientService {
     // Update client's last contact date
     await db.run('UPDATE clients SET last_contact_date = DATE("now") WHERE id = ?', [clientId]);
 
-    const row = (await db.get('SELECT * FROM client_activities WHERE id = ?', [
+    const row = (await db.get(`SELECT ${CLIENT_ACTIVITY_COLUMNS} FROM client_activities WHERE id = ?`, [
       result.lastID,
     ])) as unknown as ActivityRow | undefined;
 
@@ -497,7 +530,7 @@ class ClientService {
   ): Promise<ClientActivity[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM client_activities WHERE client_id = ?';
+    let query = `SELECT ${CLIENT_ACTIVITY_COLUMNS} FROM client_activities WHERE client_id = ?`;
     const params: SqlValue[] = [clientId];
 
     if (filters?.activityType) {
@@ -666,7 +699,7 @@ class ClientService {
       ]
     );
 
-    const field = (await db.get('SELECT * FROM client_custom_fields WHERE id = ?', [
+    const field = (await db.get(`SELECT ${CLIENT_CUSTOM_FIELD_COLUMNS} FROM client_custom_fields WHERE id = ?`, [
       result.lastID,
     ])) as unknown as CustomFieldRow | undefined;
 
@@ -683,7 +716,7 @@ class ClientService {
   async getCustomFields(includeInactive: boolean = false): Promise<CustomField[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM client_custom_fields';
+    let query = `SELECT ${CLIENT_CUSTOM_FIELD_COLUMNS} FROM client_custom_fields`;
     if (!includeInactive) {
       query += ' WHERE is_active = 1';
     }
@@ -741,7 +774,7 @@ class ClientService {
       await db.run(`UPDATE client_custom_fields SET ${updates.join(', ')} WHERE id = ?`, values);
     }
 
-    const field = (await db.get('SELECT * FROM client_custom_fields WHERE id = ?', [
+    const field = (await db.get(`SELECT ${CLIENT_CUSTOM_FIELD_COLUMNS} FROM client_custom_fields WHERE id = ?`, [
       fieldId,
     ])) as unknown as CustomFieldRow | undefined;
 
@@ -831,7 +864,7 @@ class ClientService {
       [data.name, data.color || '#6b7280', data.description || null, data.tagType || 'client']
     );
 
-    const tag = (await db.get('SELECT * FROM tags WHERE id = ?', [result.lastID])) as unknown as
+    const tag = (await db.get(`SELECT ${TAG_COLUMNS} FROM tags WHERE id = ?`, [result.lastID])) as unknown as
       | TagRow
       | undefined;
 
@@ -848,7 +881,7 @@ class ClientService {
   async getTags(tagType?: string): Promise<Tag[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM tags';
+    let query = `SELECT ${TAG_COLUMNS} FROM tags`;
     const params: SqlValue[] = [];
 
     if (tagType) {
@@ -889,7 +922,7 @@ class ClientService {
       await db.run(`UPDATE tags SET ${updates.join(', ')} WHERE id = ?`, values);
     }
 
-    const tag = (await db.get('SELECT * FROM tags WHERE id = ?', [tagId])) as unknown as
+    const tag = (await db.get(`SELECT ${TAG_COLUMNS} FROM tags WHERE id = ?`, [tagId])) as unknown as
       | TagRow
       | undefined;
 
@@ -1000,7 +1033,7 @@ class ClientService {
     const db = getDatabase();
 
     // Get client data
-    const client = (await db.get('SELECT * FROM clients WHERE id = ?', [clientId])) as unknown as
+    const client = (await db.get(`SELECT ${CLIENT_COLUMNS} FROM clients WHERE id = ?`, [clientId])) as unknown as
       | ClientRow
       | undefined;
 
@@ -1139,7 +1172,7 @@ class ClientService {
     const db = getDatabase();
 
     return (await db.all(
-      `SELECT * FROM clients
+      `SELECT ${CLIENT_COLUMNS} FROM clients
        WHERE health_status IN ('at_risk', 'critical')
        ORDER BY health_score ASC`
     )) as unknown as ClientRow[];
@@ -1314,7 +1347,7 @@ class ClientService {
     const db = getDatabase();
 
     return (await db.all(
-      `SELECT * FROM clients
+      `SELECT ${CLIENT_COLUMNS} FROM clients
        WHERE next_follow_up_date IS NOT NULL
          AND next_follow_up_date <= DATE('now')
          AND status = 'active'

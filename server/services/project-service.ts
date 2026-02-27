@@ -260,6 +260,29 @@ export interface VelocityData {
 // toTemplate (as toProjectTemplate) are imported from '../database/entities/index.js'
 
 // =====================================================
+// COLUMN CONSTANTS - Explicit column lists for SELECT queries
+// =====================================================
+
+const PROJECT_TASK_COLUMNS = `
+  id, project_id, milestone_id, title, description, status, priority, assigned_to,
+  due_date, estimated_hours, actual_hours, sort_order, parent_task_id,
+  created_at, updated_at, completed_at
+`.replace(/\s+/g, ' ').trim();
+
+const TASK_DEPENDENCY_COLUMNS = `
+  id, task_id, depends_on_task_id, dependency_type, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const TASK_CHECKLIST_ITEM_COLUMNS = `
+  id, task_id, content, is_completed, completed_at, sort_order, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const PROJECT_TEMPLATE_COLUMNS = `
+  id, name, description, project_type, default_milestones, default_tasks,
+  estimated_duration_days, default_hourly_rate, is_active, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+// =====================================================
 // PROJECT SERVICE CLASS
 // =====================================================
 
@@ -429,12 +452,12 @@ class ProjectService {
     task.subtasks = (subtaskRows as unknown as TaskRow[]).map(toTask);
 
     // Get dependencies
-    const depRows = await db.all('SELECT * FROM task_dependencies WHERE task_id = ?', [taskId]);
+    const depRows = await db.all(`SELECT ${TASK_DEPENDENCY_COLUMNS} FROM task_dependencies WHERE task_id = ?`, [taskId]);
     task.dependencies = (depRows as unknown as DependencyRow[]).map(toDependency);
 
     // Get checklist items
     const checklistRows = await db.all(
-      'SELECT * FROM task_checklist_items WHERE task_id = ? ORDER BY sort_order ASC',
+      `SELECT ${TASK_CHECKLIST_ITEM_COLUMNS} FROM task_checklist_items WHERE task_id = ? ORDER BY sort_order ASC`,
       [taskId]
     );
     task.checklistItems = (checklistRows as unknown as ChecklistRow[]).map(toChecklistItem);
@@ -592,7 +615,7 @@ class ProjectService {
     const db = getDatabase();
 
     // Get current task
-    const task = await db.get('SELECT * FROM project_tasks WHERE id = ?', [taskId]);
+    const task = await db.get(`SELECT ${PROJECT_TASK_COLUMNS} FROM project_tasks WHERE id = ?`, [taskId]);
 
     if (!task) {
       throw new Error('Task not found');
@@ -659,7 +682,7 @@ class ProjectService {
       [taskId, dependsOnTaskId, type]
     );
 
-    const dep = await db.get('SELECT * FROM task_dependencies WHERE id = ?', [result.lastID]);
+    const dep = await db.get(`SELECT ${TASK_DEPENDENCY_COLUMNS} FROM task_dependencies WHERE id = ?`, [result.lastID]);
 
     if (!dep) {
       throw new Error('Failed to create dependency');
@@ -809,7 +832,7 @@ class ProjectService {
       [taskId, content, (Number(maxOrder?.max_order) || 0) + 1]
     );
 
-    const item = await db.get('SELECT * FROM task_checklist_items WHERE id = ?', [result.lastID]);
+    const item = await db.get(`SELECT ${TASK_CHECKLIST_ITEM_COLUMNS} FROM task_checklist_items WHERE id = ?`, [result.lastID]);
 
     if (!item) {
       throw new Error('Failed to create checklist item');
@@ -832,7 +855,7 @@ class ProjectService {
       [itemId]
     );
 
-    const item = await db.get('SELECT * FROM task_checklist_items WHERE id = ?', [itemId]);
+    const item = await db.get(`SELECT ${TASK_CHECKLIST_ITEM_COLUMNS} FROM task_checklist_items WHERE id = ?`, [itemId]);
 
     if (!item) {
       throw new Error('Checklist item not found');
@@ -1178,7 +1201,7 @@ class ProjectService {
       ]
     );
 
-    const template = await db.get('SELECT * FROM project_templates WHERE id = ?', [result.lastID]);
+    const template = await db.get(`SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`, [result.lastID]);
 
     if (!template) {
       throw new Error('Failed to create template');
@@ -1193,7 +1216,7 @@ class ProjectService {
   async getTemplates(projectType?: string): Promise<ProjectTemplate[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM project_templates WHERE is_active = 1';
+    let query = `SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE is_active = 1`;
     const params: SqlValue[] = [];
 
     if (projectType) {
@@ -1212,7 +1235,7 @@ class ProjectService {
    */
   async getTemplate(templateId: number): Promise<ProjectTemplate | null> {
     const db = getDatabase();
-    const row = await db.get('SELECT * FROM project_templates WHERE id = ?', [templateId]);
+    const row = await db.get(`SELECT ${PROJECT_TEMPLATE_COLUMNS} FROM project_templates WHERE id = ?`, [templateId]);
     return row ? toTemplate(row as unknown as TemplateRow) : null;
   }
 

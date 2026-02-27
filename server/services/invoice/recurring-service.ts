@@ -29,6 +29,22 @@ type CreateInvoice = (data: InvoiceCreateData) => Promise<Invoice>;
 
 type GetInvoiceById = (id: number) => Promise<Invoice>;
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const SCHEDULED_INVOICE_COLUMNS = `
+  id, project_id, client_id, scheduled_date, trigger_type, trigger_milestone_id,
+  line_items, notes, terms, status, generated_invoice_id, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const RECURRING_INVOICE_COLUMNS = `
+  id, project_id, client_id, frequency, day_of_month, day_of_week, line_items,
+  notes, terms, start_date, end_date, next_generation_date, last_generated_at,
+  is_active, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const INVOICE_REMINDER_COLUMNS = `
+  id, invoice_id, reminder_type, scheduled_date, sent_at, status, created_at
+`.replace(/\s+/g, ' ').trim();
+
 export class InvoiceRecurringService {
   private db: Database;
   private createInvoice: CreateInvoice;
@@ -72,7 +88,7 @@ export class InvoiceRecurringService {
    * Get all scheduled invoices, optionally filtered by project
    */
   async getScheduledInvoices(projectId?: number): Promise<ScheduledInvoice[]> {
-    let sql = "SELECT * FROM scheduled_invoices WHERE status = 'pending'";
+    let sql = `SELECT ${SCHEDULED_INVOICE_COLUMNS} FROM scheduled_invoices WHERE status = 'pending'`;
     const params: SqlValue[] = [];
 
     if (projectId) {
@@ -100,7 +116,7 @@ export class InvoiceRecurringService {
     const today = new Date().toISOString().split('T')[0];
 
     const sql = `
-      SELECT * FROM scheduled_invoices
+      SELECT ${SCHEDULED_INVOICE_COLUMNS} FROM scheduled_invoices
       WHERE status = 'pending'
         AND trigger_type = 'date'
         AND scheduled_date <= ?
@@ -175,7 +191,7 @@ export class InvoiceRecurringService {
    * Get all recurring invoices, optionally filtered by project
    */
   async getRecurringInvoices(projectId?: number): Promise<RecurringInvoice[]> {
-    let sql = 'SELECT * FROM recurring_invoices';
+    let sql = `SELECT ${RECURRING_INVOICE_COLUMNS} FROM recurring_invoices`;
     const params: SqlValue[] = [];
 
     if (projectId) {
@@ -280,7 +296,7 @@ export class InvoiceRecurringService {
     const today = new Date().toISOString().split('T')[0];
 
     const sql = `
-      SELECT * FROM recurring_invoices
+      SELECT ${RECURRING_INVOICE_COLUMNS} FROM recurring_invoices
       WHERE is_active = 1
         AND next_generation_date <= ?
         AND (end_date IS NULL OR end_date >= ?)
@@ -404,7 +420,7 @@ export class InvoiceRecurringService {
    * Get all reminders for an invoice
    */
   async getInvoiceReminders(invoiceId: number): Promise<InvoiceReminder[]> {
-    const sql = 'SELECT * FROM invoice_reminders WHERE invoice_id = ? ORDER BY scheduled_date ASC';
+    const sql = `SELECT ${INVOICE_REMINDER_COLUMNS} FROM invoice_reminders WHERE invoice_id = ? ORDER BY scheduled_date ASC`;
     const rows = await this.db.all(sql, [invoiceId]);
 
     return rows.map((row: InvoiceReminderRow) => ({
@@ -477,7 +493,7 @@ export class InvoiceRecurringService {
   }
 
   private async getScheduledInvoiceById(id: number): Promise<ScheduledInvoice> {
-    const sql = 'SELECT * FROM scheduled_invoices WHERE id = ?';
+    const sql = `SELECT ${SCHEDULED_INVOICE_COLUMNS} FROM scheduled_invoices WHERE id = ?`;
     const row = await this.db.get(sql, [id]);
 
     if (!row) {
@@ -506,7 +522,7 @@ export class InvoiceRecurringService {
   }
 
   private async getRecurringInvoiceById(id: number): Promise<RecurringInvoice> {
-    const sql = 'SELECT * FROM recurring_invoices WHERE id = ?';
+    const sql = `SELECT ${RECURRING_INVOICE_COLUMNS} FROM recurring_invoices WHERE id = ?`;
     const row = await this.db.get(sql, [id]);
 
     if (!row) {

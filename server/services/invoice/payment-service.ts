@@ -27,6 +27,11 @@ type UpdateInvoiceStatus = (
 
 type GetInvoiceById = (id: number) => Promise<Invoice>;
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const INVOICE_PAYMENT_COLUMNS = `
+  id, invoice_id, amount, payment_method, payment_reference, payment_date, notes, created_at
+`.replace(/\s+/g, ' ').trim();
+
 export class InvoicePaymentService {
   private db: Database;
   private getInvoiceById: GetInvoiceById;
@@ -216,7 +221,7 @@ export class InvoicePaymentService {
    */
   async getPaymentHistory(invoiceId: number): Promise<InvoicePayment[]> {
     const sql = `
-      SELECT * FROM invoice_payments
+      SELECT ${INVOICE_PAYMENT_COLUMNS} FROM invoice_payments
       WHERE invoice_id = ?
       ORDER BY payment_date DESC, created_at DESC
     `;
@@ -239,7 +244,7 @@ export class InvoicePaymentService {
    * Get all payments across all invoices (for reports)
    */
   async getAllPayments(dateFrom?: string, dateTo?: string): Promise<InvoicePayment[]> {
-    let sql = 'SELECT * FROM invoice_payments';
+    let sql = `SELECT ${INVOICE_PAYMENT_COLUMNS} FROM invoice_payments`;
     const params: SqlValue[] = [];
 
     const conditions: string[] = [];

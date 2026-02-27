@@ -6,18 +6,27 @@
  *
  * Automatically logs all write operations (POST, PUT, DELETE)
  * to the audit_logs table.
+ *
+ * NOTE: Uses the response 'finish' event to avoid conflicts with
+ * other middleware that intercept res.json (like logger.ts).
  */
 
 import { Request, Response, NextFunction } from 'express';
 import { auditLogger, AuditAction, AuditEntityType } from '../services/audit-logger.js';
 import { logger } from '../services/logger.js';
+import type { JWTAuthRequest } from '../types/request.js';
 
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: number;
-    email: string;
-    type: string;
-  };
+// Symbol to store audit context on response object
+const AUDIT_CONTEXT = Symbol('auditContext');
+
+interface AuditContext {
+  responseBody?: unknown;
+  shouldAudit: boolean;
+}
+
+// Extend Response type to include audit context
+interface AuditableResponse extends Response {
+  [AUDIT_CONTEXT]?: AuditContext;
 }
 
 /**
@@ -31,7 +40,7 @@ const ROUTE_ENTITY_MAP: Record<string, AuditEntityType> = {
   '/api/uploads': 'file',
   '/api/intake': 'intake',
   '/api/contact': 'contact_submission',
-  '/api/auth': 'session',
+  '/api/auth': 'session'
 };
 
 /**
@@ -61,15 +70,15 @@ function getAction(method: string, path: string): AuditAction {
 
   // Default based on method
   switch (method) {
-    case 'POST':
-      return 'create';
-    case 'PUT':
-    case 'PATCH':
-      return 'update';
-    case 'DELETE':
-      return 'delete';
-    default:
-      return 'view';
+  case 'POST':
+    return 'create';
+  case 'PUT':
+  case 'PATCH':
+    return 'update';
+  case 'DELETE':
+    return 'delete';
+  default:
+    return 'view';
   }
 }
 
@@ -94,9 +103,13 @@ function getEntityId(req: Request): string | undefined {
 
 /**
  * Middleware to automatically audit write operations
+ *
+ * Uses a two-phase approach to avoid res.json conflicts:
+ * 1. Intercept res.json to capture response body
+ * 2. Use res.on('finish') to perform audit logging
  */
 export function auditMiddleware() {
-  return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  return (req: JWTAuthRequest, res: AuditableResponse, next: NextFunction) => {
     // Only audit write operations
     const writeOperations = ['POST', 'PUT', 'PATCH', 'DELETE'];
     if (!writeOperations.includes(req.method)) {
@@ -109,45 +122,63 @@ export function auditMiddleware() {
       return next();
     }
 
-    // Store original json method
+    // Initialize audit context
+    res[AUDIT_CONTEXT] = { shouldAudit: true };
+
+    // Capture response body by intercepting res.json
+    // This preserves the chain - other middleware can also intercept
     const originalJson = res.json.bind(res);
-
-    // Override json to capture response
-    res.json = function (body: any) {
-      // Log after successful response (2xx status)
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        const action = getAction(req.method, req.path);
-        const entityType = getEntityType(req.path);
-        const entityId = getEntityId(req) || body?.id?.toString() || body?.data?.id?.toString();
-
-        // Don't await - fire and forget for performance
-        auditLogger
-          .log({
-            userId: req.user?.id,
-            userEmail: req.user?.email,
-            userType: req.user?.type === 'admin' ? 'admin' : req.user ? 'client' : 'system',
-            action,
-            entityType,
-            entityId,
-            entityName: body?.name || body?.email || body?.subject || req.body?.name,
-            newValue: req.method === 'DELETE' ? undefined : req.body,
-            ipAddress: (req.ip || req.socket?.remoteAddress || '').replace('::ffff:', ''),
-            userAgent: req.get('user-agent'),
-            requestPath: req.path,
-            requestMethod: req.method,
-            metadata: {
-              statusCode: res.statusCode,
-              responseId: body?.id || body?.data?.id,
-            },
-          })
-          .catch((err) => {
-            logger.error('[AUDIT] Failed to log', { error: err });
-            console.error('[AUDIT] Failed to log:', err);
-          });
+    res.json = function (body: unknown) {
+      // Store body for audit logging in finish handler
+      if (res[AUDIT_CONTEXT]) {
+        res[AUDIT_CONTEXT].responseBody = body;
       }
-
       return originalJson(body);
     };
+
+    // Perform audit logging on response finish
+    res.on('finish', () => {
+      const ctx = res[AUDIT_CONTEXT];
+      if (!ctx?.shouldAudit) return;
+
+      // Only audit successful responses (2xx status)
+      if (res.statusCode < 200 || res.statusCode >= 300) return;
+
+      const body = ctx.responseBody as Record<string, unknown> | undefined;
+      const action = getAction(req.method, req.path);
+      const entityType = getEntityType(req.path);
+      const entityId =
+        getEntityId(req) || body?.id?.toString() || (body?.data as any)?.id?.toString();
+
+      // Fire and forget audit log - errors are caught internally
+      auditLogger
+        .log({
+          userId: req.user?.id,
+          userEmail: req.user?.email,
+          userType: req.user?.type === 'admin' ? 'admin' : req.user ? 'client' : 'system',
+          action,
+          entityType,
+          entityId,
+          entityName:
+            (body?.name as string) ||
+            (body?.email as string) ||
+            (body?.subject as string) ||
+            req.body?.name,
+          newValue: req.method === 'DELETE' ? undefined : req.body,
+          ipAddress: (req.ip || req.socket?.remoteAddress || '').replace('::ffff:', ''),
+          userAgent: req.get('user-agent'),
+          requestPath: req.path,
+          requestMethod: req.method,
+          metadata: {
+            statusCode: res.statusCode,
+            responseId: body?.id || (body?.data as any)?.id
+          }
+        })
+        .catch((err) => {
+          // Log but don't throw - response already sent
+          logger.error('[AUDIT] Failed to log', { error: err });
+        });
+    });
 
     next();
   };

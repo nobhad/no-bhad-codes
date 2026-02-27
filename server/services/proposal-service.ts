@@ -97,6 +97,56 @@ function generateToken(): string {
 }
 
 // =====================================================
+// COLUMN CONSTANTS - Explicit column lists for SELECT queries
+// =====================================================
+
+const PROPOSAL_REQUEST_COLUMNS = `
+  id, project_id, client_id, project_type, selected_tier, base_price, final_price,
+  maintenance_option, status, client_notes, admin_notes, created_at, reviewed_at, reviewed_by
+`.replace(/\s+/g, ' ').trim();
+
+const PROPOSAL_TEMPLATE_COLUMNS = `
+  id, name, description, project_type, tier_structure, default_line_items,
+  terms_and_conditions, validity_days, is_default, is_active, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const PROPOSAL_VERSION_COLUMNS = `
+  id, proposal_id, version_number, tier_data, features_data, pricing_data,
+  notes, created_by, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const PROPOSAL_SIGNATURE_COLUMNS = `
+  id, proposal_id, signer_name, signer_email, signer_title, signer_company,
+  signature_method, signature_data, ip_address, user_agent, signed_at
+`.replace(/\s+/g, ' ').trim();
+
+const PROPOSAL_COMMENT_COLUMNS = `
+  id, proposal_id, author_type, author_name, author_email, content, is_internal,
+  parent_comment_id, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const PROPOSAL_ACTIVITY_COLUMNS = `
+  id, proposal_id, activity_type, actor, actor_type, metadata, ip_address,
+  user_agent, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const PROPOSAL_CUSTOM_ITEM_COLUMNS = `
+  id, proposal_id, item_type, description, quantity, unit_price, unit_label,
+  category, is_taxable, is_optional, sort_order, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const SIGNATURE_REQUEST_COLUMNS = `
+  id, proposal_id, signer_email, signer_name, request_token, status, sent_at,
+  viewed_at, signed_at, declined_at, decline_reason, expires_at, reminder_count,
+  last_reminder_at, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const PROPOSAL_FEATURE_SELECTION_COLUMNS = `
+  id, proposal_request_id, feature_id, feature_name, feature_price, feature_category,
+  is_included_in_tier, is_addon, created_at
+`.replace(/\s+/g, ' ').trim();
+
+// =====================================================
 // PROPOSAL SERVICE CLASS
 // =====================================================
 
@@ -163,7 +213,7 @@ class ProposalService {
   async getTemplates(projectType?: string): Promise<ProposalTemplate[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM proposal_templates WHERE is_active = TRUE';
+    let query = `SELECT ${PROPOSAL_TEMPLATE_COLUMNS} FROM proposal_templates WHERE is_active = TRUE`;
     const params: string[] = [];
 
     if (projectType) {
@@ -182,7 +232,7 @@ class ProposalService {
    */
   async getTemplate(templateId: number): Promise<ProposalTemplate> {
     const db = getDatabase();
-    const row = await db.get('SELECT * FROM proposal_templates WHERE id = ?', [templateId]);
+    const row = await db.get(`SELECT ${PROPOSAL_TEMPLATE_COLUMNS} FROM proposal_templates WHERE id = ?`, [templateId]);
 
     if (!row) {
       throw new Error('Template not found');
@@ -277,14 +327,14 @@ class ProposalService {
     const db = getDatabase();
 
     // Get current proposal data
-    const proposal = await db.get('SELECT * FROM proposal_requests WHERE id = ?', [proposalId]);
+    const proposal = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [proposalId]);
     if (!proposal) {
       throw new Error('Proposal not found');
     }
 
     // Get current features
     const features = await db.all(
-      'SELECT * FROM proposal_feature_selections WHERE proposal_request_id = ?',
+      `SELECT ${PROPOSAL_FEATURE_SELECTION_COLUMNS} FROM proposal_feature_selections WHERE proposal_request_id = ?`,
       [proposalId]
     );
 
@@ -339,7 +389,7 @@ class ProposalService {
   async getVersions(proposalId: number): Promise<ProposalVersion[]> {
     const db = getDatabase();
     const rows = await db.all(
-      'SELECT * FROM proposal_versions WHERE proposal_id = ? ORDER BY version_number DESC',
+      `SELECT ${PROPOSAL_VERSION_COLUMNS} FROM proposal_versions WHERE proposal_id = ? ORDER BY version_number DESC`,
       [proposalId]
     );
     return rows.map((row) => toProposalVersion(row as ProposalVersionRow));
@@ -350,7 +400,7 @@ class ProposalService {
    */
   async getVersion(versionId: number): Promise<ProposalVersion> {
     const db = getDatabase();
-    const row = await db.get('SELECT * FROM proposal_versions WHERE id = ?', [versionId]);
+    const row = await db.get(`SELECT ${PROPOSAL_VERSION_COLUMNS} FROM proposal_versions WHERE id = ?`, [versionId]);
 
     if (!row) {
       throw new Error('Version not found');
@@ -526,7 +576,7 @@ class ProposalService {
    */
   async getSignatureRequest(requestId: number): Promise<SignatureRequest> {
     const db = getDatabase();
-    const row = await db.get('SELECT * FROM signature_requests WHERE id = ?', [requestId]);
+    const row = await db.get(`SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE id = ?`, [requestId]);
 
     if (!row) {
       throw new Error('Signature request not found');
@@ -540,7 +590,7 @@ class ProposalService {
    */
   async getSignatureRequestByToken(token: string): Promise<SignatureRequest | null> {
     const db = getDatabase();
-    const row = await db.get('SELECT * FROM signature_requests WHERE request_token = ?', [token]);
+    const row = await db.get(`SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE request_token = ?`, [token]);
 
     if (!row) {
       return null;
@@ -752,7 +802,7 @@ class ProposalService {
    */
   async getSignature(signatureId: number): Promise<ProposalSignature> {
     const db = getDatabase();
-    const row = await db.get('SELECT * FROM proposal_signatures WHERE id = ?', [signatureId]);
+    const row = await db.get(`SELECT ${PROPOSAL_SIGNATURE_COLUMNS} FROM proposal_signatures WHERE id = ?`, [signatureId]);
 
     if (!row) {
       throw new Error('Signature not found');
@@ -767,7 +817,7 @@ class ProposalService {
   async getProposalSignatures(proposalId: number): Promise<ProposalSignature[]> {
     const db = getDatabase();
     const rows = await db.all(
-      'SELECT * FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC',
+      `SELECT ${PROPOSAL_SIGNATURE_COLUMNS} FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC`,
       [proposalId]
     );
     return rows.map((row) => toProposalSignature(row as ProposalSignatureRow));
@@ -793,7 +843,7 @@ class ProposalService {
     const signatures = await this.getProposalSignatures(proposalId);
 
     const pendingRows = await db.all(
-      "SELECT * FROM signature_requests WHERE proposal_id = ? AND status IN ('pending', 'viewed')",
+      "`SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE proposal_id = ? AND status IN ('pending', 'viewed')`",
       [proposalId]
     );
     const pendingRequests = pendingRows.map((row) =>
@@ -900,7 +950,7 @@ class ProposalService {
    */
   async getComment(commentId: number): Promise<ProposalComment> {
     const db = getDatabase();
-    const row = await db.get('SELECT * FROM proposal_comments WHERE id = ?', [commentId]);
+    const row = await db.get(`SELECT ${PROPOSAL_COMMENT_COLUMNS} FROM proposal_comments WHERE id = ?`, [commentId]);
 
     if (!row) {
       throw new Error('Comment not found');
@@ -915,7 +965,7 @@ class ProposalService {
   async getComments(proposalId: number, includeInternal = false): Promise<ProposalComment[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM proposal_comments WHERE proposal_id = ?';
+    let query = `SELECT ${PROPOSAL_COMMENT_COLUMNS} FROM proposal_comments WHERE proposal_id = ?`;
     if (!includeInternal) {
       query += ' AND is_internal = FALSE';
     }
@@ -996,7 +1046,7 @@ class ProposalService {
   async getActivities(proposalId: number, limit = 50): Promise<ProposalActivity[]> {
     const db = getDatabase();
     const rows = await db.all(
-      'SELECT * FROM proposal_activities WHERE proposal_id = ? ORDER BY created_at DESC LIMIT ?',
+      `SELECT ${PROPOSAL_ACTIVITY_COLUMNS} FROM proposal_activities WHERE proposal_id = ? ORDER BY created_at DESC LIMIT ?`,
       [proposalId, limit]
     );
     return rows.map((row) => toProposalActivity(row as ProposalActivityRow));
@@ -1062,7 +1112,7 @@ class ProposalService {
    */
   async getCustomItem(itemId: number): Promise<ProposalCustomItem> {
     const db = getDatabase();
-    const row = await db.get('SELECT * FROM proposal_custom_items WHERE id = ?', [itemId]);
+    const row = await db.get(`SELECT ${PROPOSAL_CUSTOM_ITEM_COLUMNS} FROM proposal_custom_items WHERE id = ?`, [itemId]);
 
     if (!row) {
       throw new Error('Custom item not found');
@@ -1077,7 +1127,7 @@ class ProposalService {
   async getCustomItems(proposalId: number): Promise<ProposalCustomItem[]> {
     const db = getDatabase();
     const rows = await db.all(
-      'SELECT * FROM proposal_custom_items WHERE proposal_id = ? ORDER BY sort_order ASC',
+      `SELECT ${PROPOSAL_CUSTOM_ITEM_COLUMNS} FROM proposal_custom_items WHERE proposal_id = ? ORDER BY sort_order ASC`,
       [proposalId]
     );
     return rows.map((row) => toProposalCustomItem(row as ProposalCustomItemRow));
@@ -1223,7 +1273,7 @@ class ProposalService {
     const db = getDatabase();
 
     // Get proposal
-    const proposal = await db.get('SELECT * FROM proposal_requests WHERE id = ?', [proposalId]);
+    const proposal = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [proposalId]);
     if (!proposal) return;
 
     const p = proposal as Record<string, unknown>;

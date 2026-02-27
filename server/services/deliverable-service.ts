@@ -13,6 +13,35 @@ import {
   DeliverableReview,
 } from '../models/deliverable.js';
 
+// ============================================
+// Column Constants - Explicit column lists for SELECT queries
+// ============================================
+
+const DELIVERABLE_COLUMNS = `
+  id, project_id, type, title, description, status, approval_status, round_number,
+  created_by_id, reviewed_by_id, review_deadline, approved_at, locked, tags,
+  archived_file_id, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const DELIVERABLE_VERSION_COLUMNS = `
+  id, deliverable_id, version_number, file_path, file_name, file_size, file_type,
+  uploaded_by_id, change_notes, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const DELIVERABLE_COMMENT_COLUMNS = `
+  id, deliverable_id, author_id, comment_text, x_position, y_position, annotation_type,
+  element_id, resolved, resolved_at, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const DESIGN_ELEMENT_COLUMNS = `
+  id, deliverable_id, name, description, approval_status, revision_count, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const DELIVERABLE_REVIEW_COLUMNS = `
+  id, deliverable_id, reviewer_id, decision, feedback, design_elements_reviewed,
+  review_duration_minutes, created_at
+`.replace(/\s+/g, ' ').trim();
+
 export class DeliverableService {
   private db: Database;
 
@@ -64,7 +93,7 @@ export class DeliverableService {
    * Get deliverable by ID
    */
   async getDeliverableById(id: number): Promise<Deliverable | null> {
-    const row = await this.db.get('SELECT * FROM deliverables WHERE id = ?', [id]);
+    const row = await this.db.get(`SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE id = ?`, [id]);
     if (!row) return null;
     return this.formatDeliverable(row);
   }
@@ -76,7 +105,7 @@ export class DeliverableService {
     projectId: number,
     options?: { status?: string; roundNumber?: number; limit?: number; offset?: number }
   ): Promise<{ deliverables: Deliverable[]; total: number }> {
-    let query = 'SELECT * FROM deliverables WHERE project_id = ?';
+    let query = `SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE project_id = ?`;
     const params: any[] = [projectId];
 
     if (options?.status) {
@@ -250,7 +279,7 @@ export class DeliverableService {
    * Get version by ID
    */
   async getVersionById(id: number): Promise<DeliverableVersion | null> {
-    const row = await this.db.get('SELECT * FROM deliverable_versions WHERE id = ?', [id]);
+    const row = await this.db.get(`SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE id = ?`, [id]);
     if (!row) return null;
     return row as unknown as DeliverableVersion;
   }
@@ -260,7 +289,7 @@ export class DeliverableService {
    */
   async getDeliverableVersions(deliverableId: number): Promise<DeliverableVersion[]> {
     const rows = await this.db.all(
-      'SELECT * FROM deliverable_versions WHERE deliverable_id = ? ORDER BY version_number DESC',
+      `SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE deliverable_id = ? ORDER BY version_number DESC`,
       [deliverableId]
     );
     return rows as unknown as DeliverableVersion[];
@@ -271,7 +300,7 @@ export class DeliverableService {
    */
   async getLatestVersion(deliverableId: number): Promise<DeliverableVersion | null> {
     const row = await this.db.get(
-      'SELECT * FROM deliverable_versions WHERE deliverable_id = ? ORDER BY version_number DESC LIMIT 1',
+      `SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE deliverable_id = ? ORDER BY version_number DESC LIMIT 1`,
       [deliverableId]
     );
     if (!row) return null;
@@ -313,7 +342,7 @@ export class DeliverableService {
    * Get comment by ID
    */
   async getCommentById(id: number): Promise<DeliverableComment | null> {
-    const row = await this.db.get('SELECT * FROM deliverable_comments WHERE id = ?', [id]);
+    const row = await this.db.get(`SELECT ${DELIVERABLE_COMMENT_COLUMNS} FROM deliverable_comments WHERE id = ?`, [id]);
     if (!row) return null;
     return this.formatComment(row);
   }
@@ -325,7 +354,7 @@ export class DeliverableService {
     deliverableId: number,
     options?: { resolved?: boolean; elementId?: string }
   ): Promise<DeliverableComment[]> {
-    let query = 'SELECT * FROM deliverable_comments WHERE deliverable_id = ?';
+    let query = `SELECT ${DELIVERABLE_COMMENT_COLUMNS} FROM deliverable_comments WHERE deliverable_id = ?`;
     const params: any[] = [deliverableId];
 
     if (options?.resolved !== undefined) {
@@ -391,7 +420,7 @@ export class DeliverableService {
    * Get design element by ID
    */
   async getDesignElementById(id: number): Promise<DesignElement | null> {
-    const row = await this.db.get('SELECT * FROM design_elements WHERE id = ?', [id]);
+    const row = await this.db.get(`SELECT ${DESIGN_ELEMENT_COLUMNS} FROM design_elements WHERE id = ?`, [id]);
     if (!row) return null;
     return row as unknown as DesignElement;
   }
@@ -401,7 +430,7 @@ export class DeliverableService {
    */
   async getDeliverableElements(deliverableId: number): Promise<DesignElement[]> {
     const rows = await this.db.all(
-      'SELECT * FROM design_elements WHERE deliverable_id = ? ORDER BY created_at ASC',
+      `SELECT ${DESIGN_ELEMENT_COLUMNS} FROM design_elements WHERE deliverable_id = ? ORDER BY created_at ASC`,
       [deliverableId]
     );
     return rows as unknown as DesignElement[];
@@ -465,7 +494,7 @@ export class DeliverableService {
    * Get review by ID
    */
   async getReviewById(id: number): Promise<DeliverableReview | null> {
-    const row = await this.db.get('SELECT * FROM deliverable_reviews WHERE id = ?', [id]);
+    const row = await this.db.get(`SELECT ${DELIVERABLE_REVIEW_COLUMNS} FROM deliverable_reviews WHERE id = ?`, [id]);
     if (!row) return null;
     return this.formatReview(row);
   }
@@ -475,7 +504,7 @@ export class DeliverableService {
    */
   async getDeliverableReviews(deliverableId: number): Promise<DeliverableReview[]> {
     const rows = await this.db.all(
-      'SELECT * FROM deliverable_reviews WHERE deliverable_id = ? ORDER BY created_at DESC',
+      `SELECT ${DELIVERABLE_REVIEW_COLUMNS} FROM deliverable_reviews WHERE deliverable_id = ? ORDER BY created_at DESC`,
       [deliverableId]
     );
     return rows.map((row: any) => this.formatReview(row));

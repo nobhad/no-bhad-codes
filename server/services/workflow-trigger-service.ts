@@ -16,6 +16,18 @@ import { userService } from './user-service.js';
 import { logger } from './logger.js';
 
 // ============================================
+// Column Constants - Explicit column lists for SELECT queries
+// ============================================
+
+const WORKFLOW_TRIGGER_COLUMNS = `
+  id, name, description, event_type, conditions, action_type, action_config, is_active, priority, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const SYSTEM_EVENT_COLUMNS = `
+  id, event_type, entity_type, entity_id, event_data, triggered_by, created_at
+`.replace(/\s+/g, ' ').trim();
+
+// ============================================
 // Types
 // ============================================
 
@@ -121,7 +133,7 @@ class WorkflowTriggerService {
 
     // Get all active triggers for this event type
     const triggers = (await db.all(
-      `SELECT * FROM workflow_triggers
+      `SELECT ${WORKFLOW_TRIGGER_COLUMNS} FROM workflow_triggers
        WHERE event_type = ? AND is_active = TRUE
        ORDER BY priority DESC`,
       [eventType]
@@ -223,12 +235,12 @@ class WorkflowTriggerService {
     const db = getDatabase();
     if (eventType) {
       return db.all(
-        'SELECT * FROM workflow_triggers WHERE event_type = ? ORDER BY priority DESC, name',
+        `SELECT ${WORKFLOW_TRIGGER_COLUMNS} FROM workflow_triggers WHERE event_type = ? ORDER BY priority DESC, name`,
         [eventType]
       ) as unknown as Promise<WorkflowTrigger[]>;
     }
     return db.all(
-      'SELECT * FROM workflow_triggers ORDER BY event_type, priority DESC, name'
+      `SELECT ${WORKFLOW_TRIGGER_COLUMNS} FROM workflow_triggers ORDER BY event_type, priority DESC, name`
     ) as unknown as Promise<WorkflowTrigger[]>;
   }
 
@@ -237,7 +249,7 @@ class WorkflowTriggerService {
    */
   async getTrigger(id: number): Promise<WorkflowTrigger | null> {
     const db = getDatabase();
-    const result = await db.get('SELECT * FROM workflow_triggers WHERE id = ?', [id]);
+    const result = await db.get(`SELECT ${WORKFLOW_TRIGGER_COLUMNS} FROM workflow_triggers WHERE id = ?`, [id]);
     return (result as unknown as WorkflowTrigger) || null;
   }
 
@@ -392,11 +404,11 @@ class WorkflowTriggerService {
     const db = getDatabase();
     if (eventType) {
       return db.all(
-        'SELECT * FROM system_events WHERE event_type = ? ORDER BY created_at DESC LIMIT ?',
+        `SELECT ${SYSTEM_EVENT_COLUMNS} FROM system_events WHERE event_type = ? ORDER BY created_at DESC LIMIT ?`,
         [eventType, limit]
       );
     }
-    return db.all('SELECT * FROM system_events ORDER BY created_at DESC LIMIT ?', [limit]);
+    return db.all(`SELECT ${SYSTEM_EVENT_COLUMNS} FROM system_events ORDER BY created_at DESC LIMIT ?`, [limit]);
   }
 
   /**

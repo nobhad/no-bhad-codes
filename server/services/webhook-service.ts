@@ -8,6 +8,20 @@ import { getDatabase } from '../database/init.js';
 import { WebhookConfig, WebhookDelivery, WebhookPayload } from '../models/webhook.js';
 import type { Database } from '../database/init.js';
 
+// ============================================
+// Column Constants - Explicit column lists for SELECT queries
+// ============================================
+
+const WEBHOOK_COLUMNS = `
+  id, name, url, method, headers, payload_template, events, is_active, secret_key,
+  retry_enabled, retry_max_attempts, retry_backoff_seconds, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const WEBHOOK_DELIVERY_COLUMNS = `
+  id, webhook_id, event_type, event_data, status, attempt_number, response_status,
+  response_body, error_message, signature, delivered_at, next_retry_at, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 export class WebhookService {
   private db: Database;
   private signingAlgorithm = 'sha256';
@@ -69,7 +83,7 @@ export class WebhookService {
    * Get webhook by ID
    */
   async getWebhookById(id: number): Promise<WebhookConfig | null> {
-    const row = await this.db.get('SELECT * FROM webhooks WHERE id = ?', [id]);
+    const row = await this.db.get(`SELECT ${WEBHOOK_COLUMNS} FROM webhooks WHERE id = ?`, [id]);
     if (!row) return null;
     return this.formatWebhook(row);
   }
@@ -79,8 +93,8 @@ export class WebhookService {
    */
   async listWebhooks(activeOnly = false): Promise<WebhookConfig[]> {
     const query = activeOnly
-      ? 'SELECT * FROM webhooks WHERE is_active = 1 ORDER BY created_at DESC'
-      : 'SELECT * FROM webhooks ORDER BY created_at DESC';
+      ? `SELECT ${WEBHOOK_COLUMNS} FROM webhooks WHERE is_active = 1 ORDER BY created_at DESC`
+      : `SELECT ${WEBHOOK_COLUMNS} FROM webhooks ORDER BY created_at DESC`;
     const rows = await this.db.all(query);
     return rows.map((row: any) => this.formatWebhook(row));
   }
@@ -326,7 +340,7 @@ export class WebhookService {
    * Get delivery by ID
    */
   async getDeliveryById(id: number): Promise<WebhookDelivery | null> {
-    const row = await this.db.get('SELECT * FROM webhook_deliveries WHERE id = ?', [id]);
+    const row = await this.db.get(`SELECT ${WEBHOOK_DELIVERY_COLUMNS} FROM webhook_deliveries WHERE id = ?`, [id]);
     if (!row) return null;
     return this.formatDelivery(row);
   }
@@ -343,7 +357,7 @@ export class WebhookService {
       offset?: number;
     }
   ): Promise<{ deliveries: WebhookDelivery[]; total: number }> {
-    let query = 'SELECT * FROM webhook_deliveries WHERE webhook_id = ?';
+    let query = `SELECT ${WEBHOOK_DELIVERY_COLUMNS} FROM webhook_deliveries WHERE webhook_id = ?`;
     const params: any[] = [webhookId];
 
     if (options?.status) {

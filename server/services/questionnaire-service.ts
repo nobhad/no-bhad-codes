@@ -16,6 +16,15 @@ import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 
 // =====================================================
+// Column Constants - Explicit column lists for SELECT queries
+// =====================================================
+
+const QUESTIONNAIRE_COLUMNS = `
+  id, name, description, project_type, questions, is_active, auto_send_on_project_create,
+  display_order, created_by, created_by_user_id, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+// =====================================================
 // TYPES
 // =====================================================
 
@@ -135,7 +144,7 @@ class QuestionnaireService {
   async getQuestionnaire(id: number): Promise<Questionnaire | null> {
     const db = await getDatabase();
 
-    const row = await db.get('SELECT * FROM questionnaires WHERE id = ?', [id]);
+    const row = await db.get(`SELECT ${QUESTIONNAIRE_COLUMNS} FROM questionnaires WHERE id = ?`, [id]);
 
     if (!row) return null;
 
@@ -148,7 +157,7 @@ class QuestionnaireService {
   async getQuestionnaires(projectType?: string, activeOnly = false): Promise<Questionnaire[]> {
     const db = await getDatabase();
 
-    let query = 'SELECT * FROM questionnaires WHERE 1=1';
+    let query = `SELECT ${QUESTIONNAIRE_COLUMNS} FROM questionnaires WHERE 1=1`;
     const params: (string | number)[] = [];
 
     if (projectType) {

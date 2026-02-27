@@ -120,6 +120,44 @@ interface MetricAlert {
 }
 
 // ============================================
+// Column Constants - Explicit column lists for SELECT queries
+// ============================================
+
+const SAVED_REPORT_COLUMNS = `
+  id, name, description, report_type, filters, columns, sort_by, sort_order,
+  chart_type, is_favorite, is_shared, created_by, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const REPORT_SCHEDULE_COLUMNS = `
+  id, report_id, name, frequency, day_of_week, day_of_month, time_of_day,
+  timezone, recipients, format, include_charts, last_sent_at, next_send_at,
+  is_active, created_by, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const DASHBOARD_WIDGET_COLUMNS = `
+  id, user_email, widget_type, title, data_source, config, position_x, position_y,
+  width, height, refresh_interval, is_visible, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const DASHBOARD_PRESET_COLUMNS = `
+  id, name, description, widgets, is_default, is_active, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const KPI_SNAPSHOT_COLUMNS = `
+  id, snapshot_date, kpi_type, value, previous_value, change_percent, metadata, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const METRIC_ALERT_COLUMNS = `
+  id, name, kpi_type, condition, threshold_value, notification_emails, is_active,
+  last_triggered_at, trigger_count, created_by, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const REPORT_RUN_COLUMNS = `
+  id, report_id, schedule_id, run_type, status, started_at, completed_at,
+  row_count, file_path, error_message, run_by, created_at
+`.replace(/\s+/g, ' ').trim();
+
+// ============================================
 // Analytics Service Class
 // ============================================
 
@@ -174,7 +212,7 @@ class AnalyticsService {
   async getReports(userEmail?: string): Promise<SavedReport[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM saved_reports WHERE 1=1';
+    let query = `SELECT ${SAVED_REPORT_COLUMNS} FROM saved_reports WHERE 1=1`;
     const params: string[] = [];
 
     if (userEmail) {
@@ -198,7 +236,7 @@ class AnalyticsService {
    */
   async getReport(reportId: number): Promise<SavedReport> {
     const db = getDatabase();
-    const report = await db.get('SELECT * FROM saved_reports WHERE id = ?', [reportId]);
+    const report = await db.get(`SELECT ${SAVED_REPORT_COLUMNS} FROM saved_reports WHERE id = ?`, [reportId]);
 
     if (!report) {
       throw new Error('Report not found');
@@ -360,7 +398,7 @@ class AnalyticsService {
   async getSchedules(reportId?: number): Promise<ReportSchedule[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM report_schedules';
+    let query = `SELECT ${REPORT_SCHEDULE_COLUMNS} FROM report_schedules`;
     const params: number[] = [];
 
     if (reportId) {
@@ -383,7 +421,7 @@ class AnalyticsService {
    */
   async getSchedule(scheduleId: number): Promise<ReportSchedule> {
     const db = getDatabase();
-    const schedule = await db.get('SELECT * FROM report_schedules WHERE id = ?', [scheduleId]);
+    const schedule = await db.get(`SELECT ${REPORT_SCHEDULE_COLUMNS} FROM report_schedules WHERE id = ?`, [scheduleId]);
 
     if (!schedule) {
       throw new Error('Schedule not found');
@@ -481,7 +519,7 @@ class AnalyticsService {
   async getDueSchedules(): Promise<ReportSchedule[]> {
     const db = getDatabase();
     const schedules = await db.all(
-      `SELECT * FROM report_schedules
+      `SELECT ${REPORT_SCHEDULE_COLUMNS} FROM report_schedules
        WHERE is_active = TRUE AND next_send_at <= datetime('now')
        ORDER BY next_send_at ASC`
     );
@@ -582,7 +620,7 @@ class AnalyticsService {
   async getWidgets(userEmail: string): Promise<DashboardWidget[]> {
     const db = getDatabase();
     const widgets = await db.all(
-      `SELECT * FROM dashboard_widgets
+      `SELECT ${DASHBOARD_WIDGET_COLUMNS} FROM dashboard_widgets
        WHERE user_email = ? AND is_visible = TRUE
        ORDER BY position_y, position_x`,
       [userEmail]
@@ -638,7 +676,7 @@ class AnalyticsService {
    */
   async getWidget(widgetId: number): Promise<DashboardWidget> {
     const db = getDatabase();
-    const widget = await db.get('SELECT * FROM dashboard_widgets WHERE id = ?', [widgetId]);
+    const widget = await db.get(`SELECT ${DASHBOARD_WIDGET_COLUMNS} FROM dashboard_widgets WHERE id = ?`, [widgetId]);
 
     if (!widget) {
       throw new Error('Widget not found');
@@ -746,7 +784,7 @@ class AnalyticsService {
   async applyPreset(userEmail: string, presetId: number): Promise<DashboardWidget[]> {
     const db = getDatabase();
 
-    const preset = await db.get('SELECT * FROM dashboard_presets WHERE id = ?', [presetId]);
+    const preset = await db.get(`SELECT ${DASHBOARD_PRESET_COLUMNS} FROM dashboard_presets WHERE id = ?`, [presetId]);
     if (!preset) {
       throw new Error('Preset not found');
     }
@@ -946,7 +984,7 @@ class AnalyticsService {
   async getKPITrend(kpiType: string, dateRange?: DateRange): Promise<KPISnapshot[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM kpi_snapshots WHERE kpi_type = ?';
+    let query = `SELECT ${KPI_SNAPSHOT_COLUMNS} FROM kpi_snapshots WHERE kpi_type = ?`;
     const params: string[] = [kpiType];
 
     if (dateRange?.start) {
@@ -1030,7 +1068,7 @@ class AnalyticsService {
    */
   async getAlerts(): Promise<MetricAlert[]> {
     const db = getDatabase();
-    const alerts = await db.all('SELECT * FROM metric_alerts ORDER BY name');
+    const alerts = await db.all(`SELECT ${METRIC_ALERT_COLUMNS} FROM metric_alerts ORDER BY name`);
 
     return alerts.map((a: any) => ({
       ...a,
@@ -1043,7 +1081,7 @@ class AnalyticsService {
    */
   async getAlert(alertId: number): Promise<MetricAlert> {
     const db = getDatabase();
-    const alert = await db.get('SELECT * FROM metric_alerts WHERE id = ?', [alertId]);
+    const alert = await db.get(`SELECT ${METRIC_ALERT_COLUMNS} FROM metric_alerts WHERE id = ?`, [alertId]);
 
     if (!alert) {
       throw new Error('Alert not found');
@@ -1644,7 +1682,7 @@ class AnalyticsService {
 
   async getReportRuns(reportId?: number, _limit?: number): Promise<any[]> {
     const db = getDatabase();
-    let query = 'SELECT * FROM report_runs';
+    let query = `SELECT ${REPORT_RUN_COLUMNS} FROM report_runs`;
     const params: number[] = [];
 
     if (reportId) {

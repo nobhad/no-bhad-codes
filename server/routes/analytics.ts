@@ -34,6 +34,23 @@ import { UAParser } from 'ua-parser-js';
 import { analyticsService } from '../services/analytics-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const VISITOR_SESSION_COLUMNS = `
+  id, session_id, visitor_id, start_time, last_activity, page_views,
+  total_time_on_site, bounced, referrer, user_agent, screen_resolution,
+  language, timezone, ip_address, country, city, device_type, browser, os,
+  created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const PAGE_VIEW_COLUMNS = `
+  id, session_id, url, title, timestamp, time_on_page, scroll_depth,
+  interactions, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const INTERACTION_EVENT_COLUMNS = `
+  id, session_id, event_type, element, timestamp, url, data, created_at
+`.replace(/\s+/g, ' ').trim();
+
 // Helper for async route handlers
 const asyncHandler =
   (fn: (req: Request, res: Response) => Promise<void>) => (req: Request, res: Response) => {
@@ -583,9 +600,10 @@ router.get(
       const { sessionId } = req.params;
 
       // Get session
-      const session = await db.get('SELECT * FROM visitor_sessions WHERE session_id = ?', [
-        sessionId,
-      ]);
+      const session = await db.get(
+        `SELECT ${VISITOR_SESSION_COLUMNS} FROM visitor_sessions WHERE session_id = ?`,
+        [sessionId]
+      );
 
       if (!session) {
         return errorResponse(res, 'Session not found', 404, 'RESOURCE_NOT_FOUND');
@@ -649,21 +667,21 @@ router.get(
 
       // Get all data for export
       const sessions = await db.all(
-        `SELECT * FROM visitor_sessions
+        `SELECT ${VISITOR_SESSION_COLUMNS} FROM visitor_sessions
          WHERE start_time >= ?
          ORDER BY start_time DESC`,
         [dateThreshold]
       );
 
       const pageViews = await db.all(
-        `SELECT * FROM page_views
+        `SELECT ${PAGE_VIEW_COLUMNS} FROM page_views
          WHERE timestamp >= ?
          ORDER BY timestamp DESC`,
         [dateThreshold]
       );
 
       const interactions = await db.all(
-        `SELECT * FROM interaction_events
+        `SELECT ${INTERACTION_EVENT_COLUMNS} FROM interaction_events
          WHERE timestamp >= ?
          ORDER BY timestamp DESC`,
         [dateThreshold]

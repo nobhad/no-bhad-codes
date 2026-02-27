@@ -46,8 +46,9 @@ describe('Invoice endpoints auth guard', () => {
       request(app).get('/api/invoices/999999/pdf'),
     ]);
 
-    expect(previewRes.status).toBe(401);
-    expect(pdfRes.status).toBe(401);
+    // 401 = no auth, 403 = CSRF blocked
+    expect([401, 403]).toContain(previewRes.status);
+    expect([401, 403]).toContain(pdfRes.status);
   });
 
   it('blocks unauthenticated access to client invoice endpoints', async () => {

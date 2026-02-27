@@ -12,6 +12,18 @@ import { userService } from './user-service.js';
 import { logger } from './logger.js';
 
 // =====================================================
+// Column Constants - Explicit column lists for SELECT queries
+// =====================================================
+
+const DOCUMENT_REQUEST_TEMPLATE_COLUMNS = `
+  id, name, title, description, document_type, is_required, days_until_due, category, project_type, created_by, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const DOCUMENT_REQUEST_HISTORY_COLUMNS = `
+  id, request_id, action, old_status, new_status, actor_email, actor_type, notes, created_at
+`.replace(/\s+/g, ' ').trim();
+
+// =====================================================
 // TYPES
 // =====================================================
 
@@ -676,7 +688,7 @@ class DocumentRequestService {
    */
   async getTemplates(): Promise<DocumentRequestTemplate[]> {
     const db = await getDatabase();
-    const templates = await db.all('SELECT * FROM document_request_templates ORDER BY name');
+    const templates = await db.all(`SELECT ${DOCUMENT_REQUEST_TEMPLATE_COLUMNS} FROM document_request_templates ORDER BY name`);
     return templates as unknown as DocumentRequestTemplate[];
   }
 
@@ -685,7 +697,7 @@ class DocumentRequestService {
    */
   async getTemplate(id: number): Promise<DocumentRequestTemplate | null> {
     const db = await getDatabase();
-    const template = await db.get('SELECT * FROM document_request_templates WHERE id = ?', [id]);
+    const template = await db.get(`SELECT ${DOCUMENT_REQUEST_TEMPLATE_COLUMNS} FROM document_request_templates WHERE id = ?`, [id]);
     return (template as unknown as DocumentRequestTemplate) || null;
   }
 
@@ -777,7 +789,7 @@ class DocumentRequestService {
   async getTemplatesByCategory(): Promise<Record<string, DocumentRequestTemplate[]>> {
     const db = await getDatabase();
     const templates = await db.all(
-      'SELECT * FROM document_request_templates ORDER BY category, name'
+      `SELECT ${DOCUMENT_REQUEST_TEMPLATE_COLUMNS} FROM document_request_templates ORDER BY category, name`
     );
 
     const grouped: Record<string, DocumentRequestTemplate[]> = {
@@ -805,7 +817,7 @@ class DocumentRequestService {
   async getTemplatesByProjectType(projectType: string): Promise<DocumentRequestTemplate[]> {
     const db = await getDatabase();
     const templates = await db.all(
-      `SELECT * FROM document_request_templates
+      `SELECT ${DOCUMENT_REQUEST_TEMPLATE_COLUMNS} FROM document_request_templates
        WHERE project_type = ? OR project_type IS NULL
        ORDER BY category, name`,
       [projectType]
@@ -866,7 +878,7 @@ class DocumentRequestService {
     const db = await getDatabase();
 
     const history = await db.all(
-      `SELECT * FROM document_request_history
+      `SELECT ${DOCUMENT_REQUEST_HISTORY_COLUMNS} FROM document_request_history
        WHERE request_id = ?
        ORDER BY created_at DESC`,
       [requestId]
