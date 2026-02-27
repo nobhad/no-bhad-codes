@@ -1,0 +1,85 @@
+/**
+ * Portal Messages Types
+ * Types for client portal messaging feature
+ */
+
+// ============================================================================
+// MESSAGE TYPES
+// ============================================================================
+
+export interface MessageAttachment {
+  id: number;
+  filename: string;
+  file_size: number;
+  file_type: string;
+  download_url: string;
+}
+
+export interface Message {
+  id: number;
+  thread_id: number;
+  sender_id: number;
+  sender_name: string;
+  sender_type: 'client' | 'admin';
+  content: string;
+  attachments: MessageAttachment[];
+  is_edited: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface MessageThread {
+  id: number;
+  subject: string;
+  project_id?: number;
+  project_name?: string;
+  last_message_at: string;
+  last_message_preview: string;
+  unread_count: number;
+  created_at: string;
+}
+
+// ============================================================================
+// API RESPONSE TYPES
+// ============================================================================
+
+export interface ThreadsResponse {
+  threads: MessageThread[];
+  total: number;
+}
+
+export interface MessagesResponse {
+  messages: Message[];
+  total: number;
+  thread: MessageThread;
+}
+
+export interface SendMessageRequest {
+  content: string;
+  attachments?: File[];
+}
+
+export interface SendMessageResponse {
+  message: Message;
+  success: boolean;
+}
+
+export interface UpdateMessageRequest {
+  content: string;
+}
+
+export interface UpdateMessageResponse {
+  message: Message;
+  success: boolean;
+}
+
+// ============================================================================
+// COMPONENT PROPS
+// ============================================================================
+
+export interface PortalMessagesProps {
+  /** Auth token getter for API calls */
+  getAuthToken?: () => string | null;
+  /** Show notification callback */
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+}
