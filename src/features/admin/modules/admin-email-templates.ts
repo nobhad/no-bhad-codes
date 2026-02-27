@@ -5,12 +5,11 @@
  * @file src/features/admin/modules/admin-email-templates.ts
  *
  * Email template management for admin dashboard.
+ * Uses createTableModule factory for standardized table operations.
  */
 
 import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
-import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
-import { showTableError } from '../../../utils/error-utils';
 import { confirmDanger } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
@@ -21,7 +20,6 @@ import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
-import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import {
   EMAIL_TEMPLATES_FILTER_CONFIG,
   createFilterUI,
@@ -30,6 +28,12 @@ import {
   applyFilters,
   type FilterState
 } from '../../../utils/table-filter';
+import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
+import { showTableError } from '../../../utils/error-utils';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminEmailTemplates');
 
 // ============================================
 // TYPES
@@ -96,9 +100,7 @@ const CATEGORY_LABELS: Record<EmailTemplateCategory, string> = {
 
 let _storedContext: AdminDashboardContext | null = null;
 let cachedTemplates: EmailTemplate[] = [];
-let currentFilterState: FilterState = loadFilterState(EMAIL_TEMPLATES_FILTER_CONFIG.storageKey);
-
-// Modal instances
+let currentFilterState: FilterState | null = null;
 let templateModal: PortalModalInstance | null = null;
 let previewModal: PortalModalInstance | null = null;
 let versionsModal: PortalModalInstance | null = null;
@@ -144,7 +146,7 @@ export async function loadTemplates(): Promise<void> {
 
     renderTemplatesTable();
   } catch (error) {
-    console.error('[AdminEmailTemplates] Error loading templates:', error);
+    logger.error(' Error loading templates:', error);
     if (tbody) {
       showTableError(tbody, 6, 'Error loading templates', loadTemplates);
     }
@@ -154,6 +156,11 @@ export async function loadTemplates(): Promise<void> {
 function renderTemplatesTable(): void {
   const tbody = el('email-templates-table-body');
   if (!tbody) return;
+
+  // Ensure filter state is initialized
+  if (!currentFilterState) {
+    currentFilterState = loadFilterState('email-templates');
+  }
 
   // Apply filters using the standard filter utility
   const filtered = applyFilters(cachedTemplates, currentFilterState, EMAIL_TEMPLATES_FILTER_CONFIG);
@@ -172,8 +179,9 @@ function renderTemplatesTable(): void {
 
   tbody.innerHTML = filtered.map(template => `
     <tr data-template-id="${template.id}">
-      <td class="name-cell" data-label="Name">
-        ${escapeHtml(template.name)}${template.is_system ? ' <span class="badge badge-muted">System</span>' : ''}
+      <td class="identity-cell" data-label="Name">
+        <span class="identity-name" data-field="primary-name">${escapeHtml(template.name)}</span>
+        ${template.is_system ? '<span class="identity-contact" data-field="secondary-name">System Template</span>' : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
       </td>
       <td class="type-cell" data-label="Category">${CATEGORY_LABELS[template.category] || template.category}</td>
       <td class="subject-cell" data-label="Subject">${escapeHtml(template.subject)}</td>
@@ -456,7 +464,7 @@ async function saveTemplate(): Promise<void> {
     templateModal?.hide();
     await loadTemplates();
   } catch (error) {
-    console.error('[AdminEmailTemplates] Save error:', error);
+    logger.error(' Save error:', error);
     showToast(error instanceof Error ? error.message : 'Error saving template', 'error');
   }
 }
@@ -480,7 +488,7 @@ async function deleteTemplate(id: number, name: string): Promise<void> {
     showToast('Template deleted', 'success');
     await loadTemplates();
   } catch (error) {
-    console.error('[AdminEmailTemplates] Delete error:', error);
+    logger.error(' Delete error:', error);
     showToast(error instanceof Error ? error.message : 'Error deleting template', 'error');
   }
 }
@@ -565,7 +573,7 @@ async function openPreviewModal(id: number): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[AdminEmailTemplates] Preview error:', error);
+    logger.error(' Preview error:', error);
     previewModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error generating preview</span></div>';
   }
 }
@@ -656,7 +664,7 @@ async function previewFromForm(): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[AdminEmailTemplates] Preview error:', error);
+    logger.error(' Preview error:', error);
     previewModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error generating preview</span></div>';
   }
 }
@@ -729,7 +737,7 @@ async function openVersionsModal(id: number): Promise<void> {
       });
     });
   } catch (error) {
-    console.error('[AdminEmailTemplates] Versions error:', error);
+    logger.error(' Versions error:', error);
     versionsModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error loading versions</span></div>';
   }
 }
@@ -743,7 +751,7 @@ async function restoreVersion(templateId: number, version: number): Promise<void
     versionsModal?.hide();
     await loadTemplates();
   } catch (error) {
-    console.error('[AdminEmailTemplates] Restore error:', error);
+    logger.error(' Restore error:', error);
     showToast('Error restoring version', 'error');
   }
 }
@@ -777,7 +785,7 @@ async function sendTestEmail(id: number): Promise<void> {
 
     showToast(`Test email sent to ${email}`, 'success');
   } catch (error) {
-    console.error('[AdminEmailTemplates] Test email error:', error);
+    logger.error(' Test email error:', error);
     showToast(error instanceof Error ? error.message : 'Error sending test email', 'error');
   }
 }

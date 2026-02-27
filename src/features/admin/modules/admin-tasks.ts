@@ -24,6 +24,10 @@ import {
   applyPagination,
   createPaginationUI
 } from '../../../utils/table-pagination';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminTasks');
 
 // View toggle icons
 const BOARD_ICON =
@@ -130,7 +134,7 @@ async function loadTasks(): Promise<void> {
       currentTasks = [];
     }
   } catch (error) {
-    console.error('[AdminTasks] Error loading tasks:', error);
+    logger.error(' Error loading tasks:', error);
     currentTasks = [];
   }
 }
@@ -322,20 +326,24 @@ function renderListView(): void {
 
   if (currentTasks.length === 0) {
     listContainer.innerHTML = `
-      <div class="data-table-scroll-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th scope="col" class="name-col">Task</th>
-              <th scope="col">Priority</th>
-              <th scope="col" class="status-col">Status</th>
-              <th scope="col" class="date-col">Due Date</th>
-            </tr>
-          </thead>
-          <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr class="empty-row"><td colspan="4"><div class="empty-state">No tasks yet. Create your first task above.</div></td></tr>
-          </tbody>
-        </table>
+      <div class="data-table-card">
+        <div class="data-table-container">
+          <div class="data-table-scroll-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="identity-col">Task</th>
+                  <th scope="col" class="type-col">Priority</th>
+                  <th scope="col" class="status-col">Status</th>
+                  <th scope="col" class="date-col">Due Date</th>
+                </tr>
+              </thead>
+              <tbody id="project-tasks-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+                <tr class="empty-row"><td colspan="4"><div class="empty-state">No tasks yet. Create your first task above.</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     `;
     return;
@@ -374,24 +382,39 @@ function renderListView(): void {
 
   listContainer.innerHTML = `
     <div class="data-table-card">
-      <div class="data-table-scroll-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th scope="col" class="name-col">Task</th>
-              <th scope="col">Priority</th>
-              <th scope="col" class="status-col">Status</th>
-              <th scope="col" class="date-col">Due Date</th>
-            </tr>
-          </thead>
-          <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            ${displayTasks.map(task => renderListItem(task)).join('')}
-          </tbody>
-        </table>
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col" class="identity-col">Task</th>
+                <th scope="col" class="type-col">Priority</th>
+                <th scope="col" class="status-col">Status</th>
+                <th scope="col" class="date-col">Due Date</th>
+              </tr>
+            </thead>
+            <tbody id="project-tasks-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              ${displayTasks.map(task => renderListItem(task)).join('')}
+            </tbody>
+          </table>
+        </div>
       </div>
       ${showPagination ? '<div class="table-pagination" id="project-tasks-pagination"></div>' : ''}
     </div>
   `;
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#project-tasks-table-body',
+    rowSelector: 'tr[data-task-id]',
+    onRowSelect: (row) => {
+      const taskId = parseInt(row.getAttribute('data-task-id') || '0');
+      const task = currentTasks.find(t => t.id === taskId);
+      if (task) handleTaskClick(taskToKanbanItem(task));
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 
   // Create pagination UI if needed
   if (showPagination) {
@@ -431,13 +454,11 @@ function renderListItem(task: ProjectTask): string {
 
   return `
     <tr data-task-id="${task.id}">
-      <td class="name-cell" data-label="Task">
-        <div class="cell-content">
-          <span class="task-title">${SanitizationUtils.escapeHtml(task.title)}</span>
-          ${task.description ? `<small class="task-subtitle">${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</small>` : ''}
-        </div>
+      <td class="identity-cell" data-label="Task">
+        <span class="identity-name" data-field="primary-name">${SanitizationUtils.escapeHtml(task.title)}</span>
+        ${task.description ? `<span class="identity-contact" data-field="secondary-name">${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</span>` : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
       </td>
-      <td data-label="Priority"><span class="task-priority ${priorityClass}">${priorityLabel}</span></td>
+      <td class="type-cell" data-label="Priority"><span class="task-priority ${priorityClass}">${priorityLabel}</span></td>
       <td class="status-cell" data-label="Status">${getStatusDotHTML(task.status)}</td>
       <td class="date-cell ${isOverdue ? 'overdue' : ''}" data-label="Due Date">${task.due_date ? formatDate(task.due_date) : '-'}</td>
     </tr>
@@ -472,7 +493,7 @@ async function handleTaskStatusChange(
       renderCurrentView();
     }
   } catch (error) {
-    console.error('[AdminTasks] Error updating task status:', error);
+    logger.error(' Error updating task status:', error);
     alertError('Error updating task');
   }
 }
@@ -500,7 +521,7 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
       fullTask = data.task || task;
     }
   } catch (e) {
-    console.error('[AdminTasks] Error fetching task details:', e);
+    logger.error(' Error fetching task details:', e);
   }
 
   const checklistProgress = fullTask.checklist_items?.length
@@ -532,7 +553,7 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
 
     <div class="task-detail-section">
       <h4>Details</h4>
-      <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-1);">
+      <div class="meta-grid meta-grid--2col meta-grid--gap-xs">
         <div><strong>Status:</strong> ${STATUS_CONFIG[fullTask.status]?.label || fullTask.status}</div>
         <div><strong>Due:</strong> ${fullTask.due_date ? formatDate(fullTask.due_date) : ''}</div>
         <div><strong>Est. Hours:</strong> ${fullTask.estimated_hours || ''}</div>
@@ -664,7 +685,7 @@ export async function showCreateTaskModal(): Promise<void> {
         alertError('Failed to create task');
       }
     } catch (error) {
-      console.error('[AdminTasks] Error creating task:', error);
+      logger.error(' Error creating task:', error);
       alertError('Error creating task');
     }
   };
@@ -799,7 +820,7 @@ async function showEditTaskModal(task: ProjectTask): Promise<void> {
       alertError('Failed to update task');
     }
   } catch (error) {
-    console.error('[AdminTasks] Error updating task:', error);
+    logger.error(' Error updating task:', error);
     alertError('Error updating task');
   }
 }
@@ -826,7 +847,7 @@ async function deleteTask(taskId: number): Promise<void> {
       alertError('Failed to delete task');
     }
   } catch (error) {
-    console.error('[AdminTasks] Error deleting task:', error);
+    logger.error(' Error deleting task:', error);
     alertError('Error deleting task');
   }
 }
@@ -846,7 +867,7 @@ async function toggleChecklistItem(taskId: number, itemId: number, isCompleted: 
       if (item) item.is_completed = isCompleted;
     }
   } catch (error) {
-    console.error('[AdminTasks] Error toggling checklist item:', error);
+    logger.error(' Error toggling checklist item:', error);
   }
 }
 

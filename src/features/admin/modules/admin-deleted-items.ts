@@ -6,20 +6,34 @@
  *
  * Soft-deleted items management for admin dashboard.
  * Allows viewing, restoring, and permanently deleting items.
+ *
+ * Uses createTableModule factory for standardized table operations.
  */
 
-import { apiFetch, apiPost, apiDelete } from '../../../utils/api-client';
+import { apiPost, apiDelete } from '../../../utils/api-client';
 import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
 import { confirmDialog } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
-import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
-import { showTableError } from '../../../utils/error-utils';
 import { formatDate } from '../../../utils/format-utils';
+import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
+import { createLogger } from '../../../utils/logger';
+import {
+  createTableModule,
+  createPaginationConfig,
+  type TableModuleHelpers
+} from '../../../utils/table-module-factory';
+import type { TableFilterConfig } from '../../../utils/table-filter';
 
-/**
- * Represents a soft-deleted item from any entity table
- */
+const logger = createLogger('AdminDeletedItems');
+
+// Late-bound module reload function (assigned after module creation)
+let reloadModule: ((ctx: AdminDashboardContext) => Promise<void>) | null = null;
+
+// ===============================================
+// TYPES
+// ===============================================
+
 interface DeletedItem {
   id: number;
   type: 'client' | 'project' | 'invoice' | 'lead' | 'proposal';
@@ -38,314 +52,235 @@ interface DeletedItemsStats {
   total: number;
 }
 
-interface DeletedItemsResponse {
-  items: DeletedItem[];
-  stats: DeletedItemsStats;
+// ===============================================
+// FILTER CONFIGURATION
+// ===============================================
+
+const DELETED_ITEMS_FILTER_CONFIG: TableFilterConfig = {
+  tableId: 'deleted-items',
+  searchFields: ['name', 'deleted_by'],
+  statusField: 'type',
+  statusOptions: [
+    { value: 'client', label: 'Clients' },
+    { value: 'project', label: 'Projects' },
+    { value: 'invoice', label: 'Invoices' },
+    { value: 'lead', label: 'Leads' },
+    { value: 'proposal', label: 'Proposals' }
+  ],
+  dateField: 'deleted_at',
+  sortableColumns: [
+    { key: 'type', label: 'Type', type: 'string' },
+    { key: 'name', label: 'Name', type: 'string' },
+    { key: 'deleted_at', label: 'Deleted', type: 'date' },
+    { key: 'deleted_by', label: 'Deleted By', type: 'string' },
+    { key: 'days_until_permanent', label: 'Days Left', type: 'number' }
+  ],
+  storageKey: 'admin_deleted_items_filter'
+};
+
+// ===============================================
+// HELPER FUNCTIONS
+// ===============================================
+
+function capitalizeFirst(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// Module state
-let deletedItems: DeletedItem[] = [];
-let currentTypeFilter: string = 'all';
-
-// Cached DOM references
-const cachedElements: Map<string, HTMLElement | null> = new Map();
-
-/**
- * Get cached element by ID
- */
-function getElement(id: string): HTMLElement | null {
-  if (!cachedElements.has(id)) {
-    cachedElements.set(id, document.getElementById(id));
-  }
-  return cachedElements.get(id) || null;
-}
-
-/**
- * Clear cached elements when section is unloaded
- */
-function clearElementCache(): void {
-  cachedElements.clear();
-}
-
-let storedContext: AdminDashboardContext | null = null;
-
-/**
- * Store context for later use
- */
-export function setDeletedItemsContext(ctx: AdminDashboardContext): void {
-  storedContext = ctx;
-}
-
-/**
- * Load deleted items from API and render
- */
-export async function loadDeletedItems(ctx: AdminDashboardContext): Promise<void> {
-  setDeletedItemsContext(ctx);
-
-  const tableBody = getElement('deleted-items-table-body');
-  if (tableBody) {
-    showTableLoading(tableBody, 6, 'Loading deleted items...');
-  }
-
-  try {
-    const response = await apiFetch('/api/admin/deleted-items');
-
-    if (response.ok) {
-      const json = await response.json();
-      const data: DeletedItemsResponse = json.data ?? json;
-      deletedItems = data.items || [];
-      updateDeletedItemsDisplay(data, ctx);
-    } else if (response.status !== 401) {
-      console.error('[AdminDeletedItems] API error:', response.status);
-      if (tableBody) {
-        showTableError(tableBody, 6, `Error loading deleted items (${response.status})`, () => {
-          if (storedContext) loadDeletedItems(storedContext);
-        });
-      }
-    }
-  } catch (error) {
-    console.error('[AdminDeletedItems] Failed to load:', error);
-    if (tableBody) {
-      showTableError(tableBody, 6, 'Network error loading deleted items', () => {
-        if (storedContext) loadDeletedItems(storedContext);
-      });
-    }
-  }
-}
-
-/**
- * Update the deleted items display with data
- */
-function updateDeletedItemsDisplay(
-  data: DeletedItemsResponse,
-  ctx: AdminDashboardContext
-): void {
-  // Update stats
-  updateStats(data.stats);
-
-  // Setup filter buttons if not already done
-  setupTypeFilters(ctx);
-
-  // Render the table
-  renderDeletedItemsTable(data.items, ctx);
-}
-
-/**
- * Update stat counts
- */
-function updateStats(stats: DeletedItemsStats): void {
-  const statElements = {
-    clients: getElement('deleted-stat-clients'),
-    projects: getElement('deleted-stat-projects'),
-    invoices: getElement('deleted-stat-invoices'),
-    leads: getElement('deleted-stat-leads'),
-    proposals: getElement('deleted-stat-proposals'),
-    total: getElement('deleted-stat-total')
-  };
-
-  if (statElements.clients) statElements.clients.textContent = String(stats.clients);
-  if (statElements.projects) statElements.projects.textContent = String(stats.projects);
-  if (statElements.invoices) statElements.invoices.textContent = String(stats.invoices);
-  if (statElements.leads) statElements.leads.textContent = String(stats.leads);
-  if (statElements.proposals) statElements.proposals.textContent = String(stats.proposals);
-  if (statElements.total) statElements.total.textContent = String(stats.total);
-}
-
-/**
- * Setup type filter buttons
- */
-function setupTypeFilters(ctx: AdminDashboardContext): void {
-  const filterContainer = getElement('deleted-items-filter-container');
-  if (!filterContainer || filterContainer.dataset.initialized === 'true') return;
-
-  filterContainer.dataset.initialized = 'true';
-
-  const filterButtons = filterContainer.querySelectorAll('[data-filter]');
-  filterButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      // Remove active class from all
-      filterButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      currentTypeFilter = btn.getAttribute('data-filter') || 'all';
-      renderDeletedItemsTable(deletedItems, ctx);
-    });
-  });
-}
-
-/**
- * Render the deleted items table
- */
-function renderDeletedItemsTable(
-  items: DeletedItem[],
-  ctx: AdminDashboardContext
-): void {
-  const tableBody = getElement('deleted-items-table-body');
-  if (!tableBody) return;
-
-  // Filter by type if needed
-  const filtered = currentTypeFilter === 'all'
-    ? items
-    : items.filter(item => item.type === currentTypeFilter);
-
-  if (filtered.length === 0) {
-    showTableEmpty(tableBody, 6, 'No deleted items found');
-    return;
-  }
-
-  tableBody.innerHTML = filtered.map(item => {
-    const daysUntilPermanent = item.days_until_permanent;
-    const urgencyClass = daysUntilPermanent <= 7
-      ? 'status-danger'
-      : daysUntilPermanent <= 14
-        ? 'status-warning'
-        : '';
-
-    return `
-      <tr data-id="${item.id}" data-type="${item.type}">
-        <td class="type-cell" data-label="Type">
-          <span class="entity-type-badge entity-type-${item.type}">${item.type}</span>
-        </td>
-        <td class="name-cell" data-label="Name">${escapeHtml(item.name)}</td>
-        <td class="date-cell" data-label="Deleted">${formatDate(item.deleted_at)}</td>
-        <td class="name-cell" data-label="Deleted By">${item.deleted_by || 'System'}</td>
-        <td class="count-cell ${urgencyClass}" data-label="Days Left">
-          <strong>${daysUntilPermanent}</strong> days
-        </td>
-        <td class="actions-cell" data-label="Actions">
-          ${renderActionsCell([
-    createAction('restore', item.id, { className: 'restore-btn', title: 'Restore item', dataAttrs: { type: item.type } }),
-    createAction('delete', item.id, { className: 'permanent-delete-btn', title: 'Permanently delete', dataAttrs: { type: item.type } })
-  ])}
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  // Attach action handlers
-  attachActionHandlers(tableBody, ctx);
-}
-
-/**
- * Attach click handlers for restore and permanent delete
- */
-function attachActionHandlers(
-  tableBody: HTMLElement,
-  ctx: AdminDashboardContext
-): void {
-  // Restore buttons
-  tableBody.querySelectorAll('[data-action="restore"]').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const button = e.currentTarget as HTMLElement;
-      const id = parseInt(button.dataset.id || '0', 10);
-      const type = button.dataset.type || '';
-
-      if (!id || !type) return;
-
-      const confirmed = await confirmDialog({
-        title: 'Restore Item',
-        message: `Are you sure you want to restore this ${type}? It will be visible again in the main list.`,
-        confirmText: 'Restore',
-        cancelText: 'Cancel'
-      });
-
-      if (confirmed) {
-        await restoreItem(id, type, ctx);
-      }
-    });
-  });
-
-  // Permanent delete buttons
-  tableBody.querySelectorAll('[data-action="permanent-delete"]').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const button = e.currentTarget as HTMLElement;
-      const id = parseInt(button.dataset.id || '0', 10);
-      const type = button.dataset.type || '';
-
-      if (!id || !type) return;
-
-      const confirmed = await confirmDialog({
-        title: 'Permanently Delete',
-        message: `This will permanently delete this ${type} and all associated data. This action cannot be undone.`,
-        confirmText: 'Delete Forever',
-        cancelText: 'Cancel',
-        danger: true
-      });
-
-      if (confirmed) {
-        await permanentlyDeleteItem(id, type, ctx);
-      }
-    });
-  });
-}
-
-/**
- * Restore a soft-deleted item
- */
 async function restoreItem(
   id: number,
   type: string,
-  ctx: AdminDashboardContext
+  reloadFn: () => Promise<void>
 ): Promise<void> {
   try {
     const response = await apiPost(`/api/admin/deleted-items/${type}/${id}/restore`, {});
 
     if (response.ok) {
       showToast(`${capitalizeFirst(type)} restored successfully`, 'success');
-      await loadDeletedItems(ctx);
+      await reloadFn();
     } else {
       const error = await response.json();
       showToast(error.message || 'Failed to restore item', 'error');
     }
   } catch (error) {
-    console.error('[AdminDeletedItems] Restore error:', error);
+    logger.error('Restore error:', error);
     showToast('Error restoring item', 'error');
   }
 }
 
-/**
- * Permanently delete an item
- */
 async function permanentlyDeleteItem(
   id: number,
   type: string,
-  ctx: AdminDashboardContext
+  reloadFn: () => Promise<void>
 ): Promise<void> {
   try {
     const response = await apiDelete(`/api/admin/deleted-items/${type}/${id}/permanent`);
 
     if (response.ok) {
       showToast(`${capitalizeFirst(type)} permanently deleted`, 'success');
-      await loadDeletedItems(ctx);
+      await reloadFn();
     } else {
       const error = await response.json();
       showToast(error.message || 'Failed to delete item', 'error');
     }
   } catch (error) {
-    console.error('[AdminDeletedItems] Permanent delete error:', error);
+    logger.error('Permanent delete error:', error);
     showToast('Error deleting item', 'error');
   }
 }
 
-/**
- * Helper to capitalize first letter
- */
-function capitalizeFirst(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+// ===============================================
+// ROW RENDERING
+// ===============================================
+
+function buildDeletedItemRow(
+  item: DeletedItem,
+  ctx: AdminDashboardContext,
+  helpers: TableModuleHelpers<DeletedItem>
+): HTMLTableRowElement {
+  const row = document.createElement('tr');
+  row.dataset.id = String(item.id);
+  row.dataset.type = item.type;
+
+  const daysUntilPermanent = item.days_until_permanent;
+  const urgencyClass = daysUntilPermanent <= 7
+    ? 'status-danger'
+    : daysUntilPermanent <= 14
+      ? 'status-warning'
+      : '';
+
+  row.innerHTML = `
+    <td class="type-cell" data-label="Type">
+      <span class="entity-type-badge entity-type-${item.type}">${item.type}</span>
+    </td>
+    <td class="name-cell" data-label="Name">${SanitizationUtils.escapeHtml(item.name)}</td>
+    <td class="date-cell" data-label="Deleted">${formatDate(item.deleted_at)}</td>
+    <td class="name-cell" data-label="Deleted By">${item.deleted_by || 'System'}</td>
+    <td class="count-cell ${urgencyClass}" data-label="Days Left">
+      <span class="days-count">${daysUntilPermanent}</span> days
+    </td>
+    <td class="actions-cell" data-label="Actions">
+      ${renderActionsCell([
+    createAction('restore', item.id, {
+      className: 'restore-btn',
+      title: 'Restore item',
+      dataAttrs: { type: item.type }
+    }),
+    createAction('delete', item.id, {
+      className: 'permanent-delete-btn',
+      title: 'Permanently delete',
+      dataAttrs: { type: item.type }
+    })
+  ])}
+    </td>
+  `;
+
+  // Attach action handlers
+  const restoreBtn = row.querySelector('[data-action="restore"]');
+  const deleteBtn = row.querySelector('[data-action="permanent-delete"]');
+
+  const reloadFn = async () => {
+    const storedCtx = helpers.getContext();
+    if (storedCtx && reloadModule) {
+      await reloadModule(storedCtx);
+    }
+  };
+
+  restoreBtn?.addEventListener('click', async () => {
+    const confirmed = await confirmDialog({
+      title: 'Restore Item',
+      message: `Are you sure you want to restore this ${item.type}? It will be visible again in the main list.`,
+      confirmText: 'Restore',
+      cancelText: 'Cancel'
+    });
+
+    if (confirmed) {
+      await restoreItem(item.id, item.type, reloadFn);
+    }
+  });
+
+  deleteBtn?.addEventListener('click', async () => {
+    const confirmed = await confirmDialog({
+      title: 'Permanently Delete',
+      message: `This will permanently delete this ${item.type} and all associated data. This action cannot be undone.`,
+      confirmText: 'Delete Forever',
+      cancelText: 'Cancel',
+      danger: true
+    });
+
+    if (confirmed) {
+      await permanentlyDeleteItem(item.id, item.type, reloadFn);
+    }
+  });
+
+  return row;
 }
 
-/**
- * Escape HTML to prevent XSS
- */
-function escapeHtml(text: string): string {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+// ===============================================
+// STATS RENDERING
+// ===============================================
+
+function renderStats(stats: DeletedItemsStats): void {
+  const updates: Record<string, string> = {
+    'deleted-stat-clients': String(stats.clients),
+    'deleted-stat-projects': String(stats.projects),
+    'deleted-stat-invoices': String(stats.invoices),
+    'deleted-stat-leads': String(stats.leads),
+    'deleted-stat-proposals': String(stats.proposals),
+    'deleted-stat-total': String(stats.total)
+  };
+
+  for (const [id, value] of Object.entries(updates)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
 }
 
-/**
- * Cleanup when section is unloaded
- */
+// ===============================================
+// MODULE FACTORY
+// ===============================================
+
+const deletedItemsModule = createTableModule<DeletedItem, DeletedItemsStats>({
+  moduleId: 'deleted-items',
+  filterConfig: DELETED_ITEMS_FILTER_CONFIG,
+  paginationConfig: createPaginationConfig('deleted-items'),
+  columnCount: 6,
+  apiEndpoint: '/api/admin/deleted-items',
+
+  extractData: (json) => {
+    const data = json as { items?: DeletedItem[]; stats?: DeletedItemsStats };
+    return {
+      data: data.items || [],
+      stats: data.stats
+    };
+  },
+
+  renderRow: buildDeletedItemRow,
+
+  renderStats: (stats) => {
+    renderStats(stats);
+  },
+
+  emptyMessage: 'No deleted items found.',
+  filterEmptyMessage: 'No deleted items match the current filters.',
+  loadingMessage: 'Loading deleted items...',
+
+  defaultSort: {
+    column: 'deleted_at',
+    direction: 'desc'
+  }
+});
+
+// Assign late-bound reload function now that module exists
+reloadModule = deletedItemsModule.load;
+
+// ===============================================
+// PUBLIC API
+// ===============================================
+
+export const loadDeletedItems = deletedItemsModule.load;
+export const setDeletedItemsContext = deletedItemsModule.setContext;
+export const getDeletedItemsData = deletedItemsModule.getData;
+
 export function cleanupDeletedItems(): void {
-  clearElementCache();
+  deletedItemsModule.resetCache();
 }

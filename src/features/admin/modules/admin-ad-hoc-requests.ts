@@ -23,6 +23,9 @@ import {
   createTableModule,
   createPaginationConfig
 } from '../../../utils/table-module-factory';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdHocRequests');
 
 const REQUESTS_API = '/api/ad-hoc-requests';
 
@@ -162,12 +165,15 @@ function buildRequestRow(request: AdHocRequest): HTMLTableRowElement {
   const priorityLabel = SanitizationUtils.escapeHtml(formatLabel(request.priority));
 
   row.innerHTML = `
-    <td class="name-cell" data-label="Request">${title} <span class="badge badge-muted">${typeLabel}</span></td>
+    <td class="identity-cell" data-label="Request">
+      <span class="identity-name" data-field="primary-name">${title}</span>
+      <span class="identity-contact" data-field="secondary-name">${typeLabel}</span>
+    </td>
     <td class="name-cell" data-label="Client">${clientName}</td>
     <td class="name-cell" data-label="Project">${projectName}</td>
     <td class="type-cell" data-label="Priority">${priorityLabel}</td>
     <td class="status-cell" data-label="Status">${getStatusIndicator(request.status)}</td>
-    <td class="date-cell" data-label="Date">${formatDate(request.createdAt)}</td>
+    <td class="date-cell" data-label="Submitted">${formatDate(request.createdAt)}</td>
     <td class="actions-cell" data-label="Actions">
       ${renderActionsCell([
     createAction('view', request.id, { title: 'View request', ariaLabel: 'View request' })
@@ -191,7 +197,7 @@ async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTM
       timeEntries = data.entries || [];
     }
   } catch (error) {
-    console.error('Failed to load time entries:', error);
+    logger.error('Failed to load time entries:', error);
   }
 
   const totalHours = timeEntries.reduce((sum: number, entry: TimeEntry) => sum + (entry.hours || 0), 0);
@@ -227,7 +233,7 @@ async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTM
     : '<p class="ad-hoc-time-entries-empty">No time entries yet</p>'
 }
     <form id="ad-hoc-time-entry-form" class="ad-hoc-time-entry-form">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2);">
+      <div class="meta-grid meta-grid--2col meta-grid--gap-sm">
         <div class="form-group">
           <label for="time-entry-user">User Name</label>
           <input type="text" id="time-entry-user" class="form-input" required />
@@ -245,7 +251,7 @@ async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTM
         <label for="time-entry-desc">Description (optional)</label>
         <input type="text" id="time-entry-desc" class="form-input" placeholder="What was worked on?" />
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2);">
+      <div class="meta-grid meta-grid--2col meta-grid--gap-sm">
         <div class="form-group">
           <label for="time-entry-billable">
             <input type="checkbox" id="time-entry-billable" checked />
@@ -257,7 +263,7 @@ async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTM
           <input type="number" id="time-entry-rate" step="0.01" min="0" class="form-input" placeholder="Leave empty for request rate" />
         </div>
       </div>
-      <button type="submit" class="btn btn-primary" style="width: 100%;">Log Time Entry</button>
+      <button type="submit" class="btn btn-primary btn-full">Log Time Entry</button>
     </form>
   `;
 
@@ -805,19 +811,19 @@ export function renderAdHocRequestsTab(container: HTMLElement): void {
   container.innerHTML = `
     <div class="data-table-card" id="ad-hoc-requests-table-card">
       <div class="data-table-header">
-        <h3>Ad Hoc Requests</h3>
+        <h3><span class="title-full">Ad Hoc Requests</span><span class="title-mobile">Requests</span></h3>
         <div class="data-table-actions" id="ad-hoc-requests-filter-container">
           <button class="icon-btn" id="refresh-ad-hoc-requests-btn" title="Refresh" aria-label="Refresh ad hoc requests">
             ${RENDER_ICONS.REFRESH}
           </button>
         </div>
       </div>
-      <div class="data-table-container ad-hoc-requests-table-container">
+      <div class="data-table-container">
         <div class="data-table-scroll-wrapper">
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col" class="name-col">Request</th>
+                <th scope="col" class="identity-col">Request</th>
                 <th scope="col" class="name-col">Client</th>
                 <th scope="col" class="name-col">Project</th>
                 <th scope="col" class="type-col">Priority</th>
@@ -839,6 +845,7 @@ export function renderAdHocRequestsTab(container: HTMLElement): void {
           </table>
         </div>
       </div>
+      <!-- Pagination -->
       <div id="ad-hoc-requests-pagination" class="table-pagination"></div>
     </div>
   `;

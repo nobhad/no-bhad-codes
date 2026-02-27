@@ -63,6 +63,9 @@ import { renderEmptyState, renderErrorState } from '../../../components/empty-st
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
 import { initDetailKeyboardNav, cleanupDetailKeyboardNav } from '../../../components/detail-keyboard-nav';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminProjects');
 
 // ============================================
 // UTILITY HELPERS
@@ -313,35 +316,35 @@ export function renderProjectsTab(container: HTMLElement): void {
       <div id="projects-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
       <div class="data-table-container">
         <div class="data-table-scroll-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th scope="col" class="bulk-select-cell">
-                <div class="portal-checkbox">
-                  <input type="checkbox" id="projects-select-all" class="bulk-select-all" aria-label="Select all projects" />
-                </div>
-              </th>
-              <th scope="col" class="identity-col">Project</th>
-              <th scope="col" class="type-col">Type</th>
-              <th scope="col" class="status-col">Status</th>
-              <th scope="col" class="amount-col">Budget</th>
-              <th scope="col" class="timeline-col">Timeline</th>
-              <th scope="col" class="date-col start-col">Start</th>
-              <th scope="col" class="date-col target-col">Target</th>
-              <th scope="col" class="actions-col">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="projects-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr class="loading-row">
-              <td colspan="9">
-                <div class="loading-state">
-                  <span class="loading-spinner" aria-hidden="true"></span>
-                  <span class="loading-message">Loading projects...</span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col" class="bulk-select-cell">
+                  <div class="portal-checkbox">
+                    <input type="checkbox" id="projects-select-all" class="bulk-select-all" aria-label="Select all projects" />
+                  </div>
+                </th>
+                <th scope="col" class="identity-col">Project</th>
+                <th scope="col" class="type-col">Type</th>
+                <th scope="col" class="status-col">Status</th>
+                <th scope="col" class="amount-col">Budget</th>
+                <th scope="col" class="timeline-col">Timeline</th>
+                <th scope="col" class="date-col start-col">Start</th>
+                <th scope="col" class="date-col target-col">Target</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="projects-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              <tr class="loading-row">
+                <td colspan="9">
+                  <div class="loading-state">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span class="loading-message">Loading projects...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
       <!-- Pagination -->
@@ -390,7 +393,7 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
       projectsData = data.leads || [];
       updateProjectsDisplay(data, ctx);
     } else {
-      console.error('[AdminProjects] API error:', response.status);
+      logger.error(' API error:', response.status);
       if (tableBody) {
         showTableError(
           tableBody,
@@ -401,7 +404,7 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[AdminProjects] Failed to load projects:', error);
+    logger.error(' Failed to load projects:', error);
     if (tableBody) {
       showTableError(
         tableBody,
@@ -559,8 +562,8 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
     row.innerHTML = `
       ${createRowCheckbox('projects', project.id)}
       <td class="identity-cell" data-label="Project">
-        <span class="identity-name">${safeName}</span>
-        ${(safeContact || safeCompany) ? `<span class="identity-contact">${safeContact}${safeCompany ? ` - ${safeCompany}` : ''}</span>` : ''}
+        <span class="identity-name" data-field="primary-name">${safeName}</span>
+        ${(safeContact || safeCompany) ? `<span class="identity-contact" data-field="secondary-name">${safeContact}${safeCompany ? ` - ${safeCompany}` : ''}</span>` : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
         <span class="type-budget-stacked">${formatProjectType(project.project_type)} · ${formatDisplayValue(project.budget_range)}</span>
       </td>
       <td class="type-cell" data-label="Type">
@@ -736,7 +739,7 @@ export async function updateProjectStatus(
       ctx.showNotification('Failed to update project status', 'error');
     }
   } catch (error) {
-    console.error('[AdminProjects] Error updating project status:', error);
+    logger.error(' Error updating project status:', error);
     ctx.showNotification('Failed to update project status', 'error');
   }
 }
@@ -766,7 +769,7 @@ function _initSecondarySidebar(projectName: string): void {
   const horizontalMountPoint = document.getElementById('secondary-tabs-horizontal');
 
   if (!mountPoint || !horizontalMountPoint) {
-    console.warn('[AdminProjects] Secondary sidebar mount points not found');
+    logger.warn(' Secondary sidebar mount points not found');
     return;
   }
 
@@ -1585,7 +1588,7 @@ async function generateProposalPdf(projectId: number): Promise<void> {
 
     showToast('Proposal PDF downloaded', 'success');
   } catch (error) {
-    console.error('[AdminProjects] Error generating proposal PDF:', error);
+    logger.error(' Error generating proposal PDF:', error);
     showToast('Failed to generate proposal PDF', 'error');
   }
 }
@@ -1619,7 +1622,7 @@ async function generateContractPdf(projectId: number): Promise<void> {
 
     showToast('Contract PDF downloaded', 'success');
   } catch (error) {
-    console.error('[AdminProjects] Error generating contract PDF:', error);
+    logger.error(' Error generating contract PDF:', error);
     showToast('Failed to generate contract PDF', 'error');
   }
 }
@@ -1689,7 +1692,7 @@ async function generateReceiptPdf(projectId: number): Promise<void> {
 
     showToast('Receipt PDF downloaded', 'success');
   } catch (error) {
-    console.error('[AdminProjects] Error generating receipt PDF:', error);
+    logger.error(' Error generating receipt PDF:', error);
     showToast('Failed to generate receipt PDF', 'error');
   }
 }
@@ -1714,7 +1717,7 @@ export async function loadProjectMessages(
       renderEmptyState(container, 'No messages yet.');
     }
   } catch (error) {
-    console.error('[AdminProjects] Failed to load messages:', error);
+    logger.error(' Failed to load messages:', error);
     renderErrorState(container, 'Failed to load messages.', { type: 'general' });
   }
 }
@@ -1764,7 +1767,7 @@ export async function loadProjectFiles(
       renderEmptyState(container, 'No files yet. Upload files in the Files tab.');
     }
   } catch (error) {
-    console.error('[AdminProjects] Failed to load files:', error);
+    logger.error(' Failed to load files:', error);
     renderErrorState(container, 'Failed to load files.', { type: 'general' });
   }
 }
@@ -1776,17 +1779,18 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
   }
 
   container.innerHTML = `
-    <div class="data-table-scroll-wrapper">
-      <table class="data-table" aria-label="Project files">
-        <thead>
-          <tr>
-            <th scope="col" class="name-col">File</th>
-            <th scope="col" class="type-col">Size</th>
-            <th scope="col" class="date-col">Uploaded</th>
-            <th scope="col" class="actions-col">Actions</th>
-          </tr>
-        </thead>
-        <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+    <div class="data-table-container">
+      <div class="data-table-scroll-wrapper">
+        <table class="data-table" aria-label="Project files">
+          <thead>
+            <tr>
+              <th scope="col" class="name-col">File</th>
+              <th scope="col" class="type-col">Size</th>
+              <th scope="col" class="date-col">Uploaded</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="project-files-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
           ${files
     .map((file) => {
       const safeName = SanitizationUtils.escapeHtml(file.original_filename || file.filename);
@@ -1802,29 +1806,38 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
       const isIntakeFile = /^(intake_|admin_project_)/i.test(storageFilename) && /\.json$/i.test(storageFilename);
       const isPreviewable = /\.(json|txt|md|png|jpg|jpeg|gif|webp|svg|pdf)$/i.test(safeName) || isIntakeFile;
 
-      const previewBtn = isPreviewable
-        ? `<button type="button" class="icon-btn btn-preview" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Preview ${safeName}" title="Preview">${ICONS.EYE}</button>`
-        : '';
-      const downloadBtn = `<button type="button" class="icon-btn btn-download" data-file-url="${downloadUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Download ${safeName}" title="Download">${ICONS.DOWNLOAD}</button>`;
-      const deleteBtn = `<button type="button" class="icon-btn icon-btn-danger btn-delete-file" data-file-id="${file.id}" data-file-name="${safeName}" aria-label="Delete ${safeName}" title="Delete">${ICONS.TRASH}</button>`;
       return `
-              <tr>
+              <tr data-file-id="${file.id}">
                 <td class="name-cell" data-label="File">${safeName}</td>
                 <td class="type-cell" data-label="Size">${size}</td>
                 <td class="date-cell" data-label="Uploaded">${date}</td>
                 <td class="actions-cell" data-label="Actions">
-                  <div class="table-actions">
-                    ${previewBtn}
-                    ${downloadBtn}
-                    ${deleteBtn}
-                  </div>
+                  ${renderActionsCell([
+    createAction('preview', file.id, {
+      show: isPreviewable,
+      className: 'btn-preview',
+      dataAttrs: { 'file-url': fileApiUrl, 'file-name': safeName, 'storage-filename': storageFilename },
+      ariaLabel: `Preview ${safeName}`
+    }),
+    createAction('download', file.id, {
+      className: 'btn-download',
+      dataAttrs: { 'file-url': downloadUrl, 'file-name': safeName, 'storage-filename': storageFilename },
+      ariaLabel: `Download ${safeName}`
+    }),
+    createAction('delete', file.id, {
+      className: 'btn-delete-file',
+      dataAttrs: { 'file-name': safeName },
+      ariaLabel: `Delete ${safeName}`
+    })
+  ])}
                 </td>
               </tr>
             `;
     })
     .join('')}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   `;
 
@@ -1877,10 +1890,27 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
           showToast('Failed to delete file', 'error');
         }
       } catch (error) {
-        console.error('[AdminProjects] Error deleting file:', error);
+        logger.error(' Error deleting file:', error);
         showToast('Failed to delete file', 'error');
       }
     });
+  });
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#project-files-table-body',
+    rowSelector: 'tr[data-file-id]',
+    onRowSelect: (row) => {
+      const previewBtn = row.querySelector('.btn-preview') as HTMLButtonElement;
+      const downloadBtn = row.querySelector('.btn-download') as HTMLButtonElement;
+      if (previewBtn) {
+        previewBtn.click();
+      } else if (downloadBtn) {
+        downloadBtn.click();
+      }
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
   });
 }
 
@@ -1933,7 +1963,7 @@ async function downloadFile(fileUrl: string, fileName: string, projectId?: numbe
     document.body.removeChild(a);
     URL.revokeObjectURL(blobUrl);
   } catch (err) {
-    console.error('Download error:', err);
+    logger.error('Download error:', err);
     showToast('Failed to download file', 'error');
   }
 }
@@ -2004,7 +2034,7 @@ async function openFilePreview(fileUrl: string, fileName: string, projectId?: nu
       URL.revokeObjectURL(blobUrl);
     }
   } catch (err) {
-    console.error('Preview error:', err);
+    logger.error('Preview error:', err);
     showToast('Failed to load file for preview', 'error');
   }
 }
@@ -2216,7 +2246,7 @@ export async function loadProjectMilestones(
       renderEmptyState(container, 'No milestones yet. Add one to track progress.');
     }
   } catch (error) {
-    console.error('[AdminProjects] Failed to load milestones:', error);
+    logger.error(' Failed to load milestones:', error);
     renderErrorState(container, 'Failed to load milestones.', { type: 'general' });
   }
 }
@@ -2285,10 +2315,10 @@ function updateProgressBar(progress: number): void {
     apiPut(`/api/projects/${currentProjectId}`, { progress })
       .then((response) => {
         if (!response.ok) {
-          console.error('[AdminProjects] Failed to save progress:', response.status);
+          logger.error(' Failed to save progress:', response.status);
         }
       })
-      .catch((err) => console.error('[AdminProjects] Error saving progress:', err));
+      .catch((err) => logger.error(' Error saving progress:', err));
   }
 }
 
@@ -2310,7 +2340,7 @@ export async function toggleMilestone(
       ctx.showNotification('Failed to update milestone', 'error');
     }
   } catch (error) {
-    console.error('[AdminProjects] Failed to toggle milestone:', error);
+    logger.error(' Failed to toggle milestone:', error);
   }
 }
 
@@ -2389,7 +2419,7 @@ async function loadProjectSidebarStats(projectId: number): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[AdminProjects] Failed to load sidebar stats:', error);
+    logger.error(' Failed to load sidebar stats:', error);
   }
 }
 
@@ -2411,7 +2441,7 @@ export async function loadProjectInvoices(
       renderEmptyState(container, 'No invoices yet. Create one above.');
     }
   } catch (error) {
-    console.error('[AdminProjects] Failed to load invoices:', error);
+    logger.error(' Failed to load invoices:', error);
     renderErrorState(container, 'Failed to load invoices.', { type: 'general' });
   }
 }
@@ -2423,18 +2453,19 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
   }
 
   container.innerHTML = `
-    <div class="data-table-scroll-wrapper">
-      <table class="data-table" aria-label="Project invoices">
-        <thead>
-          <tr>
-            <th scope="col" class="name-col">Invoice #</th>
-            <th scope="col" class="amount-col">Amount</th>
-            <th scope="col" class="date-col">Due Date</th>
-            <th scope="col" class="status-col">Status</th>
-            <th scope="col" class="actions-col">Actions</th>
-          </tr>
-        </thead>
-        <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+    <div class="data-table-container">
+      <div class="data-table-scroll-wrapper">
+        <table class="data-table" aria-label="Project invoices">
+          <thead>
+            <tr>
+              <th scope="col" class="name-col">Invoice #</th>
+              <th scope="col" class="amount-col">Amount</th>
+              <th scope="col" class="date-col">Due Date</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="project-invoices-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
           ${invoices
     .map((invoice) => {
       const amount = new Intl.NumberFormat('en-US', {
@@ -2446,38 +2477,52 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
       const showSendBtn = isDraft;
       const showMarkPaidBtn = ['sent', 'viewed', 'partial', 'overdue'].includes(invoice.status);
 
-      const previewBtn = `<button type="button" class="icon-btn btn-preview-invoice" data-invoice-id="${invoice.id}" aria-label="Preview PDF" title="Preview PDF">${ICONS.EYE}</button>`;
-      const editBtn = isDraft
-        ? `<button type="button" class="icon-btn btn-edit-invoice" data-invoice-id="${invoice.id}" aria-label="Edit Invoice" title="Edit Invoice">${ICONS.EDIT}</button>`
-        : '';
-      const downloadBtn = `<button type="button" class="icon-btn btn-download-invoice" data-invoice-id="${invoice.id}" data-invoice-number="${invoice.invoice_number}" aria-label="Download PDF" title="Download PDF">${ICONS.DOWNLOAD}</button>`;
-      const sendBtn = showSendBtn
-        ? `<button type="button" class="icon-btn btn-send-invoice" data-invoice-id="${invoice.id}" aria-label="Send to Client" title="Send to Client">${ICONS.SEND}</button>`
-        : '';
-      const paidBtn = showMarkPaidBtn
-        ? `<button type="button" class="icon-btn btn-mark-paid" data-invoice-id="${invoice.id}" aria-label="Mark as Paid" title="Mark as Paid">${ICONS.CIRCLE_CHECK}</button>`
-        : '';
       return `
-              <tr>
-                <td class="type-cell" data-label="Invoice">${invoice.invoice_number}</td>
+              <tr data-invoice-id="${invoice.id}">
+                <td class="name-cell invoice-number-cell" data-label="Invoice">${invoice.invoice_number}</td>
                 <td class="amount-cell" data-label="Amount">${amount}</td>
                 <td class="date-cell" data-label="Due Date">${dueDate}</td>
                 <td class="status-cell" data-label="Status">${getStatusDotHTML(invoice.status)}</td>
                 <td class="actions-cell" data-label="Actions">
-                  <div class="table-actions">
-                    ${sendBtn}
-                    ${editBtn}
-                    ${paidBtn}
-                    ${previewBtn}
-                    ${downloadBtn}
-                  </div>
+                  ${renderActionsCell([
+    createAction('send', invoice.id, {
+      show: showSendBtn,
+      className: 'btn-send-invoice',
+      title: 'Send to Client',
+      ariaLabel: 'Send to Client'
+    }),
+    createAction('edit', invoice.id, {
+      show: isDraft,
+      className: 'btn-edit-invoice',
+      title: 'Edit Invoice',
+      ariaLabel: 'Edit Invoice'
+    }),
+    createAction('mark-paid', invoice.id, {
+      show: showMarkPaidBtn,
+      className: 'btn-mark-paid',
+      title: 'Mark as Paid',
+      ariaLabel: 'Mark as Paid'
+    }),
+    createAction('preview', invoice.id, {
+      className: 'btn-preview-invoice',
+      title: 'Preview PDF',
+      ariaLabel: 'Preview PDF'
+    }),
+    createAction('download', invoice.id, {
+      className: 'btn-download-invoice',
+      dataAttrs: { 'invoice-number': invoice.invoice_number },
+      title: 'Download PDF',
+      ariaLabel: 'Download PDF'
+    })
+  ])}
                 </td>
               </tr>
             `;
     })
     .join('')}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   `;
 
@@ -2494,7 +2539,7 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
           const url = URL.createObjectURL(blob);
           window.open(url, '_blank');
         } catch (error) {
-          console.error('[AdminProjects] Preview failed:', error);
+          logger.error(' Preview failed:', error);
           showToast('Failed to preview invoice', 'error');
         }
       }
@@ -2517,7 +2562,7 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
           a.click();
           URL.revokeObjectURL(url);
         } catch (error) {
-          console.error('[AdminProjects] Download failed:', error);
+          logger.error(' Download failed:', error);
           showToast('Failed to download invoice', 'error');
         }
       }
@@ -2536,7 +2581,7 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
             loadProjectInvoices(currentProjectId, storedContext);
           }
         } catch (error) {
-          console.error('[Invoice] Edit error:', error);
+          logger.error('Invoice: Edit error:', error);
         }
       }
     });
@@ -2554,7 +2599,7 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
             loadProjectInvoices(currentProjectId, storedContext);
           }
         } catch (error) {
-          console.error('[Invoice] Send error:', error);
+          logger.error('Invoice: Send error:', error);
         }
       }
     });
@@ -2572,10 +2617,22 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
             loadProjectInvoices(currentProjectId, storedContext);
           }
         } catch (error) {
-          console.error('[Invoice] Mark paid error:', error);
+          logger.error('Invoice: Mark paid error:', error);
         }
       }
     });
+  });
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#project-invoices-table-body',
+    rowSelector: 'tr[data-invoice-id]',
+    onRowSelect: (row) => {
+      const previewBtn = row.querySelector('.btn-preview-invoice') as HTMLButtonElement;
+      if (previewBtn) previewBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
   });
 }
 
@@ -2602,7 +2659,7 @@ async function navigateToClientByEmail(email: string): Promise<void> {
       storedContext.showNotification('Client not found', 'error');
     }
   } catch (error) {
-    console.error('[AdminProjects] Error navigating to client:', error);
+    logger.error(' Error navigating to client:', error);
     storedContext?.showNotification('Error loading client details', 'error');
   }
 }
@@ -2751,7 +2808,7 @@ async function showCreateInvoicePrompt(): Promise<void> {
           showToast('Failed to create deposit invoice', 'error');
         }
       } catch (error) {
-        console.error('[AdminProjects] Error creating deposit invoice:', error);
+        logger.error(' Error creating deposit invoice:', error);
         showToast('Failed to create deposit invoice', 'error');
       }
     } else {
@@ -2796,8 +2853,8 @@ async function showCreateInvoicePrompt(): Promise<void> {
               ${lineItems.map((item, index) => `
                 <div class="line-item-row" data-index="${index}">
                   <input type="text" class="form-input line-item-desc" placeholder="Description" value="${SanitizationUtils.escapeHtml(item.description)}" required>
-                  <input type="number" class="form-input line-item-qty" placeholder="Qty" value="${item.quantity}" min="1" style="width: 70px;">
-                  <input type="number" class="form-input line-item-rate" placeholder="Rate" value="${item.rate}" min="0" step="0.01" style="width: 100px;">
+                  <input type="number" class="form-input line-item-qty" placeholder="Qty" value="${item.quantity}" min="1">
+                  <input type="number" class="form-input line-item-rate" placeholder="Rate" value="${item.rate}" min="0" step="0.01">
                   <span class="line-item-amount">$${(item.quantity * item.rate).toFixed(2)}</span>
                   ${lineItems.length > 1 ? `<button type="button" class="icon-btn icon-btn-danger icon-btn-xs btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
                 </div>
@@ -3034,7 +3091,7 @@ async function createInvoiceWithLineItems(
             showToast('Invoice created, but failed to apply deposit credit', 'warning');
           }
         } catch (creditError) {
-          console.error('[AdminProjects] Error applying deposit credit:', creditError);
+          logger.error(' Error applying deposit credit:', creditError);
           showToast('Invoice created, but failed to apply deposit credit', 'warning');
         }
       } else {
@@ -3044,11 +3101,11 @@ async function createInvoiceWithLineItems(
       if (currentProjectId && storedContext) loadProjectInvoices(currentProjectId, storedContext);
     } else {
       const errorData = await response.json();
-      console.error('[AdminProjects] Invoice creation failed:', errorData);
+      logger.error(' Invoice creation failed:', errorData);
       showToast('Failed to create invoice', 'error');
     }
   } catch (error) {
-    console.error('[AdminProjects] Error creating invoice:', error);
+    logger.error(' Error creating invoice:', error);
     showToast('Failed to create invoice', 'error');
   }
 }
@@ -3122,7 +3179,7 @@ async function addMilestone(
       storedContext.showNotification('Failed to add milestone', 'error');
     }
   } catch (error) {
-    console.error('[AdminProjects] Error adding milestone:', error);
+    logger.error(' Error adding milestone:', error);
     storedContext.showNotification('Error adding milestone', 'error');
   }
 }
@@ -3153,7 +3210,7 @@ async function sendProjectMessage(): Promise<void> {
       storedContext.showNotification('Failed to send message', 'error');
     }
   } catch (error) {
-    console.error('[AdminProjects] Error sending message:', error);
+    logger.error(' Error sending message:', error);
     storedContext.showNotification('Error sending message', 'error');
   }
 }
@@ -3411,7 +3468,7 @@ async function populateClientDropdown(): Promise<void> {
       clientMount.appendChild(clientDropdown);
     }
   } catch (error) {
-    console.error('[AdminProjects] Failed to load clients for dropdown:', error);
+    logger.error(' Failed to load clients for dropdown:', error);
   }
 }
 
@@ -3511,7 +3568,7 @@ async function handleAddProjectSubmit(
       ctx.showNotification('Failed to create project. Please try again.', 'error');
     }
   } catch (error) {
-    console.error('[AdminProjects] Error creating project:', error);
+    logger.error(' Error creating project:', error);
     ctx.showNotification('Failed to create project. Please try again.', 'error');
   }
 }
