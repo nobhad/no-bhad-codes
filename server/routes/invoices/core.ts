@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { canAccessInvoice } from '../../middleware/access-control.js';
+import { canAccessInvoice, canAccessProject, isUserAdmin } from '../../middleware/access-control.js';
 import { InvoiceCreateData, InvoiceLineItem } from '../../services/invoice-service.js';
 import { emailService } from '../../services/email-service.js';
 import { getDatabase } from '../../database/init.js';
@@ -257,6 +257,11 @@ router.post(
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
         required: ['projectId', 'clientId', 'lineItems']
       });
+    }
+
+    // Authorization check: verify user can access the project
+    if (!(await canAccessProject(req, invoiceData.projectId))) {
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     // Validate line items
