@@ -74,7 +74,7 @@ describe('Authentication Middleware', () => {
       vi.mocked(jwt.verify).mockImplementation(() => mockDecoded as any);
 
       mockReq.cookies = {
-        'auth_token': 'cookie-token', // Use correct cookie name from COOKIE_CONFIG
+        auth_token: 'cookie-token', // Use correct cookie name from COOKIE_CONFIG
       };
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -96,7 +96,7 @@ describe('Authentication Middleware', () => {
         authorization: 'Bearer header-token',
       };
       mockReq.cookies = {
-        'auth_token': 'cookie-token', // Use correct cookie name
+        auth_token: 'cookie-token', // Use correct cookie name
       };
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);

@@ -14,19 +14,19 @@ const mockCronSchedule = vi.fn();
 const mockCronStop = vi.fn();
 vi.mock('node-cron', () => ({
   default: {
-    schedule: mockCronSchedule.mockReturnValue({ stop: mockCronStop })
-  }
+    schedule: mockCronSchedule.mockReturnValue({ stop: mockCronStop }),
+  },
 }));
 
 // Mock database
 const mockDb = vi.hoisted(() => ({
   run: vi.fn(),
   get: vi.fn(),
-  all: vi.fn()
+  all: vi.fn(),
 }));
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: () => mockDb
+  getDatabase: () => mockDb,
 }));
 
 // Mock invoice service
@@ -39,38 +39,38 @@ const mockInvoiceService = {
   getInvoiceById: vi.fn(),
   skipReminder: vi.fn(),
   markReminderSent: vi.fn(),
-  markReminderFailed: vi.fn()
+  markReminderFailed: vi.fn(),
 };
 
 vi.mock('../../../server/services/invoice-service', () => ({
   InvoiceService: {
-    getInstance: () => mockInvoiceService
-  }
+    getInstance: () => mockInvoiceService,
+  },
 }));
 
 // Mock email service
 const mockEmailService = {
-  sendEmail: vi.fn()
+  sendEmail: vi.fn(),
 };
 
 vi.mock('../../../server/services/email-service', () => ({
-  emailService: mockEmailService
+  emailService: mockEmailService,
 }));
 
 // Mock soft delete service
 const mockSoftDeleteService = {
-  permanentlyDeleteExpired: vi.fn()
+  permanentlyDeleteExpired: vi.fn(),
 };
 
 vi.mock('../../../server/services/soft-delete-service', () => ({
-  softDeleteService: mockSoftDeleteService
+  softDeleteService: mockSoftDeleteService,
 }));
 
 // Mock priority escalation service
 const mockEscalateAllProjects = vi.fn();
 
 vi.mock('../../../server/services/priority-escalation-service', () => ({
-  escalateAllProjects: mockEscalateAllProjects
+  escalateAllProjects: mockEscalateAllProjects,
 }));
 
 describe('Scheduler Service', () => {
@@ -100,7 +100,7 @@ describe('Scheduler Service', () => {
     mockInvoiceService.checkAndMarkOverdue.mockResolvedValue(0);
     mockSoftDeleteService.permanentlyDeleteExpired.mockResolvedValue({
       deleted: { total: 0, clients: 0, projects: 0, invoices: 0, leads: 0, proposals: 0 },
-      errors: []
+      errors: [],
     });
     mockEscalateAllProjects.mockResolvedValue({ updatedCount: 0, escalatedTasks: [] });
   });
@@ -200,7 +200,7 @@ describe('Scheduler Service', () => {
   describe('processReminders', () => {
     it('processes invoice reminders and sends emails', async () => {
       mockInvoiceService.processReminders.mockResolvedValue([
-        { id: 1, invoiceId: 10, reminderType: 'upcoming' }
+        { id: 1, invoiceId: 10, reminderType: 'upcoming' },
       ]);
       mockInvoiceService.getInvoiceById.mockResolvedValue({
         id: 10,
@@ -208,11 +208,11 @@ describe('Scheduler Service', () => {
         clientId: 5,
         amountTotal: 1000,
         amountPaid: 0,
-        dueDate: '2026-02-15'
+        dueDate: '2026-02-15',
       });
       mockDb.get.mockResolvedValue({
         email: 'client@test.com',
-        contact_name: 'Test Client'
+        contact_name: 'Test Client',
       });
       mockDb.all.mockResolvedValue([]); // No contract reminders
       mockEmailService.sendEmail.mockResolvedValue(true);
@@ -227,20 +227,20 @@ describe('Scheduler Service', () => {
       expect(count).toBeGreaterThan(0);
       expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
-          to: 'client@test.com'
+          to: 'client@test.com',
         })
       );
     });
 
     it('skips reminders when client has no email', async () => {
       mockInvoiceService.processReminders.mockResolvedValue([
-        { id: 1, invoiceId: 10, reminderType: 'upcoming' }
+        { id: 1, invoiceId: 10, reminderType: 'upcoming' },
       ]);
       mockInvoiceService.getInvoiceById.mockResolvedValue({
         id: 10,
         invoiceNumber: 'INV-010',
         clientId: 5,
-        amountTotal: 1000
+        amountTotal: 1000,
       });
       mockDb.get.mockResolvedValue(null); // No client found
       mockDb.all.mockResolvedValue([]);
@@ -305,8 +305,8 @@ describe('Scheduler Service', () => {
       mockEscalateAllProjects.mockResolvedValue({
         updatedCount: 5,
         escalatedTasks: [
-          { taskId: 1, projectId: 1, oldPriority: 'low', newPriority: 'medium', daysUntilDue: 2 }
-        ]
+          { taskId: 1, projectId: 1, oldPriority: 'low', newPriority: 'medium', daysUntilDue: 2 },
+        ],
       });
       vi.resetModules();
       const { SchedulerService } = await import('../../../server/services/scheduler-service');
@@ -335,8 +335,8 @@ describe('Scheduler Service', () => {
       );
 
       // Should insert 4 reminders
-      const insertCalls = mockDb.run.mock.calls.filter(
-        call => call[0].includes('INSERT INTO contract_reminders')
+      const insertCalls = mockDb.run.mock.calls.filter((call) =>
+        call[0].includes('INSERT INTO contract_reminders')
       );
       expect(insertCalls).toHaveLength(4);
     });
@@ -365,7 +365,7 @@ describe('Scheduler Service', () => {
         { email_type: 'welcome', days_after_signup: 0 },
         { email_type: 'getting_started', days_after_signup: 1 },
         { email_type: 'tips', days_after_signup: 3 },
-        { email_type: 'check_in', days_after_signup: 7 }
+        { email_type: 'check_in', days_after_signup: 7 },
       ]);
       mockDb.run.mockResolvedValue({});
 
@@ -376,8 +376,8 @@ describe('Scheduler Service', () => {
       await scheduler.startWelcomeSequence(1);
 
       // Should insert emails for each template
-      const insertCalls = mockDb.run.mock.calls.filter(
-        call => call[0].includes('INSERT INTO welcome_sequence_emails')
+      const insertCalls = mockDb.run.mock.calls.filter((call) =>
+        call[0].includes('INSERT INTO welcome_sequence_emails')
       );
       expect(insertCalls).toHaveLength(4);
 
@@ -390,7 +390,7 @@ describe('Scheduler Service', () => {
 
     it('does not restart if sequence already started', async () => {
       mockDb.get.mockResolvedValue({
-        welcome_sequence_started_at: '2026-01-01T00:00:00Z'
+        welcome_sequence_started_at: '2026-01-01T00:00:00Z',
       });
 
       vi.resetModules();
@@ -430,8 +430,8 @@ describe('Scheduler Service', () => {
           contract_signature_token: 'token123',
           email: 'client@test.com',
           contact_name: 'Test Client',
-          reminder_type: 'initial'
-        }
+          reminder_type: 'initial',
+        },
       ]);
       mockDb.run.mockResolvedValue({});
       mockEmailService.sendEmail.mockResolvedValue(true);
@@ -446,7 +446,7 @@ describe('Scheduler Service', () => {
       expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'client@test.com',
-          subject: expect.stringContaining('Contract Ready for Signature')
+          subject: expect.stringContaining('Contract Ready for Signature'),
         })
       );
     });
@@ -464,8 +464,8 @@ describe('Scheduler Service', () => {
           instance_id: 1,
           entity_type: 'invoice',
           entity_id: 5,
-          workflow_name: 'Invoice Approval'
-        }
+          workflow_name: 'Invoice Approval',
+        },
       ]);
       mockDb.run.mockResolvedValue({});
       mockEmailService.sendEmail.mockResolvedValue(true);

@@ -13,18 +13,18 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 const mockDb = vi.hoisted(() => ({
   run: vi.fn(),
   get: vi.fn(),
-  all: vi.fn()
+  all: vi.fn(),
 }));
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: () => mockDb
+  getDatabase: () => mockDb,
 }));
 
 // Mock user service
 vi.mock('../../../server/services/user-service', () => ({
   userService: {
-    getUserIdByEmail: vi.fn().mockResolvedValue(1)
-  }
+    getUserIdByEmail: vi.fn().mockResolvedValue(1),
+  },
 }));
 
 describe('File Service', () => {
@@ -41,17 +41,14 @@ describe('File Service', () => {
       mockDb.get.mockResolvedValue({
         id: 1,
         project_id: 10,
-        filename: 'test.pdf'
+        filename: 'test.pdf',
       });
 
       const { fileService } = await import('../../../server/services/file-service');
       const file = await fileService.getFileById(1);
 
       expect(file).toMatchObject({ id: 1, project_id: 10 });
-      expect(mockDb.get).toHaveBeenCalledWith(
-        'SELECT * FROM files WHERE id = ?',
-        [1]
-      );
+      expect(mockDb.get).toHaveBeenCalledWith('SELECT * FROM files WHERE id = ?', [1]);
     });
 
     it('returns null when file not found', async () => {
@@ -71,14 +68,12 @@ describe('File Service', () => {
         mockDb.run.mockResolvedValue({ lastID: 1 });
 
         // Mock for getVersion call
-        mockDb.get
-          .mockResolvedValueOnce({ version: 1 })
-          .mockResolvedValueOnce({
-            id: 1,
-            file_id: 1,
-            version_number: 2,
-            filename: 'test_v2.pdf'
-          });
+        mockDb.get.mockResolvedValueOnce({ version: 1 }).mockResolvedValueOnce({
+          id: 1,
+          file_id: 1,
+          version_number: 2,
+          filename: 'test_v2.pdf',
+        });
 
         const { fileService } = await import('../../../server/services/file-service');
 
@@ -88,7 +83,7 @@ describe('File Service', () => {
           file_path: '/uploads/test_v2.pdf',
           file_size: 1024,
           uploaded_by: 'admin@test.com',
-          comment: 'Updated version'
+          comment: 'Updated version',
         });
 
         expect(version.version_number).toBe(2);
@@ -117,11 +112,13 @@ describe('File Service', () => {
 
         const { fileService } = await import('../../../server/services/file-service');
 
-        await expect(fileService.uploadNewVersion(999, {
-          filename: 'test.pdf',
-          original_filename: 'test.pdf',
-          file_path: '/uploads/test.pdf'
-        })).rejects.toThrow('File not found');
+        await expect(
+          fileService.uploadNewVersion(999, {
+            filename: 'test.pdf',
+            original_filename: 'test.pdf',
+            file_path: '/uploads/test.pdf',
+          })
+        ).rejects.toThrow('File not found');
       });
     });
 
@@ -129,7 +126,7 @@ describe('File Service', () => {
       it('returns all versions ordered by version number', async () => {
         mockDb.all.mockResolvedValue([
           { id: 2, version_number: 2, is_current: true },
-          { id: 1, version_number: 1, is_current: false }
+          { id: 1, version_number: 1, is_current: false },
         ]);
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -155,7 +152,7 @@ describe('File Service', () => {
           file_path: '/uploads/original.pdf',
           file_size: 512,
           mime_type: 'application/pdf',
-          uploaded_by: 'admin@test.com'
+          uploaded_by: 'admin@test.com',
         });
 
         // Mock for uploadNewVersion
@@ -166,7 +163,7 @@ describe('File Service', () => {
           file_id: 1,
           version_number: 3,
           filename: 'original.pdf',
-          comment: 'Restored from version 1'
+          comment: 'Restored from version 1',
         });
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -203,15 +200,16 @@ describe('File Service', () => {
 
         const { fileService } = await import('../../../server/services/file-service');
 
-        await expect(fileService.createFolder(10, { name: 'Existing' }))
-          .rejects.toThrow('Folder with this name already exists');
+        await expect(fileService.createFolder(10, { name: 'Existing' })).rejects.toThrow(
+          'Folder with this name already exists'
+        );
       });
     });
 
     describe('getFolders', () => {
       it('returns folders with counts', async () => {
         mockDb.all.mockResolvedValue([
-          { id: 1, name: 'Folder 1', file_count: 5, subfolder_count: 2 }
+          { id: 1, name: 'Folder 1', file_count: 5, subfolder_count: 2 },
         ]);
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -241,8 +239,9 @@ describe('File Service', () => {
 
         const { fileService } = await import('../../../server/services/file-service');
 
-        await expect(fileService.moveFolder(1, 2))
-          .rejects.toThrow('Cannot move folder into its own subfolder');
+        await expect(fileService.moveFolder(1, 2)).rejects.toThrow(
+          'Cannot move folder into its own subfolder'
+        );
       });
 
       it('updates parent folder id', async () => {
@@ -270,10 +269,7 @@ describe('File Service', () => {
           'UPDATE files SET folder_id = ? WHERE folder_id = ?',
           [2, 1]
         );
-        expect(mockDb.run).toHaveBeenCalledWith(
-          'DELETE FROM file_folders WHERE id = ?',
-          [1]
-        );
+        expect(mockDb.run).toHaveBeenCalledWith('DELETE FROM file_folders WHERE id = ?', [1]);
       });
     });
   });
@@ -309,9 +305,7 @@ describe('File Service', () => {
 
     describe('getFileTags', () => {
       it('returns tags for a file', async () => {
-        mockDb.all.mockResolvedValue([
-          { id: 1, name: 'Important', color: '#ff0000' }
-        ]);
+        mockDb.all.mockResolvedValue([{ id: 1, name: 'Important', color: '#ff0000' }]);
 
         const { fileService } = await import('../../../server/services/file-service');
         const tags = await fileService.getFileTags(1);
@@ -328,7 +322,14 @@ describe('File Service', () => {
         mockDb.run.mockResolvedValue({});
 
         const { fileService } = await import('../../../server/services/file-service');
-        await fileService.logAccess(1, 'user@test.com', 'client', 'download', '192.168.1.1', 'Chrome');
+        await fileService.logAccess(
+          1,
+          'user@test.com',
+          'client',
+          'download',
+          '192.168.1.1',
+          'Chrome'
+        );
 
         expect(mockDb.run).toHaveBeenCalledWith(
           expect.stringContaining('INSERT INTO file_access_log'),
@@ -348,7 +349,7 @@ describe('File Service', () => {
           total_views: 100,
           total_downloads: 25,
           unique_viewers: 10,
-          last_accessed: '2026-02-10T12:00:00Z'
+          last_accessed: '2026-02-10T12:00:00Z',
         });
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -369,10 +370,10 @@ describe('File Service', () => {
         const { fileService } = await import('../../../server/services/file-service');
         await fileService.archiveFile(1, 'admin@test.com');
 
-        expect(mockDb.run).toHaveBeenCalledWith(
-          expect.stringContaining('SET is_archived = TRUE'),
-          ['admin@test.com', 1]
-        );
+        expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('SET is_archived = TRUE'), [
+          'admin@test.com',
+          1,
+        ]);
       });
     });
 
@@ -414,10 +415,10 @@ describe('File Service', () => {
         const { fileService } = await import('../../../server/services/file-service');
         await fileService.lockFile(1, 'admin@test.com');
 
-        expect(mockDb.run).toHaveBeenCalledWith(
-          expect.stringContaining('SET is_locked = TRUE'),
-          ['admin@test.com', 1]
-        );
+        expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('SET is_locked = TRUE'), [
+          'admin@test.com',
+          1,
+        ]);
       });
 
       it('throws error if already locked', async () => {
@@ -425,8 +426,9 @@ describe('File Service', () => {
 
         const { fileService } = await import('../../../server/services/file-service');
 
-        await expect(fileService.lockFile(1, 'admin@test.com'))
-          .rejects.toThrow('File is already locked by other@test.com');
+        await expect(fileService.lockFile(1, 'admin@test.com')).rejects.toThrow(
+          'File is already locked by other@test.com'
+        );
       });
     });
 
@@ -459,8 +461,9 @@ describe('File Service', () => {
 
         const { fileService } = await import('../../../server/services/file-service');
 
-        await expect(fileService.unlockFile(1, 'user@test.com', false))
-          .rejects.toThrow('Only the user who locked the file or an admin can unlock it');
+        await expect(fileService.unlockFile(1, 'user@test.com', false)).rejects.toThrow(
+          'Only the user who locked the file or an admin can unlock it'
+        );
       });
     });
   });
@@ -473,11 +476,17 @@ describe('File Service', () => {
           total_size: 1024000,
           archived_count: 5,
           recent_uploads: 10,
-          expiring_soon: 2
+          expiring_soon: 2,
         });
         mockDb.all
-          .mockResolvedValueOnce([{ category: 'document', count: 30 }, { category: 'image', count: 20 }])
-          .mockResolvedValueOnce([{ file_type: 'pdf', count: 25 }, { file_type: 'png', count: 15 }]);
+          .mockResolvedValueOnce([
+            { category: 'document', count: 30 },
+            { category: 'image', count: 20 },
+          ])
+          .mockResolvedValueOnce([
+            { file_type: 'pdf', count: 25 },
+            { file_type: 'png', count: 15 },
+          ]);
 
         const { fileService } = await import('../../../server/services/file-service');
         const stats = await fileService.getFileStats(10);
@@ -492,9 +501,7 @@ describe('File Service', () => {
   describe('File Search', () => {
     describe('searchFiles', () => {
       it('searches by filename and description', async () => {
-        mockDb.all.mockResolvedValue([
-          { id: 1, original_filename: 'report.pdf' }
-        ]);
+        mockDb.all.mockResolvedValue([{ id: 1, original_filename: 'report.pdf' }]);
 
         const { fileService } = await import('../../../server/services/file-service');
         const results = await fileService.searchFiles(10, 'report');
@@ -563,7 +570,12 @@ describe('File Service', () => {
             return Promise.resolve({ id: 1, file_id: 1, status: 'in_review' });
           }
           // Subsequent calls: return updated workflow
-          return Promise.resolve({ id: 1, file_id: 1, status: 'approved', approved_by: 'admin@test.com' });
+          return Promise.resolve({
+            id: 1,
+            file_id: 1,
+            status: 'approved',
+            approved_by: 'admin@test.com',
+          });
         });
 
         mockDb.run.mockResolvedValue({});
@@ -579,8 +591,9 @@ describe('File Service', () => {
 
         const { fileService } = await import('../../../server/services/file-service');
 
-        await expect(fileService.approveDeliverable(999, 'admin@test.com'))
-          .rejects.toThrow('Deliverable workflow not found');
+        await expect(fileService.approveDeliverable(999, 'admin@test.com')).rejects.toThrow(
+          'Deliverable workflow not found'
+        );
       });
     });
 
@@ -589,7 +602,7 @@ describe('File Service', () => {
         mockDb.all.mockResolvedValue([
           { status: 'draft', count: 5 },
           { status: 'approved', count: 10 },
-          { status: 'pending_review', count: 3 }
+          { status: 'pending_review', count: 3 },
         ]);
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -610,7 +623,7 @@ describe('File Service', () => {
         id: 100,
         project_id: 10,
         category: 'deliverable',
-        shared_with_client: true
+        shared_with_client: true,
       });
 
       const { fileService } = await import('../../../server/services/file-service');
@@ -622,7 +635,7 @@ describe('File Service', () => {
         fileName: 'design.pdf',
         fileSize: 2048,
         fileType: 'application/pdf',
-        uploadedBy: 'admin@test.com'
+        uploadedBy: 'admin@test.com',
       });
 
       expect(file.id).toBe(100);
@@ -646,7 +659,7 @@ describe('File Service', () => {
         fileName: 'image.png',
         fileSize: 1024,
         fileType: 'image/png',
-        uploadedBy: 'admin@test.com'
+        uploadedBy: 'admin@test.com',
       });
 
       expect(mockDb.run).toHaveBeenCalledWith(

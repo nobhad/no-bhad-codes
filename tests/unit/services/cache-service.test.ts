@@ -165,7 +165,7 @@ describe('Cache Service', () => {
       // Ensure cache is not initialized
       (cacheService as any).client = null;
       (cacheService as any).isConnected = false;
-      
+
       const result = await cacheService.get('test-key');
       expect(result).toBeNull();
       // Note: console.warn may not be called if the check happens before the warning
@@ -357,10 +357,7 @@ describe('Cache Service', () => {
       await cacheService.init({ host: 'localhost', port: 6379 });
       const pipeline = mockRedisClient.pipeline();
 
-      const result = await cacheService.mset(
-        { key1: 'value1', key2: { data: 'value2' } },
-        600
-      );
+      const result = await cacheService.mset({ key1: 'value1', key2: { data: 'value2' } }, 600);
 
       expect(result).toBe(true);
       expect(pipeline.setex).toHaveBeenCalledWith('key1', 600, 'value1');

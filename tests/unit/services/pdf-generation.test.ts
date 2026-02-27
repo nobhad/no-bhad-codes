@@ -23,41 +23,41 @@ const mockPdfDoc = {
     drawText: vi.fn(),
     drawLine: vi.fn(),
     drawRectangle: vi.fn(),
-    drawImage: vi.fn()
+    drawImage: vi.fn(),
   }),
   embedFont: vi.fn().mockResolvedValue({
     widthOfTextAtSize: vi.fn().mockReturnValue(100),
-    heightAtSize: vi.fn().mockReturnValue(12)
+    heightAtSize: vi.fn().mockReturnValue(12),
   }),
   embedPng: vi.fn().mockResolvedValue({
     width: 200,
     height: 100,
-    scale: vi.fn().mockReturnValue({ width: 100, height: 50 })
+    scale: vi.fn().mockReturnValue({ width: 100, height: 50 }),
   }),
   getPages: vi.fn().mockReturnValue([]),
-  save: vi.fn().mockResolvedValue(new Uint8Array([0x25, 0x50, 0x44, 0x46])) // %PDF
+  save: vi.fn().mockResolvedValue(new Uint8Array([0x25, 0x50, 0x44, 0x46])), // %PDF
 };
 
 vi.mock('pdf-lib', () => ({
   PDFDocument: {
-    create: vi.fn().mockResolvedValue(mockPdfDoc)
+    create: vi.fn().mockResolvedValue(mockPdfDoc),
   },
   StandardFonts: {
     Helvetica: 'Helvetica',
-    HelveticaBold: 'Helvetica-Bold'
+    HelveticaBold: 'Helvetica-Bold',
   },
-  rgb: vi.fn().mockReturnValue({ type: 'RGB', red: 0, green: 0, blue: 0 })
+  rgb: vi.fn().mockReturnValue({ type: 'RGB', red: 0, green: 0, blue: 0 }),
 }));
 
 // Mock database
 const mockDb = vi.hoisted(() => ({
   run: vi.fn(),
   get: vi.fn(),
-  all: vi.fn()
+  all: vi.fn(),
 }));
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: () => mockDb
+  getDatabase: () => mockDb,
 }));
 
 // Mock business config
@@ -69,16 +69,18 @@ vi.mock('../../../server/config/business', () => ({
     email: 'test@example.com',
     website: 'https://example.com',
     zelleEmail: 'zelle@example.com',
-    venmoHandle: '@testvenmo'
+    venmoHandle: '@testvenmo',
   },
-  getPdfLogoBytes: vi.fn().mockResolvedValue(new Uint8Array([0x89, 0x50, 0x4e, 0x47])) // PNG header
+  getPdfLogoBytes: vi.fn().mockResolvedValue(new Uint8Array([0x89, 0x50, 0x4e, 0x47])), // PNG header
 }));
 
 // Mock uploads config
 vi.mock('../../../server/config/uploads', () => ({
   getUploadsSubdir: vi.fn().mockReturnValue('/uploads/test'),
   getRelativePath: vi.fn().mockReturnValue('test/file.pdf'),
-  sanitizeFilename: vi.fn().mockImplementation((name: string) => name.replace(/[^a-zA-Z0-9.-]/g, '_'))
+  sanitizeFilename: vi
+    .fn()
+    .mockImplementation((name: string) => name.replace(/[^a-zA-Z0-9.-]/g, '_')),
 }));
 
 // Mock fs - support both default and named imports
@@ -90,27 +92,27 @@ const mockFs = {
   createWriteStream: vi.fn().mockReturnValue({
     write: vi.fn(),
     end: vi.fn(),
-    on: vi.fn()
+    on: vi.fn(),
   }),
   appendFileSync: vi.fn(),
   promises: {
     mkdir: vi.fn().mockResolvedValue(undefined),
     writeFile: vi.fn().mockResolvedValue(undefined),
     readFile: vi.fn().mockResolvedValue(Buffer.from('test')),
-    access: vi.fn().mockResolvedValue(undefined)
-  }
+    access: vi.fn().mockResolvedValue(undefined),
+  },
 };
 
 vi.mock('fs', () => ({
   default: mockFs,
-  ...mockFs
+  ...mockFs,
 }));
 
 // Mock user service
 vi.mock('../../../server/services/user-service', () => ({
   userService: {
-    getUserIdByEmail: vi.fn().mockResolvedValue(1)
-  }
+    getUserIdByEmail: vi.fn().mockResolvedValue(1),
+  },
 }));
 
 // Mock logger to avoid fs dependency issues
@@ -119,8 +121,8 @@ vi.mock('../../../server/services/logger', () => ({
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }));
 
 // Mock path module
@@ -128,11 +130,11 @@ vi.mock('path', () => ({
   default: {
     join: vi.fn().mockImplementation((...args: string[]) => args.join('/')),
     dirname: vi.fn().mockImplementation((p: string) => p.split('/').slice(0, -1).join('/')),
-    basename: vi.fn().mockImplementation((p: string) => p.split('/').pop())
+    basename: vi.fn().mockImplementation((p: string) => p.split('/').pop()),
   },
   join: vi.fn().mockImplementation((...args: string[]) => args.join('/')),
   dirname: vi.fn().mockImplementation((p: string) => p.split('/').slice(0, -1).join('/')),
-  basename: vi.fn().mockImplementation((p: string) => p.split('/').pop())
+  basename: vi.fn().mockImplementation((p: string) => p.split('/').pop()),
 }));
 
 describe('PDF Generation', () => {
@@ -161,11 +163,9 @@ describe('PDF Generation', () => {
         dueDate: '2026-03-12',
         clientName: 'John Doe',
         clientEmail: 'john@example.com',
-        lineItems: [
-          { description: 'Web Development', quantity: 10, rate: 150, amount: 1500 }
-        ],
+        lineItems: [{ description: 'Web Development', quantity: 10, rate: 150, amount: 1500 }],
         subtotal: 1500,
-        total: 1500
+        total: 1500,
       };
 
       const pdfBytes = await generateInvoicePdf(invoiceData);
@@ -187,11 +187,9 @@ describe('PDF Generation', () => {
         clientEmail: 'jane@acme.com',
         clientAddress: '123 Main St',
         clientCityStateZip: 'New York, NY 10001',
-        lineItems: [
-          { description: 'Design Services', quantity: 5, rate: 200, amount: 1000 }
-        ],
+        lineItems: [{ description: 'Design Services', quantity: 5, rate: 200, amount: 1000 }],
         subtotal: 1000,
-        total: 1000
+        total: 1000,
       };
 
       const pdfBytes = await generateInvoicePdf(invoiceData);
@@ -211,10 +209,10 @@ describe('PDF Generation', () => {
           { description: 'Design', quantity: 1, rate: 500, amount: 500 },
           { description: 'Development', quantity: 10, rate: 100, amount: 1000 },
           { description: 'Testing', quantity: 5, rate: 50, amount: 250 },
-          { description: 'Deployment', quantity: 1, rate: 200, amount: 200 }
+          { description: 'Deployment', quantity: 1, rate: 200, amount: 200 },
         ],
         subtotal: 1950,
-        total: 1950
+        total: 1950,
       };
 
       const pdfBytes = await generateInvoicePdf(invoiceData);
@@ -230,13 +228,11 @@ describe('PDF Generation', () => {
         issuedDate: '2026-02-12',
         clientName: 'Client With Tax',
         clientEmail: 'tax@example.com',
-        lineItems: [
-          { description: 'Services', quantity: 1, rate: 1000, amount: 1000 }
-        ],
+        lineItems: [{ description: 'Services', quantity: 1, rate: 1000, amount: 1000 }],
         subtotal: 1000,
         tax: 80, // 8% tax
         discount: 100,
-        total: 980
+        total: 980,
       };
 
       const pdfBytes = await generateInvoicePdf(invoiceData);
@@ -252,15 +248,11 @@ describe('PDF Generation', () => {
         issuedDate: '2026-02-12',
         clientName: 'Deposit Client',
         clientEmail: 'deposit@example.com',
-        lineItems: [
-          { description: 'Final Payment', quantity: 1, rate: 5000, amount: 5000 }
-        ],
+        lineItems: [{ description: 'Final Payment', quantity: 1, rate: 5000, amount: 5000 }],
         subtotal: 5000,
-        credits: [
-          { depositInvoiceNumber: 'INV-2026-001', amount: 1500 }
-        ],
+        credits: [{ depositInvoiceNumber: 'INV-2026-001', amount: 1500 }],
         totalCredits: 1500,
-        total: 3500
+        total: 3500,
       };
 
       const pdfBytes = await generateInvoicePdf(invoiceData);
@@ -277,12 +269,12 @@ describe('PDF Generation', () => {
         clientName: 'Deposit Payer',
         clientEmail: 'payer@example.com',
         lineItems: [
-          { description: '30% Deposit - Web Project', quantity: 1, rate: 1500, amount: 1500 }
+          { description: '30% Deposit - Web Project', quantity: 1, rate: 1500, amount: 1500 },
         ],
         subtotal: 1500,
         total: 1500,
         isDeposit: true,
-        depositPercentage: 30
+        depositPercentage: 30,
       };
 
       const pdfBytes = await generateInvoicePdf(invoiceData);
@@ -298,13 +290,11 @@ describe('PDF Generation', () => {
         issuedDate: '2026-02-12',
         clientName: 'Notes Client',
         clientEmail: 'notes@example.com',
-        lineItems: [
-          { description: 'Consulting', quantity: 2, rate: 250, amount: 500 }
-        ],
+        lineItems: [{ description: 'Consulting', quantity: 2, rate: 250, amount: 500 }],
         subtotal: 500,
         total: 500,
         notes: 'Thank you for your business!',
-        terms: 'Payment due within 30 days. Late payments subject to 1.5% monthly interest.'
+        terms: 'Payment due within 30 days. Late payments subject to 1.5% monthly interest.',
       };
 
       const pdfBytes = await generateInvoicePdf(invoiceData);
@@ -330,12 +320,12 @@ describe('PDF Generation', () => {
               'Homepage design and development',
               'About page',
               'Contact form with validation',
-              'Mobile responsive layout'
-            ]
-          }
+              'Mobile responsive layout',
+            ],
+          },
         ],
         subtotal: 5000,
-        total: 5000
+        total: 5000,
       };
 
       const pdfBytes = await generateInvoicePdf(invoiceData);
@@ -359,7 +349,7 @@ describe('PDF Generation', () => {
         paymentMethod: 'Credit Card',
         amount: 1500,
         clientName: 'John Doe',
-        clientEmail: 'john@example.com'
+        clientEmail: 'john@example.com',
       };
 
       const pdfBytes = await generateReceiptPdf(receiptData);
@@ -381,7 +371,7 @@ describe('PDF Generation', () => {
         paymentReference: 'TXN-123456789',
         amount: 2500,
         clientName: 'Jane Smith',
-        clientEmail: 'jane@example.com'
+        clientEmail: 'jane@example.com',
       };
 
       const pdfBytes = await generateReceiptPdf(receiptData);
@@ -401,7 +391,7 @@ describe('PDF Generation', () => {
         clientName: 'Bob Wilson',
         clientEmail: 'bob@company.com',
         clientCompany: 'Wilson Industries',
-        projectName: 'E-commerce Platform'
+        projectName: 'E-commerce Platform',
       };
 
       const pdfBytes = await generateReceiptPdf(receiptData);
@@ -412,7 +402,15 @@ describe('PDF Generation', () => {
     it('handles different payment methods', async () => {
       const { generateReceiptPdf } = await import('../../../server/services/receipt-service');
 
-      const paymentMethods = ['Credit Card', 'Debit Card', 'Bank Transfer', 'Zelle', 'Venmo', 'Check', 'Cash'];
+      const paymentMethods = [
+        'Credit Card',
+        'Debit Card',
+        'Bank Transfer',
+        'Zelle',
+        'Venmo',
+        'Check',
+        'Cash',
+      ];
 
       for (const method of paymentMethods) {
         const receiptData = {
@@ -422,7 +420,7 @@ describe('PDF Generation', () => {
           paymentMethod: method,
           amount: 100,
           clientName: 'Test Client',
-          clientEmail: 'test@example.com'
+          clientEmail: 'test@example.com',
         };
 
         const pdfBytes = await generateReceiptPdf(receiptData);
@@ -440,7 +438,7 @@ describe('PDF Generation', () => {
         paymentMethod: 'Credit Card',
         amount: 12345.67,
         clientName: 'Currency Client',
-        clientEmail: 'currency@example.com'
+        clientEmail: 'currency@example.com',
       };
 
       const pdfBytes = await generateReceiptPdf(receiptData);
@@ -457,8 +455,8 @@ describe('PDF Generation', () => {
     // Helper to setup mock for two sequential db.get calls (response then questionnaire)
     const setupQuestionnaireMocks = (responseData: object, questionnaireData: object) => {
       mockDb.get
-        .mockResolvedValueOnce(responseData)   // First call: getResponse
-        .mockResolvedValueOnce(questionnaireData);  // Second call: getQuestionnaire
+        .mockResolvedValueOnce(responseData) // First call: getResponse
+        .mockResolvedValueOnce(questionnaireData); // Second call: getQuestionnaire
     };
 
     const baseQuestionnaire = {
@@ -470,8 +468,13 @@ describe('PDF Generation', () => {
       questions: JSON.stringify([
         { id: 'q1', type: 'text', question: 'What is your business name?' },
         { id: 'q2', type: 'textarea', question: 'Describe your project goals.' },
-        { id: 'q3', type: 'multiselect', question: 'Which features do you need?', options: ['Option A', 'Option B', 'Option C'] }
-      ])
+        {
+          id: 'q3',
+          type: 'multiselect',
+          question: 'Which features do you need?',
+          options: ['Option A', 'Option B', 'Option C'],
+        },
+      ]),
     };
 
     const baseResponse = {
@@ -482,20 +485,21 @@ describe('PDF Generation', () => {
       answers: JSON.stringify({
         q1: 'Answer to question 1',
         q2: 'Answer to question 2',
-        q3: ['Option A', 'Option B']
+        q3: ['Option A', 'Option B'],
       }),
       status: 'completed',
       completed_at: '2026-02-12T10:00:00Z',
       questionnaire_name: 'Project Discovery',
       questionnaire_description: 'Initial project questionnaire',
       client_name: 'Test Client',
-      project_name: 'Test Project'
+      project_name: 'Test Project',
     };
 
     it('generates a valid questionnaire PDF', async () => {
       setupQuestionnaireMocks(baseResponse, baseQuestionnaire);
 
-      const { questionnaireService } = await import('../../../server/services/questionnaire-service');
+      const { questionnaireService } =
+        await import('../../../server/services/questionnaire-service');
 
       const pdfBytes = await questionnaireService.generateQuestionnairePdf(1);
 
@@ -506,7 +510,8 @@ describe('PDF Generation', () => {
     it('handles questionnaire not found', async () => {
       mockDb.get.mockResolvedValue(null);
 
-      const { questionnaireService } = await import('../../../server/services/questionnaire-service');
+      const { questionnaireService } =
+        await import('../../../server/services/questionnaire-service');
 
       await expect(questionnaireService.generateQuestionnairePdf(999)).rejects.toThrow();
     });
@@ -517,18 +522,17 @@ describe('PDF Generation', () => {
         id: 2,
         answers: JSON.stringify({}),
         questionnaire_name: 'Empty Questionnaire',
-        client_name: 'Empty Client'
+        client_name: 'Empty Client',
       };
       const emptyQuestionnaire = {
         ...baseQuestionnaire,
         name: 'Empty Questionnaire',
-        questions: JSON.stringify([
-          { id: 'q1', type: 'text', question: 'Unanswered question?' }
-        ])
+        questions: JSON.stringify([{ id: 'q1', type: 'text', question: 'Unanswered question?' }]),
       };
       setupQuestionnaireMocks(emptyResponse, emptyQuestionnaire);
 
-      const { questionnaireService } = await import('../../../server/services/questionnaire-service');
+      const { questionnaireService } =
+        await import('../../../server/services/questionnaire-service');
 
       const pdfBytes = await questionnaireService.generateQuestionnairePdf(2);
 
@@ -540,21 +544,27 @@ describe('PDF Generation', () => {
         ...baseResponse,
         id: 3,
         answers: JSON.stringify({
-          features: ['Feature 1', 'Feature 2', 'Feature 3']
+          features: ['Feature 1', 'Feature 2', 'Feature 3'],
         }),
         questionnaire_name: 'Feature Selection',
-        client_name: 'Feature Client'
+        client_name: 'Feature Client',
       };
       const multiselectQuestionnaire = {
         ...baseQuestionnaire,
         name: 'Feature Selection',
         questions: JSON.stringify([
-          { id: 'features', type: 'multiselect', question: 'Select features', options: ['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4'] }
-        ])
+          {
+            id: 'features',
+            type: 'multiselect',
+            question: 'Select features',
+            options: ['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4'],
+          },
+        ]),
       };
       setupQuestionnaireMocks(multiselectResponse, multiselectQuestionnaire);
 
-      const { questionnaireService } = await import('../../../server/services/questionnaire-service');
+      const { questionnaireService } =
+        await import('../../../server/services/questionnaire-service');
 
       const pdfBytes = await questionnaireService.generateQuestionnairePdf(3);
 
@@ -562,27 +572,29 @@ describe('PDF Generation', () => {
     });
 
     it('handles long text answers with wrapping', async () => {
-      const longAnswer = 'This is a very long answer that should wrap across multiple lines in the PDF. '.repeat(20);
+      const longAnswer =
+        'This is a very long answer that should wrap across multiple lines in the PDF. '.repeat(20);
 
       const longResponse = {
         ...baseResponse,
         id: 4,
         answers: JSON.stringify({
-          description: longAnswer
+          description: longAnswer,
         }),
         questionnaire_name: 'Long Answer Test',
-        client_name: 'Long Client'
+        client_name: 'Long Client',
       };
       const longQuestionnaire = {
         ...baseQuestionnaire,
         name: 'Long Answer Test',
         questions: JSON.stringify([
-          { id: 'description', type: 'textarea', question: 'Provide a detailed description' }
-        ])
+          { id: 'description', type: 'textarea', question: 'Provide a detailed description' },
+        ]),
       };
       setupQuestionnaireMocks(longResponse, longQuestionnaire);
 
-      const { questionnaireService } = await import('../../../server/services/questionnaire-service');
+      const { questionnaireService } =
+        await import('../../../server/services/questionnaire-service');
 
       const pdfBytes = await questionnaireService.generateQuestionnairePdf(4);
 
@@ -605,7 +617,7 @@ describe('PDF Generation', () => {
         clientEmail: 'meta@example.com',
         lineItems: [{ description: 'Test', quantity: 1, rate: 100, amount: 100 }],
         subtotal: 100,
-        total: 100
+        total: 100,
       };
 
       await generateInvoicePdf(invoiceData);
@@ -625,7 +637,7 @@ describe('PDF Generation', () => {
         clientEmail: 'logo@example.com',
         lineItems: [{ description: 'Test', quantity: 1, rate: 100, amount: 100 }],
         subtotal: 100,
-        total: 100
+        total: 100,
       };
 
       await generateInvoicePdf(invoiceData);
@@ -644,7 +656,7 @@ describe('PDF Generation', () => {
         clientEmail: 'font@example.com',
         lineItems: [{ description: 'Test', quantity: 1, rate: 100, amount: 100 }],
         subtotal: 100,
-        total: 100
+        total: 100,
       };
 
       await generateInvoicePdf(invoiceData);

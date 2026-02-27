@@ -68,7 +68,7 @@ describe('Security Middleware', () => {
   describe('rateLimit', () => {
     it('should allow requests within limit', async () => {
       const middleware = rateLimit({ windowMs: 1000, maxRequests: 5 });
-      
+
       for (let i = 0; i < 5; i++) {
         await middleware(mockReq as Request, mockRes as Response, mockNext);
       }
@@ -79,7 +79,7 @@ describe('Security Middleware', () => {
 
     it('should block requests exceeding limit', async () => {
       const middleware = rateLimit({ windowMs: 1000, maxRequests: 2 });
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
@@ -100,8 +100,8 @@ describe('Security Middleware', () => {
       // The middleware uses res.set with an object, not individual calls
       expect(mockRes.set).toHaveBeenCalled();
       const setCalls = (mockRes.set as any).mock.calls;
-      const headerCall = setCalls.find((call: any[]) => 
-        typeof call[0] === 'object' && call[0]['X-RateLimit-Limit']
+      const headerCall = setCalls.find(
+        (call: any[]) => typeof call[0] === 'object' && call[0]['X-RateLimit-Limit']
       );
       expect(headerCall).toBeDefined();
       expect(headerCall[0]['X-RateLimit-Limit']).toBe('10');
@@ -110,7 +110,7 @@ describe('Security Middleware', () => {
     it('should use custom key generator', async () => {
       const keyGenerator = vi.fn().mockReturnValue('custom-key');
       const middleware = rateLimit({ keyGenerator, maxRequests: 1 });
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
@@ -122,7 +122,7 @@ describe('Security Middleware', () => {
         skipIf: (req) => req.path === '/api/test',
         maxRequests: 1,
       });
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
@@ -131,7 +131,7 @@ describe('Security Middleware', () => {
 
     it('should block IP after exceeding limit', async () => {
       const middleware = rateLimit({ maxRequests: 1, blockDuration: 1000 });
-      
+
       // Exceed limit
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
@@ -150,7 +150,7 @@ describe('Security Middleware', () => {
     it('should call onLimitReached callback', async () => {
       const onLimitReached = vi.fn();
       const middleware = rateLimit({ maxRequests: 1, onLimitReached });
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
@@ -158,8 +158,12 @@ describe('Security Middleware', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      const middleware = rateLimit({ keyGenerator: () => { throw new Error('Key error'); } });
-      
+      const middleware = rateLimit({
+        keyGenerator: () => {
+          throw new Error('Key error');
+        },
+      });
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
@@ -169,7 +173,7 @@ describe('Security Middleware', () => {
   describe('csrfProtection', () => {
     it('should allow safe methods without CSRF token', async () => {
       const middleware = csrfProtection();
-      
+
       mockReq.method = 'GET';
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
@@ -178,7 +182,7 @@ describe('Security Middleware', () => {
 
     it('should allow HEAD requests without CSRF token', async () => {
       const middleware = csrfProtection();
-      
+
       mockReq.method = 'HEAD';
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
@@ -187,7 +191,7 @@ describe('Security Middleware', () => {
 
     it('should allow OPTIONS requests without CSRF token', async () => {
       const middleware = csrfProtection();
-      
+
       mockReq.method = 'OPTIONS';
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
@@ -196,7 +200,7 @@ describe('Security Middleware', () => {
 
     it('should reject POST without CSRF token', async () => {
       const middleware = csrfProtection();
-      
+
       mockReq.method = 'POST';
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
@@ -212,11 +216,11 @@ describe('Security Middleware', () => {
     it('should accept valid CSRF token in header', async () => {
       const token = 'valid-token';
       const middleware = csrfProtection();
-      
+
       mockReq.method = 'POST';
       mockReq.get = vi.fn().mockReturnValue(token);
       (mockReq as any).cookies = { 'csrf-token': token };
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
@@ -225,11 +229,11 @@ describe('Security Middleware', () => {
     it('should accept valid CSRF token in body', async () => {
       const token = 'valid-token';
       const middleware = csrfProtection();
-      
+
       mockReq.method = 'POST';
       mockReq.body = { _csrf: token };
       (mockReq as any).cookies = { 'csrf-token': token };
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
@@ -237,11 +241,11 @@ describe('Security Middleware', () => {
 
     it('should reject mismatched CSRF tokens', async () => {
       const middleware = csrfProtection();
-      
+
       mockReq.method = 'POST';
       mockReq.get = vi.fn().mockReturnValue('header-token');
       (mockReq as any).cookies = { 'csrf-token': 'cookie-token' };
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
@@ -251,7 +255,7 @@ describe('Security Middleware', () => {
       const middleware = csrfProtection({
         skipIf: (req) => req.path === '/api/test',
       });
-      
+
       mockReq.method = 'POST';
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
@@ -261,8 +265,10 @@ describe('Security Middleware', () => {
     it('should handle errors gracefully', async () => {
       const middleware = csrfProtection();
       mockReq.method = 'POST';
-      mockReq.get = vi.fn().mockImplementation(() => { throw new Error('Error'); });
-      
+      mockReq.get = vi.fn().mockImplementation(() => {
+        throw new Error('Error');
+      });
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
@@ -311,7 +317,7 @@ describe('Security Middleware', () => {
     it('should handle missing IP address', async () => {
       mockReq.ip = undefined;
       (mockReq as any).connection = { remoteAddress: undefined };
-      
+
       const middleware = ipFilter();
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
@@ -327,7 +333,7 @@ describe('Security Middleware', () => {
       const middleware = ipFilter();
       mockReq.ip = undefined;
       (mockReq as any).connection = null;
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
@@ -346,7 +352,7 @@ describe('Security Middleware', () => {
     it('should reject URLs that are too long', async () => {
       const middleware = requestSizeLimit({ maxUrlLength: 10 });
       mockReq.url = '/api/very/long/url/path';
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(414);
@@ -362,7 +368,7 @@ describe('Security Middleware', () => {
       mockReq.headers = {
         'x-large-header': 'a'.repeat(200),
       };
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(431);
@@ -376,7 +382,7 @@ describe('Security Middleware', () => {
     it('should reject requests with body that is too large', async () => {
       const middleware = requestSizeLimit({ maxBodySize: 1000 });
       mockReq.get = vi.fn().mockReturnValue('2000');
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(413);
@@ -390,7 +396,7 @@ describe('Security Middleware', () => {
     it('should handle errors gracefully', async () => {
       const middleware = requestSizeLimit();
       mockReq.url = undefined as any;
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
@@ -408,7 +414,7 @@ describe('Security Middleware', () => {
     it('should detect path traversal attempts', async () => {
       const middleware = suspiciousActivityDetector({ maxPathTraversal: 2 });
       mockReq.url = '/api/../../../etc/passwd';
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
@@ -424,7 +430,7 @@ describe('Security Middleware', () => {
     it('should detect SQL injection attempts', async () => {
       const middleware = suspiciousActivityDetector({ maxSqlInjectionAttempts: 2 });
       mockReq.url = "/api/test?id=1' OR '1'='1";
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
@@ -435,7 +441,7 @@ describe('Security Middleware', () => {
     it('should detect XSS attempts', async () => {
       const middleware = suspiciousActivityDetector({ maxXssAttempts: 2 });
       mockReq.url = '/api/test?x=<script>alert(1)</script>';
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
@@ -446,17 +452,17 @@ describe('Security Middleware', () => {
     it('should block IP after multiple suspicious activities', async () => {
       const middleware = suspiciousActivityDetector({ maxPathTraversal: 2 });
       mockReq.url = '/api/../../../etc/passwd';
-      
+
       // First attempt - should pass but be logged (count = 1)
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       expect(mockNext).toHaveBeenCalled();
-      
+
       // Clear mocks for second call
       vi.clearAllMocks();
       mockNext = vi.fn() as unknown as NextFunction;
       mockRes.status = vi.fn().mockReturnThis();
       mockRes.json = vi.fn().mockReturnThis();
-      
+
       // Second attempt - should be blocked (count = 2, equals maxPathTraversal)
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       expect(mockRes.status).toHaveBeenCalledWith(403);
@@ -470,7 +476,7 @@ describe('Security Middleware', () => {
     it('should handle errors gracefully', async () => {
       const middleware = suspiciousActivityDetector();
       mockReq.url = undefined as any;
-      
+
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
@@ -496,8 +502,10 @@ describe('Security Middleware', () => {
     });
 
     it('should handle errors gracefully', () => {
-      mockReq.get = vi.fn().mockImplementation(() => { throw new Error('Error'); });
-      
+      mockReq.get = vi.fn().mockImplementation(() => {
+        throw new Error('Error');
+      });
+
       requestFingerprint(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();

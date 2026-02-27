@@ -15,7 +15,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getDatabase } from '../../../server/database/init';
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: vi.fn()
+  getDatabase: vi.fn(),
 }));
 
 describe('Client Information - Onboarding Wizard', () => {
@@ -24,7 +24,7 @@ describe('Client Information - Onboarding Wizard', () => {
   beforeEach(() => {
     mockDb = {
       get: vi.fn(),
-      run: vi.fn()
+      run: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -35,14 +35,19 @@ describe('Client Information - Onboarding Wizard', () => {
         client_id: 5,
         project_id: 1,
         status: 'step_1',
-        current_step: 1
+        current_step: 1,
       };
 
       mockDb.run.mockResolvedValue({ lastID: 1 });
 
       await mockDb.run(
         'INSERT INTO onboarding_sessions (client_id, project_id, status, current_step) VALUES (?, ?, ?, ?)',
-        [onboardingData.client_id, onboardingData.project_id, onboardingData.status, onboardingData.current_step]
+        [
+          onboardingData.client_id,
+          onboardingData.project_id,
+          onboardingData.status,
+          onboardingData.current_step,
+        ]
       );
 
       expect(mockDb.run).toHaveBeenCalled();
@@ -51,7 +56,7 @@ describe('Client Information - Onboarding Wizard', () => {
     it('should initialize with step 1 (basic info)', async () => {
       const session = {
         current_step: 1,
-        status: 'step_1'
+        status: 'step_1',
       };
 
       expect(session.current_step).toBe(1);
@@ -64,7 +69,7 @@ describe('Client Information - Onboarding Wizard', () => {
         company_name: 'Acme Corp',
         contact_name: 'John Doe',
         email: 'john@acmecorp.com',
-        phone: '+1-555-1234'
+        phone: '+1-555-1234',
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -82,7 +87,7 @@ describe('Client Information - Onboarding Wizard', () => {
         project_type: 'website',
         description: 'Modern business website',
         goals: 'Increase online presence and lead generation',
-        target_audience: 'B2B clients in tech industry'
+        target_audience: 'B2B clients in tech industry',
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -99,7 +104,7 @@ describe('Client Information - Onboarding Wizard', () => {
       const stepData = {
         features_needed: ['Blog', 'Contact Form', 'Gallery'],
         timeline_months: 3,
-        budget_range: '5000-10000'
+        budget_range: '5000-10000',
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -117,7 +122,7 @@ describe('Client Information - Onboarding Wizard', () => {
         has_logo: true,
         has_content: false,
         has_domain: true,
-        domain_info: 'acmecorp.com'
+        domain_info: 'acmecorp.com',
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -133,15 +138,16 @@ describe('Client Information - Onboarding Wizard', () => {
     it('should save step 5: review and submit', async () => {
       const stepData = {
         review_complete: true,
-        is_submitted: true
+        is_submitted: true,
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
 
-      await mockDb.run(
-        'UPDATE onboarding_sessions SET status = ?, is_complete = ? WHERE id = ?',
-        ['complete', 1, 1]
-      );
+      await mockDb.run('UPDATE onboarding_sessions SET status = ?, is_complete = ? WHERE id = ?', [
+        'complete',
+        1,
+        1,
+      ]);
 
       expect(mockDb.run).toHaveBeenCalled();
     });
@@ -149,7 +155,7 @@ describe('Client Information - Onboarding Wizard', () => {
     it('should support progress save without step completion', async () => {
       const session = {
         current_step: 3,
-        progress_saved_at: new Date().toISOString()
+        progress_saved_at: new Date().toISOString(),
       };
 
       expect(session.progress_saved_at).toBeTruthy();
@@ -159,7 +165,7 @@ describe('Client Information - Onboarding Wizard', () => {
       const mockSession = {
         id: 1,
         current_step: 3,
-        status: 'in_progress'
+        status: 'in_progress',
       };
 
       mockDb.get.mockResolvedValue(mockSession);
@@ -196,7 +202,7 @@ describe('Client Information - Document Collection', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn()
+      run: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -209,22 +215,22 @@ describe('Client Information - Document Collection', () => {
           title: 'Logo Files',
           category: 'brand_assets',
           status: 'submitted',
-          due_date: '2026-02-15'
+          due_date: '2026-02-15',
         },
         {
           id: 2,
           title: 'Website Copy',
           category: 'content',
           status: 'pending',
-          due_date: '2026-02-20'
+          due_date: '2026-02-20',
         },
         {
           id: 3,
           title: 'Legal Documents',
           category: 'legal',
           status: 'pending',
-          due_date: '2026-02-25'
-        }
+          due_date: '2026-02-25',
+        },
       ];
 
       mockDb.all.mockResolvedValue(mockRequests);
@@ -247,7 +253,7 @@ describe('Client Information - Document Collection', () => {
       const document = {
         id: 1,
         title: 'Logo Files',
-        is_required: true
+        is_required: true,
       };
 
       expect(document.is_required).toBe(true);
@@ -262,14 +268,21 @@ describe('Client Information - Document Collection', () => {
         file_name: 'logo.png',
         file_size: 102400,
         file_type: 'image/png',
-        file_path: '/uploads/logos/logo.png'
+        file_path: '/uploads/logos/logo.png',
       };
 
       mockDb.run.mockResolvedValue({ lastID: 1 });
 
       await mockDb.run(
         'INSERT INTO document_uploads (request_id, client_id, file_name, file_size, file_type, file_path) VALUES (?, ?, ?, ?, ?, ?)',
-        [uploadData.request_id, uploadData.client_id, uploadData.file_name, uploadData.file_size, uploadData.file_type, uploadData.file_path]
+        [
+          uploadData.request_id,
+          uploadData.client_id,
+          uploadData.file_name,
+          uploadData.file_size,
+          uploadData.file_type,
+          uploadData.file_path,
+        ]
       );
 
       expect(mockDb.run).toHaveBeenCalled();
@@ -293,7 +306,7 @@ describe('Client Information - Document Collection', () => {
       const files = [
         { name: 'logo.png', size: 102400 },
         { name: 'favicon.ico', size: 51200 },
-        { name: 'brand-guide.pdf', size: 2048000 }
+        { name: 'brand-guide.pdf', size: 2048000 },
       ];
 
       expect(files).toHaveLength(3);
@@ -302,10 +315,11 @@ describe('Client Information - Document Collection', () => {
     it('should update request status to submitted after upload', async () => {
       mockDb.run.mockResolvedValue({ changes: 1 });
 
-      await mockDb.run(
-        'UPDATE document_requests SET status = ?, submitted_at = ? WHERE id = ?',
-        ['submitted', new Date().toISOString(), 1]
-      );
+      await mockDb.run('UPDATE document_requests SET status = ?, submitted_at = ? WHERE id = ?', [
+        'submitted',
+        new Date().toISOString(),
+        1,
+      ]);
 
       expect(mockDb.run).toHaveBeenCalledWith(
         expect.stringContaining('status'),
@@ -319,7 +333,7 @@ describe('Client Information - Document Collection', () => {
       const requiredDocs = [
         { id: 1, title: 'Logo Files', category: 'brand_assets' },
         { id: 2, title: 'Company Info', category: 'brand_assets' },
-        { id: 3, title: 'Website Copy', category: 'content' }
+        { id: 3, title: 'Website Copy', category: 'content' },
       ];
 
       expect(requiredDocs).toHaveLength(3);
@@ -336,7 +350,7 @@ describe('Client Information - Document Collection', () => {
       const document = {
         file_name: 'logo.png',
         file_path: '/uploads/logos/logo.png',
-        file_type: 'image/png'
+        file_type: 'image/png',
       };
 
       expect(document.file_path).toBeTruthy();
@@ -351,7 +365,7 @@ describe('Client Information - Questionnaires', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn()
+      run: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -363,13 +377,16 @@ describe('Client Information - Questionnaires', () => {
           id: 1,
           name: 'Website Project Questionnaire',
           project_type: 'website',
-          question_count: 15
-        }
+          question_count: 15,
+        },
       ];
 
       mockDb.all.mockResolvedValue(mockQuestionnaires);
 
-      const questionnaires = await mockDb.all('SELECT * FROM questionnaires WHERE project_type = ?', ['website']);
+      const questionnaires = await mockDb.all(
+        'SELECT * FROM questionnaires WHERE project_type = ?',
+        ['website']
+      );
 
       expect(questionnaires).toHaveLength(1);
       expect(questionnaires[0].name).toContain('Website');
@@ -384,15 +401,15 @@ describe('Client Information - Questionnaires', () => {
             id: 1,
             question: 'What is your primary business?',
             type: 'text',
-            required: true
+            required: true,
           },
           {
             id: 2,
             question: 'Who is your target audience?',
             type: 'textarea',
-            required: true
-          }
-        ]
+            required: true,
+          },
+        ],
       };
 
       mockDb.get.mockResolvedValue(mockQuestionnaire);
@@ -407,19 +424,23 @@ describe('Client Information - Questionnaires', () => {
     it('should support text questions', async () => {
       const questionType = 'text';
 
-      expect(['text', 'textarea', 'select', 'multiselect', 'number', 'email', 'file']).toContain(questionType);
+      expect(['text', 'textarea', 'select', 'multiselect', 'number', 'email', 'file']).toContain(
+        questionType
+      );
     });
 
     it('should support textarea questions', async () => {
       const questionType = 'textarea';
 
-      expect(['text', 'textarea', 'select', 'multiselect', 'number', 'email', 'file']).toContain(questionType);
+      expect(['text', 'textarea', 'select', 'multiselect', 'number', 'email', 'file']).toContain(
+        questionType
+      );
     });
 
     it('should support select (dropdown) questions', async () => {
       const question = {
         type: 'select',
-        options: ['Option A', 'Option B', 'Option C']
+        options: ['Option A', 'Option B', 'Option C'],
       };
 
       expect(question.options).toHaveLength(3);
@@ -428,7 +449,7 @@ describe('Client Information - Questionnaires', () => {
     it('should support multiselect questions', async () => {
       const question = {
         type: 'multiselect',
-        options: ['Option 1', 'Option 2', 'Option 3', 'Option 4']
+        options: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
       };
 
       expect(question.options.length).toBeGreaterThan(1);
@@ -437,7 +458,7 @@ describe('Client Information - Questionnaires', () => {
     it('should support file upload questions', async () => {
       const question = {
         type: 'file',
-        allowed_types: ['image/png', 'image/jpeg', 'application/pdf']
+        allowed_types: ['image/png', 'image/jpeg', 'application/pdf'],
       };
 
       expect(question.allowed_types).toContain('image/png');
@@ -447,7 +468,7 @@ describe('Client Information - Questionnaires', () => {
       const question = {
         type: 'number',
         min: 0,
-        max: 100
+        max: 100,
       };
 
       expect(question.min).toBe(0);
@@ -462,8 +483,8 @@ describe('Client Information - Questionnaires', () => {
         condition: {
           question_id: 2,
           operator: 'equals',
-          value: 'Yes'
-        }
+          value: 'Yes',
+        },
       };
 
       expect(question.condition).toBeTruthy();
@@ -479,15 +500,20 @@ describe('Client Information - Questionnaires', () => {
         answers: {
           1: 'Acme Corporation',
           2: 'Small business owners in tech',
-          3: ['Business Network', 'Blog']
-        }
+          3: ['Business Network', 'Blog'],
+        },
       };
 
       mockDb.run.mockResolvedValue({ lastID: 1 });
 
       await mockDb.run(
         'INSERT INTO questionnaire_responses (client_id, questionnaire_id, answers, submitted_at) VALUES (?, ?, ?, ?)',
-        [responses.client_id, responses.questionnaire_id, JSON.stringify(responses.answers), new Date().toISOString()]
+        [
+          responses.client_id,
+          responses.questionnaire_id,
+          JSON.stringify(responses.answers),
+          new Date().toISOString(),
+        ]
       );
 
       expect(mockDb.run).toHaveBeenCalled();
@@ -497,10 +523,10 @@ describe('Client Information - Questionnaires', () => {
       const answers = {
         1: 'Answer to Q1',
         2: null, // Required question not answered
-        3: 'Answer to Q3'
+        3: 'Answer to Q3',
       };
 
-      const allRequired = Object.values(answers).every(answer => answer !== null);
+      const allRequired = Object.values(answers).every((answer) => answer !== null);
 
       expect(allRequired).toBe(false);
     });
@@ -525,7 +551,7 @@ describe('Client Information - Status Tracking', () => {
 
   beforeEach(() => {
     mockDb = {
-      get: vi.fn()
+      get: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -535,7 +561,7 @@ describe('Client Information - Status Tracking', () => {
       const statusData = {
         total_items: 20,
         completed_items: 14,
-        completeness_percent: (14 / 20) * 100
+        completeness_percent: (14 / 20) * 100,
       };
 
       expect(statusData.completeness_percent).toBe(70);
@@ -545,7 +571,7 @@ describe('Client Information - Status Tracking', () => {
       const missingItems = [
         { id: 1, title: 'Website Copy', category: 'content', status: 'pending' },
         { id: 2, title: 'Brand Guide', category: 'brand_assets', status: 'pending' },
-        { id: 3, title: 'NDA', category: 'legal', status: 'pending' }
+        { id: 3, title: 'NDA', category: 'legal', status: 'pending' },
       ];
 
       expect(missingItems).toHaveLength(3);
@@ -556,7 +582,7 @@ describe('Client Information - Status Tracking', () => {
         brand_assets: { total: 5, completed: 3, percent: 60 },
         content: { total: 8, completed: 5, percent: 62.5 },
         legal: { total: 4, completed: 2, percent: 50 },
-        technical: { total: 3, completed: 2, percent: 67 }
+        technical: { total: 3, completed: 2, percent: 67 },
       };
 
       expect(breakdown.brand_assets.completed).toBe(3);
@@ -570,10 +596,12 @@ describe('Client Information - Status Tracking', () => {
         id: 1,
         status: 'pending',
         due_date: '2026-02-15',
-        reminder_sent_at: null
+        reminder_sent_at: null,
       };
 
-      const daysUntilDue = Math.floor((new Date(item.due_date).getTime() - new Date().getTime()) / (24 * 60 * 60 * 1000));
+      const daysUntilDue = Math.floor(
+        (new Date(item.due_date).getTime() - new Date().getTime()) / (24 * 60 * 60 * 1000)
+      );
       const shouldRemind = daysUntilDue <= 3;
 
       expect(typeof shouldRemind).toBe('boolean');
@@ -586,7 +614,7 @@ describe('Client Information - Error Handling', () => {
 
   beforeEach(() => {
     mockDb = {
-      get: vi.fn()
+      get: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -603,7 +631,7 @@ describe('Client Information - Error Handling', () => {
     const invalidFile = {
       size: null,
       type: null,
-      name: ''
+      name: '',
     };
 
     const isValid = invalidFile.name && invalidFile.type && invalidFile.size;
@@ -614,10 +642,10 @@ describe('Client Information - Error Handling', () => {
   it('should handle duplicate document uploads', async () => {
     const uploads = [
       { id: 1, file_name: 'logo.png', uploaded_at: '2026-02-01' },
-      { id: 2, file_name: 'logo.png', uploaded_at: '2026-02-10' }
+      { id: 2, file_name: 'logo.png', uploaded_at: '2026-02-10' },
     ];
 
-    const isDuplicate = uploads.filter(u => u.file_name === 'logo.png').length > 1;
+    const isDuplicate = uploads.filter((u) => u.file_name === 'logo.png').length > 1;
 
     expect(isDuplicate).toBe(true);
   });
@@ -625,10 +653,10 @@ describe('Client Information - Error Handling', () => {
   it('should validate questionnaire answers format', async () => {
     const invalidAnswers = {
       1: null, // Required answer is null
-      2: 'Valid answer'
+      2: 'Valid answer',
     };
 
-    const hasAllAnswers = Object.values(invalidAnswers).every(answer => answer !== null);
+    const hasAllAnswers = Object.values(invalidAnswers).every((answer) => answer !== null);
 
     expect(hasAllAnswers).toBe(false);
   });

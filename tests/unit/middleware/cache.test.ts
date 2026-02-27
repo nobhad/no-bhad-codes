@@ -227,15 +227,13 @@ describe('Cache Middleware', () => {
       expect(mockNext).toHaveBeenCalled();
       // Wait a bit for error to be logged
       await new Promise((resolve) => setTimeout(resolve, 20));
-      
+
       // Verify error was logged (the middleware catches and logs errors)
       const wasErrorLogged = consoleErrorSpy.mock.calls.some(
         (call) =>
-          call[0] &&
-          typeof call[0] === 'string' &&
-          call[0].includes('Cache middleware error')
+          call[0] && typeof call[0] === 'string' && call[0].includes('Cache middleware error')
       );
-      
+
       // The important thing is that next was called and the request continues
       expect(mockNext).toHaveBeenCalled();
     });
@@ -344,9 +342,7 @@ describe('Cache Middleware', () => {
       // Check if console.error was called with error message
       const wasErrorLogged = consoleErrorSpy.mock.calls.some(
         (call) =>
-          call[0] &&
-          typeof call[0] === 'string' &&
-          call[0].includes('Error invalidating cache tag')
+          call[0] && typeof call[0] === 'string' && call[0].includes('Error invalidating cache tag')
       );
 
       // If error wasn't logged, it means the error handling worked but didn't log
@@ -379,11 +375,10 @@ describe('Cache Middleware', () => {
 
       const result = await QueryCache.getOrSet('test-query', queryFn, { ttl: 300 });
 
-      expect(cacheService.getOrSet).toHaveBeenCalledWith(
-        'query:test-query',
-        queryFn,
-        { ttl: 300, tags: [] }
-      );
+      expect(cacheService.getOrSet).toHaveBeenCalledWith('query:test-query', queryFn, {
+        ttl: 300,
+        tags: [],
+      });
       expect(result).toEqual({ data: 'result' });
     });
 

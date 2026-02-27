@@ -24,16 +24,22 @@ test.describe('Client Portal Flow', () => {
     // 1. Login via API to set HttpOnly cookie (use page context so cookies are shared)
     const loginRes = await page.request.post('/api/auth/login', {
       data: { email: CLIENT_EMAIL, password: CLIENT_PASSWORD },
-      failOnStatusCode: false
+      failOnStatusCode: false,
     });
 
     if (!loginRes.ok) {
-      test.skip(true, `Login failed (${loginRes.status}) - ensure demo user exists and credentials match`);
+      test.skip(
+        true,
+        `Login failed (${loginRes.status}) - ensure demo user exists and credentials match`
+      );
     }
 
     const loginData = await loginRes.json();
     if (!loginData.success || !loginData.data?.user) {
-      test.skip(true, 'Login returned unsuccessful - check E2E_CLIENT_EMAIL and E2E_CLIENT_PASSWORD');
+      test.skip(
+        true,
+        'Login returned unsuccessful - check E2E_CLIENT_EMAIL and E2E_CLIENT_PASSWORD'
+      );
     }
 
     // 2. Navigate to portal (cookie will be sent)
@@ -52,7 +58,7 @@ test.describe('Client Portal Flow', () => {
   test('portal dashboard shows welcome and navigation', async ({ page }) => {
     const loginRes = await page.request.post('/api/auth/login', {
       data: { email: CLIENT_EMAIL, password: CLIENT_PASSWORD },
-      failOnStatusCode: false
+      failOnStatusCode: false,
     });
 
     if (!loginRes.ok) {

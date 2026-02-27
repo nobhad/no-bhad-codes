@@ -47,7 +47,13 @@ describe('Audit Logger Service', () => {
 
   describe('logCreate', () => {
     it('should log a create action', async () => {
-      const result = await auditLogger.logCreate('client', '123', 'Test Client', { name: 'Test' }, mockReq as Request);
+      const result = await auditLogger.logCreate(
+        'client',
+        '123',
+        'Test Client',
+        { name: 'Test' },
+        mockReq as Request
+      );
 
       expect(result).toBe(true);
       expect(mockDb.run).toHaveBeenCalled();
@@ -59,7 +65,7 @@ describe('Audit Logger Service', () => {
 
     it('should include user context from request', async () => {
       (mockReq as any).user = { id: 1, email: 'user@example.com', role: 'admin' };
-      
+
       await auditLogger.logCreate('project', '456', 'Test Project', {}, mockReq as Request);
 
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -83,8 +89,15 @@ describe('Audit Logger Service', () => {
     it('should log an update action', async () => {
       const oldValue = { name: 'Old Name' };
       const newValue = { name: 'New Name' };
-      
-      const result = await auditLogger.logUpdate('client', '123', 'Test Client', oldValue, newValue, mockReq as Request);
+
+      const result = await auditLogger.logUpdate(
+        'client',
+        '123',
+        'Test Client',
+        oldValue,
+        newValue,
+        mockReq as Request
+      );
 
       expect(result).toBe(true);
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -94,7 +107,7 @@ describe('Audit Logger Service', () => {
     it('should calculate changes between old and new values', async () => {
       const oldValue = { name: 'Old', status: 'active' };
       const newValue = { name: 'New', status: 'inactive' };
-      
+
       await auditLogger.logUpdate('client', '123', 'Test', oldValue, newValue);
 
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -106,7 +119,7 @@ describe('Audit Logger Service', () => {
     it('should redact sensitive fields in changes', async () => {
       const oldValue = { password: 'oldpass' };
       const newValue = { password: 'newpass' };
-      
+
       await auditLogger.logUpdate('client', '123', 'Test', oldValue, newValue);
 
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -118,7 +131,13 @@ describe('Audit Logger Service', () => {
   describe('logDelete', () => {
     it('should log a delete action', async () => {
       const oldValue = { name: 'Test Client' };
-      const result = await auditLogger.logDelete('client', '123', 'Test Client', oldValue, mockReq as Request);
+      const result = await auditLogger.logDelete(
+        'client',
+        '123',
+        'Test Client',
+        oldValue,
+        mockReq as Request
+      );
 
       expect(result).toBe(true);
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -139,7 +158,11 @@ describe('Audit Logger Service', () => {
 
   describe('logLoginFailed', () => {
     it('should log a failed login attempt', async () => {
-      const result = await auditLogger.logLoginFailed('user@example.com', mockReq as Request, 'Invalid password');
+      const result = await auditLogger.logLoginFailed(
+        'user@example.com',
+        mockReq as Request,
+        'Invalid password'
+      );
 
       expect(result).toBe(true);
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -157,7 +180,12 @@ describe('Audit Logger Service', () => {
 
   describe('logLogout', () => {
     it('should log a logout', async () => {
-      const result = await auditLogger.logLogout(1, 'user@example.com', 'client', mockReq as Request);
+      const result = await auditLogger.logLogout(
+        1,
+        'user@example.com',
+        'client',
+        mockReq as Request
+      );
 
       expect(result).toBe(true);
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -167,7 +195,14 @@ describe('Audit Logger Service', () => {
 
   describe('logStatusChange', () => {
     it('should log a status change', async () => {
-      const result = await auditLogger.logStatusChange('project', '123', 'Test Project', 'draft', 'published', mockReq as Request);
+      const result = await auditLogger.logStatusChange(
+        'project',
+        '123',
+        'Test Project',
+        'draft',
+        'published',
+        mockReq as Request
+      );
 
       expect(result).toBe(true);
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -198,7 +233,11 @@ describe('Audit Logger Service', () => {
 
   describe('logMessageSent', () => {
     it('should log a message sent', async () => {
-      const result = await auditLogger.logMessageSent('msg-123', 'Test Subject', mockReq as Request);
+      const result = await auditLogger.logMessageSent(
+        'msg-123',
+        'Test Subject',
+        mockReq as Request
+      );
 
       expect(result).toBe(true);
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -208,7 +247,11 @@ describe('Audit Logger Service', () => {
 
   describe('logEmailSent', () => {
     it('should log an email sent', async () => {
-      const result = await auditLogger.logEmailSent('recipient@example.com', 'Test Email', mockReq as Request);
+      const result = await auditLogger.logEmailSent(
+        'recipient@example.com',
+        'Test Email',
+        mockReq as Request
+      );
 
       expect(result).toBe(true);
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -236,7 +279,12 @@ describe('Audit Logger Service', () => {
 
   describe('logView', () => {
     it('should log a view action', async () => {
-      const result = await auditLogger.logView('project', '123', 'Test Project', mockReq as Request);
+      const result = await auditLogger.logView(
+        'project',
+        '123',
+        'Test Project',
+        mockReq as Request
+      );
 
       expect(result).toBe(true);
       const callArgs = mockDb.run.mock.calls[0][1];
@@ -283,7 +331,15 @@ describe('Audit Logger Service', () => {
   describe('query', () => {
     it('should query audit logs without filters', async () => {
       mockDb.all.mockResolvedValue([
-        { id: 1, action: 'create', entity_type: 'client', old_value: '{}', new_value: '{}', changes: null, metadata: null },
+        {
+          id: 1,
+          action: 'create',
+          entity_type: 'client',
+          old_value: '{}',
+          new_value: '{}',
+          changes: null,
+          metadata: null,
+        },
       ]);
 
       const result = await auditLogger.query({});
