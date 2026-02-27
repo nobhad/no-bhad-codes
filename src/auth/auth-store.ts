@@ -57,7 +57,7 @@ function createAuthStore(): AuthStore {
   }
 
   function notifyListeners(): void {
-    listeners.forEach(listener => {
+    listeners.forEach((listener) => {
       try {
         listener(state);
       } catch (error) {
@@ -76,22 +76,10 @@ function createAuthStore(): AuthStore {
 
   function saveSession(user: AnyUser, expiresAt: number, sessionId: string): void {
     try {
-      sessionStorage.setItem(
-        AUTH_STORAGE_KEYS.SESSION.USER,
-        JSON.stringify(user)
-      );
-      sessionStorage.setItem(
-        AUTH_STORAGE_KEYS.SESSION.ROLE,
-        user.role
-      );
-      sessionStorage.setItem(
-        AUTH_STORAGE_KEYS.SESSION.EXPIRY,
-        expiresAt.toString()
-      );
-      sessionStorage.setItem(
-        AUTH_STORAGE_KEYS.SESSION.SESSION_ID,
-        sessionId
-      );
+      sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.USER, JSON.stringify(user));
+      sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.ROLE, user.role);
+      sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.EXPIRY, expiresAt.toString());
+      sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.SESSION_ID, sessionId);
     } catch (error) {
       console.error('Failed to save session:', error);
     }
@@ -126,12 +114,12 @@ function createAuthStore(): AuthStore {
 
   function clearSession(): void {
     // Clear new storage keys
-    Object.values(AUTH_STORAGE_KEYS.SESSION).forEach(key => {
+    Object.values(AUTH_STORAGE_KEYS.SESSION).forEach((key) => {
       sessionStorage.removeItem(key);
     });
 
     // Clear legacy keys
-    getLegacyKeys().forEach(key => {
+    getLegacyKeys().forEach((key) => {
       sessionStorage.removeItem(key);
       localStorage.removeItem(key);
     });
@@ -150,22 +138,18 @@ function createAuthStore(): AuthStore {
     }
 
     try {
-      const refreshEndpoint = state.role === 'admin'
-        ? adminAuthEndpoints.validate
-        : authEndpoints.refresh;
+      const refreshEndpoint =
+        state.role === 'admin' ? adminAuthEndpoints.validate : authEndpoints.refresh;
 
       await fetchWithAuth(refreshEndpoint, { method: 'POST' });
 
-      const newExpiresAt = Date.now() + (
-        state.role === 'admin'
+      const newExpiresAt =
+        Date.now() +
+        (state.role === 'admin'
           ? AUTH_TIMING.ADMIN_SESSION_TIMEOUT_MS
-          : AUTH_TIMING.CLIENT_SESSION_TIMEOUT_MS
-      );
+          : AUTH_TIMING.CLIENT_SESSION_TIMEOUT_MS);
 
-      sessionStorage.setItem(
-        AUTH_STORAGE_KEYS.SESSION.EXPIRY,
-        newExpiresAt.toString()
-      );
+      sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.EXPIRY, newExpiresAt.toString());
 
       setState({ expiresAt: newExpiresAt });
       startRefreshTimer();
@@ -238,10 +222,7 @@ function createAuthStore(): AuthStore {
   // API Helpers
   // ============================================
 
-  async function fetchWithAuth<T>(
-    url: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  async function fetchWithAuth<T>(url: string, options: RequestInit = {}): Promise<T> {
     const response = await fetch(url, {
       ...options,
       credentials: 'include',
@@ -392,9 +373,8 @@ function createAuthStore(): AuthStore {
       try {
         // Notify server (ignore errors)
         if (state.isAuthenticated) {
-          const logoutEndpoint = state.role === 'admin'
-            ? adminAuthEndpoints.logout
-            : authEndpoints.logout;
+          const logoutEndpoint =
+            state.role === 'admin' ? adminAuthEndpoints.logout : authEndpoints.logout;
 
           await fetch(logoutEndpoint, {
             method: 'POST',
@@ -442,9 +422,8 @@ function createAuthStore(): AuthStore {
       }
 
       try {
-        const validateEndpoint = state.role === 'admin'
-          ? adminAuthEndpoints.validate
-          : authEndpoints.validate;
+        const validateEndpoint =
+          state.role === 'admin' ? adminAuthEndpoints.validate : authEndpoints.validate;
 
         await fetchWithAuth(validateEndpoint, { method: 'GET' });
         return true;
@@ -552,10 +531,7 @@ function createAuthStore(): AuthStore {
 
       const newExpiresAt = Date.now() + AUTH_TIMING.SESSION_EXTENSION_MS;
 
-      sessionStorage.setItem(
-        AUTH_STORAGE_KEYS.SESSION.EXPIRY,
-        newExpiresAt.toString()
-      );
+      sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.EXPIRY, newExpiresAt.toString());
 
       setState({ expiresAt: newExpiresAt });
       startRefreshTimer();
@@ -613,12 +589,16 @@ function createAuthStore(): AuthStore {
     });
 
     // Extend session on activity
-    ['mousedown', 'keydown', 'touchstart', 'scroll'].forEach(eventType => {
-      window.addEventListener(eventType, () => {
-        if (state.isAuthenticated) {
-          startInactivityTimer();
-        }
-      }, { passive: true });
+    ['mousedown', 'keydown', 'touchstart', 'scroll'].forEach((eventType) => {
+      window.addEventListener(
+        eventType,
+        () => {
+          if (state.isAuthenticated) {
+            startInactivityTimer();
+          }
+        },
+        { passive: true }
+      );
     });
   }
 

@@ -87,11 +87,13 @@ export class ContactService extends BaseService {
 
       // Rate limiting check using centralized constants
       const clientIdentifier = this.getClientIdentifier(formData);
-      if (!SanitizationUtils.checkRateLimit(
-        clientIdentifier,
-        APP_CONSTANTS.RATE_LIMITS.FORM_SUBMISSIONS,
-        APP_CONSTANTS.TIMERS.RATE_LIMIT_WINDOW
-      )) {
+      if (
+        !SanitizationUtils.checkRateLimit(
+          clientIdentifier,
+          APP_CONSTANTS.RATE_LIMITS.FORM_SUBMISSIONS,
+          APP_CONSTANTS.TIMERS.RATE_LIMIT_WINDOW
+        )
+      ) {
         SanitizationUtils.logSecurityViolation(
           'rate_limit_exceeded',
           { identifier: clientIdentifier },
@@ -99,7 +101,8 @@ export class ContactService extends BaseService {
         );
         return {
           success: false,
-          message: 'Whoa, slow down! You\'ve sent too many messages. Please wait 5 minutes before trying again.',
+          message:
+            'Whoa, slow down! You\'ve sent too many messages. Please wait 5 minutes before trying again.',
           error: 'rate_limit'
         };
       }
@@ -160,7 +163,11 @@ export class ContactService extends BaseService {
 
       // Provide user-friendly error messages based on error type
       let userMessage = 'Unable to send message. Please try again.';
-      if (errorMessage.includes('fetch') || errorMessage.includes('network') || errorMessage.includes('Failed to fetch')) {
+      if (
+        errorMessage.includes('fetch') ||
+        errorMessage.includes('network') ||
+        errorMessage.includes('Failed to fetch')
+      ) {
         userMessage = 'Network error. Please check your connection and try again.';
       } else if (errorMessage.includes('404') || errorMessage.includes('Netlify')) {
         userMessage = `Form service unavailable. Please email ${getContactEmail('fallback')} directly.`;

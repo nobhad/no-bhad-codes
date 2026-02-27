@@ -108,9 +108,10 @@ export function showFieldErrors(
   const container = form || document;
 
   Object.entries(errors).forEach(([fieldName, message]) => {
-    const field = container.querySelector(
-      `#${fieldName}, [name="${fieldName}"]`
-    ) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+    const field = container.querySelector(`#${fieldName}, [name="${fieldName}"]`) as
+      | HTMLInputElement
+      | HTMLSelectElement
+      | HTMLTextAreaElement;
 
     if (field) {
       showFieldError(field, message);
@@ -156,8 +157,10 @@ export function validateField(
  * Common validators
  */
 export const validators = {
-  required: (label = 'This field') => (value: string): string | null =>
-    value.trim() ? null : `${label} is required`,
+  required:
+    (label = 'This field') =>
+      (value: string): string | null =>
+        value.trim() ? null : `${label} is required`,
 
   email: (value: string): string | null => {
     if (!value.trim()) return null; // Use required validator for empty check
@@ -165,11 +168,15 @@ export const validators = {
     return emailRegex.test(value) ? null : 'Please enter a valid email address';
   },
 
-  minLength: (min: number, label = 'This field') => (value: string): string | null =>
-    value.length >= min ? null : `${label} must be at least ${min} characters`,
+  minLength:
+    (min: number, label = 'This field') =>
+      (value: string): string | null =>
+        value.length >= min ? null : `${label} must be at least ${min} characters`,
 
-  maxLength: (max: number, label = 'This field') => (value: string): string | null =>
-    value.length <= max ? null : `${label} must be no more than ${max} characters`,
+  maxLength:
+    (max: number, label = 'This field') =>
+      (value: string): string | null =>
+        value.length <= max ? null : `${label} must be no more than ${max} characters`,
 
   numeric: (value: string): string | null => {
     if (!value.trim()) return null;

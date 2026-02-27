@@ -107,10 +107,12 @@ function setupGlobalDropdownHandlers(): void {
   // Close dropdowns on escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      document.querySelectorAll('.custom-dropdown[data-modal-dropdown].open').forEach((dropdown) => {
-        dropdown.classList.remove('open');
-        resetDropdownMenuPosition(dropdown as HTMLElement);
-      });
+      document
+        .querySelectorAll('.custom-dropdown[data-modal-dropdown].open')
+        .forEach((dropdown) => {
+          dropdown.classList.remove('open');
+          resetDropdownMenuPosition(dropdown as HTMLElement);
+        });
       activeDropdown = null;
     }
   });
@@ -143,7 +145,7 @@ export function initModalDropdown(
   // Get current value and options from select
   const currentValue = selectElement.value;
   const selectOptions = Array.from(selectElement.options);
-  const currentOption = selectOptions.find(opt => opt.value === currentValue);
+  const currentOption = selectOptions.find((opt) => opt.value === currentValue);
   const displayText = currentOption?.text || options.placeholder || 'Select...';
 
   // Create trigger button - matches messages tab structure exactly
@@ -167,7 +169,7 @@ export function initModalDropdown(
   menu.className = 'custom-dropdown-menu';
 
   // Add options to menu (skip currently selected)
-  selectOptions.forEach(opt => {
+  selectOptions.forEach((opt) => {
     if (opt.value === '') return; // Skip placeholder options
     if (opt.value === currentValue) return; // Skip currently selected option
 
@@ -224,7 +226,7 @@ function toggleDropdown(wrapper: HTMLElement): void {
   const isOpen = wrapper.classList.contains('open');
 
   // Close all other dropdowns first
-  document.querySelectorAll('.custom-dropdown.open').forEach(el => {
+  document.querySelectorAll('.custom-dropdown.open').forEach((el) => {
     if (el !== wrapper) {
       el.classList.remove('open');
       resetDropdownMenuPosition(el as HTMLElement);
@@ -309,7 +311,7 @@ function rebuildMenu(
 
   // Rebuild from original select options
   const selectOptions = Array.from(originalSelect.options);
-  selectOptions.forEach(opt => {
+  selectOptions.forEach((opt) => {
     if (opt.value === '') return; // Skip placeholder
     if (opt.value === currentValue) return; // Skip currently selected
 
@@ -340,7 +342,7 @@ export function initModalDropdowns(
   const selects = modalElement.querySelectorAll('select:not([data-dropdown-init])');
   const dropdowns: HTMLElement[] = [];
 
-  selects.forEach(select => {
+  selects.forEach((select) => {
     const selectEl = select as HTMLSelectElement;
     selectEl.dataset.dropdownInit = 'true';
     const dropdown = initModalDropdown(selectEl, options);
@@ -367,7 +369,7 @@ export function setModalDropdownValue(wrapper: HTMLElement, value: string): void
   if (!originalSelect || originalSelect.tagName !== 'SELECT') return;
 
   // Find the option in the original select
-  const matchingOption = Array.from(originalSelect.options).find(opt => opt.value === value);
+  const matchingOption = Array.from(originalSelect.options).find((opt) => opt.value === value);
   if (!matchingOption) return;
 
   const label = matchingOption.text;

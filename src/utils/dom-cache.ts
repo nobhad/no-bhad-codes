@@ -44,7 +44,7 @@ export function createDOMCache<T extends Record<string, string>>() {
       // Handle both ID selectors and CSS selectors
       const element = selector.startsWith('#')
         ? document.getElementById(selector.slice(1))
-        : document.querySelector(selector) as HTMLElement | null;
+        : (document.querySelector(selector) as HTMLElement | null);
 
       cache.set(key, element);
       return element;

@@ -339,7 +339,10 @@ export class VisitorTrackingService {
    */
   private storeSession(): void {
     if (this.currentSession) {
-      sessionStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.SESSION_DATA, JSON.stringify(this.currentSession));
+      sessionStorage.setItem(
+        APP_CONSTANTS.STORAGE_KEYS.SESSION_DATA,
+        JSON.stringify(this.currentSession)
+      );
     }
   }
 
@@ -481,9 +484,10 @@ export class VisitorTrackingService {
     } else if (target.className) {
       // Handle SVG elements where className is SVGAnimatedString
       const className = target.className;
-      const classStr = typeof className === 'string'
-        ? className
-        : (className as { baseVal?: string })?.baseVal || '';
+      const classStr =
+        typeof className === 'string'
+          ? className
+          : (className as { baseVal?: string })?.baseVal || '';
       if (classStr) {
         elementDescription += `.${classStr.split(' ')[0]}`;
       }
@@ -688,7 +692,9 @@ export class VisitorTrackingService {
    */
   private storeEventsLocally(events: (PageView | InteractionEvent)[]): void {
     try {
-      const existing = JSON.parse(localStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.TRACKING_EVENTS) || '[]');
+      const existing = JSON.parse(
+        localStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.TRACKING_EVENTS) || '[]'
+      );
       const updated = [...existing, ...events];
 
       // Keep only last MAX_STORED_EVENTS to prevent localStorage bloat

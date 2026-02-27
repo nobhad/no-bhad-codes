@@ -182,15 +182,17 @@ export function createObfuscationPlugin(options: ObfuscationPluginOptions): Plug
 }
 
 function minifyHTML(html: string): string {
-  return html
-    // Remove HTML comments (but keep IE conditionals)
-    .replace(/<!--(?!\[if)[\s\S]*?-->/g, '')
-    // Collapse whitespace
-    .replace(/\s+/g, ' ')
-    // Remove whitespace between tags
-    .replace(/>\s+</g, '><')
-    // Trim
-    .trim();
+  return (
+    html
+      // Remove HTML comments (but keep IE conditionals)
+      .replace(/<!--(?!\[if)[\s\S]*?-->/g, '')
+      // Collapse whitespace
+      .replace(/\s+/g, ' ')
+      // Remove whitespace between tags
+      .replace(/>\s+</g, '><')
+      // Trim
+      .trim()
+  );
 }
 
 // Re-export for manual usage

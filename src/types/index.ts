@@ -74,3 +74,6 @@ export {
 
 // Module types (existing)
 export * from './modules';
+
+// Performance API types
+export * from './performance';

@@ -150,9 +150,11 @@ function handleSessionExpired(): void {
  * Check if an error response indicates token expiration
  */
 function isTokenExpiredError(data: ApiErrorResponse): boolean {
-  return data.code === API_ERROR_CODES.TOKEN_EXPIRED ||
-         data.code === API_ERROR_CODES.TOKEN_MISSING ||
-         data.code === API_ERROR_CODES.TOKEN_INVALID;
+  return (
+    data.code === API_ERROR_CODES.TOKEN_EXPIRED ||
+    data.code === API_ERROR_CODES.TOKEN_MISSING ||
+    data.code === API_ERROR_CODES.TOKEN_INVALID
+  );
 }
 
 /**
@@ -164,10 +166,7 @@ function isTokenExpiredError(data: ApiErrorResponse): boolean {
  *
  * SECURITY: Automatically includes CSRF token for state-changing requests
  */
-export async function apiFetch(
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> {
+export async function apiFetch(url: string, options: RequestInit = {}): Promise<Response> {
   // Add CSRF token for state-changing requests
   const optionsWithCsrf = addCsrfHeader(options);
 
@@ -291,7 +290,7 @@ export async function parseApiResponse<T>(response: Response): Promise<T> {
     throw new Error(errorData.message || errorData.error || `Request failed: ${response.status}`);
   }
 
-  const json = await response.json() as ApiSuccessResponse<T> | T;
+  const json = (await response.json()) as ApiSuccessResponse<T> | T;
 
   // Check if response follows the canonical format with data wrapper
   if (json && typeof json === 'object' && 'success' in json && json.success === true) {
@@ -318,11 +317,12 @@ export function installGlobalAuthInterceptor(): void {
     const response = await originalFetch(input, init);
 
     // Only intercept API calls (not static assets)
-    const url = typeof input === 'string'
-      ? input
-      : input instanceof URL
-        ? input.href
-        : (input as Request).url;
+    const url =
+      typeof input === 'string'
+        ? input
+        : input instanceof URL
+          ? input.href
+          : (input as Request).url;
 
     if (url.startsWith('/api/') && response.status === 401) {
       // Dispatch session expired event

@@ -264,9 +264,10 @@ export class ClientLogger implements Logger {
  * Create a named logger
  */
 export function createLogger(name?: string, config?: Partial<ClientLoggerConfig>): ClientLogger {
-  const isDev = import.meta.env?.MODE === 'development' ||
-                import.meta.env?.DEV === true ||
-                window.location.hostname === 'localhost';
+  const isDev =
+    import.meta.env?.MODE === 'development' ||
+    import.meta.env?.DEV === true ||
+    window.location.hostname === 'localhost';
 
   return new ClientLogger({
     level: isDev ? 'DEBUG' : 'INFO',
@@ -280,10 +281,7 @@ export function createLogger(name?: string, config?: Partial<ClientLoggerConfig>
 /**
  * Create a child logger with context
  */
-export function createChildLogger(
-  parent: Logger,
-  context: Record<string, unknown>
-): Logger {
+export function createChildLogger(parent: Logger, context: Record<string, unknown>): Logger {
   return parent.child(context);
 }
 

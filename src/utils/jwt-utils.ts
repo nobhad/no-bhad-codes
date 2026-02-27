@@ -12,11 +12,11 @@
  * JWT payload structure (common fields)
  */
 export interface JwtPayload {
-  exp?: number;      // Expiration timestamp (seconds since epoch)
-  iat?: number;      // Issued at timestamp
-  sub?: string;      // Subject (user ID)
+  exp?: number; // Expiration timestamp (seconds since epoch)
+  iat?: number; // Issued at timestamp
+  sub?: string; // Subject (user ID)
   isAdmin?: boolean; // Admin flag
-  type?: string;     // User type ('admin', 'client', etc.)
+  type?: string; // User type ('admin', 'client', etc.)
   [key: string]: unknown; // Allow additional custom claims
 }
 

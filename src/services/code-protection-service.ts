@@ -464,7 +464,9 @@ export class CodeProtectionService {
       }
     };
 
-    this.protectionIntervals.push(setInterval(checkIntegrity, APP_CONSTANTS.TIMERS.MONITORING_INTERVALS.SLOW));
+    this.protectionIntervals.push(
+      setInterval(checkIntegrity, APP_CONSTANTS.TIMERS.MONITORING_INTERVALS.SLOW)
+    );
   }
 
   /**
@@ -487,7 +489,9 @@ export class CodeProtectionService {
       window.location.href = 'about:blank';
     } else {
       console.clear();
-      showToast('Developer tools detected. Some features may be limited.', 'warning', { duration: 5000 });
+      showToast('Developer tools detected. Some features may be limited.', 'warning', {
+        duration: 5000
+      });
     }
   }
 
@@ -542,7 +546,9 @@ export class CodeProtectionService {
       }
     };
 
-    this.protectionIntervals.push(setInterval(monitor, APP_CONSTANTS.TIMERS.MONITORING_INTERVALS.VERY_SLOW));
+    this.protectionIntervals.push(
+      setInterval(monitor, APP_CONSTANTS.TIMERS.MONITORING_INTERVALS.VERY_SLOW)
+    );
   }
 
   /**
@@ -616,10 +622,7 @@ export class CodeProtectionService {
     ];
 
     const blocked = blockedKeys.some(
-      (combo) =>
-        e.key === combo.key &&
-        (!combo.ctrl || e.ctrlKey) &&
-        (!combo.shift || e.shiftKey)
+      (combo) => e.key === combo.key && (!combo.ctrl || e.ctrlKey) && (!combo.shift || e.shiftKey)
     );
 
     if (blocked) {

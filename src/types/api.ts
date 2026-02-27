@@ -190,18 +190,9 @@ export type ProjectTypeValue =
   | 'browser-extension'
   | 'other';
 
-export type BudgetRangeValue =
-  | 'under-2k'
-  | '2k-5k'
-  | '5k-10k'
-  | '10k-plus'
-  | 'discuss';
+export type BudgetRangeValue = 'under-2k' | '2k-5k' | '5k-10k' | '10k-plus' | 'discuss';
 
-export type TimelineValue =
-  | 'asap'
-  | '1-3-months'
-  | '3-6-months'
-  | 'flexible';
+export type TimelineValue = 'asap' | '1-3-months' | '3-6-months' | 'flexible';
 
 // ============================================
 // Lead API Types
@@ -532,7 +523,14 @@ export interface CreateThreadRequest {
 /**
  * Invoice status values
  */
-export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled' | 'partial' | 'viewed';
+export type InvoiceStatus =
+  | 'draft'
+  | 'sent'
+  | 'paid'
+  | 'overdue'
+  | 'cancelled'
+  | 'partial'
+  | 'viewed';
 
 /**
  * Invoice type values
@@ -896,7 +894,13 @@ export interface RecurringInvoiceResponse {
 /**
  * Invoice reminder types
  */
-export type ReminderType = 'upcoming' | 'due' | 'overdue_3' | 'overdue_7' | 'overdue_14' | 'overdue_30';
+export type ReminderType =
+  | 'upcoming'
+  | 'due'
+  | 'overdue_3'
+  | 'overdue_7'
+  | 'overdue_14'
+  | 'overdue_30';
 
 /**
  * Invoice reminder status
@@ -1025,7 +1029,16 @@ export interface ClientActivityResponse {
 /**
  * Custom field types
  */
-export type CustomFieldType = 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'boolean' | 'url' | 'email' | 'phone';
+export type CustomFieldType =
+  | 'text'
+  | 'number'
+  | 'date'
+  | 'select'
+  | 'multiselect'
+  | 'boolean'
+  | 'url'
+  | 'email'
+  | 'phone';
 
 /**
  * Custom field definition
@@ -1181,7 +1194,13 @@ export interface ClientWithCRM {
 /**
  * Scoring rule operators
  */
-export type ScoringOperator = 'equals' | 'contains' | 'greater_than' | 'less_than' | 'in' | 'not_empty';
+export type ScoringOperator =
+  | 'equals'
+  | 'contains'
+  | 'greater_than'
+  | 'less_than'
+  | 'in'
+  | 'not_empty';
 
 /**
  * Lead scoring rule
@@ -1243,7 +1262,14 @@ export interface PipelineView {
 /**
  * Lead task types
  */
-export type LeadTaskType = 'follow_up' | 'call' | 'email' | 'meeting' | 'proposal' | 'demo' | 'other';
+export type LeadTaskType =
+  | 'follow_up'
+  | 'call'
+  | 'email'
+  | 'meeting'
+  | 'proposal'
+  | 'demo'
+  | 'other';
 
 /**
  * Lead task status
@@ -1458,7 +1484,11 @@ export interface TaskCreateData {
 /**
  * Task dependency types
  */
-export type TaskDependencyType = 'finish_to_start' | 'start_to_start' | 'finish_to_finish' | 'start_to_finish';
+export type TaskDependencyType =
+  | 'finish_to_start'
+  | 'start_to_start'
+  | 'finish_to_finish'
+  | 'start_to_finish';
 
 /**
  * Task dependency
@@ -2340,7 +2370,14 @@ export interface BulkReadRequest {
 /**
  * File category types
  */
-export type FileCategory = 'general' | 'deliverable' | 'source' | 'asset' | 'document' | 'contract' | 'invoice';
+export type FileCategory =
+  | 'general'
+  | 'deliverable'
+  | 'source'
+  | 'asset'
+  | 'document'
+  | 'contract'
+  | 'invoice';
 
 /**
  * File version
@@ -2677,7 +2714,14 @@ export interface UploadFileVersionRequest {
 /**
  * Report types
  */
-export type ReportType = 'revenue' | 'pipeline' | 'project' | 'client' | 'team' | 'lead' | 'invoice';
+export type ReportType =
+  | 'revenue'
+  | 'pipeline'
+  | 'project'
+  | 'client'
+  | 'team'
+  | 'lead'
+  | 'invoice';
 
 /**
  * Chart types
@@ -2786,7 +2830,15 @@ export type WidgetType = 'metric' | 'chart' | 'list' | 'table' | 'progress' | 'c
 /**
  * Widget data sources
  */
-export type WidgetDataSource = 'revenue' | 'projects' | 'clients' | 'leads' | 'invoices' | 'tasks' | 'milestones' | 'time';
+export type WidgetDataSource =
+  | 'revenue'
+  | 'projects'
+  | 'clients'
+  | 'leads'
+  | 'invoices'
+  | 'tasks'
+  | 'milestones'
+  | 'time';
 
 /**
  * Dashboard widget

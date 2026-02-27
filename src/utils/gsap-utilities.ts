@@ -189,11 +189,7 @@ export function scaleOut(
  * @param options - Additional GSAP options
  * @returns GSAP Tween
  */
-export function spin(
-  target: gsap.TweenTarget,
-  duration = 1,
-  options: gsap.TweenVars = {}
-) {
+export function spin(target: gsap.TweenTarget, duration = 1, options: gsap.TweenVars = {}) {
   return gsap.to(target, {
     rotation: 360,
     duration,
@@ -210,11 +206,7 @@ export function spin(
  * @param options - Additional GSAP options
  * @returns GSAP Tween
  */
-export function pulse(
-  target: gsap.TweenTarget,
-  duration = 2,
-  options: gsap.TweenVars = {}
-) {
+export function pulse(target: gsap.TweenTarget, duration = 2, options: gsap.TweenVars = {}) {
   return gsap.to(target, {
     opacity: 0.5,
     duration,
@@ -232,11 +224,7 @@ export function pulse(
  * @param options - Additional GSAP options
  * @returns GSAP Tween
  */
-export function bounce(
-  target: gsap.TweenTarget,
-  duration = 1,
-  options: gsap.TweenVars = {}
-) {
+export function bounce(target: gsap.TweenTarget, duration = 1, options: gsap.TweenVars = {}) {
   return gsap.to(target, {
     y: -30,
     duration: duration / 2,
@@ -254,11 +242,7 @@ export function bounce(
  * @param options - Additional GSAP options
  * @returns GSAP Tween
  */
-export function shake(
-  target: gsap.TweenTarget,
-  duration = 0.5,
-  options: gsap.TweenVars = {}
-) {
+export function shake(target: gsap.TweenTarget, duration = 0.5, options: gsap.TweenVars = {}) {
   return gsap.to(target, {
     x: -10,
     duration: duration / 10,
@@ -295,10 +279,7 @@ export function flip(
  * @param options - Additional GSAP options
  * @returns GSAP Tween
  */
-export function pulseGlow(
-  target: gsap.TweenTarget,
-  options: gsap.TweenVars = {}
-) {
+export function pulseGlow(target: gsap.TweenTarget, options: gsap.TweenVars = {}) {
   return gsap.to(target, {
     boxShadow: '0 2px 16px rgba(var(--color-brand-primary-rgb), 0.6)',
     duration: 2,
@@ -318,12 +299,9 @@ export function pulseGlow(
  * @param target - Element(s) to optimize
  * @param properties - CSS properties to hint (default: 'transform, opacity')
  */
-export function setWillChange(
-  target: gsap.TweenTarget,
-  properties = 'transform, opacity'
-): void {
+export function setWillChange(target: gsap.TweenTarget, properties = 'transform, opacity'): void {
   const elements = gsap.utils.toArray(target) as HTMLElement[];
-  elements.forEach(el => {
+  elements.forEach((el) => {
     if (el && el.style) {
       el.style.willChange = properties;
     }
@@ -337,7 +315,7 @@ export function setWillChange(
  */
 export function clearWillChange(target: gsap.TweenTarget): void {
   const elements = gsap.utils.toArray(target) as HTMLElement[];
-  elements.forEach(el => {
+  elements.forEach((el) => {
     if (el && el.style) {
       el.style.willChange = 'auto';
     }
