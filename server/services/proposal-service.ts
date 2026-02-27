@@ -23,7 +23,7 @@ import {
   validateLineItems,
   tierStructureSchema
 } from '../../shared/validation/validators.js';
-import { emailService, type ProposalSignedData, type ProposalSignedClientData } from './email-service.js';
+import { emailService, isClientActivated, type ProposalSignedData, type ProposalSignedClientData } from './email-service.js';
 import {
   type ProposalTemplate,
   type ProposalVersion,
@@ -665,20 +665,27 @@ class ProposalService {
         console.error('[PROPOSAL] Failed to send admin notification:', adminResult.message);
       }
 
-      // Send client confirmation email
-      const baseUrl = process.env.WEBSITE_URL || process.env.BASE_URL || 'http://localhost:3000';
-      const clientData: ProposalSignedClientData = {
-        ...notificationData,
-        portalUrl: `${baseUrl}/client/portal`,
-        supportEmail: process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || 'support@nobhadcodes.com'
-      };
+      // Send client confirmation email only if client account is activated
+      const clientId = getNumber(p, 'client_id');
+      const isActivated = clientId ? await isClientActivated(clientId) : false;
 
-      const clientResult = await emailService.sendProposalSignedClientConfirmation(clientData);
+      if (isActivated) {
+        const baseUrl = process.env.WEBSITE_URL || process.env.BASE_URL || 'http://localhost:3000';
+        const clientData: ProposalSignedClientData = {
+          ...notificationData,
+          portalUrl: `${baseUrl}/client/portal`,
+          supportEmail: process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || 'support@nobhadcodes.com'
+        };
 
-      if (clientResult.success) {
-        console.log('[PROPOSAL] Client confirmation sent for proposal:', proposalId);
+        const clientResult = await emailService.sendProposalSignedClientConfirmation(clientData);
+
+        if (clientResult.success) {
+          console.log('[PROPOSAL] Client confirmation sent for proposal:', proposalId);
+        } else {
+          console.error('[PROPOSAL] Failed to send client confirmation:', clientResult.message);
+        }
       } else {
-        console.error('[PROPOSAL] Failed to send client confirmation:', clientResult.message);
+        console.log(`[PROPOSAL] Skipping client confirmation email for proposal ${proposalId} - client account not activated`);
       }
     } catch (error) {
       console.error('[PROPOSAL] Error sending proposal signed notifications:', error);

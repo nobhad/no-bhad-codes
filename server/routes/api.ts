@@ -298,10 +298,11 @@ router.post(
  */
 router.get(
   '/health',
-  // Lighter rate limiting for health checks
+  // Relaxed rate limiting for health checks
   rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
-    maxRequests: 20,
+    maxRequests: 120,        // Allow frequent health checks
+    blockDuration: 30 * 1000, // Only block for 30 seconds
     message: 'Too many health check requests'
   }),
 

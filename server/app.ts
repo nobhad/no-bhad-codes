@@ -101,10 +101,15 @@ app.use(
       directives: {
         defaultSrc: ['\'self\''],
         scriptSrc: ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''], // unsafe-eval needed for GSAP
-        styleSrc: ['\'self\'', '\'unsafe-inline\''],
+        styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
         imgSrc: ['\'self\'', 'data:', 'https:', 'blob:'],
-        connectSrc: ['\'self\'', 'https://api.sentry.io'],
-        fontSrc: ['\'self\''],
+        connectSrc: [
+          '\'self\'',
+          'https://api.sentry.io',
+          // Allow localhost API connections in development (Vite on 4000 -> Express on 4001)
+          ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:4001', 'ws://localhost:4001'] : [])
+        ],
+        fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
         mediaSrc: ['\'self\''],
         objectSrc: ['\'none\''],
         frameSrc: ['\'none\''],

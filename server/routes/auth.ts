@@ -16,7 +16,6 @@ import { emailService } from '../services/email-service.js';
 import { rateLimit } from '../middleware/security.js';
 import { auditLogger } from '../services/audit-logger.js';
 import { logger } from '../services/logger.js';
-import { getSchedulerService } from '../services/scheduler-service.js';
 import {
   PASSWORD_CONFIG,
   JWT_CONFIG,
@@ -1258,17 +1257,7 @@ No Bhad Codes Team`
       userAgent: req.get('user-agent') || 'unknown'
     });
 
-    // 4. Start welcome email sequence
-    try {
-      const scheduler = getSchedulerService();
-      await scheduler.startWelcomeSequence(clientId);
-      await logger.info(`[AUTH] Started welcome sequence for client ${clientId}`, { category: 'AUTH' });
-    } catch (welcomeError) {
-      await logger.error('[AUTH] Failed to start welcome sequence:', { error: welcomeError instanceof Error ? welcomeError : undefined, category: 'AUTH' });
-      // Continue - account was activated successfully
-    }
-
-    // 5. Generate JWT token for auto-login
+    // 4. Generate JWT token for auto-login
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       await logger.error('[AUTH] JWT_SECRET not configured for auto-login after set-password', { category: 'AUTH' });

@@ -13,9 +13,41 @@ import type { Transporter } from 'nodemailer';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getDatabase } from '../database/init.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+/**
+ * Check if a client account is activated (status = 'active')
+ * Used to prevent sending emails to unactivated accounts
+ * @param clientIdentifier - Client ID or email address
+ * @returns true if client is active, false otherwise
+ */
+export async function isClientActivated(clientIdentifier: number | string): Promise<boolean> {
+  const db = getDatabase();
+
+  let query: string;
+  let param: number | string;
+
+  if (typeof clientIdentifier === 'number') {
+    query = 'SELECT status FROM clients WHERE id = ?';
+    param = clientIdentifier;
+  } else {
+    query = 'SELECT status FROM clients WHERE email = ?';
+    param = clientIdentifier.toLowerCase();
+  }
+
+  const client = await db.get(query, [param]);
+
+  if (!client) {
+    console.log(`[EMAIL] Client not found for activation check: ${typeof clientIdentifier === 'number' ? clientIdentifier : sanitizeEmailForLog(clientIdentifier)}`);
+    return false;
+  }
+
+  const status = (client as { status: string }).status;
+  return status === 'active';
+}
 
 /**
  * Escape HTML special characters to prevent XSS in email content
