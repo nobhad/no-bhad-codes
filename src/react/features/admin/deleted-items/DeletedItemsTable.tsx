@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import {
   Trash2,
-  RotateCcw,
   AlertTriangle,
   User,
   Briefcase,
@@ -12,6 +11,7 @@ import {
   Inbox,
   Clock,
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -381,20 +381,15 @@ export function DeletedItemsTable({ onNavigate }: DeletedItemsTableProps) {
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell">
                   <div className="table-actions">
-                    <button
-                      className="icon-btn"
-                      title="Restore"
+                    <IconButton
+                      action="restore"
                       onClick={() => handleRestore(item.id)}
-                    >
-                      <RotateCcw />
-                    </button>
-                    <button
-                      className="icon-btn"
+                    />
+                    <IconButton
+                      action="delete"
                       title="Delete Permanently"
                       onClick={() => handlePermanentDelete(item.id)}
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    />
                   </div>
                 </AdminTableCell>
               </AdminTableRow>

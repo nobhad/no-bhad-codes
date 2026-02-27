@@ -12,6 +12,7 @@ import {
   Trash2,
   Download,
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -195,9 +196,7 @@ export function DocumentRequestsTable({ onNavigate }: DocumentRequestsTableProps
             values={{ status: statusFilter }}
             onChange={(key, value) => setStatusFilter(value)}
           />
-          <button className="icon-btn" title="Export">
-            <Download size={18} />
-          </button>
+          <IconButton action="export" />
           <PortalButton variant="primary" size="sm">
             <Plus className="btn-icon" />
             New Request

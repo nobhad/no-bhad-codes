@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo } from 'react';
-import { Inbox, CheckSquare, LayoutList, LayoutGrid } from 'lucide-react';
+import { Inbox, CheckSquare } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -334,20 +335,18 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate }: Ta
             onChange={handleFilterChange}
           />
           <div className="view-toggle">
-            <button
-              className={`icon-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
+            <IconButton
+              icon="list"
               title="List view"
-            >
-              <LayoutList />
-            </button>
-            <button
-              className={`icon-btn ${viewMode === 'board' ? 'active' : ''}`}
-              onClick={() => setViewMode('board')}
+              onClick={() => setViewMode('list')}
+              className={viewMode === 'list' ? 'active' : undefined}
+            />
+            <IconButton
+              icon="layout-dashboard"
               title="Board view"
-            >
-              <LayoutGrid />
-            </button>
+              onClick={() => setViewMode('board')}
+              className={viewMode === 'board' ? 'active' : undefined}
+            />
           </div>
           <PortalButton variant="primary" size="sm" onClick={() => onNavigate?.('task-create')}>
             <CheckSquare className="btn-icon" />
