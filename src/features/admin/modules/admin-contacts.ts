@@ -16,6 +16,7 @@ import { formatDate, formatDateTime } from '../../../utils/format-utils';
 import { apiFetch, apiPut, apiPost } from '../../../utils/api-client';
 import { createTableDropdown, CONTACT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, conditionalAction } from '../../../components/table-action-buttons';
 import { APP_CONSTANTS } from '../../../config/constants';
 import { CONTACTS_FILTER_CONFIG } from '../../../utils/table-filter';
 import { CONTACTS_EXPORT_CONFIG } from '../../../utils/table-export';
@@ -174,21 +175,21 @@ function buildContactRow(
 
   row.innerHTML = `
     ${createRowCheckbox('contacts', submission.id)}
-    <td class="identity-cell contact-cell" data-label="Contact">
+    <td class="identity-cell" data-label="Contact">
       <span class="identity-name">${safeName}</span>
       ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
-      <span class="email-stacked">${safeEmail}</span>
+      <span class="identity-email">${safeEmail}</span>
     </td>
     <td class="email-cell" data-label="Email">${safeEmail}</td>
     <td class="message-cell" data-label="Message" title="${safeTitleMessage}">${truncatedMessage}</td>
     <td class="status-cell" data-label="Status"></td>
     <td class="date-cell" data-label="Date">${date}</td>
     <td class="actions-cell" data-label="Actions">
-      <div class="table-actions">
-        ${canConvert ? `<button class="icon-btn btn-convert-contact" data-id="${submission.id}" data-email="${safeEmail}" data-name="${safeName}" title="Convert to Client" aria-label="Convert to Client">${ICONS.USER_PLUS}</button>` : ''}
-        ${!isArchived ? `<button class="icon-btn btn-archive-contact" data-id="${submission.id}" title="Archive" aria-label="Archive">${ICONS.ARCHIVE}</button>` : ''}
-        ${isArchived ? `<button class="icon-btn btn-restore-contact" data-id="${submission.id}" title="Restore" aria-label="Restore">${ICONS.ROTATE_CCW}</button>` : ''}
-      </div>
+      ${renderActionsCell([
+        conditionalAction(canConvert, 'convert-client', submission.id, { className: 'btn-convert-contact', dataAttrs: { email: safeEmail, name: safeName } }),
+        conditionalAction(!isArchived, 'archive', submission.id, { className: 'btn-archive-contact' }),
+        conditionalAction(isArchived, 'restore', submission.id, { className: 'btn-restore-contact' }),
+      ])}
     </td>
   `;
 
@@ -691,10 +692,10 @@ export function renderContactsTab(container: HTMLElement): void {
   contactsModule.resetCache();
 
   container.innerHTML = `
-    <div class="admin-table-card" id="contact-submissions-card">
-      <div class="admin-table-header">
+    <div class="data-table-card" id="contact-submissions-card">
+      <div class="data-table-header">
         <h3><span class="title-full">Contact Form Submissions</span><span class="title-mobile">Contacts</span></h3>
-        <div class="admin-table-actions" id="contacts-filter-container">
+        <div class="data-table-actions" id="contacts-filter-container">
           <button class="icon-btn" id="export-contacts-btn" title="Export to CSV" aria-label="Export contact submissions to CSV">
             ${RENDER_ICONS.EXPORT}
           </button>
@@ -704,9 +705,9 @@ export function renderContactsTab(container: HTMLElement): void {
         </div>
       </div>
       <div id="contacts-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
-      <div class="admin-table-container contacts-table-container">
-        <div class="admin-table-scroll-wrapper">
-        <table class="admin-table contacts-table">
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+        <table class="data-table">
           <thead>
             <tr>
               <th scope="col" class="bulk-select-cell">
@@ -714,9 +715,9 @@ export function renderContactsTab(container: HTMLElement): void {
                   <input type="checkbox" id="contacts-select-all" class="bulk-select-all" aria-label="Select all contacts" />
                 </div>
               </th>
-              <th scope="col" class="contact-col">Contact</th>
+              <th scope="col" class="identity-col">Contact</th>
               <th scope="col" class="email-col">Email</th>
-              <th scope="col">Message</th>
+              <th scope="col" class="message-col">Message</th>
               <th scope="col" class="status-col">Status</th>
               <th scope="col" class="date-col">Date</th>
               <th scope="col" class="actions-col">Actions</th>

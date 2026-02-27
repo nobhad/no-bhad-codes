@@ -16,6 +16,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDisplayValue, formatDate, formatDateTime } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, conditionalAction } from '../../../components/table-action-buttons';
 import { createTableDropdown, LEAD_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { LEADS_FILTER_CONFIG } from '../../../utils/table-filter';
@@ -56,6 +57,63 @@ interface LeadsStats {
 let currentView: 'table' | 'pipeline' = 'table';
 let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
 let pipelineLinkHandlersAttached = false;
+
+// ============================================================================
+// REACT INTEGRATION (island architecture)
+// ============================================================================
+
+// React mount functions - dynamically imported for code splitting
+type ReactMountFn = typeof import('../../../react/features/admin/leads').mountLeadsTable;
+type ReactUnmountFn = typeof import('../../../react/features/admin/leads').unmountLeadsTable;
+
+let mountLeadsTable: ReactMountFn | null = null;
+let unmountLeadsTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (!reactMountContainer || !reactMountContainer.isConnected || reactMountContainer.children.length === 0) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Check if React leads table should be used */
+function shouldUseReactLeadsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_leads') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const localFlag = localStorage.getItem('feature_react_leads_table');
+  if (localFlag === 'false') return false;
+  if (localFlag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactLeadsTable(): Promise<boolean> {
+  if (mountLeadsTable && unmountLeadsTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/leads');
+    mountLeadsTable = module.mountLeadsTable;
+    unmountLeadsTable = module.unmountLeadsTable;
+    return true;
+  } catch (err) {
+    console.error('[AdminLeads] Failed to load React module:', err);
+    return false;
+  }
+}
 
 // Pipeline stage configuration
 const PIPELINE_STAGES = [
@@ -153,18 +211,12 @@ function buildLeadRow(
       <span class="budget-stacked">${SanitizationUtils.escapeHtml(displayBudget)}</span>
     </td>
     <td class="status-cell" data-label="Status"><span class="date-stacked">${date}</span></td>
-    <td class="budget-cell" data-label="Budget">${SanitizationUtils.escapeHtml(displayBudget)}</td>
+    <td class="amount-cell" data-label="Budget">${SanitizationUtils.escapeHtml(displayBudget)}</td>
     <td class="date-cell" data-label="Date">${date}</td>
     <td class="actions-cell" data-label="Actions">
-      <div class="table-actions">
-        ${showConvertBtn ? `<button class="icon-btn btn-convert-lead" data-lead-id="${lead.id}" title="Convert to Project" aria-label="Convert to Project">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            <line x1="12" y1="11" x2="12" y2="17"></line>
-            <line x1="9" y1="14" x2="15" y2="14"></line>
-          </svg>
-        </button>` : ''}
-      </div>
+      ${renderActionsCell([
+        conditionalAction(showConvertBtn, 'convert-project', lead.id, { className: 'btn-convert-lead', dataAttrs: { 'lead-id': lead.id } }),
+      ])}
     </td>
   `;
 
@@ -628,8 +680,68 @@ async function handleLeadStageChange(
 // PUBLIC EXPORTS
 // ============================================================================
 
+/**
+ * Cleanup function called when leaving the leads tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupLeadsTab(): void {
+  if (reactTableMounted && unmountLeadsTable) {
+    unmountLeadsTable();
+    reactTableMounted = false;
+  }
+}
+
 export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
+  console.log('[AdminLeads] loadLeads called');
   setLeadsContext(ctx);
+
+  // Check if React implementation should be used
+  const useReact = shouldUseReactLeadsTable();
+  console.log('[AdminLeads] useReact:', useReact);
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      console.log('[AdminLeads] React table already mounted, returning');
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React LeadsTable
+    const mountContainer = document.getElementById('react-leads-mount');
+    console.log('[AdminLeads] Mount container found:', !!mountContainer);
+    if (mountContainer) {
+      const loaded = await loadReactLeadsTable();
+      console.log('[AdminLeads] React module loaded:', loaded, 'mountLeadsTable:', !!mountLeadsTable);
+      if (loaded && mountLeadsTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountLeadsTable) {
+          unmountLeadsTable();
+        }
+        console.log('[AdminLeads] Mounting React LeadsTable...');
+        mountLeadsTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          onViewLead: (leadId: number) => showLeadDetails(leadId),
+          showNotification: ctx.showNotification
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+        console.log('[AdminLeads] React LeadsTable mounted successfully');
+      } else {
+        console.error('[AdminLeads] React module failed to load, falling back to vanilla');
+      }
+    } else {
+      console.log('[AdminLeads] No mount container found, falling back to vanilla');
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
   setupViewToggle(ctx);
   await leadsModule.load(ctx);
 }
@@ -1290,7 +1402,7 @@ function renderScoringRules(container: HTMLElement, rules: ScoringRule[]): void 
         <button class="icon-btn" title="${rule.is_active ? 'Disable' : 'Enable'}" data-action="toggle" aria-label="${rule.is_active ? 'Disable rule' : 'Enable rule'}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${rule.is_active ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>' : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'}</svg>
         </button>
-        <button class="icon-btn icon-btn-danger" title="Delete" data-action="delete" aria-label="Delete rule">
+        <button class="icon-btn" title="Delete" data-action="delete" aria-label="Delete rule">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
       </div>
@@ -1535,21 +1647,36 @@ const RENDER_ICONS = {
 };
 
 export function renderLeadsTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactLeadsTable();
+  console.log('[AdminLeads] renderLeadsTab called, useReact:', useReact, 'container:', !!container);
+
   leadsModule.resetCache();
   currentView = 'table';
   kanbanBoard = null;
 
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Leads Table Mount Point -->
+      <div id="react-leads-mount" class="react-data-table"></div>
+    `;
+    console.log('[AdminLeads] React mount container created');
+    return;
+  }
+
+  // Vanilla implementation
   container.innerHTML = `
     <div class="quick-stats">
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="leads"><span class="stat-number" id="leads-total">-</span><span class="stat-label">Total Leads</span></button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="pending" data-table="leads"><span class="stat-number" id="leads-pending">-</span><span class="stat-label">Pending</span></button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="in_progress" data-table="leads"><span class="stat-number" id="leads-active">-</span><span class="stat-label">In Progress</span></button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="completed" data-table="leads"><span class="stat-number" id="leads-completed">-</span><span class="stat-label">Completed</span></button>
+      <button class="stat-card stat-card-clickable" data-filter="all" data-table="leads"><span class="stat-number" id="leads-total">-</span><span class="stat-label">Total Leads</span></button>
+      <button class="stat-card stat-card-clickable" data-filter="pending" data-table="leads"><span class="stat-number" id="leads-pending">-</span><span class="stat-label">Pending</span></button>
+      <button class="stat-card stat-card-clickable" data-filter="in_progress" data-table="leads"><span class="stat-number" id="leads-active">-</span><span class="stat-label">In Progress</span></button>
+      <button class="stat-card stat-card-clickable" data-filter="completed" data-table="leads"><span class="stat-number" id="leads-completed">-</span><span class="stat-label">Completed</span></button>
     </div>
-    <div class="admin-table-card" id="intake-submissions-card">
-      <div class="admin-table-header">
+    <div class="data-table-card" id="leads-table-card">
+      <div class="data-table-header">
         <h3><span class="title-full">Intake Submissions</span><span class="title-mobile">Leads</span></h3>
-        <div class="admin-table-actions" id="leads-filter-container">
+        <div class="data-table-actions" id="leads-filter-container">
           <div id="leads-view-toggle"></div>
           <button class="icon-btn" id="export-leads-btn" title="Export to CSV" aria-label="Export leads to CSV">${RENDER_ICONS.EXPORT}</button>
           <button class="icon-btn" id="refresh-leads-btn" title="Refresh" aria-label="Refresh leads">${RENDER_ICONS.REFRESH}</button>
@@ -1557,12 +1684,12 @@ export function renderLeadsTab(container: HTMLElement): void {
       </div>
       <div id="leads-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
       <div class="leads-pipeline-container hidden" id="leads-pipeline-container"></div>
-      <div class="admin-table-container leads-table-container" id="leads-table-view">
-        <div class="admin-table-scroll-wrapper">
-        <table class="admin-table leads-table">
+      <div class="data-table-container" id="leads-table-view">
+        <div class="data-table-scroll-wrapper">
+        <table class="data-table">
           <thead><tr>
             <th scope="col" class="bulk-select-cell"><div class="portal-checkbox"><input type="checkbox" id="leads-select-all" class="bulk-select-all" aria-label="Select all leads" /></div></th>
-            <th scope="col">Lead</th><th scope="col" class="type-col">Type</th><th scope="col" class="status-col">Status</th>
+            <th scope="col" class="identity-col">Lead</th><th scope="col" class="type-col">Type</th><th scope="col" class="status-col">Status</th>
             <th scope="col" class="budget-col">Budget</th><th scope="col" class="date-col">Date</th><th scope="col" class="actions-col">Actions</th>
           </tr></thead>
           <tbody id="leads-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">

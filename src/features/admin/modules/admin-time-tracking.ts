@@ -14,6 +14,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createBarChart } from '../../../components/chart-simple';
 import { exportToCsv, TIME_ENTRIES_EXPORT_CONFIG } from '../../../utils/table-export';
 import { showToast } from '../../../utils/toast-notifications';
+import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
 
 // Time entry interfaces
 interface TimeEntry {
@@ -225,7 +226,7 @@ function renderEntriesTable(): void {
           <th scope="col" class="actions-col">Actions</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
         ${sortedEntries.map(entry => renderEntryRow(entry)).join('')}
       </tbody>
     </table>
@@ -264,14 +265,10 @@ function renderEntryRow(entry: TimeEntry): string {
         </span>
       </td>
       <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          <button class="icon-btn btn-edit-entry" data-entry-id="${entry.id}" title="Edit" aria-label="Edit entry">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-          </button>
-          <button class="icon-btn icon-btn-danger btn-delete-entry" data-entry-id="${entry.id}" title="Delete" aria-label="Delete entry">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
-        </div>
+        ${renderActionsCell([
+          createAction('edit', entry.id, { className: 'btn-edit-entry', dataAttrs: { 'entry-id': entry.id }, ariaLabel: 'Edit entry' }),
+          createAction('delete', entry.id, { className: 'btn-delete-entry', dataAttrs: { 'entry-id': entry.id }, ariaLabel: 'Delete entry' }),
+        ])}
       </td>
     </tr>
   `;

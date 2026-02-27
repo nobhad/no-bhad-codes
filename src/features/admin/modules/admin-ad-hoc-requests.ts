@@ -14,6 +14,7 @@ import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { AD_HOC_REQUESTS_FILTER_CONFIG } from '../../../utils/table-filter';
@@ -153,11 +154,9 @@ function buildRequestRow(request: AdHocRequest): HTMLTableRowElement {
     <td class="status-cell" data-label="Status">${getStatusIndicator(request.status)}</td>
     <td class="date-cell" data-label="Date">${formatDate(request.createdAt)}</td>
     <td class="actions-cell" data-label="Actions">
-      <div class="table-actions">
-        <button class="icon-btn" data-action="view" data-id="${request.id}" title="View request" aria-label="View request">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-      </div>
+      ${renderActionsCell([
+        createAction('view', request.id, { title: 'View request', ariaLabel: 'View request' }),
+      ])}
     </td>
   `;
 
@@ -789,18 +788,18 @@ const RENDER_ICONS = {
  */
 export function renderAdHocRequestsTab(container: HTMLElement): void {
   container.innerHTML = `
-    <div class="admin-table-card" id="ad-hoc-requests-table-card">
-      <div class="admin-table-header">
+    <div class="data-table-card" id="ad-hoc-requests-table-card">
+      <div class="data-table-header">
         <h3>Ad Hoc Requests</h3>
-        <div class="admin-table-actions" id="ad-hoc-requests-filter-container">
+        <div class="data-table-actions" id="ad-hoc-requests-filter-container">
           <button class="icon-btn" id="refresh-ad-hoc-requests-btn" title="Refresh" aria-label="Refresh ad hoc requests">
-            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            ${RENDER_ICONS.REFRESH}
           </button>
         </div>
       </div>
-      <div class="admin-table-container ad-hoc-requests-table-container">
-        <div class="admin-table-scroll-wrapper">
-          <table class="admin-table ad-hoc-requests-table">
+      <div class="data-table-container ad-hoc-requests-table-container">
+        <div class="data-table-scroll-wrapper">
+          <table class="data-table ad-hoc-requests-table">
             <thead>
               <tr>
                 <th scope="col" class="name-col">Request</th>

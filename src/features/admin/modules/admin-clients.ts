@@ -33,6 +33,8 @@ import { getStatusDotHTML } from '../../../components/status-badge';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
+import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
 import { initDetailKeyboardNav } from '../../../components/detail-keyboard-nav';
@@ -41,6 +43,63 @@ import {
   createPaginationConfig,
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
+
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn = typeof import('../../../react/features/admin/clients').mountClientsTable;
+type ReactUnmountFn = typeof import('../../../react/features/admin/clients').unmountClientsTable;
+
+let mountClientsTable: ReactMountFn | null = null;
+let unmountClientsTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (!reactMountContainer || !reactMountContainer.isConnected || reactMountContainer.children.length === 0) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactClientsTable(): Promise<boolean> {
+  if (mountClientsTable && unmountClientsTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/clients');
+    mountClientsTable = module.mountClientsTable;
+    unmountClientsTable = module.unmountClientsTable;
+    return true;
+  } catch (err) {
+    console.error('[AdminClients] Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React clients table */
+function shouldUseReactClientsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_clients') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_clients_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
 
 // ============================================
 // DOM CACHE - Cached element references for detail view
@@ -271,8 +330,69 @@ const clientsModule = createTableModule<Client, ClientsStats>({
 });
 
 // Export factory-provided functions
-export const loadClients = clientsModule.load;
 export const getClientsData = clientsModule.getData;
+
+// Store context for React callbacks (used for future detail view integration)
+let _storedContext: AdminDashboardContext | null = null;
+
+/**
+ * Cleanup function called when leaving the clients tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupClientsTab(): void {
+  if (reactTableMounted && unmountClientsTable) {
+    unmountClientsTable();
+    reactTableMounted = false;
+  }
+}
+
+/**
+ * Load clients data - handles both React and vanilla implementations
+ */
+export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
+  _storedContext = ctx;
+
+  // Check if React implementation should be used
+  const useReact = shouldUseReactClientsTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React ClientsTable
+    const mountContainer = document.getElementById('react-clients-mount');
+    if (mountContainer) {
+      const loaded = await loadReactClientsTable();
+      if (loaded && mountClientsTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountClientsTable) {
+          unmountClientsTable();
+        }
+        mountClientsTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          onViewClient: (clientId: number) => showClientDetails(clientId),
+          showNotification: ctx.showNotification
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        console.error('[AdminClients] React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
+  await clientsModule.load(ctx);
+}
 
 // ============================================
 // DYNAMIC TAB RENDERING
@@ -283,32 +403,45 @@ export const getClientsData = clientsModule.getData;
  * Called by admin-dashboard before loading data.
  */
 export function renderClientsTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactClientsTable();
+
+  if (useReact) {
+    // React implementation - render minimal container (no extra classes - React component has its own structure)
+    container.innerHTML = `
+      <!-- React Clients Table Mount Point -->
+      <div id="react-clients-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <!-- Clients Stats -->
     <div class="quick-stats">
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="clients">
+      <button class="stat-card stat-card-clickable" data-filter="all" data-table="clients">
         <span class="stat-number" id="clients-total">-</span>
         <span class="stat-label">Total Clients</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="active" data-table="clients">
+      <button class="stat-card stat-card-clickable" data-filter="active" data-table="clients">
         <span class="stat-number" id="clients-active">-</span>
         <span class="stat-label">Active</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="pending" data-table="clients">
+      <button class="stat-card stat-card-clickable" data-filter="pending" data-table="clients">
         <span class="stat-number" id="clients-pending">-</span>
         <span class="stat-label">Pending</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="inactive" data-table="clients">
+      <button class="stat-card stat-card-clickable" data-filter="inactive" data-table="clients">
         <span class="stat-number" id="clients-inactive">-</span>
         <span class="stat-label">Inactive</span>
       </button>
     </div>
 
     <!-- Clients Table -->
-    <div class="admin-table-card" id="clients-table-card">
-      <div class="admin-table-header">
+    <div class="data-table-card" id="clients-table-card">
+      <div class="data-table-header">
         <h3><span class="title-full">Client Accounts</span><span class="title-mobile">Clients</span></h3>
-        <div class="admin-table-actions" id="clients-filter-container">
+        <div class="data-table-actions" id="clients-filter-container">
           <button class="icon-btn" id="export-clients-btn" title="Export to CSV" aria-label="Export clients to CSV">
             ${RENDER_ICONS.EXPORT}
           </button>
@@ -322,9 +455,9 @@ export function renderClientsTab(container: HTMLElement): void {
       </div>
       <!-- Bulk Action Toolbar (hidden initially) -->
       <div id="clients-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
-      <div class="admin-table-container clients-table-container">
-        <div class="admin-table-scroll-wrapper">
-        <table class="admin-table clients-table">
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+        <table class="data-table">
           <thead>
             <tr>
               <th scope="col" class="bulk-select-cell">
@@ -332,7 +465,7 @@ export function renderClientsTab(container: HTMLElement): void {
                   <input type="checkbox" id="clients-select-all" class="bulk-select-all" aria-label="Select all clients" />
                 </div>
               </th>
-              <th scope="col" class="contact-col">Client</th>
+              <th scope="col" class="identity-col">Client</th>
               <th scope="col" class="type-col">Type</th>
               <th scope="col" class="status-col">Status</th>
               <th scope="col" class="count-col" title="Projects">#</th>
@@ -459,21 +592,12 @@ function buildClientRow(client: Client): HTMLTableRowElement {
   const clientAny = client as { last_login_at?: string };
   const lastActive = clientAny.last_login_at ? formatDate(clientAny.last_login_at) : 'Never';
 
-  // Invite button for actions column (if not yet invited)
-  const inviteBtn = showInviteBtn
-    ? `<button class="icon-btn icon-btn-invite" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">
-         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-           <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-         </svg>
-       </button>`
-    : '';
-
   // Health badge (available for future use)
   const _healthBadge = getHealthBadgeHtml(client.health_score);
 
   row.innerHTML = `
     ${createRowCheckbox('clients', client.id)}
-    <td class="identity-cell contact-cell inline-editable-cell" data-client-id="${client.id}" data-label="Client">
+    <td class="identity-cell inline-editable-cell" data-client-id="${client.id}" data-label="Client">
       <span class="identity-name" data-field="primary-name">${safeName}</span>
       ${safeCompany ? `<span class="identity-contact" data-field="secondary-name">${safeCompany}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
       <span class="identity-email">${safeEmail}</span>
@@ -487,12 +611,10 @@ function buildClientRow(client: Client): HTMLTableRowElement {
     </td>
     <td class="date-cell last-active-cell" data-label="Last Active">${lastActive}</td>
     <td class="actions-cell" data-label="Actions">
-      <div class="table-actions">
-        ${inviteBtn}
-        <button class="icon-btn btn-view-client" data-client-id="${client.id}" title="View Client" aria-label="View client details">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-      </div>
+      ${renderActionsCell([
+    conditionalAction(showInviteBtn, 'send', client.id, { className: 'client-invite', title: 'Send invitation email', ariaLabel: 'Send invitation email to client', dataAttrs: { 'client-id': client.id } }),
+    createAction('view', client.id, { className: 'btn-view-client', title: 'View Client', ariaLabel: 'View client details', dataAttrs: { 'client-id': client.id } })
+  ])}
     </td>
   `;
 
@@ -510,7 +632,7 @@ function setupClientRowHandlers(tableBody: HTMLElement, clients: Client[]): void
       // Don't navigate if clicking the checkbox, invite button, bulk select cell, or inline-editable cell
       if (target.closest('.bulk-select-cell') ||
           target.closest('.btn-invite-inline') ||
-          target.closest('.icon-btn-invite') ||
+          target.closest('.client-invite') ||
           target.closest('.inline-editable-cell') ||
           target.tagName === 'INPUT') {
         return;
@@ -521,7 +643,7 @@ function setupClientRowHandlers(tableBody: HTMLElement, clients: Client[]): void
   });
 
   // Invite button click handlers (icon button next to status)
-  tableBody.querySelectorAll('.icon-btn-invite').forEach((btn) => {
+  tableBody.querySelectorAll('.client-invite').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const clientId = parseInt((btn as HTMLElement).dataset.clientId || '0');
@@ -618,16 +740,29 @@ export async function showClientDetails(clientId: number, ctx?: AdminDashboardCo
     return;
   }
 
-
   currentClientId = clientId;
 
   // Switch to client-detail tab
   context.switchTab('client-detail');
 
+  // Check if React mode should be used
+  const clientDetailsModule = await import('./admin-client-details');
+  if (clientDetailsModule.shouldUseReactClientDetail()) {
+    // React mode - let initClientDetailView handle everything
+    try {
+      await clientDetailsModule.initClientDetailView(clientId, context);
+      console.log('[AdminClients] React client detail initialized');
+      return; // Skip vanilla implementation
+    } catch (error) {
+      console.error('[AdminClients] React client detail failed, falling back to vanilla:', error);
+      // Fall through to vanilla implementation
+    }
+  }
+
+  // Vanilla implementation
   // Dynamically render the client detail tab structure
   const tabContainer = document.getElementById('tab-client-detail');
   if (tabContainer) {
-    const clientDetailsModule = await import('./admin-client-details');
     clientDetailsModule.renderClientDetailTab(tabContainer);
   }
 
@@ -646,7 +781,6 @@ export async function showClientDetails(clientId: number, ctx?: AdminDashboardCo
 
   // Initialize enhanced CRM features (contacts, activity, notes, tags)
   try {
-    const clientDetailsModule = await import('./admin-client-details');
     await clientDetailsModule.initClientDetailView(clientId, context);
   } catch (error) {
     console.error('[AdminClients] Failed to load CRM features:', error);
@@ -738,11 +872,7 @@ function populateClientDetailView(client: Client): void {
       statusEl.innerHTML = `
         <span class="status-cell-wrapper">
           <span>${statusDisplay}</span>
-          <button class="icon-btn icon-btn-invite" id="cd-invite-btn" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-            </svg>
-          </button>
+          <button class="icon-btn client-invite" id="cd-invite-btn" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">${ICONS.SEND}</button>
         </span>`;
       // Add click handler for the invite button
       const inviteBtn = document.getElementById('cd-invite-btn');
@@ -1200,7 +1330,7 @@ async function sendClientInvitation(clientId: number): Promise<void> {
   }
 }
 
-function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
+export function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
   const client = clientsModule.findById(clientId);
   if (!client) {
     console.error('[AdminClients] Client not found:', clientId);

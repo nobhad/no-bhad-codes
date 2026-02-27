@@ -17,7 +17,7 @@ import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
-import { createViewToggle } from '../../../components/view-toggle';
+import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { exportToCsv, KNOWLEDGE_BASE_EXPORT_CONFIG } from '../../../utils/table-export';
@@ -42,15 +42,11 @@ import {
 const KB_API = '/api/kb';
 
 // ---------------------------------------------------------------------------
-// Section Toggle State
+// Section State
 // ---------------------------------------------------------------------------
 
 let currentKBSection: 'categories' | 'articles' = 'categories';
-
-const CATEGORIES_ICON =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>';
-const ARTICLES_ICON =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>';
+let kbSubtabListenerSetup = false;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -133,14 +129,10 @@ function renderCategoriesTable(categories: KBCategory[], _ctx: AdminDashboardCon
       <td class="count-cell" data-label="Articles">${c.article_count ?? 0}</td>
       <td class="status-cell" data-label="Active">${c.is_active ? 'Yes' : 'No'}</td>
       <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          <button type="button" class="icon-btn kb-edit-category" data-id="${c.id}" title="Edit" aria-label="Edit category">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-          </button>
-          <button type="button" class="icon-btn icon-btn-danger kb-delete-category" data-id="${c.id}" data-name="${escapeHtml(c.name)}" title="Delete" aria-label="Delete category">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
-        </div>
+        ${renderActionsCell([
+          createAction('edit', c.id, { className: 'kb-edit-category', ariaLabel: 'Edit category' }),
+          createAction('delete', c.id, { className: 'kb-delete-category', dataAttrs: { name: escapeHtml(c.name) }, ariaLabel: 'Delete category' }),
+        ])}
       </td>
     </tr>
   `
@@ -174,14 +166,10 @@ function renderArticlesTable(articles: KBArticle[], _ctx: AdminDashboardContext)
       <td class="status-cell" data-label="Published">${a.is_published ? 'Yes' : 'No'}</td>
       <td class="date-cell" data-label="Updated">${formatDate(a.updated_at)}</td>
       <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          <button type="button" class="icon-btn kb-edit-article" data-id="${a.id}" title="Edit" aria-label="Edit article">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-          </button>
-          <button type="button" class="icon-btn icon-btn-danger kb-delete-article" data-id="${a.id}" data-title="${escapeHtml(a.title)}" title="Delete" aria-label="Delete article">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
-        </div>
+        ${renderActionsCell([
+          createAction('edit', a.id, { className: 'kb-edit-article', ariaLabel: 'Edit article' }),
+          createAction('delete', a.id, { className: 'kb-delete-article', dataAttrs: { title: escapeHtml(a.title) }, ariaLabel: 'Delete article' }),
+        ])}
       </td>
     </tr>
   `
@@ -623,56 +611,36 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
 }
 
 /**
- * Setup section toggle in unified header to switch between Categories and Articles
+ * Show/hide cards based on selected section
  */
-function setupKBSectionToggle(): void {
-  const mountPoint = document.getElementById('kb-section-toggle-mount');
-  if (!mountPoint || mountPoint.dataset.initialized) return;
-  mountPoint.dataset.initialized = 'true';
+function applyKBSection(section: 'categories' | 'articles'): void {
+  const categoriesCard = document.getElementById('kb-categories-card');
+  const articlesCard = document.getElementById('kb-articles-card');
 
-  /**
-   * Show/hide cards based on selected section
-   */
-  function applySection(section: 'categories' | 'articles'): void {
-    const categoriesCard = document.getElementById('kb-categories-card');
-    const articlesCard = document.getElementById('kb-articles-card');
-
-    if (section === 'categories') {
-      if (categoriesCard) categoriesCard.style.display = 'block';
-      if (articlesCard) articlesCard.style.display = 'none';
-    } else {
-      if (categoriesCard) categoriesCard.style.display = 'none';
-      if (articlesCard) articlesCard.style.display = 'block';
-    }
+  if (section === 'categories') {
+    if (categoriesCard) categoriesCard.style.display = 'block';
+    if (articlesCard) articlesCard.style.display = 'none';
+  } else {
+    if (categoriesCard) categoriesCard.style.display = 'none';
+    if (articlesCard) articlesCard.style.display = 'block';
   }
+}
 
-  const toggleEl = createViewToggle({
-    id: 'kb-section-toggle',
-    options: [
-      {
-        value: 'categories',
-        label: 'Categories',
-        title: 'Knowledge Base Categories',
-        ariaLabel: 'View categories',
-        iconSvg: CATEGORIES_ICON
-      },
-      {
-        value: 'articles',
-        label: 'Articles',
-        title: 'Knowledge Base Articles',
-        ariaLabel: 'View articles',
-        iconSvg: ARTICLES_ICON
-      }
-    ],
-    value: currentKBSection,
-    onChange: (value) => {
-      currentKBSection = value as 'categories' | 'articles';
-      applySection(currentKBSection);
-    }
-  });
+/**
+ * Setup listener for subtab changes from header
+ */
+function setupKBSubtabListener(): void {
+  if (kbSubtabListenerSetup) return;
+  kbSubtabListenerSetup = true;
 
-  mountPoint.appendChild(toggleEl);
-  applySection(currentKBSection);
+  document.addEventListener('knowledgeBaseSubtabChange', ((e: CustomEvent<{ subtab: string }>) => {
+    const section = e.detail.subtab as 'categories' | 'articles';
+    currentKBSection = section;
+    applyKBSection(section);
+  }) as EventListener);
+
+  // Apply initial section state
+  applyKBSection(currentKBSection);
 }
 
 // ============================================
@@ -695,21 +663,21 @@ const RENDER_ICONS = {
  */
 export function renderKnowledgeBaseTab(container: HTMLElement): void {
   container.innerHTML = `
-    <div class="admin-table-card portal-shadow" id="kb-categories-card">
-      <div class="admin-table-header">
+    <div class="data-table-card" id="kb-categories-card">
+      <div class="data-table-header">
         <h3>Categories</h3>
-        <div class="admin-table-actions">
+        <div class="data-table-actions">
           <button type="button" class="icon-btn" id="kb-refresh-categories" title="Refresh" aria-label="Refresh categories">
-            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            ${RENDER_ICONS.REFRESH}
           </button>
           <button type="button" class="icon-btn" id="kb-add-category" title="Add Category" aria-label="Add Category">
-            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+            ${RENDER_ICONS.PLUS}
           </button>
         </div>
       </div>
-      <div class="admin-table-container">
-        <div class="admin-table-scroll-wrapper">
-        <table class="admin-table" aria-label="Knowledge base categories">
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+        <table class="data-table" aria-label="Knowledge base categories">
           <thead>
             <tr>
               <th scope="col" class="name-col">Name</th>
@@ -733,24 +701,24 @@ export function renderKnowledgeBaseTab(container: HTMLElement): void {
         </div>
       </div>
     </div>
-    <div class="admin-table-card portal-shadow" id="kb-articles-card" style="display: none">
-      <div class="admin-table-header">
+    <div class="data-table-card" id="kb-articles-card" style="display: none">
+      <div class="data-table-header">
         <h3>Articles</h3>
-        <div class="admin-table-actions" id="kb-articles-filter-container">
+        <div class="data-table-actions" id="kb-articles-filter-container">
           <button type="button" class="icon-btn" id="kb-export" title="Export to CSV" aria-label="Export articles to CSV">
-            <span class="icon-btn-svg">${RENDER_ICONS.EXPORT}</span>
+            ${RENDER_ICONS.EXPORT}
           </button>
           <button type="button" class="icon-btn" id="kb-refresh-articles" title="Refresh" aria-label="Refresh articles">
-            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            ${RENDER_ICONS.REFRESH}
           </button>
           <button type="button" class="icon-btn" id="kb-add-article" title="Add Article" aria-label="Add Article">
-            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+            ${RENDER_ICONS.PLUS}
           </button>
         </div>
       </div>
-      <div class="admin-table-container">
-        <div class="admin-table-scroll-wrapper">
-        <table class="admin-table" aria-label="Knowledge base articles">
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+        <table class="data-table" aria-label="Knowledge base articles">
           <thead>
             <tr>
               <th scope="col" class="title-col">Title</th>
@@ -789,7 +757,7 @@ export function renderKnowledgeBaseTab(container: HTMLElement): void {
 export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<void> {
   _storedKbContext = ctx;
   setupKBListeners(ctx);
-  setupKBSectionToggle();
+  setupKBSubtabListener();
 
   const categoriesTbody = el('kb-categories-table-body');
   const articlesTbody = el('kb-articles-table-body');

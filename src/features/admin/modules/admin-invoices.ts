@@ -16,12 +16,13 @@ import type { InvoiceResponse, InvoiceLineItem } from '../../../types/api';
 import { formatCurrency, formatDate } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import { getStatusDotHTML } from '../../../components/status-badge';
-import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
 import { INVOICES_EXPORT_CONFIG } from '../../../utils/table-export';
+import { createRowCheckbox } from '../../../utils/table-bulk-actions';
 import { INVOICES_FILTER_CONFIG } from '../../../utils/table-filter';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS as GLOBAL_ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { withButtonLoading } from '../../../utils/button-loading';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
@@ -32,6 +33,63 @@ import {
   createPaginationConfig,
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
+
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn = typeof import('../../../react/features/admin/invoices').mountInvoicesTable;
+type ReactUnmountFn = typeof import('../../../react/features/admin/invoices').unmountInvoicesTable;
+
+let mountInvoicesTable: ReactMountFn | null = null;
+let unmountInvoicesTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (!reactMountContainer || !reactMountContainer.isConnected || reactMountContainer.children.length === 0) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactInvoicesTable(): Promise<boolean> {
+  if (mountInvoicesTable && unmountInvoicesTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/invoices');
+    mountInvoicesTable = module.mountInvoicesTable;
+    unmountInvoicesTable = module.unmountInvoicesTable;
+    return true;
+  } catch (err) {
+    console.error('[AdminInvoices] Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React invoices table */
+function shouldUseReactInvoicesTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_invoices') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_invoices_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
 
 // ============================================
 // TYPES
@@ -228,8 +286,69 @@ const invoicesModule = createTableModule<InvoiceWithDetails, InvoiceStats>({
 });
 
 // Export factory-provided functions
-export const loadInvoicesData = invoicesModule.load;
 export const getInvoicesData = invoicesModule.getData;
+
+// Store context for React callbacks (used for future detail view integration)
+let _storedContext: AdminDashboardContext | null = null;
+
+/**
+ * Cleanup function called when leaving the invoices tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupInvoicesTab(): void {
+  if (reactTableMounted && unmountInvoicesTable) {
+    unmountInvoicesTable();
+    reactTableMounted = false;
+  }
+}
+
+/**
+ * Load invoices data - handles both React and vanilla implementations
+ */
+export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void> {
+  _storedContext = ctx;
+
+  // Check if React implementation should be used
+  const useReact = shouldUseReactInvoicesTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React InvoicesTable
+    const mountContainer = document.getElementById('react-invoices-mount');
+    if (mountContainer) {
+      const loaded = await loadReactInvoicesTable();
+      if (loaded && mountInvoicesTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountInvoicesTable) {
+          unmountInvoicesTable();
+        }
+        mountInvoicesTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          onViewInvoice: (invoiceId: number) => showViewInvoiceModal(invoiceId, ctx),
+          showNotification: ctx.showNotification
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        console.error('[AdminInvoices] React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
+  await invoicesModule.load(ctx);
+}
 
 // ============================================
 // DYNAMIC TAB RENDERING
@@ -240,48 +359,61 @@ export const getInvoicesData = invoicesModule.getData;
  * Called by admin-dashboard before loading data.
  */
 export function renderInvoicesTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactInvoicesTable();
+
+  if (useReact) {
+    // React implementation - render minimal container (no extra classes - React component has its own structure)
+    container.innerHTML = `
+      <!-- React Invoices Table Mount Point -->
+      <div id="react-invoices-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <!-- Invoice Stats -->
     <div class="quick-stats">
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="invoices">
+      <button class="stat-card stat-card-clickable" data-filter="all" data-table="invoices">
         <span class="stat-number" id="invoices-total">-</span>
         <span class="stat-label">Total Invoices</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="pending" data-table="invoices">
+      <button class="stat-card stat-card-clickable" data-filter="pending" data-table="invoices">
         <span class="stat-number" id="invoices-pending">-</span>
         <span class="stat-label">Pending</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="paid" data-table="invoices">
+      <button class="stat-card stat-card-clickable" data-filter="paid" data-table="invoices">
         <span class="stat-number" id="invoices-paid">-</span>
         <span class="stat-label">Paid</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="overdue" data-table="invoices">
+      <button class="stat-card stat-card-clickable" data-filter="overdue" data-table="invoices">
         <span class="stat-number" id="invoices-overdue">-</span>
         <span class="stat-label">Overdue</span>
       </button>
     </div>
 
     <!-- Invoices Table -->
-    <div class="admin-table-card" id="invoices-table-card">
-      <div class="admin-table-header">
+    <div class="data-table-card" id="invoices-table-card">
+      <div class="data-table-header">
         <h3><span class="title-full">All Invoices</span><span class="title-mobile">Invoices</span></h3>
-        <div class="admin-table-actions" id="invoices-filter-container">
+        <div class="data-table-actions" id="invoices-filter-container">
           <button class="icon-btn" id="export-invoices-btn" title="Export to CSV" aria-label="Export invoices to CSV">
-            <span class="icon-btn-svg">${RENDER_ICONS.EXPORT}</span>
+            ${RENDER_ICONS.EXPORT}
           </button>
           <button class="icon-btn" id="refresh-invoices-btn" title="Refresh" aria-label="Refresh invoices">
-            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            ${RENDER_ICONS.REFRESH}
           </button>
           <button class="icon-btn" id="create-invoice-btn" title="Add Invoice" aria-label="Add new invoice">
-            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+            ${RENDER_ICONS.PLUS}
           </button>
         </div>
       </div>
       <!-- Bulk Action Toolbar (hidden initially) -->
       <div id="invoices-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
-      <div class="admin-table-container invoices-table-container">
-        <div class="admin-table-scroll-wrapper">
-          <table class="admin-table invoices-table">
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+          <table class="data-table">
             <thead>
               <tr>
                 <th scope="col" class="bulk-select-cell">
@@ -289,9 +421,9 @@ export function renderInvoicesTab(container: HTMLElement): void {
                     <input type="checkbox" id="invoices-select-all" class="bulk-select-all" aria-label="Select all invoices" />
                   </div>
                 </th>
-                <th scope="col">Invoice #</th>
-                <th scope="col" class="name-col">Client / Project</th>
-                <th scope="col" class="budget-col">Amount</th>
+                <th scope="col" class="name-col">Invoice #</th>
+                <th scope="col" class="identity-col">Client / Project</th>
+                <th scope="col" class="amount-col">Amount</th>
                 <th scope="col" class="status-col">Status</th>
                 <th scope="col" class="date-col">Due Date</th>
                 <th scope="col" class="actions-col">Actions</th>
@@ -329,43 +461,26 @@ function getAmount(invoice: InvoiceWithDetails): number {
   return 0;
 }
 
-// Icon SVGs for action buttons
-const ICONS = {
-  VIEW: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
-  EDIT: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
-  SEND: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>',
-  CHECK: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
-  DOWNLOAD: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>'
-};
-
 // ============================================
 // ROW BUILDING HELPERS
 // ============================================
 
 /**
  * Build contextual action buttons based on invoice status
+ * Uses centralized table-action-buttons for consistent rendering.
  */
 function buildActionButtons(invoiceId: number, status: string): string {
-  const buttons: string[] = [];
+  const isDraft = status === 'draft';
+  const canMarkPaid = ['sent', 'pending', 'viewed', 'overdue'].includes(status);
+  const canDownload = canMarkPaid || status === 'paid';
 
-  // View button - always shown
-  buttons.push(`<button class="icon-btn" data-action="view" data-id="${invoiceId}" title="View Invoice" aria-label="View invoice">${ICONS.VIEW}</button>`);
-
-  // Status-specific buttons
-  if (status === 'draft') {
-    // Draft: Send, Edit
-    buttons.push(`<button class="icon-btn" data-action="send" data-id="${invoiceId}" title="Send Invoice" aria-label="Send invoice">${ICONS.SEND}</button>`);
-    buttons.push(`<button class="icon-btn" data-action="edit" data-id="${invoiceId}" title="Edit Invoice" aria-label="Edit invoice">${ICONS.EDIT}</button>`);
-  } else if (status === 'sent' || status === 'pending' || status === 'viewed' || status === 'overdue') {
-    // Sent/Pending/Viewed/Overdue: Mark Paid, Download
-    buttons.push(`<button class="icon-btn" data-action="mark-paid" data-id="${invoiceId}" title="Mark as Paid" aria-label="Mark as paid">${ICONS.CHECK}</button>`);
-    buttons.push(`<button class="icon-btn" data-action="download" data-id="${invoiceId}" title="Download PDF" aria-label="Download PDF">${ICONS.DOWNLOAD}</button>`);
-  } else if (status === 'paid') {
-    // Paid: Download only
-    buttons.push(`<button class="icon-btn" data-action="download" data-id="${invoiceId}" title="Download PDF" aria-label="Download PDF">${ICONS.DOWNLOAD}</button>`);
-  }
-
-  return buttons.join('');
+  return renderActionsCell([
+    createAction('view', invoiceId, { title: 'View Invoice', ariaLabel: 'View invoice' }),
+    conditionalAction(isDraft, 'send', invoiceId, { title: 'Send Invoice', ariaLabel: 'Send invoice' }),
+    conditionalAction(isDraft, 'edit', invoiceId, { title: 'Edit Invoice', ariaLabel: 'Edit invoice' }),
+    conditionalAction(canMarkPaid, 'mark-paid', invoiceId, { ariaLabel: 'Mark as paid' }),
+    conditionalAction(canDownload, 'download', invoiceId, { title: 'Download PDF', ariaLabel: 'Download PDF' }),
+  ]);
 }
 
 /**
@@ -394,21 +509,18 @@ function buildInvoiceRow(invoice: InvoiceWithDetails, _ctx: AdminDashboardContex
   }
 
   const statusIndicator = getStatusDotHTML(status);
-  const checkboxHTML = getPortalCheckboxHTML({ id: `invoice-${invoice.id}`, checked: false, ariaLabel: `Select invoice ${safeInvoiceNumber}` });
 
   // Build contextual action buttons based on status
   const actionButtons = buildActionButtons(invoice.id, status);
 
   row.innerHTML = `
-    <td class="bulk-select-cell" data-label="">${checkboxHTML}</td>
-    <td class="type-cell" data-label="Invoice"><strong>${safeInvoiceNumber}</strong></td>
-    <td class="name-cell" data-label="Client/Project">
-      <div class="identity-cell">
-        <span class="identity-primary">${safeClientName}</span>
-        <span class="identity-secondary">${safeProjectName}</span>
-      </div>
+    ${createRowCheckbox('invoices', invoice.id)}
+    <td class="name-cell" data-label="Invoice"><strong>${safeInvoiceNumber}</strong></td>
+    <td class="identity-cell" data-label="Client/Project">
+      <span class="identity-name">${safeClientName}</span>
+      <span class="identity-contact">${safeProjectName}</span>
     </td>
-    <td class="budget-cell" data-label="Amount">${amount}</td>
+    <td class="amount-cell" data-label="Amount">${amount}</td>
     <td class="status-cell" data-label="Status">
       ${statusIndicator}
       <span class="date-stacked">${dueDate}</span>
@@ -417,9 +529,7 @@ function buildInvoiceRow(invoice: InvoiceWithDetails, _ctx: AdminDashboardContex
       <span class="due-date-value">${dueDate}</span>
     </td>
     <td class="actions-cell" data-label="Actions">
-      <div class="table-actions">
-        ${actionButtons}
-      </div>
+      ${actionButtons}
     </td>
   `;
 
@@ -606,26 +716,28 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
   // Build line items table
   const lineItems = invoice.line_items || [];
   const lineItemsHTML = lineItems.length > 0
-    ? `<table class="invoice-line-items">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th class="text-right">Qty</th>
-            <th class="text-right">Rate</th>
-            <th class="text-right">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${lineItems.map((item: InvoiceLineItem) => `
+    ? `<div class="data-table-scroll-wrapper">
+        <table class="data-table invoice-line-items">
+          <thead>
             <tr>
-              <td data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
-              <td class="text-right" data-label="Qty">${item.quantity || 1}</td>
-              <td class="text-right" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
-              <td class="text-right" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
+              <th scope="col" class="name-col">Description</th>
+              <th scope="col" class="count-col">Qty</th>
+              <th scope="col" class="amount-col">Rate</th>
+              <th scope="col" class="amount-col">Amount</th>
             </tr>
-          `).join('')}
-        </tbody>
-      </table>`
+          </thead>
+          <tbody>
+            ${lineItems.map((item: InvoiceLineItem) => `
+              <tr>
+                <td data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
+                <td class="text-right" data-label="Qty">${item.quantity || 1}</td>
+                <td class="text-right" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
+                <td class="text-right" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>`
     : '<p class="text-muted">No line items</p>';
 
   // Calculate totals
@@ -821,9 +933,7 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
         </td>
         <td class="line-item-amount" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
         <td data-label="">
-          <button type="button" class="icon-btn btn-danger remove-line-item" data-index="${index}" title="Remove">
-            ${ICONS.VIEW.replace('M1 12s4-8 11-8', 'M18 6 6 18M6 6l12 12').replace('circle cx="12" cy="12" r="3"', '')}
-          </button>
+          <button type="button" class="icon-btn remove-line-item" data-index="${index}" title="Remove">${GLOBAL_ICONS.X}</button>
         </td>
       </tr>
     `;
@@ -842,24 +952,26 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
 
       <div class="form-group">
         <label class="field-label">Line Items</label>
-        <table class="invoice-line-items editable">
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th class="text-right" style="width: 80px;">Qty</th>
-              <th class="text-right" style="width: 100px;">Rate</th>
-              <th class="text-right" style="width: 100px;">Amount</th>
-              <th style="width: 50px;"></th>
-            </tr>
-          </thead>
-          <tbody id="line-items-body">
-            ${lineItems.map((item, idx) => {
+        <div class="data-table-scroll-wrapper">
+          <table class="data-table invoice-line-items editable">
+            <thead>
+              <tr>
+                <th scope="col" class="name-col">Description</th>
+                <th scope="col" class="count-col">Qty</th>
+                <th scope="col" class="amount-col">Rate</th>
+                <th scope="col" class="amount-col">Amount</th>
+                <th scope="col" class="actions-col"></th>
+              </tr>
+            </thead>
+            <tbody id="line-items-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              ${lineItems.map((item, idx) => {
     lineItemIndex = idx + 1;
     return buildLineItemRow(item, idx);
   }).join('')}
-          </tbody>
-        </table>
-        <button type="button" id="add-line-item" class="btn-secondary btn-small">
+            </tbody>
+          </table>
+        </div>
+        <button type="button" id="add-line-item" class="btn btn-secondary btn-sm">
           Add Line Item
         </button>
       </div>
@@ -928,9 +1040,7 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
       </td>
       <td class="line-item-amount" data-label="Amount">${formatCurrency(0)}</td>
       <td data-label="">
-        <button type="button" class="icon-btn btn-danger remove-line-item" data-index="${lineItemIndex}" title="Remove">
-          ${ICONS.VIEW.replace('M1 12s4-8 11-8', 'M18 6 6 18M6 6l12 12').replace('circle cx="12" cy="12" r="3"', '')}
-        </button>
+        <button type="button" class="icon-btn remove-line-item" data-index="${lineItemIndex}" title="Remove">${GLOBAL_ICONS.X}</button>
       </td>
     `;
     tbody.appendChild(row);

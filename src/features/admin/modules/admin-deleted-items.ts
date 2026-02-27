@@ -9,7 +9,7 @@
  */
 
 import { apiFetch, apiPost, apiDelete } from '../../../utils/api-client';
-import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
 import { confirmDialog } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
@@ -213,26 +213,10 @@ function renderDeletedItemsTable(
           <strong>${daysUntilPermanent}</strong> days
         </td>
         <td class="actions-cell" data-label="Actions">
-          <div class="table-actions">
-            <button
-              class="icon-btn restore-btn"
-              title="Restore item"
-              data-action="restore"
-              data-id="${item.id}"
-              data-type="${item.type}"
-            >
-              ${ICONS.ROTATE_CCW}
-            </button>
-            <button
-              class="icon-btn icon-btn-danger permanent-delete-btn"
-              title="Permanently delete"
-              data-action="permanent-delete"
-              data-id="${item.id}"
-              data-type="${item.type}"
-            >
-              ${ICONS.TRASH}
-            </button>
-          </div>
+          ${renderActionsCell([
+    createAction('restore', item.id, { className: 'restore-btn', title: 'Restore item', dataAttrs: { type: item.type } }),
+    createAction('delete', item.id, { className: 'permanent-delete-btn', title: 'Permanently delete', dataAttrs: { type: item.type } })
+  ])}
         </td>
       </tr>
     `;

@@ -17,6 +17,7 @@ import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -302,17 +303,11 @@ function renderWorkflowsTable(): void {
         </td>
         <td class="date-cell" data-label="Updated">${formatDate(w.updated_at)}</td>
         <td class="actions-cell" data-label="Actions">
-          <div class="table-actions">
-            <button type="button" class="icon-btn workflow-edit" data-id="${w.id}" title="Edit workflow" aria-label="Edit workflow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-            </button>
-            <button type="button" class="icon-btn workflow-steps" data-id="${w.id}" title="Manage steps" aria-label="Manage approval steps">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
-            </button>
-            <button type="button" class="icon-btn icon-btn-danger workflow-delete" data-id="${w.id}" data-name="${escapeHtml(w.name)}" title="Delete" aria-label="Delete workflow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            </button>
-          </div>
+          ${renderActionsCell([
+            createAction('edit', w.id, { className: 'workflow-edit', title: 'Edit workflow', ariaLabel: 'Edit workflow' }),
+            createAction('steps', w.id, { className: 'workflow-steps', ariaLabel: 'Manage approval steps' }),
+            createAction('delete', w.id, { className: 'workflow-delete', dataAttrs: { name: escapeHtml(w.name) }, ariaLabel: 'Delete workflow' }),
+          ])}
         </td>
       </tr>
     `;
@@ -801,7 +796,7 @@ async function openStepsModal(workflowId: number): Promise<void> {
               ${s.is_optional ? getStatusDotHTML('pending', { label: 'Optional' }) : ''}
               ${s.auto_approve_after_hours ? `<span class="step-auto">Auto-approve after ${s.auto_approve_after_hours}h</span>` : ''}
             </div>
-            <button type="button" class="icon-btn icon-btn-danger step-delete" data-id="${s.id}" title="Remove step">
+            <button type="button" class="icon-btn step-delete" data-id="${s.id}" title="Remove step">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
@@ -973,22 +968,12 @@ function renderTriggersTable(): void {
         </td>
         <td class="date-cell" data-label="Updated">${formatDate(t.updated_at)}</td>
         <td class="actions-cell" data-label="Actions">
-          <div class="table-actions">
-            <button type="button" class="icon-btn trigger-toggle" data-id="${t.id}" title="${t.is_active ? 'Disable' : 'Enable'}" aria-label="${t.is_active ? 'Disable' : 'Enable'} trigger">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                ${t.is_active
-    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
-    : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-}
-              </svg>
-            </button>
-            <button type="button" class="icon-btn trigger-edit" data-id="${t.id}" title="Edit trigger" aria-label="Edit trigger">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-            </button>
-            <button type="button" class="icon-btn icon-btn-danger trigger-delete" data-id="${t.id}" data-name="${escapeHtml(t.name)}" title="Delete" aria-label="Delete trigger">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            </button>
-          </div>
+          ${renderActionsCell([
+            conditionalAction(t.is_active, 'disable', t.id, { className: 'trigger-toggle', ariaLabel: 'Disable trigger' }),
+            conditionalAction(!t.is_active, 'enable', t.id, { className: 'trigger-toggle', ariaLabel: 'Enable trigger' }),
+            createAction('edit', t.id, { className: 'trigger-edit', title: 'Edit trigger', ariaLabel: 'Edit trigger' }),
+            createAction('delete', t.id, { className: 'trigger-delete', dataAttrs: { name: escapeHtml(t.name) }, ariaLabel: 'Delete trigger' }),
+          ])}
         </td>
       </tr>
     `;
@@ -1449,7 +1434,7 @@ async function openTriggerLogsModal(triggerId?: number): Promise<void> {
             <label>Result</label>
             <div id="logs-result-filter-dropdown"></div>
           </div>
-          <button type="button" class="btn btn-sm btn-secondary" id="logs-refresh-btn">
+          <button type="button" class="btn btn-xs btn-secondary" id="logs-refresh-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
             Refresh
           </button>
@@ -1708,7 +1693,7 @@ function renderPendingApprovalsTable(): void {
 
     return `
       <tr data-id="${a.id}">
-        <td class="checkbox-cell" data-label="">
+        <td class="bulk-select-cell" data-label="">
           ${getPortalCheckboxHTML({
     ariaLabel: `Select approval ${a.id}`,
     inputClassName: 'approval-checkbox',
@@ -1734,10 +1719,10 @@ function renderPendingApprovalsTable(): void {
             <button type="button" class="icon-btn approval-view" data-id="${a.id}" data-entity-type="${a.entity_type}" data-entity-id="${a.entity_id}" title="View ${entityLabel}" aria-label="View ${entityLabel}">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
-            <button type="button" class="icon-btn icon-btn-success approval-approve" data-id="${a.id}" title="Approve" aria-label="Approve">
+            <button type="button" class="icon-btn approval-approve" data-id="${a.id}" title="Approve" aria-label="Approve">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
-            <button type="button" class="icon-btn icon-btn-danger approval-reject" data-id="${a.id}" title="Reject" aria-label="Reject">
+            <button type="button" class="icon-btn approval-reject" data-id="${a.id}" title="Reject" aria-label="Reject">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
@@ -2216,30 +2201,30 @@ export function renderWorkflowsTab(container: HTMLElement): void {
     <!-- Pending Approvals Dashboard -->
     <div id="pending-approvals-section" class="approval-dashboard-section flex flex-col gap-section">
       <div class="quick-stats">
-        <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="all">
+        <button class="stat-card stat-card-clickable" data-approval-filter="all">
           <span class="stat-number" id="approvals-total">-</span>
           <span class="stat-label">Total Active</span>
         </button>
-        <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="pending">
+        <button class="stat-card stat-card-clickable" data-approval-filter="pending">
           <span class="stat-number" id="approvals-pending">-</span>
           <span class="stat-label">Pending</span>
         </button>
-        <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="in_progress">
+        <button class="stat-card stat-card-clickable" data-approval-filter="in_progress">
           <span class="stat-number" id="approvals-in-progress">-</span>
           <span class="stat-label">In Progress</span>
         </button>
-        <button class="stat-card stat-card-clickable portal-shadow" data-approval-filter="approved">
+        <button class="stat-card stat-card-clickable" data-approval-filter="approved">
           <span class="stat-number" id="approvals-approved">-</span>
           <span class="stat-label">Approved</span>
         </button>
       </div>
 
-      <div class="admin-table-card portal-shadow" id="pending-approvals-card">
-        <div class="admin-table-header">
+      <div class="data-table-card" id="pending-approvals-card">
+        <div class="data-table-header">
           <h3>Pending Approvals</h3>
-          <div class="admin-table-actions">
+          <div class="data-table-actions">
             <button type="button" class="icon-btn" id="approvals-refresh" title="Refresh" aria-label="Refresh approvals">
-              <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+              ${RENDER_ICONS.REFRESH}
             </button>
           </div>
         </div>
@@ -2252,22 +2237,22 @@ export function renderWorkflowsTab(container: HTMLElement): void {
             </div>
           </div>
           <div class="bulk-toolbar-actions">
-            <button type="button" class="btn btn-sm btn-success" id="bulk-approve-btn">
+            <button type="button" class="btn btn-xs btn-success" id="bulk-approve-btn">
               ${RENDER_ICONS.CHECK}
               Approve All
             </button>
-            <button type="button" class="btn btn-sm btn-danger" id="bulk-reject-btn">
+            <button type="button" class="btn btn-xs btn-danger" id="bulk-reject-btn">
               ${RENDER_ICONS.X}
               Reject All
             </button>
           </div>
         </div>
-        <div class="admin-table-container">
-          <div class="admin-table-scroll-wrapper">
-            <table class="admin-table" aria-label="Pending approvals">
+        <div class="data-table-container">
+          <div class="data-table-scroll-wrapper">
+            <table class="data-table" aria-label="Pending approvals">
               <thead>
                 <tr>
-                  <th scope="col" class="checkbox-col">
+                  <th scope="col" class="bulk-select-cell">
                     <div class="portal-checkbox">
                       <input type="checkbox" id="approvals-select-all" aria-label="Select all approvals" />
                     </div>
@@ -2291,21 +2276,21 @@ export function renderWorkflowsTab(container: HTMLElement): void {
 
     <!-- Approvals Content (Workflow Definitions) -->
     <div id="workflows-approvals-content">
-      <div class="admin-table-card portal-shadow">
-        <div class="admin-table-header">
+      <div class="data-table-card">
+        <div class="data-table-header">
           <h3>Approval Workflows</h3>
-          <div class="admin-table-actions">
+          <div class="data-table-actions">
             <button type="button" class="icon-btn" id="workflows-refresh" title="Refresh" aria-label="Refresh workflows">
-              <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+              ${RENDER_ICONS.REFRESH}
             </button>
             <button type="button" class="icon-btn" id="create-workflow-btn" title="Create Workflow" aria-label="Create Workflow">
-              <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+              ${RENDER_ICONS.PLUS}
             </button>
           </div>
         </div>
-        <div class="admin-table-container">
-          <div class="admin-table-scroll-wrapper">
-            <table class="admin-table" aria-label="Approval workflows">
+        <div class="data-table-container">
+          <div class="data-table-scroll-wrapper">
+            <table class="data-table" aria-label="Approval workflows">
               <thead>
                 <tr>
                   <th scope="col" class="name-col">Name</th>
@@ -2327,24 +2312,24 @@ export function renderWorkflowsTab(container: HTMLElement): void {
 
     <!-- Triggers Content -->
     <div id="workflows-triggers-content" class="hidden">
-      <div class="admin-table-card portal-shadow">
-        <div class="admin-table-header">
+      <div class="data-table-card">
+        <div class="data-table-header">
           <h3>Event Triggers</h3>
-          <div class="admin-table-actions">
+          <div class="data-table-actions">
             <button type="button" class="icon-btn" id="view-trigger-logs-btn" title="View Execution Logs" aria-label="View Execution Logs">
-              <span class="icon-btn-svg">${RENDER_ICONS.FILE_TEXT}</span>
+              ${RENDER_ICONS.FILE_TEXT}
             </button>
             <button type="button" class="icon-btn" id="triggers-refresh" title="Refresh" aria-label="Refresh triggers">
-              <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+              ${RENDER_ICONS.REFRESH}
             </button>
             <button type="button" class="icon-btn" id="create-trigger-btn" title="Create Trigger" aria-label="Create Trigger">
-              <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+              ${RENDER_ICONS.PLUS}
             </button>
           </div>
         </div>
-        <div class="admin-table-container">
-          <div class="admin-table-scroll-wrapper">
-            <table class="admin-table" aria-label="Event triggers">
+        <div class="data-table-container">
+          <div class="data-table-scroll-wrapper">
+            <table class="data-table" aria-label="Event triggers">
               <thead>
                 <tr>
                   <th scope="col" class="name-col">Name</th>
@@ -2366,21 +2351,21 @@ export function renderWorkflowsTab(container: HTMLElement): void {
 
     <!-- Email Templates Content -->
     <div id="workflows-email-templates-content" class="hidden">
-      <div class="admin-table-card portal-shadow">
-        <div class="admin-table-header">
+      <div class="data-table-card">
+        <div class="data-table-header">
           <h3>Email Templates</h3>
-          <div class="admin-table-actions" id="email-templates-filter-container">
+          <div class="data-table-actions" id="email-templates-filter-container">
             <button type="button" class="icon-btn" id="email-templates-refresh" title="Refresh" aria-label="Refresh templates">
-              <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+              ${RENDER_ICONS.REFRESH}
             </button>
             <button type="button" class="icon-btn" id="create-email-template-btn" title="Create Template" aria-label="Create Template">
-              <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+              ${RENDER_ICONS.PLUS}
             </button>
           </div>
         </div>
-        <div class="admin-table-container">
-          <div class="admin-table-scroll-wrapper">
-            <table class="admin-table" aria-label="Email templates">
+        <div class="data-table-container">
+          <div class="data-table-scroll-wrapper">
+            <table class="data-table" aria-label="Email templates">
               <thead>
                 <tr>
                   <th scope="col" class="name-col">Name</th>

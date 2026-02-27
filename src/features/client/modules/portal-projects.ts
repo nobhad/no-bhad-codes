@@ -17,9 +17,92 @@ import type {
 import { formatTextWithLineBreaks } from '../../../utils/format-utils';
 import { createStatusBadge } from '../../../components/status-badge';
 import { renderEmptyState } from '../../../components/empty-state';
+import { getReactComponent } from '../../../react/registry';
+import { showToast } from '../../../utils/toast-notifications';
 
 /** API endpoints */
 const PROJECTS_API_BASE = '/api/projects';
+
+// Track React unmount function
+let reactProjectsUnmountFn: (() => void) | null = null;
+
+/**
+ * Check if React portal projects should be used
+ */
+function shouldUseReactPortalProjects(): boolean {
+  const component = getReactComponent('portalProjects');
+  if (!component) return false;
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_portal_projects') === 'true') return false;
+
+  const flag = localStorage.getItem('feature_react_portal_projects');
+  if (flag === 'false') return false;
+
+  return true;
+}
+
+/**
+ * Cleanup React portal projects
+ */
+export function cleanupPortalProjects(): void {
+  if (reactProjectsUnmountFn) {
+    reactProjectsUnmountFn();
+    reactProjectsUnmountFn = null;
+  }
+}
+
+/**
+ * Load projects with React if available
+ */
+export async function loadProjects(ctx: ClientPortalContext): Promise<void> {
+  const container = document.getElementById('projects-list') || document.querySelector('.projects-section');
+  if (!container) return;
+
+  // Check if React component should be used
+  if (shouldUseReactPortalProjects()) {
+    const component = getReactComponent('portalProjects');
+    if (component) {
+      // Mount React component
+      const unmountResult = component.mount(container as HTMLElement, {
+        getAuthToken: ctx.getAuthToken,
+        showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+          showToast(message, type);
+        }
+      });
+
+      if (typeof unmountResult === 'function') {
+        reactProjectsUnmountFn = unmountResult;
+      }
+
+      return;
+    }
+  }
+
+  // Vanilla implementation - load projects and populate list
+  try {
+    const response = await fetch(PROJECTS_API_BASE, {
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to load projects');
+    }
+
+    const data = await response.json();
+    const projects = data.projects || [];
+
+    const projectsList = document.querySelector('.projects-list') as HTMLElement;
+    if (projectsList && projects.length > 0) {
+      populateProjectsList(projectsList, projects, (project) => {
+        // Handle project selection
+        console.log('Project selected:', project);
+      });
+    }
+  } catch (error) {
+    console.error('Error loading projects:', error);
+  }
+}
 
 // ============================================================================
 // CACHED DOM REFERENCES

@@ -19,6 +19,7 @@ import type { AdminDashboardContext } from '../admin-types';
 import { confirmDialog, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
 import { showToast } from '../../../utils/toast-notifications';
 import { createViewToggle } from '../../../components/view-toggle';
 import {
@@ -456,25 +457,25 @@ function renderProposalsLayout(): string {
 
       <div id="proposals-bulk-toolbar" class="bulk-action-toolbar"></div>
 
-      <div class="table-responsive">
-        <table class="admin-table proposals-table">
+      <div class="data-table-scroll-wrapper">
+        <table class="data-table proposals-table">
           <thead>
             <tr>
-              <th class="bulk-select-cell">
+              <th scope="col" class="bulk-select-cell">
                 <div class="portal-checkbox">
                   <input type="checkbox" id="proposals-select-all" class="bulk-select-all" aria-label="Select all proposals" />
                 </div>
               </th>
-              <th scope="col" class="name-col">Client</th>
+              <th scope="col" class="identity-col">Client</th>
               <th scope="col" class="name-col">Project</th>
               <th scope="col" class="type-col">Tier</th>
-              <th scope="col" class="budget-col">Price</th>
+              <th scope="col" class="amount-col">Price</th>
               <th scope="col" class="status-col">Status</th>
               <th scope="col" class="date-col">Date</th>
               <th scope="col" class="actions-col">Actions</th>
             </tr>
           </thead>
-          <tbody id="proposals-table-body">
+          <tbody id="proposals-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
             <tr class="loading-row"><td colspan="8"><div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading proposals...</span></div></td></tr>
           </tbody>
         </table>
@@ -552,7 +553,7 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
       <td data-label="Tier">
         <span class="tier-badge tier-${proposal.selectedTier}">${tierLabel}</span>
       </td>
-      <td class="price-cell" data-label="Price">
+      <td class="amount-cell" data-label="Price">
         <span class="price-value">${formatPrice(proposal.finalPrice)}</span>
         ${proposal.maintenanceOption && proposal.maintenanceOption !== 'diy'
     ? `<span class="maintenance-badge">+${proposal.maintenanceOption}</span>`
@@ -563,16 +564,10 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
       </td>
       <td class="date-cell" data-label="Date">${formattedDate}</td>
       <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          <button class="icon-btn btn-view" data-proposal-id="${proposal.id}" title="View Details" aria-label="View proposal details">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-          ${proposal.status === 'accepted' ? `
-            <button class="icon-btn btn-convert" data-proposal-id="${proposal.id}" title="Convert to Invoice" aria-label="Convert to invoice">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            </button>
-          ` : ''}
-        </div>
+        ${renderActionsCell([
+          createAction('view', proposal.id, { className: 'btn-view', dataAttrs: { 'proposal-id': proposal.id }, title: 'View Details', ariaLabel: 'View proposal details' }),
+          conditionalAction(proposal.status === 'accepted', 'convert-invoice', proposal.id, { className: 'btn-convert', dataAttrs: { 'proposal-id': proposal.id } }),
+        ])}
       </td>
     </tr>
   `;
@@ -2340,7 +2335,7 @@ function renderCustomItems(proposalId: number, items: ProposalCustomItem[]): voi
             <span>${item.quantity} × ${formatPrice(item.unitPrice)}</span>
             <span class="item-total">${formatPrice(item.quantity * item.unitPrice)}</span>
           </div>
-          <button class="icon-btn icon-btn-danger delete-item-btn" data-item-id="${item.id}" title="Delete" aria-label="Delete item">
+          <button class="icon-btn delete-item-btn" data-item-id="${item.id}" title="Delete" aria-label="Delete item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
             </svg>

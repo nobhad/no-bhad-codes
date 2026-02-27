@@ -47,6 +47,7 @@ import {
   type BulkActionConfig
 } from '../../../utils/table-bulk-actions';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
 
 const DR_API = '/api/document-requests';
 
@@ -323,17 +324,14 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
       <td class="status-cell" data-label="Status">${statusLabel(r.status)}</td>
       <td class="date-cell" data-label="Due">${formatDate(r.due_date)}</td>
       <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          <button type="button" class="icon-btn dr-view" data-id="${r.id}" title="View" aria-label="View">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-          ${r.status === 'uploaded' ? `<button type="button" class="icon-btn dr-start-review" data-id="${r.id}" title="Start review" aria-label="Start review"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>` : ''}
-          ${r.status === 'under_review' ? `<button type="button" class="icon-btn icon-btn-success dr-approve" data-id="${r.id}" title="Approve" aria-label="Approve"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></button><button type="button" class="icon-btn icon-btn-danger dr-reject" data-id="${r.id}" title="Reject" aria-label="Reject"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></button>` : ''}
-          ${r.status !== 'approved' && r.status !== 'rejected' ? `<button type="button" class="icon-btn dr-remind" data-id="${r.id}" title="Send reminder" aria-label="Send reminder"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>` : ''}
-          <button type="button" class="icon-btn icon-btn-danger dr-delete" data-id="${r.id}" data-title="${escapeHtml(r.title)}" title="Delete" aria-label="Delete">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
-        </div>
+        ${renderActionsCell([
+          createAction('view', r.id, { className: 'dr-view' }),
+          conditionalAction(r.status === 'uploaded', 'start-review', r.id, { className: 'dr-start-review' }),
+          conditionalAction(r.status === 'under_review', 'approve', r.id, { className: 'dr-approve' }),
+          conditionalAction(r.status === 'under_review', 'reject', r.id, { className: 'dr-reject' }),
+          conditionalAction(r.status !== 'approved' && r.status !== 'rejected', 'remind', r.id, { className: 'dr-remind' }),
+          createAction('delete', r.id, { className: 'dr-delete', dataAttrs: { title: escapeHtml(r.title) } }),
+        ])}
       </td>
     </tr>
   `
@@ -586,10 +584,10 @@ function openDetailModal(requestId: number, ctx: AdminDashboardContext): void {
       ${history && history.length > 0 ? `<h3>History</h3><ul class="dr-history-list">${history.map((h) => `<li><strong>${escapeHtml(h.action)}</strong> ${escapeHtml(h.actor_email)} (${formatDate(h.created_at)})${h.notes ? ` – ${escapeHtml(h.notes)}` : ''}</li>`).join('')}</ul>` : ''}
     `;
     footerEl.innerHTML = `
-      ${r.status === 'uploaded' ? `<button type="button" class="btn btn-primary btn-sm dr-detail-start-review" data-id="${  r.id  }">Start review</button>` : ''}
-      ${r.status === 'under_review' ? `<button type="button" class="btn btn-primary btn-sm dr-detail-approve" data-id="${  r.id  }">Approve</button><button type="button" class="btn btn-danger btn-sm dr-detail-reject" data-id="${  r.id  }">Reject</button>` : ''}
-      ${r.status !== 'approved' && r.status !== 'rejected' ? `<button type="button" class="btn btn-outline btn-sm dr-detail-remind" data-id="${  r.id  }">Send reminder</button>` : ''}
-      <button type="button" class="btn btn-secondary btn-sm" id="dr-detail-close">Close</button>
+      ${r.status === 'uploaded' ? `<button type="button" class="btn btn-primary btn-xs dr-detail-start-review" data-id="${  r.id  }">Start review</button>` : ''}
+      ${r.status === 'under_review' ? `<button type="button" class="btn btn-primary btn-xs dr-detail-approve" data-id="${  r.id  }">Approve</button><button type="button" class="btn btn-danger btn-xs dr-detail-reject" data-id="${  r.id  }">Reject</button>` : ''}
+      ${r.status !== 'approved' && r.status !== 'rejected' ? `<button type="button" class="btn btn-outline btn-xs dr-detail-remind" data-id="${  r.id  }">Send reminder</button>` : ''}
+      <button type="button" class="btn btn-secondary btn-xs" id="dr-detail-close">Close</button>
     `;
     footerEl.querySelector('#dr-detail-close')?.addEventListener('click', () => closeDetailModal());
     footerEl.querySelectorAll('.dr-detail-start-review, .dr-detail-approve, .dr-detail-reject, .dr-detail-remind').forEach((btn) => {
@@ -933,25 +931,25 @@ const RENDER_ICONS = {
  */
 export function renderDocumentRequestsTab(container: HTMLElement): void {
   container.innerHTML = `
-    <div class="admin-table-card portal-shadow">
-      <div class="admin-table-header">
+    <div class="data-table-card">
+      <div class="data-table-header">
         <h3>Requests</h3>
-        <div class="admin-table-actions" id="dr-filter-container">
+        <div class="data-table-actions" id="dr-filter-container">
           <button type="button" class="icon-btn" id="dr-export" title="Export to CSV" aria-label="Export to CSV">
-            <span class="icon-btn-svg">${RENDER_ICONS.EXPORT}</span>
+            ${RENDER_ICONS.EXPORT}
           </button>
           <button type="button" class="icon-btn" id="dr-refresh" title="Refresh" aria-label="Refresh">
-            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            ${RENDER_ICONS.REFRESH}
           </button>
           <button type="button" class="icon-btn" id="dr-add-request" title="Add Request" aria-label="Add Request">
-            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+            ${RENDER_ICONS.PLUS}
           </button>
         </div>
       </div>
       <div id="dr-bulk-toolbar" class="bulk-action-toolbar"></div>
-      <div class="admin-table-container">
-        <div class="admin-table-scroll-wrapper">
-        <table class="admin-table" aria-label="Document requests">
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+        <table class="data-table" aria-label="Document requests">
           <thead>
             <tr>
               <th scope="col" class="bulk-select-cell">
@@ -959,8 +957,8 @@ export function renderDocumentRequestsTab(container: HTMLElement): void {
                   <input type="checkbox" id="document-requests-select-all" class="bulk-select-all" aria-label="Select all document requests" />
                 </div>
               </th>
-              <th scope="col">Title</th>
-              <th scope="col" class="contact-col">Client</th>
+              <th scope="col" class="name-col">Title</th>
+              <th scope="col" class="identity-col">Client</th>
               <th scope="col" class="type-col">Type</th>
               <th scope="col" class="status-col">Status</th>
               <th scope="col" class="date-col">Due</th>

@@ -16,6 +16,7 @@ import { showToast } from '../../../utils/toast-notifications';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -178,32 +179,20 @@ function renderTemplatesTable(): void {
       <td class="status-cell" data-label="Status">${getStatusDotHTML(template.is_active ? 'active' : 'inactive')}</td>
       <td class="date-cell" data-label="Updated">${formatDate(template.updated_at, 'short')}</td>
       <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          <button class="icon-btn template-preview" data-id="${template.id}" title="Preview" aria-label="Preview template">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-          <button class="icon-btn template-edit" data-id="${template.id}" title="Edit" aria-label="Edit template">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="icon-btn template-versions" data-id="${template.id}" title="Version History" aria-label="View version history">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </button>
-          <button class="icon-btn template-test" data-id="${template.id}" title="Send Test" aria-label="Send test email">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-          ${!template.is_system ? `
-            <button class="icon-btn icon-btn-danger template-delete" data-id="${template.id}" data-name="${escapeHtml(template.name)}" title="Delete" aria-label="Delete template">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            </button>
-          ` : ''}
-        </div>
+        ${renderActionsCell([
+          createAction('preview', template.id, { className: 'template-preview', ariaLabel: 'Preview template' }),
+          createAction('edit', template.id, { className: 'template-edit', ariaLabel: 'Edit template' }),
+          createAction('versions', template.id, { className: 'template-versions', ariaLabel: 'View version history' }),
+          createAction('test', template.id, { className: 'template-test', ariaLabel: 'Send test email' }),
+          conditionalAction(!template.is_system, 'delete', template.id, { className: 'template-delete', dataAttrs: { name: escapeHtml(template.name) }, ariaLabel: 'Delete template' }),
+        ])}
       </td>
     </tr>
   `).join('');
 }
 
 function setupEmailTemplatesHandlers(): void {
-  // Set up filter UI in the admin-table-actions container
+  // Set up filter UI in the data-table-actions container
   const filterContainer = el('email-templates-filter-container');
   if (filterContainer && !filterContainer.dataset.filterBound) {
     filterContainer.dataset.filterBound = 'true';
@@ -710,8 +699,8 @@ async function openVersionsModal(id: number): Promise<void> {
               ${v.change_reason ? `<div class="version-reason">Reason: ${escapeHtml(v.change_reason)}</div>` : ''}
             </div>
             <div class="version-actions">
-              <button class="btn btn-sm btn-secondary version-view" data-template-id="${id}" data-version="${v.version}">View</button>
-              <button class="btn btn-sm btn-primary version-restore" data-template-id="${id}" data-version="${v.version}">Restore</button>
+              <button class="btn btn-xs btn-secondary version-view" data-template-id="${id}" data-version="${v.version}">View</button>
+              <button class="btn btn-xs btn-primary version-restore" data-template-id="${id}" data-version="${v.version}">Restore</button>
             </div>
           </div>
         `).join('')}
