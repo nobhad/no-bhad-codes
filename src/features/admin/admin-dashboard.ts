@@ -1686,8 +1686,6 @@ class AdminDashboard {
     const resolved = resolveAdminTab(tabName);
     const activeTab = resolved.tab;
 
-    console.log('[AdminDashboard] switchTab called:', { tabName, resolved, activeTab });
-
     document.querySelectorAll('.tab-btn').forEach((btn) => {
       btn.classList.remove('active');
     });
@@ -1699,7 +1697,6 @@ class AdminDashboard {
     // Try both ID formats: tab-{name} (new) and {name}-tab (old)
     const tabContent =
       document.getElementById(`tab-${activeTab}`) || document.getElementById(`${activeTab}-tab`);
-    console.log('[AdminDashboard] Tab content element:', { id: `tab-${activeTab}`, found: !!tabContent });
     tabContent?.classList.add('active');
 
     this.currentTab = activeTab;
@@ -1722,7 +1719,6 @@ class AdminDashboard {
    * Update admin header page title based on active tab/section.
    */
   private updateAdminPageTitle(tabName: string): void {
-    console.log('[AdminDashboard] updateAdminPageTitle called:', tabName);
     const titleEl = document.getElementById('admin-page-title');
     if (!titleEl) return;
 
@@ -1741,14 +1737,11 @@ class AdminDashboard {
 
     const group = getAdminGroupForTab(tabName);
     if (group) {
-      console.log('[AdminDashboard] Setting title from group:', group, ADMIN_TAB_GROUPS[group].label);
       titleEl.textContent = ADMIN_TAB_GROUPS[group].label;
       return;
     }
 
-    const title = ADMIN_TAB_TITLES[tabName] || 'Dashboard';
-    console.log('[AdminDashboard] Setting title:', { tabName, fromTitles: ADMIN_TAB_TITLES[tabName], final: title });
-    titleEl.textContent = title;
+    titleEl.textContent = ADMIN_TAB_TITLES[tabName] || 'Dashboard';
   }
 
   /**
@@ -2198,22 +2191,17 @@ class AdminDashboard {
         }
         break;
       case 'support': {
-        console.log('[AdminDashboard] Loading support tab...');
         // Dynamically render knowledge-base tab, then load data
         const tabContainer = document.getElementById('tab-support');
-        console.log('[AdminDashboard] tab-support container:', { found: !!tabContainer, hasContent: tabContainer?.innerHTML?.length || 0 });
         const kbModule = await loadKnowledgeBaseModule();
 
         // Render the tab structure dynamically
         if (tabContainer) {
-          console.log('[AdminDashboard] Rendering knowledge base tab...');
           kbModule.renderKnowledgeBaseTab(tabContainer);
         }
 
         // Load knowledge base data
-        console.log('[AdminDashboard] Loading knowledge base data...');
         await kbModule.loadKnowledgeBase(this.moduleContext);
-        console.log('[AdminDashboard] Knowledge base loaded.');
         break;
       }
       case 'document-requests': {
