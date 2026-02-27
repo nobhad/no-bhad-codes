@@ -11,37 +11,12 @@
  * fonts are available when design tokens reference them.
  *
  * Typography System:
- * - Headings: Cormorant Garamond (classic serif)
- * - Body/UI: Inconsolata (monospace)
- * - Letter-spacing: -0.09em for tight heading tracking
+ * - MAIN SITE: Acme for headings
+ * - PORTAL: Inconsolata (monospace), Cormorant Garamond (serif headings)
  */
 
 /* ============================================
- * INCONSOLATA (Self-hosted - Monospace UI)
- * Variable font with weights 400-700
- * ============================================ */
-@font-face {
-  font-family: "Inconsolata";
-  src: url("/fonts/Inconsolata/Inconsolata-Variable.woff2") format("woff2-variations");
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* ============================================
- * CORMORANT GARAMOND (Self-hosted - Serif Headings)
- * Classic book serif for visual hierarchy
- * ============================================ */
-@font-face {
-  font-family: "Cormorant Garamond";
-  src: url("/fonts/CormorantGaramond/CormorantGaramond-Regular.woff2") format("woff2");
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* ============================================
- * ACME FONT
+ * ACME FONT (Main Site Headings)
  * ============================================ */
 
 @font-face {
@@ -63,5 +38,29 @@
   src: url("/fonts/KCAcmeHand/KCSimpleSans-Inked.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
-  font-display: swap; /* Changed from optional to swap for consistency */
+  font-display: swap;
+}
+
+/* ============================================
+ * PORTAL FONTS (Admin & Client Portal Only)
+ * These fonts are used exclusively in portal pages
+ * via [data-page="admin"] and [data-page="client-portal"]
+ * ============================================ */
+
+/* Inconsolata - Monospace UI for portal */
+@font-face {
+  font-family: "Inconsolata";
+  src: url("/fonts/Inconsolata/Inconsolata-Variable.woff2") format("woff2-variations");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Cormorant Garamond - Serif headings for portal */
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("/fonts/CormorantGaramond/CormorantGaramond-Regular.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
 }

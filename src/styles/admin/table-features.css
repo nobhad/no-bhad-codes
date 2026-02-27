@@ -317,10 +317,7 @@
     gap: var(--space-px);
   }
 
-  .pagination-btn {
-    width: calc(var(--table-pagination-btn-size) + var(--space-0-5));
-    height: calc(var(--table-pagination-btn-size) + var(--space-0-5));
-  }
+  /* Pagination button sizes controlled by --table-pagination-btn-size in portal-tables.css */
 
   .bulk-action-toolbar {
     flex-direction: column;
@@ -349,7 +346,7 @@
     font-size: var(--font-size-2xs);
   }
 
-  /* Base .pagination-btn is already 28x28 in portal-tables.css */
+  /* Pagination buttons use --table-pagination-btn-size from portal-tables.css */
 
   .pagination-btn svg {
     width: var(--icon-size-sm);

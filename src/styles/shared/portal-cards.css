@@ -28,6 +28,49 @@
 }
 
 /* =====================================================
+   PORTAL SECTION - BASE CONTAINER STYLE
+   Single source of truth for ALL bordered section containers.
+   Applies uniform structure: border, no padding (content handles padding).
+   ===================================================== */
+.portal-section {
+  background: transparent;
+  border: 1px solid var(--table-border-color);
+  overflow: hidden;
+}
+
+/* =====================================================
+   PORTAL SECTION HEADING - BASE STYLE
+   Single source of truth for ALL section headings.
+   Uses --portal-section-heading-padding from design tokens.
+   ===================================================== */
+.portal-section-heading,
+.portal-section > h3:first-child,
+.portal .analytics-section > h3:first-child,
+.portal .chart-container > h3:first-child,
+.portal .analytics-column > h3:first-child,
+.portal .analytics-column-full > h3:first-child,
+.portal .admin-table-card > h3:first-child,
+.portal .portal-card > h3:first-child,
+.portal .content-section > h3:first-child {
+  padding: var(--portal-section-heading-padding);
+  margin: 0;
+  border-bottom: 1px solid var(--table-border-color);
+}
+
+/* =====================================================
+   PORTAL SECTION CONTENT - BASE STYLE
+   Uniform padding for content area below headings.
+   ===================================================== */
+.portal-section-content,
+.portal-section > *:not(h3:first-child),
+.portal .analytics-section > *:not(h3:first-child),
+.portal .chart-container > *:not(h3:first-child),
+.portal .analytics-column > *:not(h3:first-child),
+.portal .analytics-column-full > *:not(h3:first-child) {
+  padding: var(--space-2);
+}
+
+/* =====================================================
    UNIFIED LABEL SYSTEM
    Single source of truth for ALL field labels in portals
    Matches table column headers: grey, thin, uppercase, 11px
@@ -396,6 +439,92 @@
 }
 
 /* =====================================================
+   PORTAL PROJECT CARD - Section Header with Actions
+   ===================================================== */
+.portal .portal-project-card .section-header-with-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 var(--space-2) 0;
+}
+
+.portal .portal-project-card .section-header-with-actions h3 {
+  margin: 0;
+}
+
+/* =====================================================
+   HEALTH CHECK GRID - System Status
+   ===================================================== */
+.portal .health-check-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--portal-section-gap);
+}
+
+.portal .health-item {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-lg);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: var(--portal-border);
+}
+
+.portal .health-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.portal .health-indicator.health-loading {
+  background: var(--portal-text-muted);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.portal .health-indicator.health-ok {
+  background: var(--status-active);
+}
+
+.portal .health-indicator.health-warning {
+  background: var(--color-warning);
+}
+
+.portal .health-indicator.health-error {
+  background: var(--status-cancelled);
+}
+
+.portal .health-label {
+  flex: 1;
+  color: var(--portal-text-light);
+}
+
+.portal .health-status {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+/* =====================================================
+   QUICK ACTIONS GRID - System Status
+   ===================================================== */
+.portal .quick-actions-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--portal-section-gap);
+}
+
+/* =====================================================
    CARD SHADOWS - Consolidated
    Minimal shadows for depth; cards use flat design
    ===================================================== */
@@ -607,9 +736,15 @@
       .card-grid-4,
       .kpi-cards-row,
       .analytics-card-grid,
-      .vitals-grid
+      .vitals-grid,
+      .health-check-grid
     ) {
     gap: var(--space-2);
+  }
+
+  /* Health check grid to single column on mobile */
+  .portal .health-check-grid {
+    grid-template-columns: 1fr;
   }
 
   .portal :is(.portal-project-card, .recent-activity, .upcoming-tasks) h3 {

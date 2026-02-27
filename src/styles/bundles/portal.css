@@ -33,6 +33,7 @@
  * NAVIGATION (main site nav for login page)
  * ============================================ */
 @import "../components/nav-base.css" layer(components);
+@import "../components/nav-animations.css" layer(components);
 @import "../components/nav-responsive.css" layer(components);
 @import "../components/nav-portal.css" layer(components);
 

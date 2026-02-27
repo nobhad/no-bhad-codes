@@ -1,927 +1,98 @@
-/* =====================================================
-   SHARED PORTAL MESSAGES
-   @file src/styles/shared/portal-messages.css
-   NOTE: Uses non-standard light backgrounds intentionally.
-   ===================================================== */
+/* PORTAL MESSAGES - Minimal layout */
 
-/* Messages layout */
 .portal .messages-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 200px);
+  border: var(--portal-border);
+}
+
+/* Admin messages: extend to edges of dashboard-content padding */
+[data-page="admin"] .messages-layout {
+  margin: 0 calc(-1 * clamp(0.75rem, 2vw, 1.5rem)) calc(-1 * clamp(0.75rem, 2vw, 1.5rem)) calc(-1 * clamp(0.75rem, 2vw, 1.5rem));
+}
+
+.portal .messages-global-search {
+  border-bottom: var(--portal-border);
+}
+
+.portal .messages-columns {
   display: grid;
   grid-template-columns: 280px 1fr;
-  grid-template-rows: auto 1fr;
-  gap: 0;
-  min-height: calc(100vh - 200px);
-  background: var(--color-neutral-200);
-  overflow: hidden;
+  flex: 1;
 }
 
-/* Global search bar */
-.portal .messages-global-search {
-  grid-column: 1 / -1;
-  padding: var(--space-2);
-  background: var(--color-neutral-200);
-  border-bottom: 2px solid var(--color-neutral-400);
-  position: relative;
-  z-index: 5;
-  overflow: visible;
-}
-.portal .messages-global-search .search-bar {
-  width: 100%;
-  max-width: none;
-}
-.portal .messages-global-search .search-bar-input {
-  width: 100%;
-  background: var(--color-black);
-  border: 1px solid var(--portal-border);
-  color: var(--portal-text-light);
-}
-.portal .messages-global-search .search-bar-input::placeholder {
-  color: var(--portal-text-light);
-  opacity: 0.6;
-}
-.portal .messages-global-search .search-bar-input:is(:focus, :focus-visible) {
-  outline: none;
-  border: 3px solid var(--color-primary);
-  position: relative;
-  z-index: 10;
-}
-
-/* Left column: clients list */
 .portal .messages-clients-column {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  border-right: 2px solid var(--color-neutral-400);
-  overflow: hidden;
-}
-
-/* Client portal contact/tips cards */
-[data-page="client-portal"] .messages-layout .messages-clients-column {
-  gap: 0;
+  border-right: var(--portal-border);
   overflow-y: auto;
-  justify-content: flex-start;
-  align-items: stretch;
-}
-[data-page="client-portal"]
-  .messages-layout
-  .messages-clients-column
-  :is(.messages-contact-card, .messages-tips-card) {
-  display: block;
-  flex: 0 0 auto;
-  padding: var(--space-2);
-  background: var(--color-neutral-200);
-  border-bottom: 1px solid var(--portal-border);
-}
-[data-page="client-portal"]
-  .messages-clients-column
-  :is(.messages-contact-card, .messages-tips-card)
-  h3 {
-  margin: 0 0 var(--space-1-5) 0;
-}
-[data-page="client-portal"] .messages-clients-column .messages-contact-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-[data-page="client-portal"] .messages-clients-column .messages-contact-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  margin: 0;
-  color: var(--color-gray-700);
-  font-size: var(--font-size-sm);
-}
-[data-page="client-portal"] .messages-clients-column .messages-contact-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  color: var(--color-primary);
-}
-[data-page="client-portal"] .messages-clients-column .messages-contact-icon svg {
-  width: 16px;
-  height: 16px;
-}
-[data-page="client-portal"] .messages-clients-column .messages-contact-note {
-  margin: var(--space-1) 0 0 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-gray-600);
-}
-[data-page="client-portal"] .messages-clients-column .messages-tips-list {
-  margin: 0;
-  padding: 0;
-  list-style: disc;
-  list-style-position: inside;
-  color: var(--color-gray-600);
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-}
-[data-page="client-portal"] .messages-clients-column .messages-tips-list li {
-  margin-bottom: var(--space-0-5);
-}
-[data-page="client-portal"] .messages-clients-column .messages-tips-list li:last-child {
-  margin-bottom: 0;
 }
 
-/* Right column: thread + compose */
-.portal .messages-thread-column {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Thread list sidebar */
-.portal :is(.thread-list-container, .messages-clients-column) {
-  display: flex;
-  flex-direction: column;
-  background: var(--color-neutral-200);
-  overflow: hidden;
-}
-.portal .messages-clients-column {
-}
 .portal .thread-list-header {
-  padding: var(--space-1-5) var(--space-2);
-  font-weight: 600;
-  font-size: var(--font-size-sm);
-  color: var(--color-gray-900);
-  border-bottom: 1px solid var(--portal-border);
-  background: var(--color-neutral-200);
+  padding: var(--portal-section-heading-padding);
+  border-bottom: var(--portal-border);
 }
+
+/* Heading inside thread-list-header inherits portal h3 styles from portal-cards.css */
+
 .portal .thread-list {
   flex: 1;
   overflow-y: auto;
 }
+
 .portal .thread-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-  padding: var(--space-1-5) var(--space-2);
-  border-bottom: 1px solid var(--portal-border);
+  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   cursor: pointer;
-  transition: background-color var(--transition-fast) ease;
-  background: transparent;
-}
-.portal .thread-item:hover {
-  background: var(--color-neutral-100);
-}
-.portal .thread-item.active {
-  background: var(--color-neutral-100);
-  border-left: 3px solid var(--color-primary);
-}
-.portal .thread-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-1);
-}
-.portal .thread-item-title {
-  font-weight: 500;
-  font-size: var(--font-size-sm);
-  color: var(--color-gray-900);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
-}
-.portal .thread-item.unread .thread-item-title {
-  font-weight: 700;
-}
-.portal :is(.thread-item-time, .thread-item-project) {
-  font-size: var(--font-size-xs);
-  color: var(--color-gray-600);
-  white-space: nowrap;
-}
-.portal :is(.thread-item-preview, .thread-item-contact) {
-  font-size: var(--font-size-sm);
-  color: var(--color-gray-700);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.portal .thread-item-contact {
-  color: var(--color-gray-600);
-}
-.portal .thread-item-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.portal .thread-unread-badge {
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  padding: var(--space-px) var(--space-0-5);
-  min-width: var(--space-2);
-  text-align: center;
 }
 
-/* Messages container */
-.portal :is(.messages-container, .messages-thread-column) {
+.portal .messages-thread-column {
   display: flex;
   flex-direction: column;
-  border: none;
-  background: var(--color-neutral-200);
   overflow: hidden;
-  box-shadow: var(--shadow-panel);
-}
-.portal .messages-thread-column {
-  box-shadow: none;
-}
-.portal .messages-thread-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1-5) var(--space-2);
-  font-weight: 600;
-  font-size: var(--font-size-sm);
-  color: var(--color-gray-900);
-  border-bottom: 1px solid var(--portal-border);
-  background: var(--color-neutral-200);
-}
-.portal .messages-thread-header .thread-title {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.portal .messages-thread-header .messages-search {
-  flex-shrink: 0;
-}
-.portal .messages-container > div {
-  box-shadow: none;
 }
 
-/* Messages thread */
 .portal .messages-thread {
   flex: 1;
-  min-height: 300px;
   overflow-y: auto;
-  padding: var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1-5);
-  color: var(--color-gray-900);
-  border-bottom: 2px solid var(--color-neutral-400);
-  position: relative;
+  border-bottom: var(--portal-border);
 }
 
-/* Individual message */
 .portal .message {
   display: flex;
-  flex-direction: row;
   align-items: flex-end;
-  gap: var(--space-1-5);
-  max-width: 100%;
-  width: 100%;
-  cursor: default;
-  user-select: text;
-  -webkit-touch-callout: none;
-}
-.portal .message-received {
-  align-self: flex-start;
-}
-.portal .message-sent {
-  align-self: flex-end;
-  flex-direction: row;
-  justify-content: flex-end;
-}
-.portal .message-sent .message-content {
-  order: 1;
-}
-.portal .message-sent .message-avatar {
-  order: 2;
 }
 
-/* Message avatar */
-.portal .message-avatar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-0-5);
-  flex-shrink: 0;
-}
-.portal .message-avatar .avatar-img {
-  display: block;
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-}
-.portal .message-avatar .avatar-placeholder {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.5px;
-}
-.portal .message-avatar :is(.avatar-name, ::after),
-.portal .message-avatar[data-name]::after {
-  display: none;
-  content: none;
-}
-
-/* Message content bubble */
 .portal .message-content {
-  background: var(--color-surface-primary);
   border: var(--portal-border);
-  padding: var(--space-2) var(--space-2-5);
-  line-height: 1.5;
-  color: var(--color-gray-900);
-  flex: 1;
   max-width: 80%;
 }
-.portal .message-received .message-content {
-  border-bottom-left-radius: var(--portal-radius-xs);
-}
-.portal .message-sent .message-content {
-  background: var(--color-neutral-100);
-  border-bottom-right-radius: var(--portal-radius-xs);
-}
 
-/* Client portal message alignment */
-[data-page="client-portal"] .message-admin .message-content {
-  background: var(--color-neutral-100);
-  border-bottom-right-radius: var(--portal-radius-xs);
-  border-bottom-left-radius: var(--portal-radius-pill);
-}
-[data-page="client-portal"] .message-client .message-content {
-  background: var(--color-surface-primary);
-  border-bottom-left-radius: var(--portal-radius-xs);
-  border-bottom-right-radius: var(--portal-radius-pill);
-}
-[data-page="client-portal"] .message-client {
-  align-self: flex-end;
-  flex-direction: row;
-  justify-content: flex-end;
-}
-[data-page="client-portal"] .message-client .message-content {
-  order: 1;
-}
-[data-page="client-portal"] .message-client .message-avatar {
-  order: 2;
-}
-[data-page="client-portal"] .message-admin {
-  align-self: flex-start;
-}
-
-/* Message header */
-.portal .message-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-1);
-  font-size: var(--font-size-sm);
-  gap: var(--space-2);
-}
-.portal .message-sender {
-  font-weight: 600;
-  color: var(--color-gray-900);
-}
-.portal .message-time {
-  font-size: var(--font-size-xs);
-  color: var(--color-gray-600);
-}
-.portal .message-body {
-  color: var(--color-gray-900);
-  line-height: 1.5;
-  font-size: var(--font-size-sm);
-}
-
-/* Message compose area */
 .portal .message-compose {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-2);
-  position: relative;
-  background: transparent;
-  border: none;
-  border-top: 1px solid var(--portal-border);
+  border-top: var(--portal-border);
 }
-.portal .message-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-}
-.portal .message-input-wrapper :is(.form-textarea, textarea) {
-  flex: 1;
-}
-.portal .message-compose :is(.form-textarea, textarea) {
+
+.portal .message-compose textarea {
   width: 100%;
-  box-sizing: border-box;
-  background: var(--color-black);
-  color: var(--portal-text-light);
-  border: none;
+  border: var(--portal-border);
   min-height: 100px;
-  padding: var(--space-2) var(--space-3);
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-  font-size: var(--font-size-base);
-  font-weight: 400;
-  resize: vertical;
-  caret-color: var(--portal-text-light);
-}
-.portal .message-compose :is(.form-textarea, textarea)::placeholder {
-  color: var(--portal-text-light);
-  opacity: 0.5;
-  font-weight: 400;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-}
-.portal .message-compose :is(.form-textarea, textarea):is(:focus, :focus-visible) {
-  outline: none;
-  border: 3px solid var(--color-primary);
-  box-shadow: none;
-}
-.portal .message-compose textarea:disabled {
-  cursor: not-allowed;
-  opacity: 1;
-  background-color: var(--portal-bg-medium);
-}
-.portal .message-compose button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
-/* System message */
-.portal .message-system {
-  background: var(--color-neutral-200);
-  border-left: 4px solid var(--color-primary);
-}
-
-/* Message search */
-.portal .messages-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-1-5);
-  border-bottom: 1px solid var(--portal-border);
-  background: var(--color-neutral-200);
-}
-.portal .messages-search.search-bar {
-  min-width: 200px;
-}
-.portal .messages-search .search-bar-input {
-  min-width: 200px;
-  background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-light);
-}
-
-/* Message reactions */
-.portal .message-reactions {
-  display: flex;
-  gap: var(--space-0-5);
-  margin-top: var(--space-0-5);
-  flex-wrap: wrap;
-}
-.portal .reaction-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-0-5);
-  padding: var(--space-px) var(--space-1);
-  background: var(--color-state-active);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  transition: background-color var(--transition-fast) ease;
-  border: 1px solid transparent;
-}
-.portal .reaction-badge:hover {
-  background: var(--color-shadow-lg);
-}
-.portal .reaction-badge.active {
-  border-color: var(--color-primary);
-  background: rgba(var(--color-primary-rgb), 0.1);
-}
-.portal .reaction-badge .reaction-count {
-  color: var(--color-text-secondary);
-  font-weight: 500;
-}
-.portal .message-actions.picker-open :is(.pin-message-btn, .add-reaction-btn) {
-  visibility: hidden;
-}
-.portal .message-actions .add-reaction-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--portal-text-muted);
-  transition: color var(--transition-fast);
-  outline: none;
-}
-.portal .message-actions .add-reaction-btn:hover {
-  color: var(--color-text-secondary);
-}
-.portal .message-actions .add-reaction-btn:is(:focus, :active) {
-  outline: none;
-  border: none;
-  box-shadow: none;
-}
-
-/* Reaction picker */
-.portal .reaction-picker {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  gap: var(--space-px);
-  padding: var(--space-0-5) var(--space-1);
-  background: var(--color-surface-primary);
-  border: 2px solid var(--color-primary);
-  box-shadow: var(--shadow-lg);
-  z-index: 100;
-}
-.portal .reaction-picker.hidden {
-  display: none;
-}
-.portal .reaction-picker button {
-  padding: var(--space-0-5);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: var(--font-size-lg);
-  transition: background-color var(--transition-fast);
-  line-height: 1;
-}
-.portal .reaction-picker button:hover {
-  background: var(--color-gray-200);
-}
-.portal .reaction-picker .picker-plus {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--space-3-5);
-  height: var(--space-3-5);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-primary);
-  cursor: pointer;
-  margin: calc(-1 * var(--space-0-5)) calc(-1 * var(--space-1)) calc(-1 * var(--space-0-5)) 0;
-  transform: rotate(45deg);
-  transition: transform var(--transition-fast) ease;
-}
-
-/* Message read receipts */
-.portal .message-status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-  margin-top: var(--space-1);
-}
-.portal .message-status svg {
-  width: 12px;
-  height: 12px;
-}
-.portal .message-status.read svg {
-  color: var(--color-primary);
-}
-
-/* Message actions */
-.portal .message-actions {
-  display: flex;
-  gap: var(--space-0-5);
-  margin-left: auto;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-  position: relative;
-}
-.portal .message:hover .message-actions {
-  opacity: 1;
-}
-.portal .message-actions button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--portal-text-muted);
-  transition: all var(--transition-fast);
-}
-.portal .message-actions button:hover {
-  background: var(--color-state-active);
-  color: var(--color-text-secondary);
-}
-.portal .message-actions button.pinned {
-  color: var(--color-primary);
-}
-.portal .message-actions button svg {
-  width: 14px;
-  height: 14px;
-}
-.portal .message.pinned {
-  border-left: 3px solid var(--color-primary);
-  background: rgba(var(--color-primary-rgb), 0.05);
-  padding-left: var(--space-2);
-  margin-left: calc(-1 * var(--space-2));
-}
-
-/* Message edit/delete actions */
-.portal .message-action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--portal-text-muted);
-  transition: all var(--transition-fast);
-}
-.portal .message-action-btn:hover {
-  background: var(--color-state-active);
-  color: var(--color-text-secondary);
-}
-.portal .message-action-btn:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
-}
-.portal .message-action-btn svg {
-  width: 14px;
-  height: 14px;
-}
-.portal .message-edit-btn:hover {
-  color: var(--color-primary);
-}
-.portal .message-delete-btn:hover {
-  color: var(--color-danger-500);
-  background: rgba(var(--color-danger-rgb, 239, 68, 68), 0.1);
-}
-
-/* Pinned messages section */
-.portal .pinned-messages {
-  padding: var(--space-1) var(--space-1-5);
-  border-bottom: 1px solid var(--portal-border);
-  background: rgba(var(--color-primary-rgb), 0.05);
-}
-.portal .pinned-messages-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-  font-size: var(--font-size-xs);
-  color: var(--color-primary);
-  margin-bottom: var(--space-1-5);
-}
-.portal .pinned-messages-header svg {
-  width: 12px;
-  height: 12px;
-}
-.portal .pinned-message-preview {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: pointer;
-}
-.portal .pinned-message-preview:hover {
-  color: var(--color-primary);
-}
-
-/* Search highlight */
-.portal .message-body :is(mark, .search-highlight) {
-  background: var(--color-warning-alpha-40);
-  padding: 1px 2px;
-  border-radius: 2px;
-}
-
-/* Mobile responsive */
-@media (--tablet-landscape) {
-  .portal .messages-layout {
-    grid-template-columns: 200px 1fr;
-  }
-}
-
-/* Mobile client dropdown */
-.portal .messages-mobile-select {
-  display: none;
-}
-
-@media (--mid-mobile) {
-  .portal .messages-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr;
-    gap: 0;
-  }
-  [data-page="client-portal"] .messages-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-  }
-  [data-page="client-portal"] .messages-clients-column {
-    display: none;
-  }
-  [data-page="client-portal"] .messages-thread-column {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  .portal .messages-global-search {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .portal .messages-mobile-select {
-    display: block;
-    grid-column: 1;
-    grid-row: 2;
-    padding: var(--space-2);
-    background: var(--color-neutral-200);
-    border-bottom: 1px solid var(--portal-border);
-  }
-  .portal .messages-mobile-select .form-select {
-    width: 100%;
-    background: var(--color-black);
-    color: var(--portal-text-light);
-    border: 1px solid var(--portal-border);
-    padding: var(--space-1-5) var(--space-2);
-    font-size: var(--font-size-sm);
-  }
-  .portal .messages-clients-column {
-    display: none;
-  }
-  .portal .messages-thread-column {
-    grid-column: 1;
-    grid-row: 3;
-  }
-}
-
-@media (--small-mobile) {
-  .portal .messages-thread {
-    padding: var(--space-1-5);
-    gap: var(--space-1);
-  }
-  .portal .message-compose {
-    padding: var(--space-1-5);
-    gap: var(--space-1);
-  }
-}
-
-/* Attachment button & input */
-.portal .message-compose-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-/* .btn-attach uses .icon-btn from portal-buttons.css */
 .portal .attachment-input {
   display: none;
 }
 
-/* Attachment preview */
-.portal .attachment-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  padding: var(--space-2);
-  background: var(--portal-bg-dark);
-  margin-bottom: var(--space-2);
-}
-.portal .attachment-preview.hidden {
-  display: none;
-}
-.portal .attachment-chip {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
-  background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border);
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-light);
-}
-.portal .attachment-chip-icon {
-  display: flex;
-  align-items: center;
-  color: var(--color-primary);
-}
-.portal .attachment-chip-icon svg {
-  width: 14px;
-  height: 14px;
-}
-.portal .attachment-chip-name {
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.portal .attachment-chip-size {
-  color: var(--portal-text-muted);
-}
-.portal .attachment-chip-remove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 50%;
-  color: var(--portal-text-muted);
-  cursor: pointer;
-  transition: all var(--transition-fast) ease;
-}
-.portal .attachment-chip-remove:hover {
-  color: var(--color-danger-500);
-  background: rgba(var(--color-danger-rgb, 239, 68, 68), 0.1);
-}
-.portal .attachment-chip-remove svg {
-  width: 12px;
-  height: 12px;
+@media (--tablet-landscape) {
+  .portal .messages-columns {
+    grid-template-columns: 200px 1fr;
+  }
 }
 
-/* Message attachments */
-.portal .message-attachments {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin-top: var(--space-2);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-neutral-300);
-}
-.portal .message-attachment {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
-  background: var(--color-neutral-100);
-  border: 1px solid var(--color-neutral-300);
-  color: var(--color-gray-700);
-  font-size: var(--font-size-sm);
-  text-decoration: none;
-  transition: all var(--transition-fast) ease;
-}
-.portal .message-attachment:hover {
-  background: var(--color-neutral-200);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-.portal .message-attachment-icon {
-  display: flex;
-  align-items: center;
-  color: var(--color-primary);
-}
-.portal .message-attachment-icon svg {
-  width: 16px;
-  height: 16px;
-}
-.portal .message-attachment-name {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.portal .message-attachment-size {
-  color: var(--color-gray-500);
-  font-size: var(--font-size-xs);
-}
-.portal .message-attachment-download {
-  display: flex;
-  align-items: center;
-  color: var(--portal-text-muted);
-  opacity: 0;
-  transition: opacity var(--transition-fast) ease;
-}
-.portal .message-attachment:hover .message-attachment-download {
-  opacity: 1;
-}
-.portal .message-attachment-download svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* Drag & drop indicator */
-.portal .message-compose :is(textarea, .form-textarea).drag-over {
-  border: 2px dashed var(--color-primary);
-  background: rgba(var(--color-primary-rgb), 0.05);
+@media (--mid-mobile) {
+  .portal .messages-columns {
+    grid-template-columns: 1fr;
+  }
+  .portal .messages-clients-column {
+    display: none;
+  }
 }

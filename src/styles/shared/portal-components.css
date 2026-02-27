@@ -1259,3 +1259,89 @@ a.text-danger:hover {
 .progress-fill.progress-danger {
   background: var(--color-danger);
 }
+
+/* ============================================
+   ERROR BOUNDARY COMPONENT
+   Fallback UI when React components crash
+   ============================================ */
+
+.error-boundary-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: var(--space-4);
+  background: var(--portal-bg-darker);
+  border: 1px solid var(--portal-border-color);
+}
+
+.error-boundary-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+  max-width: 400px;
+}
+
+.error-boundary-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-warning);
+}
+
+.error-boundary-title {
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--portal-text-light);
+  margin: 0;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.error-boundary-message {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+  margin: 0;
+}
+
+.error-boundary-details {
+  width: 100%;
+  padding: var(--space-2);
+  background: var(--portal-bg-darkest);
+  border: 1px solid var(--portal-border-color);
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+  margin: 0;
+}
+
+.error-boundary-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap-sm);
+  padding: var(--space-1-5) var(--space-3);
+  background: transparent;
+  border: 1px solid var(--portal-text-light);
+  color: var(--portal-text-light);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.error-boundary-retry:hover {
+  background: var(--portal-text-light);
+  color: var(--portal-bg-pitch);
+}
+
+.error-boundary-retry-icon {
+  width: 16px;
+  height: 16px;
+}

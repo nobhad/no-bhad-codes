@@ -32,6 +32,18 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 }
 
 /* ============================================
+ * SVG ICON COLOR INHERITANCE - ROOT FIX
+ * ============================================
+ * Ensures SVG icons in buttons inherit the button's text color.
+ * This is critical for Lucide icons which use stroke="currentColor".
+ * Without this, SVGs appear grey instead of matching button text.
+ */
+:is([data-page="admin"], [data-page="client-portal"]) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .form-button) > svg,
+:is([data-page="admin"], [data-page="client-portal"]) button:is(.btn, .btn-primary, .btn-secondary, .btn-outline) > svg {
+  color: inherit;
+}
+
+/* ============================================
  * VARIANT BUTTONS - Color variants
  * ============================================ */
 
@@ -229,10 +241,11 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 .portal .sidebar-btn {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-md, 0.5rem);
+  gap: var(--icon-gap-lg, 1rem);
   width: 100%;
   padding: clamp(0.55rem, 1.3vw, 0.75rem) var(--space-3) clamp(0.55rem, 1.3vw, 0.75rem)
     var(--sidebar-icon-indent, 18px);
+  font-family: "Cormorant Garamond", Georgia, serif;
   font-size: clamp(0.9rem, 1.6vw, 1.05rem);
   font-weight: 500;
   text-align: left;

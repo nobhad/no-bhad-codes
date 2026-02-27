@@ -49,7 +49,7 @@
 
 /* Tasks table styling within main container */
 .tasks-main-container .admin-table-scroll-wrapper {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .tasks-main-container .data-table {
@@ -434,7 +434,6 @@
 #time-entries-list .data-table {
   background: transparent;
   border: 1px solid var(--table-border-color);
-  overflow: hidden;
 }
 
 #time-entries-list .data-table th {

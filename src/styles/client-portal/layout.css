@@ -172,25 +172,55 @@ body[data-page="client-portal"] {
 
 /* Portal theme variables are defined in variables.css */
 
-/* Remove shadows from headings and text elements */
-/* NOTE: Button shadows are handled in shared/portal-buttons.css */
+/* ================================================
+   PORTAL TYPOGRAPHY - DISCOTHÈQUE THEME
+   Overrides global Acme headings with serif for portals
+   ================================================ */
 [data-page="client-portal"] h1,
 [data-page="client-portal"] h2,
 [data-page="client-portal"] h3,
 [data-page="client-portal"] h4,
 [data-page="client-portal"] h5,
 [data-page="client-portal"] h6,
-[data-page="client-portal"] .page-header h2,
-[data-page="client-portal"] .client-name,
 [data-page="admin"] h1,
 [data-page="admin"] h2,
 [data-page="admin"] h3,
 [data-page="admin"] h4,
 [data-page="admin"] h5,
-[data-page="admin"] h6,
+[data-page="admin"] h6 {
+  font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
+  letter-spacing: var(--letter-spacing-tightest, -0.09em);
+  text-shadow: none;
+  color: var(--portal-text-light, #ffffff);
+}
+
+/* Portal page header specific */
+[data-page="client-portal"] .page-header h2,
+[data-page="client-portal"] .client-name,
 [data-page="admin"] .page-header h2,
 [data-page="admin"] .client-name {
   text-shadow: none;
+}
+
+/* ================================================
+   PORTAL BRUTALIST DESIGN - SHARP CORNERS
+   Only applies to portal pages, not main site
+   ================================================ */
+[data-page="client-portal"] *,
+[data-page="client-portal"] *::before,
+[data-page="client-portal"] *::after,
+[data-page="admin"] *,
+[data-page="admin"] *::before,
+[data-page="admin"] *::after {
+  border-radius: 0;
+}
+
+/* Portal HR styling - sharp corners */
+[data-page="client-portal"] hr,
+[data-page="admin"] hr {
+  height: 2px;
+  border-radius: 0;
+  background-color: var(--portal-text-light, #ffffff);
 }
 
 /* ================================================

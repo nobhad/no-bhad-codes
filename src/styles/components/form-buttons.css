@@ -44,6 +44,22 @@
   box-sizing: border-box;
 }
 
+/* SVG icons inherit button color - ROOT LEVEL FIX
+   Ensures SVGs match button text color (white) instead of default grey.
+   Only sets color: inherit; to let SVG's stroke="currentColor" work.
+   Does NOT override fill/stroke to preserve icon styling (Lucide uses fill="none"). */
+.btn:not(.icon-btn):not(.sidebar-btn) svg,
+.form-button svg,
+.login-btn svg,
+.btn-primary:not(.icon-btn):not(.sidebar-btn) svg,
+.btn-secondary:not(.icon-btn):not(.sidebar-btn) svg,
+.btn-outline:not(.icon-btn):not(.sidebar-btn) svg,
+button.btn svg,
+button.btn-primary svg,
+button.btn-secondary svg {
+  color: inherit;
+}
+
 /* Hover state */
 .btn:not(.icon-btn):not(.sidebar-btn):hover,
 .form-button:hover,
