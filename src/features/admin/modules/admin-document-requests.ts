@@ -335,7 +335,7 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
   tbody.innerHTML = requests
     .map(
       (r) => `
-    <tr data-request-id="${r.id}">
+    <tr data-document-request-id="${r.id}">
       ${createRowCheckbox('document-requests', r.id)}
       <td class="name-cell" data-label="Title">${escapeHtml(r.title)}</td>
       <td class="name-cell" data-label="Client">${escapeHtml(SanitizationUtils.decodeHtmlEntities(r.client_name ?? String(r.client_id)))}</td>
@@ -364,9 +364,9 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
   // Initialize keyboard navigation
   initTableKeyboardNav({
     tableSelector: '#document-requests-table-body',
-    rowSelector: 'tr[data-request-id]',
+    rowSelector: 'tr[data-document-request-id]',
     onRowSelect: (row) => {
-      const requestId = parseInt(row.dataset.requestId || '0');
+      const requestId = parseInt(row.dataset.documentRequestId || '0');
       if (requestId && storedDrContext) openDetailModal(requestId, storedDrContext);
     },
     focusClass: 'row-focused',
