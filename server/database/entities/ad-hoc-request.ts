@@ -100,22 +100,22 @@ export const adHocRequestSchema = defineSchema<AdHocRequest>({
   status: {
     column: 'status',
     type: 'string',
-    transform: (v) => v as AdHocRequestStatus
+    transform: (v) => v as AdHocRequestStatus,
   },
   requestType: {
     column: 'request_type',
     type: 'string',
-    transform: (v) => v as AdHocRequestType
+    transform: (v) => v as AdHocRequestType,
   },
   priority: {
     column: 'priority',
     type: 'string',
-    transform: (v) => v as AdHocRequestPriority
+    transform: (v) => v as AdHocRequestPriority,
   },
   urgency: {
     column: 'urgency',
     type: 'string',
-    transform: (v) => v as AdHocRequestUrgency
+    transform: (v) => v as AdHocRequestUrgency,
   },
   estimatedHours: { column: 'estimated_hours', type: 'float?', default: null },
   flatRate: { column: 'flat_rate', type: 'float?', default: null },
@@ -131,7 +131,7 @@ export const adHocRequestSchema = defineSchema<AdHocRequest>({
   createdAt: { column: 'created_at', type: 'string' },
   updatedAt: { column: 'updated_at', type: 'string' },
   deletedAt: { column: 'deleted_at', type: 'string?', default: null },
-  deletedBy: { column: 'deleted_by', type: 'string?', default: null }
+  deletedBy: { column: 'deleted_by', type: 'string?', default: null },
 });
 
 // =====================================================

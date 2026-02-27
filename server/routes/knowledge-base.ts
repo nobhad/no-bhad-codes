@@ -76,7 +76,7 @@ router.get(
     const articles = await knowledgeBaseService.searchArticles(query, {
       limit,
       userId: req.user?.id,
-      userType: req.user?.type
+      userType: req.user?.type,
     });
 
     sendSuccess(res, { articles, query });
@@ -125,7 +125,7 @@ router.post(
       isHelpful,
       userId: req.user?.id,
       userType: req.user?.type,
-      comment
+      comment,
     });
 
     sendSuccess(res, undefined, 'Feedback submitted');
@@ -169,7 +169,7 @@ router.post(
       description,
       icon,
       color,
-      sort_order
+      sort_order,
     });
 
     sendCreated(res, { category }, 'Category created');
@@ -278,7 +278,8 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { category_id, title, slug, summary, content, keywords, is_featured, is_published } = req.body;
+    const { category_id, title, slug, summary, content, keywords, is_featured, is_published } =
+      req.body;
 
     if (!category_id || !title || !slug || !content) {
       return errorResponse(res, 'category_id, title, slug, and content are required', 400);
@@ -293,7 +294,7 @@ router.post(
       keywords,
       is_featured,
       is_published,
-      author_email: req.user?.email
+      author_email: req.user?.email,
     });
 
     sendCreated(res, { article }, 'Article created');

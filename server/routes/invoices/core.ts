@@ -10,7 +10,11 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { canAccessInvoice, canAccessProject, isUserAdmin } from '../../middleware/access-control.js';
+import {
+  canAccessInvoice,
+  canAccessProject,
+  isUserAdmin,
+} from '../../middleware/access-control.js';
 import { InvoiceCreateData, InvoiceLineItem } from '../../services/invoice-service.js';
 import { emailService } from '../../services/email-service.js';
 import { getDatabase } from '../../database/init.js';
@@ -18,7 +22,12 @@ import { getString } from '../../database/row-helpers.js';
 import { generateInvoicePdf, InvoicePdfData } from './pdf.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../../utils/api-response.js';
+import {
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sendCreated,
+} from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { receiptService } from '../../services/receipt-service.js';
@@ -56,16 +65,26 @@ router.get(
       );
 
       if (hasFilters) {
-        const clientId = req.query.clientId ? parseInt(req.query.clientId as string, 10) : undefined;
-        const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;
-        const minAmount = req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined;
-        const maxAmount = req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined;
+        const clientId = req.query.clientId
+          ? parseInt(req.query.clientId as string, 10)
+          : undefined;
+        const projectId = req.query.projectId
+          ? parseInt(req.query.projectId as string, 10)
+          : undefined;
+        const minAmount = req.query.minAmount
+          ? parseFloat(req.query.minAmount as string)
+          : undefined;
+        const maxAmount = req.query.maxAmount
+          ? parseFloat(req.query.maxAmount as string)
+          : undefined;
 
         // Validate numeric filters
-        if ((clientId !== undefined && isNaN(clientId)) ||
-            (projectId !== undefined && isNaN(projectId)) ||
-            (minAmount !== undefined && isNaN(minAmount)) ||
-            (maxAmount !== undefined && isNaN(maxAmount))) {
+        if (
+          (clientId !== undefined && isNaN(clientId)) ||
+          (projectId !== undefined && isNaN(projectId)) ||
+          (minAmount !== undefined && isNaN(minAmount)) ||
+          (maxAmount !== undefined && isNaN(maxAmount))
+        ) {
           return errorResponse(res, 'Invalid filter parameters', 400, 'VALIDATION_ERROR');
         }
 
@@ -80,7 +99,7 @@ router.get(
           minAmount,
           maxAmount,
           limit,
-          offset
+          offset,
         };
 
         const result = await getInvoiceService().searchInvoices(filters);
@@ -92,7 +111,7 @@ router.get(
       res.json(invoices.map(toSnakeCaseInvoice));
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -141,17 +160,17 @@ if (process.env.NODE_ENV === 'development') {
             description: 'Website Design & Development',
             quantity: 1,
             rate: 3500,
-            amount: 3500
+            amount: 3500,
           },
           {
             description: 'Content Management System Setup',
             quantity: 1,
             rate: 1000,
-            amount: 1000
-          }
+            amount: 1000,
+          },
         ],
         notes: 'Test invoice created for development testing',
-        terms: 'Payment due within 30 days'
+        terms: 'Payment due within 30 days',
       };
 
       try {
@@ -160,7 +179,13 @@ if (process.env.NODE_ENV === 'development') {
         sendCreated(res, { invoice }, 'Test invoice created successfully');
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        errorResponseWithPayload(res, 'Failed to create test invoice', 500, 'TEST_CREATION_FAILED', { message });
+        errorResponseWithPayload(
+          res,
+          'Failed to create test invoice',
+          500,
+          'TEST_CREATION_FAILED',
+          { message }
+        );
       }
     })
   );
@@ -197,7 +222,7 @@ if (process.env.NODE_ENV === 'development') {
           return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
         }
         errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED', {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     })
@@ -271,7 +296,7 @@ router.post(
     // Validate required fields
     if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['projectId', 'clientId', 'lineItems']
+        required: ['projectId', 'clientId', 'lineItems'],
       });
     }
 
@@ -294,7 +319,12 @@ router.post(
     if (!(await isUserAdmin(req))) {
       const projectClientId = (project as { client_id: number }).client_id;
       if (projectClientId !== invoiceData.clientId) {
-        return errorResponse(res, 'Client ID must match the project owner', 400, 'VALIDATION_ERROR');
+        return errorResponse(
+          res,
+          'Client ID must match the project owner',
+          400,
+          'VALIDATION_ERROR'
+        );
       }
     }
 
@@ -309,7 +339,7 @@ router.post(
 
     if (invalidLineItems.length > 0) {
       return errorResponseWithPayload(res, 'Invalid line items', 400, 'INVALID_LINE_ITEMS', {
-        message: 'Each line item must have description, quantity, rate, and amount'
+        message: 'Each line item must have description, quantity, rate, and amount',
       });
     }
 
@@ -323,13 +353,15 @@ router.post(
         invoiceNumber: invoice.invoiceNumber,
         clientId: invoice.clientId,
         projectId: invoice.projectId,
-        amountTotal: invoice.amountTotal
+        amountTotal: invoice.amountTotal,
       });
 
       sendCreated(res, { invoice }, 'Invoice created successfully');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', {
+        message,
+      });
     }
   })
 );
@@ -352,7 +384,13 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectId, clientId, lineItems, notes, terms } = req.body;
 
-    if (!projectId || !clientId || !lineItems || !Array.isArray(lineItems) || lineItems.length === 0) {
+    if (
+      !projectId ||
+      !clientId ||
+      !lineItems ||
+      !Array.isArray(lineItems) ||
+      lineItems.length === 0
+    ) {
       return errorResponse(res, 'Missing required fields', 400, 'MISSING_FIELDS');
     }
 
@@ -372,7 +410,10 @@ router.post(
     const project = await db.get('SELECT project_name FROM projects WHERE id = ?', [projectId]);
 
     // Calculate totals
-    const subtotal = lineItems.reduce((sum: number, item: InvoiceLineItem) => sum + (item.amount || 0), 0);
+    const subtotal = lineItems.reduce(
+      (sum: number, item: InvoiceLineItem) => sum + (item.amount || 0),
+      0
+    );
 
     // Format date
     const formatDate = (d: Date): string => {
@@ -400,22 +441,24 @@ router.post(
         quantity: item.quantity || 1,
         rate: item.rate || 0,
         amount: item.amount || 0,
-        details: (project ? [`Project: ${getString(project, 'project_name')}`] : undefined)
+        details: project ? [`Project: ${getString(project, 'project_name')}`] : undefined,
       })),
       subtotal,
       total: subtotal,
       notes: notes || undefined,
-      terms: terms || undefined
+      terms: terms || undefined,
     };
 
     try {
       const pdfBytes = await generateInvoicePdf(pdfData);
       sendPdfResponse(res, pdfBytes, {
         filename: 'invoice-preview.pdf',
-        disposition: 'inline'
+        disposition: 'inline',
       });
     } catch (error) {
-      logger.error('[Invoices] Preview PDF generation error:', { error: error instanceof Error ? error : undefined });
+      logger.error('[Invoices] Preview PDF generation error:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to generate preview', 500, 'PDF_GENERATION_FAILED');
     }
   })
@@ -471,14 +514,24 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     // Define valid statuses for type checking
     type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
-    const validStatuses: InvoiceStatus[] = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
+    const validStatuses: InvoiceStatus[] = [
+      'draft',
+      'sent',
+      'viewed',
+      'partial',
+      'paid',
+      'overdue',
+      'cancelled',
+    ];
 
     // Parse status - can be single value or comma-separated
     let status: InvoiceStatus | InvoiceStatus[] | undefined;
     if (req.query.status) {
       const statusStr = req.query.status as string;
       if (statusStr.includes(',')) {
-        const statuses = statusStr.split(',').filter(s => validStatuses.includes(s as InvoiceStatus)) as InvoiceStatus[];
+        const statuses = statusStr
+          .split(',')
+          .filter((s) => validStatuses.includes(s as InvoiceStatus)) as InvoiceStatus[];
         status = statuses.length > 0 ? statuses : undefined;
       } else if (validStatuses.includes(statusStr as InvoiceStatus)) {
         status = statusStr as InvoiceStatus;
@@ -498,7 +551,7 @@ router.get(
       minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
       maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
       limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string) : 0
+      offset: req.query.offset ? parseInt(req.query.offset as string) : 0,
     };
 
     try {
@@ -508,16 +561,15 @@ router.get(
         invoices: result.invoices.map(toSnakeCaseInvoice),
         total: result.total,
         limit: filters.limit,
-        offset: filters.offset
+        offset: filters.offset,
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to search invoices', 500, 'SEARCH_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
 );
-
 
 /**
  * @swagger
@@ -543,11 +595,11 @@ router.get(
       const transformedInvoices = invoices.map(toSnakeCaseInvoice);
       sendSuccess(res, {
         invoices: transformedInvoices,
-        count: invoices.length
+        count: invoices.length,
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve client invoices', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -577,12 +629,18 @@ router.get(
       const transformedInvoices = invoices.map(toSnakeCaseInvoice);
       sendSuccess(res, {
         invoices: transformedInvoices,
-        count: invoices.length
+        count: invoices.length,
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve project invoices', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve project invoices',
+        500,
+        'RETRIEVAL_FAILED',
+        {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }
+      );
     }
   })
 );
@@ -641,11 +699,11 @@ router.get(
 
       const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
         ? invoice.lineItems.map((item: InvoiceLineItem) => ({
-          description: item.description || '',
-          quantity: item.quantity || 1,
-          rate: item.rate || item.amount || 0,
-          amount: item.amount || 0
-        }))
+            description: item.description || '',
+            quantity: item.quantity || 1,
+            rate: item.rate || item.amount || 0,
+            amount: item.amount || 0,
+          }))
         : [];
 
       const invoiceCredits = await getInvoiceService().getInvoiceCredits(invoiceId);
@@ -653,16 +711,25 @@ router.get(
 
       const formatDate = (dateStr?: string): string => {
         if (!dateStr) {
-          return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          return new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          });
         }
-        return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        return new Date(dateStr).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
       };
 
       const pdfData: InvoicePdfData = {
         invoiceNumber: invoice.invoiceNumber,
         issuedDate: formatDate(invoice.issuedDate || invoice.createdAt),
         dueDate: invoice.dueDate ? formatDate(invoice.dueDate) : undefined,
-        clientName: invoice.clientName || (clientRow ? getString(clientRow, 'contact_name') : '') || 'Client',
+        clientName:
+          invoice.clientName || (clientRow ? getString(clientRow, 'contact_name') : '') || 'Client',
         clientCompany: clientRow ? getString(clientRow, 'company_name') : undefined,
         clientEmail: invoice.clientEmail || (clientRow ? getString(clientRow, 'email') : '') || '',
         clientPhone: clientRow ? getString(clientRow, 'phone') : undefined,
@@ -678,9 +745,9 @@ router.get(
         depositPercentage: invoice.depositPercentage,
         credits: invoiceCredits.map((credit) => ({
           depositInvoiceNumber: credit.depositInvoiceNumber || `INV-${credit.depositInvoiceId}`,
-          amount: credit.amount
+          amount: credit.amount,
         })),
-        totalCredits
+        totalCredits,
       };
 
       const pdfBytes = await generateInvoicePdf(pdfData);
@@ -692,7 +759,9 @@ router.get(
       if (message.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      errorResponseWithPayload(res, 'Failed to generate invoice PDF', 500, 'PDF_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to generate invoice PDF', 500, 'PDF_FAILED', {
+        message,
+      });
     }
   })
 );
@@ -719,7 +788,9 @@ router.put(
 
     const validStatuses = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
     if (!validStatuses.includes(status)) {
-      return errorResponseWithPayload(res, 'Invalid status', 400, 'INVALID_STATUS', { validStatuses });
+      return errorResponseWithPayload(res, 'Invalid status', 400, 'INVALID_STATUS', {
+        validStatuses,
+      });
     }
 
     try {
@@ -731,7 +802,7 @@ router.put(
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to update invoice status', 500, 'UPDATE_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -764,7 +835,9 @@ router.post(
         await getInvoiceService().scheduleReminders(invoiceId);
         logger.info(`[Invoices] Scheduled reminders for invoice #${invoiceId}`);
       } catch (reminderError) {
-        logger.error('[Invoices] Failed to schedule reminders:', { error: reminderError instanceof Error ? reminderError : undefined });
+        logger.error('[Invoices] Failed to schedule reminders:', {
+          error: reminderError instanceof Error ? reminderError : undefined,
+        });
         // Don't fail the send operation if reminders fail
       }
 
@@ -839,12 +912,14 @@ router.post(
               </div>
             </body>
             </html>
-          `
+          `,
         });
 
         logger.info(`Invoice email sent to ${client.email} for invoice #${invoiceId}`);
       } catch (emailError) {
-        logger.error('Failed to send invoice email:', { error: emailError instanceof Error ? emailError : undefined });
+        logger.error('Failed to send invoice email:', {
+          error: emailError instanceof Error ? emailError : undefined,
+        });
         // Don't fail the request if email fails
       }
 
@@ -854,7 +929,7 @@ router.post(
         triggeredBy: req.user?.email || 'system',
         invoiceNumber: invoice.invoiceNumber,
         clientId: invoice.clientId,
-        amountTotal: invoice.amountTotal
+        amountTotal: invoice.amountTotal,
       });
 
       sendSuccess(res, { invoice }, 'Invoice sent successfully');
@@ -864,7 +939,7 @@ router.post(
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to send invoice', 500, 'SEND_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -891,7 +966,7 @@ router.post(
 
     if (!amountPaid || !paymentMethod) {
       return errorResponseWithPayload(res, 'Missing payment data', 400, 'MISSING_PAYMENT_DATA', {
-        required: ['amountPaid', 'paymentMethod']
+        required: ['amountPaid', 'paymentMethod'],
       });
     }
 
@@ -904,7 +979,7 @@ router.post(
       const invoice = await getInvoiceService().markInvoiceAsPaid(invoiceId, {
         amountPaid: parseFloat(amountPaid),
         paymentMethod,
-        paymentReference
+        paymentReference,
       });
 
       // Auto-generate receipt for the payment
@@ -916,12 +991,16 @@ router.post(
           parseFloat(amountPaid),
           {
             paymentMethod,
-            paymentReference
+            paymentReference,
           }
         );
-        logger.info(`[Invoices] Receipt ${receipt.receiptNumber} generated for invoice ${invoice.invoiceNumber}`);
+        logger.info(
+          `[Invoices] Receipt ${receipt.receiptNumber} generated for invoice ${invoice.invoiceNumber}`
+        );
       } catch (receiptError) {
-        logger.error('[Invoices] Failed to generate receipt:', { error: receiptError instanceof Error ? receiptError : undefined });
+        logger.error('[Invoices] Failed to generate receipt:', {
+          error: receiptError instanceof Error ? receiptError : undefined,
+        });
         // Don't fail the payment if receipt generation fails
       }
 
@@ -932,24 +1011,30 @@ router.post(
         invoiceNumber: invoice.invoiceNumber,
         clientId: invoice.clientId,
         amountPaid: parseFloat(amountPaid),
-        paymentMethod
+        paymentMethod,
       });
 
-      sendSuccess(res, {
-        invoice,
-        receipt: receipt ? {
-          id: receipt.id,
-          receipt_number: receipt.receiptNumber,
-          amount: receipt.amount
-        } : null
-      }, 'Invoice marked as paid');
+      sendSuccess(
+        res,
+        {
+          invoice,
+          receipt: receipt
+            ? {
+                id: receipt.id,
+                receipt_number: receipt.receiptNumber,
+                amount: receipt.amount,
+              }
+            : null,
+        },
+        'Invoice marked as paid'
+      );
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to process payment', 500, 'PAYMENT_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -974,7 +1059,7 @@ router.get(
       sendSuccess(res, { stats });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve invoice statistics', 500, 'STATS_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })

@@ -80,8 +80,8 @@ router.get(
           total: stats?.total || 0,
           new: stats?.new || 0,
           inProgress: stats?.inProgress || 0,
-          converted: stats?.converted || 0
-        }
+          converted: stats?.converted || 0,
+        },
       });
     } catch (error) {
       logger.error('Error fetching leads:', { error: error instanceof Error ? error : undefined });
@@ -147,11 +147,13 @@ router.get(
           new: stats?.new || 0,
           read: stats?.read || 0,
           replied: stats?.replied || 0,
-          archived: stats?.archived || 0
-        }
+          archived: stats?.archived || 0,
+        },
       });
     } catch (error) {
-      logger.error('Error fetching contact submissions:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error fetching contact submissions:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to fetch contact submissions', 500, 'INTERNAL_ERROR');
     }
   })
@@ -198,7 +200,9 @@ router.put(
 
       sendSuccess(res, undefined, 'Status updated successfully');
     } catch (error) {
-      logger.error('Error updating contact submission status:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error updating contact submission status:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to update status', 500, 'INTERNAL_ERROR');
     }
   })
@@ -227,10 +231,7 @@ router.post(
       const db = getDatabase();
 
       // Get the contact submission
-      const contact = await db.get(
-        'SELECT * FROM contact_submissions WHERE id = ?',
-        [id]
-      );
+      const contact = await db.get('SELECT * FROM contact_submissions WHERE id = ?', [id]);
 
       if (!contact) {
         return errorResponse(res, 'Contact submission not found', 404, 'RESOURCE_NOT_FOUND');
@@ -238,14 +239,19 @@ router.post(
 
       // Check if already converted
       if (contact.client_id) {
-        return errorResponse(res, 'This contact has already been converted to a client', 400, 'VALIDATION_ERROR');
+        return errorResponse(
+          res,
+          'This contact has already been converted to a client',
+          400,
+          'VALIDATION_ERROR'
+        );
       }
 
       // Check if client with this email already exists
-      const existingClient = await db.get(
+      const existingClient = (await db.get(
         'SELECT id, contact_name, email FROM clients WHERE LOWER(email) = LOWER(?)',
         [contact.email as string]
-      ) as { id: number; contact_name: string; email: string } | undefined;
+      )) as { id: number; contact_name: string; email: string } | undefined;
 
       let clientId: number;
 
@@ -275,7 +281,7 @@ router.post(
             null, // company_name - not available from contact form
             null, // phone - not available from contact form
             invitationToken,
-            expiresAt
+            expiresAt,
           ]
         );
 
@@ -283,7 +289,8 @@ router.post(
 
         // Send invitation email if requested
         if (sendInvitation && invitationToken) {
-          const baseUrl = process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL || 'http://localhost:4000';
+          const baseUrl =
+            process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL || 'http://localhost:4000';
           const inviteLink = `${baseUrl}/client/set-password.html?token=${invitationToken}`;
 
           try {
@@ -298,10 +305,12 @@ router.post(
                 <p>This link will expire in 7 days.</p>
                 <p>If you didn't expect this email, please ignore it.</p>
               `,
-              text: `Welcome, ${contact.name}!\n\nYou've been invited to set up your client portal account.\n\nVisit this link to create your password: ${inviteLink}\n\nThis link will expire in 7 days.`
+              text: `Welcome, ${contact.name}!\n\nYou've been invited to set up your client portal account.\n\nVisit this link to create your password: ${inviteLink}\n\nThis link will expire in 7 days.`,
             });
           } catch (emailError) {
-            logger.error('Failed to send invitation email:', { error: emailError instanceof Error ? emailError : undefined });
+            logger.error('Failed to send invitation email:', {
+              error: emailError instanceof Error ? emailError : undefined,
+            });
             // Don't fail the conversion if email fails
           }
         }
@@ -315,13 +324,21 @@ router.post(
         [clientId, id]
       );
 
-      sendSuccess(res, {
-        clientId,
-        isExisting: !!existingClient,
-        invitationSent: sendInvitation && !existingClient
-      }, existingClient ? 'Contact linked to existing client' : 'Contact converted to client successfully');
+      sendSuccess(
+        res,
+        {
+          clientId,
+          isExisting: !!existingClient,
+          invitationSent: sendInvitation && !existingClient,
+        },
+        existingClient
+          ? 'Contact linked to existing client'
+          : 'Contact converted to client successfully'
+      );
     } catch (error) {
-      logger.error('Error converting contact to client:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error converting contact to client:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to convert contact to client', 500, 'INTERNAL_ERROR');
     }
   })
@@ -357,7 +374,16 @@ router.put(
       const status = normalized;
 
       // Lead pipeline statuses (must match frontend LEAD_STATUS_OPTIONS and GET /leads stats)
-      const validStatuses = ['new', 'contacted', 'qualified', 'in-progress', 'converted', 'lost', 'on-hold', 'cancelled'];
+      const validStatuses = [
+        'new',
+        'contacted',
+        'qualified',
+        'in-progress',
+        'converted',
+        'lost',
+        'on-hold',
+        'cancelled',
+      ];
       if (!status || !validStatuses.includes(status)) {
         return errorResponse(
           res,
@@ -403,14 +429,20 @@ router.put(
         );
       }
 
-      sendSuccess(res, {
-        previousStatus: project.status,
-        newStatus: status,
-        cancelledBy: status === 'cancelled' ? cancelled_by : null,
-        cancellationReason: status === 'cancelled' ? cancellation_reason : null
-      }, 'Lead status updated successfully');
+      sendSuccess(
+        res,
+        {
+          previousStatus: project.status,
+          newStatus: status,
+          cancelledBy: status === 'cancelled' ? cancelled_by : null,
+          cancellationReason: status === 'cancelled' ? cancellation_reason : null,
+        },
+        'Lead status updated successfully'
+      );
     } catch (error) {
-      logger.error('Error updating lead status:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error updating lead status:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to update lead status', 500, 'INTERNAL_ERROR');
     }
   })
@@ -580,21 +612,25 @@ No Bhad Codes Team
   </div>
 </body>
 </html>
-        `
+        `,
       });
 
       // Log the invitation
       errorTracker.captureMessage('Admin sent client invitation', 'info', {
         tags: { component: 'admin-invite' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { leadId: id, clientEmail: leadEmail }
+        extra: { leadId: id, clientEmail: leadEmail },
       });
 
-      sendSuccess(res, {
-        clientId,
-        email: leadEmail,
-        emailResult
-      }, 'Invitation sent successfully');
+      sendSuccess(
+        res,
+        {
+          clientId,
+          email: leadEmail,
+          emailResult,
+        },
+        'Invitation sent successfully'
+      );
     } catch (error) {
       logger.error('Error inviting lead:', { error: error instanceof Error ? error : undefined });
       errorResponse(res, 'Failed to send invitation', 500, 'INTERNAL_ERROR');
@@ -634,16 +670,16 @@ router.post(
       }
 
       // Update lead status to converted and set start_date
-      await db.run('UPDATE projects SET status = ?, start_date = date(\'now\'), updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
-        'converted',
-        id
-      ]);
+      await db.run(
+        "UPDATE projects SET status = ?, start_date = date('now'), updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+        ['converted', id]
+      );
 
       // Log the activation
       errorTracker.captureMessage('Admin activated lead as project', 'info', {
         tags: { component: 'admin-leads' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { leadId: id, projectName: lead.project_name }
+        extra: { leadId: id, projectName: lead.project_name },
       });
 
       sendSuccess(res, { projectId: id }, 'Lead activated as project successfully');
@@ -698,7 +734,7 @@ router.post(
       operator,
       thresholdValue,
       points,
-      isActive
+      isActive,
     });
 
     sendCreated(res, { rule });
@@ -850,7 +886,8 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id);
-    const { title, description, taskType, dueDate, dueTime, assignedTo, priority, reminderAt } = req.body;
+    const { title, description, taskType, dueDate, dueTime, assignedTo, priority, reminderAt } =
+      req.body;
 
     if (!title) {
       return errorResponse(res, 'Title is required', 400, 'MISSING_REQUIRED_FIELDS');
@@ -864,7 +901,7 @@ router.post(
       dueTime,
       assignedTo,
       priority,
-      reminderAt
+      reminderAt,
     });
 
     sendCreated(res, { task });
@@ -1123,7 +1160,12 @@ router.post(
     const { status } = req.body;
 
     if (!status || !['merged', 'not_duplicate', 'dismissed'].includes(status)) {
-      return errorResponse(res, 'Valid status is required (merged, not_duplicate, dismissed)', 400, 'INVALID_STATUS');
+      return errorResponse(
+        res,
+        'Valid status is required (merged, not_duplicate, dismissed)',
+        400,
+        'INVALID_STATUS'
+      );
     }
 
     await leadService.resolveDuplicate(duplicateId, status, req.user?.email || 'admin');
@@ -1146,7 +1188,12 @@ router.post(
     const { projectIds, status } = req.body;
 
     if (!projectIds || !Array.isArray(projectIds) || !status) {
-      return errorResponse(res, 'projectIds array and status are required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(
+        res,
+        'projectIds array and status are required',
+        400,
+        'MISSING_REQUIRED_FIELDS'
+      );
     }
 
     const count = await leadService.bulkUpdateStatus(projectIds, status);
@@ -1165,7 +1212,12 @@ router.post(
     const { projectIds, assignee } = req.body;
 
     if (!projectIds || !Array.isArray(projectIds) || !assignee) {
-      return errorResponse(res, 'projectIds array and assignee are required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(
+        res,
+        'projectIds array and assignee are required',
+        400,
+        'MISSING_REQUIRED_FIELDS'
+      );
     }
 
     const count = await leadService.bulkAssign(projectIds, assignee);
@@ -1184,7 +1236,12 @@ router.post(
     const { projectIds, stageId } = req.body;
 
     if (!projectIds || !Array.isArray(projectIds) || !stageId) {
-      return errorResponse(res, 'projectIds array and stageId are required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(
+        res,
+        'projectIds array and stageId are required',
+        400,
+        'MISSING_REQUIRED_FIELDS'
+      );
     }
 
     const count = await leadService.bulkMoveToStage(projectIds, stageId);

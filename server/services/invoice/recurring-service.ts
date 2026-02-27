@@ -18,14 +18,12 @@ import type {
   RecurringInvoice,
   RecurringInvoiceRow,
   InvoiceReminder,
-  InvoiceReminderRow
+  InvoiceReminderRow,
 } from '../../types/invoice-types.js';
 import { logger } from '../logger.js';
+import type { Database } from '../../database/init.js';
 
 type SqlValue = string | number | boolean | null;
-
-
-type Database = any;
 
 type CreateInvoice = (data: InvoiceCreateData) => Promise<Invoice>;
 
@@ -36,7 +34,10 @@ export class InvoiceRecurringService {
   private createInvoice: CreateInvoice;
   private getInvoiceById: GetInvoiceById;
 
-  constructor(db: Database, deps: { createInvoice: CreateInvoice; getInvoiceById: GetInvoiceById }) {
+  constructor(
+    db: Database,
+    deps: { createInvoice: CreateInvoice; getInvoiceById: GetInvoiceById }
+  ) {
     this.db = db;
     this.createInvoice = deps.createInvoice;
     this.getInvoiceById = deps.getInvoiceById;
@@ -61,7 +62,7 @@ export class InvoiceRecurringService {
       data.triggerMilestoneId || null,
       JSON.stringify(data.lineItems),
       data.notes || null,
-      data.terms || null
+      data.terms || null,
     ]);
 
     return this.getScheduledInvoiceById(result.lastID!);
@@ -71,7 +72,7 @@ export class InvoiceRecurringService {
    * Get all scheduled invoices, optionally filtered by project
    */
   async getScheduledInvoices(projectId?: number): Promise<ScheduledInvoice[]> {
-    let sql = 'SELECT * FROM scheduled_invoices WHERE status = \'pending\'';
+    let sql = "SELECT * FROM scheduled_invoices WHERE status = 'pending'";
     const params: SqlValue[] = [];
 
     if (projectId) {
@@ -89,10 +90,7 @@ export class InvoiceRecurringService {
    * Cancel a scheduled invoice
    */
   async cancelScheduledInvoice(id: number): Promise<void> {
-    await this.db.run(
-      'UPDATE scheduled_invoices SET status = ? WHERE id = ?',
-      ['cancelled', id]
-    );
+    await this.db.run('UPDATE scheduled_invoices SET status = ? WHERE id = ?', ['cancelled', id]);
   }
 
   /**
@@ -118,7 +116,7 @@ export class InvoiceRecurringService {
           clientId: scheduled.client_id,
           lineItems: JSON.parse(scheduled.line_items),
           notes: scheduled.notes,
-          terms: scheduled.terms
+          terms: scheduled.terms,
         });
 
         await this.db.run(
@@ -128,7 +126,10 @@ export class InvoiceRecurringService {
 
         generatedCount++;
       } catch (error) {
-        logger.error(`Failed to generate scheduled invoice ${scheduled.id}`, error instanceof Error ? error : undefined);
+        logger.error(
+          `Failed to generate scheduled invoice ${scheduled.id}`,
+          error instanceof Error ? error : undefined
+        );
       }
     }
 
@@ -164,7 +165,7 @@ export class InvoiceRecurringService {
       data.terms || null,
       data.startDate,
       data.endDate || null,
-      nextDate
+      nextDate,
     ]);
 
     return this.getRecurringInvoiceById(result.lastID!);
@@ -191,7 +192,10 @@ export class InvoiceRecurringService {
   /**
    * Update a recurring invoice pattern
    */
-  async updateRecurringInvoice(id: number, data: Partial<RecurringInvoiceData>): Promise<RecurringInvoice> {
+  async updateRecurringInvoice(
+    id: number,
+    data: Partial<RecurringInvoiceData>
+  ): Promise<RecurringInvoice> {
     const updates: string[] = [];
     const params: SqlValue[] = [];
 
@@ -239,10 +243,7 @@ export class InvoiceRecurringService {
    * Pause a recurring invoice
    */
   async pauseRecurringInvoice(id: number): Promise<void> {
-    await this.db.run(
-      'UPDATE recurring_invoices SET is_active = 0 WHERE id = ?',
-      [id]
-    );
+    await this.db.run('UPDATE recurring_invoices SET is_active = 0 WHERE id = ?', [id]);
   }
 
   /**
@@ -302,7 +303,7 @@ export class InvoiceRecurringService {
           clientId: recurring.client_id,
           lineItems: JSON.parse(recurring.line_items),
           notes: recurring.notes,
-          terms: recurring.terms
+          terms: recurring.terms,
         });
 
         const nextDate = this.calculateNextGenerationDate(
@@ -314,19 +315,21 @@ export class InvoiceRecurringService {
 
         successfulRecurring.push({ id: recurring.id, nextDate });
       } catch (error) {
-        logger.error(`Failed to generate recurring invoice ${recurring.id}`, error instanceof Error ? error : undefined);
+        logger.error(
+          `Failed to generate recurring invoice ${recurring.id}`,
+          error instanceof Error ? error : undefined
+        );
         failedIds.push(recurring.id);
       }
     }
 
     // Batch update all successful recurring invoices in a single transaction
     if (successfulRecurring.length > 0) {
-
       await this.db.transaction(async (ctx: any) => {
         // Build CASE WHEN statement for batch update
-        const ids = successfulRecurring.map(r => r.id);
+        const ids = successfulRecurring.map((r) => r.id);
         const caseWhen = successfulRecurring
-          .map(r => `WHEN id = ${r.id} THEN '${r.nextDate}'`)
+          .map((r) => `WHEN id = ${r.id} THEN '${r.nextDate}'`)
           .join(' ');
 
         await ctx.run(
@@ -349,7 +352,9 @@ export class InvoiceRecurringService {
     const invoice = await this.getInvoiceById(invoiceId);
 
     if (!invoice.dueDate) {
-      logger.warn(`[InvoiceService] Cannot schedule reminders for invoice ${invoiceId} without due date`);
+      logger.warn(
+        `[InvoiceService] Cannot schedule reminders for invoice ${invoiceId} without due date`
+      );
       return;
     }
 
@@ -361,7 +366,7 @@ export class InvoiceRecurringService {
       { type: 'overdue_3', daysFromDue: 3 },
       { type: 'overdue_7', daysFromDue: 7 },
       { type: 'overdue_14', daysFromDue: 14 },
-      { type: 'overdue_30', daysFromDue: 30 }
+      { type: 'overdue_30', daysFromDue: 30 },
     ];
 
     // Collect all valid reminders that are in the future
@@ -374,7 +379,7 @@ export class InvoiceRecurringService {
       if (scheduledDate >= now) {
         remindersToInsert.push({
           type: reminder.type,
-          scheduledDate: scheduledDate.toISOString().split('T')[0]
+          scheduledDate: scheduledDate.toISOString().split('T')[0],
         });
       }
     }
@@ -409,7 +414,7 @@ export class InvoiceRecurringService {
       scheduledDate: row.scheduled_date,
       sentAt: row.sent_at,
       status: row.status as InvoiceReminder['status'],
-      createdAt: row.created_at
+      createdAt: row.created_at,
     }));
   }
 
@@ -427,10 +432,10 @@ export class InvoiceRecurringService {
    * Skip a reminder (won't be sent)
    */
   async skipReminder(reminderId: number): Promise<void> {
-    await this.db.run(
-      'UPDATE invoice_reminders SET status = ? WHERE id = ?',
-      ['skipped', reminderId]
-    );
+    await this.db.run('UPDATE invoice_reminders SET status = ? WHERE id = ?', [
+      'skipped',
+      reminderId,
+    ]);
   }
 
   /**
@@ -457,7 +462,7 @@ export class InvoiceRecurringService {
       scheduledDate: row.scheduled_date,
       sentAt: row.sent_at,
       status: row.status as InvoiceReminder['status'],
-      createdAt: row.created_at
+      createdAt: row.created_at,
     }));
   }
 
@@ -465,10 +470,10 @@ export class InvoiceRecurringService {
    * Mark a reminder as failed
    */
   async markReminderFailed(reminderId: number): Promise<void> {
-    await this.db.run(
-      'UPDATE invoice_reminders SET status = ? WHERE id = ?',
-      ['failed', reminderId]
-    );
+    await this.db.run('UPDATE invoice_reminders SET status = ? WHERE id = ?', [
+      'failed',
+      reminderId,
+    ]);
   }
 
   private async getScheduledInvoiceById(id: number): Promise<ScheduledInvoice> {
@@ -496,7 +501,7 @@ export class InvoiceRecurringService {
       terms: row.terms,
       status: row.status as ScheduledInvoice['status'],
       generatedInvoiceId: row.generated_invoice_id,
-      createdAt: row.created_at
+      createdAt: row.created_at,
     };
   }
 
@@ -522,33 +527,39 @@ export class InvoiceRecurringService {
     const next = new Date(from);
 
     switch (frequency) {
-    case 'weekly':
-      next.setDate(next.getDate() + 7);
-      if (dayOfWeek !== undefined && dayOfWeek !== null) {
-        const currentDay = next.getDay();
-        const diff = dayOfWeek - currentDay;
-        next.setDate(next.getDate() + (diff >= 0 ? diff : diff + 7));
-      }
-      break;
+      case 'weekly':
+        next.setDate(next.getDate() + 7);
+        if (dayOfWeek !== undefined && dayOfWeek !== null) {
+          const currentDay = next.getDay();
+          const diff = dayOfWeek - currentDay;
+          next.setDate(next.getDate() + (diff >= 0 ? diff : diff + 7));
+        }
+        break;
 
-    case 'monthly':
-      next.setMonth(next.getMonth() + 1);
-      if (dayOfMonth !== undefined && dayOfMonth !== null) {
-        const targetDay = Math.min(dayOfMonth, new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate());
-        next.setDate(targetDay);
-      }
-      break;
+      case 'monthly':
+        next.setMonth(next.getMonth() + 1);
+        if (dayOfMonth !== undefined && dayOfMonth !== null) {
+          const targetDay = Math.min(
+            dayOfMonth,
+            new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()
+          );
+          next.setDate(targetDay);
+        }
+        break;
 
-    case 'quarterly':
-      next.setMonth(next.getMonth() + 3);
-      if (dayOfMonth !== undefined && dayOfMonth !== null) {
-        const targetDay = Math.min(dayOfMonth, new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate());
-        next.setDate(targetDay);
-      }
-      break;
+      case 'quarterly':
+        next.setMonth(next.getMonth() + 3);
+        if (dayOfMonth !== undefined && dayOfMonth !== null) {
+          const targetDay = Math.min(
+            dayOfMonth,
+            new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()
+          );
+          next.setDate(targetDay);
+        }
+        break;
 
-    default:
-      next.setMonth(next.getMonth() + 1);
+      default:
+        next.setMonth(next.getMonth() + 1);
     }
 
     return next.toISOString().split('T')[0];
@@ -570,7 +581,7 @@ export class InvoiceRecurringService {
       nextGenerationDate: row.next_generation_date,
       lastGeneratedAt: row.last_generated_at,
       isActive: Boolean(row.is_active),
-      createdAt: row.created_at
+      createdAt: row.created_at,
     };
   }
 }

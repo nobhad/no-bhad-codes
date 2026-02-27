@@ -140,7 +140,7 @@ const configSchema: ConfigSchema = {
   NODE_ENV: {
     required: true,
     default: 'development',
-    values: ['development', 'production', 'test']
+    values: ['development', 'production', 'test'],
   },
   PORT: { required: true, default: 4001, type: 'number' },
   FRONTEND_URL: { required: true, default: 'http://localhost:4000', type: 'url' },
@@ -235,7 +235,7 @@ const configSchema: ConfigSchema = {
   OTEL_ENABLED: { required: false, default: true, type: 'boolean' },
   OTEL_SERVICE_NAME: { required: false, default: 'client-portal' },
   OTEL_EXPORTER_OTLP_ENDPOINT: { required: false },
-  OTEL_DEBUG: { required: false, default: false, type: 'boolean' }
+  OTEL_DEBUG: { required: false, default: false, type: 'boolean' },
 };
 
 /**
@@ -281,7 +281,7 @@ const validators: Record<string, (value: any) => any> = {
     } catch {
       throw new Error('Invalid URL format');
     }
-  }
+  },
 };
 
 /**
@@ -415,7 +415,7 @@ function generateDerivedConfig(): void {
     (config as any).DATABASE_PATH ? path.dirname((config as any).DATABASE_PATH) : undefined,
     (config as any).DATABASE_BACKUP_PATH,
     (config as any).LOG_FILE ? path.dirname((config as any).LOG_FILE) : undefined,
-    (config as any).LOG_ERROR_FILE ? path.dirname((config as any).LOG_ERROR_FILE) : undefined
+    (config as any).LOG_ERROR_FILE ? path.dirname((config as any).LOG_ERROR_FILE) : undefined,
   ].filter(Boolean) as string[];
 
   directories.forEach((dir) => {
@@ -443,9 +443,9 @@ function getConfigSummary(): object {
       passwordReset: (config as any).ENABLE_PASSWORD_RESET,
       emailVerification: (config as any).ENABLE_EMAIL_VERIFICATION,
       twoFactor: (config as any).ENABLE_2FA,
-      apiDocs: (config as any).ENABLE_API_DOCS
+      apiDocs: (config as any).ENABLE_API_DOCS,
     },
-    maintenanceMode: (config as any).MAINTENANCE_MODE
+    maintenanceMode: (config as any).MAINTENANCE_MODE,
   };
 
   return summary;

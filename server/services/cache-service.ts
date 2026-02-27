@@ -9,6 +9,7 @@
 
 import Redis from 'ioredis';
 import { errorTracker } from './error-tracking.js';
+import { logger } from './logger.js';
 
 export interface CacheConfig {
   host: string;
@@ -48,7 +49,7 @@ export class CacheService {
     misses: 0,
     sets: 0,
     deletes: 0,
-    errors: 0
+    errors: 0,
   };
   private config: CacheConfig | null = null;
 
@@ -80,34 +81,34 @@ export class CacheService {
         reconnectOnError: (err) => {
           const targetError = 'READONLY';
           return err.message.includes(targetError);
-        }
+        },
       });
 
       // Set up event listeners
       this.client.on('connect', () => {
-        console.log('🔗 Redis connected');
+        logger.info('[Cache] Redis connected');
         this.isConnected = true;
         this.stats.connected = true;
       });
 
       this.client.on('ready', () => {
-        console.log('✅ Redis ready');
+        logger.info('[Cache] Redis ready');
       });
 
       this.client.on('error', (error) => {
-        console.error('❌ Redis error:', error);
+        logger.error('[Cache] Redis error:', { error: error instanceof Error ? error : undefined });
         this.stats.errors++;
         this.isConnected = false;
         this.stats.connected = false;
 
         errorTracker.captureException(error, {
           tags: { component: 'redis-cache' },
-          extra: { config: this.config }
+          extra: { config: this.config },
         });
       });
 
       this.client.on('close', () => {
-        console.log('🔴 Redis connection closed');
+        logger.info('[Cache] Redis connection closed');
         this.isConnected = false;
         this.stats.connected = false;
       });
@@ -115,9 +116,11 @@ export class CacheService {
       // Test connection
       await this.client.connect();
       await this.client.ping();
-      console.log('✅ Cache service initialized successfully');
+      logger.info('[Cache] Cache service initialized successfully');
     } catch (error) {
-      console.error('❌ Failed to initialize cache service:', error);
+      logger.error('[Cache] Failed to initialize cache service:', {
+        error: error instanceof Error ? error : undefined,
+      });
       throw new Error(`Cache service initialization failed: ${error}`);
     }
   }
@@ -127,7 +130,7 @@ export class CacheService {
    */
   async get<T = any>(key: string): Promise<T | null> {
     if (!this.isConnected || !this.client) {
-      console.warn('⚠️  Cache not available, skipping get');
+      logger.warn('[Cache] Cache not available, skipping get');
       this.stats.misses++;
       return null;
     }
@@ -148,7 +151,9 @@ export class CacheService {
         return value as T;
       }
     } catch (error) {
-      console.error(`Cache get error for key ${key}:`, error);
+      logger.error(`[Cache] Get error for key ${key}:`, {
+        error: error instanceof Error ? error : undefined,
+      });
       this.stats.errors++;
       this.stats.misses++;
       return null;
@@ -158,9 +163,13 @@ export class CacheService {
   /**
    * Set value in cache
    */
-  async set(key: string, value: string | number | boolean | object | null, options: CacheOptions = {}): Promise<boolean> {
+  async set(
+    key: string,
+    value: string | number | boolean | object | null,
+    options: CacheOptions = {}
+  ): Promise<boolean> {
     if (!this.isConnected || !this.client) {
-      console.warn('⚠️  Cache not available, skipping set');
+      logger.warn('[Cache] Cache not available, skipping set');
       return false;
     }
 
@@ -178,7 +187,9 @@ export class CacheService {
       this.stats.sets++;
       return true;
     } catch (error) {
-      console.error(`Cache set error for key ${key}:`, error);
+      logger.error(`[Cache] Set error for key ${key}:`, {
+        error: error instanceof Error ? error : undefined,
+      });
       this.stats.errors++;
       return false;
     }
@@ -197,7 +208,9 @@ export class CacheService {
       this.stats.deletes++;
       return result > 0;
     } catch (error) {
-      console.error(`Cache delete error for key ${key}:`, error);
+      logger.error(`[Cache] Delete error for key ${key}:`, {
+        error: error instanceof Error ? error : undefined,
+      });
       this.stats.errors++;
       return false;
     }
@@ -215,7 +228,9 @@ export class CacheService {
       const result = await this.client.exists(key);
       return result === 1;
     } catch (error) {
-      console.error(`Cache exists error for key ${key}:`, error);
+      logger.error(`[Cache] Exists error for key ${key}:`, {
+        error: error instanceof Error ? error : undefined,
+      });
       this.stats.errors++;
       return false;
     }
@@ -233,7 +248,9 @@ export class CacheService {
       const result = await this.client.expire(key, ttl);
       return result === 1;
     } catch (error) {
-      console.error(`Cache expire error for key ${key}:`, error);
+      logger.error(`[Cache] Expire error for key ${key}:`, {
+        error: error instanceof Error ? error : undefined,
+      });
       this.stats.errors++;
       return false;
     }
@@ -265,7 +282,7 @@ export class CacheService {
         }
       });
     } catch (error) {
-      console.error('Cache mget error:', error);
+      logger.error('[Cache] Mget error:', { error: error instanceof Error ? error : undefined });
       this.stats.errors++;
       this.stats.misses += keys.length;
       return keys.map(() => null);
@@ -292,7 +309,7 @@ export class CacheService {
       this.stats.sets += Object.keys(keyValuePairs).length;
       return true;
     } catch (error) {
-      console.error('Cache mset error:', error);
+      logger.error('[Cache] Mset error:', { error: error instanceof Error ? error : undefined });
       this.stats.errors++;
       return false;
     }
@@ -310,7 +327,9 @@ export class CacheService {
       const result = await this.client.incrby(key, amount);
       return result;
     } catch (error) {
-      console.error(`Cache increment error for key ${key}:`, error);
+      logger.error(`[Cache] Increment error for key ${key}:`, {
+        error: error instanceof Error ? error : undefined,
+      });
       this.stats.errors++;
       return null;
     }
@@ -332,7 +351,9 @@ export class CacheService {
 
       await pipeline.exec();
     } catch (error) {
-      console.error('Error storing cache tags:', error);
+      logger.error('[Cache] Error storing cache tags:', {
+        error: error instanceof Error ? error : undefined,
+      });
     }
   }
 
@@ -358,10 +379,12 @@ export class CacheService {
       await pipeline.exec();
       this.stats.deletes += keys.length;
 
-      console.log(`🗑️  Invalidated ${keys.length} cache keys for tag: ${tag}`);
+      logger.info(`[Cache] Invalidated ${keys.length} cache keys for tag: ${tag}`);
       return keys.length;
     } catch (error) {
-      console.error(`Cache tag invalidation error for tag ${tag}:`, error);
+      logger.error(`[Cache] Tag invalidation error for tag ${tag}:`, {
+        error: error instanceof Error ? error : undefined,
+      });
       this.stats.errors++;
       return 0;
     }
@@ -385,10 +408,12 @@ export class CacheService {
       await this.client.del(...keys);
       this.stats.deletes += keys.length;
 
-      console.log(`🗑️  Invalidated ${keys.length} cache keys for pattern: ${pattern}`);
+      logger.info(`[Cache] Invalidated ${keys.length} cache keys for pattern: ${pattern}`);
       return keys.length;
     } catch (error) {
-      console.error(`Cache pattern invalidation error for pattern ${pattern}:`, error);
+      logger.error(`[Cache] Pattern invalidation error for pattern ${pattern}:`, {
+        error: error instanceof Error ? error : undefined,
+      });
       this.stats.errors++;
       return 0;
     }
@@ -404,10 +429,10 @@ export class CacheService {
 
     try {
       await this.client.flushdb();
-      console.log('🗑️  Cache cleared');
+      logger.info('[Cache] Cache cleared');
       return true;
     } catch (error) {
-      console.error('Cache clear error:', error);
+      logger.error('[Cache] Clear error:', { error: error instanceof Error ? error : undefined });
       this.stats.errors++;
       return false;
     }
@@ -431,10 +456,12 @@ export class CacheService {
       return {
         ...this.stats,
         memoryUsage,
-        keyCount
+        keyCount,
       };
     } catch (error) {
-      console.error('Error getting cache stats:', error);
+      logger.error('[Cache] Error getting cache stats:', {
+        error: error instanceof Error ? error : undefined,
+      });
       return this.stats;
     }
   }
@@ -451,7 +478,9 @@ export class CacheService {
       const result = await this.client.ping();
       return result === 'PONG';
     } catch (error) {
-      console.error('Cache connection test failed:', error);
+      logger.error('[Cache] Connection test failed:', {
+        error: error instanceof Error ? error : undefined,
+      });
       return false;
     }
   }
@@ -464,7 +493,7 @@ export class CacheService {
       await this.client.disconnect();
       this.isConnected = false;
       this.stats.connected = false;
-      console.log('🔴 Cache service disconnected');
+      logger.info('[Cache] Cache service disconnected');
     }
   }
 
@@ -491,7 +520,9 @@ export class CacheService {
 
       return fresh;
     } catch (error) {
-      console.error(`Error in getOrSet for key ${key}:`, error);
+      logger.error(`[Cache] Error in getOrSet for key ${key}:`, {
+        error: error instanceof Error ? error : undefined,
+      });
       throw error;
     }
   }

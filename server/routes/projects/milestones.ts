@@ -7,6 +7,12 @@ import { getString } from '../../database/row-helpers.js';
 import { errorResponse } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const MILESTONE_COLUMNS = `
+  id, project_id, title, description, due_date, completed_date,
+  is_completed, deliverables, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 // Get milestones for a project
@@ -65,7 +71,8 @@ router.get(
       // Calculate progress percentage
       const taskCount = milestone.task_count || 0;
       const completedCount = milestone.completed_task_count || 0;
-      milestone.progress_percentage = taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0;
+      milestone.progress_percentage =
+        taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0;
     });
 
     res.json({ milestones });
@@ -133,7 +140,7 @@ router.post(
 
     res.status(201).json({
       message: 'Milestone created successfully',
-      milestone: newMilestone
+      milestone: newMilestone,
     });
   })
 );
@@ -151,9 +158,9 @@ router.put(
     const db = getDatabase();
 
     // Verify milestone belongs to project
-    const milestone = await db.get('SELECT * FROM milestones WHERE id = ? AND project_id = ?', [
+    const milestone = await db.get(`SELECT ${MILESTONE_COLUMNS} FROM milestones WHERE id = ? AND project_id = ?`, [
       milestoneId,
-      projectId
+      projectId,
     ]);
 
     if (!milestone) {
@@ -193,7 +200,7 @@ router.put(
           entityId: milestoneId,
           triggeredBy: 'admin',
           projectId,
-          milestoneTitle: title || milestone.title
+          milestoneTitle: title || milestone.title,
         });
       } else if (!is_completed && milestone.is_completed) {
         // Mark as incomplete
@@ -249,7 +256,7 @@ router.put(
 
     res.json({
       message: 'Milestone updated successfully',
-      milestone: updatedMilestone
+      milestone: updatedMilestone,
     });
   })
 );
@@ -267,7 +274,7 @@ router.delete(
     // Verify milestone belongs to project
     const milestone = await db.get('SELECT id FROM milestones WHERE id = ? AND project_id = ?', [
       milestoneId,
-      projectId
+      projectId,
     ]);
 
     if (!milestone) {
@@ -277,7 +284,7 @@ router.delete(
     await db.run('DELETE FROM milestones WHERE id = ?', [milestoneId]);
 
     res.json({
-      message: 'Milestone deleted successfully'
+      message: 'Milestone deleted successfully',
     });
   })
 );

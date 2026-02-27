@@ -18,13 +18,18 @@ import {
   PaymentPlanTemplate,
   ScheduledInvoice,
   PaymentTermsPreset,
-  InvoicePayment
+  InvoicePayment,
 } from '../services/invoice-service.js';
 import { getDatabase } from '../database/init.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../utils/pdf-utils.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../utils/api-response.js';
+import {
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sendCreated,
+} from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
 import { coreRouter } from './invoices/core.js';
 import { depositsRouter } from './invoices/deposits.js';
@@ -36,10 +41,7 @@ import { remindersRouter } from './invoices/reminders.js';
 import { clientRoutesRouter } from './invoices/client-routes.js';
 import { batchRouter } from './invoices/batch.js';
 import { agingRouter } from './invoices/aging.js';
-import {
-  getInvoiceService,
-  toSnakeCaseInvoice
-} from './invoices/helpers.js';
+import { getInvoiceService, toSnakeCaseInvoice } from './invoices/helpers.js';
 
 const router = express.Router();
 
@@ -81,7 +83,7 @@ router.post(
 
     if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['projectId', 'clientId', 'lineItems']
+        required: ['projectId', 'clientId', 'lineItems'],
       });
     }
 
@@ -90,9 +92,15 @@ router.post(
 
       sendCreated(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Milestone invoice created');
     } catch (error: unknown) {
-      return errorResponseWithPayload(res, 'Failed to create milestone invoice', 500, 'CREATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      return errorResponseWithPayload(
+        res,
+        'Failed to create milestone invoice',
+        500,
+        'CREATION_FAILED',
+        {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }
+      );
     }
   })
 );
@@ -120,12 +128,18 @@ router.get(
 
       sendSuccess(res, {
         invoices: invoices.map(toSnakeCaseInvoice),
-        count: invoices.length
+        count: invoices.length,
       });
     } catch (error: unknown) {
-      return errorResponseWithPayload(res, 'Failed to retrieve milestone invoices', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      return errorResponseWithPayload(
+        res,
+        'Failed to retrieve milestone invoices',
+        500,
+        'RETRIEVAL_FAILED',
+        {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }
+      );
     }
   })
 );
@@ -152,7 +166,7 @@ router.put(
 
     if (!milestoneId) {
       return errorResponseWithPayload(res, 'Missing milestone ID', 400, 'MISSING_FIELDS', {
-        required: ['milestoneId']
+        required: ['milestoneId'],
       });
     }
 
@@ -161,13 +175,18 @@ router.put(
 
       sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Invoice linked to milestone');
     } catch (error: unknown) {
-      return errorResponseWithPayload(res, 'Failed to link invoice to milestone', 500, 'LINK_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      return errorResponseWithPayload(
+        res,
+        'Failed to link invoice to milestone',
+        500,
+        'LINK_FAILED',
+        {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }
+      );
     }
   })
 );
-
 
 // ============================================
 // INVOICE EDIT ENDPOINT
@@ -197,7 +216,9 @@ router.put(
     if (req.body.status && Object.keys(req.body).length === 1) {
       const validStatuses = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
       if (!validStatuses.includes(req.body.status)) {
-        return errorResponseWithPayload(res, 'Invalid status', 400, 'INVALID_STATUS', { validStatuses });
+        return errorResponseWithPayload(res, 'Invalid status', 400, 'INVALID_STATUS', {
+          validStatuses,
+        });
       }
 
       try {
@@ -208,7 +229,9 @@ router.put(
         if (message.includes('not found')) {
           return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
         }
-        return errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', { message });
+        return errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', {
+          message,
+        });
       }
       return;
     }
@@ -224,7 +247,9 @@ router.put(
       if (message.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      return errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', { message });
+      return errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', {
+        message,
+      });
     }
   })
 );
@@ -376,14 +401,20 @@ router.post(
     try {
       const newInvoice = await getInvoiceService().duplicateInvoice(invoiceId);
 
-      sendCreated(res, { invoice: toSnakeCaseInvoice(newInvoice) }, 'Invoice duplicated successfully');
+      sendCreated(
+        res,
+        { invoice: toSnakeCaseInvoice(newInvoice) },
+        'Invoice duplicated successfully'
+      );
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
 
       if (message.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      errorResponseWithPayload(res, 'Failed to duplicate invoice', 500, 'DUPLICATE_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to duplicate invoice', 500, 'DUPLICATE_FAILED', {
+        message,
+      });
     }
   })
 );
@@ -455,9 +486,10 @@ router.post(
         paymentReference
       );
 
-      const paymentMessage = invoice.status === 'paid'
-        ? 'Payment recorded - invoice is now fully paid'
-        : 'Partial payment recorded successfully';
+      const paymentMessage =
+        invoice.status === 'paid'
+          ? 'Payment recorded - invoice is now fully paid'
+          : 'Partial payment recorded successfully';
       sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, paymentMessage);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -500,14 +532,21 @@ router.post(
     try {
       const count = await getInvoiceService().checkAndMarkOverdue();
 
-      const overdueMessage = count > 0
-        ? `Marked ${count} invoice(s) as overdue`
-        : 'No invoices needed to be marked as overdue';
+      const overdueMessage =
+        count > 0
+          ? `Marked ${count} invoice(s) as overdue`
+          : 'No invoices needed to be marked as overdue';
       sendSuccess(res, { count }, overdueMessage);
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to check overdue invoices', 500, 'CHECK_OVERDUE_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to check overdue invoices',
+        500,
+        'CHECK_OVERDUE_FAILED',
+        {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }
+      );
     }
   })
 );
@@ -530,7 +569,7 @@ function toSnakeCasePaymentTerms(terms: PaymentTermsPreset): Record<string, unkn
     late_fee_flat_amount: terms.lateFeeFlatAmount,
     grace_period_days: terms.gracePeriodDays,
     is_default: terms.isDefault,
-    created_at: terms.createdAt
+    created_at: terms.createdAt,
   };
 }
 
@@ -546,7 +585,7 @@ function toSnakeCasePayment(payment: InvoicePayment): Record<string, unknown> {
     payment_reference: payment.paymentReference,
     payment_date: payment.paymentDate,
     notes: payment.notes,
-    created_at: payment.createdAt
+    created_at: payment.createdAt,
   };
 }
 
@@ -568,7 +607,7 @@ router.get(
       sendSuccess(res, { terms: terms.map(toSnakeCasePaymentTerms) });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve payment terms', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -587,11 +626,20 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { name, daysUntilDue, description, lateFeeRate, lateFeeType, lateFeeFlatAmount, gracePeriodDays, isDefault } = req.body;
+    const {
+      name,
+      daysUntilDue,
+      description,
+      lateFeeRate,
+      lateFeeType,
+      lateFeeFlatAmount,
+      gracePeriodDays,
+      isDefault,
+    } = req.body;
 
     if (!name || daysUntilDue === undefined) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['name', 'daysUntilDue']
+        required: ['name', 'daysUntilDue'],
       });
     }
 
@@ -604,13 +652,13 @@ router.post(
         lateFeeType,
         lateFeeFlatAmount,
         gracePeriodDays,
-        isDefault
+        isDefault,
       });
 
       sendCreated(res, { terms: toSnakeCasePaymentTerms(terms) }, 'Payment terms preset created');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to create payment terms', 500, 'CREATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -638,7 +686,7 @@ router.post(
 
     if (!termsId) {
       return errorResponseWithPayload(res, 'Missing termsId', 400, 'MISSING_FIELDS', {
-        required: ['termsId']
+        required: ['termsId'],
       });
     }
 
@@ -650,7 +698,9 @@ router.post(
       if (message.includes('not found')) {
         return errorResponse(res, 'Invoice or payment terms not found', 404, 'NOT_FOUND');
       }
-      errorResponseWithPayload(res, 'Failed to apply payment terms', 500, 'UPDATE_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to apply payment terms', 500, 'UPDATE_FAILED', {
+        message,
+      });
     }
   })
 );
@@ -693,7 +743,9 @@ router.put(
       if (message.includes('draft')) {
         return errorResponse(res, 'Only draft invoices can be modified', 400, 'INVALID_STATUS');
       }
-      errorResponseWithPayload(res, 'Failed to update tax/discount', 500, 'UPDATE_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to update tax/discount', 500, 'UPDATE_FAILED', {
+        message,
+      });
     }
   })
 );
@@ -728,14 +780,16 @@ router.get(
         invoiceId,
         lateFee,
         alreadyApplied: !!invoice.lateFeeAppliedAt,
-        lateFeeAppliedAt: invoice.lateFeeAppliedAt
+        lateFeeAppliedAt: invoice.lateFeeAppliedAt,
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      errorResponseWithPayload(res, 'Failed to calculate late fee', 500, 'CALCULATION_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to calculate late fee', 500, 'CALCULATION_FAILED', {
+        message,
+      });
     }
   })
 );
@@ -793,7 +847,7 @@ router.post(
       sendSuccess(res, { count }, `Late fees applied to ${count} invoices`);
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to process late fees', 500, 'PROCESS_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -826,7 +880,7 @@ router.get(
       sendSuccess(res, { payments: payments.map(toSnakeCasePayment) });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve payment history', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -854,7 +908,7 @@ router.post(
 
     if (!amount || !paymentMethod) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['amount', 'paymentMethod']
+        required: ['amount', 'paymentMethod'],
       });
     }
 
@@ -867,17 +921,20 @@ router.post(
         notes
       );
 
-      sendSuccess(res, {
-        invoice: toSnakeCaseInvoice(result.invoice),
-        payment: toSnakeCasePayment(result.payment)
-      }, 'Payment recorded');
+      sendSuccess(
+        res,
+        {
+          invoice: toSnakeCaseInvoice(result.invoice),
+          payment: toSnakeCasePayment(result.payment),
+        },
+        'Payment recorded'
+      );
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       errorResponseWithPayload(res, 'Failed to record payment', 500, 'RECORD_FAILED', { message });
     }
   })
 );
-
 
 // ============================================
 // INTERNAL NOTES
@@ -911,7 +968,9 @@ router.put(
       if (message.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      errorResponseWithPayload(res, 'Failed to update internal notes', 500, 'UPDATE_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to update internal notes', 500, 'UPDATE_FAILED', {
+        message,
+      });
     }
   })
 );
@@ -948,12 +1007,12 @@ router.get(
           average_invoice_amount: stats.averageInvoiceAmount,
           average_days_to_payment: stats.averageDaysToPayment,
           status_breakdown: stats.statusBreakdown,
-          monthly_revenue: stats.monthlyRevenue
-        }
+          monthly_revenue: stats.monthlyRevenue,
+        },
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve statistics', 500, 'STATS_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -980,25 +1039,28 @@ router.post(
 
     if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['projectId', 'clientId', 'lineItems']
+        required: ['projectId', 'clientId', 'lineItems'],
       });
     }
 
     try {
       const invoice = await getInvoiceService().createInvoiceWithCustomNumber({
         ...invoiceData,
-        prefix
+        prefix,
       });
 
-      sendCreated(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Invoice created with custom number');
+      sendCreated(
+        res,
+        { invoice: toSnakeCaseInvoice(invoice) },
+        'Invoice created with custom number'
+      );
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
 );
-
 
 export { router as invoicesRouter };
 export default router;

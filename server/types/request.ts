@@ -100,8 +100,7 @@ export interface LoggingRequest extends Request {
  * Request with both auth and logging
  */
 export interface FullContextRequest<U extends AnyUser = AnyUser>
-  extends AuthenticatedRequest<U>,
-    LoggingRequest {
+  extends AuthenticatedRequest<U>, LoggingRequest {
   user: U;
   id: string;
   startTime: number;
@@ -122,8 +121,10 @@ export interface TypedRequest<T> extends Request {
 /**
  * Typed request with body and auth
  */
-export interface AuthenticatedTypedRequest<T, U extends AnyUser = AnyUser>
-  extends AuthenticatedRequest<U> {
+export interface AuthenticatedTypedRequest<
+  T,
+  U extends AnyUser = AnyUser,
+> extends AuthenticatedRequest<U> {
   body: T;
 }
 
@@ -148,7 +149,7 @@ export interface FullyTypedRequest<
   Body = unknown,
   Query = unknown,
   Params extends Record<string, string> = Record<string, string>,
-  U extends AnyUser = AnyUser
+  U extends AnyUser = AnyUser,
 > extends AuthenticatedRequest<U> {
   body: Body;
   query: Query & Request['query'];
@@ -405,9 +406,7 @@ export function isClientUser(user: AnyUser | undefined): user is ClientUser {
 /**
  * Check if request is authenticated
  */
-export function isAuthenticatedRequest(
-  req: Request
-): req is AuthenticatedRequest {
+export function isAuthenticatedRequest(req: Request): req is AuthenticatedRequest {
   return 'user' in req && req.user !== undefined;
 }
 
@@ -442,7 +441,7 @@ export function parsePagination(query: PaginationQuery): {
     limit,
     offset,
     sortBy: query.sortBy,
-    sortOrder
+    sortOrder,
   };
 }
 
@@ -455,7 +454,7 @@ export function parseDateRange(query: DateRangeQuery): {
 } {
   return {
     dateFrom: query.dateFrom ? new Date(query.dateFrom) : undefined,
-    dateTo: query.dateTo ? new Date(query.dateTo) : undefined
+    dateTo: query.dateTo ? new Date(query.dateTo) : undefined,
   };
 }
 

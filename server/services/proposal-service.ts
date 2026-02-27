@@ -18,12 +18,18 @@
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import crypto from 'crypto';
+import { logger } from './logger.js';
 import {
   validateJsonSchema,
   validateLineItems,
-  tierStructureSchema
+  tierStructureSchema,
 } from '../../shared/validation/validators.js';
-import { emailService, isClientActivated, type ProposalSignedData, type ProposalSignedClientData } from './email-service.js';
+import {
+  emailService,
+  isClientActivated,
+  type ProposalSignedData,
+  type ProposalSignedClientData,
+} from './email-service.js';
 import {
   type ProposalTemplate,
   type ProposalVersion,
@@ -45,7 +51,7 @@ import {
   toProposalComment,
   toProposalActivity,
   toProposalCustomItem,
-  toSignatureRequest
+  toSignatureRequest,
 } from '../database/entities/index.js';
 
 interface TemplateCreateData {
@@ -107,7 +113,11 @@ class ProposalService {
 
     // Validate JSON fields
     if (data.tierStructure) {
-      const tierResult = validateJsonSchema(data.tierStructure, tierStructureSchema, 'Tier structure');
+      const tierResult = validateJsonSchema(
+        data.tierStructure,
+        tierStructureSchema,
+        'Tier structure'
+      );
       if (!tierResult.isValid) {
         throw new Error(tierResult.error);
       }
@@ -122,7 +132,9 @@ class ProposalService {
 
     // If setting as default, unset other defaults
     if (data.isDefault) {
-      await db.run('UPDATE proposal_templates SET is_default = FALSE WHERE project_type = ?', [data.projectType]);
+      await db.run('UPDATE proposal_templates SET is_default = FALSE WHERE project_type = ?', [
+        data.projectType,
+      ]);
     }
 
     const result = await db.run(
@@ -138,7 +150,7 @@ class ProposalService {
         data.defaultLineItems ? JSON.stringify(data.defaultLineItems) : null,
         data.termsAndConditions || null,
         data.validityDays || 30,
-        data.isDefault ? 1 : 0
+        data.isDefault ? 1 : 0,
       ]
     );
 
@@ -182,7 +194,10 @@ class ProposalService {
   /**
    * Update a template
    */
-  async updateTemplate(templateId: number, data: Partial<TemplateCreateData>): Promise<ProposalTemplate> {
+  async updateTemplate(
+    templateId: number,
+    data: Partial<TemplateCreateData>
+  ): Promise<ProposalTemplate> {
     const db = getDatabase();
 
     const updates: string[] = [];
@@ -220,13 +235,15 @@ class ProposalService {
       // Unset other defaults first
       if (data.isDefault) {
         const template = await this.getTemplate(templateId);
-        await db.run('UPDATE proposal_templates SET is_default = FALSE WHERE project_type = ?', [template.projectType]);
+        await db.run('UPDATE proposal_templates SET is_default = FALSE WHERE project_type = ?', [
+          template.projectType,
+        ]);
       }
       updates.push('is_default = ?');
       params.push(data.isDefault ? 1 : 0);
     }
 
-    updates.push('updated_at = datetime(\'now\')');
+    updates.push("updated_at = datetime('now')");
     params.push(templateId);
 
     await db.run(`UPDATE proposal_templates SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -239,7 +256,10 @@ class ProposalService {
    */
   async deleteTemplate(templateId: number): Promise<void> {
     const db = getDatabase();
-    await db.run('UPDATE proposal_templates SET is_active = FALSE, updated_at = datetime(\'now\') WHERE id = ?', [templateId]);
+    await db.run(
+      "UPDATE proposal_templates SET is_active = FALSE, updated_at = datetime('now') WHERE id = ?",
+      [templateId]
+    );
   }
 
   // =====================================================
@@ -249,7 +269,11 @@ class ProposalService {
   /**
    * Create a new version of a proposal
    */
-  async createVersion(proposalId: number, createdBy?: string, notes?: string): Promise<ProposalVersion> {
+  async createVersion(
+    proposalId: number,
+    createdBy?: string,
+    notes?: string
+  ): Promise<ProposalVersion> {
     const db = getDatabase();
 
     // Get current proposal data
@@ -269,7 +293,7 @@ class ProposalService {
       'SELECT MAX(version_number) as max FROM proposal_versions WHERE proposal_id = ?',
       [proposalId]
     );
-    const newVersionNumber = ((lastVersion as Record<string, unknown>)?.max as number || 0) + 1;
+    const newVersionNumber = (((lastVersion as Record<string, unknown>)?.max as number) || 0) + 1;
 
     const p = proposal as Record<string, unknown>;
 
@@ -283,7 +307,7 @@ class ProposalService {
         newVersionNumber,
         JSON.stringify({
           selectedTier: getString(p, 'selected_tier'),
-          maintenanceOption: p.maintenance_option
+          maintenanceOption: p.maintenance_option,
         }),
         JSON.stringify(features),
         JSON.stringify({
@@ -293,18 +317,18 @@ class ProposalService {
           discountValue: p.discount_value,
           taxRate: p.tax_rate,
           subtotal: p.subtotal,
-          taxAmount: p.tax_amount
+          taxAmount: p.tax_amount,
         }),
         notes || null,
-        createdBy || null
+        createdBy || null,
       ]
     );
 
     // Update proposal version number
-    await db.run(
-      'UPDATE proposal_requests SET version_number = ? WHERE id = ?',
-      [newVersionNumber, proposalId]
-    );
+    await db.run('UPDATE proposal_requests SET version_number = ? WHERE id = ?', [
+      newVersionNumber,
+      proposalId,
+    ]);
 
     return this.getVersion(result.lastID!);
   }
@@ -348,8 +372,8 @@ class ProposalService {
 
     await db.transaction(async (ctx) => {
       // Update proposal with version data
-      const pricing = version.pricingData as Record<string, unknown> || {};
-      const tier = version.tierData as Record<string, unknown> || {};
+      const pricing = (version.pricingData as Record<string, unknown>) || {};
+      const tier = (version.tierData as Record<string, unknown>) || {};
 
       await ctx.run(
         `UPDATE proposal_requests SET
@@ -373,12 +397,14 @@ class ProposalService {
           pricing.taxRate as number | null,
           pricing.subtotal as number | null,
           pricing.taxAmount as number | null,
-          proposalId
+          proposalId,
         ]
       );
 
       // Restore features
-      await ctx.run('DELETE FROM proposal_feature_selections WHERE proposal_request_id = ?', [proposalId]);
+      await ctx.run('DELETE FROM proposal_feature_selections WHERE proposal_request_id = ?', [
+        proposalId,
+      ]);
 
       if (version.featuresData && Array.isArray(version.featuresData)) {
         for (const feature of version.featuresData) {
@@ -395,7 +421,7 @@ class ProposalService {
               f.feature_price as number | null,
               f.feature_category as string | null,
               f.is_included_in_tier as number | boolean | null,
-              f.is_addon as number | boolean | null
+              f.is_addon as number | boolean | null,
             ]
           );
         }
@@ -405,14 +431,17 @@ class ProposalService {
     // Log activity
     await this.logActivity(proposalId, 'version_restored', 'system', 'system', {
       restoredVersionId: versionId,
-      restoredVersionNumber: version.versionNumber
+      restoredVersionNumber: version.versionNumber,
     });
   }
 
   /**
    * Compare two versions
    */
-  async compareVersions(versionId1: number, versionId2: number): Promise<{
+  async compareVersions(
+    versionId1: number,
+    versionId2: number
+  ): Promise<{
     version1: ProposalVersion;
     version2: ProposalVersion;
     differences: object;
@@ -423,8 +452,8 @@ class ProposalService {
     const differences: Record<string, { v1: unknown; v2: unknown }> = {};
 
     // Compare pricing
-    const p1 = version1.pricingData as Record<string, unknown> || {};
-    const p2 = version2.pricingData as Record<string, unknown> || {};
+    const p1 = (version1.pricingData as Record<string, unknown>) || {};
+    const p2 = (version2.pricingData as Record<string, unknown>) || {};
 
     for (const key of ['basePrice', 'finalPrice', 'discountType', 'discountValue', 'taxRate']) {
       if (p1[key] !== p2[key]) {
@@ -433,8 +462,8 @@ class ProposalService {
     }
 
     // Compare tier
-    const t1 = version1.tierData as Record<string, unknown> || {};
-    const t2 = version2.tierData as Record<string, unknown> || {};
+    const t1 = (version1.tierData as Record<string, unknown>) || {};
+    const t2 = (version2.tierData as Record<string, unknown>) || {};
 
     if (t1.selectedTier !== t2.selectedTier) {
       differences['selectedTier'] = { v1: t1.selectedTier, v2: t2.selectedTier };
@@ -458,7 +487,12 @@ class ProposalService {
   /**
    * Request a signature on a proposal
    */
-  async requestSignature(proposalId: number, signerEmail: string, signerName?: string, expiresInDays = 7): Promise<SignatureRequest> {
+  async requestSignature(
+    proposalId: number,
+    signerEmail: string,
+    signerName?: string,
+    expiresInDays = 7
+  ): Promise<SignatureRequest> {
     const db = getDatabase();
 
     const token = generateToken();
@@ -474,15 +508,14 @@ class ProposalService {
     );
 
     // Update proposal to require signature
-    await db.run(
-      'UPDATE proposal_requests SET requires_signature = TRUE WHERE id = ?',
-      [proposalId]
-    );
+    await db.run('UPDATE proposal_requests SET requires_signature = TRUE WHERE id = ?', [
+      proposalId,
+    ]);
 
     // Log activity
     await this.logActivity(proposalId, 'signature_requested', 'system', 'system', {
       signerEmail,
-      requestId: result.lastID
+      requestId: result.lastID,
     });
 
     return this.getSignatureRequest(result.lastID!);
@@ -536,7 +569,7 @@ class ProposalService {
         data.signatureMethod,
         data.signatureData,
         data.ipAddress || null,
-        data.userAgent || null
+        data.userAgent || null,
       ]
     );
 
@@ -560,10 +593,18 @@ class ProposalService {
     );
 
     // Log activity
-    await this.logActivity(proposalId, 'signed', data.signerName, 'client', {
-      signatureMethod: data.signatureMethod,
-      signerEmail: data.signerEmail
-    }, data.ipAddress, data.userAgent);
+    await this.logActivity(
+      proposalId,
+      'signed',
+      data.signerName,
+      'client',
+      {
+        signatureMethod: data.signatureMethod,
+        signerEmail: data.signerEmail,
+      },
+      data.ipAddress,
+      data.userAgent
+    );
 
     // Send admin notification with tier info
     await this.sendProposalSignedNotification(proposalId, data);
@@ -574,12 +615,16 @@ class ProposalService {
   /**
    * Send notification to admin when proposal is signed
    */
-  private async sendProposalSignedNotification(proposalId: number, signatureData: SignatureData): Promise<void> {
+  private async sendProposalSignedNotification(
+    proposalId: number,
+    signatureData: SignatureData
+  ): Promise<void> {
     const db = getDatabase();
 
     try {
       // Get proposal with project and client details
-      const proposal = await db.get(`
+      const proposal = await db.get(
+        `
         SELECT
           pr.*,
           p.project_name as project_name,
@@ -591,27 +636,32 @@ class ProposalService {
         LEFT JOIN projects p ON pr.project_id = p.id
         LEFT JOIN clients c ON pr.client_id = c.id
         WHERE pr.id = ?
-      `, [proposalId]);
+      `,
+        [proposalId]
+      );
 
       if (!proposal) {
-        console.error('[PROPOSAL] Cannot send notification - proposal not found:', proposalId);
+        logger.error(`[PROPOSAL] Cannot send notification - proposal not found: ${proposalId}`);
         return;
       }
 
       const p = proposal as Record<string, unknown>;
 
       // Get add-on features
-      const features = await db.all(`
+      const features = await db.all(
+        `
         SELECT feature_name, feature_price
         FROM proposal_feature_selections
         WHERE proposal_request_id = ? AND is_addon = TRUE
-      `, [proposalId]);
+      `,
+        [proposalId]
+      );
 
       // Map tier to display name
       const tierNames: Record<string, string> = {
         good: 'Good',
         better: 'Better',
-        best: 'Best'
+        best: 'Best',
       };
 
       const selectedTier = getString(p, 'selected_tier') as 'good' | 'better' | 'best';
@@ -621,7 +671,7 @@ class ProposalService {
       const finalPrice = getNumber(p, 'final_price') || 0;
       const formattedPrice = finalPrice.toLocaleString('en-US', {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        maximumFractionDigits: 0,
       });
 
       // Format signed timestamp
@@ -632,7 +682,7 @@ class ProposalService {
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-        timeZoneName: 'short'
+        timeZoneName: 'short',
       });
 
       // Build notification data
@@ -648,21 +698,21 @@ class ProposalService {
         maintenanceOption: p.maintenance_option as string | undefined,
         addedFeatures: features.map((f) => ({
           name: getString(f as Record<string, unknown>, 'feature_name'),
-          price: (getNumber(f as Record<string, unknown>, 'feature_price') || 0).toLocaleString()
+          price: (getNumber(f as Record<string, unknown>, 'feature_price') || 0).toLocaleString(),
         })),
         signerName: signatureData.signerName,
         signerEmail: signatureData.signerEmail,
         signedAt,
-        ipAddress: signatureData.ipAddress || 'Unknown'
+        ipAddress: signatureData.ipAddress || 'Unknown',
       };
 
       // Send admin notification
       const adminResult = await emailService.sendProposalSignedNotification(notificationData);
 
       if (adminResult.success) {
-        console.log('[PROPOSAL] Admin notification sent for proposal:', proposalId);
+        logger.info(`[PROPOSAL] Admin notification sent for proposal: ${proposalId}`);
       } else {
-        console.error('[PROPOSAL] Failed to send admin notification:', adminResult.message);
+        logger.error(`[PROPOSAL] Failed to send admin notification: ${adminResult.message}`);
       }
 
       // Send client confirmation email only if client account is activated
@@ -674,21 +724,26 @@ class ProposalService {
         const clientData: ProposalSignedClientData = {
           ...notificationData,
           portalUrl: `${baseUrl}/client/portal`,
-          supportEmail: process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || 'support@nobhadcodes.com'
+          supportEmail:
+            process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || 'support@nobhadcodes.com',
         };
 
         const clientResult = await emailService.sendProposalSignedClientConfirmation(clientData);
 
         if (clientResult.success) {
-          console.log('[PROPOSAL] Client confirmation sent for proposal:', proposalId);
+          logger.info(`[PROPOSAL] Client confirmation sent for proposal: ${proposalId}`);
         } else {
-          console.error('[PROPOSAL] Failed to send client confirmation:', clientResult.message);
+          logger.error(`[PROPOSAL] Failed to send client confirmation: ${clientResult.message}`);
         }
       } else {
-        console.log(`[PROPOSAL] Skipping client confirmation email for proposal ${proposalId} - client account not activated`);
+        logger.info(
+          `[PROPOSAL] Skipping client confirmation email for proposal ${proposalId} - client account not activated`
+        );
       }
     } catch (error) {
-      console.error('[PROPOSAL] Error sending proposal signed notifications:', error);
+      logger.error('[PROPOSAL] Error sending proposal signed notifications:', {
+        error: error instanceof Error ? error : undefined,
+      });
     }
   }
 
@@ -729,22 +784,27 @@ class ProposalService {
   }> {
     const db = getDatabase();
 
-    const proposal = await db.get('SELECT requires_signature, signed_at FROM proposal_requests WHERE id = ?', [proposalId]);
+    const proposal = await db.get(
+      'SELECT requires_signature, signed_at FROM proposal_requests WHERE id = ?',
+      [proposalId]
+    );
     const p = proposal as Record<string, unknown>;
 
     const signatures = await this.getProposalSignatures(proposalId);
 
     const pendingRows = await db.all(
-      'SELECT * FROM signature_requests WHERE proposal_id = ? AND status IN (\'pending\', \'viewed\')',
+      "SELECT * FROM signature_requests WHERE proposal_id = ? AND status IN ('pending', 'viewed')",
       [proposalId]
     );
-    const pendingRequests = pendingRows.map((row) => toSignatureRequest(row as SignatureRequestRow));
+    const pendingRequests = pendingRows.map((row) =>
+      toSignatureRequest(row as SignatureRequestRow)
+    );
 
     return {
       requiresSignature: Boolean(p.requires_signature),
       isSigned: p.signed_at !== null,
       signatures,
-      pendingRequests
+      pendingRequests,
     };
   }
 
@@ -781,9 +841,15 @@ class ProposalService {
     );
 
     // Log activity
-    await this.logActivity(request.proposalId, 'signature_declined', request.signerName || request.signerEmail, 'client', {
-      reason
-    });
+    await this.logActivity(
+      request.proposalId,
+      'signature_declined',
+      request.signerName || request.signerEmail,
+      'client',
+      {
+        reason,
+      }
+    );
   }
 
   // =====================================================
@@ -809,13 +875,21 @@ class ProposalService {
         proposal_id, author_type, author_name, author_email, content,
         is_internal, parent_comment_id, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-      [proposalId, authorType, authorName, authorEmail || null, content, isInternal ? 1 : 0, parentCommentId || null]
+      [
+        proposalId,
+        authorType,
+        authorName,
+        authorEmail || null,
+        content,
+        isInternal ? 1 : 0,
+        parentCommentId || null,
+      ]
     );
 
     // Log activity
     await this.logActivity(proposalId, 'commented', authorName, authorType, {
       commentId: result.lastID,
-      isInternal
+      isInternal,
     });
 
     return this.getComment(result.lastID!);
@@ -911,7 +985,7 @@ class ProposalService {
         actorType || null,
         metadata ? JSON.stringify(metadata) : null,
         ipAddress || null,
-        userAgent || null
+        userAgent || null,
       ]
     );
   }
@@ -973,7 +1047,7 @@ class ProposalService {
         data.category || null,
         data.isTaxable !== false ? 1 : 0,
         data.isOptional ? 1 : 0,
-        data.sortOrder || 0
+        data.sortOrder || 0,
       ]
     );
 
@@ -1012,7 +1086,10 @@ class ProposalService {
   /**
    * Update a custom item
    */
-  async updateCustomItem(itemId: number, data: Partial<CustomItemData>): Promise<ProposalCustomItem> {
+  async updateCustomItem(
+    itemId: number,
+    data: Partial<CustomItemData>
+  ): Promise<ProposalCustomItem> {
     const db = getDatabase();
 
     const updates: string[] = [];
@@ -1055,7 +1132,7 @@ class ProposalService {
       params.push(data.sortOrder);
     }
 
-    updates.push('updated_at = datetime(\'now\')');
+    updates.push("updated_at = datetime('now')");
     params.push(itemId);
 
     await db.run(`UPDATE proposal_custom_items SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -1089,7 +1166,12 @@ class ProposalService {
   /**
    * Apply a discount to a proposal
    */
-  async applyDiscount(proposalId: number, type: 'percentage' | 'fixed', value: number, reason?: string): Promise<void> {
+  async applyDiscount(
+    proposalId: number,
+    type: 'percentage' | 'fixed',
+    value: number,
+    reason?: string
+  ): Promise<void> {
     const db = getDatabase();
 
     await db.run(
@@ -1108,7 +1190,7 @@ class ProposalService {
     await this.logActivity(proposalId, 'discount_applied', 'system', 'admin', {
       discountType: type,
       discountValue: value,
-      reason
+      reason,
     });
   }
 
@@ -1213,10 +1295,10 @@ class ProposalService {
   async setExpiration(proposalId: number, expirationDate: string): Promise<void> {
     const db = getDatabase();
 
-    await db.run(
-      'UPDATE proposal_requests SET expiration_date = ? WHERE id = ?',
-      [expirationDate, proposalId]
-    );
+    await db.run('UPDATE proposal_requests SET expiration_date = ? WHERE id = ?', [
+      expirationDate,
+      proposalId,
+    ]);
   }
 
   /**
@@ -1265,10 +1347,9 @@ class ProposalService {
   async markReminderSent(proposalId: number): Promise<void> {
     const db = getDatabase();
 
-    await db.run(
-      'UPDATE proposal_requests SET reminder_sent_at = datetime(\'now\') WHERE id = ?',
-      [proposalId]
-    );
+    await db.run("UPDATE proposal_requests SET reminder_sent_at = datetime('now') WHERE id = ?", [
+      proposalId,
+    ]);
 
     await this.logActivity(proposalId, 'reminder_sent', 'system', 'system');
   }
@@ -1280,7 +1361,9 @@ class ProposalService {
     const db = getDatabase();
 
     // Get proposal for validity days
-    const proposal = await db.get('SELECT validity_days FROM proposal_requests WHERE id = ?', [proposalId]);
+    const proposal = await db.get('SELECT validity_days FROM proposal_requests WHERE id = ?', [
+      proposalId,
+    ]);
     const validityDays = (proposal as Record<string, unknown>)?.validity_days || 30;
 
     const expirationDate = new Date();
@@ -1305,10 +1388,7 @@ class ProposalService {
     const db = getDatabase();
     const token = generateToken();
 
-    await db.run(
-      'UPDATE proposal_requests SET access_token = ? WHERE id = ?',
-      [token, proposalId]
-    );
+    await db.run('UPDATE proposal_requests SET access_token = ? WHERE id = ?', [token, proposalId]);
 
     return token;
   }

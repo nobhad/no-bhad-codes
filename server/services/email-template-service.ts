@@ -101,7 +101,6 @@ export interface PreviewData {
 // ============================================
 
 class EmailTemplateService {
-
   // ============================================
   // TEMPLATE CRUD
   // ============================================
@@ -122,8 +121,8 @@ class EmailTemplateService {
 
     query += ' ORDER BY category, name';
 
-    const templates = await db.all(query, params) as unknown[];
-    return templates.map(t => this.parseTemplate(t as Record<string, unknown>));
+    const templates = (await db.all(query, params)) as unknown[];
+    return templates.map((t) => this.parseTemplate(t as Record<string, unknown>));
   }
 
   /**
@@ -131,10 +130,9 @@ class EmailTemplateService {
    */
   async getTemplate(id: number): Promise<EmailTemplate | null> {
     const db = getDatabase();
-    const template = await db.get(
-      'SELECT * FROM email_templates WHERE id = ?',
-      [id]
-    ) as Record<string, unknown> | undefined;
+    const template = (await db.get('SELECT * FROM email_templates WHERE id = ?', [id])) as
+      | Record<string, unknown>
+      | undefined;
 
     return template ? this.parseTemplate(template) : null;
   }
@@ -144,10 +142,9 @@ class EmailTemplateService {
    */
   async getTemplateByName(name: string): Promise<EmailTemplate | null> {
     const db = getDatabase();
-    const template = await db.get(
-      'SELECT * FROM email_templates WHERE name = ?',
-      [name]
-    ) as Record<string, unknown> | undefined;
+    const template = (await db.get('SELECT * FROM email_templates WHERE name = ?', [name])) as
+      | Record<string, unknown>
+      | undefined;
 
     return template ? this.parseTemplate(template) : null;
   }
@@ -169,7 +166,7 @@ class EmailTemplateService {
         data.body_html,
         data.body_text || null,
         JSON.stringify(data.variables || []),
-        data.is_active !== false
+        data.is_active !== false,
       ]
     );
 
@@ -250,15 +247,16 @@ class EmailTemplateService {
     updates.push('updated_at = CURRENT_TIMESTAMP');
     params.push(id);
 
-    await db.run(
-      `UPDATE email_templates SET ${updates.join(', ')} WHERE id = ?`,
-      params
-    );
+    await db.run(`UPDATE email_templates SET ${updates.join(', ')} WHERE id = ?`, params);
 
     const updated = await this.getTemplate(id);
 
     // Create version if content changed
-    if (data.subject !== undefined || data.body_html !== undefined || data.body_text !== undefined) {
+    if (
+      data.subject !== undefined ||
+      data.body_html !== undefined ||
+      data.body_text !== undefined
+    ) {
       await this.createVersion(id, updated!, changedBy, changeReason);
     }
 
@@ -291,12 +289,12 @@ class EmailTemplateService {
    */
   async getVersions(templateId: number): Promise<EmailTemplateVersion[]> {
     const db = getDatabase();
-    const versions = await db.all(
+    const versions = (await db.all(
       `SELECT * FROM email_template_versions
        WHERE template_id = ?
        ORDER BY version DESC`,
       [templateId]
-    ) as unknown[];
+    )) as unknown[];
 
     return versions as EmailTemplateVersion[];
   }
@@ -306,11 +304,11 @@ class EmailTemplateService {
    */
   async getVersion(templateId: number, version: number): Promise<EmailTemplateVersion | null> {
     const db = getDatabase();
-    const v = await db.get(
+    const v = (await db.get(
       `SELECT * FROM email_template_versions
        WHERE template_id = ? AND version = ?`,
       [templateId, version]
-    ) as EmailTemplateVersion | undefined;
+    )) as EmailTemplateVersion | undefined;
 
     return v || null;
   }
@@ -331,7 +329,7 @@ class EmailTemplateService {
       {
         subject: v.subject,
         body_html: v.body_html,
-        body_text: v.body_text || undefined
+        body_text: v.body_text || undefined,
       },
       changedBy,
       `Restored from version ${version}`
@@ -350,10 +348,10 @@ class EmailTemplateService {
     const db = getDatabase();
 
     // Get the next version number
-    const lastVersion = await db.get(
+    const lastVersion = (await db.get(
       'SELECT MAX(version) as max_version FROM email_template_versions WHERE template_id = ?',
       [templateId]
-    ) as { max_version: number | null } | undefined;
+    )) as { max_version: number | null } | undefined;
 
     const nextVersion = (lastVersion?.max_version || 0) + 1;
 
@@ -367,7 +365,7 @@ class EmailTemplateService {
         template.body_html,
         template.body_text,
         changedBy || null,
-        changeReason || null
+        changeReason || null,
       ]
     );
   }
@@ -389,7 +387,7 @@ class EmailTemplateService {
     return {
       subject: this.interpolate(template.subject, sampleData),
       body_html: this.interpolate(template.body_html, sampleData),
-      body_text: template.body_text ? this.interpolate(template.body_text, sampleData) : null
+      body_text: template.body_text ? this.interpolate(template.body_text, sampleData) : null,
     };
   }
 
@@ -405,7 +403,7 @@ class EmailTemplateService {
     return {
       subject: this.interpolate(subject, sampleData),
       body_html: this.interpolate(bodyHtml, sampleData),
-      body_text: bodyText ? this.interpolate(bodyText, sampleData) : null
+      body_text: bodyText ? this.interpolate(bodyText, sampleData) : null,
     };
   }
 
@@ -418,7 +416,7 @@ class EmailTemplateService {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      '\'': '&#x27;'
+      "'": '&#x27;',
     };
     return text.replace(/[&<>"']/g, (m) => entities[m] || m);
   }
@@ -531,7 +529,7 @@ class EmailTemplateService {
         status,
         errorMessage || null,
         metadata ? JSON.stringify(metadata) : null,
-        status === 'sent' ? new Date().toISOString() : null
+        status === 'sent' ? new Date().toISOString() : null,
       ]
     );
 
@@ -555,12 +553,7 @@ class EmailTemplateService {
       `UPDATE email_send_logs
        SET status = ?, error_message = ?, sent_at = ?
        WHERE id = ?`,
-      [
-        status,
-        errorMessage || null,
-        status === 'sent' ? new Date().toISOString() : null,
-        id
-      ]
+      [status, errorMessage || null, status === 'sent' ? new Date().toISOString() : null, id]
     );
   }
 
@@ -600,12 +593,12 @@ class EmailTemplateService {
       params.push(options.limit);
     }
 
-    const logs = await db.all(query, params) as unknown[];
-    return logs.map(log => {
+    const logs = (await db.all(query, params)) as unknown[];
+    return logs.map((log) => {
       const l = log as Record<string, unknown>;
       return {
         ...l,
-        metadata: l.metadata ? JSON.parse(l.metadata as string) : null
+        metadata: l.metadata ? JSON.parse(l.metadata as string) : null,
       } as EmailSendLog;
     });
   }
@@ -630,7 +623,7 @@ class EmailTemplateService {
       is_active: Boolean(row.is_active),
       is_system: Boolean(row.is_system),
       created_at: row.created_at as string,
-      updated_at: row.updated_at as string
+      updated_at: row.updated_at as string,
     };
   }
 
@@ -644,7 +637,7 @@ class EmailTemplateService {
       { value: 'contract', label: 'Contract' },
       { value: 'project', label: 'Project' },
       { value: 'reminder', label: 'Reminder' },
-      { value: 'general', label: 'General' }
+      { value: 'general', label: 'General' },
     ];
   }
 }

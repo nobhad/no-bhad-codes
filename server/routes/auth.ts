@@ -23,7 +23,7 @@ import {
   RATE_LIMIT_CONFIG,
   COOKIE_CONFIG,
   ACCOUNT_LOCKOUT_CONFIG,
-  validatePassword
+  validatePassword,
 } from '../utils/auth-constants.js';
 import { getString, getNumber, getBoolean, getDate } from '../database/row-helpers.js';
 import {
@@ -32,7 +32,7 @@ import {
   sendUnauthorized,
   sendServerError,
   sendNotFound,
-  ErrorCodes
+  ErrorCodes,
 } from '../utils/api-response.js';
 
 const router = express.Router();
@@ -120,7 +120,7 @@ router.post(
     windowMs: RATE_LIMIT_CONFIG.LOGIN.WINDOW_MS,
     maxRequests: RATE_LIMIT_CONFIG.LOGIN.MAX_ATTEMPTS,
     message: 'Too many login attempts. Please try again later.',
-    keyGenerator: (req) => `login:${req.ip}`
+    keyGenerator: (req) => `login:${req.ip}`,
   }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
@@ -175,7 +175,11 @@ router.post(
     // Check if client is active
     if (clientStatus !== 'active') {
       await auditLogger.logLoginFailed(email, req, 'Account inactive');
-      return sendUnauthorized(res, 'Account is not active. Please contact support.', ErrorCodes.ACCOUNT_INACTIVE);
+      return sendUnauthorized(
+        res,
+        'Account is not active. Please contact support.',
+        ErrorCodes.ACCOUNT_INACTIVE
+      );
     }
 
     // Verify password
@@ -191,7 +195,11 @@ router.post(
           'UPDATE clients SET failed_login_attempts = ?, locked_until = ? WHERE id = ?',
           [newFailedAttempts, lockUntil.toISOString(), clientId]
         );
-        await auditLogger.logLoginFailed(email, req, 'Account locked due to too many failed attempts');
+        await auditLogger.logLoginFailed(
+          email,
+          req,
+          'Account locked due to too many failed attempts'
+        );
         return sendUnauthorized(
           res,
           'Account has been temporarily locked due to too many failed login attempts. Please try again in 15 minutes.',
@@ -200,10 +208,10 @@ router.post(
       }
 
       // Just increment the counter
-      await db.run(
-        'UPDATE clients SET failed_login_attempts = ? WHERE id = ?',
-        [newFailedAttempts, clientId]
-      );
+      await db.run('UPDATE clients SET failed_login_attempts = ? WHERE id = ?', [
+        newFailedAttempts,
+        clientId,
+      ]);
 
       await auditLogger.logLoginFailed(email, req, 'Invalid password');
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
@@ -225,7 +233,7 @@ router.post(
         id: clientId,
         email: clientEmail,
         type: clientIsAdmin ? 'admin' : 'client',
-        isAdmin: clientIsAdmin
+        isAdmin: clientIsAdmin,
       },
       secret,
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
@@ -242,31 +250,30 @@ router.post(
     );
 
     // Log successful login
-    await auditLogger.logLogin(
-      clientId,
-      clientEmail,
-      clientIsAdmin ? 'admin' : 'client',
-      req
-    );
+    await auditLogger.logLogin(clientId, clientEmail, clientIsAdmin ? 'admin' : 'client', req);
 
     // Set HttpOnly cookie with auth token
     res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, token, COOKIE_CONFIG.USER_OPTIONS);
 
     // Return user data (without password) - token is in HttpOnly cookie
-    return sendSuccess(res, {
-      user: {
-        id: clientId,
-        email: clientEmail,
-        name: getString(client, 'contact_name'),
-        companyName: getString(client, 'company_name'),
-        contactName: getString(client, 'contact_name'),
-        status: clientStatus,
-        isAdmin: clientIsAdmin,
-        role: clientIsAdmin ? 'admin' : 'client'
+    return sendSuccess(
+      res,
+      {
+        user: {
+          id: clientId,
+          email: clientEmail,
+          name: getString(client, 'contact_name'),
+          companyName: getString(client, 'company_name'),
+          contactName: getString(client, 'contact_name'),
+          status: clientStatus,
+          isAdmin: clientIsAdmin,
+          role: clientIsAdmin ? 'admin' : 'client',
+        },
+        isFirstLogin,
+        expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
       },
-      isFirstLogin,
-      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
-    }, 'Login successful');
+      'Login successful'
+    );
   })
 );
 
@@ -336,8 +343,8 @@ router.get(
         status: getString(client, 'status'),
         isAdmin,
         role: isAdmin ? 'admin' : 'client',
-        createdAt: getDate(client, 'created_at')?.toISOString() || null
-      }
+        createdAt: getDate(client, 'created_at')?.toISOString() || null,
+      },
     });
   })
 );
@@ -401,7 +408,7 @@ router.post(
       {
         id: req.user!.id,
         email: req.user!.email,
-        type: req.user!.type
+        type: req.user!.type,
       },
       secret,
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
@@ -409,7 +416,7 @@ router.post(
 
     return sendSuccess(res, {
       token: newToken,
-      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
+      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
     });
   })
 );
@@ -448,7 +455,7 @@ router.post('/logout', authenticateToken, (req, res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    path: '/'
+    path: '/',
   });
   return sendSuccess(res, undefined, 'Logout successful');
 });
@@ -550,7 +557,7 @@ router.post(
     windowMs: RATE_LIMIT_CONFIG.FORGOT_PASSWORD.WINDOW_MS,
     maxRequests: RATE_LIMIT_CONFIG.FORGOT_PASSWORD.MAX_ATTEMPTS,
     message: 'Too many password reset requests. Please try again later.',
-    keyGenerator: (req) => `forgot-password:${req.ip}`
+    keyGenerator: (req) => `forgot-password:${req.ip}`,
   }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email } = req.body;
@@ -595,7 +602,7 @@ router.post(
         const clientContactName = getString(client, 'contact_name');
         await emailService.sendPasswordResetEmail(clientEmail, {
           name: clientContactName || 'Client',
-          resetToken
+          resetToken,
         });
 
         // Send admin notification
@@ -605,17 +612,24 @@ router.post(
           details: {
             clientId: getNumber(client, 'id'),
             email: clientEmail,
-            name: clientContactName || 'Unknown'
+            name: clientContactName || 'Unknown',
           },
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       } catch (error) {
-        await logger.error('Failed to send password reset email:', { error: error instanceof Error ? error : undefined, category: 'AUTH' });
+        await logger.error('Failed to send password reset email:', {
+          error: error instanceof Error ? error : undefined,
+          category: 'AUTH',
+        });
         // Still return success to user - don't reveal internal errors
       }
     }
 
-    return sendSuccess(res, undefined, 'If an account with that email exists, a password reset link has been sent.');
+    return sendSuccess(
+      res,
+      undefined,
+      'If an account with that email exists, a password reset link has been sent.'
+    );
   })
 );
 
@@ -733,12 +747,12 @@ router.post(
         companyName: clientCompanyName || 'Unknown Company',
         projectType: 'Password Reset',
         budget: 'N/A',
-        timeline: 'Completed'
+        timeline: 'Completed',
       });
     } catch (emailError) {
       logger.error('Failed to send password reset confirmation', {
         category: 'email',
-        metadata: { error: emailError, clientId }
+        metadata: { error: emailError, clientId },
       });
       // Continue - password was reset successfully
     }
@@ -794,7 +808,7 @@ router.post(
     windowMs: RATE_LIMIT_CONFIG.ADMIN_LOGIN.WINDOW_MS,
     maxRequests: RATE_LIMIT_CONFIG.ADMIN_LOGIN.MAX_ATTEMPTS,
     message: 'Too many admin login attempts. Please try again later.',
-    keyGenerator: (req) => `admin-login:${req.ip}`
+    keyGenerator: (req) => `admin-login:${req.ip}`,
   }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { password } = req.body;
@@ -806,14 +820,18 @@ router.post(
 
     // Check admin account lockout status from system_settings
     const lockoutSetting = await db.get(
-      'SELECT setting_value FROM system_settings WHERE setting_key = \'admin.locked_until\''
+      "SELECT setting_value FROM system_settings WHERE setting_key = 'admin.locked_until'"
     );
     if (lockoutSetting) {
       const lockedUntil = new Date(lockoutSetting.setting_value as string);
       const now = new Date();
       if (now < lockedUntil) {
         const remainingMinutes = Math.ceil((lockedUntil.getTime() - now.getTime()) / 60000);
-        await auditLogger.logLoginFailed(process.env.ADMIN_EMAIL || 'admin', req, 'Admin account locked');
+        await auditLogger.logLoginFailed(
+          process.env.ADMIN_EMAIL || 'admin',
+          req,
+          'Admin account locked'
+        );
         return sendUnauthorized(
           res,
           `Admin account is temporarily locked. Please try again in ${remainingMinutes} minute(s).`,
@@ -821,7 +839,9 @@ router.post(
         );
       }
       // Lockout expired - reset
-      await db.run('DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')');
+      await db.run(
+        "DELETE FROM system_settings WHERE setting_key IN ('admin.locked_until', 'admin.failed_login_attempts')"
+      );
     }
 
     // Get admin password hash from environment
@@ -836,23 +856,29 @@ router.post(
     if (!isValidPassword) {
       // Get current failed attempts
       const attemptsSetting = await db.get(
-        'SELECT setting_value FROM system_settings WHERE setting_key = \'admin.failed_login_attempts\''
+        "SELECT setting_value FROM system_settings WHERE setting_key = 'admin.failed_login_attempts'"
       );
-      const currentAttempts = attemptsSetting ? parseInt(attemptsSetting.setting_value as string, 10) : 0;
+      const currentAttempts = attemptsSetting
+        ? parseInt(attemptsSetting.setting_value as string, 10)
+        : 0;
       const newAttempts = currentAttempts + 1;
 
       if (newAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
         // Lock the admin account
         const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
         await db.run(
-          'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.locked_until\', ?, \'string\', \'Admin account lockout expiry\')',
+          "INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES ('admin.locked_until', ?, 'string', 'Admin account lockout expiry')",
           [lockUntil.toISOString()]
         );
         await db.run(
-          'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.failed_login_attempts\', ?, \'number\', \'Admin failed login attempts\')',
+          "INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES ('admin.failed_login_attempts', ?, 'number', 'Admin failed login attempts')",
           [newAttempts.toString()]
         );
-        await auditLogger.logLoginFailed(process.env.ADMIN_EMAIL || 'admin', req, 'Admin account locked due to too many failed attempts');
+        await auditLogger.logLoginFailed(
+          process.env.ADMIN_EMAIL || 'admin',
+          req,
+          'Admin account locked due to too many failed attempts'
+        );
         return sendUnauthorized(
           res,
           'Admin account has been temporarily locked due to too many failed login attempts. Please try again in 15 minutes.',
@@ -862,15 +888,21 @@ router.post(
 
       // Increment failed attempts
       await db.run(
-        'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.failed_login_attempts\', ?, \'number\', \'Admin failed login attempts\')',
+        "INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES ('admin.failed_login_attempts', ?, 'number', 'Admin failed login attempts')",
         [newAttempts.toString()]
       );
-      await auditLogger.logLoginFailed(process.env.ADMIN_EMAIL || 'admin', req, 'Invalid admin password');
+      await auditLogger.logLoginFailed(
+        process.env.ADMIN_EMAIL || 'admin',
+        req,
+        'Invalid admin password'
+      );
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
 
     // Successful login - reset failed attempts
-    await db.run('DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')');
+    await db.run(
+      "DELETE FROM system_settings WHERE setting_key IN ('admin.locked_until', 'admin.failed_login_attempts')"
+    );
 
     // Generate JWT token for admin
     const secret = process.env.JWT_SECRET;
@@ -888,7 +920,7 @@ router.post(
       {
         id: 0, // Admin doesn't have a client ID
         email: adminEmail,
-        type: 'admin'
+        type: 'admin',
       },
       secret,
       { expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY } as SignOptions // Shorter expiry for admin sessions
@@ -901,18 +933,22 @@ router.post(
     res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, token, COOKIE_CONFIG.ADMIN_OPTIONS);
 
     // Return user data and token for frontend
-    return sendSuccess(res, {
-      user: {
-        id: 0,
-        email: adminEmail,
-        name: 'Admin',
-        username: 'admin',
-        isAdmin: true,
-        role: 'admin'
+    return sendSuccess(
+      res,
+      {
+        user: {
+          id: 0,
+          email: adminEmail,
+          name: 'Admin',
+          username: 'admin',
+          isAdmin: true,
+          role: 'admin',
+        },
+        token,
+        expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY,
       },
-      token,
-      expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY
-    }, 'Admin login successful');
+      'Admin login successful'
+    );
   })
 );
 
@@ -959,7 +995,7 @@ router.post(
     windowMs: RATE_LIMIT_CONFIG.MAGIC_LINK.WINDOW_MS,
     maxRequests: RATE_LIMIT_CONFIG.MAGIC_LINK.MAX_ATTEMPTS,
     message: 'Too many magic link requests. Please try again later.',
-    keyGenerator: (req) => `magic-link:${req.ip}`
+    keyGenerator: (req) => `magic-link:${req.ip}`,
   }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email } = req.body;
@@ -1004,7 +1040,7 @@ router.post(
         const clientIdForMagic = getNumber(client, 'id');
         await emailService.sendMagicLinkEmail(clientEmailForMagic, {
           magicLinkToken,
-          name: clientContactNameForMagic || undefined
+          name: clientContactNameForMagic || undefined,
         });
 
         await auditLogger.log({
@@ -1017,15 +1053,22 @@ router.post(
           userType: 'client',
           metadata: { email: clientEmailForMagic },
           ipAddress: req.ip || 'unknown',
-          userAgent: req.get('user-agent') || 'unknown'
+          userAgent: req.get('user-agent') || 'unknown',
         });
       } catch (error) {
-        await logger.error('Failed to send magic link email:', { error: error instanceof Error ? error : undefined, category: 'AUTH' });
+        await logger.error('Failed to send magic link email:', {
+          error: error instanceof Error ? error : undefined,
+          category: 'AUTH',
+        });
         // Still return success to user - don't reveal internal errors
       }
     }
 
-    return sendSuccess(res, undefined, 'If an account with that email exists, a login link has been sent.');
+    return sendSuccess(
+      res,
+      undefined,
+      'If an account with that email exists, a login link has been sent.'
+    );
   })
 );
 
@@ -1108,12 +1151,20 @@ router.post(
         );
       }
 
-      return sendBadRequest(res, 'Login link has expired. Please request a new one.', ErrorCodes.TOKEN_EXPIRED);
+      return sendBadRequest(
+        res,
+        'Login link has expired. Please request a new one.',
+        ErrorCodes.TOKEN_EXPIRED
+      );
     }
 
     // Check if account is active
     if (clientStatus !== 'active') {
-      return sendUnauthorized(res, 'Account is not active. Please contact support.', ErrorCodes.ACCOUNT_INACTIVE);
+      return sendUnauthorized(
+        res,
+        'Account is not active. Please contact support.',
+        ErrorCodes.ACCOUNT_INACTIVE
+      );
     }
 
     // Clear the magic link token (single use)
@@ -1146,31 +1197,37 @@ router.post(
         id: clientIdForMagicLink,
         email: clientEmailForMagicLink,
         type: clientIsAdminForMagicLink ? 'admin' : 'client',
-        isAdmin: clientIsAdminForMagicLink
+        isAdmin: clientIsAdminForMagicLink,
       },
       secret,
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
     );
 
     // Log successful magic link login
-    await auditLogger.logLogin(clientIdForMagicLink, clientEmailForMagicLink, 'client', req, { method: 'magic_link' });
+    await auditLogger.logLogin(clientIdForMagicLink, clientEmailForMagicLink, 'client', req, {
+      method: 'magic_link',
+    });
 
     // Set HttpOnly cookie with auth token
     res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, jwtToken, COOKIE_CONFIG.USER_OPTIONS);
 
-    return sendSuccess(res, {
-      user: {
-        id: clientIdForMagicLink,
-        email: clientEmailForMagicLink,
-        name: clientContactNameForMagicLink,
-        companyName: clientCompanyNameForMagicLink,
-        contactName: clientContactNameForMagicLink,
-        status: clientStatus,
-        isAdmin: clientIsAdminForMagicLink,
-        role: clientIsAdminForMagicLink ? 'admin' : 'client'
+    return sendSuccess(
+      res,
+      {
+        user: {
+          id: clientIdForMagicLink,
+          email: clientEmailForMagicLink,
+          name: clientContactNameForMagicLink,
+          companyName: clientCompanyNameForMagicLink,
+          contactName: clientContactNameForMagicLink,
+          status: clientStatus,
+          isAdmin: clientIsAdminForMagicLink,
+          role: clientIsAdminForMagicLink ? 'admin' : 'client',
+        },
+        expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
       },
-      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
-    }, 'Login successful');
+      'Login successful'
+    );
   })
 );
 
@@ -1209,7 +1266,11 @@ router.post(
     // Check if token is expired
     const invitationExpiresAtStr = getString(client, 'invitation_expires_at');
     if (invitationExpiresAtStr && new Date(invitationExpiresAtStr) < new Date()) {
-      return sendBadRequest(res, 'Invitation has expired. Please contact support for a new invitation.', ErrorCodes.TOKEN_EXPIRED);
+      return sendBadRequest(
+        res,
+        'Invitation has expired. Please contact support for a new invitation.',
+        ErrorCodes.TOKEN_EXPIRED
+      );
     }
 
     const normalizeValue = (value: string): string =>
@@ -1218,7 +1279,7 @@ router.post(
     return sendSuccess(res, {
       email: normalizeValue(getString(client, 'email')),
       name: normalizeValue(getString(client, 'contact_name')),
-      company: normalizeValue(getString(client, 'company_name'))
+      company: normalizeValue(getString(client, 'company_name')),
     });
   })
 );
@@ -1264,7 +1325,11 @@ router.post(
     // Check if token is expired
     const invitationExpiresAtStrForSet = getString(client, 'invitation_expires_at');
     if (invitationExpiresAtStrForSet && new Date(invitationExpiresAtStrForSet) < new Date()) {
-      return sendBadRequest(res, 'Invitation has expired. Please contact support for a new invitation.', ErrorCodes.TOKEN_EXPIRED);
+      return sendBadRequest(
+        res,
+        'Invitation has expired. Please contact support for a new invitation.',
+        ErrorCodes.TOKEN_EXPIRED
+      );
     }
 
     // Hash the new password using centralized salt rounds
@@ -1284,26 +1349,26 @@ router.post(
     );
 
     // Get client name for personalization
-    const clientData = await db.get(
-      'SELECT contact_name, company_name FROM clients WHERE id = ?',
-      [clientId]
-    );
-    const clientName = getString(clientData, 'contact_name') || getString(clientData, 'company_name') || 'there';
+    const clientData = await db.get('SELECT contact_name, company_name FROM clients WHERE id = ?', [
+      clientId,
+    ]);
+    const clientName =
+      getString(clientData, 'contact_name') || getString(clientData, 'company_name') || 'there';
 
     // === ACCOUNT ACTIVATION WELCOME FLOW ===
     // 1. Send welcome email with billing CTA
     try {
       await emailService.sendAccountActivationEmail(clientEmail, {
-        name: clientName
+        name: clientName,
       });
       logger.info('Sent account activation email', {
         category: 'email',
-        metadata: { clientEmail }
+        metadata: { clientEmail },
       });
     } catch (emailError) {
       logger.error('Failed to send account activation email', {
         category: 'email',
-        metadata: { error: emailError, clientEmail }
+        metadata: { error: emailError, clientEmail },
       });
       // Continue - account was activated successfully
     }
@@ -1336,12 +1401,17 @@ Click on "Settings" in the sidebar to update your billing information.
 If you have any questions, feel free to send us a message through this portal.
 
 Best regards,
-No Bhad Codes Team`
+No Bhad Codes Team`,
         ]
       );
-      console.log(`[AUTH] Created welcome message for client ${clientId}`);
+      await logger.info(`[AUTH] Created welcome message for client ${clientId}`, {
+        category: 'AUTH',
+      });
     } catch (messageError) {
-      await logger.error('[AUTH] Failed to create welcome message:', { error: messageError instanceof Error ? messageError : undefined, category: 'AUTH' });
+      await logger.error('[AUTH] Failed to create welcome message:', {
+        error: messageError instanceof Error ? messageError : undefined,
+        category: 'AUTH',
+      });
       // Continue - account was activated successfully
     }
 
@@ -1356,14 +1426,20 @@ No Bhad Codes Team`
       userType: 'client',
       metadata: { activatedVia: 'invitation_link' },
       ipAddress: req.ip || 'unknown',
-      userAgent: req.get('user-agent') || 'unknown'
+      userAgent: req.get('user-agent') || 'unknown',
     });
 
     // 4. Generate JWT token for auto-login
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      await logger.error('[AUTH] JWT_SECRET not configured for auto-login after set-password', { category: 'AUTH' });
-      return sendSuccess(res, { email: clientEmail }, 'Password set successfully. You can now log in.');
+      await logger.error('[AUTH] JWT_SECRET not configured for auto-login after set-password', {
+        category: 'AUTH',
+      });
+      return sendSuccess(
+        res,
+        { email: clientEmail },
+        'Password set successfully. You can now log in.'
+      );
     }
 
     const authToken = jwt.sign(
@@ -1371,14 +1447,15 @@ No Bhad Codes Team`
         id: clientId,
         email: clientEmail,
         type: 'client',
-        isAdmin: false
+        isAdmin: false,
       },
       secret,
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
     );
 
-    console.log(`[AUTH] Generated auto-login token for client ${clientId}`);
-    await logger.info(`[AUTH] Generated auto-login token for client ${clientId}`, { category: 'AUTH' });
+    await logger.info(`[AUTH] Generated auto-login token for client ${clientId}`, {
+      category: 'AUTH',
+    });
 
     return sendSuccess(res, { email: clientEmail, token: authToken }, 'Password set successfully.');
   })

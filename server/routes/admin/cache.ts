@@ -32,10 +32,12 @@ router.get(
       const stats = await cacheService.getStats();
       res.json({
         cache: stats,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      logger.error('Error getting cache stats:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error getting cache stats:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to retrieve cache statistics', 500, 'CACHE_STATS_ERROR');
     }
   })
@@ -68,12 +70,12 @@ router.post(
         // Log the cache clear action
         errorTracker.captureMessage('Admin cleared cache', 'info', {
           tags: { component: 'admin-cache' },
-          user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
+          user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
         });
 
         res.json({
           message: 'Cache cleared successfully',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       } else {
         errorResponse(res, 'Failed to clear cache', 500, 'CACHE_CLEAR_FAILED');
@@ -137,7 +139,7 @@ router.post(
       errorTracker.captureMessage('Admin invalidated cache', 'info', {
         tags: { component: 'admin-cache' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { tag, pattern, invalidatedCount: count }
+        extra: { tag, pattern, invalidatedCount: count },
       });
 
       res.json({
@@ -145,10 +147,12 @@ router.post(
         count,
         tag,
         pattern,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      logger.error('Error invalidating cache:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error invalidating cache:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to invalidate cache', 500, 'CACHE_INVALIDATE_ERROR');
     }
   })

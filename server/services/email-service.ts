@@ -14,6 +14,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getDatabase } from '../database/init.js';
+import { logger } from './logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,7 +42,9 @@ export async function isClientActivated(clientIdentifier: number | string): Prom
   const client = await db.get(query, [param]);
 
   if (!client) {
-    console.log(`[EMAIL] Client not found for activation check: ${typeof clientIdentifier === 'number' ? clientIdentifier : sanitizeEmailForLog(clientIdentifier)}`);
+    logger.info(
+      `[EMAIL] Client not found for activation check: ${typeof clientIdentifier === 'number' ? clientIdentifier : sanitizeEmailForLog(clientIdentifier)}`
+    );
     return false;
   }
 
@@ -59,7 +62,7 @@ function escapeHtml(text: string | undefined | null): string {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    '\'': '&#x27;'
+    "'": '&#x27;',
   };
   return String(text).replace(/[&<>"']/g, (m) => entities[m] || m);
 }
@@ -74,12 +77,8 @@ function sanitizeEmailForLog(email: string): string {
   const [domainName, ...tldParts] = domain.split('.');
   const tld = tldParts.join('.');
 
-  const sanitizedLocal = localPart.length > 1
-    ? `${localPart[0]  }***`
-    : '***';
-  const sanitizedDomain = domainName.length > 1
-    ? `${domainName[0]  }***`
-    : '***';
+  const sanitizedLocal = localPart.length > 1 ? `${localPart[0]}***` : '***';
+  const sanitizedDomain = domainName.length > 1 ? `${domainName[0]}***` : '***';
 
   return `${sanitizedLocal}@${sanitizedDomain}.${tld}`;
 }
@@ -163,9 +162,9 @@ let emailConfig: EmailConfig | null = null;
 async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
   // If transporter is not initialized, log and return
   if (!transporter || !emailConfig) {
-    console.log('[EMAIL] Transporter not initialized. Email logged to console:');
-    console.log(`To: ${sanitizeEmailForLog(emailContent.to)}`);
-    console.log(`Subject: ${emailContent.subject}`);
+    logger.info('[EMAIL] Transporter not initialized. Email logged to console:');
+    logger.info(`To: ${sanitizeEmailForLog(emailContent.to)}`);
+    logger.info(`Subject: ${emailContent.subject}`);
     return { success: true, message: 'Email logged to console (transporter not configured)' };
   }
 
@@ -176,20 +175,22 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
       subject: emailContent.subject,
       text: emailContent.text,
       html: emailContent.html,
-      replyTo: emailConfig.replyTo
+      replyTo: emailConfig.replyTo,
     });
 
-    console.log('[EMAIL] Message sent successfully:', info.messageId);
+    logger.info(`[EMAIL] Message sent successfully: ${info.messageId}`);
     return { success: true, message: `Email sent: ${info.messageId}` };
   } catch (error) {
-    console.error('[EMAIL] Failed to send email:', error);
+    logger.error('[EMAIL] Failed to send email:', {
+      error: error instanceof Error ? error : undefined,
+    });
     // Fall back to logging if send fails
-    console.log('[EMAIL] Email content (send failed):');
-    console.log(`To: ${sanitizeEmailForLog(emailContent.to)}`);
-    console.log(`Subject: ${emailContent.subject}`);
+    logger.info('[EMAIL] Email content (send failed):');
+    logger.info(`To: ${sanitizeEmailForLog(emailContent.to)}`);
+    logger.info(`Subject: ${emailContent.subject}`);
     return {
       success: false,
-      message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`
+      message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
 }
@@ -205,7 +206,7 @@ export async function sendWelcomeEmail(
   name: string,
   accessToken: string
 ): Promise<EmailResult> {
-  console.log('[EMAIL] Preparing welcome email for:', sanitizeEmailForLog(email));
+  logger.info(`[EMAIL] Preparing welcome email for: ${sanitizeEmailForLog(email)}`);
 
   const portalUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/client/portal?token=${accessToken}`;
 
@@ -234,7 +235,7 @@ export async function sendWelcomeEmail(
       Best regards,
       No Bhad Codes Team
     `,
-    html: generateWelcomeEmailHTML(name, portalUrl)
+    html: generateWelcomeEmailHTML(name, portalUrl),
   };
 
   return sendEmail(emailContent);
@@ -249,11 +250,11 @@ export async function sendNewIntakeNotification(
   intakeData: IntakeData,
   projectId: number
 ): Promise<EmailResult> {
-  console.log('[EMAIL] Preparing intake notification for project:', projectId);
+  logger.info(`[EMAIL] Preparing intake notification for project: ${projectId}`);
 
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) {
-    console.warn('[EMAIL] ADMIN_EMAIL not configured - skipping intake notification');
+    logger.warn('[EMAIL] ADMIN_EMAIL not configured - skipping intake notification');
     return { success: false, message: 'Admin email not configured' };
   }
 
@@ -285,7 +286,7 @@ export async function sendNewIntakeNotification(
 
       Review the full details in the admin dashboard.
     `,
-    html: generateIntakeNotificationHTML(intakeData, projectId)
+    html: generateIntakeNotificationHTML(intakeData, projectId),
   };
 
   return sendEmail(emailContent);
@@ -377,7 +378,7 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
   const safeDomainHosting = escapeHtml(intakeData.domainHosting);
   const safeDesignLevel = escapeHtml(intakeData.designLevel);
   const safeAdditionalInfo = escapeHtml(intakeData.additionalInfo);
-  const safeFeatures = features.map(f => escapeHtml(f));
+  const safeFeatures = features.map((f) => escapeHtml(f));
 
   const infoRow = (label: string, value: string | undefined) => `
     <tr>
@@ -446,7 +447,9 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                 </td>
               </tr>
 
-              ${safeFeatures.length > 0 ? `
+              ${
+                safeFeatures.length > 0
+                  ? `
               <!-- Features -->
               <tr>
                 <td style="padding: 15px 20px;">
@@ -456,7 +459,9 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                   </div>
                 </td>
               </tr>
-              ` : ''}
+              `
+                  : ''
+              }
 
               <!-- Design & Notes -->
               <tr>
@@ -465,12 +470,16 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                   <table width="100%" cellpadding="0" cellspacing="0">
                     ${infoRow('Design Level', safeDesignLevel)}
                   </table>
-                  ${safeAdditionalInfo ? `
+                  ${
+                    safeAdditionalInfo
+                      ? `
                   <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #7ff709;">
                     <strong style="display: block; margin-bottom: 8px; color: #555;">Additional Info:</strong>
                     <span style="color: #222;">${safeAdditionalInfo}</span>
                   </div>
-                  ` : ''}
+                  `
+                      : ''
+                  }
                 </td>
               </tr>
 
@@ -493,7 +502,7 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
 // Email service object for backwards compatibility
 export const emailService = {
   async init(config: EmailConfig): Promise<void> {
-    console.log('[EMAIL] Initializing email service...');
+    logger.info('[EMAIL] Initializing email service...');
 
     // Store config
     emailConfig = config;
@@ -505,27 +514,29 @@ export const emailService = {
       secure: config.secure,
       auth: {
         user: config.auth.user,
-        pass: config.auth.pass
-      }
+        pass: config.auth.pass,
+      },
     });
 
-    console.log('[EMAIL] Email service initialized successfully');
+    logger.info('[EMAIL] Email service initialized successfully');
   },
 
   async testConnection(): Promise<boolean> {
-    console.log('[EMAIL] Testing email connection...');
+    logger.info('[EMAIL] Testing email connection...');
 
     if (!transporter) {
-      console.warn('[EMAIL] Transporter not initialized. Skipping connection test.');
+      logger.warn('[EMAIL] Transporter not initialized. Skipping connection test.');
       return false;
     }
 
     try {
       await transporter.verify();
-      console.log('[EMAIL] ✅ Email connection test successful');
+      logger.info('[EMAIL] Email connection test successful');
       return true;
     } catch (error) {
-      console.error('[EMAIL] ❌ Email connection test failed:', error);
+      logger.error('[EMAIL] Email connection test failed:', {
+        error: error instanceof Error ? error : undefined,
+      });
       return false;
     }
   },
@@ -535,7 +546,7 @@ export const emailService = {
       initialized: transporter !== null,
       queueSize: 0,
       templatesLoaded: 4,
-      isProcessingQueue: false
+      isProcessingQueue: false,
     };
   },
 
@@ -561,7 +572,7 @@ export const emailService = {
     email: string,
     data: { resetToken: string; name?: string }
   ): Promise<EmailResult> {
-    console.log('[EMAIL] Preparing password reset email for:', sanitizeEmailForLog(email));
+    logger.info(`[EMAIL] Preparing password reset email for: ${sanitizeEmailForLog(email)}`);
 
     const resetUrl = `${process.env.WEBSITE_URL || 'http://localhost:3000'}/reset-password?token=${data.resetToken}`;
     const name = data.name || 'User';
@@ -611,7 +622,7 @@ export const emailService = {
           </div>
         </body>
         </html>
-      `
+      `,
     };
 
     return sendEmail(emailContent);
@@ -619,25 +630,25 @@ export const emailService = {
 
   async sendAdminNotification(title: string | any, data?: any): Promise<EmailResult> {
     if (typeof title === 'string') {
-      console.log('Sending admin notification:', title, data);
+      logger.info(`Sending admin notification: ${title}`, { metadata: data });
     } else {
-      console.log('Sending admin notification:', title);
+      logger.info('Sending admin notification', { metadata: title });
     }
     return { success: true, message: 'Admin notification logged for development' };
   },
 
   async sendMessageNotification(email: string, data: any): Promise<EmailResult> {
-    console.log('[EMAIL] Sending message notification to:', sanitizeEmailForLog(email));
+    logger.info(`[EMAIL] Sending message notification to: ${sanitizeEmailForLog(email)}`);
     return { success: true, message: 'Message notification logged for development' };
   },
 
   async sendProjectUpdateEmail(email: string, data: any): Promise<EmailResult> {
-    console.log('[EMAIL] Sending project update email to:', sanitizeEmailForLog(email));
+    logger.info(`[EMAIL] Sending project update email to: ${sanitizeEmailForLog(email)}`);
     return { success: true, message: 'Project update email logged for development' };
   },
 
   async sendIntakeConfirmation(data: any): Promise<EmailResult> {
-    console.log('Sending intake confirmation:', data);
+    logger.info('Sending intake confirmation', { metadata: data });
     return { success: true, message: 'Intake confirmation logged for development' };
   },
 
@@ -659,9 +670,12 @@ export const emailService = {
     email: string,
     data: { name?: string; portalUrl?: string }
   ): Promise<EmailResult> {
-    console.log('[EMAIL] Preparing account activation welcome email for:', sanitizeEmailForLog(email));
+    logger.info(
+      `[EMAIL] Preparing account activation welcome email for: ${sanitizeEmailForLog(email)}`
+    );
 
-    const portalUrl = data.portalUrl || `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal`;
+    const portalUrl =
+      data.portalUrl || `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal`;
     const settingsUrl = `${portalUrl}#settings`;
     const name = data.name || 'there';
 
@@ -778,7 +792,7 @@ export const emailService = {
           </div>
         </body>
         </html>
-      `
+      `,
     };
 
     return sendEmail(emailContent);
@@ -788,7 +802,7 @@ export const emailService = {
     email: string,
     data: { magicLinkToken: string; name?: string }
   ): Promise<EmailResult> {
-    console.log('[EMAIL] Preparing magic link email for:', sanitizeEmailForLog(email));
+    logger.info(`[EMAIL] Preparing magic link email for: ${sanitizeEmailForLog(email)}`);
 
     const loginUrl = `${process.env.WEBSITE_URL || 'http://localhost:3000'}/auth/magic-link?token=${data.magicLinkToken}`;
     const name = data.name || 'there';
@@ -853,7 +867,7 @@ export const emailService = {
           </div>
         </body>
         </html>
-      `
+      `,
     };
 
     return sendEmail(emailContent);
@@ -864,15 +878,16 @@ export const emailService = {
    * Includes tier selection, price, and signature details
    */
   async sendProposalSignedNotification(data: ProposalSignedData): Promise<EmailResult> {
-    console.log('[EMAIL] Preparing proposal signed notification for project:', data.projectId);
+    logger.info(`[EMAIL] Preparing proposal signed notification for project: ${data.projectId}`);
 
     const adminEmail = process.env.ADMIN_EMAIL;
     if (!adminEmail) {
-      console.warn('[EMAIL] ADMIN_EMAIL not configured - skipping proposal signed notification');
+      logger.warn('[EMAIL] ADMIN_EMAIL not configured - skipping proposal signed notification');
       return { success: false, message: 'Admin email not configured' };
     }
 
-    const adminUrl = process.env.ADMIN_URL || `${process.env.WEBSITE_URL || 'http://localhost:3000'}/admin`;
+    const adminUrl =
+      process.env.ADMIN_URL || `${process.env.WEBSITE_URL || 'http://localhost:3000'}/admin`;
     const timestamp = new Date().toLocaleString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -880,7 +895,7 @@ export const emailService = {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZoneName: 'short'
+      timeZoneName: 'short',
     });
 
     try {
@@ -888,7 +903,7 @@ export const emailService = {
       const templateDir = path.join(__dirname, '../templates/email');
       const [subjectTemplate, htmlTemplate] = await Promise.all([
         fs.readFile(path.join(templateDir, 'proposal-signed.subject.txt'), 'utf-8'),
-        fs.readFile(path.join(templateDir, 'proposal-signed.html'), 'utf-8')
+        fs.readFile(path.join(templateDir, 'proposal-signed.html'), 'utf-8'),
       ]);
 
       // Replace template variables
@@ -907,7 +922,7 @@ export const emailService = {
         signedAt: data.signedAt,
         ipAddress: data.ipAddress,
         adminUrl: adminUrl,
-        timestamp: timestamp
+        timestamp: timestamp,
       };
 
       let subject = subjectTemplate.trim();
@@ -931,8 +946,8 @@ export const emailService = {
       if (data.addedFeatures && data.addedFeatures.length > 0) {
         const eachRegex = /{{#each addedFeatures}}([\s\S]*?){{\/each}}/g;
         html = html.replace(eachRegex, (match, itemTemplate) => {
-          return data.addedFeatures!
-            .map((feature) => {
+          return data
+            .addedFeatures!.map((feature) => {
               return itemTemplate
                 .replace(/{{this\.name}}/g, feature.name)
                 .replace(/{{this\.price}}/g, feature.price);
@@ -976,15 +991,17 @@ View project: ${adminUrl}/projects/${data.projectId}
         to: adminEmail,
         subject,
         text,
-        html
+        html,
       };
 
       return sendEmail(emailContent);
     } catch (error) {
-      console.error('[EMAIL] Failed to load proposal signed templates:', error);
+      logger.error('[EMAIL] Failed to load proposal signed templates:', {
+        error: error instanceof Error ? error : undefined,
+      });
       return {
         success: false,
-        message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   },
@@ -994,14 +1011,16 @@ View project: ${adminUrl}/projects/${data.projectId}
    * Includes contract summary and next steps
    */
   async sendProposalSignedClientConfirmation(data: ProposalSignedClientData): Promise<EmailResult> {
-    console.log('[EMAIL] Preparing proposal signed confirmation for client:', sanitizeEmailForLog(data.signerEmail));
+    logger.info(
+      `[EMAIL] Preparing proposal signed confirmation for client: ${sanitizeEmailForLog(data.signerEmail)}`
+    );
 
     try {
       // Read email templates
       const templateDir = path.join(__dirname, '../templates/email');
       const [subjectTemplate, htmlTemplate] = await Promise.all([
         fs.readFile(path.join(templateDir, 'proposal-signed-client.subject.txt'), 'utf-8'),
-        fs.readFile(path.join(templateDir, 'proposal-signed-client.html'), 'utf-8')
+        fs.readFile(path.join(templateDir, 'proposal-signed-client.html'), 'utf-8'),
       ]);
 
       // Replace template variables
@@ -1020,7 +1039,7 @@ View project: ${adminUrl}/projects/${data.projectId}
         signedAt: data.signedAt,
         ipAddress: data.ipAddress,
         portalUrl: data.portalUrl,
-        supportEmail: data.supportEmail
+        supportEmail: data.supportEmail,
       };
 
       let subject = subjectTemplate.trim();
@@ -1044,8 +1063,8 @@ View project: ${adminUrl}/projects/${data.projectId}
       if (data.addedFeatures && data.addedFeatures.length > 0) {
         const eachRegex = /{{#each addedFeatures}}([\s\S]*?){{\/each}}/g;
         html = html.replace(eachRegex, (match, itemTemplate) => {
-          return data.addedFeatures!
-            .map((feature) => {
+          return data
+            .addedFeatures!.map((feature) => {
               return itemTemplate
                 .replace(/{{this\.name}}/g, feature.name)
                 .replace(/{{this\.price}}/g, feature.price);
@@ -1095,16 +1114,18 @@ This email confirms your legally binding agreement. Please keep it for your reco
         to: data.signerEmail,
         subject,
         text,
-        html
+        html,
       };
 
       return sendEmail(emailContent);
     } catch (error) {
-      console.error('[EMAIL] Failed to load proposal signed client templates:', error);
+      logger.error('[EMAIL] Failed to load proposal signed client templates:', {
+        error: error instanceof Error ? error : undefined,
+      });
       return {
         success: false,
-        message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
-  }
+  },
 };

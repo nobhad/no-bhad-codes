@@ -65,7 +65,12 @@ router.post(
     const { templateId, clientId, projectName, startDate } = req.body;
 
     if (!templateId || !clientId || !projectName || !startDate) {
-      return errorResponse(res, 'templateId, clientId, projectName, and startDate are required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(
+        res,
+        'templateId, clientId, projectName, and startDate are required',
+        400,
+        'MISSING_REQUIRED_FIELDS'
+      );
     }
 
     const result = await projectService.createProjectFromTemplate(
@@ -79,7 +84,7 @@ router.post(
       message: 'Project created from template successfully',
       projectId: result.projectId,
       milestoneIds: result.milestoneIds,
-      taskIds: result.taskIds
+      taskIds: result.taskIds,
     });
   })
 );

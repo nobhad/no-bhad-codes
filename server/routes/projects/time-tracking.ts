@@ -35,7 +35,7 @@ router.get(
       startDate: startDate as string | undefined,
       endDate: endDate as string | undefined,
       userName: userName as string | undefined,
-      taskId: taskId ? parseInt(taskId as string) : undefined
+      taskId: taskId ? parseInt(taskId as string) : undefined,
     });
 
     // Transform to frontend format (hours -> duration_minutes, billable -> is_billable)
@@ -45,7 +45,7 @@ router.get(
       is_billable: entry.billable === true,
       hourly_rate: entry.hourlyRate || null,
       user_email: entry.userName || 'admin',
-      user_name: entry.userName || 'Admin'
+      user_name: entry.userName || 'Admin',
     }));
 
     res.json({ entries: transformedEntries });
@@ -78,7 +78,7 @@ router.post(
       hourly_rate,
       hourlyRate,
       task_id,
-      taskId
+      taskId,
     } = req.body;
 
     // Calculate hours from duration_minutes if provided, otherwise use hours
@@ -88,7 +88,12 @@ router.post(
     const effectiveUserName = userName || req.user?.email || 'admin';
 
     if (!calculatedHours || !date) {
-      return errorResponse(res, 'hours (or duration_minutes) and date are required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(
+        res,
+        'hours (or duration_minutes) and date are required',
+        400,
+        'MISSING_REQUIRED_FIELDS'
+      );
     }
 
     // Normalize the data for the service
@@ -97,9 +102,9 @@ router.post(
       hours: calculatedHours,
       date,
       description: description || null,
-      billable: is_billable !== undefined ? is_billable : (billable !== undefined ? billable : true),
+      billable: is_billable !== undefined ? is_billable : billable !== undefined ? billable : true,
       hourlyRate: hourly_rate || hourlyRate || null,
-      taskId: task_id || taskId || null
+      taskId: task_id || taskId || null,
     };
 
     const entry = await projectService.logTime(projectId, normalizedData);
@@ -126,7 +131,7 @@ router.put(
       hourly_rate,
       hourlyRate,
       task_id,
-      taskId
+      taskId,
     } = req.body;
 
     // Calculate hours from duration_minutes if provided
@@ -184,10 +189,7 @@ router.get(
       return errorResponse(res, 'startDate and endDate are required', 400, 'MISSING_DATE_RANGE');
     }
 
-    const report = await projectService.getTeamTimeReport(
-      startDate as string,
-      endDate as string
-    );
+    const report = await projectService.getTeamTimeReport(startDate as string, endDate as string);
     res.json({ report });
   })
 );

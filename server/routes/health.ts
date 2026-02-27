@@ -67,7 +67,7 @@ router.get('/', async (_req: Request, res: Response) => {
     version: process.env.npm_package_version || '1.0.0',
     uptime: process.uptime(),
     traceId: getCurrentTraceId(),
-    services: {}
+    services: {},
   };
 
   // Check database connectivity
@@ -82,14 +82,14 @@ router.get('/', async (_req: Request, res: Response) => {
       latencyMs: Date.now() - dbStart,
       message: dbStats
         ? `Pool: ${dbStats.activeConnections}/${dbStats.totalConnections} active, ${dbStats.queuedRequests} queued`
-        : undefined
+        : undefined,
     };
   } catch (err) {
     health.status = 'degraded';
     health.services!.database = {
       status: 'down',
       message: (err as Error).message,
-      latencyMs: Date.now() - dbStart
+      latencyMs: Date.now() - dbStart,
     };
   }
 
@@ -98,12 +98,12 @@ router.get('/', async (_req: Request, res: Response) => {
     const emailStatus = emailService.getStatus();
     health.services!.email = {
       status: emailStatus.initialized ? 'up' : 'down',
-      message: emailStatus.initialized ? 'Configured' : 'Not configured'
+      message: emailStatus.initialized ? 'Configured' : 'Not configured',
     };
   } catch {
     health.services!.email = {
       status: 'unknown',
-      message: 'Unable to check status'
+      message: 'Unable to check status',
     };
   }
 
@@ -118,12 +118,12 @@ router.get('/', async (_req: Request, res: Response) => {
       status: schedulerStatus.isRunning ? 'up' : 'down',
       message: schedulerStatus.isRunning
         ? `Active jobs: ${activeJobs.join(', ') || 'none'}`
-        : 'Stopped'
+        : 'Stopped',
     };
   } catch {
     health.services!.scheduler = {
       status: 'unknown',
-      message: 'Unable to check status'
+      message: 'Unable to check status',
     };
   }
 
@@ -160,7 +160,7 @@ router.get('/', async (_req: Request, res: Response) => {
 router.get('/live', (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'live',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -193,22 +193,22 @@ router.get('/ready', async (_req: Request, res: Response) => {
         timestamp: new Date().toISOString(),
         details: {
           queuedRequests: dbStats.queuedRequests,
-          maxAllowed: maxQueuedRequests
-        }
+          maxAllowed: maxQueuedRequests,
+        },
       });
     }
 
     res.set('X-Response-Time', `${Date.now() - startTime}ms`);
     res.status(200).json({
       status: 'ready',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (err) {
     res.set('X-Response-Time', `${Date.now() - startTime}ms`);
     res.status(503).json({
       status: 'not_ready',
       reason: (err as Error).message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -243,15 +243,15 @@ router.get('/db', async (_req: Request, res: Response) => {
         idleConnections: 0,
         totalConnections: 0,
         maxConnections: 0,
-        queuedRequests: 0
-      }
+        queuedRequests: 0,
+      },
     });
   } catch (err) {
     res.set('X-Response-Time', `${Date.now() - startTime}ms`);
     res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      error: (err as Error).message
+      error: (err as Error).message,
     });
   }
 });

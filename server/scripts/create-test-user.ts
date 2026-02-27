@@ -60,7 +60,7 @@ async function createTestUser() {
             'medium',
             35,
             '2025-11-15',
-            '2026-02-15'
+            '2026-02-15',
           ],
           function (projErr) {
             if (projErr) {

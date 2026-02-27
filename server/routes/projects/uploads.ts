@@ -9,7 +9,7 @@ const storage = multer.diskStorage({
   filename: (_req, file, cb) => {
     const filename = sanitizeFilename(file.originalname);
     cb(null, filename);
-  }
+  },
 });
 
 // MIME type to extension mapping for validation
@@ -21,17 +21,27 @@ const MIME_TO_EXTENSIONS: Record<string, string[]> = {
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
   'text/plain': ['txt'],
   'application/zip': ['zip'],
-  'application/x-rar-compressed': ['rar']
+  'application/x-rar-compressed': ['rar'],
 };
 
 // Allowed extensions whitelist
-const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx', 'txt', 'zip', 'rar']);
+const ALLOWED_EXTENSIONS = new Set([
+  'jpg',
+  'jpeg',
+  'png',
+  'pdf',
+  'doc',
+  'docx',
+  'txt',
+  'zip',
+  'rar',
+]);
 
 export const upload = multer({
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024,
-    files: 5
+    files: 5,
   },
   fileFilter: (_req, file, cb) => {
     const fileName = file.originalname.toLowerCase();
@@ -65,5 +75,5 @@ export const upload = multer({
     }
 
     cb(null, true);
-  }
+  },
 });

@@ -35,8 +35,8 @@ import { analyticsService } from '../services/analytics-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 
 // Helper for async route handlers
-const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>) =>
-  (req: Request, res: Response) => {
+const asyncHandler =
+  (fn: (req: Request, res: Response) => Promise<void>) => (req: Request, res: Response) => {
     Promise.resolve(fn(req, res)).catch((error) => {
       logger.error('Route error', { category: 'analytics', metadata: { error } });
       errorResponse(res, 'Internal server error', 500, 'INTERNAL_ERROR');
@@ -59,7 +59,7 @@ function getDateThreshold(days: number): string {
 const trackingRateLimit = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   maxRequests: 100, // 100 requests per minute per IP
-  message: 'Too many tracking requests'
+  message: 'Too many tracking requests',
 });
 
 // Stricter rate limit for admin endpoints. Make configurable via env vars
@@ -70,7 +70,7 @@ const adminRateLimit = rateLimit({
   maxRequests: adminMaxRequests,
   // In development, skip strict admin limits to avoid local 429s
   skipIf: () => process.env.NODE_ENV === 'development',
-  message: 'Too many requests'
+  message: 'Too many requests',
 });
 
 interface TrackingPayload {
@@ -125,7 +125,8 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
     const os = uaResult.os.name || 'unknown';
 
     // Get IP address (handle proxies)
-    const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+    const ipAddress =
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
       req.socket.remoteAddress ||
       'unknown';
 
@@ -150,7 +151,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
           session.pageViews,
           session.totalTimeOnSite,
           session.bounced ? 1 : 0,
-          session.sessionId
+          session.sessionId,
         ]
       );
     } else {
@@ -177,7 +178,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
           ipAddress,
           deviceType,
           browser,
-          os
+          os,
         ]
       );
     }
@@ -197,15 +198,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
         await db.run(
           `INSERT INTO page_views (session_id, url, title, timestamp, time_on_page, scroll_depth, interactions)
            VALUES (?, ?, ?, datetime(?, 'unixepoch', 'subsec'), ?, ?, ?)`,
-          [
-            sessionId,
-            url,
-            title,
-            timestamp,
-            timeOnPage,
-            scrollDepth,
-            interactions
-          ]
+          [sessionId, url, title, timestamp, timeOnPage, scrollDepth, interactions]
         );
       } else if ('type' in event) {
         // Interaction event
@@ -219,14 +212,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
         await db.run(
           `INSERT INTO interaction_events (session_id, event_type, element, timestamp, url, data)
            VALUES (?, ?, ?, datetime(?, 'unixepoch', 'subsec'), ?, ?)`,
-          [
-            sessionId,
-            eventType,
-            element,
-            timestamp,
-            url,
-            data
-          ]
+          [sessionId, eventType, element, timestamp, url, data]
         );
       }
     }
@@ -235,15 +221,15 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
       category: 'analytics',
       metadata: {
         sessionId: session.sessionId,
-        eventCount: events.length
-      }
+        eventCount: events.length,
+      },
     });
 
     sendSuccess(res, undefined);
   } catch (error) {
     logger.error('Failed to process tracking events', {
       category: 'analytics',
-      metadata: { error }
+      metadata: { error },
     });
     errorResponse(res, 'Failed to process tracking events', 500, 'INTERNAL_ERROR');
   }
@@ -373,12 +359,12 @@ router.get(
         topReferrers,
         devices,
         browsers,
-        topInteractions
+        topInteractions,
       });
     } catch (error) {
       logger.error('Failed to get analytics summary', {
         category: 'analytics',
-        metadata: { error }
+        metadata: { error },
       });
       errorResponse(res, 'Failed to get analytics summary', 500, 'INTERNAL_ERROR');
     }
@@ -430,12 +416,12 @@ router.get(
       sendSuccess(res, {
         activeSessions: sessions.length,
         sessions,
-        recentPages
+        recentPages,
       });
     } catch (error) {
       logger.error('Failed to get realtime analytics', {
         category: 'analytics',
-        metadata: { error }
+        metadata: { error },
       });
       errorResponse(res, 'Failed to get realtime analytics', 500, 'INTERNAL_ERROR');
     }
@@ -481,14 +467,14 @@ router.delete(
 
       logger.info('Analytics data cleared', {
         category: 'analytics',
-        metadata: { deletedSessions: result.changes, olderThanDays: days }
+        metadata: { deletedSessions: result.changes, olderThanDays: days },
       });
 
       sendSuccess(res, { deletedSessions: result.changes });
     } catch (error) {
       logger.error('Failed to clear analytics data', {
         category: 'analytics',
-        metadata: { error }
+        metadata: { error },
       });
       errorResponse(res, 'Failed to clear analytics data', 500, 'INTERNAL_ERROR');
     }
@@ -561,13 +547,16 @@ router.get(
           page: pageNum,
           limit: limitNum,
           total,
-          totalPages: typeof total === 'number' && typeof limitNum === 'number' ? Math.ceil(total / limitNum) : 0
-        }
+          totalPages:
+            typeof total === 'number' && typeof limitNum === 'number'
+              ? Math.ceil(total / limitNum)
+              : 0,
+        },
       });
     } catch (error) {
       logger.error('Failed to get sessions list', {
         category: 'analytics',
-        metadata: { error }
+        metadata: { error },
       });
       errorResponse(res, 'Failed to get sessions list', 500, 'INTERNAL_ERROR');
     }
@@ -594,10 +583,9 @@ router.get(
       const { sessionId } = req.params;
 
       // Get session
-      const session = await db.get(
-        'SELECT * FROM visitor_sessions WHERE session_id = ?',
-        [sessionId]
-      );
+      const session = await db.get('SELECT * FROM visitor_sessions WHERE session_id = ?', [
+        sessionId,
+      ]);
 
       if (!session) {
         return errorResponse(res, 'Session not found', 404, 'RESOURCE_NOT_FOUND');
@@ -624,12 +612,12 @@ router.get(
       sendSuccess(res, {
         session,
         pageViews,
-        interactions
+        interactions,
       });
     } catch (error) {
       logger.error('Failed to get session details', {
         category: 'analytics',
-        metadata: { error }
+        metadata: { error },
       });
       errorResponse(res, 'Failed to get session details', 500, 'INTERNAL_ERROR');
     }
@@ -687,11 +675,11 @@ router.get(
         summary: {
           totalSessions: sessions.length,
           totalPageViews: pageViews.length,
-          totalInteractions: interactions.length
+          totalInteractions: interactions.length,
         },
         sessions,
         pageViews,
-        interactions
+        interactions,
       };
 
       // Set headers for file download
@@ -705,7 +693,7 @@ router.get(
     } catch (error) {
       logger.error('Failed to export analytics data', {
         category: 'analytics',
-        metadata: { error }
+        metadata: { error },
       });
       errorResponse(res, 'Failed to export analytics data', 500, 'INTERNAL_ERROR');
     }
@@ -720,101 +708,136 @@ router.get(
  * GET /api/analytics/reports
  * Get all saved reports
  */
-router.get('/reports', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const { type, favorites } = req.query;
-  const reports = await analyticsService.getSavedReports(
-    type as string | undefined,
-    favorites === 'true'
-  );
-  sendSuccess(res, { reports });
-}));
+router.get(
+  '/reports',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { type, favorites } = req.query;
+    const reports = await analyticsService.getSavedReports(
+      type as string | undefined,
+      favorites === 'true'
+    );
+    sendSuccess(res, { reports });
+  })
+);
 
 /**
  * POST /api/analytics/reports
  * Create a new saved report
  */
-router.post('/reports', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
-  const report = await analyticsService.createSavedReport({
-    ...req.body,
-    createdBy: userEmail
-  });
-  sendCreated(res, { report });
-}));
+router.post(
+  '/reports',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+    const report = await analyticsService.createSavedReport({
+      ...req.body,
+      createdBy: userEmail,
+    });
+    sendCreated(res, { report });
+  })
+);
 
 /**
  * GET /api/analytics/reports/:id
  * Get a specific saved report
  */
-router.get('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const reportId = parseInt(req.params.id, 10);
-  if (isNaN(reportId) || reportId <= 0) {
-    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  const report = await analyticsService.getSavedReport(reportId);
-  if (!report) {
-    errorResponse(res, 'Report not found', 404, 'RESOURCE_NOT_FOUND');
-    return;
-  }
-  sendSuccess(res, { report });
-}));
+router.get(
+  '/reports/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const reportId = parseInt(req.params.id, 10);
+    if (isNaN(reportId) || reportId <= 0) {
+      errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    const report = await analyticsService.getSavedReport(reportId);
+    if (!report) {
+      errorResponse(res, 'Report not found', 404, 'RESOURCE_NOT_FOUND');
+      return;
+    }
+    sendSuccess(res, { report });
+  })
+);
 
 /**
  * PUT /api/analytics/reports/:id
  * Update a saved report
  */
-router.put('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const reportId = parseInt(req.params.id, 10);
-  if (isNaN(reportId) || reportId <= 0) {
-    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  const report = await analyticsService.updateSavedReport(reportId, req.body);
-  sendSuccess(res, { report });
-}));
+router.put(
+  '/reports/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const reportId = parseInt(req.params.id, 10);
+    if (isNaN(reportId) || reportId <= 0) {
+      errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    const report = await analyticsService.updateSavedReport(reportId, req.body);
+    sendSuccess(res, { report });
+  })
+);
 
 /**
  * DELETE /api/analytics/reports/:id
  * Delete a saved report
  */
-router.delete('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const reportId = parseInt(req.params.id, 10);
-  if (isNaN(reportId) || reportId <= 0) {
-    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  await analyticsService.deleteSavedReport(reportId);
-  sendSuccess(res, undefined);
-}));
+router.delete(
+  '/reports/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const reportId = parseInt(req.params.id, 10);
+    if (isNaN(reportId) || reportId <= 0) {
+      errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    await analyticsService.deleteSavedReport(reportId);
+    sendSuccess(res, undefined);
+  })
+);
 
 /**
  * POST /api/analytics/reports/:id/favorite
  * Toggle report favorite status
  */
-router.post('/reports/:id/favorite', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const reportId = parseInt(req.params.id, 10);
-  if (isNaN(reportId) || reportId <= 0) {
-    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  const report = await analyticsService.toggleReportFavorite(reportId);
-  sendSuccess(res, { report });
-}));
+router.post(
+  '/reports/:id/favorite',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const reportId = parseInt(req.params.id, 10);
+    if (isNaN(reportId) || reportId <= 0) {
+      errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    const report = await analyticsService.toggleReportFavorite(reportId);
+    sendSuccess(res, { report });
+  })
+);
 
 /**
  * POST /api/analytics/reports/:id/run
  * Run a saved report and get results
  */
-router.post('/reports/:id/run', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const reportId = parseInt(req.params.id, 10);
-  if (isNaN(reportId) || reportId <= 0) {
-    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  const result = await analyticsService.runReport(reportId);
-  sendSuccess(res, result);
-}));
+router.post(
+  '/reports/:id/run',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const reportId = parseInt(req.params.id, 10);
+    if (isNaN(reportId) || reportId <= 0) {
+      errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    const result = await analyticsService.runReport(reportId);
+    sendSuccess(res, result);
+  })
+);
 
 // =====================================================
 // REPORT SCHEDULES ENDPOINTS
@@ -824,71 +847,96 @@ router.post('/reports/:id/run', authenticateToken, requireAdmin, asyncHandler(as
  * GET /api/analytics/reports/:reportId/schedules
  * Get schedules for a report
  */
-router.get('/reports/:reportId/schedules', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const reportId = parseInt(req.params.reportId, 10);
-  if (isNaN(reportId) || reportId <= 0) {
-    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  const schedules = await analyticsService.getReportSchedules(reportId);
-  sendSuccess(res, { schedules });
-}));
+router.get(
+  '/reports/:reportId/schedules',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const reportId = parseInt(req.params.reportId, 10);
+    if (isNaN(reportId) || reportId <= 0) {
+      errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    const schedules = await analyticsService.getReportSchedules(reportId);
+    sendSuccess(res, { schedules });
+  })
+);
 
 /**
  * POST /api/analytics/reports/:reportId/schedules
  * Create a schedule for a report
  */
-router.post('/reports/:reportId/schedules', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const reportId = parseInt(req.params.reportId, 10);
-  if (isNaN(reportId) || reportId <= 0) {
-    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
-  const schedule = await analyticsService.createReportSchedule({
-    ...req.body,
-    reportId,
-    createdBy: userEmail
-  });
-  sendCreated(res, { schedule });
-}));
+router.post(
+  '/reports/:reportId/schedules',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const reportId = parseInt(req.params.reportId, 10);
+    if (isNaN(reportId) || reportId <= 0) {
+      errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+    const schedule = await analyticsService.createReportSchedule({
+      ...req.body,
+      reportId,
+      createdBy: userEmail,
+    });
+    sendCreated(res, { schedule });
+  })
+);
 
 /**
  * PUT /api/analytics/schedules/:id
  * Update a report schedule
  */
-router.put('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const scheduleId = parseInt(req.params.id, 10);
-  if (isNaN(scheduleId) || scheduleId <= 0) {
-    errorResponse(res, 'Invalid schedule ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  const schedule = await analyticsService.updateReportSchedule(scheduleId, req.body);
-  sendSuccess(res, { schedule });
-}));
+router.put(
+  '/schedules/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const scheduleId = parseInt(req.params.id, 10);
+    if (isNaN(scheduleId) || scheduleId <= 0) {
+      errorResponse(res, 'Invalid schedule ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    const schedule = await analyticsService.updateReportSchedule(scheduleId, req.body);
+    sendSuccess(res, { schedule });
+  })
+);
 
 /**
  * DELETE /api/analytics/schedules/:id
  * Delete a report schedule
  */
-router.delete('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const scheduleId = parseInt(req.params.id, 10);
-  if (isNaN(scheduleId) || scheduleId <= 0) {
-    errorResponse(res, 'Invalid schedule ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  await analyticsService.deleteReportSchedule(scheduleId);
-  sendSuccess(res, undefined);
-}));
+router.delete(
+  '/schedules/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const scheduleId = parseInt(req.params.id, 10);
+    if (isNaN(scheduleId) || scheduleId <= 0) {
+      errorResponse(res, 'Invalid schedule ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    await analyticsService.deleteReportSchedule(scheduleId);
+    sendSuccess(res, undefined);
+  })
+);
 
 /**
  * POST /api/analytics/schedules/process
  * Process all due scheduled reports
  */
-router.post('/schedules/process', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const processed = await analyticsService.processDueSchedules();
-  sendSuccess(res, { processed });
-}));
+router.post(
+  '/schedules/process',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const processed = await analyticsService.processDueSchedules();
+    sendSuccess(res, { processed });
+  })
+);
 
 // =====================================================
 // DASHBOARD WIDGETS ENDPOINTS
@@ -898,87 +946,122 @@ router.post('/schedules/process', authenticateToken, requireAdmin, asyncHandler(
  * GET /api/analytics/widgets
  * Get user's dashboard widgets
  */
-router.get('/widgets', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
-  const widgets = await analyticsService.getDashboardWidgets(userEmail);
-  sendSuccess(res, { widgets });
-}));
+router.get(
+  '/widgets',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+    const widgets = await analyticsService.getDashboardWidgets(userEmail);
+    sendSuccess(res, { widgets });
+  })
+);
 
 /**
  * POST /api/analytics/widgets
  * Create a dashboard widget
  */
-router.post('/widgets', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
-  const widget = await analyticsService.createDashboardWidget({
-    ...req.body,
-    userEmail
-  });
-  sendCreated(res, { widget });
-}));
+router.post(
+  '/widgets',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+    const widget = await analyticsService.createDashboardWidget({
+      ...req.body,
+      userEmail,
+    });
+    sendCreated(res, { widget });
+  })
+);
 
 /**
  * PUT /api/analytics/widgets/:id
  * Update a dashboard widget
  */
-router.put('/widgets/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const widgetId = parseInt(req.params.id, 10);
-  if (isNaN(widgetId) || widgetId <= 0) {
-    errorResponse(res, 'Invalid widget ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  const widget = await analyticsService.updateDashboardWidget(widgetId, req.body);
-  sendSuccess(res, { widget });
-}));
+router.put(
+  '/widgets/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const widgetId = parseInt(req.params.id, 10);
+    if (isNaN(widgetId) || widgetId <= 0) {
+      errorResponse(res, 'Invalid widget ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    const widget = await analyticsService.updateDashboardWidget(widgetId, req.body);
+    sendSuccess(res, { widget });
+  })
+);
 
 /**
  * DELETE /api/analytics/widgets/:id
  * Delete a dashboard widget
  */
-router.delete('/widgets/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const widgetId = parseInt(req.params.id, 10);
-  if (isNaN(widgetId) || widgetId <= 0) {
-    errorResponse(res, 'Invalid widget ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  await analyticsService.deleteDashboardWidget(widgetId);
-  sendSuccess(res, undefined);
-}));
+router.delete(
+  '/widgets/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const widgetId = parseInt(req.params.id, 10);
+    if (isNaN(widgetId) || widgetId <= 0) {
+      errorResponse(res, 'Invalid widget ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    await analyticsService.deleteDashboardWidget(widgetId);
+    sendSuccess(res, undefined);
+  })
+);
 
 /**
  * PUT /api/analytics/widgets/layout
  * Update widget layout (positions/sizes)
  */
-router.put('/widgets/layout', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
-  const { widgets } = req.body;
-  await analyticsService.updateWidgetLayout(userEmail, widgets);
-  sendSuccess(res, undefined);
-}));
+router.put(
+  '/widgets/layout',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+    const { widgets } = req.body;
+    await analyticsService.updateWidgetLayout(userEmail, widgets);
+    sendSuccess(res, undefined);
+  })
+);
 
 /**
  * GET /api/analytics/widgets/presets
  * Get available dashboard presets
  */
-router.get('/widgets/presets', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const presets = await analyticsService.getDashboardPresets();
-  sendSuccess(res, { presets });
-}));
+router.get(
+  '/widgets/presets',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const presets = await analyticsService.getDashboardPresets();
+    sendSuccess(res, { presets });
+  })
+);
 
 /**
  * POST /api/analytics/widgets/presets/:id/apply
  * Apply a dashboard preset
  */
-router.post('/widgets/presets/:id/apply', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const presetId = parseInt(req.params.id, 10);
-  if (isNaN(presetId) || presetId <= 0) {
-    errorResponse(res, 'Invalid preset ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
-  const widgets = await analyticsService.applyDashboardPreset(userEmail, presetId);
-  sendSuccess(res, { widgets });
-}));
+router.post(
+  '/widgets/presets/:id/apply',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const presetId = parseInt(req.params.id, 10);
+    if (isNaN(presetId) || presetId <= 0) {
+      errorResponse(res, 'Invalid preset ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+    const widgets = await analyticsService.applyDashboardPreset(userEmail, presetId);
+    sendSuccess(res, { widgets });
+  })
+);
 
 // =====================================================
 // KPI SNAPSHOTS ENDPOINTS
@@ -988,37 +1071,52 @@ router.post('/widgets/presets/:id/apply', authenticateToken, requireAdmin, async
  * POST /api/analytics/kpis/snapshot
  * Capture a KPI snapshot
  */
-router.post('/kpis/snapshot', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  await analyticsService.captureKPISnapshot();
-  sendSuccess(res, undefined);
-}));
+router.post(
+  '/kpis/snapshot',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    await analyticsService.captureKPISnapshot();
+    sendSuccess(res, undefined);
+  })
+);
 
 /**
  * GET /api/analytics/kpis/latest
  * Get latest KPI values
  */
-router.get('/kpis/latest', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const kpis = await analyticsService.getLatestKPIs();
-  sendSuccess(res, { kpis });
-}));
+router.get(
+  '/kpis/latest',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const kpis = await analyticsService.getLatestKPIs();
+    sendSuccess(res, { kpis });
+  })
+);
 
 /**
  * GET /api/analytics/kpis/:type/trend
  * Get KPI trend over time
  */
-router.get('/kpis/:type/trend', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const { days = '30' } = req.query;
-  const daysNum = parseInt(days as string, 10);
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - daysNum);
+router.get(
+  '/kpis/:type/trend',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { days = '30' } = req.query;
+    const daysNum = parseInt(days as string, 10);
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysNum);
 
-  const trend = await analyticsService.getKPITrend(
-    req.params.type,
-    { start: startDate.toISOString().split('T')[0], end: endDate.toISOString().split('T')[0] }
-  );
-  sendSuccess(res, { trend });
-}));
+    const trend = await analyticsService.getKPITrend(req.params.type, {
+      start: startDate.toISOString().split('T')[0],
+      end: endDate.toISOString().split('T')[0],
+    });
+    sendSuccess(res, { trend });
+  })
+);
 
 // =====================================================
 // METRIC ALERTS ENDPOINTS
@@ -1028,60 +1126,85 @@ router.get('/kpis/:type/trend', authenticateToken, requireAdmin, asyncHandler(as
  * GET /api/analytics/alerts
  * Get all metric alerts
  */
-router.get('/alerts', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const alerts = await analyticsService.getMetricAlerts();
-  sendSuccess(res, { alerts });
-}));
+router.get(
+  '/alerts',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const alerts = await analyticsService.getMetricAlerts();
+    sendSuccess(res, { alerts });
+  })
+);
 
 /**
  * POST /api/analytics/alerts
  * Create a metric alert
  */
-router.post('/alerts', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
-  const alert = await analyticsService.createMetricAlert({
-    ...req.body,
-    createdBy: userEmail
-  });
-  sendCreated(res, { alert });
-}));
+router.post(
+  '/alerts',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+    const alert = await analyticsService.createMetricAlert({
+      ...req.body,
+      createdBy: userEmail,
+    });
+    sendCreated(res, { alert });
+  })
+);
 
 /**
  * PUT /api/analytics/alerts/:id
  * Update a metric alert
  */
-router.put('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const alertId = parseInt(req.params.id, 10);
-  if (isNaN(alertId) || alertId <= 0) {
-    errorResponse(res, 'Invalid alert ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  const alert = await analyticsService.updateMetricAlert(alertId, req.body);
-  sendSuccess(res, { alert });
-}));
+router.put(
+  '/alerts/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const alertId = parseInt(req.params.id, 10);
+    if (isNaN(alertId) || alertId <= 0) {
+      errorResponse(res, 'Invalid alert ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    const alert = await analyticsService.updateMetricAlert(alertId, req.body);
+    sendSuccess(res, { alert });
+  })
+);
 
 /**
  * DELETE /api/analytics/alerts/:id
  * Delete a metric alert
  */
-router.delete('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const alertId = parseInt(req.params.id, 10);
-  if (isNaN(alertId) || alertId <= 0) {
-    errorResponse(res, 'Invalid alert ID', 400, 'VALIDATION_ERROR');
-    return;
-  }
-  await analyticsService.deleteMetricAlert(alertId);
-  sendSuccess(res, undefined);
-}));
+router.delete(
+  '/alerts/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const alertId = parseInt(req.params.id, 10);
+    if (isNaN(alertId) || alertId <= 0) {
+      errorResponse(res, 'Invalid alert ID', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    await analyticsService.deleteMetricAlert(alertId);
+    sendSuccess(res, undefined);
+  })
+);
 
 /**
  * POST /api/analytics/alerts/check
  * Check all alerts for triggers
  */
-router.post('/alerts/check', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const triggered = await analyticsService.checkAlertTriggers();
-  sendSuccess(res, { triggered });
-}));
+router.post(
+  '/alerts/check',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const triggered = await analyticsService.checkAlertTriggers();
+    sendSuccess(res, { triggered });
+  })
+);
 
 // =====================================================
 // QUICK ANALYTICS ENDPOINTS
@@ -1091,62 +1214,92 @@ router.post('/alerts/check', authenticateToken, requireAdmin, asyncHandler(async
  * GET /api/analytics/quick/revenue
  * Quick revenue analytics
  */
-router.get('/quick/revenue', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const { days = '30' } = req.query;
-  const analytics = await analyticsService.getRevenueAnalytics(parseInt(days as string, 10));
-  sendSuccess(res, analytics);
-}));
+router.get(
+  '/quick/revenue',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { days = '30' } = req.query;
+    const analytics = await analyticsService.getRevenueAnalytics(parseInt(days as string, 10));
+    sendSuccess(res, analytics);
+  })
+);
 
 /**
  * GET /api/analytics/quick/pipeline
  * Quick pipeline analytics
  */
-router.get('/quick/pipeline', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const analytics = await analyticsService.getPipelineAnalytics();
-  sendSuccess(res, analytics);
-}));
+router.get(
+  '/quick/pipeline',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const analytics = await analyticsService.getPipelineAnalytics();
+    sendSuccess(res, analytics);
+  })
+);
 
 /**
  * GET /api/analytics/quick/projects
  * Quick project analytics
  */
-router.get('/quick/projects', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const { days = '30' } = req.query;
-  const analytics = await analyticsService.getProjectAnalytics(parseInt(days as string, 10));
-  sendSuccess(res, analytics);
-}));
+router.get(
+  '/quick/projects',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { days = '30' } = req.query;
+    const analytics = await analyticsService.getProjectAnalytics(parseInt(days as string, 10));
+    sendSuccess(res, analytics);
+  })
+);
 
 /**
  * GET /api/analytics/quick/clients
  * Quick client analytics
  */
-router.get('/quick/clients', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const analytics = await analyticsService.getClientAnalytics();
-  sendSuccess(res, analytics);
-}));
+router.get(
+  '/quick/clients',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const analytics = await analyticsService.getClientAnalytics();
+    sendSuccess(res, analytics);
+  })
+);
 
 /**
  * GET /api/analytics/quick/team
  * Quick team performance analytics
  */
-router.get('/quick/team', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const { days = '30' } = req.query;
-  const analytics = await analyticsService.getTeamAnalytics(parseInt(days as string, 10));
-  sendSuccess(res, analytics);
-}));
+router.get(
+  '/quick/team',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { days = '30' } = req.query;
+    const analytics = await analyticsService.getTeamAnalytics(parseInt(days as string, 10));
+    sendSuccess(res, analytics);
+  })
+);
 
 /**
  * GET /api/analytics/report-runs
  * Get report run history
  */
-router.get('/report-runs', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const { reportId, limit = '50' } = req.query;
-  const runs = await analyticsService.getReportRuns(
-    reportId ? parseInt(reportId as string, 10) : undefined,
-    parseInt(limit as string, 10)
-  );
-  sendSuccess(res, { runs });
-}));
+router.get(
+  '/report-runs',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { reportId, limit = '50' } = req.query;
+    const runs = await analyticsService.getReportRuns(
+      reportId ? parseInt(reportId as string, 10) : undefined,
+      parseInt(limit as string, 10)
+    );
+    sendSuccess(res, { runs });
+  })
+);
 
 // =====================================================
 // SECTION 8.1: BUSINESS INTELLIGENCE ENDPOINTS
@@ -1156,47 +1309,67 @@ router.get('/report-runs', authenticateToken, requireAdmin, asyncHandler(async (
  * GET /api/analytics/bi/revenue/:period
  * Get revenue breakdown by time period
  */
-router.get('/bi/revenue/:period', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const period = req.params.period as 'month' | 'quarter' | 'year';
-  const { startDate, endDate } = req.query;
-  const data = await analyticsService.getRevenueByPeriod(
-    period,
-    startDate as string | undefined,
-    endDate as string | undefined
-  );
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/bi/revenue/:period',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const period = req.params.period as 'month' | 'quarter' | 'year';
+    const { startDate, endDate } = req.query;
+    const data = await analyticsService.getRevenueByPeriod(
+      period,
+      startDate as string | undefined,
+      endDate as string | undefined
+    );
+    sendSuccess(res, { data });
+  })
+);
 
 /**
  * GET /api/analytics/bi/pipeline
  * Get project pipeline value
  */
-router.get('/bi/pipeline', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const data = await analyticsService.getProjectPipelineValue();
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/bi/pipeline',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const data = await analyticsService.getProjectPipelineValue();
+    sendSuccess(res, { data });
+  })
+);
 
 /**
  * GET /api/analytics/bi/funnel
  * Get client acquisition funnel
  */
-router.get('/bi/funnel', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const { startDate, endDate } = req.query;
-  const data = await analyticsService.getAcquisitionFunnel(
-    startDate as string | undefined,
-    endDate as string | undefined
-  );
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/bi/funnel',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { startDate, endDate } = req.query;
+    const data = await analyticsService.getAcquisitionFunnel(
+      startDate as string | undefined,
+      endDate as string | undefined
+    );
+    sendSuccess(res, { data });
+  })
+);
 
 /**
  * GET /api/analytics/bi/project-stats
  * Get project statistics
  */
-router.get('/bi/project-stats', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const data = await analyticsService.getProjectStatistics();
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/bi/project-stats',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const data = await analyticsService.getProjectStatistics();
+    sendSuccess(res, { data });
+  })
+);
 
 // =====================================================
 // SECTION 8.2: CLIENT INSIGHTS ENDPOINTS
@@ -1206,30 +1379,45 @@ router.get('/bi/project-stats', authenticateToken, requireAdmin, asyncHandler(as
  * GET /api/analytics/clients/ltv
  * Get client lifetime value
  */
-router.get('/clients/ltv', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const { limit = '20' } = req.query;
-  const data = await analyticsService.getClientLifetimeValue(parseInt(limit as string, 10));
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/clients/ltv',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { limit = '20' } = req.query;
+    const data = await analyticsService.getClientLifetimeValue(parseInt(limit as string, 10));
+    sendSuccess(res, { data });
+  })
+);
 
 /**
  * GET /api/analytics/clients/activity-scores
  * Get client activity scores
  */
-router.get('/clients/activity-scores', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const { limit = '20' } = req.query;
-  const data = await analyticsService.getClientActivityScores(parseInt(limit as string, 10));
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/clients/activity-scores',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { limit = '20' } = req.query;
+    const data = await analyticsService.getClientActivityScores(parseInt(limit as string, 10));
+    sendSuccess(res, { data });
+  })
+);
 
 /**
  * GET /api/analytics/clients/upsell
  * Get upsell opportunities
  */
-router.get('/clients/upsell', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const data = await analyticsService.getUpsellOpportunities();
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/clients/upsell',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const data = await analyticsService.getUpsellOpportunities();
+    sendSuccess(res, { data });
+  })
+);
 
 // =====================================================
 // SECTION 8.3: OPERATIONAL REPORTS ENDPOINTS
@@ -1239,36 +1427,56 @@ router.get('/clients/upsell', authenticateToken, requireAdmin, asyncHandler(asyn
  * GET /api/analytics/reports/overdue-invoices
  * Get overdue invoices report
  */
-router.get('/reports/overdue-invoices', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const data = await analyticsService.getOverdueInvoicesReport();
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/reports/overdue-invoices',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const data = await analyticsService.getOverdueInvoicesReport();
+    sendSuccess(res, { data });
+  })
+);
 
 /**
  * GET /api/analytics/reports/pending-approvals
  * Get pending approvals aging report
  */
-router.get('/reports/pending-approvals', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const data = await analyticsService.getPendingApprovalsReport();
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/reports/pending-approvals',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const data = await analyticsService.getPendingApprovalsReport();
+    sendSuccess(res, { data });
+  })
+);
 
 /**
  * GET /api/analytics/reports/document-requests
  * Get document requests status report
  */
-router.get('/reports/document-requests', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const data = await analyticsService.getDocumentRequestsStatusReport();
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/reports/document-requests',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const data = await analyticsService.getDocumentRequestsStatusReport();
+    sendSuccess(res, { data });
+  })
+);
 
 /**
  * GET /api/analytics/reports/project-health
  * Get project health summary
  */
-router.get('/reports/project-health', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const data = await analyticsService.getProjectHealthSummary();
-  sendSuccess(res, { data });
-}));
+router.get(
+  '/reports/project-health',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const data = await analyticsService.getProjectHealthSummary();
+    sendSuccess(res, { data });
+  })
+);
 
 export default router;

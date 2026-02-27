@@ -45,7 +45,7 @@ export async function canAccessProject(
   const db = getDatabase();
   const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
     projectId,
-    req.user?.id
+    req.user?.id,
   ]);
 
   return !!row;
@@ -65,7 +65,7 @@ export async function canAccessInvoice(
   const db = getDatabase();
   const row = await db.get('SELECT 1 FROM invoices WHERE id = ? AND client_id = ?', [
     invoiceId,
-    req.user?.id
+    req.user?.id,
   ]);
 
   return !!row;
@@ -74,10 +74,7 @@ export async function canAccessInvoice(
 /**
  * Check if user can access a specific file
  */
-export async function canAccessFile(
-  req: AuthenticatedRequest,
-  fileId: number
-): Promise<boolean> {
+export async function canAccessFile(req: AuthenticatedRequest, fileId: number): Promise<boolean> {
   if (await isUserAdmin(req)) {
     return true;
   }
@@ -120,10 +117,7 @@ export async function canAccessFolder(
 /**
  * Check if user can access a specific task
  */
-export async function canAccessTask(
-  req: AuthenticatedRequest,
-  taskId: number
-): Promise<boolean> {
+export async function canAccessTask(req: AuthenticatedRequest, taskId: number): Promise<boolean> {
   if (await isUserAdmin(req)) {
     return true;
   }
@@ -313,13 +307,14 @@ export async function getClientIdFromEntity(
     invoice: 'SELECT client_id FROM invoices WHERE id = ?',
     file: 'SELECT p.client_id FROM files f JOIN projects p ON f.project_id = p.id WHERE f.id = ?',
     task: 'SELECT p.client_id FROM project_tasks t JOIN projects p ON t.project_id = p.id WHERE t.id = ?',
-    milestone: 'SELECT p.client_id FROM milestones m JOIN projects p ON m.project_id = p.id WHERE m.id = ?',
-    thread: 'SELECT client_id FROM message_threads WHERE id = ?'
+    milestone:
+      'SELECT p.client_id FROM milestones m JOIN projects p ON m.project_id = p.id WHERE m.id = ?',
+    thread: 'SELECT client_id FROM message_threads WHERE id = ?',
   };
 
   const query = queries[entityType];
   if (!query) return null;
 
-  const row = await db.get(query, [entityId]) as { client_id?: number } | undefined;
+  const row = (await db.get(query, [entityId])) as { client_id?: number } | undefined;
   return row?.client_id ?? null;
 }

@@ -9,6 +9,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { userService } from './user-service.js';
+import { logger } from './logger.js';
 
 // =====================================================
 // TYPES
@@ -137,7 +138,7 @@ class DocumentRequestService {
         data.document_type || 'general',
         data.priority || 'normal',
         data.due_date || null,
-        data.is_required !== false ? 1 : 0
+        data.is_required !== false ? 1 : 0,
       ]
     );
 
@@ -176,7 +177,7 @@ class DocumentRequestService {
         description: template.description,
         document_type: template.document_type,
         is_required: template.is_required,
-        due_date: dueDate.toISOString().split('T')[0]
+        due_date: dueDate.toISOString().split('T')[0],
       });
 
       requests.push(request);
@@ -210,10 +211,7 @@ class DocumentRequestService {
   /**
    * Get all requests for a client
    */
-  async getClientRequests(
-    clientId: number,
-    status?: RequestStatus
-  ): Promise<DocumentRequest[]> {
+  async getClientRequests(clientId: number, status?: RequestStatus): Promise<DocumentRequest[]> {
     const db = await getDatabase();
 
     let query = `
@@ -232,7 +230,8 @@ class DocumentRequestService {
       params.push(status);
     }
 
-    query += ' ORDER BY CASE WHEN dr.due_date IS NULL THEN 1 ELSE 0 END, dr.due_date ASC, dr.created_at DESC';
+    query +=
+      ' ORDER BY CASE WHEN dr.due_date IS NULL THEN 1 ELSE 0 END, dr.due_date ASC, dr.created_at DESC';
 
     const requests = await db.all(query, params);
     return requests as unknown as DocumentRequest[];
@@ -305,7 +304,7 @@ class DocumentRequestService {
     // Only update if currently in 'requested' status
     if (request.status === 'requested') {
       await db.run(
-        'UPDATE document_requests SET status = \'viewed\', updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        "UPDATE document_requests SET status = 'viewed', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
         [id]
       );
 
@@ -427,7 +426,7 @@ class DocumentRequestService {
 
     await this.logHistory(id, 'approved', oldStatus, 'approved', reviewerEmail, 'admin', notes);
 
-    const updatedRequest = await this.getRequest(id) as DocumentRequest;
+    const updatedRequest = (await this.getRequest(id)) as DocumentRequest;
     return { request: updatedRequest, approvedFileId };
   }
 
@@ -458,14 +457,14 @@ class DocumentRequestService {
     }
 
     // Get the original uploaded file info
-    const originalFile = await db.get(
+    const originalFile = (await db.get(
       `SELECT id, project_id, filename, original_filename, file_path, file_size, mime_type, file_type
        FROM files WHERE id = ?`,
       [request.file_id]
-    ) as FileRecord | undefined;
+    )) as FileRecord | undefined;
 
     if (!originalFile) {
-      console.warn(`[DocumentRequest] Original file not found: ${request.file_id}`);
+      logger.warn(`[DocumentRequest] Original file not found: ${request.file_id}`);
       return null;
     }
 
@@ -473,7 +472,9 @@ class DocumentRequestService {
     const projectId = request.project_id;
 
     if (!projectId) {
-      console.warn(`[DocumentRequest] No project_id for request ${request.id}, cannot copy file to Files tab`);
+      logger.warn(
+        `[DocumentRequest] No project_id for request ${request.id}, cannot copy file to Files tab`
+      );
       return null;
     }
 
@@ -505,13 +506,15 @@ class DocumentRequestService {
         originalFile.file_type || 'document',
         `Document Request: ${request.title}`,
         reviewerEmail,
-        'forms' // Category for approved document request files
+        'forms', // Category for approved document request files
       ]
     );
 
     const newFileId = result.lastID;
 
-    console.log(`[DocumentRequest] Copied file ${request.file_id} to Files tab as file ${newFileId}`);
+    logger.info(
+      `[DocumentRequest] Copied file ${request.file_id} to Files tab as file ${newFileId}`
+    );
 
     return newFileId || null;
   }
@@ -519,11 +522,7 @@ class DocumentRequestService {
   /**
    * Reject a document request
    */
-  async rejectRequest(
-    id: number,
-    reviewerEmail: string,
-    reason: string
-  ): Promise<DocumentRequest> {
+  async rejectRequest(id: number, reviewerEmail: string, reason: string): Promise<DocumentRequest> {
     const db = await getDatabase();
     const request = await this.getRequest(id);
 
@@ -677,9 +676,7 @@ class DocumentRequestService {
    */
   async getTemplates(): Promise<DocumentRequestTemplate[]> {
     const db = await getDatabase();
-    const templates = await db.all(
-      'SELECT * FROM document_request_templates ORDER BY name'
-    );
+    const templates = await db.all('SELECT * FROM document_request_templates ORDER BY name');
     return templates as unknown as DocumentRequestTemplate[];
   }
 
@@ -688,10 +685,7 @@ class DocumentRequestService {
    */
   async getTemplate(id: number): Promise<DocumentRequestTemplate | null> {
     const db = await getDatabase();
-    const template = await db.get(
-      'SELECT * FROM document_request_templates WHERE id = ?',
-      [id]
-    );
+    const template = await db.get('SELECT * FROM document_request_templates WHERE id = ?', [id]);
     return (template as unknown as DocumentRequestTemplate) || null;
   }
 
@@ -720,7 +714,7 @@ class DocumentRequestService {
         data.document_type || 'general',
         data.is_required !== false ? 1 : 0,
         data.days_until_due || 7,
-        data.created_by || null
+        data.created_by || null,
       ]
     );
 
@@ -756,9 +750,9 @@ class DocumentRequestService {
         data.title || template.title,
         data.description !== undefined ? data.description : template.description,
         data.document_type || template.document_type,
-        data.is_required !== undefined ? (data.is_required ? 1 : 0) : (template.is_required ? 1 : 0),
+        data.is_required !== undefined ? (data.is_required ? 1 : 0) : template.is_required ? 1 : 0,
         data.days_until_due || template.days_until_due,
-        id
+        id,
       ]
     );
 
@@ -791,7 +785,7 @@ class DocumentRequestService {
       brand_assets: [],
       content: [],
       legal: [],
-      technical: []
+      technical: [],
     };
 
     for (const template of templates as unknown as DocumentRequestTemplate[]) {
@@ -832,11 +826,9 @@ class DocumentRequestService {
   ): Promise<DocumentRequest[]> {
     const templates = await this.getTemplatesByProjectType(projectType);
 
-    const filteredTemplates = requiredOnly
-      ? templates.filter(t => t.is_required)
-      : templates;
+    const filteredTemplates = requiredOnly ? templates.filter((t) => t.is_required) : templates;
 
-    const templateIds = filteredTemplates.map(t => t.id);
+    const templateIds = filteredTemplates.map((t) => t.id);
 
     return this.createFromTemplates(clientId, templateIds, requestedBy, projectId);
   }
@@ -900,7 +892,7 @@ class DocumentRequestService {
   }> {
     const db = await getDatabase();
 
-    const stats = await db.get(
+    const stats = (await db.get(
       `SELECT
          COUNT(*) as total,
          SUM(CASE WHEN status IN ('requested', 'viewed') THEN 1 ELSE 0 END) as pending,
@@ -911,7 +903,14 @@ class DocumentRequestService {
        FROM document_requests
        WHERE client_id = ?`,
       [clientId]
-    ) as { total: number; pending: number; uploaded: number; approved: number; rejected: number; overdue: number };
+    )) as {
+      total: number;
+      pending: number;
+      uploaded: number;
+      approved: number;
+      rejected: number;
+      overdue: number;
+    };
 
     return {
       total: stats?.total || 0,
@@ -919,7 +918,7 @@ class DocumentRequestService {
       uploaded: stats?.uploaded || 0,
       approved: stats?.approved || 0,
       rejected: stats?.rejected || 0,
-      overdue: stats?.overdue || 0
+      overdue: stats?.overdue || 0,
     };
   }
 }

@@ -65,10 +65,9 @@ class UserService {
     }
 
     const db = await getDatabase();
-    const user = await db.get(
-      'SELECT id FROM users WHERE LOWER(email) = ?',
-      [normalizedEmail]
-    ) as { id: number } | undefined;
+    const user = (await db.get('SELECT id FROM users WHERE LOWER(email) = ?', [
+      normalizedEmail,
+    ])) as { id: number } | undefined;
 
     const userId = user ? user.id : null;
     this.emailCache.set(normalizedEmail, userId);
@@ -99,10 +98,10 @@ class UserService {
 
     // Try display name match
     const db = await getDatabase();
-    const user = await db.get(
+    const user = (await db.get(
       'SELECT id FROM users WHERE LOWER(display_name) = ? OR LOWER(email) = ?',
       [cacheKey, cacheKey]
-    ) as { id: number } | undefined;
+    )) as { id: number } | undefined;
 
     const userId = user ? user.id : null;
     this.nameCache.set(cacheKey, userId);
@@ -123,10 +122,9 @@ class UserService {
    */
   async getUserByEmail(email: string): Promise<User | null> {
     const db = await getDatabase();
-    const user = await db.get(
-      'SELECT * FROM users WHERE LOWER(email) = ?',
-      [email.toLowerCase().trim()]
-    );
+    const user = await db.get('SELECT * FROM users WHERE LOWER(email) = ?', [
+      email.toLowerCase().trim(),
+    ]);
     return user ? this.mapUser(user) : null;
   }
 
@@ -135,9 +133,7 @@ class UserService {
    */
   async getActiveUsers(): Promise<User[]> {
     const db = await getDatabase();
-    const users = await db.all(
-      'SELECT * FROM users WHERE is_active = 1 ORDER BY display_name'
-    );
+    const users = await db.all('SELECT * FROM users WHERE is_active = 1 ORDER BY display_name');
     return users.map((u: any) => this.mapUser(u));
   }
 
@@ -163,7 +159,7 @@ class UserService {
         data.email.toLowerCase().trim(),
         data.displayName,
         data.role || 'team_member',
-        data.avatarUrl || null
+        data.avatarUrl || null,
       ]
     );
 
@@ -185,7 +181,7 @@ class UserService {
     return this.createUser({
       email,
       displayName: displayName || email.split('@')[0],
-      role: 'team_member'
+      role: 'team_member',
     });
   }
 
@@ -205,10 +201,9 @@ class UserService {
    */
   async deactivateUser(userId: number): Promise<void> {
     const db = await getDatabase();
-    await db.run(
-      'UPDATE users SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [userId]
-    );
+    await db.run('UPDATE users SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
+      userId,
+    ]);
     this.clearCache();
   }
 
@@ -217,10 +212,9 @@ class UserService {
    */
   async reactivateUser(userId: number): Promise<void> {
     const db = await getDatabase();
-    await db.run(
-      'UPDATE users SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [userId]
-    );
+    await db.run('UPDATE users SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
+      userId,
+    ]);
     this.clearCache();
   }
 
@@ -245,7 +239,7 @@ class UserService {
       is_active: Boolean(row.is_active),
       last_active_at: row.last_active_at,
       created_at: row.created_at,
-      updated_at: row.updated_at
+      updated_at: row.updated_at,
     };
   }
 
@@ -271,7 +265,7 @@ class UserService {
     return {
       columns: 'assigned_to, assigned_to_user_id',
       placeholders: '?, ?',
-      values: [email || null, userId]
+      values: [email || null, userId],
     };
   }
 
@@ -289,7 +283,7 @@ class UserService {
     const userId = await this.getUserIdByEmail(email);
     return {
       setClause: 'assigned_to = ?, assigned_to_user_id = ?',
-      values: [email || null, userId]
+      values: [email || null, userId],
     };
   }
 
@@ -304,7 +298,7 @@ class UserService {
     const userId = await this.getUserIdByEmailOrName(identifier);
     return {
       setClause: `${textColumn} = ?, ${userIdColumn} = ?`,
-      values: [identifier || null, userId]
+      values: [identifier || null, userId],
     };
   }
 }

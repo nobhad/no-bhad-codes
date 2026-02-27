@@ -21,6 +21,19 @@ import { emailService } from '../services/email-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
 import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const PROJECT_COLUMNS = `
+  id, client_id, project_name, description, status, priority, progress,
+  start_date, estimated_end_date, actual_end_date, budget_range, project_type,
+  timeline, preview_url, price, notes, repository_url, staging_url, production_url,
+  deposit_amount, contract_signed_at, cancelled_by, cancellation_reason,
+  default_deposit_percentage, hourly_rate, estimated_hours, actual_hours, template_id,
+  features, design_level, content_status, tech_comfort, hosting_preference,
+  page_count, integrations, brand_assets, inspiration, current_site, challenges,
+  additional_info, addons, referral_source, contract_reminders_enabled,
+  deleted_at, deleted_by, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = Router();
 
 // Configure multer for file uploads
@@ -36,13 +49,13 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
     cb(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
-  }
+  },
 });
 
 const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
     // Allow common file types
@@ -55,7 +68,7 @@ const upload = multer({
     } else {
       cb(new Error('Invalid file type. Only images, PDFs, documents, and archives are allowed.'));
     }
-  }
+  },
 });
 
 // Global API middleware
@@ -63,7 +76,7 @@ router.use(
   requestSizeLimit({
     maxBodySize: 10 * 1024 * 1024, // 10MB
     maxUrlLength: 2048,
-    maxHeaderSize: 8192
+    maxHeaderSize: 8192,
   })
 );
 
@@ -72,7 +85,7 @@ router.use(
     maxPathTraversal: 3,
     maxSqlInjectionAttempts: 3,
     maxXssAttempts: 3,
-    blockDuration: 24 * 60 * 60 * 1000
+    blockDuration: 24 * 60 * 60 * 1000,
   })
 );
 
@@ -85,7 +98,7 @@ router.use(
     windowMs: apiWindowMs,
     maxRequests: apiMaxRequests,
     skipIf: () => process.env.NODE_ENV === 'development',
-    message: 'Too many API requests'
+    message: 'Too many API requests',
   })
 );
 
@@ -99,13 +112,13 @@ router.post(
     windowMs: 60 * 60 * 1000, // 1 hour
     maxRequests: 5,
     keyGenerator: (req) => req.ip || 'unknown',
-    message: 'Too many contact form submissions'
+    message: 'Too many contact form submissions',
   }),
 
   // Validate contact form data
   validateRequest(ValidationSchemas.contact, {
     validateBody: true,
-    stripUnknownFields: true
+    stripUnknownFields: true,
   }),
 
   async (req, res) => {
@@ -136,7 +149,7 @@ router.post(
             message,
             req.ip || 'unknown',
             req.get('User-Agent') || 'unknown',
-            messageId
+            messageId,
           ]
         );
         await logger.info(`Contact form saved to database - messageId: ${messageId}`);
@@ -179,10 +192,14 @@ Received: ${new Date().toISOString()}
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Email:</td>
       <td style="padding: 8px;"><a href="mailto:${email}">${email}</a></td>
     </tr>
-    ${companyName ? `<tr>
+    ${
+      companyName
+        ? `<tr>
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Company:</td>
       <td style="padding: 8px;">${companyName}</td>
-    </tr>` : ''}
+    </tr>`
+        : ''
+    }
     <tr>
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Subject:</td>
       <td style="padding: 8px;">${subjectLine}</td>
@@ -201,7 +218,7 @@ Received: ${new Date().toISOString()}
     Received: ${new Date().toLocaleString()}
   </p>
 </div>
-          `.trim()
+          `.trim(),
           });
 
           await logger.info(
@@ -222,7 +239,7 @@ Received: ${new Date().toISOString()}
       res.json({
         success: true,
         message: 'Message received, thanks!',
-        messageId
+        messageId,
       });
     } catch (_error) {
       await logger.error('Contact form processing error');
@@ -244,7 +261,7 @@ router.post(
   rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
     maxRequests: 10,
-    message: 'Too many file uploads'
+    message: 'Too many file uploads',
   }),
 
   // Add multer middleware for file handling
@@ -264,7 +281,7 @@ router.post(
         mimetype: req.file.mimetype,
         size: req.file.size,
         url: `/uploads/general/${req.file.filename}`,
-        uploadedAt: new Date().toISOString()
+        uploadedAt: new Date().toISOString(),
       };
 
       // Save file metadata to database (optional)
@@ -278,7 +295,10 @@ router.post(
         );
         fileId = result.lastID || 0;
       } catch (err) {
-        await logger.error('Failed to save file metadata:', { error: err instanceof Error ? err : undefined, category: 'UPLOAD' });
+        await logger.error('Failed to save file metadata:', {
+          error: err instanceof Error ? err : undefined,
+          category: 'UPLOAD',
+        });
         // Don't fail - file is already uploaded
       }
 
@@ -289,7 +309,7 @@ router.post(
       res.status(201).json({
         success: true,
         message: 'File uploaded successfully',
-        file: { ...fileInfo, id: fileId > 0 ? fileId : fileInfo.id }
+        file: { ...fileInfo, id: fileId > 0 ? fileId : fileInfo.id },
       });
     } catch (_error) {
       await logger.error('File upload error');
@@ -306,9 +326,9 @@ router.get(
   // Relaxed rate limiting for health checks
   rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
-    maxRequests: 120,        // Allow frequent health checks
+    maxRequests: 120, // Allow frequent health checks
     blockDuration: 30 * 1000, // Only block for 30 seconds
-    message: 'Too many health check requests'
+    message: 'Too many health check requests',
   }),
 
   async (req, res) => {
@@ -326,13 +346,13 @@ router.get(
         scheduler: {
           enabled: process.env.SCHEDULER_ENABLED !== 'false',
           isRunning: schedulerStatus.isRunning,
-          jobs: schedulerStatus.jobs
-        }
+          jobs: schedulerStatus.jobs,
+        },
       };
 
       res.json({
         success: true,
-        data: health
+        data: health,
       });
     } catch (_error) {
       await logger.error('Health check error');
@@ -352,7 +372,7 @@ router.get(
   '/data',
   validateRequest(ValidationSchemas.pagination, {
     validateQuery: true,
-    stripUnknownFields: false
+    stripUnknownFields: false,
   }),
 
   async (req, res) => {
@@ -368,7 +388,7 @@ router.get(
       const offset = (pageNum - 1) * limitNum;
 
       // Build query with search
-      let query = 'SELECT * FROM projects';
+      let query = `SELECT ${PROJECT_COLUMNS} FROM projects`;
       let countQuery = 'SELECT COUNT(*) as count FROM projects';
       const params: (string | number)[] = [];
 
@@ -405,18 +425,18 @@ router.get(
           page: pageNum,
           limit: limitNum,
           total,
-          totalPages
+          totalPages,
         },
         meta: {
           sortBy: sortField,
           sortOrder: order,
-          search: search || null
-        }
+          search: search || null,
+        },
       };
 
       res.json({
         success: true,
-        ...result
+        ...result,
       });
     } catch (_error) {
       await logger.error('Data query error');
@@ -432,7 +452,7 @@ router.get(
   '/status',
   rateLimit({
     windowMs: 5 * 60 * 1000, // 5 minutes
-    maxRequests: 10
+    maxRequests: 10,
   }),
 
   async (req, res) => {
@@ -450,12 +470,12 @@ router.get(
         const [clientsRow, activeClientsRow, projectsRow, activeProjectsRow, invoicesRow] =
           await Promise.all([
             db.get('SELECT COUNT(*) as count FROM clients'),
-            db.get('SELECT COUNT(*) as count FROM clients WHERE status = \'active\''),
+            db.get("SELECT COUNT(*) as count FROM clients WHERE status = 'active'"),
             db.get('SELECT COUNT(*) as count FROM projects'),
             db.get(
-              'SELECT COUNT(*) as count FROM projects WHERE status IN (\'in-progress\', \'pending\')'
+              "SELECT COUNT(*) as count FROM projects WHERE status IN ('in-progress', 'pending')"
             ),
-            db.get('SELECT COUNT(*) as count FROM invoices')
+            db.get('SELECT COUNT(*) as count FROM invoices'),
           ]);
 
         totalUsers = typeof clientsRow?.count === 'number' ? clientsRow.count : 0;
@@ -464,7 +484,10 @@ router.get(
         activeProjects = typeof activeProjectsRow?.count === 'number' ? activeProjectsRow.count : 0;
         totalInvoices = typeof invoicesRow?.count === 'number' ? invoicesRow.count : 0;
       } catch (err) {
-        await logger.error('Failed to gather metrics:', { error: err instanceof Error ? err : undefined, category: 'METRICS' });
+        await logger.error('Failed to gather metrics:', {
+          error: err instanceof Error ? err : undefined,
+          category: 'METRICS',
+        });
         // Use default values of 0
       }
 
@@ -477,27 +500,27 @@ router.get(
         database: {
           users: {
             total: totalUsers,
-            active: activeUsers
+            active: activeUsers,
           },
           projects: {
             total: totalProjects,
-            active: activeProjects
+            active: activeProjects,
           },
           invoices: {
-            total: totalInvoices
-          }
+            total: totalInvoices,
+          },
         },
         requests: {
           rateLimit: {
             remaining: res.get('X-RateLimit-Remaining'),
-            reset: res.get('X-RateLimit-Reset')
-          }
-        }
+            reset: res.get('X-RateLimit-Reset'),
+          },
+        },
       };
 
       res.json({
         success: true,
-        data: status
+        data: status,
       });
     } catch (_error) {
       await logger.error('API status error');
@@ -509,21 +532,32 @@ router.get(
 // Handle 404 for unmatched API routes
 router.use(async (req, res) => {
   await logger.error('API route not found');
-  errorResponseWithPayload(res, 'API endpoint not found', 404, 'ENDPOINT_NOT_FOUND', { path: req.path });
+  errorResponseWithPayload(res, 'API endpoint not found', 404, 'ENDPOINT_NOT_FOUND', {
+    path: req.path,
+  });
 });
 
 // Error handler for API routes
-router.use(async (error: unknown, req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> => {
-  await logger.error('API route error');
+router.use(
+  async (
+    error: unknown,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ): Promise<void> => {
+    await logger.error('API route error');
 
-  if (res.headersSent) {
-    return next(error as Error);
+    if (res.headersSent) {
+      return next(error as Error);
+    }
+
+    const status = (error as { status?: number })?.status ?? 500;
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    const code = (error as { code?: string })?.code ?? 'INTERNAL_ERROR';
+    errorResponseWithPayload(res, message, status, code, {
+      requestId: req.headers['x-request-id'],
+    });
   }
-
-  const status = (error as { status?: number })?.status ?? 500;
-  const message = error instanceof Error ? error.message : 'Internal server error';
-  const code = (error as { code?: string })?.code ?? 'INTERNAL_ERROR';
-  errorResponseWithPayload(res, message, status, code, { requestId: req.headers['x-request-id'] });
-});
+);
 
 export default router;

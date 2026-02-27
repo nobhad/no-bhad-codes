@@ -31,7 +31,7 @@ const ROUTE_ENTITY_MAP: Record<string, AuditEntityType> = {
   '/api/uploads': 'file',
   '/api/intake': 'intake',
   '/api/contact': 'contact_submission',
-  '/api/auth': 'session'
+  '/api/auth': 'session',
 };
 
 /**
@@ -61,15 +61,15 @@ function getAction(method: string, path: string): AuditAction {
 
   // Default based on method
   switch (method) {
-  case 'POST':
-    return 'create';
-  case 'PUT':
-  case 'PATCH':
-    return 'update';
-  case 'DELETE':
-    return 'delete';
-  default:
-    return 'view';
+    case 'POST':
+      return 'create';
+    case 'PUT':
+    case 'PATCH':
+      return 'update';
+    case 'DELETE':
+      return 'delete';
+    default:
+      return 'view';
   }
 }
 
@@ -121,27 +121,29 @@ export function auditMiddleware() {
         const entityId = getEntityId(req) || body?.id?.toString() || body?.data?.id?.toString();
 
         // Don't await - fire and forget for performance
-        auditLogger.log({
-          userId: req.user?.id,
-          userEmail: req.user?.email,
-          userType: req.user?.type === 'admin' ? 'admin' : req.user ? 'client' : 'system',
-          action,
-          entityType,
-          entityId,
-          entityName: body?.name || body?.email || body?.subject || req.body?.name,
-          newValue: req.method === 'DELETE' ? undefined : req.body,
-          ipAddress: (req.ip || req.socket?.remoteAddress || '').replace('::ffff:', ''),
-          userAgent: req.get('user-agent'),
-          requestPath: req.path,
-          requestMethod: req.method,
-          metadata: {
-            statusCode: res.statusCode,
-            responseId: body?.id || body?.data?.id
-          }
-        }).catch((err) => {
-          logger.error('[AUDIT] Failed to log', { error: err });
-          console.error('[AUDIT] Failed to log:', err);
-        });
+        auditLogger
+          .log({
+            userId: req.user?.id,
+            userEmail: req.user?.email,
+            userType: req.user?.type === 'admin' ? 'admin' : req.user ? 'client' : 'system',
+            action,
+            entityType,
+            entityId,
+            entityName: body?.name || body?.email || body?.subject || req.body?.name,
+            newValue: req.method === 'DELETE' ? undefined : req.body,
+            ipAddress: (req.ip || req.socket?.remoteAddress || '').replace('::ffff:', ''),
+            userAgent: req.get('user-agent'),
+            requestPath: req.path,
+            requestMethod: req.method,
+            metadata: {
+              statusCode: res.statusCode,
+              responseId: body?.id || body?.data?.id,
+            },
+          })
+          .catch((err) => {
+            logger.error('[AUDIT] Failed to log', { error: err });
+            console.error('[AUDIT] Failed to log:', err);
+          });
       }
 
       return originalJson(body);

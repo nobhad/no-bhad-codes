@@ -109,7 +109,7 @@ router.post(
     res.json({
       success: true,
       message: 'Progress saved',
-      progress
+      progress,
     });
   })
 );
@@ -133,7 +133,7 @@ router.post(
     res.json({
       success: true,
       message: 'Onboarding completed',
-      progress
+      progress,
     });
   })
 );
@@ -161,7 +161,7 @@ router.get(
     const statuses = await clientInfoService.getAllClientsInfoStatus({
       minCompleteness,
       maxCompleteness,
-      onboardingStatus
+      onboardingStatus,
     });
 
     res.json({ statuses });
@@ -231,7 +231,7 @@ router.post(
     res.json({
       success: true,
       message: 'Completeness recalculated',
-      completeness
+      completeness,
     });
   })
 );
@@ -274,7 +274,7 @@ router.delete(
 
     res.json({
       success: true,
-      message: 'Onboarding reset'
+      message: 'Onboarding reset',
     });
   })
 );

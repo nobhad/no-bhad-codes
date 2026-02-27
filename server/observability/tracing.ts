@@ -44,8 +44,8 @@ export async function traceDbQuery<T>(
         [DB_NAME]: 'client_portal',
         [DB_OPERATION]: operation.toUpperCase(),
         [DB_STATEMENT]: sanitizeSql(sql),
-        ...additionalAttributes
-      }
+        ...additionalAttributes,
+      },
     },
     async (span: Span) => {
       try {
@@ -61,7 +61,7 @@ export async function traceDbQuery<T>(
       } catch (error) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : 'Database query failed'
+          message: error instanceof Error ? error.message : 'Database query failed',
         });
         span.recordException(error as Error);
         throw error;
@@ -93,8 +93,8 @@ export async function traceHttpRequest<T>(
         'http.url': url,
         'http.host': parsedUrl.host,
         'http.scheme': parsedUrl.protocol.replace(':', ''),
-        ...additionalAttributes
-      }
+        ...additionalAttributes,
+      },
     },
     async (span: Span) => {
       try {
@@ -104,7 +104,7 @@ export async function traceHttpRequest<T>(
       } catch (error) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : 'HTTP request failed'
+          message: error instanceof Error ? error.message : 'HTTP request failed',
         });
         span.recordException(error as Error);
         throw error;
@@ -138,7 +138,7 @@ export async function withSpan<T>(
     name,
     {
       kind: options?.kind || SpanKind.INTERNAL,
-      attributes: options?.attributes
+      attributes: options?.attributes,
     },
     async (span: Span) => {
       try {
@@ -148,7 +148,7 @@ export async function withSpan<T>(
       } catch (error) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : 'Operation failed'
+          message: error instanceof Error ? error.message : 'Operation failed',
         });
         span.recordException(error as Error);
         throw error;
@@ -200,7 +200,10 @@ export function getActiveSpan(): Span | undefined {
 /**
  * Add an event to the current span
  */
-export function addSpanEvent(name: string, attributes?: Record<string, string | number | boolean>): void {
+export function addSpanEvent(
+  name: string,
+  attributes?: Record<string, string | number | boolean>
+): void {
   const span = getActiveSpan();
   if (span) {
     span.addEvent(name, attributes);
@@ -248,6 +251,6 @@ function sanitizeSql(sql: string): string {
 export function getTraceContextForLogs(): { traceId?: string; spanId?: string } {
   return {
     traceId: getCurrentTraceId(),
-    spanId: getCurrentSpanId()
+    spanId: getCurrentSpanId(),
   };
 }

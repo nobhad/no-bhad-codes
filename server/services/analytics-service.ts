@@ -16,7 +16,15 @@ import { userService } from './user-service.js';
 type ReportType = 'revenue' | 'pipeline' | 'project' | 'client' | 'team' | 'lead' | 'invoice';
 type ChartType = 'bar' | 'line' | 'pie' | 'area' | 'table';
 type WidgetType = 'metric' | 'chart' | 'list' | 'table' | 'progress' | 'calendar';
-type DataSource = 'revenue' | 'projects' | 'clients' | 'leads' | 'invoices' | 'tasks' | 'time' | 'milestones';
+type DataSource =
+  | 'revenue'
+  | 'projects'
+  | 'clients'
+  | 'leads'
+  | 'invoices'
+  | 'tasks'
+  | 'time'
+  | 'milestones';
 type Frequency = 'daily' | 'weekly' | 'monthly' | 'quarterly';
 type AlertCondition = 'above' | 'below' | 'equals' | 'change_above' | 'change_below';
 
@@ -153,7 +161,7 @@ class AnalyticsService {
         data.sort_order || 'DESC',
         data.chart_type || null,
         data.created_by || null,
-        createdByUserId
+        createdByUserId,
       ]
     );
 
@@ -181,7 +189,7 @@ class AnalyticsService {
     return reports.map((r: any) => ({
       ...r,
       filters: r.filters ? JSON.parse(r.filters) : {},
-      columns: r.columns ? JSON.parse(r.columns) : null
+      columns: r.columns ? JSON.parse(r.columns) : null,
     }));
   }
 
@@ -199,7 +207,7 @@ class AnalyticsService {
     return {
       ...(report as unknown as SavedReport),
       filters: typeof report.filters === 'string' ? JSON.parse(report.filters) : {},
-      columns: typeof report.columns === 'string' ? JSON.parse(report.columns) : null
+      columns: typeof report.columns === 'string' ? JSON.parse(report.columns) : null,
     };
   }
 
@@ -225,15 +233,42 @@ class AnalyticsService {
     const updates: string[] = [];
     const values: any[] = [];
 
-    if (data.name !== undefined) { updates.push('name = ?'); values.push(data.name); }
-    if (data.description !== undefined) { updates.push('description = ?'); values.push(data.description); }
-    if (data.filters !== undefined) { updates.push('filters = ?'); values.push(JSON.stringify(data.filters)); }
-    if (data.columns !== undefined) { updates.push('columns = ?'); values.push(JSON.stringify(data.columns)); }
-    if (data.sort_by !== undefined) { updates.push('sort_by = ?'); values.push(data.sort_by); }
-    if (data.sort_order !== undefined) { updates.push('sort_order = ?'); values.push(data.sort_order); }
-    if (data.chart_type !== undefined) { updates.push('chart_type = ?'); values.push(data.chart_type); }
-    if (data.is_favorite !== undefined) { updates.push('is_favorite = ?'); values.push(data.is_favorite); }
-    if (data.is_shared !== undefined) { updates.push('is_shared = ?'); values.push(data.is_shared); }
+    if (data.name !== undefined) {
+      updates.push('name = ?');
+      values.push(data.name);
+    }
+    if (data.description !== undefined) {
+      updates.push('description = ?');
+      values.push(data.description);
+    }
+    if (data.filters !== undefined) {
+      updates.push('filters = ?');
+      values.push(JSON.stringify(data.filters));
+    }
+    if (data.columns !== undefined) {
+      updates.push('columns = ?');
+      values.push(JSON.stringify(data.columns));
+    }
+    if (data.sort_by !== undefined) {
+      updates.push('sort_by = ?');
+      values.push(data.sort_by);
+    }
+    if (data.sort_order !== undefined) {
+      updates.push('sort_order = ?');
+      values.push(data.sort_order);
+    }
+    if (data.chart_type !== undefined) {
+      updates.push('chart_type = ?');
+      values.push(data.chart_type);
+    }
+    if (data.is_favorite !== undefined) {
+      updates.push('is_favorite = ?');
+      values.push(data.is_favorite);
+    }
+    if (data.is_shared !== undefined) {
+      updates.push('is_shared = ?');
+      values.push(data.is_shared);
+    }
 
     if (updates.length > 0) {
       updates.push('updated_at = CURRENT_TIMESTAMP');
@@ -312,7 +347,7 @@ class AnalyticsService {
         data.format || 'pdf',
         data.include_charts !== false,
         nextSendAt,
-        data.created_by || null
+        data.created_by || null,
       ]
     );
 
@@ -339,7 +374,7 @@ class AnalyticsService {
 
     return schedules.map((s: any) => ({
       ...s,
-      recipients: s.recipients ? JSON.parse(s.recipients) : []
+      recipients: s.recipients ? JSON.parse(s.recipients) : [],
     }));
   }
 
@@ -356,7 +391,7 @@ class AnalyticsService {
 
     return {
       ...(schedule as unknown as ReportSchedule),
-      recipients: typeof schedule.recipients === 'string' ? JSON.parse(schedule.recipients) : []
+      recipients: typeof schedule.recipients === 'string' ? JSON.parse(schedule.recipients) : [],
     };
   }
 
@@ -383,16 +418,46 @@ class AnalyticsService {
     const updates: string[] = [];
     const values: any[] = [];
 
-    if (data.name !== undefined) { updates.push('name = ?'); values.push(data.name); }
-    if (data.frequency !== undefined) { updates.push('frequency = ?'); values.push(data.frequency); }
-    if (data.day_of_week !== undefined) { updates.push('day_of_week = ?'); values.push(data.day_of_week); }
-    if (data.day_of_month !== undefined) { updates.push('day_of_month = ?'); values.push(data.day_of_month); }
-    if (data.time_of_day !== undefined) { updates.push('time_of_day = ?'); values.push(data.time_of_day); }
-    if (data.timezone !== undefined) { updates.push('timezone = ?'); values.push(data.timezone); }
-    if (data.recipients !== undefined) { updates.push('recipients = ?'); values.push(JSON.stringify(data.recipients)); }
-    if (data.format !== undefined) { updates.push('format = ?'); values.push(data.format); }
-    if (data.include_charts !== undefined) { updates.push('include_charts = ?'); values.push(data.include_charts); }
-    if (data.is_active !== undefined) { updates.push('is_active = ?'); values.push(data.is_active); }
+    if (data.name !== undefined) {
+      updates.push('name = ?');
+      values.push(data.name);
+    }
+    if (data.frequency !== undefined) {
+      updates.push('frequency = ?');
+      values.push(data.frequency);
+    }
+    if (data.day_of_week !== undefined) {
+      updates.push('day_of_week = ?');
+      values.push(data.day_of_week);
+    }
+    if (data.day_of_month !== undefined) {
+      updates.push('day_of_month = ?');
+      values.push(data.day_of_month);
+    }
+    if (data.time_of_day !== undefined) {
+      updates.push('time_of_day = ?');
+      values.push(data.time_of_day);
+    }
+    if (data.timezone !== undefined) {
+      updates.push('timezone = ?');
+      values.push(data.timezone);
+    }
+    if (data.recipients !== undefined) {
+      updates.push('recipients = ?');
+      values.push(JSON.stringify(data.recipients));
+    }
+    if (data.format !== undefined) {
+      updates.push('format = ?');
+      values.push(data.format);
+    }
+    if (data.include_charts !== undefined) {
+      updates.push('include_charts = ?');
+      values.push(data.include_charts);
+    }
+    if (data.is_active !== undefined) {
+      updates.push('is_active = ?');
+      values.push(data.is_active);
+    }
 
     if (updates.length > 0) {
       values.push(scheduleId);
@@ -423,7 +488,7 @@ class AnalyticsService {
 
     return schedules.map((s: any) => ({
       ...s,
-      recipients: s.recipients ? JSON.parse(s.recipients) : []
+      recipients: s.recipients ? JSON.parse(s.recipients) : [],
     }));
   }
 
@@ -467,41 +532,41 @@ class AnalyticsService {
     }
 
     switch (frequency) {
-    case 'daily':
-      // Already set for next occurrence
-      break;
+      case 'daily':
+        // Already set for next occurrence
+        break;
 
-    case 'weekly': {
-      const targetDay = dayOfWeek ?? 1; // Default to Monday
-      while (next.getDay() !== targetDay) {
-        next.setDate(next.getDate() + 1);
+      case 'weekly': {
+        const targetDay = dayOfWeek ?? 1; // Default to Monday
+        while (next.getDay() !== targetDay) {
+          next.setDate(next.getDate() + 1);
+        }
+        break;
       }
-      break;
-    }
 
-    case 'monthly': {
-      const targetDate = dayOfMonth ?? 1;
-      next.setDate(targetDate);
-      if (next <= now) {
-        next.setMonth(next.getMonth() + 1);
+      case 'monthly': {
+        const targetDate = dayOfMonth ?? 1;
+        next.setDate(targetDate);
+        if (next <= now) {
+          next.setMonth(next.getMonth() + 1);
+        }
+        break;
       }
-      break;
-    }
 
-    case 'quarterly': {
-      const targetQuarterDate = dayOfMonth ?? 1;
-      next.setDate(targetQuarterDate);
-      // Move to first month of next quarter
-      const currentQuarter = Math.floor(now.getMonth() / 3);
-      const nextQuarterMonth = (currentQuarter + 1) * 3;
-      if (nextQuarterMonth > 11) {
-        next.setFullYear(next.getFullYear() + 1);
-        next.setMonth(0);
-      } else {
-        next.setMonth(nextQuarterMonth);
+      case 'quarterly': {
+        const targetQuarterDate = dayOfMonth ?? 1;
+        next.setDate(targetQuarterDate);
+        // Move to first month of next quarter
+        const currentQuarter = Math.floor(now.getMonth() / 3);
+        const nextQuarterMonth = (currentQuarter + 1) * 3;
+        if (nextQuarterMonth > 11) {
+          next.setFullYear(next.getFullYear() + 1);
+          next.setMonth(0);
+        } else {
+          next.setMonth(nextQuarterMonth);
+        }
+        break;
       }
-      break;
-    }
     }
 
     return next.toISOString();
@@ -525,7 +590,7 @@ class AnalyticsService {
 
     return widgets.map((w: any) => ({
       ...w,
-      config: w.config ? JSON.parse(w.config) : {}
+      config: w.config ? JSON.parse(w.config) : {},
     }));
   }
 
@@ -561,7 +626,7 @@ class AnalyticsService {
         data.position_y ?? 0,
         data.width ?? 1,
         data.height ?? 1,
-        data.refresh_interval ?? null
+        data.refresh_interval ?? null,
       ]
     );
 
@@ -581,7 +646,7 @@ class AnalyticsService {
 
     return {
       ...(widget as unknown as DashboardWidget),
-      config: typeof widget.config === 'string' ? JSON.parse(widget.config) : {}
+      config: typeof widget.config === 'string' ? JSON.parse(widget.config) : {},
     };
   }
 
@@ -606,14 +671,38 @@ class AnalyticsService {
     const updates: string[] = [];
     const values: any[] = [];
 
-    if (data.title !== undefined) { updates.push('title = ?'); values.push(data.title); }
-    if (data.config !== undefined) { updates.push('config = ?'); values.push(JSON.stringify(data.config)); }
-    if (data.position_x !== undefined) { updates.push('position_x = ?'); values.push(data.position_x); }
-    if (data.position_y !== undefined) { updates.push('position_y = ?'); values.push(data.position_y); }
-    if (data.width !== undefined) { updates.push('width = ?'); values.push(data.width); }
-    if (data.height !== undefined) { updates.push('height = ?'); values.push(data.height); }
-    if (data.refresh_interval !== undefined) { updates.push('refresh_interval = ?'); values.push(data.refresh_interval); }
-    if (data.is_visible !== undefined) { updates.push('is_visible = ?'); values.push(data.is_visible); }
+    if (data.title !== undefined) {
+      updates.push('title = ?');
+      values.push(data.title);
+    }
+    if (data.config !== undefined) {
+      updates.push('config = ?');
+      values.push(JSON.stringify(data.config));
+    }
+    if (data.position_x !== undefined) {
+      updates.push('position_x = ?');
+      values.push(data.position_x);
+    }
+    if (data.position_y !== undefined) {
+      updates.push('position_y = ?');
+      values.push(data.position_y);
+    }
+    if (data.width !== undefined) {
+      updates.push('width = ?');
+      values.push(data.width);
+    }
+    if (data.height !== undefined) {
+      updates.push('height = ?');
+      values.push(data.height);
+    }
+    if (data.refresh_interval !== undefined) {
+      updates.push('refresh_interval = ?');
+      values.push(data.refresh_interval);
+    }
+    if (data.is_visible !== undefined) {
+      updates.push('is_visible = ?');
+      values.push(data.is_visible);
+    }
 
     if (updates.length > 0) {
       updates.push('updated_at = CURRENT_TIMESTAMP');
@@ -679,7 +768,7 @@ class AnalyticsService {
         position_x: config.x,
         position_y: config.y,
         width: config.w,
-        height: config.h
+        height: config.h,
       });
       widgets.push(widget);
     }
@@ -710,10 +799,9 @@ class AnalyticsService {
     const today = new Date().toISOString().split('T')[0];
 
     // Check if snapshot already exists for today
-    const existing = await db.get(
-      'SELECT id FROM kpi_snapshots WHERE snapshot_date = ? LIMIT 1',
-      [today]
-    );
+    const existing = await db.get('SELECT id FROM kpi_snapshots WHERE snapshot_date = ? LIMIT 1', [
+      today,
+    ]);
 
     if (existing) {
       // Update existing snapshots
@@ -733,14 +821,20 @@ class AnalyticsService {
       );
 
       const previousValue = previous?.value !== undefined ? Number(previous.value) : null;
-      const changePercent = previousValue !== null
-        ? ((kpi.value - previousValue) / previousValue) * 100
-        : null;
+      const changePercent =
+        previousValue !== null ? ((kpi.value - previousValue) / previousValue) * 100 : null;
 
       await db.run(
         `INSERT INTO kpi_snapshots (snapshot_date, kpi_type, value, previous_value, change_percent, metadata)
          VALUES (?, ?, ?, ?, ?, ?)`,
-        [today, kpi.type, kpi.value, previousValue, changePercent, JSON.stringify(kpi.metadata ?? {})]
+        [
+          today,
+          kpi.type,
+          kpi.value,
+          previousValue,
+          changePercent,
+          JSON.stringify(kpi.metadata ?? {}),
+        ]
       );
     }
 
@@ -768,13 +862,15 @@ class AnalyticsService {
   /**
    * Calculate current KPIs
    */
-  private async calculateKPIs(): Promise<{ type: string; value: number; metadata?: Record<string, any> }[]> {
+  private async calculateKPIs(): Promise<
+    { type: string; value: number; metadata?: Record<string, any> }[]
+  > {
     const db = getDatabase();
     const kpis: { type: string; value: number; metadata?: Record<string, any> }[] = [];
 
     // Total revenue (paid invoices)
     const revenue = await db.get(
-      'SELECT COALESCE(SUM(total_amount), 0) as total FROM invoices WHERE status = \'paid\''
+      "SELECT COALESCE(SUM(total_amount), 0) as total FROM invoices WHERE status = 'paid'"
     );
     kpis.push({ type: 'total_revenue', value: Number(revenue?.total ?? 0) });
 
@@ -787,13 +883,13 @@ class AnalyticsService {
 
     // Active clients
     const activeClients = await db.get(
-      'SELECT COUNT(*) as count FROM clients WHERE status = \'active\''
+      "SELECT COUNT(*) as count FROM clients WHERE status = 'active'"
     );
     kpis.push({ type: 'active_clients', value: Number(activeClients?.count ?? 0) });
 
     // Active projects
     const activeProjects = await db.get(
-      'SELECT COUNT(*) as count FROM projects WHERE status IN (\'in_progress\', \'active\')'
+      "SELECT COUNT(*) as count FROM projects WHERE status IN ('in_progress', 'active')"
     );
     kpis.push({ type: 'active_projects', value: Number(activeProjects?.count ?? 0) });
 
@@ -826,7 +922,7 @@ class AnalyticsService {
     kpis.push({
       type: 'overdue_invoices',
       value: Number(overdue?.total ?? 0),
-      metadata: { count: Number(overdue?.count ?? 0) }
+      metadata: { count: Number(overdue?.count ?? 0) },
     });
 
     // Conversion rate (won / total closed)
@@ -847,10 +943,7 @@ class AnalyticsService {
   /**
    * Get KPI trend
    */
-  async getKPITrend(
-    kpiType: string,
-    dateRange?: DateRange
-  ): Promise<KPISnapshot[]> {
+  async getKPITrend(kpiType: string, dateRange?: DateRange): Promise<KPISnapshot[]> {
     const db = getDatabase();
 
     let query = 'SELECT * FROM kpi_snapshots WHERE kpi_type = ?';
@@ -872,7 +965,7 @@ class AnalyticsService {
 
     return snapshots.map((s: any) => ({
       ...s,
-      metadata: s.metadata ? JSON.parse(s.metadata) : null
+      metadata: s.metadata ? JSON.parse(s.metadata) : null,
     }));
   }
 
@@ -895,7 +988,7 @@ class AnalyticsService {
 
     return snapshots.map((s: any) => ({
       ...s,
-      metadata: s.metadata ? JSON.parse(s.metadata) : null
+      metadata: s.metadata ? JSON.parse(s.metadata) : null,
     }));
   }
 
@@ -925,7 +1018,7 @@ class AnalyticsService {
         data.condition,
         data.threshold_value,
         JSON.stringify(data.notification_emails),
-        data.created_by || null
+        data.created_by || null,
       ]
     );
 
@@ -941,7 +1034,7 @@ class AnalyticsService {
 
     return alerts.map((a: any) => ({
       ...a,
-      notification_emails: a.notification_emails ? JSON.parse(a.notification_emails) : []
+      notification_emails: a.notification_emails ? JSON.parse(a.notification_emails) : [],
     }));
   }
 
@@ -958,7 +1051,8 @@ class AnalyticsService {
 
     return {
       ...(alert as unknown as MetricAlert),
-      notification_emails: typeof alert.notification_emails === 'string' ? JSON.parse(alert.notification_emails) : []
+      notification_emails:
+        typeof alert.notification_emails === 'string' ? JSON.parse(alert.notification_emails) : [],
     };
   }
 
@@ -981,12 +1075,30 @@ class AnalyticsService {
     const updates: string[] = [];
     const values: any[] = [];
 
-    if (data.name !== undefined) { updates.push('name = ?'); values.push(data.name); }
-    if (data.kpi_type !== undefined) { updates.push('kpi_type = ?'); values.push(data.kpi_type); }
-    if (data.condition !== undefined) { updates.push('condition = ?'); values.push(data.condition); }
-    if (data.threshold_value !== undefined) { updates.push('threshold_value = ?'); values.push(data.threshold_value); }
-    if (data.notification_emails !== undefined) { updates.push('notification_emails = ?'); values.push(JSON.stringify(data.notification_emails)); }
-    if (data.is_active !== undefined) { updates.push('is_active = ?'); values.push(data.is_active); }
+    if (data.name !== undefined) {
+      updates.push('name = ?');
+      values.push(data.name);
+    }
+    if (data.kpi_type !== undefined) {
+      updates.push('kpi_type = ?');
+      values.push(data.kpi_type);
+    }
+    if (data.condition !== undefined) {
+      updates.push('condition = ?');
+      values.push(data.condition);
+    }
+    if (data.threshold_value !== undefined) {
+      updates.push('threshold_value = ?');
+      values.push(data.threshold_value);
+    }
+    if (data.notification_emails !== undefined) {
+      updates.push('notification_emails = ?');
+      values.push(JSON.stringify(data.notification_emails));
+    }
+    if (data.is_active !== undefined) {
+      updates.push('is_active = ?');
+      values.push(data.is_active);
+    }
 
     if (updates.length > 0) {
       values.push(alertId);
@@ -1015,28 +1127,28 @@ class AnalyticsService {
     for (const alert of alerts) {
       if (!alert.is_active) continue;
 
-      const kpi = latestKPIs.find(k => k.kpi_type === alert.kpi_type);
+      const kpi = latestKPIs.find((k) => k.kpi_type === alert.kpi_type);
       if (!kpi) continue;
 
       let triggered = false;
       const value = kpi.value;
 
       switch (alert.condition) {
-      case 'above':
-        triggered = value > alert.threshold_value;
-        break;
-      case 'below':
-        triggered = value < alert.threshold_value;
-        break;
-      case 'equals':
-        triggered = value === alert.threshold_value;
-        break;
-      case 'change_above':
-        triggered = (kpi.change_percent || 0) > alert.threshold_value;
-        break;
-      case 'change_below':
-        triggered = (kpi.change_percent || 0) < alert.threshold_value;
-        break;
+        case 'above':
+          triggered = value > alert.threshold_value;
+          break;
+        case 'below':
+          triggered = value < alert.threshold_value;
+          break;
+        case 'equals':
+          triggered = value === alert.threshold_value;
+          break;
+        case 'change_above':
+          triggered = (kpi.change_percent || 0) > alert.threshold_value;
+          break;
+        case 'change_below':
+          triggered = (kpi.change_percent || 0) < alert.threshold_value;
+          break;
       }
 
       results.push({ alert, currentValue: value, triggered });
@@ -1068,26 +1180,28 @@ class AnalyticsService {
     const db = getDatabase();
 
     switch (reportType) {
-    case 'revenue':
-      return this.generateRevenueReport(filters);
-    case 'pipeline':
-      return this.generatePipelineReport(filters);
-    case 'project':
-      return this.generateProjectReport(filters);
-    case 'client':
-      return this.generateClientReport(filters);
-    case 'team':
-      return this.generateTeamReport(filters);
-    case 'lead':
-      return this.generateLeadReport(filters);
-    case 'invoice':
-      return this.generateInvoiceReport(filters);
-    default:
-      throw new Error(`Unknown report type: ${reportType}`);
+      case 'revenue':
+        return this.generateRevenueReport(filters);
+      case 'pipeline':
+        return this.generatePipelineReport(filters);
+      case 'project':
+        return this.generateProjectReport(filters);
+      case 'client':
+        return this.generateClientReport(filters);
+      case 'team':
+        return this.generateTeamReport(filters);
+      case 'lead':
+        return this.generateLeadReport(filters);
+      case 'invoice':
+        return this.generateInvoiceReport(filters);
+      default:
+        throw new Error(`Unknown report type: ${reportType}`);
     }
   }
 
-  private async generateRevenueReport(filters: ReportFilters): Promise<{ data: any[]; summary: Record<string, any> }> {
+  private async generateRevenueReport(
+    filters: ReportFilters
+  ): Promise<{ data: any[]; summary: Record<string, any> }> {
     const db = getDatabase();
     try {
       let query = `
@@ -1124,12 +1238,17 @@ class AnalyticsService {
 
       return { data, summary: summary ?? {} };
     } catch (err) {
-      logger.error('Error generating revenue report', { category: 'analytics', metadata: { error: err, filters } });
+      logger.error('Error generating revenue report', {
+        category: 'analytics',
+        metadata: { error: err, filters },
+      });
       throw err;
     }
   }
 
-  private async generatePipelineReport(_filters: ReportFilters): Promise<{ data: any[]; summary: Record<string, any> }> {
+  private async generatePipelineReport(
+    _filters: ReportFilters
+  ): Promise<{ data: any[]; summary: Record<string, any> }> {
     const db = getDatabase();
 
     const data = await db.all(`
@@ -1156,7 +1275,9 @@ class AnalyticsService {
     return { data, summary: summary ?? {} };
   }
 
-  private async generateProjectReport(filters: ReportFilters): Promise<{ data: any[]; summary: Record<string, any> }> {
+  private async generateProjectReport(
+    filters: ReportFilters
+  ): Promise<{ data: any[]; summary: Record<string, any> }> {
     const db = getDatabase();
 
     let query = `
@@ -1195,7 +1316,9 @@ class AnalyticsService {
     return { data, summary: summary ?? {} };
   }
 
-  private async generateClientReport(_filters: ReportFilters): Promise<{ data: any[]; summary: Record<string, any> }> {
+  private async generateClientReport(
+    _filters: ReportFilters
+  ): Promise<{ data: any[]; summary: Record<string, any> }> {
     const db = getDatabase();
 
     const data = await db.all(`
@@ -1222,7 +1345,9 @@ class AnalyticsService {
     return { data, summary: summary ?? {} };
   }
 
-  private async generateTeamReport(_filters: ReportFilters): Promise<{ data: any[]; summary: Record<string, any> }> {
+  private async generateTeamReport(
+    _filters: ReportFilters
+  ): Promise<{ data: any[]; summary: Record<string, any> }> {
     const db = getDatabase();
 
     const data = await db.all(`
@@ -1250,7 +1375,9 @@ class AnalyticsService {
     return { data, summary: summary ?? {} };
   }
 
-  private async generateLeadReport(_filters: ReportFilters): Promise<{ data: any[]; summary: Record<string, any> }> {
+  private async generateLeadReport(
+    _filters: ReportFilters
+  ): Promise<{ data: any[]; summary: Record<string, any> }> {
     const db = getDatabase();
 
     const data = await db.all(`
@@ -1280,7 +1407,9 @@ class AnalyticsService {
     return { data, summary: summary ?? {} };
   }
 
-  private async generateInvoiceReport(filters: ReportFilters): Promise<{ data: any[]; summary: Record<string, any> }> {
+  private async generateInvoiceReport(
+    filters: ReportFilters
+  ): Promise<{ data: any[]; summary: Record<string, any> }> {
     const db = getDatabase();
 
     let query = `
@@ -1338,7 +1467,10 @@ class AnalyticsService {
     return this.getReport(reportId);
   }
 
-  async updateSavedReport(reportId: number, data: Parameters<typeof this.updateReport>[1]): Promise<SavedReport> {
+  async updateSavedReport(
+    reportId: number,
+    data: Parameters<typeof this.updateReport>[1]
+  ): Promise<SavedReport> {
     return this.updateReport(reportId, data);
   }
 
@@ -1360,11 +1492,16 @@ class AnalyticsService {
     return this.getSchedules(reportId);
   }
 
-  async createReportSchedule(data: Parameters<typeof this.createSchedule>[0]): Promise<ReportSchedule> {
+  async createReportSchedule(
+    data: Parameters<typeof this.createSchedule>[0]
+  ): Promise<ReportSchedule> {
     return this.createSchedule(data);
   }
 
-  async updateReportSchedule(scheduleId: number, data: Parameters<typeof this.updateSchedule>[1]): Promise<ReportSchedule> {
+  async updateReportSchedule(
+    scheduleId: number,
+    data: Parameters<typeof this.updateSchedule>[1]
+  ): Promise<ReportSchedule> {
     return this.updateSchedule(scheduleId, data);
   }
 
@@ -1382,7 +1519,9 @@ class AnalyticsService {
         await this.markScheduleSent(schedule.id);
         processed++;
       } catch (err) {
-        errors.push(`Schedule ${schedule.id}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        errors.push(
+          `Schedule ${schedule.id}: ${err instanceof Error ? err.message : 'Unknown error'}`
+        );
       }
     }
 
@@ -1394,11 +1533,16 @@ class AnalyticsService {
     return this.getWidgets(userEmail);
   }
 
-  async createDashboardWidget(data: Parameters<typeof this.createWidget>[0]): Promise<DashboardWidget> {
+  async createDashboardWidget(
+    data: Parameters<typeof this.createWidget>[0]
+  ): Promise<DashboardWidget> {
     return this.createWidget(data);
   }
 
-  async updateDashboardWidget(widgetId: number, data: Parameters<typeof this.updateWidget>[1]): Promise<DashboardWidget> {
+  async updateDashboardWidget(
+    widgetId: number,
+    data: Parameters<typeof this.updateWidget>[1]
+  ): Promise<DashboardWidget> {
     return this.updateWidget(widgetId, data);
   }
 
@@ -1406,10 +1550,13 @@ class AnalyticsService {
     return this.deleteWidget(widgetId);
   }
 
-  async updateWidgetLayout(userEmail: string, layout: { id: number; x: number; y: number; w: number; h: number }[]): Promise<void> {
+  async updateWidgetLayout(
+    userEmail: string,
+    layout: { id: number; x: number; y: number; w: number; h: number }[]
+  ): Promise<void> {
     return this.saveWidgetLayout(
       userEmail,
-      layout.map(l => ({ id: l.id, position_x: l.x, position_y: l.y, width: l.w, height: l.h }))
+      layout.map((l) => ({ id: l.id, position_x: l.x, position_y: l.y, width: l.w, height: l.h }))
     );
   }
 
@@ -1435,7 +1582,10 @@ class AnalyticsService {
     return this.createAlert(data);
   }
 
-  async updateMetricAlert(alertId: number, data: Parameters<typeof this.updateAlert>[1]): Promise<MetricAlert> {
+  async updateMetricAlert(
+    alertId: number,
+    data: Parameters<typeof this.updateAlert>[1]
+  ): Promise<MetricAlert> {
     return this.updateAlert(alertId, data);
   }
 
@@ -1443,7 +1593,9 @@ class AnalyticsService {
     return this.deleteAlert(alertId);
   }
 
-  async checkAlertTriggers(): Promise<{ alert: MetricAlert; currentValue: number; triggered: boolean }[]> {
+  async checkAlertTriggers(): Promise<
+    { alert: MetricAlert; currentValue: number; triggered: boolean }[]
+  > {
     return this.checkAlerts();
   }
 
@@ -1453,7 +1605,10 @@ class AnalyticsService {
     try {
       return await this.generateReportData('revenue', { dateRange });
     } catch (err) {
-      logger.error('Failed to generate revenue analytics', { category: 'analytics', metadata: { error: err, dateRange } });
+      logger.error('Failed to generate revenue analytics', {
+        category: 'analytics',
+        metadata: { error: err, dateRange },
+      });
       throw new Error('Revenue analytics generation failed');
     }
   }
@@ -1483,7 +1638,7 @@ class AnalyticsService {
     startDate.setDate(startDate.getDate() - days);
     return {
       start: startDate.toISOString().split('T')[0],
-      end: endDate.toISOString().split('T')[0]
+      end: endDate.toISOString().split('T')[0],
     };
   }
 
@@ -1519,17 +1674,18 @@ class AnalyticsService {
     let groupBy: string;
 
     switch (period) {
-    case 'month':
-      dateFormat = '%Y-%m';
-      groupBy = 'strftime(\'%Y-%m\', paid_at)';
-      break;
-    case 'quarter':
-      groupBy = 'strftime(\'%Y\', paid_at) || \'-Q\' || ((CAST(strftime(\'%m\', paid_at) AS INTEGER) + 2) / 3)';
-      break;
-    case 'year':
-      dateFormat = '%Y';
-      groupBy = 'strftime(\'%Y\', paid_at)';
-      break;
+      case 'month':
+        dateFormat = '%Y-%m';
+        groupBy = "strftime('%Y-%m', paid_at)";
+        break;
+      case 'quarter':
+        groupBy =
+          "strftime('%Y', paid_at) || '-Q' || ((CAST(strftime('%m', paid_at) AS INTEGER) + 2) / 3)";
+        break;
+      case 'year':
+        dateFormat = '%Y';
+        groupBy = "strftime('%Y', paid_at)";
+        break;
     }
 
     let query = `
@@ -1556,18 +1712,18 @@ class AnalyticsService {
 
     query += ` GROUP BY ${groupBy} ORDER BY period DESC LIMIT 24`;
 
-    const results = await db.all(query, params) as Array<{
+    const results = (await db.all(query, params)) as Array<{
       period: string;
       revenue: number;
       invoice_count: number;
       average_invoice: number | null;
     }>;
 
-    return results.map(r => ({
+    return results.map((r) => ({
       period: r.period,
       revenue: r.revenue || 0,
       invoiceCount: r.invoice_count,
-      averageInvoice: r.average_invoice || 0
+      averageInvoice: r.average_invoice || 0,
     }));
   }
 
@@ -1582,7 +1738,7 @@ class AnalyticsService {
   }> {
     const db = getDatabase();
 
-    const results = await db.all(`
+    const results = (await db.all(`
       SELECT
         status,
         COUNT(*) as count,
@@ -1590,7 +1746,7 @@ class AnalyticsService {
       FROM proposals
       WHERE status IN ('draft', 'sent', 'viewed')
       GROUP BY status
-    `) as Array<{
+    `)) as Array<{
       status: string;
       count: number;
       total_value: number | null;
@@ -1603,18 +1759,21 @@ class AnalyticsService {
       totalValue,
       proposalCount: totalCount,
       averageValue: totalCount > 0 ? totalValue / totalCount : 0,
-      byStatus: results.map(r => ({
+      byStatus: results.map((r) => ({
         status: r.status,
         value: r.total_value || 0,
-        count: r.count
-      }))
+        count: r.count,
+      })),
     };
   }
 
   /**
    * Get client acquisition funnel metrics
    */
-  async getAcquisitionFunnel(startDate?: string, endDate?: string): Promise<{
+  async getAcquisitionFunnel(
+    startDate?: string,
+    endDate?: string
+  ): Promise<{
     contacts: number;
     leads: number;
     proposals: number;
@@ -1641,12 +1800,18 @@ class AnalyticsService {
     }
 
     // Since migration 086, leads/intakes are stored in projects table
-    const [contacts, leads, proposals, clients] = await Promise.all([
-      db.get(`SELECT COUNT(*) as count FROM projects WHERE status IN ('pending', 'new')${dateFilter}`, params),
-      db.get(`SELECT COUNT(*) as count FROM projects WHERE status IN ('pending', 'new', 'in-progress')${dateFilter}`, params),
+    const [contacts, leads, proposals, clients] = (await Promise.all([
+      db.get(
+        `SELECT COUNT(*) as count FROM projects WHERE status IN ('pending', 'new')${dateFilter}`,
+        params
+      ),
+      db.get(
+        `SELECT COUNT(*) as count FROM projects WHERE status IN ('pending', 'new', 'in-progress')${dateFilter}`,
+        params
+      ),
       db.get(`SELECT COUNT(*) as count FROM proposals WHERE 1=1${dateFilter}`, params),
-      db.get(`SELECT COUNT(*) as count FROM clients WHERE 1=1${dateFilter}`, params)
-    ]) as Array<{ count: number } | undefined>;
+      db.get(`SELECT COUNT(*) as count FROM clients WHERE 1=1${dateFilter}`, params),
+    ])) as Array<{ count: number } | undefined>;
 
     const contactCount = contacts?.count || 0;
     const leadCount = leads?.count || 0;
@@ -1662,8 +1827,8 @@ class AnalyticsService {
         contactToLead: contactCount > 0 ? (leadCount / contactCount) * 100 : 0,
         leadToProposal: leadCount > 0 ? (proposalCount / leadCount) * 100 : 0,
         proposalToClient: proposalCount > 0 ? (clientCount / proposalCount) * 100 : 0,
-        overall: contactCount > 0 ? (clientCount / contactCount) * 100 : 0
-      }
+        overall: contactCount > 0 ? (clientCount / contactCount) * 100 : 0,
+      },
     };
   }
 
@@ -1678,7 +1843,7 @@ class AnalyticsService {
   }> {
     const db = getDatabase();
 
-    const [avgStats, typeStats, statusStats] = await Promise.all([
+    const [avgStats, typeStats, statusStats] = (await Promise.all([
       db.get(`
         SELECT
           AVG(COALESCE(budget, 0)) as average_value,
@@ -1702,25 +1867,25 @@ class AnalyticsService {
         FROM projects
         GROUP BY status
         ORDER BY count DESC
-      `)
-    ]) as [
+      `),
+    ])) as [
       { average_value: number | null; average_duration: number | null } | undefined,
       Array<{ type: string; count: number; total_value: number }>,
-      Array<{ status: string; count: number }>
+      Array<{ status: string; count: number }>,
     ];
 
     return {
       averageValue: avgStats?.average_value || 0,
       averageDuration: avgStats?.average_duration || 0,
-      popularTypes: typeStats.map(t => ({
+      popularTypes: typeStats.map((t) => ({
         type: t.type || 'Unknown',
         count: t.count,
-        totalValue: t.total_value || 0
+        totalValue: t.total_value || 0,
       })),
-      statusBreakdown: statusStats.map(s => ({
+      statusBreakdown: statusStats.map((s) => ({
         status: s.status,
-        count: s.count
-      }))
+        count: s.count,
+      })),
     };
   }
 
@@ -1731,20 +1896,23 @@ class AnalyticsService {
   /**
    * Calculate client lifetime value
    */
-  async getClientLifetimeValue(limit: number = 20): Promise<Array<{
-    clientId: number;
-    clientName: string;
-    totalRevenue: number;
-    projectCount: number;
-    averageProjectValue: number;
-    firstProjectDate: string;
-    lastProjectDate: string;
-    lifetimeMonths: number;
-    monthlyValue: number;
-  }>> {
+  async getClientLifetimeValue(limit: number = 20): Promise<
+    Array<{
+      clientId: number;
+      clientName: string;
+      totalRevenue: number;
+      projectCount: number;
+      averageProjectValue: number;
+      firstProjectDate: string;
+      lastProjectDate: string;
+      lifetimeMonths: number;
+      monthlyValue: number;
+    }>
+  > {
     const db = getDatabase();
 
-    const results = await db.all(`
+    const results = (await db.all(
+      `
       SELECT
         c.id as client_id,
         COALESCE(c.contact_name, c.company_name) as client_name,
@@ -1760,7 +1928,9 @@ class AnalyticsService {
       HAVING total_revenue > 0
       ORDER BY total_revenue DESC
       LIMIT ?
-    `, [limit]) as Array<{
+    `,
+      [limit]
+    )) as Array<{
       client_id: number;
       client_name: string;
       total_revenue: number;
@@ -1769,10 +1939,13 @@ class AnalyticsService {
       last_project_date: string | null;
     }>;
 
-    return results.map(r => {
+    return results.map((r) => {
       const firstDate = r.first_project_date ? new Date(r.first_project_date) : new Date();
       const lastDate = r.last_project_date ? new Date(r.last_project_date) : new Date();
-      const lifetimeMonths = Math.max(1, Math.ceil((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24 * 30)));
+      const lifetimeMonths = Math.max(
+        1,
+        Math.ceil((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
+      );
 
       return {
         clientId: r.client_id,
@@ -1783,7 +1956,7 @@ class AnalyticsService {
         firstProjectDate: r.first_project_date || '',
         lastProjectDate: r.last_project_date || '',
         lifetimeMonths,
-        monthlyValue: (r.total_revenue || 0) / lifetimeMonths
+        monthlyValue: (r.total_revenue || 0) / lifetimeMonths,
       };
     });
   }
@@ -1791,22 +1964,25 @@ class AnalyticsService {
   /**
    * Calculate client activity scores
    */
-  async getClientActivityScores(limit: number = 20): Promise<Array<{
-    clientId: number;
-    clientName: string;
-    score: number;
-    factors: {
-      responseTime: number;
-      approvalSpeed: number;
-      paymentSpeed: number;
-      engagement: number;
-    };
-    lastActivity: string;
-    riskLevel: 'low' | 'medium' | 'high';
-  }>> {
+  async getClientActivityScores(limit: number = 20): Promise<
+    Array<{
+      clientId: number;
+      clientName: string;
+      score: number;
+      factors: {
+        responseTime: number;
+        approvalSpeed: number;
+        paymentSpeed: number;
+        engagement: number;
+      };
+      lastActivity: string;
+      riskLevel: 'low' | 'medium' | 'high';
+    }>
+  > {
     const db = getDatabase();
 
-    const results = await db.all(`
+    const results = (await db.all(
+      `
       SELECT
         c.id as client_id,
         COALESCE(c.contact_name, c.company_name) as client_name,
@@ -1819,7 +1995,9 @@ class AnalyticsService {
       WHERE c.deleted_at IS NULL
       ORDER BY c.updated_at DESC
       LIMIT ?
-    `, [limit]) as Array<{
+    `,
+      [limit]
+    )) as Array<{
       client_id: number;
       client_name: string;
       last_activity: string;
@@ -1828,12 +2006,13 @@ class AnalyticsService {
       avg_payment_days: number | null;
     }>;
 
-    return results.map(r => {
+    return results.map((r) => {
       // Calculate factor scores (0-25 each)
       const engagementScore = Math.min(25, (r.recent_messages || 0) * 5);
-      const paymentScore = r.avg_payment_days !== null
-        ? Math.max(0, 25 - Math.max(0, r.avg_payment_days * 1.5))
-        : 12.5;
+      const paymentScore =
+        r.avg_payment_days !== null
+          ? Math.max(0, 25 - Math.max(0, r.avg_payment_days * 1.5))
+          : 12.5;
       const responseScore = 12.5; // Default if no data
       const approvalScore = 12.5; // Default if no data
 
@@ -1847,10 +2026,10 @@ class AnalyticsService {
           responseTime: Math.round(responseScore),
           approvalSpeed: Math.round(approvalScore),
           paymentSpeed: Math.round(paymentScore),
-          engagement: Math.round(engagementScore)
+          engagement: Math.round(engagementScore),
         },
         lastActivity: r.last_activity || '',
-        riskLevel: totalScore >= 70 ? 'low' : totalScore >= 40 ? 'medium' : 'high'
+        riskLevel: totalScore >= 70 ? 'low' : totalScore >= 40 ? 'medium' : 'high',
       };
     });
   }
@@ -1858,18 +2037,20 @@ class AnalyticsService {
   /**
    * Get upsell opportunities (clients without certain services)
    */
-  async getUpsellOpportunities(): Promise<Array<{
-    clientId: number;
-    clientName: string;
-    currentServices: string[];
-    missingServices: string[];
-    recommendedService: string;
-    potentialValue: number;
-    lastContact: string;
-  }>> {
+  async getUpsellOpportunities(): Promise<
+    Array<{
+      clientId: number;
+      clientName: string;
+      currentServices: string[];
+      missingServices: string[];
+      recommendedService: string;
+      potentialValue: number;
+      lastContact: string;
+    }>
+  > {
     const db = getDatabase();
 
-    const clients = await db.all(`
+    const clients = (await db.all(`
       SELECT
         c.id as client_id,
         COALESCE(c.contact_name, c.company_name) as client_name,
@@ -1881,7 +2062,7 @@ class AnalyticsService {
       WHERE c.deleted_at IS NULL
       GROUP BY c.id, COALESCE(c.contact_name, c.company_name)
       HAVING has_maintenance = 0
-    `) as Array<{
+    `)) as Array<{
       client_id: number;
       client_name: string;
       last_contact: string;
@@ -1889,11 +2070,19 @@ class AnalyticsService {
       has_maintenance: number;
     }>;
 
-    const allServices = ['website', 'web-app', 'mobile', 'branding', 'maintenance', 'seo', 'hosting'];
+    const allServices = [
+      'website',
+      'web-app',
+      'mobile',
+      'branding',
+      'maintenance',
+      'seo',
+      'hosting',
+    ];
 
-    return clients.map(c => {
+    return clients.map((c) => {
       const currentServices = (c.project_types || '').split(',').filter(Boolean);
-      const missingServices = allServices.filter(s => !currentServices.includes(s));
+      const missingServices = allServices.filter((s) => !currentServices.includes(s));
 
       const recommendedService = !currentServices.includes('maintenance')
         ? 'maintenance'
@@ -1906,7 +2095,7 @@ class AnalyticsService {
         missingServices,
         recommendedService,
         potentialValue: recommendedService === 'maintenance' ? 500 : 2000,
-        lastContact: c.last_contact || ''
+        lastContact: c.last_contact || '',
       };
     });
   }
@@ -1918,18 +2107,20 @@ class AnalyticsService {
   /**
    * Get overdue invoices report
    */
-  async getOverdueInvoicesReport(): Promise<Array<{
-    invoiceId: number;
-    invoiceNumber: string;
-    clientName: string;
-    amount: number;
-    dueDate: string;
-    daysOverdue: number;
-    remindersSent: number;
-  }>> {
+  async getOverdueInvoicesReport(): Promise<
+    Array<{
+      invoiceId: number;
+      invoiceNumber: string;
+      clientName: string;
+      amount: number;
+      dueDate: string;
+      daysOverdue: number;
+      remindersSent: number;
+    }>
+  > {
     const db = getDatabase();
 
-    const results = await db.all(`
+    const results = (await db.all(`
       SELECT
         i.id as invoice_id,
         i.invoice_number,
@@ -1943,7 +2134,7 @@ class AnalyticsService {
       WHERE i.status IN ('sent', 'overdue')
         AND i.due_date < date('now')
       ORDER BY days_overdue DESC
-    `) as Array<{
+    `)) as Array<{
       invoice_id: number;
       invoice_number: string;
       client_name: string;
@@ -1953,32 +2144,34 @@ class AnalyticsService {
       reminders_sent: number;
     }>;
 
-    return results.map(r => ({
+    return results.map((r) => ({
       invoiceId: r.invoice_id,
       invoiceNumber: r.invoice_number || `INV-${r.invoice_id}`,
       clientName: r.client_name,
       amount: r.amount || 0,
       dueDate: r.due_date,
       daysOverdue: r.days_overdue,
-      remindersSent: r.reminders_sent || 0
+      remindersSent: r.reminders_sent || 0,
     }));
   }
 
   /**
    * Get pending approvals aging report
    */
-  async getPendingApprovalsReport(): Promise<Array<{
-    id: number;
-    type: string;
-    entityName: string;
-    clientName: string;
-    requestedDate: string;
-    daysWaiting: number;
-    remindersSent: number;
-  }>> {
+  async getPendingApprovalsReport(): Promise<
+    Array<{
+      id: number;
+      type: string;
+      entityName: string;
+      clientName: string;
+      requestedDate: string;
+      daysWaiting: number;
+      remindersSent: number;
+    }>
+  > {
     const db = getDatabase();
 
-    const results = await db.all(`
+    const results = (await db.all(`
       SELECT
         a.id,
         a.entity_type as type,
@@ -1993,7 +2186,7 @@ class AnalyticsService {
       LEFT JOIN clients c ON COALESCE(p.client_id, (SELECT project_id FROM deliverables WHERE id = a.entity_id)) IN (SELECT id FROM projects WHERE client_id = c.id)
       WHERE a.status = 'pending'
       ORDER BY days_waiting DESC
-    `) as Array<{
+    `)) as Array<{
       id: number;
       type: string;
       entity_name: string;
@@ -2003,14 +2196,14 @@ class AnalyticsService {
       reminders_sent: number;
     }>;
 
-    return results.map(r => ({
+    return results.map((r) => ({
       id: r.id,
       type: r.type,
       entityName: r.entity_name,
       clientName: r.client_name || 'Unknown',
       requestedDate: r.requested_date,
       daysWaiting: r.days_waiting,
-      remindersSent: r.reminders_sent || 0
+      remindersSent: r.reminders_sent || 0,
     }));
   }
 
@@ -2026,7 +2219,7 @@ class AnalyticsService {
   }> {
     const db = getDatabase();
 
-    const [statusCounts, byClient] = await Promise.all([
+    const [statusCounts, byClient] = (await Promise.all([
       db.get(`
         SELECT
           SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
@@ -2046,10 +2239,10 @@ class AnalyticsService {
         GROUP BY c.id, COALESCE(c.contact_name, c.company_name)
         HAVING pending > 0
         ORDER BY overdue DESC, pending DESC
-      `)
-    ]) as [
+      `),
+    ])) as [
       { pending: number; submitted: number; approved: number; overdue: number } | undefined,
-      Array<{ client_id: number; client_name: string; pending: number; overdue: number }>
+      Array<{ client_id: number; client_name: string; pending: number; overdue: number }>,
     ];
 
     return {
@@ -2057,12 +2250,12 @@ class AnalyticsService {
       submitted: statusCounts?.submitted || 0,
       approved: statusCounts?.approved || 0,
       overdue: statusCounts?.overdue || 0,
-      byClient: byClient.map(c => ({
+      byClient: byClient.map((c) => ({
         clientId: c.client_id,
         clientName: c.client_name,
         pending: c.pending,
-        overdue: c.overdue
-      }))
+        overdue: c.overdue,
+      })),
     };
   }
 
@@ -2085,7 +2278,7 @@ class AnalyticsService {
   }> {
     const db = getDatabase();
 
-    const projects = await db.all(`
+    const projects = (await db.all(`
       SELECT
         p.id as project_id,
         p.project_name as project_name,
@@ -2101,7 +2294,7 @@ class AnalyticsService {
       JOIN clients c ON p.client_id = c.id
       WHERE p.status IN ('active', 'in_progress', 'review')
       ORDER BY p.estimated_end_date ASC
-    `) as Array<{
+    `)) as Array<{
       project_id: number;
       project_name: string;
       client_name: string;
@@ -2118,10 +2311,9 @@ class AnalyticsService {
     let atRisk = 0;
     let overdue = 0;
 
-    const projectList = projects.map(p => {
-      const completionPercent = p.total_tasks > 0
-        ? Math.round((p.completed_tasks / p.total_tasks) * 100)
-        : 0;
+    const projectList = projects.map((p) => {
+      const completionPercent =
+        p.total_tasks > 0 ? Math.round((p.completed_tasks / p.total_tasks) * 100) : 0;
 
       const issues: string[] = [];
       let healthStatus: 'on_track' | 'at_risk' | 'overdue' = 'on_track';
@@ -2152,7 +2344,7 @@ class AnalyticsService {
         status: healthStatus,
         dueDate: p.due_date || '',
         completionPercent,
-        issues
+        issues,
       };
     });
 
@@ -2160,7 +2352,7 @@ class AnalyticsService {
       onTrack,
       atRisk,
       overdue,
-      projects: projectList
+      projects: projectList,
     };
   }
 }

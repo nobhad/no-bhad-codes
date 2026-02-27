@@ -63,12 +63,7 @@ class QueryStatsService {
   /**
    * Record a query execution
    */
-  record(
-    type: QueryMetric['type'],
-    table: string,
-    executionTime: number,
-    sql?: string
-  ): void {
+  record(type: QueryMetric['type'], table: string, executionTime: number, sql?: string): void {
     if (!this.enabled) return;
 
     const isSlow = executionTime >= SLOW_QUERY_THRESHOLD_MS;
@@ -81,7 +76,7 @@ class QueryStatsService {
       executionTime,
       timestamp,
       sql: isSlow ? sql : undefined, // Only store SQL for slow queries
-      slow: isSlow
+      slow: isSlow,
     });
 
     // Log slow queries
@@ -91,7 +86,7 @@ class QueryStatsService {
         table,
         executionTime,
         timestamp: new Date(timestamp).toISOString(),
-        sql: sql?.substring(0, 200) // Truncate for logging
+        sql: sql?.substring(0, 200), // Truncate for logging
       };
 
       this.slowQueries.push(record);
@@ -102,15 +97,18 @@ class QueryStatsService {
       }
 
       // Log warning for slow query
-      logger.warn(`Slow query detected: ${type.toUpperCase()} on ${table} took ${executionTime}ms`, {
-        category: 'SLOW_QUERY',
-        metadata: {
-          type,
-          table,
-          executionTime,
-          threshold: SLOW_QUERY_THRESHOLD_MS
+      logger.warn(
+        `Slow query detected: ${type.toUpperCase()} on ${table} took ${executionTime}ms`,
+        {
+          category: 'SLOW_QUERY',
+          metadata: {
+            type,
+            table,
+            executionTime,
+            threshold: SLOW_QUERY_THRESHOLD_MS,
+          },
         }
-      });
+      );
     }
 
     // Cleanup old metrics periodically
@@ -122,9 +120,7 @@ class QueryStatsService {
    */
   getStats(): QueryStats {
     const now = Date.now();
-    const relevantMetrics = this.metrics.filter(
-      (m) => now - m.timestamp < STATS_RETENTION_MS
-    );
+    const relevantMetrics = this.metrics.filter((m) => now - m.timestamp < STATS_RETENTION_MS);
 
     const totalQueries = relevantMetrics.length;
     const slowQueries = relevantMetrics.filter((m) => m.slow).length;
@@ -138,7 +134,7 @@ class QueryStatsService {
       insert: { count: 0, avgTime: 0, totalTime: 0 },
       update: { count: 0, avgTime: 0, totalTime: 0 },
       delete: { count: 0, avgTime: 0, totalTime: 0 },
-      raw: { count: 0, avgTime: 0, totalTime: 0 }
+      raw: { count: 0, avgTime: 0, totalTime: 0 },
     };
 
     for (const metric of relevantMetrics) {
@@ -165,7 +161,7 @@ class QueryStatsService {
       maxExecutionTime: maxTime,
       byType,
       recentSlowQueries: [...this.slowQueries].reverse().slice(0, 10),
-      uptimeSeconds: Math.floor((now - this.startTime) / 1000)
+      uptimeSeconds: Math.floor((now - this.startTime) / 1000),
     };
   }
 

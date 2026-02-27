@@ -56,7 +56,7 @@ router.post(
       file_size: file.size,
       mime_type: file.mimetype,
       uploaded_by: req.user!.email,
-      comment
+      comment,
     });
 
     res.status(201).json({ version });

@@ -2,7 +2,11 @@ import express, { Response } from 'express';
 import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { escalateTaskPriorities, previewEscalation, getEscalationSummary } from '../../services/priority-escalation-service.js';
+import {
+  escalateTaskPriorities,
+  previewEscalation,
+  getEscalationSummary,
+} from '../../services/priority-escalation-service.js';
 import { errorResponse } from '../../utils/api-response.js';
 
 const router = express.Router();
@@ -36,7 +40,7 @@ router.post(
       const result = await previewEscalation(projectId);
       return res.json({
         preview: true,
-        ...result
+        ...result,
       });
     }
 
@@ -46,7 +50,7 @@ router.post(
     res.json({
       success: true,
       message: `Escalated ${result.updatedCount} task(s)`,
-      ...result
+      ...result,
     });
   })
 );
@@ -74,7 +78,7 @@ router.get(
 
     res.json({
       projectId,
-      ...summary
+      ...summary,
     });
   })
 );

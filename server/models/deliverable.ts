@@ -174,11 +174,23 @@ export async function initializeDeliverableTables(db: any): Promise<void> {
   `);
 
   // Create indexes
-  await db.run('CREATE INDEX IF NOT EXISTS idx_deliverables_project_id ON deliverables(project_id)');
+  await db.run(
+    'CREATE INDEX IF NOT EXISTS idx_deliverables_project_id ON deliverables(project_id)'
+  );
   await db.run('CREATE INDEX IF NOT EXISTS idx_deliverables_status ON deliverables(status)');
-  await db.run('CREATE INDEX IF NOT EXISTS idx_deliverables_approval_status ON deliverables(approval_status)');
-  await db.run('CREATE INDEX IF NOT EXISTS idx_deliverable_versions_deliverable_id ON deliverable_versions(deliverable_id)');
-  await db.run('CREATE INDEX IF NOT EXISTS idx_deliverable_comments_deliverable_id ON deliverable_comments(deliverable_id)');
-  await db.run('CREATE INDEX IF NOT EXISTS idx_design_elements_deliverable_id ON design_elements(deliverable_id)');
-  await db.run('CREATE INDEX IF NOT EXISTS idx_deliverable_reviews_deliverable_id ON deliverable_reviews(deliverable_id)');
+  await db.run(
+    'CREATE INDEX IF NOT EXISTS idx_deliverables_approval_status ON deliverables(approval_status)'
+  );
+  await db.run(
+    'CREATE INDEX IF NOT EXISTS idx_deliverable_versions_deliverable_id ON deliverable_versions(deliverable_id)'
+  );
+  await db.run(
+    'CREATE INDEX IF NOT EXISTS idx_deliverable_comments_deliverable_id ON deliverable_comments(deliverable_id)'
+  );
+  await db.run(
+    'CREATE INDEX IF NOT EXISTS idx_design_elements_deliverable_id ON design_elements(deliverable_id)'
+  );
+  await db.run(
+    'CREATE INDEX IF NOT EXISTS idx_deliverable_reviews_deliverable_id ON deliverable_reviews(deliverable_id)'
+  );
 }

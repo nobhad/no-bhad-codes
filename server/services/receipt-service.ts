@@ -15,6 +15,7 @@ import { getDatabase } from '../database/init.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
 import { getUploadsSubdir, getRelativePath, sanitizeFilename } from '../config/uploads.js';
 import { PAGE_MARGINS } from '../utils/pdf-utils.js';
+import { logger } from './logger.js';
 
 // ============================================
 // TYPES
@@ -98,7 +99,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     y: y - 20,
     size: 28,
     font: helveticaBold,
-    color: rgb(0.15, 0.15, 0.15)
+    color: rgb(0.15, 0.15, 0.15),
   });
 
   let textStartX = rightMargin - 180;
@@ -111,16 +112,46 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
       x: logoX,
       y: y - logoHeight + 10,
       width: logoWidth,
-      height: logoHeight
+      height: logoHeight,
     });
     textStartX = logoX + logoWidth + 18;
   }
 
-  page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y - 11, size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
-  page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 34, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
-  page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 54, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-  page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 70, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-  page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 86, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+  page.drawText(BUSINESS_INFO.name, {
+    x: textStartX,
+    y: y - 11,
+    size: 15,
+    font: helveticaBold,
+    color: rgb(0.1, 0.1, 0.1),
+  });
+  page.drawText(BUSINESS_INFO.owner, {
+    x: textStartX,
+    y: y - 34,
+    size: 10,
+    font: helvetica,
+    color: rgb(0.2, 0.2, 0.2),
+  });
+  page.drawText(BUSINESS_INFO.tagline, {
+    x: textStartX,
+    y: y - 54,
+    size: 9,
+    font: helvetica,
+    color: rgb(0.4, 0.4, 0.4),
+  });
+  page.drawText(BUSINESS_INFO.email, {
+    x: textStartX,
+    y: y - 70,
+    size: 9,
+    font: helvetica,
+    color: rgb(0.4, 0.4, 0.4),
+  });
+  page.drawText(BUSINESS_INFO.website, {
+    x: textStartX,
+    y: y - 86,
+    size: 9,
+    font: helvetica,
+    color: rgb(0.4, 0.4, 0.4),
+  });
 
   y -= 120;
 
@@ -129,7 +160,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     start: { x: leftMargin, y },
     end: { x: rightMargin, y },
     thickness: 1,
-    color: rgb(0.7, 0.7, 0.7)
+    color: rgb(0.7, 0.7, 0.7),
   });
   y -= 30;
 
@@ -139,20 +170,44 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     y,
     size: 16,
     font: helveticaBold,
-    color: rgb(0.13, 0.55, 0.13)
+    color: rgb(0.13, 0.55, 0.13),
   });
   y -= 30;
 
   // === CLIENT INFO ===
-  page.drawText('RECEIVED FROM:', { x: leftMargin, y, size: 11, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
+  page.drawText('RECEIVED FROM:', {
+    x: leftMargin,
+    y,
+    size: 11,
+    font: helveticaBold,
+    color: rgb(0.2, 0.2, 0.2),
+  });
   y -= 16;
-  page.drawText(data.clientName, { x: leftMargin, y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+  page.drawText(data.clientName, {
+    x: leftMargin,
+    y,
+    size: 10,
+    font: helveticaBold,
+    color: rgb(0, 0, 0),
+  });
   y -= 12;
   if (data.clientCompany) {
-    page.drawText(data.clientCompany, { x: leftMargin, y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page.drawText(data.clientCompany, {
+      x: leftMargin,
+      y,
+      size: 10,
+      font: helvetica,
+      color: rgb(0, 0, 0),
+    });
     y -= 12;
   }
-  page.drawText(data.clientEmail, { x: leftMargin, y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+  page.drawText(data.clientEmail, {
+    x: leftMargin,
+    y,
+    size: 10,
+    font: helvetica,
+    color: rgb(0.3, 0.3, 0.3),
+  });
   y -= 30;
 
   // === RECEIPT DETAILS BOX ===
@@ -164,7 +219,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     width: rightMargin - leftMargin,
     height: boxHeight,
     borderColor: rgb(0.8, 0.8, 0.8),
-    borderWidth: 1
+    borderWidth: 1,
   });
 
   // Box header
@@ -173,16 +228,34 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     y: y - 25,
     width: rightMargin - leftMargin,
     height: 25,
-    color: rgb(0.95, 0.95, 0.95)
+    color: rgb(0.95, 0.95, 0.95),
   });
-  page.drawText('PAYMENT DETAILS', { x: leftMargin + 10, y: y - 17, size: 11, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
+  page.drawText('PAYMENT DETAILS', {
+    x: leftMargin + 10,
+    y: y - 17,
+    size: 11,
+    font: helveticaBold,
+    color: rgb(0.2, 0.2, 0.2),
+  });
 
   y -= 45;
 
   // Detail rows
   const drawDetailRow = (label: string, value: string) => {
-    page.drawText(label, { x: leftMargin + 10, y, size: 10, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
-    page.drawText(value, { x: leftMargin + 150, y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page.drawText(label, {
+      x: leftMargin + 10,
+      y,
+      size: 10,
+      font: helveticaBold,
+      color: rgb(0.3, 0.3, 0.3),
+    });
+    page.drawText(value, {
+      x: leftMargin + 150,
+      y,
+      size: 10,
+      font: helvetica,
+      color: rgb(0, 0, 0),
+    });
     y -= 18;
   };
 
@@ -204,13 +277,25 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     start: { x: leftMargin, y: y + 15 },
     end: { x: rightMargin, y: y + 15 },
     thickness: 2,
-    color: rgb(0.13, 0.55, 0.13)
+    color: rgb(0.13, 0.55, 0.13),
   });
 
-  page.drawText('AMOUNT PAID:', { x: leftMargin, y, size: 14, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+  page.drawText('AMOUNT PAID:', {
+    x: leftMargin,
+    y,
+    size: 14,
+    font: helveticaBold,
+    color: rgb(0.1, 0.1, 0.1),
+  });
   const amountText = `$${data.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const amountWidth = helveticaBold.widthOfTextAtSize(amountText, 18);
-  page.drawText(amountText, { x: rightMargin - amountWidth, y, size: 18, font: helveticaBold, color: rgb(0.13, 0.55, 0.13) });
+  page.drawText(amountText, {
+    x: rightMargin - amountWidth,
+    y,
+    size: 18,
+    font: helveticaBold,
+    color: rgb(0.13, 0.55, 0.13),
+  });
 
   y -= 50;
 
@@ -222,7 +307,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     y,
     size: 12,
     font: helvetica,
-    color: rgb(0.3, 0.3, 0.3)
+    color: rgb(0.3, 0.3, 0.3),
   });
 
   // === FOOTER ===
@@ -230,7 +315,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     start: { x: leftMargin, y: 72 },
     end: { x: rightMargin, y: 72 },
     thickness: 0.5,
-    color: rgb(0.8, 0.8, 0.8)
+    color: rgb(0.8, 0.8, 0.8),
   });
 
   const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
@@ -240,7 +325,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     y: 54,
     size: 7,
     font: helvetica,
-    color: rgb(0.5, 0.5, 0.5)
+    color: rgb(0.5, 0.5, 0.5),
   });
 
   const legalText = 'This receipt confirms payment received. Please retain for your records.';
@@ -250,7 +335,7 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
     y: 40,
     size: 7,
     font: helvetica,
-    color: rgb(0.5, 0.5, 0.5)
+    color: rgb(0.5, 0.5, 0.5),
   });
 
   return await pdfDoc.save();
@@ -302,7 +387,7 @@ class ReceiptService {
       invoiceNumber: row.invoice_number,
       clientName: row.client_name,
       clientEmail: row.client_email,
-      projectName: row.project_name
+      projectName: row.project_name,
     };
   }
 
@@ -347,7 +432,7 @@ class ReceiptService {
       paymentDate: new Date(paymentDate).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       }),
       paymentMethod: paymentData.paymentMethod,
       paymentReference: paymentData.paymentReference,
@@ -355,7 +440,7 @@ class ReceiptService {
       clientName: String(invoiceRow.client_name || 'Client'),
       clientEmail: String(invoiceRow.client_email || ''),
       clientCompany: invoiceRow.company_name ? String(invoiceRow.company_name) : undefined,
-      projectName: invoiceRow.project_name ? String(invoiceRow.project_name) : undefined
+      projectName: invoiceRow.project_name ? String(invoiceRow.project_name) : undefined,
     };
 
     const pdfBytes = await generateReceiptPdf(pdfData);
@@ -380,7 +465,7 @@ class ReceiptService {
         // Get or create Documents folder for the project
         let folderId: number | null = null;
         const folderRow = (await db.get(
-          'SELECT id FROM file_folders WHERE project_id = ? AND name = \'Documents\'',
+          "SELECT id FROM file_folders WHERE project_id = ? AND name = 'Documents'",
           [projectId as number]
         )) as { id: number } | null;
 
@@ -409,12 +494,14 @@ class ReceiptService {
             relativePath,
             pdfBytes.length,
             folderId,
-            `Payment receipt for invoice ${String(invoiceRow.invoice_number || '')}`
+            `Payment receipt for invoice ${String(invoiceRow.invoice_number || '')}`,
           ]
         );
         fileId = fileResult.lastID || null;
       } catch (error) {
-        console.error('[ReceiptService] Failed to save receipt PDF:', error);
+        logger.error('[ReceiptService] Failed to save receipt PDF:', {
+          error: error instanceof Error ? error : undefined,
+        });
         // Continue without file - receipt record still created
       }
     }
@@ -526,7 +613,7 @@ class ReceiptService {
     const db = getDatabase();
 
     // Get receipt with all related info
-    const row = await db.get(
+    const row = (await db.get(
       `SELECT r.*, i.invoice_number, i.project_id,
               c.contact_name as client_name, c.email as client_email, c.company_name,
               p.project_name,
@@ -538,7 +625,7 @@ class ReceiptService {
        LEFT JOIN invoice_payments ip ON r.payment_id = ip.id
        WHERE r.id = ?`,
       [receiptId]
-    ) as Record<string, unknown> | null;
+    )) as Record<string, unknown> | null;
 
     if (!row) {
       throw new Error('Receipt not found');
@@ -552,7 +639,7 @@ class ReceiptService {
       paymentDate: new Date(paymentDateStr as string).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       }),
       paymentMethod: String(row.payment_method || 'Unknown'),
       paymentReference: row.payment_reference ? String(row.payment_reference) : undefined,
@@ -560,7 +647,7 @@ class ReceiptService {
       clientName: String(row.client_name || 'Client'),
       clientEmail: String(row.client_email || ''),
       clientCompany: row.company_name ? String(row.company_name) : undefined,
-      projectName: row.project_name ? String(row.project_name) : undefined
+      projectName: row.project_name ? String(row.project_name) : undefined,
     };
 
     const pdfBytes = await generateReceiptPdf(pdfData);

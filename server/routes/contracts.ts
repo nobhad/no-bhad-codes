@@ -46,7 +46,7 @@ router.get(
     const contracts = await contractService.getContracts({
       projectId,
       clientId,
-      status
+      status,
     });
 
     sendSuccess(res, { contracts });
@@ -62,7 +62,12 @@ router.post(
     const { templateId, projectId, clientId, status, expiresAt } = req.body;
 
     if (!templateId || !projectId || !clientId) {
-      return errorResponse(res, 'templateId, projectId, and clientId are required', 400, 'VALIDATION_ERROR');
+      return errorResponse(
+        res,
+        'templateId, projectId, and clientId are required',
+        400,
+        'VALIDATION_ERROR'
+      );
     }
 
     if (status && !contractService.isValidContractStatus(status)) {
@@ -74,7 +79,7 @@ router.post(
       projectId,
       clientId,
       status,
-      expiresAt: expiresAt || null
+      expiresAt: expiresAt || null,
     });
 
     // Emit workflow event for contract creation
@@ -83,7 +88,7 @@ router.post(
       triggeredBy: req.user?.email || 'admin',
       projectId,
       clientId,
-      templateId
+      templateId,
     });
 
     sendCreated(res, { contract }, 'Contract created successfully');
@@ -148,7 +153,12 @@ router.post(
     const { projectId, clientId, content, status } = req.body;
 
     if (!projectId || !clientId || !content) {
-      return errorResponse(res, 'projectId, clientId, and content are required', 400, 'VALIDATION_ERROR');
+      return errorResponse(
+        res,
+        'projectId, clientId, and content are required',
+        400,
+        'VALIDATION_ERROR'
+      );
     }
 
     if (status && !contractService.isValidContractStatus(status)) {
@@ -162,7 +172,7 @@ router.post(
       entityId: contract.id,
       triggeredBy: req.user?.email || 'admin',
       projectId,
-      clientId
+      clientId,
     });
 
     sendCreated(res, { contract }, 'Contract created successfully');
@@ -259,7 +269,7 @@ router.post(
   </div>
 </body>
 </html>
-      `.trim()
+      `.trim(),
     });
 
     await db.run(
@@ -290,7 +300,7 @@ router.post(
 
     const contract = await contractService.updateContract(contractId, {
       status: 'expired',
-      expiresAt: now
+      expiresAt: now,
     });
 
     await db.run(
@@ -328,7 +338,7 @@ router.post(
       content: content || original.content,
       status: 'draft',
       variables: original.variables,
-      parentContractId: original.id
+      parentContractId: original.id,
     });
 
     sendCreated(res, { contract: amendment }, 'Amendment created');
@@ -361,7 +371,9 @@ router.post(
     const clientEmail = getString(p, 'email');
     const clientName = getString(p, 'contact_name') || 'there';
     const projectName = getString(p, 'project_name');
-    const renewalAt = contract.renewalAt ? new Date(contract.renewalAt).toLocaleDateString('en-US') : 'soon';
+    const renewalAt = contract.renewalAt
+      ? new Date(contract.renewalAt).toLocaleDateString('en-US')
+      : 'soon';
 
     if (!clientEmail) {
       return errorResponse(res, 'No client email on file', 400, 'VALIDATION_ERROR');
@@ -393,13 +405,13 @@ router.post(
   </div>
 </body>
 </html>
-      `.trim()
+      `.trim(),
     });
 
     await contractService.updateContract(contractId, {
       renewalReminderSentAt: new Date().toISOString(),
       lastReminderAt: new Date().toISOString(),
-      reminderCount: (contract.reminderCount || 0) + 1
+      reminderCount: (contract.reminderCount || 0) + 1,
     });
 
     await db.run(

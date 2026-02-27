@@ -10,7 +10,11 @@
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
-import { workflowTriggerService, EventType, ActionType } from '../services/workflow-trigger-service.js';
+import {
+  workflowTriggerService,
+  EventType,
+  ActionType,
+} from '../services/workflow-trigger-service.js';
 import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
@@ -43,7 +47,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     res.json({
       eventTypes: workflowTriggerService.getEventTypes(),
-      actionTypes: workflowTriggerService.getActionTypes()
+      actionTypes: workflowTriggerService.getActionTypes(),
     });
   })
 );
@@ -78,7 +82,16 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { name, description, event_type, conditions, action_type, action_config, is_active, priority } = req.body;
+    const {
+      name,
+      description,
+      event_type,
+      conditions,
+      action_type,
+      action_config,
+      is_active,
+      priority,
+    } = req.body;
 
     if (!name || !event_type || !action_type || !action_config) {
       return errorResponse(
@@ -97,13 +110,13 @@ router.post(
       action_type,
       action_config,
       is_active,
-      priority
+      priority,
     });
 
     res.status(201).json({
       success: true,
       message: 'Trigger created',
-      trigger
+      trigger,
     });
   })
 );
@@ -129,7 +142,7 @@ router.put(
     res.json({
       success: true,
       message: 'Trigger updated',
-      trigger
+      trigger,
     });
   })
 );
@@ -150,7 +163,7 @@ router.delete(
     await workflowTriggerService.deleteTrigger(id);
     res.json({
       success: true,
-      message: 'Trigger deleted'
+      message: 'Trigger deleted',
     });
   })
 );
@@ -176,7 +189,7 @@ router.post(
     res.json({
       success: true,
       message: `Trigger ${trigger.is_active ? 'activated' : 'deactivated'}`,
-      trigger
+      trigger,
     });
   })
 );
@@ -234,12 +247,12 @@ router.post(
     await workflowTriggerService.emit(event_type as EventType, {
       ...context,
       triggeredBy: req.user?.email || 'admin',
-      isTest: true
+      isTest: true,
     });
 
     res.json({
       success: true,
-      message: `Event ${event_type} emitted`
+      message: `Event ${event_type} emitted`,
     });
   })
 );

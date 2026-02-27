@@ -73,33 +73,35 @@ router.get(
           cache: {
             connected: cacheConnected,
             available: cacheService.isAvailable(),
-            stats: cacheStats
+            stats: cacheStats,
           },
           email: {
             initialized: emailStatus.initialized,
             queueSize: emailStatus.queueSize,
             templatesLoaded: emailStatus.templatesLoaded,
-            isProcessingQueue: emailStatus.isProcessingQueue
+            isProcessingQueue: emailStatus.isProcessingQueue,
           },
           database: {
             connected: true, // We'll assume it's connected if we got this far
-            type: 'sqlite'
-          }
-        }
+            type: 'sqlite',
+          },
+        },
       };
 
       res.json(systemStatus);
     } catch (error) {
-      logger.error('Error getting system status:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error getting system status:', {
+        error: error instanceof Error ? error : undefined,
+      });
 
       errorTracker.captureException(error as Error, {
         tags: { component: 'admin-status' },
-        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
+        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
       });
 
       errorResponseWithPayload(res, 'Failed to retrieve system status', 500, 'INTERNAL_ERROR', {
         status: 'error',
-        timestamp
+        timestamp,
       });
     }
   })
@@ -175,19 +177,21 @@ router.get(
         ...(startDate && { startDate: String(startDate) }),
         ...(endDate && { endDate: String(endDate) }),
         limit: limit ? Math.min(parseInt(String(limit), 10) || 100, 500) : 100,
-        offset: offset ? Math.max(0, parseInt(String(offset), 10) || 0) : 0
+        offset: offset ? Math.max(0, parseInt(String(offset), 10) || 0) : 0,
       });
 
       res.json({
         success: true,
         data: logs,
-        count: logs.length
+        count: logs.length,
       });
     } catch (error) {
-      logger.error('Error fetching audit log:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error fetching audit log:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorTracker.captureException(error as Error, {
         tags: { component: 'admin-audit' },
-        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
+        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
       });
       errorResponse(res, 'Failed to retrieve audit log', 500, 'AUDIT_LOG_ERROR');
     }
@@ -236,10 +240,12 @@ router.get(
       res.json({
         success: true,
         leads: leadsCount?.count || 0,
-        messages: messagesCount?.count || 0
+        messages: messagesCount?.count || 0,
       });
     } catch (error) {
-      logger.error('Error fetching sidebar counts:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error fetching sidebar counts:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to fetch sidebar counts', 500, 'INTERNAL_ERROR');
     }
   })
@@ -291,16 +297,18 @@ router.get(
       const tasks = await projectService.getAllTasks({
         status: status ? String(status) : undefined,
         priority: priority ? String(priority) : undefined,
-        limit: limit ? Math.min(parseInt(String(limit), 10) || 100, 500) : 100
+        limit: limit ? Math.min(parseInt(String(limit), 10) || 100, 500) : 100,
       });
 
       res.json({
         success: true,
         tasks,
-        count: tasks.length
+        count: tasks.length,
       });
     } catch (error) {
-      logger.error('Error fetching global tasks:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error fetching global tasks:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to fetch tasks', 500, 'INTERNAL_ERROR');
     }
   })
@@ -412,14 +420,12 @@ router.get(
       // Upcoming tasks
       const upcomingTasks = await projectService.getAllTasks({
         status: 'pending,in_progress',
-        limit: 10
+        limit: 10,
       });
 
       const totalLeads = Number(leadsStats?.total) || 0;
       const convertedLeads = Number(leadsStats?.converted) || 0;
-      const conversionRate = totalLeads > 0
-        ? Math.round((convertedLeads / totalLeads) * 100)
-        : 0;
+      const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
 
       res.json({
         success: true,
@@ -427,13 +433,13 @@ router.get(
           overdueInvoices: overdueInvoices?.count || 0,
           pendingContracts: pendingContracts?.count || 0,
           newLeadsThisWeek: newLeadsThisWeek?.count || 0,
-          unreadMessages: unreadMessages?.count || 0
+          unreadMessages: unreadMessages?.count || 0,
         },
         snapshot: {
           activeProjects: activeProjects?.count || 0,
           totalClients: totalClients?.count || 0,
           revenueMTD: revenueMTD?.total || 0,
-          conversionRate
+          conversionRate,
         },
         recentActivity: recentActivity || [],
         activeProjects: activeProjectsList || [],
@@ -443,11 +449,13 @@ router.get(
           projectName: t.projectName || 'Unknown Project',
           priority: t.priority || 'medium',
           status: t.status || 'pending',
-          dueDate: t.dueDate
-        }))
+          dueDate: t.dueDate,
+        })),
       });
     } catch (error) {
-      logger.error('Error fetching dashboard data:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error fetching dashboard data:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to fetch dashboard data', 500, 'INTERNAL_ERROR');
     }
   })

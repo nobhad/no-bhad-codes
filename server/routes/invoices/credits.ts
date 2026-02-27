@@ -38,7 +38,7 @@ router.post(
 
     if (!depositInvoiceId || !amount) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['depositInvoiceId', 'amount']
+        required: ['depositInvoiceId', 'amount'],
       });
     }
 
@@ -53,7 +53,7 @@ router.post(
       res.json({
         success: true,
         message: 'Credit applied successfully',
-        credit: toSnakeCaseCredit(credit)
+        credit: toSnakeCaseCredit(credit),
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -90,11 +90,11 @@ router.get(
       res.json({
         success: true,
         credits: credits.map(toSnakeCaseCredit),
-        total_credits: totalCredits
+        total_credits: totalCredits,
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve credits', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })

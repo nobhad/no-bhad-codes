@@ -14,6 +14,7 @@
  */
 
 import { getDatabase } from '../../database/init';
+import { logger } from '../logger.js';
 
 // Stripe configuration
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
@@ -130,10 +131,10 @@ export async function createPaymentLink(config: PaymentLinkConfig): Promise<Paym
   const db = getDatabase();
 
   // Get invoice details
-  const invoice = await db.get(
+  const invoice = (await db.get(
     'SELECT i.*, COALESCE(c.contact_name, c.company_name) as client_name, c.email as client_email FROM invoices i LEFT JOIN clients c ON i.client_id = c.id WHERE i.id = ?',
     [config.invoiceId]
-  ) as InvoiceRow | undefined;
+  )) as InvoiceRow | undefined;
 
   if (!invoice) {
     throw new Error(`Invoice ${config.invoiceId} not found`);
@@ -147,10 +148,16 @@ export async function createPaymentLink(config: PaymentLinkConfig): Promise<Paym
     params.append('mode', 'payment');
     params.append('payment_method_types[]', 'card');
     params.append('line_items[0][price_data][currency]', config.currency || 'usd');
-    params.append('line_items[0][price_data][product_data][name]', config.description || `Invoice #${invoice.invoice_number}`);
+    params.append(
+      'line_items[0][price_data][product_data][name]',
+      config.description || `Invoice #${invoice.invoice_number}`
+    );
     params.append('line_items[0][price_data][unit_amount]', String(config.amount));
     params.append('line_items[0][quantity]', '1');
-    params.append('success_url', config.successUrl || `${baseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
+    params.append(
+      'success_url',
+      config.successUrl || `${baseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`
+    );
     params.append('cancel_url', config.cancelUrl || `${baseUrl}/payment-cancelled`);
 
     if (config.customerEmail || invoice.client_email) {
@@ -171,19 +178,19 @@ export async function createPaymentLink(config: PaymentLinkConfig): Promise<Paym
     const response = await fetch(`${STRIPE_API_BASE}/checkout/sessions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
+        Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Stripe-Version': STRIPE_API_VERSION
+        'Stripe-Version': STRIPE_API_VERSION,
       },
-      body: params.toString()
+      body: params.toString(),
     });
 
     if (!response.ok) {
-      const error = await response.json() as { error?: { message?: string } };
+      const error = (await response.json()) as { error?: { message?: string } };
       throw new Error(`Stripe API error: ${error.error?.message || response.statusText}`);
     }
 
-    const session = await response.json() as {
+    const session = (await response.json()) as {
       id: string;
       url: string;
       status: string;
@@ -211,10 +218,12 @@ export async function createPaymentLink(config: PaymentLinkConfig): Promise<Paym
       amount: config.amount,
       currency: config.currency || 'usd',
       status: session.status,
-      created: session.created
+      created: session.created,
     };
   } catch (error) {
-    console.error('Failed to create Stripe payment link:', error);
+    logger.error('Failed to create Stripe payment link:', {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -222,10 +231,7 @@ export async function createPaymentLink(config: PaymentLinkConfig): Promise<Paym
 /**
  * Verify Stripe webhook signature
  */
-export function verifyWebhookSignature(
-  payload: string,
-  signature: string
-): boolean {
+export function verifyWebhookSignature(payload: string, signature: string): boolean {
   // Fail loudly if webhook secret is not configured
   requireWebhookSecret();
 
@@ -250,7 +256,7 @@ export function verifyWebhookSignature(
     const timestampSeconds = parseInt(timestamp, 10);
     const currentSeconds = Math.floor(Date.now() / 1000);
     if (Math.abs(currentSeconds - timestampSeconds) > 300) {
-      console.warn('Stripe webhook timestamp outside tolerance');
+      logger.warn('Stripe webhook timestamp outside tolerance');
       return false;
     }
 
@@ -263,12 +269,11 @@ export function verifyWebhookSignature(
       .digest('hex');
 
     // Compare signatures (timing-safe)
-    return crypto.timingSafeEqual(
-      Buffer.from(v1Signature),
-      Buffer.from(expectedSignature)
-    );
+    return crypto.timingSafeEqual(Buffer.from(v1Signature), Buffer.from(expectedSignature));
   } catch (error) {
-    console.error('Webhook signature verification failed:', error);
+    logger.error('Webhook signature verification failed:', {
+      error: error instanceof Error ? error : undefined,
+    });
     return false;
   }
 }
@@ -280,106 +285,114 @@ export async function handleWebhookEvent(event: StripeWebhookEvent): Promise<voi
   const db = getDatabase();
 
   switch (event.type) {
-  case 'checkout.session.completed': {
-    const session = event.data.object;
-    const metadata = (session as { metadata?: { invoice_id?: string } }).metadata;
-    const invoiceId = metadata?.invoice_id;
+    case 'checkout.session.completed': {
+      const session = event.data.object;
+      const metadata = (session as { metadata?: { invoice_id?: string } }).metadata;
+      const invoiceId = metadata?.invoice_id;
 
-    if (invoiceId) {
-      const sessionData = session as { payment_intent?: string; amount_total?: number; id?: string };
-      // Update invoice status to paid
-      await db.run(
-        `UPDATE invoices
+      if (invoiceId) {
+        const sessionData = session as {
+          payment_intent?: string;
+          amount_total?: number;
+          id?: string;
+        };
+        // Update invoice status to paid
+        await db.run(
+          `UPDATE invoices
            SET status = 'paid', paid_at = datetime('now'), payment_method = 'stripe',
                stripe_payment_intent_id = ?, updated_at = datetime('now')
            WHERE id = ?`,
-        [sessionData.payment_intent || '', invoiceId]
-      );
+          [sessionData.payment_intent || '', invoiceId]
+        );
 
-      // Record the payment
-      await recordPayment({
-        invoiceId: parseInt(invoiceId, 10),
-        amount: ((sessionData.amount_total as number) || 0) / 100, // Convert from cents
-        paymentMethod: 'stripe',
-        stripePaymentIntentId: sessionData.payment_intent || '',
-        stripeCheckoutSessionId: sessionData.id || '',
-        status: 'succeeded',
-        paidAt: new Date().toISOString()
-      });
+        // Record the payment
+        await recordPayment({
+          invoiceId: parseInt(invoiceId, 10),
+          amount: ((sessionData.amount_total as number) || 0) / 100, // Convert from cents
+          paymentMethod: 'stripe',
+          stripePaymentIntentId: sessionData.payment_intent || '',
+          stripeCheckoutSessionId: sessionData.id || '',
+          status: 'succeeded',
+          paidAt: new Date().toISOString(),
+        });
 
-      // Update payment link status
-      await db.run(
-        'UPDATE invoice_payment_links SET status = \'completed\', completed_at = datetime(\'now\') WHERE stripe_session_id = ?',
-        [sessionData.id || '']
-      );
-
-      console.log(`Invoice ${invoiceId} marked as paid via Stripe`);
-    }
-    break;
-  }
-
-  case 'checkout.session.expired': {
-    const session = event.data.object;
-    const metadata = (session as { metadata?: { invoice_id?: string } }).metadata;
-    const invoiceId = metadata?.invoice_id;
-
-    if (invoiceId) {
-      const sessionData = session as { id?: string };
-      // Update payment link status
-      await db.run(
-        'UPDATE invoice_payment_links SET status = \'expired\' WHERE stripe_session_id = ?',
-        [sessionData.id || '']
-      );
-    }
-    break;
-  }
-
-  case 'payment_intent.payment_failed': {
-    const paymentIntent = event.data.object;
-    const metadata = (paymentIntent as { metadata?: { invoice_id?: string } }).metadata;
-    const invoiceId = metadata?.invoice_id;
-
-    if (invoiceId) {
-      const piData = paymentIntent as { id?: string; last_payment_error?: { message?: string } };
-      // Log failed payment attempt
-      await db.run(
-        `INSERT INTO invoice_payment_attempts (invoice_id, stripe_payment_intent_id, status, error_message, created_at)
-           VALUES (?, ?, 'failed', ?, datetime('now'))`,
-        [invoiceId, piData.id || '', piData.last_payment_error?.message || 'Payment failed']
-      );
-    }
-    break;
-  }
-
-  case 'charge.refunded': {
-    const charge = event.data.object as { payment_intent?: string; amount_refunded?: number; amount?: number };
-    const paymentIntentId = charge.payment_intent;
-
-    if (paymentIntentId) {
-      // Find invoice by payment intent and update status
-      const invoice = await db.get(
-        'SELECT id FROM invoices WHERE stripe_payment_intent_id = ?',
-        [paymentIntentId]
-      ) as { id: number } | undefined;
-
-      if (invoice) {
-        const refundAmount = ((charge.amount_refunded as number) || 0) / 100;
-        const totalAmount = ((charge.amount as number) || 0) / 100;
-
-        // Update invoice status based on refund amount
-        const newStatus = refundAmount >= totalAmount ? 'refunded' : 'partial_refund';
-
+        // Update payment link status
         await db.run(
-          'UPDATE invoices SET status = ?, refund_amount = ?, updated_at = datetime(\'now\') WHERE id = ?',
-          [newStatus, refundAmount, invoice.id]
+          "UPDATE invoice_payment_links SET status = 'completed', completed_at = datetime('now') WHERE stripe_session_id = ?",
+          [sessionData.id || '']
+        );
+
+        logger.info(`Invoice ${invoiceId} marked as paid via Stripe`);
+      }
+      break;
+    }
+
+    case 'checkout.session.expired': {
+      const session = event.data.object;
+      const metadata = (session as { metadata?: { invoice_id?: string } }).metadata;
+      const invoiceId = metadata?.invoice_id;
+
+      if (invoiceId) {
+        const sessionData = session as { id?: string };
+        // Update payment link status
+        await db.run(
+          "UPDATE invoice_payment_links SET status = 'expired' WHERE stripe_session_id = ?",
+          [sessionData.id || '']
         );
       }
+      break;
     }
-    break;
-  }
 
-  default:
-    console.log(`Unhandled Stripe event type: ${event.type}`);
+    case 'payment_intent.payment_failed': {
+      const paymentIntent = event.data.object;
+      const metadata = (paymentIntent as { metadata?: { invoice_id?: string } }).metadata;
+      const invoiceId = metadata?.invoice_id;
+
+      if (invoiceId) {
+        const piData = paymentIntent as { id?: string; last_payment_error?: { message?: string } };
+        // Log failed payment attempt
+        await db.run(
+          `INSERT INTO invoice_payment_attempts (invoice_id, stripe_payment_intent_id, status, error_message, created_at)
+           VALUES (?, ?, 'failed', ?, datetime('now'))`,
+          [invoiceId, piData.id || '', piData.last_payment_error?.message || 'Payment failed']
+        );
+      }
+      break;
+    }
+
+    case 'charge.refunded': {
+      const charge = event.data.object as {
+        payment_intent?: string;
+        amount_refunded?: number;
+        amount?: number;
+      };
+      const paymentIntentId = charge.payment_intent;
+
+      if (paymentIntentId) {
+        // Find invoice by payment intent and update status
+        const invoice = (await db.get(
+          'SELECT id FROM invoices WHERE stripe_payment_intent_id = ?',
+          [paymentIntentId]
+        )) as { id: number } | undefined;
+
+        if (invoice) {
+          const refundAmount = ((charge.amount_refunded as number) || 0) / 100;
+          const totalAmount = ((charge.amount as number) || 0) / 100;
+
+          // Update invoice status based on refund amount
+          const newStatus = refundAmount >= totalAmount ? 'refunded' : 'partial_refund';
+
+          await db.run(
+            "UPDATE invoices SET status = ?, refund_amount = ?, updated_at = datetime('now') WHERE id = ?",
+            [newStatus, refundAmount, invoice.id]
+          );
+        }
+      }
+      break;
+    }
+
+    default:
+      logger.info(`Unhandled Stripe event type: ${event.type}`);
   }
 }
 
@@ -399,7 +412,7 @@ async function recordPayment(payment: InvoicePayment): Promise<void> {
       payment.stripePaymentIntentId || null,
       payment.stripeCheckoutSessionId || null,
       payment.status,
-      payment.paidAt || null
+      payment.paidAt || null,
     ]
   );
 }
@@ -410,10 +423,10 @@ async function recordPayment(payment: InvoicePayment): Promise<void> {
 export async function getPaymentLink(invoiceId: number): Promise<PaymentLinkResponse | null> {
   const db = getDatabase();
 
-  const link = await db.get(
-    'SELECT * FROM invoice_payment_links WHERE invoice_id = ? AND status = \'active\' ORDER BY created_at DESC LIMIT 1',
+  const link = (await db.get(
+    "SELECT * FROM invoice_payment_links WHERE invoice_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1",
     [invoiceId]
-  ) as PaymentLinkRow | undefined;
+  )) as PaymentLinkRow | undefined;
 
   if (!link) {
     return null;
@@ -425,7 +438,7 @@ export async function getPaymentLink(invoiceId: number): Promise<PaymentLinkResp
     amount: link.amount,
     currency: link.currency,
     status: link.status,
-    created: new Date(link.created_at).getTime() / 1000
+    created: new Date(link.created_at).getTime() / 1000,
   };
 }
 
@@ -436,7 +449,7 @@ export async function expirePaymentLink(invoiceId: number): Promise<void> {
   const db = getDatabase();
 
   await db.run(
-    'UPDATE invoice_payment_links SET status = \'cancelled\' WHERE invoice_id = ? AND status = \'active\'',
+    "UPDATE invoice_payment_links SET status = 'cancelled' WHERE invoice_id = ? AND status = 'active'",
     [invoiceId]
   );
 }
@@ -448,19 +461,19 @@ export function getStripeStatus(): {
   configured: boolean;
   mode: 'live' | 'test' | 'not_configured';
   webhookConfigured: boolean;
-  } {
+} {
   if (!STRIPE_SECRET_KEY) {
     return {
       configured: false,
       mode: 'not_configured',
-      webhookConfigured: false
+      webhookConfigured: false,
     };
   }
 
   return {
     configured: true,
     mode: STRIPE_SECRET_KEY.startsWith('sk_live_') ? 'live' : 'test',
-    webhookConfigured: Boolean(STRIPE_WEBHOOK_SECRET)
+    webhookConfigured: Boolean(STRIPE_WEBHOOK_SECRET),
   };
 }
 
@@ -476,7 +489,9 @@ export async function getOrCreatePaymentUrl(invoiceId: number): Promise<string |
 
   // Get invoice to create new link
   const db = getDatabase();
-  const invoice = await db.get('SELECT * FROM invoices WHERE id = ?', [invoiceId]) as InvoiceRow | undefined;
+  const invoice = (await db.get('SELECT * FROM invoices WHERE id = ?', [invoiceId])) as
+    | InvoiceRow
+    | undefined;
 
   if (!invoice) {
     return null;
@@ -492,7 +507,7 @@ export async function getOrCreatePaymentUrl(invoiceId: number): Promise<string |
     invoiceId,
     amount: Math.round(invoice.total_amount * 100), // Convert to cents
     description: `Invoice #${invoice.invoice_number}`,
-    customerEmail: invoice.client_email || undefined
+    customerEmail: invoice.client_email || undefined,
   });
 
   return link?.url ?? null;
@@ -506,5 +521,5 @@ export default {
   getPaymentLink,
   expirePaymentLink,
   getStripeStatus,
-  getOrCreatePaymentUrl
+  getOrCreatePaymentUrl,
 };

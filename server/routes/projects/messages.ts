@@ -74,7 +74,7 @@ router.post(
         projectData?.client_id,
         req.user!.type, // Now uses 'admin' directly (unified schema)
         req.user!.email,
-        message.trim()
+        message.trim(),
       ]
     );
 
@@ -88,7 +88,7 @@ router.post(
 
     res.status(201).json({
       message: 'Message sent successfully',
-      messageData: newMessage
+      messageData: newMessage,
     });
   })
 );
@@ -120,7 +120,7 @@ router.put(
     );
 
     res.json({
-      message: 'Messages marked as read'
+      message: 'Messages marked as read',
     });
   })
 );

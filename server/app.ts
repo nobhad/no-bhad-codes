@@ -11,7 +11,11 @@
 import { Sentry, shutdownOpenTelemetry } from './instrument.js';
 
 // Import observability utilities after instrumentation
-import { initMetrics, registerDbStatsCallback, recordHttpRequest } from './observability/metrics.js';
+import {
+  initMetrics,
+  registerDbStatsCallback,
+  recordHttpRequest,
+} from './observability/metrics.js';
 
 import express from 'express';
 import { i18nMiddleware } from './middleware/i18n-middleware';
@@ -26,7 +30,12 @@ import { emailService } from './services/email-service.js';
 import { cacheService } from './services/cache-service.js';
 import { getSchedulerService } from './services/scheduler-service.js';
 import { registerWorkflowAutomations } from './services/workflow-automations.js';
-import { initializeDatabase, getDatabase, closeDatabase, getDatabaseStats } from './database/init.js';
+import {
+  initializeDatabase,
+  getDatabase,
+  closeDatabase,
+  getDatabaseStats,
+} from './database/init.js';
 import { MigrationManager } from './database/migrations.js';
 import sqlite3 from 'sqlite3';
 import authRouter from './routes/auth.js';
@@ -90,7 +99,7 @@ errorTracker.init({
   release: process.env.npm_package_version,
   enableProfiling: process.env.NODE_ENV === 'production',
   sampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 });
 
 // Request ID for tracing (must be early for logging)
@@ -105,23 +114,25 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: ['\'self\''],
-        scriptSrc: ['\'self\'', '\'unsafe-inline\''], // GSAP does not require unsafe-eval
-        styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
-        imgSrc: ['\'self\'', 'data:', 'https:', 'blob:'],
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"], // GSAP does not require unsafe-eval
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
         connectSrc: [
-          '\'self\'',
+          "'self'",
           'https://api.sentry.io',
           // Allow localhost API connections in development (Vite on 4000 -> Express on 4001)
-          ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:4001', 'ws://localhost:4001'] : [])
+          ...(process.env.NODE_ENV !== 'production'
+            ? ['http://localhost:4001', 'ws://localhost:4001']
+            : []),
         ],
-        fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
-        mediaSrc: ['\'self\''],
-        objectSrc: ['\'none\''],
-        frameSrc: ['\'none\''],
-        baseUri: ['\'self\''],
-        formAction: ['\'self\'']
-      }
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        mediaSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        frameSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
     },
     // Prevent clickjacking
     frameguard: { action: 'deny' },
@@ -132,7 +143,7 @@ app.use(
     // XSS filter (legacy browsers)
     xssFilter: true,
     // Referrer policy - don't leak referrer to external sites
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   })
 );
 
@@ -142,14 +153,23 @@ app.use(
     origin: process.env.FRONTEND_URL || 'http://localhost:4000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-ID', 'x-csrf-token']
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'X-Request-ID',
+      'x-csrf-token',
+    ],
   })
 );
 
 // Body parsing middleware
 // Skip JSON parsing for Stripe webhook (needs raw body for signature verification)
 app.use((req, res, next) => {
-  if (req.path === '/api/integrations/stripe/webhook' || req.path === '/api/v1/integrations/stripe/webhook') {
+  if (
+    req.path === '/api/integrations/stripe/webhook' ||
+    req.path === '/api/v1/integrations/stripe/webhook'
+  ) {
     next();
   } else {
     express.json({ limit: '10mb' })(req, res, next);
@@ -169,7 +189,7 @@ app.use((req, res, next) => {
       httpOnly: false, // Must be readable by JavaScript
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
   }
   next();
@@ -182,7 +202,7 @@ app.use(
     sanitizeBody: true,
     sanitizeQuery: true,
     sanitizeParams: true,
-    skipPaths: ['/uploads'] // Skip file upload paths
+    skipPaths: ['/uploads'], // Skip file upload paths
   })
 );
 
@@ -223,7 +243,7 @@ app.get('/', (req, res) => {
         knowledgeBase: '/api/v1/kb',
         webhooks: '/api/v1/webhooks',
         dataQuality: '/api/v1/data-quality',
-        contact: '/api/v1/contact'
+        contact: '/api/v1/contact',
       },
       // Legacy endpoints (still supported)
       legacy: {
@@ -245,9 +265,9 @@ app.get('/', (req, res) => {
         knowledgeBase: '/api/kb',
         webhooks: '/api/webhooks',
         dataQuality: '/api/data-quality',
-        contact: '/api/contact'
-      }
-    }
+        contact: '/api/contact',
+      },
+    },
   });
 });
 
@@ -268,19 +288,22 @@ app.use('/api', rateLimiters.standard);
 
 // CSRF protection for state-changing API requests
 // Validates that x-csrf-token header matches csrf-token cookie
-app.use('/api', csrfProtection({
-  headerName: 'x-csrf-token',
-  cookieName: 'csrf-token',
-  skipIf: (req) => {
-    // Skip CSRF for webhook endpoints (they use signature verification)
-    if (req.path.includes('/webhooks/')) return true;
-    // Skip CSRF for file uploads (may use FormData without custom headers)
-    if (req.path.includes('/uploads') && req.method === 'POST') return true;
-    // Skip CSRF for intake form (public endpoint)
-    if (req.path.includes('/intake')) return true;
-    return false;
-  }
-}));
+app.use(
+  '/api',
+  csrfProtection({
+    headerName: 'x-csrf-token',
+    cookieName: 'csrf-token',
+    skipIf: (req) => {
+      // Skip CSRF for webhook endpoints (they use signature verification)
+      if (req.path.includes('/webhooks/')) return true;
+      // Skip CSRF for file uploads (may use FormData without custom headers)
+      if (req.path.includes('/uploads') && req.method === 'POST') return true;
+      // Skip CSRF for intake form (public endpoint)
+      if (req.path.includes('/intake')) return true;
+      return false;
+    },
+  })
+);
 
 // Stricter rate limiting for sensitive endpoints
 // Sensitive rate limit: 10 requests per hour for payment operations
@@ -315,7 +338,7 @@ const apiRouters = [
   { path: '/integrations', router: integrationsRouter },
   { path: '/data-quality', router: dataQualityRouter },
   { path: '/settings', router: settingsRouter },
-  { path: '/receipts', router: receiptsRouter }
+  { path: '/receipts', router: receiptsRouter },
 ];
 
 // Mount all routers at both /api and /api/v1
@@ -338,13 +361,13 @@ app.use((req, res) => {
       request: {
         method: req.method,
         url: req.originalUrl,
-        headers: req.headers as Record<string, string>
-      }
+        headers: req.headers as Record<string, string>,
+      },
     }
   );
 
   errorResponseWithPayload(res, 'Route not found', 404, 'RESOURCE_NOT_FOUND', {
-    message: `Cannot ${req.method} ${req.originalUrl}`
+    message: `Cannot ${req.method} ${req.originalUrl}`,
   });
 });
 
@@ -368,7 +391,11 @@ async function startServer() {
     registerDbStatsCallback(() => {
       const stats = getDatabaseStats();
       return stats
-        ? { active: stats.activeConnections, idle: stats.idleConnections, queued: stats.queuedRequests }
+        ? {
+            active: stats.activeConnections,
+            idle: stats.idleConnections,
+            queued: stats.queuedRequests,
+          }
         : { active: 0, idle: 0, queued: 0 };
     });
     logger.info('Observability metrics initialized');
@@ -382,7 +409,9 @@ async function startServer() {
       await migrator.migrate();
       logger.info('Database migrations complete');
     } catch (migrationError) {
-      logger.error('Migration failed:', { error: migrationError instanceof Error ? migrationError : undefined });
+      logger.error('Migration failed:', {
+        error: migrationError instanceof Error ? migrationError : undefined,
+      });
       throw migrationError;
     } finally {
       db.close();
@@ -395,17 +424,19 @@ async function startServer() {
       secure: process.env.SMTP_SECURE === 'true',
       auth: {
         user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || ''
+        pass: process.env.SMTP_PASS || '',
       },
       from: process.env.SMTP_FROM || 'nobhaduri@gmail.com',
-      replyTo: process.env.SMTP_REPLY_TO
+      replyTo: process.env.SMTP_REPLY_TO,
     };
 
     try {
       await emailService.init(emailConfig);
       logger.info('Email service initialized');
     } catch (emailError) {
-      logger.warn('Email service initialization failed:', { error: emailError instanceof Error ? emailError : undefined });
+      logger.warn('Email service initialization failed:', {
+        error: emailError instanceof Error ? emailError : undefined,
+      });
       logger.info('Server will continue without email functionality');
     }
 
@@ -417,14 +448,16 @@ async function startServer() {
         password: process.env.REDIS_PASSWORD,
         db: parseInt(process.env.REDIS_DB || '0'),
         keyPrefix: process.env.REDIS_KEY_PREFIX || 'nbc:',
-        lazyConnect: true
+        lazyConnect: true,
       };
 
       try {
         await cacheService.init(cacheConfig);
         logger.info('Cache service initialized');
       } catch (cacheError) {
-        logger.warn('Cache service initialization failed:', { error: cacheError instanceof Error ? cacheError : undefined });
+        logger.warn('Cache service initialization failed:', {
+          error: cacheError instanceof Error ? cacheError : undefined,
+        });
         logger.info('Server will continue without caching functionality');
       }
     } else {
@@ -437,12 +470,14 @@ async function startServer() {
         const scheduler = getSchedulerService({
           enableReminders: process.env.SCHEDULER_REMINDERS !== 'false',
           enableScheduledInvoices: process.env.SCHEDULER_SCHEDULED !== 'false',
-          enableRecurringInvoices: process.env.SCHEDULER_RECURRING !== 'false'
+          enableRecurringInvoices: process.env.SCHEDULER_RECURRING !== 'false',
         });
         scheduler.start();
         logger.info('Scheduler service initialized');
       } catch (schedulerError) {
-        logger.warn('Scheduler service initialization failed:', { error: schedulerError instanceof Error ? schedulerError : undefined });
+        logger.warn('Scheduler service initialization failed:', {
+          error: schedulerError instanceof Error ? schedulerError : undefined,
+        });
         logger.info('Server will continue without scheduling functionality');
       }
     } else {
@@ -454,7 +489,9 @@ async function startServer() {
       registerWorkflowAutomations();
       logger.info('Workflow automations registered');
     } catch (workflowError) {
-      logger.warn('Workflow automations registration failed:', { error: workflowError instanceof Error ? workflowError : undefined });
+      logger.warn('Workflow automations registration failed:', {
+        error: workflowError instanceof Error ? workflowError : undefined,
+      });
       logger.info('Server will continue without workflow automations');
     }
 
@@ -465,7 +502,7 @@ async function startServer() {
 
       errorTracker.captureMessage(`Server started on port ${PORT}`, 'info', {
         tags: { component: 'server' },
-        extra: { port: PORT, environment: process.env.NODE_ENV }
+        extra: { port: PORT, environment: process.env.NODE_ENV },
       });
     });
 
@@ -479,7 +516,9 @@ async function startServer() {
         scheduler.stop();
         logger.info('Scheduler service stopped');
       } catch (error) {
-        logger.error('Error stopping scheduler:', { error: error instanceof Error ? error : undefined });
+        logger.error('Error stopping scheduler:', {
+          error: error instanceof Error ? error : undefined,
+        });
       }
 
       // Close server
@@ -490,7 +529,9 @@ async function startServer() {
         try {
           await closeDatabase();
         } catch (dbErr) {
-          logger.error('Error closing database:', { error: dbErr instanceof Error ? dbErr : undefined });
+          logger.error('Error closing database:', {
+            error: dbErr instanceof Error ? dbErr : undefined,
+          });
         }
 
         // Flush Sentry events
@@ -499,7 +540,9 @@ async function startServer() {
           await errorTracker.close(1000);
           logger.info('Error tracking closed');
         } catch (error) {
-          logger.error('Error closing error tracking:', { error: error instanceof Error ? error : undefined });
+          logger.error('Error closing error tracking:', {
+            error: error instanceof Error ? error : undefined,
+          });
         }
 
         // Shutdown OpenTelemetry
@@ -507,7 +550,9 @@ async function startServer() {
           await shutdownOpenTelemetry();
           logger.info('OpenTelemetry shutdown complete');
         } catch (error) {
-          logger.error('Error shutting down OpenTelemetry:', { error: error instanceof Error ? error : undefined });
+          logger.error('Error shutting down OpenTelemetry:', {
+            error: error instanceof Error ? error : undefined,
+          });
         }
 
         logger.info('Server shut down complete');
@@ -527,7 +572,7 @@ async function startServer() {
   } catch (error) {
     logger.error('Failed to start server:', { error: error instanceof Error ? error : undefined });
     errorTracker.captureException(error as Error, {
-      tags: { component: 'server', phase: 'startup' }
+      tags: { component: 'server', phase: 'startup' },
     });
     process.exit(1);
   }
@@ -537,7 +582,7 @@ async function startServer() {
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception:', { error });
   errorTracker.captureException(error, {
-    tags: { type: 'uncaughtException' }
+    tags: { type: 'uncaughtException' },
   });
   process.exit(1);
 });
@@ -547,7 +592,7 @@ process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection:', { metadata: { promise: promise.toString(), reason } });
   errorTracker.captureException(new Error(`Unhandled Rejection: ${reason}`), {
     tags: { type: 'unhandledRejection' },
-    extra: { promise: promise.toString(), reason }
+    extra: { promise: promise.toString(), reason },
   });
   process.exit(1);
 });

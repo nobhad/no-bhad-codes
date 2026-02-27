@@ -29,16 +29,21 @@ router.post(
       to: adminEmail,
       subject: 'No Bhad Codes - Test Email',
       text: 'This is a test email from the admin dashboard. Email service is working correctly.',
-      html: '<p>This is a test email from the admin dashboard.</p><p>Email service is working correctly.</p>'
+      html: '<p>This is a test email from the admin dashboard.</p><p>Email service is working correctly.</p>',
     });
 
     if (!result.success) {
-      return errorResponse(res, result.message || 'Failed to send test email', 500, 'TEST_EMAIL_FAILED');
+      return errorResponse(
+        res,
+        result.message || 'Failed to send test email',
+        500,
+        'TEST_EMAIL_FAILED'
+      );
     }
 
     res.json({
       message: 'Test email sent successfully',
-      to: adminEmail
+      to: adminEmail,
     });
   })
 );
@@ -109,7 +114,7 @@ router.post(
 
     res.json({
       success: true,
-      message: result.message
+      message: result.message,
     });
   })
 );
@@ -143,7 +148,7 @@ router.delete(
 
     res.json({
       success: true,
-      message: result.message
+      message: result.message,
     });
   })
 );
@@ -163,7 +168,7 @@ router.post(
       success: errors.length === 0,
       message: `Cleanup complete. Permanently deleted ${deleted.total} items.`,
       deleted,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     });
   })
 );
@@ -187,27 +192,29 @@ router.get(
     // Validate entity type if provided
     const validTypes: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
     if (entityType && !validTypes.includes(entityType)) {
-      return errorResponseWithPayload(res, 'Invalid entity type', 400, 'INVALID_TYPE', { validTypes });
+      return errorResponseWithPayload(res, 'Invalid entity type', 400, 'INVALID_TYPE', {
+        validTypes,
+      });
     }
 
     const [items, stats] = await Promise.all([
       softDeleteService.getDeletedItems(entityType),
-      softDeleteService.getDeletedItemStats()
+      softDeleteService.getDeletedItemStats(),
     ]);
 
     // Transform to match frontend expected format
-    const transformedItems = items.map(item => ({
+    const transformedItems = items.map((item) => ({
       id: item.id,
       type: item.entityType,
       name: item.name,
       deleted_at: item.deletedAt,
       deleted_by: item.deletedBy,
-      days_until_permanent: item.daysUntilPermanent
+      days_until_permanent: item.daysUntilPermanent,
     }));
 
     res.json({
       items: transformedItems,
-      stats
+      stats,
     });
   })
 );
@@ -239,7 +246,9 @@ router.post(
     // Validate entity type
     const validTypes: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
     if (!validTypes.includes(type as SoftDeleteEntityType)) {
-      return errorResponseWithPayload(res, 'Invalid entity type', 400, 'INVALID_TYPE', { validTypes });
+      return errorResponseWithPayload(res, 'Invalid entity type', 400, 'INVALID_TYPE', {
+        validTypes,
+      });
     }
 
     if (isNaN(entityId) || entityId <= 0) {
@@ -251,7 +260,7 @@ router.post(
     if (result.success) {
       res.json({
         success: true,
-        message: result.message
+        message: result.message,
       });
     } else {
       errorResponse(res, result.message, 400, 'RESTORE_FAILED');
@@ -273,7 +282,9 @@ router.delete(
     // Validate entity type
     const validTypes: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
     if (!validTypes.includes(type as SoftDeleteEntityType)) {
-      return errorResponseWithPayload(res, 'Invalid entity type', 400, 'INVALID_TYPE', { validTypes });
+      return errorResponseWithPayload(res, 'Invalid entity type', 400, 'INVALID_TYPE', {
+        validTypes,
+      });
     }
 
     if (isNaN(entityId) || entityId <= 0) {
@@ -285,7 +296,7 @@ router.delete(
     if (result.success) {
       res.json({
         success: true,
-        message: result.message
+        message: result.message,
       });
     } else {
       errorResponse(res, result.message, 400, 'DELETE_FAILED');

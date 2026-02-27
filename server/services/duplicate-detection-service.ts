@@ -18,11 +18,11 @@ const LOW_SIMILARITY_THRESHOLD = 0.5;
 
 // Field weights for similarity scoring
 const FIELD_WEIGHTS = {
-  email: 0.35,      // Email is most reliable identifier
-  company: 0.25,    // Company name is important
-  name: 0.20,       // Full name matters
-  phone: 0.15,      // Phone can be secondary contact
-  domain: 0.05     // Website domain as tie-breaker
+  email: 0.35, // Email is most reliable identifier
+  company: 0.25, // Company name is important
+  name: 0.2, // Full name matters
+  phone: 0.15, // Phone can be secondary contact
+  domain: 0.05, // Website domain as tie-breaker
 };
 
 // Duplicate detection result
@@ -75,12 +75,12 @@ export async function checkForDuplicates(
   const domain = extractDomain(data.email || data.website);
 
   // 1. Check existing intakes
-  const intakes = await db.all(
+  const intakes = (await db.all(
     `SELECT id, first_name, last_name, email, company_name, phone, created_at
      FROM client_intakes
      WHERE status != 'rejected'
      ORDER BY created_at DESC`
-  ) as Array<{
+  )) as Array<{
     id: number;
     first_name: string;
     last_name: string;
@@ -99,14 +99,14 @@ export async function checkForDuplicates(
         name: normalizedName,
         company: normalizedCompany,
         phone: normalizedPhone,
-        domain
+        domain,
       },
       {
         email: normalizeEmail(intake.email),
         name: normalizeName(`${intake.first_name} ${intake.last_name}`),
         company: normalizeCompany(intake.company_name),
         phone: normalizePhone(intake.phone),
-        domain: extractDomain(intake.email)
+        domain: extractDomain(intake.email),
       }
     );
 
@@ -120,18 +120,18 @@ export async function checkForDuplicates(
         similarityScore: score.total,
         matchedFields: score.matchedFields,
         confidence: getConfidenceLevel(score.total),
-        createdAt: intake.created_at
+        createdAt: intake.created_at,
       });
     }
   }
 
   // 2. Check existing clients
-  const clients = await db.all(
+  const clients = (await db.all(
     `SELECT id, name, email, company, phone, created_at
      FROM clients
      WHERE deleted_at IS NULL
      ORDER BY created_at DESC`
-  ) as Array<{
+  )) as Array<{
     id: number;
     name: string;
     email: string;
@@ -149,14 +149,14 @@ export async function checkForDuplicates(
         name: normalizedName,
         company: normalizedCompany,
         phone: normalizedPhone,
-        domain
+        domain,
       },
       {
         email: normalizeEmail(client.email),
         name: normalizeName(client.name),
         company: normalizeCompany(client.company),
         phone: normalizePhone(client.phone),
-        domain: extractDomain(client.email)
+        domain: extractDomain(client.email),
       }
     );
 
@@ -170,13 +170,13 @@ export async function checkForDuplicates(
         similarityScore: score.total,
         matchedFields: score.matchedFields,
         confidence: getConfidenceLevel(score.total),
-        createdAt: client.created_at
+        createdAt: client.created_at,
       });
     }
   }
 
   // 3. Check leads (projects with pending/lead status)
-  const leads = await db.all(
+  const leads = (await db.all(
     `SELECT p.id, p.project_name as project_name, COALESCE(c.contact_name, c.company_name) as client_name, c.email, c.company_name as company,
             p.created_at
      FROM projects p
@@ -184,7 +184,7 @@ export async function checkForDuplicates(
      WHERE p.status IN ('pending', 'lead', 'prospect')
      AND p.deleted_at IS NULL
      ORDER BY p.created_at DESC`
-  ) as Array<{
+  )) as Array<{
     id: number;
     project_name: string;
     client_name: string | null;
@@ -203,14 +203,14 @@ export async function checkForDuplicates(
         name: normalizedName,
         company: normalizedCompany,
         phone: normalizedPhone,
-        domain
+        domain,
       },
       {
         email: normalizeEmail(lead.email),
         name: normalizeName(lead.client_name || ''),
         company: normalizeCompany(lead.company),
         phone: '',
-        domain: extractDomain(lead.email)
+        domain: extractDomain(lead.email),
       }
     );
 
@@ -224,7 +224,7 @@ export async function checkForDuplicates(
         similarityScore: score.total,
         matchedFields: score.matchedFields,
         confidence: getConfidenceLevel(score.total),
-        createdAt: lead.created_at
+        createdAt: lead.created_at,
       });
     }
   }
@@ -322,7 +322,9 @@ function levenshteinDistance(str1: string, str2: string): number {
   if (m === 0) return n;
   if (n === 0) return m;
 
-  const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+  const dp: number[][] = Array(m + 1)
+    .fill(null)
+    .map(() => Array(n + 1).fill(0));
 
   for (let i = 0; i <= m; i++) dp[i][0] = i;
   for (let j = 0; j <= n; j++) dp[0][j] = j;
@@ -331,8 +333,8 @@ function levenshteinDistance(str1: string, str2: string): number {
     for (let j = 1; j <= n; j++) {
       const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
       dp[i][j] = Math.min(
-        dp[i - 1][j] + 1,      // deletion
-        dp[i][j - 1] + 1,      // insertion
+        dp[i - 1][j] + 1, // deletion
+        dp[i][j - 1] + 1, // insertion
         dp[i - 1][j - 1] + cost // substitution
       );
     }
@@ -351,9 +353,7 @@ function nameSimilarity(name1: string, name2: string): number {
   const parts2 = name2.split(/\s+/).filter(Boolean);
 
   // Check if all parts match (in any order)
-  const matchedParts = parts1.filter(p1 =>
-    parts2.some(p2 => stringSimilarity(p1, p2) > 0.8)
-  );
+  const matchedParts = parts1.filter((p1) => parts2.some((p2) => stringSimilarity(p1, p2) > 0.8));
 
   const matchRatio = (2 * matchedParts.length) / (parts1.length + parts2.length);
 
@@ -388,14 +388,16 @@ function normalizeName(name: string | null | undefined): string {
  */
 function normalizeCompany(company: string | null | undefined): string {
   if (!company) return '';
-  return company
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, ' ')
-    // Remove common suffixes
-    .replace(/\b(inc|llc|ltd|corp|corporation|company|co|limited)\b\.?/gi, '')
-    .replace(/[^\w\s]/g, '')
-    .trim();
+  return (
+    company
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ')
+      // Remove common suffixes
+      .replace(/\b(inc|llc|ltd|corp|corporation|company|co|limited)\b\.?/gi, '')
+      .replace(/[^\w\s]/g, '')
+      .trim()
+  );
 }
 
 /**
@@ -417,7 +419,14 @@ function extractDomain(input: string | null | undefined): string {
   if (input.includes('@')) {
     const domain = input.split('@')[1];
     // Skip common email providers
-    const commonProviders = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'icloud.com'];
+    const commonProviders = [
+      'gmail.com',
+      'yahoo.com',
+      'hotmail.com',
+      'outlook.com',
+      'aol.com',
+      'icloud.com',
+    ];
     if (commonProviders.includes(domain?.toLowerCase())) {
       return '';
     }
@@ -464,7 +473,7 @@ export async function logDuplicateCheck(
       JSON.stringify(sourceData),
       matches.length,
       matches[0]?.similarityScore || 0,
-      action
+      action,
     ]
   );
 }
@@ -481,7 +490,7 @@ export async function getDuplicateStats(): Promise<{
 }> {
   const db = getDatabase();
 
-  const stats = await db.get(`
+  const stats = (await db.get(`
     SELECT
       COUNT(*) as total_checks,
       SUM(CASE WHEN matches_found > 0 THEN 1 ELSE 0 END) as duplicates_found,
@@ -489,7 +498,7 @@ export async function getDuplicateStats(): Promise<{
       SUM(CASE WHEN action = 'merged' THEN 1 ELSE 0 END) as duplicates_merged,
       AVG(CASE WHEN top_match_score > 0 THEN top_match_score ELSE NULL END) as avg_score
     FROM duplicate_detection_log
-  `) as {
+  `)) as {
     total_checks: number;
     duplicates_found: number;
     duplicates_blocked: number;
@@ -502,14 +511,16 @@ export async function getDuplicateStats(): Promise<{
     duplicatesFound: stats.duplicates_found || 0,
     duplicatesBlocked: stats.duplicates_blocked || 0,
     duplicatesMerged: stats.duplicates_merged || 0,
-    averageMatchScore: stats.avg_score || 0
+    averageMatchScore: stats.avg_score || 0,
   };
 }
 
 /**
  * Merge duplicate records
  */
-export async function mergeDuplicates(request: MergeRequest): Promise<{ success: boolean; message: string }> {
+export async function mergeDuplicates(
+  request: MergeRequest
+): Promise<{ success: boolean; message: string }> {
   const db = getDatabase();
 
   try {
@@ -527,14 +538,14 @@ export async function mergeDuplicates(request: MergeRequest): Promise<{ success:
         );
       } else if (mergeItem.type === 'client') {
         // Soft delete duplicate client, reassign relationships
-        await db.run(
-          'UPDATE projects SET client_id = ? WHERE client_id = ?',
-          [request.keepId, mergeItem.id]
-        );
-        await db.run(
-          'UPDATE invoices SET client_id = ? WHERE client_id = ?',
-          [request.keepId, mergeItem.id]
-        );
+        await db.run('UPDATE projects SET client_id = ? WHERE client_id = ?', [
+          request.keepId,
+          mergeItem.id,
+        ]);
+        await db.run('UPDATE invoices SET client_id = ? WHERE client_id = ?', [
+          request.keepId,
+          mergeItem.id,
+        ]);
         await db.run(
           `UPDATE clients SET deleted_at = datetime('now'), deleted_by = 'duplicate_merge'
            WHERE id = ?`,
@@ -553,7 +564,10 @@ export async function mergeDuplicates(request: MergeRequest): Promise<{ success:
       'merged'
     );
 
-    return { success: true, message: `Merged ${request.mergeIds.length} duplicate(s) into record ${request.keepId}` };
+    return {
+      success: true,
+      message: `Merged ${request.mergeIds.length} duplicate(s) into record ${request.keepId}`,
+    };
   } catch (error) {
     await db.run('ROLLBACK');
     return { success: false, message: error instanceof Error ? error.message : 'Merge failed' };
@@ -570,6 +584,6 @@ export default {
     exact: EXACT_MATCH_THRESHOLD,
     high: HIGH_SIMILARITY_THRESHOLD,
     medium: MEDIUM_SIMILARITY_THRESHOLD,
-    low: LOW_SIMILARITY_THRESHOLD
-  }
+    low: LOW_SIMILARITY_THRESHOLD,
+  },
 };

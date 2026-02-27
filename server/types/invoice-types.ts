@@ -230,7 +230,13 @@ export interface RecurringInvoiceRow {
 // REMINDERS
 // =====================================================
 
-export type ReminderType = 'upcoming' | 'due' | 'overdue_3' | 'overdue_7' | 'overdue_14' | 'overdue_30';
+export type ReminderType =
+  | 'upcoming'
+  | 'due'
+  | 'overdue_3'
+  | 'overdue_7'
+  | 'overdue_14'
+  | 'overdue_30';
 
 export interface InvoiceReminder {
   id: number;
@@ -256,7 +262,14 @@ export interface InvoiceReminderRow {
 // CORE INVOICE
 // =====================================================
 
-export type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
+export type InvoiceStatus =
+  | 'draft'
+  | 'sent'
+  | 'viewed'
+  | 'partial'
+  | 'paid'
+  | 'overdue'
+  | 'cancelled';
 export type InvoiceType = 'standard' | 'deposit';
 export type DiscountType = 'percentage' | 'fixed';
 export type LateFeeType = 'none' | 'flat' | 'percentage' | 'daily_percentage';

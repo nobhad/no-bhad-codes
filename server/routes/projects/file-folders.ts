@@ -1,7 +1,11 @@
 import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { canAccessProject, canAccessFolder, canAccessFile } from '../../middleware/access-control.js';
+import {
+  canAccessProject,
+  canAccessFolder,
+  canAccessFile,
+} from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { errorResponse } from '../../utils/api-response.js';
 
@@ -53,7 +57,7 @@ router.post(
       parent_folder_id,
       color,
       icon,
-      created_by: req.user!.email
+      created_by: req.user!.email,
     });
 
     res.status(201).json({ folder });
@@ -75,7 +79,13 @@ router.put(
       return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
-    const folder = await fileService.updateFolder(folderId, { name, description, color, icon, sort_order });
+    const folder = await fileService.updateFolder(folderId, {
+      name,
+      description,
+      color,
+      icon,
+      sort_order,
+    });
     res.json({ folder });
   })
 );
@@ -87,7 +97,9 @@ router.delete(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const folderId = parseInt(req.params.folderId);
-    const moveFilesTo = req.query.move_files_to ? parseInt(req.query.move_files_to as string) : undefined;
+    const moveFilesTo = req.query.move_files_to
+      ? parseInt(req.query.move_files_to as string)
+      : undefined;
     await fileService.deleteFolder(folderId, moveFilesTo);
     res.json({ message: 'Folder deleted' });
   })

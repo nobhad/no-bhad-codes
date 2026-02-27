@@ -40,7 +40,11 @@ const MAX_CACHE_ENTRIES = parseInt(process.env.PDF_CACHE_MAX_ENTRIES || '100', 1
  * @param id - Document ID
  * @param updatedAt - Last updated timestamp of source data
  */
-export function getPdfCacheKey(type: string, id: number | string, updatedAt?: string | Date): string {
+export function getPdfCacheKey(
+  type: string,
+  id: number | string,
+  updatedAt?: string | Date
+): string {
   const timestamp = updatedAt ? new Date(updatedAt).getTime() : 0;
   return `${type}:${id}:${timestamp}`;
 }
@@ -80,7 +84,7 @@ export function cachePdf(cacheKey: string, data: Uint8Array, updatedAt?: string 
   pdfCache.set(cacheKey, {
     data,
     createdAt: Date.now(),
-    updatedAt: updatedAt ? new Date(updatedAt).getTime() : Date.now()
+    updatedAt: updatedAt ? new Date(updatedAt).getTime() : Date.now(),
   });
 }
 
@@ -112,7 +116,7 @@ export function getPdfCacheStats(): { size: number; maxSize: number; ttlMs: numb
   return {
     size: pdfCache.size,
     maxSize: MAX_CACHE_ENTRIES,
-    ttlMs: CACHE_TTL_MS
+    ttlMs: CACHE_TTL_MS,
   };
 }
 
@@ -123,7 +127,7 @@ export function getPdfCacheStats(): { size: number; maxSize: number; ttlMs: numb
 /** Standard page dimensions */
 export const PAGE_DIMENSIONS = {
   LETTER: { width: 612, height: 792 },
-  A4: { width: 595, height: 842 }
+  A4: { width: 595, height: 842 },
 };
 
 /** Standard margins (0.75 inch = 54 points) */
@@ -131,7 +135,7 @@ export const PAGE_MARGINS = {
   top: 54,
   bottom: 54,
   left: 54,
-  right: 54
+  right: 54,
 };
 
 /**
@@ -187,7 +191,7 @@ export async function createPdfContext(
     topMargin: margins.top,
     bottomMargin: margins.bottom,
     contentWidth: pageSize.width - margins.left - margins.right,
-    fonts: { regular, bold }
+    fonts: { regular, bold },
   };
 }
 
@@ -245,7 +249,7 @@ export function drawWrappedText(
     color = rgb(0, 0, 0),
     lineHeight = fontSize * 1.2,
     maxWidth = ctx.contentWidth,
-    onNewPage
+    onNewPage,
   } = options;
 
   const words = text.split(' ');
@@ -265,7 +269,7 @@ export function drawWrappedText(
         y: ctx.y,
         size: fontSize,
         font,
-        color
+        color,
       });
       ctx.y -= lineHeight;
       line = word;
@@ -282,7 +286,7 @@ export function drawWrappedText(
       y: ctx.y,
       size: fontSize,
       font,
-      color
+      color,
     });
     ctx.y -= lineHeight;
   }
@@ -323,7 +327,7 @@ export async function addPageNumbers(
       y: marginBottom,
       size: fontSize,
       font,
-      color: rgb(0.5, 0.5, 0.5)
+      color: rgb(0.5, 0.5, 0.5),
     });
   }
 }
@@ -401,5 +405,5 @@ export const PDF_A_COMPLIANCE_NOTES = {
   noExternalReferences: true,
   colorSpace: 'RGB',
   xmpMetadata: false, // Would require additional library
-  pdfVersion: '1.7'
+  pdfVersion: '1.7',
 };

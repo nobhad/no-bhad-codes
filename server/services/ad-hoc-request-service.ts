@@ -16,10 +16,16 @@ import {
   type AdHocRequestPriority,
   type AdHocRequestUrgency,
   type AdHocRequestRow,
-  toAdHocRequest
+  toAdHocRequest,
 } from '../database/entities/index.js';
 
-export type { AdHocRequestStatus, AdHocRequestType, AdHocRequestPriority, AdHocRequestUrgency, AdHocRequest };
+export type {
+  AdHocRequestStatus,
+  AdHocRequestType,
+  AdHocRequestPriority,
+  AdHocRequestUrgency,
+  AdHocRequest,
+};
 
 const REQUEST_STATUSES: AdHocRequestStatus[] = [
   'submitted',
@@ -28,7 +34,7 @@ const REQUEST_STATUSES: AdHocRequestStatus[] = [
   'approved',
   'in_progress',
   'completed',
-  'declined'
+  'declined',
 ];
 
 const REQUEST_TYPES: AdHocRequestType[] = [
@@ -36,7 +42,7 @@ const REQUEST_TYPES: AdHocRequestType[] = [
   'change',
   'bug_fix',
   'enhancement',
-  'support'
+  'support',
 ];
 
 const REQUEST_PRIORITIES: AdHocRequestPriority[] = ['low', 'normal', 'high', 'urgent'];
@@ -87,7 +93,6 @@ interface AdHocRequestFilters {
   urgency?: AdHocRequestUrgency;
   includeDeleted?: boolean;
 }
-
 
 class AdHocRequestService {
   async getRequests(filters: AdHocRequestFilters = {}): Promise<AdHocRequest[]> {
@@ -214,7 +219,7 @@ class AdHocRequestService {
         data.flatRate ?? null,
         data.hourlyRate ?? null,
         data.quotedPrice ?? null,
-        data.attachmentFileId ?? null
+        data.attachmentFileId ?? null,
       ]
     );
 
@@ -331,7 +336,7 @@ class AdHocRequestService {
       return this.getRequest(requestId);
     }
 
-    updates.push('updated_at = datetime(\'now\')');
+    updates.push("updated_at = datetime('now')");
     params.push(requestId);
 
     await db.run(`UPDATE ad_hoc_requests SET ${updates.join(', ')} WHERE id = ?`, params);

@@ -144,7 +144,13 @@ router.get(
     );
 
     // Get client names for activities that have client_id
-    const clientIds = [...new Set(recentActivity.filter((a: Record<string, unknown>) => a.client_id).map((a: Record<string, unknown>) => a.client_id as number))];
+    const clientIds = [
+      ...new Set(
+        recentActivity
+          .filter((a: Record<string, unknown>) => a.client_id)
+          .map((a: Record<string, unknown>) => a.client_id as number)
+      ),
+    ];
     const clientMap: Record<number, string> = {};
 
     if (clientIds.length > 0) {
@@ -167,8 +173,8 @@ router.get(
         date: item.date,
         entityId: item.entity_id,
         clientId: item.client_id,
-        clientName: item.client_id ? clientMap[item.client_id as number] : null
-      }))
+        clientName: item.client_id ? clientMap[item.client_id as number] : null,
+      })),
     });
   })
 );

@@ -11,6 +11,7 @@
 import { getDatabase, type SqlParam } from '../database/init.js';
 import { checkAndUpdateMilestoneCompletion, updateProjectProgress } from './progress-calculator.js';
 import { userService } from './user-service.js';
+import { logger } from './logger.js';
 import {
   toProjectTask as toTask,
   toTaskDependency as toDependency,
@@ -23,7 +24,7 @@ import {
   type CommentRow,
   type ChecklistRow,
   type TimeEntryRow,
-  type TemplateRow
+  type TemplateRow,
 } from '../database/entities/index.js';
 
 // Type alias for backward compatibility
@@ -302,7 +303,7 @@ class ProjectService {
         data.dueDate || null,
         data.estimatedHours || null,
         sortOrder,
-        data.parentTaskId || null
+        data.parentTaskId || null,
       ]
     );
 
@@ -324,12 +325,15 @@ class ProjectService {
   /**
    * Get all tasks for a project
    */
-  async getTasks(projectId: number, options?: {
-    status?: ProjectTask['status'];
-    assignedTo?: string;
-    milestoneId?: number;
-    includeSubtasks?: boolean;
-  }): Promise<ProjectTask[]> {
+  async getTasks(
+    projectId: number,
+    options?: {
+      status?: ProjectTask['status'];
+      assignedTo?: string;
+      milestoneId?: number;
+      includeSubtasks?: boolean;
+    }
+  ): Promise<ProjectTask[]> {
     const db = getDatabase();
 
     let query = `
@@ -366,18 +370,20 @@ class ProjectService {
     query += ' ORDER BY t.sort_order ASC, t.created_at ASC';
 
     const rows = await db.all(query, params);
-    const tasks = (rows as unknown as (TaskRow & { project_name?: string; milestone_title?: string })[]).map(row => ({
+    const tasks = (
+      rows as unknown as (TaskRow & { project_name?: string; milestone_title?: string })[]
+    ).map((row) => ({
       ...toTask(row),
       projectName: row.project_name,
-      milestoneTitle: row.milestone_title
+      milestoneTitle: row.milestone_title,
     }));
 
     // Attach subtasks if requested
     if (options?.includeSubtasks) {
       const taskMap = new Map<number, ProjectTask>();
-      tasks.forEach(t => taskMap.set(t.id, t));
+      tasks.forEach((t) => taskMap.set(t.id, t));
 
-      tasks.forEach(t => {
+      tasks.forEach((t) => {
         if (t.parentTaskId) {
           const parent = taskMap.get(t.parentTaskId);
           if (parent) {
@@ -387,7 +393,7 @@ class ProjectService {
         }
       });
 
-      return tasks.filter(t => !t.parentTaskId);
+      return tasks.filter((t) => !t.parentTaskId);
     }
 
     return tasks;
@@ -423,10 +429,7 @@ class ProjectService {
     task.subtasks = (subtaskRows as unknown as TaskRow[]).map(toTask);
 
     // Get dependencies
-    const depRows = await db.all(
-      'SELECT * FROM task_dependencies WHERE task_id = ?',
-      [taskId]
-    );
+    const depRows = await db.all('SELECT * FROM task_dependencies WHERE task_id = ?', [taskId]);
     task.dependencies = (depRows as unknown as DependencyRow[]).map(toDependency);
 
     // Get checklist items
@@ -442,14 +445,17 @@ class ProjectService {
   /**
    * Update a task
    */
-  async updateTask(taskId: number, data: Partial<TaskCreateData> & { actualHours?: number }): Promise<ProjectTask> {
+  async updateTask(
+    taskId: number,
+    data: Partial<TaskCreateData> & { actualHours?: number }
+  ): Promise<ProjectTask> {
     const db = getDatabase();
 
     // Get current task to check milestone_id and project_id
-    const currentTask = await db.get(
+    const currentTask = (await db.get(
       'SELECT milestone_id, project_id FROM project_tasks WHERE id = ?',
       [taskId]
-    ) as { milestone_id: number | null; project_id: number } | undefined;
+    )) as { milestone_id: number | null; project_id: number } | undefined;
 
     if (!currentTask) {
       throw new Error('Task not found');
@@ -507,10 +513,7 @@ class ProjectService {
     if (updates.length > 0) {
       updates.push('updated_at = CURRENT_TIMESTAMP');
       values.push(taskId);
-      await db.run(
-        `UPDATE project_tasks SET ${updates.join(', ')} WHERE id = ?`,
-        values
-      );
+      await db.run(`UPDATE project_tasks SET ${updates.join(', ')} WHERE id = ?`, values);
     }
 
     // Update milestone completion status if task status changed and task belongs to a milestone
@@ -518,7 +521,9 @@ class ProjectService {
       try {
         await checkAndUpdateMilestoneCompletion(currentTask.milestone_id);
       } catch (error) {
-        console.error('[ProjectService] Error updating milestone completion:', error);
+        logger.error('[ProjectService] Error updating milestone completion:', {
+          error: error instanceof Error ? error : undefined,
+        });
         // Don't fail the task update if milestone update fails
       }
     }
@@ -528,7 +533,9 @@ class ProjectService {
       try {
         await updateProjectProgress(currentTask.project_id);
       } catch (error) {
-        console.error('[ProjectService] Error updating project progress:', error);
+        logger.error('[ProjectService] Error updating project progress:', {
+          error: error instanceof Error ? error : undefined,
+        });
         // Don't fail the task update if project progress update fails
       }
     }
@@ -547,10 +554,9 @@ class ProjectService {
     const db = getDatabase();
 
     // Get task info before deleting to update milestone/project progress
-    const task = await db.get(
-      'SELECT milestone_id, project_id FROM project_tasks WHERE id = ?',
-      [taskId]
-    ) as { milestone_id: number | null; project_id: number } | undefined;
+    const task = (await db.get('SELECT milestone_id, project_id FROM project_tasks WHERE id = ?', [
+      taskId,
+    ])) as { milestone_id: number | null; project_id: number } | undefined;
 
     if (!task) {
       throw new Error('Task not found');
@@ -563,7 +569,9 @@ class ProjectService {
       try {
         await checkAndUpdateMilestoneCompletion(task.milestone_id);
       } catch (error) {
-        console.error('[ProjectService] Error updating milestone completion after task deletion:', error);
+        logger.error('[ProjectService] Error updating milestone completion after task deletion:', {
+          error: error instanceof Error ? error : undefined,
+        });
       }
     }
 
@@ -571,7 +579,9 @@ class ProjectService {
     try {
       await updateProjectProgress(task.project_id);
     } catch (error) {
-      console.error('[ProjectService] Error updating project progress after task deletion:', error);
+      logger.error('[ProjectService] Error updating project progress after task deletion:', {
+        error: error instanceof Error ? error : undefined,
+      });
     }
   }
 
@@ -582,10 +592,7 @@ class ProjectService {
     const db = getDatabase();
 
     // Get current task
-    const task = await db.get(
-      'SELECT * FROM project_tasks WHERE id = ?',
-      [taskId]
-    );
+    const task = await db.get('SELECT * FROM project_tasks WHERE id = ?', [taskId]);
 
     if (!task) {
       throw new Error('Task not found');
@@ -633,7 +640,11 @@ class ProjectService {
   /**
    * Add a dependency
    */
-  async addDependency(taskId: number, dependsOnTaskId: number, type: TaskDependency['dependencyType'] = 'finish_to_start'): Promise<TaskDependency> {
+  async addDependency(
+    taskId: number,
+    dependsOnTaskId: number,
+    type: TaskDependency['dependencyType'] = 'finish_to_start'
+  ): Promise<TaskDependency> {
     const db = getDatabase();
 
     // Check for circular dependency
@@ -648,10 +659,7 @@ class ProjectService {
       [taskId, dependsOnTaskId, type]
     );
 
-    const dep = await db.get(
-      'SELECT * FROM task_dependencies WHERE id = ?',
-      [result.lastID]
-    );
+    const dep = await db.get('SELECT * FROM task_dependencies WHERE id = ?', [result.lastID]);
 
     if (!dep) {
       throw new Error('Failed to create dependency');
@@ -663,7 +671,10 @@ class ProjectService {
   /**
    * Check for cyclic dependency
    */
-  private async wouldCreateCyclicDependency(taskId: number, dependsOnTaskId: number): Promise<boolean> {
+  private async wouldCreateCyclicDependency(
+    taskId: number,
+    dependsOnTaskId: number
+  ): Promise<boolean> {
     const db = getDatabase();
 
     // Simple check: see if dependsOnTaskId already depends on taskId
@@ -694,10 +705,10 @@ class ProjectService {
    */
   async removeDependency(taskId: number, dependsOnTaskId: number): Promise<void> {
     const db = getDatabase();
-    await db.run(
-      'DELETE FROM task_dependencies WHERE task_id = ? AND depends_on_task_id = ?',
-      [taskId, dependsOnTaskId]
-    );
+    await db.run('DELETE FROM task_dependencies WHERE task_id = ? AND depends_on_task_id = ?', [
+      taskId,
+      dependsOnTaskId,
+    ]);
   }
 
   /**
@@ -798,10 +809,7 @@ class ProjectService {
       [taskId, content, (Number(maxOrder?.max_order) || 0) + 1]
     );
 
-    const item = await db.get(
-      'SELECT * FROM task_checklist_items WHERE id = ?',
-      [result.lastID]
-    );
+    const item = await db.get('SELECT * FROM task_checklist_items WHERE id = ?', [result.lastID]);
 
     if (!item) {
       throw new Error('Failed to create checklist item');
@@ -824,10 +832,7 @@ class ProjectService {
       [itemId]
     );
 
-    const item = await db.get(
-      'SELECT * FROM task_checklist_items WHERE id = ?',
-      [itemId]
-    );
+    const item = await db.get('SELECT * FROM task_checklist_items WHERE id = ?', [itemId]);
 
     if (!item) {
       throw new Error('Checklist item not found');
@@ -869,7 +874,7 @@ class ProjectService {
         data.hours,
         data.date,
         data.billable !== false ? 1 : 0,
-        data.hourlyRate || null
+        data.hourlyRate || null,
       ]
     );
 
@@ -911,12 +916,15 @@ class ProjectService {
   /**
    * Get time entries for a project
    */
-  async getTimeEntries(projectId: number, options?: {
-    startDate?: string;
-    endDate?: string;
-    userName?: string;
-    taskId?: number;
-  }): Promise<TimeEntry[]> {
+  async getTimeEntries(
+    projectId: number,
+    options?: {
+      startDate?: string;
+      endDate?: string;
+      userName?: string;
+      taskId?: number;
+    }
+  ): Promise<TimeEntry[]> {
     const db = getDatabase();
 
     let query = `SELECT te.*, u.display_name as user_name, pt.title as task_title
@@ -983,10 +991,7 @@ class ProjectService {
     if (updates.length > 0) {
       updates.push('updated_at = CURRENT_TIMESTAMP');
       values.push(entryId);
-      await db.run(
-        `UPDATE time_entries SET ${updates.join(', ')} WHERE id = ?`,
-        values
-      );
+      await db.run(`UPDATE time_entries SET ${updates.join(', ')} WHERE id = ?`, values);
     }
 
     const entry = await db.get(
@@ -1069,20 +1074,20 @@ class ProjectService {
       billableHours: parseFloat(String(totals?.billable ?? 0)),
       nonBillableHours: parseFloat(String(totals?.non_billable ?? 0)),
       totalAmount: parseFloat(String(totals?.amount ?? 0)),
-      byUser: byUser.map(u => ({
+      byUser: byUser.map((u) => ({
         userName: String(u.user_name),
         hours: parseFloat(String(u.hours)),
-        amount: parseFloat(String(u.amount))
+        amount: parseFloat(String(u.amount)),
       })),
-      byTask: byTask.map(t => ({
+      byTask: byTask.map((t) => ({
         taskId: Number(t.task_id),
         taskTitle: String(t.task_title),
-        hours: parseFloat(String(t.hours))
+        hours: parseFloat(String(t.hours)),
       })),
-      byWeek: byWeek.map(w => ({
+      byWeek: byWeek.map((w) => ({
         weekStart: String(w.week_start),
-        hours: parseFloat(String(w.hours))
-      }))
+        hours: parseFloat(String(w.hours)),
+      })),
     };
   }
 
@@ -1110,7 +1115,7 @@ class ProjectService {
       endDate,
       totalHours: 0,
       totalAmount: 0,
-      byUser: []
+      byUser: [],
     };
 
     for (const user of byUser) {
@@ -1136,11 +1141,11 @@ class ProjectService {
         totalHours,
         billableHours: parseFloat(String(user.billable_hours)),
         totalAmount,
-        projects: userProjects.map(p => ({
+        projects: userProjects.map((p) => ({
           projectId: Number(p.project_id),
           projectName: String(p.project_name),
-          hours: parseFloat(String(p.hours))
-        }))
+          hours: parseFloat(String(p.hours)),
+        })),
       });
     }
 
@@ -1169,14 +1174,11 @@ class ProjectService {
         data.defaultMilestones ? JSON.stringify(data.defaultMilestones) : null,
         data.defaultTasks ? JSON.stringify(data.defaultTasks) : null,
         data.estimatedDurationDays || null,
-        data.defaultHourlyRate || null
+        data.defaultHourlyRate || null,
       ]
     );
 
-    const template = await db.get(
-      'SELECT * FROM project_templates WHERE id = ?',
-      [result.lastID]
-    );
+    const template = await db.get('SELECT * FROM project_templates WHERE id = ?', [result.lastID]);
 
     if (!template) {
       throw new Error('Failed to create template');
@@ -1210,10 +1212,7 @@ class ProjectService {
    */
   async getTemplate(templateId: number): Promise<ProjectTemplate | null> {
     const db = getDatabase();
-    const row = await db.get(
-      'SELECT * FROM project_templates WHERE id = ?',
-      [templateId]
-    );
+    const row = await db.get('SELECT * FROM project_templates WHERE id = ?', [templateId]);
     return row ? toTemplate(row as unknown as TemplateRow) : null;
   }
 
@@ -1246,7 +1245,7 @@ class ProjectService {
         templateId,
         template.defaultHourlyRate,
         template.defaultTasks.reduce((sum, t) => sum + (t.estimatedHours || 0), 0),
-        startDate
+        startDate,
       ]
     );
     const projectId = projectResult.lastID as number;
@@ -1269,7 +1268,7 @@ class ProjectService {
           milestone.description,
           milestone.deliverables,
           dueDate.toISOString().split('T')[0],
-          milestone.order
+          milestone.order,
         ]
       );
       milestoneIds.push(milestoneResult.lastID as number);
@@ -1294,7 +1293,7 @@ class ProjectService {
           task.description,
           task.priority || 'medium',
           task.estimatedHours,
-          taskOrder++
+          taskOrder++,
         ]
       );
       taskIds.push(taskResult.lastID as number);
@@ -1334,7 +1333,9 @@ class ProjectService {
     if (estimatedEndDate) {
       const dueDate = new Date(estimatedEndDate);
       const today = new Date();
-      const daysRemaining = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const daysRemaining = Math.ceil(
+        (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
 
       if (daysRemaining < 0) {
         scheduleHealth = 30;
@@ -1407,10 +1408,7 @@ class ProjectService {
 
     // Calculate overall score
     const score = Math.round(
-      (scheduleHealth * 0.3) +
-      (budgetHealth * 0.2) +
-      (taskCompletion * 0.25) +
-      (milestoneProgress * 0.25)
+      scheduleHealth * 0.3 + budgetHealth * 0.2 + taskCompletion * 0.25 + milestoneProgress * 0.25
     );
 
     // Determine status
@@ -1436,10 +1434,10 @@ class ProjectService {
         scheduleHealth,
         budgetHealth,
         taskCompletion,
-        milestoneProgress
+        milestoneProgress,
       },
       issues,
-      lastCalculated: new Date().toISOString()
+      lastCalculated: new Date().toISOString(),
     };
   }
 
@@ -1482,8 +1480,10 @@ class ProjectService {
       const dateStr = currentDate.toISOString().split('T')[0];
       dates.push(dateStr);
 
-      const dayIndex = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      const plannedRemaining = Math.max(0, totalHours - (hoursPerDay * (dayIndex + 1)));
+      const dayIndex = Math.floor(
+        (currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const plannedRemaining = Math.max(0, totalHours - hoursPerDay * (dayIndex + 1));
       plannedHours.push(Math.round(plannedRemaining * 10) / 10);
 
       // Get actual hours logged up to this date
@@ -1534,15 +1534,16 @@ class ProjectService {
       tasksCompleted.push(Number(week.tasks));
     }
 
-    const averageVelocity = hoursCompleted.length > 0
-      ? hoursCompleted.reduce((a, b) => a + b, 0) / hoursCompleted.length
-      : 0;
+    const averageVelocity =
+      hoursCompleted.length > 0
+        ? hoursCompleted.reduce((a, b) => a + b, 0) / hoursCompleted.length
+        : 0;
 
     return {
       weeks,
       hoursCompleted,
       tasksCompleted,
-      averageVelocity: Math.round(averageVelocity * 10) / 10
+      averageVelocity: Math.round(averageVelocity * 10) / 10,
     };
   }
 
@@ -1555,10 +1556,10 @@ class ProjectService {
    */
   async addTagToProject(projectId: number, tagId: number): Promise<void> {
     const db = getDatabase();
-    await db.run(
-      'INSERT OR IGNORE INTO project_tags (project_id, tag_id) VALUES (?, ?)',
-      [projectId, tagId]
-    );
+    await db.run('INSERT OR IGNORE INTO project_tags (project_id, tag_id) VALUES (?, ?)', [
+      projectId,
+      tagId,
+    ]);
   }
 
   /**
@@ -1566,10 +1567,10 @@ class ProjectService {
    */
   async removeTagFromProject(projectId: number, tagId: number): Promise<void> {
     const db = getDatabase();
-    await db.run(
-      'DELETE FROM project_tags WHERE project_id = ? AND tag_id = ?',
-      [projectId, tagId]
-    );
+    await db.run('DELETE FROM project_tags WHERE project_id = ? AND tag_id = ?', [
+      projectId,
+      tagId,
+    ]);
   }
 
   /**
@@ -1622,7 +1623,9 @@ class ProjectService {
     status?: string;
     priority?: string;
     limit?: number;
-  }): Promise<(ProjectTask & { projectName: string; clientName?: string; milestoneTitle?: string })[]> {
+  }): Promise<
+    (ProjectTask & { projectName: string; clientName?: string; milestoneTitle?: string })[]
+  > {
     const db = getDatabase();
 
     let query = `
@@ -1642,7 +1645,10 @@ class ProjectService {
 
     if (options?.status) {
       // Support comma-separated statuses (e.g., "pending,in_progress,blocked")
-      const statuses = options.status.split(',').map(s => s.trim()).filter(Boolean);
+      const statuses = options.status
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
       if (statuses.length === 1) {
         query += ' AND t.status = ?';
         params.push(statuses[0]);
@@ -1679,11 +1685,17 @@ class ProjectService {
 
     const rows = await db.all(query, params);
 
-    return (rows as unknown as (TaskRow & { project_name: string; client_name?: string; milestone_title?: string })[]).map(row => ({
+    return (
+      rows as unknown as (TaskRow & {
+        project_name: string;
+        client_name?: string;
+        milestone_title?: string;
+      })[]
+    ).map((row) => ({
       ...toTask(row),
       projectName: row.project_name,
       clientName: row.client_name,
-      milestoneTitle: row.milestone_title
+      milestoneTitle: row.milestone_title,
     }));
   }
 }

@@ -52,7 +52,7 @@ export class BaseModel<_T = any> {
     softDeletes: false,
     fillable: [],
     hidden: [],
-    casts: {}
+    casts: {},
   };
 
   // Instance properties
@@ -247,7 +247,7 @@ export class BaseModel<_T = any> {
         instance.setAttributes(row, true);
         return instance;
       }),
-      pagination: result.pagination
+      pagination: result.pagination,
     };
   }
 
@@ -328,18 +328,18 @@ export class BaseModel<_T = any> {
     }
 
     switch (castType) {
-    case 'string':
-      return String(value);
-    case 'number':
-      return Number(value);
-    case 'boolean':
-      return Boolean(value);
-    case 'date':
-      return value instanceof Date ? value : new Date(value);
-    case 'json':
-      return typeof value === 'string' ? JSON.parse(value) : value;
-    default:
-      return value;
+      case 'string':
+        return String(value);
+      case 'number':
+        return Number(value);
+      case 'boolean':
+        return Boolean(value);
+      case 'date':
+        return value instanceof Date ? value : new Date(value);
+      case 'json':
+        return typeof value === 'string' ? JSON.parse(value) : value;
+      default:
+        return value;
     }
   }
 

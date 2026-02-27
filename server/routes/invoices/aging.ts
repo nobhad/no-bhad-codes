@@ -37,21 +37,21 @@ router.get(
       const transformedReport = {
         generated_at: report.generatedAt,
         total_outstanding: report.totalOutstanding,
-        buckets: report.buckets.map(bucket => ({
+        buckets: report.buckets.map((bucket) => ({
           bucket: bucket.bucket,
           count: bucket.count,
           total_amount: bucket.totalAmount,
-          invoices: bucket.invoices.map(toSnakeCaseInvoice)
-        }))
+          invoices: bucket.invoices.map(toSnakeCaseInvoice),
+        })),
       };
 
       res.json({
         success: true,
-        report: transformedReport
+        report: transformedReport,
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to generate aging report', 500, 'REPORT_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })

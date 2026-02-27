@@ -113,7 +113,7 @@ export class MigrationManager {
           name: migrationName || file.replace('.sql', ''),
           filename: file,
           up: upSql.trim(),
-          down: downSql.trim()
+          down: downSql.trim(),
         });
       }
 
@@ -142,7 +142,7 @@ export class MigrationManager {
             filename: row.filename,
             appliedAt: row.applied_at,
             up: '',
-            down: ''
+            down: '',
           }));
           resolve(migrations);
         }
@@ -198,7 +198,7 @@ export class MigrationManager {
             this.db.run('ROLLBACK');
             logger.logError(err, {
               category: 'DATABASE_MIGRATION',
-              metadata: { migrationName: migration.name }
+              metadata: { migrationName: migration.name },
             });
             reject(err);
             return;
@@ -211,7 +211,7 @@ export class MigrationManager {
               this.db.run('ROLLBACK');
               logger.logError(insertErr, {
                 category: 'DATABASE_MIGRATION',
-                metadata: { migrationName: migration.name }
+                metadata: { migrationName: migration.name },
               });
               reject(insertErr);
             } else {
@@ -272,7 +272,7 @@ export class MigrationManager {
             this.db.run('ROLLBACK');
             logger.logError(err, {
               category: 'DATABASE_MIGRATION',
-              metadata: { migrationName: migration.name }
+              metadata: { migrationName: migration.name },
             });
             reject(err);
             return;
@@ -285,7 +285,7 @@ export class MigrationManager {
               this.db.run('ROLLBACK');
               logger.logError(deleteErr, {
                 category: 'DATABASE_MIGRATION',
-                metadata: { migrationName: migration.name }
+                metadata: { migrationName: migration.name },
               });
               reject(deleteErr);
             } else {

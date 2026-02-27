@@ -9,6 +9,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { logger } from './logger.js';
 
 /**
  * Milestone progress result
@@ -62,7 +63,7 @@ export async function calculateMilestoneProgress(milestoneId: number): Promise<M
   const db = getDatabase();
 
   try {
-    const result = await db.get(
+    const result = (await db.get(
       `SELECT
         COUNT(*) as total,
         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
@@ -71,7 +72,7 @@ export async function calculateMilestoneProgress(milestoneId: number): Promise<M
       FROM project_tasks
       WHERE milestone_id = ?`,
       [milestoneId]
-    ) as { total: number; completed: number; in_progress: number; pending: number };
+    )) as { total: number; completed: number; in_progress: number; pending: number };
 
     const total = result?.total || 0;
     const completed = result?.completed || 0;
@@ -84,10 +85,12 @@ export async function calculateMilestoneProgress(milestoneId: number): Promise<M
       completed,
       inProgress,
       pending,
-      percentage
+      percentage,
     };
   } catch (error) {
-    console.error(`[ProgressCalculator] Error calculating milestone ${milestoneId} progress:`, error);
+    logger.error(`[ProgressCalculator] Error calculating milestone ${milestoneId} progress:`, {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -105,27 +108,27 @@ export async function calculateProjectProgress(projectId: number): Promise<Proje
 
   try {
     // Get milestone task counts
-    const milestoneResult = await db.get(
+    const milestoneResult = (await db.get(
       `SELECT
         COUNT(*) as total,
         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
       FROM project_tasks
       WHERE project_id = ? AND milestone_id IS NOT NULL`,
       [projectId]
-    ) as { total: number; completed: number };
+    )) as { total: number; completed: number };
 
     const milestoneTasks = milestoneResult?.total || 0;
     const completedMilestoneTasks = milestoneResult?.completed || 0;
 
     // Get standalone task counts
-    const standaloneResult = await db.get(
+    const standaloneResult = (await db.get(
       `SELECT
         COUNT(*) as total,
         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
       FROM project_tasks
       WHERE project_id = ? AND milestone_id IS NULL`,
       [projectId]
-    ) as { total: number; completed: number };
+    )) as { total: number; completed: number };
 
     const standaloneTasks = standaloneResult?.total || 0;
     const completedStandaloneTasks = standaloneResult?.completed || 0;
@@ -135,17 +138,13 @@ export async function calculateProjectProgress(projectId: number): Promise<Proje
     const completedTasks = completedMilestoneTasks + completedStandaloneTasks;
 
     // Calculate percentages
-    const milestoneProgress = milestoneTasks > 0
-      ? Math.round((completedMilestoneTasks / milestoneTasks) * 100)
-      : 0;
+    const milestoneProgress =
+      milestoneTasks > 0 ? Math.round((completedMilestoneTasks / milestoneTasks) * 100) : 0;
 
-    const standaloneProgress = standaloneTasks > 0
-      ? Math.round((completedStandaloneTasks / standaloneTasks) * 100)
-      : 0;
+    const standaloneProgress =
+      standaloneTasks > 0 ? Math.round((completedStandaloneTasks / standaloneTasks) * 100) : 0;
 
-    const overallProgress = totalTasks > 0
-      ? Math.round((completedTasks / totalTasks) * 100)
-      : 0;
+    const overallProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
     return {
       milestoneProgress,
@@ -156,10 +155,12 @@ export async function calculateProjectProgress(projectId: number): Promise<Proje
       milestoneTasks,
       completedMilestoneTasks,
       standaloneTasks,
-      completedStandaloneTasks
+      completedStandaloneTasks,
     };
   } catch (error) {
-    console.error(`[ProgressCalculator] Error calculating project ${projectId} progress:`, error);
+    logger.error(`[ProgressCalculator] Error calculating project ${projectId} progress:`, {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -178,13 +179,12 @@ export async function checkAndUpdateMilestoneCompletion(milestoneId: number): Pr
 
   try {
     // Get current milestone status
-    const milestone = await db.get(
-      'SELECT is_completed FROM milestones WHERE id = ?',
-      [milestoneId]
-    ) as { is_completed: boolean } | undefined;
+    const milestone = (await db.get('SELECT is_completed FROM milestones WHERE id = ?', [
+      milestoneId,
+    ])) as { is_completed: boolean } | undefined;
 
     if (!milestone) {
-      console.warn(`[ProgressCalculator] Milestone ${milestoneId} not found`);
+      logger.warn(`[ProgressCalculator] Milestone ${milestoneId} not found`);
       return false;
     }
 
@@ -206,13 +206,17 @@ export async function checkAndUpdateMilestoneCompletion(milestoneId: number): Pr
         [shouldBeCompleted, shouldBeCompleted, milestoneId]
       );
 
-      console.log(`[ProgressCalculator] Milestone ${milestoneId} marked as ${shouldBeCompleted ? 'complete' : 'incomplete'} (${progress.completed}/${progress.total} tasks)`);
+      logger.info(
+        `[ProgressCalculator] Milestone ${milestoneId} marked as ${shouldBeCompleted ? 'complete' : 'incomplete'} (${progress.completed}/${progress.total} tasks)`
+      );
       return true;
     }
 
     return false;
   } catch (error) {
-    console.error(`[ProgressCalculator] Error checking milestone ${milestoneId} completion:`, error);
+    logger.error(`[ProgressCalculator] Error checking milestone ${milestoneId} completion:`, {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -239,10 +243,14 @@ export async function updateProjectProgress(projectId: number): Promise<number> 
       [progress.overallProgress, projectId]
     );
 
-    console.log(`[ProgressCalculator] Project ${projectId} progress updated to ${progress.overallProgress}%`);
+    logger.info(
+      `[ProgressCalculator] Project ${projectId} progress updated to ${progress.overallProgress}%`
+    );
     return progress.overallProgress;
   } catch (error) {
-    console.error(`[ProgressCalculator] Error updating project ${projectId} progress:`, error);
+    logger.error(`[ProgressCalculator] Error updating project ${projectId} progress:`, {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -264,10 +272,9 @@ export async function recalculateProjectProgress(projectId: number): Promise<{
 
   try {
     // Get all milestones for project
-    const milestones = await db.all(
-      'SELECT id FROM milestones WHERE project_id = ?',
-      [projectId]
-    ) as Array<{ id: number }>;
+    const milestones = (await db.all('SELECT id FROM milestones WHERE project_id = ?', [
+      projectId,
+    ])) as Array<{ id: number }>;
 
     let milestonesUpdated = 0;
 
@@ -282,14 +289,18 @@ export async function recalculateProjectProgress(projectId: number): Promise<{
     // Update project progress
     const projectProgress = await updateProjectProgress(projectId);
 
-    console.log(`[ProgressCalculator] Recalculated project ${projectId}: ${milestonesUpdated} milestones updated, progress ${projectProgress}%`);
+    logger.info(
+      `[ProgressCalculator] Recalculated project ${projectId}: ${milestonesUpdated} milestones updated, progress ${projectProgress}%`
+    );
 
     return {
       milestonesUpdated,
-      projectProgress
+      projectProgress,
     };
   } catch (error) {
-    console.error(`[ProgressCalculator] Error recalculating project ${projectId} progress:`, error);
+    logger.error(`[ProgressCalculator] Error recalculating project ${projectId} progress:`, {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -302,20 +313,22 @@ export async function recalculateProjectProgress(projectId: number): Promise<{
  * @param projectId - ID of the project
  * @returns Array of milestones with progress data
  */
-export async function getMilestonesWithProgress(projectId: number): Promise<Array<{
-  id: number;
-  title: string;
-  description: string;
-  due_date: string | null;
-  is_completed: boolean;
-  total_tasks: number;
-  completed_tasks: number;
-  progress_percentage: number;
-}>> {
+export async function getMilestonesWithProgress(projectId: number): Promise<
+  Array<{
+    id: number;
+    title: string;
+    description: string;
+    due_date: string | null;
+    is_completed: boolean;
+    total_tasks: number;
+    completed_tasks: number;
+    progress_percentage: number;
+  }>
+> {
   const db = getDatabase();
 
   try {
-    const milestones = await db.all(
+    const milestones = (await db.all(
       `SELECT
         m.id,
         m.title,
@@ -330,7 +343,7 @@ export async function getMilestonesWithProgress(projectId: number): Promise<Arra
       GROUP BY m.id
       ORDER BY m.sort_order, m.due_date`,
       [projectId]
-    ) as Array<{
+    )) as Array<{
       id: number;
       title: string;
       description: string;
@@ -340,14 +353,18 @@ export async function getMilestonesWithProgress(projectId: number): Promise<Arra
       completed_tasks: number;
     }>;
 
-    return milestones.map(milestone => ({
+    return milestones.map((milestone) => ({
       ...milestone,
-      progress_percentage: milestone.total_tasks > 0
-        ? Math.round((milestone.completed_tasks / milestone.total_tasks) * 100)
-        : 0
+      progress_percentage:
+        milestone.total_tasks > 0
+          ? Math.round((milestone.completed_tasks / milestone.total_tasks) * 100)
+          : 0,
     }));
   } catch (error) {
-    console.error(`[ProgressCalculator] Error getting milestones with progress for project ${projectId}:`, error);
+    logger.error(
+      `[ProgressCalculator] Error getting milestones with progress for project ${projectId}:`,
+      { error: error instanceof Error ? error : undefined }
+    );
     throw error;
   }
 }
@@ -358,5 +375,5 @@ export default {
   checkAndUpdateMilestoneCompletion,
   updateProjectProgress,
   recalculateProjectProgress,
-  getMilestonesWithProgress
+  getMilestonesWithProgress,
 };

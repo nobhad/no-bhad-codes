@@ -61,7 +61,10 @@ interface _MilestoneData {
  * 5. Generate default milestones
  * 6. Emit project.created event
  */
-async function handleProposalAccepted(data: { entityId?: number | null; triggeredBy?: string }): Promise<void> {
+async function handleProposalAccepted(data: {
+  entityId?: number | null;
+  triggeredBy?: string;
+}): Promise<void> {
   const proposalId = data.entityId;
   if (!proposalId) {
     logger.warn('[WorkflowAutomation] proposal.accepted: No proposalId provided');
@@ -93,14 +96,15 @@ async function handleProposalAccepted(data: { entityId?: number | null; triggere
       final_price: (proposalRow as Record<string, unknown>).final_price as number | null,
       description: getString(proposalRow as Record<string, unknown>, 'description') || null,
       project_name: getString(proposalRow as Record<string, unknown>, 'project_name') || null,
-      maintenance_option: getString(proposalRow as Record<string, unknown>, 'maintenance_option') || null
+      maintenance_option:
+        getString(proposalRow as Record<string, unknown>, 'maintenance_option') || null,
     };
 
     // Check if project already exists
     if (proposal.project_id) {
       logger.info('proposal.accepted: Project already exists', {
         category: 'workflow',
-        metadata: { projectId: proposal.project_id, proposalId }
+        metadata: { projectId: proposal.project_id, proposalId },
       });
 
       // Update existing project with proposal data if needed
@@ -111,19 +115,15 @@ async function handleProposalAccepted(data: { entityId?: number | null; triggere
           description = COALESCE(?, description),
           updated_at = CURRENT_TIMESTAMP
          WHERE id = ?`,
-        [
-          proposal.final_price,
-          proposal.project_type,
-          proposal.description,
-          proposal.project_id
-        ]
+        [proposal.final_price, proposal.project_type, proposal.description, proposal.project_id]
       );
 
       return;
     }
 
     // Create new project from proposal
-    const projectName = proposal.project_name ||
+    const projectName =
+      proposal.project_name ||
       `${proposal.project_type || 'Web'} Project - ${new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
 
     const result = await db.run(
@@ -136,21 +136,21 @@ async function handleProposalAccepted(data: { entityId?: number | null; triggere
         projectName,
         proposal.project_type,
         proposal.description,
-        proposal.final_price
+        proposal.final_price,
       ]
     );
 
     const projectId = result.lastID;
 
     // Link proposal to the new project
-    await db.run(
-      'UPDATE proposal_requests SET project_id = ? WHERE id = ?',
-      [projectId, proposalId]
-    );
+    await db.run('UPDATE proposal_requests SET project_id = ? WHERE id = ?', [
+      projectId,
+      proposalId,
+    ]);
 
     logger.info('proposal.accepted: Created project from proposal', {
       category: 'workflow',
-      metadata: { projectId, proposalId }
+      metadata: { projectId, proposalId },
     });
 
     // Generate default milestones for the project
@@ -161,11 +161,13 @@ async function handleProposalAccepted(data: { entityId?: number | null; triggere
         metadata: {
           projectId,
           milestonesCreated: milestoneResult.milestonesCreated,
-          tasksCreated: milestoneResult.tasksCreated
-        }
+          tasksCreated: milestoneResult.tasksCreated,
+        },
       });
     } catch (milestoneError) {
-      logger.error('[WorkflowAutomation] proposal.accepted: Failed to generate milestones', { error: milestoneError instanceof Error ? milestoneError : undefined });
+      logger.error('[WorkflowAutomation] proposal.accepted: Failed to generate milestones', {
+        error: milestoneError instanceof Error ? milestoneError : undefined,
+      });
       // Don't fail the automation if milestone generation fails
     }
 
@@ -175,11 +177,12 @@ async function handleProposalAccepted(data: { entityId?: number | null; triggere
       triggeredBy: data.triggeredBy || 'workflow-automation',
       clientId: proposal.client_id,
       projectType: proposal.project_type,
-      proposalId: proposalId
+      proposalId: proposalId,
     });
-
   } catch (error) {
-    logger.error('[WorkflowAutomation] proposal.accepted: Error creating project', { error: error instanceof Error ? error : undefined });
+    logger.error('[WorkflowAutomation] proposal.accepted: Error creating project', {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -206,10 +209,7 @@ async function handleContractSigned(data: {
 
   if (!projectId && data.entityId) {
     // entityId might be the contract ID, get the project from it
-    const contract = await db.get(
-      'SELECT project_id FROM contracts WHERE id = ?',
-      [data.entityId]
-    );
+    const contract = await db.get('SELECT project_id FROM contracts WHERE id = ?', [data.entityId]);
     if (contract) {
       projectId = getNumber(contract as Record<string, unknown>, 'project_id');
     }
@@ -222,15 +222,14 @@ async function handleContractSigned(data: {
 
   try {
     // Get current project status
-    const project = await db.get(
-      'SELECT id, status, project_name FROM projects WHERE id = ?',
-      [projectId]
-    );
+    const project = await db.get('SELECT id, status, project_name FROM projects WHERE id = ?', [
+      projectId,
+    ]);
 
     if (!project) {
       logger.warn('contract.signed: Project not found', {
         category: 'workflow',
-        metadata: { projectId }
+        metadata: { projectId },
       });
       return;
     }
@@ -238,10 +237,14 @@ async function handleContractSigned(data: {
     const previousStatus = getString(project as Record<string, unknown>, 'status');
 
     // Only update if not already active or completed
-    if (previousStatus === 'active' || previousStatus === 'completed' || previousStatus === 'in-progress') {
+    if (
+      previousStatus === 'active' ||
+      previousStatus === 'completed' ||
+      previousStatus === 'in-progress'
+    ) {
       logger.info('contract.signed: Project already in active state, skipping', {
         category: 'workflow',
-        metadata: { projectId, previousStatus }
+        metadata: { projectId, previousStatus },
       });
       return;
     }
@@ -257,7 +260,7 @@ async function handleContractSigned(data: {
 
     logger.info('contract.signed: Updated project status to active', {
       category: 'workflow',
-      metadata: { projectId }
+      metadata: { projectId },
     });
 
     // Log to contract_signature_log
@@ -271,8 +274,8 @@ async function handleContractSigned(data: {
           previousStatus,
           newStatus: 'active',
           signerName: data.signerName,
-          activatedAt: new Date().toISOString()
-        })
+          activatedAt: new Date().toISOString(),
+        }),
       ]
     );
 
@@ -282,11 +285,12 @@ async function handleContractSigned(data: {
       triggeredBy: data.triggeredBy || 'workflow-automation',
       previousStatus,
       newStatus: 'active',
-      reason: 'contract_signed'
+      reason: 'contract_signed',
     });
-
   } catch (error) {
-    logger.error('[WorkflowAutomation] contract.signed: Error updating project status', { error: error instanceof Error ? error : undefined });
+    logger.error('[WorkflowAutomation] contract.signed: Error updating project status', {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -315,17 +319,19 @@ async function handleMilestoneCompleted(data: {
 
   try {
     // Get milestone details with project and client info
-    const milestone = await db.get(
+    const milestone = (await db.get(
       `SELECT m.id, m.project_id, m.title, m.description, m.due_date,
               m.deliverables, p.client_id, p.project_name, p.price as project_price
        FROM milestones m
        JOIN projects p ON m.project_id = p.id
        WHERE m.id = ?`,
       [milestoneId]
-    ) as Record<string, unknown> | undefined;
+    )) as Record<string, unknown> | undefined;
 
     if (!milestone) {
-      logger.warn(`[WorkflowAutomation] project.milestone_completed: Milestone ${milestoneId} not found`);
+      logger.warn(
+        `[WorkflowAutomation] project.milestone_completed: Milestone ${milestoneId} not found`
+      );
       return;
     }
 
@@ -356,7 +362,7 @@ async function handleMilestoneCompleted(data: {
           description: deliverable.name || milestoneTitle,
           quantity: 1,
           rate: deliverable.price,
-          amount: deliverable.price
+          amount: deliverable.price,
         });
       }
     }
@@ -365,37 +371,39 @@ async function handleMilestoneCompleted(data: {
     // (e.g., "Deposit", "Final Payment", "50% Payment", etc.)
     if (invoiceAmount === 0) {
       const paymentKeywords = ['deposit', 'payment', 'invoice', 'billing', 'final payment'];
-      const isPaymentMilestone = paymentKeywords.some(keyword =>
+      const isPaymentMilestone = paymentKeywords.some((keyword) =>
         milestoneTitle.toLowerCase().includes(keyword)
       );
 
       if (!isPaymentMilestone) {
         logger.info('project.milestone_completed: Not a payment milestone, skipping invoice', {
           category: 'workflow',
-          metadata: { milestoneId, milestoneTitle }
+          metadata: { milestoneId, milestoneTitle },
         });
         return;
       }
 
       // For payment milestones without explicit amounts, we just log and skip
       // Admin should manually create the invoice with proper amounts
-      logger.info('project.milestone_completed: Payment milestone has no amounts, manual invoice required', {
-        category: 'workflow',
-        metadata: { milestoneId, milestoneTitle }
-      });
+      logger.info(
+        'project.milestone_completed: Payment milestone has no amounts, manual invoice required',
+        {
+          category: 'workflow',
+          metadata: { milestoneId, milestoneTitle },
+        }
+      );
       return;
     }
 
     // Check if an invoice already exists for this milestone
-    const existingInvoice = await db.get(
-      'SELECT id FROM invoices WHERE milestone_id = ?',
-      [milestoneId]
-    );
+    const existingInvoice = await db.get('SELECT id FROM invoices WHERE milestone_id = ?', [
+      milestoneId,
+    ]);
 
     if (existingInvoice) {
       logger.info('project.milestone_completed: Invoice already exists for milestone', {
         category: 'workflow',
-        metadata: { milestoneId }
+        metadata: { milestoneId },
       });
       return;
     }
@@ -408,12 +416,12 @@ async function handleMilestoneCompleted(data: {
       clientId,
       lineItems,
       notes: `${projectName} - ${milestoneTitle}\n\n${description || 'Invoice for milestone completion.'}`,
-      terms: 'Payment due within 14 days of receipt.'
+      terms: 'Payment due within 14 days of receipt.',
     });
 
     logger.info('project.milestone_completed: Created draft invoice for milestone', {
       category: 'workflow',
-      metadata: { invoiceId: invoice.id, milestoneId, amount: invoiceAmount }
+      metadata: { invoiceId: invoice.id, milestoneId, amount: invoiceAmount },
     });
 
     // Emit invoice.created event
@@ -423,11 +431,12 @@ async function handleMilestoneCompleted(data: {
       projectId,
       clientId,
       milestoneId,
-      amount: invoiceAmount
+      amount: invoiceAmount,
     });
-
   } catch (error) {
-    logger.error('[WorkflowAutomation] project.milestone_completed: Error creating invoice', { error: error instanceof Error ? error : undefined });
+    logger.error('[WorkflowAutomation] project.milestone_completed: Error creating invoice', {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -441,16 +450,16 @@ async function handleMilestoneCompleted(data: {
  */
 async function getClientEmail(clientId: number): Promise<{ email: string; name: string } | null> {
   const db = getDatabase();
-  const client = await db.get(
+  const client = (await db.get(
     'SELECT email, contact_name, company_name FROM clients WHERE id = ?',
     [clientId]
-  ) as Record<string, unknown> | undefined;
+  )) as Record<string, unknown> | undefined;
 
   if (!client || !client.email) return null;
 
   return {
     email: String(client.email),
-    name: String(client.contact_name || client.company_name || 'Valued Client')
+    name: String(client.contact_name || client.company_name || 'Valued Client'),
   };
 }
 
@@ -468,7 +477,7 @@ async function sendClientNotification(
   if (!client) {
     logger.warn('sendClientNotification: Client email not found', {
       category: 'workflow',
-      metadata: { clientId }
+      metadata: { clientId },
     });
     return;
   }
@@ -508,17 +517,17 @@ async function sendClientNotification(
           </div>
         </body>
         </html>
-      `
+      `,
     });
 
     logger.info('Client notification sent', {
       category: 'workflow',
-      metadata: { clientId, subject }
+      metadata: { clientId, subject },
     });
   } catch (error) {
     logger.error('Failed to send client notification', {
       category: 'workflow',
-      metadata: { clientId, subject, error: String(error) }
+      metadata: { clientId, subject, error: String(error) },
     });
   }
 }
@@ -526,18 +535,21 @@ async function sendClientNotification(
 /**
  * Notify client when their proposal is accepted
  */
-async function notifyProposalAccepted(data: { entityId?: number | null; projectId?: number }): Promise<void> {
+async function notifyProposalAccepted(data: {
+  entityId?: number | null;
+  projectId?: number;
+}): Promise<void> {
   const proposalId = data.entityId;
   if (!proposalId) return;
 
   const db = getDatabase();
-  const proposal = await db.get(
+  const proposal = (await db.get(
     `SELECT p.project_name, p.client_id, c.email, c.contact_name
      FROM proposal_requests p
      JOIN clients c ON p.client_id = c.id
      WHERE p.id = ?`,
     [proposalId]
-  ) as Record<string, unknown> | undefined;
+  )) as Record<string, unknown> | undefined;
 
   if (!proposal) return;
 
@@ -556,15 +568,17 @@ async function notifyProposalAccepted(data: { entityId?: number | null; projectI
 /**
  * Notify client when contract is signed (project is now active)
  */
-async function notifyContractSigned(data: { entityId?: number | null; projectId?: number }): Promise<void> {
+async function notifyContractSigned(data: {
+  entityId?: number | null;
+  projectId?: number;
+}): Promise<void> {
   const projectId = data.projectId || data.entityId;
   if (!projectId) return;
 
   const db = getDatabase();
-  const project = await db.get(
-    'SELECT project_name, client_id FROM projects WHERE id = ?',
-    [projectId]
-  ) as Record<string, unknown> | undefined;
+  const project = (await db.get('SELECT project_name, client_id FROM projects WHERE id = ?', [
+    projectId,
+  ])) as Record<string, unknown> | undefined;
 
   if (!project) return;
 
@@ -583,18 +597,21 @@ async function notifyContractSigned(data: { entityId?: number | null; projectId?
 /**
  * Notify client when a deliverable is approved
  */
-async function notifyDeliverableApproved(data: { entityId?: number | null; projectId?: number }): Promise<void> {
+async function notifyDeliverableApproved(data: {
+  entityId?: number | null;
+  projectId?: number;
+}): Promise<void> {
   const deliverableId = data.entityId;
   if (!deliverableId) return;
 
   const db = getDatabase();
-  const deliverable = await db.get(
+  const deliverable = (await db.get(
     `SELECT d.title, p.client_id, p.project_name
      FROM deliverables d
      JOIN projects p ON d.project_id = p.id
      WHERE d.id = ?`,
     [deliverableId]
-  ) as Record<string, unknown> | undefined;
+  )) as Record<string, unknown> | undefined;
 
   if (!deliverable) return;
 
@@ -619,13 +636,13 @@ async function notifyQuestionnaireCompleted(data: { entityId?: number | null }):
   if (!questionnaireId) return;
 
   const db = getDatabase();
-  const questionnaire = await db.get(
+  const questionnaire = (await db.get(
     `SELECT q.title, p.client_id, p.project_name
      FROM questionnaires q
      JOIN projects p ON q.project_id = p.id
      WHERE q.id = ?`,
     [questionnaireId]
-  ) as Record<string, unknown> | undefined;
+  )) as Record<string, unknown> | undefined;
 
   if (!questionnaire) return;
 
@@ -650,13 +667,13 @@ async function notifyDocumentRequestApproved(data: { entityId?: number | null })
   if (!requestId) return;
 
   const db = getDatabase();
-  const docRequest = await db.get(
+  const docRequest = (await db.get(
     `SELECT dr.title, p.client_id, p.project_name
      FROM document_requests dr
      JOIN projects p ON dr.project_id = p.id
      WHERE dr.id = ?`,
     [requestId]
-  ) as Record<string, unknown> | undefined;
+  )) as Record<string, unknown> | undefined;
 
   if (!docRequest) return;
 
@@ -681,19 +698,19 @@ async function notifyInvoicePaid(data: { entityId?: number | null }): Promise<vo
   if (!invoiceId) return;
 
   const db = getDatabase();
-  const invoice = await db.get(
+  const invoice = (await db.get(
     `SELECT i.invoice_number, i.total_amount, i.client_id, p.project_name
      FROM invoices i
      LEFT JOIN projects p ON i.project_id = p.id
      WHERE i.id = ?`,
     [invoiceId]
-  ) as Record<string, unknown> | undefined;
+  )) as Record<string, unknown> | undefined;
 
   if (!invoice) return;
 
   const clientId = getNumber(invoice, 'client_id');
   const invoiceNumber = getString(invoice, 'invoice_number') || String(invoiceId);
-  const amount = invoice.total_amount as number || 0;
+  const amount = (invoice.total_amount as number) || 0;
   const projectName = getString(invoice, 'project_name') || 'your project';
 
   await sendClientNotification(
@@ -708,18 +725,21 @@ async function notifyInvoicePaid(data: { entityId?: number | null }): Promise<vo
 /**
  * Notify client when a milestone is completed
  */
-async function notifyMilestoneCompleted(data: { entityId?: number | null; milestoneTitle?: string }): Promise<void> {
+async function notifyMilestoneCompleted(data: {
+  entityId?: number | null;
+  milestoneTitle?: string;
+}): Promise<void> {
   const milestoneId = data.entityId;
   if (!milestoneId) return;
 
   const db = getDatabase();
-  const milestone = await db.get(
+  const milestone = (await db.get(
     `SELECT m.title, p.client_id, p.project_name
      FROM milestones m
      JOIN projects p ON m.project_id = p.id
      WHERE m.id = ?`,
     [milestoneId]
-  ) as Record<string, unknown> | undefined;
+  )) as Record<string, unknown> | undefined;
 
   if (!milestone) return;
 
@@ -779,15 +799,11 @@ export function registerWorkflowAutomations(): void {
         'deliverable.approved -> Notify client',
         'questionnaire.completed -> Notify client',
         'document_request.approved -> Notify client',
-        'invoice.paid -> Notify client'
-      ]
-    }
+        'invoice.paid -> Notify client',
+      ],
+    },
   });
 }
 
 // Export handlers for testing
-export {
-  handleProposalAccepted,
-  handleContractSigned,
-  handleMilestoneCompleted
-};
+export { handleProposalAccepted, handleContractSigned, handleMilestoneCompleted };

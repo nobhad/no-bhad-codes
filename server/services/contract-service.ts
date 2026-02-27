@@ -13,7 +13,7 @@ import { BUSINESS_INFO } from '../config/business.js';
 import {
   applyContractVariables,
   getDefaultContractVariables,
-  resolveContractVariables
+  resolveContractVariables,
 } from '../utils/contract-variables.js';
 import {
   type ContractTemplate,
@@ -23,7 +23,7 @@ import {
   type ContractTemplateRow,
   type ContractRow,
   toContractTemplate,
-  toContract
+  toContract,
 } from '../database/entities/index.js';
 
 // Re-export types for external usage
@@ -56,7 +56,14 @@ interface ContractCreateData {
   expiresAt?: string | null;
 }
 
-const CONTRACT_STATUSES: ContractStatus[] = ['draft', 'sent', 'viewed', 'signed', 'expired', 'cancelled'];
+const CONTRACT_STATUSES: ContractStatus[] = [
+  'draft',
+  'sent',
+  'viewed',
+  'signed',
+  'expired',
+  'cancelled',
+];
 
 class ContractService {
   private async getContractVariableSource(projectId: number, clientId: number) {
@@ -88,7 +95,7 @@ class ContractService {
       client: {
         name: getString(data, 'contact_name'),
         email: getString(data, 'email'),
-        company: data.company_name as string | null | undefined
+        company: data.company_name as string | null | undefined,
       },
       project: {
         name: getString(data, 'project_name'),
@@ -97,18 +104,18 @@ class ContractService {
         startDate: data.start_date as string | null | undefined,
         dueDate: data.due_date as string | null | undefined,
         price: data.price as string | number | null | undefined,
-        depositAmount: data.deposit_amount as string | number | null | undefined
+        depositAmount: data.deposit_amount as string | number | null | undefined,
       },
       business: {
         name: BUSINESS_INFO.name,
         owner: BUSINESS_INFO.owner,
         contact: BUSINESS_INFO.contact,
         email: BUSINESS_INFO.email,
-        website: BUSINESS_INFO.website
+        website: BUSINESS_INFO.website,
       },
       date: {
-        today: new Date().toISOString().split('T')[0]
-      }
+        today: new Date().toISOString().split('T')[0],
+      },
     };
   }
 
@@ -141,9 +148,8 @@ class ContractService {
 
   async createTemplate(data: ContractTemplateCreateData): Promise<ContractTemplate> {
     const db = getDatabase();
-    const variables = data.variables && data.variables.length > 0
-      ? data.variables
-      : getDefaultContractVariables();
+    const variables =
+      data.variables && data.variables.length > 0 ? data.variables : getDefaultContractVariables();
 
     if (data.isDefault) {
       await db.run('UPDATE contract_templates SET is_default = FALSE WHERE type = ?', [data.type]);
@@ -154,19 +160,16 @@ class ContractService {
         name, type, content, variables,
         is_default, is_active, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, TRUE, datetime('now'), datetime('now'))`,
-      [
-        data.name,
-        data.type,
-        data.content,
-        JSON.stringify(variables),
-        data.isDefault ? 1 : 0
-      ]
+      [data.name, data.type, data.content, JSON.stringify(variables), data.isDefault ? 1 : 0]
     );
 
     return this.getTemplate(result.lastID!);
   }
 
-  async updateTemplate(templateId: number, data: Partial<ContractTemplateCreateData>): Promise<ContractTemplate> {
+  async updateTemplate(
+    templateId: number,
+    data: Partial<ContractTemplateCreateData>
+  ): Promise<ContractTemplate> {
     const db = getDatabase();
     const updates: string[] = [];
     const params: (string | number | null)[] = [];
@@ -197,7 +200,7 @@ class ContractService {
       params.push(data.isDefault ? 1 : 0);
     }
 
-    updates.push('updated_at = datetime(\'now\')');
+    updates.push("updated_at = datetime('now')");
     params.push(templateId);
 
     await db.run(`UPDATE contract_templates SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -207,7 +210,7 @@ class ContractService {
   async deleteTemplate(templateId: number): Promise<void> {
     const db = getDatabase();
     await db.run(
-      'UPDATE contract_templates SET is_active = FALSE, updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE contract_templates SET is_active = FALSE, updated_at = datetime('now') WHERE id = ?",
       [templateId]
     );
   }
@@ -312,7 +315,7 @@ class ContractService {
         data.reminderCount ?? null,
         data.sentAt || null,
         data.signedAt || null,
-        data.expiresAt || null
+        data.expiresAt || null,
       ]
     );
 
@@ -338,7 +341,7 @@ class ContractService {
       content,
       status: options.status,
       variables,
-      expiresAt: options.expiresAt || null
+      expiresAt: options.expiresAt || null,
     });
   }
 
@@ -411,7 +414,7 @@ class ContractService {
       return this.getContract(contractId);
     }
 
-    updates.push('updated_at = datetime(\'now\')');
+    updates.push("updated_at = datetime('now')");
     params.push(contractId);
 
     await db.run(`UPDATE contracts SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -521,7 +524,7 @@ class ContractService {
         data.signerIp,
         data.signerUserAgent,
         data.signatureData,
-        contractId
+        contractId,
       ]
     );
 
@@ -564,7 +567,7 @@ class ContractService {
         data.countersignerUserAgent,
         data.countersignatureData,
         data.signedPdfPath || null,
-        contractId
+        contractId,
       ]
     );
 
@@ -619,7 +622,7 @@ class ContractService {
       countersignerName: contract.countersignerName ?? null,
       countersignerEmail: contract.countersignerEmail ?? null,
       countersignerIp: contract.countersignerIp ?? null,
-      signedPdfPath: contract.signedPdfPath ?? null
+      signedPdfPath: contract.signedPdfPath ?? null,
     };
   }
 }

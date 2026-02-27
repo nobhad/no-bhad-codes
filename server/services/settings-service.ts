@@ -16,7 +16,7 @@ import {
   type SettingType,
   type SystemSetting,
   type SettingRow,
-  toSystemSetting
+  toSystemSetting,
 } from '../database/entities/index.js';
 
 export type { SettingType, SystemSetting };
@@ -43,25 +43,24 @@ export interface InvoiceSettings {
   nextSequence: number;
 }
 
-
 /**
  * Parse setting value based on type
  */
 function parseSettingValue(value: string, type: SettingType): string | number | boolean | unknown {
   switch (type) {
-  case 'number':
-    return parseFloat(value) || 0;
-  case 'boolean':
-    return value.toLowerCase() === 'true' || value === '1';
-  case 'json':
-    try {
-      return JSON.parse(value);
-    } catch {
-      return null;
-    }
-  case 'string':
-  default:
-    return value;
+    case 'number':
+      return parseFloat(value) || 0;
+    case 'boolean':
+      return value.toLowerCase() === 'true' || value === '1';
+    case 'json':
+      try {
+        return JSON.parse(value);
+      } catch {
+        return null;
+      }
+    case 'string':
+    default:
+      return value;
   }
 }
 
@@ -70,15 +69,15 @@ function parseSettingValue(value: string, type: SettingType): string | number | 
  */
 function stringifySettingValue(value: unknown, type: SettingType): string {
   switch (type) {
-  case 'number':
-    return String(value);
-  case 'boolean':
-    return value ? 'true' : 'false';
-  case 'json':
-    return JSON.stringify(value);
-  case 'string':
-  default:
-    return String(value);
+    case 'number':
+      return String(value);
+    case 'boolean':
+      return value ? 'true' : 'false';
+    case 'json':
+      return JSON.stringify(value);
+    case 'string':
+    default:
+      return String(value);
   }
 }
 
@@ -126,10 +125,7 @@ class SettingsService {
     }
 
     const db = getDatabase();
-    const row = await db.get(
-      'SELECT * FROM system_settings WHERE setting_key = ?',
-      [key]
-    );
+    const row = await db.get('SELECT * FROM system_settings WHERE setting_key = ?', [key]);
 
     if (!row) {
       return null;
@@ -208,10 +204,7 @@ class SettingsService {
    */
   async deleteSetting(key: string): Promise<boolean> {
     const db = getDatabase();
-    const result = await db.run(
-      'DELETE FROM system_settings WHERE setting_key = ?',
-      [key]
-    );
+    const result = await db.run('DELETE FROM system_settings WHERE setting_key = ?', [key]);
     this.invalidateCache();
     return (result.changes ?? 0) > 0;
   }
@@ -226,7 +219,7 @@ class SettingsService {
       this.getValue('business.contact', 'Noelle Bhaduri'),
       this.getValue('business.tagline', 'Web Development & Design'),
       this.getValue('business.email', 'nobhaduri@gmail.com'),
-      this.getValue('business.website', 'nobhad.codes')
+      this.getValue('business.website', 'nobhad.codes'),
     ]);
 
     return { name, owner, contact, tagline, email, website };
@@ -268,7 +261,7 @@ class SettingsService {
     const [venmoHandle, zelleEmail, paypalEmail] = await Promise.all([
       this.getValue('payment.venmo_handle', '@nobhaduri'),
       this.getValue('payment.zelle_email', 'nobhaduri@gmail.com'),
-      this.getValue('payment.paypal_email', '')
+      this.getValue('payment.paypal_email', ''),
     ]);
 
     return { venmoHandle, zelleEmail, paypalEmail };
@@ -302,7 +295,7 @@ class SettingsService {
       this.getValue('invoice.default_currency', 'USD'),
       this.getValue('invoice.default_terms', 'Payment due within 30 days of invoice date.'),
       this.getValue('invoice.prefix', 'INV-'),
-      this.getValue<number>('invoice.next_sequence', 1)
+      this.getValue<number>('invoice.next_sequence', 1),
     ]);
 
     return { defaultCurrency, defaultTerms, prefix, nextSequence };

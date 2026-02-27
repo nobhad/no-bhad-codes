@@ -25,9 +25,7 @@ export function snakeToCamel(str: string): string {
 /**
  * Convert object keys from camelCase to snake_case
  */
-export function toSnakeCase<T extends Record<string, unknown>>(
-  obj: T
-): Record<string, unknown> {
+export function toSnakeCase<T extends Record<string, unknown>>(obj: T): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(obj)) {

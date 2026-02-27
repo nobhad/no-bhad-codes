@@ -32,7 +32,7 @@ import {
   toReaction,
   toSubscription,
   toReadReceipt,
-  toPinnedMessage
+  toPinnedMessage,
 } from '../database/entities/index.js';
 
 // =====================================================
@@ -146,10 +146,10 @@ class MessageService {
     }
 
     // Update message mention count
-    await db.run(
-      'UPDATE messages SET mention_count = ? WHERE id = ?',
-      [mentions.length, messageId]
-    );
+    await db.run('UPDATE messages SET mention_count = ? WHERE id = ?', [
+      mentions.length,
+      messageId,
+    ]);
 
     return savedMentions;
   }
@@ -159,10 +159,7 @@ class MessageService {
    */
   async getMentions(messageId: number): Promise<Mention[]> {
     const db = getDatabase();
-    const rows = await db.all(
-      'SELECT * FROM message_mentions WHERE message_id = ?',
-      [messageId]
-    );
+    const rows = await db.all('SELECT * FROM message_mentions WHERE message_id = ?', [messageId]);
     return rows.map((row) => toMention(row as MentionRow));
   }
 
@@ -205,7 +202,12 @@ class MessageService {
   /**
    * Add a reaction to a message
    */
-  async addReaction(messageId: number, userEmail: string, userType: string, reaction: string): Promise<Reaction> {
+  async addReaction(
+    messageId: number,
+    userEmail: string,
+    userType: string,
+    reaction: string
+  ): Promise<Reaction> {
     const db = getDatabase();
 
     // Check if already exists
@@ -225,10 +227,9 @@ class MessageService {
     );
 
     // Update message reaction count
-    await db.run(
-      'UPDATE messages SET reaction_count = reaction_count + 1 WHERE id = ?',
-      [messageId]
-    );
+    await db.run('UPDATE messages SET reaction_count = reaction_count + 1 WHERE id = ?', [
+      messageId,
+    ]);
 
     const row = await db.get('SELECT * FROM message_reactions WHERE id = ?', [result.lastID]);
     return toReaction(row as ReactionRow);
@@ -247,10 +248,9 @@ class MessageService {
 
     if (result.changes && result.changes > 0) {
       // Update message reaction count
-      await db.run(
-        'UPDATE messages SET reaction_count = reaction_count - 1 WHERE id = ?',
-        [messageId]
-      );
+      await db.run('UPDATE messages SET reaction_count = reaction_count - 1 WHERE id = ?', [
+        messageId,
+      ]);
     }
   }
 
@@ -269,16 +269,19 @@ class MessageService {
 
     return rows.map((row) => {
       const r = row as Record<string, unknown>;
-      const usersStr = r.users as string || '';
-      const users = usersStr.split(',').filter(Boolean).map((u) => {
-        const [email, type] = u.split('|');
-        return { email, type };
-      });
+      const usersStr = (r.users as string) || '';
+      const users = usersStr
+        .split(',')
+        .filter(Boolean)
+        .map((u) => {
+          const [email, type] = u.split('|');
+          return { email, type };
+        });
 
       return {
         reaction: getString(r, 'reaction'),
         count: getNumber(r, 'count'),
-        users
+        users,
       };
     });
   }
@@ -290,7 +293,11 @@ class MessageService {
   /**
    * Get or create subscription for a project
    */
-  async getOrCreateSubscription(projectId: number, userEmail: string, userType: string): Promise<Subscription> {
+  async getOrCreateSubscription(
+    projectId: number,
+    userEmail: string,
+    userType: string
+  ): Promise<Subscription> {
     const db = getDatabase();
 
     let row = await db.get(
@@ -341,7 +348,7 @@ class MessageService {
     }
 
     if (updates.length > 0) {
-      updates.push('updated_at = datetime(\'now\')');
+      updates.push("updated_at = datetime('now')");
       params.push(projectId, userEmail);
 
       await db.run(
@@ -361,7 +368,12 @@ class MessageService {
   /**
    * Mute a project temporarily
    */
-  async muteProject(projectId: number, userEmail: string, userType: string, untilDate?: Date): Promise<void> {
+  async muteProject(
+    projectId: number,
+    userEmail: string,
+    userType: string,
+    untilDate?: Date
+  ): Promise<void> {
     const db = getDatabase();
 
     // Get or create subscription first
@@ -391,7 +403,11 @@ class MessageService {
   /**
    * Check if user should be notified for a project
    */
-  async shouldNotify(projectId: number, userEmail: string, notificationType: 'all' | 'mention' | 'reply'): Promise<boolean> {
+  async shouldNotify(
+    projectId: number,
+    userEmail: string,
+    notificationType: 'all' | 'mention' | 'reply'
+  ): Promise<boolean> {
     const db = getDatabase();
 
     const row = await db.get(
@@ -411,14 +427,14 @@ class MessageService {
     }
 
     switch (notificationType) {
-    case 'all':
-      return sub.notifyAll;
-    case 'mention':
-      return sub.notifyMentions;
-    case 'reply':
-      return sub.notifyReplies;
-    default:
-      return sub.notifyAll;
+      case 'all':
+        return sub.notifyAll;
+      case 'mention':
+        return sub.notifyMentions;
+      case 'reply':
+        return sub.notifyReplies;
+      default:
+        return sub.notifyAll;
     }
   }
 
@@ -480,11 +496,12 @@ class MessageService {
     const db = getDatabase();
 
     // Different query based on user type
-    const query = userType === 'admin'
-      ? `SELECT COUNT(*) as count FROM messages m
+    const query =
+      userType === 'admin'
+        ? `SELECT COUNT(*) as count FROM messages m
          LEFT JOIN message_read_receipts mrr ON m.id = mrr.message_id AND mrr.user_email = ?
          WHERE m.sender_type != 'admin' AND m.deleted_at IS NULL AND mrr.id IS NULL`
-      : `SELECT COUNT(*) as count FROM messages m
+        : `SELECT COUNT(*) as count FROM messages m
          JOIN message_threads mt ON m.thread_id = mt.id
          LEFT JOIN message_read_receipts mrr ON m.id = mrr.message_id AND mrr.user_email = ?
          WHERE mt.client_id = (SELECT id FROM clients WHERE email = ?)
@@ -507,10 +524,10 @@ class MessageService {
     const db = getDatabase();
 
     // Verify message belongs to thread
-    const message = await db.get(
-      'SELECT id FROM messages WHERE id = ? AND thread_id = ?',
-      [messageId, threadId]
-    );
+    const message = await db.get('SELECT id FROM messages WHERE id = ? AND thread_id = ?', [
+      messageId,
+      threadId,
+    ]);
 
     if (!message) {
       throw new Error('Message not found in thread');
@@ -524,10 +541,9 @@ class MessageService {
 
     if (result.changes && result.changes > 0) {
       // Update thread pinned count
-      await db.run(
-        'UPDATE message_threads SET pinned_count = pinned_count + 1 WHERE id = ?',
-        [threadId]
-      );
+      await db.run('UPDATE message_threads SET pinned_count = pinned_count + 1 WHERE id = ?', [
+        threadId,
+      ]);
     }
 
     const row = await db.get(
@@ -551,10 +567,9 @@ class MessageService {
 
     if (result.changes && result.changes > 0) {
       // Update thread pinned count
-      await db.run(
-        'UPDATE message_threads SET pinned_count = pinned_count - 1 WHERE id = ?',
-        [threadId]
-      );
+      await db.run('UPDATE message_threads SET pinned_count = pinned_count - 1 WHERE id = ?', [
+        threadId,
+      ]);
     }
   }
 
@@ -578,7 +593,7 @@ class MessageService {
       pinned.message = {
         senderName: getString(r, 'sender_name'),
         message: getString(r, 'message'),
-        createdAt: getString(r, 'message_created_at')
+        createdAt: getString(r, 'message_created_at'),
       };
       return pinned;
     });
@@ -594,10 +609,10 @@ class MessageService {
   async editMessage(messageId: number, newContent: string): Promise<void> {
     const db = getDatabase();
 
-    await db.run(
-      'UPDATE messages SET message = ?, edited_at = datetime(\'now\') WHERE id = ?',
-      [newContent, messageId]
-    );
+    await db.run("UPDATE messages SET message = ?, edited_at = datetime('now') WHERE id = ?", [
+      newContent,
+      messageId,
+    ]);
 
     // Re-process mentions
     await db.run('DELETE FROM message_mentions WHERE message_id = ?', [messageId]);
@@ -610,10 +625,10 @@ class MessageService {
   async deleteMessage(messageId: number, deletedBy: string): Promise<void> {
     const db = getDatabase();
 
-    await db.run(
-      'UPDATE messages SET deleted_at = datetime(\'now\'), deleted_by = ? WHERE id = ?',
-      [deletedBy, messageId]
-    );
+    await db.run("UPDATE messages SET deleted_at = datetime('now'), deleted_by = ? WHERE id = ?", [
+      deletedBy,
+      messageId,
+    ]);
   }
 
   /**
@@ -622,10 +637,9 @@ class MessageService {
   async restoreMessage(messageId: number): Promise<void> {
     const db = getDatabase();
 
-    await db.run(
-      'UPDATE messages SET deleted_at = NULL, deleted_by = NULL WHERE id = ?',
-      [messageId]
-    );
+    await db.run('UPDATE messages SET deleted_at = NULL, deleted_by = NULL WHERE id = ?', [
+      messageId,
+    ]);
   }
 
   // =====================================================
@@ -639,7 +653,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      'UPDATE message_threads SET archived_at = datetime(\'now\'), archived_by = ?, status = \'archived\' WHERE id = ?',
+      "UPDATE message_threads SET archived_at = datetime('now'), archived_by = ?, status = 'archived' WHERE id = ?",
       [archivedBy, threadId]
     );
   }
@@ -651,7 +665,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      'UPDATE message_threads SET archived_at = NULL, archived_by = NULL, status = \'active\' WHERE id = ?',
+      "UPDATE message_threads SET archived_at = NULL, archived_by = NULL, status = 'active' WHERE id = ?",
       [threadId]
     );
   }
@@ -659,7 +673,10 @@ class MessageService {
   /**
    * Get thread replies (nested messages)
    */
-  async getThreadReplies(threadId: number, parentMessageId?: number): Promise<MessageWithDetails[]> {
+  async getThreadReplies(
+    threadId: number,
+    parentMessageId?: number
+  ): Promise<MessageWithDetails[]> {
     const db = getDatabase();
 
     const query = parentMessageId
@@ -679,13 +696,16 @@ class MessageService {
   /**
    * Search messages
    */
-  async searchMessages(query: string, options?: {
-    projectId?: number;
-    threadId?: number;
-    userEmail?: string;
-    limit?: number;
-    includeInternal?: boolean;
-  }): Promise<SearchResult[]> {
+  async searchMessages(
+    query: string,
+    options?: {
+      projectId?: number;
+      threadId?: number;
+      userEmail?: string;
+      limit?: number;
+      includeInternal?: boolean;
+    }
+  ): Promise<SearchResult[]> {
     const db = getDatabase();
 
     let sql = `
@@ -730,7 +750,7 @@ class MessageService {
         message: getString(r, 'message'),
         createdAt: getString(r, 'created_at'),
         projectId: r.project_id ? getNumber(r, 'project_id') : undefined,
-        projectName: r.project_name ? getString(r, 'project_name') : undefined
+        projectName: r.project_name ? getString(r, 'project_name') : undefined,
       };
     });
   }
@@ -755,7 +775,7 @@ class MessageService {
       parentMessageId: row.parent_message_id ? getNumber(row, 'parent_message_id') : undefined,
       reactionCount: getNumber(row, 'reaction_count') || 0,
       replyCount: getNumber(row, 'reply_count') || 0,
-      mentionCount: getNumber(row, 'mention_count') || 0
+      mentionCount: getNumber(row, 'mention_count') || 0,
     };
   }
 
@@ -782,11 +802,15 @@ class MessageService {
       notifyReplies: Boolean(r.notify_replies),
       mutedUntil: r.muted_until as string | undefined,
       createdAt: getString(r, 'created_at'),
-      updatedAt: getString(r, 'updated_at')
+      updatedAt: getString(r, 'updated_at'),
     };
   }
 
-  async markMultipleAsRead(messageIds: number[], userEmail: string, userType: string): Promise<number> {
+  async markMultipleAsRead(
+    messageIds: number[],
+    userEmail: string,
+    userType: string
+  ): Promise<number> {
     const db = getDatabase();
     let count = 0;
     for (const messageId of messageIds) {
@@ -802,7 +826,8 @@ class MessageService {
 
   async getThreadUnreadCount(threadId: number, userEmail: string): Promise<number> {
     const db = getDatabase();
-    const result = await db.get(`
+    const result = await db.get(
+      `
       SELECT COUNT(*) as count
       FROM messages m
       LEFT JOIN message_read_receipts mrr
@@ -810,7 +835,9 @@ class MessageService {
       WHERE m.thread_id = ?
         AND m.deleted_at IS NULL
         AND mrr.id IS NULL
-    `, [userEmail, threadId]);
+    `,
+      [userEmail, threadId]
+    );
 
     return result ? getNumber(result as Record<string, unknown>, 'count') : 0;
   }

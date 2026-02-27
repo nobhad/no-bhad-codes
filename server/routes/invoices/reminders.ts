@@ -42,11 +42,11 @@ router.get(
       res.json({
         success: true,
         reminders: reminders.map(toSnakeCaseReminder),
-        count: reminders.length
+        count: reminders.length,
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve reminders', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -76,11 +76,11 @@ router.post(
 
       res.json({
         success: true,
-        message: 'Reminder skipped'
+        message: 'Reminder skipped',
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to skip reminder', 500, 'SKIP_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -127,15 +127,19 @@ router.post(
       }
 
       if (invoice.status === 'cancelled') {
-        return errorResponse(res, 'Cannot send reminder for a cancelled invoice', 400, 'INVOICE_CANCELLED');
+        return errorResponse(
+          res,
+          'Cannot send reminder for a cancelled invoice',
+          400,
+          'INVOICE_CANCELLED'
+        );
       }
 
       // Get client email
       const db = getDatabase();
-      const clientRow = await db.get(
-        'SELECT email, contact_name FROM clients WHERE id = ?',
-        [invoice.clientId]
-      ) as { email?: string; contact_name?: string } | undefined;
+      const clientRow = (await db.get('SELECT email, contact_name FROM clients WHERE id = ?', [
+        invoice.clientId,
+      ])) as { email?: string; contact_name?: string } | undefined;
 
       if (!clientRow || !clientRow.email) {
         return errorResponse(res, 'Client email not found', 400, 'NO_CLIENT_EMAIL');
@@ -147,7 +151,9 @@ router.post(
       // Determine reminder urgency
       const today = new Date();
       const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
-      const daysOverdue = dueDate ? Math.ceil((today.getTime() - dueDate.getTime()) / (24 * 60 * 60 * 1000)) : 0;
+      const daysOverdue = dueDate
+        ? Math.ceil((today.getTime() - dueDate.getTime()) / (24 * 60 * 60 * 1000))
+        : 0;
 
       let subject: string;
       let urgencyMessage = '';
@@ -222,13 +228,13 @@ ${BUSINESS_INFO.name}
   </div>
 </body>
 </html>
-        `
+        `,
       });
 
       res.json({
         success: true,
         message: 'Payment reminder sent successfully',
-        sentTo: clientEmail
+        sentTo: clientEmail,
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -236,7 +242,9 @@ ${BUSINESS_INFO.name}
       if (message.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      errorResponseWithPayload(res, 'Failed to send reminder', 500, 'SEND_REMINDER_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to send reminder', 500, 'SEND_REMINDER_FAILED', {
+        message,
+      });
     }
   })
 );
