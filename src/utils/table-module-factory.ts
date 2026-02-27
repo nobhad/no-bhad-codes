@@ -44,6 +44,25 @@ import type { AdminDashboardContext } from '../features/admin/admin-types';
 // ===============================================
 
 /**
+ * View mode configuration for multi-view modules (table, kanban, grid)
+ */
+export interface ViewModeConfig<T> {
+  /** Unique view mode identifier */
+  id: string;
+  /** Display label for the view toggle */
+  label: string;
+  /** Lucide icon name for the view toggle button */
+  icon: string;
+  /**
+   * Render function for this view mode
+   * @param data - Data array to render
+   * @param ctx - Admin dashboard context
+   * @param helpers - Helper functions from the module
+   */
+  render: (data: T[], ctx: AdminDashboardContext, helpers: TableModuleHelpers<T>) => void;
+}
+
+/**
  * Configuration for creating a table module
  */
 export interface TableModuleConfig<T, TStats = unknown> {
@@ -59,8 +78,19 @@ export interface TableModuleConfig<T, TStats = unknown> {
   /** Number of columns in the table (for loading/empty states) */
   columnCount: number;
 
-  /** API endpoint to fetch data from */
-  apiEndpoint: string;
+  /**
+   * API endpoint to fetch data from.
+   * Not required if fetchData is provided.
+   */
+  apiEndpoint?: string;
+
+  /**
+   * Custom data fetcher for complex scenarios (multiple endpoints, transformations).
+   * If provided, takes precedence over apiEndpoint.
+   * @param ctx - Admin dashboard context
+   * @returns Promise with data array and optional stats
+   */
+  fetchData?: (ctx: AdminDashboardContext) => Promise<{ data: T[]; stats?: TStats }>;
 
   /** Bulk action configuration (optional) */
   bulkConfig?: BulkActionConfig;
@@ -69,11 +99,12 @@ export interface TableModuleConfig<T, TStats = unknown> {
   exportConfig?: ExportConfig;
 
   /**
-   * Extract data and stats from API response
+   * Extract data and stats from API response.
+   * Only used with apiEndpoint (not with fetchData).
    * @param response - Raw API response (after json.data ?? json)
    * @returns Object with data array and optional stats
    */
-  extractData: (response: unknown) => { data: T[]; stats?: TStats };
+  extractData?: (response: unknown) => { data: T[]; stats?: TStats };
 
   /**
    * Render a single table row
@@ -131,6 +162,19 @@ export interface TableModuleConfig<T, TStats = unknown> {
     column: string;
     direction: 'asc' | 'desc';
   };
+
+  /**
+   * Optional: View modes for multi-view modules (e.g., table + kanban)
+   * When provided, a view toggle will be rendered and the module
+   * can switch between different visualizations.
+   */
+  viewModes?: ViewModeConfig<T>[];
+
+  /**
+   * Optional: Default view mode ID (must match one of viewModes[].id)
+   * Defaults to 'table' or first viewMode if not specified.
+   */
+  defaultViewMode?: string;
 }
 
 /**
@@ -153,6 +197,10 @@ export interface TableModuleHelpers<T> {
   findById: (id: number) => T | undefined;
   /** Update an item in the data array */
   updateItem: (id: number, updates: Partial<T>) => void;
+  /** Get current view mode (if viewModes configured) */
+  getCurrentViewMode: () => string | undefined;
+  /** Set current view mode (if viewModes configured) */
+  setViewMode: (modeId: string) => void;
 }
 
 /**
@@ -185,6 +233,12 @@ export interface TableModule<T, TStats = unknown> {
   getStats: () => TStats | undefined;
   /** Module configuration */
   config: TableModuleConfig<T, TStats>;
+  /** Get current view mode ID (if viewModes configured) */
+  getCurrentViewMode: () => string | undefined;
+  /** Set current view mode and re-render (if viewModes configured) */
+  setViewMode: (modeId: string) => void;
+  /** Get available view modes */
+  getViewModes: () => ViewModeConfig<T>[] | undefined;
 }
 
 // ===============================================
@@ -230,6 +284,20 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
   let storedContext: AdminDashboardContext | null = null;
   let filterUIInitialized = false;
 
+  // View mode state (for multi-view modules)
+  let currentViewMode: string | undefined = config.viewModes
+    ? config.defaultViewMode || config.viewModes[0]?.id || 'table'
+    : undefined;
+  const viewModeStorageKey = `admin_${config.moduleId}_viewMode`;
+
+  // Load persisted view mode if available
+  if (config.viewModes) {
+    const savedViewMode = localStorage.getItem(viewModeStorageKey);
+    if (savedViewMode && config.viewModes.some((v) => v.id === savedViewMode)) {
+      currentViewMode = savedViewMode;
+    }
+  }
+
   // Load filter state with optional default sort
   let filterState: FilterState = (() => {
     const loaded = loadFilterState(config.filterConfig.storageKey);
@@ -270,6 +338,30 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
     }
   }
 
+  function setViewMode(modeId: string): void {
+    if (!config.viewModes) return;
+    const viewMode = config.viewModes.find((v) => v.id === modeId);
+    if (!viewMode) return;
+
+    currentViewMode = modeId;
+    localStorage.setItem(viewModeStorageKey, modeId);
+
+    // Update toggle button states
+    const toggleContainer = getElement(`${config.moduleId}-view-toggle`);
+    if (toggleContainer) {
+      toggleContainer.querySelectorAll('button').forEach((btn) => {
+        const isActive = btn.dataset.viewMode === modeId;
+        btn.classList.toggle('btn-primary', isActive);
+        btn.classList.toggle('btn-outline', !isActive);
+      });
+    }
+
+    // Re-render with new view mode
+    if (storedContext && data.length > 0) {
+      renderCurrentView(data, storedContext);
+    }
+  }
+
   // Helper object passed to renderRow
   const helpers: TableModuleHelpers<T> = {
     getElement,
@@ -279,12 +371,40 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
     getContext: () => storedContext,
     rerender: () => {
       if (storedContext) {
-        renderTable(data, storedContext);
+        renderCurrentView(data, storedContext);
       }
     },
     findById,
-    updateItem
+    updateItem,
+    getCurrentViewMode: () => currentViewMode,
+    setViewMode
   };
+
+  // ============================================
+  // VIEW MODE TOGGLE INITIALIZATION
+  // ============================================
+
+  function initializeViewModeToggle(): void {
+    if (!config.viewModes || config.viewModes.length <= 1) return;
+
+    const toggleContainer = getElement(`${config.moduleId}-view-toggle`);
+    if (!toggleContainer) return;
+
+    // Clear existing content
+    toggleContainer.innerHTML = '';
+    toggleContainer.className = 'flex gap-1';
+
+    config.viewModes.forEach((viewMode) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.viewMode = viewMode.id;
+      btn.className = currentViewMode === viewMode.id ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      btn.title = viewMode.label;
+      btn.innerHTML = `<i data-lucide="${viewMode.icon}"></i>`;
+      btn.addEventListener('click', () => setViewMode(viewMode.id));
+      toggleContainer.appendChild(btn);
+    });
+  }
 
   // ============================================
   // FILTER UI INITIALIZATION
@@ -293,6 +413,9 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
   function initializeFilterUI(ctx: AdminDashboardContext): void {
     const container = getElement(`${config.moduleId}-filter-container`);
     if (!container) return;
+
+    // Initialize view mode toggle if configured
+    initializeViewModeToggle();
 
     // Create filter UI
     const filterUI = createFilterUI(
@@ -348,6 +471,30 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
         });
       }
     }
+  }
+
+  // ============================================
+  // VIEW RENDERING (MULTI-VIEW SUPPORT)
+  // ============================================
+
+  /**
+   * Render the current view mode (table or custom view)
+   */
+  function renderCurrentView(items: T[], ctx: AdminDashboardContext): void {
+    // If view modes are configured and current mode is not 'table', use custom render
+    if (config.viewModes && currentViewMode && currentViewMode !== 'table') {
+      const viewMode = config.viewModes.find((v) => v.id === currentViewMode);
+      if (viewMode) {
+        // Apply filters first
+        const filteredItems = applyFilters(items, filterState, config.filterConfig);
+        viewMode.render(filteredItems, ctx, helpers);
+        config.onTableRendered?.(filteredItems, ctx);
+        return;
+      }
+    }
+
+    // Default: render as table
+    renderTable(items, ctx);
   }
 
   // ============================================
@@ -457,39 +604,55 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
     }
 
     try {
-      const response = await apiFetch(config.apiEndpoint);
+      let extracted: { data: T[]; stats?: TStats };
 
-      if (response.ok) {
+      // Use custom fetchData if provided, otherwise use apiEndpoint
+      if (config.fetchData) {
+        extracted = await config.fetchData(ctx);
+      } else if (config.apiEndpoint) {
+        const response = await apiFetch(config.apiEndpoint);
+
+        if (!response.ok) {
+          if (response.status !== 401) {
+            // Don't show error for 401 - handled by apiFetch
+            const errorText = await response.text();
+            console.error(`[${config.moduleId}] API error:`, response.status, errorText);
+            if (tableBody) {
+              showTableError(
+                tableBody,
+                config.columnCount,
+                `Error loading ${config.moduleId}: ${response.status}`,
+                () => load(ctx)
+              );
+            }
+          }
+          return;
+        }
+
         const json = await response.json();
         // Handle canonical API format { success: true, data: {...} }
-        const extracted = config.extractData(json.data ?? json);
-        data = extracted.data;
-        stats = extracted.stats;
-
-        // Update stats display if configured
-        if (stats && config.renderStats) {
-          config.renderStats(stats, ctx);
+        if (!config.extractData) {
+          throw new Error(`[${config.moduleId}] extractData is required when using apiEndpoint`);
         }
-
-        // Render table
-        renderTable(data, ctx);
-
-        // Call optional callback
-        config.onDataLoaded?.(data, ctx);
-
-      } else if (response.status !== 401) {
-        // Don't show error for 401 - handled by apiFetch
-        const errorText = await response.text();
-        console.error(`[${config.moduleId}] API error:`, response.status, errorText);
-        if (tableBody) {
-          showTableError(
-            tableBody,
-            config.columnCount,
-            `Error loading ${config.moduleId}: ${response.status}`,
-            () => load(ctx)
-          );
-        }
+        extracted = config.extractData(json.data ?? json);
+      } else {
+        throw new Error(`[${config.moduleId}] Either fetchData or apiEndpoint must be provided`);
       }
+
+      data = extracted.data;
+      stats = extracted.stats;
+
+      // Update stats display if configured
+      if (stats && config.renderStats) {
+        config.renderStats(stats, ctx);
+      }
+
+      // Render current view (table or custom view mode)
+      renderCurrentView(data, ctx);
+
+      // Call optional callback
+      config.onDataLoaded?.(data, ctx);
+
     } catch (error) {
       console.error(`[${config.moduleId}] Failed to load:`, error);
       // Reuse tableBody from outer scope (already fetched before try block)
@@ -516,7 +679,7 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
     getPaginationState: () => paginationState,
     rerender: () => {
       if (storedContext) {
-        renderTable(data, storedContext);
+        renderCurrentView(data, storedContext);
       }
     },
     getElement,
@@ -528,14 +691,17 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
     updateItem: (id: number, updates: Partial<T>) => {
       updateItem(id, updates);
       if (storedContext) {
-        renderTable(data, storedContext);
+        renderCurrentView(data, storedContext);
       }
     },
     setContext: (ctx: AdminDashboardContext) => {
       storedContext = ctx;
     },
     getStats: () => stats,
-    config
+    config,
+    getCurrentViewMode: () => currentViewMode,
+    setViewMode,
+    getViewModes: () => config.viewModes
   };
 }
 
