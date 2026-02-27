@@ -14,15 +14,17 @@ const mockDb = vi.hoisted(() => {
     run: vi.fn(),
     get: vi.fn(),
     all: vi.fn(),
-    transaction: vi.fn()
+    transaction: vi.fn(),
   };
   // Transaction passes a context with run method
-  db.transaction.mockImplementation(async (fn: (ctx: { run: typeof db.run }) => unknown) => fn({ run: db.run }));
+  db.transaction.mockImplementation(async (fn: (ctx: { run: typeof db.run }) => unknown) =>
+    fn({ run: db.run })
+  );
   return db;
 });
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: () => mockDb
+  getDatabase: () => mockDb,
 }));
 
 import { InvoiceService, Invoice } from '../../../server/services/invoice-service';
@@ -54,7 +56,7 @@ describe('Invoice Service', () => {
       status: 'sent',
       dueDate: '2026-02-15',
       invoiceType: 'standard',
-      lineItems: []
+      lineItems: [],
     };
 
     expect(service.calculateLateFee(invoice)).toBe(0);
@@ -73,7 +75,7 @@ describe('Invoice Service', () => {
       status: 'paid',
       dueDate: '2026-02-01',
       invoiceType: 'standard',
-      lineItems: []
+      lineItems: [],
     };
 
     expect(service.calculateLateFee(invoice)).toBe(0);
@@ -94,7 +96,7 @@ describe('Invoice Service', () => {
       invoiceType: 'standard',
       lineItems: [],
       lateFeeRate: 25,
-      lateFeeType: 'flat'
+      lateFeeType: 'flat',
     };
 
     expect(service.calculateLateFee(invoice)).toBe(25);
@@ -115,7 +117,7 @@ describe('Invoice Service', () => {
       invoiceType: 'standard',
       lineItems: [],
       lateFeeRate: 10,
-      lateFeeType: 'percentage'
+      lateFeeType: 'percentage',
     };
 
     // Outstanding = 800, fee = 10% of 800
@@ -137,7 +139,7 @@ describe('Invoice Service', () => {
       invoiceType: 'standard',
       lineItems: [],
       lateFeeRate: 1,
-      lateFeeType: 'daily_percentage'
+      lateFeeType: 'daily_percentage',
     };
 
     // 5 days overdue, 1% per day of 1000
@@ -160,7 +162,7 @@ describe('Invoice Service', () => {
       terms: 'Net 30',
       status: 'pending',
       generated_invoice_id: null,
-      created_at: '2024-07-01'
+      created_at: '2024-07-01',
     });
 
     const result = await service.scheduleInvoice({
@@ -169,21 +171,12 @@ describe('Invoice Service', () => {
       scheduledDate: '2024-07-15',
       lineItems,
       notes: 'Follow up',
-      terms: 'Net 30'
+      terms: 'Net 30',
     });
 
     expect(mockDb.run).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO scheduled_invoices'),
-      [
-        1,
-        2,
-        '2024-07-15',
-        'date',
-        null,
-        JSON.stringify(lineItems),
-        'Follow up',
-        'Net 30'
-      ]
+      [1, 2, '2024-07-15', 'date', null, JSON.stringify(lineItems), 'Follow up', 'Net 30']
     );
     expect(result).toMatchObject({
       id: 7,
@@ -192,7 +185,7 @@ describe('Invoice Service', () => {
       scheduledDate: '2024-07-15',
       triggerType: 'date',
       lineItems,
-      status: 'pending'
+      status: 'pending',
     });
   });
 
@@ -205,21 +198,20 @@ describe('Invoice Service', () => {
         scheduled_date: '2024-08-01',
         trigger_type: 'date',
         trigger_milestone_id: null,
-        line_items: JSON.stringify([{ description: 'Phase 1', quantity: 1, rate: 300, amount: 300 }]),
+        line_items: JSON.stringify([
+          { description: 'Phase 1', quantity: 1, rate: 300, amount: 300 },
+        ]),
         notes: null,
         terms: null,
         status: 'pending',
         generated_invoice_id: null,
-        created_at: '2024-07-20'
-      }
+        created_at: '2024-07-20',
+      },
     ]);
 
     const result = await service.getScheduledInvoices(9);
 
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('AND project_id = ?'),
-      [9]
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('AND project_id = ?'), [9]);
     expect(result[0].projectId).toBe(9);
   });
 
@@ -243,13 +235,15 @@ describe('Invoice Service', () => {
         scheduled_date: '2024-07-01',
         trigger_type: 'date',
         trigger_milestone_id: null,
-        line_items: JSON.stringify([{ description: 'Phase 2', quantity: 1, rate: 800, amount: 800 }]),
+        line_items: JSON.stringify([
+          { description: 'Phase 2', quantity: 1, rate: 800, amount: 800 },
+        ]),
         notes: 'Auto',
         terms: 'Net 15',
         status: 'pending',
         generated_invoice_id: null,
-        created_at: '2024-06-20'
-      }
+        created_at: '2024-06-20',
+      },
     ]);
 
     const createInvoiceSpy = vi.spyOn(service, 'createInvoice').mockResolvedValue({
@@ -262,7 +256,7 @@ describe('Invoice Service', () => {
       currency: 'USD',
       status: 'draft',
       invoiceType: 'standard',
-      lineItems: []
+      lineItems: [],
     } as Invoice);
 
     const count = await service.processScheduledInvoices();
@@ -295,7 +289,7 @@ describe('Invoice Service', () => {
       next_generation_date: '2024-03-01',
       last_generated_at: null,
       is_active: 1,
-      created_at: '2024-01-10'
+      created_at: '2024-01-10',
     });
 
     const result = await service.createRecurringInvoice({
@@ -306,7 +300,7 @@ describe('Invoice Service', () => {
       lineItems,
       notes: 'Monthly',
       terms: 'Net 10',
-      startDate: '2024-01-10'
+      startDate: '2024-01-10',
     });
 
     const [, params] = mockDb.run.mock.calls[0];
@@ -334,7 +328,7 @@ describe('Invoice Service', () => {
       next_generation_date: '2024-07-13',
       last_generated_at: null,
       is_active: 1,
-      created_at: '2024-07-01'
+      created_at: '2024-07-01',
     });
 
     const result = await service.createRecurringInvoice({
@@ -344,7 +338,7 @@ describe('Invoice Service', () => {
       dayOfWeek: 5,
       lineItems,
       notes: 'Weekly',
-      startDate: '2024-07-01'
+      startDate: '2024-07-01',
     });
 
     const [, params] = mockDb.run.mock.calls.at(-1)!;
@@ -370,16 +364,13 @@ describe('Invoice Service', () => {
         next_generation_date: '2024-06-08',
         last_generated_at: null,
         is_active: 1,
-        created_at: '2024-06-01'
-      }
+        created_at: '2024-06-01',
+      },
     ]);
 
     const result = await service.getRecurringInvoices(7);
 
-    expect(mockDb.all).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE project_id = ?'),
-      [7]
-    );
+    expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE project_id = ?'), [7]);
     expect(result[0].projectId).toBe(7);
   });
 
@@ -402,7 +393,7 @@ describe('Invoice Service', () => {
       next_generation_date: '2024-01-17',
       last_generated_at: null,
       is_active: 1,
-      created_at: '2024-01-10'
+      created_at: '2024-01-10',
     });
 
     const result = await service.updateRecurringInvoice(6, {
@@ -410,7 +401,7 @@ describe('Invoice Service', () => {
       dayOfWeek: 2,
       lineItems,
       notes: 'Updated',
-      terms: 'Net 20'
+      terms: 'Net 20',
     });
 
     expect(mockDb.run).toHaveBeenCalledWith(
@@ -438,7 +429,7 @@ describe('Invoice Service', () => {
       next_generation_date: '2024-02-20',
       last_generated_at: null,
       is_active: 0,
-      created_at: '2024-01-20'
+      created_at: '2024-01-20',
     });
 
     await service.resumeRecurringInvoice(8);
@@ -460,7 +451,9 @@ describe('Invoice Service', () => {
         frequency: 'monthly',
         day_of_month: 15,
         day_of_week: null,
-        line_items: JSON.stringify([{ description: 'Maintenance', quantity: 1, rate: 150, amount: 150 }]),
+        line_items: JSON.stringify([
+          { description: 'Maintenance', quantity: 1, rate: 150, amount: 150 },
+        ]),
         notes: 'Recurring',
         terms: 'Net 10',
         start_date: '2024-01-15',
@@ -468,8 +461,8 @@ describe('Invoice Service', () => {
         next_generation_date: '2024-07-15',
         last_generated_at: null,
         is_active: 1,
-        created_at: '2024-01-15'
-      }
+        created_at: '2024-01-15',
+      },
     ]);
 
     const createInvoiceSpy = vi.spyOn(service, 'createInvoice').mockResolvedValue({
@@ -482,19 +475,15 @@ describe('Invoice Service', () => {
       currency: 'USD',
       status: 'draft',
       invoiceType: 'standard',
-      lineItems: []
+      lineItems: [],
     } as Invoice);
 
     const count = await service.processRecurringInvoices();
 
     expect(count).toBe(1);
     // The service uses a batch CASE WHEN update for efficiency
-    expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('UPDATE recurring_invoices')
-    );
-    expect(mockDb.run).toHaveBeenCalledWith(
-      expect.stringContaining('CASE WHEN id = 12 THEN')
-    );
+    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('UPDATE recurring_invoices'));
+    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('CASE WHEN id = 12 THEN'));
 
     createInvoiceSpy.mockRestore();
   });

@@ -15,7 +15,13 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { getDatabase } from '../../../server/database/init';
 import { auditLogger } from '../../../server/services/audit-logger';
-import { sendSuccess, sendBadRequest, sendUnauthorized, sendServerError, sendNotFound } from '../../../server/utils/api-response';
+import {
+  sendSuccess,
+  sendBadRequest,
+  sendUnauthorized,
+  sendServerError,
+  sendNotFound,
+} from '../../../server/utils/api-response';
 import { AuthenticatedRequest } from '../../../server/middleware/auth';
 
 // Mock dependencies
@@ -107,7 +113,11 @@ describe('Auth Routes - Login Handler', () => {
 
     if (clientData.status !== 'active') {
       await auditLogger.logLoginFailed(email, req as any, 'Account inactive');
-      return sendUnauthorized(res, 'Account is not active. Please contact support.', 'ACCOUNT_INACTIVE');
+      return sendUnauthorized(
+        res,
+        'Account is not active. Please contact support.',
+        'ACCOUNT_INACTIVE'
+      );
     }
 
     const isValidPassword = await bcrypt.compare(password, clientData.password_hash);

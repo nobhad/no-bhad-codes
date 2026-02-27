@@ -22,7 +22,11 @@ describe('JWT Utils', () => {
   describe('decodeJwtPayload', () => {
     it('should decode valid JWT token', () => {
       // Create a valid JWT token (header.payload.signature)
-      const payload = { id: 1, email: 'test@example.com', exp: Math.floor(Date.now() / 1000) + 3600 };
+      const payload = {
+        id: 1,
+        email: 'test@example.com',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      };
       const encodedPayload = btoa(JSON.stringify(payload));
       const token = `header.${encodedPayload}.signature`;
 

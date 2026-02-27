@@ -9,7 +9,11 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import nodemailer from 'nodemailer';
-import { emailService, sendNewIntakeNotification, sendWelcomeEmail } from '../../../server/services/email-service';
+import {
+  emailService,
+  sendNewIntakeNotification,
+  sendWelcomeEmail,
+} from '../../../server/services/email-service';
 
 // Mock nodemailer
 vi.mock('nodemailer', () => ({
@@ -27,7 +31,7 @@ describe('Email Service', () => {
     };
 
     vi.mocked(nodemailer.createTransport).mockReturnValue(mockTransporter as any);
-    
+
     // Initialize email service with transporter
     await emailService.init({
       host: 'smtp.test.com',
@@ -39,7 +43,7 @@ describe('Email Service', () => {
       },
       from: 'test@example.com',
     });
-    
+
     vi.clearAllMocks();
   });
 

@@ -176,10 +176,7 @@ describe('Form Validation', () => {
       document.body.appendChild(form1);
       document.body.appendChild(form2);
 
-      const initSpy = vi.spyOn(
-        { initFormValidation },
-        'initFormValidation' as any
-      );
+      const initSpy = vi.spyOn({ initFormValidation }, 'initFormValidation' as any);
 
       initAllFormsValidation();
 

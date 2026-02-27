@@ -15,7 +15,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getDatabase } from '../../../server/database/init';
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: vi.fn()
+  getDatabase: vi.fn(),
 }));
 
 describe('Approval System - Workflow Management', () => {
@@ -25,7 +25,7 @@ describe('Approval System - Workflow Management', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn()
+      run: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -37,20 +37,20 @@ describe('Approval System - Workflow Management', () => {
           id: 1,
           name: 'Design Review',
           type: 'sequential',
-          steps: 2
+          steps: 2,
         },
         {
           id: 2,
           name: 'Contract Approval',
           type: 'parallel',
-          steps: 3
+          steps: 3,
         },
         {
           id: 3,
           name: 'Budget Review',
           type: 'any_one',
-          steps: 2
-        }
+          steps: 2,
+        },
       ];
 
       mockDb.all.mockResolvedValue(mockWorkflows);
@@ -72,16 +72,16 @@ describe('Approval System - Workflow Management', () => {
             order: 1,
             approver_id: 1,
             approver_name: 'Lead Designer',
-            timeout_hours: 48
+            timeout_hours: 48,
           },
           {
             id: 2,
             order: 2,
             approver_id: 2,
             approver_name: 'Client',
-            timeout_hours: 72
-          }
-        ]
+            timeout_hours: 72,
+          },
+        ],
       };
 
       mockDb.get.mockResolvedValue(mockWorkflow);
@@ -98,15 +98,16 @@ describe('Approval System - Workflow Management', () => {
       const workflowData = {
         name: 'New Design Review',
         type: 'sequential',
-        description: 'Design iteration approval process'
+        description: 'Design iteration approval process',
       };
 
       mockDb.run.mockResolvedValue({ lastID: 4 });
 
-      await mockDb.run(
-        'INSERT INTO workflows (name, type, description) VALUES (?, ?, ?)',
-        [workflowData.name, workflowData.type, workflowData.description]
-      );
+      await mockDb.run('INSERT INTO workflows (name, type, description) VALUES (?, ?, ?)', [
+        workflowData.name,
+        workflowData.type,
+        workflowData.description,
+      ]);
 
       expect(mockDb.run).toHaveBeenCalled();
     });
@@ -137,7 +138,7 @@ describe('Approval System - Workflow Management', () => {
         order: 1,
         approver_id: 1,
         timeout_hours: 48,
-        auto_approve: false
+        auto_approve: false,
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -154,7 +155,7 @@ describe('Approval System - Workflow Management', () => {
       const step = {
         timeout_hours: 48,
         auto_approve: true,
-        auto_approve_decision: 'approved'
+        auto_approve_decision: 'approved',
       };
 
       expect(step.auto_approve).toBe(true);
@@ -163,7 +164,7 @@ describe('Approval System - Workflow Management', () => {
     it('should ignore auto-approve if no timeout', async () => {
       const step = {
         timeout_hours: null,
-        auto_approve: false
+        auto_approve: false,
       };
 
       expect(step.auto_approve).toBe(false);
@@ -174,15 +175,16 @@ describe('Approval System - Workflow Management', () => {
     it('should update workflow', async () => {
       const updateData = {
         name: 'Updated Design Review',
-        description: 'Updated description'
+        description: 'Updated description',
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
 
-      await mockDb.run(
-        'UPDATE workflows SET name = ?, description = ? WHERE id = ?',
-        [updateData.name, updateData.description, 1]
-      );
+      await mockDb.run('UPDATE workflows SET name = ?, description = ? WHERE id = ?', [
+        updateData.name,
+        updateData.description,
+        1,
+      ]);
 
       expect(mockDb.run).toHaveBeenCalled();
     });
@@ -190,7 +192,7 @@ describe('Approval System - Workflow Management', () => {
     it('should prevent updating active workflows', async () => {
       const workflow = {
         id: 1,
-        status: 'active'
+        status: 'active',
       };
 
       const canEdit = workflow.status !== 'active';
@@ -207,7 +209,7 @@ describe('Approval System - Approval Requests', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn()
+      run: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -219,14 +221,20 @@ describe('Approval System - Approval Requests', () => {
         entity_type: 'proposal',
         entity_id: 100,
         requested_by: 1,
-        status: 'pending'
+        status: 'pending',
       };
 
       mockDb.run.mockResolvedValue({ lastID: 1 });
 
       await mockDb.run(
         'INSERT INTO approval_requests (workflow_id, entity_type, entity_id, requested_by, status) VALUES (?, ?, ?, ?, ?)',
-        [requestData.workflow_id, requestData.entity_type, requestData.entity_id, requestData.requested_by, requestData.status]
+        [
+          requestData.workflow_id,
+          requestData.entity_type,
+          requestData.entity_id,
+          requestData.requested_by,
+          requestData.status,
+        ]
       );
 
       expect(mockDb.run).toHaveBeenCalled();
@@ -235,7 +243,7 @@ describe('Approval System - Approval Requests', () => {
     it('should create approval steps from workflow template', async () => {
       const approvalSteps = [
         { approval_request_id: 1, step_order: 1, approver_id: 1, status: 'pending' },
-        { approval_request_id: 1, step_order: 2, approver_id: 2, status: 'waiting' }
+        { approval_request_id: 1, step_order: 2, approver_id: 2, status: 'waiting' },
       ];
 
       expect(approvalSteps).toHaveLength(2);
@@ -246,7 +254,7 @@ describe('Approval System - Approval Requests', () => {
     it('should link to entity (proposal, contract, etc)', async () => {
       const request = {
         entity_type: 'proposal',
-        entity_id: 100
+        entity_id: 100,
       };
 
       expect(request.entity_type).toBe('proposal');
@@ -263,7 +271,7 @@ describe('Approval System - Approval Requests', () => {
           entity_name: 'Web Design Proposal',
           step_order: 1,
           status: 'pending',
-          requested_at: '2026-02-08T10:00:00Z'
+          requested_at: '2026-02-08T10:00:00Z',
         },
         {
           id: 2,
@@ -271,8 +279,8 @@ describe('Approval System - Approval Requests', () => {
           entity_name: 'Service Agreement',
           step_order: 1,
           status: 'pending',
-          requested_at: '2026-02-09T10:00:00Z'
-        }
+          requested_at: '2026-02-09T10:00:00Z',
+        },
       ];
 
       mockDb.all.mockResolvedValue(mockApprovals);
@@ -293,7 +301,7 @@ describe('Approval System - Approval Requests', () => {
         entity_id: 100,
         entity_title: 'Web Design Proposal',
         requester_name: 'John Doe',
-        due_date: '2026-02-10T18:00:00Z'
+        due_date: '2026-02-10T18:00:00Z',
       };
 
       expect(approval.entity_title).toBeTruthy();
@@ -309,8 +317,8 @@ describe('Approval System - Approval Requests', () => {
           entity_type: 'deliverable',
           description: 'Homepage Design',
           status: 'pending',
-          submitted_at: '2026-02-08T10:00:00Z'
-        }
+          submitted_at: '2026-02-08T10:00:00Z',
+        },
       ];
 
       mockDb.all.mockResolvedValue(mockApprovals);
@@ -332,7 +340,7 @@ describe('Approval System - Approval Decisions', () => {
   beforeEach(() => {
     mockDb = {
       get: vi.fn(),
-      run: vi.fn()
+      run: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -343,14 +351,20 @@ describe('Approval System - Approval Decisions', () => {
         approval_step_id: 1,
         approver_id: 1,
         comment: 'Looks good, approved',
-        decision: 'approved'
+        decision: 'approved',
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
 
       await mockDb.run(
         'UPDATE approval_steps SET status = ?, decision = ?, comment = ?, decided_at = ? WHERE id = ?',
-        ['approved', approvalData.decision, approvalData.comment, new Date().toISOString(), approvalData.approval_step_id]
+        [
+          'approved',
+          approvalData.decision,
+          approvalData.comment,
+          new Date().toISOString(),
+          approvalData.approval_step_id,
+        ]
       );
 
       expect(mockDb.run).toHaveBeenCalled();
@@ -359,7 +373,7 @@ describe('Approval System - Approval Decisions', () => {
     it('should trigger next step if sequential workflow', async () => {
       const nextStep = {
         step_order: 2,
-        status: 'pending'
+        status: 'pending',
       };
 
       expect(nextStep.status).toBe('pending');
@@ -368,10 +382,11 @@ describe('Approval System - Approval Decisions', () => {
     it('should mark request complete if final step', async () => {
       mockDb.run.mockResolvedValue({ changes: 1 });
 
-      await mockDb.run(
-        'UPDATE approval_requests SET status = ?, completed_at = ? WHERE id = ?',
-        ['approved', new Date().toISOString(), 1]
-      );
+      await mockDb.run('UPDATE approval_requests SET status = ?, completed_at = ? WHERE id = ?', [
+        'approved',
+        new Date().toISOString(),
+        1,
+      ]);
 
       expect(mockDb.run).toHaveBeenCalled();
     });
@@ -382,14 +397,20 @@ describe('Approval System - Approval Decisions', () => {
       const rejectData = {
         approval_step_id: 1,
         decision: 'rejected',
-        comment: 'Needs revisions in the design'
+        comment: 'Needs revisions in the design',
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
 
       await mockDb.run(
         'UPDATE approval_steps SET status = ?, decision = ?, comment = ?, decided_at = ? WHERE id = ?',
-        ['rejected', rejectData.decision, rejectData.comment, new Date().toISOString(), rejectData.approval_step_id]
+        [
+          'rejected',
+          rejectData.decision,
+          rejectData.comment,
+          new Date().toISOString(),
+          rejectData.approval_step_id,
+        ]
       );
 
       expect(mockDb.run).toHaveBeenCalled();
@@ -398,10 +419,7 @@ describe('Approval System - Approval Decisions', () => {
     it('should mark request as rejected', async () => {
       mockDb.run.mockResolvedValue({ changes: 1 });
 
-      await mockDb.run(
-        'UPDATE approval_requests SET status = ? WHERE id = ?',
-        ['rejected', 1]
-      );
+      await mockDb.run('UPDATE approval_requests SET status = ? WHERE id = ?', ['rejected', 1]);
 
       expect(mockDb.run).toHaveBeenCalled();
     });
@@ -409,7 +427,7 @@ describe('Approval System - Approval Decisions', () => {
     it('should allow resubmission after rejection', async () => {
       const request = {
         status: 'rejected',
-        can_resubmit: true
+        can_resubmit: true,
       };
 
       expect(request.can_resubmit).toBe(true);
@@ -422,7 +440,7 @@ describe('Approval System - Approval Decisions', () => {
         approval_step_id: 1,
         decision: 'revision_requested',
         comment: 'Please revise the color scheme',
-        revision_notes: 'Use brand colors from guidelines'
+        revision_notes: 'Use brand colors from guidelines',
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -437,7 +455,7 @@ describe('Approval System - Approval Decisions', () => {
 
     it('should reset step for resubmission', async () => {
       const step = {
-        status: 'revision_requested'
+        status: 'revision_requested',
       };
 
       expect(step.status).toBe('revision_requested');
@@ -449,7 +467,7 @@ describe('Approval System - Approval Decisions', () => {
       const history = [
         { event: 'requested', timestamp: '2026-02-08T10:00:00Z', user: 'John' },
         { event: 'approved', timestamp: '2026-02-08T14:30:00Z', user: 'Designer' },
-        { event: 'final_approved', timestamp: '2026-02-08T16:00:00Z', user: 'Client' }
+        { event: 'final_approved', timestamp: '2026-02-08T16:00:00Z', user: 'Client' },
       ];
 
       expect(history).toHaveLength(3);
@@ -459,7 +477,11 @@ describe('Approval System - Approval Decisions', () => {
     it('should show approval comments in history', async () => {
       const comments = [
         { type: 'comment', text: 'Looks great', timestamp: '2026-02-08T14:30:00Z' },
-        { type: 'revision_request', text: 'Please adjust spacing', timestamp: '2026-02-08T15:00:00Z' }
+        {
+          type: 'revision_request',
+          text: 'Please adjust spacing',
+          timestamp: '2026-02-08T15:00:00Z',
+        },
       ];
 
       expect(comments).toHaveLength(2);
@@ -474,7 +496,7 @@ describe('Approval System - Automated Reminders', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn()
+      run: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -486,8 +508,8 @@ describe('Approval System - Automated Reminders', () => {
         reminders: [
           { offset_hours: 24, label: '1 day' },
           { offset_hours: 72, label: '3 days' },
-          { offset_hours: 168, label: '7 days' }
-        ]
+          { offset_hours: 168, label: '7 days' },
+        ],
       };
 
       expect(reminderConfig.reminders).toHaveLength(3);
@@ -500,9 +522,7 @@ describe('Approval System - Automated Reminders', () => {
       const approvalStep = {
         created_at: '2026-02-08T10:00:00Z',
         timeout_hours: 48,
-        reminders_sent: [
-          { offset: 24, sent_at: '2026-02-09T10:00:00Z' }
-        ]
+        reminders_sent: [{ offset: 24, sent_at: '2026-02-09T10:00:00Z' }],
       };
 
       expect(approvalStep.reminders_sent).toHaveLength(1);
@@ -511,7 +531,7 @@ describe('Approval System - Automated Reminders', () => {
     it('should escalate after X days without response', async () => {
       const escalationConfig = {
         escalate_after_days: 7,
-        escalate_to_role: 'admin'
+        escalate_to_role: 'admin',
       };
 
       expect(escalationConfig.escalate_after_days).toBe(7);
@@ -522,7 +542,7 @@ describe('Approval System - Automated Reminders', () => {
       const escalation = {
         approval_step_id: 1,
         escalated_at: new Date().toISOString(),
-        notification_sent_to: 'admin@example.com'
+        notification_sent_to: 'admin@example.com',
       };
 
       expect(escalation.notification_sent_to).toBeTruthy();
@@ -533,7 +553,7 @@ describe('Approval System - Automated Reminders', () => {
     it('should include entity details in reminder email', async () => {
       const reminderEmail = {
         subject: 'Pending Approval Reminder: Web Design Proposal',
-        body: 'Please review and approve the Web Design Proposal by 2026-02-10 18:00:00'
+        body: 'Please review and approve the Web Design Proposal by 2026-02-10 18:00:00',
       };
 
       expect(reminderEmail.subject).toContain('Reminder');
@@ -542,7 +562,7 @@ describe('Approval System - Automated Reminders', () => {
 
     it('should include approval deadline in reminder', async () => {
       const reminder = {
-        deadline: '2026-02-10T18:00:00Z'
+        deadline: '2026-02-10T18:00:00Z',
       };
 
       expect(reminder.deadline).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -555,7 +575,7 @@ describe('Approval System - Bulk Operations', () => {
 
   beforeEach(() => {
     mockDb = {
-      run: vi.fn()
+      run: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -564,16 +584,17 @@ describe('Approval System - Bulk Operations', () => {
     it('should bulk approve similar items', async () => {
       const bulkApproveData = {
         approval_ids: [1, 2, 3],
-        comment: 'Approved in batch'
+        comment: 'Approved in batch',
       };
 
       mockDb.run.mockResolvedValue({ changes: 3 });
 
       for (const id of bulkApproveData.approval_ids) {
-        await mockDb.run(
-          'UPDATE approval_steps SET status = ?, decision = ? WHERE id = ?',
-          ['approved', 'approved', id]
-        );
+        await mockDb.run('UPDATE approval_steps SET status = ?, decision = ? WHERE id = ?', [
+          'approved',
+          'approved',
+          id,
+        ]);
       }
 
       expect(mockDb.run).toHaveBeenCalledTimes(3);
@@ -584,16 +605,17 @@ describe('Approval System - Bulk Operations', () => {
     it('should bulk reject similar items', async () => {
       const bulkRejectData = {
         approval_ids: [1, 2],
-        comment: 'Rejected - needs revision'
+        comment: 'Rejected - needs revision',
       };
 
       mockDb.run.mockResolvedValue({ changes: 2 });
 
       for (const id of bulkRejectData.approval_ids) {
-        await mockDb.run(
-          'UPDATE approval_steps SET status = ?, decision = ? WHERE id = ?',
-          ['rejected', 'rejected', id]
-        );
+        await mockDb.run('UPDATE approval_steps SET status = ?, decision = ? WHERE id = ?', [
+          'rejected',
+          'rejected',
+          id,
+        ]);
       }
 
       expect(mockDb.run).toHaveBeenCalledTimes(2);
@@ -606,7 +628,7 @@ describe('Approval System - Error Handling', () => {
 
   beforeEach(() => {
     mockDb = {
-      get: vi.fn()
+      get: vi.fn(),
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -622,7 +644,7 @@ describe('Approval System - Error Handling', () => {
   it('should prevent approving already approved request', async () => {
     const approval = {
       id: 1,
-      status: 'approved'
+      status: 'approved',
     };
 
     const canApprove = approval.status === 'pending';
@@ -640,10 +662,12 @@ describe('Approval System - Error Handling', () => {
     const step = {
       created_at: '2026-02-01T10:00:00Z',
       timeout_hours: 48,
-      auto_approve: true
+      auto_approve: true,
     };
 
-    const timeoutTime = new Date(new Date(step.created_at).getTime() + step.timeout_hours * 60 * 60 * 1000);
+    const timeoutTime = new Date(
+      new Date(step.created_at).getTime() + step.timeout_hours * 60 * 60 * 1000
+    );
     const isTimedOut = new Date().getTime() > timeoutTime.getTime();
 
     expect(isTimedOut).toBe(true);

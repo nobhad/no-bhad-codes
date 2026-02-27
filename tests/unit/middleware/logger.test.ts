@@ -135,7 +135,7 @@ describe('Request Logger Middleware', () => {
       const startTime = 1000000;
       const endTime = 1000100; // 100ms later
       Date.now = vi.fn().mockReturnValueOnce(startTime).mockReturnValueOnce(endTime);
-      
+
       requestLogger(mockReq as Request, mockRes as Response, mockNext);
 
       // Call res.json to trigger response logging
@@ -158,7 +158,7 @@ describe('Request Logger Middleware', () => {
       const startTime = 1000000;
       const endTime = 1000100; // 100ms later
       Date.now = vi.fn().mockReturnValueOnce(startTime).mockReturnValueOnce(endTime);
-      
+
       requestLogger(mockReq as Request, mockRes as Response, mockNext);
 
       // Call res.json to trigger response logging
@@ -181,7 +181,7 @@ describe('Request Logger Middleware', () => {
       const startTime = 1000000;
       const endTime = 1000100; // 100ms later
       Date.now = vi.fn().mockReturnValueOnce(startTime).mockReturnValueOnce(endTime);
-      
+
       requestLogger(mockReq as Request, mockRes as Response, mockNext);
 
       // Call res.json to trigger response logging
@@ -235,7 +235,10 @@ describe('Request Logger Middleware', () => {
 
     it('should calculate duration correctly', () => {
       const startTime = 1000000;
-      Date.now = vi.fn().mockReturnValueOnce(startTime).mockReturnValueOnce(startTime + 250);
+      Date.now = vi
+        .fn()
+        .mockReturnValueOnce(startTime)
+        .mockReturnValueOnce(startTime + 250);
       requestLogger(mockReq as Request, mockRes as Response, mockNext);
 
       (mockRes.json as any)({ data: 'test' });
@@ -255,30 +258,21 @@ describe('Request Logger Middleware', () => {
       mockReq.body = { name: 'New Item' };
       requestLogger(mockReq as Request, mockRes as Response, mockNext);
 
-      expect(loggerService.info).toHaveBeenCalledWith(
-        'POST /api/test',
-        expect.any(Object)
-      );
+      expect(loggerService.info).toHaveBeenCalledWith('POST /api/test', expect.any(Object));
     });
 
     it('should handle PUT requests', () => {
       mockReq.method = 'PUT';
       requestLogger(mockReq as Request, mockRes as Response, mockNext);
 
-      expect(loggerService.info).toHaveBeenCalledWith(
-        'PUT /api/test',
-        expect.any(Object)
-      );
+      expect(loggerService.info).toHaveBeenCalledWith('PUT /api/test', expect.any(Object));
     });
 
     it('should handle DELETE requests', () => {
       mockReq.method = 'DELETE';
       requestLogger(mockReq as Request, mockRes as Response, mockNext);
 
-      expect(loggerService.info).toHaveBeenCalledWith(
-        'DELETE /api/test',
-        expect.any(Object)
-      );
+      expect(loggerService.info).toHaveBeenCalledWith('DELETE /api/test', expect.any(Object));
     });
   });
 });

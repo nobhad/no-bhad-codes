@@ -55,10 +55,7 @@ describe('Invoice Generator Service', () => {
     it('should calculate subtotal correctly', async () => {
       const invoice = await generateInvoice(mockIntakeData, 1, 1);
 
-      const calculatedSubtotal = invoice.lineItems.reduce(
-        (sum, item) => sum + item.totalPrice,
-        0
-      );
+      const calculatedSubtotal = invoice.lineItems.reduce((sum, item) => sum + item.totalPrice, 0);
       expect(invoice.subtotal).toBe(calculatedSubtotal);
     });
 
@@ -92,7 +89,14 @@ describe('Invoice Generator Service', () => {
     });
 
     it('should handle different project types', async () => {
-      const types = ['simple-site', 'portfolio', 'e-commerce', 'web-app', 'browser-extension', 'other'];
+      const types = [
+        'simple-site',
+        'portfolio',
+        'e-commerce',
+        'web-app',
+        'browser-extension',
+        'other',
+      ];
 
       for (const type of types) {
         const intakeData = { ...mockIntakeData, projectType: type };
@@ -266,9 +270,7 @@ describe('Invoice Generator Service', () => {
       const invoice = await generateInvoice(intakeData, 1, 1);
 
       const adjustments = invoice.lineItems.filter((item) => item.type === 'adjustment');
-      const pageAdjustment = adjustments.find((item) =>
-        item.description.includes('11-20 pages')
-      );
+      const pageAdjustment = adjustments.find((item) => item.description.includes('11-20 pages'));
       expect(pageAdjustment).toBeDefined();
       expect(pageAdjustment?.totalPrice).toBe(800);
     });
@@ -281,9 +283,7 @@ describe('Invoice Generator Service', () => {
       const invoice = await generateInvoice(intakeData, 1, 1);
 
       const adjustments = invoice.lineItems.filter((item) => item.type === 'adjustment');
-      const pageAdjustment = adjustments.find((item) =>
-        item.description.includes('20+ pages')
-      );
+      const pageAdjustment = adjustments.find((item) => item.description.includes('20+ pages'));
       expect(pageAdjustment).toBeDefined();
       expect(pageAdjustment?.totalPrice).toBe(1500);
     });
@@ -296,9 +296,7 @@ describe('Invoice Generator Service', () => {
       const invoice = await generateInvoice(intakeData, 1, 1);
 
       const adjustments = invoice.lineItems.filter((item) => item.type === 'adjustment');
-      const rushAdjustment = adjustments.find((item) =>
-        item.description.includes('Rush Delivery')
-      );
+      const rushAdjustment = adjustments.find((item) => item.description.includes('Rush Delivery'));
       expect(rushAdjustment).toBeDefined();
       expect(rushAdjustment?.isPercentage).toBe(true);
       expect(rushAdjustment?.percentage).toBe(0.5);
@@ -451,7 +449,7 @@ describe('Invoice Generator Service', () => {
 
       expect(invoice.total).toBeGreaterThan(8000); // Base ecommerce price
       expect(invoice.lineItems.length).toBeGreaterThan(5); // Base + features + addons + adjustments
-      
+
       const featureItems = invoice.lineItems.filter((item) => item.type === 'feature');
       expect(featureItems.length).toBe(3);
 
