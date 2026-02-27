@@ -328,7 +328,7 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
   }
 
   function findById(id: number): T | undefined {
-    return data.find(item => item.id === id);
+    return data.find((item) => item.id === id);
   }
 
   function updateItem(id: number, updates: Partial<T>): void {
@@ -398,7 +398,8 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.dataset.viewMode = viewMode.id;
-      btn.className = currentViewMode === viewMode.id ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      btn.className =
+        currentViewMode === viewMode.id ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
       btn.title = viewMode.label;
       btn.innerHTML = `<i data-lucide="${viewMode.icon}"></i>`;
       btn.addEventListener('click', () => setViewMode(viewMode.id));
@@ -418,16 +419,12 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
     initializeViewModeToggle();
 
     // Create filter UI
-    const filterUI = createFilterUI(
-      config.filterConfig,
-      filterState,
-      (newState) => {
-        filterState = newState;
-        if (data.length > 0) {
-          renderTable(data, ctx);
-        }
+    const filterUI = createFilterUI(config.filterConfig, filterState, (newState) => {
+      filterState = newState;
+      if (data.length > 0) {
+        renderTable(data, ctx);
       }
-    );
+    });
 
     // Insert before export button (Search → Filter → Export → Refresh order)
     const exportBtnRef = container.querySelector(`#export-${config.moduleId}-btn`);
@@ -506,7 +503,8 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
     if (!tableBody) return;
 
     const emptyMsg = config.emptyMessage || `No ${config.moduleId} yet.`;
-    const filterEmptyMsg = config.filterEmptyMessage || `No ${config.moduleId} match the current filters.`;
+    const filterEmptyMsg =
+      config.filterEmptyMessage || `No ${config.moduleId} match the current filters.`;
 
     // Handle empty data
     if (!items || items.length === 0) {
@@ -546,7 +544,7 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
 
     // Setup bulk selection handlers
     if (config.bulkConfig) {
-      const allRowIds = paginatedItems.map(item => item.id);
+      const allRowIds = paginatedItems.map((item) => item.id);
       setupBulkSelectionHandlers(config.bulkConfig, allRowIds);
     }
 
@@ -652,7 +650,6 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
 
       // Call optional callback
       config.onDataLoaded?.(data, ctx);
-
     } catch (error) {
       console.error(`[${config.moduleId}] Failed to load:`, error);
       // Reuse tableBody from outer scope (already fetched before try block)

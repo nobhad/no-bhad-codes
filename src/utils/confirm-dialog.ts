@@ -188,12 +188,7 @@ export interface AlertDialogOptions {
  * });
  */
 export function alertDialog(options: AlertDialogOptions): Promise<void> {
-  const {
-    title,
-    message,
-    buttonText = 'OK',
-    type = 'info'
-  } = options;
+  const { title, message, buttonText = 'OK', type = 'info' } = options;
 
   // Map type to icon
   const iconMap: Record<string, string> = {
@@ -218,7 +213,15 @@ export function alertDialog(options: AlertDialogOptions): Promise<void> {
     const iconSvg = getIconSvg(iconMap[type] || 'info');
 
     // Derive title from type if not provided
-    const displayTitle = title || (type === 'error' ? 'Error' : type === 'success' ? 'Success' : type === 'warning' ? 'Warning' : 'Notice');
+    const displayTitle =
+      title ||
+      (type === 'error'
+        ? 'Error'
+        : type === 'success'
+          ? 'Success'
+          : type === 'warning'
+            ? 'Warning'
+            : 'Notice');
 
     // Create dialog HTML (icon + title on same line, left-aligned)
     overlay.innerHTML = `
@@ -368,7 +371,8 @@ export function promptDialog(options: PromptDialogOptions): Promise<string | nul
     overlay.setAttribute('aria-describedby', descriptionId);
 
     // Get icon SVG (edit/pencil icon)
-    const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
+    const iconSvg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
 
     // Create dialog HTML (icon + title on same line, left-aligned)
     overlay.innerHTML = `
@@ -526,12 +530,7 @@ export interface MultiPromptDialogOptions {
 export function multiPromptDialog(
   options: MultiPromptDialogOptions
 ): Promise<Record<string, string> | null> {
-  const {
-    title,
-    fields,
-    confirmText = 'OK',
-    cancelText = 'Cancel'
-  } = options;
+  const { title, fields, confirmText = 'OK', cancelText = 'Cancel' } = options;
 
   return new Promise((resolve) => {
     // Create overlay
@@ -545,13 +544,15 @@ export function multiPromptDialog(
     overlay.setAttribute('aria-describedby', descriptionId);
 
     // Get icon SVG
-    const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
+    const iconSvg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
 
     // Build fields HTML
-    const fieldsHtml = fields.map(field => {
-      const inputId = `multi-prompt-${field.name}`;
-      if (field.type === 'textarea') {
-        return `
+    const fieldsHtml = fields
+      .map((field) => {
+        const inputId = `multi-prompt-${field.name}`;
+        if (field.type === 'textarea') {
+          return `
           <div class="prompt-dialog-field">
             <label for="${inputId}" class="prompt-dialog-label">${escapeHtml(field.label)}${field.required ? ' *' : ''}</label>
             <textarea
@@ -564,12 +565,15 @@ export function multiPromptDialog(
             >${escapeHtml(field.defaultValue || '')}</textarea>
           </div>
         `;
-      }
-      if (field.type === 'select' && field.options) {
-        const optionsHtml = field.options.map(opt =>
-          `<option value="${escapeHtml(opt.value)}"${opt.value === field.defaultValue ? ' selected' : ''}>${escapeHtml(opt.label)}</option>`
-        ).join('');
-        return `
+        }
+        if (field.type === 'select' && field.options) {
+          const optionsHtml = field.options
+            .map(
+              (opt) =>
+                `<option value="${escapeHtml(opt.value)}"${opt.value === field.defaultValue ? ' selected' : ''}>${escapeHtml(opt.label)}</option>`
+            )
+            .join('');
+          return `
           <div class="prompt-dialog-field">
             <label for="${inputId}" class="prompt-dialog-label">${escapeHtml(field.label)}${field.required ? ' *' : ''}</label>
             <select
@@ -580,8 +584,8 @@ export function multiPromptDialog(
             >${optionsHtml}</select>
           </div>
         `;
-      }
-      return `
+        }
+        return `
         <div class="prompt-dialog-field">
           <label for="${inputId}" class="prompt-dialog-label">${escapeHtml(field.label)}${field.required ? ' *' : ''}</label>
           <input
@@ -595,7 +599,8 @@ export function multiPromptDialog(
           />
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     // Create dialog HTML
     overlay.innerHTML = `
@@ -618,7 +623,11 @@ export function multiPromptDialog(
     // Get elements
     const cancelBtn = overlay.querySelector('.confirm-dialog-cancel') as HTMLButtonElement;
     const form = overlay.querySelector('.multi-prompt-form') as HTMLFormElement;
-    const inputs = Array.from(overlay.querySelectorAll('input, textarea, select')) as (HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)[];
+    const inputs = Array.from(overlay.querySelectorAll('input, textarea, select')) as (
+      | HTMLInputElement
+      | HTMLTextAreaElement
+      | HTMLSelectElement
+    )[];
 
     // Store previously focused element
     const previouslyFocused = document.activeElement as HTMLElement;
@@ -641,7 +650,9 @@ export function multiPromptDialog(
       let valid = true;
 
       for (const field of fields) {
-        const input = overlay.querySelector(`[name="${field.name}"]`) as HTMLInputElement | HTMLTextAreaElement;
+        const input = overlay.querySelector(`[name="${field.name}"]`) as
+          | HTMLInputElement
+          | HTMLTextAreaElement;
         const value = input.value.trim();
 
         if (field.required && !value) {
@@ -681,7 +692,7 @@ export function multiPromptDialog(
     overlay.addEventListener('keydown', handleKeydown);
 
     // Clear invalid on input
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       input.addEventListener('input', () => {
         input.classList.remove('field--invalid');
       });

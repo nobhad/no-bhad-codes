@@ -56,7 +56,8 @@ export function getLoadingStateHTML(message: string = 'Loading...'): string {
 }
 
 /** Default loading state HTML constant for simple cases */
-export const LOADING_STATE_HTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+export const LOADING_STATE_HTML =
+  '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
 function escapeHtml(text: string): string {
   const div = document.createElement('div');
@@ -68,7 +69,8 @@ function escapeHtml(text: string): string {
  * Standard empty state icon (Lucide inbox icon)
  * Used across all empty states for visual consistency
  */
-const EMPTY_STATE_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-state-icon" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>';
+const EMPTY_STATE_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-state-icon" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>';
 
 /**
  * HTML for table empty row (no data)
@@ -91,11 +93,7 @@ export function getTableEmptyRow(colspan: number, message: string): string {
 /**
  * Show empty state in a table body (e.g. "No clients found")
  */
-export function showTableEmpty(
-  tableBody: HTMLElement,
-  colspan: number,
-  message: string
-): void {
+export function showTableEmpty(tableBody: HTMLElement, colspan: number, message: string): void {
   tableBody.innerHTML = getTableEmptyRow(colspan, message);
 }
 
@@ -117,10 +115,7 @@ export function getContainerEmptyHTML(message: string): string {
  * @param container The container element
  * @param message Message to display
  */
-export function showContainerEmpty(
-  container: HTMLElement,
-  message: string
-): void {
+export function showContainerEmpty(container: HTMLElement, message: string): void {
   container.innerHTML = getContainerEmptyHTML(message);
 }
 
@@ -143,10 +138,7 @@ export function showTableLoading(
  * @param container The container element
  * @param message Optional loading message
  */
-export function showContainerLoading(
-  container: HTMLElement,
-  message: string = 'Loading...'
-): void {
+export function showContainerLoading(container: HTMLElement, message: string = 'Loading...'): void {
   container.innerHTML = getContainerLoadingHTML(message);
 }
 
@@ -157,12 +149,14 @@ export function showContainerLoading(
 export function getListSkeletonHTML(itemCount: number = 3): string {
   return Array(itemCount)
     .fill(null)
-    .map(() => `
+    .map(
+      () => `
       <div class="skeleton-item" aria-hidden="true">
         <div class="skeleton-line skeleton-line--title"></div>
         <div class="skeleton-line skeleton-line--text"></div>
       </div>
-    `)
+    `
+    )
     .join('');
 }
 
@@ -173,13 +167,15 @@ export function getListSkeletonHTML(itemCount: number = 3): string {
 export function getCardSkeletonHTML(cardCount: number = 4): string {
   return Array(cardCount)
     .fill(null)
-    .map(() => `
+    .map(
+      () => `
       <div class="skeleton-card" aria-hidden="true">
         <div class="skeleton-line skeleton-line--title"></div>
         <div class="skeleton-line skeleton-line--text"></div>
         <div class="skeleton-line skeleton-line--text skeleton-line--short"></div>
       </div>
-    `)
+    `
+    )
     .join('');
 }
 

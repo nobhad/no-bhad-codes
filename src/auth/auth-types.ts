@@ -239,5 +239,5 @@ export function isSessionExpired(expiresAt: number | null): boolean {
  */
 export function shouldRefreshSession(expiresAt: number | null, bufferMs: number = 300000): boolean {
   if (expiresAt === null) return false;
-  return Date.now() >= (expiresAt - bufferMs);
+  return Date.now() >= expiresAt - bufferMs;
 }

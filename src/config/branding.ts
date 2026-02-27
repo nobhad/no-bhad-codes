@@ -33,7 +33,8 @@ export const BRANDING = {
   // Meta/SEO
   META: {
     TITLE: 'No Bhad Codes - Professional Web Development',
-    DESCRIPTION: 'Professional web development services by Noelle Bhaduri. Custom websites, client portals, and modern web applications.',
+    DESCRIPTION:
+      'Professional web development services by Noelle Bhaduri. Custom websites, client portals, and modern web applications.',
     KEYWORDS: 'web development, portfolio, typescript, client management, professional websites',
     AUTHOR: 'Noelle Bhaduri'
   },

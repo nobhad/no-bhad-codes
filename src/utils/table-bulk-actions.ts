@@ -76,8 +76,10 @@ export function resetSelection(tableId: string): void {
     headerCheckbox.indeterminate = false;
   }
 
-  const rowCheckboxes = document.querySelectorAll(`.${tableId}-row-select`) as NodeListOf<HTMLInputElement>;
-  rowCheckboxes.forEach(cb => cb.checked = false);
+  const rowCheckboxes = document.querySelectorAll(
+    `.${tableId}-row-select`
+  ) as NodeListOf<HTMLInputElement>;
+  rowCheckboxes.forEach((cb) => (cb.checked = false));
 
   // Hide toolbar
   const toolbar = document.getElementById(`${tableId}-bulk-toolbar`);
@@ -106,8 +108,8 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
   toolbar.id = `${config.tableId}-bulk-toolbar`;
 
   // Separate dropdown actions from button actions
-  const buttonActions = config.actions.filter(a => !a.dropdownOptions);
-  const dropdownActions = config.actions.filter(a => a.dropdownOptions);
+  const buttonActions = config.actions.filter((a) => !a.dropdownOptions);
+  const dropdownActions = config.actions.filter((a) => a.dropdownOptions);
 
   toolbar.innerHTML = `
     <div class="bulk-toolbar-left flex items-center">
@@ -119,7 +121,9 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
       </button>
     </div>
     <div class="bulk-toolbar-actions">
-      ${buttonActions.map(action => `
+      ${buttonActions
+    .map(
+      (action) => `
         <button type="button"
           class="icon-btn bulk-action-icon-btn"
           data-action="${action.id}"
@@ -127,10 +131,16 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
           aria-label="${action.label}">
           ${action.icon || ''}
         </button>
-      `).join('')}
-      ${dropdownActions.map(action => `
+      `
+    )
+    .join('')}
+      ${dropdownActions
+    .map(
+      (action) => `
         <div class="bulk-action-dropdown" data-action="${action.id}"></div>
-      `).join('')}
+      `
+    )
+    .join('')}
     </div>
   `;
 
@@ -142,7 +152,7 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
   });
 
   // Button action handlers
-  buttonActions.forEach(action => {
+  buttonActions.forEach((action) => {
     const btn = toolbar.querySelector(`button[data-action="${action.id}"]`);
     btn?.addEventListener('click', async () => {
       const selectedIds = getSelectedIds(config.tableId);
@@ -164,7 +174,7 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
   });
 
   // Dropdown action handlers
-  dropdownActions.forEach(action => {
+  dropdownActions.forEach((action) => {
     const container = toolbar.querySelector(`div[data-action="${action.id}"]`);
     if (container && action.dropdownOptions) {
       const dropdown = createBulkActionDropdown({
@@ -215,7 +225,7 @@ function createBulkActionDropdown(config: {
   const menu = document.createElement('ul');
   menu.className = 'custom-dropdown-menu bulk-dropdown-menu';
 
-  config.options.forEach(opt => {
+  config.options.forEach((opt) => {
     const li = document.createElement('li');
     li.className = 'custom-dropdown-item';
     li.dataset.value = opt.value;
@@ -248,7 +258,7 @@ function createBulkActionDropdown(config: {
     e.preventDefault();
 
     // Close other dropdowns
-    document.querySelectorAll('.bulk-dropdown.open').forEach(el => {
+    document.querySelectorAll('.bulk-dropdown.open').forEach((el) => {
       if (el !== wrapper) el.classList.remove('open');
     });
 
@@ -307,10 +317,7 @@ export function createRowCheckbox(tableId: string, rowId: number): string {
 /**
  * Setup bulk selection event handlers for a table
  */
-export function setupBulkSelectionHandlers(
-  config: BulkActionConfig,
-  allRowIds: number[]
-): void {
+export function setupBulkSelectionHandlers(config: BulkActionConfig, allRowIds: number[]): void {
   const { tableId, onSelectionChange } = config;
   const state = getSelectionState(tableId);
 
@@ -322,7 +329,7 @@ export function setupBulkSelectionHandlers(
 
       if (isChecked) {
         // Select all visible rows
-        allRowIds.forEach(id => state.selectedIds.add(id));
+        allRowIds.forEach((id) => state.selectedIds.add(id));
         state.allSelected = true;
       } else {
         // Deselect all
@@ -331,8 +338,10 @@ export function setupBulkSelectionHandlers(
       }
 
       // Update row checkboxes
-      const rowCheckboxes = document.querySelectorAll(`.${tableId}-row-select`) as NodeListOf<HTMLInputElement>;
-      rowCheckboxes.forEach(cb => cb.checked = isChecked);
+      const rowCheckboxes = document.querySelectorAll(
+        `.${tableId}-row-select`
+      ) as NodeListOf<HTMLInputElement>;
+      rowCheckboxes.forEach((cb) => (cb.checked = isChecked));
 
       // Update toolbar
       updateToolbarVisibility(tableId, state.selectedIds.size);
@@ -342,7 +351,9 @@ export function setupBulkSelectionHandlers(
   }
 
   // Individual row checkboxes with Shift+Click support
-  const rowCheckboxes = document.querySelectorAll(`.${tableId}-row-select`) as NodeListOf<HTMLInputElement>;
+  const rowCheckboxes = document.querySelectorAll(
+    `.${tableId}-row-select`
+  ) as NodeListOf<HTMLInputElement>;
   const checkboxArray = Array.from(rowCheckboxes);
 
   rowCheckboxes.forEach((checkbox, index) => {
@@ -457,10 +468,7 @@ async function showBulkConfirm(message: string, count: number): Promise<boolean>
   // Try to use the confirmDanger from confirm-dialog if available
   try {
     const { confirmDanger } = await import('./confirm-dialog');
-    return confirmDanger(
-      message.replace('{count}', count.toString()),
-      'Confirm Bulk Action'
-    );
+    return confirmDanger(message.replace('{count}', count.toString()), 'Confirm Bulk Action');
   } catch {
     // Fallback to native confirm
     return window.confirm(message.replace('{count}', count.toString()));
@@ -474,10 +482,7 @@ async function showBulkConfirm(message: string, count: number): Promise<boolean>
 /**
  * Common bulk action: Archive selected items
  */
-export function createArchiveAction(
-  apiEndpoint: string,
-  onSuccess?: () => void
-): BulkAction {
+export function createArchiveAction(apiEndpoint: string, onSuccess?: () => void): BulkAction {
   return {
     id: 'archive',
     label: 'Archive',
@@ -504,10 +509,7 @@ export function createArchiveAction(
 /**
  * Common bulk action: Delete selected items
  */
-export function createDeleteAction(
-  apiEndpoint: string,
-  onSuccess?: () => void
-): BulkAction {
+export function createDeleteAction(apiEndpoint: string, onSuccess?: () => void): BulkAction {
   return {
     id: 'delete',
     label: 'Delete',

@@ -36,10 +36,7 @@ export class TrustedHtml {
  * const html = safeHtml`<div>Hello, ${name}!</div>`;
  * // Result: <div>Hello, &lt;script&gt;alert("xss")&lt;/script&gt;!</div>
  */
-export function safeHtml(
-  strings: TemplateStringsArray,
-  ...values: unknown[]
-): string {
+export function safeHtml(strings: TemplateStringsArray, ...values: unknown[]): string {
   return strings.reduce((result, str, i) => {
     const value = values[i - 1];
     const escaped = escapeValue(value);
@@ -272,7 +269,7 @@ export function createElement(
       if (key === 'className') {
         element.className = String(value);
       } else if (key.startsWith('data')) {
-        const dataKey = key.replace(/^data/, '').replace(/^[A-Z]/, c => c.toLowerCase());
+        const dataKey = key.replace(/^data/, '').replace(/^[A-Z]/, (c) => c.toLowerCase());
         element.dataset[dataKey] = String(value);
       } else if (value === true) {
         element.setAttribute(key, '');
@@ -318,16 +315,16 @@ export function parseHtmlSafe(html: string): DocumentFragment {
   const dangerousTags = ['script', 'iframe', 'object', 'embed', 'form', 'link', 'meta', 'style'];
   for (const tag of dangerousTags) {
     const elements = fragment.querySelectorAll(tag);
-    elements.forEach(el => el.remove());
+    elements.forEach((el) => el.remove());
   }
 
   // Remove dangerous attributes
   const allElements = fragment.querySelectorAll('*');
-  allElements.forEach(el => {
+  allElements.forEach((el) => {
     const attrs = Array.from(el.attributes);
     for (const attr of attrs) {
       const name = attr.name.toLowerCase();
-      if (name.startsWith('on') || name === 'href' && attr.value.startsWith('javascript:')) {
+      if (name.startsWith('on') || (name === 'href' && attr.value.startsWith('javascript:'))) {
         el.removeAttribute(attr.name);
       }
     }

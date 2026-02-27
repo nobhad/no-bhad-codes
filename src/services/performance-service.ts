@@ -59,6 +59,11 @@ export interface PerformanceAlert {
 
 import { APP_CONSTANTS } from '../config/constants';
 import { createLogger } from '../utils/logger';
+import type {
+  PerformanceLCPEntry,
+  PerformanceFIDEntry,
+  PerformanceLayoutShiftEntry
+} from '../types/performance';
 
 const logger = createLogger('PerformanceService');
 
@@ -132,10 +137,10 @@ export class PerformanceService {
     if ('PerformanceObserver' in window) {
       try {
         const lcpObserver = new PerformanceObserver((list) => {
-          const entries = list.getEntries();
-          const lastEntry = entries[entries.length - 1] as any;
+          const entries = list.getEntries() as PerformanceLCPEntry[];
+          const lastEntry = entries[entries.length - 1];
 
-          this.metrics.lcp = lastEntry.startTime || 0;
+          this.metrics.lcp = lastEntry?.startTime || 0;
           if (this.metrics.lcp !== undefined) {
             this.checkBudget('lcp', this.metrics.lcp);
           }
@@ -152,8 +157,8 @@ export class PerformanceService {
       // First Input Delay
       try {
         const fidObserver = new PerformanceObserver((list) => {
-          const entries = list.getEntries();
-          entries.forEach((entry: any) => {
+          const entries = list.getEntries() as PerformanceFIDEntry[];
+          entries.forEach((entry) => {
             this.metrics.fid = entry.processingStart - entry.startTime;
             this.checkBudget('fid', this.metrics.fid);
 
@@ -172,8 +177,8 @@ export class PerformanceService {
         let clsScore = 0;
 
         const clsObserver = new PerformanceObserver((list) => {
-          const entries = list.getEntries();
-          entries.forEach((entry: any) => {
+          const entries = list.getEntries() as PerformanceLayoutShiftEntry[];
+          entries.forEach((entry) => {
             if (!entry.hadRecentInput) {
               clsScore += entry.value;
             }

@@ -32,7 +32,20 @@ export interface ExportConfig {
 // ===============================================
 
 /**
+ * Type helper for objects that can be exported to CSV
+ * This allows any object type to be exported without explicit type assertions
+ */
+export type Exportable = Record<string, unknown>;
+
+/**
  * Export data array to CSV and trigger download
+ *
+ * @example
+ * // For typed data, use the generic version:
+ * exportToCsv<Lead>(leads, config);
+ *
+ * // Or use exportDataToCsv for automatic type inference:
+ * exportDataToCsv(leads, config);
  */
 export function exportToCsv<T extends Record<string, unknown>>(
   data: T[],
@@ -46,16 +59,16 @@ export function exportToCsv<T extends Record<string, unknown>>(
   const { filename, columns } = config;
 
   // Build CSV content
-  const headers = columns.map(col => escapeCSVField(col.label));
-  const rows = data.map(row =>
-    columns.map(col => {
+  const headers = columns.map((col) => escapeCSVField(col.label));
+  const rows = data.map((row) =>
+    columns.map((col) => {
       const value = getNestedValue(row, col.key);
       const formatted = col.formatter ? col.formatter(value, row) : formatValue(value);
       return escapeCSVField(formatted);
     })
   );
 
-  const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
 
   // Generate filename with date
   const dateStr = new Date().toISOString().split('T')[0];
@@ -68,12 +81,28 @@ export function exportToCsv<T extends Record<string, unknown>>(
 }
 
 /**
+ * Type-safe CSV export wrapper for any object array
+ *
+ * This function accepts any array of objects without requiring explicit
+ * type assertions. Use this instead of exportToCsv when you have typed
+ * data that doesn't explicitly extend Record<string, unknown>.
+ *
+ * @example
+ * // Instead of:
+ * exportToCsv(leads as unknown as Record<string, unknown>[], config);
+ *
+ * // Use:
+ * exportDataToCsv(leads, config);
+ */
+export function exportDataToCsv<T extends object>(data: T[], config: ExportConfig): void {
+  // Internal type coercion - safe because exportToCsv only reads properties
+  exportToCsv(data as unknown as Record<string, unknown>[], config);
+}
+
+/**
  * Export data array to JSON and trigger download
  */
-export function exportToJson<T extends Record<string, unknown>>(
-  data: T[],
-  filename: string
-): void {
+export function exportToJson<T extends Record<string, unknown>>(data: T[], filename: string): void {
   if (!data.length) {
     logger.warn('No data to export');
     return;
@@ -82,11 +111,15 @@ export function exportToJson<T extends Record<string, unknown>>(
   const dateStr = new Date().toISOString().split('T')[0];
   const fullFilename = `${filename}_${dateStr}.json`;
 
-  const jsonContent = JSON.stringify({
-    exportDate: new Date().toISOString(),
-    count: data.length,
-    data
-  }, null, 2);
+  const jsonContent = JSON.stringify(
+    {
+      exportDate: new Date().toISOString(),
+      count: data.length,
+      data
+    },
+    null,
+    2
+  );
 
   downloadFile(jsonContent, fullFilename, 'application/json');
 
@@ -380,7 +413,8 @@ function formatBillableAmount(_value: unknown, row: Record<string, unknown>): st
   if (!isBillable || !hourlyRate || !durationMinutes) return '';
 
   const rate = typeof hourlyRate === 'string' ? parseFloat(hourlyRate) : Number(hourlyRate);
-  const minutes = typeof durationMinutes === 'string' ? parseFloat(durationMinutes) : Number(durationMinutes);
+  const minutes =
+    typeof durationMinutes === 'string' ? parseFloat(durationMinutes) : Number(durationMinutes);
 
   if (isNaN(rate) || isNaN(minutes)) return '';
 

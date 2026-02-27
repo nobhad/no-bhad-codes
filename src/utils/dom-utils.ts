@@ -249,10 +249,7 @@ export interface KeyboardNavOptions {
  *   onEscape: () => closeMenu()
  * });
  */
-export function addKeyboardNav(
-  container: HTMLElement,
-  options: KeyboardNavOptions
-): () => void {
+export function addKeyboardNav(container: HTMLElement, options: KeyboardNavOptions): () => void {
   const {
     itemSelector,
     wrap = true,

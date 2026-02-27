@@ -26,7 +26,10 @@ export function formatFileSize(bytes: number): string {
  * @param showCents - Whether to show decimal places (default: true)
  * @returns Formatted currency string (e.g., "$1,234.56" or "$1,234")
  */
-export function formatCurrency(amount: number | null | undefined, showCents: boolean = true): string {
+export function formatCurrency(
+  amount: number | null | undefined,
+  showCents: boolean = true
+): string {
   const options: Intl.NumberFormatOptions = {
     style: 'currency',
     currency: 'USD'
@@ -64,7 +67,10 @@ export function formatCurrencyCompact(amount: number | null | undefined): string
  * @param defaultValue - Default value if status is undefined/empty (default: 'pending')
  * @returns Normalized status string with hyphens
  */
-export function normalizeStatus(status: string | undefined | null, defaultValue: string = 'pending'): string {
+export function normalizeStatus(
+  status: string | undefined | null,
+  defaultValue: string = 'pending'
+): string {
   if (!status) return defaultValue;
   return status.replace(/_/g, '-');
 }
@@ -162,15 +168,15 @@ export function formatTextWithLineBreaks(text: string | undefined | null): strin
 export const PROJECT_TYPE_LABELS: Record<string, string> = {
   'simple-site': 'Simple Website',
   'business-site': 'Business Website',
-  'portfolio': 'Portfolio',
+  portfolio: 'Portfolio',
   'e-commerce': 'E-Commerce',
-  'ecommerce': 'E-Commerce', // Legacy support
+  ecommerce: 'E-Commerce', // Legacy support
   'web-app': 'Web Application',
   'browser-extension': 'Browser Extension',
-  'website': 'Website',
+  website: 'Website',
   'mobile-app': 'Mobile App',
-  'branding': 'Branding',
-  'other': 'Other'
+  branding: 'Branding',
+  other: 'Other'
 };
 
 /**
@@ -194,7 +200,10 @@ export function formatProjectType(type: string | undefined | null): string {
  * @param format - 'short' (MM/DD/YYYY), 'datetime' (MM/DD/YYYY, h:mm AM/PM), or undefined (defaults to 'short')
  * @returns Formatted date string
  */
-export function formatDate(dateString: string | Date | undefined | null, format?: 'short' | 'datetime'): string {
+export function formatDate(
+  dateString: string | Date | undefined | null,
+  format?: 'short' | 'datetime'
+): string {
   if (!dateString) return '';
 
   try {

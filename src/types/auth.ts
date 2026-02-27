@@ -58,12 +58,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'read:analytics',
     'admin:settings'
   ],
-  client: [
-    'read:projects',
-    'read:messages',
-    'write:messages',
-    'read:invoices'
-  ]
+  client: ['read:projects', 'read:messages', 'write:messages', 'read:invoices']
 };
 
 // ============================================
@@ -391,7 +386,7 @@ export function isTokenExpired(payload: JWTPayload): boolean {
  * Check if token needs refresh (within 5 minutes of expiry)
  */
 export function shouldRefreshToken(payload: JWTPayload, bufferMs: number = 300000): boolean {
-  return Date.now() >= (payload.exp * 1000) - bufferMs;
+  return Date.now() >= payload.exp * 1000 - bufferMs;
 }
 
 // ============================================

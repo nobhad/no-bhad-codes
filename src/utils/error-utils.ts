@@ -29,9 +29,7 @@ export function getTableErrorRow(colspan: number, options: ErrorStateOptions): s
   const { message, onRetry, retryLabel = 'Try Again', showIcon = true } = options;
   const safeMessage = SanitizationUtils.escapeHtml(message);
   const safeRetryLabel = SanitizationUtils.escapeHtml(retryLabel);
-  const iconHtml = showIcon
-    ? '<span class="error-icon" aria-hidden="true">⚠</span>'
-    : '';
+  const iconHtml = showIcon ? '<span class="error-icon" aria-hidden="true">⚠</span>' : '';
   const retryHtml = onRetry
     ? `<button class="btn btn-sm btn-retry" type="button">${safeRetryLabel}</button>`
     : '';

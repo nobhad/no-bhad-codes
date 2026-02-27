@@ -56,7 +56,13 @@ export { authStore } from './auth-store';
 // ============================================
 
 import { authStore } from './auth-store';
-import type { AnyUser, LoginCredentials, AdminLoginCredentials, LoginResult, AuthResult } from './auth-types';
+import type {
+  AnyUser,
+  LoginCredentials,
+  AdminLoginCredentials,
+  LoginResult,
+  AuthResult
+} from './auth-types';
 
 /**
  * Login a client user

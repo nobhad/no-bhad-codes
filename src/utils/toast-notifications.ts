@@ -52,9 +52,10 @@ export function showToast(
   // Icon SVG
   const iconSvg = showIcon ? getIconSvg(type) : '';
 
-  const actionHtml = actionLabel && actionHref
-    ? `<a class="toast-action" href="${escapeHtml(actionHref)}">${escapeHtml(actionLabel)}</a>`
-    : '';
+  const actionHtml =
+    actionLabel && actionHref
+      ? `<a class="toast-action" href="${escapeHtml(actionHref)}">${escapeHtml(actionLabel)}</a>`
+      : '';
 
   // Toast content
   toast.innerHTML = `

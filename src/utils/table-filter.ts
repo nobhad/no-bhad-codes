@@ -190,7 +190,8 @@ export function createFilterUI(
   const hasStatusOptions = config.statusOptions && config.statusOptions.length > 0;
 
   // Build status section HTML only if there are status options
-  const statusSectionHTML = hasStatusOptions ? `
+  const statusSectionHTML = hasStatusOptions
+    ? `
       <div class="filter-section">
         <span class="filter-section-label">Status</span>
         <div class="filter-checkbox-group flex flex-col gap-1">
@@ -202,7 +203,9 @@ export function createFilterUI(
   })}
             <span>All</span>
           </label>
-          ${config.statusOptions.map(opt => `
+          ${config.statusOptions
+    .map(
+      (opt) => `
             <label class="filter-checkbox">
               ${getPortalCheckboxHTML({
     value: opt.value,
@@ -211,9 +214,12 @@ export function createFilterUI(
   })}
               <span>${opt.label}</span>
             </label>
-          `).join('')}
+          `
+    )
+    .join('')}
         </div>
-      </div>` : '';
+      </div>`
+    : '';
 
   dropdownWrapper.innerHTML = `
     <button type="button" class="filter-dropdown-trigger icon-btn" title="Filters" aria-label="Filters">
@@ -266,7 +272,7 @@ export function createFilterUI(
     allCheckbox.addEventListener('change', () => {
       if (allCheckbox.checked) {
         // Uncheck all status checkboxes
-        statusCheckboxes.forEach(cb => {
+        statusCheckboxes.forEach((cb) => {
           (cb as HTMLInputElement).checked = false;
         });
         const newState = { ...state, statusFilters: [] };
@@ -278,11 +284,11 @@ export function createFilterUI(
   }
 
   // Status checkboxes - uncheck "All" when any status is checked
-  statusCheckboxes.forEach(checkbox => {
+  statusCheckboxes.forEach((checkbox) => {
     checkbox.addEventListener('change', () => {
       const checked = Array.from(statusCheckboxes)
         .filter((cb): cb is HTMLInputElement => (cb as HTMLInputElement).checked)
-        .map(cb => cb.value);
+        .map((cb) => cb.value);
 
       // Uncheck "All" if any status is selected
       if (allCheckbox && checked.length > 0) {
@@ -323,7 +329,7 @@ export function createFilterUI(
   clearBtn.addEventListener('click', () => {
     // Reset UI
     searchInput.value = '';
-    statusCheckboxes.forEach(cb => {
+    statusCheckboxes.forEach((cb) => {
       (cb as HTMLInputElement).checked = false;
     });
     if (allCheckbox) allCheckbox.checked = true;
@@ -386,7 +392,9 @@ export function updateFilterStatusOptions(
   })}
           <span>All</span>
         </label>
-        ${options.map(opt => `
+        ${options
+    .map(
+      (opt) => `
           <label class="filter-checkbox">
             ${getPortalCheckboxHTML({
     value: opt.value,
@@ -395,7 +403,9 @@ export function updateFilterStatusOptions(
   })}
             <span>${opt.label}</span>
           </label>
-        `).join('')}
+        `
+    )
+    .join('')}
       </div>
     </div>
   `;
@@ -412,14 +422,18 @@ export function updateFilterStatusOptions(
   const newStatusSection = menu.querySelector('.filter-section:first-child');
   if (!newStatusSection) return;
 
-  const allCheckbox = newStatusSection.querySelector('input[type="checkbox"][value="all"]') as HTMLInputElement;
-  const statusCheckboxes = newStatusSection.querySelectorAll('input[type="checkbox"]:not([value="all"])');
+  const allCheckbox = newStatusSection.querySelector(
+    'input[type="checkbox"][value="all"]'
+  ) as HTMLInputElement;
+  const statusCheckboxes = newStatusSection.querySelectorAll(
+    'input[type="checkbox"]:not([value="all"])'
+  );
   const dropdownWrapper = filterContainer.querySelector('.filter-dropdown-wrapper') as HTMLElement;
 
   if (allCheckbox) {
     allCheckbox.addEventListener('change', () => {
       if (allCheckbox.checked) {
-        statusCheckboxes.forEach(cb => {
+        statusCheckboxes.forEach((cb) => {
           (cb as HTMLInputElement).checked = false;
         });
         const newState = { ...state, statusFilters: [] };
@@ -430,11 +444,11 @@ export function updateFilterStatusOptions(
     });
   }
 
-  statusCheckboxes.forEach(checkbox => {
+  statusCheckboxes.forEach((checkbox) => {
     checkbox.addEventListener('change', () => {
       const checked = Array.from(statusCheckboxes)
         .filter((cb): cb is HTMLInputElement => (cb as HTMLInputElement).checked)
-        .map(cb => cb.value);
+        .map((cb) => cb.value);
 
       if (allCheckbox && checked.length > 0) {
         allCheckbox.checked = false;
@@ -482,7 +496,9 @@ export function createSortableHeaders(
   onSort: (column: string, direction: 'asc' | 'desc') => void
 ): void {
   const tableId = `${config.tableId}-table`;
-  const table = document.querySelector(`.${tableId}`) || document.querySelector(`#${config.tableId}-table-body`)?.closest('table');
+  const table =
+    document.querySelector(`.${tableId}`) ||
+    document.querySelector(`#${config.tableId}-table-body`)?.closest('table');
   if (!table) return;
 
   const thead = table.querySelector('thead');
@@ -495,9 +511,12 @@ export function createSortableHeaders(
   const headerCells = thead.querySelectorAll('th');
 
   headerCells.forEach((th, _index) => {
-    const column = config.sortableColumns.find(col => {
+    const column = config.sortableColumns.find((col) => {
       // Match by index or by existing data-sort attribute
-      return th.dataset.sort === col.key || th.textContent?.trim().toLowerCase() === col.label.toLowerCase();
+      return (
+        th.dataset.sort === col.key ||
+        th.textContent?.trim().toLowerCase() === col.label.toLowerCase()
+      );
     });
 
     if (column) {
@@ -516,7 +535,7 @@ export function createSortableHeaders(
       th.addEventListener('click', () => {
         // Read current state from DOM, not from closure
         const currentSortColumn = thead.dataset.sortColumn || '';
-        const currentSortDirection = thead.dataset.sortDirection as 'asc' | 'desc' || 'desc';
+        const currentSortDirection = (thead.dataset.sortDirection as 'asc' | 'desc') || 'desc';
 
         const currentDirection = currentSortColumn === column.key ? currentSortDirection : 'desc';
         const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
@@ -535,7 +554,7 @@ export function createSortableHeaders(
           sortDirection: newDirection
         };
 
-        headerCells.forEach(cell => {
+        headerCells.forEach((cell) => {
           const sortIcon = cell.querySelector('.sort-icon');
           if (sortIcon) {
             sortIcon.innerHTML = getSortIcon(cell.dataset.sort || '', freshState);
@@ -566,18 +585,14 @@ function getSortIcon(columnKey: string, state: FilterState): string {
  * Apply filters, search, and sorting to an array of data
  * Works with any object type that has the fields specified in config
  */
-export function applyFilters<T>(
-  data: T[],
-  state: FilterState,
-  config: TableFilterConfig
-): T[] {
+export function applyFilters<T>(data: T[], state: FilterState, config: TableFilterConfig): T[] {
   let filtered = [...data];
 
   // 1. Search filter
   if (state.searchTerm.trim()) {
     const searchLower = state.searchTerm.toLowerCase().trim();
-    filtered = filtered.filter(item => {
-      return config.searchFields.some(field => {
+    filtered = filtered.filter((item) => {
+      return config.searchFields.some((field) => {
         const value = getNestedValue(item as object, field);
         if (value === null || value === undefined) return false;
         return String(value).toLowerCase().includes(searchLower);
@@ -587,18 +602,20 @@ export function applyFilters<T>(
 
   // 2. Status filter
   if (state.statusFilters.length > 0) {
-    filtered = filtered.filter(item => {
+    filtered = filtered.filter((item) => {
       const status = getNestedValue(item as object, config.statusField);
       if (status === null || status === undefined) return false;
       // Normalize to hyphens (database format)
       const normalizedStatus = String(status).toLowerCase().replace(/_/g, '-');
-      return state.statusFilters.some(f => normalizedStatus === f.toLowerCase().replace(/_/g, '-'));
+      return state.statusFilters.some(
+        (f) => normalizedStatus === f.toLowerCase().replace(/_/g, '-')
+      );
     });
   }
 
   // 3. Date range filter
   if (state.dateStart || state.dateEnd) {
-    filtered = filtered.filter(item => {
+    filtered = filtered.filter((item) => {
       const dateValue = getNestedValue(item as object, config.dateField);
       if (!dateValue) return false;
 
@@ -623,7 +640,7 @@ export function applyFilters<T>(
 
   // 4. Sorting
   if (state.sortColumn) {
-    const column = config.sortableColumns.find(c => c.key === state.sortColumn);
+    const column = config.sortableColumns.find((c) => c.key === state.sortColumn);
     if (column) {
       // Build status priority map from statusOptions if sorting by status field
       const statusPriority: Record<string, number> = {};

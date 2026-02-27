@@ -125,11 +125,7 @@ export function animateLoadingProgress(
   options: { duration?: number } = {}
 ): gsap.core.Tween {
   const { duration = 1 } = options;
-  return gsap.fromTo(
-    element,
-    { width: '0%' },
-    { width: '100%', duration, ease: 'power2.out' }
-  );
+  return gsap.fromTo(element, { width: '0%' }, { width: '100%', duration, ease: 'power2.out' });
 }
 
 /**

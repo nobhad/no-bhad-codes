@@ -128,7 +128,9 @@ export class AuthService extends BaseService {
    * Subscribe to auth state changes
    * New method for reactive updates
    */
-  subscribe(listener: (state: { isAuthenticated: boolean; user: AuthUser | null }) => void): () => void {
+  subscribe(
+    listener: (state: { isAuthenticated: boolean; user: AuthUser | null }) => void
+  ): () => void {
     return authStore.subscribe((state) => {
       listener({
         isAuthenticated: state.isAuthenticated,

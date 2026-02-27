@@ -31,10 +31,10 @@ export const ANIMATION_DURATIONS = {
   HEADER_FADE: 0.5,
 
   // Semantic timing tokens
-  THEME_TRANSITION: 0.4,      // --transition-theme: 0.4s
-  MOUSE_INTERACTION: 0.2,      // --transition-mouse: 0.2s
-  STANDARD_LENGTH: 0.5,        // --transition-length: 0.5s
-  DRAMATIC_ENTRANCE: 0.8       // --transition-long: 0.8s
+  THEME_TRANSITION: 0.4, // --transition-theme: 0.4s
+  MOUSE_INTERACTION: 0.2, // --transition-mouse: 0.2s
+  STANDARD_LENGTH: 0.5, // --transition-length: 0.5s
+  DRAMATIC_ENTRANCE: 0.8 // --transition-long: 0.8s
 } as const;
 
 // ============================================
@@ -57,8 +57,8 @@ export const ANIMATION_EASING = {
   HERO_REVEAL: 'power2.out',
 
   // Advanced easing curves
-  SPRING: 'cubic-bezier(0.25, 0.1, 0.25, 3.5)',      // Overshoot for hover interactions
-  SMOOTH_SAL: 'cubic-bezier(0.3, 0.9, 0.3, 0.9)'    // Standard smooth animations
+  SPRING: 'cubic-bezier(0.25, 0.1, 0.25, 3.5)', // Overshoot for hover interactions
+  SMOOTH_SAL: 'cubic-bezier(0.3, 0.9, 0.3, 0.9)' // Standard smooth animations
 } as const;
 
 // ============================================
@@ -85,9 +85,7 @@ const ANIMATION_COLOR_FALLBACKS: Record<string, string> = {
 /**
  * Get animation color from CSS variable at runtime
  */
-export function getAnimationColor(
-  colorKey: keyof typeof ANIMATION_COLOR_VARS
-): string {
+export function getAnimationColor(colorKey: keyof typeof ANIMATION_COLOR_VARS): string {
   const cssVarName = ANIMATION_COLOR_VARS[colorKey];
 
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {

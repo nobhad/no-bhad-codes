@@ -190,9 +190,11 @@ export function createPaginationUI(
   `;
 
   // Per-page dropdown (reusable table dropdown, no status dot)
-  const pageSizeDropdownContainer = container.querySelector(`#${config.tableId}-page-size`) as HTMLElement;
+  const pageSizeDropdownContainer = container.querySelector(
+    `#${config.tableId}-page-size`
+  ) as HTMLElement;
   if (pageSizeDropdownContainer) {
-    const pageSizeOptionsForDropdown = pageSizeOptions.map(size => ({
+    const pageSizeOptionsForDropdown = pageSizeOptions.map((size) => ({
       value: String(size),
       label: String(size)
     }));
@@ -274,12 +276,13 @@ export function createPaginationUI(
 function renderPageButtons(currentPage: number, totalPages: number): string {
   const pages = getVisiblePages(currentPage, totalPages);
 
-  return pages.map(page => {
-    if (page === -1) {
-      return '<span class="pagination-ellipsis">...</span>';
-    }
-    const isCurrent = page === currentPage;
-    return `
+  return pages
+    .map((page) => {
+      if (page === -1) {
+        return '<span class="pagination-ellipsis">...</span>';
+      }
+      const isCurrent = page === currentPage;
+      return `
       <button type="button"
         class="pagination-page-btn ${isCurrent ? 'active' : ''}"
         data-page="${page}"
@@ -288,16 +291,14 @@ function renderPageButtons(currentPage: number, totalPages: number): string {
         ${page}
       </button>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 /**
  * Update existing pagination UI with new state
  */
-export function updatePaginationUI(
-  containerId: string,
-  state: PaginationState
-): void {
+export function updatePaginationUI(containerId: string, state: PaginationState): void {
   const container = document.getElementById(containerId);
   if (!container) return;
 
