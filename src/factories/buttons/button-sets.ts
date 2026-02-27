@@ -172,6 +172,100 @@ export const BUTTON_SETS = {
   cardEdit: (id: ButtonSetId): ButtonConfig[] => [
     { action: 'edit', dataId: id },
     { action: 'delete', dataId: id }
+  ],
+
+  // ============================================
+  // SPECIALIZED TABLE ACTIONS
+  // ============================================
+
+  /** Questionnaire actions: Edit, Send, Delete */
+  tableQuestionnaire: (id: ButtonSetId): ButtonConfig[] => [
+    { action: 'edit', dataId: id },
+    { action: 'send', dataId: id, title: 'Send to client', ariaLabel: 'Send questionnaire to client' },
+    { action: 'delete', dataId: id }
+  ],
+
+  /** Questionnaire response actions: View, Remind, Delete */
+  tableQuestionnaireResponse: (id: ButtonSetId): ButtonConfig[] => [
+    { action: 'view', dataId: id },
+    { action: 'remind', dataId: id },
+    { action: 'delete', dataId: id }
+  ],
+
+  /** Contact actions: Convert, Archive/Restore */
+  tableContact: (id: ButtonSetId, canConvert = true, isArchived = false): ButtonConfig[] => [
+    { action: 'convert-client', dataId: id, show: canConvert },
+    { action: 'archive', dataId: id, show: !isArchived },
+    { action: 'restore', dataId: id, show: isArchived }
+  ],
+
+  /** Contract actions: View, Remind, Expire */
+  tableContract: (id: ButtonSetId): ButtonConfig[] => [
+    { action: 'view', dataId: id },
+    { action: 'remind', dataId: id, title: 'Resend reminder', ariaLabel: 'Resend reminder' },
+    { action: 'expire', dataId: id }
+  ],
+
+  /** Email template actions: Preview, Edit, Versions, Test, Delete */
+  tableEmailTemplate: (id: ButtonSetId, canTest = true): ButtonConfig[] => [
+    { action: 'preview', dataId: id },
+    { action: 'edit', dataId: id },
+    { action: 'versions', dataId: id },
+    { action: 'test', dataId: id, show: canTest },
+    { action: 'delete', dataId: id }
+  ],
+
+  /** Document request actions: View, Start Review, Approve, Reject */
+  tableDocumentRequest: (id: ButtonSetId, status: string): ButtonConfig[] => [
+    { action: 'view', dataId: id },
+    { action: 'start-review', dataId: id, show: status === 'uploaded' },
+    { action: 'approve', dataId: id, show: status === 'under_review' },
+    { action: 'reject', dataId: id, show: status === 'under_review' }
+  ],
+
+  /** Toggle actions: Enable/Disable, Edit, Delete */
+  tableToggle: (id: ButtonSetId, isActive = true): ButtonConfig[] => [
+    { action: 'disable', dataId: id, show: isActive },
+    { action: 'enable', dataId: id, show: !isActive },
+    { action: 'edit', dataId: id },
+    { action: 'delete', dataId: id }
+  ],
+
+  /** Time entry actions: Edit, Delete */
+  tableTimeEntry: (id: ButtonSetId): ButtonConfig[] => [
+    { action: 'edit', dataId: id },
+    { action: 'delete', dataId: id }
+  ],
+
+  /** Deliverable actions: View, Approve, Reject, Delete */
+  tableDeliverable: (id: ButtonSetId, needsReview = false): ButtonConfig[] => [
+    { action: 'view', dataId: id },
+    { action: 'approve', dataId: id, show: needsReview },
+    { action: 'reject', dataId: id, show: needsReview },
+    { action: 'delete', dataId: id }
+  ],
+
+  /** Task actions: Complete, Edit, Delete */
+  tableTask: (id: ButtonSetId, canComplete = true): ButtonConfig[] => [
+    { action: 'complete', dataId: id, show: canComplete },
+    { action: 'edit', dataId: id },
+    { action: 'delete', dataId: id }
+  ],
+
+  // ============================================
+  // INLINE ACTIONS
+  // ============================================
+
+  /** Inline save/cancel */
+  inlineSaveCancel: (): ButtonConfig[] => [
+    { action: 'save', variant: 'primary' },
+    { action: 'cancel' }
+  ],
+
+  /** Inline edit/delete */
+  inlineEditDelete: (id: ButtonSetId): ButtonConfig[] => [
+    { action: 'edit', dataId: id },
+    { action: 'delete', dataId: id }
   ]
 } as const;
 
