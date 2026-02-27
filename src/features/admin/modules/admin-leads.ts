@@ -101,18 +101,8 @@ function isReactTableActuallyMounted(): boolean {
   return true;
 }
 
-/** Check if React leads table should be used */
+/** Check if React leads table should be used - always true */
 function shouldUseReactLeadsTable(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_leads') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const localFlag = localStorage.getItem('feature_react_leads_table');
-  if (localFlag === 'false') return false;
-  if (localFlag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }
 
