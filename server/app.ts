@@ -66,6 +66,8 @@ import { requestIdMiddleware } from './middleware/request-id.js';
 import { sanitizeInputs } from './middleware/sanitization.js';
 import { auditMiddleware } from './middleware/audit.js';
 import { rateLimiters } from './middleware/rate-limiter.js';
+import { csrfProtection } from './middleware/security.js';
+import crypto from 'crypto';
 
 // Load environment variables
 dotenv.config();
@@ -104,7 +106,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ['\'self\''],
-        scriptSrc: ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''], // unsafe-eval needed for GSAP
+        scriptSrc: ['\'self\'', '\'unsafe-inline\''], // GSAP does not require unsafe-eval
         styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
         imgSrc: ['\'self\'', 'data:', 'https:', 'blob:'],
         connectSrc: [
@@ -140,7 +142,7 @@ app.use(
     origin: process.env.FRONTEND_URL || 'http://localhost:4000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-ID']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-ID', 'x-csrf-token']
   })
 );
 
@@ -157,6 +159,21 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Cookie parsing middleware (for HttpOnly auth cookies)
 app.use(cookieParser());
+
+// CSRF token cookie - set on every request if not present
+// This cookie is readable by JavaScript so the client can send it in headers
+app.use((req, res, next) => {
+  if (!req.cookies['csrf-token']) {
+    const csrfToken = crypto.randomBytes(32).toString('hex');
+    res.cookie('csrf-token', csrfToken, {
+      httpOnly: false, // Must be readable by JavaScript
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+  }
+  next();
+});
 
 // Global input sanitization - sanitize all request body, query, and params
 // to prevent XSS and script injection attacks
@@ -248,6 +265,22 @@ app.use(portalRoutes);
 // Global rate limiting for all API routes
 // Standard rate limit: 60 requests per minute
 app.use('/api', rateLimiters.standard);
+
+// CSRF protection for state-changing API requests
+// Validates that x-csrf-token header matches csrf-token cookie
+app.use('/api', csrfProtection({
+  headerName: 'x-csrf-token',
+  cookieName: 'csrf-token',
+  skipIf: (req) => {
+    // Skip CSRF for webhook endpoints (they use signature verification)
+    if (req.path.includes('/webhooks/')) return true;
+    // Skip CSRF for file uploads (may use FormData without custom headers)
+    if (req.path.includes('/uploads') && req.method === 'POST') return true;
+    // Skip CSRF for intake form (public endpoint)
+    if (req.path.includes('/intake')) return true;
+    return false;
+  }
+}));
 
 // Stricter rate limiting for sensitive endpoints
 // Sensitive rate limit: 10 requests per hour for payment operations

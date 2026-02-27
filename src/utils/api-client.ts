@@ -6,9 +6,71 @@
  *
  * Centralized API client with automatic token expiration handling.
  * Intercepts 401 responses and handles session expiration gracefully.
+ *
+ * SECURITY FEATURES:
+ * - CSRF token validation for state-changing requests (POST/PUT/DELETE/PATCH)
+ * - Automatic session expiration handling
+ * - Credentials always included for HttpOnly cookie auth
  */
 
 import { AUTH_EVENTS } from '../auth/auth-constants';
+
+// ============================================
+// CSRF TOKEN MANAGEMENT
+// ============================================
+
+const CSRF_COOKIE_NAME = 'csrf-token';
+const CSRF_HEADER_NAME = 'x-csrf-token';
+
+/**
+ * Extract CSRF token from cookies
+ * The server sets a csrf-token cookie that must be sent back in headers
+ */
+function getCsrfToken(): string | null {
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === CSRF_COOKIE_NAME) {
+      return decodeURIComponent(value);
+    }
+  }
+  return null;
+}
+
+/**
+ * Check if a request method requires CSRF protection
+ * Safe methods (GET, HEAD, OPTIONS) do not require CSRF tokens
+ */
+function requiresCsrfProtection(method: string): boolean {
+  const safeMethods = ['GET', 'HEAD', 'OPTIONS'];
+  return !safeMethods.includes(method.toUpperCase());
+}
+
+/**
+ * Add CSRF token header to request options if needed
+ */
+function addCsrfHeader(options: RequestInit): RequestInit {
+  const method = options.method?.toUpperCase() || 'GET';
+
+  if (!requiresCsrfProtection(method)) {
+    return options;
+  }
+
+  const csrfToken = getCsrfToken();
+  if (!csrfToken) {
+    // No CSRF token available - request will proceed but may be rejected by server
+    // This can happen on first page load before any API call sets the cookie
+    return options;
+  }
+
+  return {
+    ...options,
+    headers: {
+      ...options.headers,
+      [CSRF_HEADER_NAME]: csrfToken
+    }
+  };
+}
 
 /**
  * Error codes returned by the API
@@ -94,22 +156,27 @@ function isTokenExpiredError(data: ApiErrorResponse): boolean {
 }
 
 /**
- * Enhanced fetch wrapper that handles token expiration
+ * Enhanced fetch wrapper that handles token expiration and CSRF protection
  *
  * @param url - The URL to fetch
  * @param options - Fetch options
  * @returns Promise with the fetch response
+ *
+ * SECURITY: Automatically includes CSRF token for state-changing requests
  */
 export async function apiFetch(
   url: string,
   options: RequestInit = {}
 ): Promise<Response> {
+  // Add CSRF token for state-changing requests
+  const optionsWithCsrf = addCsrfHeader(options);
+
   // Ensure credentials are included for auth cookies
   const fetchOptions: RequestInit = {
-    ...options,
+    ...optionsWithCsrf,
     credentials: 'include',
     headers: {
-      ...options.headers
+      ...optionsWithCsrf.headers
     }
   };
 
