@@ -55,7 +55,7 @@ import {
   type BulkActionConfig
 } from '../../../utils/table-bulk-actions';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction, conditionalAction } from '../../../factories';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 

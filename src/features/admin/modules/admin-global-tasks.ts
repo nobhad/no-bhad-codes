@@ -17,7 +17,7 @@ import { getStatusDotHTML } from '../../../components/status-badge';
 import { createViewToggle } from '../../../components/view-toggle';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction } from '../../../factories';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import type { AdminDashboardContext } from '../admin-types';
 import {

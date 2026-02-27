@@ -58,7 +58,7 @@ import { setupFileUploadHandlers, loadPendingRequestsDropdown, loadProjectFiles 
 import { createSecondarySidebar, SECONDARY_TAB_ICONS, type SecondarySidebarController } from '../../../components/secondary-sidebar';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction } from '../../../factories';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';

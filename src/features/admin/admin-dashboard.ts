@@ -10,6 +10,8 @@
 
 import { AdminSecurity } from './admin-security';
 import { AdminAuth } from './admin-auth';
+import { authStore } from '../../auth/auth-store';
+import type { AdminUser } from '../../auth/auth-types';
 import { AdminProjectDetails } from './admin-project-details';
 import type { PerformanceMetrics, PerformanceAlert } from '../../services/performance-service';
 import { SanitizationUtils } from '../../utils/sanitization-utils';
@@ -603,7 +605,22 @@ class AdminDashboard {
       greeting = 'Good evening';
     }
 
-    greetingEl.innerHTML = `${greeting}, <b>Noelle</b>`;
+    // Get authenticated user name from auth store
+    const currentUser = authStore.getCurrentUser() as AdminUser | null;
+    let displayName = 'Admin';
+    if (currentUser) {
+      // Prefer username, then extract from email, fallback to 'Admin'
+      if (currentUser.username) {
+        displayName = currentUser.username;
+      } else if (currentUser.email) {
+        // Extract name from email (before @)
+        displayName = currentUser.email.split('@')[0];
+        // Capitalize first letter
+        displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+      }
+    }
+
+    greetingEl.innerHTML = `${greeting}, <b>${SanitizationUtils.escapeHtml(displayName)}</b>`;
     greetingEl.style.display = '';
   }
 

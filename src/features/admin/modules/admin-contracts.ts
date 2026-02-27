@@ -17,7 +17,7 @@ import { confirmDialog, alertError } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction } from '../../../factories';
 import {
   saveFilterState,
   updateFilterStatusOptions,

@@ -34,7 +34,7 @@ import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction, conditionalAction } from '../../../factories';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
 import { initDetailKeyboardNav } from '../../../components/detail-keyboard-nav';

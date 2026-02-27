@@ -25,7 +25,7 @@ import type { AdminDashboardContext } from '../admin-types';
 import { confirmDialog, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction, conditionalAction } from '../../../factories';
 import { showToast } from '../../../utils/toast-notifications';
 import { createViewToggle } from '../../../components/view-toggle';
 import {

@@ -22,7 +22,7 @@ import { INVOICES_FILTER_CONFIG } from '../../../utils/table-filter';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS as GLOBAL_ICONS } from '../../../constants/icons';
-import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction, conditionalAction } from '../../../factories';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { withButtonLoading } from '../../../utils/button-loading';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';

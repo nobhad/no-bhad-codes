@@ -490,7 +490,10 @@ async function exportFeedbackPDF(): Promise<void> {
       return;
     }
 
-    printWindow.document.write(html);
+    // Use innerHTML instead of document.write() for better security
+    // document.write() can execute scripts in some contexts
+    printWindow.document.open();
+    printWindow.document.documentElement.innerHTML = html;
     printWindow.document.close();
 
     // Wait for content to load, then print

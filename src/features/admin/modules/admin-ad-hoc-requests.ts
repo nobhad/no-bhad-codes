@@ -14,7 +14,7 @@ import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction } from '../../../factories';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';

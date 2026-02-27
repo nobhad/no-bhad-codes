@@ -16,7 +16,7 @@ import { formatDate, formatDateTime } from '../../../utils/format-utils';
 import { apiFetch, apiPut, apiPost } from '../../../utils/api-client';
 import { createTableDropdown, CONTACT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, conditionalAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, conditionalAction } from '../../../factories';
 import { APP_CONSTANTS } from '../../../config/constants';
 import { CONTACTS_FILTER_CONFIG } from '../../../utils/table-filter';
 import { CONTACTS_EXPORT_CONFIG } from '../../../utils/table-export';
@@ -52,6 +52,9 @@ interface ContactsStats {
 // BULK ACTION FUNCTIONS
 // ============================================================================
 
+// Module reference holder - assigned after module creation to avoid forward references
+let _contactsModuleRef: ReturnType<typeof createTableModule<ContactSubmission, ContactsStats>> | null = null;
+
 /**
  * Bulk update status for multiple contacts
  */
@@ -63,10 +66,11 @@ async function bulkUpdateStatus(ids: number[], status: string): Promise<void> {
     await Promise.all(promises);
 
     // Update local data via module
-    ids.forEach(id => {
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      contactsModule.updateItem(id, { status: status as ContactSubmission['status'] });
-    });
+    if (_contactsModuleRef) {
+      ids.forEach(id => {
+        _contactsModuleRef!.updateItem(id, { status: status as ContactSubmission['status'] });
+      });
+    }
 
     showToast(`Updated ${ids.length} contacts to ${status}`, 'success');
   } catch (error) {
@@ -88,11 +92,11 @@ async function bulkDeleteContacts(ids: number[]): Promise<void> {
     showToast(`Deleted ${ids.length} contacts`, 'success');
 
     // Reload data to reflect deletions
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    const ctx = contactsModule.getContext();
-    if (ctx) {
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      await contactsModule.load(ctx);
+    if (_contactsModuleRef) {
+      const ctx = _contactsModuleRef.getContext();
+      if (ctx) {
+        await _contactsModuleRef.load(ctx);
+      }
     }
   } catch (error) {
     logger.error(' Bulk delete failed:', error);
@@ -307,6 +311,9 @@ const contactsModule = createTableModule<ContactSubmission, ContactsStats>({
     });
   }
 });
+
+// Initialize module reference for bulk actions
+_contactsModuleRef = contactsModule;
 
 // ============================================================================
 // PUBLIC EXPORTS
