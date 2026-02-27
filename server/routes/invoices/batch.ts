@@ -42,11 +42,11 @@ router.get(
       res.json({
         success: true,
         payments: payments.map(toSnakeCasePayment),
-        count: payments.length
+        count: payments.length,
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve payments', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -69,7 +69,12 @@ router.post(
     }
 
     if (invoiceIds.length > 100) {
-      return errorResponse(res, 'Maximum 100 invoices can be exported at once', 400, 'TOO_MANY_INVOICES');
+      return errorResponse(
+        res,
+        'Maximum 100 invoices can be exported at once',
+        400,
+        'TOO_MANY_INVOICES'
+      );
     }
 
     const db = getDatabase();
@@ -77,8 +82,17 @@ router.post(
 
     // Helper function to format date
     const formatDate = (dateStr: string | undefined): string => {
-      if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-      return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      if (!dateStr)
+        return new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
     };
 
     // Set up ZIP response
@@ -113,11 +127,11 @@ router.post(
         // Build line items
         const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
           ? invoice.lineItems.map((item: InvoiceLineItem) => ({
-            description: item.description || '',
-            quantity: item.quantity || 1,
-            rate: item.rate || item.amount || 0,
-            amount: item.amount || 0
-          }))
+              description: item.description || '',
+              quantity: item.quantity || 1,
+              rate: item.rate || item.amount || 0,
+              amount: item.amount || 0,
+            }))
           : [];
 
         // Get credits
@@ -129,7 +143,8 @@ router.post(
           invoiceNumber: invoice.invoiceNumber,
           issuedDate: formatDate(invoice.issuedDate || invoice.createdAt),
           dueDate: 'Within 14 days',
-          clientName: invoice.clientName || (client ? getString(client, 'contact_name') : '') || 'Client',
+          clientName:
+            invoice.clientName || (client ? getString(client, 'contact_name') : '') || 'Client',
           clientCompany: client ? getString(client, 'company_name') : '',
           clientEmail: invoice.clientEmail || (client ? getString(client, 'email') : '') || '',
           projectId: invoice.projectId,
@@ -142,9 +157,9 @@ router.post(
           depositPercentage: invoice.depositPercentage,
           credits: invoiceCredits.map((c) => ({
             depositInvoiceNumber: c.depositInvoiceNumber || `INV-${c.depositInvoiceId}`,
-            amount: c.amount
+            amount: c.amount,
           })),
-          totalCredits
+          totalCredits,
         };
 
         // Generate PDF
@@ -154,11 +169,13 @@ router.post(
         archive.append(Buffer.from(pdfBytes), { name: `${invoice.invoiceNumber}.pdf` });
         successCount++;
       } catch (error) {
-         logger.error(`[Invoices] Failed to generate PDF for invoice ${invoiceId}:`, { error: error instanceof Error ? error : undefined });
+        logger.error(`[Invoices] Failed to generate PDF for invoice ${invoiceId}:`, {
+          error: error instanceof Error ? error : undefined,
+        });
         errorCount++;
         errors.push({
           id: invoiceId,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -169,7 +186,7 @@ router.post(
       totalRequested: invoiceIds.length,
       successCount,
       errorCount,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     };
     archive.append(JSON.stringify(manifest, null, 2), { name: 'manifest.json' });
 

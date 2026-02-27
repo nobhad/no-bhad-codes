@@ -1,4 +1,5 @@
 import express, { Response } from 'express';
+import { logger } from '../../services/logger.js';
 import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
@@ -12,6 +13,19 @@ import { generateDefaultMilestones } from '../../services/milestone-generator.js
 import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const PROJECT_COLUMNS = `
+  id, client_id, project_name, description, status, priority, progress,
+  start_date, estimated_end_date, actual_end_date, budget_range, project_type,
+  timeline, preview_url, price, notes, repository_url, staging_url, production_url,
+  deposit_amount, contract_signed_at, cancelled_by, cancellation_reason,
+  default_deposit_percentage, hourly_rate, estimated_hours, actual_hours, template_id,
+  features, design_level, content_status, tech_comfort, hosting_preference,
+  page_count, integrations, brand_assets, inspiration, current_site, challenges,
+  additional_info, addons, referral_source, contract_reminders_enabled,
+  deleted_at, deleted_by, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 // Get projects for current client
@@ -20,7 +34,7 @@ router.get(
   authenticateToken,
   cache({
     ttl: 300, // 5 minutes
-    tags: ['projects', 'clients']
+    tags: ['projects', 'clients'],
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const db = getDatabase();
@@ -93,7 +107,7 @@ router.get(
       project.stats = {
         file_count: project.file_count,
         message_count: project.message_count,
-        unread_count: project.unread_count
+        unread_count: project.unread_count,
       };
       // Remove flat properties to avoid duplication
       delete project.file_count;
@@ -180,7 +194,7 @@ router.get(
       project,
       files,
       messages,
-      updates
+      updates,
     });
   })
 );
@@ -214,16 +228,20 @@ router.post(
       [req.user!.id, name, description, projectType, budget || null, timeline || null]
     );
 
-    const newProject = await db.get('SELECT * FROM projects WHERE id = ?', [result.lastID]);
+    const newProject = await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`, [result.lastID]);
 
     // Generate default milestones and tasks for the new project
     try {
       const generationResult = await generateDefaultMilestones(result.lastID!, projectType);
-      console.log(
-        `[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${result.lastID}`
+      await logger.info(
+        `[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${result.lastID}`,
+        { category: 'PROJECTS' }
       );
     } catch (milestoneError) {
-      console.error('[Projects] Failed to generate milestones:', milestoneError);
+      await logger.error('[Projects] Failed to generate milestones:', {
+        error: milestoneError instanceof Error ? milestoneError : undefined,
+        category: 'PROJECTS',
+      });
       // Non-critical - don't fail the request
     }
 
@@ -242,10 +260,13 @@ router.post(
         companyName: client?.company_name || 'Unknown Company',
         projectType: projectType,
         budget: budget || 'Not specified',
-        timeline: timeline || 'Not specified'
+        timeline: timeline || 'Not specified',
       });
     } catch (emailError) {
-      console.error('Failed to send admin notification:', emailError);
+      await logger.error('Failed to send admin notification:', {
+        error: emailError instanceof Error ? emailError : undefined,
+        category: 'PROJECTS',
+      });
     }
 
     // Emit workflow event for project creation
@@ -254,13 +275,13 @@ router.post(
       triggeredBy: req.user?.email || 'client',
       clientId: req.user!.id,
       projectType,
-      name
+      name,
     });
 
     res.status(201).json({
       success: true,
       message: 'Project request submitted successfully. We will review and get back to you soon!',
-      project: newProject
+      project: newProject,
     });
   })
 );
@@ -278,11 +299,16 @@ router.post(
       priority = 'medium',
       start_date,
       due_date,
-      budget
+      budget,
     } = req.body;
 
     if (!client_id || !name) {
-      return errorResponse(res, 'Client ID and project name are required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(
+        res,
+        'Client ID and project name are required',
+        400,
+        'MISSING_REQUIRED_FIELDS'
+      );
     }
 
     const db = getDatabase();
@@ -302,9 +328,7 @@ router.post(
     );
 
     const newProject = await db.get(
-      `
-    SELECT * FROM projects WHERE id = ?
-  `,
+      `SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`,
       [result.lastID]
     );
 
@@ -313,13 +337,17 @@ router.post(
       const projectType = (newProject as { project_type?: string })?.project_type || null;
       const projectStartDate = start_date ? new Date(start_date) : undefined;
       const generationResult = await generateDefaultMilestones(result.lastID!, projectType, {
-        startDate: projectStartDate
+        startDate: projectStartDate,
       });
-      console.log(
-        `[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${result.lastID}`
+      await logger.info(
+        `[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${result.lastID}`,
+        { category: 'PROJECTS' }
       );
     } catch (milestoneError) {
-      console.error('[Projects] Failed to generate milestones:', milestoneError);
+      await logger.error('[Projects] Failed to generate milestones:', {
+        error: milestoneError instanceof Error ? milestoneError : undefined,
+        category: 'PROJECTS',
+      });
       // Non-critical - don't fail the request
     }
 
@@ -328,12 +356,12 @@ router.post(
       entityId: result.lastID,
       triggeredBy: 'admin',
       clientId: client_id,
-      name
+      name,
     });
 
     res.status(201).json({
       message: 'Project created successfully',
-      project: newProject
+      project: newProject,
     });
   })
 );
@@ -351,11 +379,11 @@ router.put(
     // Check if user can update this project
     let project;
     if (isAdmin) {
-      project = await db.get('SELECT * FROM projects WHERE id = ?', [projectId]);
+      project = await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ?`, [projectId]);
     } else {
-      project = await db.get('SELECT * FROM projects WHERE id = ? AND client_id = ?', [
+      project = await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`, [
         projectId,
-        req.user!.id
+        req.user!.id,
       ]);
     }
 
@@ -365,9 +393,19 @@ router.put(
 
     // When updating status, validate against allowed project statuses (not lead pipeline statuses)
     if (req.body.status !== undefined) {
-      const projectStatuses = ['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled'];
+      const projectStatuses = [
+        'pending',
+        'active',
+        'in-progress',
+        'in-review',
+        'completed',
+        'on-hold',
+        'cancelled',
+      ];
       let raw =
-        typeof req.body.status === 'string' ? req.body.status.trim().toLowerCase().replace(/_/g, '-') : '';
+        typeof req.body.status === 'string'
+          ? req.body.status.trim().toLowerCase().replace(/_/g, '-')
+          : '';
       if (raw === 'in progress') raw = 'in-progress';
       if (raw === 'on hold') raw = 'on-hold';
       if (!projectStatuses.includes(raw)) {
@@ -409,11 +447,10 @@ router.put(
       production_url: 'production_url',
       deposit_amount: 'deposit_amount',
       contract_signed_at: 'contract_signed_at',
-      contract_signed_date: 'contract_signed_at' // Frontend sends contract_signed_date
+      contract_signed_date: 'contract_signed_at', // Frontend sends contract_signed_date
     };
-    const allowedUpdates =
-      isAdmin
-        ? [
+    const allowedUpdates = isAdmin
+      ? [
           'name',
           'project_name',
           'project_type',
@@ -437,9 +474,9 @@ router.put(
           'production_url',
           'deposit_amount',
           'contract_signed_at',
-          'contract_signed_date'
+          'contract_signed_date',
         ]
-        : ['description']; // Clients can only update description
+      : ['description']; // Clients can only update description
 
     for (const field of allowedUpdates) {
       if (req.body[field] !== undefined) {
@@ -495,7 +532,7 @@ router.put(
         entityId: projectId,
         triggeredBy: req.user?.email || 'system',
         previousStatus: project.status,
-        newStatus: req.body.status
+        newStatus: req.body.status,
       });
     }
 
@@ -512,10 +549,10 @@ router.put(
           const statusDescriptions: { [key: string]: string } = {
             pending: 'Your project has been queued and will begin soon.',
             'in-progress': 'Work has begun on your project and is progressing well.',
-            'in-review': 'Your project is complete and under review. We\'ll have updates soon.',
+            'in-review': "Your project is complete and under review. We'll have updates soon.",
             completed: 'Congratulations! Your project has been completed successfully.',
             'on-hold':
-              'Your project has been temporarily paused. We\'ll keep you updated on next steps.'
+              "Your project has been temporarily paused. We'll keep you updated on next steps.",
           };
 
           const clientEmail = getString(client, 'email');
@@ -524,15 +561,23 @@ router.put(
           await emailService.sendProjectUpdateEmail(clientEmail, {
             projectName: updatedProjectName || 'Your Project',
             status: req.body.status,
-            description: statusDescriptions[req.body.status] || 'Your project status has been updated.',
+            description:
+              statusDescriptions[req.body.status] || 'Your project status has been updated.',
             clientName: clientContactName || 'Client',
             portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhad.codes/client/portal.html'}?project=${projectId}`,
             nextSteps:
               req.body.status === 'completed'
-                ? ['Review the final deliverables', 'Provide feedback', 'Schedule follow-up if needed']
+                ? [
+                    'Review the final deliverables',
+                    'Provide feedback',
+                    'Schedule follow-up if needed',
+                  ]
                 : req.body.status === 'in-review'
-                  ? ['Review will be completed within 2 business days', 'We may contact you for clarifications']
-                  : []
+                  ? [
+                      'Review will be completed within 2 business days',
+                      'We may contact you for clarifications',
+                    ]
+                  : [],
           });
 
           // Send admin notification for milestone completion
@@ -546,21 +591,24 @@ router.put(
                 clientId: client.id,
                 clientName: client.contact_name || 'Unknown',
                 companyName: client.company_name || 'Unknown Company',
-                completedAt: new Date().toISOString()
+                completedAt: new Date().toISOString(),
               },
-              timestamp: new Date()
+              timestamp: new Date(),
             });
           }
         }
       } catch (emailError) {
-        console.error('Failed to send project update email:', emailError);
+        await logger.error('Failed to send project update email:', {
+          error: emailError instanceof Error ? emailError : undefined,
+          category: 'PROJECTS',
+        });
         // Continue with response - don't fail project update due to email issues
       }
     }
 
     res.json({
       message: 'Project updated successfully',
-      project: updatedProject
+      project: updatedProject,
     });
   })
 );
@@ -585,7 +633,7 @@ router.delete(
       success: true,
       message: result.message,
       projectId,
-      affectedItems: result.affectedItems
+      affectedItems: result.affectedItems,
     });
   })
 );
@@ -598,9 +646,8 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
 
-    const { fetchProjectReportData, generateProjectReportPdf } = await import(
-      '../../services/project-report-service.js'
-    );
+    const { fetchProjectReportData, generateProjectReportPdf } =
+      await import('../../services/project-report-service.js');
 
     const reportData = await fetchProjectReportData(projectId);
     if (!reportData) {
@@ -626,9 +673,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
 
-    const { fetchSowData, generateSowPdf } = await import(
-      '../../services/sow-service.js'
-    );
+    const { fetchSowData, generateSowPdf } = await import('../../services/sow-service.js');
 
     const sowData = await fetchSowData(projectId);
     if (!sowData) {
@@ -654,9 +699,8 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
 
-    const { fetchProjectReportData, generateProjectReportPdf } = await import(
-      '../../services/project-report-service.js'
-    );
+    const { fetchProjectReportData, generateProjectReportPdf } =
+      await import('../../services/project-report-service.js');
 
     const reportData = await fetchProjectReportData(projectId);
     if (!reportData) {
@@ -681,9 +725,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
 
-    const { fetchSowData, generateSowPdf } = await import(
-      '../../services/sow-service.js'
-    );
+    const { fetchSowData, generateSowPdf } = await import('../../services/sow-service.js');
 
     const sowData = await fetchSowData(projectId);
     if (!sowData) {
@@ -709,9 +751,8 @@ router.post(
     const projectId = parseInt(req.params.id);
     const db = getDatabase();
 
-    const { fetchProjectReportData, generateProjectReportPdf } = await import(
-      '../../services/project-report-service.js'
-    );
+    const { fetchProjectReportData, generateProjectReportPdf } =
+      await import('../../services/project-report-service.js');
 
     const reportData = await fetchProjectReportData(projectId);
     if (!reportData) {
@@ -750,7 +791,7 @@ router.post(
         `Project Report - Generated ${dateStr}`,
         req.user?.email || 'admin',
         'document',
-        false
+        false,
       ]
     );
 
@@ -760,8 +801,8 @@ router.post(
       file: {
         id: result.lastID,
         filename,
-        size: pdfBytes.length
-      }
+        size: pdfBytes.length,
+      },
     });
   })
 );
@@ -775,9 +816,7 @@ router.post(
     const projectId = parseInt(req.params.id);
     const db = getDatabase();
 
-    const { fetchSowData, generateSowPdf } = await import(
-      '../../services/sow-service.js'
-    );
+    const { fetchSowData, generateSowPdf } = await import('../../services/sow-service.js');
 
     const sowData = await fetchSowData(projectId);
     if (!sowData) {
@@ -816,7 +855,7 @@ router.post(
         `Statement of Work - Generated ${dateStr}`,
         req.user?.email || 'admin',
         'contract',
-        false
+        false,
       ]
     );
 
@@ -826,8 +865,8 @@ router.post(
       file: {
         id: result.lastID,
         filename,
-        size: pdfBytes.length
-      }
+        size: pdfBytes.length,
+      },
     });
   })
 );

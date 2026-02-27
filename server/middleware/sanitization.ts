@@ -102,7 +102,7 @@ export function sanitizeInputs(
     sanitizeBody = true,
     sanitizeQuery = true,
     sanitizeParams = true,
-    skipPaths = []
+    skipPaths = [],
   } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
@@ -129,7 +129,9 @@ export function sanitizeInputs(
 
       next();
     } catch (error) {
-      logger.error('Sanitization middleware error', { error: error instanceof Error ? error : undefined });
+      logger.error('Sanitization middleware error', {
+        error: error instanceof Error ? error : undefined,
+      });
       // Don't block the request on sanitization error, but log it
       next();
     }

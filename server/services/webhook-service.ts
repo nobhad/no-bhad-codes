@@ -55,7 +55,7 @@ export class WebhookService {
         secretKey,
         options?.retryEnabled ? 1 : 0,
         options?.retryMaxAttempts || 3,
-        options?.retryBackoffSeconds || 60
+        options?.retryBackoffSeconds || 60,
       ]
     );
 
@@ -105,7 +105,7 @@ export class WebhookService {
       is_active = existing.is_active,
       retry_enabled = existing.retry_enabled,
       retry_max_attempts = existing.retry_max_attempts,
-      retry_backoff_seconds = existing.retry_backoff_seconds
+      retry_backoff_seconds = existing.retry_backoff_seconds,
     } = { ...updates };
 
     const eventString = Array.isArray(events) ? events.join(',') : events;
@@ -126,7 +126,7 @@ export class WebhookService {
         retry_enabled ? 1 : 0,
         retry_max_attempts,
         retry_backoff_seconds,
-        id
+        id,
       ]
     );
 
@@ -148,7 +148,7 @@ export class WebhookService {
   async toggleWebhook(id: number, active: boolean): Promise<WebhookConfig> {
     await this.db.run('UPDATE webhooks SET is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?', [
       active ? 1 : 0,
-      id
+      id,
     ]);
     const webhook = await this.getWebhookById(id);
     if (!webhook) throw new Error('Webhook not found');
@@ -161,7 +161,7 @@ export class WebhookService {
    */
   async triggerEvent(eventType: string, eventData: Record<string, any>): Promise<void> {
     const webhooks = await this.listWebhooks(true); // Get active only
-    const matching = webhooks.filter(w => w.events.includes(eventType));
+    const matching = webhooks.filter((w) => w.events.includes(eventType));
 
     for (const webhook of matching) {
       await this.executeWebhook(webhook, eventType, eventData);
@@ -206,7 +206,7 @@ export class WebhookService {
         'X-Signature': `${this.signingAlgorithm}=${signature}`,
         'X-Timestamp': new Date().toISOString(),
         'X-Event-ID': payload.event_id,
-        ...webhook.headers
+        ...webhook.headers,
       };
 
       // eslint-disable-next-line no-undef
@@ -217,7 +217,7 @@ export class WebhookService {
         method: webhook.method,
         headers,
         body: JSON.stringify(payload),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -262,7 +262,7 @@ export class WebhookService {
     if (attempt > webhook.retry_max_attempts) {
       // Max retries exceeded
       await this.db.run(
-        'UPDATE webhook_deliveries SET status=\'failed\', updated_at=CURRENT_TIMESTAMP WHERE id=?',
+        "UPDATE webhook_deliveries SET status='failed', updated_at=CURRENT_TIMESTAMP WHERE id=?",
         [deliveryId]
       );
       return;
@@ -307,13 +307,18 @@ export class WebhookService {
         retry_max_attempts: row.retry_max_attempts as number,
         retry_backoff_seconds: row.retry_backoff_seconds as number,
         created_at: row.created_at as string,
-        updated_at: row.updated_at as string
+        updated_at: row.updated_at as string,
       };
 
       const payload = JSON.parse(row.event_data as string);
       const signature = row.signature as string;
 
-      await this.deliverWebhookAttempt(webhookData as WebhookConfig, row.id as number, payload, signature);
+      await this.deliverWebhookAttempt(
+        webhookData as WebhookConfig,
+        row.id as number,
+        payload,
+        signature
+      );
     }
   }
 
@@ -369,7 +374,7 @@ export class WebhookService {
     const rows = await this.db.all(query, params);
     return {
       deliveries: rows.map((row: any) => this.formatDelivery(row)),
-      total: Number(countResult?.count) || 0
+      total: Number(countResult?.count) || 0,
     };
   }
 
@@ -408,10 +413,10 @@ export class WebhookService {
    */
   async regenerateSecret(webhookId: number): Promise<string> {
     const newSecret = this.generateSecretKey();
-    await this.db.run('UPDATE webhooks SET secret_key = ?, updated_at=CURRENT_TIMESTAMP WHERE id = ?', [
-      newSecret,
-      webhookId
-    ]);
+    await this.db.run(
+      'UPDATE webhooks SET secret_key = ?, updated_at=CURRENT_TIMESTAMP WHERE id = ?',
+      [newSecret, webhookId]
+    );
     return newSecret;
   }
 
@@ -440,7 +445,7 @@ export class WebhookService {
       event_type: eventType,
       event_id: this.generateEventId(),
       timestamp: new Date().toISOString(),
-      data: customPayload
+      data: customPayload,
     };
   }
 
@@ -493,7 +498,7 @@ export class WebhookService {
       retry_max_attempts: row.retry_max_attempts,
       retry_backoff_seconds: row.retry_backoff_seconds,
       created_at: row.created_at,
-      updated_at: row.updated_at
+      updated_at: row.updated_at,
     };
   }
 
@@ -515,7 +520,7 @@ export class WebhookService {
       delivered_at: row.delivered_at,
       next_retry_at: row.next_retry_at,
       created_at: row.created_at,
-      updated_at: row.updated_at
+      updated_at: row.updated_at,
     };
   }
 }
@@ -542,7 +547,8 @@ export const webhookService = {
   ) => getWebhookService().createWebhook(name, url, events, payloadTemplate, options),
   updateWebhook: async (id: number, updates: any) => getWebhookService().updateWebhook(id, updates),
   deleteWebhook: async (id: number) => getWebhookService().deleteWebhook(id),
-  toggleWebhook: async (id: number, active: boolean) => getWebhookService().toggleWebhook(id, active),
+  toggleWebhook: async (id: number, active: boolean) =>
+    getWebhookService().toggleWebhook(id, active),
   triggerEvent: async (eventType: string, eventData: any) =>
     getWebhookService().triggerEvent(eventType, eventData),
   getDeliveryById: async (id: number) => getWebhookService().getDeliveryById(id),
@@ -550,7 +556,7 @@ export const webhookService = {
     getWebhookService().getWebhookDeliveries(webhookId, options),
   getDeliveryStats: async (webhookId: number) => getWebhookService().getDeliveryStats(webhookId),
   processPendingRetries: async () => getWebhookService().processPendingRetries(),
-  regenerateSecret: async (webhookId: number) => getWebhookService().regenerateSecret(webhookId)
+  regenerateSecret: async (webhookId: number) => getWebhookService().regenerateSecret(webhookId),
 };
 
 export default webhookService;

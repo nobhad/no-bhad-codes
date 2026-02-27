@@ -104,7 +104,7 @@ class ClientInfoService {
     const db = await getDatabase();
 
     // Get document request stats
-    const docStats = await db.get(
+    const docStats = (await db.get(
       `SELECT
          COUNT(*) as total,
          SUM(CASE WHEN status IN ('requested', 'viewed') THEN 1 ELSE 0 END) as pending,
@@ -112,10 +112,10 @@ class ClientInfoService {
        FROM document_requests
        WHERE client_id = ?`,
       [clientId]
-    ) as { total: number; pending: number; approved: number } | undefined;
+    )) as { total: number; pending: number; approved: number } | undefined;
 
     // Get questionnaire response stats
-    const qStats = await db.get(
+    const qStats = (await db.get(
       `SELECT
          COUNT(*) as total,
          SUM(CASE WHEN status IN ('pending', 'in_progress') THEN 1 ELSE 0 END) as pending,
@@ -123,22 +123,30 @@ class ClientInfoService {
        FROM questionnaire_responses
        WHERE client_id = ?`,
       [clientId]
-    ) as { total: number; pending: number; completed: number } | undefined;
+    )) as { total: number; pending: number; completed: number } | undefined;
 
     // Get onboarding status
     const onboarding = await this.getOnboardingProgress(clientId);
 
     // Get client profile to check completeness
-    const client = await db.get(
+    const client = (await db.get(
       `SELECT company_name, contact_name, email, phone, address
        FROM clients WHERE id = ?`,
       [clientId]
-    ) as { company_name?: string; contact_name?: string; email?: string; phone?: string; address?: string } | undefined;
+    )) as
+      | {
+          company_name?: string;
+          contact_name?: string;
+          email?: string;
+          phone?: string;
+          address?: string;
+        }
+      | undefined;
 
     // Calculate profile completeness
     const profileFields = ['company_name', 'contact_name', 'email', 'phone', 'address'];
     const filledFields = profileFields.filter(
-      field => client && client[field as keyof typeof client]
+      (field) => client && client[field as keyof typeof client]
     );
     const profileComplete = filledFields.length >= 4; // At least 4 of 5 fields
 
@@ -171,15 +179,13 @@ class ClientInfoService {
     }
 
     // Normalize percentage
-    const overallPercentage = totalWeight > 0
-      ? Math.round((completedWeight / totalWeight) * 100)
-      : 0;
+    const overallPercentage =
+      totalWeight > 0 ? Math.round((completedWeight / totalWeight) * 100) : 0;
 
     // Upsert completeness record
-    const existing = await db.get(
-      'SELECT id FROM client_info_completeness WHERE client_id = ?',
-      [clientId]
-    );
+    const existing = await db.get('SELECT id FROM client_info_completeness WHERE client_id = ?', [
+      clientId,
+    ]);
 
     if (existing) {
       await db.run(
@@ -205,7 +211,7 @@ class ClientInfoService {
           qStats?.completed || 0,
           qStats?.total || 0,
           onboarding?.status === 'completed' ? 1 : 0,
-          clientId
+          clientId,
         ]
       );
     } else {
@@ -226,7 +232,7 @@ class ClientInfoService {
           qStats?.pending || 0,
           qStats?.completed || 0,
           qStats?.total || 0,
-          onboarding?.status === 'completed' ? 1 : 0
+          onboarding?.status === 'completed' ? 1 : 0,
         ]
       );
     }
@@ -240,10 +246,9 @@ class ClientInfoService {
   async getCompleteness(clientId: number): Promise<ClientInfoCompleteness | null> {
     const db = await getDatabase();
 
-    const row = await db.get(
-      'SELECT * FROM client_info_completeness WHERE client_id = ?',
-      [clientId]
-    );
+    const row = await db.get('SELECT * FROM client_info_completeness WHERE client_id = ?', [
+      clientId,
+    ]);
 
     if (!row) return null;
 
@@ -256,11 +261,11 @@ class ClientInfoService {
   async getClientInfoStatus(clientId: number): Promise<ClientInfoStatus | null> {
     const db = await getDatabase();
 
-    const client = await db.get(
+    const client = (await db.get(
       `SELECT id, company_name, contact_name, email
        FROM clients WHERE id = ?`,
       [clientId]
-    ) as { id: number; company_name?: string; contact_name?: string; email: string } | undefined;
+    )) as { id: number; company_name?: string; contact_name?: string; email: string } | undefined;
 
     if (!client) return null;
 
@@ -273,7 +278,7 @@ class ClientInfoService {
       client_name: client.company_name || client.contact_name || 'Unknown',
       client_email: client.email,
       completeness,
-      onboarding
+      onboarding,
     };
   }
 
@@ -288,12 +293,12 @@ class ClientInfoService {
     const db = await getDatabase();
 
     // Get all clients
-    const clients = await db.all(
+    const clients = (await db.all(
       `SELECT id, company_name, contact_name, email
        FROM clients
        WHERE deleted_at IS NULL
        ORDER BY COALESCE(company_name, contact_name) ASC`
-    ) as Array<{ id: number; company_name?: string; contact_name?: string; email: string }>;
+    )) as Array<{ id: number; company_name?: string; contact_name?: string; email: string }>;
 
     const results: ClientInfoStatus[] = [];
 
@@ -302,16 +307,22 @@ class ClientInfoService {
       if (!status) continue;
 
       // Apply filters
-      if (filters?.minCompleteness !== undefined &&
-          status.completeness.overall_percentage < filters.minCompleteness) {
+      if (
+        filters?.minCompleteness !== undefined &&
+        status.completeness.overall_percentage < filters.minCompleteness
+      ) {
         continue;
       }
-      if (filters?.maxCompleteness !== undefined &&
-          status.completeness.overall_percentage > filters.maxCompleteness) {
+      if (
+        filters?.maxCompleteness !== undefined &&
+        status.completeness.overall_percentage > filters.maxCompleteness
+      ) {
         continue;
       }
-      if (filters?.onboardingStatus !== undefined &&
-          status.onboarding?.status !== filters.onboardingStatus) {
+      if (
+        filters?.onboardingStatus !== undefined &&
+        status.onboarding?.status !== filters.onboardingStatus
+      ) {
         continue;
       }
 
@@ -329,32 +340,40 @@ class ClientInfoService {
     const items: MissingItem[] = [];
 
     // Check profile completeness
-    const client = await db.get(
+    const client = (await db.get(
       `SELECT company_name, contact_name, email, phone, address
        FROM clients WHERE id = ?`,
       [clientId]
-    ) as { company_name?: string; contact_name?: string; email?: string; phone?: string; address?: string } | undefined;
+    )) as
+      | {
+          company_name?: string;
+          contact_name?: string;
+          email?: string;
+          phone?: string;
+          address?: string;
+        }
+      | undefined;
 
     if (client) {
       if (!client.company_name) {
         items.push({
           type: 'profile',
           title: 'Company Name',
-          description: 'Please add your company or business name'
+          description: 'Please add your company or business name',
         });
       }
       if (!client.phone) {
         items.push({
           type: 'profile',
           title: 'Phone Number',
-          description: 'Please add a contact phone number'
+          description: 'Please add a contact phone number',
         });
       }
       if (!client.address) {
         items.push({
           type: 'profile',
           title: 'Business Address',
-          description: 'Please add your business address'
+          description: 'Please add your business address',
         });
       }
     }
@@ -365,18 +384,24 @@ class ClientInfoService {
       items.push({
         type: 'onboarding',
         title: 'Complete Onboarding Wizard',
-        description: 'Complete the onboarding wizard to help us understand your project needs'
+        description: 'Complete the onboarding wizard to help us understand your project needs',
       });
     }
 
     // Check pending document requests
-    const pendingDocs = await db.all(
+    const pendingDocs = (await db.all(
       `SELECT id, title, description, due_date, priority
        FROM document_requests
        WHERE client_id = ? AND status IN ('requested', 'viewed')
        ORDER BY CASE WHEN due_date IS NULL THEN 1 ELSE 0 END, due_date ASC`,
       [clientId]
-    ) as Array<{ id: number; title: string; description?: string; due_date?: string; priority?: string }>;
+    )) as Array<{
+      id: number;
+      title: string;
+      description?: string;
+      due_date?: string;
+      priority?: string;
+    }>;
 
     for (const doc of pendingDocs) {
       items.push({
@@ -385,19 +410,19 @@ class ClientInfoService {
         title: doc.title,
         description: doc.description,
         due_date: doc.due_date,
-        priority: doc.priority
+        priority: doc.priority,
       });
     }
 
     // Check pending questionnaires
-    const pendingQuestionnaires = await db.all(
+    const pendingQuestionnaires = (await db.all(
       `SELECT qr.id, q.name as title, q.description, qr.due_date
        FROM questionnaire_responses qr
        JOIN questionnaires q ON qr.questionnaire_id = q.id
        WHERE qr.client_id = ? AND qr.status IN ('pending', 'in_progress')
        ORDER BY CASE WHEN qr.due_date IS NULL THEN 1 ELSE 0 END, qr.due_date ASC`,
       [clientId]
-    ) as Array<{ id: number; title: string; description?: string; due_date?: string }>;
+    )) as Array<{ id: number; title: string; description?: string; due_date?: string }>;
 
     for (const q of pendingQuestionnaires) {
       items.push({
@@ -405,7 +430,7 @@ class ClientInfoService {
         id: q.id,
         title: q.title,
         description: q.description,
-        due_date: q.due_date
+        due_date: q.due_date,
       });
     }
 
@@ -422,10 +447,7 @@ class ClientInfoService {
   async getOnboardingProgress(clientId: number): Promise<OnboardingProgress | null> {
     const db = await getDatabase();
 
-    const row = await db.get(
-      'SELECT * FROM client_onboarding WHERE client_id = ?',
-      [clientId]
-    );
+    const row = await db.get('SELECT * FROM client_onboarding WHERE client_id = ?', [clientId]);
 
     if (!row) return null;
 
@@ -492,9 +514,7 @@ class ClientInfoService {
       );
     } else {
       // Update existing record
-      const mergedData = finalData
-        ? { ...existing.step_data, ...finalData }
-        : existing.step_data;
+      const mergedData = finalData ? { ...existing.step_data, ...finalData } : existing.step_data;
 
       await db.run(
         `UPDATE client_onboarding
@@ -543,7 +563,7 @@ class ClientInfoService {
       questionnaires_completed: row.questionnaires_completed as number,
       questionnaires_total: row.questionnaires_total as number,
       onboarding_complete: Boolean(row.onboarding_complete),
-      last_calculated_at: row.last_calculated_at as string
+      last_calculated_at: row.last_calculated_at as string,
     };
   }
 
@@ -556,13 +576,14 @@ class ClientInfoService {
       client_id: row.client_id as number,
       project_id: row.project_id as number | undefined,
       current_step: row.current_step as number,
-      step_data: typeof row.step_data === 'string'
-        ? JSON.parse(row.step_data)
-        : row.step_data as Record<string, unknown>,
+      step_data:
+        typeof row.step_data === 'string'
+          ? JSON.parse(row.step_data)
+          : (row.step_data as Record<string, unknown>),
       status: row.status as OnboardingStatus,
       completed_at: row.completed_at as string | undefined,
       created_at: row.created_at as string,
-      updated_at: row.updated_at as string
+      updated_at: row.updated_at as string,
     };
   }
 }

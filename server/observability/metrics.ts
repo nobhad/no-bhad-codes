@@ -39,23 +39,23 @@ export function initMetrics(): void {
     description: 'HTTP request duration in milliseconds',
     unit: 'ms',
     advice: {
-      explicitBucketBoundaries: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
-    }
+      explicitBucketBoundaries: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000],
+    },
   });
 
   // HTTP Request Counter
   httpRequestTotal = meter.createCounter('http.server.request.total', {
-    description: 'Total number of HTTP requests'
+    description: 'Total number of HTTP requests',
   });
 
   // HTTP Error Counter
   httpErrorTotal = meter.createCounter('http.server.error.total', {
-    description: 'Total number of HTTP errors (4xx and 5xx)'
+    description: 'Total number of HTTP errors (4xx and 5xx)',
   });
 
   // Active HTTP Connections Observable Gauge
   activeConnections = meter.createObservableGauge('http.server.active_connections', {
-    description: 'Number of currently active HTTP connections'
+    description: 'Number of currently active HTTP connections',
   });
 
   activeConnections.addCallback((observableResult) => {
@@ -66,15 +66,15 @@ export function initMetrics(): void {
 
   // Database Pool Metrics
   const dbActiveConnections = meter.createObservableGauge('db.pool.connections.active', {
-    description: 'Number of active database connections'
+    description: 'Number of active database connections',
   });
 
   const dbIdleConnections = meter.createObservableGauge('db.pool.connections.idle', {
-    description: 'Number of idle database connections'
+    description: 'Number of idle database connections',
   });
 
   const dbQueuedRequests = meter.createObservableGauge('db.pool.requests.queued', {
-    description: 'Number of queued database requests'
+    description: 'Number of queued database requests',
   });
 
   dbActiveConnections.addCallback((observableResult) => {
@@ -98,13 +98,13 @@ export function initMetrics(): void {
   dbPoolMetrics = {
     activeConnections: dbActiveConnections,
     idleConnections: dbIdleConnections,
-    queuedRequests: dbQueuedRequests
+    queuedRequests: dbQueuedRequests,
   };
 
   // System Metrics (Memory, CPU)
   const memoryUsage = meter.createObservableGauge('process.memory.heap_used', {
     description: 'Process heap memory usage in bytes',
-    unit: 'bytes'
+    unit: 'bytes',
   });
 
   memoryUsage.addCallback((observableResult) => {
@@ -114,7 +114,7 @@ export function initMetrics(): void {
 
   const memoryTotal = meter.createObservableGauge('process.memory.heap_total', {
     description: 'Process total heap memory in bytes',
-    unit: 'bytes'
+    unit: 'bytes',
   });
 
   memoryTotal.addCallback((observableResult) => {
@@ -124,7 +124,7 @@ export function initMetrics(): void {
 
   const memoryRss = meter.createObservableGauge('process.memory.rss', {
     description: 'Process resident set size in bytes',
-    unit: 'bytes'
+    unit: 'bytes',
   });
 
   memoryRss.addCallback((observableResult) => {
@@ -147,7 +147,7 @@ export function recordHttpRequest(
   const attributes: Attributes = {
     'http.method': method,
     'http.route': route,
-    'http.status_code': statusCode
+    'http.status_code': statusCode,
   };
 
   if (httpRequestDuration) {
@@ -162,7 +162,7 @@ export function recordHttpRequest(
   if (statusCode >= 400 && httpErrorTotal) {
     httpErrorTotal.add(1, {
       ...attributes,
-      'http.error_type': statusCode >= 500 ? 'server_error' : 'client_error'
+      'http.error_type': statusCode >= 500 ? 'server_error' : 'client_error',
     });
   }
 }
@@ -208,20 +208,20 @@ export function getMetricsSummary(): {
 
   return {
     http: {
-      activeConnections: activeConnectionsCallback ? activeConnectionsCallback() : 0
+      activeConnections: activeConnectionsCallback ? activeConnectionsCallback() : 0,
     },
     database: {
       activeConnections: dbStats.active,
       idleConnections: dbStats.idle,
-      queuedRequests: dbStats.queued
+      queuedRequests: dbStats.queued,
     },
     memory: {
       heapUsed: memoryUsage.heapUsed,
       heapTotal: memoryUsage.heapTotal,
       rss: memoryUsage.rss,
-      external: memoryUsage.external
+      external: memoryUsage.external,
     },
-    uptime: process.uptime()
+    uptime: process.uptime(),
   };
 }
 
@@ -236,15 +236,11 @@ export function createCounter(name: string, description: string): Counter {
 /**
  * Create a custom histogram metric
  */
-export function createHistogram(
-  name: string,
-  description: string,
-  buckets?: number[]
-): Histogram {
+export function createHistogram(name: string, description: string, buckets?: number[]): Histogram {
   const meter = getMeter('client-portal');
   return meter.createHistogram(name, {
     description,
-    advice: buckets ? { explicitBucketBoundaries: buckets } : undefined
+    advice: buckets ? { explicitBucketBoundaries: buckets } : undefined,
   });
 }
 
@@ -260,15 +256,15 @@ export function initBusinessMetrics(): void {
   const meter = getMeter('client-portal-business');
 
   invoiceCounter = meter.createCounter('business.invoices.created', {
-    description: 'Number of invoices created'
+    description: 'Number of invoices created',
   });
 
   emailCounter = meter.createCounter('business.emails.sent', {
-    description: 'Number of emails sent'
+    description: 'Number of emails sent',
   });
 
   taskCounter = meter.createCounter('business.tasks.completed', {
-    description: 'Number of tasks completed'
+    description: 'Number of tasks completed',
   });
 }
 

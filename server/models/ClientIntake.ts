@@ -68,7 +68,7 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       'status',
       'priority',
       'estimated_hours',
-      'quoted_price'
+      'quoted_price',
     ],
     hidden: [],
     casts: {
@@ -79,8 +79,8 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       reviewed_by: 'number' as const,
       reviewed_at: 'date' as const,
       created_at: 'date' as const,
-      updated_at: 'date' as const
-    }
+      updated_at: 'date' as const,
+    },
   };
 
   // Accessor methods
@@ -211,7 +211,7 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       'e-commerce': 4,
       'web-app': 5,
       'browser-extension': 4,
-      other: 3
+      other: 3,
     };
     score += typeScores[this.getProjectType()] || 3;
 
@@ -224,7 +224,7 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       asap: 2,
       '1-3-months': 1,
       '3-6-months': 0.5,
-      flexible: 0
+      flexible: 0,
     };
     score += timelineScores[this.getTimeline()] || 0;
 
@@ -234,7 +234,7 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       '2k-5k': 1,
       '5k-10k': 0.5,
       '10k-plus': 0,
-      discuss: 1
+      discuss: 1,
     };
     score += budgetScores[this.getBudgetRange()] || 1;
 
@@ -250,7 +250,7 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       'e-commerce': 80,
       'web-app': 120,
       'browser-extension': 60,
-      other: 40
+      other: 40,
     };
 
     const base = baseHours[this.getProjectType()] || 40;
@@ -271,7 +271,7 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       'e-commerce': 1.2,
       'web-app': 1.3,
       'browser-extension': 1.1,
-      other: 1.0
+      other: 1.0,
     };
 
     const multiplier = rateMultipliers[this.getProjectType()] || 1.0;
@@ -422,7 +422,7 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       'e-commerce',
       'web-app',
       'browser-extension',
-      'other'
+      'other',
     ];
     return validTypes.includes(projectType);
   }

@@ -22,7 +22,7 @@ import {
   addPageNumbers,
   setPdfMetadata,
   PAGE_MARGINS,
-  type PdfPageContext
+  type PdfPageContext,
 } from '../utils/pdf-utils.js';
 
 // ============================================
@@ -139,7 +139,8 @@ export async function fetchProjectReportData(projectId: number): Promise<Project
   const db = await getDatabase();
 
   // Fetch project with client info
-  const project = await db.get(`
+  const project = (await db.get(
+    `
     SELECT
       p.id, p.name, p.status, p.priority,
       p.created_at, p.start_date, p.deadline, p.completed_date,
@@ -148,60 +149,80 @@ export async function fetchProjectReportData(projectId: number): Promise<Project
     FROM projects p
     LEFT JOIN clients c ON p.client_id = c.id
     WHERE p.id = ?
-  `, [projectId]) as unknown as ProjectRow | undefined;
+  `,
+    [projectId]
+  )) as unknown as ProjectRow | undefined;
 
   if (!project) return null;
 
   // Fetch milestones
-  const milestonesRaw = await db.all(`
+  const milestonesRaw = await db.all(
+    `
     SELECT title, description, due_date, is_completed, completed_date
     FROM milestones
     WHERE project_id = ?
     ORDER BY due_date ASC, created_at ASC
-  `, [projectId]);
+  `,
+    [projectId]
+  );
   const milestones = milestonesRaw as unknown as MilestoneRow[];
 
   // Fetch time tracking entries
-  const timeEntriesRaw = await db.all(`
+  const timeEntriesRaw = await db.all(
+    `
     SELECT description, hours, date
     FROM time_entries
     WHERE project_id = ?
     ORDER BY date DESC
     LIMIT 50
-  `, [projectId]);
+  `,
+    [projectId]
+  );
   const timeEntries = timeEntriesRaw as unknown as TimeEntryRow[];
 
-  const totalHoursRow = await db.get(`
+  const totalHoursRow = (await db.get(
+    `
     SELECT COALESCE(SUM(hours), 0) as total
     FROM time_entries
     WHERE project_id = ?
-  `, [projectId]) as unknown as { total: number } | undefined;
+  `,
+    [projectId]
+  )) as unknown as { total: number } | undefined;
 
   // Fetch deliverables
-  const deliverablesRaw = await db.all(`
+  const deliverablesRaw = await db.all(
+    `
     SELECT name, status, submitted_at, approved_at
     FROM deliverables
     WHERE project_id = ?
     ORDER BY created_at ASC
-  `, [projectId]);
+  `,
+    [projectId]
+  );
   const deliverables = deliverablesRaw as unknown as DeliverableRow[];
 
   // Fetch financial summary
-  const invoicesRaw = await db.all(`
+  const invoicesRaw = await db.all(
+    `
     SELECT invoice_number, total_amount, status, due_date
     FROM invoices
     WHERE project_id = ?
     ORDER BY created_at DESC
-  `, [projectId]);
+  `,
+    [projectId]
+  );
   const invoices = invoicesRaw as unknown as InvoiceRow[];
 
-  const financialSummary = await db.get(`
+  const financialSummary = (await db.get(
+    `
     SELECT
       COALESCE(SUM(total_amount), 0) as total_invoiced,
       COALESCE(SUM(CASE WHEN status = 'paid' THEN total_amount ELSE 0 END), 0) as total_paid
     FROM invoices
     WHERE project_id = ?
-  `, [projectId]) as unknown as { total_invoiced: number; total_paid: number } | undefined;
+  `,
+    [projectId]
+  )) as unknown as { total_invoiced: number; total_paid: number } | undefined;
 
   return {
     project: {
@@ -215,45 +236,45 @@ export async function fetchProjectReportData(projectId: number): Promise<Project
       completedDate: project.completed_date,
       description: project.description,
       projectType: project.project_type,
-      budget: project.budget
+      budget: project.budget,
     },
     client: {
       name: project.client_name || 'Unknown Client',
       email: project.client_email || '',
-      company: project.client_company
+      company: project.client_company,
     },
-    milestones: milestones.map(m => ({
+    milestones: milestones.map((m) => ({
       title: m.title,
       description: m.description,
       dueDate: m.due_date,
       isCompleted: m.is_completed === 1,
-      completedDate: m.completed_date
+      completedDate: m.completed_date,
     })),
     timeTracking: {
       totalHours: totalHoursRow?.total || 0,
-      entries: timeEntries.map(e => ({
+      entries: timeEntries.map((e) => ({
         description: e.description,
         hours: e.hours,
-        date: e.date
-      }))
+        date: e.date,
+      })),
     },
-    deliverables: deliverables.map(d => ({
+    deliverables: deliverables.map((d) => ({
       name: d.name,
       status: d.status,
       submittedAt: d.submitted_at,
-      approvedAt: d.approved_at
+      approvedAt: d.approved_at,
     })),
     financial: {
       totalInvoiced: financialSummary?.total_invoiced || 0,
       totalPaid: financialSummary?.total_paid || 0,
       outstanding: (financialSummary?.total_invoiced || 0) - (financialSummary?.total_paid || 0),
-      invoices: invoices.map(i => ({
+      invoices: invoices.map((i) => ({
         invoiceNumber: i.invoice_number,
         amount: i.total_amount,
         status: i.status,
-        dueDate: i.due_date
-      }))
-    }
+        dueDate: i.due_date,
+      })),
+    },
   };
 }
 
@@ -272,7 +293,7 @@ export async function generateProjectReportPdf(data: ProjectReportData): Promise
     author: BUSINESS_INFO.name,
     subject: 'Project Status Report',
     creator: 'NoBhadCodes',
-    creationDate: new Date()
+    creationDate: new Date(),
   });
 
   const ctx = await createPdfContext(pdfDoc);
@@ -341,7 +362,7 @@ function drawPageHeader(ctx: PdfPageContext, projectName: string): void {
     y: ctx.height - 30,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.5, 0.5, 0.5)
+    color: rgb(0.5, 0.5, 0.5),
   });
   ctx.y = ctx.height - ctx.topMargin - 20;
 }
@@ -360,7 +381,7 @@ async function drawReportHeader(ctx: PdfPageContext, data: ProjectReportData): P
       x: ctx.rightMargin - logoWidth,
       y: y - logoHeight + 10,
       width: logoWidth,
-      height: logoHeight
+      height: logoHeight,
     });
   }
 
@@ -370,7 +391,7 @@ async function drawReportHeader(ctx: PdfPageContext, data: ProjectReportData): P
     y,
     size: 24,
     font: fonts.bold,
-    color: rgb(0.1, 0.1, 0.1)
+    color: rgb(0.1, 0.1, 0.1),
   });
   y -= 30;
 
@@ -380,18 +401,21 @@ async function drawReportHeader(ctx: PdfPageContext, data: ProjectReportData): P
     y,
     size: 16,
     font: fonts.bold,
-    color: rgb(0.2, 0.2, 0.2)
+    color: rgb(0.2, 0.2, 0.2),
   });
   y -= 20;
 
   // Client
-  currentPage.drawText(`Client: ${data.client.name}${data.client.company ? ` (${data.client.company})` : ''}`, {
-    x: leftMargin,
-    y,
-    size: 11,
-    font: fonts.regular,
-    color: rgb(0.3, 0.3, 0.3)
-  });
+  currentPage.drawText(
+    `Client: ${data.client.name}${data.client.company ? ` (${data.client.company})` : ''}`,
+    {
+      x: leftMargin,
+      y,
+      size: 11,
+      font: fonts.regular,
+      color: rgb(0.3, 0.3, 0.3),
+    }
+  );
   y -= 15;
 
   // Generated date
@@ -400,7 +424,7 @@ async function drawReportHeader(ctx: PdfPageContext, data: ProjectReportData): P
     y,
     size: 10,
     font: fonts.regular,
-    color: rgb(0.5, 0.5, 0.5)
+    color: rgb(0.5, 0.5, 0.5),
   });
   y -= 20;
 
@@ -409,7 +433,7 @@ async function drawReportHeader(ctx: PdfPageContext, data: ProjectReportData): P
     start: { x: leftMargin, y },
     end: { x: ctx.rightMargin, y },
     thickness: 1,
-    color: rgb(0.8, 0.8, 0.8)
+    color: rgb(0.8, 0.8, 0.8),
   });
 
   ctx.y = y - 10;
@@ -421,7 +445,7 @@ function drawSectionTitle(ctx: PdfPageContext, title: string): void {
     y: ctx.y,
     size: 14,
     font: ctx.fonts.bold,
-    color: rgb(0.15, 0.15, 0.15)
+    color: rgb(0.15, 0.15, 0.15),
   });
   ctx.y -= 5;
 
@@ -430,7 +454,7 @@ function drawSectionTitle(ctx: PdfPageContext, title: string): void {
     start: { x: ctx.leftMargin, y: ctx.y },
     end: { x: ctx.leftMargin + 150, y: ctx.y },
     thickness: 2,
-    color: rgb(0.5, 0.99, 0.04) // Brand green
+    color: rgb(0.5, 0.99, 0.04), // Brand green
   });
   ctx.y -= 15;
 }
@@ -445,7 +469,7 @@ function drawProjectOverview(ctx: PdfPageContext, data: ProjectReportData): void
     ['Project Type', data.project.projectType || 'Not specified'],
     ['Start Date', formatDate(data.project.startDate)],
     ['Deadline', formatDate(data.project.deadline)],
-    ['Budget', data.project.budget ? formatCurrency(data.project.budget) : 'Not specified']
+    ['Budget', data.project.budget ? formatCurrency(data.project.budget) : 'Not specified'],
   ];
 
   for (const [label, value] of fields) {
@@ -454,14 +478,14 @@ function drawProjectOverview(ctx: PdfPageContext, data: ProjectReportData): void
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: rgb(0.3, 0.3, 0.3),
     });
     ctx.currentPage.drawText(value, {
       x: ctx.leftMargin + labelWidth,
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1)
+      color: rgb(0.1, 0.1, 0.1),
     });
     ctx.y -= lineHeight;
   }
@@ -474,13 +498,13 @@ function drawProjectOverview(ctx: PdfPageContext, data: ProjectReportData): void
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: rgb(0.3, 0.3, 0.3),
     });
     ctx.y -= 14;
     drawWrappedText(ctx, data.project.description, {
       fontSize: 10,
       color: rgb(0.2, 0.2, 0.2),
-      lineHeight: 14
+      lineHeight: 14,
     });
   }
 }
@@ -490,17 +514,20 @@ function drawMilestones(
   milestones: ProjectReportData['milestones'],
   onNewPage: (ctx: PdfPageContext) => void
 ): void {
-  const completed = milestones.filter(m => m.isCompleted).length;
+  const completed = milestones.filter((m) => m.isCompleted).length;
   const total = milestones.length;
 
   // Summary
-  ctx.currentPage.drawText(`Progress: ${completed}/${total} completed (${Math.round((completed / total) * 100)}%)`, {
-    x: ctx.leftMargin,
-    y: ctx.y,
-    size: 10,
-    font: ctx.fonts.bold,
-    color: rgb(0.2, 0.2, 0.2)
-  });
+  ctx.currentPage.drawText(
+    `Progress: ${completed}/${total} completed (${Math.round((completed / total) * 100)}%)`,
+    {
+      x: ctx.leftMargin,
+      y: ctx.y,
+      size: 10,
+      font: ctx.fonts.bold,
+      color: rgb(0.2, 0.2, 0.2),
+    }
+  );
   ctx.y -= 18;
 
   // List milestones
@@ -515,7 +542,7 @@ function drawMilestones(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: statusColor
+      color: statusColor,
     });
 
     ctx.currentPage.drawText(milestone.title, {
@@ -523,7 +550,7 @@ function drawMilestones(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.1, 0.1, 0.1)
+      color: rgb(0.1, 0.1, 0.1),
     });
 
     if (milestone.dueDate) {
@@ -532,7 +559,7 @@ function drawMilestones(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.5, 0.5, 0.5)
+        color: rgb(0.5, 0.5, 0.5),
       });
     }
 
@@ -553,21 +580,22 @@ function drawDeliverables(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1)
+      color: rgb(0.1, 0.1, 0.1),
     });
 
-    const statusColor = deliverable.status === 'approved'
-      ? rgb(0.13, 0.55, 0.13)
-      : deliverable.status === 'rejected'
-        ? rgb(0.8, 0.2, 0.2)
-        : rgb(0.5, 0.5, 0.5);
+    const statusColor =
+      deliverable.status === 'approved'
+        ? rgb(0.13, 0.55, 0.13)
+        : deliverable.status === 'rejected'
+          ? rgb(0.8, 0.2, 0.2)
+          : rgb(0.5, 0.5, 0.5);
 
     ctx.currentPage.drawText(formatStatus(deliverable.status), {
       x: ctx.rightMargin - 80,
       y: ctx.y,
       size: 9,
       font: ctx.fonts.regular,
-      color: statusColor
+      color: statusColor,
     });
 
     ctx.y -= 16;
@@ -585,7 +613,7 @@ function drawTimeTracking(
     y: ctx.y,
     size: 11,
     font: ctx.fonts.bold,
-    color: rgb(0.1, 0.1, 0.1)
+    color: rgb(0.1, 0.1, 0.1),
   });
   ctx.y -= 20;
 
@@ -596,7 +624,7 @@ function drawTimeTracking(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: rgb(0.3, 0.3, 0.3),
     });
     ctx.y -= 14;
 
@@ -609,20 +637,21 @@ function drawTimeTracking(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.4, 0.4, 0.4)
+        color: rgb(0.4, 0.4, 0.4),
       });
 
       const descWidth = ctx.contentWidth - 100;
-      const desc = entry.description.length > 60
-        ? `${entry.description.substring(0, 57)  }...`
-        : entry.description;
+      const desc =
+        entry.description.length > 60
+          ? `${entry.description.substring(0, 57)}...`
+          : entry.description;
 
       ctx.currentPage.drawText(desc, {
         x: ctx.leftMargin + 100,
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.2, 0.2, 0.2)
+        color: rgb(0.2, 0.2, 0.2),
       });
 
       ctx.y -= 14;
@@ -634,7 +663,7 @@ function drawTimeTracking(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.5, 0.5, 0.5)
+        color: rgb(0.5, 0.5, 0.5),
       });
       ctx.y -= 14;
     }
@@ -652,7 +681,7 @@ function drawFinancialSummary(
   const summaryItems = [
     ['Total Invoiced', formatCurrency(financial.totalInvoiced)],
     ['Total Paid', formatCurrency(financial.totalPaid)],
-    ['Outstanding', formatCurrency(financial.outstanding)]
+    ['Outstanding', formatCurrency(financial.outstanding)],
   ];
 
   for (const [label, value] of summaryItems) {
@@ -661,14 +690,14 @@ function drawFinancialSummary(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: rgb(0.3, 0.3, 0.3),
     });
     ctx.currentPage.drawText(value, {
       x: ctx.leftMargin + 120,
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1)
+      color: rgb(0.1, 0.1, 0.1),
     });
     ctx.y -= lineHeight;
   }
@@ -683,7 +712,7 @@ function drawFinancialSummary(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: rgb(0.3, 0.3, 0.3),
     });
     ctx.y -= 16;
 
@@ -695,7 +724,7 @@ function drawFinancialSummary(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.2, 0.2, 0.2)
+        color: rgb(0.2, 0.2, 0.2),
       });
 
       ctx.currentPage.drawText(formatCurrency(invoice.amount), {
@@ -703,21 +732,22 @@ function drawFinancialSummary(
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: rgb(0.2, 0.2, 0.2)
+        color: rgb(0.2, 0.2, 0.2),
       });
 
-      const statusColor = invoice.status === 'paid'
-        ? rgb(0.13, 0.55, 0.13)
-        : invoice.status === 'overdue'
-          ? rgb(0.8, 0.2, 0.2)
-          : rgb(0.5, 0.5, 0.5);
+      const statusColor =
+        invoice.status === 'paid'
+          ? rgb(0.13, 0.55, 0.13)
+          : invoice.status === 'overdue'
+            ? rgb(0.8, 0.2, 0.2)
+            : rgb(0.5, 0.5, 0.5);
 
       ctx.currentPage.drawText(formatStatus(invoice.status), {
         x: ctx.rightMargin - 80,
         y: ctx.y,
         size: 9,
         font: ctx.fonts.regular,
-        color: statusColor
+        color: statusColor,
       });
 
       ctx.y -= 14;
@@ -736,7 +766,7 @@ function formatDate(dateStr: string | null | undefined): string {
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     });
   } catch {
     return 'Invalid date';
@@ -746,7 +776,7 @@ function formatDate(dateStr: string | null | undefined): string {
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD'
+    currency: 'USD',
   }).format(amount);
 }
 
@@ -754,5 +784,5 @@ function formatStatus(status: string): string {
   return status
     .replace(/_/g, ' ')
     .replace(/-/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }

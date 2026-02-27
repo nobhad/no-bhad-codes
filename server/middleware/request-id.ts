@@ -22,11 +22,7 @@ declare global {
   }
 }
 
-export function requestIdMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+export function requestIdMiddleware(req: Request, res: Response, next: NextFunction): void {
   const incomingId = req.get(REQUEST_ID_HEADER);
   const id = incomingId && incomingId.trim() ? incomingId.trim() : crypto.randomUUID();
   req.id = id;

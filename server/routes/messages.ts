@@ -1,4 +1,3 @@
-
 import crypto from 'crypto';
 import express from 'express';
 import multer from 'multer';
@@ -13,6 +12,27 @@ import { getString, getNumber } from '../database/row-helpers.js';
 import { messageService } from '../services/message-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
+
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const MESSAGE_THREAD_COLUMNS = `
+  id, project_id, client_id, subject, thread_type, status, priority,
+  last_message_at, last_message_by, participant_count, created_at, updated_at,
+  pinned_count, archived_at, archived_by
+`.replace(/\s+/g, ' ').trim();
+
+const MESSAGE_COLUMNS = `
+  id, project_id, client_id, thread_id, context_type, sender_type, sender_name,
+  subject, message, message_type, priority, is_read, read_at, attachments,
+  parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
+  reaction_count, reply_count, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const NOTIFICATION_PREF_COLUMNS = `
+  id, client_id, email_enabled, sms_enabled, push_enabled,
+  new_message_notifications, project_updates_notifications,
+  invoice_notifications, marketing_notifications,
+  quiet_hours_start, quiet_hours_end, timezone, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
 
 const router = express.Router();
 
@@ -41,7 +61,7 @@ async function canAccessProject(req: AuthenticatedRequest, projectId: number): P
   const db = getDatabase();
   const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
     projectId,
-    req.user?.id
+    req.user?.id,
   ]);
 
   return !!row;
@@ -55,7 +75,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
     cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
 // MIME type to extension mapping for validation
@@ -69,17 +89,29 @@ const MIME_TO_EXTENSIONS: Record<string, string[]> = {
   'application/vnd.ms-excel': ['xls'],
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
   'text/plain': ['txt'],
-  'application/zip': ['zip']
+  'application/zip': ['zip'],
 };
 
 // Allowed extensions whitelist
-const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'zip']);
+const ALLOWED_EXTENSIONS = new Set([
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'pdf',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'txt',
+  'zip',
+]);
 
 const upload = multer({
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit for message attachments
-    files: 5 // Max 5 files per message
+    files: 5, // Max 5 files per message
   },
   fileFilter: (req, file, cb) => {
     const fileName = file.originalname.toLowerCase();
@@ -112,7 +144,7 @@ const upload = multer({
     }
 
     cb(null, true);
-  }
+  },
 });
 
 // ===================================
@@ -193,7 +225,7 @@ router.post(
       } else {
         project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
           project_id,
-          req.user!.id
+          req.user!.id,
         ]);
       }
 
@@ -213,9 +245,7 @@ router.post(
     );
 
     const newThread = await db.get(
-      `
-    SELECT * FROM message_threads WHERE id = ?
-  `,
+      `SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ?`,
       [result.lastID]
     );
 
@@ -243,11 +273,11 @@ router.post(
     // Verify thread access
     let thread;
     if (req.user!.type === 'admin') {
-      thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ?`, [threadId]);
     } else {
-      thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ? AND client_id = ?`, [
         threadId,
-        req.user!.id
+        req.user!.id,
       ]);
     }
 
@@ -264,17 +294,17 @@ router.post(
           originalName: file.originalname,
           path: file.path,
           size: file.size,
-          mimeType: file.mimetype
+          mimeType: file.mimetype,
         }))
       );
     }
 
     // Get the actual sender name from the clients table
-    const senderClient = await db.get(
-      'SELECT contact_name, email FROM clients WHERE id = ?',
-      [req.user!.id]
-    ) as { contact_name: string | null; email: string } | undefined;
-    const sender_name: string = senderClient?.contact_name || senderClient?.email || req.user!.email;
+    const senderClient = (await db.get('SELECT contact_name, email FROM clients WHERE id = ?', [
+      req.user!.id,
+    ])) as { contact_name: string | null; email: string } | undefined;
+    const sender_name: string =
+      senderClient?.contact_name || senderClient?.email || req.user!.email;
 
     const result = await db.run(
       `
@@ -293,7 +323,7 @@ router.post(
         priority,
         reply_to || null,
         attachmentData,
-        threadId
+        threadId,
       ]
     );
 
@@ -308,9 +338,7 @@ router.post(
     );
 
     const newMessage = await db.get(
-      `
-    SELECT * FROM messages WHERE id = ?
-  `,
+      `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE id = ?`,
       [result.lastID]
     );
 
@@ -322,7 +350,7 @@ router.post(
         // Notify client
         const clientId = getNumber(thread, 'client_id');
         const client = await db.get('SELECT email, contact_name FROM clients WHERE id = ?', [
-          clientId
+          clientId,
         ]);
 
         if (client) {
@@ -335,7 +363,7 @@ router.post(
             message: message.trim(),
             threadId: threadId,
             portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhad.codes/client/portal.html'}?thread=${threadId}`,
-            hasAttachments: attachments && attachments.length > 0
+            hasAttachments: attachments && attachments.length > 0,
           });
         }
       } else {
@@ -348,15 +376,15 @@ router.post(
             subject: thread.subject,
             clientId: thread.client_id,
             message: message.trim(),
-            hasAttachments: attachments && attachments.length > 0
+            hasAttachments: attachments && attachments.length > 0,
           },
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     } catch (emailError) {
       logger.error('Failed to send message notification', {
         category: 'email',
-        metadata: { error: emailError, threadId, subject: thread.subject }
+        metadata: { error: emailError, threadId, subject: thread.subject },
       });
       // Continue - don't fail message sending due to email issues
     }
@@ -377,11 +405,11 @@ router.get(
     // Verify thread access
     let thread;
     if (req.user!.type === 'admin') {
-      thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ?`, [threadId]);
     } else {
-      thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ? AND client_id = ?`, [
         threadId,
-        req.user!.id
+        req.user!.id,
       ]);
     }
 
@@ -442,11 +470,11 @@ router.put(
     // Verify thread access
     let thread;
     if (req.user!.type === 'admin') {
-      thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ?`, [threadId]);
     } else {
-      thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ? AND client_id = ?`, [
         threadId,
-        req.user!.id
+        req.user!.id,
       ]);
     }
 
@@ -508,17 +536,17 @@ router.post(
           originalName: file.originalname,
           path: file.path,
           size: file.size,
-          mimeType: file.mimetype
+          mimeType: file.mimetype,
         }))
       );
     }
 
     // Get the actual sender name from the clients table
-    const inquirySender = await db.get(
-      'SELECT contact_name, email FROM clients WHERE id = ?',
-      [req.user!.id]
-    );
-    const inquirySenderName = inquirySender?.contact_name || inquirySender?.email || req.user!.email;
+    const inquirySender = await db.get('SELECT contact_name, email FROM clients WHERE id = ?', [
+      req.user!.id,
+    ]);
+    const inquirySenderName =
+      inquirySender?.contact_name || inquirySender?.email || req.user!.email;
 
     // Send message
     await db.run(
@@ -538,7 +566,7 @@ router.post(
         message_type,
         priority,
         attachmentData,
-        threadId
+        threadId,
       ]
     );
 
@@ -553,12 +581,15 @@ router.post(
           clientId: req.user!.id,
           threadId: threadId,
           priority: priority,
-          hasAttachments: attachments && attachments.length > 0
+          hasAttachments: attachments && attachments.length > 0,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     } catch (emailError) {
-      await logger.error('Failed to send admin notification:', { error: emailError instanceof Error ? emailError : undefined, category: 'MESSAGES' });
+      await logger.error('Failed to send admin notification:', {
+        error: emailError instanceof Error ? emailError : undefined,
+        category: 'MESSAGES',
+      });
     }
 
     sendCreated(res, { threadId }, 'Inquiry sent successfully');
@@ -577,22 +608,19 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const db = getDatabase();
 
-    let preferences = await db.get('SELECT * FROM notification_preferences WHERE client_id = ?', [
-      req.user!.id
+    let preferences = await db.get(`SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE client_id = ?`, [
+      req.user!.id,
     ]);
 
     if (!preferences) {
       // Create default preferences
       const result = await db.run(
-        `
-      INSERT INTO notification_preferences (client_id)
-      VALUES (?)
-    `,
+        `INSERT INTO notification_preferences (client_id) VALUES (?)`,
         [req.user!.id]
       );
 
-      preferences = await db.get('SELECT * FROM notification_preferences WHERE id = ?', [
-        result.lastID
+      preferences = await db.get(`SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE id = ?`, [
+        result.lastID,
       ]);
     }
 
@@ -617,7 +645,7 @@ router.put(
       'milestone_updates',
       'invoice_notifications',
       'marketing_emails',
-      'notification_frequency'
+      'notification_frequency',
     ];
 
     for (const field of allowedFields) {
@@ -643,11 +671,15 @@ router.put(
     );
 
     const updatedPreferences = await db.get(
-      'SELECT * FROM notification_preferences WHERE client_id = ?',
+      `SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE client_id = ?`,
       [req.user!.id]
     );
 
-    sendSuccess(res, { preferences: updatedPreferences }, 'Notification preferences updated successfully');
+    sendSuccess(
+      res,
+      { preferences: updatedPreferences },
+      'Notification preferences updated successfully'
+    );
   })
 );
 
@@ -805,11 +837,11 @@ router.put(
       return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
-    const subscription = await messageService.updateSubscription(
-      projectId,
-      req.user!.email,
-      { notifyAll: notify_all, notifyMentions: notify_mentions, notifyReplies: notify_replies }
-    );
+    const subscription = await messageService.updateSubscription(projectId, req.user!.email, {
+      notifyAll: notify_all,
+      notifyMentions: notify_mentions,
+      notifyReplies: notify_replies,
+    });
     sendSuccess(res, { subscription });
   })
 );
@@ -1083,7 +1115,7 @@ router.get(
       threadId,
       limit,
       userEmail: req.user!.type === 'client' ? req.user!.email : undefined,
-      includeInternal: req.user!.type === 'admin'
+      includeInternal: req.user!.type === 'admin',
     });
 
     sendSuccess(res, { results, count: results.length });
@@ -1111,7 +1143,7 @@ router.post(
     const db = getDatabase();
 
     // Verify thread exists
-    const thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
+    const thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ?`, [threadId]);
     if (!thread) {
       return errorResponse(res, 'Thread not found', 404, 'THREAD_NOT_FOUND');
     }
@@ -1130,7 +1162,7 @@ router.post(
     // Process mentions in the internal message
     await messageService.processMentions(result.lastID!, message.trim());
 
-    const newMessage = await db.get('SELECT * FROM messages WHERE id = ?', [result.lastID]);
+    const newMessage = await db.get(`SELECT ${MESSAGE_COLUMNS} FROM messages WHERE id = ?`, [result.lastID]);
 
     sendCreated(res, { messageData: newMessage }, 'Internal message sent');
   })
@@ -1146,11 +1178,9 @@ router.get(
     const db = getDatabase();
 
     const messages = await db.all(
-      `
-      SELECT * FROM messages
+      `SELECT ${MESSAGE_COLUMNS} FROM messages
       WHERE thread_id = ? AND is_internal = TRUE AND context_type = 'general'
-      ORDER BY created_at ASC
-      `,
+      ORDER BY created_at ASC`,
       [threadId]
     );
 
@@ -1232,10 +1262,9 @@ router.get(
 
     // Get the original filename from the database if possible
     const db = getDatabase();
-    const message = await db.get(
-      'SELECT attachments FROM messages WHERE attachments LIKE ?',
-      [`%${filename}%`]
-    );
+    const message = await db.get('SELECT attachments FROM messages WHERE attachments LIKE ?', [
+      `%${filename}%`,
+    ]);
 
     let originalName = filename;
     if (message && message.attachments) {

@@ -22,7 +22,7 @@ export {
   toSnakeCasePaymentPlan,
   toSnakeCaseScheduledInvoice,
   toSnakeCaseRecurringInvoice,
-  toSnakeCaseReminder
+  toSnakeCaseReminder,
 } from './helpers.js';
 
 // Export core routes

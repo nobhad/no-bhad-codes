@@ -7,11 +7,15 @@
  * Reporting and analytics utilities for invoices.
  */
 
-import type { Invoice, InvoiceAgingBucket, InvoiceAgingReport, InvoiceRow } from '../../types/invoice-types.js';
+import type {
+  Invoice,
+  InvoiceAgingBucket,
+  InvoiceAgingReport,
+  InvoiceRow,
+} from '../../types/invoice-types.js';
+import type { Database } from '../../database/init.js';
 
 type SqlValue = string | number | boolean | null;
-
-type Database = any;
 
 type MapRowToInvoice = (row: InvoiceRow) => Invoice;
 
@@ -58,7 +62,7 @@ export class InvoiceReportingService {
       totalAmount: row?.total_amount || 0,
       totalPaid: row?.total_paid || 0,
       totalOutstanding: row?.total_outstanding || 0,
-      overdue: row?.overdue || 0
+      overdue: row?.overdue || 0,
     };
   }
 
@@ -96,7 +100,7 @@ export class InvoiceReportingService {
       ['1-30', { bucket: '1-30', count: 0, totalAmount: 0, invoices: [] }],
       ['31-60', { bucket: '31-60', count: 0, totalAmount: 0, invoices: [] }],
       ['61-90', { bucket: '61-90', count: 0, totalAmount: 0, invoices: [] }],
-      ['90+', { bucket: '90+', count: 0, totalAmount: 0, invoices: [] }]
+      ['90+', { bucket: '90+', count: 0, totalAmount: 0, invoices: [] }],
     ]);
 
     let totalOutstanding = 0;
@@ -109,7 +113,9 @@ export class InvoiceReportingService {
 
       if (invoice.dueDate) {
         const dueDate = new Date(invoice.dueDate);
-        const daysOverdue = Math.floor((today.getTime() - dueDate.getTime()) / (24 * 60 * 60 * 1000));
+        const daysOverdue = Math.floor(
+          (today.getTime() - dueDate.getTime()) / (24 * 60 * 60 * 1000)
+        );
 
         if (daysOverdue <= 0) {
           bucket = 'current';
@@ -133,14 +139,17 @@ export class InvoiceReportingService {
     return {
       generatedAt: todayStr,
       totalOutstanding,
-      buckets: Array.from(buckets.values())
+      buckets: Array.from(buckets.values()),
     };
   }
 
   /**
    * Get comprehensive invoice statistics
    */
-  async getComprehensiveStats(dateFrom?: string, dateTo?: string): Promise<{
+  async getComprehensiveStats(
+    dateFrom?: string,
+    dateTo?: string
+  ): Promise<{
     totalInvoices: number;
     totalRevenue: number;
     totalOutstanding: number;
@@ -195,7 +204,7 @@ export class InvoiceReportingService {
       partial: 0,
       paid: 0,
       overdue: 0,
-      cancelled: 0
+      cancelled: 0,
     };
 
     for (const row of statusRows) {
@@ -215,11 +224,13 @@ export class InvoiceReportingService {
     `;
 
     const monthlyRows = await this.db.all(monthlySql, params);
-    const monthlyRevenue = monthlyRows.map((row: { month: string; revenue: number; count: number }) => ({
-      month: row.month,
-      revenue: row.revenue || 0,
-      count: row.count
-    }));
+    const monthlyRevenue = monthlyRows.map(
+      (row: { month: string; revenue: number; count: number }) => ({
+        month: row.month,
+        revenue: row.revenue || 0,
+        count: row.count,
+      })
+    );
 
     return {
       totalInvoices: basicStats?.total_invoices || 0,
@@ -229,7 +240,7 @@ export class InvoiceReportingService {
       averageInvoiceAmount: basicStats?.avg_amount || 0,
       averageDaysToPayment: basicStats?.avg_days_to_payment || 0,
       statusBreakdown,
-      monthlyRevenue
+      monthlyRevenue,
     };
   }
 }

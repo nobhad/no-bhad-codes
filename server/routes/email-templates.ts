@@ -15,7 +15,7 @@ import {
   emailTemplateService,
   type EmailTemplateCategory,
   type CreateTemplateData,
-  type UpdateTemplateData
+  type UpdateTemplateData,
 } from '../services/email-template-service.js';
 import { sendSuccess, sendCreated, errorResponse } from '../utils/api-response.js';
 
@@ -82,7 +82,8 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { name, description, category, subject, body_html, body_text, variables, is_active } = req.body;
+    const { name, description, category, subject, body_html, body_text, variables, is_active } =
+      req.body;
 
     if (!name || !subject || !body_html) {
       return errorResponse(res, 'name, subject, and body_html are required', 400);
@@ -96,7 +97,7 @@ router.post(
       body_html,
       body_text,
       variables,
-      is_active
+      is_active,
     };
 
     const template = await emailTemplateService.createTemplate(data, req.user?.email);
@@ -118,7 +119,17 @@ router.put(
       return errorResponse(res, 'Invalid template ID', 400);
     }
 
-    const { name, description, category, subject, body_html, body_text, variables, is_active, change_reason } = req.body;
+    const {
+      name,
+      description,
+      category,
+      subject,
+      body_html,
+      body_text,
+      variables,
+      is_active,
+      change_reason,
+    } = req.body;
 
     const data: UpdateTemplateData = {
       name,
@@ -128,11 +139,16 @@ router.put(
       body_html,
       body_text,
       variables,
-      is_active
+      is_active,
     };
 
     try {
-      const template = await emailTemplateService.updateTemplate(id, data, req.user?.email, change_reason);
+      const template = await emailTemplateService.updateTemplate(
+        id,
+        data,
+        req.user?.email,
+        change_reason
+      );
       if (!template) {
         return errorResponse(res, 'Template not found', 404);
       }
@@ -269,8 +285,8 @@ router.post(
     }
 
     // Use provided sample data or generate from variables
-    const sampleData = req.body.sample_data ||
-      emailTemplateService.generateSampleData(template.variables);
+    const sampleData =
+      req.body.sample_data || emailTemplateService.generateSampleData(template.variables);
 
     const preview = await emailTemplateService.previewTemplate(id, sampleData);
 
@@ -293,8 +309,7 @@ router.post(
     }
 
     // Generate sample data from variables if not provided
-    const data = sample_data ||
-      emailTemplateService.generateSampleData(variables || []);
+    const data = sample_data || emailTemplateService.generateSampleData(variables || []);
 
     const preview = emailTemplateService.previewContent(
       subject,
@@ -332,8 +347,7 @@ router.post(
     }
 
     // Generate preview content
-    const data = sample_data ||
-      emailTemplateService.generateSampleData(template.variables);
+    const data = sample_data || emailTemplateService.generateSampleData(template.variables);
 
     const preview = await emailTemplateService.previewTemplate(id, data);
     if (!preview) {
@@ -380,7 +394,7 @@ router.get(
       templateId,
       recipientEmail,
       status,
-      limit
+      limit,
     });
 
     sendSuccess(res, { logs });

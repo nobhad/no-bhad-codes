@@ -105,7 +105,7 @@ const COLORS = {
   warning: '#f59e0b',
   error: '#ef4444',
   info: '#3b82f6',
-  primary: '#6366f1'
+  primary: '#6366f1',
 };
 
 const DISCORD_COLORS = {
@@ -113,7 +113,7 @@ const DISCORD_COLORS = {
   warning: 0xf59e0b,
   error: 0xef4444,
   info: 0x3b82f6,
-  primary: 0x6366f1
+  primary: 0x6366f1,
 };
 
 // Emoji mapping for event types
@@ -132,7 +132,7 @@ const EVENT_EMOJIS: Record<string, string> = {
   'lead.created': ':sparkles:',
   'task.completed': ':ballot_box_with_check:',
   'task.overdue': ':alarm_clock:',
-  'milestone.completed': ':trophy:'
+  'milestone.completed': ':trophy:',
 };
 
 /**
@@ -153,9 +153,9 @@ export function formatSlackMessage(
       text: {
         type: 'plain_text',
         text: title,
-        emoji: true
-      }
-    }
+        emoji: true,
+      },
+    },
   ];
 
   // Add main content section based on event type
@@ -169,7 +169,7 @@ export function formatSlackMessage(
   if (fields.length > 0) {
     blocks.push({
       type: 'section',
-      fields: fields.slice(0, 10) // Slack limit
+      fields: fields.slice(0, 10), // Slack limit
     });
   }
 
@@ -182,12 +182,12 @@ export function formatSlackMessage(
           type: 'button',
           text: {
             type: 'plain_text',
-            text: 'View Details'
+            text: 'View Details',
           },
           url: options.includeLink,
-          action_id: `view_${eventType}`
-        }
-      ]
+          action_id: `view_${eventType}`,
+        },
+      ],
     } as unknown as SlackBlock);
   }
 
@@ -197,15 +197,15 @@ export function formatSlackMessage(
     elements: [
       {
         type: 'mrkdwn',
-        text: `Sent from No Bhad Codes • ${new Date().toLocaleString()}`
-      }
-    ]
+        text: `Sent from No Bhad Codes • ${new Date().toLocaleString()}`,
+      },
+    ],
   });
 
   return {
     text: `${title} - ${getEventSummary(eventType, data)}`,
     blocks,
-    channel: options.channel
+    channel: options.channel,
   };
 }
 
@@ -229,9 +229,9 @@ export function formatDiscordMessage(
     color: DISCORD_COLORS[color as keyof typeof DISCORD_COLORS] || DISCORD_COLORS.info,
     fields: fields.slice(0, 25), // Discord limit
     footer: {
-      text: 'No Bhad Codes'
+      text: 'No Bhad Codes',
     },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   if (options.includeLink) {
@@ -240,33 +240,39 @@ export function formatDiscordMessage(
 
   return {
     content: `**${title}**`,
-    embeds: [embed]
+    embeds: [embed],
   };
 }
 
 /**
  * Build Slack content block based on event type
  */
-function buildSlackContentBlock(eventType: string, data: Record<string, unknown>): SlackBlock | null {
+function buildSlackContentBlock(
+  eventType: string,
+  data: Record<string, unknown>
+): SlackBlock | null {
   const summary = getEventSummary(eventType, data);
 
   return {
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: summary
-    }
+      text: summary,
+    },
   };
 }
 
 /**
  * Build Slack fields from event data
  */
-function buildSlackFields(eventType: string, data: Record<string, unknown>): Array<{ type: 'mrkdwn'; text: string }> {
+function buildSlackFields(
+  eventType: string,
+  data: Record<string, unknown>
+): Array<{ type: 'mrkdwn'; text: string }> {
   const fields: Array<{ type: 'mrkdwn'; text: string }> = [];
 
   // Extract relevant fields based on event type
-  const entityData = data[eventType.split('.')[0]] as Record<string, unknown> || data;
+  const entityData = (data[eventType.split('.')[0]] as Record<string, unknown>) || data;
 
   const fieldMappings: Record<string, string> = {
     client_name: 'Client',
@@ -278,7 +284,7 @@ function buildSlackFields(eventType: string, data: Record<string, unknown>): Arr
     due_date: 'Due Date',
     assigned_to: 'Assigned To',
     number: 'Number',
-    title: 'Title'
+    title: 'Title',
   };
 
   for (const [key, label] of Object.entries(fieldMappings)) {
@@ -292,7 +298,7 @@ function buildSlackFields(eventType: string, data: Record<string, unknown>): Arr
 
       fields.push({
         type: 'mrkdwn',
-        text: `*${label}:*\n${value}`
+        text: `*${label}:*\n${value}`,
       });
     }
   }
@@ -303,10 +309,13 @@ function buildSlackFields(eventType: string, data: Record<string, unknown>): Arr
 /**
  * Build Discord fields from event data
  */
-function buildDiscordFields(eventType: string, data: Record<string, unknown>): Array<{ name: string; value: string; inline: boolean }> {
+function buildDiscordFields(
+  eventType: string,
+  data: Record<string, unknown>
+): Array<{ name: string; value: string; inline: boolean }> {
   const fields: Array<{ name: string; value: string; inline: boolean }> = [];
 
-  const entityData = data[eventType.split('.')[0]] as Record<string, unknown> || data;
+  const entityData = (data[eventType.split('.')[0]] as Record<string, unknown>) || data;
 
   const fieldMappings: Record<string, string> = {
     client_name: 'Client',
@@ -318,7 +327,7 @@ function buildDiscordFields(eventType: string, data: Record<string, unknown>): A
     due_date: 'Due Date',
     assigned_to: 'Assigned To',
     number: 'Number',
-    title: 'Title'
+    title: 'Title',
   };
 
   for (const [key, label] of Object.entries(fieldMappings)) {
@@ -332,7 +341,7 @@ function buildDiscordFields(eventType: string, data: Record<string, unknown>): A
       fields.push({
         name: label,
         value,
-        inline: true
+        inline: true,
       });
     }
   }
@@ -344,24 +353,32 @@ function buildDiscordFields(eventType: string, data: Record<string, unknown>): A
  * Get event summary text
  */
 function getEventSummary(eventType: string, data: Record<string, unknown>): string {
-  const entityData = data[eventType.split('.')[0]] as Record<string, unknown> || data;
+  const entityData = (data[eventType.split('.')[0]] as Record<string, unknown>) || data;
 
   const summaries: Record<string, () => string> = {
-    'invoice.created': () => `Invoice ${entityData.number || `#${  entityData.id}`} created for ${entityData.client_name || 'client'} - ${formatCurrency(Number(entityData.amount) || 0)}`,
-    'invoice.sent': () => `Invoice ${entityData.number || `#${  entityData.id}`} sent to ${entityData.client_email || entityData.client_name}`,
-    'invoice.paid': () => `Invoice ${entityData.number || `#${  entityData.id}`} has been paid - ${formatCurrency(Number(entityData.amount_paid || entityData.amount) || 0)}`,
-    'invoice.overdue': () => `Invoice ${entityData.number || `#${  entityData.id}`} is overdue - ${formatCurrency(Number(entityData.amount) || 0)}`,
-    'project.created': () => `New project "${entityData.name}" created for ${entityData.client_name || 'client'}`,
+    'invoice.created': () =>
+      `Invoice ${entityData.number || `#${entityData.id}`} created for ${entityData.client_name || 'client'} - ${formatCurrency(Number(entityData.amount) || 0)}`,
+    'invoice.sent': () =>
+      `Invoice ${entityData.number || `#${entityData.id}`} sent to ${entityData.client_email || entityData.client_name}`,
+    'invoice.paid': () =>
+      `Invoice ${entityData.number || `#${entityData.id}`} has been paid - ${formatCurrency(Number(entityData.amount_paid || entityData.amount) || 0)}`,
+    'invoice.overdue': () =>
+      `Invoice ${entityData.number || `#${entityData.id}`} is overdue - ${formatCurrency(Number(entityData.amount) || 0)}`,
+    'project.created': () =>
+      `New project "${entityData.name}" created for ${entityData.client_name || 'client'}`,
     'project.started': () => `Project "${entityData.name}" has started`,
     'project.completed': () => `Project "${entityData.name}" has been completed`,
-    'contract.signed': () => `Contract for "${entityData.project_name}" signed by ${entityData.signer_name}`,
-    'proposal.accepted': () => `Proposal for "${entityData.project_name}" accepted - ${formatCurrency(Number(entityData.total_price) || 0)}`,
+    'contract.signed': () =>
+      `Contract for "${entityData.project_name}" signed by ${entityData.signer_name}`,
+    'proposal.accepted': () =>
+      `Proposal for "${entityData.project_name}" accepted - ${formatCurrency(Number(entityData.total_price) || 0)}`,
     'proposal.rejected': () => `Proposal for "${entityData.project_name}" was rejected`,
     'client.created': () => `New client "${entityData.name}" added`,
     'lead.created': () => `New lead from ${entityData.name || entityData.email}`,
     'task.completed': () => `Task "${entityData.title}" completed`,
     'task.overdue': () => `Task "${entityData.title}" is overdue`,
-    'milestone.completed': () => `Milestone "${entityData.title}" completed for ${entityData.project_name}`
+    'milestone.completed': () =>
+      `Milestone "${entityData.title}" completed for ${entityData.project_name}`,
   };
 
   return summaries[eventType]?.() || `${eventType} event occurred`;
@@ -380,7 +397,7 @@ function getColorForEvent(eventType: string): string {
     'milestone.completed': 'success',
     'invoice.overdue': 'warning',
     'task.overdue': 'warning',
-    'proposal.rejected': 'error'
+    'proposal.rejected': 'error',
   };
 
   return colorMap[eventType] || 'info';
@@ -397,9 +414,9 @@ export async function sendSlackNotification(
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(message)
+      body: JSON.stringify(message),
     });
 
     if (!response.ok) {
@@ -424,9 +441,9 @@ export async function sendDiscordNotification(
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(message)
+      body: JSON.stringify(message),
     });
 
     if (!response.ok) {
@@ -443,7 +460,9 @@ export async function sendDiscordNotification(
 /**
  * Save notification configuration
  */
-export async function saveNotificationConfig(config: NotificationConfig): Promise<NotificationConfig> {
+export async function saveNotificationConfig(
+  config: NotificationConfig
+): Promise<NotificationConfig> {
   const db = getDatabase();
 
   if (config.id) {
@@ -452,7 +471,15 @@ export async function saveNotificationConfig(config: NotificationConfig): Promis
       `UPDATE notification_integrations
        SET name = ?, platform = ?, webhook_url = ?, channel = ?, events = ?, is_active = ?, updated_at = datetime('now')
        WHERE id = ?`,
-      [config.name, config.platform, config.webhook_url, config.channel || null, config.events.join(','), config.is_active ? 1 : 0, config.id]
+      [
+        config.name,
+        config.platform,
+        config.webhook_url,
+        config.channel || null,
+        config.events.join(','),
+        config.is_active ? 1 : 0,
+        config.id,
+      ]
     );
     return config;
   }
@@ -460,10 +487,16 @@ export async function saveNotificationConfig(config: NotificationConfig): Promis
   const result = await db.run(
     `INSERT INTO notification_integrations (name, platform, webhook_url, channel, events, is_active, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-    [config.name, config.platform, config.webhook_url, config.channel || null, config.events.join(','), config.is_active ? 1 : 0]
+    [
+      config.name,
+      config.platform,
+      config.webhook_url,
+      config.channel || null,
+      config.events.join(','),
+      config.is_active ? 1 : 0,
+    ]
   );
   return { ...config, id: result.lastID };
-
 }
 
 /**
@@ -482,7 +515,7 @@ export async function getNotificationConfigs(): Promise<NotificationConfig[]> {
     events: (row.events as string).split(',').filter(Boolean),
     is_active: Boolean(row.is_active),
     created_at: row.created_at as string,
-    updated_at: row.updated_at as string
+    updated_at: row.updated_at as string,
   }));
 }
 
@@ -497,15 +530,17 @@ export async function deleteNotificationConfig(id: number): Promise<void> {
 /**
  * Test notification configuration
  */
-export async function testNotification(config: NotificationConfig): Promise<{ success: boolean; error?: string }> {
+export async function testNotification(
+  config: NotificationConfig
+): Promise<{ success: boolean; error?: string }> {
   const testData = {
     invoice: {
       id: 1,
       number: 'INV-TEST-001',
       client_name: 'Test Client',
       client_email: 'test@example.com',
-      amount: 1000.00
-    }
+      amount: 1000.0,
+    },
   };
 
   if (config.platform === 'slack') {
@@ -514,7 +549,6 @@ export async function testNotification(config: NotificationConfig): Promise<{ su
   }
   const message = formatDiscordMessage('invoice.created', testData);
   return sendDiscordNotification(config.webhook_url, message);
-
 }
 
 // Helper functions
@@ -525,7 +559,7 @@ function capitalize(str: string): string {
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD'
+    currency: 'USD',
   }).format(amount);
 }
 
@@ -537,5 +571,5 @@ export default {
   saveNotificationConfig,
   getNotificationConfigs,
   deleteNotificationConfig,
-  testNotification
+  testNotification,
 };

@@ -10,7 +10,7 @@ import {
   DeliverableVersion,
   DeliverableComment,
   DesignElement,
-  DeliverableReview
+  DeliverableReview,
 } from '../models/deliverable.js';
 
 export class DeliverableService {
@@ -42,7 +42,16 @@ export class DeliverableService {
     const result = await this.db.run(
       `INSERT INTO deliverables (project_id, type, title, description, created_by_id, round_number, tags, review_deadline)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [projectId, type, title, description, createdById, roundNumber, options?.tags || '', options?.reviewDeadline || null]
+      [
+        projectId,
+        type,
+        title,
+        description,
+        createdById,
+        roundNumber,
+        options?.tags || '',
+        options?.reviewDeadline || null,
+      ]
     );
 
     if (!result.lastID) throw new Error('Failed to insert deliverable');
@@ -99,7 +108,7 @@ export class DeliverableService {
     const rows = await this.db.all(query, params);
     return {
       deliverables: rows.map((row: any) => this.formatDeliverable(row)),
-      total: Number(countResult?.count) || 0
+      total: Number(countResult?.count) || 0,
     };
   }
 
@@ -116,7 +125,7 @@ export class DeliverableService {
       status = existing.status,
       approval_status = existing.approval_status,
       review_deadline = existing.review_deadline,
-      tags = existing.tags
+      tags = existing.tags,
     } = updates;
 
     await this.db.run(
@@ -159,10 +168,9 @@ export class DeliverableService {
    * Get archived file ID for a deliverable
    */
   async getArchivedFileId(deliverableId: number): Promise<number | null> {
-    const row = await this.db.get(
-      'SELECT archived_file_id FROM deliverables WHERE id = ?',
-      [deliverableId]
-    ) as { archived_file_id: number | null } | undefined;
+    const row = (await this.db.get('SELECT archived_file_id FROM deliverables WHERE id = ?', [
+      deliverableId,
+    ])) as { archived_file_id: number | null } | undefined;
     return row?.archived_file_id ?? null;
   }
 
@@ -215,7 +223,16 @@ export class DeliverableService {
     const result = await this.db.run(
       `INSERT INTO deliverable_versions (deliverable_id, version_number, file_path, file_name, file_size, file_type, uploaded_by_id, change_notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [deliverableId, nextVersion, filePath, fileName, fileSize, fileType, uploadedById, changeNotes || null]
+      [
+        deliverableId,
+        nextVersion,
+        filePath,
+        fileName,
+        fileSize,
+        fileType,
+        uploadedById,
+        changeNotes || null,
+      ]
     );
 
     // Update deliverable status to pending review if it was draft
@@ -282,7 +299,7 @@ export class DeliverableService {
         options?.x || null,
         options?.y || null,
         options?.annotationType || 'text',
-        options?.elementId || null
+        options?.elementId || null,
       ]
     );
 
@@ -429,7 +446,13 @@ export class DeliverableService {
     const result = await this.db.run(
       `INSERT INTO deliverable_reviews (deliverable_id, reviewer_id, decision, feedback, design_elements_reviewed)
        VALUES (?, ?, ?, ?, ?)`,
-      [deliverableId, reviewerId, decision, feedback || null, JSON.stringify(elementsReviewed || [])]
+      [
+        deliverableId,
+        reviewerId,
+        decision,
+        feedback || null,
+        JSON.stringify(elementsReviewed || []),
+      ]
     );
 
     if (!result.lastID) throw new Error('Failed to insert review');
@@ -478,7 +501,7 @@ export class DeliverableService {
       tags: row.tags,
       archived_file_id: row.archived_file_id ?? null,
       created_at: row.created_at,
-      updated_at: row.updated_at
+      updated_at: row.updated_at,
     };
   }
 
@@ -495,7 +518,7 @@ export class DeliverableService {
       resolved: Boolean(row.resolved),
       resolved_at: row.resolved_at,
       created_at: row.created_at,
-      updated_at: row.updated_at
+      updated_at: row.updated_at,
     };
   }
 
@@ -506,9 +529,11 @@ export class DeliverableService {
       reviewer_id: row.reviewer_id,
       decision: row.decision,
       feedback: row.feedback,
-      design_elements_reviewed: row.design_elements_reviewed ? JSON.parse(row.design_elements_reviewed) : [],
+      design_elements_reviewed: row.design_elements_reviewed
+        ? JSON.parse(row.design_elements_reviewed)
+        : [],
       review_duration_minutes: row.review_duration_minutes,
-      created_at: row.created_at
+      created_at: row.created_at,
     };
   }
 }
@@ -524,23 +549,40 @@ export function getDeliverableService(): DeliverableService {
 }
 
 export const deliverableService = {
-  createDeliverable: (pid: number, title: string, desc: string, type: string, cid: number, opts?: any) =>
-    getDeliverableService().createDeliverable(pid, title, desc, type, cid, opts),
+  createDeliverable: (
+    pid: number,
+    title: string,
+    desc: string,
+    type: string,
+    cid: number,
+    opts?: any
+  ) => getDeliverableService().createDeliverable(pid, title, desc, type, cid, opts),
   getDeliverableById: (id: number) => getDeliverableService().getDeliverableById(id),
-  getProjectDeliverables: (pid: number, opts?: any) => getDeliverableService().getProjectDeliverables(pid, opts),
-  updateDeliverable: (id: number, updates: any) => getDeliverableService().updateDeliverable(id, updates),
+  getProjectDeliverables: (pid: number, opts?: any) =>
+    getDeliverableService().getProjectDeliverables(pid, opts),
+  updateDeliverable: (id: number, updates: any) =>
+    getDeliverableService().updateDeliverable(id, updates),
   lockDeliverable: (id: number, rid: number) => getDeliverableService().lockDeliverable(id, rid),
-  requestRevision: (id: number, reason: string, rid: number) => getDeliverableService().requestRevision(id, reason, rid),
+  requestRevision: (id: number, reason: string, rid: number) =>
+    getDeliverableService().requestRevision(id, reason, rid),
   deleteDeliverable: (id: number) => getDeliverableService().deleteDeliverable(id),
-  uploadVersion: (did: number, path: string, name: string, size: number, type: string, uid: number, notes?: string) =>
-    getDeliverableService().uploadVersion(did, path, name, size, type, uid, notes),
+  uploadVersion: (
+    did: number,
+    path: string,
+    name: string,
+    size: number,
+    type: string,
+    uid: number,
+    notes?: string
+  ) => getDeliverableService().uploadVersion(did, path, name, size, type, uid, notes),
   getVersionById: (id: number) => getDeliverableService().getVersionById(id),
   getDeliverableVersions: (did: number) => getDeliverableService().getDeliverableVersions(did),
   getLatestVersion: (did: number) => getDeliverableService().getLatestVersion(did),
   addComment: (did: number, aid: number, text: string, opts?: any) =>
     getDeliverableService().addComment(did, aid, text, opts),
   getCommentById: (id: number) => getDeliverableService().getCommentById(id),
-  getDeliverableComments: (did: number, opts?: any) => getDeliverableService().getDeliverableComments(did, opts),
+  getDeliverableComments: (did: number, opts?: any) =>
+    getDeliverableService().getDeliverableComments(did, opts),
   resolveComment: (id: number) => getDeliverableService().resolveComment(id),
   deleteComment: (id: number) => getDeliverableService().deleteComment(id),
   createDesignElement: (did: number, name: string, desc?: string) =>
@@ -553,8 +595,9 @@ export const deliverableService = {
     getDeliverableService().createReview(did, rid, decision, feedback, elements),
   getReviewById: (id: number) => getDeliverableService().getReviewById(id),
   getDeliverableReviews: (did: number) => getDeliverableService().getDeliverableReviews(did),
-  setArchivedFileId: (did: number, fid: number) => getDeliverableService().setArchivedFileId(did, fid),
-  getArchivedFileId: (did: number) => getDeliverableService().getArchivedFileId(did)
+  setArchivedFileId: (did: number, fid: number) =>
+    getDeliverableService().setArchivedFileId(did, fid),
+  getArchivedFileId: (did: number) => getDeliverableService().getArchivedFileId(did),
 };
 
 export default deliverableService;

@@ -329,7 +329,14 @@ export interface MessageUpdate {
 // ============================================
 
 // NOTE: Must match CHECK constraint in migrations/002_client_intakes.sql
-export type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
+export type InvoiceStatus =
+  | 'draft'
+  | 'sent'
+  | 'viewed'
+  | 'partial'
+  | 'paid'
+  | 'overdue'
+  | 'cancelled';
 
 export interface InvoiceRow extends BaseEntity {
   project_id: number;

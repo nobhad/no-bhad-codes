@@ -32,12 +32,18 @@ router.get(
       res.json({
         success: true,
         templates: templates.map(toSnakeCasePaymentPlan),
-        count: templates.length
+        count: templates.length,
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve payment plan templates', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve payment plan templates',
+        500,
+        'RETRIEVAL_FAILED',
+        {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }
+      );
     }
   })
 );
@@ -59,7 +65,7 @@ router.post(
 
     if (!name || !payments || !Array.isArray(payments) || payments.length === 0) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['name', 'payments']
+        required: ['name', 'payments'],
       });
     }
 
@@ -68,18 +74,24 @@ router.post(
         name,
         description,
         payments,
-        isDefault: isDefault || false
+        isDefault: isDefault || false,
       });
 
       res.status(201).json({
         success: true,
         message: 'Payment plan template created',
-        template: toSnakeCasePaymentPlan(template)
+        template: toSnakeCasePaymentPlan(template),
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to create payment plan template', 500, 'CREATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to create payment plan template',
+        500,
+        'CREATION_FAILED',
+        {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }
+      );
     }
   })
 );
@@ -107,12 +119,18 @@ router.delete(
       await getInvoiceService().deletePaymentPlanTemplate(templateId);
       res.json({
         success: true,
-        message: 'Payment plan template deleted'
+        message: 'Payment plan template deleted',
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to delete payment plan template', 500, 'DELETION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to delete payment plan template',
+        500,
+        'DELETION_FAILED',
+        {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }
+      );
     }
   })
 );
@@ -134,7 +152,7 @@ router.post(
 
     if (!projectId || !clientId || !templateId || !totalAmount) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['projectId', 'clientId', 'templateId', 'totalAmount']
+        required: ['projectId', 'clientId', 'templateId', 'totalAmount'],
       });
     }
 
@@ -150,12 +168,18 @@ router.post(
         success: true,
         message: `Generated ${invoices.length} invoices from payment plan`,
         invoices: invoices.map(toSnakeCaseInvoice),
-        count: invoices.length
+        count: invoices.length,
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to generate invoices from plan', 500, 'GENERATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to generate invoices from plan',
+        500,
+        'GENERATION_FAILED',
+        {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }
+      );
     }
   })
 );

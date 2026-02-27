@@ -21,7 +21,7 @@ import { logger } from './logger.js';
  * Priority levels in ascending order of urgency
  */
 export const PRIORITY_LEVELS = ['low', 'medium', 'high', 'urgent'] as const;
-export type PriorityLevel = typeof PRIORITY_LEVELS[number];
+export type PriorityLevel = (typeof PRIORITY_LEVELS)[number];
 
 /**
  * Priority level numeric values for comparison
@@ -30,16 +30,16 @@ const PRIORITY_RANK: Record<PriorityLevel, number> = {
   low: 1,
   medium: 2,
   high: 3,
-  urgent: 4
+  urgent: 4,
 };
 
 /**
  * Escalation thresholds (days until due)
  */
 const ESCALATION_THRESHOLDS = {
-  URGENT: 1,   // ≤ 1 day (tomorrow or overdue)
-  HIGH: 3,     // ≤ 3 days
-  MEDIUM: 7    // ≤ 7 days
+  URGENT: 1, // ≤ 1 day (tomorrow or overdue)
+  HIGH: 3, // ≤ 3 days
+  MEDIUM: 7, // ≤ 7 days
 };
 
 /**
@@ -178,7 +178,7 @@ export async function escalateTaskPriorities(projectId?: number): Promise<Escala
           title: task.title,
           oldPriority: task.priority,
           newPriority: requiredPriority,
-          daysUntilDue
+          daysUntilDue,
         });
       }
     }
@@ -190,10 +190,12 @@ export async function escalateTaskPriorities(projectId?: number): Promise<Escala
 
     return {
       updatedCount: escalatedTasks.length,
-      escalatedTasks
+      escalatedTasks,
     };
   } catch (error) {
-    logger.error('[PriorityEscalation] Error escalating priorities', { error: error instanceof Error ? error : undefined });
+    logger.error('[PriorityEscalation] Error escalating priorities', {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -249,17 +251,19 @@ export async function previewEscalation(projectId?: number): Promise<EscalationR
           title: task.title,
           oldPriority: task.priority,
           newPriority: requiredPriority,
-          daysUntilDue
+          daysUntilDue,
         });
       }
     }
 
     return {
       updatedCount: escalatedTasks.length,
-      escalatedTasks
+      escalatedTasks,
     };
   } catch (error) {
-    logger.error('[PriorityEscalation] Error previewing escalation', { error: error instanceof Error ? error : undefined });
+    logger.error('[PriorityEscalation] Error previewing escalation', {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -291,18 +295,21 @@ export async function getEscalationSummary(projectId?: number): Promise<{
   }
 
   // Get total and priority breakdown
-  const priorityStats = await db.all(`
+  const priorityStats = await db.all(
+    `
     SELECT priority, COUNT(*) as count
     FROM project_tasks
     ${whereClause}
     GROUP BY priority
-  `, params);
+  `,
+    params
+  );
 
   const byPriority: Record<PriorityLevel, number> = {
     low: 0,
     medium: 0,
     high: 0,
-    urgent: 0
+    urgent: 0,
   };
 
   let totalTasks = 0;
@@ -317,20 +324,29 @@ export async function getEscalationSummary(projectId?: number): Promise<{
   weekFromNow.setDate(weekFromNow.getDate() + 7);
   const weekEnd = weekFromNow.toISOString().split('T')[0];
 
-  const overdueResult = await db.get(`
+  const overdueResult = (await db.get(
+    `
     SELECT COUNT(*) as count FROM project_tasks
     ${whereClause} AND due_date < ?
-  `, [...params, today]) as { count: number };
+  `,
+    [...params, today]
+  )) as { count: number };
 
-  const dueTodayResult = await db.get(`
+  const dueTodayResult = (await db.get(
+    `
     SELECT COUNT(*) as count FROM project_tasks
     ${whereClause} AND due_date = ?
-  `, [...params, today]) as { count: number };
+  `,
+    [...params, today]
+  )) as { count: number };
 
-  const dueThisWeekResult = await db.get(`
+  const dueThisWeekResult = (await db.get(
+    `
     SELECT COUNT(*) as count FROM project_tasks
     ${whereClause} AND due_date > ? AND due_date <= ?
-  `, [...params, today, weekEnd]) as { count: number };
+  `,
+    [...params, today, weekEnd]
+  )) as { count: number };
 
   // Get count that would escalate
   const preview = await previewEscalation(projectId);
@@ -341,7 +357,7 @@ export async function getEscalationSummary(projectId?: number): Promise<{
     overdue: overdueResult?.count || 0,
     dueToday: dueTodayResult?.count || 0,
     dueThisWeek: dueThisWeekResult?.count || 0,
-    wouldEscalate: preview.updatedCount
+    wouldEscalate: preview.updatedCount,
   };
 }
 
@@ -353,5 +369,5 @@ export default {
   getRequiredPriority,
   shouldEscalate,
   PRIORITY_LEVELS,
-  PRIORITY_RANK
+  PRIORITY_RANK,
 };

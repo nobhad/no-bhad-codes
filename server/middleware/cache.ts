@@ -67,7 +67,7 @@ export function cache(
     skipCache,
     tags,
     varyBy = [],
-    onlySuccessfulResponses = true
+    onlySuccessfulResponses = true,
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -131,7 +131,7 @@ export function cache(
               {
                 status: res.statusCode,
                 headers: getResponseHeaders(res),
-                body
+                body,
               },
               ttl,
               tags,
@@ -158,7 +158,7 @@ export function cache(
               {
                 status: res.statusCode,
                 headers: getResponseHeaders(res),
-                body
+                body,
               },
               ttl,
               tags,
@@ -207,11 +207,11 @@ async function cacheResponse(
       {
         status,
         headers,
-        body
+        body,
       },
       {
         ttl,
-        tags: cacheTags
+        tags: cacheTags,
       }
     );
 
@@ -234,7 +234,7 @@ function getResponseHeaders(res: Response): Record<string, string> {
     'cache-control',
     'expires',
     'last-modified',
-    'etag'
+    'etag',
   ];
 
   cacheableHeaders.forEach((header) => {
@@ -270,7 +270,9 @@ export function invalidateCache(
             const count = await cacheService.invalidateByTag(tag);
             logger.info(`Invalidated ${count} cached entries for tag: ${tag}`);
           } catch (error) {
-            logger.error(`Error invalidating cache tag ${tag}`, { error: error instanceof Error ? error : undefined });
+            logger.error(`Error invalidating cache tag ${tag}`, {
+              error: error instanceof Error ? error : undefined,
+            });
           }
         }
       }

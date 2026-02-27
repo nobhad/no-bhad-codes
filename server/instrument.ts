@@ -29,7 +29,12 @@ import * as Sentry from '@sentry/node';
 
 const dsn = process.env.SENTRY_DSN;
 
-if (dsn && !dsn.includes('your-sentry') && !dsn.includes('placeholder') && dsn.startsWith('https://')) {
+if (
+  dsn &&
+  !dsn.includes('your-sentry') &&
+  !dsn.includes('placeholder') &&
+  dsn.startsWith('https://')
+) {
   Sentry.init({
     dsn,
     environment: process.env.NODE_ENV || 'development',
@@ -44,14 +49,14 @@ if (dsn && !dsn.includes('your-sentry') && !dsn.includes('placeholder') && dsn.s
         event.contexts = event.contexts || {};
         // Add trace ID as a custom context field to avoid type issues
         event.contexts.otel = {
-          trace_id: traceId
+          trace_id: traceId,
         };
         // Also add to tags for easier searching
         event.tags = event.tags || {};
         event.tags.otel_trace_id = traceId;
       }
       return event;
-    }
+    },
   });
   console.log(`✅ Sentry instrumentation loaded for ${process.env.NODE_ENV || 'development'}`);
 } else {

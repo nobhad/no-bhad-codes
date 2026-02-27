@@ -10,11 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
-import {
-  sendSuccess,
-  errorResponse,
-  errorResponseWithPayload
-} from '../utils/api-response.js';
+import { sendSuccess, errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
 import { receiptService, Receipt } from '../services/receipt-service.js';
 import { getDatabase } from '../database/init.js';
@@ -40,7 +36,7 @@ function toSnakeCaseReceipt(receipt: Receipt): Record<string, unknown> {
     invoice_number: receipt.invoiceNumber,
     client_name: receipt.clientName,
     client_email: receipt.clientEmail,
-    project_name: receipt.projectName
+    project_name: receipt.projectName,
   };
 }
 
@@ -67,16 +63,19 @@ async function canAccessReceipt(req: AuthenticatedRequest, receiptId: number): P
 /**
  * Check if user can access invoice receipts
  */
-async function canAccessInvoiceReceipts(req: AuthenticatedRequest, invoiceId: number): Promise<boolean> {
+async function canAccessInvoiceReceipts(
+  req: AuthenticatedRequest,
+  invoiceId: number
+): Promise<boolean> {
   if (req.user?.type === 'admin') {
     return true;
   }
 
   const db = getDatabase();
-  const row = await db.get(
-    'SELECT 1 FROM invoices WHERE id = ? AND client_id = ?',
-    [invoiceId, req.user?.id]
-  );
+  const row = await db.get('SELECT 1 FROM invoices WHERE id = ? AND client_id = ?', [
+    invoiceId,
+    req.user?.id,
+  ]);
 
   return !!row;
 }
@@ -113,7 +112,9 @@ router.get(
 
       if (req.user?.type === 'admin') {
         // Admin can filter by client or get all
-        const clientId = req.query.clientId ? parseInt(req.query.clientId as string, 10) : undefined;
+        const clientId = req.query.clientId
+          ? parseInt(req.query.clientId as string, 10)
+          : undefined;
         if (clientId) {
           receipts = await receiptService.getReceiptsByClient(clientId);
         } else {
@@ -141,7 +142,7 @@ router.get(
             invoiceNumber: row.invoice_number,
             clientName: row.client_name,
             clientEmail: row.client_email,
-            projectName: row.project_name
+            projectName: row.project_name,
           }));
         }
       } else {
@@ -151,11 +152,11 @@ router.get(
 
       sendSuccess(res, {
         receipts: receipts.map(toSnakeCaseReceipt),
-        count: receipts.length
+        count: receipts.length,
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -204,7 +205,9 @@ router.get(
       if (message.includes('not found')) {
         return errorResponse(res, 'Receipt not found', 404, 'NOT_FOUND');
       }
-      errorResponseWithPayload(res, 'Failed to retrieve receipt', 500, 'RETRIEVAL_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to retrieve receipt', 500, 'RETRIEVAL_FAILED', {
+        message,
+      });
     }
   })
 );
@@ -246,11 +249,11 @@ router.get(
       const receipts = await receiptService.getReceiptsByInvoice(invoiceId);
       sendSuccess(res, {
         receipts: receipts.map(toSnakeCaseReceipt),
-        count: receipts.length
+        count: receipts.length,
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -311,7 +314,9 @@ router.get(
       if (message.includes('not found')) {
         return errorResponse(res, 'Receipt not found', 404, 'NOT_FOUND');
       }
-      errorResponseWithPayload(res, 'Failed to generate receipt PDF', 500, 'PDF_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to generate receipt PDF', 500, 'PDF_FAILED', {
+        message,
+      });
     }
   })
 );
@@ -350,11 +355,11 @@ router.get(
       const receipts = await receiptService.getReceiptsByClient(clientId);
       sendSuccess(res, {
         receipts: receipts.map(toSnakeCaseReceipt),
-        count: receipts.length
+        count: receipts.length,
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })

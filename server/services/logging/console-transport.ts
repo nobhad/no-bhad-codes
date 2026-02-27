@@ -14,7 +14,7 @@ import {
   type ConsoleTransportConfig,
   LogLevel,
   formatLogEntry,
-  colorize
+  colorize,
 } from '../../../shared/logging/types.js';
 
 /**
@@ -45,27 +45,25 @@ export class ConsoleTransport implements LogTransport {
     }
 
     const formatted = formatLogEntry(entry, {
-      includeTimestamp: this.includeTimestamp
+      includeTimestamp: this.includeTimestamp,
     });
 
-    const output = this.enableColors
-      ? colorize(formatted, entry.level)
-      : formatted;
+    const output = this.enableColors ? colorize(formatted, entry.level) : formatted;
 
     // Use appropriate console method
     switch (entry.level) {
-    case 'ERROR':
-      console.error(output);
-      break;
-    case 'WARN':
-      console.warn(output);
-      break;
-    case 'DEBUG':
-    case 'TRACE':
-      console.debug(output);
-      break;
-    default:
-      console.log(output);
+      case 'ERROR':
+        console.error(output);
+        break;
+      case 'WARN':
+        console.warn(output);
+        break;
+      case 'DEBUG':
+      case 'TRACE':
+        console.debug(output);
+        break;
+      default:
+        console.log(output);
     }
   }
 }

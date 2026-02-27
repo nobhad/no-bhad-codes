@@ -235,7 +235,7 @@ router.post(
       document_type,
       priority,
       due_date,
-      is_required
+      is_required,
     } = req.body;
 
     if (!client_id || !title) {
@@ -253,7 +253,7 @@ router.post(
       document_type,
       priority,
       due_date,
-      is_required
+      is_required,
     });
 
     sendCreated(res, { request }, 'Document request created');
@@ -327,7 +327,11 @@ router.post(
     }
 
     // Approve the request - this also copies the file to the Files tab
-    const { request, approvedFileId } = await documentRequestService.approveRequest(id, reviewerEmail, notes);
+    const { request, approvedFileId } = await documentRequestService.approveRequest(
+      id,
+      reviewerEmail,
+      notes
+    );
 
     // Emit workflow event for document request approval
     await workflowTriggerService.emit('document_request.approved', {
@@ -340,7 +344,7 @@ router.post(
       documentType: request.document_type,
       approvedFileId,
       originalFileId: request.file_id,
-      reviewerEmail
+      reviewerEmail,
     });
 
     sendSuccess(res, { request, approvedFileId }, 'Document request approved');
@@ -380,7 +384,7 @@ router.post(
       title: request.title,
       documentType: request.document_type,
       rejectionReason: reason,
-      reviewerEmail
+      reviewerEmail,
     });
 
     sendSuccess(res, { request }, 'Document request rejected');
@@ -488,7 +492,7 @@ router.post(
       document_type,
       is_required,
       days_until_due,
-      created_by: createdBy
+      created_by: createdBy,
     });
 
     sendCreated(res, { template }, 'Template created');

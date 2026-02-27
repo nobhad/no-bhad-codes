@@ -66,7 +66,7 @@ const TABLE_MAP: Record<SoftDeleteEntityType, string> = {
   project: 'projects',
   invoice: 'invoices',
   lead: 'projects', // Leads are projects with status IN ('pending', 'new')
-  proposal: 'proposal_requests'
+  proposal: 'proposal_requests',
 };
 
 // =====================================================
@@ -89,10 +89,10 @@ class SoftDeleteService {
 
     try {
       // Verify client exists and isn't already deleted
-      const client = await db.get(
+      const client = (await db.get(
         'SELECT id, company_name, contact_name, email FROM clients WHERE id = ? AND deleted_at IS NULL',
         [clientId]
-      ) as { id: number; company_name?: string; contact_name?: string; email: string } | undefined;
+      )) as { id: number; company_name?: string; contact_name?: string; email: string } | undefined;
 
       if (!client) {
         return { success: false, message: 'Client not found or already deleted' };
@@ -103,17 +103,17 @@ class SoftDeleteService {
         clients: 1,
         projects: 0,
         invoices: 0,
-        proposals: 0
+        proposals: 0,
       };
 
       // 1. Soft delete associated projects and their proposals using batch operations
-      const projects = await db.all(
+      const projects = (await db.all(
         'SELECT id FROM projects WHERE client_id = ? AND deleted_at IS NULL',
         [clientId]
-      ) as { id: number }[];
+      )) as { id: number }[];
 
       if (projects.length > 0) {
-        const projectIds = projects.map(p => p.id);
+        const projectIds = projects.map((p) => p.id);
 
         // Batch soft delete proposals for all projects in one query
         const proposalResult = await db.run(
@@ -152,10 +152,11 @@ class SoftDeleteService {
       affectedItems.invoices = voidResult.changes || 0;
 
       // 4. Soft delete the client
-      await db.run(
-        'UPDATE clients SET deleted_at = ?, deleted_by = ? WHERE id = ?',
-        [now, deletedBy, clientId]
-      );
+      await db.run('UPDATE clients SET deleted_at = ?, deleted_by = ? WHERE id = ?', [
+        now,
+        deletedBy,
+        clientId,
+      ]);
 
       // Log the action
       const clientName = client.company_name || client.contact_name || client.email;
@@ -169,18 +170,22 @@ class SoftDeleteService {
         userType: 'admin',
         metadata: { cascadeAffected: affectedItems },
         ipAddress: 'system',
-        userAgent: 'soft-delete-service'
+        userAgent: 'soft-delete-service',
       });
 
-      logger.info(`Soft deleted client ${clientId} (${clientName}) and ${affectedItems.projects} projects, ${affectedItems.proposals} proposals, voided ${affectedItems.invoices} invoices`);
+      logger.info(
+        `Soft deleted client ${clientId} (${clientName}) and ${affectedItems.projects} projects, ${affectedItems.proposals} proposals, voided ${affectedItems.invoices} invoices`
+      );
 
       return {
         success: true,
         message: `Client "${clientName}" moved to trash. Will be permanently deleted in ${RETENTION_DAYS} days.`,
-        affectedItems
+        affectedItems,
       };
     } catch (error) {
-      logger.error('Error soft deleting client:', { error: error instanceof Error ? error : new Error(String(error)) });
+      logger.error('Error soft deleting client:', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       throw error;
     }
   }
@@ -193,16 +198,20 @@ class SoftDeleteService {
    * Soft delete a project and cascade to proposals
    * Does NOT delete invoices - they remain attached to the client
    */
-  async softDeleteProject(projectId: number, deletedBy: string, isChildDelete = false): Promise<SoftDeleteResult> {
+  async softDeleteProject(
+    projectId: number,
+    deletedBy: string,
+    isChildDelete = false
+  ): Promise<SoftDeleteResult> {
     const db = getDatabase();
     const now = new Date().toISOString();
 
     try {
       // Verify project exists and isn't already deleted
-      const project = await db.get(
+      const project = (await db.get(
         'SELECT id, project_name as name, client_id FROM projects WHERE id = ? AND deleted_at IS NULL',
         [projectId]
-      ) as { id: number; name: string; client_id: number } | undefined;
+      )) as { id: number; name: string; client_id: number } | undefined;
 
       if (!project) {
         return { success: false, message: 'Project not found or already deleted' };
@@ -212,7 +221,7 @@ class SoftDeleteService {
         clients: 0,
         projects: 1,
         invoices: 0,
-        proposals: 0
+        proposals: 0,
       };
 
       // 1. Soft delete associated proposals
@@ -225,10 +234,11 @@ class SoftDeleteService {
       affectedItems.proposals = proposalResult.changes || 0;
 
       // 2. Soft delete the project
-      await db.run(
-        'UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ?',
-        [now, deletedBy, projectId]
-      );
+      await db.run('UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ?', [
+        now,
+        deletedBy,
+        projectId,
+      ]);
 
       // Log the action (only if not a child delete to avoid duplicate logs)
       if (!isChildDelete) {
@@ -242,19 +252,23 @@ class SoftDeleteService {
           userType: 'admin',
           metadata: { clientId: project.client_id, cascadeAffected: affectedItems },
           ipAddress: 'system',
-          userAgent: 'soft-delete-service'
+          userAgent: 'soft-delete-service',
         });
 
-        logger.info(`Soft deleted project ${projectId} (${project.name}) and ${affectedItems.proposals} proposals`);
+        logger.info(
+          `Soft deleted project ${projectId} (${project.name}) and ${affectedItems.proposals} proposals`
+        );
       }
 
       return {
         success: true,
         message: `Project "${project.name}" moved to trash. Will be permanently deleted in ${RETENTION_DAYS} days.`,
-        affectedItems
+        affectedItems,
       };
     } catch (error) {
-      logger.error('Error soft deleting project:', { error: error instanceof Error ? error : new Error(String(error)) });
+      logger.error('Error soft deleting project:', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       throw error;
     }
   }
@@ -274,10 +288,10 @@ class SoftDeleteService {
 
     try {
       // Verify invoice exists and check status
-      const invoice = await db.get(
+      const invoice = (await db.get(
         'SELECT id, invoice_number, status, client_id FROM invoices WHERE id = ? AND deleted_at IS NULL',
         [invoiceId]
-      ) as { id: number; invoice_number: string; status: string; client_id: number } | undefined;
+      )) as { id: number; invoice_number: string; status: string; client_id: number } | undefined;
 
       if (!invoice) {
         return { success: false, message: 'Invoice not found or already deleted' };
@@ -287,23 +301,21 @@ class SoftDeleteService {
       if (invoice.status === 'paid') {
         return {
           success: false,
-          message: 'Cannot delete paid invoices. They must be retained for accounting records.'
+          message: 'Cannot delete paid invoices. They must be retained for accounting records.',
         };
       }
 
       // Void the invoice if it's not already voided/cancelled, then soft delete
       if (invoice.status !== 'voided' && invoice.status !== 'cancelled') {
-        await db.run(
-          'UPDATE invoices SET status = \'voided\' WHERE id = ?',
-          [invoiceId]
-        );
+        await db.run("UPDATE invoices SET status = 'voided' WHERE id = ?", [invoiceId]);
       }
 
       // Soft delete the invoice
-      await db.run(
-        'UPDATE invoices SET deleted_at = ?, deleted_by = ? WHERE id = ?',
-        [now, deletedBy, invoiceId]
-      );
+      await db.run('UPDATE invoices SET deleted_at = ?, deleted_by = ? WHERE id = ?', [
+        now,
+        deletedBy,
+        invoiceId,
+      ]);
 
       await auditLogger.log({
         action: 'invoice_deleted',
@@ -315,7 +327,7 @@ class SoftDeleteService {
         userType: 'admin',
         metadata: { previousStatus: invoice.status, clientId: invoice.client_id },
         ipAddress: 'system',
-        userAgent: 'soft-delete-service'
+        userAgent: 'soft-delete-service',
       });
 
       logger.info(`Soft deleted invoice ${invoiceId} (${invoice.invoice_number})`);
@@ -323,10 +335,12 @@ class SoftDeleteService {
       return {
         success: true,
         message: `Invoice "${invoice.invoice_number}" voided and moved to trash. Will be permanently deleted in ${RETENTION_DAYS} days.`,
-        affectedItems: { clients: 0, projects: 0, invoices: 1, proposals: 0 }
+        affectedItems: { clients: 0, projects: 0, invoices: 1, proposals: 0 },
       };
     } catch (error) {
-      logger.error('Error soft deleting invoice:', { error: error instanceof Error ? error : new Error(String(error)) });
+      logger.error('Error soft deleting invoice:', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       throw error;
     }
   }
@@ -346,24 +360,38 @@ class SoftDeleteService {
 
     try {
       // Query projects table - leads are projects with pending/new status
-      const lead = await db.get(
+      const lead = (await db.get(
         `SELECT p.id, p.project_name, c.company_name, c.contact_name, c.email
          FROM projects p
          LEFT JOIN clients c ON p.client_id = c.id
          WHERE p.id = ? AND p.status IN ('pending', 'new') AND p.deleted_at IS NULL`,
         [leadId]
-      ) as { id: number; project_name?: string; company_name?: string; contact_name?: string; email?: string } | undefined;
+      )) as
+        | {
+            id: number;
+            project_name?: string;
+            company_name?: string;
+            contact_name?: string;
+            email?: string;
+          }
+        | undefined;
 
       if (!lead) {
         return { success: false, message: 'Lead not found or already deleted' };
       }
 
-      await db.run(
-        'UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ?',
-        [now, deletedBy, leadId]
-      );
+      await db.run('UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ?', [
+        now,
+        deletedBy,
+        leadId,
+      ]);
 
-      const leadName = lead.project_name || lead.company_name || lead.contact_name || lead.email || `Lead #${leadId}`;
+      const leadName =
+        lead.project_name ||
+        lead.company_name ||
+        lead.contact_name ||
+        lead.email ||
+        `Lead #${leadId}`;
 
       await auditLogger.log({
         action: 'lead_deleted',
@@ -375,7 +403,7 @@ class SoftDeleteService {
         userType: 'admin',
         metadata: {},
         ipAddress: 'system',
-        userAgent: 'soft-delete-service'
+        userAgent: 'soft-delete-service',
       });
 
       logger.info(`Soft deleted lead ${leadId} (${leadName})`);
@@ -383,10 +411,12 @@ class SoftDeleteService {
       return {
         success: true,
         message: `Lead "${leadName}" moved to trash. Will be permanently deleted in ${RETENTION_DAYS} days.`,
-        affectedItems: { clients: 0, projects: 0, invoices: 0, proposals: 0 }
+        affectedItems: { clients: 0, projects: 0, invoices: 0, proposals: 0 },
       };
     } catch (error) {
-      logger.error('Error soft deleting lead:', { error: error instanceof Error ? error : new Error(String(error)) });
+      logger.error('Error soft deleting lead:', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       throw error;
     }
   }
@@ -404,19 +434,20 @@ class SoftDeleteService {
     const now = new Date().toISOString();
 
     try {
-      const proposal = await db.get(
+      const proposal = (await db.get(
         'SELECT id, title, client_id FROM proposal_requests WHERE id = ? AND deleted_at IS NULL',
         [proposalId]
-      ) as { id: number; title?: string; client_id?: number } | undefined;
+      )) as { id: number; title?: string; client_id?: number } | undefined;
 
       if (!proposal) {
         return { success: false, message: 'Proposal not found or already deleted' };
       }
 
-      await db.run(
-        'UPDATE proposal_requests SET deleted_at = ?, deleted_by = ? WHERE id = ?',
-        [now, deletedBy, proposalId]
-      );
+      await db.run('UPDATE proposal_requests SET deleted_at = ?, deleted_by = ? WHERE id = ?', [
+        now,
+        deletedBy,
+        proposalId,
+      ]);
 
       const proposalName = proposal.title || `Proposal #${proposalId}`;
 
@@ -430,7 +461,7 @@ class SoftDeleteService {
         userType: 'admin',
         metadata: { clientId: proposal.client_id },
         ipAddress: 'system',
-        userAgent: 'soft-delete-service'
+        userAgent: 'soft-delete-service',
       });
 
       logger.info(`Soft deleted proposal ${proposalId} (${proposalName})`);
@@ -438,10 +469,12 @@ class SoftDeleteService {
       return {
         success: true,
         message: `Proposal "${proposalName}" moved to trash. Will be permanently deleted in ${RETENTION_DAYS} days.`,
-        affectedItems: { clients: 0, projects: 0, invoices: 0, proposals: 1 }
+        affectedItems: { clients: 0, projects: 0, invoices: 0, proposals: 1 },
       };
     } catch (error) {
-      logger.error('Error soft deleting proposal:', { error: error instanceof Error ? error : new Error(String(error)) });
+      logger.error('Error soft deleting proposal:', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       throw error;
     }
   }
@@ -472,28 +505,25 @@ class SoftDeleteService {
       // For invoices, we need to handle the voided status
       if (entityType === 'invoice') {
         // Get the invoice to check if we need to update status
-        const invoice = await db.get(
-          'SELECT id, status FROM invoices WHERE id = ?',
-          [entityId]
-        ) as { id: number; status: string } | undefined;
+        const invoice = (await db.get('SELECT id, status FROM invoices WHERE id = ?', [
+          entityId,
+        ])) as { id: number; status: string } | undefined;
 
         // If it was voided as part of deletion, set to draft
         if (invoice && invoice.status === 'voided') {
           await db.run(
-            'UPDATE invoices SET status = \'draft\', deleted_at = NULL, deleted_by = NULL WHERE id = ?',
+            "UPDATE invoices SET status = 'draft', deleted_at = NULL, deleted_by = NULL WHERE id = ?",
             [entityId]
           );
         } else {
-          await db.run(
-            'UPDATE invoices SET deleted_at = NULL, deleted_by = NULL WHERE id = ?',
-            [entityId]
-          );
+          await db.run('UPDATE invoices SET deleted_at = NULL, deleted_by = NULL WHERE id = ?', [
+            entityId,
+          ]);
         }
       } else {
-        await db.run(
-          `UPDATE ${table} SET deleted_at = NULL, deleted_by = NULL WHERE id = ?`,
-          [entityId]
-        );
+        await db.run(`UPDATE ${table} SET deleted_at = NULL, deleted_by = NULL WHERE id = ?`, [
+          entityId,
+        ]);
       }
 
       await auditLogger.log({
@@ -506,17 +536,19 @@ class SoftDeleteService {
         userType: 'admin',
         metadata: {},
         ipAddress: 'system',
-        userAgent: 'soft-delete-service'
+        userAgent: 'soft-delete-service',
       });
 
       logger.info(`Restored ${entityType} ${entityId}`);
 
       return {
         success: true,
-        message: `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} restored successfully. Note: Related items that were deleted may need to be restored separately.`
+        message: `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} restored successfully. Note: Related items that were deleted may need to be restored separately.`,
       };
     } catch (error) {
-      logger.error(`Error restoring ${entityType}:`, { error: error instanceof Error ? error : new Error(String(error)) });
+      logger.error(`Error restoring ${entityType}:`, {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       throw error;
     }
   }
@@ -532,7 +564,9 @@ class SoftDeleteService {
     const db = getDatabase();
     const items: DeletedItem[] = [];
 
-    const types = entityType ? [entityType] : ['client', 'project', 'invoice', 'lead', 'proposal'] as SoftDeleteEntityType[];
+    const types = entityType
+      ? [entityType]
+      : (['client', 'project', 'invoice', 'lead', 'proposal'] as SoftDeleteEntityType[]);
 
     for (const type of types) {
       const table = TABLE_MAP[type];
@@ -540,26 +574,26 @@ class SoftDeleteService {
 
       // Determine the name column for each entity type
       switch (type) {
-      case 'client':
-        nameColumn = 'COALESCE(company_name, contact_name, email, \'Unknown Client\')';
-        break;
-      case 'project':
-        nameColumn = 'COALESCE(project_name, \'Unnamed Project\')';
-        break;
-      case 'invoice':
-        nameColumn = 'COALESCE(invoice_number, \'Unknown Invoice\')';
-        break;
-      case 'lead':
-        nameColumn = 'COALESCE(company_name, contact_name, contact_email, \'Unknown Lead\')';
-        break;
-      case 'proposal':
-        nameColumn = 'COALESCE(title, \'Unnamed Proposal\')';
-        break;
-      default:
-        nameColumn = '\'Unknown\'';
+        case 'client':
+          nameColumn = "COALESCE(company_name, contact_name, email, 'Unknown Client')";
+          break;
+        case 'project':
+          nameColumn = "COALESCE(project_name, 'Unnamed Project')";
+          break;
+        case 'invoice':
+          nameColumn = "COALESCE(invoice_number, 'Unknown Invoice')";
+          break;
+        case 'lead':
+          nameColumn = "COALESCE(company_name, contact_name, contact_email, 'Unknown Lead')";
+          break;
+        case 'proposal':
+          nameColumn = "COALESCE(title, 'Unnamed Proposal')";
+          break;
+        default:
+          nameColumn = "'Unknown'";
       }
 
-      const rows = await db.all(
+      const rows = (await db.all(
         `SELECT
           id,
           ${nameColumn} as name,
@@ -569,7 +603,13 @@ class SoftDeleteService {
          FROM ${table}
          WHERE deleted_at IS NOT NULL
          ORDER BY deleted_at DESC`
-      ) as { id: number; name: string; deleted_at: string; deleted_by: string; days_remaining: number }[];
+      )) as {
+        id: number;
+        name: string;
+        deleted_at: string;
+        deleted_by: string;
+        days_remaining: number;
+      }[];
 
       for (const row of rows) {
         items.push({
@@ -579,7 +619,7 @@ class SoftDeleteService {
           deletedAt: row.deleted_at,
           deletedBy: row.deleted_by || 'system',
           daysUntilPermanent: Math.max(0, row.days_remaining),
-          canRestore: row.days_remaining > 0
+          canRestore: row.days_remaining > 0,
         });
       }
     }
@@ -602,35 +642,35 @@ class SoftDeleteService {
       invoices: 0,
       leads: 0,
       proposals: 0,
-      total: 0
+      total: 0,
     };
 
     // Count each type
-    const clientCount = await db.get(
+    const clientCount = (await db.get(
       'SELECT COUNT(*) as count FROM clients WHERE deleted_at IS NOT NULL'
-    ) as { count: number };
+    )) as { count: number };
     stats.clients = clientCount.count;
 
-    const projectCount = await db.get(
+    const projectCount = (await db.get(
       'SELECT COUNT(*) as count FROM projects WHERE deleted_at IS NOT NULL'
-    ) as { count: number };
+    )) as { count: number };
     stats.projects = projectCount.count;
 
-    const invoiceCount = await db.get(
+    const invoiceCount = (await db.get(
       'SELECT COUNT(*) as count FROM invoices WHERE deleted_at IS NOT NULL'
-    ) as { count: number };
+    )) as { count: number };
     stats.invoices = invoiceCount.count;
 
     // Leads are now projects with pending/new status (since migration 086)
-    const leadCount = await db.get(
+    const leadCount = (await db.get(
       `SELECT COUNT(*) as count FROM projects
        WHERE status IN ('pending', 'new') AND deleted_at IS NOT NULL`
-    ) as { count: number };
+    )) as { count: number };
     stats.leads = leadCount.count;
 
-    const proposalCount = await db.get(
+    const proposalCount = (await db.get(
       'SELECT COUNT(*) as count FROM proposal_requests WHERE deleted_at IS NOT NULL'
-    ) as { count: number };
+    )) as { count: number };
     stats.proposals = proposalCount.count;
 
     stats.total = stats.clients + stats.projects + stats.invoices + stats.leads + stats.proposals;
@@ -661,7 +701,7 @@ class SoftDeleteService {
       invoices: 0,
       leads: 0,
       proposals: 0,
-      total: 0
+      total: 0,
     };
     const errors: string[] = [];
 
@@ -762,12 +802,12 @@ class SoftDeleteService {
       // 7. Delete leads (leads are projects with pending/new status - since migration 086)
       // Note: Lead deletion is handled by the projects deletion above
       // Count leads separately for reporting
-      const leadCount = await db.get(
+      const leadCount = (await db.get(
         `SELECT COUNT(*) as count FROM projects
          WHERE status IN ('pending', 'new')
          AND deleted_at IS NOT NULL AND deleted_at < ?`,
         [cutoffDateStr]
-      ) as { count: number };
+      )) as { count: number };
       deleted.leads = leadCount.count;
       // Note: Actual deletion happens in step 6 (projects deletion)
 
@@ -829,7 +869,8 @@ class SoftDeleteService {
       );
       deleted.clients = clientResult.changes || 0;
 
-      deleted.total = deleted.clients + deleted.projects + deleted.invoices + deleted.leads + deleted.proposals;
+      deleted.total =
+        deleted.clients + deleted.projects + deleted.invoices + deleted.leads + deleted.proposals;
 
       if (deleted.total > 0) {
         await auditLogger.log({
@@ -842,17 +883,21 @@ class SoftDeleteService {
           userType: 'admin',
           metadata: { retentionDays, deleted },
           ipAddress: 'system',
-          userAgent: 'scheduler-service'
+          userAgent: 'scheduler-service',
         });
 
-        logger.info(`Permanently deleted ${deleted.total} items (${deleted.clients} clients, ${deleted.projects} projects, ${deleted.invoices} invoices, ${deleted.leads} leads, ${deleted.proposals} proposals)`);
+        logger.info(
+          `Permanently deleted ${deleted.total} items (${deleted.clients} clients, ${deleted.projects} projects, ${deleted.invoices} invoices, ${deleted.leads} leads, ${deleted.proposals} proposals)`
+        );
       }
 
       return { deleted, errors };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       errors.push(errorMsg);
-      logger.error('Error in permanent delete cleanup:', { error: error instanceof Error ? error : new Error(String(error)) });
+      logger.error('Error in permanent delete cleanup:', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       return { deleted, errors };
     }
   }
@@ -866,10 +911,7 @@ class SoftDeleteService {
 
     try {
       // First verify the item exists
-      const entity = await db.get(
-        `SELECT id, deleted_at FROM ${table} WHERE id = ?`,
-        [entityId]
-      );
+      const entity = await db.get(`SELECT id, deleted_at FROM ${table} WHERE id = ?`, [entityId]);
 
       if (!entity) {
         return { success: false, message: `${entityType} not found` };
@@ -899,7 +941,9 @@ class SoftDeleteService {
         await db.run('DELETE FROM invoices WHERE client_id = ?', [entityId]);
 
         // Delete related projects and their children
-        const projects = await db.all('SELECT id FROM projects WHERE client_id = ?', [entityId]) as { id: number }[];
+        const projects = (await db.all('SELECT id FROM projects WHERE client_id = ?', [
+          entityId,
+        ])) as { id: number }[];
         for (const project of projects) {
           await db.run('DELETE FROM project_milestones WHERE project_id = ?', [project.id]);
           await db.run('DELETE FROM project_tasks WHERE project_id = ?', [project.id]);
@@ -937,17 +981,19 @@ class SoftDeleteService {
         userType: 'admin',
         metadata: {},
         ipAddress: 'system',
-        userAgent: 'soft-delete-service'
+        userAgent: 'soft-delete-service',
       });
 
       logger.info(`Force deleted ${entityType} ${entityId}`);
 
       return {
         success: true,
-        message: `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} permanently deleted.`
+        message: `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} permanently deleted.`,
       };
     } catch (error) {
-      logger.error(`Error force deleting ${entityType}:`, { error: error instanceof Error ? error : new Error(String(error)) });
+      logger.error(`Error force deleting ${entityType}:`, {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       throw error;
     }
   }

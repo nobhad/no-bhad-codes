@@ -79,7 +79,14 @@ interface FileStats {
   expiring_soon: number;
 }
 
-type FileCategory = 'general' | 'deliverable' | 'source' | 'asset' | 'document' | 'contract' | 'invoice';
+type FileCategory =
+  | 'general'
+  | 'deliverable'
+  | 'source'
+  | 'asset'
+  | 'document'
+  | 'contract'
+  | 'invoice';
 
 // ============================================
 // File Service Class
@@ -93,7 +100,9 @@ class FileService {
   /**
    * Get a file by its ID
    */
-  async getFileById(fileId: number): Promise<{ id: number; project_id: number; [key: string]: unknown } | null> {
+  async getFileById(
+    fileId: number
+  ): Promise<{ id: number; project_id: number; [key: string]: unknown } | null> {
     const db = getDatabase();
     const file = await db.get('SELECT * FROM files WHERE id = ?', [fileId]);
     return file as { id: number; project_id: number; [key: string]: unknown } | null;
@@ -129,10 +138,7 @@ class FileService {
     const newVersionNumber = (Number(file.version) || 1) + 1;
 
     // Mark all existing versions as not current
-    await db.run(
-      'UPDATE file_versions SET is_current = FALSE WHERE file_id = ?',
-      [fileId]
-    );
+    await db.run('UPDATE file_versions SET is_current = FALSE WHERE file_id = ?', [fileId]);
 
     // Insert new version
     const result = await db.run(
@@ -149,7 +155,7 @@ class FileService {
         versionData.file_size || null,
         versionData.mime_type || null,
         versionData.uploaded_by || null,
-        versionData.comment || null
+        versionData.comment || null,
       ]
     );
 
@@ -170,7 +176,7 @@ class FileService {
         versionData.file_path,
         versionData.file_size || null,
         versionData.mime_type || null,
-        fileId
+        fileId,
       ]
     );
 
@@ -196,10 +202,7 @@ class FileService {
    */
   async getVersion(versionId: number): Promise<FileVersion> {
     const db = getDatabase();
-    const version = await db.get(
-      'SELECT * FROM file_versions WHERE id = ?',
-      [versionId]
-    );
+    const version = await db.get('SELECT * FROM file_versions WHERE id = ?', [versionId]);
     if (!version) {
       throw new Error('Version not found');
     }
@@ -212,10 +215,10 @@ class FileService {
   async restoreVersion(fileId: number, versionId: number): Promise<FileVersion> {
     const db = getDatabase();
 
-    const version = await db.get(
-      'SELECT * FROM file_versions WHERE id = ? AND file_id = ?',
-      [versionId, fileId]
-    );
+    const version = await db.get('SELECT * FROM file_versions WHERE id = ? AND file_id = ?', [
+      versionId,
+      fileId,
+    ]);
     if (!version) {
       throw new Error('Version not found');
     }
@@ -228,7 +231,7 @@ class FileService {
       file_size: version.file_size as number | undefined,
       mime_type: version.mime_type as string | undefined,
       uploaded_by: version.uploaded_by as string | undefined,
-      comment: `Restored from version ${version.version_number}`
+      comment: `Restored from version ${version.version_number}`,
     });
   }
 
@@ -281,7 +284,7 @@ class FileService {
         data.color || '#6b7280',
         data.icon || 'folder',
         (Number(maxOrder?.max_order) || 0) + 1,
-        data.created_by || null
+        data.created_by || null,
       ]
     );
 
@@ -375,10 +378,7 @@ class FileService {
     if (updates.length > 0) {
       updates.push('updated_at = CURRENT_TIMESTAMP');
       values.push(folderId);
-      await db.run(
-        `UPDATE file_folders SET ${updates.join(', ')} WHERE id = ?`,
-        values
-      );
+      await db.run(`UPDATE file_folders SET ${updates.join(', ')} WHERE id = ?`, values);
     }
 
     return this.getFolder(folderId);
@@ -392,10 +392,10 @@ class FileService {
 
     // Move files to another folder or root if specified
     if (moveFilesTo !== undefined) {
-      await db.run(
-        'UPDATE files SET folder_id = ? WHERE folder_id = ?',
-        [moveFilesTo || null, folderId]
-      );
+      await db.run('UPDATE files SET folder_id = ? WHERE folder_id = ?', [
+        moveFilesTo || null,
+        folderId,
+      ]);
     }
 
     // Delete folder (cascade will handle subfolders)
@@ -407,10 +407,7 @@ class FileService {
    */
   async moveFile(fileId: number, folderId: number | null): Promise<void> {
     const db = getDatabase();
-    await db.run(
-      'UPDATE files SET folder_id = ? WHERE id = ?',
-      [folderId, fileId]
-    );
+    await db.run('UPDATE files SET folder_id = ? WHERE id = ?', [folderId, fileId]);
   }
 
   /**
@@ -426,11 +423,11 @@ class FileService {
         if (parentId === folderId) {
           throw new Error('Cannot move folder into its own subfolder');
         }
-        const parent = await db.get(
+        const parent: { parent_folder_id: number | null } | undefined = await db.get(
           'SELECT parent_folder_id FROM file_folders WHERE id = ?',
           [parentId]
         );
-        parentId = (parent?.parent_folder_id as number | null) ?? null;
+        parentId = parent?.parent_folder_id ?? null;
       }
     }
 
@@ -449,10 +446,10 @@ class FileService {
    */
   async addTag(fileId: number, tagId: number): Promise<void> {
     const db = getDatabase();
-    await db.run(
-      'INSERT OR IGNORE INTO file_tags (file_id, tag_id) VALUES (?, ?)',
-      [fileId, tagId]
-    );
+    await db.run('INSERT OR IGNORE INTO file_tags (file_id, tag_id) VALUES (?, ?)', [
+      fileId,
+      tagId,
+    ]);
   }
 
   /**
@@ -460,10 +457,7 @@ class FileService {
    */
   async removeTag(fileId: number, tagId: number): Promise<void> {
     const db = getDatabase();
-    await db.run(
-      'DELETE FROM file_tags WHERE file_id = ? AND tag_id = ?',
-      [fileId, tagId]
-    );
+    await db.run('DELETE FROM file_tags WHERE file_id = ? AND tag_id = ?', [fileId, tagId]);
   }
 
   /**
@@ -567,7 +561,7 @@ class FileService {
       total_views: Number(stats?.total_views ?? 0),
       total_downloads: Number(stats?.total_downloads ?? 0),
       unique_viewers: Number(stats?.unique_viewers ?? 0),
-      last_accessed: (stats?.last_accessed as string | null) ?? null
+      last_accessed: (stats?.last_accessed as string | null) ?? null,
     };
   }
 
@@ -595,7 +589,16 @@ class FileService {
     const result = await db.run(
       `INSERT INTO file_comments (file_id, author_email, author_user_id, author_type, author_name, content, is_internal, parent_comment_id)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [fileId, authorEmail, authorUserId, authorType, authorName || null, content, isInternal, parentCommentId || null]
+      [
+        fileId,
+        authorEmail,
+        authorUserId,
+        authorType,
+        authorName || null,
+        content,
+        isInternal,
+        parentCommentId || null,
+      ]
     );
 
     return this.getComment(result.lastID!);
@@ -640,10 +643,7 @@ class FileService {
    */
   async getComment(commentId: number): Promise<FileComment> {
     const db = getDatabase();
-    const comment = await db.get(
-      'SELECT * FROM file_comments WHERE id = ?',
-      [commentId]
-    );
+    const comment = await db.get('SELECT * FROM file_comments WHERE id = ?', [commentId]);
     if (!comment) {
       throw new Error('Comment not found');
     }
@@ -700,10 +700,7 @@ class FileService {
    */
   async setExpiration(fileId: number, expiresAt: string | null): Promise<void> {
     const db = getDatabase();
-    await db.run(
-      'UPDATE files SET expires_at = ? WHERE id = ?',
-      [expiresAt, fileId]
-    );
+    await db.run('UPDATE files SET expires_at = ? WHERE id = ?', [expiresAt, fileId]);
   }
 
   /**
@@ -846,7 +843,7 @@ class FileService {
       by_type: byType,
       recent_uploads: Number(stats?.recent_uploads ?? 0),
       archived_count: Number(stats?.archived_count ?? 0),
-      expiring_soon: Number(stats?.expiring_soon ?? 0)
+      expiring_soon: Number(stats?.expiring_soon ?? 0),
     };
   }
 
@@ -908,7 +905,7 @@ class FileService {
     'in_review',
     'changes_requested',
     'approved',
-    'rejected'
+    'rejected',
   ] as const;
 
   /**
@@ -918,21 +915,15 @@ class FileService {
     const db = getDatabase();
 
     // Check if workflow exists
-    let workflow = await db.get(
-      'SELECT * FROM deliverable_workflows WHERE file_id = ?',
-      [fileId]
-    );
+    let workflow = await db.get('SELECT * FROM deliverable_workflows WHERE file_id = ?', [fileId]);
 
     if (!workflow) {
       // Create new workflow
       const result = await db.run(
-        'INSERT INTO deliverable_workflows (file_id, project_id, status) VALUES (?, ?, \'draft\')',
+        "INSERT INTO deliverable_workflows (file_id, project_id, status) VALUES (?, ?, 'draft')",
         [fileId, projectId]
       );
-      workflow = await db.get(
-        'SELECT * FROM deliverable_workflows WHERE id = ?',
-        [result.lastID]
-      );
+      workflow = await db.get('SELECT * FROM deliverable_workflows WHERE id = ?', [result.lastID]);
     }
 
     return workflow;
@@ -991,7 +982,13 @@ class FileService {
     );
 
     // Log history
-    await this.logDeliverableHistory(workflow.id, workflow.status, 'pending_review', submittedBy, notes);
+    await this.logDeliverableHistory(
+      workflow.id,
+      workflow.status,
+      'pending_review',
+      submittedBy,
+      notes
+    );
 
     return this.getDeliverableWorkflow(fileId);
   }
@@ -1038,7 +1035,13 @@ class FileService {
     // Add review comment
     await this.addReviewComment(workflow.id, reviewerEmail, 'admin', feedback, 'revision_request');
 
-    await this.logDeliverableHistory(workflow.id, workflow.status, 'changes_requested', reviewerEmail, feedback);
+    await this.logDeliverableHistory(
+      workflow.id,
+      workflow.status,
+      'changes_requested',
+      reviewerEmail,
+      feedback
+    );
 
     return this.getDeliverableWorkflow(fileId);
   }
@@ -1064,7 +1067,13 @@ class FileService {
       await this.addReviewComment(workflow.id, approverEmail, 'admin', comment, 'approval');
     }
 
-    await this.logDeliverableHistory(workflow.id, workflow.status, 'approved', approverEmail, comment);
+    await this.logDeliverableHistory(
+      workflow.id,
+      workflow.status,
+      'approved',
+      approverEmail,
+      comment
+    );
 
     return this.getDeliverableWorkflow(fileId);
   }
@@ -1087,7 +1096,13 @@ class FileService {
     );
 
     await this.addReviewComment(workflow.id, reviewerEmail, 'admin', reason, 'rejection');
-    await this.logDeliverableHistory(workflow.id, workflow.status, 'rejected', reviewerEmail, reason);
+    await this.logDeliverableHistory(
+      workflow.id,
+      workflow.status,
+      'rejected',
+      reviewerEmail,
+      reason
+    );
 
     return this.getDeliverableWorkflow(fileId);
   }
@@ -1110,7 +1125,13 @@ class FileService {
       [submittedBy, submittedByUserId, notes || null, workflow.id]
     );
 
-    await this.logDeliverableHistory(workflow.id, workflow.status, 'pending_review', submittedBy, notes);
+    await this.logDeliverableHistory(
+      workflow.id,
+      workflow.status,
+      'pending_review',
+      submittedBy,
+      notes
+    );
 
     return this.getDeliverableWorkflow(fileId);
   }
@@ -1234,7 +1255,7 @@ class FileService {
       in_review: 0,
       changes_requested: 0,
       approved: 0,
-      rejected: 0
+      rejected: 0,
     };
 
     for (const row of stats) {
@@ -1295,7 +1316,7 @@ class FileService {
         fileTypeCategory,
         `Approved deliverable: ${options.deliverableTitle}`,
         options.uploadedBy,
-        options.uploadedBy
+        options.uploadedBy,
       ]
     );
 
@@ -1303,7 +1324,11 @@ class FileService {
       throw new Error('Failed to create file entry from deliverable');
     }
 
-    return this.getFileById(result.lastID) as Promise<{ id: number; project_id: number; [key: string]: unknown }>;
+    return this.getFileById(result.lastID) as Promise<{
+      id: number;
+      project_id: number;
+      [key: string]: unknown;
+    }>;
   }
 }
 

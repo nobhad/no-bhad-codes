@@ -115,7 +115,10 @@ class NotificationPreferencesService {
   /**
    * Get preferences for a user, creating defaults if they don't exist
    */
-  async getPreferences(userId: number, userType: UserType = 'client'): Promise<NotificationPreferences> {
+  async getPreferences(
+    userId: number,
+    userType: UserType = 'client'
+  ): Promise<NotificationPreferences> {
     const db = await getDatabase();
 
     let prefs = await db.get(
@@ -125,10 +128,10 @@ class NotificationPreferencesService {
 
     if (!prefs) {
       // Create default preferences
-      await db.run(
-        'INSERT INTO notification_preferences (user_id, user_type) VALUES (?, ?)',
-        [userId, userType]
-      );
+      await db.run('INSERT INTO notification_preferences (user_id, user_type) VALUES (?, ?)', [
+        userId,
+        userType,
+      ]);
 
       prefs = await db.get(
         'SELECT * FROM notification_preferences WHERE user_id = ? AND user_type = ?',
@@ -175,7 +178,7 @@ class NotificationPreferencesService {
       'quiet_hours_enabled',
       'marketing_emails',
       'newsletter_emails',
-      'product_updates'
+      'product_updates',
     ];
 
     const stringFields = [
@@ -183,7 +186,7 @@ class NotificationPreferencesService {
       'digest_time',
       'digest_day',
       'quiet_hours_start',
-      'quiet_hours_end'
+      'quiet_hours_end',
     ];
 
     for (const field of booleanFields) {
@@ -231,7 +234,10 @@ class NotificationPreferencesService {
     }
 
     // Check quiet hours
-    if (prefs.quiet_hours_enabled && this.isQuietHours(prefs.quiet_hours_start, prefs.quiet_hours_end)) {
+    if (
+      prefs.quiet_hours_enabled &&
+      this.isQuietHours(prefs.quiet_hours_start, prefs.quiet_hours_end)
+    ) {
       // Queue for later instead of sending now
       return false;
     }
@@ -251,7 +257,7 @@ class NotificationPreferencesService {
       deliverable_ready: 'notify_deliverable_ready',
       proposal_created: 'notify_proposal_created',
       contract_ready: 'notify_contract_ready',
-      file_uploaded: 'notify_file_uploaded'
+      file_uploaded: 'notify_file_uploaded',
     };
 
     const prefKey = typeMap[notificationType];
@@ -315,7 +321,7 @@ class NotificationPreferencesService {
         data.subject || null,
         data.messagePreview || null,
         data.status || 'pending',
-        data.metadata ? JSON.stringify(data.metadata) : null
+        data.metadata ? JSON.stringify(data.metadata) : null,
       ]
     );
 
@@ -348,10 +354,7 @@ class NotificationPreferencesService {
 
     values.push(logId);
 
-    await db.run(
-      `UPDATE notification_log SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
+    await db.run(`UPDATE notification_log SET ${updates.join(', ')} WHERE id = ?`, values);
   }
 
   /**
@@ -374,7 +377,7 @@ class NotificationPreferencesService {
 
     return logs.map((log: any) => ({
       ...log,
-      metadata: log.metadata ? JSON.parse(log.metadata) : null
+      metadata: log.metadata ? JSON.parse(log.metadata) : null,
     })) as NotificationLog[];
   }
 
@@ -409,7 +412,7 @@ class NotificationPreferencesService {
         data.message || null,
         data.entityType || null,
         data.entityId || null,
-        data.priority || 0
+        data.priority || 0,
       ]
     );
   }
@@ -501,7 +504,7 @@ class NotificationPreferencesService {
       newsletter_emails: Boolean(row.newsletter_emails),
       product_updates: Boolean(row.product_updates),
       created_at: row.created_at,
-      updated_at: row.updated_at
+      updated_at: row.updated_at,
     };
   }
 }

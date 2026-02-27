@@ -16,7 +16,7 @@ import type {
   LeadNote,
   LeadSource,
   LeadSummary,
-  DuplicateResult
+  DuplicateResult,
 } from '../../services/lead-service.js';
 
 // =====================================================
@@ -143,13 +143,13 @@ export const scoringRuleSchema = defineSchema<ScoringRule>({
   operator: {
     column: 'operator',
     type: 'string',
-    transform: (v) => v as ScoringRule['operator']
+    transform: (v) => v as ScoringRule['operator'],
   },
   thresholdValue: { column: 'threshold_value', type: 'string' },
   points: 'number',
   isActive: { column: 'is_active', type: 'boolean' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const pipelineStageSchema = defineSchema<PipelineStage>({
@@ -162,7 +162,7 @@ export const pipelineStageSchema = defineSchema<PipelineStage>({
   isWon: { column: 'is_won', type: 'boolean' },
   isLost: { column: 'is_lost', type: 'boolean' },
   autoConvertToProject: { column: 'auto_convert_to_project', type: 'boolean' },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 export const leadTaskSchema = defineSchema<LeadTask>({
@@ -173,26 +173,26 @@ export const leadTaskSchema = defineSchema<LeadTask>({
   taskType: {
     column: 'task_type',
     type: 'string',
-    transform: (v) => v as LeadTask['taskType']
+    transform: (v) => v as LeadTask['taskType'],
   },
   dueDate: { column: 'due_date', type: 'string?' },
   dueTime: { column: 'due_time', type: 'string?' },
   status: {
     column: 'status',
     type: 'string',
-    transform: (v) => v as LeadTask['status']
+    transform: (v) => v as LeadTask['status'],
   },
   assignedTo: { column: 'assigned_to_name', type: 'string?' },
   priority: {
     column: 'priority',
     type: 'string',
-    transform: (v) => v as LeadTask['priority']
+    transform: (v) => v as LeadTask['priority'],
   },
   reminderAt: { column: 'reminder_at', type: 'string?' },
   completedAt: { column: 'completed_at', type: 'string?' },
   completedBy: { column: 'completed_by', type: 'string?' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const leadNoteSchema = defineSchema<LeadNote>({
@@ -201,12 +201,12 @@ export const leadNoteSchema = defineSchema<LeadNote>({
   author: {
     column: 'author_name',
     type: 'string',
-    default: 'Unknown'
+    default: 'Unknown',
   },
   content: 'string',
   isPinned: { column: 'is_pinned', type: 'boolean' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const leadSourceSchema = defineSchema<LeadSource>({
@@ -214,7 +214,7 @@ export const leadSourceSchema = defineSchema<LeadSource>({
   name: 'string',
   description: 'string?',
   isActive: { column: 'is_active', type: 'boolean' },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 export const leadSummarySchema = defineSchema<LeadSummary>({
@@ -227,7 +227,7 @@ export const leadSummarySchema = defineSchema<LeadSummary>({
   expectedValue: { column: 'expected_value', type: 'float?' },
   expectedCloseDate: { column: 'expected_close_date', type: 'string?' },
   assignedTo: { column: 'assigned_to', type: 'string?' },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 // DuplicateResult has optional lead1/lead2 fields that are computed, not from DB
@@ -240,11 +240,11 @@ export const duplicateResultSchema = definePartialSchema<DuplicateResult>()({
   status: {
     column: 'status',
     type: 'string',
-    transform: (v) => v as DuplicateResult['status']
+    transform: (v) => v as DuplicateResult['status'],
   },
   resolvedAt: { column: 'resolved_at', type: 'string?' },
   resolvedBy: { column: 'resolved_by', type: 'string?' },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 // =====================================================
@@ -263,6 +263,8 @@ export const toLeadSummary = createMapper<ProjectRow, LeadSummary>(leadSummarySc
  */
 export function toDuplicateResult(row: DuplicateRow): DuplicateResult {
   return createMapper<DuplicateRow, Omit<DuplicateResult, 'lead1' | 'lead2'>>(
-    duplicateResultSchema as ReturnType<typeof defineSchema<Omit<DuplicateResult, 'lead1' | 'lead2'>>>
+    duplicateResultSchema as ReturnType<
+      typeof defineSchema<Omit<DuplicateResult, 'lead1' | 'lead2'>>
+    >
   )(row) as DuplicateResult;
 }

@@ -171,8 +171,9 @@ class TimelineService {
     // 5. Document requests
     if (!types || types.includes('document_requested') || types.includes('document_uploaded')) {
       queries.push(
-        db.all(
-          `SELECT
+        db
+          .all(
+            `SELECT
             CASE
               WHEN dr.status = 'uploaded' THEN 'document_uploaded'
               WHEN dr.status = 'approved' THEN 'deliverable_approved'
@@ -199,16 +200,22 @@ class TimelineService {
           LEFT JOIN projects p ON dr.project_id = p.id
           WHERE dr.client_id = ? ${projectClause}
           ORDER BY dr.created_at DESC`,
-          [clientId, ...projectParams]
-        ).catch(() => []) // Gracefully handle if table doesn't exist
+            [clientId, ...projectParams]
+          )
+          .catch(() => []) // Gracefully handle if table doesn't exist
       );
     }
 
     // 6. Deliverable workflows
-    if (!types || types.includes('deliverable_submitted') || types.includes('deliverable_approved')) {
+    if (
+      !types ||
+      types.includes('deliverable_submitted') ||
+      types.includes('deliverable_approved')
+    ) {
       queries.push(
-        db.all(
-          `SELECT
+        db
+          .all(
+            `SELECT
             CASE
               WHEN dw.status = 'approved' THEN 'deliverable_approved'
               ELSE 'deliverable_submitted'
@@ -234,8 +241,9 @@ class TimelineService {
           JOIN projects p ON dw.project_id = p.id
           WHERE p.client_id = ? ${projectClause}
           ORDER BY dw.created_at DESC`,
-          [clientId, ...projectParams]
-        ).catch(() => []) // Gracefully handle if table doesn't exist
+            [clientId, ...projectParams]
+          )
+          .catch(() => []) // Gracefully handle if table doesn't exist
       );
     }
 
@@ -254,7 +262,7 @@ class TimelineService {
       entity_type: event.entity_type,
       created_at: event.created_at,
       actor_name: event.actor_name,
-      actor_type: event.actor_type
+      actor_type: event.actor_type,
     }));
 
     // Filter by types if specified
@@ -263,9 +271,7 @@ class TimelineService {
     }
 
     // Sort by date descending
-    allEvents.sort((a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+    allEvents.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     const total = allEvents.length;
 
@@ -285,7 +291,9 @@ class TimelineService {
     const db = await getDatabase();
 
     // Get client ID for the project
-    const project = await db.get('SELECT client_id FROM projects WHERE id = ?', [projectId]) as { client_id: number } | undefined;
+    const project = (await db.get('SELECT client_id FROM projects WHERE id = ?', [projectId])) as
+      | { client_id: number }
+      | undefined;
 
     if (!project) {
       return { events: [], total: 0 };
@@ -294,7 +302,7 @@ class TimelineService {
     return this.getClientTimeline(project.client_id, {
       projectId,
       limit: options.limit,
-      offset: options.offset
+      offset: options.offset,
     });
   }
 
@@ -314,9 +322,7 @@ class TimelineService {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    const recentEvents = events.filter(
-      (e) => new Date(e.created_at) >= cutoffDate
-    );
+    const recentEvents = events.filter((e) => new Date(e.created_at) >= cutoffDate);
 
     // Count by type
     const byType: Record<string, number> = {};
@@ -327,7 +333,7 @@ class TimelineService {
     return {
       totalEvents: recentEvents.length,
       byType,
-      recentEvents: recentEvents.slice(0, 10)
+      recentEvents: recentEvents.slice(0, 10),
     };
   }
 }

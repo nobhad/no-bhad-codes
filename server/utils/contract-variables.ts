@@ -45,7 +45,7 @@ const DEFAULT_VARIABLES = [
   'business.contact',
   'business.email',
   'business.website',
-  'date.today'
+  'date.today',
 ];
 
 export function getDefaultContractVariables(): string[] {
@@ -77,11 +77,14 @@ export function resolveContractVariables(source: ContractVariableSource): Record
     'business.contact': source.business?.contact || '',
     'business.email': source.business?.email || '',
     'business.website': source.business?.website || '',
-    'date.today': today
+    'date.today': today,
   };
 }
 
-export function applyContractVariables(template: string, variables: Record<string, string>): string {
+export function applyContractVariables(
+  template: string,
+  variables: Record<string, string>
+): string {
   return template.replace(/{{\s*([\w.]+)\s*}}/g, (match, key: string) => {
     return Object.prototype.hasOwnProperty.call(variables, key) ? variables[key] : match;
   });

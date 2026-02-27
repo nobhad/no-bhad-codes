@@ -10,10 +10,9 @@
 import type { Invoice, InvoicePayment, InvoicePaymentRow } from '../../types/invoice-types.js';
 import { receiptService } from '../receipt-service.js';
 import { logger } from '../logger.js';
+import type { Database } from '../../database/init.js';
 
 type SqlValue = string | number | boolean | null;
-
-type Database = any;
 
 type UpdateInvoiceStatus = (
   id: number,
@@ -33,7 +32,10 @@ export class InvoicePaymentService {
   private getInvoiceById: GetInvoiceById;
   private updateInvoiceStatus: UpdateInvoiceStatus;
 
-  constructor(db: Database, deps: { getInvoiceById: GetInvoiceById; updateInvoiceStatus: UpdateInvoiceStatus }) {
+  constructor(
+    db: Database,
+    deps: { getInvoiceById: GetInvoiceById; updateInvoiceStatus: UpdateInvoiceStatus }
+  ) {
     this.db = db;
     this.getInvoiceById = deps.getInvoiceById;
     this.updateInvoiceStatus = deps.updateInvoiceStatus;
@@ -54,7 +56,7 @@ export class InvoicePaymentService {
 
     return this.updateInvoiceStatus(id, 'paid', {
       ...paymentData,
-      paidDate
+      paidDate,
     });
   }
 
@@ -102,20 +104,28 @@ export class InvoicePaymentService {
       paid_date = COALESCE(?, paid_date),
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ?`;
-    const updateInvoiceParams = [newAmountPaid, newStatus, paymentMethod, paymentReference || null, paidDate, id];
+    const updateInvoiceParams = [
+      newAmountPaid,
+      newStatus,
+      paymentMethod,
+      paymentReference || null,
+      paidDate,
+      id,
+    ];
     const startUpdate = Date.now();
     await this.db.run(updateInvoiceSql, updateInvoiceParams);
     logger.info('Query executed', {
       metadata: {
         sql: updateInvoiceSql,
         params: updateInvoiceParams,
-        durationMs: Date.now() - startUpdate
-      }
+        durationMs: Date.now() - startUpdate,
+      },
     });
 
     // If fully paid, skip remaining reminders
     if (newStatus === 'paid') {
-      const skipRemindersSql = 'UPDATE invoice_reminders SET status = ? WHERE invoice_id = ? AND status = ?';
+      const skipRemindersSql =
+        'UPDATE invoice_reminders SET status = ? WHERE invoice_id = ? AND status = ?';
       const skipRemindersParams = ['skipped', id, 'pending'];
       const startSkip = Date.now();
       await this.db.run(skipRemindersSql, skipRemindersParams);
@@ -123,8 +133,8 @@ export class InvoicePaymentService {
         metadata: {
           sql: skipRemindersSql,
           params: skipRemindersParams,
-          durationMs: Date.now() - startSkip
-        }
+          durationMs: Date.now() - startSkip,
+        },
       });
     }
 
@@ -141,7 +151,11 @@ export class InvoicePaymentService {
     paymentMethod: string,
     paymentReference?: string,
     notes?: string
-  ): Promise<{ invoice: Invoice; payment: InvoicePayment; receipt?: { id: number; receiptNumber: string } }> {
+  ): Promise<{
+    invoice: Invoice;
+    payment: InvoicePayment;
+    receipt?: { id: number; receiptNumber: string };
+  }> {
     const paymentDate = new Date().toISOString().split('T')[0];
 
     const invoice = await this.recordPayment(invoiceId, amount, paymentMethod, paymentReference);
@@ -158,7 +172,7 @@ export class InvoicePaymentService {
       paymentMethod,
       paymentReference || null,
       paymentDate,
-      notes || null
+      notes || null,
     ]);
 
     const payment: InvoicePayment = {
@@ -169,29 +183,28 @@ export class InvoicePaymentService {
       paymentReference,
       paymentDate,
       notes,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     // Auto-generate receipt for this payment
     let receipt: { id: number; receiptNumber: string } | undefined;
     try {
-      const receiptRecord = await receiptService.createReceipt(
-        invoiceId,
-        payment.id,
-        amount,
-        {
-          paymentMethod,
-          paymentReference,
-          paymentDate
-        }
-      );
+      const receiptRecord = await receiptService.createReceipt(invoiceId, payment.id, amount, {
+        paymentMethod,
+        paymentReference,
+        paymentDate,
+      });
       receipt = {
         id: receiptRecord.id,
-        receiptNumber: receiptRecord.receiptNumber
+        receiptNumber: receiptRecord.receiptNumber,
       };
-      logger.info(`[PaymentService] Receipt ${receiptRecord.receiptNumber} generated for payment ${payment.id}`);
+      logger.info(
+        `[PaymentService] Receipt ${receiptRecord.receiptNumber} generated for payment ${payment.id}`
+      );
     } catch (receiptError) {
-      logger.error('[PaymentService] Failed to generate receipt', { error: receiptError instanceof Error ? receiptError : undefined });
+      logger.error('[PaymentService] Failed to generate receipt', {
+        error: receiptError instanceof Error ? receiptError : undefined,
+      });
       // Don't fail the payment if receipt generation fails
     }
 
@@ -218,7 +231,7 @@ export class InvoicePaymentService {
       paymentReference: row.payment_reference,
       paymentDate: row.payment_date,
       notes: row.notes,
-      createdAt: row.created_at
+      createdAt: row.created_at,
     }));
   }
 
@@ -240,7 +253,7 @@ export class InvoicePaymentService {
     }
 
     if (conditions.length > 0) {
-      sql += ` WHERE ${  conditions.join(' AND ')}`;
+      sql += ` WHERE ${conditions.join(' AND ')}`;
     }
 
     sql += ' ORDER BY payment_date DESC, created_at DESC';
@@ -255,7 +268,7 @@ export class InvoicePaymentService {
       paymentReference: row.payment_reference,
       paymentDate: row.payment_date,
       notes: row.notes,
-      createdAt: row.created_at
+      createdAt: row.created_at,
     }));
   }
 }

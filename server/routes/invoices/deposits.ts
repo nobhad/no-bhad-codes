@@ -34,13 +34,13 @@ router.post(
 
     if (!projectId || !clientId || !amount) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['projectId', 'clientId', 'amount']
+        required: ['projectId', 'clientId', 'amount'],
       });
     }
 
     if (typeof amount !== 'number' || amount <= 0) {
       return errorResponseWithPayload(res, 'Invalid amount', 400, 'INVALID_AMOUNT', {
-        message: 'Amount must be a positive number'
+        message: 'Amount must be a positive number',
       });
     }
 
@@ -56,12 +56,14 @@ router.post(
       res.status(201).json({
         success: true,
         message: 'Deposit invoice created successfully',
-        invoice: toSnakeCaseInvoice(invoice)
+        invoice: toSnakeCaseInvoice(invoice),
       });
     } catch (error: unknown) {
-      logger.error('[Invoices] Error creating deposit invoice:', { error: error instanceof Error ? error : undefined });
+      logger.error('[Invoices] Error creating deposit invoice:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponseWithPayload(res, 'Failed to create deposit invoice', 500, 'CREATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   })
@@ -91,12 +93,18 @@ router.get(
       res.json({
         success: true,
         deposits: deposits.map(toSnakeCaseDeposit),
-        count: deposits.length
+        count: deposits.length,
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve available deposits', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      errorResponseWithPayload(
+        res,
+        'Failed to retrieve available deposits',
+        500,
+        'RETRIEVAL_FAILED',
+        {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }
+      );
     }
   })
 );

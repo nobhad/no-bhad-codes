@@ -43,7 +43,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
     req.user = {
       id: decoded.id || decoded.clientId, // Support both id and clientId from tokens
       email: decoded.email,
-      type: decoded.type
+      type: decoded.type,
     };
     next();
   } catch (error) {

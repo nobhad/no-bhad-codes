@@ -22,17 +22,41 @@ export type SqlParam = string | number | boolean | null | undefined;
 type SqlParams = SqlParam[];
 
 interface TransactionContext {
-  get(sql: string, params?: SqlParams): Promise<DatabaseRow | undefined>;
-  all(sql: string, params?: SqlParams): Promise<DatabaseRow[]>;
+  get<T = DatabaseRow>(sql: string, params?: SqlParams): Promise<T | undefined>;
+  all<T = DatabaseRow>(sql: string, params?: SqlParams): Promise<T[]>;
   run(sql: string, params?: SqlParams): Promise<{ lastID?: number; changes?: number }>;
 }
 
 export interface Database {
-  get(sql: string, params?: SqlParams): Promise<DatabaseRow | undefined>;
-  all(sql: string, params?: SqlParams): Promise<DatabaseRow[]>;
+  /**
+   * Query a single row from the database
+   * @template T The expected row type (defaults to any for backward compatibility)
+   * @example db.get<UserRow>('SELECT * FROM users WHERE id = ?', [id])
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get<T = any>(sql: string, params?: SqlParams): Promise<T | undefined>;
+  /**
+   * Query multiple rows from the database
+   * @template T The expected row type (defaults to any for backward compatibility)
+   * @example db.all<InvoiceRow>('SELECT * FROM invoices WHERE client_id = ?', [clientId])
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  all<T = any>(sql: string, params?: SqlParams): Promise<T[]>;
+  /**
+   * Execute a statement that modifies data
+   */
   run(sql: string, params?: SqlParams): Promise<{ lastID?: number; changes?: number }>;
+  /**
+   * Execute multiple operations in a transaction
+   */
   transaction<T>(fn: (ctx: TransactionContext) => Promise<T>): Promise<T>;
+  /**
+   * Close the database connection
+   */
   close(): Promise<void>;
+  /**
+   * Get connection pool statistics
+   */
   getConnectionStats(): ConnectionStats;
 }
 
@@ -93,7 +117,7 @@ class DatabaseConnectionPool implements Database {
           db,
           inUse: false,
           lastUsed: Date.now(),
-          id: crypto.randomBytes(4).toString('hex')
+          id: crypto.randomBytes(4).toString('hex'),
         };
 
         resolve(connection);
@@ -160,13 +184,13 @@ class DatabaseConnectionPool implements Database {
     });
   }
 
-  async get(sql: string, params: SqlParams = []): Promise<DatabaseRow | undefined> {
+  async get<T = DatabaseRow>(sql: string, params: SqlParams = []): Promise<T | undefined> {
     const connection = await this.getConnection();
     try {
-      return await new Promise<DatabaseRow | undefined>((resolve, reject) => {
+      return await new Promise<T | undefined>((resolve, reject) => {
         connection.db.get(sql, params, (err, row) => {
           if (err) reject(err);
-          else resolve(row as DatabaseRow);
+          else resolve(row as T);
         });
       });
     } finally {
@@ -174,13 +198,13 @@ class DatabaseConnectionPool implements Database {
     }
   }
 
-  async all(sql: string, params: SqlParams = []): Promise<DatabaseRow[]> {
+  async all<T = DatabaseRow>(sql: string, params: SqlParams = []): Promise<T[]> {
     const connection = await this.getConnection();
     try {
-      return await new Promise<DatabaseRow[]>((resolve, reject) => {
+      return await new Promise<T[]>((resolve, reject) => {
         connection.db.all(sql, params, (err, rows) => {
           if (err) reject(err);
-          else resolve(rows as DatabaseRow[]);
+          else resolve(rows as T[]);
         });
       });
     } finally {
@@ -211,30 +235,33 @@ class DatabaseConnectionPool implements Database {
 
     // Create a context that uses this specific connection
     const ctx: TransactionContext = {
-      get: (sql: string, params: SqlParams = []): Promise<DatabaseRow | undefined> => {
+      get: <R = DatabaseRow>(sql: string, params: SqlParams = []): Promise<R | undefined> => {
         return new Promise((resolve, reject) => {
           connection.db.get(sql, params, (err, row) => {
             if (err) reject(err);
-            else resolve(row as DatabaseRow);
+            else resolve(row as R);
           });
         });
       },
-      all: (sql: string, params: SqlParams = []): Promise<DatabaseRow[]> => {
+      all: <R = DatabaseRow>(sql: string, params: SqlParams = []): Promise<R[]> => {
         return new Promise((resolve, reject) => {
           connection.db.all(sql, params, (err, rows) => {
             if (err) reject(err);
-            else resolve(rows as DatabaseRow[]);
+            else resolve(rows as R[]);
           });
         });
       },
-      run: (sql: string, params: SqlParams = []): Promise<{ lastID?: number; changes?: number }> => {
+      run: (
+        sql: string,
+        params: SqlParams = []
+      ): Promise<{ lastID?: number; changes?: number }> => {
         return new Promise((resolve, reject) => {
           connection.db.run(sql, params, function (err) {
             if (err) reject(err);
             else resolve({ lastID: this.lastID, changes: this.changes });
           });
         });
-      }
+      },
     };
 
     try {
@@ -253,7 +280,9 @@ class DatabaseConnectionPool implements Database {
       try {
         await ctx.run('ROLLBACK');
       } catch (rollbackError) {
-        logger.error('Rollback failed:', { error: rollbackError instanceof Error ? rollbackError : undefined });
+        logger.error('Rollback failed:', {
+          error: rollbackError instanceof Error ? rollbackError : undefined,
+        });
       }
       throw error;
     } finally {
@@ -294,7 +323,7 @@ class DatabaseConnectionPool implements Database {
       idleConnections,
       totalConnections: this.connections.length,
       maxConnections: this.maxConnections,
-      queuedRequests: this.waitingQueue.length
+      queuedRequests: this.waitingQueue.length,
     };
   }
 }
@@ -336,11 +365,11 @@ export async function initializeDatabase(): Promise<void> {
 
     // Log connection stats
     const stats = dbPool.getConnectionStats();
-    logger.info(
-      `Pool stats: ${stats.activeConnections} active, ${stats.totalConnections} total`
-    );
+    logger.info(`Pool stats: ${stats.activeConnections} active, ${stats.totalConnections} total`);
   } catch (error: any) {
-    logger.error('Failed to initialize database:', { error: error instanceof Error ? error : undefined });
+    logger.error('Failed to initialize database:', {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }

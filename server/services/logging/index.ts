@@ -20,7 +20,7 @@ import {
   type LogOptions,
   LogLevel,
   parseLogLevel,
-  DEFAULT_LOGGER_CONFIG
+  DEFAULT_LOGGER_CONFIG,
 } from '../../../shared/logging/types.js';
 
 import { createConsoleTransport } from './console-transport.js';
@@ -56,7 +56,7 @@ export class UnifiedLoggerService implements ServerLogger {
       this.transports.push(
         createConsoleTransport({
           level: this.config.level,
-          enableColors: this.config.enableColors
+          enableColors: this.config.enableColors,
         })
       );
     }
@@ -68,7 +68,7 @@ export class UnifiedLoggerService implements ServerLogger {
           level: this.config.level,
           filePath: this.config.filePath,
           maxFileSize: this.config.maxFileSize,
-          maxFiles: this.config.maxFiles
+          maxFiles: this.config.maxFiles,
         })
       );
 
@@ -77,7 +77,7 @@ export class UnifiedLoggerService implements ServerLogger {
         this.transports.push(
           createErrorFileTransport(this.config.errorFilePath, {
             maxFileSize: this.config.maxFileSize,
-            maxFiles: this.config.maxFiles
+            maxFiles: this.config.maxFiles,
           })
         );
       }
@@ -108,11 +108,7 @@ export class UnifiedLoggerService implements ServerLogger {
   /**
    * Create a log entry
    */
-  private createEntry(
-    level: LogLevelType,
-    message: string,
-    options: LogOptions = {}
-  ): LogEntry {
+  private createEntry(level: LogLevelType, message: string, options: LogOptions = {}): LogEntry {
     return {
       timestamp: new Date().toISOString(),
       level,
@@ -125,8 +121,8 @@ export class UnifiedLoggerService implements ServerLogger {
         ...(options.requestId && { requestId: options.requestId }),
         ...(options.userId && { userId: options.userId }),
         ...(options.ip && { ip: options.ip }),
-        ...(options.userAgent && { userAgent: options.userAgent })
-      }
+        ...(options.userAgent && { userAgent: options.userAgent }),
+      },
     };
   }
 
@@ -202,14 +198,14 @@ export class UnifiedLoggerService implements ServerLogger {
       metadata: {
         ...this.config.defaultContext,
         ...this.context,
-        ...context.metadata
+        ...context.metadata,
       },
       error: {
         name: error.name,
         message: error.message,
         stack: error.stack,
-        code: (error as NodeJS.ErrnoException).code
-      }
+        code: (error as NodeJS.ErrnoException).code,
+      },
     };
 
     this.writeToTransports(entry);
@@ -218,7 +214,18 @@ export class UnifiedLoggerService implements ServerLogger {
   /**
    * Log HTTP request
    */
-  logRequest(req: { method?: string; url?: string; ip?: string; get?: (key: string) => string | undefined; id?: string; user?: { id?: unknown } }, res: { statusCode?: number }, duration?: number): void {
+  logRequest(
+    req: {
+      method?: string;
+      url?: string;
+      ip?: string;
+      get?: (key: string) => string | undefined;
+      id?: string;
+      user?: { id?: unknown };
+    },
+    res: { statusCode?: number },
+    duration?: number
+  ): void {
     const statusCode = res.statusCode || 200;
     const level: LogLevelType = statusCode >= 400 ? 'WARN' : 'INFO';
 
@@ -233,17 +240,20 @@ export class UnifiedLoggerService implements ServerLogger {
         ip: req.ip,
         userAgent: req.get?.('user-agent'),
         contentLength: parseInt(req.get?.('content-length') || '0'),
-        contentType: req.get?.('content-type')
+        contentType: req.get?.('content-type'),
       },
       response: {
         statusCode,
-        duration
+        duration,
       },
       requestId: req.id,
-      userId: typeof req.user?.id === 'string' || typeof req.user?.id === 'number' ? String(req.user.id) : undefined,
+      userId:
+        typeof req.user?.id === 'string' || typeof req.user?.id === 'number'
+          ? String(req.user.id)
+          : undefined,
       metadata: {
-        ...this.context
-      }
+        ...this.context,
+      },
     };
 
     this.writeToTransports(entry);
@@ -252,7 +262,17 @@ export class UnifiedLoggerService implements ServerLogger {
   /**
    * Log security event
    */
-  logSecurity(event: string, details: Record<string, unknown> = {}, req?: { ip?: string; url?: string; method?: string; get?: (key: string) => string | undefined; user?: { id?: unknown } }): void {
+  logSecurity(
+    event: string,
+    details: Record<string, unknown> = {},
+    req?: {
+      ip?: string;
+      url?: string;
+      method?: string;
+      get?: (key: string) => string | undefined;
+      user?: { id?: unknown };
+    }
+  ): void {
     const entry: AnyLogEntry = {
       timestamp: new Date().toISOString(),
       level: 'WARN',
@@ -261,12 +281,15 @@ export class UnifiedLoggerService implements ServerLogger {
       event,
       ip: req?.ip,
       userAgent: req?.get?.('user-agent'),
-      userId: typeof req?.user?.id === 'string' || typeof req?.user?.id === 'number' ? String(req.user.id) : undefined,
+      userId:
+        typeof req?.user?.id === 'string' || typeof req?.user?.id === 'number'
+          ? String(req.user.id)
+          : undefined,
       details,
       metadata: {
         ...this.context,
-        ...details
-      }
+        ...details,
+      },
     };
 
     this.writeToTransports(entry);
@@ -288,8 +311,8 @@ export class UnifiedLoggerService implements ServerLogger {
       rowCount: details.rowCount as number,
       metadata: {
         ...this.context,
-        ...details
-      }
+        ...details,
+      },
     };
 
     this.writeToTransports(entry);
@@ -318,18 +341,14 @@ export class UnifiedLoggerService implements ServerLogger {
    * Flush all transports
    */
   async flush(): Promise<void> {
-    await Promise.all(
-      this.transports.map((t) => t.flush?.())
-    );
+    await Promise.all(this.transports.map((t) => t.flush?.()));
   }
 
   /**
    * Close all transports
    */
   async close(): Promise<void> {
-    await Promise.all(
-      this.transports.map((t) => t.close?.())
-    );
+    await Promise.all(this.transports.map((t) => t.close?.()));
   }
 }
 
@@ -352,7 +371,7 @@ export function createLogger(config?: Partial<LoggerConfig>): UnifiedLoggerServi
     maxFileSize: process.env.LOG_MAX_SIZE || '10m',
     maxFiles: process.env.LOG_MAX_FILES || '14',
     enableColors: isDev,
-    ...config
+    ...config,
   });
 }
 

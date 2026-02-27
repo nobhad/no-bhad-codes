@@ -235,7 +235,7 @@ export const proposalTemplateSchema = defineSchema<ProposalTemplate>({
   isDefault: { column: 'is_default', type: 'boolean' },
   isActive: { column: 'is_active', type: 'boolean' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const proposalVersionSchema = defineSchema<ProposalVersion>({
@@ -247,7 +247,7 @@ export const proposalVersionSchema = defineSchema<ProposalVersion>({
   pricingData: { column: 'pricing_data', type: 'json?' },
   notes: 'string?',
   createdBy: { column: 'created_by', type: 'string?' },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 export const proposalSignatureSchema = defineSchema<ProposalSignature>({
@@ -261,7 +261,7 @@ export const proposalSignatureSchema = defineSchema<ProposalSignature>({
   signatureData: { column: 'signature_data', type: 'string?' },
   ipAddress: { column: 'ip_address', type: 'string?' },
   userAgent: { column: 'user_agent', type: 'string?' },
-  signedAt: { column: 'signed_at', type: 'string' }
+  signedAt: { column: 'signed_at', type: 'string' },
 });
 
 // ProposalComment has optional 'replies' computed field
@@ -271,7 +271,7 @@ export const proposalCommentSchema = definePartialSchema<ProposalComment>()({
   authorType: {
     column: 'author_type',
     type: 'string',
-    transform: (v) => v as 'admin' | 'client'
+    transform: (v) => v as 'admin' | 'client',
   },
   authorName: { column: 'author_name', type: 'string' },
   authorEmail: { column: 'author_email', type: 'string?' },
@@ -279,7 +279,7 @@ export const proposalCommentSchema = definePartialSchema<ProposalComment>()({
   isInternal: { column: 'is_internal', type: 'boolean' },
   parentCommentId: { column: 'parent_comment_id', type: 'number?' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const proposalActivitySchema = defineSchema<ProposalActivity>({
@@ -291,7 +291,7 @@ export const proposalActivitySchema = defineSchema<ProposalActivity>({
   metadata: { column: 'metadata', type: 'json?' },
   ipAddress: { column: 'ip_address', type: 'string?' },
   userAgent: { column: 'user_agent', type: 'string?' },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 export const proposalCustomItemSchema = defineSchema<ProposalCustomItem>({
@@ -307,7 +307,7 @@ export const proposalCustomItemSchema = defineSchema<ProposalCustomItem>({
   isOptional: { column: 'is_optional', type: 'boolean' },
   sortOrder: { column: 'sort_order', type: 'number', default: 0 },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const signatureRequestSchema = defineSchema<SignatureRequest>({
@@ -325,19 +325,31 @@ export const signatureRequestSchema = defineSchema<SignatureRequest>({
   expiresAt: { column: 'expires_at', type: 'string?' },
   reminderCount: { column: 'reminder_count', type: 'number', default: 0 },
   lastReminderAt: { column: 'last_reminder_at', type: 'string?' },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 // =====================================================
 // MAPPER FUNCTIONS
 // =====================================================
 
-export const toProposalTemplate = createMapper<ProposalTemplateRow, ProposalTemplate>(proposalTemplateSchema);
-export const toProposalVersion = createMapper<ProposalVersionRow, ProposalVersion>(proposalVersionSchema);
-export const toProposalSignature = createMapper<ProposalSignatureRow, ProposalSignature>(proposalSignatureSchema);
-export const toProposalActivity = createMapper<ProposalActivityRow, ProposalActivity>(proposalActivitySchema);
-export const toProposalCustomItem = createMapper<ProposalCustomItemRow, ProposalCustomItem>(proposalCustomItemSchema);
-export const toSignatureRequest = createMapper<SignatureRequestRow, SignatureRequest>(signatureRequestSchema);
+export const toProposalTemplate = createMapper<ProposalTemplateRow, ProposalTemplate>(
+  proposalTemplateSchema
+);
+export const toProposalVersion = createMapper<ProposalVersionRow, ProposalVersion>(
+  proposalVersionSchema
+);
+export const toProposalSignature = createMapper<ProposalSignatureRow, ProposalSignature>(
+  proposalSignatureSchema
+);
+export const toProposalActivity = createMapper<ProposalActivityRow, ProposalActivity>(
+  proposalActivitySchema
+);
+export const toProposalCustomItem = createMapper<ProposalCustomItemRow, ProposalCustomItem>(
+  proposalCustomItemSchema
+);
+export const toSignatureRequest = createMapper<SignatureRequestRow, SignatureRequest>(
+  signatureRequestSchema
+);
 
 /**
  * Map a ProposalCommentRow to ProposalComment.

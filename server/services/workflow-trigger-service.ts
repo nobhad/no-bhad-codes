@@ -13,6 +13,7 @@
 import { getDatabase } from '../database/init.js';
 import { emailService } from './email-service.js';
 import { userService } from './user-service.js';
+import { logger } from './logger.js';
 
 // ============================================
 // Types
@@ -114,43 +115,64 @@ class WorkflowTriggerService {
         this.extractEntityType(eventType),
         context.entityId ?? null,
         JSON.stringify(context),
-        context.triggeredBy || 'system'
+        context.triggeredBy || 'system',
       ]
     );
 
     // Get all active triggers for this event type
-    const triggers = await db.all(
+    const triggers = (await db.all(
       `SELECT * FROM workflow_triggers
        WHERE event_type = ? AND is_active = TRUE
        ORDER BY priority DESC`,
       [eventType]
-    ) as unknown as WorkflowTrigger[];
+    )) as unknown as WorkflowTrigger[];
 
-    console.log(`[WorkflowTrigger] Event ${eventType} - Found ${triggers.length} triggers`);
+    logger.info(`[WorkflowTrigger] Event ${eventType} - Found ${triggers.length} triggers`);
 
     // Execute each trigger
     for (const trigger of triggers) {
       try {
         // Check conditions
         if (trigger.conditions) {
-          const conditions = typeof trigger.conditions === 'string'
-            ? JSON.parse(trigger.conditions)
-            : trigger.conditions;
+          const conditions =
+            typeof trigger.conditions === 'string'
+              ? JSON.parse(trigger.conditions)
+              : trigger.conditions;
 
           if (!this.evaluateConditions(conditions, context)) {
-            await this.logTriggerExecution(trigger.id, eventType, context, 'skipped', null, Date.now() - startTime);
+            await this.logTriggerExecution(
+              trigger.id,
+              eventType,
+              context,
+              'skipped',
+              null,
+              Date.now() - startTime
+            );
             continue;
           }
         }
 
         // Execute action
         await this.executeAction(trigger, context);
-        await this.logTriggerExecution(trigger.id, eventType, context, 'success', null, Date.now() - startTime);
-
+        await this.logTriggerExecution(
+          trigger.id,
+          eventType,
+          context,
+          'success',
+          null,
+          Date.now() - startTime
+        );
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error(`[WorkflowTrigger] Trigger ${trigger.id} failed:`, errorMessage);
-        await this.logTriggerExecution(trigger.id, eventType, context, 'failed', errorMessage, Date.now() - startTime);
+        logger.error(`[WorkflowTrigger] Trigger ${trigger.id} failed:`, { message: errorMessage });
+        await this.logTriggerExecution(
+          trigger.id,
+          eventType,
+          context,
+          'failed',
+          errorMessage,
+          Date.now() - startTime
+        );
       }
     }
 
@@ -160,7 +182,9 @@ class WorkflowTriggerService {
       try {
         await listener(context);
       } catch (error) {
-        console.error(`[WorkflowTrigger] Listener failed for ${eventType}:`, error);
+        logger.error(`[WorkflowTrigger] Listener failed for ${eventType}:`, {
+          error: error instanceof Error ? error : undefined,
+        });
       }
     }
   }
@@ -203,7 +227,9 @@ class WorkflowTriggerService {
         [eventType]
       ) as unknown as Promise<WorkflowTrigger[]>;
     }
-    return db.all('SELECT * FROM workflow_triggers ORDER BY event_type, priority DESC, name') as unknown as Promise<WorkflowTrigger[]>;
+    return db.all(
+      'SELECT * FROM workflow_triggers ORDER BY event_type, priority DESC, name'
+    ) as unknown as Promise<WorkflowTrigger[]>;
   }
 
   /**
@@ -240,7 +266,7 @@ class WorkflowTriggerService {
         data.action_type,
         JSON.stringify(data.action_config),
         data.is_active !== false,
-        data.priority || 0
+        data.priority || 0,
       ]
     );
     return this.getTrigger(result.lastID!) as Promise<WorkflowTrigger>;
@@ -249,38 +275,62 @@ class WorkflowTriggerService {
   /**
    * Update a trigger
    */
-  async updateTrigger(id: number, data: Partial<{
-    name: string;
-    description: string;
-    event_type: EventType;
-    conditions: Record<string, unknown>;
-    action_type: ActionType;
-    action_config: Record<string, unknown>;
-    is_active: boolean;
-    priority: number;
-  }>): Promise<WorkflowTrigger | null> {
+  async updateTrigger(
+    id: number,
+    data: Partial<{
+      name: string;
+      description: string;
+      event_type: EventType;
+      conditions: Record<string, unknown>;
+      action_type: ActionType;
+      action_config: Record<string, unknown>;
+      is_active: boolean;
+      priority: number;
+    }>
+  ): Promise<WorkflowTrigger | null> {
     const db = getDatabase();
     const updates: string[] = [];
     const values: (string | number | boolean | null)[] = [];
 
-    if (data.name !== undefined) { updates.push('name = ?'); values.push(data.name); }
-    if (data.description !== undefined) { updates.push('description = ?'); values.push(data.description); }
-    if (data.event_type !== undefined) { updates.push('event_type = ?'); values.push(data.event_type); }
-    if (data.conditions !== undefined) { updates.push('conditions = ?'); values.push(JSON.stringify(data.conditions)); }
-    if (data.action_type !== undefined) { updates.push('action_type = ?'); values.push(data.action_type); }
-    if (data.action_config !== undefined) { updates.push('action_config = ?'); values.push(JSON.stringify(data.action_config)); }
-    if (data.is_active !== undefined) { updates.push('is_active = ?'); values.push(data.is_active); }
-    if (data.priority !== undefined) { updates.push('priority = ?'); values.push(data.priority); }
+    if (data.name !== undefined) {
+      updates.push('name = ?');
+      values.push(data.name);
+    }
+    if (data.description !== undefined) {
+      updates.push('description = ?');
+      values.push(data.description);
+    }
+    if (data.event_type !== undefined) {
+      updates.push('event_type = ?');
+      values.push(data.event_type);
+    }
+    if (data.conditions !== undefined) {
+      updates.push('conditions = ?');
+      values.push(JSON.stringify(data.conditions));
+    }
+    if (data.action_type !== undefined) {
+      updates.push('action_type = ?');
+      values.push(data.action_type);
+    }
+    if (data.action_config !== undefined) {
+      updates.push('action_config = ?');
+      values.push(JSON.stringify(data.action_config));
+    }
+    if (data.is_active !== undefined) {
+      updates.push('is_active = ?');
+      values.push(data.is_active);
+    }
+    if (data.priority !== undefined) {
+      updates.push('priority = ?');
+      values.push(data.priority);
+    }
 
     if (updates.length === 0) return this.getTrigger(id);
 
     updates.push('updated_at = CURRENT_TIMESTAMP');
     values.push(id);
 
-    await db.run(
-      `UPDATE workflow_triggers SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
+    await db.run(`UPDATE workflow_triggers SET ${updates.join(', ')} WHERE id = ?`, values);
 
     return this.getTrigger(id);
   }
@@ -346,10 +396,7 @@ class WorkflowTriggerService {
         [eventType, limit]
       );
     }
-    return db.all(
-      'SELECT * FROM system_events ORDER BY created_at DESC LIMIT ?',
-      [limit]
-    );
+    return db.all('SELECT * FROM system_events ORDER BY created_at DESC LIMIT ?', [limit]);
   }
 
   /**
@@ -357,18 +404,43 @@ class WorkflowTriggerService {
    */
   getEventTypes(): string[] {
     return [
-      'invoice.created', 'invoice.sent', 'invoice.paid', 'invoice.overdue', 'invoice.cancelled',
-      'contract.created', 'contract.sent', 'contract.signed', 'contract.expired',
-      'project.created', 'project.started', 'project.completed', 'project.status_changed', 'project.milestone_completed',
-      'client.created', 'client.activated', 'client.deactivated',
-      'message.created', 'message.read',
-      'file.uploaded', 'file.downloaded',
-      'proposal.created', 'proposal.sent', 'proposal.accepted', 'proposal.rejected',
-      'lead.created', 'lead.converted', 'lead.stage_changed',
-      'deliverable.submitted', 'deliverable.approved', 'deliverable.rejected',
-      'document_request.approved', 'document_request.rejected',
+      'invoice.created',
+      'invoice.sent',
+      'invoice.paid',
+      'invoice.overdue',
+      'invoice.cancelled',
+      'contract.created',
+      'contract.sent',
+      'contract.signed',
+      'contract.expired',
+      'project.created',
+      'project.started',
+      'project.completed',
+      'project.status_changed',
+      'project.milestone_completed',
+      'client.created',
+      'client.activated',
+      'client.deactivated',
+      'message.created',
+      'message.read',
+      'file.uploaded',
+      'file.downloaded',
+      'proposal.created',
+      'proposal.sent',
+      'proposal.accepted',
+      'proposal.rejected',
+      'lead.created',
+      'lead.converted',
+      'lead.stage_changed',
+      'deliverable.submitted',
+      'deliverable.approved',
+      'deliverable.rejected',
+      'document_request.approved',
+      'document_request.rejected',
       'questionnaire.completed',
-      'task.created', 'task.completed', 'task.overdue'
+      'task.created',
+      'task.completed',
+      'task.overdue',
     ];
   }
 
@@ -381,7 +453,7 @@ class WorkflowTriggerService {
       { type: 'create_task', description: 'Create a task for the project' },
       { type: 'update_status', description: 'Update entity status' },
       { type: 'webhook', description: 'Call an external webhook URL' },
-      { type: 'notify', description: 'Send in-app notification' }
+      { type: 'notify', description: 'Send in-app notification' },
     ];
   }
 
@@ -393,33 +465,34 @@ class WorkflowTriggerService {
    * Execute a trigger action
    */
   private async executeAction(trigger: WorkflowTrigger, context: EventContext): Promise<void> {
-    const config = typeof trigger.action_config === 'string'
-      ? JSON.parse(trigger.action_config)
-      : trigger.action_config;
+    const config =
+      typeof trigger.action_config === 'string'
+        ? JSON.parse(trigger.action_config)
+        : trigger.action_config;
 
     switch (trigger.action_type) {
-    case 'send_email':
-      await this.executeSendEmail(config, context);
-      break;
+      case 'send_email':
+        await this.executeSendEmail(config, context);
+        break;
 
-    case 'create_task':
-      await this.executeCreateTask(config, context);
-      break;
+      case 'create_task':
+        await this.executeCreateTask(config, context);
+        break;
 
-    case 'update_status':
-      await this.executeUpdateStatus(config, context);
-      break;
+      case 'update_status':
+        await this.executeUpdateStatus(config, context);
+        break;
 
-    case 'webhook':
-      await this.executeWebhook(config, context);
-      break;
+      case 'webhook':
+        await this.executeWebhook(config, context);
+        break;
 
-    case 'notify':
-      await this.executeNotify(config, context);
-      break;
+      case 'notify':
+        await this.executeNotify(config, context);
+        break;
 
-    default:
-      console.warn(`[WorkflowTrigger] Unknown action type: ${trigger.action_type}`);
+      default:
+        logger.warn(`[WorkflowTrigger] Unknown action type: ${trigger.action_type}`);
     }
   }
 
@@ -441,12 +514,12 @@ class WorkflowTriggerService {
     }
 
     if (!toEmail) {
-      console.warn('[WorkflowTrigger] No recipient email for send_email action');
+      logger.warn('[WorkflowTrigger] No recipient email for send_email action');
       return;
     }
 
     // For now, log the email that would be sent
-    console.log(`[WorkflowTrigger] Would send email: template=${config.template}, to=${toEmail}`);
+    logger.info(`[WorkflowTrigger] Would send email: template=${config.template}, to=${toEmail}`);
 
     // In production, use emailService to send
     // await emailService.sendEmail({
@@ -468,7 +541,7 @@ class WorkflowTriggerService {
     const projectId = context.projectId as number;
 
     if (!projectId) {
-      console.warn('[WorkflowTrigger] No projectId for create_task action');
+      logger.warn('[WorkflowTrigger] No projectId for create_task action');
       return;
     }
 
@@ -487,11 +560,11 @@ class WorkflowTriggerService {
         this.interpolate(config.title, context),
         config.description ? this.interpolate(config.description, context) : null,
         assigneeUserId,
-        dueDate
+        dueDate,
       ]
     );
 
-    console.log(`[WorkflowTrigger] Created task for project ${projectId}: ${config.title}`);
+    logger.info(`[WorkflowTrigger] Created task for project ${projectId}: ${config.title}`);
   }
 
   /**
@@ -508,28 +581,28 @@ class WorkflowTriggerService {
     let entityId: number | undefined;
 
     switch (config.entity) {
-    case 'project':
-      table = 'projects';
-      idField = 'id';
-      entityId = context.projectId as number;
-      break;
-    case 'invoice':
-      table = 'invoices';
-      idField = 'id';
-      entityId = context.invoiceId as number;
-      break;
-    case 'client':
-      table = 'clients';
-      idField = 'id';
-      entityId = context.clientId as number;
-      break;
-    default:
-      console.warn(`[WorkflowTrigger] Unknown entity type for update_status: ${config.entity}`);
-      return;
+      case 'project':
+        table = 'projects';
+        idField = 'id';
+        entityId = context.projectId as number;
+        break;
+      case 'invoice':
+        table = 'invoices';
+        idField = 'id';
+        entityId = context.invoiceId as number;
+        break;
+      case 'client':
+        table = 'clients';
+        idField = 'id';
+        entityId = context.clientId as number;
+        break;
+      default:
+        logger.warn(`[WorkflowTrigger] Unknown entity type for update_status: ${config.entity}`);
+        return;
     }
 
     if (!entityId) {
-      console.warn(`[WorkflowTrigger] No ${config.entity}Id for update_status action`);
+      logger.warn(`[WorkflowTrigger] No ${config.entity}Id for update_status action`);
       return;
     }
 
@@ -538,7 +611,9 @@ class WorkflowTriggerService {
       [config.status, entityId]
     );
 
-    console.log(`[WorkflowTrigger] Updated ${config.entity} ${entityId} ${field} to ${config.status}`);
+    logger.info(
+      `[WorkflowTrigger] Updated ${config.entity} ${entityId} ${field} to ${config.status}`
+    );
   }
 
   /**
@@ -553,14 +628,16 @@ class WorkflowTriggerService {
         method: config.method || 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...config.headers
+          ...config.headers,
         },
-        body: JSON.stringify(context)
+        body: JSON.stringify(context),
       });
 
-      console.log(`[WorkflowTrigger] Webhook ${config.url} returned ${response.status}`);
+      logger.info(`[WorkflowTrigger] Webhook ${config.url} returned ${response.status}`);
     } catch (error) {
-      console.error('[WorkflowTrigger] Webhook failed:', error);
+      logger.error('[WorkflowTrigger] Webhook failed:', {
+        error: error instanceof Error ? error : undefined,
+      });
       throw error;
     }
   }
@@ -574,7 +651,7 @@ class WorkflowTriggerService {
   ): Promise<void> {
     // For now, just log the notification
     const message = this.interpolate(config.message, context);
-    console.log(`[WorkflowTrigger] Notification [${config.channel}]: ${message}`);
+    logger.info(`[WorkflowTrigger] Notification [${config.channel}]: ${message}`);
 
     // In a real implementation, this would push to a notification system
     // or store in a notifications table
@@ -620,7 +697,9 @@ class WorkflowTriggerService {
    */
   private getNestedValue(obj: Record<string, unknown>, path: string): unknown {
     return path.split('.').reduce((current: unknown, key: string) => {
-      return current && typeof current === 'object' ? (current as Record<string, unknown>)[key] : undefined;
+      return current && typeof current === 'object'
+        ? (current as Record<string, unknown>)[key]
+        : undefined;
     }, obj);
   }
 

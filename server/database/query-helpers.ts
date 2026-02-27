@@ -23,7 +23,7 @@
  * // => SELECT * FROM clients c WHERE c.deleted_at IS NULL
  */
 export const notDeleted = (alias?: string): string =>
-  `${alias ? `${alias  }.` : ''}deleted_at IS NULL`;
+  `${alias ? `${alias}.` : ''}deleted_at IS NULL`;
 
 /**
  * Returns SQL fragment to find soft-deleted records
@@ -31,7 +31,7 @@ export const notDeleted = (alias?: string): string =>
  * @returns SQL fragment like 'deleted_at IS NOT NULL'
  */
 export const isDeleted = (alias?: string): string =>
-  `${alias ? `${alias  }.` : ''}deleted_at IS NOT NULL`;
+  `${alias ? `${alias}.` : ''}deleted_at IS NOT NULL`;
 
 /**
  * Returns SQL fragment to find records deleted within retention period
@@ -40,7 +40,7 @@ export const isDeleted = (alias?: string): string =>
  * @returns SQL fragment for recoverable deleted records
  */
 export const isRecoverable = (alias?: string, days: number = 30): string => {
-  const prefix = alias ? `${alias  }.` : '';
+  const prefix = alias ? `${alias}.` : '';
   return `${prefix}deleted_at IS NOT NULL AND datetime(${prefix}deleted_at, '+${days} days') > datetime('now')`;
 };
 
@@ -51,7 +51,7 @@ export const isRecoverable = (alias?: string, days: number = 30): string => {
  * @returns SQL fragment for expired deleted records
  */
 export const isExpired = (alias?: string, days: number = 30): string => {
-  const prefix = alias ? `${alias  }.` : '';
+  const prefix = alias ? `${alias}.` : '';
   return `${prefix}deleted_at IS NOT NULL AND datetime(${prefix}deleted_at, '+${days} days') <= datetime('now')`;
 };
 
@@ -122,7 +122,7 @@ export function buildSafeUpdate(
 
   return {
     setClause: setClauses.join(', '),
-    params
+    params,
   };
 }
 
@@ -145,6 +145,8 @@ export function isValidFieldName(fieldName: string): boolean {
  */
 export function assertValidFieldName(fieldName: string): void {
   if (!isValidFieldName(fieldName)) {
-    throw new Error(`Invalid field name: ${fieldName}. Field names must be alphanumeric with underscores.`);
+    throw new Error(
+      `Invalid field name: ${fieldName}. Field names must be alphanumeric with underscores.`
+    );
   }
 }

@@ -9,8 +9,13 @@
  */
 
 import { getDatabase } from '../database/init.js';
-import { getMilestoneTemplates, normalizeProjectType, MilestoneTemplate } from '../config/default-milestones.js';
+import {
+  getMilestoneTemplates,
+  normalizeProjectType,
+  MilestoneTemplate,
+} from '../config/default-milestones.js';
 import { generateMilestoneTasks } from './task-generator.js';
+import { logger } from './logger.js';
 
 /**
  * Generated milestone result
@@ -59,13 +64,15 @@ export async function generateDefaultMilestones(
   try {
     // Check if milestones already exist for this project
     if (options.skipIfExists !== false) {
-      const existingCount = await db.get(
+      const existingCount = (await db.get(
         'SELECT COUNT(*) as count FROM milestones WHERE project_id = ?',
         [projectId]
-      ) as { count: number };
+      )) as { count: number };
 
       if (existingCount && existingCount.count > 0) {
-        console.log(`[MilestoneGenerator] Skipping project ${projectId}: ${existingCount.count} milestones already exist`);
+        logger.info(
+          `[MilestoneGenerator] Skipping project ${projectId}: ${existingCount.count} milestones already exist`
+        );
         return { milestonesCreated: 0, tasksCreated: 0 };
       }
     }
@@ -74,7 +81,9 @@ export async function generateDefaultMilestones(
     const templates = getMilestoneTemplates(projectType);
     const normalizedType = normalizeProjectType(projectType);
 
-    console.log(`[MilestoneGenerator] Generating ${templates.length} milestones for project ${projectId} (type: ${normalizedType})`);
+    logger.info(
+      `[MilestoneGenerator] Generating ${templates.length} milestones for project ${projectId} (type: ${normalizedType})`
+    );
 
     // Generate each milestone
     for (const template of templates) {
@@ -86,13 +95,7 @@ export async function generateDefaultMilestones(
           project_id, title, description, due_date, deliverables,
           is_completed, created_at, updated_at
         ) VALUES (?, ?, ?, ?, ?, FALSE, datetime('now'), datetime('now'))`,
-        [
-          projectId,
-          template.name,
-          template.description,
-          dueDate,
-          deliverables
-        ]
+        [projectId, template.name, template.description, dueDate, deliverables]
       );
 
       if (result?.lastID) {
@@ -111,16 +114,23 @@ export async function generateDefaultMilestones(
           );
           totalTasksCreated += taskIds.length;
         } catch (taskError) {
-          console.error(`[MilestoneGenerator] Error generating tasks for milestone ${milestoneId}:`, taskError);
+          logger.error(
+            `[MilestoneGenerator] Error generating tasks for milestone ${milestoneId}:`,
+            { error: taskError instanceof Error ? taskError : undefined }
+          );
           // Continue with other milestones even if task generation fails
         }
       }
     }
 
-    console.log(`[MilestoneGenerator] Created ${milestoneIds.length} milestones and ${totalTasksCreated} tasks for project ${projectId}`);
+    logger.info(
+      `[MilestoneGenerator] Created ${milestoneIds.length} milestones and ${totalTasksCreated} tasks for project ${projectId}`
+    );
     return { milestonesCreated: milestoneIds.length, tasksCreated: totalTasksCreated };
   } catch (error) {
-    console.error(`[MilestoneGenerator] Error generating milestones for project ${projectId}:`, error);
+    logger.error(`[MilestoneGenerator] Error generating milestones for project ${projectId}:`, {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -155,9 +165,9 @@ export function previewMilestones(
   const templates = getMilestoneTemplates(projectType);
   const baseDate = startDate || new Date();
 
-  return templates.map(template => ({
+  return templates.map((template) => ({
     ...template,
-    dueDate: calculateDueDate(baseDate, template.estimatedDays)
+    dueDate: calculateDueDate(baseDate, template.estimatedDays),
   }));
 }
 
@@ -187,10 +197,12 @@ export async function regenerateMilestones(
     // Generate new milestones and tasks
     return generateDefaultMilestones(projectId, projectType, {
       startDate: startDate || new Date(),
-      skipIfExists: false
+      skipIfExists: false,
     });
   } catch (error) {
-    console.error(`[MilestoneGenerator] Error regenerating milestones for project ${projectId}:`, error);
+    logger.error(`[MilestoneGenerator] Error regenerating milestones for project ${projectId}:`, {
+      error: error instanceof Error ? error : undefined,
+    });
     throw error;
   }
 }
@@ -240,7 +252,7 @@ export async function backfillMilestones(): Promise<{
   let tasksCreated = 0;
 
   // Get projects without milestones along with their types
-  const projects = await db.all(`
+  const projects = (await db.all(`
     SELECT p.id, p.project_type, p.start_date
     FROM projects p
     LEFT JOIN milestones m ON p.id = m.project_id
@@ -248,16 +260,16 @@ export async function backfillMilestones(): Promise<{
       AND p.deleted_at IS NULL
       AND p.status NOT IN ('completed', 'cancelled')
     ORDER BY p.created_at DESC
-  `) as Array<{ id: number; project_type: string | null; start_date: string | null }>;
+  `)) as Array<{ id: number; project_type: string | null; start_date: string | null }>;
 
-  console.log(`[MilestoneGenerator] Backfilling milestones for ${projects.length} projects`);
+  logger.info(`[MilestoneGenerator] Backfilling milestones for ${projects.length} projects`);
 
   for (const project of projects) {
     try {
       const startDate = project.start_date ? new Date(project.start_date) : new Date();
       const result = await generateDefaultMilestones(project.id, project.project_type, {
         startDate,
-        skipIfExists: true
+        skipIfExists: true,
       });
 
       milestonesCreated += result.milestonesCreated;
@@ -266,17 +278,21 @@ export async function backfillMilestones(): Promise<{
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       errors.push({ projectId: project.id, error: errorMessage });
-      console.error(`[MilestoneGenerator] Failed to backfill project ${project.id}:`, errorMessage);
+      logger.error(`[MilestoneGenerator] Failed to backfill project ${project.id}:`, {
+        message: errorMessage,
+      });
     }
   }
 
-  console.log(`[MilestoneGenerator] Backfill complete: ${projectsProcessed} projects, ${milestonesCreated} milestones, ${tasksCreated} tasks`);
+  logger.info(
+    `[MilestoneGenerator] Backfill complete: ${projectsProcessed} projects, ${milestonesCreated} milestones, ${tasksCreated} tasks`
+  );
 
   return {
     projectsProcessed,
     milestonesCreated,
     tasksCreated,
-    errors
+    errors,
   };
 }
 
@@ -285,5 +301,5 @@ export default {
   previewMilestones,
   regenerateMilestones,
   getProjectsWithoutMilestones,
-  backfillMilestones
+  backfillMilestones,
 };

@@ -15,7 +15,7 @@ import type {
   TaskComment,
   ChecklistItem,
   TimeEntry,
-  ProjectTemplate
+  ProjectTemplate,
 } from '../../services/project-service.js';
 
 // =====================================================
@@ -114,12 +114,12 @@ export const projectTaskSchema = definePartialSchema<ProjectTask>()({
   status: {
     column: 'status',
     type: 'string',
-    transform: (v) => v as ProjectTask['status']
+    transform: (v) => v as ProjectTask['status'],
   },
   priority: {
     column: 'priority',
     type: 'string',
-    transform: (v) => v as ProjectTask['priority']
+    transform: (v) => v as ProjectTask['priority'],
   },
   assignedTo: { column: 'assigned_to_name', type: 'string?' },
   dueDate: { column: 'due_date', type: 'string?' },
@@ -129,7 +129,7 @@ export const projectTaskSchema = definePartialSchema<ProjectTask>()({
   parentTaskId: { column: 'parent_task_id', type: 'number?' },
   completedAt: { column: 'completed_at', type: 'string?' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const taskDependencySchema = defineSchema<TaskDependency>({
@@ -139,9 +139,9 @@ export const taskDependencySchema = defineSchema<TaskDependency>({
   dependencyType: {
     column: 'dependency_type',
     type: 'string',
-    transform: (v) => v as TaskDependency['dependencyType']
+    transform: (v) => v as TaskDependency['dependencyType'],
   },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 export const taskCommentSchema = defineSchema<TaskComment>({
@@ -150,11 +150,11 @@ export const taskCommentSchema = defineSchema<TaskComment>({
   author: {
     column: 'author_name',
     type: 'string',
-    default: 'Unknown'
+    default: 'Unknown',
   },
   content: 'string',
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const checklistItemSchema = defineSchema<ChecklistItem>({
@@ -164,7 +164,7 @@ export const checklistItemSchema = defineSchema<ChecklistItem>({
   isCompleted: { column: 'is_completed', type: 'boolean' },
   completedAt: { column: 'completed_at', type: 'string?' },
   sortOrder: { column: 'sort_order', type: 'number' },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 // TimeEntry has computed 'amount' field
@@ -175,7 +175,7 @@ export const timeEntrySchema = definePartialSchema<TimeEntry>()({
   userName: {
     column: 'user_name',
     type: 'string',
-    default: 'Unknown'
+    default: 'Unknown',
   },
   description: 'string?',
   hours: { column: 'hours', type: 'float' },
@@ -184,7 +184,7 @@ export const timeEntrySchema = definePartialSchema<TimeEntry>()({
   hourlyRate: { column: 'hourly_rate', type: 'float?' },
   createdAt: { column: 'created_at', type: 'string' },
   updatedAt: { column: 'updated_at', type: 'string' },
-  taskTitle: { column: 'task_title', type: 'string?' }
+  taskTitle: { column: 'task_title', type: 'string?' },
 });
 
 export const projectTemplateSchema = defineSchema<ProjectTemplate>({
@@ -198,7 +198,7 @@ export const projectTemplateSchema = defineSchema<ProjectTemplate>({
   defaultHourlyRate: { column: 'default_hourly_rate', type: 'float?' },
   isActive: { column: 'is_active', type: 'boolean' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 // =====================================================
@@ -210,7 +210,10 @@ export const projectTemplateSchema = defineSchema<ProjectTemplate>({
  * Note: subtasks, dependencies, blockedBy, checklistItems are computed fields.
  */
 export function toProjectTask(row: TaskRow): ProjectTask {
-  type BaseProjectTask = Omit<ProjectTask, 'subtasks' | 'dependencies' | 'blockedBy' | 'checklistItems'>;
+  type BaseProjectTask = Omit<
+    ProjectTask,
+    'subtasks' | 'dependencies' | 'blockedBy' | 'checklistItems'
+  >;
   return createMapper<TaskRow, BaseProjectTask>(
     projectTaskSchema as ReturnType<typeof defineSchema<BaseProjectTask>>
   )(row) as ProjectTask;
@@ -230,12 +233,10 @@ export function toTimeEntry(row: TimeEntryRow): TimeEntry {
   )(row);
 
   // Compute the amount if we have hours and hourly rate
-  const amount = baseEntry.hourlyRate != null
-    ? baseEntry.hours * baseEntry.hourlyRate
-    : undefined;
+  const amount = baseEntry.hourlyRate != null ? baseEntry.hours * baseEntry.hourlyRate : undefined;
 
   return {
     ...baseEntry,
-    amount
+    amount,
   };
 }

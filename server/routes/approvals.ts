@@ -71,15 +71,29 @@ router.post(
       return errorResponse(res, 'Name, entity_type, and workflow_type are required', 400);
     }
 
-    const validEntityTypes: EntityType[] = ['proposal', 'invoice', 'contract', 'deliverable', 'project'];
+    const validEntityTypes: EntityType[] = [
+      'proposal',
+      'invoice',
+      'contract',
+      'deliverable',
+      'project',
+    ];
     const validWorkflowTypes: WorkflowType[] = ['sequential', 'parallel', 'any_one'];
 
     if (!validEntityTypes.includes(entity_type)) {
-      return errorResponse(res, `Invalid entity_type. Must be one of: ${validEntityTypes.join(', ')}`, 400);
+      return errorResponse(
+        res,
+        `Invalid entity_type. Must be one of: ${validEntityTypes.join(', ')}`,
+        400
+      );
     }
 
     if (!validWorkflowTypes.includes(workflow_type)) {
-      return errorResponse(res, `Invalid workflow_type. Must be one of: ${validWorkflowTypes.join(', ')}`, 400);
+      return errorResponse(
+        res,
+        `Invalid workflow_type. Must be one of: ${validWorkflowTypes.join(', ')}`,
+        400
+      );
     }
 
     const workflow = await approvalService.createWorkflowDefinition({
@@ -87,13 +101,13 @@ router.post(
       description,
       entity_type,
       workflow_type,
-      is_default
+      is_default,
     });
 
     res.status(201).json({
       success: true,
       message: 'Workflow created',
-      workflow
+      workflow,
     });
   })
 );
@@ -111,7 +125,8 @@ router.post(
       return errorResponse(res, 'Invalid workflow ID', 400);
     }
 
-    const { step_order, approver_type, approver_value, is_optional, auto_approve_after_hours } = req.body;
+    const { step_order, approver_type, approver_value, is_optional, auto_approve_after_hours } =
+      req.body;
 
     if (!step_order || !approver_type || !approver_value) {
       return errorResponse(res, 'step_order, approver_type, and approver_value are required', 400);
@@ -123,13 +138,13 @@ router.post(
       approver_type,
       approver_value,
       is_optional,
-      auto_approve_after_hours
+      auto_approve_after_hours,
     });
 
     res.status(201).json({
       success: true,
       message: 'Step added',
-      step
+      step,
     });
   })
 );
@@ -165,7 +180,7 @@ router.post(
       res.status(201).json({
         success: true,
         message: 'Approval workflow started',
-        instance
+        instance,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to start workflow';
@@ -277,10 +292,10 @@ router.post(
 
     if (req.user?.type !== 'admin') {
       const db = getDatabase();
-      const request = await db.get(
+      const request = (await db.get(
         'SELECT approver_email FROM approval_requests WHERE id = ? AND status = ?',
         [requestId, 'pending']
-      ) as { approver_email?: string } | undefined;
+      )) as { approver_email?: string } | undefined;
 
       if (!request || request.approver_email !== approverEmail) {
         return errorResponse(res, 'Access denied', 403);
@@ -292,7 +307,7 @@ router.post(
       res.json({
         success: true,
         message: 'Approved',
-        instance
+        instance,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to approve';
@@ -322,10 +337,10 @@ router.post(
 
     if (req.user?.type !== 'admin') {
       const db = getDatabase();
-      const request = await db.get(
+      const request = (await db.get(
         'SELECT approver_email FROM approval_requests WHERE id = ? AND status = ?',
         [requestId, 'pending']
-      ) as { approver_email?: string } | undefined;
+      )) as { approver_email?: string } | undefined;
 
       if (!request || request.approver_email !== approverEmail) {
         return errorResponse(res, 'Access denied', 403);
@@ -337,7 +352,7 @@ router.post(
       res.json({
         success: true,
         message: 'Rejected',
-        instance
+        instance,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to reject';
@@ -367,7 +382,7 @@ router.post(
       res.json({
         success: true,
         message: 'Workflow cancelled',
-        instance
+        instance,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to cancel workflow';

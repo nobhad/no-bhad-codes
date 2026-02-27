@@ -27,6 +27,11 @@ import { rateLimiters } from '../middleware/rate-limiter.js';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const PROJECT_UPDATE_COLUMNS = `
+  id, project_id, title, description, update_type, author_user_id, created_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 /**
@@ -51,7 +56,7 @@ async function saveIntakeAsFile(
       name: intakeData.name,
       email: intakeData.email,
       projectFor: intakeData.projectFor || 'business',
-      companyName: intakeData.companyName || null
+      companyName: intakeData.companyName || null,
     },
     projectDetails: {
       type: intakeData.projectType,
@@ -59,13 +64,13 @@ async function saveIntakeAsFile(
       timeline: intakeData.timeline,
       budget: intakeData.budget,
       features: intakeData.features || [],
-      designLevel: intakeData.designLevel || null
+      designLevel: intakeData.designLevel || null,
     },
     technicalInfo: {
       techComfort: intakeData.techComfort || null,
-      domainHosting: intakeData.domainHosting || null
+      domainHosting: intakeData.domainHosting || null,
     },
-    additionalInfo: intakeData.additionalInfo || null
+    additionalInfo: intakeData.additionalInfo || null,
   };
 
   // Generate descriptive filename with NoBhadCodes branding
@@ -104,11 +109,10 @@ async function saveIntakeAsFile(
       'application/json',
       'document',
       'Project intake form submission',
-      'system'
+      'system',
     ]
   );
 
-  console.log(`[Intake] Saved intake form as file: ${relativePath}`);
   await logger.info(`[Intake] Saved intake form as file: ${relativePath}`, { category: 'INTAKE' });
 }
 
@@ -198,7 +202,10 @@ router.post(
   validateRequest(ValidationSchemas.intakeSubmission),
   async (req: Request, res: Response) => {
     try {
-      console.log('Received intake form submission:', req.body);
+      await logger.info('Received intake form submission', {
+        category: 'INTAKE',
+        metadata: { body: req.body },
+      });
 
       const intakeData: IntakeFormData = req.body;
 
@@ -211,19 +218,21 @@ router.post(
         : [intakeData.features].filter(Boolean);
 
       // Determine client type and company name
-      const clientType: 'personal' | 'business' = intakeData.projectFor === 'personal' ? 'personal' : 'business';
-      const companyName = clientType === 'personal'
-        ? null  // Personal clients don't have a company name
-        : (intakeData.companyName || intakeData.name);
+      const clientType: 'personal' | 'business' =
+        intakeData.projectFor === 'personal' ? 'personal' : 'business';
+      const companyName =
+        clientType === 'personal'
+          ? null // Personal clients don't have a company name
+          : intakeData.companyName || intakeData.name;
 
       // Generate password hash outside transaction
       const hashedPassword = await bcrypt.hash(generateRandomPassword(), 10);
 
       // Execute database operations in a transaction
       const result = await db.transaction(async (ctx) => {
-      // Check if client with this email already exists
+        // Check if client with this email already exists
         const existingClient = (await ctx.get('SELECT id, email FROM clients WHERE email = ?', [
-          intakeData.email
+          intakeData.email,
         ])) as ExistingClient | undefined;
 
         let clientId: number;
@@ -233,7 +242,7 @@ router.post(
           clientId = getNumber(existingClient as unknown as { [key: string]: unknown }, 'id');
           await logger.info(`Existing client found: ${clientId}`, { category: 'INTAKE' });
         } else {
-        // Create new client account
+          // Create new client account
           const clientResult = await ctx.run(
             `
           INSERT INTO clients (
@@ -282,7 +291,7 @@ router.post(
             intakeData.projectType,
             intakeData.budget,
             intakeData.timeline,
-            notes
+            notes,
           ]
         );
 
@@ -300,8 +309,8 @@ router.post(
           [
             projectId,
             'Project Intake Received',
-            'Thank you for submitting your project details! We\'re reviewing your requirements and will provide a detailed proposal within 24-48 hours.',
-            systemUserId
+            "Thank you for submitting your project details! We're reviewing your requirements and will provide a detailed proposal within 24-48 hours.",
+            systemUserId,
           ]
         );
 
@@ -316,12 +325,16 @@ router.post(
               milestone.title,
               milestone.description,
               milestone.dueDate,
-              JSON.stringify(milestone.deliverables)
+              JSON.stringify(milestone.deliverables),
             ]
           );
-          await logger.info(`Created milestone for project ${projectId}: ${milestone.title}`, { category: 'INTAKE' });
+          await logger.info(`Created milestone for project ${projectId}: ${milestone.title}`, {
+            category: 'INTAKE',
+          });
         }
-        console.log(`Created ${milestones.length} milestones for project ${projectId}`);
+        await logger.info(`Created ${milestones.length} milestones for project ${projectId}`, {
+          category: 'INTAKE',
+        });
 
         // Create proposal request if provided
         let proposalRequestId: number | null = null;
@@ -365,11 +378,14 @@ router.post(
               taxRate,
               taxAmount,
               expirationDate,
-              validityDays
+              validityDays,
             ]
           );
           proposalRequestId = proposalResult.lastID!;
-          await logger.info(`Created proposal request ${proposalRequestId} for project ${projectId}`, { category: 'INTAKE' });
+          await logger.info(
+            `Created proposal request ${proposalRequestId} for project ${projectId}`,
+            { category: 'INTAKE' }
+          );
 
           if (proposal.customItems && proposal.customItems.length > 0) {
             for (const [index, item] of proposal.customItems.entries()) {
@@ -387,7 +403,7 @@ router.post(
                   item.unitLabel || null,
                   item.isTaxable !== false ? 1 : 0,
                   item.isOptional ? 1 : 0,
-                  index
+                  index,
                 ]
               );
             }
@@ -406,11 +422,19 @@ router.post(
       await generateInvoice(intakeData, projectId, clientId);
 
       // Save intake form as downloadable file
-      const projectName = generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name);
+      const projectName = generateProjectName(
+        intakeData.projectType,
+        clientType,
+        companyName,
+        intakeData.name
+      );
       try {
         await saveIntakeAsFile(intakeData, projectId, projectName);
       } catch (fileError) {
-        await logger.error('[Intake] Failed to save intake file:', { error: fileError instanceof Error ? fileError : undefined, category: 'INTAKE' });
+        await logger.error('[Intake] Failed to save intake file:', {
+          error: fileError instanceof Error ? fileError : undefined,
+          category: 'INTAKE',
+        });
         // Non-critical error - don't fail the whole request
       }
 
@@ -424,7 +448,7 @@ router.post(
           clientId,
           projectId,
           email: intakeData.email,
-          type: 'client_access'
+          type: 'client_access',
         },
         jwtSecret,
         { expiresIn: '7d' }
@@ -439,7 +463,10 @@ router.post(
           // Send new intake notification to admin only
           await sendNewIntakeNotification(intakeData, projectId);
         } catch (emailError) {
-          await logger.error('Failed to send emails:', { error: emailError instanceof Error ? emailError : undefined, category: 'INTAKE' });
+          await logger.error('Failed to send emails:', {
+            error: emailError instanceof Error ? emailError : undefined,
+            category: 'INTAKE',
+          });
         }
       }, 100);
 
@@ -451,36 +478,40 @@ router.post(
           clientId,
           projectId,
           proposalRequestId,
-          projectName: generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name),
+          projectName: generateProjectName(
+            intakeData.projectType,
+            clientType,
+            companyName,
+            intakeData.name
+          ),
           accessToken,
           isNewClient,
           projectPlan: projectPlan.summary,
           estimatedDelivery: projectPlan.estimatedDelivery,
           nextSteps: proposalRequestId
             ? [
-              'Review your proposal in the client portal',
-              'We\'ll finalize your quote within 24-48 hours',
-              'Schedule a call to discuss the details',
-              'Begin project development upon agreement'
-            ]
+                'Review your proposal in the client portal',
+                "We'll finalize your quote within 24-48 hours",
+                'Schedule a call to discuss the details',
+                'Begin project development upon agreement',
+              ]
             : [
-              'Review your project details in the client portal',
-              'We\'ll send a detailed proposal within 24-48 hours',
-              'Schedule a discovery call to discuss requirements',
-              'Begin project development upon agreement'
-            ]
-        }
+                'Review your project details in the client portal',
+                "We'll send a detailed proposal within 24-48 hours",
+                'Schedule a discovery call to discuss requirements',
+                'Begin project development upon agreement',
+              ],
+        },
       });
     } catch (error: unknown) {
-      await logger.error('Intake processing error:', { error: error instanceof Error ? error : undefined, category: 'INTAKE' });
+      await logger.error('Intake processing error:', {
+        error: error instanceof Error ? error : undefined,
+        category: 'INTAKE',
+      });
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      errorResponseWithPayload(
-        res,
-        'Failed to process intake form',
-        500,
-        'INTERNAL_ERROR',
-        { details: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error' }
-      );
+      errorResponseWithPayload(res, 'Failed to process intake form', 500, 'INTERNAL_ERROR', {
+        details: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error',
+      });
     }
   }
 );
@@ -489,69 +520,73 @@ router.post(
  * GET /api/intake/status/:projectId
  * Get intake processing status (requires authentication)
  */
-router.get('/status/:projectId', authenticateToken, rateLimiters.standard, async (req: Request, res: Response) => {
-  try {
-    const { projectId } = req.params;
+router.get(
+  '/status/:projectId',
+  authenticateToken,
+  rateLimiters.standard,
+  async (req: Request, res: Response) => {
+    try {
+      const { projectId } = req.params;
 
-    const db = getDatabase();
-    const project = await db.get(
-      `
+      const db = getDatabase();
+      const project = await db.get(
+        `
       SELECT p.*, c.company_name, c.contact_name, c.email
       FROM projects p
       JOIN clients c ON p.client_id = c.id
       WHERE p.id = ?
     `,
-      [projectId]
-    );
+        [projectId]
+      );
 
-    if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+      if (!project) {
+        return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+      }
+
+      // Get latest update
+      const latestUpdate = await db.get(
+        `SELECT ${PROJECT_UPDATE_COLUMNS} FROM project_updates
+         WHERE project_id = ? ORDER BY created_at DESC LIMIT 1`,
+        [projectId]
+      );
+
+      const responseData: ProjectStatusResponse = {
+        project: {
+          id: getNumber(project, 'id'),
+          name: getString(project, 'project_name'),
+          status: getString(project, 'status'),
+          type: getString(project, 'project_type'),
+          timeline: getString(project, 'timeline'),
+          budget: getString(project, 'budget_range'),
+        },
+        client: {
+          name: getString(project, 'contact_name'),
+          company: getString(project, 'company_name'),
+          email: getString(project, 'email'),
+        },
+        latestUpdate: latestUpdate
+          ? {
+              title: getString(latestUpdate, 'title'),
+              description: getString(latestUpdate, 'description'),
+              date: getString(latestUpdate, 'created_at'),
+              type: getString(latestUpdate, 'type'),
+            }
+          : null,
+      };
+
+      res.json({
+        success: true,
+        data: responseData,
+      });
+    } catch (error: unknown) {
+      await logger.error('Status check error:', {
+        error: error instanceof Error ? error : undefined,
+        category: 'INTAKE',
+      });
+      errorResponse(res, 'Failed to get project status', 500, 'INTERNAL_ERROR');
     }
-
-    // Get latest update
-    const latestUpdate = await db.get(
-      `
-      SELECT * FROM project_updates 
-      WHERE project_id = ? 
-      ORDER BY created_at DESC 
-      LIMIT 1
-    `,
-      [projectId]
-    );
-
-    const responseData: ProjectStatusResponse = {
-      project: {
-        id: getNumber(project, 'id'),
-        name: getString(project, 'project_name'),
-        status: getString(project, 'status'),
-        type: getString(project, 'project_type'),
-        timeline: getString(project, 'timeline'),
-        budget: getString(project, 'budget_range')
-      },
-      client: {
-        name: getString(project, 'contact_name'),
-        company: getString(project, 'company_name'),
-        email: getString(project, 'email')
-      },
-      latestUpdate: latestUpdate
-        ? {
-          title: getString(latestUpdate, 'title'),
-          description: getString(latestUpdate, 'description'),
-          date: getString(latestUpdate, 'created_at'),
-          type: getString(latestUpdate, 'type')
-        }
-        : null
-    };
-
-    res.json({
-      success: true,
-      data: responseData
-    });
-  } catch (error: unknown) {
-    await logger.error('Status check error:', { error: error instanceof Error ? error : undefined, category: 'INTAKE' });
-    errorResponse(res, 'Failed to get project status', 500, 'INTERNAL_ERROR');
   }
-});
+);
 
 // Helper functions
 function generateRandomPassword(length: number = 12): string {
@@ -578,7 +613,7 @@ function generateProjectName(
     ecommerce: 'E-commerce Store', // Legacy support
     'web-app': 'Web App',
     'browser-extension': 'Browser Extension',
-    other: 'Custom Project'
+    other: 'Custom Project',
   };
 
   const typeName = typeNames[projectType] || 'Web Project';
@@ -602,21 +637,21 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
   // Calculate timeline multiplier based on timeline selection
   let timelineWeeks = 4; // default
   switch (timeline) {
-  case 'asap':
-    timelineWeeks = 2;
-    break;
-  case '1-month':
-    timelineWeeks = 4;
-    break;
-  case '1-3-months':
-    timelineWeeks = 8;
-    break;
-  case '3-6-months':
-    timelineWeeks = 16;
-    break;
-  case 'flexible':
-    timelineWeeks = 6;
-    break;
+    case 'asap':
+      timelineWeeks = 2;
+      break;
+    case '1-month':
+      timelineWeeks = 4;
+      break;
+    case '1-3-months':
+      timelineWeeks = 8;
+      break;
+    case '3-6-months':
+      timelineWeeks = 16;
+      break;
+    case 'flexible':
+      timelineWeeks = 6;
+      break;
   }
 
   const addDays = (date: Date, days: number): string => {
@@ -631,7 +666,7 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
       title: 'Discovery & Planning',
       description: 'Review requirements, create project plan and timeline',
       dueDate: addDays(now, Math.floor(timelineWeeks * 0.15 * 7)),
-      deliverables: ['Requirements document', 'Project timeline', 'Technical specification']
+      deliverables: ['Requirements document', 'Project timeline', 'Technical specification'],
     },
     {
       title: 'Design & Wireframes',
@@ -641,27 +676,27 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
         'Wireframe mockups',
         'Color palette',
         'Typography selection',
-        'Design approval'
-      ]
+        'Design approval',
+      ],
     },
     {
       title: 'Development',
       description: 'Build the core functionality and features',
       dueDate: addDays(now, Math.floor(timelineWeeks * 0.7 * 7)),
-      deliverables: ['Core features implemented', 'Responsive design', 'Content integration']
+      deliverables: ['Core features implemented', 'Responsive design', 'Content integration'],
     },
     {
       title: 'Testing & Revisions',
       description: 'Quality assurance testing and client revisions',
       dueDate: addDays(now, Math.floor(timelineWeeks * 0.85 * 7)),
-      deliverables: ['Bug fixes', 'Performance optimization', 'Client feedback integration']
+      deliverables: ['Bug fixes', 'Performance optimization', 'Client feedback integration'],
     },
     {
       title: 'Launch',
       description: 'Final deployment and go-live',
       dueDate: addDays(now, timelineWeeks * 7),
-      deliverables: ['Production deployment', 'DNS configuration', 'Launch checklist complete']
-    }
+      deliverables: ['Production deployment', 'DNS configuration', 'Launch checklist complete'],
+    },
   ];
 
   // Add project-type specific milestones
@@ -672,7 +707,7 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
       title: 'Payment Integration',
       description: 'Set up payment processing and checkout flow',
       dueDate: addDays(now, Math.floor(timelineWeeks * 0.6 * 7)),
-      deliverables: ['Payment gateway setup', 'Checkout testing', 'Order management']
+      deliverables: ['Payment gateway setup', 'Checkout testing', 'Order management'],
     });
   }
 
@@ -681,7 +716,7 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
       title: 'User Authentication',
       description: 'Implement user login, registration, and security',
       dueDate: addDays(now, Math.floor(timelineWeeks * 0.4 * 7)),
-      deliverables: ['Login system', 'User registration', 'Password recovery']
+      deliverables: ['Login system', 'User registration', 'Password recovery'],
     });
   }
 

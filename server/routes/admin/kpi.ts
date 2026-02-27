@@ -53,11 +53,13 @@ router.get(
         totalFormatted: formatBytes(totalJs + totalCss),
         jsFormatted: formatBytes(totalJs),
         cssFormatted: formatBytes(totalCss),
-        jsFiles: jsFiles.slice(0, 10).map(f => ({ ...f, sizeFormatted: formatBytes(f.size) })),
-        cssFiles: cssFiles.slice(0, 5).map(f => ({ ...f, sizeFormatted: formatBytes(f.size) }))
+        jsFiles: jsFiles.slice(0, 10).map((f) => ({ ...f, sizeFormatted: formatBytes(f.size) })),
+        cssFiles: cssFiles.slice(0, 5).map((f) => ({ ...f, sizeFormatted: formatBytes(f.size) })),
       });
     } catch (error) {
-      logger.error('Error reading bundle stats:', { error: error instanceof Error ? error : undefined });
+      logger.error('Error reading bundle stats:', {
+        error: error instanceof Error ? error : undefined,
+      });
       errorResponse(res, 'Failed to read bundle stats', 500, 'INTERNAL_ERROR');
     }
   })
@@ -92,13 +94,14 @@ router.get(
         summary: {
           totalQueries: stats.totalQueries,
           slowQueries: stats.slowQueries,
-          slowQueryPercentage: stats.totalQueries > 0
-            ? `${((stats.slowQueries / stats.totalQueries) * 100).toFixed(2)}%`
-            : '0%',
+          slowQueryPercentage:
+            stats.totalQueries > 0
+              ? `${((stats.slowQueries / stats.totalQueries) * 100).toFixed(2)}%`
+              : '0%',
           avgExecutionTime: `${stats.avgExecutionTime}ms`,
-          maxExecutionTime: `${stats.maxExecutionTime}ms`
-        }
-      }
+          maxExecutionTime: `${stats.maxExecutionTime}ms`,
+        },
+      },
     });
   })
 );
@@ -122,7 +125,7 @@ router.post(
 
     res.json({
       success: true,
-      message: 'Query statistics reset successfully'
+      message: 'Query statistics reset successfully',
     });
   })
 );

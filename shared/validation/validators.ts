@@ -44,7 +44,7 @@ export function validatePattern(
   if (!pattern.test(value)) {
     return {
       isValid: false,
-      error: errorMessage || 'Invalid format'
+      error: errorMessage || 'Invalid format',
     };
   }
   return { isValid: true, sanitizedValue: value };
@@ -60,30 +60,23 @@ export function validateWithPattern(
 ): ValidationResult {
   const pattern = VALIDATION_PATTERNS[patternKey];
   const description = PATTERN_DESCRIPTIONS[patternKey];
-  return validatePattern(
-    value,
-    pattern,
-    customError || `Must be ${description}`
-  );
+  return validatePattern(value, pattern, customError || `Must be ${description}`);
 }
 
 /**
  * Validate required field
  */
-export function validateRequired(
-  value: unknown,
-  fieldName: string = 'Field'
-): ValidationResult {
+export function validateRequired(value: unknown, fieldName: string = 'Field'): ValidationResult {
   if (value === undefined || value === null || value === '') {
     return {
       isValid: false,
-      error: `${fieldName} is required`
+      error: `${fieldName} is required`,
     };
   }
   if (typeof value === 'string' && VALIDATION_PATTERNS.WHITESPACE_ONLY.test(value)) {
     return {
       isValid: false,
-      error: `${fieldName} cannot be empty`
+      error: `${fieldName} cannot be empty`,
     };
   }
   return { isValid: true, sanitizedValue: value };
@@ -102,21 +95,21 @@ export function validateLength(
   if (options.exact !== undefined && length !== options.exact) {
     return {
       isValid: false,
-      error: `${fieldName} must be exactly ${options.exact} characters`
+      error: `${fieldName} must be exactly ${options.exact} characters`,
     };
   }
 
   if (options.min !== undefined && length < options.min) {
     return {
       isValid: false,
-      error: `${fieldName} must be at least ${options.min} characters`
+      error: `${fieldName} must be at least ${options.min} characters`,
     };
   }
 
   if (options.max !== undefined && length > options.max) {
     return {
       isValid: false,
-      error: `${fieldName} must be at most ${options.max} characters`
+      error: `${fieldName} must be at most ${options.max} characters`,
     };
   }
 
@@ -134,14 +127,14 @@ export function validateRange(
   if (options.min !== undefined && value < options.min) {
     return {
       isValid: false,
-      error: `${fieldName} must be at least ${options.min}`
+      error: `${fieldName} must be at least ${options.min}`,
     };
   }
 
   if (options.max !== undefined && value > options.max) {
     return {
       isValid: false,
-      error: `${fieldName} must be at most ${options.max}`
+      error: `${fieldName} must be at most ${options.max}`,
     };
   }
 
@@ -159,7 +152,7 @@ export function validateAllowedValues<T>(
   if (!allowedValues.includes(value)) {
     return {
       isValid: false,
-      error: `${fieldName} must be one of: ${allowedValues.join(', ')}`
+      error: `${fieldName} must be one of: ${allowedValues.join(', ')}`,
     };
   }
   return { isValid: true, sanitizedValue: value };
@@ -179,14 +172,12 @@ export function validateEmail(
   const trimmed = email.trim().toLowerCase();
 
   // Basic format check
-  const pattern = options.strict
-    ? VALIDATION_PATTERNS.EMAIL_STRICT
-    : VALIDATION_PATTERNS.EMAIL;
+  const pattern = options.strict ? VALIDATION_PATTERNS.EMAIL_STRICT : VALIDATION_PATTERNS.EMAIL;
 
   if (!pattern.test(trimmed)) {
     return {
       isValid: false,
-      error: 'Please enter a valid email address'
+      error: 'Please enter a valid email address',
     };
   }
 
@@ -194,7 +185,7 @@ export function validateEmail(
   if (trimmed.length > 254) {
     return {
       isValid: false,
-      error: 'Email address is too long'
+      error: 'Email address is too long',
     };
   }
 
@@ -208,14 +199,14 @@ export function validateEmail(
       'throwaway.email',
       'temp-mail.org',
       'fakeinbox.com',
-      'trashmail.com'
+      'trashmail.com',
     ];
 
     const domain = trimmed.split('@')[1];
     if (disposableDomains.includes(domain)) {
       return {
         isValid: false,
-        error: 'Temporary email addresses are not allowed'
+        error: 'Temporary email addresses are not allowed',
       };
     }
   }
@@ -236,13 +227,13 @@ export function validatePhone(
   const patterns = {
     e164: VALIDATION_PATTERNS.PHONE_E164,
     us: VALIDATION_PATTERNS.PHONE_US,
-    generic: VALIDATION_PATTERNS.PHONE_GENERIC
+    generic: VALIDATION_PATTERNS.PHONE_GENERIC,
   };
 
   if (!patterns[format].test(trimmed)) {
     return {
       isValid: false,
-      error: 'Please enter a valid phone number'
+      error: 'Please enter a valid phone number',
     };
   }
 
@@ -261,34 +252,29 @@ export function validatePassword(
   const patterns = {
     basic: VALIDATION_PATTERNS.PASSWORD_BASIC,
     medium: VALIDATION_PATTERNS.PASSWORD_MEDIUM,
-    strong: VALIDATION_PATTERNS.PASSWORD_STRONG
+    strong: VALIDATION_PATTERNS.PASSWORD_STRONG,
   };
 
   const descriptions = {
     basic: 'at least 8 characters',
     medium: 'at least 8 characters with letters and numbers',
-    strong: 'at least 12 characters with uppercase, lowercase, number, and special character'
+    strong: 'at least 12 characters with uppercase, lowercase, number, and special character',
   };
 
   if (!patterns[strength].test(password)) {
     return {
       isValid: false,
-      error: `Password must be ${descriptions[strength]}`
+      error: `Password must be ${descriptions[strength]}`,
     };
   }
 
   // Check for common weak passwords
-  const weakPasswords = [
-    'password123',
-    '123456789012',
-    'qwertyuiop',
-    'admin12345'
-  ];
+  const weakPasswords = ['password123', '123456789012', 'qwertyuiop', 'admin12345'];
 
-  if (weakPasswords.some(weak => password.toLowerCase().includes(weak))) {
+  if (weakPasswords.some((weak) => password.toLowerCase().includes(weak))) {
     return {
       isValid: false,
-      error: 'Password is too common, please choose a stronger one'
+      error: 'Password is too common, please choose a stronger one',
     };
   }
 
@@ -317,13 +303,13 @@ export function validateName(
   const patterns = {
     person: VALIDATION_PATTERNS.NAME,
     single: VALIDATION_PATTERNS.NAME_SINGLE,
-    company: VALIDATION_PATTERNS.COMPANY_NAME
+    company: VALIDATION_PATTERNS.COMPANY_NAME,
   };
 
   if (!patterns[type].test(trimmed)) {
     return {
       isValid: false,
-      error: 'Name contains invalid characters'
+      error: 'Name contains invalid characters',
     };
   }
 
@@ -343,21 +329,20 @@ export function validateUrl(
     // Removed URL_ANY validation as pattern does not exist
     return {
       isValid: false,
-      error: 'Please enter a valid URL'
+      error: 'Please enter a valid URL',
     };
-  }
-  else {
+  } else {
     if (!VALIDATION_PATTERNS.URL_HTTP.test(trimmed)) {
       return {
         isValid: false,
-        error: 'Please enter a valid HTTP/HTTPS URL'
+        error: 'Please enter a valid HTTP/HTTPS URL',
       };
     }
 
     if (options.requireHttps && !trimmed.startsWith('https://')) {
       return {
         isValid: false,
-        error: 'URL must use HTTPS'
+        error: 'URL must use HTTPS',
       };
     }
   }
@@ -374,16 +359,16 @@ export function validateDate(
 ): ValidationResult {
   const format = options.format || 'iso';
 
-  const pattern = format === 'datetime'
-    ? VALIDATION_PATTERNS.DATETIME_ISO
-    : VALIDATION_PATTERNS.DATE_ISO;
+  const pattern =
+    format === 'datetime' ? VALIDATION_PATTERNS.DATETIME_ISO : VALIDATION_PATTERNS.DATE_ISO;
 
   if (!pattern.test(dateStr)) {
     return {
       isValid: false,
-      error: format === 'datetime'
-        ? 'Please enter a valid datetime (YYYY-MM-DDTHH:mm:ss)'
-        : 'Please enter a valid date (YYYY-MM-DD)'
+      error:
+        format === 'datetime'
+          ? 'Please enter a valid datetime (YYYY-MM-DDTHH:mm:ss)'
+          : 'Please enter a valid date (YYYY-MM-DD)',
     };
   }
 
@@ -391,21 +376,21 @@ export function validateDate(
   if (isNaN(date.getTime())) {
     return {
       isValid: false,
-      error: 'Invalid date value'
+      error: 'Invalid date value',
     };
   }
 
   if (options.minDate && date < options.minDate) {
     return {
       isValid: false,
-      error: `Date must be after ${options.minDate.toISOString().split('T')[0]}`
+      error: `Date must be after ${options.minDate.toISOString().split('T')[0]}`,
     };
   }
 
   if (options.maxDate && date > options.maxDate) {
     return {
       isValid: false,
-      error: `Date must be before ${options.maxDate.toISOString().split('T')[0]}`
+      error: `Date must be before ${options.maxDate.toISOString().split('T')[0]}`,
     };
   }
 
@@ -423,7 +408,7 @@ export function checkSqlInjection(value: string): ValidationResult {
   if (VALIDATION_PATTERNS.SQL_INJECTION.test(value)) {
     return {
       isValid: false,
-      error: 'Input contains potentially dangerous characters'
+      error: 'Input contains potentially dangerous characters',
     };
   }
   return { isValid: true, sanitizedValue: value };
@@ -436,7 +421,7 @@ export function checkXss(value: string): ValidationResult {
   if (VALIDATION_PATTERNS.XSS_DETECTION.test(value)) {
     return {
       isValid: false,
-      error: 'Input contains potentially malicious content'
+      error: 'Input contains potentially malicious content',
     };
   }
   return { isValid: true, sanitizedValue: value };
@@ -449,7 +434,7 @@ export function checkPathTraversal(value: string): ValidationResult {
   if (VALIDATION_PATTERNS.PATH_TRAVERSAL.test(value)) {
     return {
       isValid: false,
-      error: 'Invalid path'
+      error: 'Invalid path',
     };
   }
   return { isValid: true, sanitizedValue: value };
@@ -483,7 +468,7 @@ export function validateMessageContent(
     if (VALIDATION_PATTERNS.SPAM_PATTERNS.test(trimmed)) {
       return {
         isValid: false,
-        error: 'Message appears to contain spam content'
+        error: 'Message appears to contain spam content',
       };
     }
 
@@ -492,7 +477,7 @@ export function validateMessageContent(
     if (urlMatches && urlMatches.length > 3) {
       return {
         isValid: false,
-        error: 'Message contains too many links'
+        error: 'Message contains too many links',
       };
     }
   }
@@ -509,27 +494,31 @@ export function validateMessageContent(
  */
 export function validateArray<T>(
   value: T[],
-  options: { minLength?: number; maxLength?: number; itemValidator?: (item: T) => ValidationResult },
+  options: {
+    minLength?: number;
+    maxLength?: number;
+    itemValidator?: (item: T) => ValidationResult;
+  },
   fieldName: string = 'Array'
 ): ValidationResult {
   if (!Array.isArray(value)) {
     return {
       isValid: false,
-      error: `${fieldName} must be an array`
+      error: `${fieldName} must be an array`,
     };
   }
 
   if (options.minLength !== undefined && value.length < options.minLength) {
     return {
       isValid: false,
-      error: `${fieldName} must have at least ${options.minLength} items`
+      error: `${fieldName} must have at least ${options.minLength} items`,
     };
   }
 
   if (options.maxLength !== undefined && value.length > options.maxLength) {
     return {
       isValid: false,
-      error: `${fieldName} must have at most ${options.maxLength} items`
+      error: `${fieldName} must have at most ${options.maxLength} items`,
     };
   }
 
@@ -539,7 +528,7 @@ export function validateArray<T>(
       if (!itemResult.isValid) {
         return {
           isValid: false,
-          error: `${fieldName}[${i}]: ${itemResult.error}`
+          error: `${fieldName}[${i}]: ${itemResult.error}`,
         };
       }
     }
@@ -563,7 +552,7 @@ const HTML_ENTITIES: Record<string, string> = {
   "'": '&#x27;',
   '/': '&#x2F;',
   '`': '&#x60;',
-  '=': '&#x3D;'
+  '=': '&#x3D;',
 };
 
 /**
@@ -601,10 +590,7 @@ export function escapeHtmlAttribute(str: string): string {
   if (typeof str !== 'string') {
     return '';
   }
-  return escapeHtml(str)
-    .replace(/\n/g, '&#10;')
-    .replace(/\r/g, '&#13;')
-    .replace(/\t/g, '&#9;');
+  return escapeHtml(str).replace(/\n/g, '&#10;').replace(/\r/g, '&#13;').replace(/\t/g, '&#9;');
 }
 
 /**
@@ -670,7 +656,10 @@ function validateJsonProperty(
         return { isValid: false, error: `${path} must be a string` };
       }
       if (propDef.minLength !== undefined && value.length < propDef.minLength) {
-        return { isValid: false, error: `${path} must be at least ${propDef.minLength} characters` };
+        return {
+          isValid: false,
+          error: `${path} must be at least ${propDef.minLength} characters`,
+        };
       }
       if (propDef.maxLength !== undefined && value.length > propDef.maxLength) {
         return { isValid: false, error: `${path} must be at most ${propDef.maxLength} characters` };
@@ -821,10 +810,10 @@ export const tierDataSchema: JsonSchema = {
     description: { type: 'string', maxLength: 1000 },
     features: {
       type: 'array',
-      items: { type: 'string', maxLength: 200 }
-    }
+      items: { type: 'string', maxLength: 200 },
+    },
   },
-  allowAdditional: true
+  allowAdditional: true,
 };
 
 /**
@@ -838,8 +827,8 @@ export const featuresDataItemSchema: JsonPropertyDef = {
     description: { type: 'string', maxLength: 500 },
     included: { type: 'boolean' },
     price: { type: 'number', min: 0 },
-    category: { type: 'string', maxLength: 50 }
-  }
+    category: { type: 'string', maxLength: 50 },
+  },
 };
 
 /**
@@ -853,9 +842,9 @@ export const pricingDataSchema: JsonSchema = {
     tax: { type: 'number', min: 0 },
     taxRate: { type: 'number', min: 0, max: 100 },
     total: { type: 'number', required: true, min: 0 },
-    currency: { type: 'string', maxLength: 3 }
+    currency: { type: 'string', maxLength: 3 },
   },
-  allowAdditional: true
+  allowAdditional: true,
 };
 
 /**
@@ -872,12 +861,12 @@ export const tierStructureSchema: JsonSchema = {
         properties: {
           id: { type: 'string', required: true, maxLength: 50 },
           name: { type: 'string', required: true, minLength: 1, maxLength: 100 },
-          basePrice: { type: 'number', min: 0 }
-        }
-      }
-    }
+          basePrice: { type: 'number', min: 0 },
+        },
+      },
+    },
   },
-  allowAdditional: true
+  allowAdditional: true,
 };
 
 /**
@@ -892,14 +881,17 @@ export const lineItemSchema: JsonPropertyDef = {
     unitLabel: { type: 'string', maxLength: 50 },
     category: { type: 'string', maxLength: 50 },
     isTaxable: { type: 'boolean' },
-    isOptional: { type: 'boolean' }
-  }
+    isOptional: { type: 'boolean' },
+  },
 };
 
 /**
  * Validate features data array
  */
-export function validateFeaturesData(value: unknown, fieldName: string = 'Features'): ValidationResult {
+export function validateFeaturesData(
+  value: unknown,
+  fieldName: string = 'Features'
+): ValidationResult {
   if (!Array.isArray(value)) {
     return { isValid: false, error: `${fieldName} must be an array` };
   }
@@ -921,7 +913,10 @@ export function validateFeaturesData(value: unknown, fieldName: string = 'Featur
 /**
  * Validate line items array
  */
-export function validateLineItems(value: unknown, fieldName: string = 'Line items'): ValidationResult {
+export function validateLineItems(
+  value: unknown,
+  fieldName: string = 'Line items'
+): ValidationResult {
   if (!Array.isArray(value)) {
     return { isValid: false, error: `${fieldName} must be an array` };
   }
@@ -947,9 +942,7 @@ export function validateLineItems(value: unknown, fieldName: string = 'Line item
 /**
  * Run multiple validators and return first error
  */
-export function validateAll(
-  ...results: ValidationResult[]
-): ValidationResult {
+export function validateAll(...results: ValidationResult[]): ValidationResult {
   for (const result of results) {
     if (!result.isValid) {
       return result;
@@ -972,13 +965,13 @@ export function validateField(
       return {
         isValid: false,
         field: fieldName,
-        error: result.error
+        error: result.error,
       };
     }
   }
   return {
     isValid: true,
     field: fieldName,
-    sanitizedValue: value
+    sanitizedValue: value,
   };
 }

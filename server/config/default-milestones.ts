@@ -48,22 +48,22 @@ export const DEFAULT_MILESTONES: Record<string, MilestoneTemplate[]> = {
       description: 'Initial consultation, requirements gathering, and project planning',
       estimatedDays: 3,
       order: 1,
-      deliverables: ['Project brief', 'Sitemap', 'Content outline']
+      deliverables: ['Project brief', 'Sitemap', 'Content outline'],
     },
     {
       name: 'Design & Development',
       description: 'Visual design, development, and content integration',
       estimatedDays: 10,
       order: 2,
-      deliverables: ['Design mockups', 'Responsive site build', 'Content integration']
+      deliverables: ['Design mockups', 'Responsive site build', 'Content integration'],
     },
     {
       name: 'Testing & Launch',
       description: 'Quality assurance, client review, and deployment',
       estimatedDays: 14,
       order: 3,
-      deliverables: ['Cross-browser testing', 'Mobile testing', 'Live deployment']
-    }
+      deliverables: ['Cross-browser testing', 'Mobile testing', 'Live deployment'],
+    },
   ],
 
   /**
@@ -76,36 +76,36 @@ export const DEFAULT_MILESTONES: Record<string, MilestoneTemplate[]> = {
       description: 'Business analysis, competitor research, and requirements definition',
       estimatedDays: 5,
       order: 1,
-      deliverables: ['Discovery document', 'Competitor analysis', 'Feature requirements']
+      deliverables: ['Discovery document', 'Competitor analysis', 'Feature requirements'],
     },
     {
       name: 'Design',
       description: 'Brand integration, wireframes, and visual design',
       estimatedDays: 12,
       order: 2,
-      deliverables: ['Wireframes', 'Style guide', 'Design mockups']
+      deliverables: ['Wireframes', 'Style guide', 'Design mockups'],
     },
     {
       name: 'Development',
       description: 'Frontend development, CMS setup, and functionality implementation',
       estimatedDays: 22,
       order: 3,
-      deliverables: ['Responsive build', 'CMS configuration', 'Contact forms']
+      deliverables: ['Responsive build', 'CMS configuration', 'Contact forms'],
     },
     {
       name: 'Content Integration',
       description: 'Content population, SEO optimization, and media integration',
       estimatedDays: 27,
       order: 4,
-      deliverables: ['Page content', 'SEO setup', 'Image optimization']
+      deliverables: ['Page content', 'SEO setup', 'Image optimization'],
     },
     {
       name: 'Testing & Launch',
       description: 'Comprehensive testing, training, and production deployment',
       estimatedDays: 32,
       order: 5,
-      deliverables: ['QA testing', 'Client training', 'Live deployment']
-    }
+      deliverables: ['QA testing', 'Client training', 'Live deployment'],
+    },
   ],
 
   /**
@@ -118,36 +118,36 @@ export const DEFAULT_MILESTONES: Record<string, MilestoneTemplate[]> = {
       description: 'Business requirements, product catalog analysis, and platform selection',
       estimatedDays: 7,
       order: 1,
-      deliverables: ['Requirements document', 'Platform recommendation', 'Product structure']
+      deliverables: ['Requirements document', 'Platform recommendation', 'Product structure'],
     },
     {
       name: 'Design',
       description: 'Store design, product page layouts, and checkout flow design',
       estimatedDays: 14,
       order: 2,
-      deliverables: ['Store wireframes', 'Product page designs', 'Checkout flow']
+      deliverables: ['Store wireframes', 'Product page designs', 'Checkout flow'],
     },
     {
       name: 'Development',
       description: 'Platform setup, theme customization, and core functionality',
       estimatedDays: 28,
       order: 3,
-      deliverables: ['Store setup', 'Payment integration', 'Shipping configuration']
+      deliverables: ['Store setup', 'Payment integration', 'Shipping configuration'],
     },
     {
       name: 'Product Setup',
       description: 'Product import, inventory setup, and categorization',
       estimatedDays: 35,
       order: 4,
-      deliverables: ['Product catalog', 'Inventory system', 'Category structure']
+      deliverables: ['Product catalog', 'Inventory system', 'Category structure'],
     },
     {
       name: 'Testing & Launch',
       description: 'Order testing, payment verification, and production launch',
       estimatedDays: 45,
       order: 5,
-      deliverables: ['Order flow testing', 'Payment testing', 'Store launch']
-    }
+      deliverables: ['Order flow testing', 'Payment testing', 'Store launch'],
+    },
   ],
 
   /**
@@ -160,93 +160,93 @@ export const DEFAULT_MILESTONES: Record<string, MilestoneTemplate[]> = {
       description: 'Requirements analysis, technical architecture, and project planning',
       estimatedDays: 10,
       order: 1,
-      deliverables: ['Technical spec', 'Architecture diagram', 'Project roadmap']
+      deliverables: ['Technical spec', 'Architecture diagram', 'Project roadmap'],
     },
     {
       name: 'UI/UX Design',
       description: 'User research, wireframes, and interface design',
       estimatedDays: 20,
       order: 2,
-      deliverables: ['User flows', 'Wireframes', 'UI design system']
+      deliverables: ['User flows', 'Wireframes', 'UI design system'],
     },
     {
       name: 'Core Development',
       description: 'Backend development, API creation, and core functionality',
       estimatedDays: 40,
       order: 3,
-      deliverables: ['Backend API', 'Database schema', 'Core features']
+      deliverables: ['Backend API', 'Database schema', 'Core features'],
     },
     {
       name: 'Frontend Integration',
       description: 'Frontend development and API integration',
       estimatedDays: 50,
       order: 4,
-      deliverables: ['Frontend application', 'API integration', 'User authentication']
+      deliverables: ['Frontend application', 'API integration', 'User authentication'],
     },
     {
       name: 'Testing & Deployment',
       description: 'Testing, bug fixes, and production deployment',
       estimatedDays: 60,
       order: 5,
-      deliverables: ['Test coverage', 'Bug fixes', 'Production deployment']
-    }
+      deliverables: ['Test coverage', 'Bug fixes', 'Production deployment'],
+    },
   ],
 
   /**
    * Maintenance/Retainer: Ongoing maintenance contracts
    * Monthly milestones
    */
-  'maintenance': [
+  maintenance: [
     {
       name: 'Month 1 - Setup',
       description: 'Initial audit, setup monitoring, and establish maintenance schedule',
       estimatedDays: 30,
       order: 1,
-      deliverables: ['Site audit', 'Monitoring setup', 'Maintenance schedule']
+      deliverables: ['Site audit', 'Monitoring setup', 'Maintenance schedule'],
     },
     {
       name: 'Month 2 - Optimization',
       description: 'Performance optimization and security updates',
       estimatedDays: 60,
       order: 2,
-      deliverables: ['Performance report', 'Security patches', 'Optimization updates']
+      deliverables: ['Performance report', 'Security patches', 'Optimization updates'],
     },
     {
       name: 'Month 3 - Review',
       description: 'Quarterly review and planning for next period',
       estimatedDays: 90,
       order: 3,
-      deliverables: ['Quarterly report', 'Next period plan', 'Recommendations']
-    }
+      deliverables: ['Quarterly report', 'Next period plan', 'Recommendations'],
+    },
   ],
 
   /**
    * Other/Custom: Fallback for unknown project types
    * Generic 28 day timeline
    */
-  'other': [
+  other: [
     {
       name: 'Phase 1 - Planning',
       description: 'Requirements gathering and project planning',
       estimatedDays: 7,
       order: 1,
-      deliverables: ['Project plan', 'Requirements document']
+      deliverables: ['Project plan', 'Requirements document'],
     },
     {
       name: 'Phase 2 - Execution',
       description: 'Primary work phase - design and development',
       estimatedDays: 21,
       order: 2,
-      deliverables: ['Design deliverables', 'Development work']
+      deliverables: ['Design deliverables', 'Development work'],
     },
     {
       name: 'Phase 3 - Completion',
       description: 'Final review, testing, and project handoff',
       estimatedDays: 28,
       order: 3,
-      deliverables: ['Final deliverables', 'Testing', 'Project handoff']
-    }
-  ]
+      deliverables: ['Final deliverables', 'Testing', 'Project handoff'],
+    },
+  ],
 };
 
 /**
@@ -277,23 +277,23 @@ export function normalizeProjectType(projectType: string | null | undefined): st
 
   // Check for partial matches
   const typeMap: Record<string, string> = {
-    'simple': 'simple-site',
-    'landing': 'simple-site',
-    'personal': 'simple-site',
-    'business': 'business-site',
-    'corporate': 'business-site',
-    'portfolio': 'business-site',
-    'ecommerce': 'ecommerce-site',
+    simple: 'simple-site',
+    landing: 'simple-site',
+    personal: 'simple-site',
+    business: 'business-site',
+    corporate: 'business-site',
+    portfolio: 'business-site',
+    ecommerce: 'ecommerce-site',
     'e-commerce': 'ecommerce-site',
-    'shop': 'ecommerce-site',
-    'store': 'ecommerce-site',
-    'webapp': 'web-app',
-    'application': 'web-app',
-    'dashboard': 'web-app',
-    'saas': 'web-app',
-    'retainer': 'maintenance',
-    'support': 'maintenance',
-    'custom': 'other'
+    shop: 'ecommerce-site',
+    store: 'ecommerce-site',
+    webapp: 'web-app',
+    application: 'web-app',
+    dashboard: 'web-app',
+    saas: 'web-app',
+    retainer: 'maintenance',
+    support: 'maintenance',
+    custom: 'other',
   };
 
   // Check if normalized type contains any of the keywords

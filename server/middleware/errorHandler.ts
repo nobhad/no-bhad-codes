@@ -42,11 +42,11 @@ function sanitizeRequestData(data: any): any {
     'set-cookie',
     'x-api-key',
     'x-auth-token',
-    'x-access-token'
+    'x-access-token',
   ];
 
   const sanitized = { ...data };
-  const sensitiveSet = new Set(sensitiveFields.map(f => f.toLowerCase()));
+  const sensitiveSet = new Set(sensitiveFields.map((f) => f.toLowerCase()));
 
   for (const key of Object.keys(sanitized)) {
     if (sensitiveSet.has(key.toLowerCase())) {
@@ -81,11 +81,11 @@ export const errorHandler = (
       body: sanitizeRequestData(req.body),
       params: req.params,
       query: req.query,
-      headers: sanitizeRequestData(req.headers)
+      headers: sanitizeRequestData(req.headers),
     },
     requestId: req.id,
     ip: req.ip,
-    userAgent: req.get('user-agent')
+    userAgent: req.get('user-agent'),
   });
 
   // Handle specific error types
@@ -116,7 +116,7 @@ export const errorHandler = (
     error: message,
     code,
     timestamp: new Date().toISOString(),
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
   });
 };
 

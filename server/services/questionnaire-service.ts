@@ -122,7 +122,7 @@ class QuestionnaireService {
         data.auto_send_on_project_create ? 1 : 0,
         data.display_order || 0,
         data.created_by || null,
-        createdByUserId
+        createdByUserId,
       ]
     );
 
@@ -135,10 +135,7 @@ class QuestionnaireService {
   async getQuestionnaire(id: number): Promise<Questionnaire | null> {
     const db = await getDatabase();
 
-    const row = await db.get(
-      'SELECT * FROM questionnaires WHERE id = ?',
-      [id]
-    );
+    const row = await db.get('SELECT * FROM questionnaires WHERE id = ?', [id]);
 
     if (!row) return null;
 
@@ -166,7 +163,7 @@ class QuestionnaireService {
     query += ' ORDER BY display_order ASC, name ASC';
 
     const rows = await db.all(query, params);
-    return rows.map(row => this.mapQuestionnaireRow(row));
+    return rows.map((row) => this.mapQuestionnaireRow(row));
   }
 
   /**
@@ -197,12 +194,16 @@ class QuestionnaireService {
         data.description !== undefined ? data.description : existing.description,
         data.project_type !== undefined ? data.project_type : existing.project_type,
         data.questions ? JSON.stringify(data.questions) : JSON.stringify(existing.questions),
-        data.is_active !== undefined ? (data.is_active ? 1 : 0) : (existing.is_active ? 1 : 0),
+        data.is_active !== undefined ? (data.is_active ? 1 : 0) : existing.is_active ? 1 : 0,
         data.auto_send_on_project_create !== undefined
-          ? (data.auto_send_on_project_create ? 1 : 0)
-          : (existing.auto_send_on_project_create ? 1 : 0),
+          ? data.auto_send_on_project_create
+            ? 1
+            : 0
+          : existing.auto_send_on_project_create
+            ? 1
+            : 0,
         data.display_order ?? existing.display_order,
-        id
+        id,
       ]
     );
 
@@ -231,12 +232,7 @@ class QuestionnaireService {
       `INSERT INTO questionnaire_responses
        (questionnaire_id, client_id, project_id, answers, status, due_date)
        VALUES (?, ?, ?, '{}', 'pending', ?)`,
-      [
-        data.questionnaire_id,
-        data.client_id,
-        data.project_id || null,
-        data.due_date || null
-      ]
+      [data.questionnaire_id, data.client_id, data.project_id || null, data.due_date || null]
     );
 
     return this.getResponse(result.lastID!) as Promise<QuestionnaireResponse>;
@@ -251,7 +247,7 @@ class QuestionnaireService {
     projectType: string
   ): Promise<QuestionnaireResponse[]> {
     const questionnaires = await this.getQuestionnaires(projectType, true);
-    const autoSendQuestionnaires = questionnaires.filter(q => q.auto_send_on_project_create);
+    const autoSendQuestionnaires = questionnaires.filter((q) => q.auto_send_on_project_create);
 
     const responses: QuestionnaireResponse[] = [];
 
@@ -263,7 +259,7 @@ class QuestionnaireService {
       const response = await this.sendQuestionnaire({
         questionnaire_id: questionnaire.id,
         client_id: clientId,
-        project_id: projectId
+        project_id: projectId,
       });
 
       responses.push(response);
@@ -323,10 +319,11 @@ class QuestionnaireService {
       params.push(status);
     }
 
-    query += ' ORDER BY CASE WHEN qr.due_date IS NULL THEN 1 ELSE 0 END, qr.due_date ASC, qr.created_at DESC';
+    query +=
+      ' ORDER BY CASE WHEN qr.due_date IS NULL THEN 1 ELSE 0 END, qr.due_date ASC, qr.created_at DESC';
 
     const rows = await db.all(query, params);
-    return rows.map(row => this.mapResponseRow(row));
+    return rows.map((row) => this.mapResponseRow(row));
   }
 
   /**
@@ -376,7 +373,7 @@ class QuestionnaireService {
          qr.created_at DESC`
     );
 
-    return rows.map(row => this.mapResponseRow(row));
+    return rows.map((row) => this.mapResponseRow(row));
   }
 
   /**
@@ -489,7 +486,7 @@ class QuestionnaireService {
   }> {
     const db = await getDatabase();
 
-    const stats = await db.get(
+    const stats = (await db.get(
       `SELECT
          COUNT(*) as total,
          SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
@@ -498,13 +495,13 @@ class QuestionnaireService {
        FROM questionnaire_responses
        WHERE client_id = ?`,
       [clientId]
-    ) as { total: number; pending: number; in_progress: number; completed: number };
+    )) as { total: number; pending: number; in_progress: number; completed: number };
 
     return {
       total: stats?.total || 0,
       pending: stats?.pending || 0,
       in_progress: stats?.in_progress || 0,
-      completed: stats?.completed || 0
+      completed: stats?.completed || 0,
     };
   }
 
@@ -521,15 +518,16 @@ class QuestionnaireService {
       name: row.name as string,
       description: row.description as string | undefined,
       project_type: row.project_type as string | undefined,
-      questions: typeof row.questions === 'string'
-        ? JSON.parse(row.questions)
-        : row.questions as Question[],
+      questions:
+        typeof row.questions === 'string'
+          ? JSON.parse(row.questions)
+          : (row.questions as Question[]),
       is_active: Boolean(row.is_active),
       auto_send_on_project_create: Boolean(row.auto_send_on_project_create),
       display_order: row.display_order as number,
       created_by: row.created_by as string | undefined,
       created_at: row.created_at as string,
-      updated_at: row.updated_at as string
+      updated_at: row.updated_at as string,
     };
   }
 
@@ -542,9 +540,10 @@ class QuestionnaireService {
       questionnaire_id: row.questionnaire_id as number,
       client_id: row.client_id as number,
       project_id: row.project_id as number | undefined,
-      answers: typeof row.answers === 'string'
-        ? JSON.parse(row.answers)
-        : row.answers as Record<string, unknown>,
+      answers:
+        typeof row.answers === 'string'
+          ? JSON.parse(row.answers)
+          : (row.answers as Record<string, unknown>),
       status: row.status as ResponseStatus,
       started_at: row.started_at as string | undefined,
       completed_at: row.completed_at as string | undefined,
@@ -557,7 +556,7 @@ class QuestionnaireService {
       questionnaire_name: row.questionnaire_name as string | undefined,
       questionnaire_description: row.questionnaire_description as string | undefined,
       client_name: row.client_name as string | undefined,
-      project_name: row.project_name as string | undefined
+      project_name: row.project_name as string | undefined,
     };
   }
 
@@ -623,7 +622,7 @@ class QuestionnaireService {
       y: y - 20,
       size: 24,
       font: helveticaBold,
-      color: rgb(0.15, 0.15, 0.15)
+      color: rgb(0.15, 0.15, 0.15),
     });
 
     // Logo and business info on right
@@ -638,7 +637,7 @@ class QuestionnaireService {
           x: logoX,
           y: y - logoHeight + 10,
           width: logoWidth,
-          height: logoHeight
+          height: logoHeight,
         });
         textStartX = logoX + logoWidth + 18;
       } catch {
@@ -647,11 +646,41 @@ class QuestionnaireService {
     }
 
     // Business info
-    page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y - 11, size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
-    page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 34, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
-    page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 54, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-    page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 70, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-    page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 86, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(BUSINESS_INFO.name, {
+      x: textStartX,
+      y: y - 11,
+      size: 15,
+      font: helveticaBold,
+      color: rgb(0.1, 0.1, 0.1),
+    });
+    page.drawText(BUSINESS_INFO.owner, {
+      x: textStartX,
+      y: y - 34,
+      size: 10,
+      font: helvetica,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+    page.drawText(BUSINESS_INFO.tagline, {
+      x: textStartX,
+      y: y - 54,
+      size: 9,
+      font: helvetica,
+      color: rgb(0.4, 0.4, 0.4),
+    });
+    page.drawText(BUSINESS_INFO.email, {
+      x: textStartX,
+      y: y - 70,
+      size: 9,
+      font: helvetica,
+      color: rgb(0.4, 0.4, 0.4),
+    });
+    page.drawText(BUSINESS_INFO.website, {
+      x: textStartX,
+      y: y - 86,
+      size: 9,
+      font: helvetica,
+      color: rgb(0.4, 0.4, 0.4),
+    });
 
     y -= 120;
 
@@ -660,7 +689,7 @@ class QuestionnaireService {
       start: { x: leftMargin, y: y },
       end: { x: rightMargin, y: y },
       thickness: 1,
-      color: lineGray
+      color: lineGray,
     });
     y -= 25;
 
@@ -671,7 +700,7 @@ class QuestionnaireService {
       y: y,
       size: 12,
       font: helveticaBold,
-      color: black
+      color: black,
     });
     y -= 18;
 
@@ -681,7 +710,7 @@ class QuestionnaireService {
         y: y,
         size: 10,
         font: helvetica,
-        color: lightGray
+        color: lightGray,
       });
       y -= 16;
     }
@@ -693,22 +722,22 @@ class QuestionnaireService {
       y: y,
       size: 10,
       font: helvetica,
-      color: black
+      color: black,
     });
 
     const completedDate = response.completed_at
       ? new Date(response.completed_at).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
       : 'In Progress';
     page.drawText(`Completed: ${completedDate}`, {
       x: leftMargin + 200,
       y: y,
       size: 10,
       font: helvetica,
-      color: black
+      color: black,
     });
 
     if (response.project_name) {
@@ -718,7 +747,7 @@ class QuestionnaireService {
         y: y,
         size: 10,
         font: helvetica,
-        color: black
+        color: black,
       });
     }
 
@@ -729,13 +758,16 @@ class QuestionnaireService {
       start: { x: leftMargin, y: y },
       end: { x: rightMargin, y: y },
       thickness: 0.5,
-      color: rgb(0.9, 0.9, 0.9)
+      color: rgb(0.9, 0.9, 0.9),
     });
     y -= 25;
 
     // Helper to sanitize text for PDF
     const sanitizeForPdf = (text: string): string => {
-      return text.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+      return text
+        .replace(/[\n\r\t]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     };
 
     // Helper to draw wrapped text and return new Y position
@@ -797,18 +829,11 @@ class QuestionnaireService {
         y: y,
         size: 10,
         font: helveticaBold,
-        color: questionColor
+        color: questionColor,
       });
 
       const prefixWidth = helveticaBold.widthOfTextAtSize(questionPrefix, 10);
-      y = drawWrappedText(
-        question.question,
-        y,
-        10,
-        helveticaBold,
-        questionColor,
-        prefixWidth
-      );
+      y = drawWrappedText(question.question, y, 10, helveticaBold, questionColor, prefixWidth);
 
       y -= 4;
 
@@ -840,7 +865,7 @@ class QuestionnaireService {
         start: { x: leftMargin, y: bottomMargin },
         end: { x: rightMargin, y: bottomMargin },
         thickness: 0.5,
-        color: rgb(0.8, 0.8, 0.8)
+        color: rgb(0.8, 0.8, 0.8),
       });
 
       // Footer text
@@ -851,7 +876,7 @@ class QuestionnaireService {
         y: bottomMargin - 18,
         size: 7,
         font: helvetica,
-        color: lightGray
+        color: lightGray,
       });
 
       // Page numbers
@@ -863,7 +888,7 @@ class QuestionnaireService {
           y: bottomMargin - 18,
           size: 8,
           font: helvetica,
-          color: lightGray
+          color: lightGray,
         });
       }
     }
@@ -917,10 +942,10 @@ class QuestionnaireService {
     writeFileSync(fullPath, Buffer.from(pdfBytes));
 
     // Get or create Forms folder for the project
-    const formsFolderRow = await db.get(
-      'SELECT id FROM file_folders WHERE project_id = ? AND name = \'Forms\'',
+    const formsFolderRow = (await db.get(
+      "SELECT id FROM file_folders WHERE project_id = ? AND name = 'Forms'",
       [response.project_id]
-    ) as { id: number } | undefined;
+    )) as { id: number } | undefined;
 
     let formsFolderId: number;
     if (!formsFolderRow) {
@@ -947,7 +972,7 @@ class QuestionnaireService {
         originalFilename,
         filePath,
         pdfBytes.length,
-        `Questionnaire response: ${questionnaire.name}`
+        `Questionnaire response: ${questionnaire.name}`,
       ]
     );
 
@@ -983,7 +1008,7 @@ class QuestionnaireService {
         id: questionnaire.id,
         name: questionnaire.name,
         description: questionnaire.description,
-        project_type: questionnaire.project_type
+        project_type: questionnaire.project_type,
       },
       response: {
         id: response.id,
@@ -993,17 +1018,17 @@ class QuestionnaireService {
         project_name: response.project_name,
         status: response.status,
         started_at: response.started_at,
-        completed_at: response.completed_at
+        completed_at: response.completed_at,
       },
-      questions_and_answers: questionnaire.questions.map(q => ({
+      questions_and_answers: questionnaire.questions.map((q) => ({
         question_id: q.id,
         question_type: q.type,
         question_text: q.question,
         required: q.required || false,
         options: q.options,
-        answer: response.answers[q.id] ?? null
+        answer: response.answers[q.id] ?? null,
       })),
-      exported_at: new Date().toISOString()
+      exported_at: new Date().toISOString(),
     };
 
     return JSON.stringify(exportData, null, 2);

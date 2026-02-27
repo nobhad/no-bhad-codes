@@ -18,7 +18,7 @@ import {
   getNumberOrNull,
   getBoolean,
   getBooleanOrNull,
-  getDate
+  getDate,
 } from './row-helpers.js';
 
 /**
@@ -32,7 +32,7 @@ export function snakeToCamel(str: string): string {
  * Convert camelCase string to snake_case
  */
 export function camelToSnake(str: string): string {
-  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 }
 
 /**
@@ -199,11 +199,14 @@ export function createMapper<TRow extends DatabaseRow, TEntity>(
  * Helper to create a simple field mapping
  * Uses convention: camelCase field name → snake_case column name
  */
-export function field(type: FieldType, options?: Partial<FieldMapping>): (fieldName: string) => FieldMapping {
+export function field(
+  type: FieldType,
+  options?: Partial<FieldMapping>
+): (fieldName: string) => FieldMapping {
   return (fieldName: string) => ({
     column: options?.column ?? camelToSnake(fieldName),
     type,
-    ...options
+    ...options,
   });
 }
 
@@ -231,14 +234,14 @@ export const fields = {
   json: (column?: string, defaultValue?: unknown) => ({
     column: column ?? '',
     type: 'json' as const,
-    default: defaultValue ?? {}
+    default: defaultValue ?? {},
   }),
   /** Optional JSON field */
   jsonOrNull: (column?: string) => ({ column: column ?? '', type: 'json?' as const }),
   /** Required date field */
   date: (column?: string) => ({ column: column ?? '', type: 'date' as const }),
   /** Optional date field */
-  dateOrNull: (column?: string) => ({ column: column ?? '', type: 'date?' as const })
+  dateOrNull: (column?: string) => ({ column: column ?? '', type: 'date?' as const }),
 };
 
 /**
@@ -267,14 +270,14 @@ export function defineSchema<T>(
       // It's just a type, derive column name from key
       schema[key] = {
         column: camelToSnake(key),
-        type: value as FieldType
+        type: value as FieldType,
       };
     } else {
       // It's a full FieldMapping, use column from mapping or derive from key
       const mapping = value as FieldMapping;
       schema[key] = {
         ...mapping,
-        column: mapping.column || camelToSnake(key)
+        column: mapping.column || camelToSnake(key),
       };
     }
   }
@@ -309,13 +312,13 @@ export function definePartialSchema<T>() {
       if (typeof value === 'string') {
         schema[key] = {
           column: camelToSnake(key),
-          type: value as FieldType
+          type: value as FieldType,
         };
       } else {
         const mapping = value as FieldMapping;
         schema[key] = {
           ...mapping,
-          column: mapping.column || camelToSnake(key)
+          column: mapping.column || camelToSnake(key),
         };
       }
     }
@@ -328,8 +331,10 @@ export function definePartialSchema<T>() {
  * Create a mapper that returns a partial entity.
  * Useful for entities with computed fields that need to be added after mapping.
  */
-export function createPartialMapper<TRow extends DatabaseRow, TEntity, TPartial extends Partial<TEntity>>(
-  schema: EntitySchema<TPartial>
-): (row: TRow) => TPartial {
+export function createPartialMapper<
+  TRow extends DatabaseRow,
+  TEntity,
+  TPartial extends Partial<TEntity>,
+>(schema: EntitySchema<TPartial>): (row: TRow) => TPartial {
   return (row: TRow) => transformRow<TPartial>(row, schema);
 }

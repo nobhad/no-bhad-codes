@@ -18,9 +18,4 @@ import slackService from './slack-service';
 import stripeService from './stripe-service';
 import calendarService from './calendar-service';
 
-export {
-  zapierService,
-  slackService,
-  stripeService,
-  calendarService
-};
+export { zapierService, slackService, stripeService, calendarService };

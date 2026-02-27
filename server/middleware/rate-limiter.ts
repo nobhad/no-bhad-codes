@@ -15,8 +15,8 @@ import { logger } from '../services/logger.js';
 
 // Rate limit configuration
 export interface RateLimitConfig {
-  windowMs: number;      // Time window in milliseconds
-  maxRequests: number;   // Max requests per window
+  windowMs: number; // Time window in milliseconds
+  maxRequests: number; // Max requests per window
   blockDurationMs: number; // How long to block after exceeding limit
   skipFailedRequests?: boolean;
   keyGenerator?: (req: Request) => string;
@@ -28,36 +28,39 @@ export const RATE_LIMIT_PRESETS = {
   // Intentionally low to prevent bot spam while allowing legitimate users
   // 10 req/min is enough for form submissions with retries
   publicForm: {
-    windowMs: 60 * 1000,        // 1 minute
-    maxRequests: 10,            // 10 requests per minute (relaxed from 5)
-    blockDurationMs: 5 * 60 * 1000  // Block for 5 minutes
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 10, // 10 requests per minute (relaxed from 5)
+    blockDurationMs: 5 * 60 * 1000, // Block for 5 minutes
   },
   // Standard API limit
   standard: {
-    windowMs: 60 * 1000,        // 1 minute
-    maxRequests: 60,            // 60 requests per minute
-    blockDurationMs: 60 * 1000  // Block for 1 minute
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 60, // 60 requests per minute
+    blockDurationMs: 60 * 1000, // Block for 1 minute
   },
   // Relaxed limit for authenticated users
   authenticated: {
-    windowMs: 60 * 1000,        // 1 minute
-    maxRequests: 120,           // 120 requests per minute
-    blockDurationMs: 30 * 1000  // Block for 30 seconds
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 120, // 120 requests per minute
+    blockDurationMs: 30 * 1000, // Block for 30 seconds
   },
   // Very strict for sensitive operations
   sensitive: {
-    windowMs: 60 * 60 * 1000,   // 1 hour
-    maxRequests: 10,            // 10 requests per hour
-    blockDurationMs: 60 * 60 * 1000  // Block for 1 hour
-  }
+    windowMs: 60 * 60 * 1000, // 1 hour
+    maxRequests: 10, // 10 requests per hour
+    blockDurationMs: 60 * 60 * 1000, // Block for 1 hour
+  },
 };
 
 // In-memory cache for rate limiting (faster than DB)
-const rateLimitCache = new Map<string, {
-  count: number;
-  windowStart: number;
-  blockedUntil?: number;
-}>();
+const rateLimitCache = new Map<
+  string,
+  {
+    count: number;
+    windowStart: number;
+    blockedUntil?: number;
+  }
+>();
 
 // Cleanup old entries periodically
 const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
@@ -134,11 +137,13 @@ async function logRateLimitEvent(
         windowStart.toISOString(),
         now.toISOString(),
         isBlocked ? 1 : 0,
-        blockedUntil?.toISOString() || null
+        blockedUntil?.toISOString() || null,
       ]
     );
   } catch (error) {
-    logger.error('Failed to log rate limit event', { error: error instanceof Error ? error : undefined });
+    logger.error('Failed to log rate limit event', {
+      error: error instanceof Error ? error : undefined,
+    });
   }
 }
 
@@ -150,7 +155,7 @@ export function createRateLimiter(config: RateLimitConfig) {
     windowMs,
     maxRequests,
     blockDurationMs,
-    keyGenerator = (req) => `${getClientIP(req)}:${req.path}`
+    keyGenerator = (req) => `${getClientIP(req)}:${req.path}`,
   } = config;
 
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -161,7 +166,7 @@ export function createRateLimiter(config: RateLimitConfig) {
     // Check if IP is permanently blocked
     if (await isIPBlocked(ip)) {
       errorResponseWithPayload(res, 'Access denied', 403, 'IP_BLOCKED', {
-        message: 'Your IP address has been blocked'
+        message: 'Your IP address has been blocked',
       });
       return;
     }
@@ -179,7 +184,7 @@ export function createRateLimiter(config: RateLimitConfig) {
 
       errorResponseWithPayload(res, 'Too Many Requests', 429, 'RATE_LIMIT_EXCEEDED', {
         message: 'Rate limit exceeded. Please try again later.',
-        retryAfter
+        retryAfter,
       });
       return;
     }
@@ -188,7 +193,7 @@ export function createRateLimiter(config: RateLimitConfig) {
     if (!entry || now - entry.windowStart > windowMs) {
       entry = {
         count: 0,
-        windowStart: now
+        windowStart: now,
       };
     }
 
@@ -211,7 +216,7 @@ export function createRateLimiter(config: RateLimitConfig) {
 
       errorResponseWithPayload(res, 'Too Many Requests', 429, 'RATE_LIMIT_EXCEEDED', {
         message: 'Rate limit exceeded. Please try again later.',
-        retryAfter
+        retryAfter,
       });
       return;
     }
@@ -238,7 +243,7 @@ export const rateLimiters = {
   publicForm: createRateLimiter(RATE_LIMIT_PRESETS.publicForm),
   standard: createRateLimiter(RATE_LIMIT_PRESETS.standard),
   authenticated: createRateLimiter(RATE_LIMIT_PRESETS.authenticated),
-  sensitive: createRateLimiter(RATE_LIMIT_PRESETS.sensitive)
+  sensitive: createRateLimiter(RATE_LIMIT_PRESETS.sensitive),
 };
 
 /**
@@ -265,10 +270,7 @@ export async function blockIP(
 export async function unblockIP(ip: string): Promise<void> {
   const db = getDatabase();
 
-  await db.run(
-    'UPDATE blocked_ips SET is_active = 0 WHERE ip_address = ?',
-    [ip]
-  );
+  await db.run('UPDATE blocked_ips SET is_active = 0 WHERE ip_address = ?', [ip]);
 
   // Clear from cache
   for (const key of rateLimitCache.keys()) {
@@ -291,10 +293,10 @@ export async function getRateLimitStats(): Promise<{
 
   const [totalResult, blockedResult, topEndpoints, blockedIPs] = await Promise.all([
     db.get(
-      'SELECT COUNT(*) as count FROM rate_limit_log WHERE created_at > datetime(\'now\', \'-24 hours\')'
+      "SELECT COUNT(*) as count FROM rate_limit_log WHERE created_at > datetime('now', '-24 hours')"
     ) as Promise<{ count: number } | undefined>,
     db.get(
-      'SELECT COUNT(*) as count FROM rate_limit_log WHERE is_blocked = 1 AND created_at > datetime(\'now\', \'-24 hours\')'
+      "SELECT COUNT(*) as count FROM rate_limit_log WHERE is_blocked = 1 AND created_at > datetime('now', '-24 hours')"
     ) as Promise<{ count: number } | undefined>,
     db.all(
       `SELECT endpoint, SUM(request_count) as count
@@ -310,14 +312,14 @@ export async function getRateLimitStats(): Promise<{
        WHERE is_active = 1
        ORDER BY blocked_at DESC
        LIMIT 20`
-    ) as Promise<{ ip: string; reason: string; blockedAt: string }[]>
+    ) as Promise<{ ip: string; reason: string; blockedAt: string }[]>,
   ]);
 
   return {
     totalRequests24h: totalResult?.count || 0,
     blockedRequests24h: blockedResult?.count || 0,
     topEndpoints: topEndpoints || [],
-    blockedIPs: blockedIPs || []
+    blockedIPs: blockedIPs || [],
   };
 }
 
@@ -327,5 +329,5 @@ export default {
   blockIP,
   unblockIP,
   getRateLimitStats,
-  RATE_LIMIT_PRESETS
+  RATE_LIMIT_PRESETS,
 };

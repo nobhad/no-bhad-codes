@@ -2,7 +2,11 @@ import express, { Response } from 'express';
 import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { canAccessProject, canAccessTask, canAccessChecklistItem } from '../../middleware/access-control.js';
+import {
+  canAccessProject,
+  canAccessTask,
+  canAccessChecklistItem,
+} from '../../middleware/access-control.js';
 import { projectService } from '../../services/project-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
 
@@ -32,16 +36,21 @@ router.get(
     const { status, assignedTo, milestoneId, includeSubtasks } = req.query;
 
     type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'blocked';
-    const validStatuses: TaskStatus[] = ['pending', 'in_progress', 'completed', 'cancelled', 'blocked'];
-    const statusFilter = status && validStatuses.includes(status as TaskStatus)
-      ? status as TaskStatus
-      : undefined;
+    const validStatuses: TaskStatus[] = [
+      'pending',
+      'in_progress',
+      'completed',
+      'cancelled',
+      'blocked',
+    ];
+    const statusFilter =
+      status && validStatuses.includes(status as TaskStatus) ? (status as TaskStatus) : undefined;
 
     const tasks = await projectService.getTasks(projectId, {
       status: statusFilter,
       assignedTo: assignedTo as string | undefined,
       milestoneId: milestoneId ? parseInt(milestoneId as string) : undefined,
-      includeSubtasks: includeSubtasks === 'true'
+      includeSubtasks: includeSubtasks === 'true',
     });
 
     sendSuccess(res, { tasks });
@@ -235,11 +244,7 @@ router.post(
       return errorResponse(res, 'Comment content is required', 400, 'MISSING_CONTENT');
     }
 
-    const comment = await projectService.addTaskComment(
-      taskId,
-      req.user!.email,
-      content
-    );
+    const comment = await projectService.addTaskComment(taskId, req.user!.email, content);
     sendCreated(res, { comment }, 'Comment added successfully');
   })
 );

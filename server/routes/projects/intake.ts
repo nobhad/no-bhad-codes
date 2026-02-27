@@ -12,6 +12,12 @@ import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js
 import { errorResponse } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const FILE_COLUMNS = `
+  id, project_id, filename, original_filename, file_path, file_size,
+  mime_type, file_type, description, uploaded_by, created_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 interface IntakeDocument {
@@ -72,7 +78,7 @@ router.get(
 
     // Find the intake file for this project
     const intakeFile = await db.get(
-      `SELECT * FROM files
+      `SELECT ${FILE_COLUMNS} FROM files
        WHERE project_id = ?
        AND (original_filename LIKE '%intake%' OR filename LIKE 'intake_%' OR filename LIKE 'admin_project_%' OR filename LIKE 'project_intake_%' OR filename LIKE 'nobhadcodes_intake_%')
        AND mime_type = 'application/json'
@@ -87,7 +93,11 @@ router.get(
 
     // Check cache first (use intake file's updated_at for freshness)
     const intakeFileRecord = intakeFile as Record<string, unknown>;
-    const cacheKey = getPdfCacheKey('intake', projectId, getString(intakeFileRecord, 'updated_at') || getString(intakeFileRecord, 'created_at'));
+    const cacheKey = getPdfCacheKey(
+      'intake',
+      projectId,
+      getString(intakeFileRecord, 'updated_at') || getString(intakeFileRecord, 'created_at')
+    );
     const cachedPdf = getCachedPdf(cacheKey);
     if (cachedPdf) {
       const clientOrCompany = getString(p, 'company_name') || getString(p, 'client_name');
@@ -101,7 +111,7 @@ router.get(
       return sendPdfResponse(res, cachedPdf, {
         filename: `nobhadcodes_intake_${safeClientName}.pdf`,
         disposition: 'inline',
-        cacheStatus: 'HIT'
+        cacheStatus: 'HIT',
       });
     }
 
@@ -127,17 +137,17 @@ router.get(
         month: 'long',
         day: 'numeric',
         hour: 'numeric',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     };
 
     const formatTimeline = (timeline: string): string => {
       const timelineMap: Record<string, string> = {
-        'asap': 'As Soon As Possible',
+        asap: 'As Soon As Possible',
         '1-month': '1 Month',
         '1-3-months': '1-3 Months',
         '3-6-months': '3-6 Months',
-        'flexible': 'Flexible'
+        flexible: 'Flexible',
       };
       return timelineMap[timeline] || timeline;
     };
@@ -149,7 +159,7 @@ router.get(
         '2.5k-5k': '$2,500 - $5,000',
         '5k-10k': '$5,000 - $10,000',
         '10k-25k': '$10,000 - $25,000',
-        '25k+': '$25,000+'
+        '25k+': '$25,000+',
       };
       return budgetMap[budget] || budget;
     };
@@ -158,14 +168,14 @@ router.get(
       const typeMap: Record<string, string> = {
         'simple-site': 'Simple Website',
         'business-site': 'Business Website',
-        'portfolio': 'Portfolio Website',
+        portfolio: 'Portfolio Website',
         'e-commerce': 'E-commerce Store',
-        'ecommerce': 'E-commerce Store',
+        ecommerce: 'E-commerce Store',
         'web-app': 'Web Application',
         'browser-extension': 'Browser Extension',
-        'other': 'Custom Project'
+        other: 'Custom Project',
       };
-      return typeMap[type] || type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      return typeMap[type] || type.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
     };
 
     const decodeHtml = (text: string): string => {
@@ -175,7 +185,7 @@ router.get(
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, '\'');
+        .replace(/&#39;/g, "'");
     };
 
     // Create PDF document using pdf-lib
@@ -220,7 +230,7 @@ router.get(
       y: y - 20,
       size: 28,
       font: helveticaBold,
-      color: rgb(0.15, 0.15, 0.15)
+      color: rgb(0.15, 0.15, 0.15),
     });
 
     // Logo and business info on right (logo left of text, text left-aligned)
@@ -234,17 +244,47 @@ router.get(
         x: logoX,
         y: y - logoHeight + 10,
         width: logoWidth,
-        height: logoHeight
+        height: logoHeight,
       });
       textStartX = logoX + logoWidth + 18;
     }
 
     // Business info (left-aligned, to right of logo)
-    page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y - 11, size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
-    page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 34, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
-    page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 54, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-    page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 70, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-    page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 86, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(BUSINESS_INFO.name, {
+      x: textStartX,
+      y: y - 11,
+      size: 15,
+      font: helveticaBold,
+      color: rgb(0.1, 0.1, 0.1),
+    });
+    page.drawText(BUSINESS_INFO.owner, {
+      x: textStartX,
+      y: y - 34,
+      size: 10,
+      font: helvetica,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+    page.drawText(BUSINESS_INFO.tagline, {
+      x: textStartX,
+      y: y - 54,
+      size: 9,
+      font: helvetica,
+      color: rgb(0.4, 0.4, 0.4),
+    });
+    page.drawText(BUSINESS_INFO.email, {
+      x: textStartX,
+      y: y - 70,
+      size: 9,
+      font: helvetica,
+      color: rgb(0.4, 0.4, 0.4),
+    });
+    page.drawText(BUSINESS_INFO.website, {
+      x: textStartX,
+      y: y - 86,
+      size: 9,
+      font: helvetica,
+      color: rgb(0.4, 0.4, 0.4),
+    });
 
     y -= 120; // Account for 100pt logo height
 
@@ -253,7 +293,7 @@ router.get(
       start: { x: leftMargin, y: y },
       end: { x: rightMargin, y: y },
       thickness: 1,
-      color: lineGray
+      color: lineGray,
     });
     y -= 21; // 0.3 inch gap
 
@@ -266,7 +306,7 @@ router.get(
       y: y,
       size: 11,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2)
+      color: rgb(0.2, 0.2, 0.2),
     });
 
     // Client name (bold)
@@ -275,7 +315,7 @@ router.get(
       y: y - 14,
       size: 10,
       font: helveticaBold,
-      color: black
+      color: black,
     });
 
     // Company name (if exists)
@@ -286,7 +326,7 @@ router.get(
         y: clientLineY,
         size: 10,
         font: helvetica,
-        color: black
+        color: black,
       });
       clientLineY -= 11;
     }
@@ -297,7 +337,7 @@ router.get(
       y: clientLineY,
       size: 10,
       font: helvetica,
-      color: rgb(0.3, 0.3, 0.3)
+      color: rgb(0.3, 0.3, 0.3),
     });
 
     // Right side - DATE:
@@ -306,14 +346,14 @@ router.get(
       y: y,
       size: 9,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: rgb(0.3, 0.3, 0.3),
     });
     page.drawText(formatDate(intakeData.submittedAt), {
       x: rightMargin - helvetica.widthOfTextAtSize(formatDate(intakeData.submittedAt), 9),
       y: y,
       size: 9,
       font: helvetica,
-      color: black
+      color: black,
     });
 
     // PROJECT #:
@@ -322,7 +362,7 @@ router.get(
       y: y - 14,
       size: 9,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: rgb(0.3, 0.3, 0.3),
     });
     const projectIdText = `#${intakeData.projectId}`;
     page.drawText(projectIdText, {
@@ -330,7 +370,7 @@ router.get(
       y: y - 14,
       size: 9,
       font: helvetica,
-      color: black
+      color: black,
     });
 
     y -= 72; // Move past client info section (1.0 inch)
@@ -340,49 +380,108 @@ router.get(
       start: { x: leftMargin, y: y },
       end: { x: rightMargin, y: y },
       thickness: 0.5,
-      color: rgb(0.9, 0.9, 0.9)
+      color: rgb(0.9, 0.9, 0.9),
     });
     y -= 21;
 
     // Helper to sanitize text for PDF (remove newlines and special chars)
     const sanitizeForPdf = (text: string): string => {
-      return text.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+      return text
+        .replace(/[\n\r\t]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     };
 
     // === PROJECT DETAILS ===
-    page.drawText('Project Details', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: black });
+    page.drawText('Project Details', {
+      x: leftMargin,
+      y: y,
+      size: 12,
+      font: helveticaBold,
+      color: black,
+    });
     y -= 20;
 
     // Project Name
-    page.drawText('Project Name: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+    page.drawText('Project Name: ', {
+      x: leftMargin,
+      y: y,
+      size: 10,
+      font: helveticaBold,
+      color: black,
+    });
     const nameX = leftMargin + helveticaBold.widthOfTextAtSize('Project Name: ', 10);
-    page.drawText(sanitizeForPdf(decodeHtml(intakeData.projectName)), { x: nameX, y: y, size: 10, font: helvetica, color: black });
+    page.drawText(sanitizeForPdf(decodeHtml(intakeData.projectName)), {
+      x: nameX,
+      y: y,
+      size: 10,
+      font: helvetica,
+      color: black,
+    });
     y -= 16;
 
     // Project Type
-    page.drawText('Project Type: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+    page.drawText('Project Type: ', {
+      x: leftMargin,
+      y: y,
+      size: 10,
+      font: helveticaBold,
+      color: black,
+    });
     const typeX = leftMargin + helveticaBold.widthOfTextAtSize('Project Type: ', 10);
-    page.drawText(sanitizeForPdf(formatProjectType(intakeData.projectDetails.type)), { x: typeX, y: y, size: 10, font: helvetica, color: black });
+    page.drawText(sanitizeForPdf(formatProjectType(intakeData.projectDetails.type)), {
+      x: typeX,
+      y: y,
+      size: 10,
+      font: helvetica,
+      color: black,
+    });
     y -= 16;
 
     // Timeline
-    page.drawText('Timeline: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+    page.drawText('Timeline: ', {
+      x: leftMargin,
+      y: y,
+      size: 10,
+      font: helveticaBold,
+      color: black,
+    });
     const timelineX = leftMargin + helveticaBold.widthOfTextAtSize('Timeline: ', 10);
-    page.drawText(sanitizeForPdf(formatTimeline(intakeData.projectDetails.timeline)), { x: timelineX, y: y, size: 10, font: helvetica, color: black });
+    page.drawText(sanitizeForPdf(formatTimeline(intakeData.projectDetails.timeline)), {
+      x: timelineX,
+      y: y,
+      size: 10,
+      font: helvetica,
+      color: black,
+    });
     y -= 16;
 
     // Budget
     page.drawText('Budget: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
     const budgetX = leftMargin + helveticaBold.widthOfTextAtSize('Budget: ', 10);
-    page.drawText(sanitizeForPdf(formatBudget(intakeData.projectDetails.budget)), { x: budgetX, y: y, size: 10, font: helvetica, color: black });
+    page.drawText(sanitizeForPdf(formatBudget(intakeData.projectDetails.budget)), {
+      x: budgetX,
+      y: y,
+      size: 10,
+      font: helvetica,
+      color: black,
+    });
     y -= 30;
 
     // === PROJECT DESCRIPTION ===
-    page.drawText('Project Description', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: black });
+    page.drawText('Project Description', {
+      x: leftMargin,
+      y: y,
+      size: 12,
+      font: helveticaBold,
+      color: black,
+    });
     y -= 18;
 
     // Word wrap description text
-    const description = sanitizeForPdf(decodeHtml(intakeData.projectDetails.description || 'No description provided'));
+    const description = sanitizeForPdf(
+      decodeHtml(intakeData.projectDetails.description || 'No description provided')
+    );
     const words = description.split(' ');
     let line = '';
     const maxWidth = contentWidth;
@@ -407,32 +506,79 @@ router.get(
 
     // === FEATURES (if any) ===
     if (intakeData.projectDetails.features && intakeData.projectDetails.features.length > 0) {
-      page.drawText('Requested Features', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: black });
+      page.drawText('Requested Features', {
+        x: leftMargin,
+        y: y,
+        size: 12,
+        font: helveticaBold,
+        color: black,
+      });
       y -= 18;
 
       for (const feature of intakeData.projectDetails.features) {
-        const featureText = sanitizeForPdf(decodeHtml(`•  ${feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`));
-        page.drawText(featureText, { x: leftMargin, y: y, size: 10, font: helvetica, color: black });
+        const featureText = sanitizeForPdf(
+          decodeHtml(`•  ${feature.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`)
+        );
+        page.drawText(featureText, {
+          x: leftMargin,
+          y: y,
+          size: 10,
+          font: helvetica,
+          color: black,
+        });
         y -= 14;
       }
       y -= 10;
     }
 
     // === TECHNICAL INFO (if any) ===
-    if (intakeData.technicalInfo && (intakeData.technicalInfo.techComfort || intakeData.technicalInfo.domainHosting)) {
-      page.drawText('Technical Information', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: black });
+    if (
+      intakeData.technicalInfo &&
+      (intakeData.technicalInfo.techComfort || intakeData.technicalInfo.domainHosting)
+    ) {
+      page.drawText('Technical Information', {
+        x: leftMargin,
+        y: y,
+        size: 12,
+        font: helveticaBold,
+        color: black,
+      });
       y -= 18;
 
       if (intakeData.technicalInfo.techComfort) {
-        page.drawText('Technical Comfort: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+        page.drawText('Technical Comfort: ', {
+          x: leftMargin,
+          y: y,
+          size: 10,
+          font: helveticaBold,
+          color: black,
+        });
         const tcX = leftMargin + helveticaBold.widthOfTextAtSize('Technical Comfort: ', 10);
-        page.drawText(sanitizeForPdf(decodeHtml(intakeData.technicalInfo.techComfort)), { x: tcX, y: y, size: 10, font: helvetica, color: black });
+        page.drawText(sanitizeForPdf(decodeHtml(intakeData.technicalInfo.techComfort)), {
+          x: tcX,
+          y: y,
+          size: 10,
+          font: helvetica,
+          color: black,
+        });
         y -= 14;
       }
       if (intakeData.technicalInfo.domainHosting) {
-        page.drawText('Domain/Hosting: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+        page.drawText('Domain/Hosting: ', {
+          x: leftMargin,
+          y: y,
+          size: 10,
+          font: helveticaBold,
+          color: black,
+        });
         const dhX = leftMargin + helveticaBold.widthOfTextAtSize('Domain/Hosting: ', 10);
-        page.drawText(sanitizeForPdf(decodeHtml(intakeData.technicalInfo.domainHosting)), { x: dhX, y: y, size: 10, font: helvetica, color: black });
+        page.drawText(sanitizeForPdf(decodeHtml(intakeData.technicalInfo.domainHosting)), {
+          x: dhX,
+          y: y,
+          size: 10,
+          font: helvetica,
+          color: black,
+        });
         y -= 14;
       }
     }
@@ -443,7 +589,7 @@ router.get(
       start: { x: leftMargin, y: 72 }, // 1 inch from bottom
       end: { x: rightMargin, y: 72 },
       thickness: 0.5,
-      color: rgb(0.8, 0.8, 0.8)
+      color: rgb(0.8, 0.8, 0.8),
     });
 
     // Footer contact info (centered with bullet separators)
@@ -454,14 +600,18 @@ router.get(
       y: 36, // 0.5 inch from bottom
       size: 7,
       font: helvetica,
-      color: lightGray
+      color: lightGray,
     });
 
     // Generate PDF bytes and send response
     const pdfBytes = await pdfDoc.save();
 
     // Cache the generated PDF
-    cachePdf(cacheKey, pdfBytes, getString(intakeFileRecord, 'updated_at') || getString(intakeFileRecord, 'created_at'));
+    cachePdf(
+      cacheKey,
+      pdfBytes,
+      getString(intakeFileRecord, 'updated_at') || getString(intakeFileRecord, 'created_at')
+    );
 
     // Generate descriptive PDF filename with NoBhadCodes branding
     // Use company name if available, otherwise client name
@@ -476,7 +626,7 @@ router.get(
     sendPdfResponse(res, pdfBytes, {
       filename: `nobhadcodes_intake_${safeClientName}.pdf`,
       disposition: 'inline',
-      cacheStatus: 'MISS'
+      cacheStatus: 'MISS',
     });
   })
 );

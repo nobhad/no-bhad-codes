@@ -23,7 +23,8 @@ export const VALIDATION_PATTERNS = {
    * - Requires valid domain with TLD of 2+ characters
    * - Case insensitive
    */
-  EMAIL: /^[a-zA-Z0-9]+(?:[._+-][a-zA-Z0-9]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/,
+  EMAIL:
+    /^[a-zA-Z0-9]+(?:[._+-][a-zA-Z0-9]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/,
 
   /**
    * Strict email validation (more restrictive)
@@ -31,7 +32,8 @@ export const VALIDATION_PATTERNS = {
    * - No leading/trailing dots in local part
    * - TLD must be 2-6 characters
    */
-  EMAIL_STRICT: /^[a-zA-Z0-9](?:[a-zA-Z0-9._+-]*[a-zA-Z0-9])?@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,6}$/,
+  EMAIL_STRICT:
+    /^[a-zA-Z0-9](?:[a-zA-Z0-9._+-]*[a-zA-Z0-9])?@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,6}$/,
 
   // ============================================
   // Phone Patterns
@@ -72,7 +74,8 @@ export const VALIDATION_PATTERNS = {
    * - At least one special character
    * - Maximum 128 characters
    */
-  PASSWORD_STRONG: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()\-_=+\[\]{}|;:,.<>])[A-Za-z\d@$!%*?&#^()\-_=+\[\]{}|;:,.<>]{12,128}$/,
+  PASSWORD_STRONG:
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()\-_=+\[\]{}|;:,.<>])[A-Za-z\d@$!%*?&#^()\-_=+\[\]{}|;:,.<>]{12,128}$/,
 
   /**
    * Medium password validation
@@ -151,9 +154,9 @@ export const VALIDATION_PATTERNS = {
   URL_HTTP: /^https?:\/\/(?:[\w-]+\.)+[\w-]+(?::\d{1,5})?(?:\/[^\s]*)?$/,
 
   /**
-  * Generic URL validation (includes ftp, mailto, etc.)
-  * Use for broad URL matching, not strict HTTP/HTTPS
-  */
+   * Generic URL validation (includes ftp, mailto, etc.)
+   * Use for broad URL matching, not strict HTTP/HTTPS
+   */
   URL_GENERIC: /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/(?:[\w-]+\.)+[\w-]+(?::\d{1,5})?(?:\/[^\s]*)?$/,
 
   /**
@@ -175,7 +178,8 @@ export const VALIDATION_PATTERNS = {
   /**
    * ISO 8601 datetime (YYYY-MM-DDTHH:mm:ss)
    */
-  DATETIME_ISO: /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)?$/,
+  DATETIME_ISO:
+    /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)?$/,
 
   /**
    * Time (HH:mm or HH:mm:ss)
@@ -267,13 +271,15 @@ export const VALIDATION_PATTERNS = {
    * SQL injection detection (basic)
    * Used to detect potential SQL injection attempts
    */
-  SQL_INJECTION: /('|"|;|--|\/\*|\*\/|xp_|exec\s|execute\s|select\s|insert\s|update\s|delete\s|drop\s|union\s|create\s|alter\s)/i,
+  SQL_INJECTION:
+    /('|"|;|--|\/\*|\*\/|xp_|exec\s|execute\s|select\s|insert\s|update\s|delete\s|drop\s|union\s|create\s|alter\s)/i,
 
   /**
    * XSS detection (basic)
    * Used to detect potential XSS attempts
    */
-  XSS_DETECTION: /<\s*script|javascript:|on\w+\s*=|<\s*iframe|<\s*object|<\s*embed|<\s*link|<\s*style|<\s*meta/i,
+  XSS_DETECTION:
+    /<\s*script|javascript:|on\w+\s*=|<\s*iframe|<\s*object|<\s*embed|<\s*link|<\s*style|<\s*meta/i,
 
   /**
    * Path traversal detection
@@ -302,8 +308,8 @@ export const VALIDATION_PATTERNS = {
   /**
    * Spam patterns (for message validation)
    */
-  SPAM_PATTERNS: /\b(buy now|click here|limited time|act fast|urgent|winner|congratulations|viagra|casino|loan|mortgage|weight loss|get rich|free money|earn cash|make money fast)\b/gi
-
+  SPAM_PATTERNS:
+    /\b(buy now|click here|limited time|act fast|urgent|winner|congratulations|viagra|casino|loan|mortgage|weight loss|get rich|free money|earn cash|make money fast)\b/gi,
 } as const;
 
 /**
@@ -315,7 +321,8 @@ export const PATTERN_DESCRIPTIONS: Record<keyof typeof VALIDATION_PATTERNS, stri
   PHONE_E164: 'a valid international phone number (e.g., +15551234567)',
   PHONE_US: 'a valid US phone number',
   PHONE_GENERIC: 'a valid phone number',
-  PASSWORD_STRONG: 'at least 12 characters with uppercase, lowercase, number, and special character',
+  PASSWORD_STRONG:
+    'at least 12 characters with uppercase, lowercase, number, and special character',
   PASSWORD_MEDIUM: 'at least 8 characters with letters and numbers',
   PASSWORD_BASIC: 'at least 8 characters',
   NAME: 'a valid name (letters, spaces, apostrophes, hyphens)',
@@ -348,7 +355,7 @@ export const PATTERN_DESCRIPTIONS: Record<keyof typeof VALIDATION_PATTERNS, stri
   NO_HTML: 'no HTML tags',
   WHITESPACE_ONLY: 'not empty or whitespace only',
   PRINTABLE_ASCII: 'printable ASCII characters only',
-  SPAM_PATTERNS: 'no spam-like content'
+  SPAM_PATTERNS: 'no spam-like content',
 };
 
 /**

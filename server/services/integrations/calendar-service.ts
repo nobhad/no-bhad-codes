@@ -105,7 +105,7 @@ export function getGoogleAuthUrl(state?: string): string {
     response_type: 'code',
     scope: 'https://www.googleapis.com/auth/calendar.events',
     access_type: 'offline',
-    prompt: 'consent'
+    prompt: 'consent',
   });
 
   if (state) {
@@ -126,23 +126,23 @@ export async function exchangeCodeForTokens(code: string): Promise<GoogleCalenda
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       client_secret: GOOGLE_CLIENT_SECRET,
       code,
       grant_type: 'authorization_code',
-      redirect_uri: GOOGLE_REDIRECT_URI
-    }).toString()
+      redirect_uri: GOOGLE_REDIRECT_URI,
+    }).toString(),
   });
 
   if (!response.ok) {
-    const error = await response.json() as { error_description?: string; error?: string };
+    const error = (await response.json()) as { error_description?: string; error?: string };
     throw new Error(`Google OAuth error: ${error.error_description || error.error}`);
   }
 
-  const data = await response.json() as {
+  const data = (await response.json()) as {
     access_token: string;
     refresh_token?: string;
     expires_in: number;
@@ -152,8 +152,8 @@ export async function exchangeCodeForTokens(code: string): Promise<GoogleCalenda
   return {
     access_token: data.access_token,
     refresh_token: data.refresh_token,
-    expires_at: Date.now() + (data.expires_in * 1000),
-    token_type: data.token_type
+    expires_at: Date.now() + data.expires_in * 1000,
+    token_type: data.token_type,
   };
 }
 
@@ -168,22 +168,22 @@ export async function refreshAccessToken(refreshToken: string): Promise<GoogleCa
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       client_secret: GOOGLE_CLIENT_SECRET,
       refresh_token: refreshToken,
-      grant_type: 'refresh_token'
-    }).toString()
+      grant_type: 'refresh_token',
+    }).toString(),
   });
 
   if (!response.ok) {
-    const error = await response.json() as { error_description?: string; error?: string };
+    const error = (await response.json()) as { error_description?: string; error?: string };
     throw new Error(`Token refresh error: ${error.error_description || error.error}`);
   }
 
-  const data = await response.json() as {
+  const data = (await response.json()) as {
     access_token: string;
     expires_in: number;
     token_type: string;
@@ -192,8 +192,8 @@ export async function refreshAccessToken(refreshToken: string): Promise<GoogleCa
   return {
     access_token: data.access_token,
     refresh_token: refreshToken, // Refresh token doesn't change
-    expires_at: Date.now() + (data.expires_in * 1000),
-    token_type: data.token_type
+    expires_at: Date.now() + data.expires_in * 1000,
+    token_type: data.token_type,
   };
 }
 
@@ -205,17 +205,20 @@ export async function createGoogleCalendarEvent(
   calendarId: string,
   event: CalendarEvent
 ): Promise<CalendarEvent> {
-  const response = await fetch(`${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(event)
-  });
+  const response = await fetch(
+    `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(event),
+    }
+  );
 
   if (!response.ok) {
-    const error = await response.json() as { error?: { message?: string } };
+    const error = (await response.json()) as { error?: { message?: string } };
     throw new Error(`Google Calendar API error: ${error.error?.message || response.statusText}`);
   }
 
@@ -231,17 +234,20 @@ export async function updateGoogleCalendarEvent(
   eventId: string,
   event: Partial<CalendarEvent>
 ): Promise<CalendarEvent> {
-  const response = await fetch(`${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`, {
-    method: 'PATCH',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(event)
-  });
+  const response = await fetch(
+    `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(event),
+    }
+  );
 
   if (!response.ok) {
-    const error = await response.json() as { error?: { message?: string } };
+    const error = (await response.json()) as { error?: { message?: string } };
     throw new Error(`Google Calendar API error: ${error.error?.message || response.statusText}`);
   }
 
@@ -256,15 +262,18 @@ export async function deleteGoogleCalendarEvent(
   calendarId: string,
   eventId: string
 ): Promise<void> {
-  const response = await fetch(`${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`
+  const response = await fetch(
+    `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     }
-  });
+  );
 
   if (!response.ok && response.status !== 404) {
-    const error = await response.json() as { error?: { message?: string } };
+    const error = (await response.json()) as { error?: { message?: string } };
     throw new Error(`Google Calendar API error: ${error.error?.message || response.statusText}`);
   }
 }
@@ -272,71 +281,79 @@ export async function deleteGoogleCalendarEvent(
 /**
  * Convert milestone to calendar event
  */
-export function milestoneToCalendarEvent(milestone: Record<string, unknown>, projectName: string): CalendarEvent {
+export function milestoneToCalendarEvent(
+  milestone: Record<string, unknown>,
+  projectName: string
+): CalendarEvent {
   const dueDate = milestone.due_date as string;
 
   return {
     summary: `[Milestone] ${milestone.title}`,
     description: `Project: ${projectName}\n\n${milestone.description || ''}\n\nStatus: ${milestone.status}`,
     start: {
-      date: dueDate.split('T')[0] // All-day event
+      date: dueDate.split('T')[0], // All-day event
     },
     end: {
-      date: dueDate.split('T')[0]
+      date: dueDate.split('T')[0],
     },
     colorId: getColorIdForStatus(milestone.status as string),
     reminders: {
       useDefault: false,
       overrides: [
         { method: 'email', minutes: 1440 }, // 1 day before
-        { method: 'popup', minutes: 60 } // 1 hour before
-      ]
+        { method: 'popup', minutes: 60 }, // 1 hour before
+      ],
     },
     extendedProperties: {
       private: {
         source: 'no-bhad-codes',
         type: 'milestone',
         milestoneId: String(milestone.id),
-        projectId: String(milestone.project_id)
-      }
-    }
+        projectId: String(milestone.project_id),
+      },
+    },
   };
 }
 
 /**
  * Convert task to calendar event
  */
-export function taskToCalendarEvent(task: Record<string, unknown>, projectName: string): CalendarEvent {
+export function taskToCalendarEvent(
+  task: Record<string, unknown>,
+  projectName: string
+): CalendarEvent {
   const dueDate = task.due_date as string;
 
   return {
     summary: `[Task] ${task.title}`,
     description: `Project: ${projectName}\nPriority: ${task.priority || 'normal'}\n\n${task.description || ''}\n\nStatus: ${task.status}`,
     start: {
-      date: dueDate.split('T')[0]
+      date: dueDate.split('T')[0],
     },
     end: {
-      date: dueDate.split('T')[0]
+      date: dueDate.split('T')[0],
     },
-    attendees: task.assigned_to ? [{
-      email: task.assigned_to as string,
-      responseStatus: 'needsAction'
-    }] : undefined,
+    attendees: task.assigned_to
+      ? [
+          {
+            email: task.assigned_to as string,
+            responseStatus: 'needsAction',
+          },
+        ]
+      : undefined,
     colorId: getColorIdForPriority(task.priority as string),
     reminders: {
       useDefault: false,
-      overrides: [
-        { method: 'popup', minutes: 60 }
-      ]
+      overrides: [{ method: 'popup', minutes: 60 }],
     },
     extendedProperties: {
       private: {
         source: 'no-bhad-codes',
         type: 'task',
         taskId: String(task.id),
-        projectId: String(task.project_id)
-      }
-    }
+        projectId: String(task.project_id),
+      },
+    },
   };
 }
 
@@ -345,16 +362,18 @@ export function taskToCalendarEvent(task: Record<string, unknown>, projectName: 
  */
 export function invoiceToCalendarEvent(invoice: Record<string, unknown>): CalendarEvent {
   const dueDate = invoice.due_date as string;
-  const amount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(invoice.total_amount));
+  const amount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+    Number(invoice.total_amount)
+  );
 
   return {
     summary: `[Invoice Due] ${invoice.invoice_number} - ${amount}`,
     description: `Client: ${invoice.client_name}\nAmount: ${amount}\n\nInvoice #${invoice.invoice_number}`,
     start: {
-      date: dueDate.split('T')[0]
+      date: dueDate.split('T')[0],
     },
     end: {
-      date: dueDate.split('T')[0]
+      date: dueDate.split('T')[0],
     },
     colorId: '11', // Red for payment due
     reminders: {
@@ -362,16 +381,16 @@ export function invoiceToCalendarEvent(invoice: Record<string, unknown>): Calend
       overrides: [
         { method: 'email', minutes: 4320 }, // 3 days before
         { method: 'email', minutes: 1440 }, // 1 day before
-        { method: 'popup', minutes: 60 }
-      ]
+        { method: 'popup', minutes: 60 },
+      ],
     },
     extendedProperties: {
       private: {
         source: 'no-bhad-codes',
         type: 'invoice',
-        invoiceId: String(invoice.id)
-      }
-    }
+        invoiceId: String(invoice.id),
+      },
+    },
   };
 }
 
@@ -380,10 +399,10 @@ export function invoiceToCalendarEvent(invoice: Record<string, unknown>): Calend
  */
 function getColorIdForStatus(status: string): string {
   const colors: Record<string, string> = {
-    'pending': '5', // Yellow
-    'in_progress': '9', // Blue
-    'completed': '10', // Green
-    'blocked': '11' // Red
+    pending: '5', // Yellow
+    in_progress: '9', // Blue
+    completed: '10', // Green
+    blocked: '11', // Red
   };
   return colors[status] || '8'; // Gray default
 }
@@ -393,10 +412,10 @@ function getColorIdForStatus(status: string): string {
  */
 function getColorIdForPriority(priority: string): string {
   const colors: Record<string, string> = {
-    'low': '8', // Gray
-    'medium': '5', // Yellow
-    'high': '6', // Orange
-    'urgent': '11' // Red
+    low: '8', // Gray
+    medium: '5', // Yellow
+    high: '6', // Orange
+    urgent: '11', // Red
   };
   return colors[priority] || '8';
 }
@@ -410,7 +429,7 @@ export function generateICalExport(events: CalendarEvent[]): string {
     `PRODID:${ICAL_PRODID}`,
     `VERSION:${ICAL_VERSION}`,
     'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH'
+    'METHOD:PUBLISH',
   ];
 
   for (const event of events) {
@@ -427,7 +446,9 @@ export function generateICalExport(events: CalendarEvent[]): string {
 
     if (event.start.date) {
       lines.push(`DTSTART;VALUE=DATE:${event.start.date.replace(/-/g, '')}`);
-      lines.push(`DTEND;VALUE=DATE:${event.end?.date?.replace(/-/g, '') || event.start.date.replace(/-/g, '')}`);
+      lines.push(
+        `DTEND;VALUE=DATE:${event.end?.date?.replace(/-/g, '') || event.start.date.replace(/-/g, '')}`
+      );
     } else if (event.start.dateTime) {
       lines.push(`DTSTART:${formatICalDate(new Date(event.start.dateTime))}`);
       lines.push(`DTEND:${formatICalDate(new Date(event.end?.dateTime || event.start.dateTime))}`);
@@ -435,7 +456,9 @@ export function generateICalExport(events: CalendarEvent[]): string {
 
     if (event.attendees) {
       for (const attendee of event.attendees) {
-        lines.push(`ATTENDEE;CN=${attendee.displayName || attendee.email}:mailto:${attendee.email}`);
+        lines.push(
+          `ATTENDEE;CN=${attendee.displayName || attendee.email}:mailto:${attendee.email}`
+        );
       }
     }
 
@@ -465,7 +488,9 @@ export async function exportProjectToICal(projectId: number): Promise<string> {
   const db = getDatabase();
 
   // Get project details
-  const project = await db.get('SELECT * FROM projects WHERE id = ?', [projectId]) as { name: string } | undefined;
+  const project = (await db.get('SELECT * FROM projects WHERE id = ?', [projectId])) as
+    | { name: string }
+    | undefined;
   if (!project) {
     throw new Error(`Project ${projectId} not found`);
   }
@@ -473,20 +498,20 @@ export async function exportProjectToICal(projectId: number): Promise<string> {
   const events: CalendarEvent[] = [];
 
   // Get milestones
-  const milestones = await db.all(
+  const milestones = (await db.all(
     'SELECT * FROM milestones WHERE project_id = ? AND due_date IS NOT NULL ORDER BY due_date',
     [projectId]
-  ) as Record<string, unknown>[];
+  )) as Record<string, unknown>[];
 
   for (const milestone of milestones) {
     events.push(milestoneToCalendarEvent(milestone, project.name));
   }
 
   // Get tasks
-  const tasks = await db.all(
+  const tasks = (await db.all(
     'SELECT * FROM project_tasks WHERE project_id = ? AND due_date IS NOT NULL ORDER BY due_date',
     [projectId]
-  ) as Record<string, unknown>[];
+  )) as Record<string, unknown>[];
 
   for (const task of tasks) {
     events.push(taskToCalendarEvent(task, project.name));
@@ -507,39 +532,39 @@ export async function exportUpcomingToICal(daysAhead: number = 30): Promise<stri
   const futureDateStr = futureDate.toISOString().split('T')[0];
 
   // Get upcoming milestones
-  const milestones = await db.all(
+  const milestones = (await db.all(
     `SELECT m.*, p.project_name as project_name FROM milestones m
      JOIN projects p ON m.project_id = p.id
      WHERE m.due_date IS NOT NULL AND m.due_date <= ? AND m.status != 'completed'
      ORDER BY m.due_date`,
     [futureDateStr]
-  ) as Array<Record<string, unknown> & { project_name: string }>;
+  )) as Array<Record<string, unknown> & { project_name: string }>;
 
   for (const milestone of milestones) {
     events.push(milestoneToCalendarEvent(milestone, milestone.project_name));
   }
 
   // Get upcoming tasks
-  const tasks = await db.all(
+  const tasks = (await db.all(
     `SELECT t.*, p.project_name as project_name FROM project_tasks t
      JOIN projects p ON t.project_id = p.id
      WHERE t.due_date IS NOT NULL AND t.due_date <= ? AND t.status != 'completed'
      ORDER BY t.due_date`,
     [futureDateStr]
-  ) as Array<Record<string, unknown> & { project_name: string }>;
+  )) as Array<Record<string, unknown> & { project_name: string }>;
 
   for (const task of tasks) {
     events.push(taskToCalendarEvent(task, task.project_name));
   }
 
   // Get upcoming invoice due dates
-  const invoices = await db.all(
+  const invoices = (await db.all(
     `SELECT i.*, COALESCE(c.contact_name, c.company_name) as client_name FROM invoices i
      JOIN clients c ON i.client_id = c.id
      WHERE i.due_date IS NOT NULL AND i.due_date <= ? AND i.status IN ('sent', 'pending', 'overdue')
      ORDER BY i.due_date`,
     [futureDateStr]
-  ) as Record<string, unknown>[];
+  )) as Record<string, unknown>[];
 
   for (const invoice of invoices) {
     events.push(invoiceToCalendarEvent(invoice));
@@ -552,7 +577,7 @@ export async function exportUpcomingToICal(daysAhead: number = 30): Promise<stri
  * Format date for iCal
  */
 function formatICalDate(date: Date): string {
-  return `${date.toISOString().replace(/[-:]/g, '').split('.')[0]  }Z`;
+  return `${date.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`;
 }
 
 /**
@@ -569,7 +594,9 @@ function escapeICalText(text: string): string {
 /**
  * Save calendar sync configuration
  */
-export async function saveCalendarSyncConfig(config: CalendarSyncConfig): Promise<CalendarSyncConfig> {
+export async function saveCalendarSyncConfig(
+  config: CalendarSyncConfig
+): Promise<CalendarSyncConfig> {
   const db = getDatabase();
 
   if (config.id) {
@@ -579,9 +606,17 @@ export async function saveCalendarSyncConfig(config: CalendarSyncConfig): Promis
            sync_milestones = ?, sync_tasks = ?, sync_invoice_due_dates = ?, is_active = ?,
            updated_at = datetime('now')
        WHERE id = ?`,
-      [config.calendarId, config.accessToken, config.refreshToken, config.expiresAt,
-        config.syncMilestones ? 1 : 0, config.syncTasks ? 1 : 0, config.syncInvoiceDueDates ? 1 : 0,
-        config.isActive ? 1 : 0, config.id]
+      [
+        config.calendarId,
+        config.accessToken,
+        config.refreshToken,
+        config.expiresAt,
+        config.syncMilestones ? 1 : 0,
+        config.syncTasks ? 1 : 0,
+        config.syncInvoiceDueDates ? 1 : 0,
+        config.isActive ? 1 : 0,
+        config.id,
+      ]
     );
     return config;
   }
@@ -589,12 +624,19 @@ export async function saveCalendarSyncConfig(config: CalendarSyncConfig): Promis
     `INSERT INTO calendar_sync_configs
        (user_id, calendar_id, access_token, refresh_token, expires_at, sync_milestones, sync_tasks, sync_invoice_due_dates, is_active, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-    [config.userId, config.calendarId, config.accessToken, config.refreshToken, config.expiresAt,
-      config.syncMilestones ? 1 : 0, config.syncTasks ? 1 : 0, config.syncInvoiceDueDates ? 1 : 0,
-      config.isActive ? 1 : 0]
+    [
+      config.userId,
+      config.calendarId,
+      config.accessToken,
+      config.refreshToken,
+      config.expiresAt,
+      config.syncMilestones ? 1 : 0,
+      config.syncTasks ? 1 : 0,
+      config.syncInvoiceDueDates ? 1 : 0,
+      config.isActive ? 1 : 0,
+    ]
   );
   return { ...config, id: result.lastID };
-
 }
 
 /**
@@ -602,7 +644,9 @@ export async function saveCalendarSyncConfig(config: CalendarSyncConfig): Promis
  */
 export async function getCalendarSyncConfig(userId: number): Promise<CalendarSyncConfig | null> {
   const db = getDatabase();
-  const row = await db.get('SELECT * FROM calendar_sync_configs WHERE user_id = ?', [userId]) as Record<string, unknown> | undefined;
+  const row = (await db.get('SELECT * FROM calendar_sync_configs WHERE user_id = ?', [userId])) as
+    | Record<string, unknown>
+    | undefined;
 
   if (!row) {
     return null;
@@ -619,7 +663,7 @@ export async function getCalendarSyncConfig(userId: number): Promise<CalendarSyn
     syncTasks: Boolean(row.sync_tasks),
     syncInvoiceDueDates: Boolean(row.sync_invoice_due_dates),
     lastSyncAt: row.last_sync_at as string | undefined,
-    isActive: Boolean(row.is_active)
+    isActive: Boolean(row.is_active),
   };
 }
 
@@ -638,5 +682,5 @@ export default {
   exportProjectToICal,
   exportUpcomingToICal,
   saveCalendarSyncConfig,
-  getCalendarSyncConfig
+  getCalendarSyncConfig,
 };

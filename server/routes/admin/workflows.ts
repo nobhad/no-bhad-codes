@@ -27,7 +27,7 @@ router.post(
       reminders: remindersSent,
       scheduledInvoices: scheduled,
       recurringInvoices: recurring,
-      overdueMarked: overdueCount
+      overdueMarked: overdueCount,
     });
   })
 );
@@ -54,8 +54,8 @@ router.post(
         projectsProcessed: result.projectsProcessed,
         milestonesCreated: result.milestonesCreated,
         tasksCreated: result.tasksCreated,
-        errors: result.errors
-      }
+        errors: result.errors,
+      },
     });
   })
 );
@@ -81,8 +81,8 @@ router.post(
       data: {
         milestonesProcessed: result.milestonesProcessed,
         tasksCreated: result.tasksCreated,
-        errors: result.errors
-      }
+        errors: result.errors,
+      },
     });
   })
 );

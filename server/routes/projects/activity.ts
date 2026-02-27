@@ -7,6 +7,19 @@ import { getNumber } from '../../database/row-helpers.js';
 import { userService } from '../../services/user-service.js';
 import { errorResponse } from '../../utils/api-response.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const PROJECT_COLUMNS = `
+  id, client_id, project_name, description, status, priority, progress,
+  start_date, estimated_end_date, actual_end_date, budget_range, project_type,
+  timeline, preview_url, price, notes, repository_url, staging_url, production_url,
+  deposit_amount, contract_signed_at, cancelled_by, cancellation_reason,
+  default_deposit_percentage, hourly_rate, estimated_hours, actual_hours, template_id,
+  features, design_level, content_status, tech_comfort, hosting_preference,
+  page_count, integrations, brand_assets, inspiration, current_site, challenges,
+  additional_info, addons, referral_source, contract_reminders_enabled,
+  deleted_at, deleted_by, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 // Add project update (admin only)
@@ -58,7 +71,7 @@ router.post(
 
     res.status(201).json({
       message: 'Project update added successfully',
-      update: newUpdate
+      update: newUpdate,
     });
   })
 );
@@ -81,23 +94,17 @@ router.get(
     }
 
     const isAdmin = await isUserAdmin(req);
+    const projectCols = PROJECT_COLUMNS.split(', ').map(c => `p.${c}`).join(', ');
     const project = isAdmin
       ? await db.get(
-        `
-      SELECT p.*, c.company_name, c.contact_name, c.email as client_email
-      FROM projects p
-      JOIN clients c ON p.client_id = c.id
-      WHERE p.id = ?
-    `,
-        [projectId]
-      )
+          `SELECT ${projectCols}, c.company_name, c.contact_name, c.email as client_email
+           FROM projects p JOIN clients c ON p.client_id = c.id WHERE p.id = ?`,
+          [projectId]
+        )
       : await db.get(
-        `
-      SELECT * FROM projects 
-      WHERE id = ? AND client_id = ?
-    `,
-        [projectId, req.user!.id]
-      );
+          `SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`,
+          [projectId, req.user!.id]
+        );
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
@@ -175,7 +182,7 @@ router.get(
       progressPercentage,
       upcomingMilestones,
       recentUpdates,
-      recentMessages
+      recentMessages,
     });
   })
 );

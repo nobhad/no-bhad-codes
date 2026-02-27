@@ -13,7 +13,12 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { questionnaireService, ResponseStatus } from '../services/questionnaire-service.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../utils/api-response.js';
+import {
+  errorResponse,
+  errorResponseWithPayload,
+  sendSuccess,
+  sendCreated,
+} from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
 
 const router = express.Router();
@@ -158,7 +163,11 @@ router.post(
         exportedFileId = await questionnaireService.saveQuestionnairePdfToFiles(responseId);
       } catch (pdfError) {
         // Log error but don't fail the submission
-        await logger.error(`[Questionnaire] Failed to generate PDF for response ${responseId}:`, { error: pdfError instanceof Error ? pdfError : undefined, category: 'QUESTIONNAIRE', metadata: { responseId } });
+        await logger.error(`[Questionnaire] Failed to generate PDF for response ${responseId}:`, {
+          error: pdfError instanceof Error ? pdfError : undefined,
+          category: 'QUESTIONNAIRE',
+          metadata: { responseId },
+        });
       }
     }
 
@@ -173,15 +182,19 @@ router.post(
       projectName: response.project_name,
       exportedFileId,
       completedAt: response.completed_at,
-      triggeredBy: req.user?.email
+      triggeredBy: req.user?.email,
     });
 
-    sendSuccess(res, {
-      response: {
-        ...response,
-        exported_file_id: exportedFileId
-      }
-    }, 'Questionnaire submitted');
+    sendSuccess(
+      res,
+      {
+        response: {
+          ...response,
+          exported_file_id: exportedFileId,
+        },
+      },
+      'Questionnaire submitted'
+    );
   })
 );
 
@@ -243,7 +256,7 @@ router.post(
       questions,
       is_active,
       auto_send_on_project_create,
-      display_order
+      display_order,
     } = req.body;
 
     if (!name || !questions || !Array.isArray(questions)) {
@@ -260,7 +273,7 @@ router.post(
       is_active,
       auto_send_on_project_create,
       display_order,
-      created_by: createdBy
+      created_by: createdBy,
     });
 
     sendCreated(res, { questionnaire }, 'Questionnaire created');
@@ -353,18 +366,27 @@ router.post(
     }
 
     // Check if already sent
-    const existing = await questionnaireService.getClientResponseForQuestionnaire(client_id, questionnaireId);
+    const existing = await questionnaireService.getClientResponseForQuestionnaire(
+      client_id,
+      questionnaireId
+    );
     if (existing) {
-      return errorResponseWithPayload(res, 'Questionnaire already sent to this client', 400, undefined, {
-        existing_response_id: existing.id
-      });
+      return errorResponseWithPayload(
+        res,
+        'Questionnaire already sent to this client',
+        400,
+        undefined,
+        {
+          existing_response_id: existing.id,
+        }
+      );
     }
 
     const response = await questionnaireService.sendQuestionnaire({
       questionnaire_id: questionnaireId,
       client_id,
       project_id,
-      due_date
+      due_date,
     });
 
     sendCreated(res, { response }, 'Questionnaire sent to client');
@@ -478,7 +500,7 @@ router.get(
 
     sendPdfResponse(res, pdfBytes, {
       filename: `questionnaire_${safeQuestionnaireName}_${safeClientName}.pdf`,
-      disposition: 'inline'
+      disposition: 'inline',
     });
   })
 );
@@ -519,7 +541,10 @@ router.get(
     const timestamp = new Date().toISOString().substring(0, 10);
 
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="questionnaire_${safeQuestionnaireName}_${timestamp}.json"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="questionnaire_${safeQuestionnaireName}_${timestamp}.json"`
+    );
     res.send(jsonData);
   })
 );
@@ -555,7 +580,11 @@ router.post(
     // Generate and save PDF to project Files
     const exportedFileId = await questionnaireService.saveQuestionnairePdfToFiles(responseId);
 
-    sendSuccess(res, { exported_file_id: exportedFileId }, 'PDF regenerated and saved to project files');
+    sendSuccess(
+      res,
+      { exported_file_id: exportedFileId },
+      'PDF regenerated and saved to project files'
+    );
   })
 );
 

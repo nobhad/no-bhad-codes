@@ -15,7 +15,7 @@ import {
   type LogLevelType,
   type FileTransportConfig,
   LogLevel,
-  formatLogEntry
+  formatLogEntry,
 } from '../../../shared/logging/types.js';
 
 /**
@@ -57,7 +57,7 @@ export class FileTransport implements LogTransport {
     const units: Record<string, number> = {
       k: 1024,
       m: 1024 * 1024,
-      g: 1024 * 1024 * 1024
+      g: 1024 * 1024 * 1024,
     };
 
     const match = size.match(/^(\d+)([kmg])?$/i);
@@ -144,7 +144,7 @@ export class FileTransport implements LogTransport {
         .filter((file) => file.startsWith(`${base}-`) && file.endsWith(ext))
         .map((file) => ({
           name: file,
-          path: path.join(dir, file)
+          path: path.join(dir, file),
         }));
 
       // Sort by modification time (newest first)
@@ -190,10 +190,13 @@ export function createFileTransport(config: FileTransportConfig): FileTransport 
 /**
  * Create separate error file transport
  */
-export function createErrorFileTransport(errorFilePath: string, config?: Partial<FileTransportConfig>): FileTransport {
+export function createErrorFileTransport(
+  errorFilePath: string,
+  config?: Partial<FileTransportConfig>
+): FileTransport {
   return new FileTransport({
     level: 'ERROR',
     filePath: errorFilePath,
-    ...config
+    ...config,
   });
 }

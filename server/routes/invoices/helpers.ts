@@ -16,7 +16,7 @@ import {
   ScheduledInvoice,
   RecurringInvoice,
   InvoiceReminder,
-  InvoicePayment
+  InvoicePayment,
 } from '../../services/invoice-service.js';
 
 /**
@@ -79,7 +79,7 @@ export function toSnakeCaseInvoice(invoice: Invoice): Record<string, unknown> {
     // Internal
     internal_notes: invoice.internalNotes,
     invoice_prefix: invoice.invoicePrefix,
-    invoice_sequence: invoice.invoiceSequence
+    invoice_sequence: invoice.invoiceSequence,
   };
 }
 
@@ -94,7 +94,7 @@ export function toSnakeCaseCredit(credit: InvoiceCredit): Record<string, unknown
     deposit_invoice_number: credit.depositInvoiceNumber,
     amount: credit.amount,
     applied_at: credit.appliedAt,
-    applied_by: credit.appliedBy
+    applied_by: credit.appliedBy,
   };
 }
 
@@ -108,7 +108,7 @@ export function toSnakeCaseDeposit(deposit: DepositSummary): Record<string, unkn
     total_amount: deposit.totalAmount,
     amount_applied: deposit.amountApplied,
     available_amount: deposit.availableAmount,
-    paid_date: deposit.paidDate
+    paid_date: deposit.paidDate,
   };
 }
 
@@ -122,7 +122,7 @@ export function toSnakeCasePaymentPlan(plan: PaymentPlanTemplate): Record<string
     description: plan.description,
     payments: plan.payments,
     is_default: plan.isDefault,
-    created_at: plan.createdAt
+    created_at: plan.createdAt,
   };
 }
 
@@ -142,7 +142,7 @@ export function toSnakeCaseScheduledInvoice(scheduled: ScheduledInvoice): Record
     terms: scheduled.terms,
     status: scheduled.status,
     generated_invoice_id: scheduled.generatedInvoiceId,
-    created_at: scheduled.createdAt
+    created_at: scheduled.createdAt,
   };
 }
 
@@ -165,7 +165,7 @@ export function toSnakeCaseRecurringInvoice(recurring: RecurringInvoice): Record
     next_generation_date: recurring.nextGenerationDate,
     last_generated_at: recurring.lastGeneratedAt,
     is_active: recurring.isActive,
-    created_at: recurring.createdAt
+    created_at: recurring.createdAt,
   };
 }
 
@@ -180,7 +180,7 @@ export function toSnakeCaseReminder(reminder: InvoiceReminder): Record<string, u
     scheduled_date: reminder.scheduledDate,
     sent_at: reminder.sentAt,
     status: reminder.status,
-    created_at: reminder.createdAt
+    created_at: reminder.createdAt,
   };
 }
 
@@ -196,6 +196,6 @@ export function toSnakeCasePayment(payment: InvoicePayment): Record<string, unkn
     payment_reference: payment.paymentReference,
     payment_date: payment.paymentDate,
     notes: payment.notes,
-    created_at: payment.createdAt
+    created_at: payment.createdAt,
   };
 }

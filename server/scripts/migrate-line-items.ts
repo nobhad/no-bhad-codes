@@ -78,14 +78,14 @@ async function migrateLineItems(): Promise<void> {
     invoicesProcessed: 0,
     lineItemsCreated: 0,
     invoicesSkipped: 0,
-    errors: []
+    errors: [],
   };
 
   try {
     // Check if invoice_line_items table exists
-    const tableCheck = await dbGet(
-      'SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\'invoice_line_items\''
-    ) as { name: string } | undefined;
+    const tableCheck = (await dbGet(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='invoice_line_items'"
+    )) as { name: string } | undefined;
 
     if (!tableCheck) {
       console.error('Error: invoice_line_items table does not exist.');
@@ -94,9 +94,9 @@ async function migrateLineItems(): Promise<void> {
     }
 
     // Check if migration has already been run
-    const existingCount = await dbGet(
-      'SELECT COUNT(*) as count FROM invoice_line_items'
-    ) as { count: number };
+    const existingCount = (await dbGet('SELECT COUNT(*) as count FROM invoice_line_items')) as {
+      count: number;
+    };
 
     if (existingCount.count > 0) {
       console.log(`Found ${existingCount.count} existing line items.`);
@@ -104,19 +104,19 @@ async function migrateLineItems(): Promise<void> {
     }
 
     // Get all invoices with JSON line_items
-    const invoices = await dbAll(
+    const invoices = (await dbAll(
       'SELECT id, line_items FROM invoices WHERE line_items IS NOT NULL'
-    ) as InvoiceRow[];
+    )) as InvoiceRow[];
 
     console.log(`Found ${invoices.length} invoices with line_items to process.\n`);
 
     for (const invoice of invoices) {
       try {
         // Check if this invoice already has migrated line items
-        const migrated = await dbGet(
+        const migrated = (await dbGet(
           'SELECT COUNT(*) as count FROM invoice_line_items WHERE invoice_id = ?',
           [invoice.id]
-        ) as { count: number };
+        )) as { count: number };
 
         if (migrated.count > 0) {
           stats.invoicesSkipped++;
@@ -145,7 +145,7 @@ async function migrateLineItems(): Promise<void> {
           const item = lineItems[i];
           const quantity = item.quantity ?? 1;
           const unitPrice = item.rate ?? 0;
-          const amount = item.amount ?? (quantity * unitPrice);
+          const amount = item.amount ?? quantity * unitPrice;
 
           await dbRun(
             `INSERT INTO invoice_line_items (
@@ -164,7 +164,7 @@ async function migrateLineItems(): Promise<void> {
               item.discountType ?? null,
               item.discountValue ?? null,
               item.discountAmount ?? null,
-              i
+              i,
             ]
           );
 
@@ -189,7 +189,7 @@ async function migrateLineItems(): Promise<void> {
     console.log('  Verification');
     console.log('----------------------------------------\n');
 
-    const jsonTotal = await dbGet(`
+    const jsonTotal = (await dbGet(`
       SELECT SUM(
         CASE
           WHEN line_items IS NOT NULL AND line_items != '[]' AND line_items != ''
@@ -198,11 +198,11 @@ async function migrateLineItems(): Promise<void> {
         END
       ) as count
       FROM invoices
-    `) as { count: number };
+    `)) as { count: number };
 
-    const tableTotal = await dbGet(
-      'SELECT COUNT(*) as count FROM invoice_line_items'
-    ) as { count: number };
+    const tableTotal = (await dbGet('SELECT COUNT(*) as count FROM invoice_line_items')) as {
+      count: number;
+    };
 
     console.log(`  JSON line items total: ${jsonTotal.count ?? 0}`);
     console.log(`  Table line items total: ${tableTotal.count}`);

@@ -121,7 +121,7 @@ class KnowledgeBaseService {
         data.description || null,
         data.icon || 'book',
         data.color || '#6b7280',
-        data.sort_order || 0
+        data.sort_order || 0,
       ]
     );
 
@@ -160,8 +160,8 @@ class KnowledgeBaseService {
         data.icon || category.icon,
         data.color || category.color,
         data.sort_order !== undefined ? data.sort_order : category.sort_order,
-        data.is_active !== undefined ? (data.is_active ? 1 : 0) : (category.is_active ? 1 : 0),
-        id
+        data.is_active !== undefined ? (data.is_active ? 1 : 0) : category.is_active ? 1 : 0,
+        id,
       ]
     );
 
@@ -292,7 +292,7 @@ class KnowledgeBaseService {
         isPublished ? 1 : 0,
         data.author_email || null,
         authorUserId,
-        isPublished ? new Date().toISOString() : null
+        isPublished ? new Date().toISOString() : null,
       ]
     );
 
@@ -313,7 +313,8 @@ class KnowledgeBaseService {
     // If publishing for the first time, set published_at
     const wasPublished = article.is_published;
     const willPublish = data.is_published !== undefined ? data.is_published : wasPublished;
-    const publishedAt = !wasPublished && willPublish ? new Date().toISOString() : article.published_at;
+    const publishedAt =
+      !wasPublished && willPublish ? new Date().toISOString() : article.published_at;
 
     await db.run(
       `UPDATE kb_articles
@@ -328,11 +329,11 @@ class KnowledgeBaseService {
         data.summary !== undefined ? data.summary : article.summary,
         data.content || article.content,
         data.keywords !== undefined ? data.keywords : article.keywords,
-        data.is_featured !== undefined ? (data.is_featured ? 1 : 0) : (article.is_featured ? 1 : 0),
+        data.is_featured !== undefined ? (data.is_featured ? 1 : 0) : article.is_featured ? 1 : 0,
         willPublish ? 1 : 0,
         data.sort_order !== undefined ? data.sort_order : article.sort_order,
         publishedAt,
-        id
+        id,
       ]
     );
 
@@ -352,10 +353,7 @@ class KnowledgeBaseService {
    */
   async incrementViewCount(id: number): Promise<void> {
     const db = await getDatabase();
-    await db.run(
-      'UPDATE kb_articles SET view_count = view_count + 1 WHERE id = ?',
-      [id]
-    );
+    await db.run('UPDATE kb_articles SET view_count = view_count + 1 WHERE id = ?', [id]);
   }
 
   // =====================================================
@@ -452,16 +450,15 @@ class KnowledgeBaseService {
         data.userId || null,
         data.userType || 'anonymous',
         data.isHelpful ? 1 : 0,
-        data.comment || null
+        data.comment || null,
       ]
     );
 
     // Update article counts
     const countField = data.isHelpful ? 'helpful_count' : 'not_helpful_count';
-    await db.run(
-      `UPDATE kb_articles SET ${countField} = ${countField} + 1 WHERE id = ?`,
-      [data.articleId]
-    );
+    await db.run(`UPDATE kb_articles SET ${countField} = ${countField} + 1 WHERE id = ?`, [
+      data.articleId,
+    ]);
   }
 
   // =====================================================
@@ -480,13 +477,13 @@ class KnowledgeBaseService {
   }> {
     const db = await getDatabase();
 
-    const articleStats = await db.get(
+    const articleStats = (await db.get(
       'SELECT COUNT(*) as count, SUM(view_count) as views FROM kb_articles WHERE is_published = 1'
-    ) as { count: number; views: number };
+    )) as { count: number; views: number };
 
-    const categoryCount = await db.get(
+    const categoryCount = (await db.get(
       'SELECT COUNT(*) as count FROM kb_categories WHERE is_active = 1'
-    ) as { count: number };
+    )) as { count: number };
 
     const recentSearches = await db.all(
       `SELECT query, COUNT(*) as count
@@ -511,7 +508,7 @@ class KnowledgeBaseService {
       totalCategories: categoryCount?.count || 0,
       totalViews: articleStats?.views || 0,
       recentSearches: recentSearches as { query: string; count: number }[],
-      topArticles: topArticles as unknown as KBArticle[]
+      topArticles: topArticles as unknown as KBArticle[],
     };
   }
 }

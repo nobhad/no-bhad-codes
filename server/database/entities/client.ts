@@ -15,7 +15,7 @@ import type {
   CustomField,
   CustomFieldValue,
   Tag,
-  ClientNote
+  ClientNote,
 } from '../../services/client-service.js';
 
 // =====================================================
@@ -112,12 +112,12 @@ export const clientContactSchema = defineSchema<ClientContact>({
   role: {
     column: 'role',
     type: 'string',
-    transform: (v) => (v as string) || 'general'
+    transform: (v) => (v as string) || 'general',
   },
   isPrimary: { column: 'is_primary', type: 'boolean' },
   notes: 'string?',
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const clientActivitySchema = defineSchema<ClientActivity>({
@@ -128,7 +128,7 @@ export const clientActivitySchema = defineSchema<ClientActivity>({
   description: 'string?',
   metadata: { column: 'metadata', type: 'json?' },
   createdBy: { column: 'created_by', type: 'string?' },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 export const customFieldSchema = defineSchema<CustomField>({
@@ -138,7 +138,7 @@ export const customFieldSchema = defineSchema<CustomField>({
   fieldType: {
     column: 'field_type',
     type: 'string',
-    transform: (v) => v as CustomField['fieldType']
+    transform: (v) => v as CustomField['fieldType'],
   },
   options: { column: 'options', type: 'json?' },
   isRequired: { column: 'is_required', type: 'boolean' },
@@ -147,7 +147,7 @@ export const customFieldSchema = defineSchema<CustomField>({
   displayOrder: { column: 'display_order', type: 'number' },
   isActive: { column: 'is_active', type: 'boolean' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const customFieldValueSchema = defineSchema<CustomFieldValue>({
@@ -159,7 +159,7 @@ export const customFieldValueSchema = defineSchema<CustomFieldValue>({
   fieldType: { column: 'field_type', type: 'string' },
   fieldValue: { column: 'field_value', type: 'string?' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 export const tagSchema = defineSchema<Tag>({
@@ -168,7 +168,7 @@ export const tagSchema = defineSchema<Tag>({
   color: 'string',
   description: 'string?',
   tagType: { column: 'tag_type', type: 'string' },
-  createdAt: { column: 'created_at', type: 'string' }
+  createdAt: { column: 'created_at', type: 'string' },
 });
 
 export const clientNoteSchema = defineSchema<ClientNote>({
@@ -177,12 +177,12 @@ export const clientNoteSchema = defineSchema<ClientNote>({
   author: {
     column: 'author_name',
     type: 'string',
-    default: 'Unknown'
+    default: 'Unknown',
   },
   content: 'string',
   isPinned: { column: 'is_pinned', type: 'boolean' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' }
+  updatedAt: { column: 'updated_at', type: 'string' },
 });
 
 // =====================================================
@@ -192,6 +192,8 @@ export const clientNoteSchema = defineSchema<ClientNote>({
 export const toContact = createMapper<ContactRow, ClientContact>(clientContactSchema);
 export const toActivity = createMapper<ActivityRow, ClientActivity>(clientActivitySchema);
 export const toCustomField = createMapper<CustomFieldRow, CustomField>(customFieldSchema);
-export const toCustomFieldValue = createMapper<CustomFieldValueRow, CustomFieldValue>(customFieldValueSchema);
+export const toCustomFieldValue = createMapper<CustomFieldValueRow, CustomFieldValue>(
+  customFieldValueSchema
+);
 export const toTag = createMapper<TagRow, Tag>(tagSchema);
 export const toClientNote = createMapper<ClientNoteRow, ClientNote>(clientNoteSchema);

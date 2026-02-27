@@ -86,7 +86,9 @@ class ApprovalService {
         [entityType]
       ) as unknown as Promise<WorkflowDefinition[]>;
     }
-    return db.all('SELECT * FROM approval_workflow_definitions ORDER BY entity_type, is_default DESC, name') as unknown as Promise<WorkflowDefinition[]>;
+    return db.all(
+      'SELECT * FROM approval_workflow_definitions ORDER BY entity_type, is_default DESC, name'
+    ) as unknown as Promise<WorkflowDefinition[]>;
   }
 
   /**
@@ -133,7 +135,13 @@ class ApprovalService {
     const result = await db.run(
       `INSERT INTO approval_workflow_definitions (name, description, entity_type, workflow_type, is_default)
        VALUES (?, ?, ?, ?, ?)`,
-      [data.name, data.description || null, data.entity_type, data.workflow_type, data.is_default || false]
+      [
+        data.name,
+        data.description || null,
+        data.entity_type,
+        data.workflow_type,
+        data.is_default || false,
+      ]
     );
 
     return this.getWorkflowDefinition(result.lastID!) as Promise<WorkflowDefinition>;
@@ -172,10 +180,12 @@ class ApprovalService {
         data.approver_type,
         data.approver_value,
         data.is_optional || false,
-        data.auto_approve_after_hours || null
+        data.auto_approve_after_hours || null,
       ]
     );
-    const step = await db.get('SELECT * FROM approval_workflow_steps WHERE id = ?', [result.lastID]);
+    const step = await db.get('SELECT * FROM approval_workflow_steps WHERE id = ?', [
+      result.lastID,
+    ]);
     return step as unknown as WorkflowStep;
   }
 
@@ -215,7 +225,7 @@ class ApprovalService {
       [definition.id, entityType, entityId, initiatedBy, notes || null]
     );
 
-    const instance = await this.getWorkflowInstance(result.lastID!) as WorkflowInstance;
+    const instance = (await this.getWorkflowInstance(result.lastID!)) as WorkflowInstance;
 
     // Log initiation
     await this.logHistory(instance.id, 'initiated', initiatedBy, null, notes);
@@ -249,7 +259,10 @@ class ApprovalService {
   /**
    * Get workflow instance for an entity
    */
-  async getEntityWorkflow(entityType: EntityType, entityId: number): Promise<WorkflowInstance | null> {
+  async getEntityWorkflow(
+    entityType: EntityType,
+    entityId: number
+  ): Promise<WorkflowInstance | null> {
     const db = getDatabase();
     const result = await db.get(
       'SELECT * FROM approval_workflow_instances WHERE entity_type = ? AND entity_id = ? ORDER BY id DESC LIMIT 1',
@@ -295,7 +308,11 @@ class ApprovalService {
   /**
    * Approve a request
    */
-  async approve(requestId: number, approverEmail: string, comment?: string): Promise<WorkflowInstance> {
+  async approve(
+    requestId: number,
+    approverEmail: string,
+    comment?: string
+  ): Promise<WorkflowInstance> {
     const db = getDatabase();
 
     // Get request and verify
@@ -313,7 +330,13 @@ class ApprovalService {
     );
 
     // Log history
-    await this.logHistory(request.workflow_instance_id, 'approved', approverEmail, request.step_id, comment);
+    await this.logHistory(
+      request.workflow_instance_id,
+      'approved',
+      approverEmail,
+      request.step_id,
+      comment
+    );
 
     // Check if workflow should advance
     return this.advanceWorkflow(request.workflow_instance_id);
@@ -322,7 +345,11 @@ class ApprovalService {
   /**
    * Reject a request
    */
-  async reject(requestId: number, approverEmail: string, reason: string): Promise<WorkflowInstance> {
+  async reject(
+    requestId: number,
+    approverEmail: string,
+    reason: string
+  ): Promise<WorkflowInstance> {
     const db = getDatabase();
 
     // Get request and verify
@@ -348,7 +375,13 @@ class ApprovalService {
     );
 
     // Log history
-    await this.logHistory(request.workflow_instance_id, 'rejected', approverEmail, request.step_id, reason);
+    await this.logHistory(
+      request.workflow_instance_id,
+      'rejected',
+      approverEmail,
+      request.step_id,
+      reason
+    );
 
     return this.getWorkflowInstance(request.workflow_instance_id) as Promise<WorkflowInstance>;
   }
@@ -356,12 +389,16 @@ class ApprovalService {
   /**
    * Cancel a workflow
    */
-  async cancelWorkflow(instanceId: number, cancelledBy: string, reason?: string): Promise<WorkflowInstance> {
+  async cancelWorkflow(
+    instanceId: number,
+    cancelledBy: string,
+    reason?: string
+  ): Promise<WorkflowInstance> {
     const db = getDatabase();
 
     // Update all pending requests to skipped
     await db.run(
-      'UPDATE approval_requests SET status = \'skipped\' WHERE workflow_instance_id = ? AND status = \'pending\'',
+      "UPDATE approval_requests SET status = 'skipped' WHERE workflow_instance_id = ? AND status = 'pending'",
       [instanceId]
     );
 
@@ -409,66 +446,68 @@ class ApprovalService {
    */
   private async advanceWorkflow(instanceId: number): Promise<WorkflowInstance> {
     const db = getDatabase();
-    const instance = await this.getWorkflowInstance(instanceId) as WorkflowInstance;
-    const definition = await this.getWorkflowDefinition(instance.workflow_definition_id) as WorkflowDefinition;
+    const instance = (await this.getWorkflowInstance(instanceId)) as WorkflowInstance;
+    const definition = (await this.getWorkflowDefinition(
+      instance.workflow_definition_id
+    )) as WorkflowDefinition;
     const steps = await this.getWorkflowSteps(definition.id);
-    const requests = await db.all(
+    const requests = (await db.all(
       'SELECT * FROM approval_requests WHERE workflow_instance_id = ?',
       [instanceId]
-    ) as unknown as ApprovalRequest[];
+    )) as unknown as ApprovalRequest[];
 
     // Check workflow type logic
     if (definition.workflow_type === 'any_one') {
       // If any request is approved, workflow is approved
-      const hasApproval = requests.some(r => r.status === 'approved');
+      const hasApproval = requests.some((r) => r.status === 'approved');
       if (hasApproval) {
         await db.run(
-          'UPDATE approval_workflow_instances SET status = \'approved\', completed_at = CURRENT_TIMESTAMP WHERE id = ?',
+          "UPDATE approval_workflow_instances SET status = 'approved', completed_at = CURRENT_TIMESTAMP WHERE id = ?",
           [instanceId]
         );
         // Skip remaining pending requests
         await db.run(
-          'UPDATE approval_requests SET status = \'skipped\' WHERE workflow_instance_id = ? AND status = \'pending\'',
+          "UPDATE approval_requests SET status = 'skipped' WHERE workflow_instance_id = ? AND status = 'pending'",
           [instanceId]
         );
       }
     } else if (definition.workflow_type === 'parallel') {
       // All non-optional must be approved
-      const pendingRequired = requests.filter(r => {
-        const step = steps.find(s => s.id === r.step_id);
+      const pendingRequired = requests.filter((r) => {
+        const step = steps.find((s) => s.id === r.step_id);
         return r.status === 'pending' && step && !step.is_optional;
       });
-      const allApproved = requests.every(r => {
-        const step = steps.find(s => s.id === r.step_id);
+      const allApproved = requests.every((r) => {
+        const step = steps.find((s) => s.id === r.step_id);
         return r.status === 'approved' || (step && step.is_optional && r.status !== 'rejected');
       });
 
       if (pendingRequired.length === 0 && allApproved) {
         await db.run(
-          'UPDATE approval_workflow_instances SET status = \'approved\', completed_at = CURRENT_TIMESTAMP WHERE id = ?',
+          "UPDATE approval_workflow_instances SET status = 'approved', completed_at = CURRENT_TIMESTAMP WHERE id = ?",
           [instanceId]
         );
       }
     } else {
       // Sequential - advance to next step
-      const currentStepRequest = requests.find(r => {
-        const step = steps.find(s => s.id === r.step_id);
+      const currentStepRequest = requests.find((r) => {
+        const step = steps.find((s) => s.id === r.step_id);
         return step && step.step_order === instance.current_step;
       });
 
       if (currentStepRequest && currentStepRequest.status === 'approved') {
-        const nextStep = steps.find(s => s.step_order === instance.current_step + 1);
+        const nextStep = steps.find((s) => s.step_order === instance.current_step + 1);
         if (nextStep) {
           // Advance to next step
-          await db.run(
-            'UPDATE approval_workflow_instances SET current_step = ? WHERE id = ?',
-            [nextStep.step_order, instanceId]
-          );
+          await db.run('UPDATE approval_workflow_instances SET current_step = ? WHERE id = ?', [
+            nextStep.step_order,
+            instanceId,
+          ]);
           await this.createApprovalRequest(instanceId, nextStep);
         } else {
           // All steps complete
           await db.run(
-            'UPDATE approval_workflow_instances SET status = \'approved\', completed_at = CURRENT_TIMESTAMP WHERE id = ?',
+            "UPDATE approval_workflow_instances SET status = 'approved', completed_at = CURRENT_TIMESTAMP WHERE id = ?",
             [instanceId]
           );
         }
