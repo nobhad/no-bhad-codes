@@ -147,7 +147,7 @@ export function ApprovalCard({
     <>
       <div
         className={cn('tw-card', onNavigate && 'tw-card-hover')}
-        style={{ borderColor: overdue ? '#ffffff' : undefined }}
+        style={{ borderColor: overdue ? 'var(--portal-text-light)' : undefined }}
         onClick={onNavigate ? handleCardClick : undefined}
       >
         {/* Header */}

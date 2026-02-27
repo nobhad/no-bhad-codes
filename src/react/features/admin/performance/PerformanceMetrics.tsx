@@ -187,7 +187,7 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
                     className="tw-progress-bar"
                     style={{
                       width: `${Math.min((kpi.value / kpi.target) * 100, 100)}%`,
-                      backgroundColor: kpi.value >= kpi.target ? '#ffffff' : 'rgba(255,255,255,0.6)',
+                      backgroundColor: kpi.value >= kpi.target ? 'var(--portal-text-light)' : 'var(--portal-text-muted)',
                     }}
                   />
                 </div>
@@ -200,7 +200,7 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
         <div className="tw-card" style={{ padding: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <h3 className="tw-section-title">Team Performance</h3>
-            <Award style={{ width: '1rem', height: '1rem', color: 'rgba(255,255,255,0.46)' }} />
+            <Award style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
           </div>
           {isLoading ? (
             <div className="tw-loading">Loading team data...</div>
@@ -233,7 +233,7 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
         <div className="tw-card" style={{ padding: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <h3 className="tw-section-title">Project Status</h3>
-            <Briefcase style={{ width: '1rem', height: '1rem', color: 'rgba(255,255,255,0.46)' }} />
+            <Briefcase style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
           </div>
           {isLoading ? (
             <div className="tw-loading">Loading project data...</div>

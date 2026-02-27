@@ -131,9 +131,7 @@ export function useClients({
         if (data.success) {
           // Update local state optimistically
           setClients((prev) =>
-            prev.map((client) =>
-              client.id === id ? { ...client, ...updates } : client
-            )
+            prev.map((client) => (client.id === id ? { ...client, ...updates } : client))
           );
           return true;
         }

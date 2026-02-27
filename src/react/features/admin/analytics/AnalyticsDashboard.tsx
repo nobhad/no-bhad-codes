@@ -250,7 +250,7 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
             <div className="tw-card" style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <h3 className="tw-section-title">Revenue Over Time</h3>
-                <LineChart style={{ width: '1rem', height: '1rem', color: 'rgba(255,255,255,0.46)' }} />
+                <LineChart style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
               </div>
               <div style={{ height: '16rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChartPlaceholder data={data?.revenueChart} type="line" />
@@ -261,7 +261,7 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
             <div className="tw-card" style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <h3 className="tw-section-title">Projects by Status</h3>
-                <PieChart style={{ width: '1rem', height: '1rem', color: 'rgba(255,255,255,0.46)' }} />
+                <PieChart style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
               </div>
               <div style={{ height: '16rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChartPlaceholder data={data?.projectsChart} type="pie" />
@@ -272,7 +272,7 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
             <div className="tw-card" style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <h3 className="tw-section-title">Lead Funnel</h3>
-                <BarChart3 style={{ width: '1rem', height: '1rem', color: 'rgba(255,255,255,0.46)' }} />
+                <BarChart3 style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
               </div>
               <div style={{ height: '16rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChartPlaceholder data={data?.leadsChart} type="bar" />

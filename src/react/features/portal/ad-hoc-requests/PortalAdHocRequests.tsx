@@ -307,7 +307,7 @@ export function PortalAdHocRequests({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)'
+            backgroundColor: 'var(--portal-bg-overlay)'
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsModalOpen(false);

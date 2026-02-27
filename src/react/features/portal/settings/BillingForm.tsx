@@ -180,7 +180,7 @@ export function BillingForm({ billing, onUpdate }: BillingFormProps) {
       {/* Billing Address Section */}
       <div className="tw-panel">
         <div className="tw-flex tw-items-center tw-gap-2 tw-mb-4">
-          <MapPin className="tw-h-4 tw-w-4 tw-text-[rgba(255,255,255,0.46)]" />
+          <MapPin className="tw-h-4 tw-w-4 tw-text-[var(--portal-text-muted)]" />
           <h3 className="tw-section-title tw-m-0">
             Billing Address
           </h3>

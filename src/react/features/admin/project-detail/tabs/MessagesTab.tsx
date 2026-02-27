@@ -120,7 +120,7 @@ export function MessagesTab({
                       'tw-w-8 tw-h-8 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0',
                       isAdmin
                         ? 'tw-bg-white'
-                        : 'tw-bg-transparent tw-border tw-border-[rgba(255,255,255,0.3)]'
+                        : 'tw-bg-transparent tw-border tw-border-[var(--portal-border-color)]'
                     )}
                     style={{ borderRadius: 0 }}
                   >
@@ -147,7 +147,7 @@ export function MessagesTab({
                         'tw-px-4 tw-py-2',
                         isAdmin
                           ? 'tw-bg-white tw-text-black'
-                          : 'tw-border tw-border-[rgba(255,255,255,0.3)] tw-text-white'
+                          : 'tw-border tw-border-[var(--portal-border-color)] tw-text-white'
                       )}
                       style={{ borderRadius: 0 }}
                     >
@@ -163,7 +163,7 @@ export function MessagesTab({
       </div>
 
       {/* Message Input */}
-      <div className="tw-panel" style={{ borderTop: '1px solid rgba(255,255,255,0.2)', borderRadius: 0 }}>
+      <div className="tw-panel" style={{ borderTop: '1px solid var(--portal-border-color)', borderRadius: 0 }}>
         <div className="tw-flex tw-gap-3">
           <textarea
             ref={textareaRef}

@@ -381,7 +381,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
             justifyContent: 'center',
             gap: '0.5rem',
             padding: '1.5rem',
-            border: '2px dashed rgba(255, 255, 255, 0.2)',
+            border: '2px dashed var(--portal-border-color)',
             cursor: disabled ? 'not-allowed' : 'pointer',
             opacity: disabled ? 0.5 : 1
           }}

@@ -71,39 +71,39 @@ interface OverviewDashboardProps {
 // Brutalist panel styles
 const panelStyle: React.CSSProperties = {
   background: 'transparent',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
-  padding: '1rem',
+  border: '1px solid var(--portal-border-color)',
+  padding: 'var(--space-4)',
 };
 
 const panelHoverStyle: React.CSSProperties = {
   ...panelStyle,
   cursor: 'pointer',
-  transition: 'border-color 0.15s ease',
+  transition: 'border-color var(--transition-faster)',
 };
 
 const sectionTitleStyle: React.CSSProperties = {
-  fontSize: '11px',
+  fontSize: 'var(--font-size-2xs)',
   fontWeight: 500,
   letterSpacing: '0.1em',
   textTransform: 'uppercase' as const,
-  color: 'rgba(255, 255, 255, 0.46)',
-  marginBottom: '1rem',
+  color: 'var(--portal-text-muted)',
+  marginBottom: 'var(--space-4)',
   fontFamily: 'var(--font-mono)',
 };
 
 const statValueStyle: React.CSSProperties = {
-  fontSize: '24px',
+  fontSize: 'var(--font-size-2xl)',
   fontWeight: 600,
-  color: '#fff',
+  color: 'var(--portal-text-light)',
   fontFamily: 'var(--font-mono)',
   lineHeight: 1.2,
 };
 
 const statLabelStyle: React.CSSProperties = {
-  fontSize: '11px',
-  color: 'rgba(255, 255, 255, 0.46)',
+  fontSize: 'var(--font-size-2xs)',
+  color: 'var(--portal-text-muted)',
   fontFamily: 'var(--font-mono)',
-  marginTop: '4px',
+  marginTop: 'var(--space-1)',
 };
 
 export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
@@ -217,23 +217,23 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
 
   if (error) {
     return (
-      <div style={{ ...panelStyle, textAlign: 'center', padding: '3rem' }}>
-        <p style={{ color: 'rgba(255, 255, 255, 0.7)', marginBottom: '1rem', fontFamily: 'var(--font-mono)' }}>
+      <div style={{ ...panelStyle, textAlign: 'center', padding: 'var(--space-12)' }}>
+        <p style={{ color: 'var(--portal-text-secondary)', marginBottom: '1rem', fontFamily: 'var(--font-mono)' }}>
           {error}
         </p>
         <button
           onClick={loadDashboardData}
           style={{
             background: 'transparent',
-            border: '1px solid #fff',
-            color: '#fff',
-            padding: '8px 16px',
+            border: '1px solid var(--portal-text-light)',
+            color: 'var(--portal-text-light)',
+            padding: 'var(--space-2) var(--space-4)',
             cursor: 'pointer',
             fontFamily: 'var(--font-mono)',
-            fontSize: '12px',
+            fontSize: 'var(--font-size-xs)',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: 'var(--space-2)',
           }}
         >
           <RefreshCw style={{ width: 14, height: 14 }} />
@@ -260,10 +260,10 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
                 gap: '1rem',
                 textAlign: 'left',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)'}
-              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--portal-text-muted)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--portal-border-color)'}
             >
-              <div style={{ color: 'rgba(255, 255, 255, 0.46)' }}>{item.icon}</div>
+              <div style={{ color: 'var(--portal-text-muted)' }}>{item.icon}</div>
               <div>
                 <div style={statValueStyle}>{item.count}</div>
                 <div style={statLabelStyle}>{item.label}</div>
@@ -271,9 +271,9 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
             </button>
           ))}
           {attentionItems.filter(item => item.count > 0).length === 0 && (
-            <div style={{ ...panelStyle, gridColumn: '1 / -1', textAlign: 'center', padding: '2rem' }}>
-              <CheckCircle style={{ width: 24, height: 24, margin: '0 auto 8px', opacity: 0.5, color: '#fff' }} />
-              <p style={{ color: 'rgba(255, 255, 255, 0.46)', fontSize: '13px', fontFamily: 'var(--font-mono)' }}>
+            <div style={{ ...panelStyle, gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--space-8)' }}>
+              <CheckCircle style={{ width: 24, height: 24, margin: '0 auto 8px', opacity: 0.5, color: 'var(--portal-text-light)' }} />
+              <p style={{ color: 'var(--portal-text-muted)', fontSize: 'var(--font-size-xs)', fontFamily: 'var(--font-mono)' }}>
                 All caught up! Nothing needs your attention.
               </p>
             </div>
@@ -287,9 +287,9 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
           {snapshotMetrics.map((metric) => (
             <div key={metric.label} style={panelStyle}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <span style={{ color: 'rgba(255, 255, 255, 0.46)' }}>{metric.icon}</span>
-                <span style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.46)', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
+                <span style={{ color: 'var(--portal-text-muted)' }}>{metric.icon}</span>
+                <span style={{ fontSize: 'var(--font-size-2xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)' }}>
                   {metric.label}
                 </span>
               </div>
@@ -310,13 +310,13 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: 'rgba(255, 255, 255, 0.46)',
-                fontSize: '11px',
+                color: 'var(--portal-text-muted)',
+                fontSize: 'var(--font-size-2xs)',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-mono)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: 'var(--space-1)',
               }}
             >
               View All <ArrowRight style={{ width: 12, height: 12 }} />
@@ -324,7 +324,7 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
           </div>
           <div style={panelStyle}>
             {activeProjects.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255, 255, 255, 0.46)', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+              <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)' }}>
                 No active projects
               </div>
             ) : (
@@ -337,24 +337,24 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '12px 0',
-                      borderTop: index > 0 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                      padding: 'var(--space-3) 0',
+                      borderTop: index > 0 ? '1px solid var(--portal-border-subtle)' : 'none',
                       cursor: 'pointer',
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#fff', fontFamily: 'var(--font-mono)' }}>
+                      <div style={{ fontSize: 'var(--font-size-sm)', fontWeight: 500, color: 'var(--portal-text-light)', fontFamily: 'var(--font-mono)' }}>
                         {project.name}
                       </div>
-                      <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.46)', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
+                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', marginTop: 'var(--space-0-5)' }}>
                         {project.client}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '80px', height: '4px', background: 'rgba(255, 255, 255, 0.1)' }}>
-                        <div style={{ width: `${project.progress}%`, height: '100%', background: '#fff' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                      <div style={{ width: '80px', height: '4px', background: 'var(--portal-border-subtle)' }}>
+                        <div style={{ width: `${project.progress}%`, height: '100%', background: 'var(--portal-text-light)' }} />
                       </div>
-                      <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.46)', fontFamily: 'var(--font-mono)', minWidth: '32px' }}>
+                      <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', minWidth: '32px' }}>
                         {project.progress}%
                       </span>
                     </div>
@@ -370,7 +370,7 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
           <h2 style={sectionTitleStyle}>Recent Activity</h2>
           <div style={panelStyle}>
             {recentActivity.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255, 255, 255, 0.46)', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+              <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)' }}>
                 No recent activity
               </div>
             ) : (
@@ -379,14 +379,14 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
                   <div
                     key={activity.id}
                     style={{
-                      padding: '10px 0',
-                      borderTop: index > 0 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                      padding: 'var(--space-2-5) 0',
+                      borderTop: index > 0 ? '1px solid var(--portal-border-subtle)' : 'none',
                     }}
                   >
-                    <div style={{ fontSize: '13px', color: '#fff', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-light)', fontFamily: 'var(--font-mono)' }}>
                       {activity.description}
                     </div>
-                    <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.46)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
+                    <div style={{ fontSize: 'var(--font-size-2xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', marginTop: 'var(--space-1)' }}>
                       {formatRelativeTime(activity.timestamp)}
                     </div>
                   </div>
@@ -401,15 +401,15 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
       <section>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
           <h2 style={{ ...sectionTitleStyle, marginBottom: 0 }}>Upcoming Tasks</h2>
-          <div style={{ display: 'flex', gap: '4px' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-1)' }}>
             <button
               onClick={() => setTasksView('list')}
               style={{
                 background: 'transparent',
                 border: '1px solid',
-                borderColor: tasksView === 'list' ? '#fff' : 'rgba(255, 255, 255, 0.2)',
-                color: tasksView === 'list' ? '#fff' : 'rgba(255, 255, 255, 0.46)',
-                padding: '6px',
+                borderColor: tasksView === 'list' ? 'var(--portal-text-light)' : 'var(--portal-border-color)',
+                color: tasksView === 'list' ? 'var(--portal-text-light)' : 'var(--portal-text-muted)',
+                padding: 'var(--space-1-5)',
                 cursor: 'pointer',
               }}
               title="List view"
@@ -421,9 +421,9 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
               style={{
                 background: 'transparent',
                 border: '1px solid',
-                borderColor: tasksView === 'kanban' ? '#fff' : 'rgba(255, 255, 255, 0.2)',
-                color: tasksView === 'kanban' ? '#fff' : 'rgba(255, 255, 255, 0.46)',
-                padding: '6px',
+                borderColor: tasksView === 'kanban' ? 'var(--portal-text-light)' : 'var(--portal-border-color)',
+                color: tasksView === 'kanban' ? 'var(--portal-text-light)' : 'var(--portal-text-muted)',
+                padding: 'var(--space-1-5)',
                 cursor: 'pointer',
               }}
               title="Kanban view"
@@ -436,7 +436,7 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
         {tasksView === 'list' ? (
           <div style={panelStyle}>
             {upcomingTasks.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255, 255, 255, 0.46)', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+              <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)' }}>
                 No upcoming tasks
               </div>
             ) : (
@@ -447,9 +447,9 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 0',
-                      borderTop: index > 0 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                      gap: 'var(--space-3)',
+                      padding: 'var(--space-3) 0',
+                      borderTop: index > 0 ? '1px solid var(--portal-border-subtle)' : 'none',
                     }}
                   >
                     <span style={{
@@ -459,15 +459,15 @@ export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
                       flexShrink: 0,
                     }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#fff', fontFamily: 'var(--font-mono)' }}>
+                      <div style={{ fontSize: 'var(--font-size-sm)', fontWeight: 500, color: 'var(--portal-text-light)', fontFamily: 'var(--font-mono)' }}>
                         {task.title}
                       </div>
-                      <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.46)', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
+                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', marginTop: 'var(--space-0-5)' }}>
                         {task.projectName}
                       </div>
                     </div>
                     {task.dueDate && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'rgba(255, 255, 255, 0.46)', fontFamily: 'var(--font-mono)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)', fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)' }}>
                         <Clock style={{ width: 12, height: 12 }} />
                         {formatDate(task.dueDate)}
                       </div>
@@ -496,8 +496,8 @@ function TasksKanban({ tasks }: { tasks: UpcomingTask[] }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
       {columns.map((column) => (
         <div key={column.id} style={panelStyle}>
-          <h3 style={{ ...sectionTitleStyle, marginBottom: '12px' }}>{column.label}</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <h3 style={{ ...sectionTitleStyle, marginBottom: 'var(--space-3)' }}>{column.label}</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
             {tasks
               .filter((task) => task.status === column.id)
               .map((task) => (
@@ -505,27 +505,27 @@ function TasksKanban({ tasks }: { tasks: UpcomingTask[] }) {
                   key={task.id}
                   style={{
                     background: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    padding: '12px',
+                    border: '1px solid var(--portal-border-color)',
+                    padding: 'var(--space-3)',
                     cursor: 'pointer',
                     transition: 'border-color 0.15s',
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)'}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)'}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--portal-border-color)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--portal-border-color)'}
                 >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
                     <span style={{
                       width: '8px',
                       height: '8px',
                       background: getPriorityColor(task.priority),
                       flexShrink: 0,
-                      marginTop: '6px',
+                      marginTop: 'var(--space-1-5)',
                     }} />
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 500, color: '#fff', fontFamily: 'var(--font-mono)' }}>
+                      <div style={{ fontSize: 'var(--font-size-xs)', fontWeight: 500, color: 'var(--portal-text-light)', fontFamily: 'var(--font-mono)' }}>
                         {task.title}
                       </div>
-                      <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.46)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
+                      <div style={{ fontSize: 'var(--font-size-2xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', marginTop: 'var(--space-1)' }}>
                         {task.projectName}
                       </div>
                     </div>
@@ -533,7 +533,7 @@ function TasksKanban({ tasks }: { tasks: UpcomingTask[] }) {
                 </div>
               ))}
             {tasks.filter((task) => task.status === column.id).length === 0 && (
-              <div style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255, 255, 255, 0.3)', padding: '1.5rem', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ textAlign: 'center', fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-muted)', padding: 'var(--space-6)', fontFamily: 'var(--font-mono)' }}>
                 No tasks
               </div>
             )}
@@ -546,8 +546,8 @@ function TasksKanban({ tasks }: { tasks: UpcomingTask[] }) {
 
 function DashboardSkeleton() {
   const skeletonStyle: React.CSSProperties = {
-    background: 'rgba(255, 255, 255, 0.05)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
+    background: 'var(--portal-bg-hover)',
+    border: '1px solid var(--portal-border-subtle)',
   };
 
   return (
@@ -605,11 +605,11 @@ function formatRelativeTime(timestamp: string): string {
 
 function getPriorityColor(priority: string): string {
   switch (priority) {
-    case 'urgent': return '#ef4444';
-    case 'high': return '#f97316';
-    case 'medium': return '#fff';
-    case 'low': return 'rgba(255, 255, 255, 0.46)';
-    default: return 'rgba(255, 255, 255, 0.46)';
+    case 'urgent': return 'var(--status-cancelled)';
+    case 'high': return 'var(--status-pending)';
+    case 'medium': return 'var(--portal-text-light)';
+    case 'low': return 'var(--portal-text-muted)';
+    default: return 'var(--portal-text-muted)';
   }
 }
 

@@ -175,13 +175,13 @@ export function ActivityTab({ activities }: ActivityTabProps) {
               <span className="tw-heading" style={{ fontSize: '14px' }}>
                 {group.label}
               </span>
-              <div className="tw-flex-1 tw-h-px" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
+              <div className="tw-flex-1 tw-h-px" style={{ backgroundColor: 'var(--portal-border-color)' }} />
             </div>
 
             {/* Activities for this date */}
             <div className="tw-relative tw-pl-8">
               {/* Timeline line */}
-              <div className="tw-absolute tw-left-3 tw-top-0 tw-bottom-0 tw-w-px" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
+              <div className="tw-absolute tw-left-3 tw-top-0 tw-bottom-0 tw-w-px" style={{ backgroundColor: 'var(--portal-border-color)' }} />
 
               <div className="tw-flex tw-flex-col tw-gap-4">
                 {group.items.map((activity, index) => {
@@ -193,7 +193,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                     <div key={activity.id} className="tw-relative tw-flex tw-gap-4">
                       {/* Timeline dot */}
                       <div
-                        className="tw-absolute tw--left-5 tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-border tw-border-[rgba(255,255,255,0.3)]"
+                        className="tw-absolute tw--left-5 tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-border tw-border-[var(--portal-border-color)]"
                         style={{ backgroundColor: 'transparent', borderRadius: 0 }}
                       >
                         <Icon className={cn('tw-h-3.5 tw-w-3.5', iconColor)} />
@@ -229,7 +229,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
 
                         {/* Activity metadata */}
                         {(activity.created_by || activity.metadata) && (
-                          <div className="tw-flex tw-items-center tw-gap-3 tw-mt-2 tw-pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                          <div className="tw-flex tw-items-center tw-gap-3 tw-mt-2 tw-pt-2" style={{ borderTop: '1px solid var(--portal-border-subtle)' }}>
                             {activity.created_by && (
                               <span className="tw-text-muted" style={{ fontSize: '12px' }}>
                                 by {activity.created_by}

@@ -194,8 +194,8 @@ export function FilesTab({
         className={cn(
           'tw-panel tw-border-2 tw-border-dashed tw-cursor-pointer tw-transition-colors',
           isDragging
-            ? 'tw-border-white tw-bg-[rgba(255,255,255,0.05)]'
-            : 'tw-border-[rgba(255,255,255,0.3)] hover:tw-border-white'
+            ? 'tw-border-white tw-bg-[var(--portal-bg-hover)]'
+            : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
         )}
         style={{ borderRadius: 0, padding: '1.5rem' }}
         onDragOver={handleDragOver}
@@ -264,7 +264,7 @@ export function FilesTab({
         <div className="tw-panel" style={{ padding: 0 }}>
           <table className="tw-w-full">
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+              <tr style={{ borderBottom: '1px solid var(--portal-border-color)' }}>
                 <th className="tw-label tw-text-left tw-px-4 tw-py-3">
                   File
                 </th>

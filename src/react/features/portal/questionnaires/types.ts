@@ -101,7 +101,10 @@ export interface PortalQuestionnaireResponse {
 // STATUS CONFIG
 // ============================================================================
 
-export const QUESTIONNAIRE_STATUS_CONFIG: Record<QuestionnaireStatus, { label: string; variant: string }> = {
+export const QUESTIONNAIRE_STATUS_CONFIG: Record<
+  QuestionnaireStatus,
+  { label: string; variant: string }
+> = {
   pending: { label: 'Not Started', variant: 'inactive' },
   in_progress: { label: 'In Progress', variant: 'active' },
   submitted: { label: 'Submitted', variant: 'completed' },

@@ -115,10 +115,7 @@ export interface ProjectStats {
 /**
  * Status display configuration
  */
-export const PROJECT_STATUS_CONFIG: Record<
-  ProjectStatus,
-  { label: string; variant: string }
-> = {
+export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, { label: string; variant: string }> = {
   pending: { label: 'Pending', variant: 'pending' },
   active: { label: 'Active', variant: 'active' },
   'in-progress': { label: 'In Progress', variant: 'active' },
@@ -196,10 +193,7 @@ export interface LeadStats {
 /**
  * Lead status display configuration
  */
-export const LEAD_STATUS_CONFIG: Record<
-  LeadStatus,
-  { label: string; variant: string }
-> = {
+export const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; variant: string }> = {
   new: { label: 'New', variant: 'pending' },
   contacted: { label: 'Contacted', variant: 'active' },
   qualified: { label: 'Qualified', variant: 'warning' },
@@ -282,10 +276,7 @@ export interface ClientStats {
 /**
  * Client status display configuration
  */
-export const CLIENT_STATUS_CONFIG: Record<
-  ClientStatus,
-  { label: string; variant: string }
-> = {
+export const CLIENT_STATUS_CONFIG: Record<ClientStatus, { label: string; variant: string }> = {
   active: { label: 'Active', variant: 'active' },
   inactive: { label: 'Inactive', variant: 'cancelled' },
   pending: { label: 'Pending', variant: 'pending' }
@@ -370,10 +361,7 @@ export interface InvoiceStats {
 /**
  * Invoice status display configuration
  */
-export const INVOICE_STATUS_CONFIG: Record<
-  InvoiceStatus,
-  { label: string; variant: string }
-> = {
+export const INVOICE_STATUS_CONFIG: Record<InvoiceStatus, { label: string; variant: string }> = {
   draft: { label: 'Draft', variant: 'pending' },
   sent: { label: 'Sent', variant: 'active' },
   pending: { label: 'Pending', variant: 'warning' },
@@ -612,12 +600,7 @@ export interface ClientTag {
 /**
  * Client detail tab IDs
  */
-export type ClientDetailTab =
-  | 'overview'
-  | 'contacts'
-  | 'activity'
-  | 'projects'
-  | 'notes';
+export type ClientDetailTab = 'overview' | 'contacts' | 'activity' | 'projects' | 'notes';
 
 /**
  * Tab configuration for client detail
@@ -632,7 +615,6 @@ export const CLIENT_DETAIL_TABS: Array<{
   { id: 'activity', label: 'Activity', icon: 'Clock' },
   { id: 'projects', label: 'Projects', icon: 'FolderKanban' },
   { id: 'notes', label: 'Notes', icon: 'StickyNote' }
-
 ];
 
 /**

@@ -7,8 +7,4 @@ export { PortalSettings } from './PortalSettings';
 export { ProfileForm } from './ProfileForm';
 export { BillingForm } from './BillingForm';
 export { NotificationsForm } from './NotificationsForm';
-export {
-  mountPortalSettings,
-  unmountPortalSettings,
-  shouldUseReactPortalSettings
-} from './mount';
+export { mountPortalSettings, unmountPortalSettings, shouldUseReactPortalSettings } from './mount';

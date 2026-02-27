@@ -12,9 +12,5 @@ export {
   AssetsStep,
   ConfirmationStep
 } from './steps';
-export {
-  mountOnboardingWizard,
-  unmountOnboardingWizard,
-  shouldUseReactOnboarding
-} from './mount';
+export { mountOnboardingWizard, unmountOnboardingWizard, shouldUseReactOnboarding } from './mount';
 export * from './types';

@@ -382,7 +382,7 @@ export function OverviewTab({
                         'tw-w-5 tw-h-5 tw-border tw-flex tw-items-center tw-justify-center tw-transition-colors',
                         milestone.is_completed
                           ? 'tw-bg-white tw-border-white'
-                          : 'tw-border-[rgba(255,255,255,0.3)] hover:tw-border-white'
+                          : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
                       )}
                       style={{ borderRadius: 0 }}
                     >
@@ -418,7 +418,7 @@ export function OverviewTab({
 
                   {/* Expanded Content */}
                   {expandedMilestones.has(milestone.id) && (
-                    <div className="tw-px-3 tw-pb-3 tw-pt-0 tw-ml-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div className="tw-px-3 tw-pb-3 tw-pt-0 tw-ml-8" style={{ borderTop: '1px solid var(--portal-border-subtle)' }}>
                       {milestone.description && (
                         <p className="tw-text-muted tw-mt-2" style={{ fontSize: '12px' }}>
                           {milestone.description}

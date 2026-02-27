@@ -358,7 +358,7 @@ function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
             {/* Status Icon */}
             <div style={{ flexShrink: 0, marginTop: '2px' }}>
               {milestone.is_completed ? (
-                <CheckCircle2 className="tw-h-4 tw-w-4" style={{ color: '#ffffff' }} />
+                <CheckCircle2 className="tw-h-4 tw-w-4" style={{ color: 'var(--portal-text-light)' }} />
               ) : (
                 <Circle className="tw-h-4 tw-w-4 tw-text-muted" />
               )}
@@ -389,7 +389,7 @@ function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
                 </p>
               )}
               {milestone.is_completed && milestone.completed_date && (
-                <span style={{ fontSize: '11px', marginTop: '0.25rem', display: 'block', color: '#ffffff' }}>
+                <span style={{ fontSize: '11px', marginTop: '0.25rem', display: 'block', color: 'var(--portal-text-light)' }}>
                   Completed {formatDate(milestone.completed_date)}
                 </span>
               )}
@@ -425,7 +425,7 @@ function UpdatesTimeline({ updates, containerRef }: UpdatesTimelineProps) {
         top: '1rem',
         bottom: '1rem',
         width: '1px',
-        background: 'rgba(255, 255, 255, 0.2)'
+        background: 'var(--portal-border-color)'
       }} />
 
       {/* Updates */}
@@ -441,7 +441,7 @@ function UpdatesTimeline({ updates, containerRef }: UpdatesTimelineProps) {
               alignItems: 'center',
               justifyContent: 'center',
               background: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
+              border: '1px solid var(--portal-border-color)',
               zIndex: 10
             }}>
               <span className="tw-text-muted">{getUpdateIcon(update.update_type)}</span>

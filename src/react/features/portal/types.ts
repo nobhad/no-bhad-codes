@@ -7,7 +7,14 @@
 // INVOICE TYPES
 // ============================================================================
 
-export type PortalInvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
+export type PortalInvoiceStatus =
+  | 'draft'
+  | 'sent'
+  | 'viewed'
+  | 'partial'
+  | 'paid'
+  | 'overdue'
+  | 'cancelled';
 
 export interface PortalInvoice {
   id: number;
@@ -26,7 +33,10 @@ export interface PortalInvoiceSummary {
   totalPaid: number;
 }
 
-export const PORTAL_INVOICE_STATUS_CONFIG: Record<PortalInvoiceStatus, { label: string; color: string }> = {
+export const PORTAL_INVOICE_STATUS_CONFIG: Record<
+  PortalInvoiceStatus,
+  { label: string; color: string }
+> = {
   draft: { label: 'Draft', color: 'var(--portal-text-muted)' },
   sent: { label: 'Sent', color: 'var(--status-pending)' },
   viewed: { label: 'Viewed', color: 'var(--color-brand-primary)' },
@@ -54,7 +64,13 @@ export interface PortalFile {
 // PROJECT TYPES
 // ============================================================================
 
-export type PortalProjectStatus = 'pending' | 'active' | 'in-progress' | 'on-hold' | 'completed' | 'cancelled';
+export type PortalProjectStatus =
+  | 'pending'
+  | 'active'
+  | 'in-progress'
+  | 'on-hold'
+  | 'completed'
+  | 'cancelled';
 
 export interface PortalProject {
   id: number;
@@ -91,7 +107,10 @@ export interface PortalProjectUpdate {
   created_by?: string;
 }
 
-export const PORTAL_PROJECT_STATUS_CONFIG: Record<PortalProjectStatus, { label: string; color: string }> = {
+export const PORTAL_PROJECT_STATUS_CONFIG: Record<
+  PortalProjectStatus,
+  { label: string; color: string }
+> = {
   pending: { label: 'Pending', color: 'var(--status-pending)' },
   active: { label: 'Active', color: 'var(--status-active)' },
   'in-progress': { label: 'In Progress', color: 'var(--status-active)' },

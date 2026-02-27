@@ -259,7 +259,7 @@ export function NotesTab({
 
       {/* Note footer */}
       {note.created_by && (
-        <div className="tw-mt-2 tw-pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="tw-mt-2 tw-pt-2" style={{ borderTop: '1px solid var(--portal-border-subtle)' }}>
           <span className="tw-text-muted" style={{ fontSize: '12px' }}>
             by {note.created_by}
           </span>

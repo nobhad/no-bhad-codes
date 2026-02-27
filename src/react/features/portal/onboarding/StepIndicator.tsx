@@ -72,8 +72,8 @@ export function StepIndicator({
                 !isCompleted &&
                   !isCurrent && [
                     'tw-bg-transparent',
-                    'tw-text-[rgba(255,255,255,0.46)]',
-                    'tw-border-[rgba(255,255,255,0.3)]',
+                    'tw-text-[var(--portal-text-muted)]',
+                    'tw-border-[var(--portal-border-color)]',
                   ],
                 !isAccessible && 'tw-cursor-not-allowed tw-opacity-50'
               )}
@@ -95,7 +95,7 @@ export function StepIndicator({
                   'tw-w-8 tw-h-[1px] tw-transition-colors tw-duration-200',
                   index < currentIndex || isStepCompleted(steps[index + 1]?.id)
                     ? 'tw-bg-white'
-                    : 'tw-bg-[rgba(255,255,255,0.2)]'
+                    : 'tw-bg-[var(--portal-border-subtle)]'
                 )}
               />
             )}
@@ -174,8 +174,8 @@ export function StepIndicatorDetailed({
                     !isCompleted &&
                       !isCurrent && [
                         'tw-bg-transparent',
-                        'tw-text-[rgba(255,255,255,0.46)]',
-                        'tw-border-[rgba(255,255,255,0.3)]',
+                        'tw-text-[var(--portal-text-muted)]',
+                        'tw-border-[var(--portal-border-color)]',
                       ],
                     !isAccessible && 'tw-cursor-not-allowed tw-opacity-50'
                   )}
@@ -196,7 +196,7 @@ export function StepIndicatorDetailed({
                       'tw-flex-1 tw-h-[1px] tw-mx-2 tw-transition-colors tw-duration-200',
                       index < currentIndex
                         ? 'tw-bg-white'
-                        : 'tw-bg-[rgba(255,255,255,0.2)]'
+                        : 'tw-bg-[var(--portal-border-subtle)]'
                     )}
                   />
                 )}
@@ -208,7 +208,7 @@ export function StepIndicatorDetailed({
                   'tw-mt-2 tw-text-[11px] tw-text-center tw-max-w-[80px] tw-leading-tight tw-font-mono',
                   isCurrent
                     ? 'tw-text-white tw-font-bold'
-                    : 'tw-text-[rgba(255,255,255,0.46)]'
+                    : 'tw-text-[var(--portal-text-muted)]'
                 )}
               >
                 {step.title}

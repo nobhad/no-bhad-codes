@@ -471,7 +471,7 @@ export function ClientsTable({
         ) : undefined
       }
     >
-      <div className="admin-table-scroll-wrapper">
+      <div className="data-table-scroll-wrapper">
         <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>

@@ -79,7 +79,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
       if (data.projects && Array.isArray(data.projects)) {
         setProjects(data.projects);
       } else if (data.success && data.data) {
-        const projectsArray = Array.isArray(data.data) ? data.data : (data.data.projects || []);
+        const projectsArray = Array.isArray(data.data) ? data.data : data.data.projects || [];
         setProjects(projectsArray);
       } else if (Array.isArray(data)) {
         setProjects(data);
@@ -123,13 +123,10 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
 
         if (data.success) {
           // Update local state
-          setProjects((prev) =>
-            prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
-          );
+          setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
           return true;
         }
         throw new Error(data.error || 'Failed to update project');
-
       } catch (err) {
         const message = err instanceof Error ? err.message : 'An error occurred';
         console.error('[useProjects] Update error:', message);
