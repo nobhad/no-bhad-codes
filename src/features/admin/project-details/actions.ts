@@ -8,18 +8,14 @@
 import { AdminAuth } from '../admin-auth';
 import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import { showToast } from '../../../utils/toast-notifications';
-import { getElement } from '../../../utils/dom-cache';
 import {
   confirmDialog,
   confirmDanger,
   alertError,
   alertSuccess
 } from '../../../utils/confirm-dialog';
-import { domCache } from './dom-cache';
 import { formatDate } from '../../../utils/format-utils';
 import type { ProjectResponse } from '../../../types/api';
-import { initProjectModalDropdowns, setupEditProjectModalHandlers } from '../modules/admin-projects';
-import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { createRichTextEditor, htmlToPlainText, plainTextToHTML, type RichTextEditorInstance } from '../../../components/rich-text-editor';
 import { ICONS } from '../../../constants/icons';
 
@@ -179,151 +175,7 @@ export async function duplicateProject(
   }
 }
 
-/**
- * Open the edit project modal with current project data
- */
-export function openEditProjectModal(
-  projectId: number,
-  projectsData: ProjectResponse[],
-  onSave: () => Promise<void>
-): void {
-  const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
-  if (!project) return;
-
-  const modal = domCache.get('editModal');
-  if (!modal) {
-    console.error('[ProjectActions] Edit project modal not found');
-    return;
-  }
-
-  // Ensure modal handlers and dropdown elements are initialized before populating
-  // This prevents timing issues where selects are not created yet
-  setupEditProjectModalHandlers(modal);
-  initProjectModalDropdowns(project);
-
-  // Populate form fields - query fresh since values change between openings
-  const nameInput = getElement('edit-project-name') as HTMLInputElement;
-  const typeSelect = getElement('edit-project-type') as HTMLSelectElement;
-  const budgetInput = getElement('edit-project-budget') as HTMLInputElement;
-  const priceInput = getElement('edit-project-price') as HTMLInputElement;
-  const timelineInput = getElement('edit-project-timeline') as HTMLInputElement;
-  const previewUrlInput = getElement('edit-project-preview-url') as HTMLInputElement;
-  const statusSelect = getElement('edit-project-status') as HTMLSelectElement;
-  const startDateInput = getElement('edit-project-start-date') as HTMLInputElement;
-  const endDateInput = getElement('edit-project-end-date') as HTMLInputElement;
-  const depositInput = getElement('edit-project-deposit') as HTMLInputElement;
-  const contractDateInput = getElement('edit-project-contract-date') as HTMLInputElement;
-  const repoUrlInput = getElement('edit-project-repo-url') as HTMLInputElement;
-  const productionUrlInput = getElement('edit-project-production-url') as HTMLInputElement;
-  const notesInput = getElement('edit-project-notes') as HTMLTextAreaElement;
-
-  if (nameInput) nameInput.value = project.project_name || '';
-  if (typeSelect) typeSelect.value = project.project_type || '';
-  if (budgetInput) budgetInput.value = project.budget_range || '';
-  if (priceInput) priceInput.value = project.price ? String(project.price) : '';
-  if (timelineInput) timelineInput.value = project.timeline || '';
-  if (previewUrlInput) previewUrlInput.value = project.preview_url || '';
-  if (statusSelect) statusSelect.value = project.status || 'pending';
-  if (startDateInput) startDateInput.value = project.start_date ? project.start_date.split('T')[0] : '';
-  if (endDateInput) endDateInput.value = project.estimated_end_date ? project.estimated_end_date.split('T')[0] : '';
-  if (depositInput) depositInput.value = project.deposit_amount ? String(project.deposit_amount) : '';
-  if (contractDateInput) contractDateInput.value = project.contract_signed_at ? project.contract_signed_at.split('T')[0] : '';
-  if (repoUrlInput) repoUrlInput.value = project.repository_url || '';
-  if (productionUrlInput) productionUrlInput.value = project.production_url || '';
-  if (notesInput) notesInput.value = project.notes || '';
-
-  // Show modal and lock body scroll
-  openModalOverlay(modal);
-
-  // Setup close handlers (use cached refs)
-  const closeBtn = domCache.get('editClose');
-  const cancelBtn = domCache.get('editCancel');
-  const form = domCache.getAs<HTMLFormElement>('editForm');
-
-  const closeModal = () => {
-    closeModalOverlay(modal);
-  };
-
-  closeBtn?.addEventListener('click', closeModal, { once: true });
-  cancelBtn?.addEventListener('click', closeModal, { once: true });
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  }, { once: true });
-
-  // Handle form submit
-  if (form) {
-    const handleSubmit = async (e: Event) => {
-      e.preventDefault();
-      await onSave();
-      closeModal();
-    };
-    form.removeEventListener('submit', handleSubmit);
-    form.addEventListener('submit', handleSubmit, { once: true });
-  }
-}
-
-/**
- * Save project changes from the edit modal
- */
-export async function saveProjectChanges(
-  projectId: number,
-  loadProjects: () => Promise<void>,
-  populateView: (project: ProjectResponse) => void,
-  projectsData: ProjectResponse[]
-): Promise<void> {
-  if (!AdminAuth.isAuthenticated()) return;
-
-  // Form inputs - query fresh for current values
-  const nameInput = getElement('edit-project-name') as HTMLInputElement;
-  const typeSelect = getElement('edit-project-type') as HTMLSelectElement;
-  const budgetInput = getElement('edit-project-budget') as HTMLInputElement;
-  const priceInput = getElement('edit-project-price') as HTMLInputElement;
-  const timelineInput = getElement('edit-project-timeline') as HTMLInputElement;
-  const previewUrlInput = getElement('edit-project-preview-url') as HTMLInputElement;
-  const statusSelect = getElement('edit-project-status') as HTMLSelectElement;
-  const startDateInput = getElement('edit-project-start-date') as HTMLInputElement;
-  const endDateInput = getElement('edit-project-end-date') as HTMLInputElement;
-  const depositInput = getElement('edit-project-deposit') as HTMLInputElement;
-  const contractDateInput = getElement('edit-project-contract-date') as HTMLInputElement;
-  const repoUrlInput = getElement('edit-project-repo-url') as HTMLInputElement;
-  const productionUrlInput = getElement('edit-project-production-url') as HTMLInputElement;
-  const notesInput = getElement('edit-project-notes') as HTMLTextAreaElement;
-
-  const updates: Record<string, string> = {};
-  if (nameInput?.value) updates.project_name = nameInput.value;
-  if (typeSelect?.value) updates.project_type = typeSelect.value;
-  if (budgetInput?.value) updates.budget = budgetInput.value;
-  if (priceInput?.value) updates.price = priceInput.value;
-  if (timelineInput?.value) updates.timeline = timelineInput.value;
-  if (previewUrlInput?.value !== undefined) updates.preview_url = previewUrlInput.value;
-  if (statusSelect?.value) updates.status = statusSelect.value;
-  if (startDateInput?.value !== undefined) updates.start_date = startDateInput.value;
-  if (endDateInput?.value !== undefined) updates.estimated_end_date = endDateInput.value;
-  if (depositInput?.value !== undefined) updates.deposit_amount = depositInput.value;
-  if (contractDateInput?.value !== undefined) updates.contract_signed_at = contractDateInput.value;
-  if (repoUrlInput?.value !== undefined) updates.repository_url = repoUrlInput.value;
-  if (productionUrlInput?.value !== undefined) updates.production_url = productionUrlInput.value;
-  if (notesInput?.value !== undefined) updates.notes = notesInput.value;
-
-  try {
-    const response = await apiPut(`/api/projects/${projectId}`, updates);
-
-    if (response.ok) {
-      // Refresh project data
-      await loadProjects();
-      // Re-populate the view
-      const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
-      if (project) {
-        populateView(project);
-      }
-    } else {
-      alertError('Failed to save project. Please try again.');
-    }
-  } catch (error) {
-    console.error('[ProjectActions] Error saving project:', error);
-    alertError('Failed to save project. Please try again.');
-  }
-}
+// Note: Edit project modal functions removed - inline editing now used in project overview
 
 /**
  * Handle contract sign button click

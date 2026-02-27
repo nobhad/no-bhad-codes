@@ -18,6 +18,8 @@ import {
 } from '../../utils/format-utils';
 import { alertWarning } from '../../utils/confirm-dialog';
 import { apiPut } from '../../utils/api-client';
+import { makeEditable } from '../../components/inline-edit';
+import { showToast } from '../../utils/toast-notifications';
 import {
   createSecondarySidebar,
   SECONDARY_TAB_ICONS,
@@ -69,8 +71,6 @@ import {
   deleteProject,
   archiveProject,
   duplicateProject,
-  openEditProjectModal,
-  saveProjectChanges,
   handleContractSign,
   handleContractCountersign,
   showContractBuilder,
@@ -142,24 +142,20 @@ export function renderProjectDetailTab(container: HTMLElement): void {
     <!-- Overview Tab -->
     <div class="portal-tab-panel active" id="pd-tab-overview">
       <!-- Project Header Card - Only in Overview -->
-      <div class="portal-project-card portal-shadow pd-header-card">
+      <div class="portal-project-card pd-header-card">
         <div class="pd-header-top">
           <div class="pd-header-info">
             <div class="detail-title-row">
               <div class="detail-title-group">
-                <h2 class="detail-title" id="pd-project-name">Project Name</h2>
-                <span class="status-badge" id="pd-status">-</span>
+                <h2 class="detail-title inline-editable" id="pd-project-name">Project Name</h2>
+                <span class="status-badge inline-editable" id="pd-status">-</span>
               </div>
               <div class="detail-actions">
-                <button class="icon-btn" id="pd-btn-edit" title="Edit Project" aria-label="Edit project details">
-                  ${RENDER_ICONS.EDIT}
-                </button>
                 <div class="table-dropdown detail-more-menu" id="pd-more-menu">
                   <button type="button" class="custom-dropdown-trigger" aria-label="More actions">
                     ${RENDER_ICONS.MORE}
                   </button>
                   <ul class="custom-dropdown-menu">
-                    <li class="custom-dropdown-item" data-action="edit">${RENDER_ICONS.PEN} Edit Project</li>
                     <li class="custom-dropdown-item" data-action="duplicate">${RENDER_ICONS.COPY} Duplicate Project</li>
                     <li class="custom-dropdown-item" data-action="archive">${RENDER_ICONS.ARCHIVE} Archive Project</li>
                     <li class="custom-dropdown-item" data-action="generate-docs">${RENDER_ICONS.DOC} Generate Documents</li>
@@ -188,39 +184,39 @@ export function renderProjectDetailTab(container: HTMLElement): void {
             <div class="pd-header-meta">
               <div class="pd-meta-item">
                 <span class="field-label">Type</span>
-                <span class="pd-meta-value" id="pd-type">-</span>
+                <span class="pd-meta-value inline-editable" id="pd-type">-</span>
               </div>
               <div class="pd-meta-item">
                 <span class="field-label">Start</span>
-                <span class="pd-meta-value" id="pd-start-date">-</span>
+                <span class="pd-meta-value inline-editable" id="pd-start-date">-</span>
               </div>
               <div class="pd-meta-item">
                 <span class="field-label">Target End</span>
-                <span class="pd-meta-value" id="pd-end-date">-</span>
+                <span class="pd-meta-value inline-editable" id="pd-end-date">-</span>
               </div>
               <div class="pd-meta-item">
                 <span class="field-label">Budget</span>
-                <span class="pd-meta-value" id="pd-budget">-</span>
+                <span class="pd-meta-value inline-editable" id="pd-budget">-</span>
               </div>
             </div>
             <!-- Description -->
             <div class="pd-header-description">
               <span class="field-label">Description</span>
-              <p class="pd-description" id="pd-description">-</p>
+              <p class="pd-description inline-editable" id="pd-description">-</p>
             </div>
             <!-- Financial Details -->
             <div class="pd-header-meta">
               <div class="pd-meta-item">
                 <span class="field-label">Timeline</span>
-                <span class="pd-meta-value" id="pd-timeline">-</span>
+                <span class="pd-meta-value inline-editable" id="pd-timeline">-</span>
               </div>
               <div class="pd-meta-item">
                 <span class="field-label">Quoted Price</span>
-                <span class="pd-meta-value" id="pd-price">-</span>
+                <span class="pd-meta-value inline-editable" id="pd-price">-</span>
               </div>
               <div class="pd-meta-item">
                 <span class="field-label">Deposit</span>
-                <span class="pd-meta-value" id="pd-deposit">-</span>
+                <span class="pd-meta-value inline-editable" id="pd-deposit">-</span>
               </div>
             </div>
             <!-- URLs -->
@@ -239,16 +235,16 @@ export function renderProjectDetailTab(container: HTMLElement): void {
               </div>
             </div>
             <!-- Admin Notes -->
-            <div class="pd-header-description" id="pd-admin-notes-section" style="display: none;">
+            <div class="pd-header-description" id="pd-admin-notes-section">
               <span class="field-label">Admin Notes (Internal)</span>
-              <p class="pd-description" id="pd-admin-notes">-</p>
+              <p class="pd-description inline-editable" id="pd-admin-notes">Click to add notes...</p>
             </div>
           </div>
         </div>
       </div>
       <div class="pd-overview-grid">
         <div class="pd-overview-main flex flex-col gap-3">
-          <div class="portal-project-card portal-shadow pd-progress-card">
+          <div class="portal-project-card pd-progress-card">
             <h3>Progress</h3>
             <div class="pd-progress-display pd-progress-horizontal">
               <div class="pd-progress-ring">
@@ -259,7 +255,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
               </div>
             </div>
           </div>
-          <div class="portal-project-card portal-shadow">
+          <div class="portal-project-card">
             <div class="card-header-with-action">
               <h3>Milestones</h3>
               <button class="btn btn-secondary btn-sm" id="btn-add-milestone">+ Add Milestone</button>
@@ -270,7 +266,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
           </div>
         </div>
         <div class="pd-overview-sidebar flex flex-col gap-3">
-          <div class="portal-project-card portal-shadow">
+          <div class="portal-project-card">
             <h3>Financials</h3>
             <div class="pd-financial-stats">
               <div class="pd-stat-item"><span class="pd-stat-label">Budget</span><span class="pd-stat-value" id="pd-sidebar-budget">-</span></div>
@@ -279,7 +275,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
               <div class="pd-stat-item"><span class="pd-stat-label">Outstanding</span><span class="pd-stat-value pd-stat-warning" id="pd-sidebar-outstanding">$0</span></div>
             </div>
           </div>
-          <div class="portal-project-card portal-shadow">
+          <div class="portal-project-card">
             <h3>Quick Stats</h3>
             <div class="pd-quick-stats">
               <div class="pd-stat-item"><span class="pd-stat-label">Files</span><span class="pd-stat-value" id="pd-stat-files">0</span></div>
@@ -290,7 +286,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
           </div>
         </div>
       </div>
-      <div class="portal-project-card portal-shadow pd-activity-card">
+      <div class="portal-project-card pd-activity-card">
         <h3>Recent Activity</h3>
         <ul class="activity-list" id="pd-activity-list" aria-live="polite" aria-atomic="false">
           <li>No activity recorded yet.</li>
@@ -301,7 +297,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
     <!-- Deliverables Tab -->
     <div class="portal-tab-panel" id="pd-tab-deliverables">
       <div class="tab-content-wrapper">
-        <div class="portal-project-card portal-shadow">
+        <div class="portal-project-card">
           <div class="card-header-with-action">
             <h3>Project Deliverables</h3>
             <button class="btn btn-secondary btn-sm" id="btn-manage-deliverables" data-action="open-deliverables">Manage Deliverables</button>
@@ -316,7 +312,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
     <!-- Files Tab -->
     <div class="portal-tab-panel" id="pd-tab-files">
       <div class="tab-content-wrapper">
-        <div class="portal-project-card portal-shadow files-upload-section">
+        <div class="portal-project-card files-upload-section">
           <div class="card-header-with-action">
             <h3>Upload Files for Client</h3>
             <div class="table-dropdown generate-document-menu" id="pd-generate-document-menu">
@@ -342,7 +338,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
           <div class="admin-modal">
             <div class="admin-modal-header">
               <h2 id="file-upload-modal-title">Upload Files</h2>
-              <button type="button" class="btn-icon close-modal" id="file-upload-modal-close" aria-label="Close">${RENDER_ICONS.CLOSE}</button>
+              <button type="button" class="icon-btn close-modal" id="file-upload-modal-close" aria-label="Close">${RENDER_ICONS.CLOSE}</button>
             </div>
             <div class="admin-modal-body">
               <div class="upload-files-preview" id="upload-files-preview"></div>
@@ -361,11 +357,11 @@ export function renderProjectDetailTab(container: HTMLElement): void {
             </div>
           </div>
         </div>
-        <div class="portal-project-card portal-shadow files-browser">
+        <div class="portal-project-card files-browser">
           <div class="folder-panel">
             <div class="folder-panel-header">
               <h4>Folders</h4>
-              <button class="btn-icon" id="btn-create-folder" title="Create Folder" aria-label="Create folder">${RENDER_ICONS.FOLDER_PLUS}</button>
+              <button class="icon-btn" id="btn-create-folder" title="Create Folder" aria-label="Create folder">${RENDER_ICONS.FOLDER_PLUS}</button>
             </div>
             <div class="folder-tree" id="pd-folder-tree">
               <div class="folder-item root active" data-folder-id="root">${RENDER_ICONS.FOLDER} <span>All Files</span></div>
@@ -384,10 +380,10 @@ export function renderProjectDetailTab(container: HTMLElement): void {
           </div>
         </div>
         <div class="file-detail-modal hidden" id="file-detail-modal">
-          <div class="file-detail-content portal-shadow">
+          <div class="file-detail-content">
             <div class="file-detail-header">
               <h2 id="file-detail-name">File Name</h2>
-              <button class="btn-icon close-modal" id="close-file-detail">${RENDER_ICONS.CLOSE}</button>
+              <button class="icon-btn close-modal" id="close-file-detail">${RENDER_ICONS.CLOSE}</button>
             </div>
             <div class="file-detail-tabs">
               <button class="active" data-tab="info">Info</button>
@@ -426,7 +422,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
     <!-- Messages Tab -->
     <div class="portal-tab-panel" id="pd-tab-messages">
       <div class="tab-content-wrapper">
-        <div class="messages-container portal-shadow">
+        <div class="messages-container">
           <div class="messages-thread" id="pd-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Project messages thread">
             <div class="empty-state">No messages yet. Start the conversation with your client.</div>
           </div>
@@ -445,10 +441,10 @@ export function renderProjectDetailTab(container: HTMLElement): void {
     <div class="portal-tab-panel" id="pd-tab-invoices">
       <div class="tab-content-wrapper">
         <div class="invoice-summary">
-          <div class="portal-project-card portal-shadow summary-card"><h4>Total Outstanding</h4><span class="summary-value" id="pd-outstanding">$0.00</span></div>
-          <div class="portal-project-card portal-shadow summary-card"><h4>Total Paid</h4><span class="summary-value" id="pd-paid">$0.00</span></div>
+          <div class="portal-project-card summary-card"><h4>Total Outstanding</h4><span class="summary-value" id="pd-outstanding">$0.00</span></div>
+          <div class="portal-project-card summary-card"><h4>Total Paid</h4><span class="summary-value" id="pd-paid">$0.00</span></div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="portal-project-card">
           <div class="card-header-with-action">
             <h3>Invoices</h3>
             <div class="invoice-action-buttons">
@@ -459,7 +455,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
           </div>
           <div class="invoices-list" id="pd-invoices-list"><div class="empty-state">No invoices yet. Create one above.</div></div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="portal-project-card">
           <div class="card-header-with-action">
             <h3>Payment Plans & Recurring</h3>
             <div class="invoice-action-buttons">
@@ -480,7 +476,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
     <!-- Tasks Tab -->
     <div class="portal-tab-panel" id="pd-tab-tasks">
       <div class="tab-content-wrapper">
-        <div class="portal-project-card portal-shadow">
+        <div class="portal-project-card">
           <div class="card-header-with-action">
             <div class="view-toggle-container">
               <div id="tasks-view-toggle-mount"></div>
@@ -496,7 +492,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
     <!-- Time Tracking Tab -->
     <div class="portal-tab-panel" id="pd-tab-time">
       <div class="tab-content-wrapper">
-        <div class="portal-project-card portal-shadow">
+        <div class="portal-project-card">
           <div class="card-header-with-action">
             <h3>Time Tracking</h3>
             <div class="time-tracking-actions">
@@ -506,11 +502,11 @@ export function renderProjectDetailTab(container: HTMLElement): void {
           </div>
           <div class="time-tracking-summary" id="time-tracking-summary"></div>
         </div>
-        <div class="portal-project-card portal-shadow time-weekly-chart">
+        <div class="portal-project-card time-weekly-chart">
           <h3>This Week</h3>
           <div id="time-weekly-chart-container"></div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="portal-project-card">
           <h3>Time Entries</h3>
           <div id="time-entries-list"><div class="empty-state">No time entries yet.</div></div>
         </div>
@@ -520,7 +516,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
     <!-- Contract Tab -->
     <div class="portal-tab-panel" id="pd-tab-contract">
       <div class="tab-content-wrapper">
-        <div class="portal-project-card portal-shadow">
+        <div class="portal-project-card">
           <div class="contract-status-display">
             <div class="contract-status-info">
               <div class="status-item"><span class="field-label">Status</span><span class="status-badge" id="pd-contract-status-badge">Not Signed</span></div>
@@ -530,7 +526,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
             </div>
           </div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="portal-project-card">
           <h3>Contract Document</h3>
           <p class="contract-description">Preview, download, or request a signature for this project's contract.</p>
           <div class="contract-actions-grid">
@@ -548,7 +544,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
             </button>
           </div>
         </div>
-        <div class="portal-project-card portal-shadow">
+        <div class="portal-project-card">
           <div class="card-header-with-action">
             <div>
               <h3>Contract Builder</h3>
@@ -561,7 +557,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
             <div class="status-item"><span class="field-label">Draft</span><span class="meta-value" id="pd-contract-draft-status">No draft yet</span></div>
           </div>
         </div>
-        <div class="portal-project-card portal-shadow" id="pd-contract-signature-card" style="display: none;">
+        <div class="portal-project-card" id="pd-contract-signature-card" style="display: none;">
           <h3>Signature Details</h3>
           <div class="signature-details">
             <div class="signature-info-row"><span class="field-label">Signed By</span><span class="meta-value" id="pd-contract-signer">-</span></div>
@@ -577,7 +573,7 @@ export function renderProjectDetailTab(container: HTMLElement): void {
     <!-- Notes Tab -->
     <div class="portal-tab-panel" id="pd-tab-notes">
       <div class="tab-content-wrapper">
-        <div class="portal-project-card portal-shadow">
+        <div class="portal-project-card">
           <div class="card-header-with-action">
             <h3>Admin Notes (Internal)</h3>
             <button class="btn btn-secondary btn-sm" id="btn-edit-project-notes">Edit Notes</button>
@@ -962,6 +958,358 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // Load project-specific data
     this.refreshProjectData(project.id);
+
+    // Set up inline editing for overview fields
+    this.setupInlineEditing(project);
+  }
+
+  /**
+   * Set up inline editing for overview fields
+   */
+  private setupInlineEditing(project: ProjectResponse): void {
+    const projectId = project.id;
+
+    // Helper to save a field
+    const saveField = async (field: string, value: string, element: HTMLElement, displayFn?: (v: string) => string) => {
+      try {
+        const res = await apiPut(`/api/projects/${projectId}`, { [field]: value || null });
+        if (!res.ok) throw new Error('Failed to save');
+        const data = await res.json();
+
+        // Update local project data
+        if (this.projectsData) {
+          const idx = this.projectsData.findIndex(p => p.id === projectId);
+          if (idx !== -1) {
+            this.projectsData[idx] = { ...this.projectsData[idx], ...data.project };
+          }
+        }
+
+        // Update display
+        element.textContent = displayFn ? displayFn(value) : (value || '-');
+        showToast('Saved', 'success');
+      } catch {
+        showToast('Failed to save', 'error');
+        throw new Error('Save failed');
+      }
+    };
+
+    // Project Name
+    const projectName = document.getElementById('pd-project-name');
+    if (projectName) {
+      makeEditable(
+        projectName,
+        () => project.project_name || '',
+        async (newValue) => {
+          await saveField('project_name', newValue, projectName);
+          // Also update the header title
+          const detailTitle = domCache.get('detailTitle');
+          if (detailTitle) detailTitle.textContent = newValue || 'Untitled Project';
+        },
+        { required: true, placeholder: 'Project name' }
+      );
+    }
+
+    // Project Type (dropdown)
+    const projectType = document.getElementById('pd-type');
+    if (projectType) {
+      projectType.addEventListener('click', () => {
+        if (projectType.classList.contains('is-editing')) return;
+        this.showTypeDropdown(projectType, project, projectId);
+      });
+    }
+
+    // Status (dropdown)
+    const statusBadge = document.getElementById('pd-status');
+    if (statusBadge) {
+      statusBadge.addEventListener('click', () => {
+        if (statusBadge.classList.contains('is-editing')) return;
+        this.showStatusDropdown(statusBadge, project, projectId);
+      });
+    }
+
+    // Start Date
+    const startDate = document.getElementById('pd-start-date');
+    if (startDate) {
+      makeEditable(
+        startDate,
+        () => project.start_date ? project.start_date.split('T')[0] : '',
+        async (newValue) => {
+          await saveField('start_date', newValue, startDate, v => v ? formatDate(v) : '-');
+        },
+        { type: 'date' }
+      );
+    }
+
+    // End Date
+    const endDate = document.getElementById('pd-end-date');
+    if (endDate) {
+      makeEditable(
+        endDate,
+        () => project.estimated_end_date ? project.estimated_end_date.split('T')[0] : '',
+        async (newValue) => {
+          await saveField('estimated_end_date', newValue, endDate, v => v ? formatDate(v) : '-');
+        },
+        { type: 'date' }
+      );
+    }
+
+    // Budget
+    const budget = document.getElementById('pd-budget');
+    if (budget) {
+      makeEditable(
+        budget,
+        () => project.budget_range || (project.budget ? String(project.budget) : ''),
+        async (newValue) => {
+          await saveField('budget_range', newValue, budget);
+        },
+        { placeholder: 'Budget range' }
+      );
+    }
+
+    // Timeline
+    const timeline = document.getElementById('pd-timeline');
+    if (timeline) {
+      makeEditable(
+        timeline,
+        () => project.timeline || '',
+        async (newValue) => {
+          await saveField('timeline', newValue, timeline);
+        },
+        { placeholder: 'e.g., 4-6 weeks' }
+      );
+    }
+
+    // Price
+    const price = document.getElementById('pd-price');
+    if (price) {
+      makeEditable(
+        price,
+        () => project.price ? String(project.price) : '',
+        async (newValue) => {
+          const numValue = parseFloat(newValue.replace(/[,$]/g, '')) || 0;
+          await saveField('price', String(numValue), price, v => v ? formatCurrency(parseFloat(v)) : '-');
+        },
+        { placeholder: 'Quoted price' }
+      );
+    }
+
+    // Deposit
+    const deposit = document.getElementById('pd-deposit');
+    if (deposit) {
+      makeEditable(
+        deposit,
+        () => project.deposit_amount ? String(project.deposit_amount) : '',
+        async (newValue) => {
+          const numValue = parseFloat(newValue.replace(/[,$]/g, '')) || 0;
+          await saveField('deposit_amount', String(numValue), deposit, v => v ? formatCurrency(parseFloat(v)) : '-');
+        },
+        { placeholder: 'Deposit amount' }
+      );
+    }
+
+    // Description (textarea)
+    const description = document.getElementById('pd-description');
+    if (description) {
+      description.addEventListener('click', () => {
+        if (description.classList.contains('is-editing')) return;
+        this.showTextareaEdit(description, project.description || '', async (newValue) => {
+          await saveField('description', newValue, description);
+        });
+      });
+    }
+
+    // Admin Notes (textarea)
+    const adminNotes = document.getElementById('pd-admin-notes');
+    if (adminNotes) {
+      adminNotes.addEventListener('click', () => {
+        if (adminNotes.classList.contains('is-editing')) return;
+        this.showTextareaEdit(adminNotes, project.notes || '', async (newValue) => {
+          await saveField('notes', newValue, adminNotes, v => v || 'Click to add notes...');
+        });
+      });
+    }
+  }
+
+  /**
+   * Show dropdown for project type selection
+   */
+  private showTypeDropdown(element: HTMLElement, project: ProjectResponse, projectId: number): void {
+    const types = ['simple_site', 'business', 'portfolio', 'ecommerce', 'web_app', 'extension', 'other'];
+    const labels: Record<string, string> = {
+      'simple_site': 'Simple Website',
+      'business': 'Business Website',
+      'portfolio': 'Portfolio',
+      'ecommerce': 'E-Commerce',
+      'web_app': 'Web Application',
+      'extension': 'Browser Extension',
+      'other': 'Other'
+    };
+
+    this.showSelectDropdown(element, types, project.project_type || '', labels, async (newValue) => {
+      try {
+        const res = await apiPut(`/api/projects/${projectId}`, { project_type: newValue });
+        if (!res.ok) throw new Error('Failed to save');
+        element.textContent = labels[newValue] || newValue || '-';
+        showToast('Saved', 'success');
+      } catch {
+        showToast('Failed to save', 'error');
+      }
+    });
+  }
+
+  /**
+   * Show dropdown for status selection
+   */
+  private showStatusDropdown(element: HTMLElement, project: ProjectResponse, projectId: number): void {
+    const statuses = ['pending', 'active', 'on_hold', 'completed', 'archived'];
+    const labels: Record<string, string> = {
+      'pending': 'Pending',
+      'active': 'Active',
+      'on_hold': 'On Hold',
+      'completed': 'Completed',
+      'archived': 'Archived'
+    };
+
+    this.showSelectDropdown(element, statuses, project.status || '', labels, async (newValue) => {
+      try {
+        const res = await apiPut(`/api/projects/${projectId}`, { status: newValue });
+        if (!res.ok) throw new Error('Failed to save');
+        element.textContent = labels[newValue] || newValue || '-';
+        element.className = `status-badge inline-editable status-${newValue}`;
+        showToast('Saved', 'success');
+      } catch {
+        showToast('Failed to save', 'error');
+      }
+    });
+  }
+
+  /**
+   * Show select dropdown for inline editing
+   */
+  private showSelectDropdown(
+    element: HTMLElement,
+    options: string[],
+    currentValue: string,
+    labels: Record<string, string>,
+    onSave: (value: string) => Promise<void>
+  ): void {
+    element.classList.add('is-editing');
+
+    const select = document.createElement('select');
+    select.className = 'inline-edit-select form-select';
+    select.style.cssText = `
+      padding: 4px 8px;
+      border: 1px solid var(--color-primary);
+      border-radius: 4px;
+      background: var(--portal-bg-darker);
+      color: var(--portal-text-light);
+      font-size: inherit;
+      outline: none;
+      cursor: pointer;
+      min-width: 120px;
+    `;
+
+    options.forEach(opt => {
+      const option = document.createElement('option');
+      option.value = opt;
+      option.textContent = labels[opt] || opt;
+      if (opt === currentValue) option.selected = true;
+      select.appendChild(option);
+    });
+
+    const originalContent = element.innerHTML;
+    element.innerHTML = '';
+    element.appendChild(select);
+    select.focus();
+
+    const cleanup = () => {
+      element.classList.remove('is-editing');
+      element.innerHTML = originalContent;
+    };
+
+    select.addEventListener('change', async () => {
+      const newValue = select.value;
+      cleanup();
+      await onSave(newValue);
+    });
+
+    select.addEventListener('blur', () => {
+      setTimeout(() => {
+        if (element.contains(select)) {
+          cleanup();
+        }
+      }, 100);
+    });
+
+    select.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        cleanup();
+      }
+    });
+  }
+
+  /**
+   * Show textarea for inline editing
+   */
+  private showTextareaEdit(
+    element: HTMLElement,
+    currentValue: string,
+    onSave: (value: string) => Promise<void>
+  ): void {
+    element.classList.add('is-editing');
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'inline-edit-textarea form-textarea';
+    textarea.value = currentValue;
+    textarea.style.cssText = `
+      width: 100%;
+      min-height: 80px;
+      padding: 8px;
+      border: 1px solid var(--color-primary);
+      border-radius: 4px;
+      background: var(--portal-bg-darker);
+      color: var(--portal-text-light);
+      font-size: inherit;
+      font-family: inherit;
+      outline: none;
+      resize: vertical;
+    `;
+
+    const originalContent = element.innerHTML;
+    element.innerHTML = '';
+    element.appendChild(textarea);
+    textarea.focus();
+
+    const cleanup = () => {
+      element.classList.remove('is-editing');
+      element.innerHTML = originalContent;
+    };
+
+    const save = async () => {
+      const newValue = textarea.value.trim();
+      element.classList.remove('is-editing');
+      element.textContent = newValue || 'Click to add...';
+      await onSave(newValue);
+    };
+
+    textarea.addEventListener('blur', () => {
+      setTimeout(() => {
+        if (element.contains(textarea)) {
+          save();
+        }
+      }, 100);
+    });
+
+    textarea.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        cleanup();
+      }
+      // Ctrl/Cmd + Enter to save
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        save();
+      }
+    });
   }
 
   /**
@@ -1333,16 +1681,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       if (!this.currentProjectId || !action) return;
 
       switch (action) {
-      case 'edit':
-        openEditProjectModal(this.currentProjectId, this.projectsData, async () => {
-          await saveProjectChanges(
-              this.currentProjectId!,
-              this.loadProjectsFn!,
-              (p) => this.populateProjectDetailView(p),
-              this.projectsData
-          );
-        });
-        break;
       case 'duplicate':
         await duplicateProject(
           this.currentProjectId,

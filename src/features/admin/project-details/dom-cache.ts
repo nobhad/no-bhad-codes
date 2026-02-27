@@ -102,11 +102,6 @@ export type ProjectDetailsDOMKeys = {
   invoicesList: string;
   outstanding: string;
   paid: string;
-  // Edit modal
-  editModal: string;
-  editForm: string;
-  editClose: string;
-  editCancel: string;
 };
 
 /** Cached DOM element references for performance */
@@ -206,12 +201,7 @@ export function initDOMCache(): void {
     // Invoices
     invoicesList: '#pd-invoices-list',
     outstanding: '#pd-outstanding',
-    paid: '#pd-paid',
-    // Edit modal
-    editModal: '#edit-project-modal',
-    editForm: '#edit-project-form',
-    editClose: '#edit-project-close',
-    editCancel: '#edit-project-cancel'
+    paid: '#pd-paid'
   });
 }
 

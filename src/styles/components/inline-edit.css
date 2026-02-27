@@ -58,7 +58,7 @@
 
 [data-page="admin"] .inline-edit-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.2);
+  box-shadow: 0 0 0 2px var(--color-error-alpha-20);
 }
 
 [data-page="admin"] .inline-edit-input::placeholder {
@@ -86,4 +86,201 @@
 [data-page="admin"] .inline-edit-input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* ===============================================
+ * INLINE EDIT WRAPPER AND BUTTONS
+ * Used by InlineEdit.tsx React component
+ * =============================================== */
+
+/* Edit mode wrapper - contains input and action buttons */
+.portal .inline-edit-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Action buttons (save/cancel) */
+.portal .inline-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  border-radius: var(--portal-radius-sm, 4px);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color var(--transition-faster, 0.1s) ease;
+}
+
+.portal .inline-edit-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.portal .inline-edit-btn-save {
+  color: var(--status-completed, var(--color-success));
+}
+
+.portal .inline-edit-btn-save:hover {
+  background-color: var(--status-completed-bg, var(--color-success-alpha-15));
+}
+
+.portal .inline-edit-btn-cancel {
+  color: var(--status-cancelled, var(--color-danger));
+}
+
+.portal .inline-edit-btn-cancel:hover {
+  background-color: var(--status-cancelled-bg, var(--color-danger-alpha-15));
+}
+
+/* Display mode - clickable value */
+.portal .inline-edit-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  min-height: 24px;
+  padding: 0 4px;
+  margin: 0 -4px;
+  border-radius: var(--portal-radius-sm, 4px);
+  transition: background-color var(--transition-faster, 0.1s) ease;
+}
+
+.portal .inline-edit-display:hover {
+  background-color: var(--portal-bg-hover);
+}
+
+.portal .inline-edit-display.is-disabled {
+  cursor: default;
+}
+
+.portal .inline-edit-display.is-disabled:hover {
+  background-color: transparent;
+}
+
+/* Value text */
+.portal .inline-edit-value {
+  font-size: 13px;
+}
+
+.portal .inline-edit-value.is-placeholder {
+  color: var(--portal-text-muted);
+  font-style: italic;
+}
+
+/* Edit icon - hidden by default, shown on hover */
+.portal .inline-edit-icon {
+  width: 10px;
+  height: 10px;
+  color: var(--portal-text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-faster, 0.1s) ease;
+}
+
+.portal .inline-edit-display:hover .inline-edit-icon {
+  opacity: 1;
+}
+
+/* Compact input for inline editing */
+.portal .inline-edit-input-compact {
+  height: 24px;
+  min-width: 80px;
+  width: 100%;
+  padding: 0 6px;
+  background: var(--portal-bg-darkest);
+  color: var(--portal-text-primary);
+  border: 1px solid var(--color-brand-primary, var(--color-primary));
+  border-radius: var(--portal-radius-sm, 4px);
+  font-size: 12px;
+  outline: none;
+}
+
+.portal .inline-edit-input-compact[type="date"] {
+  min-width: 130px;
+  color-scheme: dark;
+}
+
+/* ===============================================
+ * PROJECT DETAIL INLINE EDITING
+ * Styles for the project overview inline editing
+ * =============================================== */
+
+/* Project title inline editing */
+.pd-header-card .detail-title.inline-editable {
+  padding: var(--space-1) var(--space-2);
+  margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-2));
+  border-radius: var(--portal-radius-sm);
+}
+
+.pd-header-card .detail-title.inline-editable:hover:not(.is-editing) {
+  background: var(--portal-bg-lighter);
+}
+
+/* Status badge inline editing */
+.pd-header-card .status-badge.inline-editable {
+  cursor: pointer;
+}
+
+.pd-header-card .status-badge.inline-editable:hover:not(.is-editing) {
+  filter: brightness(1.2);
+}
+
+/* Meta value inline editing */
+.pd-header-card .pd-meta-value.inline-editable {
+  padding: var(--space-0-5) var(--space-1);
+  margin: calc(-1 * var(--space-0-5)) calc(-1 * var(--space-1));
+  border-radius: var(--portal-radius-sm);
+  min-width: 60px;
+  display: inline-block;
+}
+
+.pd-header-card .pd-meta-value.inline-editable:hover:not(.is-editing) {
+  background: var(--portal-bg-lighter);
+}
+
+/* Description inline editing */
+.pd-header-card .pd-description.inline-editable {
+  padding: var(--space-1) var(--space-2);
+  margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-2));
+  border-radius: var(--portal-radius-sm);
+  min-height: 1.5em;
+}
+
+.pd-header-card .pd-description.inline-editable:hover:not(.is-editing) {
+  background: var(--portal-bg-lighter);
+}
+
+/* Hide edit icon pseudo-element for project detail fields */
+.pd-header-card .inline-editable:hover:not(.is-editing)::after {
+  display: none;
+}
+
+/* Textarea for description/notes editing */
+.pd-header-card .inline-edit-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: var(--space-2);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  font-size: inherit;
+  font-family: inherit;
+  line-height: 1.5;
+  outline: none;
+  resize: vertical;
+}
+
+/* Select dropdown for type/status editing */
+.pd-header-card .inline-edit-select {
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  font-size: inherit;
+  outline: none;
+  cursor: pointer;
+  min-width: 140px;
 }

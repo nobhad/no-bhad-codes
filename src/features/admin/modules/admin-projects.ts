@@ -582,8 +582,8 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       <td class="date-cell target-cell" data-label="Target">${formatDate(project.end_date)}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-          createAction('view', project.id, { className: 'btn-view-project', dataAttrs: { 'project-id': project.id }, title: 'View Project', ariaLabel: 'View project details' }),
-        ])}
+    createAction('view', project.id, { className: 'btn-view-project', dataAttrs: { 'project-id': project.id }, title: 'View Project', ariaLabel: 'View project details' })
+  ])}
       </td>
     `;
 
@@ -1777,7 +1777,7 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
 
   container.innerHTML = `
     <div class="data-table-scroll-wrapper">
-      <table class="data-table files-table" aria-label="Project files">
+      <table class="data-table" aria-label="Project files">
         <thead>
           <tr>
             <th scope="col" class="name-col">File</th>
@@ -2424,7 +2424,7 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
 
   container.innerHTML = `
     <div class="data-table-scroll-wrapper">
-      <table class="data-table invoices-table" aria-label="Project invoices">
+      <table class="data-table" aria-label="Project invoices">
         <thead>
           <tr>
             <th scope="col" class="name-col">Invoice #</th>
