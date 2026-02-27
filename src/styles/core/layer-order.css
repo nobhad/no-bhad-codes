@@ -1,0 +1,37 @@
+/**
+ * ===============================================
+ * CSS CASCADE LAYER ORDER - SINGLE SOURCE OF TRUTH
+ * ===============================================
+ * @file src/styles/core/layer-order.css
+ *
+ * This file establishes the ONLY layer order declaration for the entire project.
+ * Import this file FIRST in any bundle to ensure consistent cascade behavior.
+ *
+ * LAYER HIERARCHY (lowest to highest priority):
+ * 1. reset      - Browser resets, normalize styles
+ * 2. tokens     - CSS custom properties, design tokens
+ * 3. base       - HTML element defaults, typography
+ * 4. components - Reusable UI components (buttons, forms, cards)
+ * 5. layouts    - Grid/flex layout systems
+ * 6. pages      - Page-specific styles
+ * 7. states     - Visibility and interactive states
+ * 8. responsive - Media query overrides
+ * 9. utilities  - Final overrides (highest priority)
+ *
+ * RULES:
+ * - Never declare @layer order in any other file
+ * - All other CSS files should use @layer(name) { } syntax
+ * - Utilities layer should only contain atomic helper classes
+ */
+
+@layer reset, tokens, base, components, layouts, pages, states, responsive, utilities;
+
+/**
+ * SUB-LAYER DECLARATIONS (for bundle-specific organization)
+ *
+ * These allow bundles to organize within the main hierarchy:
+ * - admin: Admin dashboard specific styles (within pages)
+ * - portal: Client portal specific styles (within pages)
+ * - page-states: Page transition states (within states)
+ * - mobile: Mobile-specific overrides (within responsive)
+ */

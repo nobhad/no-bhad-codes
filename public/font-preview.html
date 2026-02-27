@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Font Preview - Heading Serif Options</title>
+
+    <!-- Load all serif font options from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600;700&family=Inconsolata:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Reset */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --font-mono: 'Inconsolata', monospace;
+        --font-heading: 'Playfair Display', serif;
+        --letter-spacing-tight: -0.09em;
+
+        --bg-pitch: #000000;
+        --bg-dark: #0a0a0a;
+        --bg-medium: #1a1a1a;
+        --bg-light: #2a2a2a;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a0a0;
+        --border-color: #3a3a3a;
+        --primary: #00aff0;
+      }
+
+      body {
+        font-family: var(--font-mono);
+        background: var(--bg-pitch);
+        color: var(--text-primary);
+        line-height: 1.5;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      /* Font selector */
+      .font-selector {
+        position: sticky;
+        top: 0;
+        background: var(--bg-dark);
+        padding: 1rem 2rem;
+        margin: -2rem -2rem 2rem -2rem;
+        border-bottom: 1px solid var(--border-color);
+        z-index: 100;
+      }
+
+      .font-selector h1 {
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+      }
+
+      .font-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .font-btn {
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .font-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .font-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #000;
+      }
+
+      .font-btn .font-name {
+        display: block;
+        font-size: 1.25rem;
+        margin-top: 0.25rem;
+      }
+
+      .font-btn[data-font='playfair'] .font-name {
+        font-family: 'Playfair Display', serif;
+      }
+      .font-btn[data-font='cormorant'] .font-name {
+        font-family: 'Cormorant Garamond', serif;
+      }
+      .font-btn[data-font='garamond'] .font-name {
+        font-family: 'EB Garamond', serif;
+      }
+      .font-btn[data-font='baskerville'] .font-name {
+        font-family: 'Libre Baskerville', serif;
+      }
+      .font-btn[data-font='inconsolata'] .font-name {
+        font-family: 'Inconsolata', monospace;
+      }
+
+      /* Current font display */
+      .current-font {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background: var(--bg-medium);
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      /* Preview grid */
+      .preview-grid {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      /* Sidebar preview */
+      .sidebar-preview {
+        background: var(--bg-dark);
+        border: 1px solid var(--border-color);
+        padding: 1rem;
+      }
+
+      .sidebar-logo {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        letter-spacing: var(--letter-spacing-tight);
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1rem;
+      }
+
+      .sidebar-nav {
+        list-style: none;
+      }
+
+      .sidebar-nav li {
+        padding: 0.75rem 0;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+
+      .sidebar-nav li:hover,
+      .sidebar-nav li.active {
+        color: var(--primary);
+      }
+
+      .sidebar-nav li.active {
+        font-weight: 600;
+      }
+
+      /* Main content */
+      .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      /* Header preview */
+      .header-preview {
+        background: var(--bg-dark);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+      }
+
+      .header-preview h1 {
+        font-family: var(--font-heading);
+        font-size: 2.5rem;
+        font-weight: 500;
+        letter-spacing: var(--letter-spacing-tight);
+        margin-bottom: 0.5rem;
+      }
+
+      .header-preview p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: 1px solid var(--border-color);
+        background: transparent;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #000;
+      }
+
+      .btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .btn-primary:hover {
+        background: #008fcc;
+      }
+
+      /* Cards preview */
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+      }
+
+      .card {
+        background: var(--bg-dark);
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+      }
+
+      .card h3 {
+        font-family: var(--font-heading);
+        font-size: 1.25rem;
+        font-weight: 500;
+        letter-spacing: var(--letter-spacing-tight);
+        margin-bottom: 0.75rem;
+      }
+
+      .card p {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+      }
+
+      .card-meta {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+      }
+
+      .card-value {
+        font-size: 2rem;
+        font-family: var(--font-heading);
+        letter-spacing: var(--letter-spacing-tight);
+        margin-top: 0.25rem;
+      }
+
+      /* Table preview */
+      .table-preview {
+        background: var(--bg-dark);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+      }
+
+      .table-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .table-header h2 {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        font-weight: 500;
+        letter-spacing: var(--letter-spacing-tight);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        text-align: left;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border-color);
+        font-weight: 500;
+      }
+
+      td {
+        padding: 1rem 1.5rem;
+        font-size: 0.875rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      tr:hover td {
+        background: var(--bg-medium);
+      }
+
+      .table-name {
+        font-weight: 500;
+      }
+
+      .table-title {
+        font-family: var(--font-heading);
+        font-weight: 500;
+        letter-spacing: var(--letter-spacing-tight);
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: var(--bg-medium);
+        border: 1px solid var(--border-color);
+      }
+
+      .status-badge.active {
+        border-color: #22c55e;
+        color: #22c55e;
+      }
+
+      .status-badge.pending {
+        border-color: #f59e0b;
+        color: #f59e0b;
+      }
+
+      /* Heading scale preview */
+      .heading-scale {
+        background: var(--bg-dark);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+      }
+
+      .heading-scale-title {
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+      }
+
+      .heading-scale h1,
+      .heading-scale h2,
+      .heading-scale h3,
+      .heading-scale h4,
+      .heading-scale h5,
+      .heading-scale h6 {
+        font-family: var(--font-heading);
+        letter-spacing: var(--letter-spacing-tight);
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .heading-scale h1 {
+        font-size: 3rem;
+        font-weight: 700;
+      }
+      .heading-scale h2 {
+        font-size: 2.25rem;
+        font-weight: 600;
+      }
+      .heading-scale h3 {
+        font-size: 1.75rem;
+        font-weight: 500;
+      }
+      .heading-scale h4 {
+        font-size: 1.25rem;
+        font-weight: 500;
+      }
+      .heading-scale h5 {
+        font-size: 1rem;
+        font-weight: 500;
+      }
+      .heading-scale h6 {
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-bottom: none;
+      }
+
+      .heading-label {
+        font-family: var(--font-mono);
+        font-size: 0.6875rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-left: 1rem;
+      }
+
+      /* Weight comparison */
+      .weight-comparison {
+        background: var(--bg-dark);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+      }
+
+      .weight-row {
+        display: flex;
+        align-items: baseline;
+        gap: 2rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .weight-row:last-child {
+        border-bottom: none;
+      }
+
+      .weight-label {
+        width: 100px;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-secondary);
+      }
+
+      .weight-sample {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        letter-spacing: var(--letter-spacing-tight);
+      }
+
+      .weight-400 {
+        font-weight: 400;
+      }
+      .weight-500 {
+        font-weight: 500;
+      }
+      .weight-600 {
+        font-weight: 600;
+      }
+      .weight-700 {
+        font-weight: 700;
+      }
+
+      /* Responsive */
+      @media (max-width: 1024px) {
+        .preview-grid {
+          grid-template-columns: 1fr;
+        }
+        .cards-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="font-selector">
+      <h1>Select Heading Font</h1>
+      <div class="font-buttons">
+        <button class="font-btn active" data-font="playfair">
+          <span>Playfair Display</span>
+          <span class="font-name">Aa Bb Cc</span>
+        </button>
+        <button class="font-btn" data-font="cormorant">
+          <span>Cormorant Garamond</span>
+          <span class="font-name">Aa Bb Cc</span>
+        </button>
+        <button class="font-btn" data-font="garamond">
+          <span>EB Garamond</span>
+          <span class="font-name">Aa Bb Cc</span>
+        </button>
+        <button class="font-btn" data-font="baskerville">
+          <span>Libre Baskerville</span>
+          <span class="font-name">Aa Bb Cc</span>
+        </button>
+        <button class="font-btn" data-font="inconsolata">
+          <span>Inconsolata (Current)</span>
+          <span class="font-name">Aa Bb Cc</span>
+        </button>
+      </div>
+      <div class="current-font">
+        Current: <strong id="current-font-name">Playfair Display</strong>
+      </div>
+    </div>
+
+    <div class="preview-grid">
+      <!-- Sidebar -->
+      <div class="sidebar-preview">
+        <div class="sidebar-logo">DISCOTHÈQUE</div>
+        <ul class="sidebar-nav">
+          <li class="active">Dashboard</li>
+          <li>Projects</li>
+          <li>Clients</li>
+          <li>Messages</li>
+          <li>Analytics</li>
+          <li>Settings</li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Header -->
+        <div class="header-preview">
+          <h1>Client Dashboard</h1>
+          <p>Welcome back. Here's an overview of your projects and activity.</p>
+          <div class="header-actions">
+            <button class="btn btn-primary">New Project</button>
+            <button class="btn">Export Data</button>
+          </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card-meta">Total Revenue</div>
+            <div class="card-value">$124,500</div>
+          </div>
+          <div class="card">
+            <div class="card-meta">Active Projects</div>
+            <div class="card-value">12</div>
+          </div>
+          <div class="card">
+            <div class="card-meta">Pending Invoices</div>
+            <div class="card-value">3</div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-preview">
+          <div class="table-header">
+            <h2>Recent Projects</h2>
+            <button class="btn">View All</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Client</th>
+                <th>Status</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="table-title">Brand Identity Redesign</td>
+                <td class="table-name">Acme Corp</td>
+                <td><span class="status-badge active">Active</span></td>
+                <td>$15,000</td>
+              </tr>
+              <tr>
+                <td class="table-title">E-commerce Platform</td>
+                <td class="table-name">TechStart Inc</td>
+                <td><span class="status-badge active">Active</span></td>
+                <td>$45,000</td>
+              </tr>
+              <tr>
+                <td class="table-title">Mobile App Design</td>
+                <td class="table-name">HealthPlus</td>
+                <td><span class="status-badge pending">Pending</span></td>
+                <td>$28,000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Heading Scale -->
+        <div class="heading-scale">
+          <div class="heading-scale-title">Heading Scale</div>
+          <h1>Heading One <span class="heading-label">3rem / 700</span></h1>
+          <h2>Heading Two <span class="heading-label">2.25rem / 600</span></h2>
+          <h3>Heading Three <span class="heading-label">1.75rem / 500</span></h3>
+          <h4>Heading Four <span class="heading-label">1.25rem / 500</span></h4>
+          <h5>Heading Five <span class="heading-label">1rem / 500</span></h5>
+          <h6>Heading Six <span class="heading-label">0.875rem / 500</span></h6>
+        </div>
+
+        <!-- Weight Comparison -->
+        <div class="weight-comparison">
+          <div class="heading-scale-title">Font Weights</div>
+          <div class="weight-row">
+            <span class="weight-label">400 Regular</span>
+            <span class="weight-sample weight-400"
+              >The quick brown fox jumps over the lazy dog</span
+            >
+          </div>
+          <div class="weight-row">
+            <span class="weight-label">500 Medium</span>
+            <span class="weight-sample weight-500"
+              >The quick brown fox jumps over the lazy dog</span
+            >
+          </div>
+          <div class="weight-row">
+            <span class="weight-label">600 Semibold</span>
+            <span class="weight-sample weight-600"
+              >The quick brown fox jumps over the lazy dog</span
+            >
+          </div>
+          <div class="weight-row">
+            <span class="weight-label">700 Bold</span>
+            <span class="weight-sample weight-700"
+              >The quick brown fox jumps over the lazy dog</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const fontMap = {
+        playfair: "'Playfair Display', serif",
+        cormorant: "'Cormorant Garamond', serif",
+        garamond: "'EB Garamond', serif",
+        baskerville: "'Libre Baskerville', serif",
+        inconsolata: "'Inconsolata', monospace",
+      };
+
+      const fontNames = {
+        playfair: 'Playfair Display',
+        cormorant: 'Cormorant Garamond',
+        garamond: 'EB Garamond',
+        baskerville: 'Libre Baskerville',
+        inconsolata: 'Inconsolata',
+      };
+
+      const buttons = document.querySelectorAll('.font-btn');
+      const currentFontDisplay = document.getElementById('current-font-name');
+
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          // Update active state
+          buttons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          // Get font key
+          const fontKey = btn.dataset.font;
+          const fontFamily = fontMap[fontKey];
+
+          // Update CSS variable
+          document.documentElement.style.setProperty('--font-heading', fontFamily);
+
+          // Update display
+          currentFontDisplay.textContent = fontNames[fontKey];
+        });
+      });
+    </script>
+  </body>
+</html>

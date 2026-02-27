@@ -101,14 +101,14 @@ This CSS file defines global variables and font-face rules for consistent stylin
   /* Container and Layout - defined in base/layout.css */
 
   /* Responsive Typography */
-  --font-size-2xs: 0.625rem;  /* 10px - smallest, badges/tags */
-  --font-size-xs: 0.75rem;    /* 12px - table cells, secondary text */
-  --font-size-sm: 0.875rem;   /* 14px - body text, buttons */
-  --font-size-base: 1rem;     /* 16px - default body */
-  --font-size-lg: 1.125rem;   /* 18px - headings */
-  --font-size-xl: 1.25rem;    /* 20px - large headings */
-  --font-size-2xl: 1.5rem;    /* 24px - page titles */
-  --font-size-3xl: 2rem;      /* 32px - hero text */
+  --font-size-2xs: 0.625rem; /* 10px - smallest, badges/tags */
+  --font-size-xs: 0.75rem; /* 12px - table cells, secondary text */
+  --font-size-sm: 0.875rem; /* 14px - body text, buttons */
+  --font-size-base: 1rem; /* 16px - default body */
+  --font-size-lg: 1.125rem; /* 18px - headings */
+  --font-size-xl: 1.25rem; /* 20px - large headings */
+  --font-size-2xl: 1.5rem; /* 24px - page titles */
+  --font-size-3xl: 2rem; /* 32px - hero text */
 
   /* Icon Sizes - standardized icon dimensions */
   --icon-size-xs: 12px;
@@ -176,7 +176,9 @@ This CSS file defines global variables and font-face rules for consistent stylin
    */
 
   /* Card shadows - subtle elevation for cards and panels */
-  --shadow-card: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+  --shadow-card:
+    1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 2px 6px rgba(0, 0, 0, 0.15);
 
   /* Content box shadows - medium elevation */
   --shadow-content: 2px 2px 8px rgba(0, 0, 0, 0.4), 4px 4px 16px rgba(0, 0, 0, 0.3);
@@ -185,14 +187,18 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --shadow-sidebar: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3);
 
   /* Panel shadows - for floating panels with border emphasis */
-  --shadow-panel: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3);
+  --shadow-panel:
+    2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3);
 
   /* Inset shadows - for progress bars and recessed elements */
   --shadow-inset: inset 2px 2px 6px rgba(0, 0, 0, 0.5), inset -1px -1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-inset-light: inset 2px 2px 6px rgba(0, 0, 0, 0.3), inset -1px -1px 3px rgba(0, 0, 0, 0.15);
+  --shadow-inset-light:
+    inset 2px 2px 6px rgba(0, 0, 0, 0.3), inset -1px -1px 3px rgba(0, 0, 0, 0.15);
 
   /* Spread shadows - for modals */
-  --shadow-spread: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-spread:
+    4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
 
   /* Elevated shadows - for floating elements */
   --shadow-elevated-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -201,7 +207,8 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --shadow-elevated-xl: 0 12px 40px rgba(0, 0, 0, 0.15);
 
   /* Dropdown/menu shadows - top shadows for tabs */
-  --shadow-dropdown: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 -4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-dropdown:
+    4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 -4px 12px rgba(0, 0, 0, 0.3);
 
   /* Large dropdown shadows - for modal-like dropdowns */
   --shadow-dropdown-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -228,32 +235,32 @@ This CSS file defines global variables and font-face rules for consistent stylin
  */
 [data-page="client-portal"],
 [data-page="admin"] {
-  /* Base neutral colors - override theme */
-  --color-neutral-100: #f5f5f5;
-  --color-neutral-200: #e0e0e0;
-  --color-neutral-300: #e0e0e0;
-  --color-neutral-400: #bdbdbd;
-  --color-dark: #333333;
-  --color-text-primary: #333333;
-  --color-border: #333333;
+  /* Base neutral colors - DISCOTHÈQUE override */
+  --color-neutral-100: #0a0a0a;
+  --color-neutral-200: #000000;
+  --color-neutral-300: #000000;
+  --color-neutral-400: #787878;
+  --color-dark: #ffffff;
+  --color-text-primary: #ffffff;
+  --color-border: #ffffff;
 
-  /* Portal text colors */
-  --portal-text-light: #f5f5f5;
-  --portal-text-primary: #f5f5f5;
-  --portal-text-secondary: #A3A3A3;
-  --portal-text-muted: #999999;
-  --portal-text-dark: #1a1a1a;
+  /* Portal text colors - DISCOTHÈQUE white on black */
+  --portal-text-light: #ffffff;
+  --portal-text-primary: #ffffff;
+  --portal-text-secondary: #f4f4f4;
+  --portal-text-muted: #a0a0a0;
+  --portal-text-dark: #000000;
 
-  /* Portal background colors */
-  --portal-bg-pitch: #0a0a0a; /* Pitch black - page backgrounds, dropdowns, modals */
-  --portal-bg-darkest: #1a1a1a;
-  --portal-bg-darker: #2a2a2a;
-  --portal-bg-dark: #333333;
-  --portal-bg-medium: #444444;
-  --portal-bg-light: #555555;
-  --portal-bg-lighter: #666666;
-  --portal-bg-hover: #3a3a3a;
-  --portal-bg-readonly: #222222;
+  /* Portal background colors - DISCOTHÈQUE pure black */
+  --portal-bg-pitch: #000000; /* Pure black - page backgrounds */
+  --portal-bg-darkest: #000000; /* Pure black */
+  --portal-bg-darker: #0a0a0a; /* Near black for cards */
+  --portal-bg-dark: #1a1a1a; /* Subtle elevation */
+  --portal-bg-medium: #2a2a2a;
+  --portal-bg-light: #3a3a3a;
+  --portal-bg-lighter: #4a4a4a;
+  --portal-bg-hover: #1a1a1a;
+  --portal-bg-readonly: #0a0a0a;
 
   /* Portal border - single source of truth (matches text color) */
   --portal-border-color: var(--portal-text-muted);
@@ -377,13 +384,13 @@ html {
 }
 
 body {
-  font-family: var(--font-pp-neue);
+  font-family: var(--font-family-mono, "Inconsolata", monospace);
   font-size: var(--font-size-base);
   line-height: 1.6;
   margin: 0;
   padding: 0;
-  background-color: var(--color-neutral-300);
-  color: var(--color-dark);
+  background-color: var(--color-bg-primary, #000000);
+  color: var(--color-text-primary, #ffffff);
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
@@ -394,7 +401,9 @@ body {
 main,
 section,
 .footer {
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 /* Font Utility Classes */

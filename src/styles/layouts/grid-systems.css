@@ -1,0 +1,189 @@
+/**
+ * ===============================================
+ * GRID LAYOUT SYSTEMS
+ * ===============================================
+ * @file src/styles/layouts/grid-systems.css
+ *
+ * Reusable CSS Grid layout patterns.
+ * These are higher priority than components but lower than page-specific styles.
+ */
+
+@layer layouts {
+  /* ============================================
+   * ADMIN DASHBOARD GRIDS
+   * ============================================ */
+
+  /* Base admin grid */
+  .admin-grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  /* 2-column grid */
+  .admin-grid-2col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* 3-column grid */
+  .admin-grid-3col {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* 4-column grid */
+  .admin-grid-4col {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Auto-fit columns (responsive) */
+  .admin-grid-auto {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  /* ============================================
+   * PORTAL GRIDS
+   * ============================================ */
+
+  /* Portal stat cards grid */
+  .portal-stats-grid {
+    display: grid;
+    gap: var(--portal-section-gap, 24px);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  /* Portal dashboard widgets grid */
+  .portal-widgets-grid {
+    display: grid;
+    gap: var(--portal-section-gap, 24px);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  /* ============================================
+   * CARD GRIDS
+   * ============================================ */
+
+  /* Cards grid - auto-fit with min 280px */
+  .cards-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  /* Cards grid - smaller min width */
+  .cards-grid-sm {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  /* Cards grid - larger min width */
+  .cards-grid-lg {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+
+  /* ============================================
+   * FORM GRIDS
+   * ============================================ */
+
+  /* Form 2-column layout */
+  .form-grid-2col {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Form field + button inline */
+  .form-grid-inline {
+    display: grid;
+    gap: var(--space-2);
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+
+  /* Form label + input stacked */
+  .form-grid-stacked {
+    display: grid;
+    gap: var(--space-1);
+    grid-template-rows: auto 1fr;
+  }
+
+  /* ============================================
+   * SIDEBAR LAYOUTS
+   * ============================================ */
+
+  /* Sidebar + content layout */
+  .layout-sidebar {
+    display: grid;
+    grid-template-columns: var(--sidebar-width, 280px) 1fr;
+    min-height: 100vh;
+  }
+
+  /* Collapsed sidebar layout */
+  .layout-sidebar-collapsed {
+    display: grid;
+    grid-template-columns: var(--sidebar-collapsed-width, 64px) 1fr;
+    min-height: 100vh;
+  }
+
+  /* ============================================
+   * HOLY GRAIL LAYOUT
+   * ============================================ */
+
+  /* Header + sidebar + content + footer */
+  .layout-holy-grail {
+    display: grid;
+    grid-template-areas:
+      "header header"
+      "sidebar content"
+      "footer footer";
+    grid-template-columns: var(--sidebar-width, 280px) 1fr;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+  }
+
+  .layout-holy-grail > .layout-header {
+    grid-area: header;
+  }
+  .layout-holy-grail > .layout-sidebar {
+    grid-area: sidebar;
+  }
+  .layout-holy-grail > .layout-content {
+    grid-area: content;
+  }
+  .layout-holy-grail > .layout-footer {
+    grid-area: footer;
+  }
+
+  /* ============================================
+   * TABLE-LIKE GRIDS
+   * ============================================ */
+
+  /* Table header/body alignment */
+  .table-grid {
+    display: grid;
+    gap: 0;
+  }
+
+  /* Table row (inherits column template from parent) */
+  .table-grid-row {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+  }
+
+  /* ============================================
+   * MASONRY-LIKE LAYOUTS
+   * ============================================ */
+
+  /* Simple masonry with columns */
+  .masonry-grid {
+    column-count: 3;
+    column-gap: var(--space-4);
+  }
+
+  .masonry-grid > * {
+    break-inside: avoid;
+    margin-bottom: var(--space-4);
+  }
+}

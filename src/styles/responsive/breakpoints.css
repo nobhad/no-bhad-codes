@@ -1,0 +1,271 @@
+/**
+ * ===============================================
+ * RESPONSIVE BREAKPOINT OVERRIDES
+ * ===============================================
+ * @file src/styles/responsive/breakpoints.css
+ *
+ * All media query overrides for responsive behavior.
+ * This layer has higher priority than pages, allowing responsive
+ * adjustments to override page-specific styles without !important.
+ *
+ * BREAKPOINT REFERENCE (using CSS custom media from design system):
+ * --mobile:  max-width: 639px
+ * --tablet:  min-width: 640px
+ * --desktop: min-width: 1024px
+ * --wide:    min-width: 1440px
+ */
+
+@layer responsive {
+  /* ============================================
+   * MOBILE-FIRST BASE OVERRIDES
+   * ============================================ */
+
+  /* Hide on mobile */
+  @media (--mobile) {
+    .hide-mobile {
+      display: none;
+    }
+
+    /* Stack grids on mobile */
+    .admin-grid-2col,
+    .admin-grid-3col,
+    .admin-grid-4col,
+    .form-grid-2col {
+      grid-template-columns: 1fr;
+    }
+
+    /* Full width cards on mobile */
+    .cards-grid,
+    .cards-grid-sm,
+    .cards-grid-lg {
+      grid-template-columns: 1fr;
+    }
+
+    /* Stack split layouts on mobile */
+    .layout-split,
+    .layout-split-asymmetric {
+      flex-direction: column;
+    }
+
+    /* Collapse masonry on mobile */
+    .masonry-grid {
+      column-count: 1;
+    }
+  }
+
+  /* ============================================
+   * TABLET OVERRIDES (640px+)
+   * ============================================ */
+
+  @media (--tablet) {
+    .show-tablet {
+      display: block;
+    }
+
+    .hide-tablet {
+      display: none;
+    }
+
+    /* 2-column grid on tablet */
+    .admin-grid-auto {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Masonry 2 columns on tablet */
+    .masonry-grid {
+      column-count: 2;
+    }
+  }
+
+  /* ============================================
+   * DESKTOP OVERRIDES (1024px+)
+   * ============================================ */
+
+  @media (--desktop) {
+    .show-desktop {
+      display: block;
+    }
+
+    .hide-desktop {
+      display: none;
+    }
+
+    /* Full grid columns on desktop */
+    .admin-grid-2col {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .admin-grid-3col {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .admin-grid-4col {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* Auto grid expands on desktop */
+    .admin-grid-auto {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    /* Masonry 3 columns on desktop */
+    .masonry-grid {
+      column-count: 3;
+    }
+  }
+
+  /* ============================================
+   * WIDE SCREEN OVERRIDES (1440px+)
+   * ============================================ */
+
+  @media (--wide) {
+    .show-wide {
+      display: block;
+    }
+
+    .hide-wide {
+      display: none;
+    }
+
+    /* Masonry 4 columns on wide screens */
+    .masonry-grid {
+      column-count: 4;
+    }
+  }
+
+  /* ============================================
+   * ADMIN DASHBOARD RESPONSIVE
+   * ============================================ */
+
+  @media (--mobile) {
+    /* Analytics quick stats - single column */
+    [data-page="admin"] #tab-analytics > .quick-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (--small-mobile) {
+    /* Chart.js legend grid */
+    [data-page="admin"] #tab-analytics .chart-container ul {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.25rem;
+      justify-items: start;
+    }
+
+    [data-page="admin"] #tab-analytics .chart-container ul li {
+      margin: 0;
+    }
+
+    /* Table header mobile titles */
+    .admin-table-header h3 .title-mobile,
+    .data-table-header h3 .title-mobile {
+      display: inline;
+    }
+
+    /* Empty table cells */
+    [data-page="admin"] .data-table tbody td:empty {
+      display: none;
+    }
+  }
+
+  /* ============================================
+   * PORTAL-SPECIFIC RESPONSIVE
+   * ============================================ */
+
+  @media (--mobile) {
+    /* Portal sidebar collapses on mobile */
+    .portal-sidebar {
+      position: fixed;
+      left: -100%;
+      transition: left 0.3s ease;
+    }
+
+    .portal-sidebar.is-open {
+      left: 0;
+    }
+
+    /* Portal header adjusts on mobile */
+    .portal-header {
+      padding: var(--space-2) var(--space-3);
+    }
+
+    /* Portal stat cards stack */
+    .portal-stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    /* Portal widgets stack */
+    .portal-widgets-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ============================================
+   * PRINT STYLES
+   * ============================================ */
+
+  @media print {
+    /* Hide navigation on print */
+    .sidebar,
+    .portal-sidebar,
+    .admin-sidebar {
+      display: none;
+    }
+
+    /* Hide interactive elements */
+    .btn,
+    button,
+    .dropdown-toggle {
+      display: none;
+    }
+
+    /* Full width content */
+    .main-content,
+    .dashboard-content {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Avoid page breaks in cards */
+    .card,
+    .portal-card {
+      break-inside: avoid;
+    }
+  }
+
+  /* ============================================
+   * REDUCED MOTION
+   * ============================================ */
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms;
+      animation-iteration-count: 1;
+      transition-duration: 0.01ms;
+      scroll-behavior: auto;
+    }
+  }
+
+  /* ============================================
+   * HIGH CONTRAST MODE
+   * ============================================ */
+
+  @media (prefers-contrast: high) {
+    /* Increase border visibility */
+    .card,
+    .portal-card,
+    .btn {
+      border-width: 2px;
+    }
+
+    /* Ensure focus is visible */
+    :focus-visible {
+      outline-width: 3px;
+      outline-offset: 3px;
+    }
+  }
+}

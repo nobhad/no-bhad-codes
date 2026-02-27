@@ -10,16 +10,24 @@
  */
 
 /* ============================================
- * CASCADE LAYER ORDER DECLARATION
- * ============================================
- * Layers are listed in priority order - later layers win.
- */
-@layer reset, tokens, base, components, pages, page-states, mobile, utilities;
-
-/* ============================================
- * FOUNDATION (reset, tokens, base, form components)
+ * FOUNDATION (includes layer-order.css, reset, tokens, base, form components)
  * ============================================ */
 @import "./foundation.css";
+
+/* ============================================
+ * LAYOUTS LAYER
+ * ============================================ */
+@import "../layouts/index.css";
+
+/* ============================================
+ * STATES LAYER
+ * ============================================ */
+@import "../states/index.css";
+
+/* ============================================
+ * RESPONSIVE LAYER
+ * ============================================ */
+@import "../responsive/breakpoints.css";
 
 /* ============================================
  * NAVIGATION COMPONENTS
@@ -55,12 +63,12 @@
 /* ============================================
  * PAGE STATES (transitions, visibility)
  * ============================================ */
-@import "../components/page-transitions.css" layer(page-states);
+@import "../components/page-transitions.css" layer(states);
 
 /* ============================================
  * MOBILE OVERRIDES
  * ============================================ */
-@import "../mobile/index.css" layer(mobile);
+@import "../mobile/index.css" layer(responsive);
 
 /* Utilities merged into base/utilities.css */
 

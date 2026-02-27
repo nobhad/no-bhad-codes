@@ -1,0 +1,116 @@
+/**
+ * ===============================================
+ * VISIBILITY STATE CLASSES
+ * ===============================================
+ * @file src/styles/states/visibility.css
+ *
+ * Controls element visibility. These states have higher priority
+ * than component styles, allowing them to override display/visibility
+ * without !important.
+ */
+
+@layer states {
+  /* ============================================
+   * DISPLAY STATES
+   * ============================================ */
+
+  /* Hidden - completely removed from layout */
+  .state-hidden {
+    display: none;
+  }
+
+  /* Visible - block display */
+  .state-visible {
+    display: block;
+  }
+
+  /* Visible inline */
+  .state-visible-inline {
+    display: inline;
+  }
+
+  /* Visible flex */
+  .state-visible-flex {
+    display: flex;
+  }
+
+  /* Visible grid */
+  .state-visible-grid {
+    display: grid;
+  }
+
+  /* ============================================
+   * VISIBILITY STATES (keeps layout space)
+   * ============================================ */
+
+  /* Invisible - hidden but maintains space */
+  .state-invisible {
+    visibility: hidden;
+  }
+
+  /* Explicitly visible */
+  .state-shown {
+    visibility: visible;
+  }
+
+  /* ============================================
+   * COLLAPSE STATES
+   * ============================================ */
+
+  /* Collapsed - zero height with hidden overflow */
+  .state-collapsed {
+    height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+  }
+
+  /* Expanded - auto height */
+  .state-expanded {
+    height: auto;
+    overflow: visible;
+  }
+
+  /* ============================================
+   * OPACITY STATES
+   * ============================================ */
+
+  /* Fade out */
+  .state-faded {
+    opacity: 0;
+  }
+
+  /* Fade in */
+  .state-opaque {
+    opacity: 1;
+  }
+
+  /* ============================================
+   * COMBINED STATES (common patterns)
+   * ============================================ */
+
+  /* Completely hidden (display + visibility + opacity) */
+  .state-removed {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  /* Ready for animation (positioned but invisible) */
+  .state-staged {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Entering view (animated reveal) */
+  .state-entering {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

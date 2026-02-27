@@ -1,0 +1,184 @@
+/**
+ * ===============================================
+ * INTERACTIVE STATE CLASSES
+ * ===============================================
+ * @file src/styles/states/interactive.css
+ *
+ * Controls interactive element states like disabled, loading,
+ * active, selected. These override component hover/focus styles.
+ */
+
+@layer states {
+  /* ============================================
+   * DISABLED STATES
+   * ============================================ */
+
+  /* Disabled - no interaction, reduced opacity */
+  .is-disabled,
+  [disabled] {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Readonly - visible but not editable */
+  .is-readonly {
+    pointer-events: none;
+    cursor: default;
+  }
+
+  /* ============================================
+   * LOADING STATES
+   * ============================================ */
+
+  /* Loading - shows wait cursor, blocks interaction */
+  .is-loading {
+    pointer-events: none;
+    cursor: wait;
+    position: relative;
+  }
+
+  /* Loading with spinner overlay */
+  .is-loading-overlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--portal-bg-dark, rgba(0, 0, 0, 0.5));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Skeleton loading state */
+  .is-skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--portal-bg-dark) 25%,
+      var(--portal-bg-medium) 50%,
+      var(--portal-bg-dark) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    color: transparent;
+    border-radius: var(--portal-radius-sm);
+  }
+
+  @keyframes skeleton-loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* ============================================
+   * ACTIVE/SELECTED STATES
+   * ============================================ */
+
+  /* Active - currently selected/active item */
+  .is-active {
+    background-color: var(--portal-bg-hover);
+  }
+
+  /* Selected - checkbox/radio style selection */
+  .is-selected {
+    background-color: var(--color-primary-10, rgba(0, 175, 240, 0.1));
+    border-color: var(--color-primary);
+  }
+
+  /* Current - navigation current item */
+  .is-current {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* ============================================
+   * FOCUS STATES
+   * ============================================ */
+
+  /* Focused - keyboard focus visible */
+  .is-focused {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Focus within container */
+  .has-focus-within:focus-within {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* ============================================
+   * ERROR/SUCCESS STATES
+   * ============================================ */
+
+  /* Error state */
+  .is-error,
+  .has-error {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+
+  /* Success state */
+  .is-success,
+  .has-success {
+    border-color: var(--color-success);
+    color: var(--color-success);
+  }
+
+  /* Warning state */
+  .is-warning,
+  .has-warning {
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+  }
+
+  /* ============================================
+   * OPEN/CLOSED STATES (dropdowns, modals)
+   * ============================================ */
+
+  /* Open state */
+  .is-open {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* Closed state */
+  .is-closed {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  /* ============================================
+   * DRAGGING STATES
+   * ============================================ */
+
+  /* Being dragged */
+  .is-dragging {
+    opacity: 0.8;
+    cursor: grabbing;
+  }
+
+  /* Drag target */
+  .is-drag-over {
+    background-color: var(--color-primary-10, rgba(0, 175, 240, 0.1));
+    border: 2px dashed var(--color-primary);
+  }
+
+  /* ============================================
+   * ANIMATION CONTROL UTILITIES
+   * ============================================ */
+
+  /* Disable all transitions */
+  .no-transition {
+    transition: none;
+  }
+
+  /* Force transitions (for GSAP compatibility) */
+  .force-transition {
+    transition: all 0.3s cubic-bezier(0.65, 0.05, 0, 1);
+  }
+}

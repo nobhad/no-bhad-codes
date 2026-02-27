@@ -22,15 +22,15 @@
   --btn-portal-padding: var(--btn-portal-padding-y) var(--btn-portal-padding-x);
   --btn-portal-min-height: 40px;
 
-  /* Button typography - BRUTALIST: monospace font */
-  --btn-portal-font-family: 'Courier New', 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;
+  /* Button typography - DISCOTHÈQUE: Inconsolata monospace */
+  --btn-portal-font-family: "Inconsolata", ui-monospace, monospace;
   --btn-portal-font-size: 0.875rem;
   --btn-portal-font-weight: 500;
   --btn-portal-letter-spacing: -0.02em;
   --btn-portal-text-transform: uppercase;
 
-  /* Button borders - BRUTALIST: no radius, thin white border */
-  --btn-portal-border-width: 1px;
+  /* Button borders - DISCOTHÈQUE: no radius, 2px white border */
+  --btn-portal-border-width: 2px;
   --btn-portal-border-radius: 0;
   --btn-portal-border-color: rgb(255, 255, 255);
 

@@ -10,14 +10,24 @@
  */
 
 /* ============================================
- * CASCADE LAYER ORDER DECLARATION
- * ============================================ */
-@layer reset, tokens, base, components, portal, utilities;
-
-/* ============================================
- * FOUNDATION (reset, tokens, base, form components)
+ * FOUNDATION (includes layer-order.css, reset, tokens, base, form components)
  * ============================================ */
 @import "./foundation.css";
+
+/* ============================================
+ * LAYOUTS LAYER
+ * ============================================ */
+@import "../layouts/index.css";
+
+/* ============================================
+ * STATES LAYER
+ * ============================================ */
+@import "../states/index.css";
+
+/* ============================================
+ * RESPONSIVE LAYER
+ * ============================================ */
+@import "../responsive/breakpoints.css";
 
 /* ============================================
  * NAVIGATION (main site nav for login page)
@@ -32,9 +42,9 @@
 @import "../components/footer.css" layer(components);
 
 /* ============================================
- * CLIENT PORTAL STYLES
+ * CLIENT PORTAL STYLES (pages layer)
  * ============================================ */
-@import "../client-portal/index.css" layer(portal);
+@import "../client-portal/index.css" layer(pages);
 
 /* Wireframe mode merged into base/utilities.css */
 
@@ -49,11 +59,11 @@
     transform: translateX(-50%);
     z-index: 9999;
     padding: 12px 24px;
-    background-color: var(--color-dark, #333333);
-    color: var(--color-light, #ffffff);
+    background-color: var(--portal-bg-darker, #0a0a0a);
+    color: var(--portal-text-primary, #ffffff);
     text-decoration: none;
     font-weight: 600;
-    border-radius: 4px;
+    border-radius: 0; /* DISCOTHÈQUE: sharp corners */
     transition: top 0.2s ease;
   }
 
