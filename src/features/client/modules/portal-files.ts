@@ -16,6 +16,38 @@ import { confirmDanger, alertError } from '../../../utils/confirm-dialog';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 import { renderEmptyState } from '../../../components/empty-state';
+import { getReactComponent } from '../../../react/registry';
+import { showToast } from '../../../utils/toast-notifications';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+
+// Track React unmount function
+let reactFilesUnmountFn: (() => void) | null = null;
+
+/**
+ * Check if React portal files should be used
+ */
+function shouldUseReactPortalFiles(): boolean {
+  const component = getReactComponent('portalFiles');
+  if (!component) return false;
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_portal_files') === 'true') return false;
+
+  const flag = localStorage.getItem('feature_react_portal_files');
+  if (flag === 'false') return false;
+
+  return true;
+}
+
+/**
+ * Cleanup React portal files
+ */
+export function cleanupPortalFiles(): void {
+  if (reactFilesUnmountFn) {
+    reactFilesUnmountFn();
+    reactFilesUnmountFn = null;
+  }
+}
 
 const FILES_API_BASE = '/api/uploads';
 const DOC_REQUESTS_API = '/api/document-requests';
@@ -328,6 +360,34 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
   const filesContainer = document.getElementById('files-list') || document.querySelector('.files-list-section');
   if (!filesContainer) return;
 
+  // Check if React component should be used
+  if (shouldUseReactPortalFiles()) {
+    const component = getReactComponent('portalFiles');
+    if (component) {
+      // Hide vanilla elements - React renders its own
+      const folderTree = document.getElementById('folder-tree');
+      const uploadDropzone = document.getElementById('upload-dropzone');
+      if (folderTree) (folderTree as HTMLElement).style.display = 'none';
+      if (uploadDropzone) (uploadDropzone as HTMLElement).style.display = 'none';
+
+      // Mount React component
+      const unmountResult = component.mount(filesContainer as HTMLElement, {
+        getAuthToken: ctx.getAuthToken,
+        showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+          showToast(message, type);
+        }
+      });
+
+      if (typeof unmountResult === 'function') {
+        reactFilesUnmountFn = unmountResult;
+      }
+
+      return;
+    }
+  }
+
+  // Vanilla implementation below
+
   try {
     // Always fetch all files (don't filter on server for category)
     const params = new URLSearchParams();
@@ -431,7 +491,7 @@ function renderFilesList(
       return `
         <tr data-file-id="${file.id}">
           <td class="name-cell" data-label="File">${safeName}</td>
-          <td data-label="Size">${size}</td>
+          <td class="type-cell" data-label="Size">${size}</td>
           <td class="date-cell" data-label="Uploaded">${date}</td>
           <td class="actions-cell" data-label="Actions">
             ${previewBtn}
@@ -444,22 +504,36 @@ function renderFilesList(
     .join('');
 
   container.innerHTML = `
-    <table class="admin-table files-table" aria-label="Project files">
-      <thead>
-        <tr>
-          <th scope="col" class="name-col">File</th>
-          <th scope="col">Size</th>
-          <th scope="col" class="date-col">Uploaded</th>
-          <th scope="col" class="actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${tableRows}
-      </tbody>
-    </table>
+    <div class="data-table-scroll-wrapper">
+      <table class="data-table" aria-label="Project files">
+        <thead>
+          <tr>
+            <th scope="col" class="name-col">File</th>
+            <th scope="col" class="type-col">Size</th>
+            <th scope="col" class="date-col">Uploaded</th>
+            <th scope="col" class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="portal-files-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+          ${tableRows}
+        </tbody>
+      </table>
+    </div>
   `;
 
   attachFileActionListeners(container, ctx);
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#portal-files-body',
+    rowSelector: 'tr[data-file-id]',
+    onRowSelect: (row) => {
+      const previewBtn = row.querySelector('.btn-preview') as HTMLButtonElement;
+      if (previewBtn) previewBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 /**
@@ -624,11 +698,11 @@ async function deleteFile(
     }
 
     // Check if table is now empty
-    const filesTable = document.querySelector('.files-table tbody');
+    const filesTable = document.querySelector('.data-table tbody');
     if (filesTable && filesTable.children.length === 0) {
       const container = document.getElementById('files-list') || document.querySelector('.files-list-section');
       if (container) {
-        const table = container.querySelector('.files-table');
+        const table = container.querySelector('.data-table');
         if (table) table.remove();
 
         const noFilesMsg = container.querySelector('.no-files');
@@ -1185,9 +1259,9 @@ function showDropzoneError(message: string, ctx: ClientPortalContext, filesToRet
   if (!dropzone) return;
 
   const retryBtn = filesToRetry && filesToRetry.length > 0
-    ? '<button type="button" class="btn btn-sm btn-retry" id="btn-retry-upload">Try Again</button>'
+    ? '<button type="button" class="btn btn-xs btn-retry" id="btn-retry-upload">Try Again</button>'
     : '';
-  const dismissBtn = '<button type="button" class="btn btn-sm btn-secondary" id="btn-dismiss-error">Dismiss</button>';
+  const dismissBtn = '<button type="button" class="btn btn-xs btn-secondary" id="btn-dismiss-error">Dismiss</button>';
 
   dropzone.innerHTML = `
     <div class="dropzone-error" role="alert">

@@ -12,6 +12,37 @@ import { createPortalModal } from '../../../components/portal-modal';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatCurrency } from '../../../utils/format-utils';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getReactComponent } from '../../../react/registry';
+import { showToast } from '../../../utils/toast-notifications';
+
+// Track React unmount function
+let reactAdHocRequestsUnmountFn: (() => void) | null = null;
+
+/**
+ * Check if React portal ad-hoc requests should be used
+ */
+function shouldUseReactPortalAdHocRequests(): boolean {
+  const component = getReactComponent('portalAdHocRequests');
+  if (!component) return false;
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_portal_ad_hoc_requests') === 'true') return false;
+
+  const flag = localStorage.getItem('feature_react_portal_ad_hoc_requests');
+  if (flag === 'false') return false;
+
+  return true;
+}
+
+/**
+ * Cleanup React portal ad-hoc requests
+ */
+export function cleanupPortalAdHocRequests(): void {
+  if (reactAdHocRequestsUnmountFn) {
+    reactAdHocRequestsUnmountFn();
+    reactAdHocRequestsUnmountFn = null;
+  }
+}
 
 const REQUESTS_API = '/api/ad-hoc-requests';
 const PROJECTS_API = '/api/projects';
@@ -585,6 +616,29 @@ function setupListeners(ctx: ClientPortalContext): void {
 export async function loadAdHocRequests(ctx: ClientPortalContext): Promise<void> {
   // Clear DOM cache to ensure fresh lookups after view is rendered
   cache.clear();
+
+  // Check if React component should be used
+  if (shouldUseReactPortalAdHocRequests()) {
+    const component = getReactComponent('portalAdHocRequests');
+    const container = el('ad-hoc-requests-section') || document.querySelector('.ad-hoc-requests-section');
+    if (component && container) {
+      // Mount React component
+      const unmountResult = component.mount(container as HTMLElement, {
+        getAuthToken: ctx.getAuthToken,
+        showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+          showToast(message, type);
+        }
+      });
+
+      if (typeof unmountResult === 'function') {
+        reactAdHocRequestsUnmountFn = unmountResult;
+      }
+
+      return;
+    }
+  }
+
+  // Vanilla implementation below
   // Reset listeners flag since view was re-rendered
   listenersAttached = false;
   await loadProjectsForForm(ctx);
