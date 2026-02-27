@@ -9,6 +9,7 @@ import { logger } from '../services/logger.js';
  * and client account setup.
  */
 
+import crypto from 'crypto';
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -555,9 +556,10 @@ router.get('/status/:projectId', authenticateToken, rateLimiters.standard, async
 // Helper functions
 function generateRandomPassword(length: number = 12): string {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+  const randomBytes = crypto.randomBytes(length);
   let password = '';
   for (let i = 0; i < length; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
+    password += chars.charAt(randomBytes[i] % chars.length);
   }
   return password;
 }

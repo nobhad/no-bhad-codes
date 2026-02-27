@@ -4,7 +4,7 @@
  * Simple test script to verify email service functionality
  */
 
-import { emailService } from './services/email-service.js';
+import { emailService } from '../services/email-service.js';
 import dotenv from 'dotenv';
 
 // Load environment variables

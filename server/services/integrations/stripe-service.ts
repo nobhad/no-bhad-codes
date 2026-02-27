@@ -16,10 +16,34 @@
 import { getDatabase } from '../../database/init';
 
 // Stripe configuration
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
-const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const STRIPE_API_VERSION = '2023-10-16';
 const STRIPE_API_BASE = 'https://api.stripe.com/v1';
+
+/**
+ * Validate Stripe configuration before any operation
+ * Throws an error if Stripe is not properly configured
+ */
+function requireStripeConfig(): void {
+  if (!STRIPE_SECRET_KEY || !STRIPE_SECRET_KEY.startsWith('sk_')) {
+    throw new Error(
+      'Stripe is not configured. Set STRIPE_SECRET_KEY environment variable with a valid Stripe secret key.'
+    );
+  }
+}
+
+/**
+ * Validate Stripe webhook secret before webhook verification
+ * Throws an error if webhook secret is not configured
+ */
+function requireWebhookSecret(): void {
+  if (!STRIPE_WEBHOOK_SECRET || !STRIPE_WEBHOOK_SECRET.startsWith('whsec_')) {
+    throw new Error(
+      'Stripe webhook secret is not configured. Set STRIPE_WEBHOOK_SECRET environment variable.'
+    );
+  }
+}
 
 // Payment link configuration
 export interface PaymentLinkConfig {
@@ -99,11 +123,9 @@ export function isStripeConfigured(): boolean {
 /**
  * Create a Stripe Checkout Session for invoice payment
  */
-export async function createPaymentLink(config: PaymentLinkConfig): Promise<PaymentLinkResponse | null> {
-  if (!isStripeConfigured()) {
-    console.warn('Stripe is not configured. Set STRIPE_SECRET_KEY environment variable.');
-    return null;
-  }
+export async function createPaymentLink(config: PaymentLinkConfig): Promise<PaymentLinkResponse> {
+  // Fail loudly if Stripe is not configured
+  requireStripeConfig();
 
   const db = getDatabase();
 
@@ -204,10 +226,8 @@ export function verifyWebhookSignature(
   payload: string,
   signature: string
 ): boolean {
-  if (!STRIPE_WEBHOOK_SECRET) {
-    console.warn('Stripe webhook secret not configured');
-    return false;
-  }
+  // Fail loudly if webhook secret is not configured
+  requireWebhookSecret();
 
   try {
     // Parse the signature header

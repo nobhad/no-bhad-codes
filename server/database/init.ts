@@ -8,6 +8,7 @@
  * Implements a connection pool pattern for better resource management
  */
 
+import crypto from 'crypto';
 import sqlite3 from 'sqlite3';
 import { dirname } from 'path';
 import fs from 'fs';
@@ -92,7 +93,7 @@ class DatabaseConnectionPool implements Database {
           db,
           inUse: false,
           lastUsed: Date.now(),
-          id: Math.random().toString(36).substring(7)
+          id: crypto.randomBytes(4).toString('hex')
         };
 
         resolve(connection);

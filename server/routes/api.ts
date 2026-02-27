@@ -7,6 +7,7 @@
  * Main API routes with comprehensive validation and security.
  */
 
+import crypto from 'crypto';
 import express, { Router } from 'express';
 import multer from 'multer';
 import { resolve, extname } from 'path';
@@ -33,7 +34,7 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
     cb(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
   }
 });
@@ -120,7 +121,7 @@ router.post(
       );
 
       // Send email notification to admin
-      const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const messageId = `msg_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
 
       // Store in database
       const db = getDatabase();
