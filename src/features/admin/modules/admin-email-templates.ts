@@ -21,6 +21,7 @@ import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import {
   EMAIL_TEMPLATES_FILTER_CONFIG,
   createFilterUI,
@@ -180,15 +181,27 @@ function renderTemplatesTable(): void {
       <td class="date-cell" data-label="Updated">${formatDate(template.updated_at, 'short')}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-          createAction('preview', template.id, { className: 'template-preview', ariaLabel: 'Preview template' }),
-          createAction('edit', template.id, { className: 'template-edit', ariaLabel: 'Edit template' }),
-          createAction('versions', template.id, { className: 'template-versions', ariaLabel: 'View version history' }),
-          createAction('test', template.id, { className: 'template-test', ariaLabel: 'Send test email' }),
-          conditionalAction(!template.is_system, 'delete', template.id, { className: 'template-delete', dataAttrs: { name: escapeHtml(template.name) }, ariaLabel: 'Delete template' }),
-        ])}
+    createAction('preview', template.id, { className: 'template-preview', ariaLabel: 'Preview template' }),
+    createAction('edit', template.id, { className: 'template-edit', ariaLabel: 'Edit template' }),
+    createAction('versions', template.id, { className: 'template-versions', ariaLabel: 'View version history' }),
+    createAction('test', template.id, { className: 'template-test', ariaLabel: 'Send test email' }),
+    conditionalAction(!template.is_system, 'delete', template.id, { className: 'template-delete', dataAttrs: { name: escapeHtml(template.name) }, ariaLabel: 'Delete template' })
+  ])}
       </td>
     </tr>
   `).join('');
+
+  // Initialize keyboard navigation for templates table
+  initTableKeyboardNav({
+    tableSelector: '#email-templates-table-body',
+    rowSelector: 'tr[data-template-id]',
+    onRowSelect: (row) => {
+      const editBtn = row.querySelector('.template-edit') as HTMLButtonElement;
+      if (editBtn) editBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 function setupEmailTemplatesHandlers(): void {

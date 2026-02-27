@@ -17,6 +17,13 @@ import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { createViewToggle } from '../../../components/view-toggle';
 import { createModalDropdown } from '../../../components/modal-dropdown';
+import {
+  type PaginationState,
+  getDefaultPaginationState,
+  loadPaginationState,
+  applyPagination,
+  createPaginationUI
+} from '../../../utils/table-pagination';
 
 // View toggle icons
 const BOARD_ICON =
@@ -74,6 +81,11 @@ let currentProjectId: number | null = null;
 let currentTasks: ProjectTask[] = [];
 let currentView: 'kanban' | 'list' = 'kanban';
 let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
+
+// Pagination state - only show when > 10 items
+const PAGINATION_THRESHOLD = 10;
+const PAGINATION_STORAGE_KEY = 'project-tasks-pagination';
+let paginationState: PaginationState = getDefaultPaginationState({ tableId: 'project-tasks', defaultPageSize: 25 });
 
 // Status configuration
 const STATUS_CONFIG = {
@@ -310,8 +322,8 @@ function renderListView(): void {
 
   if (currentTasks.length === 0) {
     listContainer.innerHTML = `
-      <div class="admin-table-scroll-wrapper">
-        <table class="admin-table tasks-table">
+      <div class="data-table-scroll-wrapper">
+        <table class="data-table">
           <thead>
             <tr>
               <th scope="col" class="name-col">Task</th>
@@ -320,7 +332,7 @@ function renderListView(): void {
               <th scope="col" class="date-col">Due Date</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
             <tr class="empty-row"><td colspan="4"><div class="empty-state">No tasks yet. Create your first task above.</div></td></tr>
           </tbody>
         </table>
@@ -340,23 +352,62 @@ function renderListView(): void {
     return priorityOrder[a.priority] - priorityOrder[b.priority];
   });
 
+  // Check if pagination is needed (> 10 items)
+  const showPagination = sortedTasks.length > PAGINATION_THRESHOLD;
+
+  // Load saved page size if needed
+  if (showPagination) {
+    const savedState = loadPaginationState(PAGINATION_STORAGE_KEY);
+    if (savedState.pageSize) {
+      paginationState.pageSize = savedState.pageSize;
+    }
+    paginationState.totalItems = sortedTasks.length;
+    // Ensure current page is valid
+    const totalPages = Math.ceil(sortedTasks.length / paginationState.pageSize) || 1;
+    if (paginationState.currentPage > totalPages) {
+      paginationState.currentPage = 1;
+    }
+  }
+
+  // Apply pagination if needed
+  const displayTasks = showPagination ? applyPagination(sortedTasks, paginationState) : sortedTasks;
+
   listContainer.innerHTML = `
-    <div class="admin-table-scroll-wrapper">
-      <table class="admin-table tasks-table">
-        <thead>
-          <tr>
-            <th scope="col" class="name-col">Task</th>
-            <th scope="col">Priority</th>
-            <th scope="col" class="status-col">Status</th>
-            <th scope="col" class="date-col">Due Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${sortedTasks.map(task => renderListItem(task)).join('')}
-        </tbody>
-      </table>
+    <div class="data-table-card">
+      <div class="data-table-scroll-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col" class="name-col">Task</th>
+              <th scope="col">Priority</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="date-col">Due Date</th>
+            </tr>
+          </thead>
+          <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            ${displayTasks.map(task => renderListItem(task)).join('')}
+          </tbody>
+        </table>
+      </div>
+      ${showPagination ? '<div class="table-pagination" id="project-tasks-pagination"></div>' : ''}
     </div>
   `;
+
+  // Create pagination UI if needed
+  if (showPagination) {
+    const paginationContainer = listContainer.querySelector('#project-tasks-pagination');
+    if (paginationContainer) {
+      const paginationUI = createPaginationUI(
+        { tableId: 'project-tasks', storageKey: PAGINATION_STORAGE_KEY },
+        paginationState,
+        (newState) => {
+          paginationState = newState;
+          renderListView();
+        }
+      );
+      paginationContainer.appendChild(paginationUI);
+    }
+  }
 
   // Add click handlers via event delegation
   const tbody = listContainer.querySelector('tbody');
@@ -809,6 +860,8 @@ export function cleanup(): void {
   }
   currentProjectId = null;
   currentTasks = [];
+  // Reset pagination to first page
+  paginationState.currentPage = 1;
 }
 
 /**

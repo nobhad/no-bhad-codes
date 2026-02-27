@@ -18,6 +18,7 @@ import { createViewToggle } from '../../../components/view-toggle';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
 import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import type { AdminDashboardContext } from '../admin-types';
 import {
   type PaginationState,
@@ -488,7 +489,7 @@ function renderListView(): void {
   listContainer.innerHTML = `
     <div class="data-table-container">
       <div class="data-table-scroll-wrapper">
-        <table class="data-table tasks-table">
+        <table class="data-table">
           <thead>
             <tr>
               <th scope="col" class="name-col">Task</th>
@@ -543,6 +544,19 @@ function renderListView(): void {
         }
       });
     });
+
+    // Initialize keyboard navigation (J/K to move between rows)
+    initTableKeyboardNav({
+      tableSelector: '#global-tasks-table-body',
+      rowSelector: 'tr[data-task-id]',
+      onRowSelect: (row) => {
+        const taskId = parseInt(row.dataset.taskId || '0');
+        const task = currentTasks.find(t => t.id === taskId);
+        if (task) handleTaskClick(taskToKanbanItem(task));
+      },
+      focusClass: 'row-focused',
+      selectedClass: 'row-selected'
+    });
   }
 }
 
@@ -581,8 +595,8 @@ function renderListItem(task: GlobalTask): string {
       <td class="date-cell ${isOverdue ? 'overdue' : ''}" data-label="Due Date">${task.dueDate ? formatDate(task.dueDate) : ''}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-          createAction('delete', task.id, { dataAttrs: { 'task-id': task.id }, title: 'Delete task' }),
-        ])}
+    createAction('delete', task.id, { dataAttrs: { 'task-id': task.id }, title: 'Delete task' })
+  ])}
       </td>
     </tr>
   `;

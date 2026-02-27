@@ -17,6 +17,7 @@ import { ICONS } from '../../../constants/icons';
 import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { getStatusDotHTML } from '../../../components/status-badge';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { AD_HOC_REQUESTS_FILTER_CONFIG } from '../../../utils/table-filter';
 import {
   createTableModule,
@@ -128,6 +129,19 @@ const adHocRequestsModule = createTableModule<AdHocRequest>({
 
   onDataLoaded: (_data: AdHocRequest[], ctx: AdminDashboardContext) => {
     setupListeners(ctx);
+  },
+
+  onTableRendered: (_filteredData: AdHocRequest[], _ctx: AdminDashboardContext) => {
+    initTableKeyboardNav({
+      tableSelector: '#ad-hoc-requests-table-body',
+      rowSelector: 'tr[data-request-id]',
+      onRowSelect: (row) => {
+        const viewBtn = row.querySelector('button[title="View request"]') as HTMLButtonElement;
+        if (viewBtn) viewBtn.click();
+      },
+      focusClass: 'row-focused',
+      selectedClass: 'row-selected'
+    });
   }
 });
 
@@ -139,6 +153,7 @@ export const loadAdHocRequests = adHocRequestsModule.load;
  */
 function buildRequestRow(request: AdHocRequest): HTMLTableRowElement {
   const row = document.createElement('tr');
+  row.dataset.requestId = String(request.id);
 
   const title = SanitizationUtils.escapeHtml(request.title);
   const clientName = SanitizationUtils.escapeHtml(request.clientName || 'Client');
@@ -155,8 +170,8 @@ function buildRequestRow(request: AdHocRequest): HTMLTableRowElement {
     <td class="date-cell" data-label="Date">${formatDate(request.createdAt)}</td>
     <td class="actions-cell" data-label="Actions">
       ${renderActionsCell([
-        createAction('view', request.id, { title: 'View request', ariaLabel: 'View request' }),
-      ])}
+    createAction('view', request.id, { title: 'View request', ariaLabel: 'View request' })
+  ])}
     </td>
   `;
 
@@ -799,7 +814,7 @@ export function renderAdHocRequestsTab(container: HTMLElement): void {
       </div>
       <div class="data-table-container ad-hoc-requests-table-container">
         <div class="data-table-scroll-wrapper">
-          <table class="data-table ad-hoc-requests-table">
+          <table class="data-table">
             <thead>
               <tr>
                 <th scope="col" class="name-col">Request</th>

@@ -7,6 +7,11 @@
  * Admin UI for document requests: list (pending / for-review / overdue),
  * create single request, create from templates, view detail, review actions.
  * Uses /api/document-requests admin endpoints.
+ *
+ * NOTE: This module intentionally does NOT use createTableModule factory.
+ * Reason: Loads and merges data from 3 API endpoints (pending, for-review,
+ * overdue) into a single table. The factory expects a single API endpoint.
+ * All standardized components ARE used: bulk actions, keyboard nav, status badges.
  */
 
 import type { AdminDashboardContext } from '../admin-types';
@@ -48,6 +53,8 @@ import {
 } from '../../../utils/table-bulk-actions';
 import { ICONS } from '../../../constants/icons';
 import { renderActionsCell, createAction, conditionalAction } from '../../../components/table-action-buttons';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 
 const DR_API = '/api/document-requests';
 
@@ -135,16 +142,28 @@ function escapeHtml(text: string): string {
   return SanitizationUtils.escapeHtml(text);
 }
 
+const STATUS_LABELS: Record<RequestStatus, string> = {
+  requested: 'Requested',
+  viewed: 'Viewed',
+  uploaded: 'Uploaded',
+  under_review: 'Under review',
+  approved: 'Approved',
+  rejected: 'Rejected'
+};
+
+const STATUS_VARIANTS: Record<RequestStatus, string> = {
+  requested: 'pending',
+  viewed: 'pending',
+  uploaded: 'in-progress',
+  under_review: 'in-progress',
+  approved: 'completed',
+  rejected: 'cancelled'
+};
+
 function statusLabel(status: RequestStatus): string {
-  const map: Record<RequestStatus, string> = {
-    requested: 'Requested',
-    viewed: 'Viewed',
-    uploaded: 'Uploaded',
-    under_review: 'Under review',
-    approved: 'Approved',
-    rejected: 'Rejected'
-  };
-  return map[status] ?? status;
+  const label = STATUS_LABELS[status] ?? status;
+  const variant = STATUS_VARIANTS[status] ?? 'pending';
+  return getStatusBadgeHTML(label, variant);
 }
 
 // ---------------------------------------------------------------------------
@@ -325,13 +344,13 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
       <td class="date-cell" data-label="Due">${formatDate(r.due_date)}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-          createAction('view', r.id, { className: 'dr-view' }),
-          conditionalAction(r.status === 'uploaded', 'start-review', r.id, { className: 'dr-start-review' }),
-          conditionalAction(r.status === 'under_review', 'approve', r.id, { className: 'dr-approve' }),
-          conditionalAction(r.status === 'under_review', 'reject', r.id, { className: 'dr-reject' }),
-          conditionalAction(r.status !== 'approved' && r.status !== 'rejected', 'remind', r.id, { className: 'dr-remind' }),
-          createAction('delete', r.id, { className: 'dr-delete', dataAttrs: { title: escapeHtml(r.title) } }),
-        ])}
+    createAction('view', r.id, { className: 'dr-view' }),
+    conditionalAction(r.status === 'uploaded', 'start-review', r.id, { className: 'dr-start-review' }),
+    conditionalAction(r.status === 'under_review', 'approve', r.id, { className: 'dr-approve' }),
+    conditionalAction(r.status === 'under_review', 'reject', r.id, { className: 'dr-reject' }),
+    conditionalAction(r.status !== 'approved' && r.status !== 'rejected', 'remind', r.id, { className: 'dr-remind' }),
+    createAction('delete', r.id, { className: 'dr-delete', dataAttrs: { title: escapeHtml(r.title) } })
+  ])}
       </td>
     </tr>
   `
@@ -341,6 +360,18 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
   // Setup bulk selection handlers
   const allRowIds = requests.map(r => r.id);
   setupBulkSelectionHandlers(DR_BULK_CONFIG, allRowIds);
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#document-requests-table-body',
+    rowSelector: 'tr[data-request-id]',
+    onRowSelect: (row) => {
+      const requestId = parseInt(row.dataset.requestId || '0');
+      if (requestId && storedDrContext) openDetailModal(requestId, storedDrContext);
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 /**

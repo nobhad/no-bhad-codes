@@ -170,17 +170,18 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
   today.setHours(0, 0, 0, 0);
 
   container.innerHTML = `
-    <table class="invoices-table" aria-label="Project invoices">
-      <thead>
-        <tr>
-          <th scope="col">Invoice #</th>
-          <th scope="col">Amount</th>
-          <th scope="col">Due Date</th>
-          <th scope="col">Status</th>
-          <th scope="col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
+    <div class="data-table-scroll-wrapper">
+      <table class="data-table invoices-table" aria-label="Project invoices">
+        <thead>
+          <tr>
+            <th scope="col" class="name-col">Invoice #</th>
+            <th scope="col" class="amount-col">Amount</th>
+            <th scope="col" class="date-col">Due Date</th>
+            <th scope="col" class="status-col">Status</th>
+            <th scope="col" class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
         ${filteredInvoices.map((inv: ExtendedInvoice) => {
     // Determine effective status (check for overdue)
     let effectiveStatus = inv.status;
@@ -253,8 +254,9 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
             </tr>
           `;
   }).join('')}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   `;
 
   // Attach event handlers using delegation
@@ -412,26 +414,28 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
   // Build line items table
   const lineItems = invoice.line_items || [];
   const lineItemsHTML = lineItems.length > 0
-    ? `<table class="invoice-line-items">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th class="text-right">Qty</th>
-            <th class="text-right">Rate</th>
-            <th class="text-right">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${lineItems.map((item: InvoiceLineItem) => `
+    ? `<div class="data-table-scroll-wrapper">
+        <table class="data-table invoice-line-items">
+          <thead>
             <tr>
-              <td data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
-              <td class="text-right" data-label="Qty">${item.quantity || 1}</td>
-              <td class="text-right" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
-              <td class="text-right" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
+              <th scope="col" class="name-col">Description</th>
+              <th scope="col" class="count-col">Qty</th>
+              <th scope="col" class="amount-col">Rate</th>
+              <th scope="col" class="amount-col">Amount</th>
             </tr>
-          `).join('')}
-        </tbody>
-      </table>`
+          </thead>
+          <tbody>
+            ${lineItems.map((item: InvoiceLineItem) => `
+              <tr>
+                <td data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
+                <td class="text-right" data-label="Qty">${item.quantity || 1}</td>
+                <td class="text-right" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
+                <td class="text-right" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>`
     : '<p class="text-muted">No line items</p>';
 
   // Calculate totals

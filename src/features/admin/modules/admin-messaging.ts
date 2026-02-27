@@ -107,7 +107,7 @@ const RENDER_ICONS = {
 export function renderMessagesTab(container: HTMLElement): void {
   container.innerHTML = `
     <!-- Messages Layout - Split View -->
-    <div class="messages-layout portal-shadow">
+    <div class="messages-layout">
       <!-- Full-width Search Bar -->
       <div class="messages-global-search">
         <div class="search-bar">
@@ -169,7 +169,7 @@ export function renderMessagesTab(container: HTMLElement): void {
             ></textarea>
           </div>
           <div class="message-compose-actions">
-            <button type="button" class="btn-attach" id="admin-attach-btn" title="Attach files">
+            <button type="button" class="icon-btn btn-attach" id="admin-attach-btn" title="Attach files">
               ${RENDER_ICONS.ATTACH}
             </button>
             <button class="btn btn-secondary" id="admin-send-message" tabindex="0" disabled>Send Message</button>

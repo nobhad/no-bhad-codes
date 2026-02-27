@@ -22,6 +22,7 @@ import { createModalDropdown } from '../../../components/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
 import { loadEmailTemplatesData } from './admin-email-templates';
 
@@ -290,7 +291,7 @@ function renderWorkflowsTable(): void {
       </span>` : '';
 
     return `
-      <tr data-id="${w.id}">
+      <tr data-workflow-id="${w.id}">
         <td class="name-cell" data-label="Name"><span class="workflow-name">${escapeHtml(w.name)}</span>${defaultIcon}</td>
         <td class="type-cell entity-type-cell" data-label="Entity Type">
           ${entityLabel}
@@ -304,10 +305,10 @@ function renderWorkflowsTable(): void {
         <td class="date-cell" data-label="Updated">${formatDate(w.updated_at)}</td>
         <td class="actions-cell" data-label="Actions">
           ${renderActionsCell([
-            createAction('edit', w.id, { className: 'workflow-edit', title: 'Edit workflow', ariaLabel: 'Edit workflow' }),
-            createAction('steps', w.id, { className: 'workflow-steps', ariaLabel: 'Manage approval steps' }),
-            createAction('delete', w.id, { className: 'workflow-delete', dataAttrs: { name: escapeHtml(w.name) }, ariaLabel: 'Delete workflow' }),
-          ])}
+    createAction('edit', w.id, { className: 'workflow-edit', title: 'Edit workflow', ariaLabel: 'Edit workflow' }),
+    createAction('steps', w.id, { className: 'workflow-steps', ariaLabel: 'Manage approval steps' }),
+    createAction('delete', w.id, { className: 'workflow-delete', dataAttrs: { name: escapeHtml(w.name) }, ariaLabel: 'Delete workflow' })
+  ])}
         </td>
       </tr>
     `;
@@ -357,6 +358,18 @@ function setupWorkflowHandlers(): void {
     refreshBtn.dataset.bound = 'true';
     refreshBtn.addEventListener('click', () => loadApprovalWorkflows());
   }
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#workflows-table-body',
+    rowSelector: 'tr[data-workflow-id]',
+    onRowSelect: (row) => {
+      const editBtn = row.querySelector('.workflow-edit') as HTMLButtonElement;
+      if (editBtn) editBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 async function openWorkflowModal(id?: number): Promise<void> {
@@ -958,7 +971,7 @@ function renderTriggersTable(): void {
     const statusBadge = getStatusDotHTML(t.is_active ? 'active' : 'inactive');
 
     return `
-      <tr data-id="${t.id}">
+      <tr data-trigger-id="${t.id}">
         <td class="name-cell" data-label="Name">${escapeHtml(t.name)}</td>
         <td class="type-cell" data-label="Event Type"><code>${escapeHtml(t.event_type)}</code></td>
         <td class="type-cell" data-label="Action">${actionLabel}</td>
@@ -969,11 +982,11 @@ function renderTriggersTable(): void {
         <td class="date-cell" data-label="Updated">${formatDate(t.updated_at)}</td>
         <td class="actions-cell" data-label="Actions">
           ${renderActionsCell([
-            conditionalAction(t.is_active, 'disable', t.id, { className: 'trigger-toggle', ariaLabel: 'Disable trigger' }),
-            conditionalAction(!t.is_active, 'enable', t.id, { className: 'trigger-toggle', ariaLabel: 'Enable trigger' }),
-            createAction('edit', t.id, { className: 'trigger-edit', title: 'Edit trigger', ariaLabel: 'Edit trigger' }),
-            createAction('delete', t.id, { className: 'trigger-delete', dataAttrs: { name: escapeHtml(t.name) }, ariaLabel: 'Delete trigger' }),
-          ])}
+    conditionalAction(t.is_active, 'disable', t.id, { className: 'trigger-toggle', ariaLabel: 'Disable trigger' }),
+    conditionalAction(!t.is_active, 'enable', t.id, { className: 'trigger-toggle', ariaLabel: 'Enable trigger' }),
+    createAction('edit', t.id, { className: 'trigger-edit', title: 'Edit trigger', ariaLabel: 'Edit trigger' }),
+    createAction('delete', t.id, { className: 'trigger-delete', dataAttrs: { name: escapeHtml(t.name) }, ariaLabel: 'Delete trigger' })
+  ])}
         </td>
       </tr>
     `;
@@ -1023,6 +1036,18 @@ function setupTriggerHandlers(): void {
     refreshBtn.dataset.bound = 'true';
     refreshBtn.addEventListener('click', () => loadTriggers());
   }
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#triggers-table-body',
+    rowSelector: 'tr[data-trigger-id]',
+    onRowSelect: (row) => {
+      const editBtn = row.querySelector('.trigger-edit') as HTMLButtonElement;
+      if (editBtn) editBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 async function openTriggerModal(id?: number): Promise<void> {
@@ -1692,7 +1717,7 @@ function renderPendingApprovalsTable(): void {
       : '';
 
     return `
-      <tr data-id="${a.id}">
+      <tr data-approval-id="${a.id}">
         <td class="bulk-select-cell" data-label="">
           ${getPortalCheckboxHTML({
     ariaLabel: `Select approval ${a.id}`,
@@ -1734,6 +1759,18 @@ function renderPendingApprovalsTable(): void {
   // Reset select-all checkbox
   const selectAll = el('approvals-select-all') as HTMLInputElement;
   if (selectAll) selectAll.checked = false;
+
+  // Initialize keyboard navigation for approvals table
+  initTableKeyboardNav({
+    tableSelector: '#pending-approvals-table-body',
+    rowSelector: 'tr[data-approval-id]',
+    onRowSelect: (row) => {
+      const viewBtn = row.querySelector('.approval-view') as HTMLButtonElement;
+      if (viewBtn) viewBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 function setupPendingApprovalsHandlers(): void {

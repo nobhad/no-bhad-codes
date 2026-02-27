@@ -18,6 +18,7 @@ import { createFilterSelect, type FilterSelectInstance } from '../../../componen
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
 import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { exportToCsv, KNOWLEDGE_BASE_EXPORT_CONFIG } from '../../../utils/table-export';
@@ -123,21 +124,33 @@ function renderCategoriesTable(categories: KBCategory[], _ctx: AdminDashboardCon
   tbody.innerHTML = categories
     .map(
       (c) => `
-    <tr>
+    <tr data-category-id="${c.id}">
       <td class="name-cell" data-label="Name">${escapeHtml(c.name)}</td>
       <td class="slug-cell" data-label="Slug"><code>${escapeHtml(c.slug)}</code></td>
       <td class="count-cell" data-label="Articles">${c.article_count ?? 0}</td>
       <td class="status-cell" data-label="Active">${c.is_active ? 'Yes' : 'No'}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-          createAction('edit', c.id, { className: 'kb-edit-category', ariaLabel: 'Edit category' }),
-          createAction('delete', c.id, { className: 'kb-delete-category', dataAttrs: { name: escapeHtml(c.name) }, ariaLabel: 'Delete category' }),
-        ])}
+    createAction('edit', c.id, { className: 'kb-edit-category', ariaLabel: 'Edit category' }),
+    createAction('delete', c.id, { className: 'kb-delete-category', dataAttrs: { name: escapeHtml(c.name) }, ariaLabel: 'Delete category' })
+  ])}
       </td>
     </tr>
   `
     )
     .join('');
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#kb-categories-table-body',
+    rowSelector: 'tr[data-category-id]',
+    onRowSelect: (row) => {
+      const editBtn = row.querySelector('.kb-edit-category') as HTMLButtonElement;
+      if (editBtn) editBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -158,7 +171,7 @@ function renderArticlesTable(articles: KBArticle[], _ctx: AdminDashboardContext)
   tbody.innerHTML = articles
     .map(
       (a) => `
-    <tr>
+    <tr data-article-id="${a.id}">
       <td class="name-cell" data-label="Title">${escapeHtml(a.title)}</td>
       <td class="type-cell" data-label="Category">${escapeHtml(a.category_name || '')}</td>
       <td class="slug-cell" data-label="Slug"><code>${escapeHtml(a.slug)}</code></td>
@@ -167,14 +180,26 @@ function renderArticlesTable(articles: KBArticle[], _ctx: AdminDashboardContext)
       <td class="date-cell" data-label="Updated">${formatDate(a.updated_at)}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-          createAction('edit', a.id, { className: 'kb-edit-article', ariaLabel: 'Edit article' }),
-          createAction('delete', a.id, { className: 'kb-delete-article', dataAttrs: { title: escapeHtml(a.title) }, ariaLabel: 'Delete article' }),
-        ])}
+    createAction('edit', a.id, { className: 'kb-edit-article', ariaLabel: 'Edit article' }),
+    createAction('delete', a.id, { className: 'kb-delete-article', dataAttrs: { title: escapeHtml(a.title) }, ariaLabel: 'Delete article' })
+  ])}
       </td>
     </tr>
   `
     )
     .join('');
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#kb-articles-table-body',
+    rowSelector: 'tr[data-article-id]',
+    onRowSelect: (row) => {
+      const editBtn = row.querySelector('.kb-edit-article') as HTMLButtonElement;
+      if (editBtn) editBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 // ---------------------------------------------------------------------------

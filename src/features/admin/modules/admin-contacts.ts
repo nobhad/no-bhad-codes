@@ -27,6 +27,7 @@ import { createRowCheckbox, type BulkActionConfig } from '../../../utils/table-b
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
 import { getStatusDotHTML } from '../../../components/status-badge';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import {
   createTableModule,
   createPaginationConfig,
@@ -186,10 +187,10 @@ function buildContactRow(
     <td class="date-cell" data-label="Date">${date}</td>
     <td class="actions-cell" data-label="Actions">
       ${renderActionsCell([
-        conditionalAction(canConvert, 'convert-client', submission.id, { className: 'btn-convert-contact', dataAttrs: { email: safeEmail, name: safeName } }),
-        conditionalAction(!isArchived, 'archive', submission.id, { className: 'btn-archive-contact' }),
-        conditionalAction(isArchived, 'restore', submission.id, { className: 'btn-restore-contact' }),
-      ])}
+    conditionalAction(canConvert, 'convert-client', submission.id, { className: 'btn-convert-contact', dataAttrs: { email: safeEmail, name: safeName } }),
+    conditionalAction(!isArchived, 'archive', submission.id, { className: 'btn-archive-contact' }),
+    conditionalAction(isArchived, 'restore', submission.id, { className: 'btn-restore-contact' })
+  ])}
     </td>
   `;
 
@@ -288,7 +289,21 @@ const contactsModule = createTableModule<ContactSubmission, ContactsStats>({
     }
   },
 
-  renderRow: buildContactRow
+  renderRow: buildContactRow,
+
+  onTableRendered: (_filteredData, _ctx) => {
+    // Initialize keyboard navigation
+    initTableKeyboardNav({
+      tableSelector: '#contacts-table-body',
+      rowSelector: 'tr[data-contact-id]',
+      onRowSelect: (row) => {
+        const contactId = parseInt(row.dataset.contactId || '0');
+        if (contactId) showContactDetails(contactId);
+      },
+      focusClass: 'row-focused',
+      selectedClass: 'row-selected'
+    });
+  }
 });
 
 // ============================================================================

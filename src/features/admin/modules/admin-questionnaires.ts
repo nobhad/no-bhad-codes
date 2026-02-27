@@ -20,6 +20,8 @@ import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { ICONS } from '../../../constants/icons';
 import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { getStatusDotHTML } from '../../../components/status-badge';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 
 const QUESTIONNAIRES_API = '/api/questionnaires';
 
@@ -165,21 +167,29 @@ function renderQuestionnairesTable(questionnaires: Questionnaire[]): void {
       <td class="name-cell" data-label="Name">${escapeHtml(q.name)}</td>
       <td class="name-cell" data-label="Description">${escapeHtml(q.description || '—')}</td>
       <td class="type-cell" data-label="Project Type">${q.project_type ? escapeHtml(q.project_type) : 'All'}</td>
-      <td class="status-cell" data-label="Status">
-        <span class="status-indicator ${q.is_active ? 'status-active' : 'status-inactive'}">
-          <span class="status-dot"></span>
-          <span class="status-text">${q.is_active ? 'Active' : 'Inactive'}</span>
-        </span>
-      </td>
+      <td class="status-cell" data-label="Status">${getStatusDotHTML(q.is_active ? 'active' : 'inactive')}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-          createAction('edit', q.id, { className: 'questionnaire-edit' }),
-          createAction('send', q.id, { className: 'questionnaire-send', title: 'Send to client', ariaLabel: 'Send to client' }),
-          createAction('delete', q.id, { className: 'questionnaire-delete', dataAttrs: { name: escapeHtml(q.name) } }),
-        ])}
+    createAction('edit', q.id, { className: 'questionnaire-edit' }),
+    createAction('send', q.id, { className: 'questionnaire-send', title: 'Send to client', ariaLabel: 'Send to client' }),
+    createAction('delete', q.id, { className: 'questionnaire-delete', dataAttrs: { name: escapeHtml(q.name) } })
+  ])}
       </td>
     </tr>
   `).join('');
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#questionnaires-table-body',
+    rowSelector: 'tr[data-questionnaire-id]',
+    onRowSelect: (row) => {
+      const id = parseInt(row.dataset.questionnaireId || '0');
+      const editBtn = row.querySelector('.questionnaire-edit') as HTMLButtonElement;
+      if (editBtn) editBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -201,22 +211,29 @@ function renderResponsesTable(responses: QuestionnaireResponse[]): void {
     <tr data-response-id="${r.id}">
       <td class="name-cell" data-label="Questionnaire">${escapeHtml(r.questionnaire_name || `#${r.questionnaire_id}`)}</td>
       <td class="name-cell" data-label="Client">${escapeHtml(SanitizationUtils.decodeHtmlEntities(r.client_name || String(r.client_id)))}</td>
-      <td class="status-cell" data-label="Status">
-        <span class="status-indicator status-${r.status === 'completed' ? 'completed' : r.status === 'in_progress' ? 'in-progress' : 'pending'}">
-          <span class="status-dot"></span>
-          <span class="status-text">${statusLabel(r.status)}</span>
-        </span>
-      </td>
+      <td class="status-cell" data-label="Status">${getStatusDotHTML(r.status, { label: statusLabel(r.status) })}</td>
       <td class="date-cell" data-label="Due Date">${formatDate(r.due_date)}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-          createAction('view', r.id, { className: 'response-view', ariaLabel: 'View response' }),
-          createAction('remind', r.id, { className: 'response-remind' }),
-          createAction('delete', r.id, { className: 'response-delete', ariaLabel: 'Delete response' }),
-        ])}
+    createAction('view', r.id, { className: 'response-view', ariaLabel: 'View response' }),
+    createAction('remind', r.id, { className: 'response-remind' }),
+    createAction('delete', r.id, { className: 'response-delete', ariaLabel: 'Delete response' })
+  ])}
       </td>
     </tr>
   `).join('');
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#responses-table-body',
+    rowSelector: 'tr[data-response-id]',
+    onRowSelect: (row) => {
+      const viewBtn = row.querySelector('.response-view') as HTMLButtonElement;
+      if (viewBtn) viewBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 // ---------------------------------------------------------------------------

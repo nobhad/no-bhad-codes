@@ -11,6 +11,7 @@ import { ICONS } from '../../../constants/icons';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { openDesignReview } from './admin-design-review';
 import { showToast } from '../../../utils/toast-notifications';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
 
 // Simple DOM helper
 function el(id: string): HTMLElement | null {
@@ -207,7 +208,7 @@ function renderDeliverables(items: Deliverable[]): void {
         </div>
         <div class="deliverable-meta">
           <span class="round-badge">Round ${d.roundNumber}</span>
-          <span class="status-badge status-${d.status}">${getStatusLabel(d.status)}</span>
+          ${getStatusBadgeHTML(getStatusLabel(d.status), d.status)}
         </div>
       </div>
       <div class="deliverable-actions">

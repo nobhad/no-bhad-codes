@@ -7,6 +7,12 @@
  * Proposal management functionality for admin dashboard.
  * View, review, and manage client proposal submissions.
  * Dynamically imported for code splitting.
+ *
+ * NOTE: This module intentionally does NOT use createTableModule factory.
+ * Reason: View toggle between proposals table and templates card view
+ * requires managing two different data types (Proposal vs ProposalTemplate)
+ * with different rendering logic. The factory expects a single table/data type.
+ * All standardized components ARE used: bulk actions, keyboard nav, status badges.
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -56,6 +62,7 @@ import {
 } from '../../../utils/table-pagination';
 import { showTableError } from '../../../utils/error-utils';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 
 // ============================================================================
 // TYPES
@@ -458,7 +465,7 @@ function renderProposalsLayout(): string {
       <div id="proposals-bulk-toolbar" class="bulk-action-toolbar"></div>
 
       <div class="data-table-scroll-wrapper">
-        <table class="data-table proposals-table">
+        <table class="data-table">
           <thead>
             <tr>
               <th scope="col" class="bulk-select-cell">
@@ -529,6 +536,19 @@ function renderProposalsTable(proposals: Proposal[], ctx: AdminDashboardContext)
   // Setup bulk selection handlers
   const allRowIds = proposals.map(p => p.id);
   setupBulkSelectionHandlers(PROPOSALS_BULK_CONFIG, allRowIds);
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#proposals-table-body',
+    rowSelector: 'tr[data-proposal-id]',
+    onRowSelect: (row) => {
+      const proposalId = parseInt(row.dataset.proposalId || '0');
+      const proposal = proposalsData.find(p => p.id === proposalId);
+      if (proposal && _storedContext) showProposalDetails(proposal, _storedContext);
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): string {
@@ -540,15 +560,13 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
   return `
     <tr data-proposal-id="${proposal.id}">
       ${createRowCheckbox('proposals', proposal.id)}
-      <td data-label="Client">
-        <div class="client-info">
-          <span class="client-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.name))}</span>
-          ${proposal.client.company ? `<span class="client-company">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.company))}</span>` : ''}
-        </div>
+      <td class="identity-cell" data-label="Client">
+        <span class="identity-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.name))}</span>
+        ${proposal.client.company ? `<span class="identity-contact">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.company))}</span>` : ''}
       </td>
-      <td data-label="Project">
-        <span class="project-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.project.name))}</span>
-        <span class="project-type">${formatProjectType(proposal.projectType)}</span>
+      <td class="identity-cell" data-label="Project">
+        <span class="identity-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.project.name))}</span>
+        <span class="identity-contact">${formatProjectType(proposal.projectType)}</span>
       </td>
       <td data-label="Tier">
         <span class="tier-badge tier-${proposal.selectedTier}">${tierLabel}</span>
@@ -565,9 +583,9 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
       <td class="date-cell" data-label="Date">${formattedDate}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-          createAction('view', proposal.id, { className: 'btn-view', dataAttrs: { 'proposal-id': proposal.id }, title: 'View Details', ariaLabel: 'View proposal details' }),
-          conditionalAction(proposal.status === 'accepted', 'convert-invoice', proposal.id, { className: 'btn-convert', dataAttrs: { 'proposal-id': proposal.id } }),
-        ])}
+    createAction('view', proposal.id, { className: 'btn-view', dataAttrs: { 'proposal-id': proposal.id }, title: 'View Details', ariaLabel: 'View proposal details' }),
+    conditionalAction(proposal.status === 'accepted', 'convert-invoice', proposal.id, { className: 'btn-convert', dataAttrs: { 'proposal-id': proposal.id } })
+  ])}
       </td>
     </tr>
   `;
