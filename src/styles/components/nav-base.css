@@ -301,7 +301,8 @@ li {
 
 .bg-panel {
   z-index: 1;
-  background-color: var(--color-neutral-100);
+  /* Use --color-gray-* tokens (not --color-neutral-*) so panels stay light on all pages */
+  background-color: var(--color-gray-100);
   border-top-left-radius: var(--menu-border-radius);
   border-bottom-left-radius: var(--menu-border-radius);
   position: absolute;
@@ -309,11 +310,11 @@ li {
 }
 
 .bg-panel.first {
-  background-color: var(--color-primary);
+  background-color: var(--color-brand-primary);
 }
 
 .bg-panel.second {
-  background-color: var(--color-neutral-300);
+  background-color: var(--color-gray-300);
 }
 
 /* =====================================================
@@ -821,20 +822,5 @@ html[data-theme="dark"] .menu-button:hover {
   color: var(--color-primary);
 }
 
-/* Dark mode menu link text shadow - use darkest panel color for duplicate text, no drop shadow */
-html[data-theme="dark"] .menu-link-heading {
-  text-shadow: 0 1em 0 var(--color-neutral-300);
-}
-
-/* Dark mode panel color swaps - use darker bg, keep green, swap the other two */
-html[data-theme="dark"] .bg-panel {
-  background-color: var(--portal-bg-darker);
-}
-
-html[data-theme="dark"] .bg-panel.first {
-  background-color: var(--color-primary); /* Keep green accent */
-}
-
-html[data-theme="dark"] .bg-panel.second {
-  background-color: var(--color-neutral-100);
-}
+/* Menu panels always use light mode colors regardless of theme
+   This ensures consistent branding across main site, admin, and client portal */
