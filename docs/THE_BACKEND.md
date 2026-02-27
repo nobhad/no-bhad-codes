@@ -1,6 +1,6 @@
 # THE BACKEND - Portal System Documentation
 
-**Last Updated:** February 17, 2026
+**Last Updated:** February 27, 2026
 
 Complete documentation for the No Bhad Codes Portal System, consisting of the **Client Portal** and **Admin Dashboard**.
 
@@ -25,10 +25,24 @@ Complete documentation for the No Bhad Codes Portal System, consisting of the **
 
 ### Technology Stack
 
-- **Frontend**: TypeScript, Vite, GSAP animations
-- **Architecture**: Module-based with dependency injection
-- **Styling**: CSS design tokens, modular CSS
-- **Authentication**: JWT with HttpOnly cookies
+**Frontend:**
+
+- TypeScript, Vite build system
+- GSAP animations, Lucide icons
+- CSS design tokens, modular CSS
+
+**Backend:**
+
+- Express.js server framework
+- SQLite3 database (`data/client_portal.db`)
+- JWT with HttpOnly cookies for authentication
+
+**Services:**
+
+- Nodemailer for email delivery
+- Stripe for payment processing
+- Sentry for error tracking
+- Redis for caching (optional)
 
 ---
 
@@ -96,6 +110,52 @@ Features available across both portals.
 | Knowledge Base | [KNOWLEDGE_BASE.md](./features/KNOWLEDGE_BASE.md) | Help articles |
 | Workflows | [WORKFLOWS.md](./features/WORKFLOWS.md) | Automation workflows |
 | Integrations | [INTEGRATIONS.md](./features/INTEGRATIONS.md) | Third-party integrations |
+
+---
+
+## Backend Routes
+
+API routes are mounted under `/api/` prefix. See [API Documentation](./API_DOCUMENTATION.md) for endpoint details.
+
+### Core Routes
+
+| Route | File | Purpose |
+|-------|------|---------|
+| `/api/auth` | `auth.ts` | Authentication, login, logout, password reset |
+| `/api/clients` | `clients.ts` | Client CRUD, contacts, tags |
+| `/api/projects` | `projects/` | Project management (18 sub-route files) |
+| `/api/invoices` | `invoices/` | Invoice system (13 sub-route files) |
+| `/api/admin` | `admin/` | Admin dashboard (12 sub-route files) |
+| `/api/messages` | `messages.ts` | Messaging system |
+
+### Feature Routes
+
+| Route | File | Purpose |
+|-------|------|---------|
+| `/api/proposals` | `proposals.ts` | Proposal builder and management |
+| `/api/contracts` | `contracts.ts` | Contract management, e-signatures |
+| `/api/analytics` | `analytics.ts` | Analytics and KPIs |
+| `/api/questionnaires` | `questionnaires.ts` | Questionnaire system |
+| `/api/document-requests` | `document-requests.ts` | Document collection |
+| `/api/ad-hoc-requests` | `ad-hoc-requests.ts` | Ad hoc service requests |
+| `/api/deliverables` | `deliverables.ts` | Deliverable management |
+| `/api/knowledge-base` | `knowledge-base.ts` | Help articles |
+
+### System Routes
+
+| Route | File | Purpose |
+|-------|------|---------|
+| `/api/uploads` | `uploads.ts` | File uploads |
+| `/api/webhooks` | `webhooks.ts` | Webhook management |
+| `/api/integrations` | `integrations.ts` | Third-party integrations |
+| `/api/data-quality` | `data-quality.ts` | Data validation and cleanup |
+| `/api/settings` | `settings.ts` | System settings |
+| `/api/intake` | `intake.ts` | New project intake |
+| `/api/approvals` | `approvals.ts` | Approval workflows |
+| `/api/triggers` | `triggers.ts` | Workflow automation triggers |
+| `/api/email-templates` | `email-templates.ts` | Email template management |
+| `/api/receipts` | `receipts.ts` | Receipt management |
+| `/api/health` | `health.ts` | Health check endpoint |
 
 ---
 
