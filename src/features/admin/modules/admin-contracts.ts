@@ -11,6 +11,7 @@
 
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import { formatDate, formatDateTime } from '../../../utils/format-utils';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { confirmDialog, alertError } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
@@ -23,6 +24,11 @@ import {
   CONTRACTS_FILTER_CONFIG,
   type FilterState
 } from '../../../utils/table-filter';
+import {
+  createRowCheckbox,
+  resetSelection,
+  type BulkActionConfig
+} from '../../../utils/table-bulk-actions';
 import type { AdminDashboardContext } from '../admin-types';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
@@ -83,13 +89,13 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: 'Cancelled'
 };
 
-const STATUS_CLASSES: Record<string, string> = {
-  draft: 'status-pending',
-  sent: 'status-pending',
-  viewed: 'status-pending',
-  signed: 'status-completed',
-  expired: 'status-cancelled',
-  cancelled: 'status-cancelled'
+const STATUS_VARIANTS: Record<string, string> = {
+  draft: 'pending',
+  sent: 'pending',
+  viewed: 'pending',
+  signed: 'completed',
+  expired: 'cancelled',
+  cancelled: 'cancelled'
 };
 
 const STATUS_FILTER_MAP: Record<string, string[]> = {
@@ -102,10 +108,61 @@ const STATUS_FILTER_MAP: Record<string, string[]> = {
   cancelled: ['cancelled']
 };
 
+// Bulk action configuration for contracts table
+const CONTRACTS_BULK_CONFIG: BulkActionConfig = {
+  tableId: 'contracts',
+  actions: [
+    {
+      id: 'send-reminder',
+      label: 'Send Reminders',
+      icon: ICONS.BELL,
+      variant: 'default',
+      confirmMessage: 'Send reminders for {count} selected contracts?',
+      handler: async (ids: number[]) => {
+        const results = await Promise.all(
+          ids.map(id =>
+            apiPost(`/api/contracts/${id}/remind`, {})
+              .then(res => ({ id, success: res.ok }))
+              .catch(() => ({ id, success: false }))
+          )
+        );
+        const successCount = results.filter(r => r.success).length;
+        if (successCount > 0) {
+          showToast(`Sent ${successCount} reminder${successCount > 1 ? 's' : ''}`, 'success');
+          resetSelection('contracts');
+        }
+      }
+    },
+    {
+      id: 'expire',
+      label: 'Mark Expired',
+      icon: ICONS.CLOCK,
+      variant: 'warning',
+      confirmMessage: 'Mark {count} selected contracts as expired?',
+      handler: async (ids: number[]) => {
+        const results = await Promise.all(
+          ids.map(id =>
+            apiPut(`/api/contracts/${id}`, { status: 'expired' })
+              .then(res => ({ id, success: res.ok }))
+              .catch(() => ({ id, success: false }))
+          )
+        );
+        const successCount = results.filter(r => r.success).length;
+        if (successCount > 0) {
+          showToast(`Marked ${successCount} contract${successCount > 1 ? 's' : ''} as expired`, 'success');
+          resetSelection('contracts');
+          // Reload data to reflect changes - dispatch custom event
+          window.dispatchEvent(new CustomEvent('contracts:reload'));
+        }
+      }
+    }
+  ]
+};
+
 function getStatusBadge(status: string): string {
   const label = STATUS_LABELS[status] || status;
-  const className = STATUS_CLASSES[status] || 'status-pending';
-  return `<span class="status-badge ${className}">${label}</span>`;
+  const variant = STATUS_VARIANTS[status] || 'pending';
+  return getStatusBadgeHTML(label, variant);
 }
 
 function formatDateSafe(value?: string | null): string {
@@ -129,8 +186,9 @@ const contractsModule = createTableModule<ContractListItem, ContractStats>({
   moduleId: 'contracts',
   filterConfig: CONTRACTS_FILTER_CONFIG,
   paginationConfig: { ...createPaginationConfig('contracts'), defaultPageSize: 10 },
-  columnCount: 8,
+  columnCount: 9,
   apiEndpoint: '/api/contracts',
+  bulkConfig: CONTRACTS_BULK_CONFIG,
 
   emptyMessage: 'No contracts found.',
   filterEmptyMessage: 'No contracts match the current filters.',
@@ -165,6 +223,9 @@ const contractsModule = createTableModule<ContractListItem, ContractStats>({
   onDataLoaded: (_data: ContractListItem[], ctx: AdminDashboardContext) => {
     // Setup event listeners
     attachContractsListeners(ctx);
+    // Listen for reload events from bulk actions
+    const reloadHandler = () => contractsModule.load(ctx);
+    window.addEventListener('contracts:reload', reloadHandler, { once: true });
   },
 
   onTableRendered: (filteredData: ContractListItem[], _ctx: AdminDashboardContext) => {
@@ -212,6 +273,7 @@ function buildContractRow(contract: ContractListItem): HTMLTableRowElement {
   const amendmentLabel = contract.parentContractId ? ' · Amendment' : '';
 
   row.innerHTML = `
+    ${createRowCheckbox('contracts', contract.id)}
     <td class="name-cell" data-label="Contract">
       <span class="identity-name">${title}</span>
       <span class="identity-contact">${typeLabel}${amendmentLabel}</span>
@@ -229,10 +291,10 @@ function buildContractRow(contract: ContractListItem): HTMLTableRowElement {
     </td>
     <td class="actions-cell" data-label="Actions">
       ${renderActionsCell([
-        createAction('view', contract.id, { title: 'View details', ariaLabel: 'View contract' }),
-        createAction('remind', contract.id, { title: 'Resend reminder', ariaLabel: 'Resend reminder' }),
-        createAction('expire', contract.id, { title: 'Expire contract', ariaLabel: 'Expire contract' }),
-      ])}
+    createAction('view', contract.id, { title: 'View details', ariaLabel: 'View contract' }),
+    createAction('remind', contract.id, { title: 'Resend reminder', ariaLabel: 'Resend reminder' }),
+    createAction('expire', contract.id, { title: 'Expire contract', ariaLabel: 'Expire contract' })
+  ])}
     </td>
   `;
 
@@ -604,11 +666,18 @@ export function renderContractsTab(container: HTMLElement): void {
           </button>
         </div>
       </div>
+      <!-- Bulk Action Toolbar (hidden initially) -->
+      <div id="contracts-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
       <div class="data-table-container">
         <div class="data-table-scroll-wrapper">
           <table class="data-table">
             <thead>
               <tr>
+                <th scope="col" class="bulk-select-cell">
+                  <div class="portal-checkbox">
+                    <input type="checkbox" id="contracts-select-all" class="bulk-select-all" aria-label="Select all contracts" />
+                  </div>
+                </th>
                 <th scope="col" class="name-col">Contract</th>
                 <th scope="col" class="name-col">Project</th>
                 <th scope="col" class="identity-col">Client</th>
@@ -621,7 +690,7 @@ export function renderContractsTab(container: HTMLElement): void {
             </thead>
             <tbody id="contracts-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
               <tr class="loading-row">
-                <td colspan="8">
+                <td colspan="9">
                   <div class="loading-state">
                     <span class="loading-spinner" aria-hidden="true"></span>
                     <span class="loading-message">Loading contracts...</span>
