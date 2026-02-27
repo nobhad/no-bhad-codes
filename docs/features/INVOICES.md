@@ -1350,7 +1350,7 @@ DEPOSIT CREDITS APPLIED:
 |`server/routes/invoices/pdf.ts`|PDF generation utilities (used by routes)|
 |`server/services/invoice-service.ts`|Invoice business logic|
 |`src/features/client/modules/portal-invoices.ts`|Frontend invoice handling (~250 lines)|
-|`src/styles/client-portal/invoices.css`|Invoice styling|
+|`src/styles/client-portal/documents.css`|Invoice styling (consolidated)|
 |`templates/pages/client-portal.ejs`|Invoices tab HTML (tab-invoices section)|
 
 ---
@@ -1472,7 +1472,7 @@ When an invoice is sent, reminders are automatically scheduled:
 |`server/services/scheduler-service.ts`|Automated task scheduling|
 |`server/database/migrations/028_invoice_enhancements.sql`|New tables migration|
 |`src/features/client/modules/portal-invoices.ts`|Frontend invoice handling (~250 lines)|
-|`src/styles/client-portal/invoices.css`|Invoice styling|
+|`src/styles/client-portal/documents.css`|Invoice styling (consolidated)|
 |`templates/pages/client-portal.ejs`|Invoices tab HTML (tab-invoices section)|
 
 ---

@@ -133,7 +133,7 @@ POST /api/contacts (public)
 |------|---------|
 | `src/features/admin/modules/admin-contacts.ts` | Contacts module |
 | `src/features/admin/renderers/admin-contacts.renderer.ts` | Detail modal renderer |
-| `server/routes/contacts.ts` | API endpoints |
+| `server/routes/clients.ts` | API endpoints (contacts merged into clients) |
 | `src/utils/table-filter.ts` | Filter configuration |
 | `src/utils/table-dropdown.ts` | Status dropdown |
 | `src/modules/ui/contact-form.ts` | Public contact form |

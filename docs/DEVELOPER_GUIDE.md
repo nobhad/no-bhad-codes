@@ -609,7 +609,7 @@ The application includes a comprehensive messaging system for client-developer c
 
 #### Frontend Components
 
-1. **Messaging Module** (`src/modules/messaging.ts`)
+1. **Messaging Module** (`src/features/client/modules/portal-messages.ts`)
 
    ```typescript
 
@@ -1452,7 +1452,7 @@ The codebase uses a centralized debug logger that automatically respects debug m
    
    # Use Node.js debugger
 
-   node --inspect server/app.js
+   node --inspect server/app.ts
 
 ```text
 

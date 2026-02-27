@@ -230,7 +230,7 @@ import { escapeHtml } from '../../../../shared/validation/validators';
 **Files Affected:**
 
 - `admin/index.html` - incorrectly removed `<kbd class="sidebar-shortcut">` elements
-- `src/styles/admin/sidebar-badges.css` - incorrectly removed sidebar-shortcut CSS
+- `src/styles/admin/index.css` - incorrectly removed sidebar-shortcut CSS (styles consolidated)
 
 **Fix Required:** Restore all `<kbd class="sidebar-shortcut">` elements and their CSS styles.
 

@@ -31,7 +31,7 @@ Design and front-end changes are applied **directly to the main site** (admin an
 ### Technical details
 
 - Wireframe is toggled by `data-wireframe="true"` on `html` (set synchronously in head so greyscale applies as soon as CSS loads).
-- Styles live in `src/styles/shared/wireframe.css`, imported by both admin and portal CSS bundles.
+- Styles for wireframe mode are consolidated in shared portal styles.
 - A small inline script in each portal HTML reads `?wireframe=1` or `localStorage.wireframe` and sets `data-wireframe` on `document.documentElement` before any other scripts run.
 
 ---
@@ -183,7 +183,7 @@ The following are now **reusable** and available for admin and client portals. W
 |**Stat cards**|`src/components/quick-stats.ts`: `createQuickStats(items)`, `QuickStatItem`|Factory for `.quick-stats` grid; use when building tabs dynamically.|
 |**Recent activity**|`src/components/recent-activity.ts`: `createRecentActivity(items, title?, listId?)`, `RecentActivityItem`|Factory for `.recent-activity` block; use when building tabs dynamically.|
 |**Page header**|`src/components/page-header.ts`: `createPageHeader(config)` with `title`, `showToggle`, `toggleAriaLabel`|Factory for `.page-header`; use when building tabs dynamically.|
-|**Search bar**|`src/components/search-bar.ts`: `createSearchBar(config)`; `src/styles/shared/search-bar.css`: `.search-bar`, `.search-bar-icon`, `.search-bar-input`, `.search-bar-clear`|Reusable inline search: icon + input + optional clear. Shared padding so placeholder/text do not overlap the icon. Used by table filter dropdown and messages search.|
+|**Search bar**|`src/components/search-bar.ts`: `createSearchBar(config)`; styles in `src/styles/shared/portal-components.css`|Reusable inline search: icon + input + optional clear. Shared padding so placeholder/text do not overlap the icon. Used by table filter dropdown and messages search.|
 |**Empty state**|`src/components/empty-state.ts`: `createEmptyState(message, options?)`, `renderEmptyState(container, message, options?)`|Admin: `admin-project-details.ts` uses it for messages/files empty and error states. Use for any "No X yet" or loading/error message.|
 |**Status badge**|`src/components/status-badge.ts`: `createStatusBadge(label, variant)`, `getStatusBadgeHTML(label, variant)`|Admin: `admin-clients.ts` uses `getStatusBadgeHTML` for client table status cells. Use for status pills (active, pending, healthy, etc.).|
 |**Icon button**|`src/components/icon-button.ts`: `createIconButton(config)` with `iconSvg`, `label`, `onClick`, `className`|Admin: `admin-project-details.ts` uses it for the project overview "Send invitation" button. Use for edit, close, invite, etc.|
@@ -203,7 +203,7 @@ All are exported from `src/components/index.ts` (or loading-utils/error-utils). 
 |Stat cards|QuickStats factory|**Done:** `quick-stats.ts`; use for dynamic tabs.|
 |Recent activity|RecentActivity factory|**Done:** `recent-activity.ts`; use for dynamic tabs.|
 |Page header|PageHeader factory|**Done:** `page-header.ts`; use for dynamic tabs.|
-|Search bar|SearchBar factory + shared CSS|**Done:** `search-bar.ts` + `search-bar.css`; table filter and messages use it.|
+|Search bar|SearchBar factory + shared CSS|**Done:** `search-bar.ts` + styles in `portal-components.css`; table filter and messages use it.|
 |Sidebar|Sidebar component|Inline HTML in each portal; shared CSS only.|
 |Primary header row|PrimaryHeader (toggle + breadcrumbs)|Inline HTML in admin + client; shared CSS only.|
 |Admin tables|TableCard / DataTable|Per-feature HTML; table-filter/table-dropdown are utils only.|

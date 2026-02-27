@@ -191,7 +191,7 @@ await intake.init();
 
 Unit tests located at:
 
-- `tests/unit/features/terminal-intake.test.ts` (if exists)
+- `tests/unit/` directory (terminal intake tests)
 
 ### Manual Testing
 

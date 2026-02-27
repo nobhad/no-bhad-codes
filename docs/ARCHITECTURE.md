@@ -1192,7 +1192,7 @@ src/types/client.ts                     → ClientProject, ClientMessage
 src/types/invoice.ts                    → Invoice, InvoiceItem
 
 # Styles (kebab-case)
-src/styles/pages/client-portal.css
+src/styles/client-portal/index.css   # Client portal styles entry point
 src/styles/pages/admin.css
 ```
 

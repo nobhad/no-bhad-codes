@@ -830,7 +830,7 @@ const deleteIcon = canDelete
 |------|---------|
 |`server/routes/uploads.ts`|Backend API endpoints|
 |`src/features/client/modules/portal-files.ts`|Frontend file handling (~501 lines)|
-|`src/styles/client-portal/files.css`|File section styling|
+|`src/styles/client-portal/documents.css`|File section styling (consolidated)|
 |`client/portal.html`|Files tab HTML (tab-files section)|
 
 ---

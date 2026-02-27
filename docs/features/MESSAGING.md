@@ -946,7 +946,7 @@ await emailService.sendMessageNotification(clientEmail, {
 | `src/features/client/modules/portal-messages.ts` | Client message module (~270 lines) |
 | `src/features/admin/modules/admin-messaging.ts` | Admin message module (~400 lines) |
 | `src/features/admin/renderers/admin-messaging.renderer.ts` | Admin messaging UI renderer |
-| `src/styles/client-portal/messages.css` | Client message styling |
+| `src/styles/shared/portal-messages.css` | Client message styling |
 | `src/styles/admin/project-detail.css` | Admin message styling |
 | `server/routes/messages.ts` | API endpoints |
 | `server/services/message-service.ts` | Message service (backend logic) |

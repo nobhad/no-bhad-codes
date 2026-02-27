@@ -281,7 +281,7 @@ Both bundles:
 
 1. Import **shared.css** (reset, design-system tokens, variables, base typography/layout, form components)
 2. Use **cascade layers**: `reset`, `tokens`, `base`, `components`, then `admin` or `portal`, then `utilities`
-3. Import **wireframe.css** for `data-wireframe="true"` greyscale mode
+3. Wireframe mode: Use `data-wireframe="true"` attribute for greyscale mode (styles consolidated in shared components)
 
 ### Import Order
 
