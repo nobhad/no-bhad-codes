@@ -68,6 +68,9 @@ const ICONS = {
   logOutClient: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>',
 
   // Client-specific icons
+  briefcase: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
+  receipt: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>',
+  checkCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
   messageCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
   clipboardList: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>',
   messageSquare: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>',
@@ -146,6 +149,15 @@ const ADMIN_CONFIG: PortalConfig = {
       ]
     },
     {
+      forTab: 'support',
+      id: 'knowledge-base-subtabs',
+      mode: 'primary',
+      subtabs: [
+        { id: 'categories', label: 'Categories', active: true },
+        { id: 'articles', label: 'Articles' }
+      ]
+    },
+    {
       forTab: 'project-detail',
       id: 'project-detail-header-tabs',
       subtabs: [
@@ -194,11 +206,14 @@ const CLIENT_CONFIG: PortalConfig = {
   pageTitleId: 'portal-page-title',
   navigation: [
     { id: 'dashboard', label: 'Dashboard', icon: ICONS.gauge, active: true },
+    { id: 'projects', label: 'Projects', icon: ICONS.briefcase, badge: 'badge-projects' },
+    { id: 'messages', label: 'Messages', icon: ICONS.messageSquare, badge: 'badge-messages' },
     { id: 'requests', label: 'Requests', icon: ICONS.messageCircle, badge: 'badge-requests' },
     { id: 'questionnaires', label: 'Questionnaires', icon: ICONS.clipboardList, badge: 'badge-questionnaires' },
-    { id: 'messages', label: 'Messages', icon: ICONS.messageSquare, badge: 'badge-messages' },
-    { id: 'review', label: 'Review', icon: ICONS.eye, dataTab: 'preview' },
+    { id: 'approvals', label: 'Approvals', icon: ICONS.checkCircle, badge: 'badge-approvals' },
+    { id: 'invoices', label: 'Invoices', icon: ICONS.receipt, badge: 'badge-invoices' },
     { id: 'documents', label: 'Files', icon: ICONS.fileText, badge: 'badge-documents', dataTab: 'files' },
+    { id: 'review', label: 'Review', icon: ICONS.eye, dataTab: 'preview' },
     { id: 'help', label: 'Help', icon: ICONS.helpCircle },
     { id: 'settings', label: 'Settings', icon: ICONS.settingsClient }
   ],

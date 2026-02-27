@@ -39,22 +39,22 @@ export function renderDashboardView(): void {
   container.innerHTML = `
     <!-- Quick Stats -->
     <div class="quick-stats">
-      <button class="stat-card stat-card-clickable portal-shadow" data-tab="dashboard" type="button">
+      <button class="stat-card stat-card-clickable" data-tab="dashboard" type="button">
         <span class="stat-number">0</span>
         <span class="stat-label">Active Projects</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-tab="invoices" type="button">
+      <button class="stat-card stat-card-clickable" data-tab="invoices" type="button">
         <span class="stat-number">0</span>
         <span class="stat-label">Pending Invoices</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-tab="messages" type="button">
+      <button class="stat-card stat-card-clickable" data-tab="messages" type="button">
         <span class="stat-number">0</span>
         <span class="stat-label">Unread Messages</span>
       </button>
     </div>
 
     <!-- Project Progress & Milestones (Combined) -->
-    <div class="project-progress-section portal-shadow" id="project-progress-section">
+    <div class="project-progress-section" id="project-progress-section">
       <!-- Progress Overview -->
       <div class="progress-overview">
         <div class="section-header-with-actions">
@@ -89,7 +89,7 @@ export function renderDashboardView(): void {
     </div>
 
     <!-- Pending Approvals -->
-    <div class="pending-approvals-section portal-shadow hidden" id="pending-approvals-section">
+    <div class="pending-approvals-section hidden" id="pending-approvals-section">
       <div class="section-header-with-actions">
         <h3>Items Awaiting Your Review</h3>
         <span class="approval-count" id="approval-count"></span>
@@ -100,7 +100,7 @@ export function renderDashboardView(): void {
     </div>
 
     <!-- Recent Activity -->
-    <div class="recent-activity portal-shadow">
+    <div class="recent-activity">
       <h3>Recent Activity</h3>
       <ul class="activity-list" id="recent-activity-list" aria-live="polite" aria-atomic="false">
         <li>Loading...</li>
@@ -119,7 +119,7 @@ export function renderFilesView(): void {
 
   container.innerHTML = `
     <!-- Upload Section -->
-    <div class="files-upload-section portal-shadow">
+    <div class="files-upload-section">
       <h3>Upload Files</h3>
       <div class="upload-dropzone" id="upload-dropzone">
         <p class="dropzone-desktop">Drag and drop files here or</p>
@@ -130,7 +130,7 @@ export function renderFilesView(): void {
     </div>
 
     <!-- Files Browser (matching admin structure exactly) -->
-    <div class="files-browser portal-shadow">
+    <div class="files-browser">
       <!-- Folder Tree Panel -->
       <div class="folder-panel">
         <div class="folder-panel-header">
@@ -169,7 +169,7 @@ export function renderMessagesView(): void {
 
   container.innerHTML = `
     <!-- Messages Layout - Split View (matching admin structure) -->
-    <div class="messages-layout portal-shadow">
+    <div class="messages-layout">
       <!-- Full-width Search Bar -->
       <div class="messages-global-search">
         <label for="messages-search-input" class="sr-only">Search messages</label>
@@ -228,9 +228,7 @@ export function renderMessagesView(): void {
             ></textarea>
           </div>
           <div class="message-compose-actions">
-            <button type="button" class="btn-attach" id="btn-attach-file" title="Attach files">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-            </button>
+            <button type="button" class="icon-btn btn-attach" id="btn-attach-file" title="Attach files">${ICONS.PAPERCLIP}</button>
             <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
           </div>
           <input type="file" id="attachment-input" class="attachment-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip" />
@@ -251,18 +249,18 @@ export function renderInvoicesView(): void {
   container.innerHTML = `
     <!-- Invoice Summary -->
     <div class="invoice-summary">
-      <div class="summary-card portal-shadow">
+      <div class="summary-card">
         <span class="summary-label">Total Outstanding</span>
         <span class="summary-value" id="invoice-total-outstanding">$0.00</span>
       </div>
-      <div class="summary-card portal-shadow">
+      <div class="summary-card">
         <span class="summary-label">Total Paid</span>
         <span class="summary-value" id="invoice-total-paid">$0.00</span>
       </div>
     </div>
 
     <!-- Invoices List -->
-    <div class="invoices-list portal-shadow">
+    <div class="invoices-list">
       <h3>Invoice History</h3>
       <div id="invoices-list-content">
         <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading invoices...</span></div>
@@ -284,14 +282,14 @@ export function renderDocumentsView(): void {
 
   container.innerHTML = `
     <p id="documents-intro" class="documents-intro">Documents we need from you. Open a request to view details and upload.</p>
-    <div id="documents-list-wrap" class="documents-list-wrap portal-shadow">
+    <div id="documents-list-wrap" class="documents-list-wrap">
       <div id="documents-list" class="documents-list">
         <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading document requests...</span></div>
       </div>
       <p id="documents-empty" class="documents-empty" style="display: none;">No document requests.</p>
       <p id="documents-load-error" class="documents-error" style="display: none;"></p>
     </div>
-    <div id="documents-detail-wrap" class="documents-detail-wrap portal-shadow" style="display: none;">
+    <div id="documents-detail-wrap" class="documents-detail-wrap" style="display: none;">
       <div class="documents-detail-back">
         <button type="button" id="documents-detail-back" class="btn btn-outline btn-sm">
           ${ICONS.CHEVRON_LEFT}
@@ -345,7 +343,7 @@ export function renderRequestsView(): void {
 
   container.innerHTML = `
     <div class="requests-grid">
-      <div class="requests-form portal-card portal-shadow">
+      <div class="requests-form portal-card">
         <div class="section-header-with-actions">
           <h3>Request Something New</h3>
         </div>
@@ -390,7 +388,7 @@ export function renderRequestsView(): void {
           <button type="submit" id="ad-hoc-submit-btn" class="btn btn-primary">Submit Request</button>
         </form>
       </div>
-      <div class="requests-list portal-card portal-shadow">
+      <div class="requests-list portal-card">
         <div class="section-header-with-actions">
           <h3>Your Requests</h3>
           <button type="button" id="ad-hoc-refresh-btn" class="icon-btn" title="Refresh" aria-label="Refresh requests">
@@ -416,7 +414,7 @@ export function renderQuestionnairesView(): void {
   if (!container) return;
 
   container.innerHTML = `
-    <div id="questionnaires-list-container" class="questionnaires-list-container portal-shadow">
+    <div id="questionnaires-list-container" class="questionnaires-list-container">
       <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading questionnaires...</span></div>
     </div>
   `;
@@ -432,7 +430,7 @@ export function renderHelpView(): void {
 
   container.innerHTML = `
     <!-- Hero Search Section -->
-    <div class="help-hero portal-shadow">
+    <div class="help-hero">
       <p class="help-hero-text">How can we help you today?</p>
       <div class="help-search-container">
         <label for="help-search-input" class="sr-only">Search help articles</label>
@@ -458,7 +456,7 @@ export function renderHelpView(): void {
     </div>
 
     <!-- Main Content - Two Column Layout -->
-    <div id="help-browse" class="help-main-grid portal-shadow">
+    <div id="help-browse" class="help-main-grid">
       <!-- Left Column: Categories Accordion -->
       <section class="help-left-column" id="help-categories-section" aria-label="Browse by category">
         <h3 class="help-section-title">Browse by Category</h3>
@@ -512,7 +510,7 @@ export function renderHelpView(): void {
     </div>
 
     <!-- Contact Section -->
-    <section class="help-contact-section portal-shadow" aria-label="Contact support">
+    <section class="help-contact-section" aria-label="Contact support">
       <div class="help-contact-content">
         <div class="help-contact-text">
           <h3 class="help-section-title">Still Need Help?</h3>
@@ -546,7 +544,7 @@ export function renderSettingsView(): void {
   container.innerHTML = `
     <div class="settings-grid">
       <!-- Account Section (Profile) -->
-      <div class="settings-section portal-shadow">
+      <div class="settings-section">
         <h3>Account</h3>
         <form class="settings-form" id="profile-form">
           <div class="form-group">
@@ -591,7 +589,7 @@ export function renderSettingsView(): void {
       </div>
 
       <!-- Change Password Section -->
-      <div class="settings-section portal-shadow" id="password-section-container">
+      <div class="settings-section" id="password-section-container">
         <h3>Change Password</h3>
         <form class="settings-form" id="password-form" data-form-type="change-password" autocomplete="off">
           <!-- Hidden username for password managers - truly hidden with type="hidden" -->
@@ -637,7 +635,7 @@ export function renderSettingsView(): void {
       </div>
 
       <!-- Billing Info Section -->
-      <div class="settings-section settings-section-wide portal-shadow">
+      <div class="settings-section settings-section-wide">
         <h3>Billing Information</h3>
         <form class="settings-form billing-form-grid" id="billing-form">
           <div class="billing-column">
@@ -692,7 +690,7 @@ export function renderNewProjectView(): void {
   if (!container) return;
 
   container.innerHTML = `
-    <section class="terminal-intake-container portal-intake portal-shadow" id="terminal-intake-container">
+    <section class="terminal-intake-container portal-intake" id="terminal-intake-container">
       <!-- Terminal UI will be rendered by JavaScript -->
     </section>
   `;
@@ -707,7 +705,7 @@ export function renderPreviewView(): void {
   if (!container) return;
 
   container.innerHTML = `
-    <div class="preview-container portal-shadow">
+    <div class="preview-container">
       <div class="preview-toolbar">
         <div class="preview-url">
           <span class="url-icon">${ICONS.GLOBE}</span>
@@ -730,15 +728,53 @@ export function renderPreviewView(): void {
 }
 
 // ============================================================================
+// PROJECTS VIEW
+// ============================================================================
+
+export function renderProjectsView(): void {
+  const container = getContentContainer();
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="projects-section">
+      <div id="projects-list" class="projects-list">
+        <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading projects...</span></div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================================
+// APPROVALS VIEW
+// ============================================================================
+
+export function renderApprovalsView(): void {
+  const container = getContentContainer();
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="approvals-section">
+      <p class="approvals-intro">Review and approve deliverables for your project.</p>
+      <div id="approvals-list" class="approvals-list">
+        <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading approvals...</span></div>
+      </div>
+      <p id="approvals-empty" class="approvals-empty" style="display: none;">No pending approvals.</p>
+    </div>
+  `;
+}
+
+// ============================================================================
 // VIEW REGISTRY
 // ============================================================================
 
 /** Map of view names to render functions */
 export const VIEW_RENDERERS: Record<string, () => void> = {
   dashboard: renderDashboardView,
+  projects: renderProjectsView,
   files: renderFilesView,
   messages: renderMessagesView,
   invoices: renderInvoicesView,
+  approvals: renderApprovalsView,
   documents: renderDocumentsView,
   requests: renderRequestsView,
   questionnaires: renderQuestionnairesView,
