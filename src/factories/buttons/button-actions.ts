@@ -56,8 +56,18 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   approve: { icon: 'circle-check', title: 'Approve', ariaLabel: 'Approve', variant: 'success' },
   reject: { icon: 'circle-x', title: 'Reject', ariaLabel: 'Reject', variant: 'danger' },
   'start-review': { icon: 'check-square', title: 'Start Review', ariaLabel: 'Start review' },
-  'mark-paid': { icon: 'circle-check', title: 'Mark as Paid', ariaLabel: 'Mark as paid', variant: 'success' },
-  markPaid: { icon: 'circle-check', title: 'Mark as Paid', ariaLabel: 'Mark as paid', variant: 'success' }, // Alias
+  'mark-paid': {
+    icon: 'circle-check',
+    title: 'Mark as Paid',
+    ariaLabel: 'Mark as paid',
+    variant: 'success'
+  },
+  markPaid: {
+    icon: 'circle-check',
+    title: 'Mark as Paid',
+    ariaLabel: 'Mark as paid',
+    variant: 'success'
+  }, // Alias
   complete: { icon: 'check', title: 'Complete', ariaLabel: 'Mark as complete', variant: 'success' },
 
   // ============================================
@@ -73,9 +83,21 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   // CONVERT / TRANSFORM
   // ============================================
   convert: { icon: 'rocket', title: 'Convert', ariaLabel: 'Convert' },
-  'convert-client': { icon: 'user-plus', title: 'Convert to Client', ariaLabel: 'Convert to client' },
-  'convert-project': { icon: 'rocket', title: 'Convert to Project', ariaLabel: 'Convert to project' },
-  'convert-invoice': { icon: 'receipt', title: 'Convert to Invoice', ariaLabel: 'Convert to invoice' },
+  'convert-client': {
+    icon: 'user-plus',
+    title: 'Convert to Client',
+    ariaLabel: 'Convert to client'
+  },
+  'convert-project': {
+    icon: 'rocket',
+    title: 'Convert to Project',
+    ariaLabel: 'Convert to project'
+  },
+  'convert-invoice': {
+    icon: 'receipt',
+    title: 'Convert to Invoice',
+    ariaLabel: 'Convert to invoice'
+  },
   activate: { icon: 'rocket', title: 'Activate', ariaLabel: 'Activate' },
   launch: { icon: 'rocket', title: 'Launch', ariaLabel: 'Launch' },
 

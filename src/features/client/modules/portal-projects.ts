@@ -10,10 +10,7 @@
 
 import type { ClientProject } from '../../../types/client';
 import type { ClientPortalContext, PortalProject } from '../portal-types';
-import type {
-  ProjectUpdateResponse,
-  MessageResponse
-} from '../../../types/api';
+import type { ProjectUpdateResponse, MessageResponse } from '../../../types/api';
 import { formatTextWithLineBreaks } from '../../../utils/format-utils';
 import { createStatusBadge } from '../../../components/status-badge';
 import { renderEmptyState } from '../../../components/empty-state';
@@ -56,7 +53,8 @@ export function cleanupPortalProjects(): void {
  * Load projects with React if available
  */
 export async function loadProjects(ctx: ClientPortalContext): Promise<void> {
-  const container = document.getElementById('projects-list') || document.querySelector('.projects-section');
+  const container =
+    document.getElementById('projects-list') || document.querySelector('.projects-section');
   if (!container) return;
 
   // Check if React component should be used
@@ -125,7 +123,6 @@ export interface ProjectCallbacks {
   escapeHtml: (text: string) => string;
 }
 
-
 /**
  * Populate the projects list in the sidebar
  */
@@ -153,9 +150,7 @@ export function populateProjectsList(
 
     projectItem.addEventListener('click', () => {
       onProjectSelect(project);
-      document
-        .querySelectorAll('.project-item')
-        .forEach((item) => item.classList.remove('active'));
+      document.querySelectorAll('.project-item').forEach((item) => item.classList.remove('active'));
       projectItem.classList.add('active');
     });
 
@@ -199,7 +194,10 @@ export async function fetchProjectDetails(
       currentProject.messages = data.messages.map((m: MessageResponse) => ({
         id: String(m.id),
         sender: m.sender_name || 'Unknown',
-        senderRole: (m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system')) as 'client' | 'developer' | 'system',
+        senderRole: (m.sender_role === 'admin' ? 'developer' : m.sender_role || 'system') as
+          | 'client'
+          | 'developer'
+          | 'system',
         message: m.message || '',
         timestamp: m.created_at || new Date().toISOString(),
         isRead: m.read_at !== null
@@ -261,11 +259,7 @@ export function populateProjectDetails(
 
   // Populate next milestone
   const nextMilestoneElement = getElement('next-milestone');
-  if (
-    nextMilestoneElement &&
-    currentProject.milestones &&
-    currentProject.milestones.length > 0
-  ) {
+  if (nextMilestoneElement && currentProject.milestones && currentProject.milestones.length > 0) {
     const nextMilestone = currentProject.milestones.find((m) => !m.isCompleted);
     nextMilestoneElement.textContent = nextMilestone
       ? nextMilestone.title
@@ -299,10 +293,7 @@ export function populateProjectDetails(
 /**
  * Load and render project updates timeline
  */
-export function loadUpdates(
-  currentProject: ClientProject,
-  callbacks: ProjectCallbacks
-): void {
+export function loadUpdates(currentProject: ClientProject, callbacks: ProjectCallbacks): void {
   const timelineContainer = getElement('updates-timeline');
   if (!timelineContainer) return;
 
@@ -333,10 +324,7 @@ export function loadUpdates(
 /**
  * Load and render project messages
  */
-export function loadMessages(
-  currentProject: ClientProject,
-  callbacks: ProjectCallbacks
-): void {
+export function loadMessages(currentProject: ClientProject, callbacks: ProjectCallbacks): void {
   const messagesContainer = getElement('messages-list');
   if (!messagesContainer) return;
 

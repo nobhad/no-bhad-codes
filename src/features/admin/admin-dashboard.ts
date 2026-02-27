@@ -35,7 +35,11 @@ import { manageFocusTrap } from '../../utils/focus-trap';
 import { renderBreadcrumbs, type BreadcrumbItem } from '../../components/breadcrumbs';
 import { createTableDropdown } from '../../utils/table-dropdown';
 import { getStatusDotHTML } from '../../components/status-badge';
-import { initCopyEmailDelegation, getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../utils/copy-email';
+import {
+  initCopyEmailDelegation,
+  getCopyEmailButtonHtml,
+  getEmailWithCopyHtml
+} from '../../utils/copy-email';
 import { closeAllModalOverlays } from '../../utils/modal-utils';
 import { initAdminCommandPalette, destroyAdminCommandPalette } from './admin-command-palette';
 import { initKeyboardHelp } from '../../components/keyboard-help';
@@ -158,7 +162,10 @@ const ADMIN_TAB_GROUPS = {
 type AdminTabGroup = keyof typeof ADMIN_TAB_GROUPS;
 
 function getAdminGroupForTab(tabName: string): AdminTabGroup | null {
-  const entries = Object.entries(ADMIN_TAB_GROUPS) as [AdminTabGroup, typeof ADMIN_TAB_GROUPS[AdminTabGroup]][];
+  const entries = Object.entries(ADMIN_TAB_GROUPS) as [
+    AdminTabGroup,
+    (typeof ADMIN_TAB_GROUPS)[AdminTabGroup],
+  ][];
   for (const [group, config] of entries) {
     if ((config.tabs as readonly string[]).includes(tabName)) return group;
   }
@@ -270,8 +277,7 @@ class AdminDashboard {
 
     // Initialize module context
     this.moduleContext = {
-      getAuthToken: () =>
-        sessionStorage.getItem('client_auth_mode'),
+      getAuthToken: () => sessionStorage.getItem('client_auth_mode'),
       showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') =>
         this.showNotification(message, type),
       refreshData: () => this.loadDashboardData(),
@@ -370,9 +376,7 @@ class AdminDashboard {
     closeAllModalOverlays({ unlockBody: true });
     document.body.classList.remove('modal-open');
 
-    const overlays = document.querySelectorAll<HTMLElement>(
-      '.admin-modal-overlay, .modal-overlay'
-    );
+    const overlays = document.querySelectorAll<HTMLElement>('.admin-modal-overlay, .modal-overlay');
 
     overlays.forEach((overlay) => {
       overlay.classList.add('hidden');
@@ -403,7 +407,9 @@ class AdminDashboard {
     };
 
     // Find all elements with truncation classes
-    const truncatedElements = document.querySelectorAll('.truncate-text, .message-cell, [class*="ellipsis"]');
+    const truncatedElements = document.querySelectorAll(
+      '.truncate-text, .message-cell, [class*="ellipsis"]'
+    );
     truncatedElements.forEach((el) => addTooltipIfTruncated(el as HTMLElement));
 
     // Also set up a mutation observer to handle dynamically added content
@@ -412,14 +418,19 @@ class AdminDashboard {
         mutation.addedNodes.forEach((node) => {
           if (node instanceof HTMLElement) {
             // Check child elements
-            const truncated = node.querySelectorAll('.truncate-text, .message-cell, [class*="ellipsis"]');
+            const truncated = node.querySelectorAll(
+              '.truncate-text, .message-cell, [class*="ellipsis"]'
+            );
             truncated.forEach((el) => {
               if (!el.hasAttribute('data-tooltip')) {
                 addTooltipIfTruncated(el as HTMLElement);
               }
             });
             // Check if the node itself is truncated
-            if (node.classList?.contains('truncate-text') || node.classList?.contains('message-cell')) {
+            if (
+              node.classList?.contains('truncate-text') ||
+              node.classList?.contains('message-cell')
+            ) {
               if (!node.hasAttribute('data-tooltip')) {
                 addTooltipIfTruncated(node);
               }
@@ -463,8 +474,10 @@ class AdminDashboard {
         // 503 = backend starting up, retry
         if (response.status === 503) {
           if (attempt < MAX_RETRIES) {
-            logger.log(`Backend starting up (attempt ${attempt}), retrying in ${RETRY_DELAY_MS}ms...`);
-            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+            logger.log(
+              `Backend starting up (attempt ${attempt}), retrying in ${RETRY_DELAY_MS}ms...`
+            );
+            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
             continue;
           }
         }
@@ -476,7 +489,7 @@ class AdminDashboard {
         // Network error - backend might not be ready yet
         if (attempt < MAX_RETRIES) {
           logger.log(`Auth check attempt ${attempt} failed, retrying in ${RETRY_DELAY_MS}ms...`);
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
         } else {
           logger.log('Auth check failed after all retries:', error);
         }
@@ -636,7 +649,8 @@ class AdminDashboard {
   private setupEventListeners(): void {
     logger.log('setupEventListeners() called');
     // Logout button - try direct query first, then fallback to domCache
-    const logoutBtn = document.getElementById('btn-logout') ||
+    const logoutBtn =
+      document.getElementById('btn-logout') ||
       document.getElementById('logout-btn') ||
       document.querySelector('.btn-logout') ||
       this.domCache.get('logoutBtn') ||
@@ -659,22 +673,26 @@ class AdminDashboard {
     }
 
     // Document-level event delegation for logout button (fallback for CSS blocking)
-    document.addEventListener('click', async (e) => {
-      const target = e.target as HTMLElement;
-      const logoutButton = target.closest('#btn-logout, #logout-btn, .btn-logout');
-      if (logoutButton) {
-        logger.log('Logout detected via document delegation');
-        e.preventDefault();
-        e.stopPropagation();
-        try {
-          await AdminAuth.logout();
-        } catch (error) {
-          logger.error('Logout via delegation failed:', error);
-          // Force redirect on error
-          window.location.href = '/admin';
+    document.addEventListener(
+      'click',
+      async (e) => {
+        const target = e.target as HTMLElement;
+        const logoutButton = target.closest('#btn-logout, #logout-btn, .btn-logout');
+        if (logoutButton) {
+          logger.log('Logout detected via document delegation');
+          e.preventDefault();
+          e.stopPropagation();
+          try {
+            await AdminAuth.logout();
+          } catch (error) {
+            logger.error('Logout via delegation failed:', error);
+            // Force redirect on error
+            window.location.href = '/admin';
+          }
         }
-      }
-    }, true); // Use capture phase to catch events before they're blocked
+      },
+      true
+    ); // Use capture phase to catch events before they're blocked
 
     // Details overlay - close panels when clicking overlay
     const detailsOverlay = document.getElementById('details-overlay');
@@ -753,7 +771,9 @@ class AdminDashboard {
         if (filter && table) {
           this.filterTable(table, filter);
           // Update active state on filter cards
-          const siblingCards = document.querySelectorAll(`.stat-card-clickable[data-table="${table}"]`);
+          const siblingCards = document.querySelectorAll(
+            `.stat-card-clickable[data-table="${table}"]`
+          );
           siblingCards.forEach((c) => c.classList.remove('active'));
           card.classList.add('active');
         }
@@ -928,7 +948,11 @@ class AdminDashboard {
 
     // Ensure tab structure is rendered first (needed for React mount container)
     const tabContainer = document.getElementById('tab-leads');
-    if (tabContainer && !document.getElementById('react-leads-mount') && !document.getElementById('leads-table-body')) {
+    if (
+      tabContainer &&
+      !document.getElementById('react-leads-mount') &&
+      !document.getElementById('leads-table-body')
+    ) {
       leadsModule.renderLeadsTab(tabContainer);
     }
 
@@ -950,7 +974,10 @@ class AdminDashboard {
     }
   }
 
-  private updateContactsDisplay(data: { submissions: ContactSubmission[]; stats: ContactStats }): void {
+  private updateContactsDisplay(data: {
+    submissions: ContactSubmission[];
+    stats: ContactStats;
+  }): void {
     // Store contacts data for detail views
     this.contactsData = data.submissions || [];
 
@@ -979,13 +1006,19 @@ class AdminDashboard {
             const decodedName = SanitizationUtils.decodeHtmlEntities(submission.name || '');
             const decodedMessage = SanitizationUtils.decodeHtmlEntities(submission.message || '');
             const safeName = SanitizationUtils.escapeHtml(decodedName);
-            const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || ''));
-            const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.subject || ''));
+            const safeEmail = SanitizationUtils.escapeHtml(
+              SanitizationUtils.decodeHtmlEntities(submission.email || '')
+            );
+            const safeSubject = SanitizationUtils.escapeHtml(
+              SanitizationUtils.decodeHtmlEntities(submission.subject || '')
+            );
             const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);
             // Truncate message for display (after sanitization)
             const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
             const truncatedMessage =
-              safeMessage.length > truncateLen ? `${safeMessage.substring(0, truncateLen)}...` : safeMessage;
+              safeMessage.length > truncateLen
+                ? `${safeMessage.substring(0, truncateLen)}...`
+                : safeMessage;
             // For title attribute, also escape
             const safeTitleMessage = SanitizationUtils.escapeHtml(decodedMessage);
             return `
@@ -1024,7 +1057,9 @@ class AdminDashboard {
         dropdownContainers.forEach((container) => {
           const contactId = (container as HTMLElement).dataset.contactId;
           const _row = container.closest('tr');
-          const submission = data.submissions.find((s: ContactSubmission) => String(s.id) === contactId);
+          const submission = data.submissions.find(
+            (s: ContactSubmission) => String(s.id) === contactId
+          );
           if (!submission || !contactId) return;
           const dropdown = createTableDropdown({
             options: DASHBOARD_CONTACT_STATUS_OPTIONS,
@@ -1056,7 +1091,6 @@ class AdminDashboard {
     }
   }
 
-
   private async inviteLead(leadId: number, email: string): Promise<void> {
     const inviteBtn = this.domCache.getAs<HTMLButtonElement>('inviteLeadBtn');
     if (inviteBtn) {
@@ -1070,7 +1104,9 @@ class AdminDashboard {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          await alertSuccess(`Invitation sent to ${email}! They will receive a link to set up their account.`);
+          await alertSuccess(
+            `Invitation sent to ${email}! They will receive a link to set up their account.`
+          );
           // Close modal and refresh leads
           const modal = this.domCache.get('detailModal');
           if (modal) modal.style.display = 'none';
@@ -1116,10 +1152,18 @@ class AdminDashboard {
     const date = formatDateTime(contact.created_at);
 
     // Decode HTML entities then sanitize to prevent XSS
-    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.name || ''));
-    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || ''));
-    const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.subject || ''));
-    const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.message || ''));
+    const safeName = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(contact.name || '')
+    );
+    const safeEmail = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(contact.email || '')
+    );
+    const safeSubject = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(contact.subject || '')
+    );
+    const safeMessage = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(contact.message || '')
+    );
 
     modalBody.innerHTML = `
       <div class="detail-grid">
@@ -1391,8 +1435,7 @@ class AdminDashboard {
   private async loadThreadMessages(threadId: number): Promise<void> {
     // Try new container ID first, then old one
     const container =
-      this.domCache.get('adminMessagesThread') ||
-      this.domCache.get('adminMessagesContainer');
+      this.domCache.get('adminMessagesThread') || this.domCache.get('adminMessagesContainer');
     if (!container) return;
 
     container.innerHTML =
@@ -1409,20 +1452,17 @@ class AdminDashboard {
         // Mark messages as read
         await apiPut(`/api/messages/threads/${threadId}/read`);
       } else {
-        container.innerHTML =
-          '<div class="empty-state-message">Failed to load messages</div>';
+        container.innerHTML = '<div class="empty-state-message">Failed to load messages</div>';
       }
     } catch (error) {
       logger.error(' Failed to load messages:', error);
-      container.innerHTML =
-        '<div class="empty-state-message">Error loading messages</div>';
+      container.innerHTML = '<div class="empty-state-message">Error loading messages</div>';
     }
   }
 
   private renderMessages(messages: Message[]): void {
     const container =
-      this.domCache.get('adminMessagesThread') ||
-      this.domCache.get('adminMessagesContainer');
+      this.domCache.get('adminMessagesThread') || this.domCache.get('adminMessagesContainer');
     if (!container) return;
 
     if (messages.length === 0) {
@@ -1436,11 +1476,17 @@ class AdminDashboard {
       .map((msg: Message) => {
         const isAdmin = msg.sender_type === 'admin';
         const dateTime = formatDateTime(msg.created_at);
-        const rawSenderName = isAdmin ? 'You' : SanitizationUtils.decodeHtmlEntities(msg.sender_name || 'Client');
+        const rawSenderName = isAdmin
+          ? 'You'
+          : SanitizationUtils.decodeHtmlEntities(msg.sender_name || 'Client');
         // Decode HTML entities then sanitize to prevent XSS
         const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
-        const safeContent = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(msg.message || msg.content || ''));
-        const safeInitials = SanitizationUtils.escapeHtml(rawSenderName.substring(0, 2).toUpperCase());
+        const safeContent = SanitizationUtils.escapeHtml(
+          SanitizationUtils.decodeHtmlEntities(msg.message || msg.content || '')
+        );
+        const safeInitials = SanitizationUtils.escapeHtml(
+          rawSenderName.substring(0, 2).toUpperCase()
+        );
 
         if (isAdmin) {
           // Admin message (sent - right aligned)
@@ -1491,7 +1537,9 @@ class AdminDashboard {
 
     try {
       // Backend expects 'message' field
-      const response = await apiPost(`/api/messages/threads/${this.selectedThreadId}/messages`, { message });
+      const response = await apiPost(`/api/messages/threads/${this.selectedThreadId}/messages`, {
+        message
+      });
 
       if (response.ok) {
         // Reload messages
@@ -1574,7 +1622,11 @@ class AdminDashboard {
      * UNIVERSAL: Update active state for any subtab group
      * This is the SINGLE SOURCE OF TRUTH for subtab active state management
      */
-    const updateSubtabActiveState = (group: HTMLElement, activeValue: string, dataAttr: string): void => {
+    const updateSubtabActiveState = (
+      group: HTMLElement,
+      activeValue: string,
+      dataAttr: string
+    ): void => {
       group.querySelectorAll('.portal-subtab').forEach((btn) => {
         const btnValue = (btn as HTMLElement).dataset[dataAttr];
         btn.classList.toggle('active', btnValue === activeValue);
@@ -1583,7 +1635,9 @@ class AdminDashboard {
 
     // UNIVERSAL click handler for ALL header subtab types
     document.addEventListener('click', (e) => {
-      const target = (e.target as HTMLElement).closest('.header-subtab-group .portal-subtab') as HTMLElement | null;
+      const target = (e.target as HTMLElement).closest(
+        '.header-subtab-group .portal-subtab'
+      ) as HTMLElement | null;
       if (!target) return;
 
       // Get the parent group to check its type
@@ -1600,7 +1654,9 @@ class AdminDashboard {
         const subtab = target.dataset.subtab;
         if (!subtab) return;
         updateSubtabActiveState(group, subtab, 'subtab');
-        document.dispatchEvent(new CustomEvent('knowledgeBaseSubtabChange', { detail: { subtab } }));
+        document.dispatchEvent(
+          new CustomEvent('knowledgeBaseSubtabChange', { detail: { subtab } })
+        );
         return;
       }
 
@@ -1782,7 +1838,11 @@ class AdminDashboard {
     const group = getAdminGroupForTab(tabName);
     if (group) {
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
-      items.push({ label: ADMIN_TAB_GROUPS[group].label, href: true, onClick: () => this.switchTab(group) });
+      items.push({
+        label: ADMIN_TAB_GROUPS[group].label,
+        href: true,
+        onClick: () => this.switchTab(group)
+      });
       items.push({ label: ADMIN_TAB_TITLES[tabName] || tabName, href: false });
       renderBreadcrumbs(list, items);
       return;
@@ -1829,7 +1889,9 @@ class AdminDashboard {
       // Get project name - will be populated asynchronously if needed
       const projectName = this.projectDetails.getCurrentProjectName();
       const label = projectName
-        ? (projectName.length > 40 ? `${projectName.slice(0, 37)}...` : projectName)
+        ? projectName.length > 40
+          ? `${projectName.slice(0, 37)}...`
+          : projectName
         : 'Project';
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Projects', href: true, onClick: goProjects });
@@ -1845,7 +1907,10 @@ class AdminDashboard {
               // Re-render breadcrumbs with actual name
               const listEl = document.getElementById('breadcrumb-list');
               if (listEl) {
-                const truncLabel = modProjectName.length > 40 ? `${modProjectName.slice(0, 37)}...` : modProjectName;
+                const truncLabel =
+                    modProjectName.length > 40
+                      ? `${modProjectName.slice(0, 37)}...`
+                      : modProjectName;
                 renderBreadcrumbs(listEl, [
                   { label: 'Dashboard', href: true, onClick: goOverview },
                   { label: 'Projects', href: true, onClick: goProjects },
@@ -1853,7 +1918,9 @@ class AdminDashboard {
                 ]);
               }
             }
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
         }, 50);
       }
       break;
@@ -1903,9 +1970,13 @@ class AdminDashboard {
         // Filter invoices to show only overdue
         this.filterTable('invoices', 'overdue');
         // Update active state on filter cards
-        const filterCards = document.querySelectorAll('.stat-card-clickable[data-table="invoices"]');
+        const filterCards = document.querySelectorAll(
+          '.stat-card-clickable[data-table="invoices"]'
+        );
         filterCards.forEach((c) => c.classList.remove('active'));
-        const overdueCard = document.querySelector('.stat-card-clickable[data-filter="overdue"][data-table="invoices"]');
+        const overdueCard = document.querySelector(
+          '.stat-card-clickable[data-filter="overdue"][data-table="invoices"]'
+        );
         overdueCard?.classList.add('active');
       } else if (tabName === 'projects' && filter === 'pending_contract') {
         // Filter projects to show only those with unsigned contracts
@@ -1915,8 +1986,9 @@ class AdminDashboard {
           rows.forEach((row) => {
             // Check for contract badge or contract column
             const contractBadge = row.querySelector('.contract-badge, [data-contract]');
-            const hasContract = contractBadge?.textContent?.toLowerCase().includes('signed') ||
-                               contractBadge?.classList.contains('signed');
+            const hasContract =
+              contractBadge?.textContent?.toLowerCase().includes('signed') ||
+              contractBadge?.classList.contains('signed');
             row.style.display = hasContract ? 'none' : '';
           });
         }
@@ -1943,8 +2015,9 @@ class AdminDashboard {
         if (threadList) {
           const threads = threadList.querySelectorAll('.thread-item');
           threads.forEach((thread) => {
-            const hasUnread = thread.classList.contains('unread') ||
-                             thread.querySelector('.unread-badge, .unread-indicator');
+            const hasUnread =
+              thread.classList.contains('unread') ||
+              thread.querySelector('.unread-badge, .unread-indicator');
             (thread as HTMLElement).style.display = hasUnread ? '' : 'none';
           });
         }
@@ -1985,9 +2058,10 @@ class AdminDashboard {
         const filterNormalized = filter.toLowerCase();
 
         // Match status text with filter
-        const matches = statusText.includes(filterNormalized) ||
-                       (filterNormalized === 'in_progress' && statusText.includes('progress')) ||
-                       (filterNormalized === 'on_hold' && statusText.includes('hold'));
+        const matches =
+          statusText.includes(filterNormalized) ||
+          (filterNormalized === 'in_progress' && statusText.includes('progress')) ||
+          (filterNormalized === 'on_hold' && statusText.includes('hold'));
 
         row.style.display = matches ? '' : 'none';
       }
@@ -2639,7 +2713,8 @@ class AdminDashboard {
       if (dashboardContainer) {
         // Performance dashboard component not yet implemented
         // TODO: Add performance dashboard component when available
-        dashboardContainer.innerHTML = '<div class="empty-state">Performance dashboard coming soon</div>';
+        dashboardContainer.innerHTML =
+          '<div class="empty-state">Performance dashboard coming soon</div>';
       }
     } catch (error) {
       logger.warn(' Failed to initialize performance dashboard component:', error);
@@ -2707,7 +2782,7 @@ class AdminDashboard {
   }
 
   /**
-    * Fetches and updates sidebar notification badges for CRM
+   * Fetches and updates sidebar notification badges for CRM
    */
   private async updateSidebarBadges(): Promise<void> {
     try {
@@ -2874,7 +2949,11 @@ class AdminDashboard {
   }
 
   /** Toggle task completion - delegated to projectDetails */
-  public toggleTaskCompletion(taskId: number, isCompleted: boolean, projectId: number): Promise<void> {
+  public toggleTaskCompletion(
+    taskId: number,
+    isCompleted: boolean,
+    projectId: number
+  ): Promise<void> {
     return this.projectDetails.toggleTaskCompletion(taskId, isCompleted, projectId);
   }
 

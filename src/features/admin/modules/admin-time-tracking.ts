@@ -8,17 +8,85 @@
  */
 
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
-import { confirmDanger, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
+import {
+  confirmDanger,
+  alertSuccess,
+  alertError,
+  multiPromptDialog
+} from '../../../utils/confirm-dialog';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createBarChart } from '../../../components/chart-simple';
-import { exportToCsv, TIME_ENTRIES_EXPORT_CONFIG } from '../../../utils/table-export';
+import { exportDataToCsv, TIME_ENTRIES_EXPORT_CONFIG } from '../../../utils/table-export';
 import { showToast } from '../../../utils/toast-notifications';
 import { renderActionsCell, createAction } from '../../../factories';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('TimeTracking');
+
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn =
+  typeof import('../../../react/features/admin/time-tracking').mountTimeTrackingPanel;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/time-tracking').unmountTimeTrackingPanel;
+
+let mountTimeTrackingPanel: ReactMountFn | null = null;
+let unmountTimeTrackingPanel: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactTimeTrackingPanel(): Promise<boolean> {
+  if (mountTimeTrackingPanel && unmountTimeTrackingPanel) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/time-tracking');
+    mountTimeTrackingPanel = module.mountTimeTrackingPanel;
+    unmountTimeTrackingPanel = module.unmountTimeTrackingPanel;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React time tracking table */
+function shouldUseReactTimeTrackingTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_time_tracking') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_time_tracking_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
 
 // Time entry interfaces
 interface TimeEntry {
@@ -48,10 +116,65 @@ let currentEntries: TimeEntry[] = [];
 let weeklyChart: ReturnType<typeof createBarChart> | null = null;
 
 /**
+ * Renders the Time Tracking tab structure dynamically.
+ * Called before loading data.
+ */
+export function renderTimeTrackingTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactTimeTrackingTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Time Tracking Table Mount Point -->
+      <div id="react-time-tracking-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML structure
+  container.innerHTML = `
+    <div id="time-tracking-summary" class="time-tracking-summary"></div>
+    <div id="time-weekly-chart-container" class="time-weekly-chart-container"></div>
+    <div id="time-entries-list" class="time-entries-list"></div>
+  `;
+}
+
+/**
  * Initialize time tracking module for a project
  */
 export async function initTimeTrackingModule(projectId: number): Promise<void> {
   currentProjectId = projectId;
+
+  // Check if React implementation should be used
+  const useReact = shouldUseReactTimeTrackingTable();
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React TimeTrackingPanel
+    const mountContainer = document.getElementById('react-time-tracking-mount');
+    if (mountContainer) {
+      const loaded = await loadReactTimeTrackingPanel();
+      if (loaded && mountTimeTrackingPanel) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountTimeTrackingPanel) {
+          unmountTimeTrackingPanel();
+        }
+        mountTimeTrackingPanel(mountContainer, {
+          projectId: String(projectId)
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        return;
+      }
+    }
+  }
+
+  // Fallback to vanilla implementation
   await loadTimeEntries();
   renderTimeTracking();
   setupEventHandlers();
@@ -113,9 +236,11 @@ function renderSummary(): void {
 
   // Calculate totals
   const totalMinutes = currentEntries.reduce((sum, e) => sum + e.duration_minutes, 0);
-  const billableMinutes = currentEntries.filter(e => e.is_billable).reduce((sum, e) => sum + e.duration_minutes, 0);
+  const billableMinutes = currentEntries
+    .filter((e) => e.is_billable)
+    .reduce((sum, e) => sum + e.duration_minutes, 0);
   const totalBillable = currentEntries
-    .filter(e => e.is_billable && e.hourly_rate)
+    .filter((e) => e.is_billable && e.hourly_rate)
     .reduce((sum, e) => sum + (e.duration_minutes / 60) * (e.hourly_rate || 0), 0);
 
   // This week's hours
@@ -124,7 +249,7 @@ function renderSummary(): void {
   startOfWeek.setHours(0, 0, 0, 0);
 
   const thisWeekMinutes = currentEntries
-    .filter(e => new Date(e.date) >= startOfWeek)
+    .filter((e) => new Date(e.date) >= startOfWeek)
     .reduce((sum, e) => sum + e.duration_minutes, 0);
 
   container.innerHTML = `
@@ -182,23 +307,27 @@ function renderWeeklyChart(): void {
 
     const dateStr = date.toISOString().split('T')[0];
     const dayMinutes = currentEntries
-      .filter(e => e.date.startsWith(dateStr))
+      .filter((e) => e.date.startsWith(dateStr))
       .reduce((sum, e) => sum + e.duration_minutes, 0);
 
     days.push({
       day: dayNames[date.getDay()],
-      hours: Math.round(dayMinutes / 60 * 10) / 10
+      hours: Math.round((dayMinutes / 60) * 10) / 10
     });
   }
 
-  weeklyChart = createBarChart('time-weekly-chart-container', days.map(d => ({
-    label: d.day,
-    value: d.hours,
-    color: 'var(--app-color-primary)'
-  })), {
-    showValues: true,
-    barHeight: 20
-  });
+  weeklyChart = createBarChart(
+    'time-weekly-chart-container',
+    days.map((d) => ({
+      label: d.day,
+      value: d.hours,
+      color: 'var(--app-color-primary)'
+    })),
+    {
+      showValues: true,
+      barHeight: 20
+    }
+  );
 }
 
 /**
@@ -214,8 +343,8 @@ function renderEntriesTable(): void {
   }
 
   // Sort by date, most recent first
-  const sortedEntries = [...currentEntries].sort((a, b) =>
-    new Date(b.date).getTime() - new Date(a.date).getTime()
+  const sortedEntries = [...currentEntries].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
   container.innerHTML = `
@@ -233,7 +362,7 @@ function renderEntriesTable(): void {
             </tr>
           </thead>
           <tbody id="time-entries-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            ${sortedEntries.map(entry => renderEntryRow(entry)).join('')}
+            ${sortedEntries.map((entry) => renderEntryRow(entry)).join('')}
           </tbody>
         </table>
       </div>
@@ -253,15 +382,15 @@ function renderEntriesTable(): void {
   });
 
   // Add click handlers for edit/delete
-  container.querySelectorAll('.btn-edit-entry').forEach(btn => {
+  container.querySelectorAll('.btn-edit-entry').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       const entryId = parseInt((e.target as HTMLElement).dataset.entryId || '0');
-      const entry = currentEntries.find(en => en.id === entryId);
+      const entry = currentEntries.find((en) => en.id === entryId);
       if (entry) showEditTimeModal(entry);
     });
   });
 
-  container.querySelectorAll('.btn-delete-entry').forEach(btn => {
+  container.querySelectorAll('.btn-delete-entry').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       const entryId = parseInt((e.target as HTMLElement).dataset.entryId || '0');
       await deleteTimeEntry(entryId);
@@ -286,8 +415,16 @@ function renderEntryRow(entry: TimeEntry): string {
       </td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-    createAction('edit', entry.id, { className: 'btn-edit-entry', dataAttrs: { 'entry-id': entry.id }, ariaLabel: 'Edit entry' }),
-    createAction('delete', entry.id, { className: 'btn-delete-entry', dataAttrs: { 'entry-id': entry.id }, ariaLabel: 'Delete entry' })
+    createAction('edit', entry.id, {
+      className: 'btn-edit-entry',
+      dataAttrs: { 'entry-id': entry.id },
+      ariaLabel: 'Edit entry'
+    }),
+    createAction('delete', entry.id, {
+      className: 'btn-delete-entry',
+      dataAttrs: { 'entry-id': entry.id },
+      ariaLabel: 'Delete entry'
+    })
   ])}
       </td>
     </tr>
@@ -303,7 +440,13 @@ export async function showLogTimeModal(): Promise<void> {
   const result = await multiPromptDialog({
     title: 'Log Time',
     fields: [
-      { name: 'description', label: 'Description', type: 'text', required: true, placeholder: 'What did you work on?' },
+      {
+        name: 'description',
+        label: 'Description',
+        type: 'text',
+        required: true,
+        placeholder: 'What did you work on?'
+      },
       { name: 'hours', label: 'Hours', type: 'number', placeholder: '0', defaultValue: '0' },
       { name: 'minutes', label: 'Minutes', type: 'number', placeholder: '0', defaultValue: '0' },
       { name: 'date', label: 'Date', type: 'date', required: true, defaultValue: today },
@@ -317,7 +460,12 @@ export async function showLogTimeModal(): Promise<void> {
           { value: 'false', label: 'No - Non-billable' }
         ]
       },
-      { name: 'hourlyRate', label: 'Hourly Rate ($)', type: 'number', placeholder: 'Leave blank for default' }
+      {
+        name: 'hourlyRate',
+        label: 'Hourly Rate ($)',
+        type: 'number',
+        placeholder: 'Leave blank for default'
+      }
     ],
     confirmText: 'Log Time',
     cancelText: 'Cancel'
@@ -366,10 +514,22 @@ async function showEditTimeModal(entry: TimeEntry): Promise<void> {
   const result = await multiPromptDialog({
     title: 'Edit Time Entry',
     fields: [
-      { name: 'description', label: 'Description', type: 'text', required: true, defaultValue: entry.description },
+      {
+        name: 'description',
+        label: 'Description',
+        type: 'text',
+        required: true,
+        defaultValue: entry.description
+      },
       { name: 'hours', label: 'Hours', type: 'number', defaultValue: hours.toString() },
       { name: 'minutes', label: 'Minutes', type: 'number', defaultValue: minutes.toString() },
-      { name: 'date', label: 'Date', type: 'date', required: true, defaultValue: entry.date.split('T')[0] },
+      {
+        name: 'date',
+        label: 'Date',
+        type: 'date',
+        required: true,
+        defaultValue: entry.date.split('T')[0]
+      },
       {
         name: 'isBillable',
         label: 'Billable',
@@ -380,7 +540,12 @@ async function showEditTimeModal(entry: TimeEntry): Promise<void> {
           { value: 'false', label: 'No - Non-billable' }
         ]
       },
-      { name: 'hourlyRate', label: 'Hourly Rate ($)', type: 'number', defaultValue: entry.hourly_rate?.toString() || '' }
+      {
+        name: 'hourlyRate',
+        label: 'Hourly Rate ($)',
+        type: 'number',
+        defaultValue: entry.hourly_rate?.toString() || ''
+      }
     ],
     confirmText: 'Save Changes',
     cancelText: 'Cancel'
@@ -461,7 +626,7 @@ function exportTimeEntries(): void {
     filename: `time_entries_project_${currentProjectId}`
   };
 
-  exportToCsv(currentEntries as unknown as Record<string, unknown>[], config);
+  exportDataToCsv(currentEntries, config);
   showToast('Time entries exported!', 'success');
 }
 
@@ -475,4 +640,16 @@ export function cleanup(): void {
   }
   currentProjectId = null;
   currentEntries = [];
+}
+
+/**
+ * Cleanup function called when leaving the time tracking tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupTimeTrackingTab(): void {
+  if (reactTableMounted && unmountTimeTrackingPanel) {
+    unmountTimeTrackingPanel();
+    reactTableMounted = false;
+    reactMountContainer = null;
+  }
 }

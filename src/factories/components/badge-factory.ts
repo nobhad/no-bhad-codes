@@ -32,13 +32,13 @@ export const BADGE_VARIANTS: Record<string, { cssClass: string; defaultLabel: st
 
   // In Progress states
   'in-progress': { cssClass: 'in-progress', defaultLabel: 'In Progress' },
-  'in_progress': { cssClass: 'in-progress', defaultLabel: 'In Progress' },
+  in_progress: { cssClass: 'in-progress', defaultLabel: 'In Progress' },
   processing: { cssClass: 'in-progress', defaultLabel: 'Processing' },
   working: { cssClass: 'in-progress', defaultLabel: 'Working' },
 
   // On Hold states
   'on-hold': { cssClass: 'on-hold', defaultLabel: 'On Hold' },
-  'on_hold': { cssClass: 'on-hold', defaultLabel: 'On Hold' },
+  on_hold: { cssClass: 'on-hold', defaultLabel: 'On Hold' },
   paused: { cssClass: 'on-hold', defaultLabel: 'Paused' },
 
   // Completed/Success states
@@ -102,9 +102,7 @@ function normalizeStatus(status: string): string {
  * Format status text for display.
  */
 function formatStatusLabel(status: string): string {
-  return status
-    .replace(/[_-]/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
+  return status.replace(/[_-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /**
@@ -142,9 +140,7 @@ export function renderBadge(config: BadgeConfig): string {
     displayLabel = displayLabel.toUpperCase();
   }
 
-  const classes = ['status-badge', `status-${cssClass}`, className]
-    .filter(Boolean)
-    .join(' ');
+  const classes = ['status-badge', `status-${cssClass}`, className].filter(Boolean).join(' ');
 
   return `<span class="${escapeHtml(classes)}">${escapeHtml(displayLabel)}</span>`;
 }
@@ -162,9 +158,7 @@ export function renderDot(config: DotConfig): string {
     displayLabel = displayLabel.toUpperCase();
   }
 
-  const classes = ['status-indicator', `status-${cssClass}`, className]
-    .filter(Boolean)
-    .join(' ');
+  const classes = ['status-indicator', `status-${cssClass}`, className].filter(Boolean).join(' ');
 
   return `<span class="${escapeHtml(classes)}"><span class="status-dot"></span><span class="status-text">${escapeHtml(displayLabel)}</span></span>`;
 }
@@ -172,10 +166,7 @@ export function renderDot(config: DotConfig): string {
 /**
  * Get badge HTML (alias for renderBadge).
  */
-export function getStatusBadgeHTML(
-  label: string,
-  variant: BadgeVariant = 'pending'
-): string {
+export function getStatusBadgeHTML(label: string, variant: BadgeVariant = 'pending'): string {
   return renderBadge({ status: variant, label });
 }
 
@@ -210,10 +201,7 @@ export function createBadge(config: BadgeConfig): HTMLSpanElement {
 /**
  * Create a status badge element (alias for createBadge).
  */
-export function createStatusBadge(
-  label: string,
-  variant: BadgeVariant = 'pending'
-): HTMLElement {
+export function createStatusBadge(label: string, variant: BadgeVariant = 'pending'): HTMLElement {
   return createBadge({ status: variant, label });
 }
 
@@ -245,9 +233,4 @@ export function createStatusDot(
 // UTILITY EXPORTS
 // ============================================
 
-export {
-  normalizeStatus,
-  formatStatusLabel,
-  getStatusClass,
-  getDefaultLabel
-};
+export { normalizeStatus, formatStatusLabel, getStatusClass, getDefaultLabel };

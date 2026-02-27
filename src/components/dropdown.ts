@@ -174,7 +174,7 @@ export function createDropdown(config: DropdownConfig): HTMLElement {
   }
 
   // Add items
-  items.forEach(item => {
+  items.forEach((item) => {
     const menuItem = createDropdownItem(item, () => {
       if (closeOnClick) {
         closeDropdown(wrapper);
@@ -201,13 +201,17 @@ export function createDropdown(config: DropdownConfig): HTMLElement {
     if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       openDropdown(wrapper);
-      const firstItem = menu.querySelector('.dropdown-item:not([aria-disabled="true"])') as HTMLElement;
+      const firstItem = menu.querySelector(
+        '.dropdown-item:not([aria-disabled="true"])'
+      ) as HTMLElement;
       firstItem?.focus();
     }
   });
 
   menu.addEventListener('keydown', (e) => {
-    const menuItems = Array.from(menu.querySelectorAll('.dropdown-item:not([aria-disabled="true"])')) as HTMLElement[];
+    const menuItems = Array.from(
+      menu.querySelectorAll('.dropdown-item:not([aria-disabled="true"])')
+    ) as HTMLElement[];
     const currentIndex = menuItems.indexOf(document.activeElement as HTMLElement);
 
     if (e.key === 'ArrowDown') {
@@ -287,7 +291,7 @@ function toggleDropdown(dropdown: HTMLElement): void {
 
 function openDropdown(dropdown: HTMLElement): void {
   // Close other dropdowns
-  document.querySelectorAll('.dropdown.open').forEach(other => {
+  document.querySelectorAll('.dropdown.open').forEach((other) => {
     if (other !== dropdown) closeDropdown(other as HTMLElement);
   });
 
@@ -410,7 +414,7 @@ export function createSplitButton(config: SplitButtonConfig): HTMLElement {
   menu.className = 'dropdown-menu';
   menu.setAttribute('role', 'menu');
 
-  items.forEach(item => {
+  items.forEach((item) => {
     const menuItem = createDropdownItem(item, () => {
       wrapper.classList.remove('open');
       dropdownBtn.setAttribute('aria-expanded', 'false');
@@ -447,14 +451,12 @@ export function createSplitButton(config: SplitButtonConfig): HTMLElement {
 /**
  * Add a tooltip to an element.
  */
-export function createTooltip(config: TooltipConfig): { show: () => void; hide: () => void; destroy: () => void } {
-  const {
-    content,
-    target,
-    position = 'top',
-    delay = 200,
-    className = ''
-  } = config;
+export function createTooltip(config: TooltipConfig): {
+  show: () => void;
+  hide: () => void;
+  destroy: () => void;
+} {
+  const { content, target, position = 'top', delay = 200, className = '' } = config;
 
   let tooltip: HTMLElement | null = null;
   let showTimeout: ReturnType<typeof setTimeout>;
@@ -543,7 +545,12 @@ function positionTooltip(tooltip: HTMLElement, target: HTMLElement, position: st
 /**
  * Create a popover attached to an element.
  */
-export function createPopover(config: PopoverConfig): { open: () => void; close: () => void; toggle: () => void; destroy: () => void } {
+export function createPopover(config: PopoverConfig): {
+  open: () => void;
+  close: () => void;
+  toggle: () => void;
+  destroy: () => void;
+} {
   const {
     content,
     target,
@@ -591,7 +598,8 @@ export function createPopover(config: PopoverConfig): { open: () => void; close:
         closeBtn.type = 'button';
         closeBtn.className = 'popover-close';
         closeBtn.setAttribute('aria-label', 'Close');
-        closeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+        closeBtn.innerHTML =
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
         closeBtn.addEventListener('click', close);
         header.appendChild(closeBtn);
       }

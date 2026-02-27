@@ -183,6 +183,8 @@ appState.addReducer('NETWORK_STATUS_CHANGED', (_state, action) => {
 });
 
 appState.addReducer('CONNECTION_TYPE_CHANGED', (_state, action) => {
-  const payload = action.payload as { connectionType: 'slow-2g' | '2g' | '3g' | '4g' | 'unknown' } | undefined;
+  const payload = action.payload as
+    | { connectionType: 'slow-2g' | '2g' | '3g' | '4g' | 'unknown' }
+    | undefined;
   return { connectionType: payload?.connectionType ?? 'unknown' };
 });

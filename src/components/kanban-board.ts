@@ -65,9 +65,13 @@ export function createKanbanBoard(config: KanbanConfig): {
    * Default item renderer
    */
   function defaultRenderItem(item: KanbanItem): string {
-    const badges = item.badges?.map(b =>
-      `<span class="kanban-badge" style="background-color: ${b.color || 'var(--color-neutral-600)'}">${b.text}</span>`
-    ).join('') || '';
+    const badges =
+      item.badges
+        ?.map(
+          (b) =>
+            `<span class="kanban-badge" style="background-color: ${b.color || 'var(--color-neutral-600)'}">${b.text}</span>`
+        )
+        .join('') || '';
 
     return `
       <div class="kanban-card-title">${escapeHtml(item.title)}</div>
@@ -93,7 +97,7 @@ export function createKanbanBoard(config: KanbanConfig): {
     container.innerHTML = '';
     container.className = 'kanban-board';
 
-    currentColumns.forEach(column => {
+    currentColumns.forEach((column) => {
       const columnEl = document.createElement('div');
       columnEl.className = 'kanban-column';
       columnEl.dataset.columnId = column.id;
@@ -119,7 +123,7 @@ export function createKanbanBoard(config: KanbanConfig): {
       if (column.items.length === 0) {
         content.innerHTML = `<div class="kanban-empty">${config.emptyColumnText || 'No items'}</div>`;
       } else {
-        column.items.forEach(item => {
+        column.items.forEach((item) => {
           const card = document.createElement('div');
           card.className = 'kanban-card';
           card.dataset.itemId = String(item.id);
@@ -181,7 +185,7 @@ export function createKanbanBoard(config: KanbanConfig): {
     sourceColumnId = null;
 
     // Remove all drag-over states
-    container?.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    container?.querySelectorAll('.drag-over').forEach((el) => el.classList.remove('drag-over'));
   }
 
   /**
@@ -238,11 +242,11 @@ export function createKanbanBoard(config: KanbanConfig): {
         await config.onItemMove(draggedItemData.id, sourceColumnId, targetColumnId);
 
         // Update local state
-        const sourceColumn = currentColumns.find(c => c.id === sourceColumnId);
-        const targetColumn = currentColumns.find(c => c.id === targetColumnId);
+        const sourceColumn = currentColumns.find((c) => c.id === sourceColumnId);
+        const targetColumn = currentColumns.find((c) => c.id === targetColumnId);
 
         if (sourceColumn && targetColumn) {
-          const itemIndex = sourceColumn.items.findIndex(i => i.id === draggedItemData!.id);
+          const itemIndex = sourceColumn.items.findIndex((i) => i.id === draggedItemData!.id);
           if (itemIndex !== -1) {
             const [item] = sourceColumn.items.splice(itemIndex, 1);
             targetColumn.items.push(item);

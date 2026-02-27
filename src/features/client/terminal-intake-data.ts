@@ -28,8 +28,7 @@ export const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'email',
     field: 'email',
-    question:
-      'Nice to meet you, {{name}}! What\'s your email address?',
+    question: 'Nice to meet you, {{name}}! What\'s your email address?',
     type: 'email',
     required: true,
     validation: (value) => {
@@ -66,8 +65,7 @@ export const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'projectType',
     field: 'projectType',
-    question:
-      'Great! What type of project are you looking to build?',
+    question: 'Great! What type of project are you looking to build?',
     type: 'select',
     required: true,
     options: [
@@ -83,8 +81,7 @@ export const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'projectDescription',
     field: 'projectDescription',
-    question:
-      'Tell me about your project. What are you trying to achieve?',
+    question: 'Tell me about your project. What are you trying to achieve?',
     type: 'textarea',
     required: true,
     placeholder: 'Describe your project goals, target audience, and vision...'
@@ -166,7 +163,8 @@ export const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'additionalInfo',
     field: 'additionalInfo',
-    question: 'Last question! Any additional details, questions, or concerns? Feel free to share your current website URL or any sites you like the look/feel of. (optional)',
+    question:
+      'Last question! Any additional details, questions, or concerns? Feel free to share your current website URL or any sites you like the look/feel of. (optional)',
     type: 'textarea',
     required: false,
     placeholder: 'Current site URL, inspiration sites, or any other details...'

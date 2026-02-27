@@ -38,19 +38,19 @@ const TAB_TITLES: Record<string, string> = {
 
 /** Route configuration mapping tabs to hash paths */
 const PORTAL_ROUTES: Record<string, string> = {
-  'dashboard': '/dashboard',
-  'projects': '/projects',
-  'files': '/files',
-  'invoices': '/invoices',
-  'approvals': '/approvals',
-  'documents': '/documents',
-  'questionnaires': '/questionnaires',
-  'requests': '/requests',
-  'preview': '/review',
+  dashboard: '/dashboard',
+  projects: '/projects',
+  files: '/files',
+  invoices: '/invoices',
+  approvals: '/approvals',
+  documents: '/documents',
+  questionnaires: '/questionnaires',
+  requests: '/requests',
+  preview: '/review',
   'new-project': '/new-project',
-  'messages': '/messages',
-  'help': '/help',
-  'settings': '/settings'
+  messages: '/messages',
+  help: '/help',
+  settings: '/settings'
 };
 
 /** Reverse mapping from hash path to tab name */
@@ -100,7 +100,9 @@ function updateHash(tabName: string): void {
     isNavigating = true;
     window.location.hash = newHash;
     // Reset flag after a tick to allow hashchange to be ignored
-    setTimeout(() => { isNavigating = false; }, 0);
+    setTimeout(() => {
+      isNavigating = false;
+    }, 0);
   }
 }
 
@@ -190,7 +192,10 @@ const PORTAL_TAB_GROUPS = {
 type PortalTabGroup = keyof typeof PORTAL_TAB_GROUPS;
 
 function getPortalGroupForTab(tabName: string): PortalTabGroup | null {
-  const entries = Object.entries(PORTAL_TAB_GROUPS) as [PortalTabGroup, typeof PORTAL_TAB_GROUPS[PortalTabGroup]][];
+  const entries = Object.entries(PORTAL_TAB_GROUPS) as [
+    PortalTabGroup,
+    (typeof PORTAL_TAB_GROUPS)[PortalTabGroup],
+  ][];
   for (const [group, config] of entries) {
     if ((config.tabs as readonly string[]).includes(tabName)) return group;
   }
@@ -349,20 +354,24 @@ export function updatePortalPageTitle(tabName: string): void {
  * @param callbacks - Data loading callbacks for each tab
  * @param shouldUpdateHash - Whether to update the URL hash (default: true)
  */
-export function switchTab(tabName: string, callbacks: {
-  loadFiles: () => Promise<void>;
-  loadInvoices: () => Promise<void>;
-  loadProjectPreview: () => Promise<void>;
-  loadMessagesFromAPI: () => Promise<void>;
-  loadHelp?: () => Promise<void>;
-  loadDocumentRequests?: () => Promise<void>;
-  loadAdHocRequests?: () => Promise<void>;
-  loadQuestionnaires?: () => Promise<void>;
-  loadSettings?: () => Promise<void>;
-  loadDashboard?: () => Promise<void>;
-  loadProjects?: () => Promise<void>;
-  loadApprovals?: () => Promise<void>;
-}, shouldUpdateHash = true): void {
+export function switchTab(
+  tabName: string,
+  callbacks: {
+    loadFiles: () => Promise<void>;
+    loadInvoices: () => Promise<void>;
+    loadProjectPreview: () => Promise<void>;
+    loadMessagesFromAPI: () => Promise<void>;
+    loadHelp?: () => Promise<void>;
+    loadDocumentRequests?: () => Promise<void>;
+    loadAdHocRequests?: () => Promise<void>;
+    loadQuestionnaires?: () => Promise<void>;
+    loadSettings?: () => Promise<void>;
+    loadDashboard?: () => Promise<void>;
+    loadProjects?: () => Promise<void>;
+    loadApprovals?: () => Promise<void>;
+  },
+  shouldUpdateHash = true
+): void {
   // Update URL hash if requested (default behavior)
   if (shouldUpdateHash) {
     updateHash(tabName);
@@ -375,7 +384,9 @@ export function switchTab(tabName: string, callbacks: {
   renderView(activeTab);
 
   // Update nav button active states
-  const navButtons = document.querySelectorAll('.nav-btn[data-tab], .sidebar-buttons .btn[data-tab]');
+  const navButtons = document.querySelectorAll(
+    '.nav-btn[data-tab], .sidebar-buttons .btn[data-tab]'
+  );
   navButtons.forEach((btn) => {
     btn.classList.remove('active');
     btn.removeAttribute('aria-current');

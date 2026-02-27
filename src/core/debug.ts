@@ -71,7 +71,9 @@ export function setupDebugHelpers(app: Application): void {
     },
     getVisitorData: async () => {
       try {
-        const trackingService = (await container.resolve('VisitorTrackingService')) as ServiceInstance;
+        const trackingService = (await container.resolve(
+          'VisitorTrackingService'
+        )) as ServiceInstance;
         return trackingService.exportData
           ? trackingService.exportData()
           : { error: 'Export method not available' };
@@ -124,23 +126,19 @@ function testBusinessCard(app: Application): void {
         : 'No status method'
   });
 
-  if (
-    renderer &&
-    'getCardElements' in renderer &&
-    typeof renderer.getCardElements === 'function'
-  ) {
+  if (renderer && 'getCardElements' in renderer && typeof renderer.getCardElements === 'function') {
     console.log('Renderer elements:', renderer.getCardElements());
   }
 
   console.log(
     'All business card elements:',
-    Array.from(
-      document.querySelectorAll('[id*="business-card"], [class*="business-card"]')
-    ).map((el) => ({
-      tag: el.tagName,
-      id: el.id,
-      classes: el.className
-    }))
+    Array.from(document.querySelectorAll('[id*="business-card"], [class*="business-card"]')).map(
+      (el) => ({
+        tag: el.tagName,
+        id: el.id,
+        classes: el.className
+      })
+    )
   );
 
   // Test clicking on section card

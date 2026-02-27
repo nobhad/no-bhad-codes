@@ -38,10 +38,7 @@ export function createStatusBadge(
 /**
  * Return HTML string for a status badge (for use in innerHTML / template literals).
  */
-export function getStatusBadgeHTML(
-  label: string,
-  variant: StatusBadgeVariant = 'pending'
-): string {
+export function getStatusBadgeHTML(label: string, variant: StatusBadgeVariant = 'pending'): string {
   return factoryGetStatusBadgeHTML(label, variant);
 }
 

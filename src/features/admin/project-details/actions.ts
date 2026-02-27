@@ -16,7 +16,12 @@ import {
 } from '../../../utils/confirm-dialog';
 import { formatDate } from '../../../utils/format-utils';
 import type { ProjectResponse } from '../../../types/api';
-import { createRichTextEditor, htmlToPlainText, plainTextToHTML, type RichTextEditorInstance } from '../../../components/rich-text-editor';
+import {
+  createRichTextEditor,
+  htmlToPlainText,
+  plainTextToHTML,
+  type RichTextEditorInstance
+} from '../../../components/rich-text-editor';
 import { ICONS } from '../../../constants/icons';
 import { createLogger } from '../../../utils/logger';
 
@@ -493,15 +498,27 @@ export async function showContractBuilder(
   document.body.appendChild(modal.overlay);
   modal.show();
 
-  const templateSelect = modal.body.querySelector('#contract-template-select') as HTMLSelectElement | null;
-  const templateLoadBtn = modal.body.querySelector('#contract-template-load') as HTMLButtonElement | null;
-  const templateClearBtn = modal.body.querySelector('#contract-template-clear') as HTMLButtonElement | null;
-  const editorContainer = modal.body.querySelector('#contract-editor-container') as HTMLElement | null;
+  const templateSelect = modal.body.querySelector(
+    '#contract-template-select'
+  ) as HTMLSelectElement | null;
+  const templateLoadBtn = modal.body.querySelector(
+    '#contract-template-load'
+  ) as HTMLButtonElement | null;
+  const templateClearBtn = modal.body.querySelector(
+    '#contract-template-clear'
+  ) as HTMLButtonElement | null;
+  const editorContainer = modal.body.querySelector(
+    '#contract-editor-container'
+  ) as HTMLElement | null;
   const variablesContainer = modal.body.querySelector('#contract-variables') as HTMLElement | null;
   const previewBody = modal.body.querySelector('#contract-preview') as HTMLElement | null;
-  const generateBtn = modal.body.querySelector('#contract-generate-draft') as HTMLButtonElement | null;
+  const generateBtn = modal.body.querySelector(
+    '#contract-generate-draft'
+  ) as HTMLButtonElement | null;
   const cancelBtn = modal.footer.querySelector('#contract-cancel-btn') as HTMLButtonElement | null;
-  const saveDraftBtn = modal.footer.querySelector('#contract-save-draft') as HTMLButtonElement | null;
+  const saveDraftBtn = modal.footer.querySelector(
+    '#contract-save-draft'
+  ) as HTMLButtonElement | null;
 
   let contractId: number | null = null;
   let currentTemplateId: number | null = null;
@@ -527,7 +544,7 @@ export async function showContractBuilder(
 
   // Setup variable insertion buttons
   if (variablesContainer && editor) {
-    variablesContainer.querySelectorAll('.rich-text-variable-btn').forEach(btn => {
+    variablesContainer.querySelectorAll('.rich-text-variable-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const variable = (btn as HTMLElement).dataset.variable;
         if (variable) {
@@ -538,14 +555,27 @@ export async function showContractBuilder(
   }
 
   const buildDraftFromSections = (): string => {
-    const scope = (modal.body.querySelector('#contract-section-scope') as HTMLTextAreaElement | null)?.value.trim();
-    const timeline = (modal.body.querySelector('#contract-section-timeline') as HTMLTextAreaElement | null)?.value.trim();
-    const payment = (modal.body.querySelector('#contract-section-payment') as HTMLTextAreaElement | null)?.value.trim();
-    const ipRights = (modal.body.querySelector('#contract-section-ip') as HTMLTextAreaElement | null)?.value.trim();
-    const termination = (modal.body.querySelector('#contract-section-termination') as HTMLTextAreaElement | null)?.value.trim();
+    const scope = (
+      modal.body.querySelector('#contract-section-scope') as HTMLTextAreaElement | null
+    )?.value.trim();
+    const timeline = (
+      modal.body.querySelector('#contract-section-timeline') as HTMLTextAreaElement | null
+    )?.value.trim();
+    const payment = (
+      modal.body.querySelector('#contract-section-payment') as HTMLTextAreaElement | null
+    )?.value.trim();
+    const ipRights = (
+      modal.body.querySelector('#contract-section-ip') as HTMLTextAreaElement | null
+    )?.value.trim();
+    const termination = (
+      modal.body.querySelector('#contract-section-termination') as HTMLTextAreaElement | null
+    )?.value.trim();
 
     const sections = [
-      { title: 'Project Overview', body: `Project: ${project.project_name || ''}\nClient: ${project.client_name || project.contact_name || ''}` },
+      {
+        title: 'Project Overview',
+        body: `Project: ${project.project_name || ''}\nClient: ${project.client_name || project.contact_name || ''}`
+      },
       { title: 'Scope', body: scope || '' },
       { title: 'Timeline', body: timeline || '' },
       { title: 'Payment', body: payment || '' },
@@ -554,8 +584,8 @@ export async function showContractBuilder(
     ];
 
     return sections
-      .filter(section => section.body.trim())
-      .map(section => `${section.title}\n${section.body}`)
+      .filter((section) => section.body.trim())
+      .map((section) => `${section.title}\n${section.body}`)
       .join('\n\n');
   };
 
@@ -616,7 +646,10 @@ export async function showContractBuilder(
         updatePreview(contract?.content || '');
       }
       const templateLabel = document.getElementById('pd-contract-template-label');
-      if (templateLabel && templateSelect) templateLabel.textContent = templateSelect.options[templateSelect.selectedIndex]?.textContent || 'Template applied';
+      if (templateLabel && templateSelect) {
+        templateLabel.textContent =
+          templateSelect.options[templateSelect.selectedIndex]?.textContent || 'Template applied';
+      }
       const draftStatus = document.getElementById('pd-contract-draft-status');
       if (draftStatus) draftStatus.textContent = 'Draft loaded';
       alertSuccess('Contract draft created from template');

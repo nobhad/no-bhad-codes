@@ -137,7 +137,10 @@ export class ClientPortalModule extends BaseModule {
   private createModuleContext(): ClientPortalContext {
     return {
       getAuthToken: () => sessionStorage.getItem('client_auth_mode'),
-      showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
+      showNotification: (
+        message: string,
+        type: 'success' | 'error' | 'info' | 'warning' = 'success'
+      ) => {
         if (type === 'error') {
           console.error('[ClientPortal]', message);
           showToast(message, 'error', { duration: 5000 });
@@ -160,8 +163,13 @@ export class ClientPortalModule extends BaseModule {
     this.normalizeProjectTabs();
     initCopyEmailDelegation(document);
     // Set initial breadcrumb at top of page when on client portal (so it shows even before/without login)
-    if (document.body.getAttribute('data-page') === 'client-portal' && document.getElementById('breadcrumb-list')) {
-      loadNavigationModule().then((nav) => nav.updateBreadcrumbs([{ label: 'Dashboard', href: false }]));
+    if (
+      document.body.getAttribute('data-page') === 'client-portal' &&
+      document.getElementById('breadcrumb-list')
+    ) {
+      loadNavigationModule().then((nav) =>
+        nav.updateBreadcrumbs([{ label: 'Dashboard', href: false }])
+      );
     }
     // Check for existing authentication using the auth module
     const authModule = await loadAuthModule();
@@ -220,8 +228,8 @@ export class ClientPortalModule extends BaseModule {
         this.log('Login form submitted');
 
         const formData = new FormData(this.loginForm!);
-        const email = (formData.get('email') as string || '').trim();
-        const password = formData.get('password') as string || '';
+        const email = ((formData.get('email') as string) || '').trim();
+        const password = (formData.get('password') as string) || '';
 
         this.log('Login attempt for:', email);
 
@@ -705,7 +713,9 @@ export class ClientPortalModule extends BaseModule {
     if (notificationsForm) {
       notificationsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitBtn = notificationsForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+        const submitBtn = notificationsForm.querySelector(
+          'button[type="submit"]'
+        ) as HTMLButtonElement;
         await withButtonLoading(submitBtn, () => this.saveNotificationSettings(), 'Saving...');
       });
     }
@@ -725,7 +735,9 @@ export class ClientPortalModule extends BaseModule {
     if (newProjectForm) {
       newProjectForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitBtn = newProjectForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+        const submitBtn = newProjectForm.querySelector(
+          'button[type="submit"]'
+        ) as HTMLButtonElement;
         await withButtonLoading(submitBtn, () => this.submitProjectRequest(), 'Submitting...');
       });
     }
@@ -809,9 +821,11 @@ export class ClientPortalModule extends BaseModule {
     const companyName = this.domCache.getAs<HTMLInputElement>('settingsCompany')?.value;
     const phone = this.domCache.getAs<HTMLInputElement>('settingsPhone')?.value;
     // Password fields are rendered dynamically, so access directly from DOM
-    const currentPassword = (document.getElementById('current-password') as HTMLInputElement | null)?.value;
+    const currentPassword = (document.getElementById('current-password') as HTMLInputElement | null)
+      ?.value;
     const newPassword = (document.getElementById('new-password') as HTMLInputElement | null)?.value;
-    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement | null)?.value;
+    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement | null)
+      ?.value;
 
     try {
       // Update profile info
@@ -930,9 +944,11 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Get password values directly from DOM (elements are rendered dynamically)
-    const currentPassword = (document.getElementById('current-password') as HTMLInputElement | null)?.value;
+    const currentPassword = (document.getElementById('current-password') as HTMLInputElement | null)
+      ?.value;
     const newPassword = (document.getElementById('new-password') as HTMLInputElement | null)?.value;
-    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement | null)?.value;
+    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement | null)
+      ?.value;
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       showToast('Please fill in all password fields', 'error');
@@ -1080,7 +1096,8 @@ export class ClientPortalModule extends BaseModule {
   }): Promise<void> {
     // Show loading state
     if (this.projectsList) {
-      this.projectsList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading projects...</span></div>';
+      this.projectsList.innerHTML =
+        '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading projects...</span></div>';
     }
 
     try {
@@ -1127,15 +1144,22 @@ export class ClientPortalModule extends BaseModule {
               credentials: 'include'
             });
             if (milestonesResponse.ok) {
-              const milestonesData = await milestonesResponse.json() as { milestones?: ProjectMilestoneResponse[] };
+              const milestonesData = (await milestonesResponse.json()) as {
+                milestones?: ProjectMilestoneResponse[];
+              };
               milestones = milestonesData.milestones || [];
             } else {
               milestoneFetchFailures++;
-              console.warn(`[ClientPortal] Failed to fetch milestones for project ${apiProject.id}: ${milestonesResponse.status}`);
+              console.warn(
+                `[ClientPortal] Failed to fetch milestones for project ${apiProject.id}: ${milestonesResponse.status}`
+              );
             }
           } catch (milestoneError) {
             milestoneFetchFailures++;
-            console.warn(`[ClientPortal] Failed to fetch milestones for project ${apiProject.id}:`, milestoneError);
+            console.warn(
+              `[ClientPortal] Failed to fetch milestones for project ${apiProject.id}:`,
+              milestoneError
+            );
           }
 
           // Transform milestone data to match ProjectMilestone interface
@@ -1152,9 +1176,10 @@ export class ClientPortalModule extends BaseModule {
           // Calculate progress from milestones if available
           const completedMilestones = transformedMilestones.filter((m) => m.isCompleted).length;
           const totalMilestones = transformedMilestones.length;
-          const calculatedProgress = totalMilestones > 0
-            ? Math.round((completedMilestones / totalMilestones) * 100)
-            : (apiProject.progress || 0);
+          const calculatedProgress =
+            totalMilestones > 0
+              ? Math.round((completedMilestones / totalMilestones) * 100)
+              : apiProject.progress || 0;
 
           // Transform to ClientProject interface
           return {
@@ -1166,11 +1191,14 @@ export class ClientPortalModule extends BaseModule {
             status: (apiProject.status || 'pending') as ClientProjectStatus,
             priority: (apiProject.priority || 'medium') as ProjectPriority,
             progress: calculatedProgress,
-            startDate: apiProject.start_date || apiProject.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+            startDate:
+              apiProject.start_date ||
+              apiProject.created_at?.split('T')[0] ||
+              new Date().toISOString().split('T')[0],
             estimatedEndDate: apiProject.estimated_end_date || undefined,
             actualEndDate: apiProject.actual_end_date || undefined,
             updates: [], // Loaded on-demand when project is selected
-            files: [],   // Loaded on-demand when project is selected
+            files: [], // Loaded on-demand when project is selected
             messages: [], // Loaded on-demand when project is selected
             milestones: transformedMilestones
           } as ClientProject;
@@ -1255,22 +1283,24 @@ export class ClientPortalModule extends BaseModule {
         if (!recentActivity || recentActivity.length === 0) {
           activityList.innerHTML = '<li class="activity-item empty">No recent activity</li>';
         } else {
-          activityList.innerHTML = recentActivity.map((item: {
-            type: string;
-            title: string;
-            context: string;
-            date: string;
-            entityId?: number;
-          }) => {
-            const date = new Date(item.date);
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const year = date.getFullYear();
-            const formattedDate = `${month}/${day}/${year}`;
-            const icon = this.getActivityIcon(item.type);
-            const safeTitle = this.escapeHtml(item.title);
-            const safeContext = item.context ? this.escapeHtml(item.context) : '';
-            return `
+          activityList.innerHTML = recentActivity
+            .map(
+              (item: {
+                type: string;
+                title: string;
+                context: string;
+                date: string;
+                entityId?: number;
+              }) => {
+                const date = new Date(item.date);
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const year = date.getFullYear();
+                const formattedDate = `${month}/${day}/${year}`;
+                const icon = this.getActivityIcon(item.type);
+                const safeTitle = this.escapeHtml(item.title);
+                const safeContext = item.context ? this.escapeHtml(item.context) : '';
+                return `
               <li class="activity-item">
                 <div class="activity-icon">${icon}</div>
                 <div class="activity-content">
@@ -1280,7 +1310,9 @@ export class ClientPortalModule extends BaseModule {
                 <span class="activity-time">${formattedDate}</span>
               </li>
             `;
-          }).join('');
+              }
+            )
+            .join('');
         }
       }
 
@@ -1311,10 +1343,7 @@ export class ClientPortalModule extends BaseModule {
     }
   }
 
-  private renderDashboardMilestones(
-    projects: ClientProject[],
-    errorMessage?: string
-  ): void {
+  private renderDashboardMilestones(projects: ClientProject[], errorMessage?: string): void {
     const list = document.getElementById('milestones-list');
     const empty = document.getElementById('milestones-empty');
     const summary = document.getElementById('milestones-summary');
@@ -1403,14 +1432,13 @@ export class ClientPortalModule extends BaseModule {
           ? `Due ${formatDate(milestone.dueDate)}`
           : 'Due date TBD';
 
-      const deliverables = Array.isArray(milestone.deliverables)
-        ? milestone.deliverables
-        : [];
-      const deliverablesMarkup = deliverables.length > 0
-        ? `<ul class="milestone-deliverables">${deliverables
-          .map((deliverableItem) => `<li>${this.escapeHtml(String(deliverableItem))}</li>`)
-          .join('')}</ul>`
-        : '';
+      const deliverables = Array.isArray(milestone.deliverables) ? milestone.deliverables : [];
+      const deliverablesMarkup =
+        deliverables.length > 0
+          ? `<ul class="milestone-deliverables">${deliverables
+            .map((deliverableItem) => `<li>${this.escapeHtml(String(deliverableItem))}</li>`)
+            .join('')}</ul>`
+          : '';
 
       item.className = `milestone-item${milestone.isCompleted ? ' completed' : ''}`;
       item.innerHTML = `
@@ -1498,7 +1526,11 @@ export class ClientPortalModule extends BaseModule {
     if (!this.projectsList) return;
 
     if (projects.length === 0) {
-      renderEmptyState(this.projectsList, 'No projects yet. Submit a project request to get started!', { className: 'no-projects' });
+      renderEmptyState(
+        this.projectsList,
+        'No projects yet. Submit a project request to get started!',
+        { className: 'no-projects' }
+      );
       return;
     }
 
@@ -1569,7 +1601,7 @@ export class ClientPortalModule extends BaseModule {
         return;
       }
 
-      const data = await response.json() as ProjectDetailResponse;
+      const data = (await response.json()) as ProjectDetailResponse;
 
       // Transform and update updates
       if (data.updates && Array.isArray(data.updates)) {
@@ -1579,7 +1611,12 @@ export class ClientPortalModule extends BaseModule {
           title: u.title || 'Update',
           description: u.description || '',
           author: (u as { author?: string }).author || 'System',
-          type: (u.update_type || 'general') as 'progress' | 'milestone' | 'issue' | 'resolution' | 'general'
+          type: (u.update_type || 'general') as
+            | 'progress'
+            | 'milestone'
+            | 'issue'
+            | 'resolution'
+            | 'general'
         }));
       }
 
@@ -1588,13 +1625,15 @@ export class ClientPortalModule extends BaseModule {
         this.currentProject.messages = data.messages.map((m: MessageResponse) => ({
           id: String(m.id),
           sender: m.sender_name || 'Unknown',
-          senderRole: (m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system')) as 'client' | 'developer' | 'system',
+          senderRole: (m.sender_role === 'admin' ? 'developer' : m.sender_role || 'system') as
+            | 'client'
+            | 'developer'
+            | 'system',
           message: m.message || '',
           timestamp: m.created_at || new Date().toISOString(),
           isRead: m.read_at !== null
         }));
       }
-
     } catch (error) {
       console.warn('[ClientPortal] Error fetching project details:', error);
     }
@@ -2040,11 +2079,15 @@ export class ClientPortalModule extends BaseModule {
     if (!tabName) return;
 
     // Update tab active states
-    document.querySelectorAll('.project-tab, .portal-tabs button').forEach((t) => t.classList.remove('active'));
+    document
+      .querySelectorAll('.project-tab, .portal-tabs button')
+      .forEach((t) => t.classList.remove('active'));
     tab.classList.add('active');
 
     // Update tab content
-    document.querySelectorAll('.tab-pane, .portal-tab-panel').forEach((pane) => pane.classList.remove('active'));
+    document
+      .querySelectorAll('.tab-pane, .portal-tab-panel')
+      .forEach((pane) => pane.classList.remove('active'));
     const targetPane = document.getElementById(`${tabName}-content`);
     if (targetPane) {
       targetPane.classList.add('active');

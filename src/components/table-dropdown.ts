@@ -50,13 +50,20 @@ export interface TableDropdownConfig {
  * or table header (e.g. filter, per page). For form fields use createFormSelect.
  */
 export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
-  const { options, currentValue, onChange, showStatusDot = true, ariaLabelPrefix, showAllWithCheckmark = false } = config;
+  const {
+    options,
+    currentValue,
+    onChange,
+    showStatusDot = true,
+    ariaLabelPrefix,
+    showAllWithCheckmark = false
+  } = config;
 
   // Normalize value (legacy data may have underscores, we use hyphens)
   const normalizedValue = normalizeStatus(currentValue);
 
   // Find current option label
-  const currentOption = options.find(opt => opt.value === normalizedValue);
+  const currentOption = options.find((opt) => opt.value === normalizedValue);
   const currentLabel = currentOption?.label || getStatusLabel(currentValue);
 
   // Create wrapper
@@ -79,9 +86,9 @@ export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
     ? `${ariaLabelPrefix}, current: ${currentLabel}`
     : `Change status, current: ${currentLabel}`;
   trigger.setAttribute('aria-label', ariaLabel);
-  trigger.innerHTML =
-    `${useStatusDot ? '<span class="status-dot"></span>' : ''
-    }<span class="custom-dropdown-text">${escapeHtml(currentLabel)}</span>
+  trigger.innerHTML = `${
+    useStatusDot ? '<span class="status-dot"></span>' : ''
+  }<span class="custom-dropdown-text">${escapeHtml(currentLabel)}</span>
     ${ICONS.CARET_DOWN}`;
 
   // Create menu
@@ -90,7 +97,7 @@ export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
 
   if (showAllWithCheckmark) {
     // All options; each has fixed-width check column so labels align
-    options.forEach(opt => {
+    options.forEach((opt) => {
       const li = document.createElement('li');
       li.className = 'custom-dropdown-item';
       li.dataset.value = opt.value;
@@ -113,7 +120,7 @@ export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
     });
   } else {
     // Add options (excluding current) with status dots
-    options.forEach(opt => {
+    options.forEach((opt) => {
       if (opt.value === normalizedValue) return;
 
       const li = document.createElement('li');
@@ -169,24 +176,31 @@ export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
   if (showAllWithCheckmark) {
     (wrapper as TableDropdownWrapper)._options = options;
     (wrapper as TableDropdownWrapper)._onChange = onChange;
-    (wrapper as TableDropdownWrapper).setOptions = (newOptions: TableDropdownOption[], selectedValue?: string) => {
+    (wrapper as TableDropdownWrapper).setOptions = (
+      newOptions: TableDropdownOption[],
+      selectedValue?: string
+    ) => {
       (wrapper as TableDropdownWrapper)._options = newOptions;
       const value = selectedValue !== undefined ? selectedValue : (wrapper.dataset.status ?? '');
       const normalized = normalizeStatus(value);
-      const currentOpt = newOptions.find(o => o.value === normalized);
-      const label = currentOpt?.label ?? (value === '' ? newOptions[0]?.label ?? '' : String(value));
+      const currentOpt = newOptions.find((o) => o.value === normalized);
+      const label =
+        currentOpt?.label ?? (value === '' ? (newOptions[0]?.label ?? '') : String(value));
       wrapper.dataset.status = normalized;
       const textEl = wrapper.querySelector('.custom-dropdown-trigger .custom-dropdown-text');
       if (textEl) textEl.textContent = label;
       const triggerBtn = wrapper.querySelector('button.custom-dropdown-trigger');
       if (triggerBtn) {
         const prefix = (wrapper as TableDropdownWrapper)._ariaLabelPrefix;
-        triggerBtn.setAttribute('aria-label', prefix ? `${prefix}, current: ${label}` : `Change status, current: ${label}`);
+        triggerBtn.setAttribute(
+          'aria-label',
+          prefix ? `${prefix}, current: ${label}` : `Change status, current: ${label}`
+        );
       }
       const menuEl = wrapper.querySelector('.custom-dropdown-menu');
       if (menuEl) {
         menuEl.innerHTML = '';
-        newOptions.forEach(opt => {
+        newOptions.forEach((opt) => {
           const li = document.createElement('li');
           li.className = 'custom-dropdown-item';
           li.dataset.value = opt.value;
@@ -201,7 +215,13 @@ export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
           li.appendChild(textSpan);
           li.addEventListener('click', (e) => {
             e.stopPropagation();
-            selectOption(wrapper, opt.value, opt.label, newOptions, (wrapper as TableDropdownWrapper)._onChange!);
+            selectOption(
+              wrapper,
+              opt.value,
+              opt.label,
+              newOptions,
+              (wrapper as TableDropdownWrapper)._onChange!
+            );
           });
           menuEl.appendChild(li);
         });
@@ -230,7 +250,7 @@ export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
  */
 function toggleDropdown(wrapper: HTMLElement): void {
   // Close all other table dropdowns first
-  document.querySelectorAll('.table-dropdown.open').forEach(el => {
+  document.querySelectorAll('.table-dropdown.open').forEach((el) => {
     if (el !== wrapper) {
       el.classList.remove('open');
     }
@@ -296,7 +316,7 @@ function selectOption(
 
   if (menu && showAllWithCheckmark) {
     menu.innerHTML = '';
-    allOptions.forEach(opt => {
+    allOptions.forEach((opt) => {
       const li = document.createElement('li');
       li.className = 'custom-dropdown-item';
       li.dataset.value = opt.value;
@@ -320,7 +340,7 @@ function selectOption(
   } else if (menu) {
     menu.innerHTML = '';
     const showDot = (wrapper as TableDropdownWrapper)._showStatusDot;
-    allOptions.forEach(opt => {
+    allOptions.forEach((opt) => {
       if (opt.value === value) return;
 
       const li = document.createElement('li');

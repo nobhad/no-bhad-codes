@@ -159,7 +159,11 @@ async function respondToQuote(requestId: number, decision: 'approve' | 'decline'
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error((err as { message?: string; error?: string }).message || (err as { error?: string }).error || res.statusText);
+    throw new Error(
+      (err as { message?: string; error?: string }).message ||
+        (err as { error?: string }).error ||
+        res.statusText
+    );
   }
 }
 
@@ -234,10 +238,12 @@ function renderRequests(requests: AdHocRequest[]): void {
     card.className = 'requests-card portal-list-item';
     const attachmentNote = request.attachmentFileId ? '<span>Attachment on file</span>' : '';
     const hasQuoteDetails =
-      request.quotedPrice !== null && request.quotedPrice !== undefined ||
-      request.flatRate !== null && request.flatRate !== undefined ||
-      (request.estimatedHours !== null && request.estimatedHours !== undefined &&
-        request.hourlyRate !== null && request.hourlyRate !== undefined);
+      (request.quotedPrice !== null && request.quotedPrice !== undefined) ||
+      (request.flatRate !== null && request.flatRate !== undefined) ||
+      (request.estimatedHours !== null &&
+        request.estimatedHours !== undefined &&
+        request.hourlyRate !== null &&
+        request.hourlyRate !== undefined);
     const quoteSummary = hasQuoteDetails
       ? `
         <div class="requests-quote">
@@ -248,14 +254,15 @@ function renderRequests(requests: AdHocRequest[]): void {
         </div>
       `
       : '';
-    const quoteActions = request.status === 'quoted'
-      ? `
+    const quoteActions =
+      request.status === 'quoted'
+        ? `
         <div class="requests-quote-actions">
           <button class="btn btn-primary" data-action="approve-quote" data-id="${request.id}">Approve Quote</button>
           <button class="btn btn-secondary" data-action="decline-quote" data-id="${request.id}">Decline Quote</button>
         </div>
       `
-      : '';
+        : '';
     card.innerHTML = `
       <div class="requests-card-header">
         <span class="requests-card-title">${escapeHtml(request.title)}</span>
@@ -276,7 +283,10 @@ function renderRequests(requests: AdHocRequest[]): void {
   });
 }
 
-function openQuoteConfirmModal(request: AdHocRequest, decision: 'approve' | 'decline'): Promise<boolean> {
+function openQuoteConfirmModal(
+  request: AdHocRequest,
+  decision: 'approve' | 'decline'
+): Promise<boolean> {
   return new Promise((resolve) => {
     const actionLabel = decision === 'approve' ? 'Approve Quote' : 'Decline Quote';
     const modal = createPortalModal({
@@ -294,9 +304,11 @@ function openQuoteConfirmModal(request: AdHocRequest, decision: 'approve' | 'dec
     const body = document.createElement('div');
     body.className = 'requests-quote-modal-body';
     body.innerHTML = `
-      <p>${decision === 'approve'
+      <p>${
+  decision === 'approve'
     ? 'You are about to approve this quote.'
-    : 'You are about to decline this quote.'}
+    : 'You are about to decline this quote.'
+}
       </p>
       <div class="requests-quote-modal-summary">
         <div><strong>Request:</strong> ${escapeHtml(request.title)}</div>
@@ -364,7 +376,7 @@ function renderProjects(projects: ProjectOption[]): void {
   // Multiple projects - show dropdown
   if (formGroup) (formGroup as HTMLElement).style.display = '';
 
-  const options = projects.map(p => ({
+  const options = projects.map((p) => ({
     value: String(p.id),
     label: getProjectLabel(p)
   }));
@@ -445,7 +457,9 @@ function createStaticDropdowns(): void {
       currentValue: '',
       placeholder: 'Select type',
       ariaLabelPrefix: 'Request type',
-      onChange: (value) => { typeInput.value = value; }
+      onChange: (value) => {
+        typeInput.value = value;
+      }
     });
     dropdown.setAttribute('data-modal-dropdown', 'true');
     typeMount.appendChild(dropdown);
@@ -465,7 +479,9 @@ function createStaticDropdowns(): void {
       ],
       currentValue: 'normal',
       ariaLabelPrefix: 'Priority',
-      onChange: (value) => { priorityInput.value = value; }
+      onChange: (value) => {
+        priorityInput.value = value;
+      }
     });
     dropdown.setAttribute('data-modal-dropdown', 'true');
     priorityMount.appendChild(dropdown);
@@ -485,7 +501,9 @@ function createStaticDropdowns(): void {
       ],
       currentValue: 'normal',
       ariaLabelPrefix: 'Urgency',
-      onChange: (value) => { urgencyInput.value = value; }
+      onChange: (value) => {
+        urgencyInput.value = value;
+      }
     });
     dropdown.setAttribute('data-modal-dropdown', 'true');
     urgencyMount.appendChild(dropdown);
@@ -620,7 +638,8 @@ export async function loadAdHocRequests(ctx: ClientPortalContext): Promise<void>
   // Check if React component should be used
   if (shouldUseReactPortalAdHocRequests()) {
     const component = getReactComponent('portalAdHocRequests');
-    const container = el('ad-hoc-requests-section') || document.querySelector('.ad-hoc-requests-section');
+    const container =
+      el('ad-hoc-requests-section') || document.querySelector('.ad-hoc-requests-section');
     if (component && container) {
       // Mount React component
       const unmountResult = component.mount(container as HTMLElement, {

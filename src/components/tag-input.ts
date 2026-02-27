@@ -74,7 +74,9 @@ export function createTagInput(config: TagInputConfig): {
    * Render selected tags
    */
   function renderSelectedTags(): string {
-    return selectedTags.map(tag => `
+    return selectedTags
+      .map(
+        (tag) => `
       <span class="tag-pill" style="background-color: ${tag.color}; color: ${getContrastColor(tag.color)}">
         ${escapeHtml(tag.name)}
         <button type="button" class="tag-remove" data-tag-id="${tag.id}" aria-label="Remove ${tag.name}">
@@ -84,7 +86,9 @@ export function createTagInput(config: TagInputConfig): {
           </svg>
         </button>
       </span>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   /**
@@ -92,11 +96,10 @@ export function createTagInput(config: TagInputConfig): {
    */
   function getFilteredTags(query: string): Tag[] {
     const lowerQuery = query.toLowerCase();
-    const selectedIds = new Set(selectedTags.map(t => t.id));
+    const selectedIds = new Set(selectedTags.map((t) => t.id));
 
-    return availableTags.filter(tag =>
-      !selectedIds.has(tag.id) &&
-      tag.name.toLowerCase().includes(lowerQuery)
+    return availableTags.filter(
+      (tag) => !selectedIds.has(tag.id) && tag.name.toLowerCase().includes(lowerQuery)
     );
   }
 
@@ -109,16 +112,20 @@ export function createTagInput(config: TagInputConfig): {
     if (filteredTags.length === 0 && !config.allowCreate) {
       dropdownEl.innerHTML = '<div class="tag-dropdown-empty">No matching tags</div>';
     } else {
-      let html = filteredTags.map(tag => `
+      let html = filteredTags
+        .map(
+          (tag) => `
         <button type="button" class="tag-dropdown-item" data-tag-id="${tag.id}">
           <span class="tag-dropdown-color" style="background-color: ${tag.color}"></span>
           ${escapeHtml(tag.name)}
         </button>
-      `).join('');
+      `
+        )
+        .join('');
 
       // Add create option if allowed and query doesn't match existing tag
       if (config.allowCreate && query.length > 0) {
-        const exactMatch = availableTags.some(t => t.name.toLowerCase() === query.toLowerCase());
+        const exactMatch = availableTags.some((t) => t.name.toLowerCase() === query.toLowerCase());
         if (!exactMatch) {
           html += `
             <button type="button" class="tag-dropdown-item tag-create-item" data-create="${escapeHtml(query)}">
@@ -142,19 +149,19 @@ export function createTagInput(config: TagInputConfig): {
    * Handle tag removal
    */
   async function handleTagRemove(tagId: number): Promise<void> {
-    const tag = selectedTags.find(t => t.id === tagId);
+    const tag = selectedTags.find((t) => t.id === tagId);
     if (!tag) return;
 
     if (config.onTagRemove) {
       try {
         await config.onTagRemove(tag);
-        selectedTags = selectedTags.filter(t => t.id !== tagId);
+        selectedTags = selectedTags.filter((t) => t.id !== tagId);
         render();
       } catch (error) {
         console.error('[TagInput] Failed to remove tag:', error);
       }
     } else {
-      selectedTags = selectedTags.filter(t => t.id !== tagId);
+      selectedTags = selectedTags.filter((t) => t.id !== tagId);
       render();
     }
   }
@@ -163,7 +170,7 @@ export function createTagInput(config: TagInputConfig): {
    * Handle tag add
    */
   async function handleTagAdd(tagId: number): Promise<void> {
-    const tag = availableTags.find(t => t.id === tagId);
+    const tag = availableTags.find((t) => t.id === tagId);
     if (!tag) return;
 
     // Check max tags
@@ -260,7 +267,7 @@ export function createTagInput(config: TagInputConfig): {
     }
 
     // Tag remove buttons
-    container.querySelectorAll('.tag-remove').forEach(btn => {
+    container.querySelectorAll('.tag-remove').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();

@@ -180,8 +180,12 @@ export function createButton(config: ButtonConfig): HTMLButtonElement {
       <span class="btn-text">${loadingText}</span>
     `;
   } else {
-    const leftIcon = iconLeft ? `<span class="btn-icon btn-icon-left" aria-hidden="true">${iconLeft}</span>` : '';
-    const rightIcon = iconRight ? `<span class="btn-icon btn-icon-right" aria-hidden="true">${iconRight}</span>` : '';
+    const leftIcon = iconLeft
+      ? `<span class="btn-icon btn-icon-left" aria-hidden="true">${iconLeft}</span>`
+      : '';
+    const rightIcon = iconRight
+      ? `<span class="btn-icon btn-icon-right" aria-hidden="true">${iconRight}</span>`
+      : '';
     btn.innerHTML = `${leftIcon}<span class="btn-text">${text}</span>${rightIcon}`;
   }
 
@@ -232,14 +236,20 @@ export function getButtonHTML(config: ButtonConfig): string {
     disabled || loading ? 'disabled' : '',
     loading ? 'aria-busy="true"' : '',
     ...Object.entries(dataAttributes).map(([k, v]) => `data-${k}="${escapeHtml(String(v))}"`)
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   let content: string;
   if (loading) {
     content = `<span class="btn-spinner" aria-hidden="true"></span><span class="btn-text">${escapeHtml(loadingText)}</span>`;
   } else {
-    const leftIcon = iconLeft ? `<span class="btn-icon btn-icon-left" aria-hidden="true">${iconLeft}</span>` : '';
-    const rightIcon = iconRight ? `<span class="btn-icon btn-icon-right" aria-hidden="true">${iconRight}</span>` : '';
+    const leftIcon = iconLeft
+      ? `<span class="btn-icon btn-icon-left" aria-hidden="true">${iconLeft}</span>`
+      : '';
+    const rightIcon = iconRight
+      ? `<span class="btn-icon btn-icon-right" aria-hidden="true">${iconRight}</span>`
+      : '';
     content = `${leftIcon}<span class="btn-text">${escapeHtml(text)}</span>${rightIcon}`;
   }
 
@@ -310,12 +320,7 @@ export function createLinkButton(config: LinkButtonConfig): HTMLAnchorElement {
 
   const link = document.createElement('a');
   link.href = href;
-  link.className = cx(
-    'btn',
-    `btn-${variant}`,
-    `btn-${size}`,
-    className
-  );
+  link.className = cx('btn', `btn-${variant}`, `btn-${size}`, className);
 
   if (newTab) {
     link.target = '_blank';
@@ -326,8 +331,12 @@ export function createLinkButton(config: LinkButtonConfig): HTMLAnchorElement {
     link.download = typeof download === 'string' ? download : '';
   }
 
-  const leftIcon = iconLeft ? `<span class="btn-icon btn-icon-left" aria-hidden="true">${iconLeft}</span>` : '';
-  const rightIcon = iconRight ? `<span class="btn-icon btn-icon-right" aria-hidden="true">${iconRight}</span>` : '';
+  const leftIcon = iconLeft
+    ? `<span class="btn-icon btn-icon-left" aria-hidden="true">${iconLeft}</span>`
+    : '';
+  const rightIcon = iconRight
+    ? `<span class="btn-icon btn-icon-right" aria-hidden="true">${iconRight}</span>`
+    : '';
   link.innerHTML = `${leftIcon}<span class="btn-text">${text}</span>${rightIcon}`;
 
   return link;
@@ -369,7 +378,9 @@ export function createToggleButton(config: ToggleButtonConfig): HTMLButtonElemen
       className
     );
 
-    const icon = state.iconSvg ? `<span class="btn-icon" aria-hidden="true">${state.iconSvg}</span>` : '';
+    const icon = state.iconSvg
+      ? `<span class="btn-icon" aria-hidden="true">${state.iconSvg}</span>`
+      : '';
     btn.innerHTML = `${icon}<span class="btn-text">${state.text}</span>`;
     btn.setAttribute('aria-pressed', String(currentState));
   };

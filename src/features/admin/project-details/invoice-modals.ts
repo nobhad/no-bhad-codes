@@ -61,7 +61,8 @@ export function showCreateInvoicePrompt(
     let total = 0;
     rows.forEach((row) => {
       const qty = parseFloat((row.querySelector('.line-item-qty') as HTMLInputElement)?.value) || 1;
-      const rate = parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
+      const rate =
+        parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
       const amount = qty * rate;
       total += amount;
       const amountSpan = row.querySelector('.line-item-amount');
@@ -75,7 +76,7 @@ export function showCreateInvoicePrompt(
     saveCurrentValues();
 
     // Validate line items
-    const validLineItems = lineItems.filter(item => item.description.trim() && item.rate > 0);
+    const validLineItems = lineItems.filter((item) => item.description.trim() && item.rate > 0);
     if (validLineItems.length === 0) {
       alertWarning('Please add at least one line item with description and amount');
       return;
@@ -83,11 +84,14 @@ export function showCreateInvoicePrompt(
 
     const typeSelect = modal.body.querySelector('#invoice-type-select') as HTMLSelectElement;
     const isDeposit = typeSelect?.value === 'deposit';
-    const depositPercentageInput = modal.body.querySelector('#deposit-percentage') as HTMLInputElement;
-    const depositPercentage = isDeposit && depositPercentageInput ? parseFloat(depositPercentageInput.value) : undefined;
+    const depositPercentageInput = modal.body.querySelector(
+      '#deposit-percentage'
+    ) as HTMLInputElement;
+    const depositPercentage =
+      isDeposit && depositPercentageInput ? parseFloat(depositPercentageInput.value) : undefined;
 
     // Calculate total
-    const totalAmount = validLineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+    const totalAmount = validLineItems.reduce((sum, item) => sum + item.quantity * item.rate, 0);
 
     modal.hide();
 
@@ -108,7 +112,7 @@ export function showCreateInvoicePrompt(
 
   // Render the modal content
   const renderModalContent = (): void => {
-    const totalAmount = lineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+    const totalAmount = lineItems.reduce((sum, item) => sum + item.quantity * item.rate, 0);
 
     modal.body.innerHTML = `
       <div class="form-group">
@@ -127,7 +131,9 @@ export function showCreateInvoicePrompt(
       <div class="form-group">
         <label class="form-label">Line Items</label>
         <div class="line-items-container">
-          ${lineItems.map((item, index) => `
+          ${lineItems
+    .map(
+      (item, index) => `
             <div class="line-item-row" data-index="${index}">
               <input type="text" class="form-input line-item-desc" placeholder="Description" value="${SanitizationUtils.escapeHtml(item.description)}" required>
               <input type="number" class="form-input line-item-qty" placeholder="Qty" value="${item.quantity}" min="1" style="width: 70px;">
@@ -135,7 +141,9 @@ export function showCreateInvoicePrompt(
               <span class="line-item-amount">$${(item.quantity * item.rate).toFixed(2)}</span>
               ${lineItems.length > 1 ? `<button type="button" class="icon-btn icon-btn-danger icon-btn-xs btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
             </div>
-          `).join('')}
+          `
+    )
+    .join('')}
         </div>
         <button type="button" class="btn btn-outline btn-sm" id="btn-add-line-item">+ Add Line Item</button>
       </div>
@@ -168,7 +176,7 @@ export function showCreateInvoicePrompt(
     });
 
     // Remove line item buttons
-    modal.body.querySelectorAll('.btn-remove-line').forEach(btn => {
+    modal.body.querySelectorAll('.btn-remove-line').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const index = parseInt((e.target as HTMLElement).dataset.index || '0');
         lineItems.splice(index, 1);
@@ -178,7 +186,7 @@ export function showCreateInvoicePrompt(
     });
 
     // Update amounts on input change
-    modal.body.querySelectorAll('.line-item-qty, .line-item-rate').forEach(input => {
+    modal.body.querySelectorAll('.line-item-qty, .line-item-rate').forEach((input) => {
       input.addEventListener('input', () => {
         updateLineItemAmounts();
       });
@@ -231,7 +239,7 @@ export async function createInvoiceWithLineItems(
     const response = await apiPost('/api/invoices', {
       projectId,
       clientId,
-      lineItems: lineItems.map(item => ({
+      lineItems: lineItems.map((item) => ({
         description: item.description,
         quantity: item.quantity,
         rate: item.rate,

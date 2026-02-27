@@ -90,7 +90,12 @@ export type {
   TablePaginationConfig,
   SortableHeaderConfig
 } from './table-builder';
-export { createStatusBadge, getStatusBadgeHTML, createStatusDot, getStatusDotHTML } from './status-badge';
+export {
+  createStatusBadge,
+  getStatusBadgeHTML,
+  createStatusDot,
+  getStatusDotHTML
+} from './status-badge';
 export type { StatusBadgeVariant } from './status-badge';
 export { createIconButton } from './icon-button';
 export type { IconButtonConfig } from './icon-button';
@@ -102,7 +107,13 @@ export { createFilterSelect } from './filter-select';
 export type { FilterSelectConfig, FilterSelectOption, FilterSelectInstance } from './filter-select';
 export { createFormSelect } from './form-select';
 export type { FormSelectConfig, FormSelectOption, FormSelectInstance } from './form-select';
-export { createTableDropdown, getStatusLabel, LEAD_STATUS_OPTIONS, CONTACT_STATUS_OPTIONS, PROJECT_STATUS_OPTIONS } from './table-dropdown';
+export {
+  createTableDropdown,
+  getStatusLabel,
+  LEAD_STATUS_OPTIONS,
+  CONTACT_STATUS_OPTIONS,
+  PROJECT_STATUS_OPTIONS
+} from './table-dropdown';
 export type { TableDropdownOption, TableDropdownConfig } from './table-dropdown';
 export { createPortalModal } from './portal-modal';
 export type { PortalModalConfig, PortalModalInstance } from './portal-modal';
@@ -110,7 +121,11 @@ export { getPortalCheckboxHTML } from './portal-checkbox';
 export type { PortalCheckboxConfig } from './portal-checkbox';
 export { initPasswordToggle, initAllPasswordToggles } from './password-toggle';
 export { createSecondarySidebar, SECONDARY_TAB_ICONS } from './secondary-sidebar';
-export type { SecondaryTab, SecondarySidebarConfig, SecondarySidebarController } from './secondary-sidebar';
+export type {
+  SecondaryTab,
+  SecondarySidebarConfig,
+  SecondarySidebarController
+} from './secondary-sidebar';
 
 // Bulk action utilities
 export {
@@ -153,11 +168,7 @@ export {
 } from '../utils/loading-utils';
 
 // Button loading utilities
-export {
-  setButtonLoading,
-  clearButtonLoading,
-  withButtonLoading
-} from '../utils/button-loading';
+export { setButtonLoading, clearButtonLoading, withButtonLoading } from '../utils/button-loading';
 
 // Button components (standalone HTML elements)
 export {

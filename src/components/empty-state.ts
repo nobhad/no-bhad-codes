@@ -64,10 +64,7 @@ export interface ErrorStateOptions {
  * Create an empty-state element (e.g. "No files yet", "Loading...").
  * Apply shared styles via class .empty-state (see portal/project-detail CSS).
  */
-export function createEmptyState(
-  message: string,
-  options: EmptyStateOptions = {}
-): HTMLElement {
+export function createEmptyState(message: string, options: EmptyStateOptions = {}): HTMLElement {
   return factoryCreateEmptyState(message, {
     className: options.className,
     ctaLabel: options.ctaLabel,
@@ -118,10 +115,7 @@ export function renderLoadingState(
 /**
  * Create an error state element with optional retry button.
  */
-export function createErrorState(
-  message: string,
-  options: ErrorStateOptions = {}
-): HTMLElement {
+export function createErrorState(message: string, options: ErrorStateOptions = {}): HTMLElement {
   return factoryCreateErrorState(message, {
     className: options.className,
     retryLabel: options.retryLabel,

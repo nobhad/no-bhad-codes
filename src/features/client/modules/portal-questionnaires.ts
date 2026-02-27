@@ -183,18 +183,22 @@ function getVisibleQuestions(questions: Question[], answers: Record<string, unkn
   return questions.filter((q) => isQuestionVisible(q, answers));
 }
 
-
 // =====================================================
 // DATA LOADING
 // =====================================================
 
-async function loadMyResponses(): Promise<{ responses: QuestionnaireResponse[]; stats: QuestionnaireStats }> {
+async function loadMyResponses(): Promise<{
+  responses: QuestionnaireResponse[];
+  stats: QuestionnaireStats;
+}> {
   const res = await fetch(`${API_BASE}/my-responses`, { credentials: 'include' });
   if (!res.ok) throw new Error('Failed to load questionnaires');
   return await res.json();
 }
 
-async function loadResponseDetails(responseId: number): Promise<{ response: QuestionnaireResponse; questionnaire: Questionnaire }> {
+async function loadResponseDetails(
+  responseId: number
+): Promise<{ response: QuestionnaireResponse; questionnaire: Questionnaire }> {
   const res = await fetch(`${API_BASE}/responses/${responseId}`, { credentials: 'include' });
   if (!res.ok) throw new Error('Failed to load questionnaire');
   return await res.json();
@@ -237,8 +241,10 @@ function renderQuestionnairesList(): void {
   if (!container) return;
 
   // Group by status
-  const pending = responsesCache.filter(r => r.status === 'pending' || r.status === 'in_progress');
-  const completed = responsesCache.filter(r => r.status === 'completed');
+  const pending = responsesCache.filter(
+    (r) => r.status === 'pending' || r.status === 'in_progress'
+  );
+  const completed = responsesCache.filter((r) => r.status === 'completed');
 
   let html = '';
 
@@ -264,7 +270,7 @@ function renderQuestionnairesList(): void {
       <div class="cp-questionnaires-section">
         <h3 class="cp-section-title">Pending Questionnaires</h3>
         <div class="cp-questionnaires-grid">
-          ${pending.map(r => renderQuestionnaireCard(r)).join('')}
+          ${pending.map((r) => renderQuestionnaireCard(r)).join('')}
         </div>
       </div>
     `;
@@ -276,7 +282,7 @@ function renderQuestionnairesList(): void {
       <div class="cp-questionnaires-section">
         <h3 class="cp-section-title">Completed</h3>
         <div class="cp-questionnaires-grid">
-          ${completed.map(r => renderQuestionnaireCard(r)).join('')}
+          ${completed.map((r) => renderQuestionnaireCard(r)).join('')}
         </div>
       </div>
     `;
@@ -300,7 +306,8 @@ function renderQuestionnairesList(): void {
 function renderQuestionnaireCard(response: QuestionnaireResponse): string {
   const isComplete = response.status === 'completed';
   const isPending = response.status === 'pending';
-  const dueClass = response.due_date && new Date(response.due_date) < new Date() && !isComplete ? 'overdue' : '';
+  const dueClass =
+    response.due_date && new Date(response.due_date) < new Date() && !isComplete ? 'overdue' : '';
 
   return `
     <div class="cp-questionnaire-card overview-card ${isComplete ? 'completed' : ''}" data-response-id="${response.id}">
@@ -314,7 +321,8 @@ function renderQuestionnaireCard(response: QuestionnaireResponse): string {
         ${response.completed_at ? `<span class="cp-questionnaire-completed">Completed: ${formatDate(response.completed_at)}</span>` : ''}
       </div>
       <div class="cp-questionnaire-actions">
-        ${isComplete
+        ${
+  isComplete
     ? `<button type="button" class="btn btn-secondary btn-sm questionnaire-view" data-id="${response.id}">View Answers</button>`
     : `<button type="button" class="btn btn-primary btn-sm questionnaire-start" data-id="${response.id}">${isPending ? 'Start' : 'Continue'}</button>`
 }
@@ -325,16 +333,20 @@ function renderQuestionnaireCard(response: QuestionnaireResponse): string {
 
 function animateCards(): void {
   const cards = document.querySelectorAll('.cp-questionnaire-card');
-  gsap.fromTo(cards, {
-    opacity: 0,
-    y: 10
-  }, {
-    opacity: 1,
-    y: 0,
-    duration: 0.3,
-    stagger: 0.05,
-    ease: 'power2.out'
-  });
+  gsap.fromTo(
+    cards,
+    {
+      opacity: 0,
+      y: 10
+    },
+    {
+      opacity: 1,
+      y: 0,
+      duration: 0.3,
+      stagger: 0.05,
+      ease: 'power2.out'
+    }
+  );
 }
 
 // =====================================================
@@ -364,12 +376,16 @@ function renderQuestionnaireForm(): void {
       <form id="questionnaire-answer-form" class="cp-questionnaire-form">
         ${visibleQuestions.map((q, index) => renderQuestion(q, index, isCompleted)).join('')}
 
-        ${!isCompleted ? `
+        ${
+  !isCompleted
+    ? `
           <div class="cp-questionnaire-form-actions">
             <button type="button" class="btn btn-secondary questionnaire-save-btn">Save Progress</button>
             <button type="submit" class="btn btn-success">Submit Questionnaire</button>
           </div>
-        ` : ''}
+        `
+    : ''
+}
       </form>
     </div>
   `;
@@ -387,15 +403,19 @@ function renderQuestionnaireForm(): void {
   }
 
   // Animate in
-  gsap.fromTo('.cp-questionnaire-form-wrapper', {
-    opacity: 0,
-    x: 20
-  }, {
-    opacity: 1,
-    x: 0,
-    duration: 0.3,
-    ease: 'power2.out'
-  });
+  gsap.fromTo(
+    '.cp-questionnaire-form-wrapper',
+    {
+      opacity: 0,
+      x: 20
+    },
+    {
+      opacity: 1,
+      x: 0,
+      duration: 0.3,
+      ease: 'power2.out'
+    }
+  );
 }
 
 /**
@@ -476,7 +496,7 @@ function renderQuestion(question: Question, index: number, isCompleted: boolean)
     inputHtml = `
         <select id="q_${question.id}" name="${question.id}" class="form-select" ${disabled}>
           <option value="">Select an option...</option>
-          ${(question.options || []).map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('')}
+          ${(question.options || []).map((opt) => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('')}
         </select>
       `;
     break;
@@ -484,14 +504,18 @@ function renderQuestion(question: Question, index: number, isCompleted: boolean)
   case 'multiselect':
     inputHtml = `
         <div class="cp-checkbox-group" id="q_${question.id}">
-          ${(question.options || []).map(opt => `
+          ${(question.options || [])
+    .map(
+      (opt) => `
             <label class="cp-checkbox-label">
               <span class="portal-checkbox">
                 <input type="checkbox" name="${question.id}" value="${escapeHtml(opt)}" ${disabled} />
               </span>
               <span>${escapeHtml(opt)}</span>
             </label>
-          `).join('')}
+          `
+    )
+    .join('')}
         </div>
       `;
     break;
@@ -519,7 +543,7 @@ function renderQuestion(question: Question, index: number, isCompleted: boolean)
 function populateAnswers(): void {
   if (!currentQuestionnaire || !currentAnswers) return;
 
-  currentQuestionnaire.questions.forEach(question => {
+  currentQuestionnaire.questions.forEach((question) => {
     const answer = currentAnswers[question.id];
     if (answer === undefined || answer === null) return;
 
@@ -534,7 +558,10 @@ function populateAnswers(): void {
         }
       });
     } else {
-      const input = document.getElementById(`q_${question.id}`) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+      const input = document.getElementById(`q_${question.id}`) as
+        | HTMLInputElement
+        | HTMLSelectElement
+        | HTMLTextAreaElement;
       if (input) {
         input.value = String(answer);
       }
@@ -548,17 +575,20 @@ function collectAnswers(): Record<string, unknown> {
   const answers: Record<string, unknown> = {};
 
   // Collect from all questions (not just visible) to preserve answers for conditionally hidden questions
-  currentQuestionnaire.questions.forEach(question => {
+  currentQuestionnaire.questions.forEach((question) => {
     if (question.type === 'multiselect') {
       const checkboxes = document.querySelectorAll(`input[name="${question.id}"]:checked`);
       if (checkboxes.length > 0) {
-        answers[question.id] = Array.from(checkboxes).map(cb => (cb as HTMLInputElement).value);
+        answers[question.id] = Array.from(checkboxes).map((cb) => (cb as HTMLInputElement).value);
       } else if (currentAnswers[question.id]) {
         // Preserve existing answer for hidden questions
         answers[question.id] = currentAnswers[question.id];
       }
     } else {
-      const input = document.getElementById(`q_${question.id}`) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+      const input = document.getElementById(`q_${question.id}`) as
+        | HTMLInputElement
+        | HTMLSelectElement
+        | HTMLTextAreaElement;
       if (input) {
         if (question.type === 'number' && input.value) {
           answers[question.id] = parseFloat(input.value);
@@ -584,7 +614,7 @@ function validateAnswers(): { valid: boolean; missingFields: string[] } {
   // Only validate visible questions
   const visibleQuestions = getVisibleQuestions(currentQuestionnaire.questions, answers);
 
-  visibleQuestions.forEach(question => {
+  visibleQuestions.forEach((question) => {
     if (!question.required) return;
 
     const answer = answers[question.id];
@@ -634,7 +664,7 @@ async function handleSaveProgress(): Promise<void> {
     ctx?.showNotification('Progress saved', 'success');
 
     // Update local cache
-    const cached = responsesCache.find(r => r.id === currentResponse!.id);
+    const cached = responsesCache.find((r) => r.id === currentResponse!.id);
     if (cached) {
       cached.status = 'in_progress';
       cached.answers = currentAnswers;
@@ -654,7 +684,10 @@ async function handleSubmit(): Promise<void> {
   const { valid, missingFields } = validateAnswers();
 
   if (!valid) {
-    ctx?.showNotification(`Please answer all required fields: ${missingFields.join(', ')}`, 'error');
+    ctx?.showNotification(
+      `Please answer all required fields: ${missingFields.join(', ')}`,
+      'error'
+    );
     return;
   }
 
@@ -772,7 +805,6 @@ function setupEventListeners(): void {
     // Retry button
     if (target.closest('.questionnaires-retry')) {
       await refreshQuestionnaires();
-
     }
   });
 
@@ -807,7 +839,8 @@ export async function loadQuestionnaires(context: ClientPortalContext): Promise<
   // Check if React component should be used
   if (shouldUseReactPortalQuestionnaires()) {
     const component = getReactComponent('portalQuestionnaires');
-    const container = el('questionnaires-list') || document.querySelector('.questionnaires-section');
+    const container =
+      el('questionnaires-list') || document.querySelector('.questionnaires-section');
     if (component && container) {
       // Mount React component
       const unmountResult = component.mount(container as HTMLElement, {

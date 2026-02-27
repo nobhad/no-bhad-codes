@@ -103,9 +103,7 @@ function formatDate(s: string | undefined): string {
  * Format status text for display (capitalize, handle underscores/hyphens).
  */
 function formatStatusLabel(status: string): string {
-  return status
-    .replace(/[_-]+/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return status.replace(/[_-]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 /**
@@ -182,7 +180,11 @@ async function markViewed(requestId: number): Promise<void> {
   if (!res.ok) throw new Error('Failed to mark as viewed');
 }
 
-async function uploadForRequest(requestId: number, fileId: number, _ctx: ClientPortalContext): Promise<void> {
+async function uploadForRequest(
+  requestId: number,
+  fileId: number,
+  _ctx: ClientPortalContext
+): Promise<void> {
   const res = await fetch(`${DOC_REQUESTS_API}/${requestId}/upload`, {
     method: 'POST',
     credentials: 'include',
@@ -310,7 +312,10 @@ async function doUpload(ctx: ClientPortalContext): Promise<void> {
   }
 
   if (projectId === null || projectId === undefined) {
-    ctx.showNotification('You need at least one project to upload. Start a project first.', 'error');
+    ctx.showNotification(
+      'You need at least one project to upload. Start a project first.',
+      'error'
+    );
     return;
   }
 

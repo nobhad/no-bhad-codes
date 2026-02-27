@@ -35,7 +35,8 @@ export function registerModules(debug: boolean = false): void {
           // Use separate modules for mobile and desktop
           const isMobile = window.matchMedia('(max-width: 767px)').matches;
           if (isMobile) {
-            const { MobileIntroAnimationModule } = await import('../modules/animation/intro-animation-mobile');
+            const { MobileIntroAnimationModule } =
+              await import('../modules/animation/intro-animation-mobile');
             return new MobileIntroAnimationModule();
           }
           const { IntroAnimationModule } = await import('../modules/animation/intro-animation');
@@ -84,7 +85,9 @@ export function registerModules(debug: boolean = false): void {
         // DataService may not be available on client/admin pages - handle gracefully
         let dataService: { init?: () => Promise<void> | void } | null = null;
         try {
-          dataService = await container.resolve('DataService') as { init?: () => Promise<void> | void };
+          dataService = (await container.resolve('DataService')) as {
+            init?: () => Promise<void> | void;
+          };
           if (dataService && typeof dataService.init === 'function') {
             await dataService.init();
           }
@@ -213,10 +216,11 @@ export function registerModules(debug: boolean = false): void {
       factory: async () => {
         // Only load client portal on client pages
         const currentPath = window.location.pathname;
-        const isClientPage = currentPath === '/client' ||
-                             currentPath === '/client/' ||
-                             currentPath.startsWith('/client/index') ||
-                             currentPath.startsWith('/client/portal');
+        const isClientPage =
+          currentPath === '/client' ||
+          currentPath === '/client/' ||
+          currentPath.startsWith('/client/index') ||
+          currentPath.startsWith('/client/portal');
         if (isClientPage) {
           const { ClientPortalModule } = await import('../features/client/client-portal');
           return new ClientPortalModule();

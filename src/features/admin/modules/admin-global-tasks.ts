@@ -12,7 +12,11 @@ import { apiFetch, apiPut, apiDelete } from '../../../utils/api-client';
 import { alertSuccess, alertError, confirmDanger } from '../../../utils/confirm-dialog';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
+import {
+  createKanbanBoard,
+  type KanbanColumn,
+  type KanbanItem
+} from '../../../components/kanban-board';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { createViewToggle } from '../../../components/view-toggle';
 import { createPortalModal } from '../../../components/portal-modal';
@@ -30,6 +34,69 @@ import {
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('AdminGlobalTasks');
+
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn =
+  typeof import('../../../react/features/admin/global-tasks').mountGlobalTasksTable;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/global-tasks').unmountGlobalTasksTable;
+
+let mountGlobalTasksTable: ReactMountFn | null = null;
+let unmountGlobalTasksTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactGlobalTasksTable(): Promise<boolean> {
+  if (mountGlobalTasksTable && unmountGlobalTasksTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/global-tasks');
+    mountGlobalTasksTable = module.mountGlobalTasksTable;
+    unmountGlobalTasksTable = module.unmountGlobalTasksTable;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React global tasks table */
+function shouldUseReactGlobalTasksTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_global_tasks') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_global_tasks_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
 
 // View toggle icons
 const BOARD_ICON =
@@ -65,7 +132,10 @@ let moduleContext: AdminDashboardContext | null = null;
 // Pagination state - only show when > 10 items
 const PAGINATION_THRESHOLD = 10;
 const PAGINATION_STORAGE_KEY = 'global-tasks-pagination';
-let paginationState: PaginationState = getDefaultPaginationState({ tableId: 'global-tasks', defaultPageSize: 25 });
+let paginationState: PaginationState = getDefaultPaginationState({
+  tableId: 'global-tasks',
+  defaultPageSize: 25
+});
 
 // Status configuration - all colors use CSS variables
 const STATUS_CONFIG = {
@@ -88,7 +158,8 @@ const PRIORITY_CONFIG = {
 // ============================================
 
 const RENDER_ICONS = {
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
 };
 
 // ============================================
@@ -98,8 +169,10 @@ const RENDER_ICONS = {
 // Stat card icons
 const STAT_ICONS = {
   TODO: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>',
-  IN_PROGRESS: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>',
-  BLOCKED: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>',
+  IN_PROGRESS:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>',
+  BLOCKED:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>',
   DONE: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
 };
 
@@ -108,6 +181,19 @@ const STAT_ICONS = {
  * Called by admin-dashboard before loading data.
  */
 export function renderGlobalTasksTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactGlobalTasksTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Global Tasks Table Mount Point -->
+      <div id="react-global-tasks-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <!-- Task Stats Strip -->
     <div class="tasks-stats-strip" aria-label="Task statistics">
@@ -166,10 +252,10 @@ export function renderGlobalTasksTab(container: HTMLElement): void {
  */
 function updateTaskStats(): void {
   const counts = {
-    pending: currentTasks.filter(t => t.status === 'pending').length,
-    in_progress: currentTasks.filter(t => t.status === 'in_progress').length,
-    blocked: currentTasks.filter(t => t.status === 'blocked').length,
-    completed: currentTasks.filter(t => t.status === 'completed').length
+    pending: currentTasks.filter((t) => t.status === 'pending').length,
+    in_progress: currentTasks.filter((t) => t.status === 'in_progress').length,
+    blocked: currentTasks.filter((t) => t.status === 'blocked').length,
+    completed: currentTasks.filter((t) => t.status === 'completed').length
   };
 
   const todoEl = document.getElementById('stat-tasks-todo');
@@ -194,10 +280,65 @@ function updateTaskStats(): void {
 }
 
 /**
+ * Cleanup function called when leaving the global tasks tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupGlobalTasksTab(): void {
+  if (reactTableMounted && unmountGlobalTasksTable) {
+    unmountGlobalTasksTable();
+    reactTableMounted = false;
+  }
+}
+
+/**
  * Load global tasks and render the view
  */
 export async function loadGlobalTasks(ctx: AdminDashboardContext): Promise<void> {
   moduleContext = ctx;
+
+  // Check if React implementation should be used
+  const useReact = shouldUseReactGlobalTasksTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React GlobalTasksTable
+    const mountContainer = document.getElementById('react-global-tasks-mount');
+    if (mountContainer) {
+      const loaded = await loadReactGlobalTasksTable();
+      if (loaded && mountGlobalTasksTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountGlobalTasksTable) {
+          unmountGlobalTasksTable();
+        }
+        mountGlobalTasksTable(mountContainer, {
+          onNavigate: (tab: string, entityId?: string) => {
+            if (entityId) {
+              ctx.switchTab(tab);
+            } else {
+              ctx.switchTab(tab);
+            }
+          }
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        logger.error(' React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
   await fetchTasks();
   updateTaskStats();
   setupViewToggle();
@@ -214,7 +355,7 @@ function openTaskFromUrl(): void {
   const taskId = Number(taskIdParam);
   if (Number.isNaN(taskId)) return;
 
-  const task = currentTasks.find(t => t.id === taskId);
+  const task = currentTasks.find((t) => t.id === taskId);
   if (task) {
     handleTaskClick(taskToKanbanItem(task));
     const url = new URL(window.location.href);
@@ -278,8 +419,20 @@ function setupViewToggle(): void {
   const toggleEl = createViewToggle({
     id: 'global-tasks-view-toggle',
     options: [
-      { value: 'kanban', label: 'Board', title: 'Board view', ariaLabel: 'Board view', iconSvg: BOARD_ICON },
-      { value: 'list', label: 'List', title: 'List view', ariaLabel: 'List view', iconSvg: LIST_ICON }
+      {
+        value: 'kanban',
+        label: 'Board',
+        title: 'Board view',
+        ariaLabel: 'Board view',
+        iconSvg: BOARD_ICON
+      },
+      {
+        value: 'list',
+        label: 'List',
+        title: 'List view',
+        ariaLabel: 'List view',
+        iconSvg: LIST_ICON
+      }
     ],
     value: currentView,
     onChange: (v) => {
@@ -338,9 +491,9 @@ function renderKanbanView(): void {
 
   // Populate columns
   currentTasks
-    .filter(task => task.status !== 'cancelled')
-    .forEach(task => {
-      const column = columns.find(c => c.id === task.status);
+    .filter((task) => task.status !== 'cancelled')
+    .forEach((task) => {
+      const column = columns.find((c) => c.id === task.status);
       if (column) {
         column.items.push(taskToKanbanItem(task));
       }
@@ -401,7 +554,9 @@ function renderTaskCard(item: KanbanItem): string {
   const dueDateClass = isOverdue ? 'overdue' : '';
 
   return `
-    ${meta.projectName && meta.projectId ? `
+    ${
+  meta.projectName && meta.projectId
+    ? `
       <div class="task-project-link">
         <button type="button" class="task-project-name" data-action="view-project" data-project-id="${meta.projectId}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -411,23 +566,33 @@ function renderTaskCard(item: KanbanItem): string {
           ${SanitizationUtils.escapeHtml(meta.projectName)}
         </button>
       </div>
-    ` : ''}
+    `
+    : ''
+}
     <div class="kanban-card-title">${SanitizationUtils.escapeHtml(item.title)}</div>
-    ${meta.milestoneTitle ? `
+    ${
+  meta.milestoneTitle
+    ? `
       <div class="task-milestone-tag">${SanitizationUtils.escapeHtml(meta.milestoneTitle)}</div>
-    ` : `
+    `
+    : `
       <div class="task-standalone-tag">Standalone</div>
-    `}
+    `
+}
     <div class="task-meta">
       <span class="task-priority ${priorityClass}">${priorityLabel}</span>
-      ${meta.dueDate ? `
+      ${
+  meta.dueDate
+    ? `
         <span class="task-due-date ${dueDateClass}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
           ${formatDate(meta.dueDate)}
         </span>
-      ` : ''}
+      `
+    : ''
+}
     </div>
     <div class="task-card-actions">
       <button type="button" class="task-delete-btn" data-action="delete-task" data-task-id="${item.id}" title="Delete task">
@@ -458,7 +623,7 @@ function renderListView(): void {
   listContainer.style.display = 'block';
 
   // Filter out cancelled tasks
-  const activeTasks = currentTasks.filter(t => t.status !== 'cancelled');
+  const activeTasks = currentTasks.filter((t) => t.status !== 'cancelled');
 
   if (activeTasks.length === 0) {
     listContainer.innerHTML = `
@@ -505,7 +670,7 @@ function renderListView(): void {
             </tr>
           </thead>
           <tbody id="global-tasks-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            ${displayTasks.map(task => renderListItem(task)).join('')}
+            ${displayTasks.map((task) => renderListItem(task)).join('')}
           </tbody>
         </table>
       </div>
@@ -532,10 +697,10 @@ function renderListView(): void {
   // Add click and keyboard handlers for accessibility
   const tableBody = listContainer.querySelector('#global-tasks-table-body');
   if (tableBody) {
-    tableBody.querySelectorAll('tr[data-task-id]').forEach(row => {
+    tableBody.querySelectorAll('tr[data-task-id]').forEach((row) => {
       const handleRowActivate = (): void => {
         const taskId = parseInt((row as HTMLElement).dataset.taskId || '0');
-        const task = currentTasks.find(t => t.id === taskId);
+        const task = currentTasks.find((t) => t.id === taskId);
         if (task) handleTaskClick(taskToKanbanItem(task));
       };
 
@@ -554,7 +719,7 @@ function renderListView(): void {
       rowSelector: 'tr[data-task-id]',
       onRowSelect: (row) => {
         const taskId = parseInt(row.dataset.taskId || '0');
-        const task = currentTasks.find(t => t.id === taskId);
+        const task = currentTasks.find((t) => t.id === taskId);
         if (task) handleTaskClick(taskToKanbanItem(task));
       },
       focusClass: 'row-focused',
@@ -571,7 +736,8 @@ function renderListItem(task: GlobalTask): string {
   const priorityClass = priorityConfig?.class || '';
   const priorityLabel = priorityConfig?.label || task.priority;
   const _statusLabel = STATUS_CONFIG[task.status]?.label || task.status;
-  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+  const isOverdue =
+    task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
 
   return `
     <tr data-task-id="${task.id}" class="clickable-row" tabindex="0" role="button" aria-label="View task: ${SanitizationUtils.escapeHtml(task.title)}">
@@ -585,18 +751,25 @@ function renderListItem(task: GlobalTask): string {
         </button>
       </td>
       <td class="name-cell" data-label="Milestone">
-        ${task.milestoneTitle ? `
+        ${
+  task.milestoneTitle
+    ? `
           <span class="task-milestone-tag">${SanitizationUtils.escapeHtml(task.milestoneTitle)}</span>
-        ` : `
+        `
+    : `
           <span class="task-standalone-tag">Standalone</span>
-        `}
+        `
+}
       </td>
       <td class="type-cell" data-label="Priority"><span class="task-priority ${priorityClass}">${priorityLabel}</span></td>
       <td class="status-cell" data-label="Status">${getStatusDotHTML(task.status)}</td>
       <td class="date-cell ${isOverdue ? 'overdue' : ''}" data-label="Due Date">${task.dueDate ? formatDate(task.dueDate) : ''}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-    createAction('delete', task.id, { dataAttrs: { 'task-id': task.id }, title: 'Delete task' })
+    createAction('delete', task.id, {
+      dataAttrs: { 'task-id': task.id },
+      title: 'Delete task'
+    })
   ])}
       </td>
     </tr>
@@ -612,7 +785,7 @@ async function handleTaskStatusChange(
   toColumn: string
 ): Promise<void> {
   const taskId = typeof itemId === 'string' ? parseInt(itemId) : itemId;
-  const task = currentTasks.find(t => t.id === taskId);
+  const task = currentTasks.find((t) => t.id === taskId);
   if (!task) return;
 
   try {
@@ -642,7 +815,7 @@ async function handleTaskStatusChange(
  * Handle task click to show detail modal
  */
 function handleTaskClick(item: KanbanItem): void {
-  const task = currentTasks.find(t => t.id === item.id);
+  const task = currentTasks.find((t) => t.id === item.id);
   if (!task) return;
 
   showTaskDetailModal(task);
@@ -656,7 +829,8 @@ function showTaskDetailModal(task: GlobalTask): void {
   const priorityClass = priorityConfig?.class || '';
   const priorityLabel = priorityConfig?.label || task.priority;
   const statusLabel = STATUS_CONFIG[task.status]?.label || task.status;
-  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+  const isOverdue =
+    task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
 
   // Create modal using portal modal component
   const modal = createPortalModal({
@@ -684,12 +858,16 @@ function showTaskDetailModal(task: GlobalTask): void {
       </p>
     </div>
 
-    ${task.description ? `
+    ${
+  task.description
+    ? `
       <div class="task-detail-section">
         <h4>Description</h4>
         <p>${SanitizationUtils.escapeHtml(task.description)}</p>
       </div>
-    ` : ''}
+    `
+    : ''
+}
 
     <div class="task-detail-section">
       <h4>Details</h4>
@@ -720,7 +898,9 @@ function showTaskDetailModal(task: GlobalTask): void {
     if (moduleContext) {
       moduleContext.switchTab('project-detail');
       // The project detail tab will need the project ID - dispatch custom event
-      window.dispatchEvent(new CustomEvent('admin:view-project', { detail: { projectId: task.projectId } }));
+      window.dispatchEvent(
+        new CustomEvent('admin:view-project', { detail: { projectId: task.projectId } })
+      );
     }
   });
 
@@ -730,7 +910,9 @@ function showTaskDetailModal(task: GlobalTask): void {
     modal.hide();
     if (moduleContext) {
       moduleContext.switchTab('project-detail');
-      window.dispatchEvent(new CustomEvent('admin:view-project', { detail: { projectId: task.projectId } }));
+      window.dispatchEvent(
+        new CustomEvent('admin:view-project', { detail: { projectId: task.projectId } })
+      );
     }
   });
 

@@ -132,12 +132,7 @@ export function createTabs(config: TabsConfig): HTMLElement {
   } = config;
 
   const wrapper = document.createElement('div');
-  wrapper.className = cx(
-    'tabs',
-    `tabs-${variant}`,
-    `tabs-${layout}`,
-    className
-  );
+  wrapper.className = cx('tabs', `tabs-${variant}`, `tabs-${layout}`, className);
 
   // Tab list
   const tabList = document.createElement('div');
@@ -191,7 +186,7 @@ export function createTabs(config: TabsConfig): HTMLElement {
       if (tab.disabled) return;
 
       // Update buttons
-      tabList.querySelectorAll('.tabs-tab').forEach(btn => {
+      tabList.querySelectorAll('.tabs-tab').forEach((btn) => {
         btn.classList.remove('active');
         btn.setAttribute('aria-selected', 'false');
         (btn as HTMLButtonElement).tabIndex = -1;
@@ -201,7 +196,7 @@ export function createTabs(config: TabsConfig): HTMLElement {
       button.tabIndex = 0;
 
       // Update panels
-      panels.querySelectorAll('.tabs-panel').forEach(panel => {
+      panels.querySelectorAll('.tabs-panel').forEach((panel) => {
         panel.classList.remove('active');
         panel.setAttribute('hidden', '');
       });
@@ -216,16 +211,18 @@ export function createTabs(config: TabsConfig): HTMLElement {
 
     // Keyboard navigation
     button.addEventListener('keydown', (e) => {
-      const tabButtons = Array.from(tabList.querySelectorAll('.tabs-tab:not([disabled])')) as HTMLButtonElement[];
+      const tabButtons = Array.from(
+        tabList.querySelectorAll('.tabs-tab:not([disabled])')
+      ) as HTMLButtonElement[];
       const currentIndex = tabButtons.indexOf(button);
 
       let newIndex: number | null = null;
       if (layout === 'horizontal') {
         if (e.key === 'ArrowRight') newIndex = (currentIndex + 1) % tabButtons.length;
-        if (e.key === 'ArrowLeft') newIndex = (currentIndex - 1 + tabButtons.length) % tabButtons.length;
+        if (e.key === 'ArrowLeft') {newIndex = (currentIndex - 1 + tabButtons.length) % tabButtons.length;}
       } else {
         if (e.key === 'ArrowDown') newIndex = (currentIndex + 1) % tabButtons.length;
-        if (e.key === 'ArrowUp') newIndex = (currentIndex - 1 + tabButtons.length) % tabButtons.length;
+        if (e.key === 'ArrowUp') {newIndex = (currentIndex - 1 + tabButtons.length) % tabButtons.length;}
       }
       if (e.key === 'Home') newIndex = 0;
       if (e.key === 'End') newIndex = tabButtons.length - 1;
@@ -348,7 +345,9 @@ export function createNavItem(config: NavItemConfig): HTMLElement {
   if (hasSubmenu) {
     const chevron = document.createElement('span');
     chevron.className = 'nav-item-chevron';
-    chevron.innerHTML = ICONS.CHEVRON_DOWN || '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
+    chevron.innerHTML =
+      ICONS.CHEVRON_DOWN ||
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
     item.appendChild(chevron);
   }
 
@@ -364,7 +363,7 @@ export function createNavItem(config: NavItemConfig): HTMLElement {
     submenu.className = cx('nav-submenu', expanded && 'expanded');
     submenu.setAttribute('role', 'group');
 
-    children.forEach(child => {
+    children.forEach((child) => {
       submenu.appendChild(createNavItem(child));
     });
 
@@ -404,11 +403,7 @@ export function createSidebar(config: SidebarConfig): HTMLElement {
   } = config;
 
   const sidebar = document.createElement('nav');
-  sidebar.className = cx(
-    'sidebar',
-    collapsed && 'sidebar-collapsed',
-    className
-  );
+  sidebar.className = cx('sidebar', collapsed && 'sidebar-collapsed', className);
   sidebar.setAttribute('aria-label', 'Main navigation');
 
   // Header
@@ -446,7 +441,7 @@ export function createSidebar(config: SidebarConfig): HTMLElement {
   const nav = document.createElement('div');
   nav.className = 'sidebar-nav';
 
-  items.forEach(item => {
+  items.forEach((item) => {
     const navItem = createNavItem({
       ...item,
       onClick: (id, e) => {
@@ -490,7 +485,7 @@ export function toggleSidebar(sidebar: HTMLElement): boolean {
  * Set active nav item in sidebar
  */
 export function setActiveNavItem(sidebar: HTMLElement, itemId: string): void {
-  sidebar.querySelectorAll('.nav-item').forEach(item => {
+  sidebar.querySelectorAll('.nav-item').forEach((item) => {
     item.classList.remove('active');
     item.removeAttribute('aria-current');
   });
@@ -519,16 +514,14 @@ export function createStepIndicator(config: StepIndicatorConfig): HTMLElement {
   } = config;
 
   const wrapper = document.createElement('div');
-  wrapper.className = cx(
-    'step-indicator',
-    `step-indicator-${layout}`,
-    className
-  );
+  wrapper.className = cx('step-indicator', `step-indicator-${layout}`, className);
   wrapper.setAttribute('role', 'list');
   wrapper.setAttribute('aria-label', 'Progress steps');
 
   steps.forEach((step, index) => {
-    const state = step.state || (index < currentStep ? 'completed' : index === currentStep ? 'current' : 'upcoming');
+    const state =
+      step.state ||
+      (index < currentStep ? 'completed' : index === currentStep ? 'current' : 'upcoming');
 
     const stepEl = document.createElement('div');
     stepEl.className = cx(
@@ -546,7 +539,8 @@ export function createStepIndicator(config: StepIndicatorConfig): HTMLElement {
     marker.className = 'step-marker';
 
     if (state === 'completed') {
-      marker.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+      marker.innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
     } else {
       marker.textContent = String(index + 1);
     }
@@ -604,7 +598,8 @@ export function setCurrentStep(wrapper: HTMLElement, stepIndex: number): void {
     if (index < stepIndex) {
       step.classList.add('step-completed');
       if (marker) {
-        marker.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+        marker.innerHTML =
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
       }
     } else if (index === stepIndex) {
       step.classList.add('step-current');

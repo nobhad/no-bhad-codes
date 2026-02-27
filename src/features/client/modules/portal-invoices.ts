@@ -131,17 +131,13 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
     console.error('Error loading invoices:', error);
     if (summaryOutstanding) summaryOutstanding.textContent = '$0.00';
     if (summaryPaid) summaryPaid.textContent = '$0.00';
-    const errorState = createErrorState(
-      'Unable to load invoices. Please try again later.',
-      {
-        className: 'no-invoices-message',
-        onRetry: () => loadInvoices(ctx)
-      }
-    );
+    const errorState = createErrorState('Unable to load invoices. Please try again later.', {
+      className: 'no-invoices-message',
+      onRetry: () => loadInvoices(ctx)
+    });
     (invoicesContainer as HTMLElement).appendChild(errorState);
   }
 }
-
 
 /**
  * Render invoices list as a table (unified with admin portal)
@@ -168,20 +164,23 @@ function renderInvoicesList(
   }
 
   // Build table rows
-  const tableRows = invoices.map((invoice) => {
-    const statusLabel = getInvoiceStatusLabel(invoice.status);
-    const showReceiptBtn = invoice.status === 'paid' || invoice.status === 'partial';
+  const tableRows = invoices
+    .map((invoice) => {
+      const statusLabel = getInvoiceStatusLabel(invoice.status);
+      const showReceiptBtn = invoice.status === 'paid' || invoice.status === 'partial';
 
-    const receiptBtnHtml = showReceiptBtn ? `
+      const receiptBtnHtml = showReceiptBtn
+        ? `
       <button class="icon-btn btn-download-receipt"
               data-invoice-id="${invoice.id}"
               data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}"
               aria-label="Download receipt" title="Download Receipt">
         ${ICONS.FILE_TEXT}
       </button>
-    ` : '';
+    `
+        : '';
 
-    return `
+      return `
       <tr data-invoice-id="${invoice.id}">
         <td class="name-cell" data-label="Invoice">${ctx.escapeHtml(invoice.invoice_number)}</td>
         <td class="name-cell" data-label="Project">${ctx.escapeHtml(invoice.project_name || 'Project')}</td>
@@ -202,7 +201,8 @@ function renderInvoicesList(
         </td>
       </tr>
     `;
-  }).join('');
+    })
+    .join('');
 
   // Create table HTML
   const tableHtml = `

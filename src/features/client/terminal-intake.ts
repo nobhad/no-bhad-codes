@@ -17,7 +17,12 @@ import type {
   TerminalIntakeOptions,
   SavedProgress
 } from './terminal-intake-types';
-import { QUESTIONS, BUDGET_OPTIONS, FEATURE_OPTIONS, getBaseQuestionCount } from './terminal-intake-data';
+import {
+  QUESTIONS,
+  BUDGET_OPTIONS,
+  FEATURE_OPTIONS,
+  getBaseQuestionCount
+} from './terminal-intake-data';
 import {
   renderTerminalHTML,
   showAvatarIntro,
@@ -122,7 +127,10 @@ export class TerminalIntakeModule extends BaseModule {
     this.bindEvents();
 
     const savedProgress = this.loadProgress();
-    this.log('Saved progress:', savedProgress ? `index=${savedProgress.currentQuestionIndex}` : 'none');
+    this.log(
+      'Saved progress:',
+      savedProgress ? `index=${savedProgress.currentQuestionIndex}` : 'none'
+    );
     if (savedProgress && savedProgress.currentQuestionIndex > 0) {
       this.log('Calling askToResume');
       await this.askToResume(savedProgress);
@@ -202,7 +210,14 @@ export class TerminalIntakeModule extends BaseModule {
     let handleResumeKeydown: ((e: KeyboardEvent) => void) | null = null;
 
     const processChoice = async (choice: 'resume' | 'restart', displayText: string) => {
-      this.log('[PROCESS CHOICE] Called with choice:', choice, 'displayText:', displayText, 'handled:', handled);
+      this.log(
+        '[PROCESS CHOICE] Called with choice:',
+        choice,
+        'displayText:',
+        displayText,
+        'handled:',
+        handled
+      );
       if (handled) return;
       handled = true;
       this.log('[PROCESS CHOICE] Processing choice:', choice);
@@ -276,7 +291,14 @@ export class TerminalIntakeModule extends BaseModule {
     optionsEl.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       const btnNum = target.dataset.resumeBtn;
-      this.log('[RESUME OPTIONS CLICK] Clicked element:', target.tagName, 'data-resume-btn:', btnNum, 'data-value:', target.dataset.value);
+      this.log(
+        '[RESUME OPTIONS CLICK] Clicked element:',
+        target.tagName,
+        'data-resume-btn:',
+        btnNum,
+        'data-value:',
+        target.dataset.value
+      );
 
       if (!btnNum) return;
 
@@ -478,7 +500,11 @@ export class TerminalIntakeModule extends BaseModule {
           this.log('[CHAT CONTAINER CLICK] Skipping resume button');
           return;
         }
-        this.log('[CHAT CONTAINER CLICK] Option clicked:', target.dataset.value, target.textContent);
+        this.log(
+          '[CHAT CONTAINER CLICK] Option clicked:',
+          target.dataset.value,
+          target.textContent
+        );
         e.stopPropagation();
         this.handleOptionClick(target);
       }
@@ -493,7 +519,9 @@ export class TerminalIntakeModule extends BaseModule {
       if (this.intakeModal) {
         this.intakeModal.classList.remove('open', 'minimized', 'fullscreen');
         document.body.style.overflow = '';
-        (window as typeof globalThis & { terminalIntakeInitialized?: boolean }).terminalIntakeInitialized = false;
+        (
+          window as typeof globalThis & { terminalIntakeInitialized?: boolean }
+        ).terminalIntakeInitialized = false;
         const container = this.intakeModal.querySelector('.terminal-intake-container');
         if (container) container.innerHTML = '';
       }
@@ -604,7 +632,7 @@ export class TerminalIntakeModule extends BaseModule {
         -1, // No question index for greeting
         () => {}, // No go back for greeting
         () => {}, // No option click for greeting
-        () => {}  // No confirm click for greeting
+        () => {} // No confirm click for greeting
       );
       this.messages.push({ type: 'ai', content: greetingMessage });
     }
@@ -627,7 +655,8 @@ export class TerminalIntakeModule extends BaseModule {
       return;
     }
 
-    const billingDescription = billing.description ||
+    const billingDescription =
+      billing.description ||
       (billing.amount ? `${billing.type} - ${billing.amount}` : billing.type);
 
     const billingQuestion = `Your last project was billed as: ${billingDescription}. Would you like to use the same billing arrangement for this project?`;
@@ -926,7 +955,14 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private handleOptionClick(target: HTMLElement): void {
-    this.log('[HANDLE OPTION CLICK] Called with value:', target.dataset.value, 'isProcessing:', this.isProcessing, 'isInSpecialPrompt:', this.isInSpecialPrompt);
+    this.log(
+      '[HANDLE OPTION CLICK] Called with value:',
+      target.dataset.value,
+      'isProcessing:',
+      this.isProcessing,
+      'isInSpecialPrompt:',
+      this.isInSpecialPrompt
+    );
     // Skip if processing or in a special prompt (resume, review, etc.)
     if (this.isProcessing || this.isInSpecialPrompt) return;
 
@@ -1494,7 +1530,8 @@ export class TerminalIntakeModule extends BaseModule {
 
     this.addMessage({
       type: 'ai',
-      content: 'Now let\'s customize your project package. I\'ll show you our tier options so you can select the features that best fit your needs.'
+      content:
+        'Now let\'s customize your project package. I\'ll show you our tier options so you can select the features that best fit your needs.'
     });
 
     await delay(500);
@@ -1506,7 +1543,10 @@ export class TerminalIntakeModule extends BaseModule {
     // Insert the proposal builder after the terminal window but inside the intake container
     const terminalWindow = this.terminalContainer.querySelector('.terminal-window');
     if (terminalWindow && terminalWindow.parentNode) {
-      terminalWindow.parentNode.insertBefore(this.proposalBuilderContainer, terminalWindow.nextSibling);
+      terminalWindow.parentNode.insertBefore(
+        this.proposalBuilderContainer,
+        terminalWindow.nextSibling
+      );
     } else {
       this.terminalContainer.appendChild(this.proposalBuilderContainer);
     }
@@ -1665,7 +1705,8 @@ export class TerminalIntakeModule extends BaseModule {
 
       // Build success message based on proposal selection
       const tierName = this.proposalSelection?.selectedTier
-        ? this.proposalSelection.selectedTier.charAt(0).toUpperCase() + this.proposalSelection.selectedTier.slice(1)
+        ? this.proposalSelection.selectedTier.charAt(0).toUpperCase() +
+          this.proposalSelection.selectedTier.slice(1)
         : 'Custom';
 
       this.addMessage({

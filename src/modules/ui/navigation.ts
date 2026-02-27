@@ -228,7 +228,8 @@ export class NavigationModule extends BaseModule {
 
         // Check if we're on the home page
         const currentPath = window.location.pathname;
-        const isHomePage = currentPath === '/' || currentPath === '/index.html' || currentPath === '';
+        const isHomePage =
+          currentPath === '/' || currentPath === '/index.html' || currentPath === '';
 
         if (isHomePage) {
           // If already on home page, navigate to intro section via router
@@ -346,13 +347,17 @@ export class NavigationModule extends BaseModule {
 
     // On mobile, show portal button after panels pass (at 0.25s)
     if (isMobile && portalButton) {
-      tl.to(portalButton, {
-        opacity: 1,
-        visibility: 'visible',
-        pointerEvents: 'auto',
-        duration: 0.2,
-        ease: 'power2.out'
-      }, 0.25);
+      tl.to(
+        portalButton,
+        {
+          opacity: 1,
+          visibility: 'visible',
+          pointerEvents: 'auto',
+          duration: 0.2,
+          ease: 'power2.out'
+        },
+        0.25
+      );
     }
   }
 

@@ -32,13 +32,7 @@ export function resolveIconSize(size: IconSizeKey | number | undefined): number 
  * Uses the icon registry and applies consistent styling.
  */
 export function renderIcon(config: IconConfig): string {
-  const {
-    name,
-    size,
-    className = '',
-    ariaLabel,
-    ariaHidden = true
-  } = config;
+  const { name, size, className = '', ariaLabel, ariaHidden = true } = config;
 
   const definition = getIconDefinition(name);
   if (!definition) {
@@ -174,4 +168,9 @@ export function getLucideComponentName(iconName: string): string | undefined {
 // ICON ALIASES (exported for convenience)
 // ============================================
 
-export { ICON_REGISTRY, getIconDefinition, getAllIconNames, getIconsByCategory } from './icon-registry';
+export {
+  ICON_REGISTRY,
+  getIconDefinition,
+  getAllIconNames,
+  getIconsByCategory
+} from './icon-registry';

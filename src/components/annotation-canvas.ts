@@ -38,10 +38,7 @@ export class AnnotationCanvas {
   private onAnnotationAdded: ((annotation: Annotation) => void) | null = null;
   private zoomLevel = 1;
 
-  constructor(
-    canvasElement: HTMLCanvasElement,
-    imageElement: HTMLImageElement
-  ) {
+  constructor(canvasElement: HTMLCanvasElement, imageElement: HTMLImageElement) {
     this.canvas = canvasElement;
     this.ctx = this.canvas.getContext('2d')!;
     this.image = imageElement;
@@ -153,7 +150,7 @@ export class AnnotationCanvas {
       this.ctx.stroke();
     } else if (this.currentTool === 'highlight') {
       const color = this.getColorValue();
-      this.ctx.fillStyle = `${color  }40`; // 25% opacity
+      this.ctx.fillStyle = `${color}40`; // 25% opacity
       this.ctx.fillRect(
         Math.min(this.startX, endX),
         Math.min(this.startY, endY),
@@ -226,7 +223,7 @@ export class AnnotationCanvas {
         this.ctx.stroke();
       } else if (ann.type === 'highlight' && ann.coordinates) {
         const color = this.getColorValue(ann.color);
-        this.ctx.fillStyle = `${color  }40`;
+        this.ctx.fillStyle = `${color}40`;
         this.ctx.fillRect(
           Math.min(ann.coordinates[0].x, ann.coordinates[1].x),
           Math.min(ann.coordinates[0].y, ann.coordinates[1].y),
@@ -308,10 +305,12 @@ export class AnnotationCanvas {
   }
 
   public exportAnnotations(): string {
-    return JSON.stringify(this.annotations.map((a) => ({
-      ...a,
-      authorId: '' // Will be filled by caller
-    })));
+    return JSON.stringify(
+      this.annotations.map((a) => ({
+        ...a,
+        authorId: '' // Will be filled by caller
+      }))
+    );
   }
 
   public getCanvasImage(): string {

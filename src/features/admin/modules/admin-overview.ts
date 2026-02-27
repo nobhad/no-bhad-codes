@@ -14,7 +14,11 @@ import { apiFetch } from '../../../utils/api-client';
 import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createViewToggle } from '../../../components/view-toggle';
-import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
+import {
+  createKanbanBoard,
+  type KanbanColumn,
+  type KanbanItem
+} from '../../../components/kanban-board';
 import { getStatusDotHTML as _getStatusDotHTML } from '../../../components/status-badge';
 import { showTableEmpty } from '../../../utils/loading-utils';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
@@ -145,7 +149,12 @@ export async function loadOverviewData(ctx: AdminDashboardContext): Promise<void
     updateElement('stat-active-projects', formatNumber(dashboardData.snapshot.activeProjects));
     updateElement('stat-revenue-mtd', formatCurrency(dashboardData.snapshot.revenueMTD, false));
     updateElement('stat-new-leads', formatNumber(dashboardData.attention.newLeadsThisWeek));
-    updateElement('stat-overdue-tasks', formatNumber(dashboardData.attention.overdueInvoices + dashboardData.attention.pendingContracts));
+    updateElement(
+      'stat-overdue-tasks',
+      formatNumber(
+        dashboardData.attention.overdueInvoices + dashboardData.attention.pendingContracts
+      )
+    );
 
     // Update leads badge
     const leadsBadge = document.getElementById('leads-count-badge');
@@ -157,13 +166,21 @@ export async function loadOverviewData(ctx: AdminDashboardContext): Promise<void
     }
 
     // Update revenue KPIs (placeholder values for now - can be extended)
-    updateElement('stat-invoiced-ytd', formatCurrency(dashboardData.snapshot.revenueMTD * 2, false));
-    updateElement('stat-collected-ytd', formatCurrency(dashboardData.snapshot.revenueMTD * 1.6, false));
-    updateElement('stat-outstanding', formatCurrency(dashboardData.snapshot.revenueMTD * 0.4, false));
+    updateElement(
+      'stat-invoiced-ytd',
+      formatCurrency(dashboardData.snapshot.revenueMTD * 2, false)
+    );
+    updateElement(
+      'stat-collected-ytd',
+      formatCurrency(dashboardData.snapshot.revenueMTD * 1.6, false)
+    );
+    updateElement(
+      'stat-outstanding',
+      formatCurrency(dashboardData.snapshot.revenueMTD * 0.4, false)
+    );
 
     // Render simple revenue chart
     renderRevenueChart();
-
   } catch (error) {
     logger.error(' Error loading overview data:', error);
     showNoDataMessage();
@@ -203,8 +220,9 @@ async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
 
     // Filter for active/in-progress projects and limit to 5
     const projects = allProjects
-      .filter((p: { status?: string }) =>
-        p.status === 'active' || p.status === 'in-progress' || p.status === 'in_progress'
+      .filter(
+        (p: { status?: string }) =>
+          p.status === 'active' || p.status === 'in-progress' || p.status === 'in_progress'
       )
       .slice(0, 5);
 
@@ -213,29 +231,31 @@ async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
       return;
     }
 
-    tbody.innerHTML = projects.map((p: {
-      id: number;
-      project_name?: string;
-      name?: string;
-      company_name?: string;
-      contact_name?: string;
-      client_name?: string;
-      status: string;
-      progress?: number;
-      estimated_end_date?: string;
-      due_date?: string;
-    }) => {
-      const progress = p.progress ?? 0;
-      const statusClass = getStatusClass(p.status);
-      const statusLabel = getStatusLabel(p.status);
-      // Use correct field names from API
-      const projectName = p.project_name || p.name || 'Unnamed Project';
-      const clientName = p.company_name || p.contact_name || p.client_name || '';
-      const dueDate = p.estimated_end_date || p.due_date;
-      const dueClass = getDueDateClass(dueDate);
-      const dueStr = dueDate ? formatDate(dueDate) : '-';
+    tbody.innerHTML = projects
+      .map(
+        (p: {
+          id: number;
+          project_name?: string;
+          name?: string;
+          company_name?: string;
+          contact_name?: string;
+          client_name?: string;
+          status: string;
+          progress?: number;
+          estimated_end_date?: string;
+          due_date?: string;
+        }) => {
+          const progress = p.progress ?? 0;
+          const statusClass = getStatusClass(p.status);
+          const statusLabel = getStatusLabel(p.status);
+          // Use correct field names from API
+          const projectName = p.project_name || p.name || 'Unnamed Project';
+          const clientName = p.company_name || p.contact_name || p.client_name || '';
+          const dueDate = p.estimated_end_date || p.due_date;
+          const dueClass = getDueDateClass(dueDate);
+          const dueStr = dueDate ? formatDate(dueDate) : '-';
 
-      return `
+          return `
         <tr class="overview-table-row" data-project-id="${p.id}">
           <td class="identity-cell" data-label="Project">
             <span class="identity-name" data-field="primary-name">${SanitizationUtils.escapeHtml(projectName)}</span>
@@ -251,7 +271,9 @@ async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
           <td class="date-cell ${dueClass}" data-label="Due Date">${dueStr}</td>
         </tr>
       `;
-    }).join('');
+        }
+      )
+      .join('');
 
     // Add click handlers - navigate to projects tab
     tbody.querySelectorAll('.overview-table-row').forEach((row) => {
@@ -270,7 +292,6 @@ async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
       focusClass: 'row-focused',
       selectedClass: 'row-selected'
     });
-
   } catch (error) {
     logger.error(' Error loading projects:', error);
     tbody.innerHTML = '<tr><td colspan="4" class="error-cell">Failed to load projects</td></tr>';
@@ -294,9 +315,7 @@ async function loadRecentLeads(ctx: AdminDashboardContext): Promise<void> {
 
     // Filter for new/contacted leads and limit to 3
     const leads = allLeads
-      .filter((lead: { status?: string }) =>
-        lead.status === 'new' || lead.status === 'contacted'
-      )
+      .filter((lead: { status?: string }) => lead.status === 'new' || lead.status === 'contacted')
       .slice(0, 3);
 
     if (leads.length === 0) {
@@ -304,26 +323,28 @@ async function loadRecentLeads(ctx: AdminDashboardContext): Promise<void> {
       return;
     }
 
-    list.innerHTML = leads.map((lead: {
-      id: number;
-      contact_name?: string;
-      name?: string;
-      company_name?: string;
-      company?: string;
-      project_type?: string;
-      budget_range?: string;
-      budget?: string;
-      created_at?: string;
-    }) => {
-      // Use correct field names from API
-      const leadName = lead.contact_name || lead.name;
-      const company = lead.company_name || lead.company || '';
-      const budget = lead.budget_range || lead.budget || '';
-      const initials = getInitials(leadName);
-      const color = getAvatarColor(lead.id);
-      const timeAgo = lead.created_at ? getTimeAgo(lead.created_at) : '';
+    list.innerHTML = leads
+      .map(
+        (lead: {
+          id: number;
+          contact_name?: string;
+          name?: string;
+          company_name?: string;
+          company?: string;
+          project_type?: string;
+          budget_range?: string;
+          budget?: string;
+          created_at?: string;
+        }) => {
+          // Use correct field names from API
+          const leadName = lead.contact_name || lead.name;
+          const company = lead.company_name || lead.company || '';
+          const budget = lead.budget_range || lead.budget || '';
+          const initials = getInitials(leadName);
+          const color = getAvatarColor(lead.id);
+          const timeAgo = lead.created_at ? getTimeAgo(lead.created_at) : '';
 
-      return `
+          return `
         <li class="leads-item" data-lead-id="${lead.id}">
           <span class="leads-avatar" style="background: ${color}">${initials}</span>
           <div class="leads-info">
@@ -336,7 +357,9 @@ async function loadRecentLeads(ctx: AdminDashboardContext): Promise<void> {
           </div>
         </li>
       `;
-    }).join('');
+        }
+      )
+      .join('');
 
     // Add click handlers
     list.querySelectorAll('.leads-item').forEach((item) => {
@@ -344,7 +367,6 @@ async function loadRecentLeads(ctx: AdminDashboardContext): Promise<void> {
         ctx.switchTab?.('leads');
       });
     });
-
   } catch (error) {
     logger.error(' Error loading leads:', error);
     list.innerHTML = '<li class="leads-item-error">Failed to load leads</li>';
@@ -400,16 +422,19 @@ async function loadProjectHealth(): Promise<void> {
         </svg>
       </div>
       <div class="health-legend">
-        ${healthData.map(d => `
+        ${healthData
+    .map(
+      (d) => `
           <div class="health-legend-row">
             <span class="health-legend-dot" style="background: ${d.color}"></span>
             <span class="field-label">${d.label}</span>
             <span class="health-legend-value">${d.count}</span>
           </div>
-        `).join('')}
+        `
+    )
+    .join('')}
       </div>
     `;
-
   } catch (error) {
     logger.error(' Error loading project health:', error);
     container.innerHTML = '<div class="health-error">Failed to load</div>';
@@ -424,9 +449,10 @@ function renderDonutSegments(data: { count: number; color: string }[], total: nu
   const radius = 15.91549430918954; // circumference = 100
   let offset = 25; // Start at top
 
-  return data.map(d => {
-    const pct = (d.count / total) * 100;
-    const segment = `
+  return data
+    .map((d) => {
+      const pct = (d.count / total) * 100;
+      const segment = `
       <circle
         cx="18" cy="18" r="${radius}"
         fill="none"
@@ -437,9 +463,10 @@ function renderDonutSegments(data: { count: number; color: string }[], total: nu
         class="health-segment"
       />
     `;
-    offset -= pct;
-    return segment;
-  }).join('');
+      offset -= pct;
+      return segment;
+    })
+    .join('');
 }
 
 /**
@@ -469,14 +496,14 @@ function renderRevenueChart(): void {
  */
 function getStatusClass(status: string): string {
   const classes: Record<string, string> = {
-    'active': 'status-in-progress',
+    active: 'status-in-progress',
     'in-progress': 'status-in-progress',
-    'in_progress': 'status-in-progress',
+    in_progress: 'status-in-progress',
     'on-hold': 'status-on-hold',
-    'on_hold': 'status-on-hold',
-    'completed': 'status-completed',
-    'cancelled': 'status-cancelled',
-    'review': 'status-review'
+    on_hold: 'status-on-hold',
+    completed: 'status-completed',
+    cancelled: 'status-cancelled',
+    review: 'status-review'
   };
   return classes[status] || 'status-in-progress';
 }
@@ -486,14 +513,14 @@ function getStatusClass(status: string): string {
  */
 function getStatusLabel(status: string): string {
   const labels: Record<string, string> = {
-    'active': 'In Progress',
+    active: 'In Progress',
     'in-progress': 'In Progress',
-    'in_progress': 'In Progress',
+    in_progress: 'In Progress',
     'on-hold': 'On Hold',
-    'on_hold': 'On Hold',
-    'completed': 'Completed',
-    'cancelled': 'Cancelled',
-    'review': 'In Review'
+    on_hold: 'On Hold',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    review: 'In Review'
   };
   return labels[status] || 'Active';
 }
@@ -518,13 +545,15 @@ function getDueDateClass(dueDate?: string): string {
  */
 function getInitials(name: string | undefined | null): string {
   if (!name) return '?';
-  return name
-    .split(' ')
-    .map(n => n[0])
-    .filter(Boolean)
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || '?';
+  return (
+    name
+      .split(' ')
+      .map((n) => n[0])
+      .filter(Boolean)
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '?'
+  );
 }
 
 /**
@@ -561,21 +590,15 @@ function getTimeAgo(dateStr: string): string {
  */
 async function loadDashboardData(): Promise<DashboardData> {
   // Fetch data from multiple endpoints in parallel
-  const [
-    invoicesRes,
-    projectsRes,
-    clientsRes,
-    leadsRes,
-    messagesRes,
-    metricsRes
-  ] = await Promise.all([
-    apiFetch('/api/invoices').catch(() => null),
-    apiFetch('/api/projects').catch(() => null),
-    apiFetch('/api/clients').catch(() => null),
-    apiFetch('/api/admin/leads').catch(() => null),
-    apiFetch('/api/messages/unread-count').catch(() => null),
-    apiFetch('/api/analytics/quick/revenue?days=30').catch(() => null)
-  ]);
+  const [invoicesRes, projectsRes, clientsRes, leadsRes, messagesRes, metricsRes] =
+    await Promise.all([
+      apiFetch('/api/invoices').catch(() => null),
+      apiFetch('/api/projects').catch(() => null),
+      apiFetch('/api/clients').catch(() => null),
+      apiFetch('/api/admin/leads').catch(() => null),
+      apiFetch('/api/messages/unread-count').catch(() => null),
+      apiFetch('/api/analytics/quick/revenue?days=30').catch(() => null)
+    ]);
 
   // Parse responses - handle canonical API format { success: true, data: {...} }
   const invoicesJson = invoicesRes?.ok ? await invoicesRes.json() : { data: [] };
@@ -596,7 +619,9 @@ async function loadDashboardData(): Promise<DashboardData> {
   const messagesJson = messagesRes?.ok ? await messagesRes.json() : { data: { unread_count: 0 } };
   const messagesData = messagesJson.data ?? messagesJson ?? { unread_count: 0 };
 
-  const metricsJson = metricsRes?.ok ? await metricsRes.json() : { data: { summary: {}, revenueMTD: 0 } };
+  const metricsJson = metricsRes?.ok
+    ? await metricsRes.json()
+    : { data: { summary: {}, revenueMTD: 0 } };
   const metricsData = metricsJson.data ?? metricsJson ?? { summary: {}, revenueMTD: 0 };
 
   // Calculate overdue invoices (due_date < today and status not paid)
@@ -613,8 +638,16 @@ async function loadDashboardData(): Promise<DashboardData> {
   // Calculate pending contracts (projects with contract not signed)
   // Database field is contract_signed_at (datetime), not contract_signed (boolean)
   const pendingContracts = Array.isArray(projects)
-    ? projects.filter((p: { contract_signed_at?: string | null; contract_signed_date?: string | null; status?: string }) =>
-      !p.contract_signed_at && !p.contract_signed_date && p.status !== 'completed' && p.status !== 'cancelled'
+    ? projects.filter(
+      (p: {
+          contract_signed_at?: string | null;
+          contract_signed_date?: string | null;
+          status?: string;
+        }) =>
+        !p.contract_signed_at &&
+          !p.contract_signed_date &&
+          p.status !== 'completed' &&
+          p.status !== 'cancelled'
     ).length
     : 0;
 
@@ -634,8 +667,8 @@ async function loadDashboardData(): Promise<DashboardData> {
 
   // Active projects count (status uses hyphen: 'in-progress')
   const activeProjects = Array.isArray(projects)
-    ? projects.filter((p: { status?: string }) =>
-      p.status === 'active' || p.status === 'in-progress'
+    ? projects.filter(
+      (p: { status?: string }) => p.status === 'active' || p.status === 'in-progress'
     ).length
     : 0;
 
@@ -650,9 +683,7 @@ async function loadDashboardData(): Promise<DashboardData> {
   const convertedLeads = Array.isArray(leads)
     ? leads.filter((lead: { status?: string }) => lead.status === 'converted').length
     : 0;
-  const conversionRate = totalLeads > 0
-    ? Math.round((convertedLeads / totalLeads) * 100)
-    : 0;
+  const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
 
   return {
     attention: {
@@ -706,21 +737,24 @@ async function loadRecentActivity(): Promise<void> {
       return;
     }
 
-    listEl.innerHTML = activities.slice(0, 6).map((item: {
-      type: string;
-      title: string;
-      context?: string;
-      date: string;
-      clientName?: string;
-    }) => {
-      const timeAgo = item.date ? getTimeAgo(item.date) : '';
-      const dotClass = getActivityDotClass(item.type);
-      const safeTitle = SanitizationUtils.escapeHtml(item.title);
-      const safeContext = item.context ? SanitizationUtils.escapeHtml(
-        SanitizationUtils.decodeHtmlEntities(item.context)
-      ) : '';
+    listEl.innerHTML = activities
+      .slice(0, 6)
+      .map(
+        (item: {
+          type: string;
+          title: string;
+          context?: string;
+          date: string;
+          clientName?: string;
+        }) => {
+          const timeAgo = item.date ? getTimeAgo(item.date) : '';
+          const dotClass = getActivityDotClass(item.type);
+          const safeTitle = SanitizationUtils.escapeHtml(item.title);
+          const safeContext = item.context
+            ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(item.context))
+            : '';
 
-      return `
+          return `
         <li class="activity-feed-item">
           <span class="activity-dot ${dotClass}"></span>
           <div class="activity-body">
@@ -729,8 +763,9 @@ async function loadRecentActivity(): Promise<void> {
           </div>
         </li>
       `;
-    }).join('');
-
+        }
+      )
+      .join('');
   } catch (error) {
     logger.error(' Error loading recent activity:', error);
     listEl.innerHTML = '<li class="activity-item-error">Failed to load activity</li>';
@@ -742,13 +777,13 @@ async function loadRecentActivity(): Promise<void> {
  */
 function getActivityDotClass(type: string): string {
   const classes: Record<string, string> = {
-    'message': 'dot-blue',
-    'file': 'dot-green',
-    'invoice': 'dot-green',
-    'lead': 'dot-purple',
-    'project_update': 'dot-orange',
-    'contract': 'dot-green',
-    'document_request': 'dot-orange'
+    message: 'dot-blue',
+    file: 'dot-green',
+    invoice: 'dot-green',
+    lead: 'dot-purple',
+    project_update: 'dot-orange',
+    contract: 'dot-green',
+    document_request: 'dot-orange'
   };
   return classes[type] || 'dot-blue';
 }
@@ -759,16 +794,24 @@ function getActivityDotClass(type: string): string {
  */
 function _getActivityIcon(activityType: string): string {
   const icons: Record<string, string> = {
-    'lead': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>',
-    'invoice': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>',
-    'message': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
-    'document_request': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
-    'contract': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
-    'project_update': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
-    'file': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+    lead: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>',
+    invoice:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>',
+    message:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+    document_request:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+    contract:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+    project_update:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
+    file: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
   };
 
-  return icons[activityType] || '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>';
+  return (
+    icons[activityType] ||
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>'
+  );
 }
 
 /**
@@ -857,7 +900,6 @@ async function _loadUpcomingTasks(ctx: AdminDashboardContext): Promise<void> {
 
     // Render current view
     renderDashboardTasksView();
-
   } catch (error) {
     logger.error(' Error loading upcoming tasks:', error);
     const listEl = document.getElementById('upcoming-tasks-list');
@@ -879,8 +921,20 @@ function setupDashboardTasksViewToggle(): void {
   const toggleEl = createViewToggle({
     id: 'dashboard-tasks-view-toggle',
     options: [
-      { value: 'kanban', label: 'Board', title: 'Board view', ariaLabel: 'Board view', iconSvg: BOARD_ICON },
-      { value: 'list', label: 'List', title: 'List view', ariaLabel: 'List view', iconSvg: LIST_ICON }
+      {
+        value: 'kanban',
+        label: 'Board',
+        title: 'Board view',
+        ariaLabel: 'Board view',
+        iconSvg: BOARD_ICON
+      },
+      {
+        value: 'list',
+        label: 'List',
+        title: 'List view',
+        ariaLabel: 'List view',
+        iconSvg: LIST_ICON
+      }
     ],
     value: dashboardTasksView,
     onChange: (v) => {
@@ -934,9 +988,9 @@ function renderDashboardKanbanView(): void {
 
   // Populate columns
   dashboardTasks
-    .filter(task => task.status !== 'completed' && task.status !== 'cancelled')
-    .forEach(task => {
-      const column = columns.find(c => c.id === task.status);
+    .filter((task) => task.status !== 'completed' && task.status !== 'cancelled')
+    .forEach((task) => {
+      const column = columns.find((c) => c.id === task.status);
       if (column) {
         column.items.push(taskToKanbanItem(task));
       }
@@ -976,7 +1030,12 @@ function taskToKanbanItem(task: UpcomingTask): KanbanItem {
  * Render task card for dashboard kanban
  */
 function renderDashboardTaskCard(item: KanbanItem): string {
-  const meta = item.metadata as { priority: string; dueDate?: string; assignee?: string; projectName: string };
+  const meta = item.metadata as {
+    priority: string;
+    dueDate?: string;
+    assignee?: string;
+    projectName: string;
+  };
   const priorityConfig = PRIORITY_CONFIG[meta.priority];
   const priorityClass = priorityConfig?.class || '';
   const priorityLabel = priorityConfig?.label || meta.priority;
@@ -990,14 +1049,18 @@ function renderDashboardTaskCard(item: KanbanItem): string {
     </div>
     <div class="task-meta">
       <span class="task-priority ${priorityClass}">${priorityLabel}</span>
-      ${meta.dueDate ? `
+      ${
+  meta.dueDate
+    ? `
         <span class="task-due-date ${dueDateClass}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
           ${formatDate(meta.dueDate)}
         </span>
-      ` : ''}
+      `
+    : ''
+}
     </div>
   </div>
   `;
@@ -1006,7 +1069,11 @@ function renderDashboardTaskCard(item: KanbanItem): string {
 /**
  * Handle task move in dashboard kanban (navigate to tasks tab)
  */
-async function handleDashboardTaskMove(_itemId: string | number, _fromColumn: string, _toColumn: string): Promise<void> {
+async function handleDashboardTaskMove(
+  _itemId: string | number,
+  _fromColumn: string,
+  _toColumn: string
+): Promise<void> {
   // For dashboard widget, just navigate to tasks tab for full functionality
   dashboardCtx?.switchTab?.('tasks');
 }
@@ -1041,7 +1108,7 @@ function renderDashboardListView(): void {
 
   // Show top 5 tasks for list view
   const activeTasks = dashboardTasks
-    .filter(t => t.status !== 'completed' && t.status !== 'cancelled')
+    .filter((t) => t.status !== 'completed' && t.status !== 'cancelled')
     .slice(0, 5);
 
   if (activeTasks.length === 0) {
@@ -1049,16 +1116,17 @@ function renderDashboardListView(): void {
     return;
   }
 
-  listEl.innerHTML = activeTasks.map((task) => {
-    const priorityClass = PRIORITY_CLASSES[task.priority] || '';
-    const dueDateStr = task.dueDate ? formatDate(task.dueDate) : '';
-    const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
-    const overdueClass = isOverdue ? 'task-overdue' : '';
+  listEl.innerHTML = activeTasks
+    .map((task) => {
+      const priorityClass = PRIORITY_CLASSES[task.priority] || '';
+      const dueDateStr = task.dueDate ? formatDate(task.dueDate) : '';
+      const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
+      const overdueClass = isOverdue ? 'task-overdue' : '';
 
-    const safeTitle = SanitizationUtils.escapeHtml(task.title);
-    const safeProject = SanitizationUtils.escapeHtml(task.projectName);
+      const safeTitle = SanitizationUtils.escapeHtml(task.title);
+      const safeProject = SanitizationUtils.escapeHtml(task.projectName);
 
-    return `
+      return `
       <li class="task-item ${priorityClass} ${overdueClass}" data-task-id="${task.id}" data-project-id="${task.projectId}">
         <div class="task-item-content">
           <span class="task-title">${safeTitle}</span>
@@ -1070,7 +1138,8 @@ function renderDashboardListView(): void {
         </div>
       </li>
     `;
-  }).join('');
+    })
+    .join('');
 
   // Add click handlers to navigate to tasks tab
   listEl.querySelectorAll('.task-item[data-task-id]').forEach((item) => {
@@ -1085,13 +1154,20 @@ function renderDashboardListView(): void {
 // ============================================
 
 const OVERVIEW_ICONS = {
-  FOLDER: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h16Z"/></svg>',
-  DOLLAR: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
-  RADAR: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></svg>',
-  ALERT: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
-  ACTIVITY: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
-  USER_PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>',
-  HEART: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>'
+  FOLDER:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h16Z"/></svg>',
+  DOLLAR:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  RADAR:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></svg>',
+  ALERT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+  ACTIVITY:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+  USER_PLUS:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>',
+  HEART:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>'
 };
 
 // ============================================
@@ -1104,7 +1180,10 @@ const OVERVIEW_ICONS = {
  * Linear-style layout: 4-stat strip, 2-column grid (projects+chart | activity+leads+health)
  * Call this before loadOverviewData to create the DOM elements.
  */
-export async function renderOverviewTab(container: HTMLElement, ctx?: AdminDashboardContext): Promise<void> {
+export async function renderOverviewTab(
+  container: HTMLElement,
+  ctx?: AdminDashboardContext
+): Promise<void> {
   // Check if we should use React implementation
   if (shouldUseReactOverview()) {
     const loaded = await loadReactOverview();
@@ -1126,13 +1205,16 @@ export async function renderOverviewTab(container: HTMLElement, ctx?: AdminDashb
       return;
     }
     logger.warn(' Failed to load React, falling back to vanilla');
-
   }
 
   // Vanilla implementation (fallback or when feature flag disabled)
   const today = new Date();
   // Date string reserved for future use in overview display
-  const _dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const _dateStr = today.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
 
   container.innerHTML = `
   <div class="overview-linear">

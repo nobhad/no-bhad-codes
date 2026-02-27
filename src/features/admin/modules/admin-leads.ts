@@ -25,9 +25,18 @@ import { confirmDialog, multiPromptDialog } from '../../../utils/confirm-dialog'
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { getCopyEmailButtonHtml } from '../../../utils/copy-email';
-import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
+import {
+  createKanbanBoard,
+  type KanbanColumn,
+  type KanbanItem
+} from '../../../components/kanban-board';
 import { createPortalModal } from '../../../components/portal-modal';
-import { createRowCheckbox, setupBulkSelectionHandlers, resetSelection, type BulkActionConfig } from '../../../utils/table-bulk-actions';
+import {
+  createRowCheckbox,
+  setupBulkSelectionHandlers,
+  resetSelection,
+  type BulkActionConfig
+} from '../../../utils/table-bulk-actions';
 import { LEADS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { createViewToggle } from '../../../components/view-toggle';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
@@ -80,7 +89,11 @@ let reactMountContainer: HTMLElement | null = null;
 function isReactTableActuallyMounted(): boolean {
   if (!reactTableMounted) return false;
   // Check if the container still exists in the DOM and has content
-  if (!reactMountContainer || !reactMountContainer.isConnected || reactMountContainer.children.length === 0) {
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
     reactTableMounted = false;
     reactMountContainer = null;
     return false;
@@ -121,9 +134,24 @@ async function loadReactLeadsTable(): Promise<boolean> {
 // Pipeline stage configuration
 const PIPELINE_STAGES = [
   { id: 'new', label: 'New', statuses: ['new'], color: 'var(--portal-text-secondary)' },
-  { id: 'contacted', label: 'Contacted', statuses: ['contacted'], color: 'var(--app-color-primary)' },
-  { id: 'qualified', label: 'Qualified', statuses: ['qualified'], color: 'var(--color-warning-500)' },
-  { id: 'in-progress', label: 'In Progress', statuses: ['in-progress'], color: 'var(--color-info-500)' },
+  {
+    id: 'contacted',
+    label: 'Contacted',
+    statuses: ['contacted'],
+    color: 'var(--app-color-primary)'
+  },
+  {
+    id: 'qualified',
+    label: 'Qualified',
+    statuses: ['qualified'],
+    color: 'var(--color-warning-500)'
+  },
+  {
+    id: 'in-progress',
+    label: 'In Progress',
+    statuses: ['in-progress'],
+    color: 'var(--color-info-500)'
+  },
   { id: 'won', label: 'Won', statuses: ['converted'], color: 'var(--status-active)' },
   { id: 'lost', label: 'Lost', statuses: ['lost', 'cancelled'], color: 'var(--status-cancelled)' }
 ];
@@ -154,7 +182,10 @@ const LEADS_BULK_CONFIG: BulkActionConfig = {
             status: selectedStatus
           });
           if (response.ok) {
-            ctx.showNotification(`Updated ${ids.length} lead${ids.length > 1 ? 's' : ''}`, 'success');
+            ctx.showNotification(
+              `Updated ${ids.length} lead${ids.length > 1 ? 's' : ''}`,
+              'success'
+            );
             resetSelection('leads');
             await _leadsModuleRef.load(ctx);
           } else {
@@ -181,8 +212,12 @@ function buildLeadRow(
   const date = formatDate(lead.created_at);
   const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '');
   const decodedCompany = SanitizationUtils.decodeHtmlEntities(lead.company_name || '');
-  const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact));
-  const safeCompanyName = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
+  const safeContactName = SanitizationUtils.escapeHtml(
+    SanitizationUtils.capitalizeName(decodedContact)
+  );
+  const safeCompanyName = decodedCompany
+    ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany))
+    : '';
   const safeEmail = SanitizationUtils.escapeHtml(lead.email || '');
   const leadAny = lead as unknown as Record<string, string>;
   const projectType = leadAny.project_type || '';
@@ -196,13 +231,15 @@ function buildLeadRow(
   const row = document.createElement('tr');
   row.dataset.leadId = String(lead.id);
 
-  const wrapWithClientLink = (text: string) => hasClient
-    ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${text}</a>`
-    : text;
+  const wrapWithClientLink = (text: string) =>
+    hasClient
+      ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${text}</a>`
+      : text;
 
   const primaryName = safeCompanyName || safeContactName;
   const primaryContent = primaryName ? wrapWithClientLink(primaryName) : '';
-  const secondaryContent = safeCompanyName && safeContactName ? wrapWithClientLink(safeContactName) : '';
+  const secondaryContent =
+    safeCompanyName && safeContactName ? wrapWithClientLink(safeContactName) : '';
 
   row.innerHTML = `
     ${createRowCheckbox('leads', lead.id)}
@@ -220,7 +257,10 @@ function buildLeadRow(
     <td class="date-cell" data-label="Date">${date}</td>
     <td class="actions-cell" data-label="Actions">
       ${renderActionsCell([
-    conditionalAction(showConvertBtn, 'convert-project', lead.id, { className: 'btn-convert-lead', dataAttrs: { 'lead-id': lead.id } })
+    conditionalAction(showConvertBtn, 'convert-project', lead.id, {
+      className: 'btn-convert-lead',
+      dataAttrs: { 'lead-id': lead.id }
+    })
   ])}
     </td>
   `;
@@ -271,7 +311,14 @@ function buildLeadRow(
   // Row click handler
   row.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
-    if (target.closest('.table-dropdown') || target.closest('button') || target.closest('.lead-link') || target.closest('.bulk-select-cell') || target.closest('.inline-editable-cell') || target.tagName === 'INPUT') return;
+    if (
+      target.closest('.table-dropdown') ||
+      target.closest('button') ||
+      target.closest('.lead-link') ||
+      target.closest('.bulk-select-cell') ||
+      target.closest('.inline-editable-cell') ||
+      target.tagName === 'INPUT'
+    ) {return;}
     showLeadDetails(lead.id);
   });
 
@@ -301,10 +348,12 @@ function setupInlineEditing(
   if (primaryNameEl) {
     makeEditable(
       primaryNameEl,
-      () => isPrimaryCompany ? (lead.company_name || '') : (lead.contact_name || ''),
+      () => (isPrimaryCompany ? lead.company_name || '' : lead.contact_name || ''),
       async (newValue) => {
         const fieldToUpdate = isPrimaryCompany ? 'company_name' : 'contact_name';
-        const response = await apiPut(`/api/admin/leads/${lead.id}`, { [fieldToUpdate]: newValue || null });
+        const response = await apiPut(`/api/admin/leads/${lead.id}`, {
+          [fieldToUpdate]: newValue || null
+        });
         if (response.ok) {
           if (isPrimaryCompany) {
             helpers.updateItem(lead.id, { company_name: newValue || '' });
@@ -312,11 +361,14 @@ function setupInlineEditing(
             helpers.updateItem(lead.id, { contact_name: newValue || '' });
           }
           const displayName = newValue
-            ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(newValue)))
+            ? SanitizationUtils.escapeHtml(
+              SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(newValue))
+            )
             : '';
-          primaryNameEl.innerHTML = hasClient && displayName
-            ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${displayName}</a>`
-            : displayName;
+          primaryNameEl.innerHTML =
+            hasClient && displayName
+              ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${displayName}</a>`
+              : displayName;
           primaryNameEl.style.display = displayName ? '' : 'none';
           showToast(`${isPrimaryCompany ? 'Company' : 'Name'} updated`, 'success');
         } else {
@@ -333,10 +385,12 @@ function setupInlineEditing(
   if (secondaryNameEl && hasBothNames) {
     makeEditable(
       secondaryNameEl,
-      () => isPrimaryCompany ? (lead.contact_name || '') : (lead.company_name || ''),
+      () => (isPrimaryCompany ? lead.contact_name || '' : lead.company_name || ''),
       async (newValue) => {
         const fieldToUpdate = isPrimaryCompany ? 'contact_name' : 'company_name';
-        const response = await apiPut(`/api/admin/leads/${lead.id}`, { [fieldToUpdate]: newValue || null });
+        const response = await apiPut(`/api/admin/leads/${lead.id}`, {
+          [fieldToUpdate]: newValue || null
+        });
         if (response.ok) {
           if (isPrimaryCompany) {
             helpers.updateItem(lead.id, { contact_name: newValue || '' });
@@ -344,11 +398,14 @@ function setupInlineEditing(
             helpers.updateItem(lead.id, { company_name: newValue || '' });
           }
           const displayName = newValue
-            ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(newValue)))
+            ? SanitizationUtils.escapeHtml(
+              SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(newValue))
+            )
             : '';
-          secondaryNameEl.innerHTML = hasClient && displayName
-            ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${displayName}</a>`
-            : displayName;
+          secondaryNameEl.innerHTML =
+            hasClient && displayName
+              ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${displayName}</a>`
+              : displayName;
           secondaryNameEl.style.display = displayName ? '' : 'none';
           showToast(`${isPrimaryCompany ? 'Name' : 'Company'} updated`, 'success');
         } else {
@@ -458,7 +515,7 @@ const leadsModule = createTableModule<Lead, LeadsStats>({
     });
 
     // Setup bulk selection
-    const allRowIds = filteredLeads.map(l => l.id);
+    const allRowIds = filteredLeads.map((l) => l.id);
     setupBulkSelectionHandlers({ tableId: 'leads', actions: [] }, allRowIds);
   }
 });
@@ -501,8 +558,20 @@ function setupViewToggle(ctx: AdminDashboardContext): void {
   const toggleEl = createViewToggle({
     id: 'leads-view-toggle',
     options: [
-      { value: 'table', label: 'Table', title: 'Table View', ariaLabel: 'Table view', iconSvg: LEADS_TABLE_ICON },
-      { value: 'pipeline', label: 'Pipeline', title: 'Pipeline View', ariaLabel: 'Pipeline view', iconSvg: LEADS_PIPELINE_ICON }
+      {
+        value: 'table',
+        label: 'Table',
+        title: 'Table View',
+        ariaLabel: 'Table view',
+        iconSvg: LEADS_TABLE_ICON
+      },
+      {
+        value: 'pipeline',
+        label: 'Pipeline',
+        title: 'Pipeline View',
+        ariaLabel: 'Pipeline view',
+        iconSvg: LEADS_PIPELINE_ICON
+      }
     ],
     value: currentView,
     onChange: (value) => {
@@ -529,16 +598,16 @@ function renderPipelineView(ctx: AdminDashboardContext): void {
 
   const leadsData = leadsModule.getData();
 
-  const columns: KanbanColumn[] = PIPELINE_STAGES.map(stage => ({
+  const columns: KanbanColumn[] = PIPELINE_STAGES.map((stage) => ({
     id: stage.id,
     title: stage.label,
     color: stage.color,
     items: leadsData
-      .filter(lead => {
+      .filter((lead) => {
         const status = lead.status || 'new';
         return stage.statuses.includes(status);
       })
-      .map(lead => leadToKanbanItem(lead))
+      .map((lead) => leadToKanbanItem(lead))
   }));
 
   kanbanBoard = createKanbanBoard({
@@ -557,7 +626,9 @@ function renderPipelineView(ctx: AdminDashboardContext): void {
   if (!pipelineLinkHandlersAttached && container) {
     pipelineLinkHandlersAttached = true;
     container.addEventListener('click', async (e: Event) => {
-      const target = (e.target as HTMLElement).closest?.('.lead-card-client-link, .lead-card-project-link');
+      const target = (e.target as HTMLElement).closest?.(
+        '.lead-card-client-link, .lead-card-project-link'
+      );
       const currentCtx = leadsModule.getContext();
       if (!target || !currentCtx) return;
       e.preventDefault();
@@ -577,7 +648,9 @@ function leadToKanbanItem(lead: Lead): KanbanItem {
   return {
     id: lead.id,
     title: SanitizationUtils.decodeHtmlEntities(lead.contact_name || 'Unknown'),
-    subtitle: lead.company_name ? SanitizationUtils.decodeHtmlEntities(lead.company_name) : undefined,
+    subtitle: lead.company_name
+      ? SanitizationUtils.decodeHtmlEntities(lead.company_name)
+      : undefined,
     metadata: {
       email: lead.email,
       budget: lead.budget_range,
@@ -596,15 +669,13 @@ function calculateLeadScore(lead: Lead): number {
   const leadAny = lead as unknown as Record<string, string | number>;
 
   const budget = String(leadAny.budget_range || '').toLowerCase();
-  if (budget.includes('10000') || budget.includes('20000') || budget.includes('enterprise')) score += 20;
-  else if (budget.includes('5000') || budget.includes('premium')) score += 15;
-  else if (budget.includes('2500') || budget.includes('3000') || budget.includes('standard')) score += 10;
+  if (budget.includes('10000') || budget.includes('20000') || budget.includes('enterprise')) {score += 20;} else if (budget.includes('5000') || budget.includes('premium')) score += 15;
+  else if (budget.includes('2500') || budget.includes('3000') || budget.includes('standard')) {score += 10;}
 
   if (lead.company_name) score += 10;
 
   const timeline = String(leadAny.timeline || '').toLowerCase();
-  if (timeline.includes('asap') || timeline.includes('urgent') || timeline.includes('1 week')) score += 15;
-  else if (timeline.includes('2 week') || timeline.includes('month')) score += 10;
+  if (timeline.includes('asap') || timeline.includes('urgent') || timeline.includes('1 week')) {score += 15;} else if (timeline.includes('2 week') || timeline.includes('month')) score += 10;
 
   const source = (lead.source || '').toLowerCase();
   if (source.includes('referral')) score += 15;
@@ -638,10 +709,13 @@ function renderLeadCard(item: KanbanItem): string {
   const nameContent = meta.clientId
     ? `<a href="/admin/clients/${meta.clientId}" class="lead-card-client-link" data-client-id="${meta.clientId}" title="View client">${titleEscaped}</a>`
     : titleEscaped;
-  const projectName = meta.projectName ? SanitizationUtils.escapeHtml(String(meta.projectName)) : '';
-  const projectContent = projectName && meta.isActivated
-    ? `<a href="/admin/projects/${item.id}" class="lead-card-project-link" data-project-id="${item.id}" title="View project">${projectName}</a>`
-    : projectName || '';
+  const projectName = meta.projectName
+    ? SanitizationUtils.escapeHtml(String(meta.projectName))
+    : '';
+  const projectContent =
+    projectName && meta.isActivated
+      ? `<a href="/admin/projects/${item.id}" class="lead-card-project-link" data-project-id="${item.id}" title="View project">${projectName}</a>`
+      : projectName || '';
   const titleBlock = projectContent
     ? `<div class="kanban-card-title">${projectContent}</div><div class="lead-card-client-name">${nameContent}</div>`
     : `<div class="kanban-card-title">${nameContent}</div>`;
@@ -671,12 +745,12 @@ async function handleLeadStageChange(
   if (!lead) return;
 
   const stageToStatus: Record<string, string> = {
-    'new': 'new',
-    'contacted': 'contacted',
-    'qualified': 'qualified',
+    new: 'new',
+    contacted: 'contacted',
+    qualified: 'qualified',
     'in-progress': 'in-progress',
-    'won': 'converted',
-    'lost': 'lost'
+    won: 'converted',
+    lost: 'lost'
   };
 
   const newStatus = stageToStatus[toStage] || 'new';
@@ -774,7 +848,11 @@ async function openClientDetails(clientId: number, ctx: AdminDashboardContext): 
 // STATUS UPDATE
 // ============================================================================
 
-async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardContext): Promise<void> {
+async function updateLeadStatus(
+  id: number,
+  status: string,
+  ctx: AdminDashboardContext
+): Promise<void> {
   try {
     let cancelled_by: string | null = null;
     let cancellation_reason: string | null = null;
@@ -798,7 +876,9 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
     }
 
     const normalizedStatus = String(status).trim().replace(/_/g, '-');
-    const body: { status: string; cancelled_by?: string; cancellation_reason?: string } = { status: normalizedStatus };
+    const body: { status: string; cancelled_by?: string; cancellation_reason?: string } = {
+      status: normalizedStatus
+    };
     if (cancelled_by) body.cancelled_by = cancelled_by;
     if (cancellation_reason) body.cancellation_reason = cancellation_reason;
 
@@ -847,8 +927,8 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
     let selectedCancelledBy: string | null = null;
     let resolved = false;
 
-    const reasonOptions = CANCELLATION_REASONS.map(r =>
-      `<option value="${r.value}">${r.label}</option>`
+    const reasonOptions = CANCELLATION_REASONS.map(
+      (r) => `<option value="${r.value}">${r.label}</option>`
     ).join('');
 
     const modal = createPortalModal({
@@ -909,9 +989,9 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
       confirmBtn.disabled = !(selectedCancelledBy && reasonSelect.value);
     };
 
-    cancelledByBtns.forEach(btn => {
+    cancelledByBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
-        cancelledByBtns.forEach(b => b.classList.remove('active'));
+        cancelledByBtns.forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
         selectedCancelledBy = (btn as HTMLElement).dataset.value || null;
         updateConfirmState();
@@ -936,7 +1016,7 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
       if (reason === 'other' && descTextarea.value.trim()) {
         reason = descTextarea.value.trim();
       } else {
-        const selectedOption = CANCELLATION_REASONS.find(r => r.value === reason);
+        const selectedOption = CANCELLATION_REASONS.find((r) => r.value === reason);
         if (selectedOption) {
           reason = selectedOption.label;
           if (descTextarea.value.trim()) {
@@ -980,18 +1060,28 @@ export async function showLeadDetails(leadId: number): Promise<void> {
 
   const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '');
   const decodedCompany = SanitizationUtils.decodeHtmlEntities(lead.company_name || '');
-  const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact));
-  const safeCompanyName = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
+  const safeContactName = SanitizationUtils.escapeHtml(
+    SanitizationUtils.capitalizeName(decodedContact)
+  );
+  const safeCompanyName = decodedCompany
+    ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany))
+    : '';
   const safeEmail = SanitizationUtils.escapeHtml(lead.email || '');
   const safePhone = SanitizationUtils.formatPhone(lead.phone || '');
   const safeProjectType = SanitizationUtils.escapeHtml(lead.project_type || '');
-  const safeDescription = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(lead.description || 'No description'));
+  const safeDescription = SanitizationUtils.escapeHtml(
+    SanitizationUtils.decodeHtmlEntities(lead.description || 'No description')
+  );
   const safeBudget = SanitizationUtils.escapeHtml(formatDisplayValue(lead.budget_range));
   const safeTimeline = SanitizationUtils.escapeHtml(formatDisplayValue(lead.timeline));
-  const safeFeatures = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities((lead.features || '').replace(/,/g, ', ')));
+  const safeFeatures = SanitizationUtils.escapeHtml(
+    SanitizationUtils.decodeHtmlEntities((lead.features || '').replace(/,/g, ', '))
+  );
   const safeSource = SanitizationUtils.escapeHtml(lead.source || '');
   const hasClient = typeof lead.client_id === 'number';
-  const safeProjectName = lead.project_name ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(lead.project_name)) : '';
+  const safeProjectName = lead.project_name
+    ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(lead.project_name))
+    : '';
 
   const score = calculateLeadScore(lead);
   const scoreClass = getScoreClass(score);
@@ -1000,9 +1090,10 @@ export async function showLeadDetails(leadId: number): Promise<void> {
 
   const [tasks, notes] = await Promise.all([loadLeadTasks(leadId), loadLeadNotes(leadId)]);
 
-  const companyValue = safeCompanyName && hasClient
-    ? `<a href="#" class="panel-link panel-link-client" data-client-id="${lead.client_id}" title="View client">${safeCompanyName}</a>`
-    : safeCompanyName;
+  const companyValue =
+    safeCompanyName && hasClient
+      ? `<a href="#" class="panel-link panel-link-client" data-client-id="${lead.client_id}" title="View client">${safeCompanyName}</a>`
+      : safeCompanyName;
   const nameValue = hasClient
     ? `<a href="#" class="panel-link panel-link-client" data-client-id="${lead.client_id}" title="View client">${safeContactName}</a>`
     : safeContactName;
@@ -1056,35 +1147,41 @@ export async function showLeadDetails(leadId: number): Promise<void> {
   `;
 
   // Tab switching
-  detailsPanel.querySelectorAll('.lead-tab').forEach(tab => {
+  detailsPanel.querySelectorAll('.lead-tab').forEach((tab) => {
     tab.addEventListener('click', () => {
       const tabName = (tab as HTMLElement).dataset.tab;
-      detailsPanel.querySelectorAll('.lead-tab').forEach(t => t.classList.remove('active'));
-      detailsPanel.querySelectorAll('.lead-tab-content').forEach(c => c.classList.remove('active'));
+      detailsPanel.querySelectorAll('.lead-tab').forEach((t) => t.classList.remove('active'));
+      detailsPanel
+        .querySelectorAll('.lead-tab-content')
+        .forEach((c) => c.classList.remove('active'));
       tab.classList.add('active');
       detailsPanel.querySelector(`[data-tab-content="${tabName}"]`)?.classList.add('active');
     });
   });
 
   // Task actions
-  detailsPanel.querySelectorAll('[data-action="toggle-task"]').forEach(btn => {
+  detailsPanel.querySelectorAll('[data-action="toggle-task"]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const taskItem = btn.closest('.lead-task-item');
       const taskId = parseInt((taskItem as HTMLElement)?.dataset.taskId || '0');
       if (taskId) completeTask(taskId, leadId);
     });
   });
-  detailsPanel.querySelector('.add-lead-task-btn')?.addEventListener('click', () => showAddTaskDialog(leadId));
+  detailsPanel
+    .querySelector('.add-lead-task-btn')
+    ?.addEventListener('click', () => showAddTaskDialog(leadId));
 
   // Note actions
-  detailsPanel.querySelectorAll('[data-action="toggle-pin"]').forEach(btn => {
+  detailsPanel.querySelectorAll('[data-action="toggle-pin"]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const noteItem = btn.closest('.lead-note-item');
       const noteId = parseInt((noteItem as HTMLElement)?.dataset.noteId || '0');
       if (noteId) toggleNotePin(noteId, leadId);
     });
   });
-  detailsPanel.querySelector('.add-lead-note-btn')?.addEventListener('click', () => showAddNoteDialog(leadId));
+  detailsPanel
+    .querySelector('.add-lead-note-btn')
+    ?.addEventListener('click', () => showAddNoteDialog(leadId));
 
   // Status dropdown
   const statusContainer = detailsPanel.querySelector('#panel-lead-status-container');
@@ -1095,11 +1192,13 @@ export async function showLeadDetails(leadId: number): Promise<void> {
       onChange: async (newStatus) => {
         await updateLeadStatus(lead.id, newStatus, storedContext);
         leadsModule.updateItem(lead.id, { status: newStatus as Lead['status'] });
-        const tableDropdown = document.querySelector(`tr[data-lead-id="${lead.id}"] .table-dropdown`);
+        const tableDropdown = document.querySelector(
+          `tr[data-lead-id="${lead.id}"] .table-dropdown`
+        );
         if (tableDropdown) {
           const textEl = tableDropdown.querySelector('.custom-dropdown-text');
           if (textEl) {
-            const option = LEAD_STATUS_OPTIONS.find(o => o.value === newStatus);
+            const option = LEAD_STATUS_OPTIONS.find((o) => o.value === newStatus);
             textEl.textContent = option?.label || newStatus;
           }
           (tableDropdown as HTMLElement).dataset.status = newStatus;
@@ -1228,7 +1327,11 @@ export async function activateLead(leadId: number, ctx: AdminDashboardContext): 
   }
 }
 
-export async function inviteLead(leadId: number, email: string, ctx: AdminDashboardContext): Promise<void> {
+export async function inviteLead(
+  leadId: number,
+  email: string,
+  ctx: AdminDashboardContext
+): Promise<void> {
   try {
     const response = await apiPost(`/api/admin/leads/${leadId}/invite`, { email });
 
@@ -1247,8 +1350,17 @@ export async function inviteLead(leadId: number, email: string, ctx: AdminDashbo
 // LEAD ANALYTICS
 // ============================================================================
 
-interface FunnelStage { stage: string; count: number; percentage: number; }
-interface SourcePerformance { source: string; total: number; converted: number; conversionRate: number; }
+interface FunnelStage {
+  stage: string;
+  count: number;
+  percentage: number;
+}
+interface SourcePerformance {
+  source: string;
+  total: number;
+  converted: number;
+  conversionRate: number;
+}
 
 export async function loadLeadAnalytics(): Promise<void> {
   await Promise.all([loadConversionFunnel(), loadSourcePerformance()]);
@@ -1264,11 +1376,23 @@ async function loadConversionFunnel(): Promise<void> {
       const data = await response.json();
       const raw = data?.funnel?.stages ?? data?.funnel;
       const stages = Array.isArray(raw) ? raw : [];
-      const funnel: FunnelStage[] = stages.map((s: { name?: string; stage?: string; count: number; conversionRate?: number; percentage?: number }) => ({
-        stage: s.name ?? s.stage ?? '',
-        count: s.count ?? 0,
-        percentage: s.percentage ?? (s.conversionRate !== undefined && s.conversionRate !== null ? s.conversionRate * 100 : 0)
-      }));
+      const funnel: FunnelStage[] = stages.map(
+        (s: {
+          name?: string;
+          stage?: string;
+          count: number;
+          conversionRate?: number;
+          percentage?: number;
+        }) => ({
+          stage: s.name ?? s.stage ?? '',
+          count: s.count ?? 0,
+          percentage:
+            s.percentage ??
+            (s.conversionRate !== undefined && s.conversionRate !== null
+              ? s.conversionRate * 100
+              : 0)
+        })
+      );
       renderConversionFunnel(container, funnel);
     } else {
       renderErrorState(container, 'Unable to load funnel data', { type: 'general' });
@@ -1286,28 +1410,30 @@ function renderConversionFunnel(container: HTMLElement, funnel: FunnelStage[]): 
     return;
   }
 
-  const maxCount = Math.max(...safeFunnel.map(s => s.count), 1);
+  const maxCount = Math.max(...safeFunnel.map((s) => s.count), 1);
   const stageCount = safeFunnel.length;
-  const allZero = safeFunnel.every(s => s.count === 0);
+  const allZero = safeFunnel.every((s) => s.count === 0);
   const TAPER_RANGE = 85;
 
-  container.innerHTML = safeFunnel.map((stage, index) => {
-    let barWidth: number;
-    let barClass = 'funnel-bar';
-    if (allZero) {
-      barWidth = stageCount > 1 ? 100 - (index * (TAPER_RANGE / (stageCount - 1))) : 100;
-      barClass = 'funnel-bar funnel-bar-empty';
-    } else {
-      barWidth = Math.max((stage.count / maxCount) * 100, 8);
-    }
-    return `
+  container.innerHTML = safeFunnel
+    .map((stage, index) => {
+      let barWidth: number;
+      let barClass = 'funnel-bar';
+      if (allZero) {
+        barWidth = stageCount > 1 ? 100 - index * (TAPER_RANGE / (stageCount - 1)) : 100;
+        barClass = 'funnel-bar funnel-bar-empty';
+      } else {
+        barWidth = Math.max((stage.count / maxCount) * 100, 8);
+      }
+      return `
       <div class="funnel-stage">
         <div class="funnel-stage-label">${SanitizationUtils.escapeHtml(stage.stage)}</div>
         <div class="funnel-bar-wrapper"><div class="${barClass}" style="width: ${barWidth}%"></div></div>
         <div class="funnel-stage-stats"><span class="funnel-count">${stage.count}</span><span class="funnel-percentage">${stage.percentage.toFixed(0)}%</span></div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 async function loadSourcePerformance(): Promise<void> {
@@ -1343,7 +1469,9 @@ function renderSourcePerformance(container: HTMLElement, sources: SourcePerforma
     return;
   }
 
-  container.innerHTML = sources.map(source => `
+  container.innerHTML = sources
+    .map(
+      (source) => `
     <div class="source-item">
       <div class="source-name">${SanitizationUtils.escapeHtml(source.source)}</div>
       <div class="source-stats">
@@ -1352,14 +1480,25 @@ function renderSourcePerformance(container: HTMLElement, sources: SourcePerforma
         <span class="source-rate ${source.conversionRate > 20 ? 'rate-good' : ''}">${source.conversionRate.toFixed(0)}%</span>
       </div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 }
 
 // ============================================================================
 // SCORING RULES
 // ============================================================================
 
-interface ScoringRule { id: number; name: string; description?: string; field_name: string; operator: string; threshold_value: string; points: number; is_active: boolean; }
+interface ScoringRule {
+  id: number;
+  name: string;
+  description?: string;
+  field_name: string;
+  operator: string;
+  threshold_value: string;
+  points: number;
+  is_active: boolean;
+}
 let scoringRulesInitialized = false;
 
 export async function loadScoringRules(): Promise<void> {
@@ -1399,7 +1538,9 @@ function renderScoringRules(container: HTMLElement, rules: ScoringRule[]): void 
     return;
   }
 
-  container.innerHTML = rules.map(rule => `
+  container.innerHTML = rules
+    .map(
+      (rule) => `
     <div class="scoring-rule-item ${rule.is_active ? '' : 'rule-inactive'}" data-rule-id="${rule.id}">
       <div class="rule-info">
         <div class="rule-name">${SanitizationUtils.escapeHtml(rule.name)}</div>
@@ -1415,12 +1556,18 @@ function renderScoringRules(container: HTMLElement, rules: ScoringRule[]): void 
         </button>
       </div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
-  container.querySelectorAll('.scoring-rule-item').forEach(item => {
+  container.querySelectorAll('.scoring-rule-item').forEach((item) => {
     const ruleId = parseInt((item as HTMLElement).dataset.ruleId || '0');
-    item.querySelector('[data-action="toggle"]')?.addEventListener('click', () => toggleScoringRule(ruleId));
-    item.querySelector('[data-action="delete"]')?.addEventListener('click', () => deleteScoringRule(ruleId));
+    item
+      .querySelector('[data-action="toggle"]')
+      ?.addEventListener('click', () => toggleScoringRule(ruleId));
+    item
+      .querySelector('[data-action="delete"]')
+      ?.addEventListener('click', () => deleteScoringRule(ruleId));
   });
 }
 
@@ -1429,16 +1576,33 @@ async function showAddScoringRuleDialog(): Promise<void> {
     title: 'Add Scoring Rule',
     fields: [
       { name: 'name', label: 'Rule Name', type: 'text', required: true },
-      { name: 'field_name', label: 'Field', type: 'select', options: [
-        { value: 'budget_range', label: 'Budget Range' }, { value: 'project_type', label: 'Project Type' },
-        { value: 'timeline', label: 'Timeline' }, { value: 'source', label: 'Source' },
-        { value: 'company_name', label: 'Company Name' }, { value: 'description', label: 'Description' }
-      ], required: true },
-      { name: 'operator', label: 'Operator', type: 'select', options: [
-        { value: 'equals', label: 'Equals' }, { value: 'contains', label: 'Contains' },
-        { value: 'in', label: 'In (comma-separated)' }, { value: 'not_empty', label: 'Not Empty' },
-        { value: 'greater_than', label: 'Greater Than' }
-      ], required: true },
+      {
+        name: 'field_name',
+        label: 'Field',
+        type: 'select',
+        options: [
+          { value: 'budget_range', label: 'Budget Range' },
+          { value: 'project_type', label: 'Project Type' },
+          { value: 'timeline', label: 'Timeline' },
+          { value: 'source', label: 'Source' },
+          { value: 'company_name', label: 'Company Name' },
+          { value: 'description', label: 'Description' }
+        ],
+        required: true
+      },
+      {
+        name: 'operator',
+        label: 'Operator',
+        type: 'select',
+        options: [
+          { value: 'equals', label: 'Equals' },
+          { value: 'contains', label: 'Contains' },
+          { value: 'in', label: 'In (comma-separated)' },
+          { value: 'not_empty', label: 'Not Empty' },
+          { value: 'greater_than', label: 'Greater Than' }
+        ],
+        required: true
+      },
       { name: 'threshold_value', label: 'Value', type: 'text', required: true },
       { name: 'points', label: 'Points', type: 'text', required: true }
     ],
@@ -1449,8 +1613,11 @@ async function showAddScoringRuleDialog(): Promise<void> {
   if (result) {
     try {
       const response = await apiPost('/api/admin/leads/scoring-rules', {
-        name: result.name, field_name: result.field_name, operator: result.operator,
-        threshold_value: result.threshold_value, points: parseInt(result.points) || 0
+        name: result.name,
+        field_name: result.field_name,
+        operator: result.operator,
+        threshold_value: result.threshold_value,
+        points: parseInt(result.points) || 0
       });
       if (response.ok) {
         showToast('Scoring rule added', 'success');
@@ -1467,7 +1634,9 @@ async function showAddScoringRuleDialog(): Promise<void> {
 
 async function toggleScoringRule(ruleId: number): Promise<void> {
   try {
-    const response = await apiPut(`/api/admin/leads/scoring-rules/${ruleId}`, { toggleActive: true });
+    const response = await apiPut(`/api/admin/leads/scoring-rules/${ruleId}`, {
+      toggleActive: true
+    });
     if (response.ok) {
       showToast('Rule updated', 'success');
       await loadScoringRules();
@@ -1481,7 +1650,12 @@ async function toggleScoringRule(ruleId: number): Promise<void> {
 }
 
 async function deleteScoringRule(ruleId: number): Promise<void> {
-  const confirmed = await confirmDialog({ title: 'Delete Scoring Rule', message: 'Are you sure you want to delete this scoring rule?', confirmText: 'Delete', danger: true });
+  const confirmed = await confirmDialog({
+    title: 'Delete Scoring Rule',
+    message: 'Are you sure you want to delete this scoring rule?',
+    confirmText: 'Delete',
+    danger: true
+  });
   if (confirmed) {
     try {
       const response = await apiDelete(`/api/admin/leads/scoring-rules/${ruleId}`);
@@ -1502,7 +1676,17 @@ async function deleteScoringRule(ruleId: number): Promise<void> {
 // LEAD TASKS
 // ============================================================================
 
-interface LeadTask { id: number; project_id: number; title: string; description?: string; task_type: string; due_date?: string; status: string; priority: string; completed_at?: string; }
+interface LeadTask {
+  id: number;
+  project_id: number;
+  title: string;
+  description?: string;
+  task_type: string;
+  due_date?: string;
+  status: string;
+  priority: string;
+  completed_at?: string;
+}
 
 async function loadLeadTasks(leadId: number): Promise<LeadTask[]> {
   try {
@@ -1519,13 +1703,17 @@ async function loadLeadTasks(leadId: number): Promise<LeadTask[]> {
 
 function renderLeadTasks(tasks: LeadTask[], leadId: number): string {
   const emptyBody = '<div class="empty-state-small">No tasks yet</div>';
-  const listBody = `<div class="lead-tasks-list">${tasks.map(task => `
+  const listBody = `<div class="lead-tasks-list">${tasks
+    .map(
+      (task) => `
     <div class="lead-task-item ${task.status === 'completed' ? 'task-completed' : ''}" data-task-id="${task.id}">
       <button class="task-checkbox ${task.status === 'completed' ? 'checked' : ''}" data-action="toggle-task">${task.status === 'completed' ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</button>
       <div class="task-info flex flex-col gap-0-5"><span class="task-title">${SanitizationUtils.escapeHtml(task.title)}</span>${task.due_date ? `<span class="task-due">${formatDate(task.due_date)}</span>` : ''}</div>
       <span class="task-type-badge">${task.task_type}</span>
     </div>
-  `).join('')}</div>`;
+  `
+    )
+    .join('')}</div>`;
   return `<div class="lead-tab-section"><div class="lead-tab-section-header"><span class="field-label">Tasks</span><button type="button" class="icon-btn add-lead-task-btn" data-lead-id="${leadId}" title="Add Task" aria-label="Add Task">${ICONS.PLUS}</button></div><div class="lead-tab-section-body">${tasks.length === 0 ? emptyBody : listBody}</div></div>`;
 }
 
@@ -1534,14 +1722,32 @@ async function showAddTaskDialog(leadId: number): Promise<void> {
     title: 'Add Task',
     fields: [
       { name: 'title', label: 'Task Title', type: 'text', required: true },
-      { name: 'task_type', label: 'Type', type: 'select', options: [
-        { value: 'follow_up', label: 'Follow Up' }, { value: 'call', label: 'Call' }, { value: 'email', label: 'Email' },
-        { value: 'meeting', label: 'Meeting' }, { value: 'proposal', label: 'Send Proposal' }, { value: 'other', label: 'Other' }
-      ], required: true },
+      {
+        name: 'task_type',
+        label: 'Type',
+        type: 'select',
+        options: [
+          { value: 'follow_up', label: 'Follow Up' },
+          { value: 'call', label: 'Call' },
+          { value: 'email', label: 'Email' },
+          { value: 'meeting', label: 'Meeting' },
+          { value: 'proposal', label: 'Send Proposal' },
+          { value: 'other', label: 'Other' }
+        ],
+        required: true
+      },
       { name: 'due_date', label: 'Due Date', type: 'date' },
-      { name: 'priority', label: 'Priority', type: 'select', options: [
-        { value: 'low', label: 'Low' }, { value: 'medium', label: 'Medium' }, { value: 'high', label: 'High' }, { value: 'urgent', label: 'Urgent' }
-      ] }
+      {
+        name: 'priority',
+        label: 'Priority',
+        type: 'select',
+        options: [
+          { value: 'low', label: 'Low' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'high', label: 'High' },
+          { value: 'urgent', label: 'Urgent' }
+        ]
+      }
     ],
     confirmText: 'Add Task',
     cancelText: 'Cancel'
@@ -1549,7 +1755,12 @@ async function showAddTaskDialog(leadId: number): Promise<void> {
 
   if (result) {
     try {
-      const response = await apiPost(`/api/admin/leads/${leadId}/tasks`, { title: result.title, taskType: result.task_type, dueDate: result.due_date || null, priority: result.priority || 'medium' });
+      const response = await apiPost(`/api/admin/leads/${leadId}/tasks`, {
+        title: result.title,
+        taskType: result.task_type,
+        dueDate: result.due_date || null,
+        priority: result.priority || 'medium'
+      });
       if (response.ok) {
         showToast('Task added', 'success');
         showLeadDetails(leadId);
@@ -1582,7 +1793,14 @@ async function completeTask(taskId: number, leadId: number): Promise<void> {
 // LEAD NOTES
 // ============================================================================
 
-interface LeadNote { id: number; project_id: number; author: string; content: string; is_pinned: boolean; created_at: string; }
+interface LeadNote {
+  id: number;
+  project_id: number;
+  author: string;
+  content: string;
+  is_pinned: boolean;
+  created_at: string;
+}
 
 async function loadLeadNotes(leadId: number): Promise<LeadNote[]> {
   try {
@@ -1603,20 +1821,32 @@ function renderLeadNotes(notes: LeadNote[], leadId: number): string {
     if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
-  const listBody = `<div class="lead-notes-list">${sortedNotes.map(note => `
+  const listBody = `<div class="lead-notes-list">${sortedNotes
+    .map(
+      (note) => `
     <div class="lead-note-item ${note.is_pinned ? 'note-pinned' : ''}" data-note-id="${note.id}">
       <div class="note-header"><span class="note-author">${SanitizationUtils.escapeHtml(note.author)}</span><span class="note-date">${formatDate(note.created_at)}</span><button class="icon-btn icon-btn-sm" data-action="toggle-pin" title="${note.is_pinned ? 'Unpin' : 'Pin'}" aria-label="${note.is_pinned ? 'Unpin note' : 'Pin note'}"><svg width="12" height="12" viewBox="0 0 24 24" fill="${note.is_pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2L12 12"/><circle cx="12" cy="16" r="4"/></svg></button></div>
       <div class="note-content">${SanitizationUtils.escapeHtml(note.content)}</div>
     </div>
-  `).join('')}</div>`;
+  `
+    )
+    .join('')}</div>`;
   return `<div class="lead-tab-section"><div class="lead-tab-section-header"><span class="field-label">Notes</span><button type="button" class="icon-btn add-lead-note-btn" data-lead-id="${leadId}" title="Add Note" aria-label="Add Note">${ICONS.PLUS}</button></div><div class="lead-tab-section-body">${notes.length === 0 ? emptyBody : listBody}</div></div>`;
 }
 
 async function showAddNoteDialog(leadId: number): Promise<void> {
-  const result = await multiPromptDialog({ title: 'Add Note', fields: [{ name: 'content', label: 'Note', type: 'textarea', required: true }], confirmText: 'Add Note', cancelText: 'Cancel' });
+  const result = await multiPromptDialog({
+    title: 'Add Note',
+    fields: [{ name: 'content', label: 'Note', type: 'textarea', required: true }],
+    confirmText: 'Add Note',
+    cancelText: 'Cancel'
+  });
   if (result && result.content) {
     try {
-      const response = await apiPost(`/api/admin/leads/${leadId}/notes`, { content: result.content, author: 'Admin' });
+      const response = await apiPost(`/api/admin/leads/${leadId}/notes`, {
+        content: result.content,
+        author: 'Admin'
+      });
       if (response.ok) {
         showToast('Note added', 'success');
         showLeadDetails(leadId);
@@ -1650,8 +1880,10 @@ async function toggleNotePin(noteId: number, leadId: number): Promise<void> {
 // ============================================================================
 
 const RENDER_ICONS = {
-  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+  EXPORT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
 };
 
 export function renderLeadsTab(container: HTMLElement): void {

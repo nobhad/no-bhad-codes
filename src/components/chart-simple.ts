@@ -38,8 +38,8 @@ function escapeHtml(text: string): string {
  * Format number with K/M suffix
  */
 function formatNumber(num: number): string {
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)  }M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(1)  }K`;
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
   return num.toString();
 }
 
@@ -63,7 +63,7 @@ export function createBarChart(
   }
 
   const opts = {
-    maxValue: options.maxValue || Math.max(...data.map(d => d.value)) || 100,
+    maxValue: options.maxValue || Math.max(...data.map((d) => d.value)) || 100,
     showValues: options.showValues !== false,
     barHeight: options.barHeight || 24,
     defaultColor: options.defaultColor || 'var(--app-color-primary)'
@@ -71,11 +71,12 @@ export function createBarChart(
 
   function render(chartData: BarChartData[]): void {
     if (!container) return;
-    const maxVal = Math.max(...chartData.map(d => d.value), opts.maxValue);
+    const maxVal = Math.max(...chartData.map((d) => d.value), opts.maxValue);
 
-    container.innerHTML = chartData.map(item => {
-      const percentage = maxVal > 0 ? (item.value / maxVal) * 100 : 0;
-      return `
+    container.innerHTML = chartData
+      .map((item) => {
+        const percentage = maxVal > 0 ? (item.value / maxVal) * 100 : 0;
+        return `
         <div class="bar-chart-item">
           <div class="bar-chart-label">${escapeHtml(item.label)}</div>
           <div class="bar-chart-bar-wrapper">
@@ -87,14 +88,17 @@ export function createBarChart(
           </div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
   }
 
   render(data);
 
   return {
     refresh: (newData: BarChartData[]) => render(newData),
-    destroy: () => { if (container) container.innerHTML = ''; }
+    destroy: () => {
+      if (container) container.innerHTML = '';
+    }
   };
 }
 
@@ -136,13 +140,14 @@ export function createPieChart(
     const circumference = 2 * Math.PI * radius;
     let currentOffset = 0;
 
-    const segments = chartData.map(item => {
-      const percentage = item.value / total;
-      const strokeDasharray = `${percentage * circumference} ${circumference}`;
-      const strokeDashoffset = -currentOffset * circumference;
-      currentOffset += percentage;
+    const segments = chartData
+      .map((item) => {
+        const percentage = item.value / total;
+        const strokeDasharray = `${percentage * circumference} ${circumference}`;
+        const strokeDashoffset = -currentOffset * circumference;
+        currentOffset += percentage;
 
-      return `
+        return `
         <circle
           cx="${opts.size / 2}"
           cy="${opts.size / 2}"
@@ -155,7 +160,8 @@ export function createPieChart(
           transform="rotate(-90 ${opts.size / 2} ${opts.size / 2})"
         />
       `;
-    }).join('');
+      })
+      .join('');
 
     let html = `
       <div class="pie-chart-wrapper">
@@ -167,16 +173,18 @@ export function createPieChart(
     if (opts.showLegend) {
       html += `
         <div class="pie-chart-legend">
-          ${chartData.map(item => {
-    const percentage = ((item.value / total) * 100).toFixed(1);
-    return `
+          ${chartData
+    .map((item) => {
+      const percentage = ((item.value / total) * 100).toFixed(1);
+      return `
               <div class="pie-chart-legend-item">
                 <span class="pie-chart-legend-color" style="background-color: ${item.color}"></span>
                 <span class="pie-chart-legend-label">${escapeHtml(item.label)}</span>
                 <span class="pie-chart-legend-value">${percentage}%</span>
               </div>
             `;
-  }).join('')}
+    })
+    .join('')}
         </div>
       `;
     }
@@ -189,7 +197,9 @@ export function createPieChart(
 
   return {
     refresh: (newData: PieChartData[]) => render(newData),
-    destroy: () => { if (container) container.innerHTML = ''; }
+    destroy: () => {
+      if (container) container.innerHTML = '';
+    }
   };
 }
 
@@ -231,15 +241,18 @@ export function createSparkline(
     const range = maxVal - minVal || 1;
     const padding = 2;
 
-    const points = chartData.map((value, i) => {
-      const x = (i / (chartData.length - 1)) * (opts.width - padding * 2) + padding;
-      const y = opts.height - padding - ((value - minVal) / range) * (opts.height - padding * 2);
-      return `${x},${y}`;
-    }).join(' ');
+    const points = chartData
+      .map((value, i) => {
+        const x = (i / (chartData.length - 1)) * (opts.width - padding * 2) + padding;
+        const y = opts.height - padding - ((value - minVal) / range) * (opts.height - padding * 2);
+        return `${x},${y}`;
+      })
+      .join(' ');
 
     // Create fill path
     const firstX = padding;
-    const lastX = (chartData.length - 1) / (chartData.length - 1) * (opts.width - padding * 2) + padding;
+    const lastX =
+      ((chartData.length - 1) / (chartData.length - 1)) * (opts.width - padding * 2) + padding;
     const fillPath = `M${firstX},${opts.height} L${points} L${lastX},${opts.height} Z`;
 
     container.innerHTML = `
@@ -265,7 +278,9 @@ export function createSparkline(
 
   return {
     refresh: (newData: number[]) => render(newData),
-    destroy: () => { if (container) container.innerHTML = ''; }
+    destroy: () => {
+      if (container) container.innerHTML = '';
+    }
   };
 }
 
@@ -293,7 +308,7 @@ export function createKPICard(
     if (!container) return;
     const changeClass = change !== undefined ? (change >= 0 ? 'positive' : 'negative') : '';
     const changeIcon = change !== undefined ? (change >= 0 ? '↑' : '↓') : '';
-    const changeValue = change !== undefined ? `${Math.abs(change).toFixed(1)  }%` : '';
+    const changeValue = change !== undefined ? `${Math.abs(change).toFixed(1)}%` : '';
 
     container.innerHTML = `
       <div class="kpi-card" ${config.color ? `style="border-top-color: ${config.color}"` : ''}>
@@ -302,13 +317,17 @@ export function createKPICard(
           <span class="kpi-card-value">${typeof value === 'number' ? formatNumber(value) : value}</span>
           <span class="kpi-card-label">${escapeHtml(config.label)}</span>
         </div>
-        ${change !== undefined ? `
+        ${
+  change !== undefined
+    ? `
           <div class="kpi-card-change ${changeClass}">
             <span class="kpi-card-change-icon">${changeIcon}</span>
             <span class="kpi-card-change-value">${changeValue}</span>
             ${config.changeLabel ? `<span class="kpi-card-change-label">${escapeHtml(config.changeLabel)}</span>` : ''}
           </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
     `;
   }
@@ -317,7 +336,9 @@ export function createKPICard(
 
   return {
     update: (value: string | number, change?: number) => render(value, change),
-    destroy: () => { if (container) container.innerHTML = ''; }
+    destroy: () => {
+      if (container) container.innerHTML = '';
+    }
   };
 }
 

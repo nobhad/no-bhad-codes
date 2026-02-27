@@ -417,7 +417,6 @@ export function createStatusUpdateHandler(config: StatusUpdateConfig) {
       }
       showToast(`Failed to update ${config.entityName} status`, 'error');
       return false;
-
     } catch (error) {
       logger.error('StatusUpdate: Error:', error);
       showToast(`Error updating ${config.entityName} status`, 'error');

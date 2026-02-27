@@ -30,7 +30,10 @@ function escapeAttr(s: string): string {
  * Creates a reusable search bar DOM (wrapper + icon + input + optional clear).
  * Apply shared styles via class .search-bar (see src/styles/shared/search-bar.css).
  */
-export function createSearchBar(config: SearchBarConfig): { wrapper: HTMLElement; input: HTMLInputElement } {
+export function createSearchBar(config: SearchBarConfig): {
+  wrapper: HTMLElement;
+  input: HTMLInputElement;
+} {
   const {
     placeholder = 'Search...',
     value = '',

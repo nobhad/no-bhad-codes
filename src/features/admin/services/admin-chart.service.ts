@@ -100,11 +100,14 @@ class AdminChartService {
   /**
    * Create visitors line chart
    */
-  async createVisitorsChart(containerId: string, data?: {
-    labels: string[];
-    visitors: number[];
-    pageViews: number[];
-  }): Promise<void> {
+  async createVisitorsChart(
+    containerId: string,
+    data?: {
+      labels: string[];
+      visitors: number[];
+      pageViews: number[];
+    }
+  ): Promise<void> {
     const chartData = data || {
       labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       visitors: [120, 190, 150, 220, 180, 250, 210],
@@ -162,10 +165,13 @@ class AdminChartService {
   /**
    * Create traffic sources doughnut chart
    */
-  async createSourcesChart(containerId: string, data?: {
-    labels: string[];
-    values: number[];
-  }): Promise<void> {
+  async createSourcesChart(
+    containerId: string,
+    data?: {
+      labels: string[];
+      values: number[];
+    }
+  ): Promise<void> {
     const chartData = data || {
       labels: ['Direct', 'Search', 'Social', 'Referral', 'Email'],
       values: [35, 30, 20, 10, 5]
@@ -206,13 +212,16 @@ class AdminChartService {
   /**
    * Create leads status bar chart
    */
-  async createLeadsChart(containerId: string, data: {
-    new: number;
-    contacted: number;
-    qualified: number;
-    converted: number;
-    lost: number;
-  }): Promise<void> {
+  async createLeadsChart(
+    containerId: string,
+    data: {
+      new: number;
+      contacted: number;
+      qualified: number;
+      converted: number;
+      lost: number;
+    }
+  ): Promise<void> {
     await this.createChart(containerId, {
       type: 'bar',
       labels: ['New', 'Contacted', 'Qualified', 'Converted', 'Lost'],
@@ -251,13 +260,16 @@ class AdminChartService {
   /**
    * Create project status pie chart
    */
-  async createProjectsChart(containerId: string, data: {
-    planning: number;
-    'in-progress': number;
-    review: number;
-    completed: number;
-    'on-hold': number;
-  }): Promise<void> {
+  async createProjectsChart(
+    containerId: string,
+    data: {
+      planning: number;
+      'in-progress': number;
+      review: number;
+      completed: number;
+      'on-hold': number;
+    }
+  ): Promise<void> {
     await this.createChart(containerId, {
       type: 'pie',
       labels: ['Planning', 'In Progress', 'Review', 'Completed', 'On Hold'],
@@ -293,8 +305,14 @@ class AdminChartService {
   /**
    * Update chart data
    */
-  async updateChartData(containerId: string, labels: string[], datasets: ChartDataset[]): Promise<void> {
-    const chart = this.charts.get(containerId) as { data: { labels: string[]; datasets: ChartDataset[] }; update: () => void } | undefined;
+  async updateChartData(
+    containerId: string,
+    labels: string[],
+    datasets: ChartDataset[]
+  ): Promise<void> {
+    const chart = this.charts.get(containerId) as
+      | { data: { labels: string[]; datasets: ChartDataset[] }; update: () => void }
+      | undefined;
     if (!chart) {
       logger.warn('Chart not found for update', { containerId });
       return;

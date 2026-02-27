@@ -207,7 +207,10 @@ export function createPortalModal(config: PortalModalConfig): PortalModalInstanc
 
       console.log('[PortalModal] Calling openModalOverlay');
       openModalOverlay(overlay, { allowStack: true });
-      console.log('[PortalModal] Modal should now be visible, hidden class:', overlay.classList.contains('hidden'));
+      console.log(
+        '[PortalModal] Modal should now be visible, hidden class:',
+        overlay.classList.contains('hidden')
+      );
 
       // Focus first focusable element after modal is shown
       // Use requestAnimationFrame to ensure DOM is updated

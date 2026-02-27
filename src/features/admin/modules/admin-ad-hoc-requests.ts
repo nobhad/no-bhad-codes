@@ -19,13 +19,73 @@ import { createModalDropdown } from '../../../components/modal-dropdown';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { AD_HOC_REQUESTS_FILTER_CONFIG } from '../../../utils/table-filter';
-import {
-  createTableModule,
-  createPaginationConfig
-} from '../../../utils/table-module-factory';
+import { createTableModule, createPaginationConfig } from '../../../utils/table-module-factory';
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('AdHocRequests');
+
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn =
+  typeof import('../../../react/features/admin/ad-hoc-requests').mountAdHocRequestsTable;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/ad-hoc-requests').unmountAdHocRequestsTable;
+
+let mountAdHocRequestsTable: ReactMountFn | null = null;
+let unmountAdHocRequestsTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactAdHocRequestsTable(): Promise<boolean> {
+  if (mountAdHocRequestsTable && unmountAdHocRequestsTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/ad-hoc-requests');
+    mountAdHocRequestsTable = module.mountAdHocRequestsTable;
+    unmountAdHocRequestsTable = module.unmountAdHocRequestsTable;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React ad hoc requests table */
+function shouldUseReactAdHocRequestsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_adhoc_requests') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_adhoc_requests_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
 
 const REQUESTS_API = '/api/ad-hoc-requests';
 
@@ -87,9 +147,7 @@ const STATUS_VARIANTS: Record<string, string> = {
 
 function formatLabel(value: string | null | undefined): string {
   if (!value) return '-';
-  return value
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return value.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function parseNumber(value: string): number | null {
@@ -148,8 +206,66 @@ const adHocRequestsModule = createTableModule<AdHocRequest>({
   }
 });
 
-// Export factory-provided functions
-export const loadAdHocRequests = adHocRequestsModule.load;
+/**
+ * Cleanup function called when leaving the ad hoc requests tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupAdHocRequestsTab(): void {
+  if (reactTableMounted && unmountAdHocRequestsTable) {
+    unmountAdHocRequestsTable();
+    reactTableMounted = false;
+  }
+}
+
+/**
+ * Load ad hoc requests data - handles both React and vanilla implementations
+ */
+export async function loadAdHocRequests(ctx: AdminDashboardContext): Promise<void> {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactAdHocRequestsTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React AdHocRequestsTable
+    const mountContainer = document.getElementById('react-ad-hoc-requests-mount');
+    if (mountContainer) {
+      const loaded = await loadReactAdHocRequestsTable();
+      if (loaded && mountAdHocRequestsTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountAdHocRequestsTable) {
+          unmountAdHocRequestsTable();
+        }
+        mountAdHocRequestsTable(mountContainer, {
+          onNavigate: (tab: string, entityId?: string) => {
+            if (entityId) {
+              ctx.switchTab(tab);
+            } else {
+              ctx.switchTab(tab);
+            }
+          }
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        logger.error(' React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
+  await adHocRequestsModule.load(ctx);
+}
 
 /**
  * Build a single ad hoc request table row
@@ -200,7 +316,10 @@ async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTM
     logger.error('Failed to load time entries:', error);
   }
 
-  const totalHours = timeEntries.reduce((sum: number, entry: TimeEntry) => sum + (entry.hours || 0), 0);
+  const totalHours = timeEntries.reduce(
+    (sum: number, entry: TimeEntry) => sum + (entry.hours || 0),
+    0
+  );
 
   container.innerHTML = `
     <div class="ad-hoc-time-entries-header">
@@ -310,11 +429,14 @@ async function createTimeEntryUI(requestId: number, taskId: number): Promise<HTM
   return container;
 }
 
-async function openInvoiceGenerationModal(request: AdHocRequest, onSuccess: () => void): Promise<void> {
+async function openInvoiceGenerationModal(
+  request: AdHocRequest,
+  onSuccess: () => void
+): Promise<void> {
   // Get all completed requests for bundling option
-  const completedRequests = adHocRequestsModule.getData().filter(
-    (r) => r.status === 'completed' && r.projectId === request.projectId
-  );
+  const completedRequests = adHocRequestsModule
+    .getData()
+    .filter((r) => r.status === 'completed' && r.projectId === request.projectId);
 
   const modal = createPortalModal({
     id: 'ad-hoc-invoice-modal',
@@ -460,7 +582,9 @@ async function openInvoiceGenerationModal(request: AdHocRequest, onSuccess: () =
           return;
         }
 
-        const requestIds = Array.from(bundleCheckboxes).map((cb) => Number((cb as HTMLInputElement).value));
+        const requestIds = Array.from(bundleCheckboxes).map((cb) =>
+          Number((cb as HTMLInputElement).value)
+        );
         const response = await apiPost(`${REQUESTS_API}/invoice/bundle`, {
           requestIds,
           dueDate: dueDateEl.value,
@@ -598,7 +722,7 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
   const statusMount = body.querySelector('#ad-hoc-status-mount') as HTMLElement | null;
   if (statusMount) {
     const statusDropdown = createModalDropdown({
-      options: STATUS_OPTIONS.map(s => ({ value: s, label: formatLabel(s) })),
+      options: STATUS_OPTIONS.map((s) => ({ value: s, label: formatLabel(s) })),
       currentValue: request.status,
       ariaLabelPrefix: 'Status'
     });
@@ -732,13 +856,21 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
 
       const taskId = data.task?.id as number | undefined;
       const projectId = data.task?.projectId as number | undefined;
-      const actionHref = taskId ? `/admin?tab=tasks&taskId=${taskId}${projectId ? `&projectId=${projectId}` : ''}` : undefined;
+      const actionHref = taskId
+        ? `/admin?tab=tasks&taskId=${taskId}${projectId ? `&projectId=${projectId}` : ''}`
+        : undefined;
 
-      showToast('Request converted to task.', 'success', actionHref ? {
-        duration: 6000,
-        actionLabel: 'View task',
+      showToast(
+        'Request converted to task.',
+        'success',
         actionHref
-      } : undefined);
+          ? {
+            duration: 6000,
+            actionLabel: 'View task',
+            actionHref
+          }
+          : undefined
+      );
       modal.hide();
       modal.overlay.remove();
       const ctx = adHocRequestsModule.getContext();
@@ -758,7 +890,9 @@ async function openRequestModal(request: AdHocRequest): Promise<void> {
     }
   });
 
-  const generateInvoiceBtn = body.querySelector('#generate-ad-hoc-invoice') as HTMLButtonElement | null;
+  const generateInvoiceBtn = body.querySelector(
+    '#generate-ad-hoc-invoice'
+  ) as HTMLButtonElement | null;
   generateInvoiceBtn?.addEventListener('click', async () => {
     await openInvoiceGenerationModal(request, async () => {
       const ctx = adHocRequestsModule.getContext();
@@ -796,7 +930,8 @@ function setupListeners(ctx: AdminDashboardContext): void {
 // ============================================
 
 const RENDER_ICONS = {
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
 };
 
 // ============================================
@@ -808,6 +943,19 @@ const RENDER_ICONS = {
  * Called by admin-dashboard before loading data.
  */
 export function renderAdHocRequestsTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactAdHocRequestsTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Ad Hoc Requests Table Mount Point -->
+      <div id="react-ad-hoc-requests-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <div class="data-table-card" id="ad-hoc-requests-table-card">
       <div class="data-table-header">

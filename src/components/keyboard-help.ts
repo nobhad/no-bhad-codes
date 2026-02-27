@@ -88,7 +88,7 @@ function createPanel(): HTMLElement {
   panel.appendChild(header);
 
   // Sections
-  SHORTCUTS.forEach(section => {
+  SHORTCUTS.forEach((section) => {
     const sectionEl = document.createElement('div');
     sectionEl.className = 'keyboard-help-section';
 
@@ -100,7 +100,7 @@ function createPanel(): HTMLElement {
     const list = document.createElement('ul');
     list.className = 'keyboard-help-list';
 
-    section.shortcuts.forEach(shortcut => {
+    section.shortcuts.forEach((shortcut) => {
       const item = document.createElement('li');
       item.className = 'keyboard-help-item';
 
@@ -117,7 +117,11 @@ function createPanel(): HTMLElement {
         keyEl.textContent = key;
         keys.appendChild(keyEl);
 
-        if (index < shortcut.keys.length - 1 && shortcut.keys.length === 2 && !['↓', '↑'].includes(shortcut.keys[1])) {
+        if (
+          index < shortcut.keys.length - 1 &&
+          shortcut.keys.length === 2 &&
+          !['↓', '↑'].includes(shortcut.keys[1])
+        ) {
           const sep = document.createElement('span');
           sep.className = 'keyboard-help-separator';
           sep.textContent = '+';

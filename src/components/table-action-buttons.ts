@@ -85,9 +85,7 @@ export function renderActionButton(config: TableActionConfig): string {
  * Returns HTML string for the actions cell content.
  */
 export function renderActionButtons(configs: TableActionConfig[]): string {
-  return factoryRenderButtons(
-    configs.map(cfg => ({ ...cfg, context: 'table' }) as ButtonConfig)
-  );
+  return factoryRenderButtons(configs.map((cfg) => ({ ...cfg, context: 'table' }) as ButtonConfig));
 }
 
 /**
@@ -95,7 +93,7 @@ export function renderActionButtons(configs: TableActionConfig[]): string {
  */
 export function renderActionsCell(configs: TableActionConfig[]): string {
   return factoryRenderActionsCell(
-    configs.map(cfg => ({ ...cfg }) as ButtonConfig),
+    configs.map((cfg) => ({ ...cfg }) as ButtonConfig),
     'table'
   );
 }

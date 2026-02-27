@@ -103,9 +103,8 @@ export class ThemeModule extends BaseModule {
     // Update theme-color meta tag to match site background
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     if (themeColorMeta) {
-      const themeColor = theme === 'dark'
-        ? APP_CONSTANTS.THEME.META_DARK
-        : APP_CONSTANTS.THEME.META_LIGHT;
+      const themeColor =
+        theme === 'dark' ? APP_CONSTANTS.THEME.META_DARK : APP_CONSTANTS.THEME.META_LIGHT;
       themeColorMeta.setAttribute('content', themeColor);
     }
 

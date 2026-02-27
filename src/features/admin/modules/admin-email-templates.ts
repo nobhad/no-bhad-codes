@@ -36,6 +36,69 @@ import { createLogger } from '../../../utils/logger';
 const logger = createLogger('AdminEmailTemplates');
 
 // ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn =
+  typeof import('../../../react/features/admin/email-templates').mountEmailTemplatesManager;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/email-templates').unmountEmailTemplatesManager;
+
+let mountEmailTemplatesManager: ReactMountFn | null = null;
+let unmountEmailTemplatesManager: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactEmailTemplatesManager(): Promise<boolean> {
+  if (mountEmailTemplatesManager && unmountEmailTemplatesManager) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/email-templates');
+    mountEmailTemplatesManager = module.mountEmailTemplatesManager;
+    unmountEmailTemplatesManager = module.unmountEmailTemplatesManager;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React email templates table */
+function shouldUseReactEmailTemplatesTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_email_templates') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_email_templates_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
+
+// ============================================
 // TYPES
 // ============================================
 
@@ -98,7 +161,6 @@ const CATEGORY_LABELS: Record<EmailTemplateCategory, string> = {
 // STATE
 // ============================================
 
-let _storedContext: AdminDashboardContext | null = null;
 let cachedTemplates: EmailTemplate[] = [];
 let currentFilterState: FilterState | null = null;
 let templateModal: PortalModalInstance | null = null;
@@ -118,12 +180,73 @@ function escapeHtml(text: string): string {
 }
 
 // ============================================
+// CLEANUP & RENDER
+// ============================================
+
+/**
+ * Cleanup function called when leaving the email templates tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupEmailTemplatesTab(): void {
+  if (reactTableMounted && unmountEmailTemplatesManager) {
+    unmountEmailTemplatesManager();
+    reactTableMounted = false;
+    reactMountContainer = null;
+  }
+}
+
+/**
+ * Renders the Email Templates tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderEmailTemplatesTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactEmailTemplatesTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Email Templates Table Mount Point -->
+      <div id="react-email-templates-mount"></div>
+    `;
+  }
+
+  // Vanilla implementation - rendered by workflows tab
+  // Email templates content is part of the workflows tab HTML
+}
+
+// ============================================
 // MAIN ENTRY POINT
 // ============================================
 
-export async function loadEmailTemplatesData(ctx: AdminDashboardContext): Promise<void> {
-  _storedContext = ctx;
+export async function loadEmailTemplatesData(_ctx: AdminDashboardContext): Promise<void> {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactEmailTemplatesTable();
 
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React EmailTemplatesTable
+    const mountContainer = document.getElementById('react-email-templates-mount');
+    if (mountContainer) {
+      const loaded = await loadReactEmailTemplatesManager();
+      if (loaded && mountEmailTemplatesManager) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountEmailTemplatesManager) {
+          unmountEmailTemplatesManager();
+        }
+        mountEmailTemplatesManager(mountContainer, {});
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        return;
+      }
+    }
+  }
+
+  // Fallback to vanilla implementation
   // Initial load
   await loadTemplates();
 
@@ -166,18 +289,19 @@ function renderTemplatesTable(): void {
   const filtered = applyFilters(cachedTemplates, currentFilterState, EMAIL_TEMPLATES_FILTER_CONFIG);
 
   if (filtered.length === 0) {
-    const hasFilters = currentFilterState.searchTerm ||
+    const hasFilters =
+      currentFilterState.searchTerm ||
       currentFilterState.statusFilters.length > 0 ||
       currentFilterState.dateStart ||
       currentFilterState.dateEnd;
-    const message = hasFilters
-      ? 'No templates match your filters.'
-      : 'No email templates found.';
+    const message = hasFilters ? 'No templates match your filters.' : 'No email templates found.';
     showTableEmpty(tbody, 6, message);
     return;
   }
 
-  tbody.innerHTML = filtered.map(template => `
+  tbody.innerHTML = filtered
+    .map(
+      (template) => `
     <tr data-template-id="${template.id}">
       <td class="identity-cell" data-label="Name">
         <span class="identity-name" data-field="primary-name">${escapeHtml(template.name)}</span>
@@ -189,15 +313,33 @@ function renderTemplatesTable(): void {
       <td class="date-cell" data-label="Updated">${formatDate(template.updated_at, 'short')}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-    createAction('preview', template.id, { className: 'template-preview', ariaLabel: 'Preview template' }),
-    createAction('edit', template.id, { className: 'template-edit', ariaLabel: 'Edit template' }),
-    createAction('versions', template.id, { className: 'template-versions', ariaLabel: 'View version history' }),
-    createAction('test', template.id, { className: 'template-test', ariaLabel: 'Send test email' }),
-    conditionalAction(!template.is_system, 'delete', template.id, { className: 'template-delete', dataAttrs: { name: escapeHtml(template.name) }, ariaLabel: 'Delete template' })
+    createAction('preview', template.id, {
+      className: 'template-preview',
+      ariaLabel: 'Preview template'
+    }),
+    createAction('edit', template.id, {
+      className: 'template-edit',
+      ariaLabel: 'Edit template'
+    }),
+    createAction('versions', template.id, {
+      className: 'template-versions',
+      ariaLabel: 'View version history'
+    }),
+    createAction('test', template.id, {
+      className: 'template-test',
+      ariaLabel: 'Send test email'
+    }),
+    conditionalAction(!template.is_system, 'delete', template.id, {
+      className: 'template-delete',
+      dataAttrs: { name: escapeHtml(template.name) },
+      ariaLabel: 'Delete template'
+    })
   ])}
       </td>
     </tr>
-  `).join('');
+  `
+    )
+    .join('');
 
   // Initialize keyboard navigation for templates table
   initTableKeyboardNav({
@@ -285,7 +427,7 @@ async function openTemplateModal(id?: number): Promise<void> {
   let template: EmailTemplate | null = null;
 
   if (isEdit) {
-    template = cachedTemplates.find(t => t.id === id) || null;
+    template = cachedTemplates.find((t) => t.id === id) || null;
     if (!template) return;
   }
 
@@ -413,7 +555,9 @@ async function openTemplateModal(id?: number): Promise<void> {
   (el('template-subject') as HTMLInputElement).value = template?.subject || '';
   (el('template-body-html') as HTMLTextAreaElement).value = template?.body_html || '';
   (el('template-body-text') as HTMLTextAreaElement).value = template?.body_text || '';
-  (el('template-variables') as HTMLTextAreaElement).value = template?.variables ? JSON.stringify(template.variables, null, 2) : '';
+  (el('template-variables') as HTMLTextAreaElement).value = template?.variables
+    ? JSON.stringify(template.variables, null, 2)
+    : '';
   (el('template-active') as HTMLInputElement).checked = template?.is_active ?? true;
 
   templateModal.show();
@@ -498,7 +642,7 @@ async function deleteTemplate(id: number, name: string): Promise<void> {
 // ============================================
 
 async function openPreviewModal(id: number): Promise<void> {
-  const template = cachedTemplates.find(t => t.id === id);
+  const template = cachedTemplates.find((t) => t.id === id);
   if (!template) return;
 
   // Create modal if not exists
@@ -519,7 +663,8 @@ async function openPreviewModal(id: number): Promise<void> {
     el('preview-close-btn')?.addEventListener('click', () => previewModal?.hide());
   }
 
-  previewModal.body.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  previewModal.body.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   previewModal.setTitle(`Preview: ${escapeHtml(template.name)}`);
   previewModal.show();
   manageFocusTrap(previewModal.overlay);
@@ -545,12 +690,16 @@ async function openPreviewModal(id: number): Promise<void> {
             <iframe id="preview-html-iframe" sandbox="allow-same-origin" title="Email HTML preview"></iframe>
           </div>
         </div>
-        ${data.preview.body_text ? `
+        ${
+  data.preview.body_text
+    ? `
           <div class="preview-section">
             <h4>Plain Text</h4>
             <pre class="preview-text">${escapeHtml(data.preview.body_text)}</pre>
           </div>
-        ` : ''}
+        `
+    : ''
+}
         <div class="preview-section">
           <h4>Sample Data Used</h4>
           <pre class="preview-data">${escapeHtml(JSON.stringify(data.sample_data, null, 2))}</pre>
@@ -568,13 +717,14 @@ async function openPreviewModal(id: number): Promise<void> {
         doc.close();
         // Adjust iframe height
         setTimeout(() => {
-          iframe.style.height = `${doc.body.scrollHeight + 20  }px`;
+          iframe.style.height = `${doc.body.scrollHeight + 20}px`;
         }, 100);
       }
     }
   } catch (error) {
     logger.error(' Preview error:', error);
-    previewModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error generating preview</span></div>';
+    previewModal.body.innerHTML =
+      '<div class="error-state"><span class="error-message">Error generating preview</span></div>';
   }
 }
 
@@ -616,7 +766,8 @@ async function previewFromForm(): Promise<void> {
     el('preview-close-btn')?.addEventListener('click', () => previewModal?.hide());
   }
 
-  previewModal.body.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  previewModal.body.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   previewModal.setTitle('Preview (Unsaved)');
   previewModal.show();
 
@@ -641,12 +792,16 @@ async function previewFromForm(): Promise<void> {
             <iframe id="preview-html-iframe" sandbox="allow-same-origin" title="Email HTML preview"></iframe>
           </div>
         </div>
-        ${data.preview.body_text ? `
+        ${
+  data.preview.body_text
+    ? `
           <div class="preview-section">
             <h4>Plain Text</h4>
             <pre class="preview-text">${escapeHtml(data.preview.body_text)}</pre>
           </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
     `;
 
@@ -659,13 +814,14 @@ async function previewFromForm(): Promise<void> {
         doc.write(data.preview.body_html);
         doc.close();
         setTimeout(() => {
-          iframe.style.height = `${doc.body.scrollHeight + 20  }px`;
+          iframe.style.height = `${doc.body.scrollHeight + 20}px`;
         }, 100);
       }
     }
   } catch (error) {
     logger.error(' Preview error:', error);
-    previewModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error generating preview</span></div>';
+    previewModal.body.innerHTML =
+      '<div class="error-state"><span class="error-message">Error generating preview</span></div>';
   }
 }
 
@@ -674,7 +830,7 @@ async function previewFromForm(): Promise<void> {
 // ============================================
 
 async function openVersionsModal(id: number): Promise<void> {
-  const template = cachedTemplates.find(t => t.id === id);
+  const template = cachedTemplates.find((t) => t.id === id);
   if (!template) return;
 
   // Create modal if not exists
@@ -689,7 +845,8 @@ async function openVersionsModal(id: number): Promise<void> {
     });
   }
 
-  versionsModal.body.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  versionsModal.body.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   versionsModal.setTitle(`Versions: ${escapeHtml(template.name)}`);
   versionsModal.show();
   manageFocusTrap(versionsModal.overlay);
@@ -708,7 +865,9 @@ async function openVersionsModal(id: number): Promise<void> {
 
     versionsModal.body.innerHTML = `
       <div class="versions-list flex flex-col gap-2">
-        ${versions.map(v => `
+        ${versions
+    .map(
+      (v) => `
           <div class="version-item">
             <div class="version-header">
               <div class="version-number">Version ${v.version}</div>
@@ -724,12 +883,14 @@ async function openVersionsModal(id: number): Promise<void> {
               <button class="btn btn-xs btn-primary version-restore" data-template-id="${id}" data-version="${v.version}">Restore</button>
             </div>
           </div>
-        `).join('')}
+        `
+    )
+    .join('')}
       </div>
     `;
 
     // Bind version action handlers
-    versionsModal.body.querySelectorAll('.version-restore').forEach(btn => {
+    versionsModal.body.querySelectorAll('.version-restore').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const templateId = parseInt((btn as HTMLElement).dataset.templateId || '0');
         const version = parseInt((btn as HTMLElement).dataset.version || '0');
@@ -738,7 +899,8 @@ async function openVersionsModal(id: number): Promise<void> {
     });
   } catch (error) {
     logger.error(' Versions error:', error);
-    versionsModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error loading versions</span></div>';
+    versionsModal.body.innerHTML =
+      '<div class="error-state"><span class="error-message">Error loading versions</span></div>';
   }
 }
 
@@ -761,7 +923,7 @@ async function restoreVersion(templateId: number, version: number): Promise<void
 // ============================================
 
 async function sendTestEmail(id: number): Promise<void> {
-  const template = cachedTemplates.find(t => t.id === id);
+  const template = cachedTemplates.find((t) => t.id === id);
   if (!template) return;
 
   const email = prompt('Enter email address to send test to:');

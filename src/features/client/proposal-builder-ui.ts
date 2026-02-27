@@ -81,7 +81,7 @@ export function renderTierCards(
     <div class="tier-selection">
       <h3 class="section-title">Choose Your Package</h3>
       <div class="tier-grid">
-        ${tiers.map(tier => renderTierCard(tier, features, selectedTierId === tier.id)).join('')}
+        ${tiers.map((tier) => renderTierCard(tier, features, selectedTierId === tier.id)).join('')}
       </div>
     </div>
   `;
@@ -95,7 +95,7 @@ function renderTierCard(
   allFeatures: ProposalFeature[],
   isSelected: boolean
 ): string {
-  const tierFeatures = allFeatures.filter(f => tier.baseFeatures.includes(f.id));
+  const tierFeatures = allFeatures.filter((f) => tier.baseFeatures.includes(f.id));
   const highlightClass = tier.highlighted ? 'tier-card--recommended' : '';
   const selectedClass = isSelected ? 'tier-card--selected' : '';
 
@@ -113,12 +113,16 @@ function renderTierCard(
         <p>${tier.description || ''}</p>
       </div>
       <ul class="tier-features">
-        ${tierFeatures.map(f => `
+        ${tierFeatures
+    .map(
+      (f) => `
           <li class="tier-feature">
             <span class="feature-check">${createCheckIcon()}</span>
             <span class="feature-name">${f.name}</span>
           </li>
-        `).join('')}
+        `
+    )
+    .join('')}
       </ul>
       <button class="tier-select-btn ${isSelected ? 'selected' : ''}" data-tier-id="${tier.id}">
         ${isSelected ? 'Selected' : `Select ${tier.name}`}
@@ -130,18 +134,18 @@ function renderTierCard(
 /**
  * Render feature comparison table
  */
-export function renderFeatureTable(
-  tiers: ProposalTier[],
-  features: ProposalFeature[]
-): string {
+export function renderFeatureTable(tiers: ProposalTier[], features: ProposalFeature[]): string {
   // Group features by category
-  const groupedFeatures = features.reduce((acc, feature) => {
-    if (!acc[feature.category]) {
-      acc[feature.category] = [];
-    }
-    acc[feature.category].push(feature);
-    return acc;
-  }, {} as Record<string, ProposalFeature[]>);
+  const groupedFeatures = features.reduce(
+    (acc, feature) => {
+      if (!acc[feature.category]) {
+        acc[feature.category] = [];
+      }
+      acc[feature.category].push(feature);
+      return acc;
+    },
+    {} as Record<string, ProposalFeature[]>
+  );
 
   const categoryLabels: Record<string, string> = {
     design: 'Design',
@@ -158,33 +162,46 @@ export function renderFeatureTable(
           <thead>
             <tr>
               <th class="feature-column">Feature</th>
-              ${tiers.map(t => `<th class="tier-column ${t.highlighted ? 'highlighted' : ''}">${t.name}</th>`).join('')}
+              ${tiers.map((t) => `<th class="tier-column ${t.highlighted ? 'highlighted' : ''}">${t.name}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
-            ${Object.entries(groupedFeatures).map(([category, categoryFeatures]) => `
+            ${Object.entries(groupedFeatures)
+    .map(
+      ([category, categoryFeatures]) => `
               <tr class="category-row">
                 <td colspan="${tiers.length + 1}" class="category-label">${categoryLabels[category] || category}</td>
               </tr>
-              ${categoryFeatures.map(feature => `
+              ${categoryFeatures
+    .map(
+      (feature) => `
                 <tr class="feature-row">
                   <td class="feature-name-cell">
                     <span class="feature-name">${feature.name}</span>
                     <span class="feature-description">${feature.description}</span>
                   </td>
-                  ${tiers.map(tier => `
+                  ${tiers
+    .map(
+      (tier) => `
                     <td class="feature-check-cell ${tier.highlighted ? 'highlighted' : ''}">
-                      ${tier.baseFeatures.includes(feature.id)
+                      ${
+  tier.baseFeatures.includes(feature.id)
     ? `<span class="check-included">${createCheckIcon()}</span>`
     : feature.price > 0
       ? `<span class="check-addon">+${formatPrice(feature.price)}</span>`
       : `<span class="check-none">${createDashIcon()}</span>`
 }
                     </td>
-                  `).join('')}
+                  `
+    )
+    .join('')}
                 </tr>
-              `).join('')}
-            `).join('')}
+              `
+    )
+    .join('')}
+            `
+    )
+    .join('')}
           </tbody>
         </table>
       </div>
@@ -200,9 +217,9 @@ export function renderFeatureChecklist(
   allFeatures: ProposalFeature[],
   addedFeatures: string[]
 ): string {
-  const includedFeatures = allFeatures.filter(f => selectedTier.baseFeatures.includes(f.id));
+  const includedFeatures = allFeatures.filter((f) => selectedTier.baseFeatures.includes(f.id));
   const availableAddons = allFeatures.filter(
-    f => !selectedTier.baseFeatures.includes(f.id) && !f.isRequired && f.price > 0
+    (f) => !selectedTier.baseFeatures.includes(f.id) && !f.isRequired && f.price > 0
   );
 
   return `
@@ -213,7 +230,9 @@ export function renderFeatureChecklist(
       <div class="feature-section">
         <h4 class="feature-section-title">Included in ${selectedTier.name}</h4>
         <div class="feature-list feature-list--included">
-          ${includedFeatures.map(feature => `
+          ${includedFeatures
+    .map(
+      (feature) => `
             <div class="feature-item feature-item--included">
               <span class="feature-check">${createCheckIcon()}</span>
               <div class="feature-info">
@@ -222,15 +241,21 @@ export function renderFeatureChecklist(
               </div>
               <span class="feature-price">Included</span>
             </div>
-          `).join('')}
+          `
+    )
+    .join('')}
         </div>
       </div>
 
-      ${availableAddons.length > 0 ? `
+      ${
+  availableAddons.length > 0
+    ? `
         <div class="feature-section">
           <h4 class="feature-section-title">Available Add-ons</h4>
           <div class="feature-list feature-list--addons">
-            ${availableAddons.map(feature => `
+            ${availableAddons
+    .map(
+      (feature) => `
               <label class="feature-item feature-item--addon ${addedFeatures.includes(feature.id) ? 'feature-item--selected' : ''}">
                 <input type="checkbox"
                        class="feature-checkbox"
@@ -243,10 +268,14 @@ export function renderFeatureChecklist(
                 </div>
                 <span class="feature-price">+${formatPrice(feature.price)}</span>
               </label>
-            `).join('')}
+            `
+    )
+    .join('')}
           </div>
         </div>
-      ` : ''}
+      `
+    : ''
+}
     </div>
   `;
 }
@@ -264,7 +293,7 @@ export function renderMaintenanceOptions(
       <p class="section-description">Keep your site secure, updated, and running smoothly with our maintenance plans.</p>
 
       <div class="maintenance-grid">
-        ${options.map(option => renderMaintenanceCard(option, selectedId === option.id)).join('')}
+        ${options.map((option) => renderMaintenanceCard(option, selectedId === option.id)).join('')}
       </div>
     </div>
   `;
@@ -276,9 +305,10 @@ export function renderMaintenanceOptions(
 function renderMaintenanceCard(option: MaintenanceOption, isSelected: boolean): string {
   const highlightClass = option.highlighted ? 'maintenance-card--recommended' : '';
   const selectedClass = isSelected ? 'maintenance-card--selected' : '';
-  const priceDisplay = option.price === 0
-    ? 'Free'
-    : `${formatPrice(option.price)}<span class="billing-cycle">/${option.billingCycle === 'monthly' ? 'mo' : 'yr'}</span>`;
+  const priceDisplay =
+    option.price === 0
+      ? 'Free'
+      : `${formatPrice(option.price)}<span class="billing-cycle">/${option.billingCycle === 'monthly' ? 'mo' : 'yr'}</span>`;
 
   return `
     <div class="maintenance-card ${highlightClass} ${selectedClass}" data-maintenance-id="${option.id}">
@@ -289,12 +319,16 @@ function renderMaintenanceCard(option: MaintenanceOption, isSelected: boolean): 
       </div>
       ${option.description ? `<p class="maintenance-description">${option.description}</p>` : ''}
       <ul class="maintenance-features">
-        ${option.features.map(f => `
+        ${option.features
+    .map(
+      (f) => `
           <li class="maintenance-feature">
             <span class="feature-check">${createCheckIcon()}</span>
             <span>${f}</span>
           </li>
-        `).join('')}
+        `
+    )
+    .join('')}
       </ul>
       <button class="maintenance-select-btn ${isSelected ? 'selected' : ''}" data-maintenance-id="${option.id}">
         ${isSelected ? 'Selected' : 'Select Plan'}
@@ -312,21 +346,25 @@ export function renderSummary(
   features: ProposalFeature[],
   maintenanceOptions: MaintenanceOption[]
 ): string {
-  const includedFeatures = features.filter(f => tier.baseFeatures.includes(f.id));
-  const addedFeatures = features.filter(f => selection.addedFeatures.includes(f.id));
-  const maintenance = maintenanceOptions.find(m => m.id === selection.maintenanceOption);
+  const includedFeatures = features.filter((f) => tier.baseFeatures.includes(f.id));
+  const addedFeatures = features.filter((f) => selection.addedFeatures.includes(f.id));
+  const maintenance = maintenanceOptions.find((m) => m.id === selection.maintenanceOption);
   const customItems = selection.customItems || [];
 
   // Calculate base price (midpoint of range)
   const basePrice = Math.round((tier.priceRange.min + tier.priceRange.max) / 2);
   const addonsTotal = addedFeatures.reduce((sum, f) => sum + f.price, 0);
-  const customItemsTotal = customItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+  const customItemsTotal = customItems.reduce(
+    (sum, item) => sum + item.quantity * item.unitPrice,
+    0
+  );
   const subtotal = basePrice + addonsTotal + customItemsTotal;
   const discountType = selection.discountType;
   const discountValue = selection.discountValue || 0;
-  const discountAmount = discountType === 'percentage'
-    ? Math.min(subtotal, (subtotal * discountValue) / 100)
-    : Math.min(subtotal, discountValue);
+  const discountAmount =
+    discountType === 'percentage'
+      ? Math.min(subtotal, (subtotal * discountValue) / 100)
+      : Math.min(subtotal, discountValue);
   const taxableTotal = Math.max(0, subtotal - discountAmount);
   const taxRate = selection.taxRate || 0;
   const taxAmount = (taxableTotal * taxRate) / 100;
@@ -350,31 +388,45 @@ export function renderSummary(
       <div class="summary-section">
         <h4 class="summary-section-title">Included Features</h4>
         <ul class="summary-feature-list">
-          ${includedFeatures.map(f => `
+          ${includedFeatures
+    .map(
+      (f) => `
             <li class="summary-feature">
               <span class="feature-check">${createCheckIcon()}</span>
               <span>${f.name}</span>
             </li>
-          `).join('')}
+          `
+    )
+    .join('')}
         </ul>
       </div>
 
-      ${addedFeatures.length > 0 ? `
+      ${
+  addedFeatures.length > 0
+    ? `
         <div class="summary-section">
           <h4 class="summary-section-title">Add-ons Selected</h4>
           <ul class="summary-feature-list summary-addons">
-            ${addedFeatures.map(f => `
+            ${addedFeatures
+    .map(
+      (f) => `
               <li class="summary-feature summary-addon">
                 <span class="feature-check">${createPlusIcon()}</span>
                 <span>${f.name}</span>
                 <span class="addon-price">+${formatPrice(f.price)}</span>
               </li>
-            `).join('')}
+            `
+    )
+    .join('')}
           </ul>
         </div>
-      ` : ''}
+      `
+    : ''
+}
 
-      ${maintenance ? `
+      ${
+  maintenance
+    ? `
         <div class="summary-section">
           <h4 class="summary-section-title">Maintenance Plan</h4>
           <div class="summary-maintenance">
@@ -384,17 +436,27 @@ export function renderSummary(
             </span>
           </div>
         </div>
-      ` : ''}
+      `
+    : ''
+}
 
       <div class="summary-section">
         <h4 class="summary-section-title">Custom Line Items</h4>
         <div class="summary-line-items">
-          ${customItems.length ? customItems.map(item => `
+          ${
+  customItems.length
+    ? customItems
+      .map(
+        (item) => `
             <div class="summary-line-item" data-item-id="${item.id}">
               <select class="summary-input" data-item-id="${item.id}" data-item-field="itemType">
-                ${['service', 'product', 'fee', 'hourly'].map(option => `
+                ${['service', 'product', 'fee', 'hourly']
+    .map(
+      (option) => `
                   <option value="${option}" ${item.itemType === option ? 'selected' : ''}>${option.replace('-', ' ')}</option>
-                `).join('')}
+                `
+    )
+    .join('')}
               </select>
               <input class="summary-input" data-item-id="${item.id}" data-item-field="description" value="${item.description}" placeholder="Description">
               <input class="summary-input" type="number" min="0" step="0.01" data-item-id="${item.id}" data-item-field="unitPrice" value="${item.unitPrice}">
@@ -412,7 +474,11 @@ export function renderSummary(
                 ${createDashIcon()}
               </button>
             </div>
-          `).join('') : '<div class="summary-empty">No custom items yet.</div>'}
+          `
+      )
+      .join('')
+    : '<div class="summary-empty">No custom items yet.</div>'
+}
         </div>
         <button class="proposal-btn proposal-btn-secondary summary-add-btn" id="add-custom-item-btn" type="button">Add Line Item</button>
       </div>
@@ -465,40 +531,60 @@ export function renderSummary(
             <span>Base Package</span>
             <span>${formatPrice(basePrice)}</span>
           </div>
-          ${addonsTotal > 0 ? `
+          ${
+  addonsTotal > 0
+    ? `
             <div class="total-row">
               <span>Add-ons</span>
               <span>+${formatPrice(addonsTotal)}</span>
             </div>
-          ` : ''}
-          ${customItemsTotal > 0 ? `
+          `
+    : ''
+}
+          ${
+  customItemsTotal > 0
+    ? `
             <div class="total-row">
               <span>Custom Items</span>
               <span>+${formatPrice(customItemsTotal)}</span>
             </div>
-          ` : ''}
-          ${discountAmount > 0 ? `
+          `
+    : ''
+}
+          ${
+  discountAmount > 0
+    ? `
             <div class="total-row">
               <span>Discount</span>
               <span>-${formatPrice(discountAmount)}</span>
             </div>
-          ` : ''}
-          ${taxAmount > 0 ? `
+          `
+    : ''
+}
+          ${
+  taxAmount > 0
+    ? `
             <div class="total-row">
               <span>Tax</span>
               <span>+${formatPrice(taxAmount)}</span>
             </div>
-          ` : ''}
+          `
+    : ''
+}
           <div class="total-row total-row--final">
             <span>One-time Total</span>
             <span>${formatPrice(projectTotal)}</span>
           </div>
-          ${maintenance && maintenance.price > 0 ? `
+          ${
+  maintenance && maintenance.price > 0
+    ? `
             <div class="total-row total-row--recurring">
               <span>Monthly Maintenance</span>
               <span>${formatPrice(maintenance.price)}/mo</span>
             </div>
-          ` : ''}
+          `
+    : ''
+}
         </div>
       </div>
     </div>
@@ -513,12 +599,16 @@ export function renderPriceBar(breakdown: PriceBreakdown): string {
     <div class="price-breakdown">
       <div class="price-details">
         <span class="price-tier">${breakdown.tierName}</span>
-        ${breakdown.addedFeatures.length > 0
+        ${
+  breakdown.addedFeatures.length > 0
     ? `<span class="price-addons">+${breakdown.addedFeatures.length} add-on${breakdown.addedFeatures.length > 1 ? 's' : ''}</span>`
-    : ''}
-        ${breakdown.customItems.length > 0
+    : ''
+}
+        ${
+  breakdown.customItems.length > 0
     ? `<span class="price-addons">+${breakdown.customItems.length} custom</span>`
-    : ''}
+    : ''
+}
       </div>
       <div class="price-total">
         <span class="price-label">Estimated:</span>
@@ -532,7 +622,12 @@ export function renderPriceBar(breakdown: PriceBreakdown): string {
  * Update step indicators
  */
 export function updateStepIndicators(currentStep: ProposalStep): void {
-  const steps: ProposalStep[] = ['tier-selection', 'feature-customization', 'maintenance', 'summary'];
+  const steps: ProposalStep[] = [
+    'tier-selection',
+    'feature-customization',
+    'maintenance',
+    'summary'
+  ];
   const currentIndex = steps.indexOf(currentStep);
 
   document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
@@ -582,14 +677,17 @@ export async function animateContentTransition(
 export function animatePriceUpdate(element: HTMLElement, newPrice: number): void {
   const currentValue = parseInt(element.textContent?.replace(/[^0-9]/g, '') || '0', 10);
 
-  gsap.to({ value: currentValue }, {
-    value: newPrice,
-    duration: 0.5,
-    ease: 'power2.out',
-    onUpdate: function () {
-      element.textContent = formatPrice(Math.round(this.targets()[0].value));
+  gsap.to(
+    { value: currentValue },
+    {
+      value: newPrice,
+      duration: 0.5,
+      ease: 'power2.out',
+      onUpdate: function () {
+        element.textContent = formatPrice(Math.round(this.targets()[0].value));
+      }
     }
-  });
+  );
 }
 
 /**

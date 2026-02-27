@@ -56,7 +56,11 @@ let reactMountContainer: HTMLElement | null = null;
 function isReactTableActuallyMounted(): boolean {
   if (!reactTableMounted) return false;
   // Check if the container still exists in the DOM and has content
-  if (!reactMountContainer || !reactMountContainer.isConnected || reactMountContainer.children.length === 0) {
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
     reactTableMounted = false;
     reactMountContainer = null;
     return false;
@@ -116,8 +120,10 @@ interface InvoiceWithDetails extends InvoiceResponse {
 // ============================================
 
 const RENDER_ICONS = {
-  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+  EXPORT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
   PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>'
 };
 
@@ -249,7 +255,11 @@ const invoicesModule = createTableModule<InvoiceWithDetails, InvoiceStats>({
     return { data: invoices, stats };
   },
 
-  renderRow: (invoice: InvoiceWithDetails, ctx: AdminDashboardContext, _helpers: TableModuleHelpers<InvoiceWithDetails>) => {
+  renderRow: (
+    invoice: InvoiceWithDetails,
+    ctx: AdminDashboardContext,
+    _helpers: TableModuleHelpers<InvoiceWithDetails>
+  ) => {
     return buildInvoiceRow(invoice, ctx);
   },
 
@@ -291,9 +301,6 @@ const invoicesModule = createTableModule<InvoiceWithDetails, InvoiceStats>({
 // Export factory-provided functions
 export const getInvoicesData = invoicesModule.getData;
 
-// Store context for React callbacks (used for future detail view integration)
-let _storedContext: AdminDashboardContext | null = null;
-
 /**
  * Cleanup function called when leaving the invoices tab
  * Unmounts React components if they were mounted
@@ -309,8 +316,6 @@ export function cleanupInvoicesTab(): void {
  * Load invoices data - handles both React and vanilla implementations
  */
 export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void> {
-  _storedContext = ctx;
-
   // Check if React implementation should be used
   const useReact = shouldUseReactInvoicesTable();
   let reactMountSuccess = false;
@@ -479,26 +484,44 @@ function buildActionButtons(invoiceId: number, status: string): string {
 
   return renderActionsCell([
     createAction('view', invoiceId, { title: 'View Invoice', ariaLabel: 'View invoice' }),
-    conditionalAction(isDraft, 'send', invoiceId, { title: 'Send Invoice', ariaLabel: 'Send invoice' }),
-    conditionalAction(isDraft, 'edit', invoiceId, { title: 'Edit Invoice', ariaLabel: 'Edit invoice' }),
+    conditionalAction(isDraft, 'send', invoiceId, {
+      title: 'Send Invoice',
+      ariaLabel: 'Send invoice'
+    }),
+    conditionalAction(isDraft, 'edit', invoiceId, {
+      title: 'Edit Invoice',
+      ariaLabel: 'Edit invoice'
+    }),
     conditionalAction(canMarkPaid, 'mark-paid', invoiceId, { ariaLabel: 'Mark as paid' }),
-    conditionalAction(canDownload, 'download', invoiceId, { title: 'Download PDF', ariaLabel: 'Download PDF' })
+    conditionalAction(canDownload, 'download', invoiceId, {
+      title: 'Download PDF',
+      ariaLabel: 'Download PDF'
+    })
   ]);
 }
 
 /**
  * Build a single invoice table row
  */
-function buildInvoiceRow(invoice: InvoiceWithDetails, _ctx: AdminDashboardContext): HTMLTableRowElement {
+function buildInvoiceRow(
+  invoice: InvoiceWithDetails,
+  _ctx: AdminDashboardContext
+): HTMLTableRowElement {
   const row = document.createElement('tr');
   row.dataset.invoiceId = String(invoice.id);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const safeInvoiceNumber = SanitizationUtils.escapeHtml(invoice.invoice_number || `INV-${invoice.id}`);
-  const safeClientName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(invoice.client_name || 'Unknown Client'));
-  const safeProjectName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(invoice.project_name || ''));
+  const safeInvoiceNumber = SanitizationUtils.escapeHtml(
+    invoice.invoice_number || `INV-${invoice.id}`
+  );
+  const safeClientName = SanitizationUtils.escapeHtml(
+    SanitizationUtils.decodeHtmlEntities(invoice.client_name || 'Unknown Client')
+  );
+  const safeProjectName = SanitizationUtils.escapeHtml(
+    SanitizationUtils.decodeHtmlEntities(invoice.project_name || '')
+  );
   const amount = formatCurrency(getAmount(invoice));
   const dueDate = invoice.due_date ? formatDate(invoice.due_date) : '-';
 
@@ -546,12 +569,12 @@ function setupInlineDateEditing(tableBody: HTMLElement, invoices: InvoiceWithDet
   tableBody.querySelectorAll('.date-cell.inline-editable-cell').forEach((cell) => {
     const cellEl = cell as HTMLElement;
     const invoiceId = parseInt(cellEl.dataset.invoiceId || '0');
-    const invoice = invoices.find(inv => inv.id === invoiceId);
+    const invoice = invoices.find((inv) => inv.id === invoiceId);
     if (!invoice) return;
 
     makeEditable(
       cellEl,
-      () => invoice.due_date ? invoice.due_date.split('T')[0] : '',
+      () => (invoice.due_date ? invoice.due_date.split('T')[0] : ''),
       async (newValue) => {
         const response = await apiPut(`/api/invoices/${invoiceId}`, { due_date: newValue || null });
         if (response.ok) {
@@ -718,8 +741,9 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
 
   // Build line items table
   const lineItems = invoice.line_items || [];
-  const lineItemsHTML = lineItems.length > 0
-    ? `<div class="data-table-container">
+  const lineItemsHTML =
+    lineItems.length > 0
+      ? `<div class="data-table-container">
         <div class="data-table-scroll-wrapper">
           <table class="data-table invoice-line-items">
             <thead>
@@ -731,26 +755,34 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
               </tr>
             </thead>
             <tbody>
-              ${lineItems.map((item: InvoiceLineItem) => `
+              ${lineItems
+    .map(
+      (item: InvoiceLineItem) => `
                 <tr>
                   <td class="name-cell" data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
                   <td class="count-cell" data-label="Qty">${item.quantity || 1}</td>
                   <td class="amount-cell" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
                   <td class="amount-cell" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
                 </tr>
-              `).join('')}
+              `
+    )
+    .join('')}
             </tbody>
           </table>
         </div>
       </div>`
-    : '<p class="text-muted">No line items</p>';
+      : '<p class="text-muted">No line items</p>';
 
   // Calculate totals
-  const subtotal = lineItems.reduce((sum: number, item: InvoiceLineItem) => sum + (item.amount || 0), 0);
+  const subtotal = lineItems.reduce(
+    (sum: number, item: InvoiceLineItem) => sum + (item.amount || 0),
+    0
+  );
   const total = getAmount(invoice);
-  const amountPaid = typeof invoice.amount_paid === 'number'
-    ? invoice.amount_paid
-    : parseFloat(String(invoice.amount_paid)) || 0;
+  const amountPaid =
+    typeof invoice.amount_paid === 'number'
+      ? invoice.amount_paid
+      : parseFloat(String(invoice.amount_paid)) || 0;
   const balanceDue = total - amountPaid;
 
   // Build modal body
@@ -782,12 +814,16 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
             <span class="field-label">Created</span>
             <span class="field-value">${invoice.created_at ? formatDate(invoice.created_at) : '-'}</span>
           </div>
-          ${invoice.paid_date ? `
+          ${
+  invoice.paid_date
+    ? `
             <div class="invoice-info-item flex flex-col gap-1">
               <span class="field-label">Paid</span>
               <span class="field-value">${formatDate(invoice.paid_date)}</span>
             </div>
-          ` : ''}
+          `
+    : ''
+}
         </div>
       </div>
 
@@ -805,7 +841,9 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
           <span>Total</span>
           <span>${formatCurrency(total)}</span>
         </div>
-        ${amountPaid > 0 ? `
+        ${
+  amountPaid > 0
+    ? `
           <div class="total-row">
             <span>Amount Paid</span>
             <span>${formatCurrency(amountPaid)}</span>
@@ -814,22 +852,32 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
             <span>Balance Due</span>
             <span>${formatCurrency(balanceDue)}</span>
           </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
 
-      ${invoice.notes ? `
+      ${
+  invoice.notes
+    ? `
         <div class="invoice-notes">
           <h4 class="section-title">Notes</h4>
           <p>${SanitizationUtils.escapeHtml(invoice.notes)}</p>
         </div>
-      ` : ''}
+      `
+    : ''
+}
 
-      ${invoice.terms ? `
+      ${
+  invoice.terms
+    ? `
         <div class="invoice-terms">
           <h4 class="section-title">Terms</h4>
           <p>${SanitizationUtils.escapeHtml(invoice.terms)}</p>
         </div>
-      ` : ''}
+      `
+    : ''
+}
     </div>
   `;
 
@@ -970,10 +1018,12 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
                 </tr>
               </thead>
               <tbody id="invoice-line-items-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-                ${lineItems.map((item, idx) => {
-    lineItemIndex = idx + 1;
-    return buildLineItemRow(item, idx);
-  }).join('')}
+                ${lineItems
+    .map((item, idx) => {
+      lineItemIndex = idx + 1;
+      return buildLineItemRow(item, idx);
+    })
+    .join('')}
               </tbody>
             </table>
           </div>
@@ -1011,7 +1061,8 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
 
     rows.forEach((row) => {
       const qty = parseFloat((row.querySelector('.line-item-qty') as HTMLInputElement)?.value) || 0;
-      const rate = parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
+      const rate =
+        parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
       const amount = qty * rate;
       total += amount;
 
@@ -1067,7 +1118,10 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
     // Delegate events for line items
     modal.body.addEventListener('input', (e) => {
       const target = e.target as HTMLElement;
-      if (target.classList.contains('line-item-qty') || target.classList.contains('line-item-rate')) {
+      if (
+        target.classList.contains('line-item-qty') ||
+        target.classList.contains('line-item-rate')
+      ) {
         recalculateTotal();
       }
     });
@@ -1096,54 +1150,60 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
       return;
     }
 
-    await withButtonLoading(saveBtn, async () => {
-      // Collect form data
-      const dueDate = (document.getElementById('invoice-due-date') as HTMLInputElement)?.value;
-      const notes = (document.getElementById('invoice-notes') as HTMLTextAreaElement)?.value;
-      const terms = (document.getElementById('invoice-terms') as HTMLTextAreaElement)?.value;
+    await withButtonLoading(
+      saveBtn,
+      async () => {
+        // Collect form data
+        const dueDate = (document.getElementById('invoice-due-date') as HTMLInputElement)?.value;
+        const notes = (document.getElementById('invoice-notes') as HTMLTextAreaElement)?.value;
+        const terms = (document.getElementById('invoice-terms') as HTMLTextAreaElement)?.value;
 
-      // Collect line items
-      const rows = modal.body.querySelectorAll('.line-item-row');
-      const newLineItems: InvoiceLineItem[] = [];
+        // Collect line items
+        const rows = modal.body.querySelectorAll('.line-item-row');
+        const newLineItems: InvoiceLineItem[] = [];
 
-      rows.forEach((row) => {
-        const desc = (row.querySelector('.line-item-desc') as HTMLInputElement)?.value || '';
-        const qty = parseFloat((row.querySelector('.line-item-qty') as HTMLInputElement)?.value) || 1;
-        const rate = parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
-        const amount = qty * rate;
+        rows.forEach((row) => {
+          const desc = (row.querySelector('.line-item-desc') as HTMLInputElement)?.value || '';
+          const qty =
+            parseFloat((row.querySelector('.line-item-qty') as HTMLInputElement)?.value) || 1;
+          const rate =
+            parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
+          const amount = qty * rate;
 
-        if (desc.trim()) {
-          newLineItems.push({ description: desc, quantity: qty, rate, amount });
-        }
-      });
-
-      // Calculate new total
-      const newTotal = newLineItems.reduce((sum, item) => sum + item.amount, 0);
-
-      try {
-        const response = await apiPut(`/api/invoices/${invoiceId}`, {
-          due_date: dueDate || null,
-          notes: notes || null,
-          terms: terms || null,
-          line_items: newLineItems,
-          amount_total: newTotal
+          if (desc.trim()) {
+            newLineItems.push({ description: desc, quantity: qty, rate, amount });
+          }
         });
 
-        if (response.ok) {
-          showToast('Invoice updated successfully', 'success');
-          if (cleanupFocusTrap) cleanupFocusTrap();
-          modal.hide();
-          modal.overlay.remove();
-          invoicesModule.load(ctx);
-        } else {
-          const error = await response.json();
-          showToast(error.error || 'Failed to update invoice', 'error');
+        // Calculate new total
+        const newTotal = newLineItems.reduce((sum, item) => sum + item.amount, 0);
+
+        try {
+          const response = await apiPut(`/api/invoices/${invoiceId}`, {
+            due_date: dueDate || null,
+            notes: notes || null,
+            terms: terms || null,
+            line_items: newLineItems,
+            amount_total: newTotal
+          });
+
+          if (response.ok) {
+            showToast('Invoice updated successfully', 'success');
+            if (cleanupFocusTrap) cleanupFocusTrap();
+            modal.hide();
+            modal.overlay.remove();
+            invoicesModule.load(ctx);
+          } else {
+            const error = await response.json();
+            showToast(error.error || 'Failed to update invoice', 'error');
+          }
+        } catch (error) {
+          logger.error('Update error:', error);
+          showToast('Failed to update invoice', 'error');
         }
-      } catch (error) {
-        logger.error('Update error:', error);
-        showToast('Failed to update invoice', 'error');
-      }
-    }, 'Saving...');
+      },
+      'Saving...'
+    );
   });
 
   const cancelBtn = document.createElement('button');

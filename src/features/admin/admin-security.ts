@@ -265,7 +265,7 @@ export class AdminSecurity {
 
     // Return cleanup function
     return () => {
-      cleanupFns.forEach(fn => fn());
+      cleanupFns.forEach((fn) => fn());
     };
   }
 }

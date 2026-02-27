@@ -58,7 +58,11 @@ export class ContactFormModule extends BaseModule {
     await this.contactService.init();
 
     this.form = this.getElement('Contact form', '.contact-form', true) as HTMLFormElement;
-    this.submitButton = this.getElement('Submit button', '.submit-button', true) as HTMLButtonElement;
+    this.submitButton = this.getElement(
+      'Submit button',
+      '.submit-button',
+      true
+    ) as HTMLButtonElement;
 
     if (this.form) {
       this.setupEventListeners();
@@ -132,14 +136,21 @@ export class ContactFormModule extends BaseModule {
 
       if (this.submitButton) {
         // Remove all arrow direction classes
-        this.submitButton.classList.remove('form-valid', 'point-to-name', 'point-to-email', 'point-to-message');
+        this.submitButton.classList.remove(
+          'form-valid',
+          'point-to-name',
+          'point-to-email',
+          'point-to-message'
+        );
 
         if (isValid) {
           this.submitButton.classList.add('form-valid');
           this.log('Added form-valid class');
         } else if (messageTouched && firstInvalidField) {
           // Only point to invalid field once message field has been touched
-          const fieldId = (firstInvalidField as HTMLInputElement).id || (firstInvalidField as HTMLInputElement).name;
+          const fieldId =
+            (firstInvalidField as HTMLInputElement).id ||
+            (firstInvalidField as HTMLInputElement).name;
           if (fieldId === 'name' || fieldId === 'Name') {
             this.submitButton.classList.add('point-to-name');
           } else if (fieldId === 'email' || fieldId === 'Email') {
@@ -578,7 +589,8 @@ export class ContactFormModule extends BaseModule {
             buttonSpan.textContent = 'SENT!';
           }
           // Fade in the span
-          gsap.fromTo(buttonSpan,
+          gsap.fromTo(
+            buttonSpan,
             { opacity: 0, scale: 0.5 },
             { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.7)' }
           );
@@ -611,11 +623,15 @@ export class ContactFormModule extends BaseModule {
       });
 
       // Phase 4: Fade out the bow
-      tl.to(bowGroup, {
-        opacity: 0,
-        duration: 0.2,
-        ease: 'power1.out'
-      }, '-=0.2');
+      tl.to(
+        bowGroup,
+        {
+          opacity: 0,
+          duration: 0.2,
+          ease: 'power1.out'
+        },
+        '-=0.2'
+      );
     });
   }
 

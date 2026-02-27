@@ -130,7 +130,15 @@ const SIMPLE_SITE_TIERS: ProposalTier[] = [
     name: 'Professional',
     tagline: 'Recommended for most projects',
     priceRange: { min: 1500, max: 2500 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'social-integration', 'custom-design', 'analytics', 'training-session'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'social-integration',
+      'custom-design',
+      'analytics',
+      'training-session'
+    ],
     highlighted: true,
     description: 'Custom design with professional features'
   },
@@ -139,7 +147,17 @@ const SIMPLE_SITE_TIERS: ProposalTier[] = [
     name: 'Premium',
     tagline: 'Full-service solution',
     priceRange: { min: 2500, max: 3500 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'social-integration', 'custom-design', 'analytics', 'training-session', 'cms', 'priority-support'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'social-integration',
+      'custom-design',
+      'analytics',
+      'training-session',
+      'cms',
+      'priority-support'
+    ],
     description: 'Everything you need plus ongoing support'
   }
 ];
@@ -181,7 +199,17 @@ const BUSINESS_SITE_TIERS: ProposalTier[] = [
     name: 'Professional',
     tagline: 'Recommended for growing businesses',
     priceRange: { min: 4000, max: 6000 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'social-integration', 'custom-design', 'cms', 'analytics', 'training-session', 'blog'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'social-integration',
+      'custom-design',
+      'cms',
+      'analytics',
+      'training-session',
+      'blog'
+    ],
     highlighted: true,
     description: 'Full-featured site with content management'
   },
@@ -190,7 +218,20 @@ const BUSINESS_SITE_TIERS: ProposalTier[] = [
     name: 'Enterprise',
     tagline: 'Complete business solution',
     priceRange: { min: 5500, max: 8000 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'social-integration', 'custom-design', 'cms', 'analytics', 'training-session', 'blog', 'brand-package', 'priority-support', 'advanced-seo'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'social-integration',
+      'custom-design',
+      'cms',
+      'analytics',
+      'training-session',
+      'blog',
+      'brand-package',
+      'priority-support',
+      'advanced-seo'
+    ],
     description: 'Everything plus branding and priority support'
   }
 ];
@@ -264,7 +305,17 @@ const PORTFOLIO_TIERS: ProposalTier[] = [
     name: 'Professional',
     tagline: 'Recommended for creatives',
     priceRange: { min: 3000, max: 5000 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'portfolio-gallery', 'custom-design', 'cms', 'analytics', 'case-studies', 'training-session'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'portfolio-gallery',
+      'custom-design',
+      'cms',
+      'analytics',
+      'case-studies',
+      'training-session'
+    ],
     highlighted: true,
     description: 'Custom design with case study features'
   },
@@ -273,7 +324,20 @@ const PORTFOLIO_TIERS: ProposalTier[] = [
     name: 'Premium',
     tagline: 'Stand out from the crowd',
     priceRange: { min: 5000, max: 8000 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'portfolio-gallery', 'custom-design', 'cms', 'analytics', 'case-studies', 'training-session', 'brand-package', 'blog', 'priority-support'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'portfolio-gallery',
+      'custom-design',
+      'cms',
+      'analytics',
+      'case-studies',
+      'training-session',
+      'brand-package',
+      'blog',
+      'priority-support'
+    ],
     description: 'Full creative package with branding'
   }
 ];
@@ -323,7 +387,14 @@ const ECOMMERCE_TIERS: ProposalTier[] = [
     name: 'Starter Store',
     tagline: 'Start selling online',
     priceRange: { min: 5000, max: 10000 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'shopping-cart', 'payment-processing', 'product-management'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'shopping-cart',
+      'payment-processing',
+      'product-management'
+    ],
     description: 'Essential e-commerce features'
   },
   {
@@ -331,7 +402,19 @@ const ECOMMERCE_TIERS: ProposalTier[] = [
     name: 'Professional Store',
     tagline: 'Recommended for growing businesses',
     priceRange: { min: 10000, max: 20000 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'shopping-cart', 'payment-processing', 'product-management', 'custom-design', 'inventory-management', 'user-accounts', 'analytics', 'training-session'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'shopping-cart',
+      'payment-processing',
+      'product-management',
+      'custom-design',
+      'inventory-management',
+      'user-accounts',
+      'analytics',
+      'training-session'
+    ],
     highlighted: true,
     description: 'Full-featured store with inventory'
   },
@@ -340,7 +423,23 @@ const ECOMMERCE_TIERS: ProposalTier[] = [
     name: 'Enterprise Store',
     tagline: 'Complete commerce solution',
     priceRange: { min: 20000, max: 35000 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'shopping-cart', 'payment-processing', 'product-management', 'custom-design', 'inventory-management', 'user-accounts', 'analytics', 'training-session', 'brand-package', 'admin-dashboard', 'advanced-seo', 'priority-support'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'shopping-cart',
+      'payment-processing',
+      'product-management',
+      'custom-design',
+      'inventory-management',
+      'user-accounts',
+      'analytics',
+      'training-session',
+      'brand-package',
+      'admin-dashboard',
+      'advanced-seo',
+      'priority-support'
+    ],
     description: 'Everything for serious e-commerce'
   }
 ];
@@ -441,7 +540,12 @@ const WEB_APP_TIERS: ProposalTier[] = [
     name: 'MVP',
     tagline: 'Launch your idea',
     priceRange: { min: 10000, max: 25000 },
-    baseFeatures: ['responsive-design', 'user-authentication', 'database-integration', 'basic-dashboard'],
+    baseFeatures: [
+      'responsive-design',
+      'user-authentication',
+      'database-integration',
+      'basic-dashboard'
+    ],
     description: 'Minimum viable product to validate your idea'
   },
   {
@@ -449,7 +553,17 @@ const WEB_APP_TIERS: ProposalTier[] = [
     name: 'Full Application',
     tagline: 'Recommended for most apps',
     priceRange: { min: 25000, max: 50000 },
-    baseFeatures: ['responsive-design', 'user-authentication', 'database-integration', 'basic-dashboard', 'custom-design', 'api-integration', 'user-dashboard', 'analytics', 'training-session'],
+    baseFeatures: [
+      'responsive-design',
+      'user-authentication',
+      'database-integration',
+      'basic-dashboard',
+      'custom-design',
+      'api-integration',
+      'user-dashboard',
+      'analytics',
+      'training-session'
+    ],
     highlighted: true,
     description: 'Production-ready application'
   },
@@ -458,7 +572,20 @@ const WEB_APP_TIERS: ProposalTier[] = [
     name: 'Enterprise Application',
     tagline: 'Complete platform solution',
     priceRange: { min: 50000, max: 100000 },
-    baseFeatures: ['responsive-design', 'user-authentication', 'database-integration', 'basic-dashboard', 'custom-design', 'api-integration', 'user-dashboard', 'analytics', 'training-session', 'admin-panel', 'priority-support', 'advanced-security'],
+    baseFeatures: [
+      'responsive-design',
+      'user-authentication',
+      'database-integration',
+      'basic-dashboard',
+      'custom-design',
+      'api-integration',
+      'user-dashboard',
+      'analytics',
+      'training-session',
+      'admin-panel',
+      'priority-support',
+      'advanced-security'
+    ],
     description: 'Full-scale application with admin tools'
   }
 ];
@@ -567,7 +694,15 @@ const BROWSER_EXTENSION_TIERS: ProposalTier[] = [
     name: 'Advanced Extension',
     tagline: 'Recommended for most extensions',
     priceRange: { min: 6000, max: 12000 },
-    baseFeatures: ['popup-interface', 'data-storage', 'basic-functionality', 'content-modification', 'background-processing', 'custom-design', 'training-session'],
+    baseFeatures: [
+      'popup-interface',
+      'data-storage',
+      'basic-functionality',
+      'content-modification',
+      'background-processing',
+      'custom-design',
+      'training-session'
+    ],
     highlighted: true,
     description: 'Full-featured browser extension'
   },
@@ -576,13 +711,26 @@ const BROWSER_EXTENSION_TIERS: ProposalTier[] = [
     name: 'Premium Extension',
     tagline: 'Enterprise-grade solution',
     priceRange: { min: 12000, max: 20000 },
-    baseFeatures: ['popup-interface', 'data-storage', 'basic-functionality', 'content-modification', 'background-processing', 'custom-design', 'training-session', 'cross-browser', 'sync-storage', 'priority-support'],
+    baseFeatures: [
+      'popup-interface',
+      'data-storage',
+      'basic-functionality',
+      'content-modification',
+      'background-processing',
+      'custom-design',
+      'training-session',
+      'cross-browser',
+      'sync-storage',
+      'priority-support'
+    ],
     description: 'Cross-browser with sync capabilities'
   }
 ];
 
 const BROWSER_EXTENSION_FEATURES: ProposalFeature[] = [
-  ...BASE_FEATURES.filter(f => ['priority-support', 'training-session', 'custom-design'].includes(f.id)),
+  ...BASE_FEATURES.filter((f) =>
+    ['priority-support', 'training-session', 'custom-design'].includes(f.id)
+  ),
   {
     id: 'popup-interface',
     name: 'Popup Interface',
@@ -669,7 +817,14 @@ const OTHER_TIERS: ProposalTier[] = [
     name: 'Standard',
     tagline: 'Recommended approach',
     priceRange: { min: 8000, max: 20000 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'custom-design', 'analytics', 'training-session'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'custom-design',
+      'analytics',
+      'training-session'
+    ],
     highlighted: true,
     description: 'Full-featured custom solution'
   },
@@ -678,7 +833,15 @@ const OTHER_TIERS: ProposalTier[] = [
     name: 'Premium',
     tagline: 'Complete solution',
     priceRange: { min: 20000, max: 50000 },
-    baseFeatures: ['responsive-design', 'basic-seo', 'contact-form', 'custom-design', 'analytics', 'training-session', 'priority-support'],
+    baseFeatures: [
+      'responsive-design',
+      'basic-seo',
+      'contact-form',
+      'custom-design',
+      'analytics',
+      'training-session',
+      'priority-support'
+    ],
     description: 'Enterprise-grade custom development'
   }
 ];
@@ -736,11 +899,7 @@ export const MAINTENANCE_OPTIONS: MaintenanceOption[] = [
     name: 'DIY',
     price: 0,
     billingCycle: 'monthly',
-    features: [
-      'Documentation provided',
-      'Email support for questions',
-      'Self-managed hosting'
-    ],
+    features: ['Documentation provided', 'Email support for questions', 'Self-managed hosting'],
     description: 'Handle updates yourself with our documentation'
   },
   {
@@ -794,14 +953,17 @@ export const MAINTENANCE_OPTIONS: MaintenanceOption[] = [
 /**
  * Map of project types to their configurations
  */
-const TIER_CONFIGURATIONS: Record<ProjectType, { tiers: ProposalTier[]; features: ProposalFeature[] }> = {
+const TIER_CONFIGURATIONS: Record<
+  ProjectType,
+  { tiers: ProposalTier[]; features: ProposalFeature[] }
+> = {
   'simple-site': { tiers: SIMPLE_SITE_TIERS, features: SIMPLE_SITE_FEATURES },
   'business-site': { tiers: BUSINESS_SITE_TIERS, features: BUSINESS_SITE_FEATURES },
-  'portfolio': { tiers: PORTFOLIO_TIERS, features: PORTFOLIO_FEATURES },
+  portfolio: { tiers: PORTFOLIO_TIERS, features: PORTFOLIO_FEATURES },
   'e-commerce': { tiers: ECOMMERCE_TIERS, features: ECOMMERCE_FEATURES },
   'web-app': { tiers: WEB_APP_TIERS, features: WEB_APP_FEATURES },
   'browser-extension': { tiers: BROWSER_EXTENSION_TIERS, features: BROWSER_EXTENSION_FEATURES },
-  'other': { tiers: OTHER_TIERS, features: OTHER_FEATURES }
+  other: { tiers: OTHER_TIERS, features: OTHER_FEATURES }
 };
 
 /**
@@ -822,7 +984,7 @@ export function getTierConfiguration(projectType: ProjectType): TierConfiguratio
  */
 export function getTierById(projectType: ProjectType, tierId: TierId): ProposalTier | undefined {
   const config = getTierConfiguration(projectType);
-  return config.tiers.find(t => t.id === tierId);
+  return config.tiers.find((t) => t.id === tierId);
 }
 
 /**
@@ -830,10 +992,10 @@ export function getTierById(projectType: ProjectType, tierId: TierId): ProposalT
  */
 export function getFeaturesForTier(projectType: ProjectType, tierId: TierId): ProposalFeature[] {
   const config = getTierConfiguration(projectType);
-  const tier = config.tiers.find(t => t.id === tierId);
+  const tier = config.tiers.find((t) => t.id === tierId);
   if (!tier) return [];
 
-  return config.features.filter(f => tier.baseFeatures.includes(f.id));
+  return config.features.filter((f) => tier.baseFeatures.includes(f.id));
 }
 
 /**
@@ -841,11 +1003,11 @@ export function getFeaturesForTier(projectType: ProjectType, tierId: TierId): Pr
  */
 export function getAvailableAddons(projectType: ProjectType, tierId: TierId): ProposalFeature[] {
   const config = getTierConfiguration(projectType);
-  const tier = config.tiers.find(t => t.id === tierId);
+  const tier = config.tiers.find((t) => t.id === tierId);
   if (!tier) return [];
 
   return config.features.filter(
-    f => !tier.baseFeatures.includes(f.id) && !f.isRequired && f.price > 0
+    (f) => !tier.baseFeatures.includes(f.id) && !f.isRequired && f.price > 0
   );
 }
 
@@ -896,7 +1058,7 @@ export function calculatePriceBreakdown(
   total: number;
 } {
   const config = getTierConfiguration(projectType);
-  const tier = config.tiers.find(t => t.id === tierId);
+  const tier = config.tiers.find((t) => t.id === tierId);
   if (!tier) {
     return {
       basePrice: 0,
@@ -911,25 +1073,26 @@ export function calculatePriceBreakdown(
 
   const basePrice = Math.round((tier.priceRange.min + tier.priceRange.max) / 2);
   const addonsTotal = addedFeatureIds.reduce((total, featureId) => {
-    const feature = config.features.find(f => f.id === featureId);
+    const feature = config.features.find((f) => f.id === featureId);
     return total + (feature?.price || 0);
   }, 0);
 
   const customItemsTotal = customItems.reduce((total, item) => {
     const quantity = Number.isFinite(item.quantity) ? item.quantity : 1;
     const unitPrice = Number.isFinite(item.unitPrice) ? item.unitPrice : 0;
-    return total + (quantity * unitPrice);
+    return total + quantity * unitPrice;
   }, 0);
 
   const subtotal = basePrice + addonsTotal + customItemsTotal;
   const discountBase = Math.max(0, subtotal);
   const normalizedDiscountValue = Math.max(0, discountValue || 0);
-  const discountAmount = discountType === 'percentage'
-    ? Math.min(discountBase, (discountBase * normalizedDiscountValue) / 100)
-    : Math.min(discountBase, normalizedDiscountValue);
+  const discountAmount =
+    discountType === 'percentage'
+      ? Math.min(discountBase, (discountBase * normalizedDiscountValue) / 100)
+      : Math.min(discountBase, normalizedDiscountValue);
 
   const taxableTotal = Math.max(0, subtotal - discountAmount);
-  const taxAmount = Math.max(0, (taxRate || 0)) / 100 * taxableTotal;
+  const taxAmount = (Math.max(0, taxRate || 0) / 100) * taxableTotal;
   const total = Math.max(0, taxableTotal + taxAmount);
 
   return {

@@ -124,7 +124,8 @@ export async function loadAdHocAnalytics(_ctx: AdminDashboardContext): Promise<v
     ]);
 
     // Check if we have any real data (with safety check for undefined metrics)
-    const hasData = (metrics?.invoiceCount ?? 0) > 0 || monthlyData.length > 0 || clientData.length > 0;
+    const hasData =
+      (metrics?.invoiceCount ?? 0) > 0 || monthlyData.length > 0 || clientData.length > 0;
 
     if (!hasData) {
       container.innerHTML = `

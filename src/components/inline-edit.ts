@@ -48,7 +48,15 @@ let activeEdit: { element: HTMLElement; cleanup: () => void } | null = null;
  * Enable inline editing on an element
  */
 export function enableInlineEdit(config: InlineEditConfig): void {
-  const { element, value, onSave, onCancel, type = 'text', placeholder = '', required = false } = config;
+  const {
+    element,
+    value,
+    onSave,
+    onCancel,
+    type = 'text',
+    placeholder = '',
+    required = false
+  } = config;
 
   // Close any active edit first
   if (activeEdit) {

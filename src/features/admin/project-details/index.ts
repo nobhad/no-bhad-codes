@@ -43,10 +43,7 @@ export {
 } from './milestones';
 
 // Invoices
-export {
-  loadProjectInvoices,
-  type ExtendedInvoice
-} from './invoices';
+export { loadProjectInvoices, type ExtendedInvoice } from './invoices';
 
 // Invoice Modals
 export {

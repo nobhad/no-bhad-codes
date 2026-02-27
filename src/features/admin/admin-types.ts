@@ -118,7 +118,15 @@ export interface Lead {
   contact_name: string;
   email: string;
   phone?: string;
-  status: 'new' | 'contacted' | 'qualified' | 'in-progress' | 'converted' | 'lost' | 'on-hold' | 'cancelled';
+  status:
+    | 'new'
+    | 'contacted'
+    | 'qualified'
+    | 'in-progress'
+    | 'converted'
+    | 'lost'
+    | 'on-hold'
+    | 'cancelled';
   source?: string;
   notes?: string;
   created_at: string;
@@ -156,7 +164,14 @@ export interface Project {
   name: string;
   client_id: number;
   client_name?: string;
-  status: 'pending' | 'active' | 'in-progress' | 'in-review' | 'completed' | 'on-hold' | 'cancelled';
+  status:
+    | 'pending'
+    | 'active'
+    | 'in-progress'
+    | 'in-review'
+    | 'completed'
+    | 'on-hold'
+    | 'cancelled';
   start_date?: string;
   end_date?: string;
   budget?: number;
@@ -215,7 +230,7 @@ export interface Message {
   sender_type: 'client' | 'admin' | 'system';
   sender_name: string;
   message: string;
-  content?: string;  // Alias for message in some contexts
+  content?: string; // Alias for message in some contexts
   read_at: string | null; // Datetime when message was read, null if unread
   created_at: string;
 }

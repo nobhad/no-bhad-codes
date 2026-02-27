@@ -67,7 +67,8 @@ interface ProjectFile {
  */
 const SHARE_ICONS = {
   // Share2 icon - shown when file is not shared (click to share)
-  share: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+  share:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
   // Lock icon - shown when file is shared (click to unshare/lock)
   lock: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
 };
@@ -95,14 +96,15 @@ export async function loadProjectFiles(projectId: number): Promise<void> {
         renderEmptyState(filesList, 'No files yet. Upload files above.');
       } else {
         filesList.innerHTML = files
-          .map(
-            (file: ProjectFile) => {
-              const safeName = SanitizationUtils.escapeHtml(file.originalName || file.filename);
-              const isShared = file.sharedWithClient;
-              const shareIcon = isShared ? SHARE_ICONS.lock : SHARE_ICONS.share;
-              const shareTitle = isShared ? 'Shared with client - Click to unshare' : 'Share with client';
-              const shareClass = isShared ? 'icon-btn-active' : '';
-              return `
+          .map((file: ProjectFile) => {
+            const safeName = SanitizationUtils.escapeHtml(file.originalName || file.filename);
+            const isShared = file.sharedWithClient;
+            const shareIcon = isShared ? SHARE_ICONS.lock : SHARE_ICONS.share;
+            const shareTitle = isShared
+              ? 'Shared with client - Click to unshare'
+              : 'Share with client';
+            const shareClass = isShared ? 'icon-btn-active' : '';
+            return `
             <div class="file-item" data-file-id="${file.id}">
               <span class="file-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -121,8 +123,7 @@ export async function loadProjectFiles(projectId: number): Promise<void> {
               </div>
             </div>
           `;
-            }
-          )
+          })
           .join('');
 
         // Add handlers
@@ -143,7 +144,7 @@ function setupFileDeleteHandlers(projectId: number): void {
   const filesList = domCache.get('filesList');
   if (!filesList) return;
 
-  filesList.querySelectorAll('.btn-delete-file').forEach(btn => {
+  filesList.querySelectorAll('.btn-delete-file').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -179,7 +180,7 @@ function setupFileShareHandlers(projectId: number): void {
   const filesList = domCache.get('filesList');
   if (!filesList) return;
 
-  filesList.querySelectorAll('.btn-share-file').forEach(btn => {
+  filesList.querySelectorAll('.btn-share-file').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -251,7 +252,9 @@ export async function uploadFiles(
   }
 
   if (invalidFiles.length > 0) {
-    alertError(`Unsupported file type(s): ${invalidFiles.join(', ')}. Allowed: images, PDF, Word docs, text, ZIP, RAR`);
+    alertError(
+      `Unsupported file type(s): ${invalidFiles.join(', ')}. Allowed: images, PDF, Word docs, text, ZIP, RAR`
+    );
     return;
   }
 
@@ -313,7 +316,9 @@ function showUploadModal(files: File[], projectId: number, onSuccess: () => void
   }
 
   if (invalidFiles.length > 0) {
-    alertError(`Unsupported file type(s): ${invalidFiles.join(', ')}. Allowed: images, PDF, Word docs, text, ZIP, RAR`);
+    alertError(
+      `Unsupported file type(s): ${invalidFiles.join(', ')}. Allowed: images, PDF, Word docs, text, ZIP, RAR`
+    );
     if (validFiles.length === 0) return;
   }
 
@@ -331,7 +336,9 @@ function showUploadModal(files: File[], projectId: number, onSuccess: () => void
   if (!modal || !preview) return;
 
   // Render file preview
-  preview.innerHTML = validFiles.map(file => `
+  preview.innerHTML = validFiles
+    .map(
+      (file) => `
     <div class="upload-file-preview-item">
       <span class="file-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -342,7 +349,9 @@ function showUploadModal(files: File[], projectId: number, onSuccess: () => void
       <span class="file-name">${SanitizationUtils.escapeHtml(file.name)}</span>
       <span class="file-size">${formatFileSize(file.size)}</span>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
   // Initialize the file type dropdown
   const fileTypeMount = document.getElementById('upload-file-type-mount');
@@ -363,7 +372,7 @@ function showUploadModal(files: File[], projectId: number, onSuccess: () => void
 
     const requestOptions: ModalDropdownOption[] = [
       { value: '', label: 'General upload (no request)' },
-      ..._pendingRequestsCache.map(req => ({
+      ..._pendingRequestsCache.map((req) => ({
         value: String(req.id),
         label: `${req.title}${req.is_required ? ' (Required)' : ''}`
       }))
@@ -438,14 +447,12 @@ async function handleUploadConfirm(): Promise<void> {
   const files = pendingFilesToUpload;
   const onSuccess = currentUploadCallback;
   const selectedRequestValue = uploadRequestDropdown?.dataset.value;
-  const selectedRequestId = selectedRequestValue
-    ? parseInt(selectedRequestValue, 10)
-    : null;
+  const selectedRequestId = selectedRequestValue ? parseInt(selectedRequestValue, 10) : null;
 
   // Get file type from dropdown
   const fileType = uploadFileTypeDropdown?.dataset.value || '';
   // Get the label text for the selected file type
-  const fileTypeOption = FILE_TYPE_OPTIONS.find(opt => opt.value === fileType);
+  const fileTypeOption = FILE_TYPE_OPTIONS.find((opt) => opt.value === fileType);
   const fileLabel = fileTypeOption?.label || '';
 
   // Hide modal before upload
@@ -520,7 +527,6 @@ function setupUploadModalHandlers(): void {
   }
 }
 
-
 /**
  * Link uploaded file to a document request
  */
@@ -537,10 +543,7 @@ async function linkFileToRequest(requestId: number, fileId: number): Promise<boo
 /**
  * Set up file upload handlers (drag/drop, browse button)
  */
-export function setupFileUploadHandlers(
-  projectId: number,
-  onUploadSuccess: () => void
-): void {
+export function setupFileUploadHandlers(projectId: number, onUploadSuccess: () => void): void {
   const dropzone = domCache.get('uploadDropzone');
   const fileInput = domCache.getAs<HTMLInputElement>('fileInput');
   const browseBtn = domCache.get('browseFilesBtn');
@@ -569,7 +572,10 @@ export function setupFileUploadHandlers(
     // Make dropzone keyboard accessible
     dropzone.setAttribute('tabindex', '0');
     dropzone.setAttribute('role', 'button');
-    dropzone.setAttribute('aria-label', 'File upload dropzone - press Enter or Space to browse files, or drag and drop files here');
+    dropzone.setAttribute(
+      'aria-label',
+      'File upload dropzone - press Enter or Space to browse files, or drag and drop files here'
+    );
 
     dropzone.addEventListener('dragover', (e) => {
       e.preventDefault();

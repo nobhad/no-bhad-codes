@@ -138,7 +138,6 @@ export class PageHeroModule extends BaseHeroAnimation {
     });
   }
 
-
   /**
    * Setup event listeners
    */
@@ -230,10 +229,8 @@ export class PageHeroModule extends BaseHeroAnimation {
     window.removeEventListener('wheel', this.handleWheelBound);
 
     // Use base class reveal method
-    super.revealHeroContent(
-      instance.hero,
-      instance.content,
-      () => this.dispatchEvent('revealed', { pageId })
+    super.revealHeroContent(instance.hero, instance.content, () =>
+      this.dispatchEvent('revealed', { pageId })
     );
   }
 

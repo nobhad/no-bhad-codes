@@ -39,7 +39,10 @@ export async function loadProjectMessages(
     // Get the client ID for this project
     const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
     if (!project || !project.client_id) {
-      renderEmptyState(messagesThread, 'No client account linked. Invite the client first to enable messaging.');
+      renderEmptyState(
+        messagesThread,
+        'No client account linked. Invite the client first to enable messaging.'
+      );
       return;
     }
 
@@ -51,7 +54,7 @@ export async function loadProjectMessages(
       return;
     }
 
-    const threadsData = await threadsResponse.json() as { threads?: MessageThreadResponse[] };
+    const threadsData = (await threadsResponse.json()) as { threads?: MessageThreadResponse[] };
     const threads: MessageThreadResponse[] = threadsData.threads || [];
 
     // Find thread for this project or client
@@ -76,7 +79,7 @@ export async function loadProjectMessages(
       return;
     }
 
-    const messagesData = await messagesResponse.json() as { messages?: MessageResponse[] };
+    const messagesData = (await messagesResponse.json()) as { messages?: MessageResponse[] };
     const messages: MessageResponse[] = messagesData.messages || [];
 
     if (messages.length === 0) {
@@ -86,7 +89,9 @@ export async function loadProjectMessages(
         .map((msg: MessageResponse) => {
           // Sanitize user data to prevent XSS
           const safeSenderName = SanitizationUtils.escapeHtml(
-            msg.sender_type === 'admin' ? 'You' : (msg.sender_name || project.contact_name || 'Client')
+            msg.sender_type === 'admin'
+              ? 'You'
+              : msg.sender_name || project.contact_name || 'Client'
           );
           const safeContent = SanitizationUtils.escapeHtml(msg.message || '');
           return `
@@ -148,7 +153,6 @@ export async function sendProjectMessage(
       }
       alertError('Failed to create message thread');
       return false;
-
     }
 
     // Send message to existing thread
@@ -162,7 +166,6 @@ export async function sendProjectMessage(
     }
     alertError('Failed to send message');
     return false;
-
   } catch (error) {
     logger.error(' Error sending message:', error);
     alertError('Error sending message');

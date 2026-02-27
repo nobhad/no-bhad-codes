@@ -130,11 +130,7 @@ export function createSearchFilter(config: SearchFilterConfig): HTMLElement {
   } = config;
 
   const wrapper = document.createElement('div');
-  wrapper.className = cx(
-    'search-filter',
-    expandable && 'search-filter-expandable',
-    className
-  );
+  wrapper.className = cx('search-filter', expandable && 'search-filter-expandable', className);
 
   const input = document.createElement('input');
   input.type = 'search';
@@ -244,7 +240,7 @@ export function createStatusFilter(config: StatusFilterConfig): HTMLElement {
     if (selected.size === 0) {
       trigger.textContent = allLabel;
     } else if (selected.size === 1) {
-      const opt = options.find(o => o.value === Array.from(selected)[0]);
+      const opt = options.find((o) => o.value === Array.from(selected)[0]);
       trigger.textContent = opt?.label || Array.from(selected)[0];
     } else {
       trigger.textContent = `${selected.size} selected`;
@@ -267,11 +263,13 @@ export function createStatusFilter(config: StatusFilterConfig): HTMLElement {
   menu.appendChild(allOption);
 
   // Status options
-  options.forEach(opt => {
+  options.forEach((opt) => {
     const option = document.createElement('label');
     option.className = 'status-filter-option';
 
-    const dotStyle = opt.color ? `style="background-color: ${opt.color}"` : `data-status="${opt.value}"`;
+    const dotStyle = opt.color
+      ? `style="background-color: ${opt.color}"`
+      : `data-status="${opt.value}"`;
 
     option.innerHTML = `
       <input type="${multiSelect ? 'checkbox' : 'radio'}" name="status-filter" value="${opt.value}" ${selected.has(opt.value) ? 'checked' : ''}>
@@ -419,7 +417,7 @@ export function createDateRangeFilter(config: DateRangeFilterConfig): HTMLElemen
       { label: 'Last 30 Days', getValue: () => getDatePreset('last30') }
     ];
 
-    presets.forEach(preset => {
+    presets.forEach((preset) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'date-range-preset-btn';
@@ -446,7 +444,10 @@ export function createDateRangeFilter(config: DateRangeFilterConfig): HTMLElemen
 /**
  * Get date range for preset values.
  */
-function getDatePreset(preset: 'today' | 'week' | 'month' | 'last30'): { start: string; end: string } {
+function getDatePreset(preset: 'today' | 'week' | 'month' | 'last30'): {
+  start: string;
+  end: string;
+} {
   const today = new Date();
   const formatDate = (d: Date) => d.toISOString().split('T')[0];
 
@@ -487,13 +488,7 @@ function getDatePreset(preset: 'today' | 'week' | 'month' | 'last30'): { start: 
  * Create a per-page select dropdown.
  */
 export function createPerPageSelect(config: PerPageSelectConfig): HTMLElement {
-  const {
-    options = [10, 25, 50, 100],
-    value,
-    onChange,
-    className = '',
-    id
-  } = config;
+  const { options = [10, 25, 50, 100], value, onChange, className = '', id } = config;
 
   const wrapper = document.createElement('div');
   wrapper.className = cx('per-page-select', className);
@@ -506,7 +501,7 @@ export function createPerPageSelect(config: PerPageSelectConfig): HTMLElement {
   select.className = 'per-page-dropdown form-input';
   if (id) select.id = id;
 
-  options.forEach(opt => {
+  options.forEach((opt) => {
     const option = document.createElement('option');
     option.value = String(opt);
     option.textContent = String(opt);

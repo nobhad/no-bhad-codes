@@ -124,7 +124,12 @@ function setupEventListeners(): void {
         { value: 'all', label: 'All', title: 'All Files', ariaLabel: 'All files' },
         { value: 'admin', label: 'Admin', title: 'Admin Uploads', ariaLabel: 'Admin uploads' },
         { value: 'client', label: 'Client', title: 'Client Uploads', ariaLabel: 'Client uploads' },
-        { value: 'pending', label: 'Pending', title: 'Pending Requests', ariaLabel: 'Pending document requests' }
+        {
+          value: 'pending',
+          label: 'Pending',
+          title: 'Pending Requests',
+          ariaLabel: 'Pending document requests'
+        }
       ],
       value: _currentSourceFilter,
       onChange: (v) => setSourceFilter(v as SourceFilter)
@@ -142,8 +147,20 @@ function setupEventListeners(): void {
     const toggleEl = createViewToggle({
       id: 'files-view-toggle',
       options: [
-        { value: 'list', label: 'List', title: 'List View', ariaLabel: 'List view', iconSvg: listIcon },
-        { value: 'grid', label: 'Grid', title: 'Grid View', ariaLabel: 'Grid view', iconSvg: gridIcon }
+        {
+          value: 'list',
+          label: 'List',
+          title: 'List View',
+          ariaLabel: 'List view',
+          iconSvg: listIcon
+        },
+        {
+          value: 'grid',
+          label: 'Grid',
+          title: 'Grid View',
+          ariaLabel: 'Grid view',
+          iconSvg: gridIcon
+        }
       ],
       value: _currentView,
       onChange: (v) => setView(v as 'list' | 'grid')
@@ -160,7 +177,7 @@ function setupEventListeners(): void {
   // File detail modal tabs
   const detailTabs = document.querySelector('.file-detail-tabs');
   if (detailTabs) {
-    detailTabs.querySelectorAll('button').forEach(btn => {
+    detailTabs.querySelectorAll('button').forEach((btn) => {
       btn.addEventListener('click', () => {
         const tab = btn.dataset.tab;
         if (tab) switchDetailTab(tab);
@@ -263,7 +280,8 @@ async function loadFolders(): Promise<void> {
     const data = await response.json();
     const folders: Folder[] = data.folders || [];
 
-    const folderIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
+    const folderIcon =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
 
     // Build folder tree HTML with default virtual folders
     let html = `
@@ -282,7 +300,7 @@ async function loadFolders(): Promise<void> {
     `;
 
     // Add custom folders from database
-    folders.forEach(folder => {
+    folders.forEach((folder) => {
       const isNested = folder.parent_id !== null;
       html += `
         <div class="folder-item ${isNested ? 'nested' : ''} ${currentFolderId === folder.id ? 'active' : ''}" data-folder-id="${folder.id}">
@@ -296,7 +314,7 @@ async function loadFolders(): Promise<void> {
     folderTree.innerHTML = html;
 
     // Add click handlers
-    folderTree.querySelectorAll('.folder-item').forEach(item => {
+    folderTree.querySelectorAll('.folder-item').forEach((item) => {
       item.addEventListener('click', () => {
         const folderId = (item as HTMLElement).dataset.folderId;
         if (folderId) {
@@ -309,7 +327,6 @@ async function loadFolders(): Promise<void> {
         }
       });
     });
-
   } catch (error) {
     logger.error(' Error loading folders:', error);
   }
@@ -322,7 +339,7 @@ async function selectFolder(folderId: number | string): Promise<void> {
   currentFolderId = folderId;
 
   // Update active state
-  document.querySelectorAll('.folder-item').forEach(item => {
+  document.querySelectorAll('.folder-item').forEach((item) => {
     const itemId = (item as HTMLElement).dataset.folderId;
     item.classList.toggle('active', itemId === String(folderId));
   });
@@ -331,13 +348,14 @@ async function selectFolder(folderId: number | string): Promise<void> {
   const pathEl = document.getElementById('pd-files-path');
   if (pathEl) {
     const folderLabels: Record<string, string> = {
-      'root': 'All Files',
-      'client': 'Client Files',
-      'shared': 'Shared Files'
+      root: 'All Files',
+      client: 'Client Files',
+      shared: 'Shared Files'
     };
-    const label = typeof folderId === 'string' && folderLabels[folderId]
-      ? folderLabels[folderId]
-      : String(folderId);
+    const label =
+      typeof folderId === 'string' && folderLabels[folderId]
+        ? folderLabels[folderId]
+        : String(folderId);
     pathEl.innerHTML = `<span>${label}</span>`;
   }
 
@@ -353,7 +371,8 @@ async function loadFiles(): Promise<void> {
   const filesList = document.getElementById('pd-files-list');
   if (!filesList) return;
 
-  filesList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  filesList.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     let url = `/api/projects/${currentProjectId}/files`;
@@ -374,45 +393,51 @@ async function loadFiles(): Promise<void> {
     // Apply virtual folder filter
     if (currentFolderId === 'client') {
       // Filter for client-uploaded files
-      files = files.filter(f => f.uploaded_by && (f.uploaded_by.includes('client') || f.category === 'client_upload'));
+      files = files.filter(
+        (f) => f.uploaded_by && (f.uploaded_by.includes('client') || f.category === 'client_upload')
+      );
     } else if (currentFolderId === 'shared') {
       // Filter for admin-shared files (uploaded by admin/non-client)
-      files = files.filter(f => f.uploaded_by && !f.uploaded_by.includes('client') && f.category !== 'client_upload');
+      files = files.filter(
+        (f) => f.uploaded_by && !f.uploaded_by.includes('client') && f.category !== 'client_upload'
+      );
     }
     // 'root' shows all files
 
     // Apply source filter (from toggle)
     if (_currentSourceFilter === 'admin') {
-      files = files.filter(f => f.uploaded_by && !f.uploaded_by.includes('client'));
+      files = files.filter((f) => f.uploaded_by && !f.uploaded_by.includes('client'));
     } else if (_currentSourceFilter === 'client') {
-      files = files.filter(f => f.uploaded_by && f.uploaded_by.includes('client') || f.category === 'client_upload');
+      files = files.filter(
+        (f) => (f.uploaded_by && f.uploaded_by.includes('client')) || f.category === 'client_upload'
+      );
     }
     // 'all' shows everything, 'pending' handled separately
 
     if (files.length === 0) {
       const folderLabels: Record<string, string> = {
-        'root': 'this folder',
-        'client': 'Client Files',
-        'shared': 'Shared Files'
+        root: 'this folder',
+        client: 'Client Files',
+        shared: 'Shared Files'
       };
-      const folderLabel = typeof currentFolderId === 'string' && folderLabels[currentFolderId]
-        ? folderLabels[currentFolderId]
-        : 'this folder';
+      const folderLabel =
+        typeof currentFolderId === 'string' && folderLabels[currentFolderId]
+          ? folderLabels[currentFolderId]
+          : 'this folder';
       const emptyMessage = `No files in ${folderLabel}. Upload files above.`;
       renderEmptyState(filesList, emptyMessage);
       return;
     }
 
-    filesList.innerHTML = files.map(file => renderFileItem(file)).join('');
+    filesList.innerHTML = files.map((file) => renderFileItem(file)).join('');
 
     // Add click handlers
-    filesList.querySelectorAll('.file-item').forEach(item => {
+    filesList.querySelectorAll('.file-item').forEach((item) => {
       item.addEventListener('click', () => {
         const fileId = parseInt((item as HTMLElement).dataset.fileId || '0', 10);
         if (fileId) openFileDetail(fileId);
       });
     });
-
   } catch (error) {
     logger.error(' Error loading files:', error);
     renderErrorState(filesList, 'Error loading files.', { type: 'general' });
@@ -454,8 +479,8 @@ function renderFileItem(file: FileItem): string {
  */
 function getFileIconClass(mimeType: string): string {
   if (mimeType.startsWith('image/')) return 'image';
-  if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('text')) return 'document';
-  if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('archive')) return 'archive';
+  if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('text')) {return 'document';}
+  if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('archive')) {return 'archive';}
   return '';
 }
 
@@ -508,12 +533,12 @@ function closeFileDetailModal(): void {
  */
 function switchDetailTab(tab: string): void {
   // Update tab buttons
-  document.querySelectorAll('.file-detail-tabs button').forEach(btn => {
+  document.querySelectorAll('.file-detail-tabs button').forEach((btn) => {
     btn.classList.toggle('active', (btn as HTMLButtonElement).dataset.tab === tab);
   });
 
   // Update tab content
-  document.querySelectorAll('.file-detail-tab-content').forEach(content => {
+  document.querySelectorAll('.file-detail-tab-content').forEach((content) => {
     const isActive = (content as HTMLElement).dataset.tabContent === tab;
     content.classList.toggle('active', isActive);
   });
@@ -548,7 +573,7 @@ async function loadFileInfo(fileId: number): Promise<void> {
     if (!response.ok) return;
 
     const data = await response.json();
-    const file = (data.files as FileItem[])?.find(f => f.id === fileId);
+    const file = (data.files as FileItem[])?.find((f) => f.id === fileId);
 
     if (!file) {
       container.innerHTML = '<p>File not found</p>';
@@ -609,7 +634,6 @@ async function loadFileInfo(fileId: number): Promise<void> {
       shareBtn.classList.toggle('btn-success', Boolean(file.shared_with_client));
       shareBtn.classList.toggle('btn-secondary', !file.shared_with_client);
     }
-
   } catch (error) {
     logger.error(' Error loading file info:', error);
     container.innerHTML = '<p>Error loading file info</p>';
@@ -623,7 +647,8 @@ async function loadFileVersions(fileId: number): Promise<void> {
   const container = document.getElementById('file-versions-list');
   if (!container) return;
 
-  container.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  container.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     const response = await apiFetch(`/api/projects/files/${fileId}/versions`);
@@ -640,7 +665,9 @@ async function loadFileVersions(fileId: number): Promise<void> {
       return;
     }
 
-    container.innerHTML = versions.map(version => `
+    container.innerHTML = versions
+      .map(
+        (version) => `
       <div class="version-item ${version.is_current ? 'current' : ''}">
         <div class="version-info flex flex-col gap-0-5">
           <span class="version-label">
@@ -656,17 +683,18 @@ async function loadFileVersions(fileId: number): Promise<void> {
           ${!version.is_current ? `<button class="btn btn-secondary btn-xs restore-version-btn" data-version-id="${version.id}">Restore</button>` : ''}
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     // Add restore handlers
-    container.querySelectorAll('.restore-version-btn').forEach(btn => {
+    container.querySelectorAll('.restore-version-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const versionId = (btn as HTMLElement).dataset.versionId;
         if (versionId) await restoreVersion(fileId, parseInt(versionId, 10));
       });
     });
-
   } catch (error) {
     logger.error(' Error loading versions:', error);
     renderErrorState(container, 'Error loading versions', { type: 'general' });
@@ -687,7 +715,10 @@ async function restoreVersion(fileId: number, versionId: number): Promise<void> 
   if (!confirmed) return;
 
   try {
-    const response = await apiPost(`/api/projects/files/${fileId}/versions/${versionId}/restore`, {});
+    const response = await apiPost(
+      `/api/projects/files/${fileId}/versions/${versionId}/restore`,
+      {}
+    );
     if (response.ok) {
       alertSuccess('Version restored successfully');
       await loadFileVersions(fileId);
@@ -708,7 +739,8 @@ async function loadFileComments(fileId: number): Promise<void> {
   const container = document.getElementById('file-comments-list');
   if (!container) return;
 
-  container.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  container.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     const response = await apiFetch(`/api/projects/files/${fileId}/comments`);
@@ -725,7 +757,9 @@ async function loadFileComments(fileId: number): Promise<void> {
       return;
     }
 
-    container.innerHTML = comments.map(comment => `
+    container.innerHTML = comments
+      .map(
+        (comment) => `
       <div class="comment-item">
         <div class="comment-header">
           <span class="comment-author">${escapeHtml(comment.user_email)}</span>
@@ -733,8 +767,9 @@ async function loadFileComments(fileId: number): Promise<void> {
         </div>
         <div class="comment-text">${escapeHtml(comment.content)}</div>
       </div>
-    `).join('');
-
+    `
+      )
+      .join('');
   } catch (error) {
     logger.error(' Error loading comments:', error);
     renderErrorState(container, 'Error loading comments', { type: 'general' });
@@ -776,7 +811,8 @@ async function loadFileAccessLog(fileId: number): Promise<void> {
   const container = document.getElementById('file-access-log');
   if (!container) return;
 
-  container.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  container.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     const response = await apiFetch(`/api/projects/files/${fileId}/access-log`);
@@ -793,14 +829,18 @@ async function loadFileAccessLog(fileId: number): Promise<void> {
       return;
     }
 
-    container.innerHTML = log.slice(0, 20).map(entry => `
+    container.innerHTML = log
+      .slice(0, 20)
+      .map(
+        (entry) => `
       <div class="access-log-item">
         <span class="access-log-action">${formatAccessAction(entry.action)}</span>
         <span class="access-log-user">${escapeHtml(entry.user_email)}</span>
         <span class="access-log-date">${formatDateTime(entry.created_at)}</span>
       </div>
-    `).join('');
-
+    `
+      )
+      .join('');
   } catch (error) {
     logger.error(' Error loading access log:', error);
     renderErrorState(container, 'Error loading access log', { type: 'general' });
@@ -812,14 +852,14 @@ async function loadFileAccessLog(fileId: number): Promise<void> {
  */
 function formatAccessAction(action: string): string {
   const actions: Record<string, string> = {
-    'view': 'Viewed',
-    'download': 'Downloaded',
-    'upload': 'Uploaded',
-    'delete': 'Deleted',
-    'lock': 'Locked',
-    'unlock': 'Unlocked',
-    'comment': 'Commented',
-    'restore': 'Restored version'
+    view: 'Viewed',
+    download: 'Downloaded',
+    upload: 'Uploaded',
+    delete: 'Deleted',
+    lock: 'Locked',
+    unlock: 'Unlocked',
+    comment: 'Commented',
+    restore: 'Restored version'
   };
   return actions[action] || action;
 }
@@ -967,7 +1007,8 @@ async function loadPendingRequests(): Promise<void> {
   const pendingList = document.getElementById('pd-pending-requests-list');
   if (!pendingList) return;
 
-  pendingList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  pendingList.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     const response = await apiFetch(`/api/document-requests/project/${currentProjectId}/pending`);
@@ -985,10 +1026,10 @@ async function loadPendingRequests(): Promise<void> {
       return;
     }
 
-    pendingList.innerHTML = requests.map(req => renderPendingRequestItem(req)).join('');
+    pendingList.innerHTML = requests.map((req) => renderPendingRequestItem(req)).join('');
 
     // Add click handlers for actions
-    pendingList.querySelectorAll('.pending-request-action').forEach(btn => {
+    pendingList.querySelectorAll('.pending-request-action').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const action = (btn as HTMLElement).dataset.action;
@@ -998,7 +1039,6 @@ async function loadPendingRequests(): Promise<void> {
         }
       });
     });
-
   } catch (error) {
     logger.error(' Error loading pending requests:', error);
     renderErrorState(pendingList, 'Error loading pending requests.', { type: 'general' });
@@ -1061,7 +1101,8 @@ async function handlePendingRequestAction(requestId: number, action: string): Pr
     } else if (action === 'delete') {
       const confirmed = await confirmDialog({
         title: 'Delete Document Request',
-        message: 'Are you sure you want to delete this document request? This action cannot be undone.',
+        message:
+          'Are you sure you want to delete this document request? This action cannot be undone.',
         confirmText: 'Delete',
         cancelText: 'Cancel',
         danger: true
@@ -1104,7 +1145,7 @@ async function loadPendingRequestsDropdown(): Promise<void> {
     // Clear and repopulate options
     select.innerHTML = '<option value="">General upload</option>';
 
-    requests.forEach(req => {
+    requests.forEach((req) => {
       const option = document.createElement('option');
       option.value = String(req.id);
       option.textContent = `${req.title}${req.is_required ? ' (Required)' : ''}`;
@@ -1116,7 +1157,6 @@ async function loadPendingRequestsDropdown(): Promise<void> {
     if (container) {
       container.style.display = requests.length > 0 ? 'block' : 'none';
     }
-
   } catch (error) {
     logger.error(' Error loading pending requests dropdown:', error);
   }

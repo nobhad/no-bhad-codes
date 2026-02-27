@@ -171,11 +171,21 @@ class AdminDataService {
   private _threadsData: MessageThread[] = [];
 
   // Getters
-  get leadsData(): Lead[] { return this._leadsData; }
-  get contactsData(): Contact[] { return this._contactsData; }
-  get projectsData(): Project[] { return this._projectsData; }
-  get clientsData(): Client[] { return this._clientsData; }
-  get threadsData(): MessageThread[] { return this._threadsData; }
+  get leadsData(): Lead[] {
+    return this._leadsData;
+  }
+  get contactsData(): Contact[] {
+    return this._contactsData;
+  }
+  get projectsData(): Project[] {
+    return this._projectsData;
+  }
+  get clientsData(): Client[] {
+    return this._clientsData;
+  }
+  get threadsData(): MessageThread[] {
+    return this._threadsData;
+  }
 
   // ----------------------------------------
   // Leads
@@ -234,7 +244,7 @@ class AdminDataService {
   }
 
   getLeadById(id: number): Lead | undefined {
-    return this._leadsData.find(l => l.id === id);
+    return this._leadsData.find((l) => l.id === id);
   }
 
   // ----------------------------------------
@@ -247,7 +257,9 @@ class AdminDataService {
 
     try {
       const response = await apiFetch('/api/admin/contact-submissions');
-      const data = await parseApiResponse<{ submissions: Contact[]; stats: ContactStats }>(response);
+      const data = await parseApiResponse<{ submissions: Contact[]; stats: ContactStats }>(
+        response
+      );
       this._contactsData = data.submissions || [];
       this.cache.set('contacts', data);
       return data;
@@ -272,7 +284,7 @@ class AdminDataService {
   }
 
   getContactById(id: number): Contact | undefined {
-    return this._contactsData.find(c => c.id === id);
+    return this._contactsData.find((c) => c.id === id);
   }
 
   // ----------------------------------------
@@ -311,7 +323,7 @@ class AdminDataService {
   }
 
   getProjectById(id: number): Project | undefined {
-    return this._projectsData.find(p => p.id === id);
+    return this._projectsData.find((p) => p.id === id);
   }
 
   // ----------------------------------------
@@ -335,7 +347,7 @@ class AdminDataService {
   }
 
   getClientById(id: number): Client | undefined {
-    return this._clientsData.find(c => c.id === id);
+    return this._clientsData.find((c) => c.id === id);
   }
 
   // ----------------------------------------
@@ -384,7 +396,7 @@ class AdminDataService {
   }
 
   getThreadById(id: number): MessageThread | undefined {
-    return this._threadsData.find(t => t.id === id);
+    return this._threadsData.find((t) => t.id === id);
   }
 
   // ----------------------------------------

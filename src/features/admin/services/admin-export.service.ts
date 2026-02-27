@@ -17,7 +17,13 @@ const logger = createLogger('AdminExportService');
 // Types
 // ============================================
 
-export type ExportType = 'analytics' | 'visitors' | 'performance' | 'leads' | 'contacts' | 'projects';
+export type ExportType =
+  | 'analytics'
+  | 'visitors'
+  | 'performance'
+  | 'leads'
+  | 'contacts'
+  | 'projects';
 
 interface PerformanceMetricDisplay {
   value: string;
@@ -113,17 +119,19 @@ class AdminExportService {
     const headers = Object.keys(data[0]);
     const csvRows = [
       headers.join(','),
-      ...data.map(row =>
-        headers.map(header => {
-          const value = row[header];
-          // Handle strings with commas or quotes
-          if (typeof value === 'string') {
-            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-              return `"${value.replace(/"/g, '""')}"`;
+      ...data.map((row) =>
+        headers
+          .map((header) => {
+            const value = row[header];
+            // Handle strings with commas or quotes
+            if (typeof value === 'string') {
+              if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                return `"${value.replace(/"/g, '""')}"`;
+              }
             }
-          }
-          return String(value ?? '');
-        }).join(',')
+            return String(value ?? '');
+          })
+          .join(',')
       )
     ];
 
@@ -143,7 +151,9 @@ class AdminExportService {
       const events = eventsJson ? JSON.parse(eventsJson) : [];
 
       const pageViews = events.filter((e: Record<string, unknown>) => 'title' in e);
-      const interactions = events.filter((e: Record<string, unknown>) => 'type' in e && e.type !== 'page_view');
+      const interactions = events.filter(
+        (e: Record<string, unknown>) => 'type' in e && e.type !== 'page_view'
+      );
 
       return {
         exportDate: new Date().toISOString(),

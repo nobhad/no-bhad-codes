@@ -125,11 +125,7 @@ export function initTableKeyboardNav(config: TableKeyboardNavConfig): TableNavIn
   function handleKeyDown(e: KeyboardEvent): void {
     // Don't handle if user is typing in an input
     const target = e.target as HTMLElement;
-    if (
-      target.tagName === 'INPUT' ||
-      target.tagName === 'TEXTAREA' ||
-      target.isContentEditable
-    ) {
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
       return;
     }
 
@@ -223,7 +219,7 @@ export function initTableKeyboardNav(config: TableKeyboardNavConfig): TableNavIn
 
       // Clean up classes
       const rows = getRows();
-      rows.forEach(row => {
+      rows.forEach((row) => {
         row.classList.remove(focusClass, selectedClass);
         row.removeAttribute('data-focused');
         row.removeAttribute('data-selected');
@@ -234,8 +230,8 @@ export function initTableKeyboardNav(config: TableKeyboardNavConfig): TableNavIn
     getSelectedRows: () => {
       const rows = getRows();
       return Array.from(selectedIndices)
-        .filter(i => i < rows.length)
-        .map(i => rows[i]);
+        .filter((i) => i < rows.length)
+        .map((i) => rows[i]);
     }
   };
 
@@ -254,6 +250,6 @@ export function getTableKeyboardNav(tableSelector: string): TableNavInstance | u
  * Destroy all table nav instances
  */
 export function destroyAllTableKeyboardNav(): void {
-  instances.forEach(instance => instance.destroy());
+  instances.forEach((instance) => instance.destroy());
   instances.clear();
 }

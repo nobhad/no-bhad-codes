@@ -89,7 +89,9 @@ export class ContactAnimationModule extends BaseModule {
     const isTablet = viewportWidth >= 600 && viewportWidth < 1100;
     const isMobile = viewportWidth < 600;
 
-    this.log(`Viewport: ${viewportWidth}px | Desktop: ${isDesktop}, Tablet: ${isTablet}, Mobile: ${isMobile}`);
+    this.log(
+      `Viewport: ${viewportWidth}px | Desktop: ${isDesktop}, Tablet: ${isTablet}, Mobile: ${isMobile}`
+    );
 
     if (isDesktop) {
       this.setupAnimation();
@@ -126,7 +128,9 @@ export class ContactAnimationModule extends BaseModule {
     const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
 
     // Debug: log what elements were found
-    this.log(`Elements found - h2: ${!!heading}, hr: ${!!hr}, contactOptions: ${!!contactOptions}, cardColumn: ${!!cardColumn}, avatarBlurb: ${!!avatarBlurb}`);
+    this.log(
+      `Elements found - h2: ${!!heading}, hr: ${!!hr}, contactOptions: ${!!contactOptions}, cardColumn: ${!!cardColumn}, avatarBlurb: ${!!avatarBlurb}`
+    );
 
     this.timeline = gsap.timeline({
       onComplete: () => {
@@ -182,38 +186,54 @@ export class ContactAnimationModule extends BaseModule {
 
     // Fade in while blurred
     if (heading) {
-      this.timeline.to(heading, {
-        opacity: 1,
-        duration: blurFadeDuration,
-        ease: 'power2.out'
-      }, 0);
+      this.timeline.to(
+        heading,
+        {
+          opacity: 1,
+          duration: blurFadeDuration,
+          ease: 'power2.out'
+        },
+        0
+      );
     }
     // contactOptions already visible - no animation needed
     if (cardColumn) {
-      this.timeline.to(cardColumn, {
-        opacity: 1,
-        duration: blurFadeDuration,
-        ease: 'power2.out'
-      }, 0);
+      this.timeline.to(
+        cardColumn,
+        {
+          opacity: 1,
+          duration: blurFadeDuration,
+          ease: 'power2.out'
+        },
+        0
+      );
     }
 
     // Brief pause then clear blur
     this.timeline.to({}, { duration: blurPause });
 
     if (heading) {
-      this.timeline.to(heading, {
-        filter: 'blur(0px)',
-        duration: blurClearDuration,
-        ease: 'power2.out'
-      }, '>');
+      this.timeline.to(
+        heading,
+        {
+          filter: 'blur(0px)',
+          duration: blurClearDuration,
+          ease: 'power2.out'
+        },
+        '>'
+      );
     }
     // contactOptions already visible - no blur animation
     if (cardColumn) {
-      this.timeline.to(cardColumn, {
-        filter: 'blur(0px)',
-        duration: blurClearDuration,
-        ease: 'power2.out'
-      }, '<');
+      this.timeline.to(
+        cardColumn,
+        {
+          filter: 'blur(0px)',
+          duration: blurClearDuration,
+          ease: 'power2.out'
+        },
+        '<'
+      );
     }
 
     // Clean up will-change after blur animations complete
@@ -223,11 +243,15 @@ export class ContactAnimationModule extends BaseModule {
 
     // Fade in hr after h2 animation completes (appears after h2 is fully visible)
     if (hr) {
-      this.timeline.to(hr, {
-        opacity: 1,
-        duration: blurClearDuration,
-        ease: 'power2.out'
-      }, '>');
+      this.timeline.to(
+        hr,
+        {
+          opacity: 1,
+          duration: blurClearDuration,
+          ease: 'power2.out'
+        },
+        '>'
+      );
     }
 
     // ========================================================================
@@ -239,12 +263,15 @@ export class ContactAnimationModule extends BaseModule {
     const nameField = this.domCache.get('nameInput')?.closest('.input-item');
     const companyField = this.domCache.get('companyInput')?.closest('.input-item');
     const emailField = this.domCache.get('emailInput')?.closest('.input-item');
-    const messageField = this.domCache.get('messageInput')?.closest('.input-item') ||
-                         this.container.querySelector('textarea')?.closest('.input-item');
-    const submitButton = this.container.querySelector('button[type="submit"]') ||
-                         this.container.querySelector('.contact-submit');
-    const _formContainer = this.container.querySelector('.contact-form') ||
-                          this.container.querySelector('.contact-form-column');
+    const messageField =
+      this.domCache.get('messageInput')?.closest('.input-item') ||
+      this.container.querySelector('textarea')?.closest('.input-item');
+    const submitButton =
+      this.container.querySelector('button[type="submit"]') ||
+      this.container.querySelector('.contact-submit');
+    const _formContainer =
+      this.container.querySelector('.contact-form') ||
+      this.container.querySelector('.contact-form-column');
     const textarea = messageField?.querySelector('textarea') as HTMLTextAreaElement | null;
     const wrapper = messageField?.querySelector('.input-wrapper') || messageField;
     const nameLabel = nameField?.querySelector('label');
@@ -279,7 +306,14 @@ export class ContactAnimationModule extends BaseModule {
     if (emailField) gsap.set(emailField, { zIndex: 3, position: 'relative' });
     if (messageField) gsap.set(messageField, { zIndex: 2, position: 'relative' });
     // Button needs higher z-index to stay visible during form width animation
-    if (submitButton) gsap.set(submitButton, { zIndex: 10, opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)` });
+    if (submitButton) {
+      gsap.set(submitButton, {
+        zIndex: 10,
+        opacity: 0,
+        scale: 0.8,
+        filter: `blur(${blurAmount}px)`
+      });
+    }
 
     // Shared border-radius for all fields during cascade
     const fieldBorderRadius = '0 50px 50px 50px';
@@ -362,13 +396,17 @@ export class ContactAnimationModule extends BaseModule {
 
     // Avatar blurb scales up and clears blur in sync with form fields cascade
     if (avatarBlurb) {
-      this.timeline.to(avatarBlurb, {
-        opacity: 1,
-        scale: 1,
-        filter: 'blur(0px)',
-        duration: 0.5,
-        ease: 'back.out(1.4)'
-      }, formStartTime);
+      this.timeline.to(
+        avatarBlurb,
+        {
+          opacity: 1,
+          scale: 1,
+          filter: 'blur(0px)',
+          duration: 0.5,
+          ease: 'back.out(1.4)'
+        },
+        formStartTime
+      );
 
       // Star glow animation - starts after avatar blurb appears
       const starGlow = avatarBlurb.querySelector('#STAR_GLOW') as SVGPathElement | null;
@@ -380,11 +418,15 @@ export class ContactAnimationModule extends BaseModule {
         });
 
         // Fade in star glow
-        this.timeline.to(starGlow, {
-          opacity: 1,
-          duration: 0.8,
-          ease: 'power2.out'
-        }, formStartTime + 0.5);
+        this.timeline.to(
+          starGlow,
+          {
+            opacity: 1,
+            duration: 0.8,
+            ease: 'power2.out'
+          },
+          formStartTime + 0.5
+        );
 
         // Continuous pulsing glow animation (glow overflows beyond star shape)
         const glowTimeline = gsap.timeline({ repeat: -1, repeatDelay: 0 });
@@ -417,11 +459,15 @@ export class ContactAnimationModule extends BaseModule {
     // Phase 1: All fields appear (height 0 → compressed) with stagger
     // Starts AFTER h2/card drop animation
     allFieldWrappers.forEach((field, i) => {
-      this.timeline?.to(field, {
-        height: compressedHeight,
-        duration: 0.2,
-        ease: 'sine.out'
-      }, formStartTime + i * stagger);
+      this.timeline?.to(
+        field,
+        {
+          height: compressedHeight,
+          duration: 0.2,
+          ease: 'sine.out'
+        },
+        formStartTime + i * stagger
+      );
     });
 
     // Phase 2: All fields expand height together (compressed → full) - starts after first field appears
@@ -429,94 +475,140 @@ export class ContactAnimationModule extends BaseModule {
 
     // Input fields expand to inputFieldHeight
     if (nameField) {
-      this.timeline.to(nameField, {
-        height: inputFieldHeight,
-        overflow: 'visible',
-        clearProps: 'borderRadius',
-        duration: 0.25,
-        ease: 'sine.inOut'
-      }, expandStart);
+      this.timeline.to(
+        nameField,
+        {
+          height: inputFieldHeight,
+          overflow: 'visible',
+          clearProps: 'borderRadius',
+          duration: 0.25,
+          ease: 'sine.inOut'
+        },
+        expandStart
+      );
     }
     if (nameInput) {
-      this.timeline.to(nameInput, { height: inputFieldHeight, opacity: 1, duration: 0.25, ease: 'sine.inOut' }, '<');
+      this.timeline.to(
+        nameInput,
+        { height: inputFieldHeight, opacity: 1, duration: 0.25, ease: 'sine.inOut' },
+        '<'
+      );
     }
 
     if (companyField) {
-      this.timeline.to(companyField, {
-        height: inputFieldHeight,
-        overflow: 'visible',
-        clearProps: 'borderRadius',
-        duration: 0.25,
-        ease: 'sine.inOut'
-      }, expandStart + stagger);
+      this.timeline.to(
+        companyField,
+        {
+          height: inputFieldHeight,
+          overflow: 'visible',
+          clearProps: 'borderRadius',
+          duration: 0.25,
+          ease: 'sine.inOut'
+        },
+        expandStart + stagger
+      );
     }
     if (companyInput) {
-      this.timeline.to(companyInput, { height: inputFieldHeight, opacity: 1, duration: 0.25, ease: 'sine.inOut' }, '<');
+      this.timeline.to(
+        companyInput,
+        { height: inputFieldHeight, opacity: 1, duration: 0.25, ease: 'sine.inOut' },
+        '<'
+      );
     }
 
     if (emailField) {
-      this.timeline.to(emailField, {
-        height: inputFieldHeight,
-        overflow: 'visible',
-        clearProps: 'borderRadius',
-        duration: 0.25,
-        ease: 'sine.inOut'
-      }, expandStart + stagger * 2);
+      this.timeline.to(
+        emailField,
+        {
+          height: inputFieldHeight,
+          overflow: 'visible',
+          clearProps: 'borderRadius',
+          duration: 0.25,
+          ease: 'sine.inOut'
+        },
+        expandStart + stagger * 2
+      );
     }
     if (emailInput) {
-      this.timeline.to(emailInput, { height: inputFieldHeight, opacity: 1, duration: 0.25, ease: 'sine.inOut' }, '<');
+      this.timeline.to(
+        emailInput,
+        { height: inputFieldHeight, opacity: 1, duration: 0.25, ease: 'sine.inOut' },
+        '<'
+      );
     }
 
     // Message field expands to its final height
     if (messageField) {
-      this.timeline.to(messageField, {
-        height: finalMessageFieldHeight,
-        overflow: 'visible',
-        clearProps: 'borderRadius',
-        duration: 0.25,
-        ease: 'sine.inOut'
-      }, expandStart + stagger * 3);
+      this.timeline.to(
+        messageField,
+        {
+          height: finalMessageFieldHeight,
+          overflow: 'visible',
+          clearProps: 'borderRadius',
+          duration: 0.25,
+          ease: 'sine.inOut'
+        },
+        expandStart + stagger * 3
+      );
     }
     if (textarea) {
-      this.timeline.to(textarea, {
-        height: finalTextareaHeight,
-        minHeight: finalTextareaHeight,
-        opacity: 1,
-        duration: 0.25,
-        ease: 'sine.inOut'
-      }, '<');
+      this.timeline.to(
+        textarea,
+        {
+          height: finalTextareaHeight,
+          minHeight: finalTextareaHeight,
+          opacity: 1,
+          duration: 0.25,
+          ease: 'sine.inOut'
+        },
+        '<'
+      );
     }
     if (wrapper && wrapper !== messageField) {
-      this.timeline.to(wrapper, {
-        height: 'auto',
-        overflow: 'visible',
-        clearProps: 'borderRadius',
-        duration: 0.25,
-        ease: 'sine.inOut'
-      }, '<');
+      this.timeline.to(
+        wrapper,
+        {
+          height: 'auto',
+          overflow: 'visible',
+          clearProps: 'borderRadius',
+          duration: 0.25,
+          ease: 'sine.inOut'
+        },
+        '<'
+      );
     }
 
     // WIDTH: One continuous expansion for ALL fields together (runs throughout form phase)
     // Input fields expand to 460px
-    this.timeline.to([nameField, companyField, emailField].filter(Boolean), {
-      width: inputFullWidth,
-      duration: totalDuration * 0.8,
-      ease: 'sine.inOut'
-    }, formStartTime);
+    this.timeline.to(
+      [nameField, companyField, emailField].filter(Boolean),
+      {
+        width: inputFullWidth,
+        duration: totalDuration * 0.8,
+        ease: 'sine.inOut'
+      },
+      formStartTime
+    );
 
     // Message field expands to full width (640px)
     const messageFullWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_MESSAGE_WIDTH_FULL;
     if (messageField) {
-      this.timeline.to(messageField, {
-        width: messageFullWidth,
-        duration: totalDuration * 0.8,
-        ease: 'sine.inOut'
-      }, formStartTime);
+      this.timeline.to(
+        messageField,
+        {
+          width: messageFullWidth,
+          duration: totalDuration * 0.8,
+          ease: 'sine.inOut'
+        },
+        formStartTime
+      );
     }
 
     // 6. Labels and placeholders fade in early (during field expansion)
     const allLabels = [nameLabel, companyLabel, emailLabel, messageLabel].filter(Boolean);
-    const allInputsWithPlaceholders = [nameInput, companyInput, emailInput, textarea].filter(Boolean);
+    const allInputsWithPlaceholders = [nameInput, companyInput, emailInput, textarea].filter(
+      Boolean
+    );
 
     // Start text fade-in during field expansion
     const textFadeStart = formStartTime + 0.2;
@@ -526,22 +618,30 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     if (allInputsWithPlaceholders.length > 0) {
-      this.timeline.to(allInputsWithPlaceholders, {
-        '--placeholder-opacity': 1,
-        duration: 0.3,
-        ease: 'power1.out'
-      }, textFadeStart);
+      this.timeline.to(
+        allInputsWithPlaceholders,
+        {
+          '--placeholder-opacity': 1,
+          duration: 0.3,
+          ease: 'power1.out'
+        },
+        textFadeStart
+      );
     }
 
     // Button scales up and clears blur in sync with form fields and avatar blurb
     if (submitButton) {
-      this.timeline.to(submitButton, {
-        opacity: 1,
-        scale: 1,
-        filter: 'blur(0px)',
-        duration: 0.5,
-        ease: 'back.out(1.4)'
-      }, formStartTime);
+      this.timeline.to(
+        submitButton,
+        {
+          opacity: 1,
+          scale: 1,
+          filter: 'blur(0px)',
+          duration: 0.5,
+          ease: 'back.out(1.4)'
+        },
+        formStartTime
+      );
     }
 
     // Restore section height after animation
@@ -652,20 +752,40 @@ export class ContactAnimationModule extends BaseModule {
     const contactOptions = this.container.querySelector('.contact-options');
     const cardColumn = this.container.querySelector('.contact-card-column');
 
-    if (heading) gsap.set(heading, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
+    if (heading) {
+      gsap.set(heading, {
+        opacity: 0,
+        filter: `blur(${blurAmount}px)`,
+        willChange: 'filter, opacity'
+      });
+    }
     // Hide hr so it doesn't appear before h2 - hr should appear after h2 or not animate
     if (hr) gsap.set(hr, { opacity: 0 });
     // Contact options (nav links) show immediately - no animation
     if (contactOptions) gsap.set(contactOptions, { opacity: 1, filter: 'blur(0px)' });
-    if (cardColumn) gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
+    if (cardColumn) {
+      gsap.set(cardColumn, {
+        opacity: 0,
+        filter: `blur(${blurAmount}px)`,
+        willChange: 'filter, opacity'
+      });
+    }
 
     // Reset avatar blurb to initial scaled-down, blurred state
     const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
-    if (avatarBlurb) gsap.set(avatarBlurb, { opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)`, transformOrigin: 'center center' });
+    if (avatarBlurb) {
+      gsap.set(avatarBlurb, {
+        opacity: 0,
+        scale: 0.8,
+        filter: `blur(${blurAmount}px)`,
+        transformOrigin: 'center center'
+      });
+    }
 
     // Get form container reference (no overflow changes - causes button clipping)
-    const _formContainer = this.container.querySelector('.contact-form') ||
-                          this.container.querySelector('.contact-form-column');
+    const _formContainer =
+      this.container.querySelector('.contact-form') ||
+      this.container.querySelector('.contact-form-column');
 
     // Reset form fields
     const fields = [
@@ -706,7 +826,14 @@ export class ContactAnimationModule extends BaseModule {
 
     // Reset button
     const submitButton = this.container.querySelector('.submit-button, button[type="submit"]');
-    if (submitButton) gsap.set(submitButton, { zIndex: 10, opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)` });
+    if (submitButton) {
+      gsap.set(submitButton, {
+        zIndex: 10,
+        opacity: 0,
+        scale: 0.8,
+        filter: `blur(${blurAmount}px)`
+      });
+    }
   }
 
   /**
@@ -763,10 +890,10 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // Form fields - just opacity, no height/width transforms
-    formFields.forEach(field => {
+    formFields.forEach((field) => {
       gsap.set(field, { opacity: 0 });
     });
-    labels.forEach(label => {
+    labels.forEach((label) => {
       gsap.set(label, { opacity: 0 });
     });
 
@@ -777,44 +904,68 @@ export class ContactAnimationModule extends BaseModule {
 
     // PHASE 1: Heading and card column fade in
     if (heading) {
-      this.timeline.to(heading, { opacity: 1, filter: 'blur(0px)', duration: fadeDuration, ease: 'power2.out' }, 0);
+      this.timeline.to(
+        heading,
+        { opacity: 1, filter: 'blur(0px)', duration: fadeDuration, ease: 'power2.out' },
+        0
+      );
     }
     if (cardColumn) {
-      this.timeline.to(cardColumn, { opacity: 1, filter: 'blur(0px)', duration: fadeDuration, ease: 'power2.out' }, 0);
+      this.timeline.to(
+        cardColumn,
+        { opacity: 1, filter: 'blur(0px)', duration: fadeDuration, ease: 'power2.out' },
+        0
+      );
     }
 
     // PHASE 2: Avatar blurb scales up (the key animation user wants)
     if (avatarBlurb) {
-      this.timeline.to(avatarBlurb, {
-        opacity: 1,
-        scale: 1,
-        filter: 'blur(0px)',
-        duration: 0.5,
-        ease: 'back.out(1.4)'
-      }, 0.1);
+      this.timeline.to(
+        avatarBlurb,
+        {
+          opacity: 1,
+          scale: 1,
+          filter: 'blur(0px)',
+          duration: 0.5,
+          ease: 'back.out(1.4)'
+        },
+        0.1
+      );
     }
 
     // PHASE 3: Form fields and button fade in
-    this.timeline.to(formFields, {
-      opacity: 1,
-      duration: fadeDuration,
-      stagger: 0.05,
-      ease: 'power2.out'
-    }, 0.15);
+    this.timeline.to(
+      formFields,
+      {
+        opacity: 1,
+        duration: fadeDuration,
+        stagger: 0.05,
+        ease: 'power2.out'
+      },
+      0.15
+    );
 
-    this.timeline.to(labels, {
-      opacity: 1,
-      duration: fadeDuration,
-      ease: 'power2.out'
-    }, 0.2);
+    this.timeline.to(
+      labels,
+      {
+        opacity: 1,
+        duration: fadeDuration,
+        ease: 'power2.out'
+      },
+      0.2
+    );
 
     if (submitButton) {
-      this.timeline.to(submitButton, {
-        opacity: 1,
-        filter: 'blur(0px)',
-        duration: 0.4,
-        ease: 'power2.out'
-      }, 0.2);
+      this.timeline.to(
+        submitButton,
+        {
+          opacity: 1,
+          filter: 'blur(0px)',
+          duration: 0.4,
+          ease: 'power2.out'
+        },
+        0.2
+      );
     }
 
     // Pause timeline - wait for page transition
@@ -881,7 +1032,7 @@ export class ContactAnimationModule extends BaseModule {
     // PageTransitionModule handles page transitions
     const allElements = this.container.querySelectorAll(
       'h2, .contact-options, .contact-card-column, .avatar-blurb-container, ' +
-      '.input-item, .input-wrapper, .submit-button, label'
+        '.input-item, .input-wrapper, .submit-button, label'
     );
 
     gsap.set(allElements, {

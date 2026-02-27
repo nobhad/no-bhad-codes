@@ -18,10 +18,7 @@ export interface BreadcrumbItem {
  * Render breadcrumbs into a container (e.g. #breadcrumb-list).
  * Container should be a <ul> or element that will hold list items.
  */
-export function renderBreadcrumbs(
-  container: HTMLElement,
-  items: BreadcrumbItem[]
-): void {
+export function renderBreadcrumbs(container: HTMLElement, items: BreadcrumbItem[]): void {
   container.innerHTML = '';
 
   items.forEach((crumb, index) => {

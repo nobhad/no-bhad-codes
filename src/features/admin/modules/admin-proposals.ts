@@ -22,7 +22,12 @@ import { apiFetch, apiPut, apiPost, apiDelete } from '../../../utils/api-client'
 import { createTableDropdown } from '../../../utils/table-dropdown';
 import { initModalDropdown } from '../../../utils/modal-dropdown';
 import type { AdminDashboardContext } from '../admin-types';
-import { confirmDialog, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
+import {
+  confirmDialog,
+  alertSuccess,
+  alertError,
+  multiPromptDialog
+} from '../../../utils/confirm-dialog';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
 import { renderActionsCell, createAction, conditionalAction } from '../../../factories';
@@ -41,7 +46,7 @@ const PROPOSALS_ICON =
   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
 const TEMPLATES_ICON =
   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>';
-import { exportToCsv, PROPOSALS_EXPORT_CONFIG } from '../../../utils/table-export';
+import { exportDataToCsv, PROPOSALS_EXPORT_CONFIG } from '../../../utils/table-export';
 import {
   createFilterUI,
   createSortableHeaders,
@@ -66,6 +71,68 @@ import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('AdminProposals');
+
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn = typeof import('../../../react/features/admin/proposals').mountProposalsTable;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/proposals').unmountProposalsTable;
+
+let mountProposalsTable: ReactMountFn | null = null;
+let unmountProposalsTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactProposalsTable(): Promise<boolean> {
+  if (mountProposalsTable && unmountProposalsTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/proposals');
+    mountProposalsTable = module.mountProposalsTable;
+    unmountProposalsTable = module.unmountProposalsTable;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React proposals table */
+function shouldUseReactProposalsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_proposals') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_proposals_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
 
 // ============================================================================
 // TYPES
@@ -278,15 +345,18 @@ const PROPOSALS_BULK_CONFIG: BulkActionConfig = {
         try {
           // Update each proposal
           const results = await Promise.all(
-            ids.map(id =>
+            ids.map((id) =>
               apiPut(`/api/proposals/admin/${id}`, { status: result.status })
-                .then(res => ({ id, success: res.ok }))
+                .then((res) => ({ id, success: res.ok }))
                 .catch(() => ({ id, success: false }))
             )
           );
-          const successCount = results.filter(r => r.success).length;
+          const successCount = results.filter((r) => r.success).length;
           if (successCount > 0) {
-            _storedContext.showNotification?.(`Updated ${successCount} proposal${successCount > 1 ? 's' : ''}`, 'success');
+            _storedContext.showNotification?.(
+              `Updated ${successCount} proposal${successCount > 1 ? 's' : ''}`,
+              'success'
+            );
             resetSelection('proposals');
             await refreshProposals(_storedContext);
           } else {
@@ -322,6 +392,38 @@ function clearElementCache(): void {
 // EXPORTS
 // ============================================================================
 
+/**
+ * Cleanup function called when leaving the proposals tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupProposalsTab(): void {
+  if (reactTableMounted && unmountProposalsTable) {
+    unmountProposalsTable();
+    reactTableMounted = false;
+  }
+}
+
+/**
+ * Renders the Proposals tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderProposalsTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactProposalsTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Proposals Table Mount Point -->
+      <div id="react-proposals-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - set ID for proposals-content lookup
+  container.id = 'proposals-content';
+}
+
 export function getProposalsData(): Proposal[] {
   return proposalsData;
 }
@@ -331,12 +433,55 @@ export function setProposalsContext(ctx: AdminDashboardContext): void {
 }
 
 /**
- * Load and display proposals
+ * Load and display proposals - handles both React and vanilla implementations
  */
 export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
   _storedContext = ctx;
   clearElementCache();
 
+  // Check if React implementation should be used
+  const useReact = shouldUseReactProposalsTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React ProposalsTable
+    const mountContainer = document.getElementById('react-proposals-mount');
+    if (mountContainer) {
+      const loaded = await loadReactProposalsTable();
+      if (loaded && mountProposalsTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountProposalsTable) {
+          unmountProposalsTable();
+        }
+        mountProposalsTable(mountContainer, {
+          onNavigate: (tab: string, entityId?: string) => {
+            if (entityId) {
+              ctx.switchTab(tab);
+            } else {
+              ctx.switchTab(tab);
+            }
+          }
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        logger.error(' React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
   const container = getElement('proposals-content');
   if (!container) {
     logger.error(' Container not found');
@@ -376,7 +521,7 @@ export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
         ctx.showNotification?.('No proposals to export', 'warning');
         return;
       }
-      exportToCsv(filteredData as unknown as Record<string, unknown>[], PROPOSALS_EXPORT_CONFIG);
+      exportDataToCsv(filteredData, PROPOSALS_EXPORT_CONFIG);
       ctx.showNotification?.(`Exported ${filteredData.length} proposals to CSV`, 'success');
     });
   }
@@ -531,9 +676,8 @@ function renderProposalsTable(proposals: Proposal[], ctx: AdminDashboardContext)
   if (!tableBody) return;
 
   if (proposals.length === 0) {
-    const message = proposalsData.length === 0
-      ? 'No proposals yet.'
-      : 'No proposals match the current filters.';
+    const message =
+      proposalsData.length === 0 ? 'No proposals yet.' : 'No proposals match the current filters.';
     showTableEmpty(tableBody, 8, message);
     return;
   }
@@ -541,13 +685,13 @@ function renderProposalsTable(proposals: Proposal[], ctx: AdminDashboardContext)
   // Reset bulk selection when data changes
   resetSelection('proposals');
 
-  tableBody.innerHTML = proposals.map(proposal => renderProposalRow(proposal, ctx)).join('');
+  tableBody.innerHTML = proposals.map((proposal) => renderProposalRow(proposal, ctx)).join('');
 
   // Setup event listeners
   setupRowEventListeners(proposals, ctx);
 
   // Setup bulk selection handlers
-  const allRowIds = proposals.map(p => p.id);
+  const allRowIds = proposals.map((p) => p.id);
   setupBulkSelectionHandlers(PROPOSALS_BULK_CONFIG, allRowIds);
 
   // Initialize keyboard navigation
@@ -556,7 +700,7 @@ function renderProposalsTable(proposals: Proposal[], ctx: AdminDashboardContext)
     rowSelector: 'tr[data-proposal-id]',
     onRowSelect: (row) => {
       const proposalId = parseInt(row.dataset.proposalId || '0');
-      const proposal = proposalsData.find(p => p.id === proposalId);
+      const proposal = proposalsData.find((p) => p.id === proposalId);
       if (proposal && _storedContext) showProposalDetails(proposal, _storedContext);
     },
     focusClass: 'row-focused',
@@ -565,7 +709,7 @@ function renderProposalsTable(proposals: Proposal[], ctx: AdminDashboardContext)
 }
 
 function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): string {
-  const _statusOption = PROPOSAL_STATUS_OPTIONS.find(s => s.value === proposal.status);
+  const _statusOption = PROPOSAL_STATUS_OPTIONS.find((s) => s.value === proposal.status);
   const tierLabel = proposal.selectedTier.charAt(0).toUpperCase() + proposal.selectedTier.slice(1);
   const formattedDate = formatDate(proposal.createdAt);
 
@@ -586,9 +730,11 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
       </td>
       <td class="amount-cell" data-label="Price">
         <span class="price-value">${formatPrice(proposal.finalPrice)}</span>
-        ${proposal.maintenanceOption && proposal.maintenanceOption !== 'diy'
+        ${
+  proposal.maintenanceOption && proposal.maintenanceOption !== 'diy'
     ? `<span class="maintenance-badge">+${proposal.maintenanceOption}</span>`
-    : ''}
+    : ''
+}
       </td>
       <td class="status-cell" data-label="Status">
         <div class="status-dropdown-container" data-proposal-id="${proposal.id}"></div>
@@ -596,8 +742,16 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
       <td class="date-cell" data-label="Date">${formattedDate}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-    createAction('view', proposal.id, { className: 'btn-view', dataAttrs: { 'proposal-id': proposal.id }, title: 'View Details', ariaLabel: 'View proposal details' }),
-    conditionalAction(proposal.status === 'accepted', 'convert-invoice', proposal.id, { className: 'btn-convert', dataAttrs: { 'proposal-id': proposal.id } })
+    createAction('view', proposal.id, {
+      className: 'btn-view',
+      dataAttrs: { 'proposal-id': proposal.id },
+      title: 'View Details',
+      ariaLabel: 'View proposal details'
+    }),
+    conditionalAction(proposal.status === 'accepted', 'convert-invoice', proposal.id, {
+      className: 'btn-convert',
+      dataAttrs: { 'proposal-id': proposal.id }
+    })
   ])}
       </td>
     </tr>
@@ -654,7 +808,7 @@ function renderProposalsPaginationUI(totalItems: number, ctx: AdminDashboardCont
 
 function setupRowEventListeners(proposals: Proposal[], ctx: AdminDashboardContext): void {
   // Row click navigation - open details on row click (except interactive elements)
-  document.querySelectorAll('#proposals-table-body tr[data-proposal-id]').forEach(row => {
+  document.querySelectorAll('#proposals-table-body tr[data-proposal-id]').forEach((row) => {
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       // Skip if clicking on interactive elements
@@ -668,7 +822,7 @@ function setupRowEventListeners(proposals: Proposal[], ctx: AdminDashboardContex
         return;
       }
       const id = parseInt((row as HTMLElement).dataset.proposalId || '0', 10);
-      const proposal = proposals.find(p => p.id === id);
+      const proposal = proposals.find((p) => p.id === id);
       if (proposal) {
         showProposalDetails(proposal, ctx);
       }
@@ -678,8 +832,10 @@ function setupRowEventListeners(proposals: Proposal[], ctx: AdminDashboardContex
   });
 
   // Setup status dropdowns
-  proposals.forEach(proposal => {
-    const container = document.querySelector(`.status-dropdown-container[data-proposal-id="${proposal.id}"]`);
+  proposals.forEach((proposal) => {
+    const container = document.querySelector(
+      `.status-dropdown-container[data-proposal-id="${proposal.id}"]`
+    );
     if (container) {
       const dropdown = createTableDropdown({
         options: PROPOSAL_STATUS_OPTIONS,
@@ -694,10 +850,10 @@ function setupRowEventListeners(proposals: Proposal[], ctx: AdminDashboardContex
   });
 
   // View buttons
-  document.querySelectorAll('.btn-view[data-proposal-id]').forEach(btn => {
+  document.querySelectorAll('.btn-view[data-proposal-id]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       const id = parseInt((e.currentTarget as HTMLElement).dataset.proposalId || '0', 10);
-      const proposal = proposals.find(p => p.id === id);
+      const proposal = proposals.find((p) => p.id === id);
       if (proposal) {
         showProposalDetails(proposal, ctx);
       }
@@ -705,7 +861,7 @@ function setupRowEventListeners(proposals: Proposal[], ctx: AdminDashboardContex
   });
 
   // Convert buttons
-  document.querySelectorAll('.btn-convert[data-proposal-id]').forEach(btn => {
+  document.querySelectorAll('.btn-convert[data-proposal-id]').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       const id = parseInt((e.currentTarget as HTMLElement).dataset.proposalId || '0', 10);
       await convertToInvoice(id, ctx);
@@ -733,14 +889,10 @@ function initializeProposalsFilterUI(ctx: AdminDashboardContext): void {
   if (!container) return;
 
   // Create filter UI using shared infrastructure
-  const filterUI = createFilterUI(
-    PROPOSALS_FILTER_CONFIG,
-    filterState,
-    (newState) => {
-      filterState = newState;
-      renderFilteredProposals(ctx);
-    }
-  );
+  const filterUI = createFilterUI(PROPOSALS_FILTER_CONFIG, filterState, (newState) => {
+    filterState = newState;
+    renderFilteredProposals(ctx);
+  });
 
   // Insert filter UI at the beginning of the container (before export button)
   const firstBtn = container.querySelector('button');
@@ -769,8 +921,20 @@ function setupViewToggle(ctx: AdminDashboardContext): void {
   const toggleEl = createViewToggle({
     id: 'proposals-view-toggle',
     options: [
-      { value: 'proposals', label: 'Proposals', title: 'Proposals', ariaLabel: 'Proposals view', iconSvg: PROPOSALS_ICON },
-      { value: 'templates', label: 'Templates', title: 'Templates', ariaLabel: 'Templates view', iconSvg: TEMPLATES_ICON }
+      {
+        value: 'proposals',
+        label: 'Proposals',
+        title: 'Proposals',
+        ariaLabel: 'Proposals view',
+        iconSvg: PROPOSALS_ICON
+      },
+      {
+        value: 'templates',
+        label: 'Templates',
+        title: 'Templates',
+        ariaLabel: 'Templates view',
+        iconSvg: TEMPLATES_ICON
+      }
     ],
     value: _currentView,
     onChange: async (view) => {
@@ -796,7 +960,8 @@ async function loadTemplates(ctx: AdminDashboardContext): Promise<void> {
   const templatesList = document.getElementById('templates-list');
   if (!templatesList) return;
 
-  templatesList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading templates...</span></div>';
+  templatesList.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading templates...</span></div>';
 
   try {
     const response = await apiFetch('/api/proposals/templates');
@@ -831,7 +996,9 @@ function renderTemplatesList(ctx: AdminDashboardContext): void {
 
   templatesList.innerHTML = `
     <div class="templates-grid">
-      ${templatesData.map(template => `
+      ${templatesData
+    .map(
+      (template) => `
         <div class="template-card" data-template-id="${template.id}">
           <div class="template-card-header">
             <h4>${SanitizationUtils.escapeHtml(template.name)}</h4>
@@ -844,12 +1011,16 @@ function renderTemplatesList(ctx: AdminDashboardContext): void {
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 ${formatDate(template.createdAt)}
               </span>
-              ${template.projectType ? `
+              ${
+  template.projectType
+    ? `
                 <span class="meta-item">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
                   ${formatProjectType(template.projectType)}
                 </span>
-              ` : ''}
+              `
+    : ''
+}
               <span class="meta-item">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="10"/></svg>
                 ${template.validityDays || 30} days
@@ -868,7 +1039,9 @@ function renderTemplatesList(ctx: AdminDashboardContext): void {
             </button>
           </div>
         </div>
-      `).join('')}
+      `
+    )
+    .join('')}
     </div>
   `;
 
@@ -883,7 +1056,7 @@ function setupTemplateListeners(ctx: AdminDashboardContext): void {
   }
 
   // Use template buttons
-  document.querySelectorAll('.use-template-btn').forEach(btn => {
+  document.querySelectorAll('.use-template-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const templateId = parseInt((btn as HTMLElement).dataset.templateId || '0', 10);
       await useTemplate(templateId, ctx);
@@ -891,10 +1064,10 @@ function setupTemplateListeners(ctx: AdminDashboardContext): void {
   });
 
   // Edit template buttons
-  document.querySelectorAll('.edit-template-btn').forEach(btn => {
+  document.querySelectorAll('.edit-template-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const templateId = parseInt((btn as HTMLElement).dataset.templateId || '0', 10);
-      const template = templatesData.find(t => t.id === templateId);
+      const template = templatesData.find((t) => t.id === templateId);
       if (template) {
         openTemplateEditor(template, ctx);
       }
@@ -902,7 +1075,7 @@ function setupTemplateListeners(ctx: AdminDashboardContext): void {
   });
 
   // Delete template buttons
-  document.querySelectorAll('.delete-template-btn').forEach(btn => {
+  document.querySelectorAll('.delete-template-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const templateId = parseInt((btn as HTMLElement).dataset.templateId || '0', 10);
       await deleteTemplate(templateId, ctx);
@@ -931,40 +1104,44 @@ const DEFAULT_TIERS: TemplateTier[] = [
 
 function normalizeTierStructure(structure?: TemplateTierStructure): TemplateTierStructure {
   const tiers = structure?.tiers?.length
-    ? structure.tiers.map(tier => ({
+    ? structure.tiers.map((tier) => ({
       id: tier.id || '',
       name: tier.name || '',
       basePrice: Number(tier.basePrice || 0),
       description: tier.description
     }))
-    : DEFAULT_TIERS.map(tier => ({ ...tier }));
+    : DEFAULT_TIERS.map((tier) => ({ ...tier }));
 
-  const features = structure?.features?.map(feature => ({
-    id: feature.id || '',
-    name: feature.name || '',
-    description: feature.description,
-    category: feature.category,
-    price: Number(feature.price || 0),
-    includedTiers: Array.isArray(feature.includedTiers) ? [...feature.includedTiers] : [],
-    isActive: feature.isActive !== false
-  })) || [];
+  const features =
+    structure?.features?.map((feature) => ({
+      id: feature.id || '',
+      name: feature.name || '',
+      description: feature.description,
+      category: feature.category,
+      price: Number(feature.price || 0),
+      includedTiers: Array.isArray(feature.includedTiers) ? [...feature.includedTiers] : [],
+      isActive: feature.isActive !== false
+    })) || [];
 
-  const maintenanceOptions = structure?.maintenanceOptions?.map(option => ({
-    id: option.id || '',
-    name: option.name || '',
-    description: option.description,
-    price: Number(option.price || 0),
-    billingCycle: (option.billingCycle === 'yearly' ? 'yearly' : 'monthly') as TemplateMaintenanceOption['billingCycle'],
-    highlighted: option.highlighted,
-    features: option.features || []
-  })) || [];
+  const maintenanceOptions =
+    structure?.maintenanceOptions?.map((option) => ({
+      id: option.id || '',
+      name: option.name || '',
+      description: option.description,
+      price: Number(option.price || 0),
+      billingCycle: (option.billingCycle === 'yearly'
+        ? 'yearly'
+        : 'monthly') as TemplateMaintenanceOption['billingCycle'],
+      highlighted: option.highlighted,
+      features: option.features || []
+    })) || [];
 
   return { tiers, features, maintenanceOptions };
 }
 
 function normalizeLineItems(items?: TemplateLineItem[]): TemplateLineItem[] {
   if (!items || !Array.isArray(items)) return [];
-  return items.map(item => ({
+  return items.map((item) => ({
     description: item.description || '',
     quantity: item.quantity ?? 1,
     unitPrice: Number(item.unitPrice || 0),
@@ -976,10 +1153,12 @@ function normalizeLineItems(items?: TemplateLineItem[]): TemplateLineItem[] {
 }
 
 function slugifyValue(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '') || 'item';
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || 'item'
+  );
 }
 
 function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboardContext): void {
@@ -1032,9 +1211,11 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
           <div class="form-group">
             <label class="form-label" for="template-project-type">Project Type</label>
             <select id="template-project-type" class="form-input">
-              ${TEMPLATE_PROJECT_TYPES.map(type => `
+              ${TEMPLATE_PROJECT_TYPES.map(
+    (type) => `
                 <option value="${type.value}" ${projectType === type.value ? 'selected' : ''}>${type.label}</option>
-              `).join('')}
+              `
+  ).join('')}
             </select>
           </div>
           <div class="form-group">
@@ -1136,7 +1317,9 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
   const renderTierList = (): void => {
     const container = modal.body.querySelector('#template-tier-list') as HTMLElement | null;
     if (!container) return;
-    container.innerHTML = editorState.tiers.map((tier, index) => `
+    container.innerHTML = editorState.tiers
+      .map(
+        (tier, index) => `
       <div class="template-row template-tier-row" data-tier-index="${index}">
         <input class="form-input" data-scope="tier" data-field="id" data-index="${index}" value="${SanitizationUtils.escapeHtml(tier.id)}" placeholder="tier-id">
         <input class="form-input" data-scope="tier" data-field="name" data-index="${index}" value="${SanitizationUtils.escapeHtml(tier.name)}" placeholder="Tier name">
@@ -1146,26 +1329,34 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6v12"/><path d="M16 6v12"/><path d="M5 6l1-2h12l1 2"/></svg>
         </button>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   };
 
   const renderFeatureList = (): void => {
     const container = modal.body.querySelector('#template-feature-list') as HTMLElement | null;
     if (!container) return;
-    const tierOptions = editorState.tiers.map(tier => ({ id: tier.id, name: tier.name }));
-    container.innerHTML = editorState.features.map((feature, index) => `
+    const tierOptions = editorState.tiers.map((tier) => ({ id: tier.id, name: tier.name }));
+    container.innerHTML = editorState.features
+      .map(
+        (feature, index) => `
       <div class="template-row template-feature-row" data-feature-index="${index}">
         <input class="form-input" data-scope="feature" data-field="id" data-index="${index}" value="${SanitizationUtils.escapeHtml(feature.id)}" placeholder="feature-id">
         <input class="form-input" data-scope="feature" data-field="name" data-index="${index}" value="${SanitizationUtils.escapeHtml(feature.name)}" placeholder="Feature name">
         <input class="form-input" data-scope="feature" data-field="category" data-index="${index}" value="${SanitizationUtils.escapeHtml(feature.category || '')}" placeholder="Category">
         <input class="form-input" type="number" min="0" data-scope="feature" data-field="price" data-index="${index}" value="${feature.price}">
         <div class="template-tier-checks">
-          ${tierOptions.map(tier => `
+          ${tierOptions
+    .map(
+      (tier) => `
             <label class="template-tier-check">
               <input type="checkbox" data-scope="feature-tier" data-index="${index}" data-tier-id="${SanitizationUtils.escapeHtml(tier.id)}" ${feature.includedTiers.includes(tier.id) ? 'checked' : ''}>
               <span>${SanitizationUtils.escapeHtml(tier.name || tier.id)}</span>
             </label>
-          `).join('')}
+          `
+    )
+    .join('')}
         </div>
         <label class="template-toggle">
           <input type="checkbox" data-scope="feature" data-field="isActive" data-index="${index}" ${feature.isActive ? 'checked' : ''}>
@@ -1175,13 +1366,17 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6v12"/><path d="M16 6v12"/><path d="M5 6l1-2h12l1 2"/></svg>
         </button>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   };
 
   const renderMaintenanceList = (): void => {
     const container = modal.body.querySelector('#template-maintenance-list') as HTMLElement | null;
     if (!container) return;
-    container.innerHTML = editorState.maintenanceOptions.map((option, index) => `
+    container.innerHTML = editorState.maintenanceOptions
+      .map(
+        (option, index) => `
       <div class="template-row template-maintenance-row" data-maintenance-index="${index}">
         <input class="form-input" data-scope="maintenance" data-field="id" data-index="${index}" value="${SanitizationUtils.escapeHtml(option.id)}" placeholder="option-id">
         <input class="form-input" data-scope="maintenance" data-field="name" data-index="${index}" value="${SanitizationUtils.escapeHtml(option.name)}" placeholder="Maintenance name">
@@ -1199,13 +1394,17 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6v12"/><path d="M16 6v12"/><path d="M5 6l1-2h12l1 2"/></svg>
         </button>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   };
 
   const renderLineItems = (): void => {
     const container = modal.body.querySelector('#template-lineitem-list') as HTMLElement | null;
     if (!container) return;
-    container.innerHTML = editorState.lineItems.map((item, index) => `
+    container.innerHTML = editorState.lineItems
+      .map(
+        (item, index) => `
       <div class="template-row template-lineitem-row" data-lineitem-index="${index}">
         <input class="form-input" data-scope="line-item" data-field="description" data-index="${index}" value="${SanitizationUtils.escapeHtml(item.description)}" placeholder="Description">
         <input class="form-input" type="number" min="0" step="0.01" data-scope="line-item" data-field="unitPrice" data-index="${index}" value="${item.unitPrice}">
@@ -1224,32 +1423,39 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6v12"/><path d="M16 6v12"/><path d="M5 6l1-2h12l1 2"/></svg>
         </button>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   };
 
   const renderPreview = (): void => {
     const preview = modal.body.querySelector('#template-preview') as HTMLElement | null;
     if (!preview) return;
 
-    const activeFeatures = editorState.features.filter(feature => feature.isActive);
-    const lineItemsCount = editorState.lineItems.filter(item => item.description.trim()).length;
+    const activeFeatures = editorState.features.filter((feature) => feature.isActive);
+    const lineItemsCount = editorState.lineItems.filter((item) => item.description.trim()).length;
 
     preview.innerHTML = `
       <div class="template-preview-grid">
         <div class="preview-card">
           <span class="preview-label">Tiers</span>
           <span class="preview-value">${editorState.tiers.length}</span>
-          <span class="preview-subtext">${editorState.tiers.map(tier => SanitizationUtils.escapeHtml(tier.name || tier.id)).join(', ') || 'None'}</span>
+          <span class="preview-subtext">${editorState.tiers.map((tier) => SanitizationUtils.escapeHtml(tier.name || tier.id)).join(', ') || 'None'}</span>
         </div>
         <div class="preview-card">
           <span class="preview-label">Features</span>
           <span class="preview-value">${activeFeatures.length}</span>
-          <span class="preview-subtext">${activeFeatures.slice(0, 3).map(feature => SanitizationUtils.escapeHtml(feature.name || feature.id)).join(', ') || 'None'}${activeFeatures.length > 3 ? '...' : ''}</span>
+          <span class="preview-subtext">${
+  activeFeatures
+    .slice(0, 3)
+    .map((feature) => SanitizationUtils.escapeHtml(feature.name || feature.id))
+    .join(', ') || 'None'
+}${activeFeatures.length > 3 ? '...' : ''}</span>
         </div>
         <div class="preview-card">
           <span class="preview-label">Maintenance</span>
           <span class="preview-value">${editorState.maintenanceOptions.length}</span>
-          <span class="preview-subtext">${editorState.maintenanceOptions.map(option => SanitizationUtils.escapeHtml(option.name || option.id)).join(', ') || 'None'}</span>
+          <span class="preview-subtext">${editorState.maintenanceOptions.map((option) => SanitizationUtils.escapeHtml(option.name || option.id)).join(', ') || 'None'}</span>
         </div>
         <div class="preview-card">
           <span class="preview-label">Line Items</span>
@@ -1275,7 +1481,11 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
     const removeBtn = target.closest('.remove-row-btn') as HTMLElement | null;
 
     if (target.closest('#add-tier-btn')) {
-      editorState.tiers.push({ id: `tier-${editorState.tiers.length + 1}`, name: '', basePrice: 0 });
+      editorState.tiers.push({
+        id: `tier-${editorState.tiers.length + 1}`,
+        name: '',
+        basePrice: 0
+      });
       rerenderAll();
       return;
     }
@@ -1347,8 +1557,10 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
         const previousId = tier.id;
         tier.id = target.value.trim();
         if (previousId && previousId !== tier.id) {
-          editorState.features.forEach(feature => {
-            feature.includedTiers = feature.includedTiers.map(id => (id === previousId ? tier.id : id));
+          editorState.features.forEach((feature) => {
+            feature.includedTiers = feature.includedTiers.map((id) =>
+              id === previousId ? tier.id : id
+            );
           });
         }
       } else if (field === 'name') {
@@ -1381,7 +1593,7 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
       if (field === 'id') option.id = target.value.trim();
       if (field === 'name') option.name = target.value;
       if (field === 'price') option.price = Number(target.value || 0);
-      if (field === 'billingCycle') option.billingCycle = target.value === 'yearly' ? 'yearly' : 'monthly';
+      if (field === 'billingCycle') {option.billingCycle = target.value === 'yearly' ? 'yearly' : 'monthly';}
       if (field === 'description') option.description = target.value;
       if (field === 'highlighted') option.highlighted = target.checked;
       renderPreview();
@@ -1414,7 +1626,7 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
       if (target.checked) {
         if (!feature.includedTiers.includes(tierId)) feature.includedTiers.push(tierId);
       } else {
-        feature.includedTiers = feature.includedTiers.filter(id => id !== tierId);
+        feature.includedTiers = feature.includedTiers.filter((id) => id !== tierId);
       }
       renderPreview();
       return;
@@ -1467,13 +1679,13 @@ async function saveTemplateFromModal(
   }
 
   const tiers = editorState.tiers
-    .map(tier => ({
+    .map((tier) => ({
       id: tier.id.trim() || slugifyValue(tier.name || 'tier'),
       name: tier.name.trim() || tier.id.trim() || 'Tier',
       basePrice: Number(tier.basePrice || 0),
       description: tier.description?.trim() || undefined
     }))
-    .filter(tier => tier.id && tier.name);
+    .filter((tier) => tier.id && tier.name);
 
   if (!tiers.length) {
     alertError('Please provide valid tier details');
@@ -1481,7 +1693,7 @@ async function saveTemplateFromModal(
   }
 
   const features = editorState.features
-    .map(feature => ({
+    .map((feature) => ({
       id: feature.id.trim() || slugifyValue(feature.name || 'feature'),
       name: feature.name.trim() || feature.id.trim(),
       description: feature.description?.trim() || undefined,
@@ -1490,10 +1702,10 @@ async function saveTemplateFromModal(
       includedTiers: feature.includedTiers || [],
       isActive: feature.isActive !== false
     }))
-    .filter(feature => feature.name);
+    .filter((feature) => feature.name);
 
   const maintenanceOptions = editorState.maintenanceOptions
-    .map(option => ({
+    .map((option) => ({
       id: option.id.trim() || slugifyValue(option.name || 'maintenance'),
       name: option.name.trim() || option.id.trim(),
       description: option.description?.trim() || undefined,
@@ -1502,10 +1714,10 @@ async function saveTemplateFromModal(
       highlighted: option.highlighted || false,
       features: option.features || []
     }))
-    .filter(option => option.name);
+    .filter((option) => option.name);
 
   const defaultLineItems = editorState.lineItems
-    .map(item => ({
+    .map((item) => ({
       description: item.description.trim(),
       unitPrice: Number(item.unitPrice || 0),
       quantity: Number(item.quantity ?? 1),
@@ -1514,7 +1726,7 @@ async function saveTemplateFromModal(
       isTaxable: item.isTaxable !== false,
       isOptional: item.isOptional === true
     }))
-    .filter(item => item.description);
+    .filter((item) => item.description);
 
   const validityDays = Math.max(1, Number(validityInput?.value || 30));
 
@@ -1582,12 +1794,15 @@ async function deleteTemplate(templateId: number, ctx: AdminDashboardContext): P
 }
 
 async function useTemplate(templateId: number, ctx: AdminDashboardContext): Promise<void> {
-  const template = templatesData.find(t => t.id === templateId);
+  const template = templatesData.find((t) => t.id === templateId);
   if (!template) return;
 
   // For now, show a notification - in a full implementation this would
   // pre-fill a proposal creation form with the template data
-  ctx.showNotification?.(`Template "${template.name}" selected. Create a new proposal to use it.`, 'info');
+  ctx.showNotification?.(
+    `Template "${template.name}" selected. Create a new proposal to use it.`,
+    'info'
+  );
 }
 
 // ============================================================================
@@ -1641,16 +1856,22 @@ function renderVersionHistory(proposalId: number): void {
       </button>
     </div>
     <div class="version-list flex flex-col gap-1">
-      ${currentProposalVersions.map(version => `
+      ${currentProposalVersions
+    .map(
+      (version) => `
         <div class="version-item" data-version-id="${version.id}">
           <div class="version-info">
             <span class="version-number">v${version.versionNumber}</span>
             <span class="version-date">${formatDateTime(version.createdAt)}</span>
             <span class="version-author">${SanitizationUtils.escapeHtml(version.createdBy)}</span>
           </div>
-          ${version.notes ? `
+          ${
+  version.notes
+    ? `
             <div class="version-summary">${SanitizationUtils.escapeHtml(version.notes)}</div>
-          ` : ''}
+          `
+    : ''
+}
           <div class="version-actions">
             <button class="btn-link restore-version-btn" data-version-id="${version.id}">
               Restore
@@ -1660,7 +1881,9 @@ function renderVersionHistory(proposalId: number): void {
             </button>
           </div>
         </div>
-      `).join('')}
+      `
+    )
+    .join('')}
     </div>
   `;
 
@@ -1670,14 +1893,14 @@ function renderVersionHistory(proposalId: number): void {
     createBtn.onclick = () => createVersion(proposalId);
   }
 
-  document.querySelectorAll('.restore-version-btn').forEach(btn => {
+  document.querySelectorAll('.restore-version-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const versionId = parseInt((btn as HTMLElement).dataset.versionId || '0', 10);
       await restoreVersion(proposalId, versionId);
     });
   });
 
-  document.querySelectorAll('.compare-version-btn').forEach(btn => {
+  document.querySelectorAll('.compare-version-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const versionId = parseInt((btn as HTMLElement).dataset.versionId || '0', 10);
       await showVersionComparison(proposalId, versionId);
@@ -1708,7 +1931,8 @@ async function createVersion(proposalId: number): Promise<void> {
 async function restoreVersion(proposalId: number, versionId: number): Promise<void> {
   const confirmed = await confirmDialog({
     title: 'Restore Version',
-    message: 'This will restore the proposal to this version. A backup of the current state will be saved. Continue?',
+    message:
+      'This will restore the proposal to this version. A backup of the current state will be saved. Continue?',
     confirmText: 'Restore',
     cancelText: 'Cancel'
   });
@@ -1716,7 +1940,10 @@ async function restoreVersion(proposalId: number, versionId: number): Promise<vo
   if (!confirmed) return;
 
   try {
-    const response = await apiPost(`/api/proposals/${proposalId}/versions/${versionId}/restore`, {});
+    const response = await apiPost(
+      `/api/proposals/${proposalId}/versions/${versionId}/restore`,
+      {}
+    );
 
     if (response.ok) {
       alertSuccess('Version restored');
@@ -1735,7 +1962,9 @@ async function restoreVersion(proposalId: number, versionId: number): Promise<vo
 
 async function showVersionComparison(proposalId: number, versionId: number): Promise<void> {
   try {
-    const versionsSorted = [...currentProposalVersions].sort((a, b) => b.versionNumber - a.versionNumber);
+    const versionsSorted = [...currentProposalVersions].sort(
+      (a, b) => b.versionNumber - a.versionNumber
+    );
     const latestVersion = versionsSorted[0]?.id;
     if (!latestVersion) {
       alertError('No versions available to compare');
@@ -1754,7 +1983,9 @@ async function showVersionComparison(proposalId: number, versionId: number): Pro
       return;
     }
 
-    const response = await apiFetch(`/api/proposals/versions/compare?version1=${version1}&version2=${version2}`);
+    const response = await apiFetch(
+      `/api/proposals/versions/compare?version1=${version1}&version2=${version2}`
+    );
 
     if (response.ok) {
       const json = await response.json();
@@ -1766,10 +1997,14 @@ async function showVersionComparison(proposalId: number, versionId: number): Pro
       if (changeEntries.length === 0) {
         alertSuccess('No differences found between versions');
       } else {
-        alert(`Changes:\n${changeEntries.map(([field, value]) => {
-          const diff = value as { v1?: unknown; v2?: unknown };
-          return `- ${field}: ${diff.v1 ?? 'N/A'} → ${diff.v2 ?? 'N/A'}`;
-        }).join('\n')}`);
+        alert(
+          `Changes:\n${changeEntries
+            .map(([field, value]) => {
+              const diff = value as { v1?: unknown; v2?: unknown };
+              return `- ${field}: ${diff.v1 ?? 'N/A'} → ${diff.v2 ?? 'N/A'}`;
+            })
+            .join('\n')}`
+        );
       }
     } else {
       alertError('Failed to compare versions');
@@ -1836,19 +2071,21 @@ function renderSignatureStatus(proposalId: number, signature: SignatureData | nu
     return;
   }
 
-  const statusClass = {
-    pending: 'status-pending',
-    signed: 'status-success',
-    declined: 'status-danger',
-    expired: 'status-warning'
-  }[signature.status] || 'status-pending';
+  const statusClass =
+    {
+      pending: 'status-pending',
+      signed: 'status-success',
+      declined: 'status-danger',
+      expired: 'status-warning'
+    }[signature.status] || 'status-pending';
 
-  const statusLabel = {
-    pending: 'Awaiting Signature',
-    signed: 'Signed',
-    declined: 'Declined',
-    expired: 'Expired'
-  }[signature.status] || signature.status;
+  const statusLabel =
+    {
+      pending: 'Awaiting Signature',
+      signed: 'Signed',
+      declined: 'Declined',
+      expired: 'Expired'
+    }[signature.status] || signature.status;
 
   signatureContainer.innerHTML = `
     <div class="signature-info">
@@ -1861,17 +2098,25 @@ function renderSignatureStatus(proposalId: number, signature: SignatureData | nu
         ${signature.signer_name ? `<p><strong>Signer:</strong> ${SanitizationUtils.escapeHtml(signature.signer_name)}</p>` : ''}
         ${signature.expires_at ? `<p><strong>Expires:</strong> ${formatDateTime(signature.expires_at)}</p>` : ''}
       </div>
-      ${signature.status === 'pending' ? `
+      ${
+  signature.status === 'pending'
+    ? `
         <div class="signature-actions">
           <button class="btn btn-secondary btn-sm" id="resend-signature-btn">Resend Request</button>
           <button class="btn btn-danger btn-sm" id="cancel-signature-btn">Cancel Request</button>
         </div>
-      ` : ''}
-      ${signature.status === 'expired' ? `
+      `
+    : ''
+}
+      ${
+  signature.status === 'expired'
+    ? `
         <div class="signature-actions">
           <button class="btn btn-primary btn-sm" id="request-signature-btn">Request New Signature</button>
         </div>
-      ` : ''}
+      `
+    : ''
+}
     </div>
   `;
 
@@ -1951,11 +2196,11 @@ async function cancelSignatureRequest(proposalId: number): Promise<void> {
 }
 
 function updateStats(proposals: Proposal[]): void {
-  const pending = proposals.filter(p => p.status === 'pending').length;
-  const reviewed = proposals.filter(p => p.status === 'reviewed').length;
-  const accepted = proposals.filter(p => p.status === 'accepted').length;
+  const pending = proposals.filter((p) => p.status === 'pending').length;
+  const reviewed = proposals.filter((p) => p.status === 'reviewed').length;
+  const accepted = proposals.filter((p) => p.status === 'accepted').length;
   const totalValue = proposals
-    .filter(p => ['accepted', 'converted'].includes(p.status))
+    .filter((p) => ['accepted', 'converted'].includes(p.status))
     .reduce((sum, p) => sum + p.finalPrice, 0);
 
   const statPending = document.getElementById('stat-pending');
@@ -2015,8 +2260,8 @@ function renderProposalDetailsContent(proposal: Proposal): string {
   const tierLabel = proposal.selectedTier.charAt(0).toUpperCase() + proposal.selectedTier.slice(1);
   const formattedDate = formatDate(proposal.createdAt);
 
-  const includedFeatures = proposal.features?.filter(f => f.isIncludedInTier) || [];
-  const addonFeatures = proposal.features?.filter(f => f.isAddon) || [];
+  const includedFeatures = proposal.features?.filter((f) => f.isIncludedInTier) || [];
+  const addonFeatures = proposal.features?.filter((f) => f.isAddon) || [];
 
   return `
     <div class="proposal-details">
@@ -2031,12 +2276,16 @@ function renderProposalDetailsContent(proposal: Proposal): string {
             <span class="detail-label">Email</span>
             <span class="detail-value">${getEmailWithCopyHtml(proposal.client.email || '', SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.email || '')))}</span>
           </div>
-          ${proposal.client.company ? `
+          ${
+  proposal.client.company
+    ? `
             <div class="detail-item">
               <span class="detail-label">Company</span>
               <span class="detail-value">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.company))}</span>
             </div>
-          ` : ''}
+          `
+    : ''
+}
         </div>
       </div>
 
@@ -2065,43 +2314,63 @@ function renderProposalDetailsContent(proposal: Proposal): string {
             <span class="tier-badge tier-${proposal.selectedTier} large">${tierLabel} Package</span>
             <span class="package-price">${formatPrice(proposal.basePrice)}</span>
           </div>
-          ${proposal.maintenanceOption && proposal.maintenanceOption !== 'diy' ? `
+          ${
+  proposal.maintenanceOption && proposal.maintenanceOption !== 'diy'
+    ? `
             <div class="maintenance-selection">
               <span class="maintenance-label">Maintenance Plan:</span>
               <span class="maintenance-value">${formatMaintenanceOption(proposal.maintenanceOption)}</span>
             </div>
-          ` : ''}
+          `
+    : ''
+}
         </div>
       </div>
 
-      ${includedFeatures.length > 0 ? `
+      ${
+  includedFeatures.length > 0
+    ? `
         <div class="details-section">
           <h4>Included Features</h4>
           <ul class="features-list">
-            ${includedFeatures.map(f => `
+            ${includedFeatures
+    .map(
+      (f) => `
               <li class="feature-item feature-included">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
                 <span>${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(f.featureName))}</span>
               </li>
-            `).join('')}
+            `
+    )
+    .join('')}
           </ul>
         </div>
-      ` : ''}
+      `
+    : ''
+}
 
-      ${addonFeatures.length > 0 ? `
+      ${
+  addonFeatures.length > 0
+    ? `
         <div class="details-section">
           <h4>Add-ons Selected</h4>
           <ul class="features-list">
-            ${addonFeatures.map(f => `
+            ${addonFeatures
+    .map(
+      (f) => `
               <li class="feature-item feature-addon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                 <span>${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(f.featureName))}</span>
                 <span class="addon-price">+${formatPrice(f.featurePrice)}</span>
               </li>
-            `).join('')}
+            `
+    )
+    .join('')}
           </ul>
         </div>
-      ` : ''}
+      `
+    : ''
+}
 
       <div class="details-section">
         <h4>Pricing</h4>
@@ -2110,12 +2379,16 @@ function renderProposalDetailsContent(proposal: Proposal): string {
             <span>Base Package</span>
             <span>${formatPrice(proposal.basePrice)}</span>
           </div>
-          ${addonFeatures.length > 0 ? `
+          ${
+  addonFeatures.length > 0
+    ? `
             <div class="price-row">
               <span>Add-ons</span>
               <span>+${formatPrice(proposal.finalPrice - proposal.basePrice)}</span>
             </div>
-          ` : ''}
+          `
+    : ''
+}
           <div class="price-row total">
             <span>Total</span>
             <span>${formatPrice(proposal.finalPrice)}</span>
@@ -2123,12 +2396,16 @@ function renderProposalDetailsContent(proposal: Proposal): string {
         </div>
       </div>
 
-      ${proposal.clientNotes ? `
+      ${
+  proposal.clientNotes
+    ? `
         <div class="details-section">
           <h4>Client Notes</h4>
           <div class="notes-content">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.clientNotes))}</div>
         </div>
-      ` : ''}
+      `
+    : ''
+}
 
       <div class="details-section">
         <h4>Admin Notes</h4>
@@ -2179,13 +2456,21 @@ function renderProposalDetailsContent(proposal: Proposal): string {
       </div>
 
       <div class="details-actions">
-        ${proposal.status === 'pending' ? `
+        ${
+  proposal.status === 'pending'
+    ? `
           <button class="btn btn-success" id="accept-proposal-btn">Accept Proposal</button>
           <button class="btn btn-danger" id="reject-proposal-btn">Reject Proposal</button>
-        ` : ''}
-        ${proposal.status === 'accepted' ? `
+        `
+    : ''
+}
+        ${
+  proposal.status === 'accepted'
+    ? `
           <button class="btn btn-primary" id="convert-proposal-btn">Convert to Invoice</button>
-        ` : ''}
+        `
+    : ''
+}
       </div>
     </div>
   `;
@@ -2352,11 +2637,13 @@ function renderCustomItems(proposalId: number, items: ProposalCustomItem[]): voi
     return;
   }
 
-  const total = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+  const total = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
 
   container.innerHTML = `
     <div class="custom-items-list">
-      ${items.map(item => `
+      ${items
+    .map(
+      (item) => `
         <div class="custom-item-row" data-item-id="${item.id}">
           <div class="item-info">
             <span class="item-type-badge">${item.itemType}</span>
@@ -2372,7 +2659,9 @@ function renderCustomItems(proposalId: number, items: ProposalCustomItem[]): voi
             </svg>
           </button>
         </div>
-      `).join('')}
+      `
+    )
+    .join('')}
     </div>
     <div class="custom-items-footer">
       <span class="items-total">Custom Items Total: ${formatPrice(total)}</span>
@@ -2384,7 +2673,7 @@ function renderCustomItems(proposalId: number, items: ProposalCustomItem[]): voi
   const addBtn = document.getElementById('add-custom-item-btn');
   if (addBtn) addBtn.onclick = () => showAddCustomItemDialog(proposalId);
 
-  container.querySelectorAll('.delete-item-btn').forEach(btn => {
+  container.querySelectorAll('.delete-item-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const itemId = parseInt((btn as HTMLElement).dataset.itemId || '0');
       await deleteCustomItem(itemId, proposalId);
@@ -2397,13 +2686,19 @@ async function showAddCustomItemDialog(proposalId: number): Promise<void> {
     title: 'Add Custom Line Item',
     fields: [
       { name: 'description', label: 'Description', type: 'text', required: true },
-      { name: 'item_type', label: 'Type', type: 'select', options: [
-        { value: 'service', label: 'Service' },
-        { value: 'product', label: 'Product' },
-        { value: 'fee', label: 'Fee' },
-        { value: 'discount', label: 'Discount' },
-        { value: 'hourly', label: 'Hourly Rate' }
-      ], required: true },
+      {
+        name: 'item_type',
+        label: 'Type',
+        type: 'select',
+        options: [
+          { value: 'service', label: 'Service' },
+          { value: 'product', label: 'Product' },
+          { value: 'fee', label: 'Fee' },
+          { value: 'discount', label: 'Discount' },
+          { value: 'hourly', label: 'Hourly Rate' }
+        ],
+        required: true
+      },
       { name: 'quantity', label: 'Quantity', type: 'text', required: true },
       { name: 'unit_price', label: 'Unit Price ($)', type: 'text', required: true }
     ],
@@ -2496,10 +2791,16 @@ async function showApplyDiscountDialog(proposalId: number): Promise<void> {
   const result = await multiPromptDialog({
     title: 'Apply Discount',
     fields: [
-      { name: 'type', label: 'Discount Type', type: 'select', options: [
-        { value: 'percentage', label: 'Percentage' },
-        { value: 'fixed', label: 'Fixed Amount' }
-      ], required: true },
+      {
+        name: 'type',
+        label: 'Discount Type',
+        type: 'select',
+        options: [
+          { value: 'percentage', label: 'Percentage' },
+          { value: 'fixed', label: 'Fixed Amount' }
+        ],
+        required: true
+      },
       { name: 'value', label: 'Value (% or $)', type: 'text', required: true },
       { name: 'reason', label: 'Reason', type: 'text' }
     ],
@@ -2580,9 +2881,13 @@ function renderComments(proposalId: number, comments: ProposalComment[]): void {
   if (!container) return;
 
   container.innerHTML = `
-    ${comments.length > 0 ? `
+    ${
+  comments.length > 0
+    ? `
       <div class="comments-list">
-        ${comments.map(comment => `
+        ${comments
+    .map(
+      (comment) => `
           <div class="comment-item ${comment.isInternal ? 'comment-internal' : ''}">
             <div class="comment-header">
               <span class="comment-author">${SanitizationUtils.escapeHtml(comment.authorName)}</span>
@@ -2592,9 +2897,13 @@ function renderComments(proposalId: number, comments: ProposalComment[]): void {
             </div>
             <div class="comment-content">${SanitizationUtils.escapeHtml(comment.content)}</div>
           </div>
-        `).join('')}
+        `
+    )
+    .join('')}
       </div>
-    ` : '<div class="empty-state-small">No comments yet</div>'}
+    `
+    : '<div class="empty-state-small">No comments yet</div>'
+}
     <div class="add-comment-form flex flex-col gap-1">
       <textarea id="new-comment-input" placeholder="Add a comment..." rows="2"></textarea>
       <div class="comment-actions">
@@ -2693,13 +3002,18 @@ function renderActivities(activities: ProposalActivity[]): void {
 
   container.innerHTML = `
     <div class="activity-list flex flex-col gap-0-5">
-      ${activities.slice(0, 10).map(activity => `
+      ${activities
+    .slice(0, 10)
+    .map(
+      (activity) => `
         <div class="activity-item">
           <span class="activity-type">${activityLabels[activity.activityType] || activity.activityType}</span>
           ${activity.actor ? `<span class="activity-actor">by ${SanitizationUtils.escapeHtml(activity.actor)}</span>` : ''}
           <span class="activity-date">${formatDateTime(activity.createdAt)}</span>
         </div>
-      `).join('')}
+      `
+    )
+    .join('')}
     </div>
     ${activities.length > 10 ? `<div class="activity-more">${activities.length - 10} more activities...</div>` : ''}
   `;
@@ -2723,10 +3037,10 @@ function formatPrice(amount: number): string {
 function formatMaintenanceOption(option: string | null): string {
   if (!option) return 'None';
   const labels: Record<string, string> = {
-    'diy': 'DIY (Self-managed)',
-    'essential': 'Essential Care ($99/mo)',
-    'standard': 'Standard Care ($249/mo)',
-    'premium': 'Premium Care ($499/mo)'
+    diy: 'DIY (Self-managed)',
+    essential: 'Essential Care ($99/mo)',
+    standard: 'Standard Care ($249/mo)',
+    premium: 'Premium Care ($499/mo)'
   };
   return labels[option] || option;
 }

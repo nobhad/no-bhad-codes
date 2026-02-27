@@ -23,7 +23,8 @@ const logger = createLogger('AdminDocuments');
 // Section State
 // ---------------------------------------------------------------------------
 
-let currentDocumentsSection: 'invoices' | 'contracts' | 'document-requests' | 'questionnaires' = 'invoices';
+let currentDocumentsSection: 'invoices' | 'contracts' | 'document-requests' | 'questionnaires' =
+  'invoices';
 let documentsSubtabListenerSetup = false;
 let isLoading = false;
 let hasRendered = false;
@@ -59,7 +60,9 @@ async function loadQuestionnairesModule() {
 /**
  * Show/hide cards based on selected section
  */
-function applyDocumentsSection(section: 'invoices' | 'contracts' | 'document-requests' | 'questionnaires'): void {
+function applyDocumentsSection(
+  section: 'invoices' | 'contracts' | 'document-requests' | 'questionnaires'
+): void {
   logger.log('applyDocumentsSection:', section);
   const invoicesCard = document.getElementById('documents-invoices-card');
   const contractsCard = document.getElementById('documents-contracts-card');
@@ -103,7 +106,11 @@ function setupDocumentsSubtabListener(): void {
   documentsSubtabListenerSetup = true;
 
   document.addEventListener('documentsSubtabChange', ((e: CustomEvent<{ subtab: string }>) => {
-    const section = e.detail.subtab as 'invoices' | 'contracts' | 'document-requests' | 'questionnaires';
+    const section = e.detail.subtab as
+      | 'invoices'
+      | 'contracts'
+      | 'document-requests'
+      | 'questionnaires';
     logger.log('documentsSubtabChange received:', section);
     currentDocumentsSection = section;
     applyDocumentsSection(section);
@@ -122,7 +129,12 @@ function setupDocumentsSubtabListener(): void {
  * Called by admin-dashboard before loading data.
  */
 export function renderDocumentsTab(container: HTMLElement): void {
-  logger.log('renderDocumentsTab called, container:', container?.id || 'no-id', 'hasRendered:', hasRendered);
+  logger.log(
+    'renderDocumentsTab called, container:',
+    container?.id || 'no-id',
+    'hasRendered:',
+    hasRendered
+  );
 
   // Skip if already rendered to prevent wiping content during double-calls
   if (hasRendered && container.querySelector('#documents-invoices-card')) {
@@ -155,9 +167,14 @@ export function renderDocumentsTab(container: HTMLElement): void {
  */
 export async function loadDocuments(ctx: AdminDashboardContext): Promise<void> {
   const tabContainer = document.getElementById('tab-documents');
-  logger.log('loadDocuments called, isLoading:', isLoading,
-    'container exists:', !!tabContainer,
-    'has active class:', tabContainer?.classList.contains('active'));
+  logger.log(
+    'loadDocuments called, isLoading:',
+    isLoading,
+    'container exists:',
+    !!tabContainer,
+    'has active class:',
+    tabContainer?.classList.contains('active')
+  );
 
   // Prevent double-loading
   if (isLoading) {

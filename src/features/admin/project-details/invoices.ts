@@ -69,8 +69,12 @@ export async function loadProjectInvoices(projectId: number): Promise<void> {
       let totalPaid = 0;
 
       invoices.forEach((inv: InvoiceResponse) => {
-        const amount = typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0);
-        const paid = typeof inv.amount_paid === 'string' ? parseFloat(inv.amount_paid) : (inv.amount_paid || 0);
+        const amount =
+          typeof inv.amount_total === 'string'
+            ? parseFloat(inv.amount_total)
+            : inv.amount_total || 0;
+        const paid =
+          typeof inv.amount_paid === 'string' ? parseFloat(inv.amount_paid) : inv.amount_paid || 0;
         if (inv.status === 'paid') {
           totalPaid += amount;
         } else if (['sent', 'viewed', 'partial', 'overdue'].includes(inv.status)) {
@@ -107,8 +111,9 @@ function initializeStatusFilter(): void {
   const filterSelect = document.createElement('select');
   filterSelect.id = 'invoice-status-filter';
   filterSelect.className = 'form-input form-input-sm';
-  filterSelect.innerHTML = STATUS_FILTER_OPTIONS.map(opt =>
-    `<option value="${opt.value}"${opt.value === currentFilter ? ' selected' : ''}>${opt.label}</option>`
+  filterSelect.innerHTML = STATUS_FILTER_OPTIONS.map(
+    (opt) =>
+      `<option value="${opt.value}"${opt.value === currentFilter ? ' selected' : ''}>${opt.label}</option>`
   ).join('');
 
   // Add change handler
@@ -132,7 +137,7 @@ function filterInvoices(invoices: ExtendedInvoice[]): ExtendedInvoice[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  return invoices.filter(inv => {
+  return invoices.filter((inv) => {
     // Check for overdue
     const isOverdue = inv.status !== 'paid' && inv.due_date && new Date(inv.due_date) < today;
 
@@ -187,63 +192,66 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
           </tr>
         </thead>
         <tbody id="project-invoices-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-        ${filteredInvoices.map((inv: ExtendedInvoice) => {
-    // Determine effective status (check for overdue)
-    let effectiveStatus = inv.status;
-    if (inv.status !== 'paid' && inv.status !== 'cancelled' && inv.due_date) {
-      const dueDate = new Date(inv.due_date);
-      if (dueDate < today) {
-        effectiveStatus = 'overdue';
+        ${filteredInvoices
+    .map((inv: ExtendedInvoice) => {
+      // Determine effective status (check for overdue)
+      let effectiveStatus = inv.status;
+      if (inv.status !== 'paid' && inv.status !== 'cancelled' && inv.due_date) {
+        const dueDate = new Date(inv.due_date);
+        if (dueDate < today) {
+          effectiveStatus = 'overdue';
+        }
       }
-    }
 
-    // Determine which action buttons to show
-    const isDraft = inv.status === 'draft';
-    const isOutstanding = ['sent', 'viewed', 'partial', 'overdue'].includes(effectiveStatus);
-    const isDeposit = inv.invoice_type === 'deposit';
+      // Determine which action buttons to show
+      const isDraft = inv.status === 'draft';
+      const isOutstanding = ['sent', 'viewed', 'partial', 'overdue'].includes(
+        effectiveStatus
+      );
+      const isDeposit = inv.invoice_type === 'deposit';
 
-    // Build action buttons
-    const viewBtn = `<button class="icon-btn btn-view-invoice" data-invoice-id="${inv.id}" title="View Details" aria-label="View invoice details">
+      // Build action buttons
+      const viewBtn = `<button class="icon-btn btn-view-invoice" data-invoice-id="${inv.id}" title="View Details" aria-label="View invoice details">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>`;
 
-    const editBtn = isDraft
-      ? `<button class="icon-btn btn-edit-invoice" data-invoice-id="${inv.id}" title="Edit Invoice" aria-label="Edit invoice">
+      const editBtn = isDraft
+        ? `<button class="icon-btn btn-edit-invoice" data-invoice-id="${inv.id}" title="Edit Invoice" aria-label="Edit invoice">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
             </button>`
-      : '';
+        : '';
 
-    const sendBtn = isDraft
-      ? `<button class="icon-btn btn-send-invoice" data-invoice-id="${inv.id}" title="Send to Client" aria-label="Send invoice to client">
+      const sendBtn = isDraft
+        ? `<button class="icon-btn btn-send-invoice" data-invoice-id="${inv.id}" title="Send to Client" aria-label="Send invoice to client">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
             </button>`
-      : '';
+        : '';
 
-    const markPaidBtn = isOutstanding
-      ? `<button class="icon-btn btn-mark-paid" data-invoice-id="${inv.id}" title="Mark as Paid" aria-label="Mark invoice as paid">
+      const markPaidBtn = isOutstanding
+        ? `<button class="icon-btn btn-mark-paid" data-invoice-id="${inv.id}" title="Mark as Paid" aria-label="Mark invoice as paid">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
             </button>`
-      : '';
+        : '';
 
-    const downloadBtn = `<button class="icon-btn btn-download-invoice" data-invoice-id="${inv.id}" data-invoice-number="${inv.invoice_number || `INV-${inv.id}`}" title="Download PDF" aria-label="Download invoice PDF">
+      const downloadBtn = `<button class="icon-btn btn-download-invoice" data-invoice-id="${inv.id}" data-invoice-number="${inv.invoice_number || `INV-${inv.id}`}" title="Download PDF" aria-label="Download invoice PDF">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
             </button>`;
 
-    // Receipt download button for paid/partial invoices
-    const isPaidOrPartial = inv.status === 'paid' || inv.status === 'partial';
-    const receiptBtn = isPaidOrPartial
-      ? `<button class="icon-btn btn-download-receipt" data-invoice-id="${inv.id}" data-invoice-number="${inv.invoice_number || `INV-${inv.id}`}" title="Download Receipt" aria-label="Download receipt PDF">
+      // Receipt download button for paid/partial invoices
+      const isPaidOrPartial = inv.status === 'paid' || inv.status === 'partial';
+      const receiptBtn = isPaidOrPartial
+        ? `<button class="icon-btn btn-download-receipt" data-invoice-id="${inv.id}" data-invoice-number="${inv.invoice_number || `INV-${inv.id}`}" title="Download Receipt" aria-label="Download receipt PDF">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
             </button>`
-      : '';
+        : '';
 
-    return `
+      return `
             <tr data-invoice-id="${inv.id}">
               <td class="name-cell" data-label="Invoice">
                 <strong>${SanitizationUtils.escapeHtml(inv.invoice_number || `INV-${inv.id}`)}</strong>
                 ${isDeposit ? '<span class="badge badge-muted">DEPOSIT</span>' : ''}
               </td>
-              <td class="amount-cell" data-label="Amount">${formatCurrency(typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0))}</td>
+              <td class="amount-cell" data-label="Amount">${formatCurrency(typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : inv.amount_total || 0)}</td>
               <td class="date-cell" data-label="Due Date">${inv.due_date ? formatDate(inv.due_date) : '-'}</td>
               <td class="status-cell" data-label="Status">${getStatusDotHTML(effectiveStatus)}</td>
               <td class="actions-cell" data-label="Actions">
@@ -258,7 +266,8 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
               </td>
             </tr>
           `;
-  }).join('')}
+    })
+    .join('')}
         </tbody>
         </table>
       </div>
@@ -286,7 +295,8 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
  */
 function setupInvoiceTableHandlers(container: HTMLElement): void {
   // Remove existing listener to avoid duplicates
-  const existingHandler = (container as HTMLElement & { _invoiceHandler?: (e: Event) => void })._invoiceHandler;
+  const existingHandler = (container as HTMLElement & { _invoiceHandler?: (e: Event) => void })
+    ._invoiceHandler;
   if (existingHandler) {
     container.removeEventListener('click', existingHandler);
   }
@@ -398,7 +408,7 @@ async function downloadReceiptPdf(invoiceId: number, invoiceNumber: string): Pro
  */
 async function showViewInvoiceModal(invoiceId: number): Promise<void> {
   // Find invoice in cache or fetch
-  let invoice = cachedInvoices.find(inv => inv.id === invoiceId);
+  let invoice = cachedInvoices.find((inv) => inv.id === invoiceId);
 
   if (!invoice) {
     try {
@@ -431,8 +441,9 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
 
   // Build line items table
   const lineItems = invoice.line_items || [];
-  const lineItemsHTML = lineItems.length > 0
-    ? `<div class="data-table-container">
+  const lineItemsHTML =
+    lineItems.length > 0
+      ? `<div class="data-table-container">
         <div class="data-table-scroll-wrapper">
           <table class="data-table invoice-line-items">
             <thead>
@@ -444,27 +455,33 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
               </tr>
             </thead>
             <tbody>
-              ${lineItems.map((item: InvoiceLineItem) => `
+              ${lineItems
+    .map(
+      (item: InvoiceLineItem) => `
                 <tr>
                   <td class="name-cell" data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
                   <td class="count-cell" data-label="Qty">${item.quantity || 1}</td>
                   <td class="amount-cell" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
                   <td class="amount-cell" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
                 </tr>
-              `).join('')}
+              `
+    )
+    .join('')}
             </tbody>
           </table>
         </div>
       </div>`
-    : '<p class="text-muted">No line items</p>';
+      : '<p class="text-muted">No line items</p>';
 
   // Calculate totals
-  const total = typeof invoice.amount_total === 'string'
-    ? parseFloat(invoice.amount_total)
-    : (invoice.amount_total || 0);
-  const amountPaid = typeof invoice.amount_paid === 'string'
-    ? parseFloat(invoice.amount_paid)
-    : (invoice.amount_paid || 0);
+  const total =
+    typeof invoice.amount_total === 'string'
+      ? parseFloat(invoice.amount_total)
+      : invoice.amount_total || 0;
+  const amountPaid =
+    typeof invoice.amount_paid === 'string'
+      ? parseFloat(invoice.amount_paid)
+      : invoice.amount_paid || 0;
   const balanceDue = total - amountPaid;
 
   // Check for overdue
@@ -497,21 +514,29 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
             <span class="field-label">Created</span>
             <span class="field-value">${invoice.created_at ? formatDate(invoice.created_at) : '-'}</span>
           </div>
-          ${invoice.paid_date ? `
+          ${
+  invoice.paid_date
+    ? `
             <div class="invoice-info-item flex flex-col gap-1">
               <span class="field-label">Paid</span>
               <span class="field-value">${formatDate(invoice.paid_date)}</span>
             </div>
-          ` : ''}
+          `
+    : ''
+}
         </div>
-        ${invoice.invoice_type === 'deposit' ? `
+        ${
+  invoice.invoice_type === 'deposit'
+    ? `
           <div class="invoice-info-row">
             <div class="invoice-info-item flex flex-col gap-1">
               <span class="field-label">Type</span>
               <span class="field-value"><span class="invoice-type-badge">DEPOSIT</span></span>
             </div>
           </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
 
       <div class="invoice-line-items-section">
@@ -524,7 +549,9 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
           <span>Total</span>
           <span>${formatCurrency(total)}</span>
         </div>
-        ${amountPaid > 0 ? `
+        ${
+  amountPaid > 0
+    ? `
           <div class="total-row">
             <span>Amount Paid</span>
             <span>${formatCurrency(amountPaid)}</span>
@@ -533,15 +560,21 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
             <span>Balance Due</span>
             <span>${formatCurrency(balanceDue)}</span>
           </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
 
-      ${invoice.notes ? `
+      ${
+  invoice.notes
+    ? `
         <div class="invoice-notes-section">
           <h3 class="section-title">Notes</h3>
           <p>${SanitizationUtils.escapeHtml(invoice.notes)}</p>
         </div>
-      ` : ''}
+      `
+    : ''
+}
     </div>
   `;
 
