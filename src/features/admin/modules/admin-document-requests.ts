@@ -26,6 +26,9 @@ import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { exportToCsv, DOCUMENT_REQUESTS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('DocRequests');
 import {
   createFilterUI,
   createSortableHeaders,
@@ -221,7 +224,7 @@ const DR_BULK_CONFIG: BulkActionConfig = {
             resetSelection('document-requests');
           }
         } catch (error) {
-          console.error('[DocRequests] Bulk remind error:', error);
+          logger.error(' Bulk remind error:', error);
           showToast('Failed to send reminders', 'error');
         }
       }
@@ -249,7 +252,7 @@ const DR_BULK_CONFIG: BulkActionConfig = {
             await refreshTable(storedDrContext);
           }
         } catch (error) {
-          console.error('[DocRequests] Bulk delete error:', error);
+          logger.error(' Bulk delete error:', error);
           showToast('Failed to delete requests', 'error');
         }
       }
@@ -272,13 +275,13 @@ async function loadAllRequests(): Promise<DocumentRequest[]> {
 
   // Log any errors
   if (!pendingRes.ok) {
-    console.error('[DocRequests] Failed to load pending:', pendingRes.status);
+    logger.error(' Failed to load pending:', pendingRes.status);
   }
   if (!forReviewRes.ok) {
-    console.error('[DocRequests] Failed to load for-review:', forReviewRes.status);
+    logger.error(' Failed to load for-review:', forReviewRes.status);
   }
   if (!overdueRes.ok) {
-    console.error('[DocRequests] Failed to load overdue:', overdueRes.status);
+    logger.error(' Failed to load overdue:', overdueRes.status);
   }
 
   const pending = pendingRes.ok ? await parseApiResponse<{ requests: DocumentRequest[] }>(pendingRes).then((d) => d.requests || []) : [];
@@ -766,7 +769,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
       if (dueInput) dueInput.value = '';
       await refreshDocumentRequests(ctx);
     } catch (err) {
-      console.error('[DocRequests] Create error:', err);
+      logger.error(' Create error:', err);
       showToast((err as Error).message, 'error');
     }
   });
@@ -977,36 +980,37 @@ export function renderDocumentRequestsTab(container: HTMLElement): void {
           </button>
         </div>
       </div>
-      <div id="dr-bulk-toolbar" class="bulk-action-toolbar"></div>
+      <!-- Bulk Action Toolbar (hidden initially) -->
+      <div id="dr-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
       <div class="data-table-container">
         <div class="data-table-scroll-wrapper">
-        <table class="data-table" aria-label="Document requests">
-          <thead>
-            <tr>
-              <th scope="col" class="bulk-select-cell">
-                <div class="portal-checkbox">
-                  <input type="checkbox" id="document-requests-select-all" class="bulk-select-all" aria-label="Select all document requests" />
-                </div>
-              </th>
-              <th scope="col" class="name-col">Title</th>
-              <th scope="col" class="identity-col">Client</th>
-              <th scope="col" class="type-col">Type</th>
-              <th scope="col" class="status-col">Status</th>
-              <th scope="col" class="date-col">Due</th>
-              <th scope="col" class="actions-col">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="document-requests-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr class="loading-row">
-              <td colspan="7">
-                <div class="loading-state">
-                  <span class="loading-spinner" aria-hidden="true"></span>
-                  <span class="loading-message">Loading requests...</span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <table class="data-table" aria-label="Document requests">
+            <thead>
+              <tr>
+                <th scope="col" class="bulk-select-cell">
+                  <div class="portal-checkbox">
+                    <input type="checkbox" id="document-requests-select-all" class="bulk-select-all" aria-label="Select all document requests" />
+                  </div>
+                </th>
+                <th scope="col" class="name-col">Title</th>
+                <th scope="col" class="name-col">Client</th>
+                <th scope="col" class="type-col">Type</th>
+                <th scope="col" class="status-col">Status</th>
+                <th scope="col" class="date-col">Due</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="document-requests-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              <tr class="loading-row">
+                <td colspan="7">
+                  <div class="loading-state">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span class="loading-message">Loading requests...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
       <!-- Pagination -->

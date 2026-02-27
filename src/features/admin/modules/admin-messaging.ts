@@ -22,6 +22,9 @@ import type {
 import { ICONS } from '../../../constants/icons';
 import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminMessaging');
 
 // Attachment configuration
 const MAX_ATTACHMENTS = 5;
@@ -243,7 +246,7 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
     _cachedClientsWithThreads = clientsWithThreads;
     renderThreadList(threadList, clientsWithThreads, ctx);
   } catch (error) {
-    console.error('[AdminMessaging] Failed to load clients/threads:', error);
+    logger.error(' Failed to load clients/threads:', error);
     renderErrorState(threadList, 'Failed to load conversations', { type: 'general' });
   }
 }
@@ -385,7 +388,7 @@ function setupThreadListHandlers(container: HTMLElement, ctx: AdminDashboardCont
             ctx.showNotification('Failed to start conversation', 'error');
           }
         } catch (error) {
-          console.error('[AdminMessaging] Failed to create thread:', error);
+          logger.error(' Failed to create thread:', error);
           ctx.showNotification('Error starting conversation', 'error');
         }
       } else {
@@ -472,7 +475,7 @@ export async function loadThreadMessages(
         '<div class="empty-state">Failed to load messages</div>';
     }
   } catch (error) {
-    console.error('[AdminMessaging] Failed to load messages:', error);
+    logger.error(' Failed to load messages:', error);
     container.innerHTML =
       '<div class="empty-state">Error loading messages</div>';
   }
@@ -785,7 +788,7 @@ async function addReaction(messageId: number, reaction: string): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[AdminMessaging] Error adding reaction:', error);
+    logger.error(' Error adding reaction:', error);
   }
 }
 
@@ -807,7 +810,7 @@ async function toggleReaction(messageId: number, reaction: string): Promise<void
       }
     }
   } catch (error) {
-    console.error('[AdminMessaging] Error toggling reaction:', error);
+    logger.error(' Error toggling reaction:', error);
   }
 }
 
@@ -830,7 +833,7 @@ async function togglePin(messageId: number, isPinned: boolean): Promise<void> {
       await loadThreadMessagesWithReactions(selectedThreadId, container);
     }
   } catch (error) {
-    console.error('[AdminMessaging] Error toggling pin:', error);
+    logger.error(' Error toggling pin:', error);
   }
 }
 
@@ -845,7 +848,7 @@ async function loadThreadMessagesWithReactions(threadId: number, container: HTML
       renderMessages(data.messages || [], container);
     }
   } catch (error) {
-    console.error('[AdminMessaging] Error loading messages:', error);
+    logger.error(' Error loading messages:', error);
   }
 }
 
@@ -895,7 +898,7 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
       ctx.showNotification('Failed to send message', 'error');
     }
   } catch (error) {
-    console.error('[AdminMessaging] Error sending message:', error);
+    logger.error(' Error sending message:', error);
     ctx.showNotification('Error sending message', 'error');
   } finally {
     input.disabled = false;
@@ -1170,7 +1173,7 @@ export function setupMessagingListeners(ctx: AdminDashboardContext): void {
             selectThread(clientId, data.thread.id, ctx);
           }
         } catch (error) {
-          console.error('[AdminMessaging] Failed to create thread:', error);
+          logger.error(' Failed to create thread:', error);
         }
       } else {
         selectThread(clientId, parseInt(threadIdStr), ctx);

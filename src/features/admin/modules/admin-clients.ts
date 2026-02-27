@@ -43,6 +43,9 @@ import {
   createPaginationConfig,
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminClients');
 
 // ============================================
 // REACT INTEGRATION (ISLAND ARCHITECTURE)
@@ -81,7 +84,7 @@ async function loadReactClientsTable(): Promise<boolean> {
     unmountClientsTable = module.unmountClientsTable;
     return true;
   } catch (err) {
-    console.error('[AdminClients] Failed to load React module:', err);
+    logger.error(' Failed to load React module:', err);
     return false;
   }
 }
@@ -380,7 +383,7 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
         reactMountContainer = mountContainer;
         reactMountSuccess = true;
       } else {
-        console.error('[AdminClients] React module failed to load, falling back to vanilla');
+        logger.error(' React module failed to load, falling back to vanilla');
       }
     }
 
@@ -597,9 +600,9 @@ function buildClientRow(client: Client): HTMLTableRowElement {
 
   row.innerHTML = `
     ${createRowCheckbox('clients', client.id)}
-    <td class="identity-cell inline-editable-cell" data-client-id="${client.id}" data-label="Client">
+    <td class="identity-cell inline-editable-cell" data-label="Client">
       <span class="identity-name" data-field="primary-name">${safeName}</span>
-      ${safeCompany ? `<span class="identity-contact" data-field="secondary-name">${safeCompany}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
+      ${safeCompany ? `<span class="identity-contact" data-field="secondary-name">${safeCompany}</span>` : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
       <span class="identity-email">${safeEmail}</span>
     </td>
     <td class="type-cell" data-label="Type">${typeLabel}</td>
@@ -730,13 +733,13 @@ function setupInlineEditingForClient(cellEl: HTMLElement, client: Client): void 
 export async function showClientDetails(clientId: number, ctx?: AdminDashboardContext): Promise<void> {
   const context = ctx || clientsModule.getContext();
   if (!context) {
-    console.error('[AdminClients] No context available');
+    logger.error(' No context available');
     return;
   }
 
   const client = clientsModule.findById(clientId);
   if (!client) {
-    console.error('[AdminClients] Client not found:', clientId);
+    logger.error(' Client not found:', clientId);
     return;
   }
 
@@ -751,10 +754,10 @@ export async function showClientDetails(clientId: number, ctx?: AdminDashboardCo
     // React mode - let initClientDetailView handle everything
     try {
       await clientDetailsModule.initClientDetailView(clientId, context);
-      console.log('[AdminClients] React client detail initialized');
+      logger.log(' React client detail initialized');
       return; // Skip vanilla implementation
     } catch (error) {
-      console.error('[AdminClients] React client detail failed, falling back to vanilla:', error);
+      logger.error(' React client detail failed, falling back to vanilla:', error);
       // Fall through to vanilla implementation
     }
   }
@@ -783,7 +786,7 @@ export async function showClientDetails(clientId: number, ctx?: AdminDashboardCo
   try {
     await clientDetailsModule.initClientDetailView(clientId, context);
   } catch (error) {
-    console.error('[AdminClients] Failed to load CRM features:', error);
+    logger.error(' Failed to load CRM features:', error);
   }
 
   // Initialize keyboard shortcuts for detail view (E=edit, Esc=back, 1-6=tabs)
@@ -1106,7 +1109,7 @@ async function loadClientProjects(clientId: number): Promise<void> {
       renderEmptyState(container, 'No projects found for this client.');
     }
   } catch (error) {
-    console.error('[AdminClients] Failed to load client projects:', error);
+    logger.error(' Failed to load client projects:', error);
     renderErrorState(container, 'Failed to load projects.', { type: 'general' });
   }
 }
@@ -1204,7 +1207,7 @@ async function loadClientBilling(clientId: number): Promise<void> {
       if (outstandingCountEl) outstandingCountEl.textContent = '0';
     }
   } catch (error) {
-    console.error('[AdminClients] Failed to load client billing:', error);
+    logger.error(' Failed to load client billing:', error);
     if (container) {
       renderErrorState(container, 'Failed to load billing data.', { type: 'general' });
     }
@@ -1266,7 +1269,7 @@ async function resetClientPassword(clientId: number): Promise<void> {
       showToast('Failed to send password reset', 'error');
     }
   } catch (error) {
-    console.error('[AdminClients] Error resetting password:', error);
+    logger.error(' Error resetting password:', error);
     showToast('Error sending password reset', 'error');
   }
 }
@@ -1289,7 +1292,7 @@ async function resendClientInvite(clientId: number): Promise<void> {
       showToast('Failed to resend invitation', 'error');
     }
   } catch (error) {
-    console.error('[AdminClients] Error resending invite:', error);
+    logger.error(' Error resending invite:', error);
     showToast('Error resending invitation', 'error');
   }
 }
@@ -1325,7 +1328,7 @@ async function sendClientInvitation(clientId: number): Promise<void> {
       showToast('Failed to send invitation. Please try again.', 'error');
     }
   } catch (error) {
-    console.error('[AdminClients] Error sending invite:', error);
+    logger.error(' Error sending invite:', error);
     showToast('Failed to send invitation. Please try again.', 'error');
   }
 }
@@ -1333,7 +1336,7 @@ async function sendClientInvitation(clientId: number): Promise<void> {
 export function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
   const client = clientsModule.findById(clientId);
   if (!client) {
-    console.error('[AdminClients] Client not found:', clientId);
+    logger.error(' Client not found:', clientId);
     return;
   }
 
@@ -1458,7 +1461,7 @@ export function editClientInfo(clientId: number, ctx: AdminDashboardContext): vo
 function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
   const client = clientsModule.findById(clientId);
   if (!client) {
-    console.error('[AdminClients] Client not found:', clientId);
+    logger.error(' Client not found:', clientId);
     return;
   }
 
@@ -1564,7 +1567,7 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
 async function archiveClient(clientId: number, ctx: AdminDashboardContext): Promise<void> {
   const client = clientsModule.findById(clientId);
   if (!client) {
-    console.error('[AdminClients] Client not found:', clientId);
+    logger.error(' Client not found:', clientId);
     return;
   }
 
@@ -1588,7 +1591,7 @@ async function archiveClient(clientId: number, ctx: AdminDashboardContext): Prom
       showToast('Failed to archive client', 'error');
     }
   } catch (error) {
-    console.error('[AdminClients] Error archiving client:', error);
+    logger.error(' Error archiving client:', error);
     showToast('Error archiving client', 'error');
   }
 }
@@ -1596,7 +1599,7 @@ async function archiveClient(clientId: number, ctx: AdminDashboardContext): Prom
 async function deleteClient(clientId: number): Promise<void> {
   const client = clientsModule.findById(clientId);
   if (!client) {
-    console.error('[AdminClients] Client not found:', clientId);
+    logger.error(' Client not found:', clientId);
     return;
   }
 
@@ -1618,7 +1621,7 @@ async function deleteClient(clientId: number): Promise<void> {
       showToast('Failed to delete client', 'error');
     }
   } catch (error) {
-    console.error('[AdminClients] Error deleting client:', error);
+    logger.error(' Error deleting client:', error);
     showToast('Error deleting client', 'error');
   }
 }
@@ -1760,7 +1763,7 @@ async function bulkArchiveClients(clientIds: number[]): Promise<void> {
       showToast('Failed to archive clients', 'error');
     }
   } catch (error) {
-    console.error('[AdminClients] Bulk archive error:', error);
+    logger.error(' Bulk archive error:', error);
     showToast('Error archiving clients', 'error');
   }
 }
@@ -1796,7 +1799,7 @@ async function bulkDeleteClients(clientIds: number[]): Promise<void> {
       showToast('Failed to delete clients', 'error');
     }
   } catch (error) {
-    console.error('[AdminClients] Bulk delete error:', error);
+    logger.error(' Bulk delete error:', error);
     showToast('Error deleting clients', 'error');
   }
 }

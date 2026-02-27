@@ -72,6 +72,10 @@ export async function loadKnowledgeBaseModule() {
   return import('./admin-knowledge-base');
 }
 
+export async function loadDocumentsModule() {
+  return import('./admin-documents');
+}
+
 export async function loadDocumentRequestsModule() {
   return import('./admin-document-requests');
 }

@@ -38,6 +38,9 @@ import {
   createPaginationConfig,
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminContracts');
 
 interface ContractListItem {
   id: number;
@@ -274,13 +277,13 @@ function buildContractRow(contract: ContractListItem): HTMLTableRowElement {
 
   row.innerHTML = `
     ${createRowCheckbox('contracts', contract.id)}
-    <td class="name-cell" data-label="Contract">
-      <span class="identity-name">${title}</span>
-      <span class="identity-contact">${typeLabel}${amendmentLabel}</span>
+    <td class="identity-cell" data-label="Contract">
+      <span class="identity-name" data-field="primary-name">${title}</span>
+      <span class="identity-contact" data-field="secondary-name">${typeLabel}${amendmentLabel}</span>
     </td>
     <td class="name-cell" data-label="Project">${projectName}</td>
     <td class="identity-cell" data-label="Client">
-      <span class="identity-name">${clientName}</span>
+      <span class="identity-name" data-field="primary-name">${clientName}</span>
       <span class="identity-email">${clientEmail}</span>
     </td>
     <td class="status-cell" data-label="Status">${getStatusBadge(contract.status)}</td>
@@ -479,7 +482,7 @@ async function openContractDetail(contract: ContractListItem): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[AdminContracts] Activity load failed', error);
+    logger.error(' Activity load failed', error);
   }
 }
 
@@ -495,7 +498,7 @@ async function handleReminder(contractId: number): Promise<void> {
     const ctx = contractsModule.getContext();
     if (ctx) await contractsModule.load(ctx);
   } catch (error) {
-    console.error('[AdminContracts] Reminder failed:', error);
+    logger.error(' Reminder failed:', error);
     alertError('Failed to send reminder.');
   }
 }
@@ -521,7 +524,7 @@ async function handleExpire(contractId: number): Promise<void> {
     const ctx = contractsModule.getContext();
     if (ctx) await contractsModule.load(ctx);
   } catch (error) {
-    console.error('[AdminContracts] Expire failed:', error);
+    logger.error(' Expire failed:', error);
     alertError('Failed to expire contract.');
   }
 }
@@ -547,7 +550,7 @@ async function handleAmendment(contractId: number): Promise<void> {
     const ctx = contractsModule.getContext();
     if (ctx) await contractsModule.load(ctx);
   } catch (error) {
-    console.error('[AdminContracts] Amendment failed:', error);
+    logger.error(' Amendment failed:', error);
     alertError('Failed to create amendment.');
   }
 }
@@ -564,7 +567,7 @@ async function handleRenewalReminder(contractId: number): Promise<void> {
     const ctx = contractsModule.getContext();
     if (ctx) await contractsModule.load(ctx);
   } catch (error) {
-    console.error('[AdminContracts] Renewal reminder failed:', error);
+    logger.error(' Renewal reminder failed:', error);
     alertError('Failed to send renewal reminder.');
   }
 }
@@ -678,7 +681,7 @@ export function renderContractsTab(container: HTMLElement): void {
                     <input type="checkbox" id="contracts-select-all" class="bulk-select-all" aria-label="Select all contracts" />
                   </div>
                 </th>
-                <th scope="col" class="name-col">Contract</th>
+                <th scope="col" class="identity-col">Contract</th>
                 <th scope="col" class="name-col">Project</th>
                 <th scope="col" class="identity-col">Client</th>
                 <th scope="col" class="status-col">Status</th>

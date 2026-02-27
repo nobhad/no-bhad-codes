@@ -11,6 +11,9 @@ import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch } from '../../../utils/api-client';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatCurrency } from '../../../utils/format-utils';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdHocAnalytics');
 
 interface AdHocRevenueData {
   invoiceCount: number;
@@ -54,13 +57,13 @@ async function fetchAdHocRevenueMetrics(): Promise<AdHocRevenueData> {
     const data = await response.json();
 
     if (!response.ok || !data.success || !data.data) {
-      console.warn('[AdHocAnalytics] Metrics API not ready, using defaults');
+      logger.warn(' Metrics API not ready, using defaults');
       return DEFAULT_METRICS;
     }
 
     return { ...DEFAULT_METRICS, ...data.data } as AdHocRevenueData;
   } catch {
-    console.warn('[AdHocAnalytics] Metrics API not available');
+    logger.warn(' Metrics API not available');
     return DEFAULT_METRICS;
   }
 }
@@ -71,13 +74,13 @@ async function fetchMonthlyAdHocRevenue(): Promise<MonthlyAdHocData[]> {
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      console.warn('[AdHocAnalytics] Monthly API not ready');
+      logger.warn(' Monthly API not ready');
       return [];
     }
 
     return (data.data || []) as MonthlyAdHocData[];
   } catch {
-    console.warn('[AdHocAnalytics] Monthly API not available');
+    logger.warn(' Monthly API not available');
     return [];
   }
 }
@@ -88,13 +91,13 @@ async function fetchTopClientsAdHoc(): Promise<ClientAdHocData[]> {
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      console.warn('[AdHocAnalytics] Clients API not ready');
+      logger.warn(' Clients API not ready');
       return [];
     }
 
     return (data.data || []) as ClientAdHocData[];
   } catch {
-    console.warn('[AdHocAnalytics] Clients API not available');
+    logger.warn(' Clients API not available');
     return [];
   }
 }
@@ -216,7 +219,7 @@ export async function loadAdHocAnalytics(_ctx: AdminDashboardContext): Promise<v
       container.appendChild(clientsSection);
     }
   } catch (error) {
-    console.error('[AdHocAnalytics] Failed to load analytics:', error);
+    logger.error(' Failed to load analytics:', error);
     container.innerHTML = `
       <div class="ad-hoc-analytics-error">
         <p>Unable to load ad hoc analytics. Please try again.</p>

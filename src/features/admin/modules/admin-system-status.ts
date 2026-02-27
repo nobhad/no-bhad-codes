@@ -13,6 +13,9 @@ import type { AdminDashboardContext, ApplicationStatus, StatusItem } from '../ad
 import { APP_CONSTANTS } from '../../../config/constants';
 import { apiFetch } from '../../../utils/api-client';
 import { getStatusDotHTML } from '../../../components/status-badge';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminSystemStatus');
 
 let systemListenersInitialized = false;
 
@@ -162,7 +165,7 @@ export async function loadSystemData(ctx: AdminDashboardContext): Promise<void> 
     // Populate browser info
     populateBrowserInfo();
   } catch (error) {
-    console.error('[AdminSystemStatus] Error loading system data:', error);
+    logger.error(' Error loading system data:', error);
     showSystemError();
   }
 }
@@ -213,7 +216,7 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
 
         ctx.showNotification('Cache cleared successfully', 'success');
       } catch (error) {
-        console.error('[AdminSystem] Failed to clear cache:', error);
+        logger.error(' Failed to clear cache:', error);
         ctx.showNotification('Failed to clear cache', 'error');
       } finally {
         clearCacheBtn.disabled = false;
@@ -235,7 +238,7 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
           ctx.showNotification(data.error || 'Failed to send test email', 'error');
         }
       } catch (error) {
-        console.error('[AdminSystem] Failed to send test email:', error);
+        logger.error(' Failed to send test email:', error);
         ctx.showNotification('Failed to send test email', 'error');
       } finally {
         testEmailBtn.disabled = false;
@@ -258,7 +261,7 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
           ctx.showNotification(data.error || 'Failed to run scheduler', 'error');
         }
       } catch (error) {
-        console.error('[AdminSystem] Failed to run scheduler:', error);
+        logger.error(' Failed to run scheduler:', error);
         ctx.showNotification('Failed to run scheduler', 'error');
       } finally {
         runSchedulerBtn.disabled = false;
@@ -429,7 +432,7 @@ export async function getApplicationStatus(): Promise<ApplicationStatus> {
         return status;
       }
     } catch (error) {
-      console.warn('[AdminSystemStatus] Could not get status from NBW_DEBUG:', error);
+      logger.warn(' Could not get status from NBW_DEBUG:', error);
     }
   }
 
@@ -529,7 +532,7 @@ async function checkApiHealth(): Promise<StatusItem> {
       message: `Status: ${response.status}`
     };
   } catch (error) {
-    console.error('[AdminSystem] Health check failed, trying root endpoint:', error);
+    logger.error(' Health check failed, trying root endpoint:', error);
     clearTimeout(timeoutId);
     // API might not have a /health endpoint, try root
     const rootController = new AbortControllerClass();

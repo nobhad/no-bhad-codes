@@ -63,6 +63,9 @@ import {
 import { showTableError } from '../../../utils/error-utils';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminProposals');
 
 // ============================================================================
 // TYPES
@@ -290,7 +293,7 @@ const PROPOSALS_BULK_CONFIG: BulkActionConfig = {
             _storedContext.showNotification?.('Failed to update proposals', 'error');
           }
         } catch (error) {
-          console.error('[AdminProposals] Bulk status update error:', error);
+          logger.error(' Bulk status update error:', error);
           _storedContext.showNotification?.('Error updating proposals', 'error');
         }
       }
@@ -336,7 +339,7 @@ export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
 
   const container = getElement('proposals-content');
   if (!container) {
-    console.error('[AdminProposals] Container not found');
+    logger.error(' Container not found');
     return;
   }
 
@@ -401,7 +404,7 @@ async function refreshProposals(ctx: AdminDashboardContext): Promise<void> {
       renderFilteredProposals(ctx);
       updateStats(proposalsData);
     } else if (response.status !== 401) {
-      console.error('[AdminProposals] API error:', response.status);
+      logger.error(' API error:', response.status);
       if (tableBody) {
         showTableError(tableBody, 8, `Error loading proposals (${response.status})`, () => {
           if (_storedContext) refreshProposals(_storedContext);
@@ -409,7 +412,7 @@ async function refreshProposals(ctx: AdminDashboardContext): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[AdminProposals] Failed to load proposals:', error);
+    logger.error(' Failed to load proposals:', error);
     if (tableBody) {
       showTableError(tableBody, 8, 'Network error loading proposals', () => {
         if (_storedContext) refreshProposals(_storedContext);
@@ -462,31 +465,41 @@ function renderProposalsLayout(): string {
         </div>
       </div>
 
-      <div id="proposals-bulk-toolbar" class="bulk-action-toolbar"></div>
-
-      <div class="data-table-scroll-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th scope="col" class="bulk-select-cell">
-                <div class="portal-checkbox">
-                  <input type="checkbox" id="proposals-select-all" class="bulk-select-all" aria-label="Select all proposals" />
-                </div>
-              </th>
-              <th scope="col" class="identity-col">Client</th>
-              <th scope="col" class="name-col">Project</th>
-              <th scope="col" class="type-col">Tier</th>
-              <th scope="col" class="amount-col">Price</th>
-              <th scope="col" class="status-col">Status</th>
-              <th scope="col" class="date-col">Date</th>
-              <th scope="col" class="actions-col">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="proposals-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr class="loading-row"><td colspan="8"><div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading proposals...</span></div></td></tr>
-          </tbody>
-        </table>
+      <!-- Bulk Action Toolbar (hidden initially) -->
+      <div id="proposals-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col" class="bulk-select-cell">
+                  <div class="portal-checkbox">
+                    <input type="checkbox" id="proposals-select-all" class="bulk-select-all" aria-label="Select all proposals" />
+                  </div>
+                </th>
+                <th scope="col" class="identity-col">Client</th>
+                <th scope="col" class="identity-col">Project</th>
+                <th scope="col" class="type-col">Tier</th>
+                <th scope="col" class="amount-col">Price</th>
+                <th scope="col" class="status-col">Status</th>
+                <th scope="col" class="date-col">Date</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="proposals-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              <tr class="loading-row">
+                <td colspan="8">
+                  <div class="loading-state">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span class="loading-message">Loading proposals...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+      <!-- Pagination -->
       <div id="proposals-pagination" class="table-pagination"></div>
     </div>
 
@@ -561,14 +574,14 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
     <tr data-proposal-id="${proposal.id}">
       ${createRowCheckbox('proposals', proposal.id)}
       <td class="identity-cell" data-label="Client">
-        <span class="identity-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.name))}</span>
-        ${proposal.client.company ? `<span class="identity-contact">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.company))}</span>` : ''}
+        <span class="identity-name" data-field="primary-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.name))}</span>
+        ${proposal.client.company ? `<span class="identity-contact" data-field="secondary-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.company))}</span>` : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
       </td>
       <td class="identity-cell" data-label="Project">
-        <span class="identity-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.project.name))}</span>
-        <span class="identity-contact">${formatProjectType(proposal.projectType)}</span>
+        <span class="identity-name" data-field="primary-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.project.name))}</span>
+        <span class="identity-contact" data-field="secondary-name">${formatProjectType(proposal.projectType)}</span>
       </td>
-      <td data-label="Tier">
+      <td class="type-cell" data-label="Tier">
         <span class="tier-badge tier-${proposal.selectedTier}">${tierLabel}</span>
       </td>
       <td class="amount-cell" data-label="Price">
@@ -577,7 +590,7 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
     ? `<span class="maintenance-badge">+${proposal.maintenanceOption}</span>`
     : ''}
       </td>
-      <td data-label="Status">
+      <td class="status-cell" data-label="Status">
         <div class="status-dropdown-container" data-proposal-id="${proposal.id}"></div>
       </td>
       <td class="date-cell" data-label="Date">${formattedDate}</td>
@@ -796,7 +809,7 @@ async function loadTemplates(ctx: AdminDashboardContext): Promise<void> {
       templatesList.innerHTML = '<div class="empty-row">Error loading templates</div>';
     }
   } catch (error) {
-    console.error('[AdminProposals] Error loading templates:', error);
+    logger.error(' Error loading templates:', error);
     templatesList.innerHTML = '<div class="empty-row">Network error loading templates</div>';
   }
 }
@@ -1538,7 +1551,7 @@ async function saveTemplateFromModal(
       alertError(`Failed to save template: ${error}`);
     }
   } catch (error) {
-    console.error('[AdminProposals] Error saving template:', error);
+    logger.error(' Error saving template:', error);
     alertError('Network error saving template');
   }
 }
@@ -1563,7 +1576,7 @@ async function deleteTemplate(templateId: number, ctx: AdminDashboardContext): P
       alertError('Failed to delete template');
     }
   } catch (error) {
-    console.error('[AdminProposals] Error deleting template:', error);
+    logger.error(' Error deleting template:', error);
     alertError('Network error deleting template');
   }
 }
@@ -1596,7 +1609,7 @@ async function loadProposalVersions(proposalId: number): Promise<void> {
       versionContainer.innerHTML = '<div class="empty-row">No versions available</div>';
     }
   } catch (error) {
-    console.error('[AdminProposals] Error loading versions:', error);
+    logger.error(' Error loading versions:', error);
     versionContainer.innerHTML = '<div class="empty-row">Error loading versions</div>';
   }
 }
@@ -1687,7 +1700,7 @@ async function createVersion(proposalId: number): Promise<void> {
       alertError('Failed to create version');
     }
   } catch (error) {
-    console.error('[AdminProposals] Error creating version:', error);
+    logger.error(' Error creating version:', error);
     alertError('Network error creating version');
   }
 }
@@ -1715,7 +1728,7 @@ async function restoreVersion(proposalId: number, versionId: number): Promise<vo
       alertError('Failed to restore version');
     }
   } catch (error) {
-    console.error('[AdminProposals] Error restoring version:', error);
+    logger.error(' Error restoring version:', error);
     alertError('Network error restoring version');
   }
 }
@@ -1762,7 +1775,7 @@ async function showVersionComparison(proposalId: number, versionId: number): Pro
       alertError('Failed to compare versions');
     }
   } catch (error) {
-    console.error('[AdminProposals] Error comparing versions:', error);
+    logger.error(' Error comparing versions:', error);
     alertError('Network error comparing versions');
   }
 }
@@ -1788,7 +1801,7 @@ async function loadSignatureStatus(proposalId: number): Promise<void> {
       signatureContainer.innerHTML = '<div class="empty-row">Error loading signature status</div>';
     }
   } catch (error) {
-    console.error('[AdminProposals] Error loading signature status:', error);
+    logger.error(' Error loading signature status:', error);
     signatureContainer.innerHTML = '<div class="empty-row">Error loading signature status</div>';
   }
 }
@@ -1891,7 +1904,7 @@ async function requestSignature(proposalId: number): Promise<void> {
       alertError(`Failed to request signature: ${error}`);
     }
   } catch (error) {
-    console.error('[AdminProposals] Error requesting signature:', error);
+    logger.error(' Error requesting signature:', error);
     alertError('Network error requesting signature');
   }
 }
@@ -1906,7 +1919,7 @@ async function resendSignatureRequest(proposalId: number): Promise<void> {
       alertError('Failed to resend signature request');
     }
   } catch (error) {
-    console.error('[AdminProposals] Error resending signature:', error);
+    logger.error(' Error resending signature:', error);
     alertError('Network error resending signature');
   }
 }
@@ -1932,7 +1945,7 @@ async function cancelSignatureRequest(proposalId: number): Promise<void> {
       alertError('Failed to cancel signature request');
     }
   } catch (error) {
-    console.error('[AdminProposals] Error cancelling signature:', error);
+    logger.error(' Error cancelling signature:', error);
     alertError('Network error cancelling signature');
   }
 }
@@ -2243,11 +2256,11 @@ async function updateProposalStatus(
       ctx.showNotification?.(`Proposal status updated to ${status}`, 'success');
     } else {
       const error = await response.text();
-      console.error('[AdminProposals] Failed to update status:', error);
+      logger.error(' Failed to update status:', error);
       ctx.showNotification?.('Failed to update proposal status', 'error');
     }
   } catch (error) {
-    console.error('[AdminProposals] Error updating status:', error);
+    logger.error(' Error updating status:', error);
     ctx.showNotification?.('Network error updating proposal', 'error');
   }
 }
@@ -2268,7 +2281,7 @@ async function updateProposalNotes(
       ctx.showNotification?.('Failed to save notes', 'error');
     }
   } catch (error) {
-    console.error('[AdminProposals] Error saving notes:', error);
+    logger.error(' Error saving notes:', error);
     ctx.showNotification?.('Network error saving notes', 'error');
   }
 }
@@ -2293,11 +2306,11 @@ async function convertToInvoice(proposalId: number, ctx: AdminDashboardContext):
       ctx.showNotification?.(`Invoice ${data.data.invoiceNumber} created`, 'success');
     } else {
       const error = await response.text();
-      console.error('[AdminProposals] Failed to convert:', error);
+      logger.error(' Failed to convert:', error);
       ctx.showNotification?.('Failed to create invoice', 'error');
     }
   } catch (error) {
-    console.error('[AdminProposals] Error converting:', error);
+    logger.error(' Error converting:', error);
     ctx.showNotification?.('Network error creating invoice', 'error');
   }
 }
@@ -2320,7 +2333,7 @@ async function loadCustomItems(proposalId: number): Promise<void> {
       container.innerHTML = '<div class="empty-state-small">No custom items</div>';
     }
   } catch (error) {
-    console.error('[AdminProposals] Error loading custom items:', error);
+    logger.error(' Error loading custom items:', error);
     container.innerHTML = '<div class="empty-state-small">Error loading items</div>';
   }
 }
@@ -2414,7 +2427,7 @@ async function showAddCustomItemDialog(proposalId: number): Promise<void> {
         showToast('Failed to add item', 'error');
       }
     } catch (error) {
-      console.error('[AdminProposals] Error adding custom item:', error);
+      logger.error(' Error adding custom item:', error);
       showToast('Error adding item', 'error');
     }
   }
@@ -2438,7 +2451,7 @@ async function deleteCustomItem(itemId: number, proposalId: number): Promise<voi
         showToast('Failed to delete item', 'error');
       }
     } catch (error) {
-      console.error('[AdminProposals] Error deleting custom item:', error);
+      logger.error(' Error deleting custom item:', error);
       showToast('Error deleting item', 'error');
     }
   }
@@ -2509,7 +2522,7 @@ async function showApplyDiscountDialog(proposalId: number): Promise<void> {
         showToast('Failed to apply discount', 'error');
       }
     } catch (error) {
-      console.error('[AdminProposals] Error applying discount:', error);
+      logger.error(' Error applying discount:', error);
       showToast('Error applying discount', 'error');
     }
   }
@@ -2533,7 +2546,7 @@ async function removeDiscount(proposalId: number): Promise<void> {
         showToast('Failed to remove discount', 'error');
       }
     } catch (error) {
-      console.error('[AdminProposals] Error removing discount:', error);
+      logger.error(' Error removing discount:', error);
       showToast('Error removing discount', 'error');
     }
   }
@@ -2557,7 +2570,7 @@ async function loadProposalComments(proposalId: number): Promise<void> {
       container.innerHTML = '<div class="empty-state-small">No comments</div>';
     }
   } catch (error) {
-    console.error('[AdminProposals] Error loading comments:', error);
+    logger.error(' Error loading comments:', error);
     container.innerHTML = '<div class="empty-state-small">Error loading comments</div>';
   }
 }
@@ -2625,7 +2638,7 @@ async function addComment(proposalId: number): Promise<void> {
       showToast('Failed to add comment', 'error');
     }
   } catch (error) {
-    console.error('[AdminProposals] Error adding comment:', error);
+    logger.error(' Error adding comment:', error);
     showToast('Error adding comment', 'error');
   }
 }
@@ -2648,7 +2661,7 @@ async function loadProposalActivities(proposalId: number): Promise<void> {
       container.innerHTML = '<div class="empty-state-small">No activity</div>';
     }
   } catch (error) {
-    console.error('[AdminProposals] Error loading activities:', error);
+    logger.error(' Error loading activities:', error);
     container.innerHTML = '<div class="empty-state-small">Error loading activity</div>';
   }
 }

@@ -33,6 +33,9 @@ import {
   createPaginationConfig,
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminContacts');
 
 // ============================================================================
 // TYPES
@@ -67,7 +70,7 @@ async function bulkUpdateStatus(ids: number[], status: string): Promise<void> {
 
     showToast(`Updated ${ids.length} contacts to ${status}`, 'success');
   } catch (error) {
-    console.error('[AdminContacts] Bulk status update failed:', error);
+    logger.error(' Bulk status update failed:', error);
     showToast('Failed to update some contacts', 'error');
   }
 }
@@ -92,7 +95,7 @@ async function bulkDeleteContacts(ids: number[]): Promise<void> {
       await contactsModule.load(ctx);
     }
   } catch (error) {
-    console.error('[AdminContacts] Bulk delete failed:', error);
+    logger.error(' Bulk delete failed:', error);
     showToast('Failed to delete some contacts', 'error');
   }
 }
@@ -177,11 +180,10 @@ function buildContactRow(
   row.innerHTML = `
     ${createRowCheckbox('contacts', submission.id)}
     <td class="identity-cell" data-label="Contact">
-      <span class="identity-name">${safeName}</span>
-      ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
+      <span class="identity-name" data-field="primary-name">${safeName}</span>
+      ${safeCompany ? `<span class="identity-contact" data-field="secondary-name">${safeCompany}</span>` : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
       <span class="identity-email">${safeEmail}</span>
     </td>
-    <td class="email-cell" data-label="Email">${safeEmail}</td>
     <td class="message-cell" data-label="Message" title="${safeTitleMessage}">${truncatedMessage}</td>
     <td class="status-cell" data-label="Status"></td>
     <td class="date-cell" data-label="Date">${date}</td>
@@ -266,7 +268,7 @@ const contactsModule = createTableModule<ContactSubmission, ContactsStats>({
   moduleId: 'contacts',
   filterConfig: CONTACTS_FILTER_CONFIG,
   paginationConfig: createPaginationConfig('contacts'),
-  columnCount: 7,
+  columnCount: 6,
   apiEndpoint: '/api/admin/contact-submissions',
   bulkConfig: CONTACTS_BULK_CONFIG,
   exportConfig: CONTACTS_EXPORT_CONFIG,
@@ -542,9 +544,7 @@ function setupPanelActionHandlers(
               const existingBadge = actionsCell.querySelector('.converted-badge');
               if (!existingBadge) {
                 const badge = document.createElement('span');
-                badge.className = 'status-badge status-active converted-badge';
-                badge.style.fontSize = '0.7rem';
-                badge.style.padding = '2px 6px';
+                badge.className = 'status-badge status-converted';
                 badge.textContent = 'Client';
                 actionsCell.prepend(badge);
               }
@@ -555,7 +555,7 @@ function setupPanelActionHandlers(
           showToast(errorData.error || 'Failed to convert contact', 'error');
         }
       } catch (error) {
-        console.error('Error converting contact to client:', error);
+        logger.error('Error converting contact to client:', error);
         showToast('Failed to convert contact to client', 'error');
       }
     });
@@ -605,7 +605,7 @@ export async function updateContactStatus(
       showToast('Failed to update status. Please try again.', 'error');
     }
   } catch (error) {
-    console.error('[AdminContacts] Failed to update status:', error);
+    logger.error(' Failed to update status:', error);
     showToast('Failed to update status. Please try again.', 'error');
   }
 }
@@ -659,7 +659,7 @@ async function handleConvertToClient(
       showToast(errorData.error || 'Failed to convert contact', 'error');
     }
   } catch (error) {
-    console.error('Error converting contact to client:', error);
+    logger.error('Error converting contact to client:', error);
     showToast('Failed to convert contact to client', 'error');
   }
 }
@@ -731,7 +731,6 @@ export function renderContactsTab(container: HTMLElement): void {
                 </div>
               </th>
               <th scope="col" class="identity-col">Contact</th>
-              <th scope="col" class="email-col">Email</th>
               <th scope="col" class="message-col">Message</th>
               <th scope="col" class="status-col">Status</th>
               <th scope="col" class="date-col">Date</th>
@@ -740,7 +739,7 @@ export function renderContactsTab(container: HTMLElement): void {
           </thead>
           <tbody id="contacts-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
             <tr class="loading-row">
-              <td colspan="7">
+              <td colspan="6">
                 <div class="loading-state">
                   <span class="loading-spinner" aria-hidden="true"></span>
                   <span class="loading-message">Loading contact submissions...</span>

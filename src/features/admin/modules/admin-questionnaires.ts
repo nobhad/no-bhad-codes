@@ -864,9 +864,9 @@ const RENDER_ICONS = {
  */
 export function renderQuestionnairesTab(container: HTMLElement): void {
   container.innerHTML = `
-    <div class="data-table-card">
+    <div class="data-table-card" id="questionnaires-table-card">
       <div class="data-table-header">
-        <h3>Questionnaires</h3>
+        <h3><span class="title-full">Questionnaires</span><span class="title-mobile">Forms</span></h3>
         <div class="data-table-actions" id="questionnaires-filter-container">
           <button type="button" class="icon-btn" id="questionnaires-refresh" title="Refresh" aria-label="Refresh questionnaires">
             ${RENDER_ICONS.REFRESH}
@@ -878,36 +878,37 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
       </div>
       <div class="data-table-container">
         <div class="data-table-scroll-wrapper">
-        <table class="data-table" aria-label="Questionnaires">
-          <thead>
-            <tr>
-              <th scope="col" class="name-col">Name</th>
-              <th scope="col" class="name-col">Description</th>
-              <th scope="col" class="type-col">Project Type</th>
-              <th scope="col" class="status-col">Status</th>
-              <th scope="col" class="actions-col">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="questionnaires-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr class="loading-row">
-              <td colspan="5">
-                <div class="loading-state">
-                  <span class="loading-spinner" aria-hidden="true"></span>
-                  <span class="loading-message">Loading questionnaires...</span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <table class="data-table" aria-label="Questionnaires">
+            <thead>
+              <tr>
+                <th scope="col" class="name-col">Name</th>
+                <th scope="col" class="name-col">Description</th>
+                <th scope="col" class="type-col">Project Type</th>
+                <th scope="col" class="status-col">Status</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="questionnaires-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              <tr class="loading-row">
+                <td colspan="5">
+                  <div class="loading-state">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span class="loading-message">Loading questionnaires...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
+      <!-- Pagination -->
       <div id="questionnaires-pagination" class="table-pagination"></div>
     </div>
 
     <!-- Pending Responses Card -->
-    <div class="data-table-card">
+    <div class="data-table-card" id="responses-table-card">
       <div class="data-table-header">
-        <h3>Pending Responses</h3>
+        <h3><span class="title-full">Pending Responses</span><span class="title-mobile">Responses</span></h3>
         <div class="data-table-actions">
           <button type="button" class="icon-btn" id="responses-refresh" title="Refresh" aria-label="Refresh responses">
             ${RENDER_ICONS.REFRESH}
@@ -916,29 +917,31 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
       </div>
       <div class="data-table-container">
         <div class="data-table-scroll-wrapper">
-        <table class="data-table" aria-label="Pending questionnaire responses">
-          <thead>
-            <tr>
-              <th scope="col" class="name-col">Questionnaire</th>
-              <th scope="col" class="name-col">Client</th>
-              <th scope="col" class="status-col">Status</th>
-              <th scope="col" class="date-col">Due Date</th>
-              <th scope="col" class="actions-col">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="responses-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr class="loading-row">
-              <td colspan="5">
-                <div class="loading-state">
-                  <span class="loading-spinner" aria-hidden="true"></span>
-                  <span class="loading-message">Loading responses...</span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <table class="data-table" aria-label="Pending questionnaire responses">
+            <thead>
+              <tr>
+                <th scope="col" class="name-col">Questionnaire</th>
+                <th scope="col" class="name-col">Client</th>
+                <th scope="col" class="status-col">Status</th>
+                <th scope="col" class="date-col">Due Date</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="responses-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              <tr class="loading-row">
+                <td colspan="5">
+                  <div class="loading-state">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span class="loading-message">Loading responses...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
+      <!-- Pagination -->
+      <div id="responses-pagination" class="table-pagination"></div>
     </div>
 
     <!-- Create/Edit Questionnaire Modal -->

@@ -746,7 +746,7 @@ export function renderKnowledgeBaseTab(container: HTMLElement): void {
         <table class="data-table" aria-label="Knowledge base articles">
           <thead>
             <tr>
-              <th scope="col" class="title-col">Title</th>
+              <th scope="col" class="name-col">Title</th>
               <th scope="col" class="type-col">Category</th>
               <th scope="col" class="slug-col">Slug</th>
               <th scope="col" class="status-col">Featured</th>
