@@ -1,14 +1,7 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Eye,
-  RefreshCw,
-  Download,
-  Inbox,
-  Send,
-  Check,
-  FileText
-} from 'lucide-react';
+import { Inbox, Download, RefreshCw, Eye, Send, Check, FileText } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
   AdminTable,
@@ -434,22 +427,18 @@ export function InvoicesTable({
               values={{ status: filterValues.status || 'all' }}
               onChange={(key, value) => setFilter(key, value)}
             />
-            <button
-              className="icon-btn"
+            <IconButton
+              action="download"
               onClick={exportCsv}
               disabled={isExporting || filteredInvoices.length === 0}
               title="Export to CSV"
-            >
-              <Download size={18} />
-            </button>
-            <button
-              className="icon-btn"
+            />
+            <IconButton
+              action="refresh"
               onClick={refetch}
               disabled={isLoading}
-              title="Refresh"
-            >
-              <RefreshCw size={18} className={isLoading ? 'spinning' : ''} />
-            </button>
+              loading={isLoading}
+            />
           </>
         }
         bulkActions={
@@ -611,45 +600,37 @@ export function InvoicesTable({
                     {/* Actions */}
                     <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                       <div className="table-actions">
-                        <button
-                          className="icon-btn"
+                        <IconButton
+                          action="view"
                           onClick={() => handleViewInvoice(invoice.id)}
                           title="View invoice"
-                        >
-                          <Eye size={18} />
-                        </button>
+                        />
 
                         {canSend && (
-                          <button
-                            className="icon-btn"
+                          <IconButton
+                            action="send"
                             onClick={() => handleSend(invoice.id)}
                             disabled={actionLoading?.type === 'send' && actionLoading?.id === invoice.id}
                             title="Send invoice"
-                          >
-                            <Send size={18} />
-                          </button>
+                          />
                         )}
 
                         {canMarkPaid && (
-                          <button
-                            className="icon-btn"
+                          <IconButton
+                            action="markPaid"
                             onClick={() => handleMarkPaid(invoice.id)}
                             disabled={actionLoading?.type === 'markPaid' && actionLoading?.id === invoice.id}
                             title="Mark as paid"
-                          >
-                            <Check />
-                          </button>
+                          />
                         )}
 
                         {canDownload && (
-                          <button
-                            className="icon-btn"
+                          <IconButton
+                            action="pdf"
                             onClick={() => handleDownloadPdf(invoice.id)}
                             disabled={actionLoading?.type === 'download' && actionLoading?.id === invoice.id}
                             title="Download PDF"
-                          >
-                            <FileText />
-                          </button>
+                          />
                         )}
                       </div>
                     </AdminTableCell>

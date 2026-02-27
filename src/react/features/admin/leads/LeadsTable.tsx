@@ -1,12 +1,7 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Eye,
-  RefreshCw,
-  Download,
-  Inbox,
-  Mail
-} from 'lucide-react';
+import { Inbox, Download, RefreshCw, Eye, Mail } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
   AdminTable,
@@ -356,22 +351,18 @@ export function LeadsTable({
               values={filterValues}
               onChange={setFilter}
             />
-            <button
-              className="icon-btn"
+            <IconButton
+              action="download"
               onClick={exportCsv}
               disabled={isExporting || filteredLeads.length === 0}
               title="Export to CSV"
-            >
-              <Download size={18} />
-            </button>
-            <button
-              className="icon-btn"
+            />
+            <IconButton
+              action="refresh"
               onClick={refetch}
               disabled={isLoading}
-              title="Refresh"
-            >
-              <RefreshCw size={18} className={isLoading ? 'spinning' : ''} />
-            </button>
+              loading={isLoading}
+            />
           </>
         }
         bulkActions={
@@ -557,21 +548,17 @@ export function LeadsTable({
                   {/* Actions */}
                   <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
-                      <button
-                        className="icon-btn"
+                      <IconButton
+                        action="view"
                         onClick={() => handleViewLead(lead.id)}
                         title="View lead"
-                      >
-                        <Eye size={18} />
-                      </button>
+                      />
                       {lead.email && (
-                        <button
-                          className="icon-btn"
+                        <IconButton
+                          action="email"
                           onClick={() => window.location.href = `mailto:${lead.email}`}
                           title="Send email"
-                        >
-                          <Mail size={18} />
-                        </button>
+                        />
                       )}
                     </div>
                   </AdminTableCell>
