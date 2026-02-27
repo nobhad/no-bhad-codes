@@ -94,7 +94,7 @@ export async function loadProjectMilestones(
                 ${safeDescription ? `<p class="milestone-description">${safeDescription}</p>` : ''}
                 ${safeDeliverables ? `<ul class="milestone-deliverables">${safeDeliverables}</ul>` : ''}
                 ${taskCount > 0 ? `
-                  <button class="btn-milestone-tasks" data-action="toggle-milestone-tasks" data-milestone-id="${m.id}" data-project-id="${projectId}">
+                  <button class="btn btn-outline btn-sm btn-milestone-tasks" data-action="toggle-milestone-tasks" data-milestone-id="${m.id}" data-project-id="${projectId}">
                     <svg class="icon-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -103,7 +103,7 @@ export async function loadProjectMilestones(
                   <div class="milestone-tasks-container" id="milestone-tasks-${m.id}" style="display: none;"></div>
                 ` : ''}
               </div>
-              <button class="btn btn-danger btn-sm" data-action="delete-milestone" data-milestone-id="${m.id}">Delete</button>
+              <button class="btn btn-danger btn-xs" data-action="delete-milestone" data-milestone-id="${m.id}">Delete</button>
             </div>
           `;
           })

@@ -11,6 +11,11 @@
  * - Contact management
  * - Activity timeline
  * - Quick notes
+ *
+ * React Migration:
+ * - Feature flag: feature_react_client_detail
+ * - Set localStorage.setItem('feature_react_client_detail', 'true') to enable
+ * - Or add ?react_client_detail=true to URL
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -23,6 +28,90 @@ import { confirmDialog, confirmDanger, multiPromptDialog } from '../../../utils/
 import { createTimeline, type TimelineEvent } from '../../../components/timeline';
 import { createTagInput, type Tag } from '../../../components/tag-input';
 import { renderEmptyState } from '../../../components/empty-state';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
+
+// ============================================
+// REACT INTEGRATION
+// ============================================
+
+// React components are registered via the global registry to avoid
+// Vite React plugin preamble detection issues with .ts -> .tsx imports
+// See: src/react/admin-entry.tsx for registration
+
+import { getReactComponent } from '../../../react/registry';
+
+let _reactDetailMounted = false;
+
+/**
+ * Check if React client detail should be used
+ * React is now enabled by default - use ?vanilla_client_detail=true to disable
+ */
+export function shouldUseReactClientDetail(): boolean {
+  // Check if React component is registered
+  const component = getReactComponent('clientDetail');
+  if (!component) {
+    return false;
+  }
+
+  // Check for explicit vanilla mode via URL param
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_client_detail') === 'true') return false;
+
+  // Check for explicit vanilla mode via localStorage
+  const flag = localStorage.getItem('feature_react_client_detail');
+  if (flag === 'false') return false;
+
+  // React is enabled by default
+  return true;
+}
+
+/**
+ * Mount React client detail component
+ */
+async function mountReactClientDetail(
+  container: HTMLElement,
+  clientId: number,
+  ctx: AdminDashboardContext
+): Promise<boolean> {
+  const component = getReactComponent('clientDetail');
+  if (!component) {
+    console.warn('[AdminClientDetails] React client detail not registered');
+    return false;
+  }
+
+  try {
+    component.mount(container, {
+      clientId,
+      getAuthToken: () => null, // Auth handled by cookies
+      onBack: () => {
+        // Return to clients list
+        ctx.switchTab('clients');
+      },
+      onEdit: (id: number) => {
+        // Trigger edit modal
+        import('./admin-clients').then((module) => {
+          module.editClientInfo(id, ctx);
+        });
+      },
+      onViewProject: (projectId: number) => {
+        // Navigate to project detail
+        ctx.switchTab('projects');
+        setTimeout(() => {
+          import('./admin-projects').then((module) => {
+            module.showProjectDetails(projectId, ctx);
+          });
+        }, 100);
+      },
+      showNotification: ctx.showNotification
+    });
+
+    _reactDetailMounted = true;
+    return true;
+  } catch (error) {
+    console.error('[AdminClientDetails] Failed to mount React client detail:', error);
+    return false;
+  }
+}
 
 // ============================================
 // INTERFACES
@@ -151,6 +240,37 @@ export async function initClientDetailView(
   currentClientId = clientId;
   storedContext = ctx;
 
+  // Check if React mode should be used
+  if (shouldUseReactClientDetail()) {
+    const container = document.getElementById('tab-client-detail');
+    if (container) {
+      // Hide vanilla header tabs (they're rendered in portal.ejs header)
+      const headerTabs = document.getElementById('client-detail-header-tabs');
+      if (headerTabs) {
+        headerTabs.style.display = 'none';
+      }
+
+      // Render React mount container
+      container.innerHTML = '<div id="react-client-detail-mount" class="react-client-detail"></div>';
+      const mountContainer = document.getElementById('react-client-detail-mount');
+
+      if (mountContainer) {
+        const mounted = await mountReactClientDetail(mountContainer, clientId, ctx);
+        if (mounted) {
+          _reactDetailMounted = true;
+          console.log('[AdminClientDetails] React client detail mounted');
+          return;
+        }
+        // Fall back to vanilla if mount fails - restore header tabs
+        if (headerTabs) {
+          headerTabs.style.display = '';
+        }
+        console.warn('[AdminClientDetails] React mount failed, falling back to vanilla');
+      }
+    }
+  }
+
+  // Vanilla implementation
   // Setup tab navigation
   setupTabNavigation();
 
@@ -465,7 +585,7 @@ function renderHealthScore(): void {
         <div class="health-score-badge at-risk">
           <span>No health data</span>
         </div>
-        <button class="btn btn-sm btn-secondary" id="btn-calculate-health">Calculate Health</button>
+        <button class="btn btn-xs btn-secondary" id="btn-calculate-health">Calculate Health</button>
       </div>
     `;
 
@@ -658,7 +778,7 @@ function renderProjectsSummary(): void {
         <div class="project-item-compact" data-project-id="${project.id}">
           <div class="project-item-info">
             <span class="project-item-name">${escapeHtml(project.project_name)}</span>
-            <span class="status-badge status-${project.status}">${project.status}</span>
+            ${getStatusBadgeHTML(project.status, project.status)}
           </div>
           ${project.progress !== undefined ? `
             <div class="project-progress-bar-wrapper">
@@ -1631,7 +1751,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
     <!-- Overview Tab - Two Column Layout -->
     <div class="portal-tab-panel active" id="cd-tab-overview">
       <!-- Client Header Card - Only on Overview -->
-      <div class="portal-project-card portal-shadow cd-header-card">
+      <div class="portal-project-card cd-header-card">
         <div class="header-card-top">
           <div class="header-card-info">
             <div class="detail-title-row">
@@ -1713,10 +1833,10 @@ export function renderClientDetailTab(container: HTMLElement): void {
         <!-- LEFT COLUMN -->
         <div class="overview-col-main">
           <!-- Projects Summary -->
-          <div class="portal-project-card portal-shadow">
+          <div class="portal-project-card">
             <div class="card-header-with-action">
               <h3>Projects</h3>
-              <button class="btn btn-sm btn-secondary" data-action="view-projects">View All</button>
+              <button class="btn btn-xs btn-secondary" data-action="view-projects">View All</button>
             </div>
             <div class="cd-projects-summary" id="cd-overview-projects">
               <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
@@ -1724,7 +1844,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
           </div>
 
           <!-- CRM Details -->
-          <div class="portal-project-card portal-shadow">
+          <div class="portal-project-card">
             <h3>CRM Details</h3>
             <div class="cd-contact-grid">
               <div class="meta-item">
@@ -1755,7 +1875,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
           </div>
 
           <!-- Custom Fields (hidden when empty) -->
-          <div class="portal-project-card portal-shadow" id="cd-custom-fields-card" style="display: none;">
+          <div class="portal-project-card" id="cd-custom-fields-card" style="display: none;">
             <h3>Custom Fields</h3>
             <div id="cd-custom-fields-container"></div>
           </div>
@@ -1764,7 +1884,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
         <!-- RIGHT COLUMN (Sidebar) -->
         <div class="overview-col-aside">
           <!-- Health & Stats Combined -->
-          <div class="portal-project-card portal-shadow cd-health-stats-card">
+          <div class="portal-project-card cd-health-stats-card">
             <h3>Client Health</h3>
             <div id="cd-health-score-container">
               <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
@@ -1776,7 +1896,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
         </div>
 
         <!-- Recent Activity - Full Width spanning both columns -->
-        <div class="portal-project-card portal-shadow cd-recent-activity-full">
+        <div class="portal-project-card cd-recent-activity-full">
           <h3>Recent Activity</h3>
           <div id="cd-recent-activity">
             <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
@@ -1787,7 +1907,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
 
     <!-- Contacts Tab -->
     <div class="portal-tab-panel" id="cd-tab-contacts">
-      <div class="portal-project-card portal-shadow">
+      <div class="portal-project-card">
         <h3>Contacts</h3>
         <div id="cd-contacts-list">
           <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>
@@ -1797,7 +1917,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
 
     <!-- Activity Tab -->
     <div class="portal-tab-panel" id="cd-tab-activity">
-      <div class="portal-project-card portal-shadow">
+      <div class="portal-project-card">
         <div class="card-header-with-action">
           <h3>Activity Timeline</h3>
           <button class="btn btn-secondary btn-sm" id="btn-log-activity">Log Activity</button>
@@ -1810,7 +1930,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
 
     <!-- Projects Tab -->
     <div class="portal-tab-panel" id="cd-tab-projects">
-      <div class="portal-project-card portal-shadow">
+      <div class="portal-project-card">
         <h3>Projects</h3>
         <div class="client-projects-list flex flex-col gap-2" id="cd-projects-list">
           <div class="empty-state" role="status"><p>No projects found for this client.</p></div>
@@ -1821,7 +1941,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
     <!-- Invoices Tab -->
     <div class="portal-tab-panel" id="cd-tab-invoices">
       <!-- Billing Summary -->
-      <div class="portal-project-card portal-shadow">
+      <div class="portal-project-card">
         <h3>Billing Summary</h3>
         <div class="billing-summary">
           <div class="meta-item">
@@ -1839,7 +1959,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
         </div>
       </div>
       <!-- Billing Address -->
-      <div class="portal-project-card portal-shadow">
+      <div class="portal-project-card">
         <div class="card-header-with-action">
           <h3>Billing Address</h3>
           <button class="icon-btn" id="cd-btn-edit-billing-invoices" title="Edit Billing Details" aria-label="Edit billing details">
@@ -1878,7 +1998,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
         </div>
       </div>
       <!-- Invoice List -->
-      <div class="portal-project-card portal-shadow">
+      <div class="portal-project-card">
         <h3>Invoice History</h3>
         <div class="client-invoices-list flex flex-col gap-2" id="cd-invoices-list">
           <div class="empty-state" role="status"><p>No invoices found for this client.</p></div>
@@ -1888,7 +2008,7 @@ export function renderClientDetailTab(container: HTMLElement): void {
 
     <!-- Notes Tab -->
     <div class="portal-tab-panel" id="cd-tab-notes">
-      <div class="portal-project-card portal-shadow">
+      <div class="portal-project-card">
         <h3>Notes</h3>
         <div id="cd-notes-list">
           <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>

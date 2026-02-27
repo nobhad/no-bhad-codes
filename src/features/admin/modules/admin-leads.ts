@@ -215,8 +215,8 @@ function buildLeadRow(
     <td class="date-cell" data-label="Date">${date}</td>
     <td class="actions-cell" data-label="Actions">
       ${renderActionsCell([
-        conditionalAction(showConvertBtn, 'convert-project', lead.id, { className: 'btn-convert-lead', dataAttrs: { 'lead-id': lead.id } }),
-      ])}
+    conditionalAction(showConvertBtn, 'convert-project', lead.id, { className: 'btn-convert-lead', dataAttrs: { 'lead-id': lead.id } })
+  ])}
     </td>
   `;
 

@@ -16,6 +16,7 @@ import { createViewToggle } from '../../../components/view-toggle';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
 
 interface Folder {
   id: number;
@@ -582,7 +583,7 @@ async function loadFileInfo(fileId: number): Promise<void> {
       </div>
       <div class="file-info-item flex flex-col gap-0-5">
         <span class="file-info-label">Shared with Client</span>
-        <span class="file-info-value">${file.shared_with_client ? `<span class="status-badge status-active">Yes</span> (${formatDateTime(file.shared_at || '')})` : '<span class="status-badge status-inactive">No</span>'}</span>
+        <span class="file-info-value">${file.shared_with_client ? `${getStatusBadgeHTML('Yes', 'active')} (${formatDateTime(file.shared_at || '')})` : getStatusBadgeHTML('No', 'inactive')}</span>
       </div>
     `;
 
@@ -649,7 +650,7 @@ async function loadFileVersions(fileId: number): Promise<void> {
           </span>
         </div>
         <div class="version-actions">
-          ${!version.is_current ? `<button class="btn btn-secondary btn-sm restore-version-btn" data-version-id="${version.id}">Restore</button>` : ''}
+          ${!version.is_current ? `<button class="btn btn-secondary btn-xs restore-version-btn" data-version-id="${version.id}">Restore</button>` : ''}
         </div>
       </div>
     `).join('');
@@ -1025,13 +1026,13 @@ function renderPendingRequestItem(request: PendingRequest): string {
         ${request.description ? `<p class="pending-request-description">${escapeHtml(request.description)}</p>` : ''}
       </div>
       <div class="pending-request-actions">
-        <button type="button" class="btn btn-secondary btn-sm pending-request-action" data-action="view" data-request-id="${request.id}" title="View Details">
+        <button type="button" class="btn btn-secondary btn-xs pending-request-action" data-action="view" data-request-id="${request.id}" title="View Details">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
-        <button type="button" class="btn btn-secondary btn-sm pending-request-action" data-action="remind" data-request-id="${request.id}" title="Send Reminder">
+        <button type="button" class="btn btn-secondary btn-xs pending-request-action" data-action="remind" data-request-id="${request.id}" title="Send Reminder">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </button>
-        <button type="button" class="btn btn-danger btn-sm pending-request-action" data-action="delete" data-request-id="${request.id}" title="Delete Request">
+        <button type="button" class="btn btn-danger btn-xs pending-request-action" data-action="delete" data-request-id="${request.id}" title="Delete Request">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
       </div>

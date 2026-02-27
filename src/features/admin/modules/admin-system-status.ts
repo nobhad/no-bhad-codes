@@ -38,11 +38,11 @@ const RENDER_ICONS = {
 export function renderSystemStatusTab(container: HTMLElement): void {
   container.innerHTML = `
     <!-- Health Check -->
-    <div class="portal-project-card portal-shadow">
+    <div class="portal-project-card">
       <div class="section-header-with-actions">
         <h3>Health Check</h3>
         <button type="button" class="icon-btn" id="btn-refresh-health" title="Refresh health status" aria-label="Refresh health status">
-          <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+          ${RENDER_ICONS.REFRESH}
         </button>
       </div>
       <div class="health-check-grid" id="health-check-status">
@@ -70,7 +70,7 @@ export function renderSystemStatusTab(container: HTMLElement): void {
     </div>
 
     <!-- Quick Actions -->
-    <div class="portal-project-card portal-shadow">
+    <div class="portal-project-card">
       <h3>Quick Actions</h3>
       <div class="quick-actions-grid flex flex-wrap gap-2">
         <button type="button" class="btn btn-secondary" id="btn-clear-cache" title="Clear application cache">
@@ -89,7 +89,7 @@ export function renderSystemStatusTab(container: HTMLElement): void {
     </div>
 
     <!-- Recent Errors -->
-    <div class="portal-project-card portal-shadow">
+    <div class="portal-project-card">
       <h3>Recent Errors</h3>
       <div class="recent-errors-list" id="recent-errors-list">
         <div class="empty-state">No recent errors</div>
@@ -97,7 +97,7 @@ export function renderSystemStatusTab(container: HTMLElement): void {
     </div>
 
     <!-- Build Information -->
-    <details class="portal-project-card portal-shadow system-details" open>
+    <details class="portal-project-card system-details" open>
       <summary><h3>Build Information</h3></summary>
       <div class="system-info-grid">
         <div class="system-info-row">
@@ -116,7 +116,7 @@ export function renderSystemStatusTab(container: HTMLElement): void {
     </details>
 
     <!-- Browser Information -->
-    <details class="portal-project-card portal-shadow system-details">
+    <details class="portal-project-card system-details">
       <summary><h3>Browser Information</h3></summary>
       <div class="system-info-grid">
         <div class="system-info-row">

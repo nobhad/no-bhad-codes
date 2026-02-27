@@ -130,7 +130,7 @@ export function showCreateInvoicePrompt(
               <input type="number" class="form-input line-item-qty" placeholder="Qty" value="${item.quantity}" min="1" style="width: 70px;">
               <input type="number" class="form-input line-item-rate" placeholder="Rate" value="${item.rate}" min="0" step="0.01" style="width: 100px;">
               <span class="line-item-amount">$${(item.quantity * item.rate).toFixed(2)}</span>
-              ${lineItems.length > 1 ? `<button type="button" class="btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
+              ${lineItems.length > 1 ? `<button type="button" class="icon-btn icon-btn-danger icon-btn-xs btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
             </div>
           `).join('')}
         </div>

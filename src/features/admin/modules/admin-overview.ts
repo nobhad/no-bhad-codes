@@ -18,6 +18,41 @@ import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../
 import { getStatusDotHTML as _getStatusDotHTML } from '../../../components/status-badge';
 import { showTableEmpty } from '../../../utils/loading-utils';
 
+// React mount functions - lazy loaded
+let mountOverviewDashboard: ((element: HTMLElement, options: any) => () => void) | null = null;
+let unmountOverviewDashboard: (() => void) | null = null;
+let reactCleanup: (() => void) | null = null;
+
+/** Lazy load React mount functions */
+async function loadReactOverview(): Promise<boolean> {
+  if (mountOverviewDashboard && unmountOverviewDashboard) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/overview');
+    mountOverviewDashboard = module.mountOverviewDashboard;
+    unmountOverviewDashboard = module.unmountOverviewDashboard;
+    return true;
+  } catch (err) {
+    console.error('[AdminOverview] Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React overview */
+function shouldUseReactOverview(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_overview') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_overview');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
+
 // View toggle icons
 const BOARD_ICON =
   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="15" y="5" width="6" height="16" rx="1"/></svg>';
@@ -198,11 +233,9 @@ async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
 
       return `
         <tr class="overview-table-row" data-project-id="${p.id}">
-          <td class="name-cell" data-label="Project">
-            <div class="identity-cell">
-              <span class="identity-primary">${SanitizationUtils.escapeHtml(projectName)}</span>
-              <span class="identity-secondary">${SanitizationUtils.escapeHtml(clientName)}</span>
-            </div>
+          <td class="identity-cell" data-label="Project">
+            <span class="identity-name">${SanitizationUtils.escapeHtml(projectName)}</span>
+            <span class="identity-contact">${SanitizationUtils.escapeHtml(clientName)}</span>
           </td>
           <td class="status-cell" data-label="Status"><span class="status-pill ${statusClass}">${statusLabel}</span></td>
           <td class="type-cell" data-label="Progress">
@@ -1052,10 +1085,36 @@ const OVERVIEW_ICONS = {
 
 /**
  * Render the overview tab HTML structure dynamically.
+ * Uses React component when feature flag enabled, otherwise vanilla HTML.
  * Linear-style layout: 4-stat strip, 2-column grid (projects+chart | activity+leads+health)
  * Call this before loadOverviewData to create the DOM elements.
  */
-export function renderOverviewTab(container: HTMLElement): void {
+export async function renderOverviewTab(container: HTMLElement, ctx?: AdminDashboardContext): Promise<void> {
+  // Check if we should use React implementation
+  if (shouldUseReactOverview()) {
+    const loaded = await loadReactOverview();
+    if (loaded && mountOverviewDashboard) {
+      // Clean up any existing React mount
+      if (reactCleanup) {
+        reactCleanup();
+        reactCleanup = null;
+      }
+
+      // Mount React component
+      container.innerHTML = '';
+      reactCleanup = mountOverviewDashboard(container, {
+        onNavigate: (tab: string) => {
+          ctx?.switchTab?.(tab);
+        }
+      });
+      console.log('[AdminOverview] Mounted React OverviewDashboard');
+      return;
+    }
+    console.warn('[AdminOverview] Failed to load React, falling back to vanilla');
+
+  }
+
+  // Vanilla implementation (fallback or when feature flag disabled)
   const today = new Date();
   // Date string reserved for future use in overview display
   const _dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -1063,7 +1122,7 @@ export function renderOverviewTab(container: HTMLElement): void {
   container.innerHTML = `
   <div class="overview-linear">
     <!-- Greeting -->
-    <div class="overview-greeting">Good ${getGreeting()},<b>Noelle</b></div>
+    <div class="overview-greeting">Good ${getGreeting()}, <b>Noelle</b></div>
 
     <!-- 4-Stat Strip -->
     <div class="overview-stats-strip" aria-label="Key metrics">
@@ -1115,19 +1174,28 @@ export function renderOverviewTab(container: HTMLElement): void {
             <button type="button" class="overview-panel-action" data-tab="projects">View all</button>
           </div>
           <div class="overview-panel-body">
-            <table class="overview-table" id="overview-projects-table">
+            <div class="data-table-scroll-wrapper">
+            <table class="data-table" id="overview-projects-table">
               <thead>
                 <tr>
-                  <th>Project</th>
-                  <th>Status</th>
-                  <th>Progress</th>
-                  <th>Due</th>
+                  <th scope="col" class="identity-col">Project</th>
+                  <th scope="col" class="status-col">Status</th>
+                  <th scope="col" class="type-col">Progress</th>
+                  <th scope="col" class="date-col">Due</th>
                 </tr>
               </thead>
-              <tbody id="overview-projects-tbody">
-                <tr><td colspan="4" class="loading-cell">Loading projects...</td></tr>
+              <tbody id="overview-projects-tbody" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+                <tr class="loading-row">
+                  <td colspan="4">
+                    <div class="loading-state">
+                      <span class="loading-spinner" aria-hidden="true"></span>
+                      <span class="loading-message">Loading projects...</span>
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
+            </div>
           </div>
         </div>
 

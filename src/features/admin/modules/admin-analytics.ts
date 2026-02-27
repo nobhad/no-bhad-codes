@@ -32,6 +32,9 @@ Chart.register(...registerables);
 const charts: Map<string, Chart> = new Map();
 
 export async function loadAnalyticsCharts(ctx: AdminDashboardContext): Promise<void> {
+  // Destroy existing charts before creating new ones to prevent canvas reuse errors
+  destroyCharts();
+
   // Setup event listeners for analytics controls
   setupAnalyticsEventListeners();
 
@@ -463,9 +466,9 @@ async function loadSavedReports(): Promise<void> {
           <span class="report-meta">${report.type} ${report.last_run_at ? `• Last run: ${formatDateTime(report.last_run_at)}` : ''}</span>
         </div>
         <div class="report-actions flex items-center gap-0-5">
-          <button class="btn btn-secondary btn-sm run-report-btn" data-report-id="${report.id}" title="Run Report">Run</button>
-          <button class="btn btn-outline btn-sm schedule-report-btn" data-report-id="${report.id}" data-report-name="${escapeHtml(report.name)}" title="Schedule Report">Schedule</button>
-          <button class="btn btn-danger btn-sm delete-report-btn" data-report-id="${report.id}" title="Delete Report">
+          <button class="btn btn-secondary btn-xs run-report-btn" data-report-id="${report.id}" title="Run Report">Run</button>
+          <button class="btn btn-outline btn-xs schedule-report-btn" data-report-id="${report.id}" data-report-name="${escapeHtml(report.name)}" title="Schedule Report">Schedule</button>
+          <button class="btn btn-danger btn-xs delete-report-btn" data-report-id="${report.id}" title="Delete Report">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </button>
         </div>
@@ -738,7 +741,7 @@ async function loadScheduledReports(): Promise<void> {
 }
             </svg>
           </button>
-          <button class="icon-btn icon-btn-danger delete-schedule-btn" data-schedule-id="${sched.id}" title="Delete" aria-label="Delete schedule">
+          <button class="icon-btn delete-schedule-btn" data-schedule-id="${sched.id}" title="Delete" aria-label="Delete schedule">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div>
@@ -866,7 +869,7 @@ async function loadMetricAlerts(): Promise<void> {
 }
             </svg>
           </button>
-          <button class="icon-btn icon-btn-danger delete-alert-btn" data-alert-id="${alert.id}" title="Delete" aria-label="Delete alert">
+          <button class="icon-btn delete-alert-btn" data-alert-id="${alert.id}" title="Delete" aria-label="Delete alert">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div>
@@ -2260,7 +2263,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
           <div class="analytics-column-header">
             <span class="field-label">Scoring Rules</span>
             <button type="button" class="icon-btn" id="add-scoring-rule-btn" title="Add rule" aria-label="Add scoring rule">
-              <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+              ${RENDER_ICONS.PLUS}
             </button>
           </div>
           <div class="scoring-rules-list" id="scoring-rules-list">
@@ -2363,13 +2366,13 @@ export function renderAnalyticsTab(container: HTMLElement): void {
 
       <!-- Visitors Table -->
       <div class="visitors-dashboard">
-        <div class="admin-table-card portal-shadow">
-          <div class="admin-table-header">
+        <div class="data-table-card">
+          <div class="data-table-header">
             <h3>Recent Sessions</h3>
           </div>
-          <div class="admin-table-container">
-            <div class="admin-table-scroll-wrapper">
-              <table class="admin-table visitors-table">
+          <div class="data-table-container">
+            <div class="data-table-scroll-wrapper">
+              <table class="data-table">
                 <thead>
                   <tr>
                     <th scope="col" class="slug-col">Session ID</th>
@@ -2382,10 +2385,10 @@ export function renderAnalyticsTab(container: HTMLElement): void {
                 </thead>
                 <tbody id="visitors-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                   <tr class="loading-row">
-                    <td colspan="6" class="loading-row">
+                    <td colspan="6">
                       <div class="loading-state">
                         <span class="loading-spinner" aria-hidden="true"></span>
-                        <span class="loading-message">Loading...</span>
+                        <span class="loading-message">Loading sessions...</span>
                       </div>
                     </td>
                   </tr>
@@ -2405,7 +2408,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
         <div class="section-header-with-actions">
           <h3>Saved Reports</h3>
           <button type="button" class="icon-btn" id="create-report-btn" title="New report" aria-label="Create new report">
-            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+            ${RENDER_ICONS.PLUS}
           </button>
         </div>
         <div class="reports-list flex flex-col gap-1" id="saved-reports-list">
@@ -2428,7 +2431,7 @@ export function renderAnalyticsTab(container: HTMLElement): void {
         <div class="section-header-with-actions">
           <h3>Metric Alerts</h3>
           <button type="button" class="icon-btn" id="create-alert-btn" title="New alert" aria-label="Create new metric alert">
-            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+            ${RENDER_ICONS.PLUS}
           </button>
         </div>
         <div class="alerts-list flex flex-col gap-1" id="metric-alerts-list">

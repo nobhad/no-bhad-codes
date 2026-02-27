@@ -479,7 +479,7 @@ function buildActionButtons(invoiceId: number, status: string): string {
     conditionalAction(isDraft, 'send', invoiceId, { title: 'Send Invoice', ariaLabel: 'Send invoice' }),
     conditionalAction(isDraft, 'edit', invoiceId, { title: 'Edit Invoice', ariaLabel: 'Edit invoice' }),
     conditionalAction(canMarkPaid, 'mark-paid', invoiceId, { ariaLabel: 'Mark as paid' }),
-    conditionalAction(canDownload, 'download', invoiceId, { title: 'Download PDF', ariaLabel: 'Download PDF' }),
+    conditionalAction(canDownload, 'download', invoiceId, { title: 'Download PDF', ariaLabel: 'Download PDF' })
   ]);
 }
 

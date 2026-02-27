@@ -213,7 +213,7 @@ export async function loadScheduledInvoices(projectId: number): Promise<void> {
             <span class="scheduled-date">${formatDate(inv.scheduled_date)}</span>
             <span class="scheduled-desc">${SanitizationUtils.escapeHtml(inv.description)}</span>
             <span class="scheduled-amount">${formatCurrency(inv.amount)}</span>
-            <button class="btn btn-danger btn-sm" data-action="cancel-scheduled-invoice" data-schedule-id="${inv.id}">Cancel</button>
+            <button class="btn btn-danger btn-xs" data-action="cancel-scheduled-invoice" data-schedule-id="${inv.id}">Cancel</button>
           </div>
         `).join('');
       }

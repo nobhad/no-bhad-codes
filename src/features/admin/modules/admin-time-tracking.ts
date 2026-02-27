@@ -266,9 +266,9 @@ function renderEntryRow(entry: TimeEntry): string {
       </td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-          createAction('edit', entry.id, { className: 'btn-edit-entry', dataAttrs: { 'entry-id': entry.id }, ariaLabel: 'Edit entry' }),
-          createAction('delete', entry.id, { className: 'btn-delete-entry', dataAttrs: { 'entry-id': entry.id }, ariaLabel: 'Delete entry' }),
-        ])}
+    createAction('edit', entry.id, { className: 'btn-edit-entry', dataAttrs: { 'entry-id': entry.id }, ariaLabel: 'Edit entry' }),
+    createAction('delete', entry.id, { className: 'btn-delete-entry', dataAttrs: { 'entry-id': entry.id }, ariaLabel: 'Delete entry' })
+  ])}
       </td>
     </tr>
   `;
