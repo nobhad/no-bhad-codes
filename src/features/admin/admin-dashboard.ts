@@ -1665,9 +1665,20 @@ class AdminDashboard {
     // Check if it's a primary group (strip quotes from mode value)
     const groupMode = subtabGroup?.dataset.mode?.replace(/["']/g, '');
     if (subtabGroup && groupMode === 'primary') {
-      subtabGroup.querySelectorAll('.portal-subtab[data-subtab]').forEach((btn) => {
-        btn.classList.toggle('active', (btn as HTMLElement).dataset.subtab === tabName);
-      });
+      // For support tab, the tabName is 'support' but subtabs are 'categories'/'articles'
+      // Default to first subtab (which has active class in HTML) if tabName doesn't match any subtab
+      const subtabs = subtabGroup.querySelectorAll('.portal-subtab[data-subtab]');
+      const hasMatchingSubtab = Array.from(subtabs).some(
+        (btn) => (btn as HTMLElement).dataset.subtab === tabName
+      );
+
+      if (hasMatchingSubtab) {
+        // Standard behavior: set active based on tabName
+        subtabs.forEach((btn) => {
+          btn.classList.toggle('active', (btn as HTMLElement).dataset.subtab === tabName);
+        });
+      }
+      // If no match (e.g., support tab), keep the HTML-defined active state
     }
   }
 
