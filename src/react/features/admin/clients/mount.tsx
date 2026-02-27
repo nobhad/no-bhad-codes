@@ -71,19 +71,8 @@ export function unmountClientsTable(): void {
 
 /**
  * Check if React clients table should be used
- * Based on feature flag in localStorage or URL param
+ * Always returns true - React is the default implementation
  */
 export function shouldUseReactClientsTable(): boolean {
-  // Check URL param first
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('react_clients') === 'true') {
-    return true;
-  }
-
-  // Check localStorage
-  try {
-    return localStorage.getItem('feature_react_clients_table') === 'true';
-  } catch {
-    return false;
-  }
+  return true;
 }

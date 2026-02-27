@@ -66,18 +66,8 @@ export function unmountProjectDetail(container: HTMLElement): void {
 
 /**
  * Check if React project detail should be used
- * Controlled via feature flag
+ * Always returns true - React is the default implementation
  */
 export function shouldUseReactProjectDetail(): boolean {
-  // Check localStorage
-  if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('feature_react_project_detail');
-    if (stored === 'true') return true;
-
-    // Check URL param
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('react_project_detail') === 'true') return true;
-  }
-
-  return false;
+  return true;
 }

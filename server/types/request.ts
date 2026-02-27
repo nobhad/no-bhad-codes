@@ -16,12 +16,36 @@ import type { LoggerService } from '../services/logger.js';
 // ============================================
 
 /**
- * User role type
+ * User role type (for extended user context)
  */
 export type UserRole = 'admin' | 'client';
 
 /**
- * Base authenticated user
+ * User type alias (for JWT middleware compatibility)
+ * @note This matches the 'type' field used in JWT tokens
+ */
+export type UserType = 'client' | 'admin';
+
+/**
+ * Simple auth user from JWT token (used by middleware)
+ * @note Uses 'type' field to match JWT payload structure
+ */
+export interface JWTAuthUser {
+  id: number;
+  email: string;
+  type: UserType;
+}
+
+/**
+ * Request with JWT authentication context (used by auth middleware)
+ * @note User is optional because middleware attaches it after token verification
+ */
+export interface JWTAuthRequest extends Request {
+  user?: JWTAuthUser;
+}
+
+/**
+ * Base authenticated user (for extended user context)
  */
 export interface AuthenticatedUser {
   id: number;
@@ -441,7 +465,7 @@ export function parsePagination(query: PaginationQuery): {
     limit,
     offset,
     sortBy: query.sortBy,
-    sortOrder,
+    sortOrder
   };
 }
 
@@ -454,7 +478,7 @@ export function parseDateRange(query: DateRangeQuery): {
 } {
   return {
     dateFrom: query.dateFrom ? new Date(query.dateFrom) : undefined,
-    dateTo: query.dateTo ? new Date(query.dateTo) : undefined,
+    dateTo: query.dateTo ? new Date(query.dateTo) : undefined
   };
 }
 

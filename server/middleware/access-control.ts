@@ -26,5 +26,5 @@ export {
   canAccessDocumentRequest,
   canAccessContract,
   canAccessProposal,
-  getClientIdFromEntity,
+  getClientIdFromEntity
 } from '../utils/access-control.js';
