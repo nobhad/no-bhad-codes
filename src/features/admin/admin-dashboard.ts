@@ -127,13 +127,12 @@ const ADMIN_TAB_TITLES: Record<string, string> = {
   'document-requests': 'Document Requests',
   'ad-hoc-requests': 'Ad Hoc Requests',
   questionnaires: 'Questionnaires',
-  'knowledge-base': 'Knowledge Base',
+  support: 'Knowledge Base',
   system: 'System Status',
   workflows: 'Workflows',
   work: 'Work',
   crm: 'CRM',
   documents: 'Documents',
-  support: 'Knowledge Base',
   'client-detail': 'Client Details',
   'project-detail': 'Project Details'
 };
@@ -156,8 +155,8 @@ const ADMIN_TAB_GROUPS = {
   },
   support: {
     label: 'Knowledge Base',
-    tabs: ['knowledge-base'],
-    defaultTab: 'knowledge-base'
+    tabs: ['categories', 'articles'],
+    defaultTab: 'categories'
   }
 } as const;
 
@@ -981,10 +980,10 @@ class AdminDashboard {
             const safeTitleMessage = SanitizationUtils.escapeHtml(decodedMessage);
             return `
             <tr data-contact-id="${submission.id}">
-              <td data-label="Date">${date}</td>
-              <td data-label="Name">${safeName}</td>
-              <td class="meta-value-with-copy" data-label="Email">${safeEmail} ${getCopyEmailButtonHtml(submission.email || '')}</td>
-              <td data-label="Subject">${safeSubject}</td>
+              <td class="date-cell" data-label="Date">${date}</td>
+              <td class="name-cell" data-label="Name">${safeName}</td>
+              <td class="email-cell meta-value-with-copy" data-label="Email">${safeEmail} ${getCopyEmailButtonHtml(submission.email || '')}</td>
+              <td class="name-cell" data-label="Subject">${safeSubject}</td>
               <td class="message-cell" data-label="Message" title="${safeTitleMessage}">${truncatedMessage}</td>
               <td class="status-cell" data-label="Status">
                 <div class="contact-status-dropdown-container" data-contact-id="${submission.id}"></div>
@@ -1835,7 +1834,7 @@ class AdminDashboard {
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Analytics', href: false });
       break;
-    case 'knowledge-base':
+    case 'support':
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Knowledge Base', href: false });
       break;
@@ -2181,9 +2180,9 @@ class AdminDashboard {
           await messagingModule.loadClientThreads(this.moduleContext);
         }
         break;
-      case 'knowledge-base': {
+      case 'support': {
         // Dynamically render knowledge-base tab, then load data
-        const tabContainer = document.getElementById('tab-knowledge-base');
+        const tabContainer = document.getElementById('tab-support');
         const kbModule = await loadKnowledgeBaseModule();
 
         // Render the tab structure dynamically

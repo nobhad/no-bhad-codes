@@ -263,7 +263,7 @@ export const ADMIN_TAB_IDS = [
   'analytics',
   'document-requests',
   'questionnaires',
-  'knowledge-base',
+  'support',
   'system',
   'project-detail',
   'workflows'
