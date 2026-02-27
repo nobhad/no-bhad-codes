@@ -497,7 +497,7 @@ function renderAdminMessageAttachments(attachments: { filename: string; original
          class="message-attachment"
          target="_blank"
          rel="noopener noreferrer"
-         title="Download ${name}">
+         title="Download ${SanitizationUtils.escapeHtml(name)}">
         <span class="message-attachment-icon">${ICONS.FILE}</span>
         <span class="message-attachment-name">${SanitizationUtils.escapeHtml(displayName)}</span>
         <span class="message-attachment-size">(${size})</span>
@@ -1014,7 +1014,7 @@ function renderAdminAttachmentPreview(): void {
     return `
       <div class="attachment-chip" data-index="${index}">
         <span class="attachment-chip-icon">${ICONS.FILE}</span>
-        <span class="attachment-chip-name" title="${file.name}">${name}</span>
+        <span class="attachment-chip-name" title="${SanitizationUtils.escapeHtml(file.name)}">${SanitizationUtils.escapeHtml(name)}</span>
         <span class="attachment-chip-size">(${size})</span>
         <button type="button" class="attachment-chip-remove" data-index="${index}" aria-label="Remove attachment">
           ${ICONS.X_SMALL}

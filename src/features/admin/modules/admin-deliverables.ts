@@ -13,6 +13,7 @@ import { openDesignReview } from './admin-design-review';
 import { showToast } from '../../../utils/toast-notifications';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { createLogger } from '../../../utils/logger';
+import { SanitizationUtils } from '../../../utils/sanitization-utils';
 
 const logger = createLogger('Deliverables');
 
@@ -206,8 +207,8 @@ function renderDeliverables(items: Deliverable[]): void {
     <div class="deliverable-item" data-id="${d.id}">
       <div class="deliverable-header">
         <div class="deliverable-info">
-          <h4 class="deliverable-title">${d.title}</h4>
-          <p class="deliverable-description">${d.description || ''}</p>
+          <h4 class="deliverable-title">${SanitizationUtils.escapeHtml(d.title)}</h4>
+          <p class="deliverable-description">${SanitizationUtils.escapeHtml(d.description || '')}</p>
         </div>
         <div class="deliverable-meta">
           <span class="round-badge">Round ${d.roundNumber}</span>
