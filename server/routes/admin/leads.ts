@@ -295,13 +295,22 @@ router.post(
 
         // Send invitation email if requested
         if (sendInvitation && invitationToken) {
+          // Validate email format before sending
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          const contactEmail = contact.email as string;
+          if (!contactEmail || !emailRegex.test(contactEmail)) {
+            logger.warn('Invalid contact email format, skipping invitation email', {
+              category: 'leads',
+              metadata: { clientId },
+            });
+          } else {
           const baseUrl =
             process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL || 'http://localhost:4000';
           const inviteLink = `${baseUrl}/client/set-password.html?token=${invitationToken}`;
 
           try {
             await emailService.sendEmail({
-              to: contact.email as string,
+              to: contactEmail,
               subject: 'Welcome to No Bhad Codes - Set Up Your Client Portal',
               html: `
                 <h2>Welcome, ${contact.name}!</h2>
@@ -318,6 +327,7 @@ router.post(
               error: emailError instanceof Error ? emailError : undefined,
             });
             // Don't fail the conversion if email fails
+          }
           }
         }
       }
@@ -557,13 +567,17 @@ router.post(
         await db.run('UPDATE projects SET status = ? WHERE id = ?', ['converted', id]);
       }
 
+      // Validate email format before sending
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!leadEmail || !emailRegex.test(leadEmail)) {
+        return errorResponse(res, 'Invalid lead email format', 400, 'VALIDATION_ERROR');
+      }
+
       // Build invitation link
       const baseUrl = process.env.BASE_URL || 'http://localhost:4000';
       const invitationUrl = new URL('/client/set-password.html', baseUrl);
       invitationUrl.searchParams.set('token', invitationToken);
-      if (leadEmail) {
-        invitationUrl.searchParams.set('email', leadEmail);
-      }
+      invitationUrl.searchParams.set('email', leadEmail);
       const invitationLink = invitationUrl.toString();
 
       // Send invitation email
@@ -963,7 +977,8 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const days = req.query.days ? parseInt(req.query.days as string) : 7;
+    const daysParam = req.query.days ? parseInt(req.query.days as string, 10) : 7;
+    const days = isNaN(daysParam) || daysParam < 1 || daysParam > 365 ? 7 : daysParam;
     const tasks = await leadService.getUpcomingTasks(days);
     sendSuccess(res, { tasks });
   })

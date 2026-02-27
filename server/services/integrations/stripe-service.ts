@@ -262,6 +262,10 @@ export function verifyWebhookSignature(payload: string, signature: string): bool
 
     // Check timestamp is within tolerance (5 minutes)
     const timestampSeconds = parseInt(timestamp, 10);
+    if (isNaN(timestampSeconds)) {
+      logger.warn('Stripe webhook timestamp is not a valid number');
+      return false;
+    }
     const currentSeconds = Math.floor(Date.now() / 1000);
     if (Math.abs(currentSeconds - timestampSeconds) > 300) {
       logger.warn('Stripe webhook timestamp outside tolerance');

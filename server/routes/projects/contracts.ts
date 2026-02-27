@@ -851,12 +851,13 @@ router.get(
       );
     }
 
-    // Log view
+    // Log view (truncate User-Agent to prevent log bloat)
     const projectId = p.id as number;
+    const userAgent = (req.get('user-agent') || 'unknown').substring(0, 500);
     await db.run(
       `INSERT INTO contract_signature_log (project_id, action, actor_ip, actor_user_agent)
        VALUES (?, 'viewed', ?, ?)`,
-      [projectId, req.ip || 'unknown', req.get('user-agent') || 'unknown']
+      [projectId, req.ip || 'unknown', userAgent]
     );
 
     const latestContract = await db.get(
@@ -945,7 +946,7 @@ router.post(
     }
 
     const signerIp = req.ip || req.socket.remoteAddress || 'unknown';
-    const signerUserAgent = req.get('user-agent') || 'unknown';
+    const signerUserAgent = (req.get('user-agent') || 'unknown').substring(0, 500);
     const signedAt = new Date().toISOString();
 
     // Update the project with signature
@@ -1164,7 +1165,7 @@ router.post(
 
     const countersignedAt = new Date().toISOString();
     const countersignerIp = req.ip || req.socket.remoteAddress || 'unknown';
-    const countersignerUserAgent = req.get('user-agent') || 'unknown';
+    const countersignerUserAgent = (req.get('user-agent') || 'unknown').substring(0, 500);
     const countersignerEmail = req.user?.email || 'admin';
 
     await db.run(

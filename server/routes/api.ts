@@ -148,7 +148,7 @@ router.post(
             subjectLine,
             message,
             req.ip || 'unknown',
-            req.get('User-Agent') || 'unknown',
+            (req.get('User-Agent') || 'unknown').substring(0, 500),
             messageId,
           ]
         );

@@ -32,8 +32,67 @@ import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { receiptService } from '../../services/receipt-service.js';
 import { logger } from '../../services/logger.js';
+import { validateRequest } from '../../middleware/validation.js';
 
 const router = express.Router();
+
+// Invoice validation schemas
+const InvoiceValidationSchemas = {
+  create: {
+    projectId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    clientId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    lineItems: [
+      { type: 'required' as const },
+      {
+        type: 'array' as const,
+        minLength: 1,
+        maxLength: 100,
+        customValidator: (items: Array<{ description?: string; quantity?: number; rate?: number }>) => {
+          for (const item of items) {
+            if (!item.description || typeof item.description !== 'string') {
+              return 'Each line item must have a description';
+            }
+            if (typeof item.quantity !== 'number' || item.quantity <= 0) {
+              return 'Each line item must have a positive quantity';
+            }
+            if (typeof item.rate !== 'number' || item.rate < 0) {
+              return 'Each line item must have a valid rate';
+            }
+          }
+          return true;
+        },
+      },
+    ],
+    notes: { type: 'string' as const, maxLength: 2000 },
+    terms: { type: 'string' as const, maxLength: 2000 },
+    dueDate: { type: 'string' as const, maxLength: 20 },
+    invoiceType: {
+      type: 'string' as const,
+      allowedValues: ['standard', 'deposit', 'recurring', 'credit'],
+    },
+  },
+  updateStatus: {
+    status: [
+      { type: 'required' as const },
+      {
+        type: 'string' as const,
+        allowedValues: ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'],
+      },
+    ],
+    paymentData: { type: 'object' as const },
+  },
+  recordPayment: {
+    amountPaid: [{ type: 'required' as const }, { type: 'number' as const, min: 0.01 }],
+    paymentMethod: [
+      { type: 'required' as const },
+      {
+        type: 'string' as const,
+        allowedValues: ['credit_card', 'bank_transfer', 'check', 'cash', 'stripe', 'other'],
+      },
+    ],
+    paymentReference: { type: 'string' as const, maxLength: 255 },
+  },
+};
 
 // GET /api/invoices
 // Admin invoice listing. Returns an array of invoices (snake_case fields).
@@ -88,12 +147,16 @@ router.get(
           return errorResponse(res, 'Invalid filter parameters', 400, 'VALIDATION_ERROR');
         }
 
+        // Truncate search to prevent DoS
+        const searchParam = req.query.search as string | undefined;
+        const search = searchParam ? searchParam.substring(0, 200) : undefined;
+
         const filters: any = {
           clientId,
           projectId,
           status: req.query.status as string | undefined,
           invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
-          search: req.query.search as string | undefined,
+          search,
           dateFrom: req.query.dateFrom as string | undefined,
           dateTo: req.query.dateTo as string | undefined,
           minAmount,
@@ -290,15 +353,10 @@ if (process.env.NODE_ENV === 'development') {
 router.post(
   '/',
   authenticateToken,
+  // Validate and sanitize input
+  validateRequest(InvoiceValidationSchemas.create),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceData: InvoiceCreateData = req.body;
-
-    // Validate required fields
-    if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['projectId', 'clientId', 'lineItems'],
-      });
-    }
 
     // Verify project exists and check authorization
     const db = getDatabase();
@@ -381,18 +439,10 @@ router.post(
   '/preview',
   authenticateToken,
   requireAdmin,
+  // Validate and sanitize input
+  validateRequest(InvoiceValidationSchemas.create),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { projectId, clientId, lineItems, notes, terms } = req.body;
-
-    if (
-      !projectId ||
-      !clientId ||
-      !lineItems ||
-      !Array.isArray(lineItems) ||
-      lineItems.length === 0
-    ) {
-      return errorResponse(res, 'Missing required fields', 400, 'MISSING_FIELDS');
-    }
 
     const db = getDatabase();
 
@@ -538,12 +588,16 @@ router.get(
       }
     }
 
+    // Truncate search to prevent DoS
+    const searchParam = req.query.search as string | undefined;
+    const search = searchParam ? searchParam.substring(0, 200) : undefined;
+
     const filters = {
       clientId: req.query.clientId ? parseInt(req.query.clientId as string) : undefined,
       projectId: req.query.projectId ? parseInt(req.query.projectId as string) : undefined,
       status,
       invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
-      search: req.query.search as string | undefined,
+      search,
       dateFrom: req.query.dateFrom as string | undefined,
       dateTo: req.query.dateTo as string | undefined,
       dueDateFrom: req.query.dueDateFrom as string | undefined,
@@ -778,19 +832,14 @@ router.put(
   '/:id/status',
   authenticateToken,
   requireAdmin,
+  // Validate and sanitize input
+  validateRequest(InvoiceValidationSchemas.updateStatus),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id);
     const { status, paymentData } = req.body;
 
     if (isNaN(invoiceId)) {
       return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
-    }
-
-    const validStatuses = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      return errorResponseWithPayload(res, 'Invalid status', 400, 'INVALID_STATUS', {
-        validStatuses,
-      });
     }
 
     try {
@@ -956,18 +1005,14 @@ router.post(
 router.post(
   '/:id/pay',
   authenticateToken,
+  // Validate and sanitize input
+  validateRequest(InvoiceValidationSchemas.recordPayment),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id);
     const { amountPaid, paymentMethod, paymentReference } = req.body;
 
     if (isNaN(invoiceId)) {
       return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
-    }
-
-    if (!amountPaid || !paymentMethod) {
-      return errorResponseWithPayload(res, 'Missing payment data', 400, 'MISSING_PAYMENT_DATA', {
-        required: ['amountPaid', 'paymentMethod'],
-      });
     }
 
     try {

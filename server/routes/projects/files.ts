@@ -217,7 +217,7 @@ router.post(
       req.user!.type as 'admin' | 'client',
       access_type,
       req.ip,
-      req.get('User-Agent')
+      (req.get('User-Agent') || '').substring(0, 500)
     );
     sendSuccess(res, undefined, 'Access logged');
   })

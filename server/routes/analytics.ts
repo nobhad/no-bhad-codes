@@ -1123,7 +1123,8 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: Request, res: Response) => {
     const { days = '30' } = req.query;
-    const daysNum = parseInt(days as string, 10);
+    const daysParam = parseInt(days as string, 10);
+    const daysNum = isNaN(daysParam) || daysParam < 1 || daysParam > 365 ? 30 : daysParam;
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - daysNum);

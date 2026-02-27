@@ -66,13 +66,16 @@ router.get(
 router.get(
   '/search',
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const query = req.query.q as string;
+    const queryParam = req.query.q as string;
 
-    if (!query || query.length < 2) {
+    if (!queryParam || queryParam.length < 2) {
       return errorResponse(res, 'Search query must be at least 2 characters', 400);
     }
 
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+    // Truncate search query to prevent DoS
+    const query = queryParam.substring(0, 200);
+    const limitParam = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
+    const limit = isNaN(limitParam) || limitParam < 1 || limitParam > 100 ? 20 : limitParam;
     const articles = await knowledgeBaseService.searchArticles(query, {
       limit,
       userId: req.user?.id,

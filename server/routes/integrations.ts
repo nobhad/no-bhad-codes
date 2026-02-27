@@ -626,7 +626,8 @@ router.get(
   '/calendar/export/upcoming',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const days = parseInt(req.query.days as string, 10) || 30;
+    const daysParam = parseInt(req.query.days as string, 10);
+    const days = isNaN(daysParam) || daysParam < 1 || daysParam > 365 ? 30 : daysParam;
     const ical = await exportUpcomingToICal(days);
 
     res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
