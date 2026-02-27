@@ -27,18 +27,18 @@
 
 [data-page="admin"] select[class*="tw-py-"],
 [data-page="admin"] .tw-flex select {
-  height: 28px;
-  min-height: 28px;
-  max-height: 28px;
+  height: var(--table-pagination-btn-size);
+  min-height: var(--table-pagination-btn-size);
+  max-height: var(--table-pagination-btn-size);
   padding-top: 0;
   padding-bottom: 0;
   padding-left: var(--space-2);
   padding-right: var(--space-6);
-  line-height: 26px;
+  line-height: calc(var(--table-pagination-btn-size) - var(--space-px) * 2);
   flex-shrink: 0;
   width: auto;
-  min-width: 120px;
-  max-width: 180px;
+  min-width: var(--table-col-sm);
+  max-width: var(--table-col-md);
 }
 
 /* Search dropdown wrapper */
@@ -46,7 +46,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  height: 36px;
+  height: var(--btn-portal-icon-size, 36px);
 }
 
 /* Search trigger button */
@@ -58,10 +58,10 @@
 .filter-search-trigger.has-value::after {
   content: "";
   position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
+  top: calc(-1 * var(--space-px) * 2);
+  right: calc(-1 * var(--space-px) * 2);
+  width: var(--space-1);
+  height: var(--space-1);
   background: var(--color-primary);
   border-radius: 50%;
   z-index: 1;
@@ -71,11 +71,11 @@
 .filter-search-dropdown,
 .filter-search-dropdown.search-bar {
   position: absolute;
-  top: calc(100% + 0.5rem);
+  top: calc(100% + var(--space-1));
   right: 0;
   display: none;
-  width: 280px;
-  z-index: 100;
+  width: var(--table-col-xl);
+  z-index: var(--z-index-portal-dropdown, 100);
   box-shadow: var(--shadow-elevated-md);
 }
 
@@ -114,16 +114,16 @@
 .filter-count-badge {
   display: none;
   position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 16px;
-  height: 16px;
+  top: calc(-1 * var(--space-0-5) - var(--space-px) * 2);
+  right: calc(-1 * var(--space-0-5) - var(--space-px) * 2);
+  min-width: var(--space-2);
+  height: var(--space-2);
   padding: 0 var(--space-0-5);
   background: var(--color-primary);
   color: var(--color-white);
   font-size: var(--font-size-xs);
   font-weight: 600;
-  line-height: 16px;
+  line-height: var(--space-2);
   text-align: center;
   z-index: 1;
 }
@@ -135,17 +135,17 @@
 /* Filter dropdown menu */
 .filter-dropdown-menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + var(--space-0-5));
   right: 0;
-  z-index: 1000;
-  min-width: 240px;
-  padding: var(--space-3) 0.75rem 0.75rem 0.75rem;
+  z-index: var(--z-index-portal-dropdown, 1000);
+  min-width: var(--table-col-lg);
+  padding: var(--space-3) var(--space-1-5) var(--space-1-5) var(--space-1-5);
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border);
   box-shadow: var(--shadow-dropdown-xl);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-8px);
+  transform: translateY(calc(-1 * var(--space-1)));
   transition:
     opacity var(--transition-fast),
     visibility var(--transition-fast),
@@ -238,7 +238,7 @@
   border: 1px solid var(--portal-border);
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
-  height: 32px;
+  height: var(--space-4);
 }
 
 .filter-date-input:focus {
@@ -284,7 +284,7 @@
 
   .filter-search {
     flex: 1;
-    min-width: 150px;
+    min-width: var(--table-col-md);
   }
 
   .filter-search-input {
@@ -314,7 +314,7 @@
   .filter-dropdown-wrapper {
     display: flex;
     align-items: center;
-    height: 28px;
+    height: var(--table-pagination-btn-size);
     width: auto;
     margin: 0;
     padding: 0;

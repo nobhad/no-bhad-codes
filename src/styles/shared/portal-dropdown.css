@@ -481,16 +481,6 @@
    INLINE TABLE DROPDOWNS (Admin-specific)
    ================================================ */
 
-/* Ensure status cells allow dropdown overflow */
-[data-page="admin"] .data-table td.status-cell {
-  overflow: visible;
-  position: relative;
-  vertical-align: middle;
-  height: var(--table-row-height);
-  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
-  box-sizing: border-box;
-}
-
 /* Allow dropdown to escape table containers */
 [data-page="admin"]
   :is(
@@ -519,7 +509,7 @@
   padding: var(--space-2) var(--space-3);
   padding-right: var(--space-1-5);
   border: 1px solid transparent;
-  background-color: var(--portal-bg-pitch);
+  background-color: transparent;
   color: var(--portal-text-light);
   font-size: var(--table-cell-font-size, 12px);
   font-weight: 400;
@@ -561,7 +551,7 @@
   border-bottom: none;
   z-index: 1001;
   position: relative;
-  background-color: var(--portal-bg-pitch);
+  background-color: transparent;
   box-shadow: none;
 }
 
@@ -617,7 +607,7 @@
 
 /* Details panel dropdown override */
 [data-page="admin"] .details-panel .table-dropdown .custom-dropdown-trigger {
-  background-color: var(--portal-bg-pitch);
+  background-color: transparent;
 }
 
 [data-page="admin"] .details-panel .table-dropdown .custom-dropdown-menu {
@@ -640,7 +630,7 @@
   outline: none;
   border: var(--portal-border);
   border-top: none;
-  background-color: var(--portal-bg-pitch);
+  background-color: transparent;
   box-shadow: none;
 }
 

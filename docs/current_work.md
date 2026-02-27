@@ -1,12 +1,61 @@
 # Current Work
 
-**Last Updated:** February 26, 2026
+**Last Updated:** February 27, 2026
 
 This file tracks active development work and TODOs. Completed items are archived in `archive/ARCHIVED_WORK_2026-02.md`.
 
 ---
 
 ## Active TODOs
+
+### Backend Design Consistency Audit - Phase 1 COMPLETE
+
+**Completed:** February 27, 2026
+
+Comprehensive audit of the backend codebase (`/server/`) with focus on design consistency. See full report: `docs/BACKEND_AUDIT_REPORT.md`
+
+#### Phase 1: Critical Fixes - COMPLETE
+
+- [x] **Consolidated `AuthenticatedRequest` type** - Created `JWTAuthRequest` in `/server/types/request.ts` as single source of truth. Updated `auth.ts` and `audit.ts` to import from central location.
+
+- [x] **Fixed audit logger to throw on failure** - Changed `createAuditLog` from returning `false` to throwing `AuditLogError`. This is compliance-critical - silent audit failures are a risk.
+
+- [x] **Removed duplicate rate limiter** - Refactored `security.ts` to use the consolidated `rate-limiter.ts` implementation. The `rateLimit()` function in security.ts is now a wrapper for backward compatibility.
+
+- [x] **Fixed response interceptor conflict** - Updated `audit.ts` to use `res.on('finish')` event instead of overriding `res.json()`. This avoids conflicts with `logger.ts` which also intercepts `res.json()`.
+
+**Files Modified:**
+
+- `server/types/request.ts` - Added `UserType`, `JWTAuthUser`, `JWTAuthRequest`
+- `server/middleware/auth.ts` - Imports `JWTAuthRequest` from types
+- `server/middleware/audit.ts` - Uses `JWTAuthRequest`, uses `res.on('finish')` pattern
+- `server/middleware/security.ts` - Wrapper for `rate-limiter.ts`
+- `server/services/audit-logger.ts` - Throws `AuditLogError` on failure
+- `tests/unit/services/audit-logger.test.ts` - Updated for throwing behavior
+- `tests/unit/middleware/audit.test.ts` - Updated for `res.on('finish')` pattern
+- `tests/unit/middleware/security.test.ts` - Updated for new rate limiter
+
+#### Phase 2: Standardization - COMPLETE
+
+- [x] **Created `types/index.ts` with all exports** - Central type re-exports from `request.ts`, `database.ts`, and `invoice-types.ts`. Handles duplicate type conflicts (InvoiceStatus, InvoiceRow) by exporting canonical versions from invoice-types.ts.
+
+- [x] **Created `config/index.ts`** - Central exports for environment, business config, uploads, navigation, default templates, and swagger. Makes imports cleaner across codebase.
+
+- [x] **Moved access-control.ts to utils** - These are utility functions, not Express middleware. Created `server/utils/access-control.ts` with the actual implementation, and `server/middleware/access-control.ts` now re-exports for backwards compatibility.
+
+- [x] **Environment schema already comprehensive** - `environment.ts` already has validation for all env vars including rate limiting, feature flags, OTEL, CORS, etc. No additions needed.
+
+- [ ] Create response builder utility (deferred - api-response.ts already comprehensive)
+- [ ] Standardize service singleton pattern (deferred - low priority)
+
+**Files Modified/Created:**
+
+- `server/types/index.ts` - Expanded with all type re-exports
+- `server/config/index.ts` (NEW) - Central config exports
+- `server/utils/access-control.ts` (NEW) - Access control utilities
+- `server/middleware/access-control.ts` - Now re-exports from utils
+
+---
 
 ### CSS Architecture Refactor & Typography System - IN PROGRESS
 

@@ -20,7 +20,7 @@
   --btn-portal-padding-y: var(--space-2);
   --btn-portal-padding-x: var(--space-4);
   --btn-portal-padding: var(--btn-portal-padding-y) var(--btn-portal-padding-x);
-  --btn-portal-min-height: 40px;
+  --btn-portal-min-height: var(--space-5);
 
   /* Button typography - DISCOTHÈQUE: Inconsolata monospace */
   --btn-portal-font-family: "Inconsolata", ui-monospace, monospace;
@@ -84,11 +84,17 @@
   --btn-portal-sm-padding-y: var(--space-1);
   --btn-portal-sm-padding-x: var(--space-2);
   --btn-portal-sm-font-size: 0.8rem;
-  --btn-portal-sm-min-height: 32px;
+  --btn-portal-sm-min-height: var(--space-4);
 
-  /* Icon button (square) */
-  --btn-portal-icon-size: 36px;
+  /* Icon button sizes (square) */
+  --btn-portal-icon-size: calc(var(--space-4) + var(--space-0-5));
+  --btn-portal-icon-size-sm: var(--space-4);
+  --btn-portal-icon-size-xs: calc(var(--space-3) + var(--space-0-5));
   --btn-portal-icon-radius: 0;
+
+  /* Icon sizes within buttons */
+  --btn-portal-icon-inner-size: var(--icon-size-lg);
+  --btn-portal-icon-inner-size-sm: var(--icon-size-md);
 }
 
 /* ============================================

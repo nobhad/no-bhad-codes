@@ -14,18 +14,18 @@
 
 :root {
   /* Table dimensions - compact Linear-style */
-  --table-header-height: 32px;
-  --table-row-height: 40px;
-  --table-cell-padding-x: clamp(8px, 2vw, 16px);
-  --table-cell-padding-y: clamp(4px, 1vw, 12px);
-  --table-outer-padding: clamp(12px, 3vw, 24px);
-  --table-actions-gap: var(--table-actions-gap);
+  --table-header-height: var(--space-4);
+  --table-row-height: var(--space-5);
+  --table-cell-padding-x: clamp(var(--space-1), 2vw, var(--space-2));
+  --table-cell-padding-y: clamp(var(--space-0-5), 1vw, var(--space-1-5));
+  --table-outer-padding: clamp(var(--space-1-5), 3vw, var(--space-3));
+  --table-actions-gap: var(--space-1);
 
   /* Table typography - derived from design system */
-  --table-header-font-size: var(--font-size-xs, 0.6875rem);
-  --table-cell-font-size: var(--font-size-sm, 12px);
+  --table-header-font-size: var(--font-size-xs);
+  --table-cell-font-size: var(--font-size-sm);
   --table-header-font-weight: var(--font-weight-medium, 500);
-  --table-header-letter-spacing: 0.05em;
+  --table-header-letter-spacing: var(--letter-spacing-label);
 
   /* Table colors - from portal variables */
   --table-bg: transparent;
@@ -33,28 +33,28 @@
   --table-cell-color: var(--portal-text-primary, var(--portal-text-light));
 
   /* Table column sizing */
-  --table-identity-max-width: 220px;
-  --table-truncate-max-width: 300px;
-  --table-checkbox-width: 40px;
-  --table-cell-max-width: 200px;
-  --table-name-max-width: 250px;
-  --table-compact-max-width: 120px;
+  --table-identity-max-width: calc(var(--space-base) * 27.5);
+  --table-truncate-max-width: calc(var(--space-base) * 37.5);
+  --table-checkbox-width: var(--space-5);
+  --table-cell-max-width: calc(var(--space-base) * 25);
+  --table-name-max-width: calc(var(--space-base) * 31.25);
+  --table-compact-max-width: calc(var(--space-base) * 15);
 
   /* Table icon sizing */
-  --table-icon-size: 16px;
-  --table-sort-indicator-size: 10px;
-  --table-pagination-btn-size: 28px;
+  --table-icon-size: var(--icon-size-md);
+  --table-sort-indicator-size: calc(var(--icon-size-xs) - 2px);
+  --table-pagination-btn-size: var(--btn-portal-icon-size-xs);
 
   /* Table mobile layout */
   --table-mobile-label-width: 48%;
   --table-mobile-label-padding: 0.75em;
 
   /* Table column width scale */
-  --table-col-xs: 60px;
-  --table-col-sm: 100px;
-  --table-col-md: 150px;
-  --table-col-lg: 200px;
-  --table-col-xl: 280px;
+  --table-col-xs: calc(var(--space-base) * 7.5);
+  --table-col-sm: calc(var(--space-base) * 12.5);
+  --table-col-md: calc(var(--space-base) * 18.75);
+  --table-col-lg: calc(var(--space-base) * 25);
+  --table-col-xl: calc(var(--space-base) * 35);
 }
 
 /* ==============================================
@@ -95,7 +95,7 @@
 .data-table tbody tr {
   height: var(--table-row-height);
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background var(--duration-faster);
 }
 
 .data-table td {
@@ -139,7 +139,8 @@
 
 .data-table tbody tr.row-focused td:first-child,
 .data-table tbody tr[data-focused="true"] td:first-child {
-  box-shadow: inset 2px 0 0 var(--color-primary);
+  box-shadow: inset var(--space-px) 0 0 var(--color-primary),
+              inset calc(var(--space-px) * 2) 0 0 var(--color-primary);
 }
 
 .data-table tbody tr.row-selected td,
@@ -656,12 +657,12 @@
   cursor: pointer;
   user-select: none;
   position: relative;
-  padding-right: calc(var(--table-cell-padding-x) + 20px);
-  transition: background-color 0.1s;
+  padding-right: calc(var(--table-cell-padding-x) + var(--space-2) + var(--space-0-5));
+  transition: background-color var(--duration-faster);
 }
 
 .data-table th.sortable:hover {
-  background: var(--portal-bg-hover);
+  background-color: var(--portal-bg-hover);
 }
 
 .sort-header-btn {
@@ -704,7 +705,7 @@
   width: var(--table-icon-size);
   height: var(--table-icon-size);
   color: var(--portal-text-muted);
-  transition: color 0.1s;
+  transition: color var(--duration-faster);
 }
 
 .data-table th.sortable:hover .sort-icon svg,
@@ -762,7 +763,8 @@
 
   .data-table tr {
     margin-bottom: var(--table-mobile-card-gap);
-    border-bottom: 2px solid var(--portal-border-color);
+    border-bottom: var(--space-px) solid var(--portal-border-color);
+    border-bottom-width: calc(var(--space-px) * 2);
   }
 
   .data-table td {

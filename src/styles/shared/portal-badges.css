@@ -186,10 +186,9 @@
   white-space: nowrap;
 }
 
-/* Status indicator in tables - match table cell font size for consistency */
+/* Status indicator in tables - inherits from table cell styles */
 .data-table .status-indicator {
-  font-size: var(--table-cell-font-size, 12px);
-  gap: var(--space-1-5);
+  font: inherit;
 }
 
 .status-indicator .status-dot {
@@ -268,14 +267,6 @@
   cursor: pointer;
 }
 
-/* Status badge button inside tables - match table cell font size */
-.data-table .status-badge-btn {
-  font-size: var(--table-cell-font-size, 12px);
-}
-
-.data-table .status-badge-btn .status-indicator {
-  font-size: inherit;
-}
 
 /* =====================================================
    SIDEBAR NOTIFICATION BADGES

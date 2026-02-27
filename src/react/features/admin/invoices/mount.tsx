@@ -71,19 +71,8 @@ export function unmountInvoicesTable(): void {
 
 /**
  * Check if React invoices table should be used
- * Based on feature flag in localStorage or URL param
+ * Always returns true - React is the default implementation
  */
 export function shouldUseReactInvoicesTable(): boolean {
-  // Check URL param first
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('react_invoices') === 'true') {
-    return true;
-  }
-
-  // Check localStorage
-  try {
-    return localStorage.getItem('feature_react_invoices_table') === 'true';
-  } catch {
-    return false;
-  }
+  return true;
 }

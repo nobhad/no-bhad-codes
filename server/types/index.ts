@@ -82,7 +82,7 @@ export {
   type MessageStats,
   // Helper types
   type PartialWithId,
-  type InsertFields,
+  type InsertFields
 } from './database.js';
 
 // Invoice-specific types (canonical invoice definitions)

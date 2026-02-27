@@ -75,16 +75,9 @@ export function unmountLeadsTable(): void {
 }
 
 /**
- * Check if React leads table should be used based on feature flag
+ * Check if React leads table should be used
+ * Always returns true - React is the default implementation
  */
 export function shouldUseReactLeadsTable(): boolean {
-  // Check localStorage
-  const localFlag = localStorage.getItem('feature_react_leads_table');
-  if (localFlag === 'true') return true;
-
-  // Check URL param
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('react_leads') === 'true') return true;
-
-  return false;
+  return true;
 }

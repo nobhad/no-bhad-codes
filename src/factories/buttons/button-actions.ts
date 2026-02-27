@@ -29,15 +29,15 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   // EDIT / MODIFY
   // ============================================
   edit: { icon: 'edit', title: 'Edit', ariaLabel: 'Edit' },
-  save: { icon: 'check', title: 'Save', ariaLabel: 'Save', variant: 'primary' },
+  save: { icon: 'check', title: 'Save', ariaLabel: 'Save' },
   cancel: { icon: 'x', title: 'Cancel', ariaLabel: 'Cancel' },
 
   // ============================================
   // CRUD OPERATIONS
   // ============================================
   add: { icon: 'plus', title: 'Add', ariaLabel: 'Add' },
-  create: { icon: 'plus', title: 'Create', ariaLabel: 'Create', variant: 'primary' },
-  delete: { icon: 'trash', title: 'Delete', ariaLabel: 'Delete', variant: 'danger' },
+  create: { icon: 'plus', title: 'Create', ariaLabel: 'Create' },
+  delete: { icon: 'trash', title: 'Delete', ariaLabel: 'Delete' },
   remove: { icon: 'x', title: 'Remove', ariaLabel: 'Remove' },
 
   // ============================================
@@ -53,22 +53,20 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   // ============================================
   // APPROVE / REJECT / REVIEW
   // ============================================
-  approve: { icon: 'circle-check', title: 'Approve', ariaLabel: 'Approve', variant: 'success' },
-  reject: { icon: 'circle-x', title: 'Reject', ariaLabel: 'Reject', variant: 'danger' },
+  approve: { icon: 'circle-check', title: 'Approve', ariaLabel: 'Approve' },
+  reject: { icon: 'circle-x', title: 'Reject', ariaLabel: 'Reject' },
   'start-review': { icon: 'check-square', title: 'Start Review', ariaLabel: 'Start review' },
   'mark-paid': {
     icon: 'circle-check',
     title: 'Mark as Paid',
-    ariaLabel: 'Mark as paid',
-    variant: 'success'
+    ariaLabel: 'Mark as paid'
   },
   markPaid: {
     icon: 'circle-check',
     title: 'Mark as Paid',
-    ariaLabel: 'Mark as paid',
-    variant: 'success'
+    ariaLabel: 'Mark as paid'
   }, // Alias
-  complete: { icon: 'check', title: 'Complete', ariaLabel: 'Mark as complete', variant: 'success' },
+  complete: { icon: 'check', title: 'Complete', ariaLabel: 'Mark as complete' },
 
   // ============================================
   // DOWNLOAD / EXPORT / COPY
@@ -107,7 +105,7 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   toggle: { icon: 'eye', title: 'Toggle', ariaLabel: 'Toggle visibility' },
   enable: { icon: 'eye', title: 'Enable', ariaLabel: 'Enable' },
   disable: { icon: 'eye-off', title: 'Disable', ariaLabel: 'Disable' },
-  publish: { icon: 'globe', title: 'Publish', ariaLabel: 'Publish', variant: 'primary' },
+  publish: { icon: 'globe', title: 'Publish', ariaLabel: 'Publish' },
   unpublish: { icon: 'eye-off', title: 'Unpublish', ariaLabel: 'Unpublish' },
 
   // ============================================
@@ -115,7 +113,7 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   // ============================================
   archive: { icon: 'archive', title: 'Archive', ariaLabel: 'Archive' },
   restore: { icon: 'rotate-ccw', title: 'Restore', ariaLabel: 'Restore' },
-  expire: { icon: 'clock', title: 'Expire', ariaLabel: 'Mark as expired', variant: 'warning' },
+  expire: { icon: 'clock', title: 'Expire', ariaLabel: 'Mark as expired' },
   unarchive: { icon: 'rotate-ccw', title: 'Unarchive', ariaLabel: 'Unarchive' },
 
   // ============================================

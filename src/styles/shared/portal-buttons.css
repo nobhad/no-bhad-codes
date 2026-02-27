@@ -137,10 +137,10 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 
 /* Large button - for prominent CTAs */
 .btn-lg {
-  height: 60px;
-  padding: 0 1.5rem;
+  height: var(--space-7);
+  padding: 0 var(--space-3);
   font-size: var(--btn-portal-font-size);
-  line-height: 60px;
+  line-height: var(--space-7);
 }
 
 /* Animated button - for GSAP/animation contexts */
@@ -183,8 +183,8 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   border-color: var(--portal-border-light);
 }
 .btn-back svg {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
 }
 
 /* ============================================
@@ -340,20 +340,20 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 }
 /* Size modifiers */
 .icon-btn.icon-btn-sm {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  min-height: 32px;
+  width: var(--btn-portal-icon-size-sm);
+  height: var(--btn-portal-icon-size-sm);
+  min-width: var(--btn-portal-icon-size-sm);
+  min-height: var(--btn-portal-icon-size-sm);
 }
 .icon-btn.icon-btn-xs {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
+  width: var(--btn-portal-icon-size-xs);
+  height: var(--btn-portal-icon-size-xs);
+  min-width: var(--btn-portal-icon-size-xs);
+  min-height: var(--btn-portal-icon-size-xs);
 }
 .icon-btn svg {
-  width: 18px;
-  height: 18px;
+  width: var(--btn-portal-icon-inner-size);
+  height: var(--btn-portal-icon-inner-size);
   stroke-width: 2.5;
 }
 
@@ -384,10 +384,10 @@ button > :is(.icon-wrap, .tab-icon, svg) {
  */
 @media (pointer: coarse) {
   :is([data-page="admin"], [data-page="client-portal"]) .icon-btn {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
+    width: var(--space-5);
+    height: var(--space-5);
+    min-width: var(--space-5);
+    min-height: var(--space-5);
   }
 
   .icon-btn:active {
@@ -402,7 +402,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   }
 }
 
-/* Table action buttons stay compact (28px) even on touch devices - UTILITIES LAYER for override priority */
+/* Table action buttons stay compact even on touch devices - UTILITIES LAYER for override priority */
 @layer utilities {
   @media (pointer: coarse) {
     .data-table .icon-btn,
@@ -411,10 +411,10 @@ button > :is(.icon-wrap, .tab-icon, svg) {
     .data-table td .icon-btn,
     .table-actions .icon-btn,
     .actions-cell .icon-btn {
-      width: 28px;
-      height: 28px;
-      min-width: 28px;
-      min-height: 28px;
+      width: var(--btn-portal-icon-size-xs);
+      height: var(--btn-portal-icon-size-xs);
+      min-width: var(--btn-portal-icon-size-xs);
+      min-height: var(--btn-portal-icon-size-xs);
     }
 
     .data-table .icon-btn svg,
@@ -423,8 +423,8 @@ button > :is(.icon-wrap, .tab-icon, svg) {
     .data-table td .icon-btn svg,
     .table-actions .icon-btn svg,
     .actions-cell .icon-btn svg {
-      width: 16px;
-      height: 16px;
+      width: var(--icon-size-md);
+      height: var(--icon-size-md);
     }
   }
 }
@@ -448,6 +448,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
  * TABLE ACTION BUTTONS - UTILITIES LAYER
  * ============================================
  * Using utilities layer for highest priority without !important
+ * ALL table action buttons are COLORLESS - neutral color only
  */
 @layer utilities {
   /* MASTER SELECTOR: Every icon-btn in table contexts */
@@ -472,17 +473,42 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   [data-page="client-portal"] td .icon-btn,
   [data-page="client-portal"] .actions-cell .icon-btn,
   [data-page="client-portal"] .table-actions .icon-btn {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    min-height: 36px;
-    max-width: 36px;
-    max-height: 36px;
+    width: var(--btn-portal-icon-size);
+    height: var(--btn-portal-icon-size);
+    min-width: var(--btn-portal-icon-size);
+    min-height: var(--btn-portal-icon-size);
+    max-width: var(--btn-portal-icon-size);
+    max-height: var(--btn-portal-icon-size);
     padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    /* ALL table action buttons are neutral - no colors */
+    color: var(--portal-text-light);
+    background: transparent;
+  }
+
+  /* TABLE ACTION BUTTONS - REMOVE ALL COLOR VARIANTS
+   * Override all colored variants (danger, success, warning, primary)
+   * to use neutral color in table contexts */
+  td .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
+  .actions-cell .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
+  .table-actions .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
+  .data-table .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
+  table .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary) {
+    color: var(--portal-text-light);
+    background: transparent;
+  }
+
+  /* Hover state - ALL table buttons hover to primary, no colored hover states */
+  td .icon-btn:hover,
+  .actions-cell .icon-btn:hover,
+  .table-actions .icon-btn:hover,
+  .data-table .icon-btn:hover,
+  table .icon-btn:hover {
+    color: var(--color-primary);
+    background: transparent;
   }
 
   /* MASTER SELECTOR: Every SVG in table icon buttons */
@@ -507,12 +533,12 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   [data-page="client-portal"] td .icon-btn svg,
   [data-page="client-portal"] .actions-cell .icon-btn svg,
   [data-page="client-portal"] .table-actions .icon-btn svg {
-    width: 18px;
-    height: 18px;
-    min-width: 18px;
-    min-height: 18px;
-    max-width: 18px;
-    max-height: 18px;
+    width: var(--btn-portal-icon-inner-size);
+    height: var(--btn-portal-icon-inner-size);
+    min-width: var(--btn-portal-icon-inner-size);
+    min-height: var(--btn-portal-icon-inner-size);
+    max-width: var(--btn-portal-icon-inner-size);
+    max-height: var(--btn-portal-icon-inner-size);
     flex-shrink: 0;
   }
 }
@@ -523,8 +549,8 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 
 /* Base icon-only button styles - applies to all collapsed states */
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn {
-  width: 40px;
-  height: 40px;
+  width: var(--space-5);
+  height: var(--space-5);
   padding: 0;
   justify-content: center;
   margin: 0 auto;
@@ -564,8 +590,8 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 /* Icon sizing */
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-icon {
   margin: 0;
-  width: 22px;
-  height: 22px;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
 }
 
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-icon svg {
@@ -589,8 +615,8 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 
   /* Force icon-only appearance at this breakpoint */
   .portal .sidebar .sidebar-btn {
-    width: 40px;
-    height: 40px;
+    width: var(--space-5);
+    height: var(--space-5);
     padding: 0;
     justify-content: center;
     border: none;
@@ -620,8 +646,8 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 
   .portal .sidebar .sidebar-btn .btn-icon {
     margin: 0;
-    width: 22px;
-    height: 22px;
+    width: var(--icon-size-xl);
+    height: var(--icon-size-xl);
   }
 
   .portal .sidebar .sidebar-btn .btn-icon svg {
