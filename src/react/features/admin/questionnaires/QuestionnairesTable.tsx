@@ -392,7 +392,7 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
                         title="Send"
                         onClick={() => handleSendQuestionnaire(questionnaire.id)}
                       >
-                        <Send />
+                        <Send size={18} />
                       </button>
                     )}
                   </div>

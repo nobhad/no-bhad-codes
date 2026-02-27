@@ -463,7 +463,7 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
                   <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       <button className="icon-btn">
-                        <MoreHorizontal />
+                        <MoreHorizontal size={18} />
                       </button>
                     </div>
                   </AdminTableCell>

@@ -420,7 +420,7 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <button className="icon-btn" title="Edit entry">
-                      <Clock />
+                      <Clock size={18} />
                     </button>
                   </div>
                 </AdminTableCell>

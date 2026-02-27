@@ -440,7 +440,7 @@ export function InvoicesTable({
               disabled={isExporting || filteredInvoices.length === 0}
               title="Export to CSV"
             >
-              <Download />
+              <Download size={18} />
             </button>
             <button
               className="icon-btn"
@@ -448,7 +448,7 @@ export function InvoicesTable({
               disabled={isLoading}
               title="Refresh"
             >
-              <RefreshCw className={isLoading ? 'spinning' : ''} />
+              <RefreshCw size={18} className={isLoading ? 'spinning' : ''} />
             </button>
           </>
         }
@@ -616,7 +616,7 @@ export function InvoicesTable({
                           onClick={() => handleViewInvoice(invoice.id)}
                           title="View invoice"
                         >
-                          <Eye />
+                          <Eye size={18} />
                         </button>
 
                         {canSend && (
@@ -626,7 +626,7 @@ export function InvoicesTable({
                             disabled={actionLoading?.type === 'send' && actionLoading?.id === invoice.id}
                             title="Send invoice"
                           >
-                            <Send />
+                            <Send size={18} />
                           </button>
                         )}
 

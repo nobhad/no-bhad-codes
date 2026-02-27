@@ -362,7 +362,7 @@ export function LeadsTable({
               disabled={isExporting || filteredLeads.length === 0}
               title="Export to CSV"
             >
-              <Download />
+              <Download size={18} />
             </button>
             <button
               className="icon-btn"
@@ -370,7 +370,7 @@ export function LeadsTable({
               disabled={isLoading}
               title="Refresh"
             >
-              <RefreshCw className={isLoading ? 'spinning' : ''} />
+              <RefreshCw size={18} className={isLoading ? 'spinning' : ''} />
             </button>
           </>
         }
@@ -562,7 +562,7 @@ export function LeadsTable({
                         onClick={() => handleViewLead(lead.id)}
                         title="View lead"
                       >
-                        <Eye />
+                        <Eye size={18} />
                       </button>
                       {lead.email && (
                         <button
@@ -570,7 +570,7 @@ export function LeadsTable({
                           onClick={() => window.location.href = `mailto:${lead.email}`}
                           title="Send email"
                         >
-                          <Mail />
+                          <Mail size={18} />
                         </button>
                       )}
                     </div>
