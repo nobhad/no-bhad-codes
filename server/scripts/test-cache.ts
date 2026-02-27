@@ -4,7 +4,7 @@
  * Simple test script to verify Redis cache functionality
  */
 
-import { cacheService } from './services/cache-service.js';
+import { cacheService } from '../services/cache-service.js';
 import dotenv from 'dotenv';
 
 // Load environment variables

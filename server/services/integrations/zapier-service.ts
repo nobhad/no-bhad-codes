@@ -8,6 +8,7 @@
  * for seamless integration with Zapier automations.
  */
 
+import crypto from 'crypto';
 import { getDatabase } from '../../database/init';
 
 // Zapier-compatible event payload formats
@@ -38,7 +39,7 @@ export function formatZapierPayload(
   entityId?: string | number
 ): ZapierPayload {
   return {
-    id: `${eventType}_${entityId || Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `${eventType}_${entityId || Date.now()}_${crypto.randomBytes(6).toString('hex')}`,
     event_type: eventType,
     timestamp: new Date().toISOString(),
     data: flattenObject(data),
@@ -291,12 +292,7 @@ export async function createZapierWebhook(
  * Generate a secure secret key for webhook signing
  */
 function generateSecretKey(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = 'whsec_';
-  for (let i = 0; i < 32; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+  return `whsec_${crypto.randomBytes(24).toString('base64url')}`;
 }
 
 /**

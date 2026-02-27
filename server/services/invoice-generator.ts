@@ -8,6 +8,8 @@
  * and intake form data.
  */
 
+import crypto from 'crypto';
+
 export interface IntakeData {
   company?: string;
   projectType: string;
@@ -463,7 +465,7 @@ function generateInvoiceNumber(): string {
   const year = now.getFullYear().toString().slice(-2);
   const month = (now.getMonth() + 1).toString().padStart(2, '0');
   const day = now.getDate().toString().padStart(2, '0');
-  const random = Math.floor(Math.random() * 1000)
+  const random = (crypto.randomBytes(2).readUInt16BE(0) % 1000)
     .toString()
     .padStart(3, '0');
 

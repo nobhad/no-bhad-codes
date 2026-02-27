@@ -1,4 +1,5 @@
 
+import crypto from 'crypto';
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
@@ -52,7 +53,7 @@ const storage = multer.diskStorage({
     cb(null, getUploadsSubdir(UPLOAD_DIRS.MESSAGES));
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
     cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
