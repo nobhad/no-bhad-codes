@@ -1,13 +1,7 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Eye,
-  RefreshCw,
-  Download,
-  Inbox,
-  Phone,
-  Send
-} from 'lucide-react';
+import { Inbox, Download, RefreshCw, Eye, Send, Phone } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
   AdminTable,
@@ -423,22 +417,18 @@ export function ClientsTable({
             values={filterValues}
             onChange={handleFilterChange}
           />
-          <button
-            className="icon-btn"
+          <IconButton
+            action="download"
             onClick={exportCsv}
             disabled={isExporting || filteredClients.length === 0}
             title="Export to CSV"
-          >
-            <Download size={18} />
-          </button>
-          <button
-            className="icon-btn"
+          />
+          <IconButton
+            action="refresh"
             onClick={refetch}
             disabled={isLoading}
-            title="Refresh"
-          >
-            <RefreshCw size={18} className={isLoading ? 'spinning' : ''} />
-          </button>
+            loading={isLoading}
+          />
         </>
       }
       bulkActions={
@@ -623,31 +613,25 @@ export function ClientsTable({
                     {/* Actions */}
                     <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                       <div className="table-actions">
-                        <button
-                          className="icon-btn"
+                        <IconButton
+                          action="view"
                           onClick={() => handleViewClient(client.id)}
                           title="View client"
-                        >
-                          <Eye size={18} />
-                        </button>
+                        />
                         {inviteStatus === 'not-invited' && (
-                          <button
-                            className="icon-btn"
+                          <IconButton
+                            action="send"
                             onClick={() => handleSendInvite(client.id)}
                             disabled={inviteLoading === client.id}
                             title="Send invitation"
-                          >
-                            <Send size={18} />
-                          </button>
+                          />
                         )}
                         {client.phone && (
-                          <button
-                            className="icon-btn"
+                          <IconButton
+                            action="call"
                             onClick={() => window.location.href = `tel:${client.phone}`}
                             title="Call client"
-                          >
-                            <Phone size={18} />
-                          </button>
+                          />
                         )}
                       </div>
                     </AdminTableCell>

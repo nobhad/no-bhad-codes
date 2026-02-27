@@ -3,15 +3,16 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   Plus,
   FileText,
-  Download,
-  Send,
-  Eye,
-  Copy,
   Inbox,
   Edit,
   MoreHorizontal,
   Trash2,
+  Copy,
+  Download,
+  Eye,
+  Send,
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -223,9 +224,7 @@ export function ProposalsTable({ onNavigate }: ProposalsTableProps) {
             values={{ status: statusFilter }}
             onChange={(key, value) => setStatusFilter(value)}
           />
-          <button className="icon-btn" title="Export">
-            <Download size={18} />
-          </button>
+          <IconButton action="download" title="Export" />
           <PortalButton variant="primary" size="sm">
             <Plus className="btn-icon" />
             New Proposal
@@ -355,17 +354,13 @@ export function ProposalsTable({ onNavigate }: ProposalsTableProps) {
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
-                    <button className="icon-btn" title="View">
-                      <Eye size={18} />
-                    </button>
+                    <IconButton action="view" title="View" />
                     {proposal.status === 'draft' && (
-                      <button
-                        className="icon-btn"
+                      <IconButton
+                        action="send"
                         title="Send"
                         onClick={() => handleSendProposal(proposal.id)}
-                      >
-                        <Send size={18} />
-                      </button>
+                      />
                     )}
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>

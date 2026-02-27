@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Eye, RefreshCw, Download, Inbox } from 'lucide-react';
+import { Inbox, Download, RefreshCw, Eye } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
   AdminTable,
@@ -368,17 +369,18 @@ export function ProjectsTable({
               values={filterValues}
               onChange={(key, value) => setFilter(key, value)}
             />
-            <button
-              className="icon-btn"
+            <IconButton
+              action="download"
               onClick={exportCsv}
               disabled={isExporting || filteredProjects.length === 0}
               title="Export to CSV"
-            >
-              <Download size={18} />
-            </button>
-            <button className="icon-btn" onClick={refetch} disabled={isLoading} title="Refresh">
-              <RefreshCw size={18} className={isLoading ? 'spinning' : ''} />
-            </button>
+            />
+            <IconButton
+              action="refresh"
+              onClick={refetch}
+              disabled={isLoading}
+              loading={isLoading}
+            />
           </>
         }
         bulkActions={
@@ -575,13 +577,11 @@ export function ProjectsTable({
                   {/* Actions */}
                   <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
-                      <button
-                        className="icon-btn"
+                      <IconButton
+                        action="view"
                         onClick={() => handleViewProject(project.id)}
                         title="View project"
-                      >
-                        <Eye size={16} />
-                      </button>
+                      />
                     </div>
                   </AdminTableCell>
                 </AdminTableRow>
