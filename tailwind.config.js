@@ -167,7 +167,13 @@ export default {
 
       // Font family - monospace for brutalist aesthetic
       fontFamily: {
-        mono: ['Inconsolata', 'Courier', '"Lucida Sans Typewriter"', '"Lucida Typewriter"', 'monospace'],
+        mono: [
+          'Inconsolata',
+          'Courier',
+          '"Lucida Sans Typewriter"',
+          '"Lucida Typewriter"',
+          'monospace',
+        ],
         sans: ['Inconsolata', 'monospace'],
       },
 
