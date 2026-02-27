@@ -27,15 +27,6 @@ let reactProjectsUnmountFn: (() => void) | null = null;
  * Check if React portal projects should be used
  */
 function shouldUseReactPortalProjects(): boolean {
-  const component = getReactComponent('portalProjects');
-  if (!component) return false;
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_portal_projects') === 'true') return false;
-
-  const flag = localStorage.getItem('feature_react_portal_projects');
-  if (flag === 'false') return false;
-
   return true;
 }
 

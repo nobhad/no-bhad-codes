@@ -75,16 +75,6 @@ async function loadReactTimeTrackingPanel(): Promise<boolean> {
 
 /** Feature flag for React time tracking table */
 function shouldUseReactTimeTrackingTable(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_time_tracking') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_time_tracking_table');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }
 

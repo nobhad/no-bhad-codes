@@ -21,15 +21,6 @@ let reactDocRequestsUnmountFn: (() => void) | null = null;
  * Check if React portal document requests should be used
  */
 function shouldUseReactPortalDocumentRequests(): boolean {
-  const component = getReactComponent('portalDocumentRequests');
-  if (!component) return false;
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_portal_document_requests') === 'true') return false;
-
-  const flag = localStorage.getItem('feature_react_portal_document_requests');
-  if (flag === 'false') return false;
-
   return true;
 }
 

@@ -27,15 +27,6 @@ let reactFilesUnmountFn: (() => void) | null = null;
  * Check if React portal files should be used
  */
 function shouldUseReactPortalFiles(): boolean {
-  const component = getReactComponent('portalFiles');
-  if (!component) return false;
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_portal_files') === 'true') return false;
-
-  const flag = localStorage.getItem('feature_react_portal_files');
-  if (flag === 'false') return false;
-
   return true;
 }
 

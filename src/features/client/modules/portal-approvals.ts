@@ -21,15 +21,6 @@ let reactApprovalsUnmountFn: (() => void) | null = null;
  * Check if React portal approvals should be used
  */
 function shouldUseReactPortalApprovals(): boolean {
-  const component = getReactComponent('portalApprovals');
-  if (!component) return false;
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_portal_approvals') === 'true') return false;
-
-  const flag = localStorage.getItem('feature_react_portal_approvals');
-  if (flag === 'false') return false;
-
   return true;
 }
 

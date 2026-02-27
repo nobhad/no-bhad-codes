@@ -22,15 +22,6 @@ let reactQuestionnairesUnmountFn: (() => void) | null = null;
  * Check if React portal questionnaires should be used
  */
 function shouldUseReactPortalQuestionnaires(): boolean {
-  const component = getReactComponent('portalQuestionnaires');
-  if (!component) return false;
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_portal_questionnaires') === 'true') return false;
-
-  const flag = localStorage.getItem('feature_react_portal_questionnaires');
-  if (flag === 'false') return false;
-
   return true;
 }
 

@@ -23,15 +23,6 @@ let reactMessagesUnmountFn: (() => void) | null = null;
  * Check if React portal messages should be used
  */
 function shouldUseReactPortalMessages(): boolean {
-  const component = getReactComponent('portalMessages');
-  if (!component) return false;
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_portal_messages') === 'true') return false;
-
-  const flag = localStorage.getItem('feature_react_portal_messages');
-  if (flag === 'false') return false;
-
   return true;
 }
 

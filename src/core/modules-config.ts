@@ -214,13 +214,10 @@ export function registerModules(debug: boolean = false): void {
       name: 'ClientPortalModule',
       type: 'dom',
       factory: async () => {
-        // Only load client portal on client pages
+        // Load client portal on all /client/* pages except intake (which uses TerminalIntakeModule)
         const currentPath = window.location.pathname;
         const isClientPage =
-          currentPath === '/client' ||
-          currentPath === '/client/' ||
-          currentPath.startsWith('/client/index') ||
-          currentPath.startsWith('/client/portal');
+          currentPath.startsWith('/client') && !currentPath.includes('/client/intake');
         if (isClientPage) {
           const { ClientPortalModule } = await import('../features/client/client-portal');
           return new ClientPortalModule();

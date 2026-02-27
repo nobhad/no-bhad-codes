@@ -27,18 +27,6 @@ let reactUnmountFn: (() => void) | null = null;
  * Check if React portal invoices should be used
  */
 function shouldUseReactPortalInvoices(): boolean {
-  const component = getReactComponent('portalInvoices');
-  if (!component) return false;
-
-  // Check URL parameter for vanilla fallback
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_portal_invoices') === 'true') return false;
-
-  // Check localStorage flag
-  const flag = localStorage.getItem('feature_react_portal_invoices');
-  if (flag === 'false') return false;
-
-  // Default: enabled
   return true;
 }
 
