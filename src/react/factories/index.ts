@@ -27,7 +27,10 @@ export {
 export {
   useButtonFactory,
   useIconSize,
-  useTableActions
+  useTableActions,
+  useButtonSet,
+  useConditionalActions,
+  useActionHandlers
 } from './useFactory';
 
 // ============================================

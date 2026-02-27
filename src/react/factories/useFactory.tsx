@@ -231,6 +231,204 @@ export function useTableActions<T extends { id: string | number }>(
 }
 
 // ============================================
+// BUTTON SET HOOK
+// ============================================
+
+type ButtonSetName = keyof typeof BUTTON_SETS;
+
+interface UseButtonSetOptions {
+  /** UI context */
+  context?: UIContext;
+  /** Handler for action clicks */
+  onClick?: (action: string, id?: string | number, e?: React.MouseEvent) => void;
+}
+
+/**
+ * Hook for using predefined button sets.
+ *
+ * @example
+ * const { renderSet } = useButtonSet({
+ *   onClick: (action, id) => handleAction(action, id)
+ * });
+ *
+ * return <TableCell>{renderSet('tableCrud', row.id)}</TableCell>;
+ */
+export function useButtonSet(options: UseButtonSetOptions = {}) {
+  const { context = 'table', onClick } = options;
+  const { renderButtons } = useButtonFactory({ context, onClick });
+
+  const renderSet = useCallback(
+    <T extends ButtonSetName>(
+      setName: T,
+      ...args: Parameters<(typeof BUTTON_SETS)[T]>
+    ) => {
+      const setFn = BUTTON_SETS[setName] as (...args: unknown[]) => ButtonConfig[];
+      const configs = setFn(...args);
+      return (
+        <TableActions>
+          {renderButtons(configs)}
+        </TableActions>
+      );
+    },
+    [renderButtons]
+  );
+
+  return { renderSet };
+}
+
+// ============================================
+// CONDITIONAL ACTIONS HOOK
+// ============================================
+
+type ActionCondition<T> = boolean | ((row: T) => boolean);
+
+interface ConditionalAction<T> {
+  /** Action name */
+  action: string;
+  /** Show condition */
+  show?: ActionCondition<T>;
+  /** Disabled condition */
+  disabled?: ActionCondition<T>;
+  /** Custom title override */
+  title?: string;
+  /** Custom aria-label override */
+  ariaLabel?: string;
+  /** Additional data attributes */
+  dataAttrs?: Record<string, string | number>;
+}
+
+interface UseConditionalActionsOptions<T> {
+  /** Handler for action clicks */
+  onAction: (action: string, id: string | number, row: T) => void;
+  /** Actions configuration */
+  actions: ConditionalAction<T>[];
+  /** UI context */
+  context?: UIContext;
+}
+
+/**
+ * Hook for complex conditional action rendering.
+ * Provides more control over action visibility and state.
+ *
+ * @example
+ * const { renderActions } = useConditionalActions({
+ *   onAction: (action, id, row) => {
+ *     if (action === 'approve') approveItem(id);
+ *     if (action === 'reject') rejectItem(id);
+ *   },
+ *   actions: [
+ *     { action: 'view' },
+ *     { action: 'approve', show: (row) => row.status === 'pending' },
+ *     { action: 'reject', show: (row) => row.status === 'pending' },
+ *     { action: 'delete', disabled: (row) => row.isProtected }
+ *   ]
+ * });
+ */
+export function useConditionalActions<T extends { id: string | number }>(
+  options: UseConditionalActionsOptions<T>
+) {
+  const { onAction, actions, context = 'table' } = options;
+
+  const resolveCondition = useCallback(
+    (condition: ActionCondition<T> | undefined, row: T, defaultValue: boolean): boolean => {
+      if (condition === undefined) return defaultValue;
+      if (typeof condition === 'function') return condition(row);
+      return condition;
+    },
+    []
+  );
+
+  const renderActions = useCallback(
+    (row: T) => {
+      const configs: ButtonConfig[] = actions.map(
+        ({ action, show, disabled, title, ariaLabel, dataAttrs }) => ({
+          action,
+          dataId: row.id,
+          show: resolveCondition(show, row, true),
+          disabled: resolveCondition(disabled, row, false),
+          title,
+          ariaLabel,
+          dataAttrs
+        })
+      );
+
+      const visibleConfigs = configs.filter(cfg => cfg.show !== false);
+      if (visibleConfigs.length === 0) return null;
+
+      return (
+        <TableActions>
+          {visibleConfigs.map(config => (
+            <IconButton
+              key={`${config.action}-${config.dataId}`}
+              action={config.action}
+              context={context}
+              dataId={config.dataId}
+              disabled={config.disabled}
+              title={config.title}
+              ariaLabel={config.ariaLabel}
+              onClick={() => onAction(config.action, row.id, row)}
+            />
+          ))}
+        </TableActions>
+      );
+    },
+    [actions, context, onAction, resolveCondition]
+  );
+
+  return { renderActions };
+}
+
+// ============================================
+// ACTION HANDLER HOOK
+// ============================================
+
+type ActionHandler<T> = (id: string | number, row?: T) => void | Promise<void>;
+
+interface UseActionHandlersOptions<T> {
+  /** Map of action names to handlers */
+  handlers: Record<string, ActionHandler<T>>;
+  /** Fallback handler for unknown actions */
+  onUnknownAction?: (action: string, id: string | number, row?: T) => void;
+}
+
+/**
+ * Hook for creating a unified action handler from individual handlers.
+ *
+ * @example
+ * const handleAction = useActionHandlers({
+ *   handlers: {
+ *     view: (id) => openDetail(id),
+ *     edit: (id) => openEditModal(id),
+ *     delete: (id) => confirmDelete(id)
+ *   }
+ * });
+ *
+ * const { renderActions } = useTableActions({
+ *   onAction: handleAction,
+ *   actions: [...]
+ * });
+ */
+export function useActionHandlers<T = unknown>(options: UseActionHandlersOptions<T>) {
+  const { handlers, onUnknownAction } = options;
+
+  const handleAction = useCallback(
+    (action: string, id: string | number, row?: T) => {
+      const handler = handlers[action];
+      if (handler) {
+        handler(id, row);
+      } else if (onUnknownAction) {
+        onUnknownAction(action, id, row);
+      } else {
+        console.warn(`[useActionHandlers] No handler for action: ${action}`);
+      }
+    },
+    [handlers, onUnknownAction]
+  );
+
+  return handleAction;
+}
+
+// ============================================
 // EXPORTS
 // ============================================
 
