@@ -133,7 +133,7 @@ export function formatDisplayValue(value: string | undefined | null): string {
  * @param text - Raw text that may contain HTML characters
  * @returns Escaped text safe for innerHTML
  */
-function escapeHtml(text: string): string {
+export function escapeHtml(text: string): string {
   const htmlEntities: Record<string, string> = {
     '&': '&amp;',
     '<': '&lt;',
