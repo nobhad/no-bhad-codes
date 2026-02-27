@@ -206,22 +206,24 @@ function renderInvoicesList(
 
   // Create table HTML
   const tableHtml = `
-    <div class="data-table-scroll-wrapper">
-      <table class="data-table" aria-label="Invoices">
-        <thead>
-          <tr>
-            <th scope="col" class="name-col">Invoice #</th>
-            <th scope="col" class="name-col">Project</th>
-            <th scope="col" class="date-col">Date</th>
-            <th scope="col" class="amount-col">Amount</th>
-            <th scope="col" class="status-col">Status</th>
-            <th scope="col" class="actions-col">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="portal-invoices-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-          ${tableRows}
-        </tbody>
-      </table>
+    <div class="data-table-container">
+      <div class="data-table-scroll-wrapper">
+        <table class="data-table" aria-label="Invoices">
+          <thead>
+            <tr>
+              <th scope="col" class="name-col">Invoice #</th>
+              <th scope="col" class="name-col">Project</th>
+              <th scope="col" class="date-col">Date</th>
+              <th scope="col" class="amount-col">Amount</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="portal-invoices-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            ${tableRows}
+          </tbody>
+        </table>
+      </div>
     </div>
   `;
 
