@@ -25,6 +25,7 @@ import { multiPromptDialog, alertDialog, confirmDialog } from '../../../utils/co
 import { showToast } from '../../../utils/toast-notifications';
 import { loadLeadAnalytics, loadScoringRules } from './admin-leads';
 import { loadAdHocAnalytics } from './admin-ad-hoc-analytics';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -1360,7 +1361,7 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
           : session.country || '';
 
         return `
-          <tr>
+          <tr data-session-id="${session.session_id}">
             <td class="slug-cell" data-label="Session ID">${session.session_id.substring(0, 8)}...</td>
             <td class="date-cell" data-label="Started">${startTime}</td>
             <td class="type-cell" data-label="Duration">${duration}</td>
@@ -1371,6 +1372,17 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
         `;
       })
       .join('');
+
+    // Initialize keyboard navigation for visitors table
+    initTableKeyboardNav({
+      tableSelector: '#visitors-table-body',
+      rowSelector: 'tr[data-session-id]',
+      onRowSelect: () => {
+        // Read-only table, no action on select
+      },
+      focusClass: 'row-focused',
+      selectedClass: 'row-selected'
+    });
 
   } catch (error) {
     console.error('[AdminAnalytics] Error loading visitors data:', error);
