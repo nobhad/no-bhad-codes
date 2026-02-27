@@ -739,30 +739,36 @@ router.post(
       return errorResponse(res, 'Client created but could not retrieve details', 500, 'CLIENT_CREATION_ERROR');
     }
 
-    // Send welcome email
+    // Send welcome email only if client is active (has password set)
+    // Pending clients will receive an invitation email instead
     try {
-      // Note: Login URL no longer includes email in query string for privacy
-      // Client will enter email on the login page (portal login is now on home page)
-      const portalUrl = process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL;
-      const supportEmail = process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL;
-
       const newClientEmail = getString(newClient, 'email');
       const newClientContactName = getString(newClient, 'contact_name');
       const newClientCompanyName = getString(newClient, 'company_name');
       const newClientId = getNumber(newClient, 'id');
+      const newClientStatus = getString(newClient, 'status');
 
-      if (!portalUrl || !supportEmail) {
-        console.warn('CLIENT_PORTAL_URL or SUPPORT_EMAIL not configured, skipping welcome email');
+      // Only send welcome email to active clients (those created with a password)
+      // Pending clients should receive an invitation email via the send-invite endpoint
+      if (newClientStatus === 'active') {
+        const portalUrl = process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL;
+        const supportEmail = process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL;
+
+        if (!portalUrl || !supportEmail) {
+          console.warn('CLIENT_PORTAL_URL or SUPPORT_EMAIL not configured, skipping welcome email');
+        } else {
+          await emailService.sendWelcomeEmail(newClientEmail, {
+            name: newClientContactName || 'Client',
+            companyName: newClientCompanyName,
+            loginUrl: portalUrl,
+            supportEmail: supportEmail
+          });
+        }
       } else {
-        await emailService.sendWelcomeEmail(newClientEmail, {
-          name: newClientContactName || 'Client',
-          companyName: newClientCompanyName,
-          loginUrl: portalUrl,
-          supportEmail: supportEmail
-        });
+        console.log(`[Clients] Skipping welcome email for pending client ${newClientId} - account not yet activated`);
       }
 
-      // Send admin notification
+      // Send admin notification (always send to admin regardless of client status)
       await emailService.sendAdminNotification({
         subject: 'New Client Registration',
         intakeId: newClientId.toString(),

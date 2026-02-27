@@ -1,28 +1,10 @@
-<!-- Sidebar -->
+<!-- Sidebar - Navigation only (branding/toggle now in unified header) -->
 <aside class="sidebar" id="sidebar">
-  <!-- Sidebar Toggle Button - on sidebar edge -->
-  <button class="sidebar-toggle-btn" id="btn-sidebar-toggle" aria-label="Toggle sidebar">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <rect x="3" y="3" width="18" height="18" rx="2"/>
-      <path d="M9 3v18"/>
-    </svg>
-  </button>
-
-  <!-- Collapsed state avatar link -->
-  <a href="/" class="sidebar-collapsed-logo" aria-label="Go to home">
-    <img src="/images/avatar_small_sidebar.svg" alt="No Bhad Codes" class="sidebar-collapsed-logo-img" />
-  </a>
-
   <div class="sidebar-content">
-    <!-- Logo -->
-    <a href="/" class="sidebar-logo">
-      <img src="/images/avatar.svg" alt="No Bhad Codes" class="sidebar-logo-img" />
-    </a>
-
     <!-- Navigation Buttons -->
     <div class="sidebar-buttons">
       <% config.navigation.forEach(item => { %>
-        <button class="btn btn-secondary<%= item.active ? ' active' : '' %>" id="btn-<%= item.id %>" data-tab="<%= item.dataTab || item.id %>"<% if (item.shortcut) { %> data-shortcut="<%= item.shortcut %>"<% } %> aria-label="<%= item.ariaLabel || item.label %>">
+        <button class="btn sidebar-btn<%= item.active ? ' active' : '' %>" id="btn-<%= item.id %>" data-tab="<%= item.dataTab || item.id %>"<% if (item.shortcut) { %> data-shortcut="<%= item.shortcut %>"<% } %> aria-label="<%= item.ariaLabel || item.label %>">
           <%- item.icon.replace('<svg ', '<svg class="btn-icon" aria-hidden="true" ') %>
           <span class="btn-text"><%= item.label %></span>
           <% if (item.badge) { %>
@@ -34,7 +16,7 @@
 
     <!-- Sign Out Button -->
     <div class="sidebar-footer">
-      <button type="button" class="btn btn-secondary btn-logout" id="btn-logout" aria-label="Sign out">
+      <button type="button" class="btn sidebar-btn btn-logout" id="btn-logout" aria-label="Sign out">
         <%- icons.logOut.replace('<svg ', '<svg class="btn-icon" aria-hidden="true" ') %>
         <span class="btn-text">Sign Out</span>
       </button>

@@ -1,11 +1,25 @@
-<!-- Full-Width Global Header -->
+<!-- Unified Portal Header - Avatar, Logo, Toggle, Page Title, Theme Toggle -->
 <header class="portal-global-header">
   <div class="portal-global-header-left">
-    <a href="/" class="header-logo" aria-label="Go to homepage">NO BHAD CODES</a>
+    <a href="/" class="header-branding" aria-label="Go to homepage">
+      <img src="/images/avatar_small_sidebar.svg" alt="" class="header-avatar" />
+      <span class="header-logo-text">NO BHAD CODES</span>
+    </a>
     <span class="header-separator"></span>
-    <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
-      <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
-    </nav>
+    <!-- Sidebar Toggle -->
+    <button class="header-sidebar-toggle" id="header-sidebar-toggle" aria-label="Toggle sidebar">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-toggle-icon" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M9 3v18"/>
+      </svg>
+    </button>
+    <h1 class="header-page-title" id="<%= config.pageTitleId %>">
+      <% if (portalType === 'client') { %>
+        Welcome Back, <span id="client-name">Client</span>!
+      <% } else { %>
+        <%= config.pageTitle %>
+      <% } %>
+    </h1>
   </div>
   <div class="portal-global-header-right">
     <% if (config.features.notificationBell) { %>

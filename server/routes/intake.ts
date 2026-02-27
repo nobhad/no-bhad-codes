@@ -17,7 +17,7 @@ import { join } from 'path';
 import { getDatabase } from '../database/init.js';
 import { generateProjectPlan, ProjectPlan } from '../services/project-generator.js';
 import { generateInvoice } from '../services/invoice-generator.js';
-import { sendWelcomeEmail, sendNewIntakeNotification } from '../services/email-service.js';
+import { sendNewIntakeNotification } from '../services/email-service.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { userService } from '../services/user-service.js';
@@ -409,8 +409,8 @@ router.post(
       try {
         await saveIntakeAsFile(intakeData, projectId, projectName);
       } catch (fileError) {
-         await logger.error('[Intake] Failed to save intake file:', { error: fileError instanceof Error ? fileError : undefined, category: 'INTAKE' });
-      // Non-critical error - don't fail the whole request
+        await logger.error('[Intake] Failed to save intake file:', { error: fileError instanceof Error ? fileError : undefined, category: 'INTAKE' });
+        // Non-critical error - don't fail the whole request
       }
 
       // Generate access token for client portal
@@ -430,17 +430,15 @@ router.post(
       );
 
       // Send notifications (async, don't wait)
+      // NOTE: Welcome email is NOT sent here because new clients are in 'pending' status.
+      // They will receive an invitation email to activate their account, and welcome
+      // emails will be sent after account activation via the welcome sequence.
       setTimeout(async () => {
         try {
-        // Send welcome email to client
-          if (isNewClient) {
-            await sendWelcomeEmail(intakeData.email, intakeData.name, accessToken);
-          }
-
-          // Send new intake notification to admin
+          // Send new intake notification to admin only
           await sendNewIntakeNotification(intakeData, projectId);
         } catch (emailError) {
-           await logger.error('Failed to send emails:', { error: emailError instanceof Error ? emailError : undefined, category: 'INTAKE' });
+          await logger.error('Failed to send emails:', { error: emailError instanceof Error ? emailError : undefined, category: 'INTAKE' });
         }
       }, 100);
 

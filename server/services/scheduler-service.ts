@@ -22,7 +22,6 @@ type Database = any;
 interface SchedulerConfig {
   enableReminders: boolean;
   enableContractReminders: boolean;
-  enableWelcomeSequences: boolean;
   enableScheduledInvoices: boolean;
   enableRecurringInvoices: boolean;
   enableSoftDeleteCleanup: boolean;
@@ -42,7 +41,6 @@ interface SchedulerConfig {
 const DEFAULT_CONFIG: SchedulerConfig = {
   enableReminders: true,
   enableContractReminders: true,
-  enableWelcomeSequences: true,
   enableScheduledInvoices: true,
   enableRecurringInvoices: true,
   enableSoftDeleteCleanup: true,
@@ -58,15 +56,6 @@ const DEFAULT_CONFIG: SchedulerConfig = {
   approvalReminderIntervals: [1, 3, 7], // Send reminders at 1, 3, and 7 days
   approvalStallThresholdDays: 7 // Notify admin after 7 days without response
 };
-
-interface WelcomeEmail {
-  id: number;
-  clientId: number;
-  emailType: 'welcome' | 'getting_started' | 'tips' | 'check_in';
-  scheduledDate: string;
-  sentAt: string | null;
-  status: 'pending' | 'sent' | 'skipped' | 'failed';
-}
 
 interface ContractReminder {
   id: number;
@@ -402,12 +391,6 @@ export class SchedulerService {
       totalSent += contractSent;
     }
 
-    // Process welcome sequences
-    if (this.config.enableWelcomeSequences) {
-      const welcomeSent = await this.processWelcomeSequences();
-      totalSent += welcomeSent;
-    }
-
     // Process approval reminders
     if (this.config.enableApprovalReminders) {
       const approvalSent = await this.processApprovalReminders();
@@ -646,283 +629,6 @@ No Bhad Codes Team
     </div>
     <div class="footer">
       <p>Best regards,<br>No Bhad Codes Team</p>
-    </div>
-  </div>
-</body>
-</html>
-      `
-    });
-  }
-
-  // ===================================
-  // WELCOME SEQUENCE METHODS
-  // ===================================
-
-  /**
-   * Process due welcome sequence emails
-   */
-  async processWelcomeSequences(): Promise<number> {
-    console.log('[Scheduler] Processing welcome sequences...');
-
-    const today = new Date().toISOString().split('T')[0];
-    let sentCount = 0;
-
-    // Get due welcome emails for active clients
-    const sql = `
-      SELECT w.*, c.email, c.contact_name, c.company_name
-      FROM welcome_sequence_emails w
-      JOIN clients c ON w.client_id = c.id
-      WHERE w.status = 'pending'
-        AND w.scheduled_date <= ?
-        AND c.status IN ('active', 'pending')
-    `;
-
-    const dueEmails = await this.db.all(sql, [today]);
-
-    for (const email of dueEmails) {
-      try {
-        if (!email.email) {
-          console.warn(`[Scheduler] No email for client ${email.client_id}, skipping welcome email`);
-          await this.markWelcomeEmailSkipped(email.id);
-          continue;
-        }
-
-        const portalUrl = process.env.CLIENT_PORTAL_URL || 'http://localhost:3000/client/portal';
-
-        await this.sendWelcomeEmail({
-          email: email.email,
-          clientName: email.contact_name || 'Valued Client',
-          companyName: email.company_name,
-          emailType: email.email_type,
-          portalUrl
-        });
-
-        await this.markWelcomeEmailSent(email.id);
-        sentCount++;
-
-        console.log(`[Scheduler] Sent ${email.email_type} welcome email to ${email.email}`);
-      } catch (error) {
-        console.error(`[Scheduler] Failed to send welcome email ${email.id}:`, error);
-        await this.markWelcomeEmailFailed(email.id);
-      }
-    }
-
-    // Check if any clients have completed their sequence
-    await this.checkWelcomeSequenceCompletion();
-
-    console.log(`[Scheduler] Processed ${dueEmails.length} welcome emails, sent ${sentCount}`);
-    return sentCount;
-  }
-
-  /**
-   * Start welcome sequence for a client (called when client account is activated)
-   */
-  async startWelcomeSequence(clientId: number): Promise<void> {
-    const today = new Date();
-
-    // Check if sequence already started
-    const client = await this.db.get(
-      'SELECT welcome_sequence_started_at FROM clients WHERE id = ?',
-      [clientId]
-    );
-
-    if (client?.welcome_sequence_started_at) {
-      console.log(`[Scheduler] Welcome sequence already started for client ${clientId}`);
-      return;
-    }
-
-    // Get active welcome sequence templates
-    const templates = await this.db.all(
-      'SELECT * FROM welcome_sequence_templates WHERE is_active = TRUE ORDER BY sort_order'
-    );
-
-    // Schedule each email
-    for (const template of templates) {
-      const scheduledDate = new Date(today);
-      scheduledDate.setDate(scheduledDate.getDate() + template.days_after_signup);
-
-      await this.db.run(
-        'INSERT INTO welcome_sequence_emails (client_id, email_type, scheduled_date) VALUES (?, ?, ?)',
-        [clientId, template.email_type, scheduledDate.toISOString().split('T')[0]]
-      );
-    }
-
-    // Mark sequence as started
-    await this.db.run(
-      'UPDATE clients SET welcome_sequence_started_at = ? WHERE id = ?',
-      [today.toISOString(), clientId]
-    );
-
-    console.log(`[Scheduler] Started welcome sequence for client ${clientId} with ${templates.length} emails`);
-  }
-
-  /**
-   * Cancel welcome sequence (e.g., if client is deactivated)
-   */
-  async cancelWelcomeSequence(clientId: number): Promise<void> {
-    await this.db.run(
-      'UPDATE welcome_sequence_emails SET status = ? WHERE client_id = ? AND status = ?',
-      ['skipped', clientId, 'pending']
-    );
-    console.log(`[Scheduler] Cancelled welcome sequence for client ${clientId}`);
-  }
-
-  /**
-   * Check if clients have completed their welcome sequence
-   */
-  private async checkWelcomeSequenceCompletion(): Promise<void> {
-    // Find clients with all emails sent/skipped
-    const sql = `
-      UPDATE clients SET welcome_sequence_completed = TRUE
-      WHERE id IN (
-        SELECT c.id FROM clients c
-        WHERE c.welcome_sequence_started_at IS NOT NULL
-          AND c.welcome_sequence_completed = FALSE
-          AND NOT EXISTS (
-            SELECT 1 FROM welcome_sequence_emails w
-            WHERE w.client_id = c.id AND w.status = 'pending'
-          )
-      )
-    `;
-    await this.db.run(sql);
-  }
-
-  private async markWelcomeEmailSent(emailId: number): Promise<void> {
-    await this.db.run(
-      'UPDATE welcome_sequence_emails SET status = ?, sent_at = ? WHERE id = ?',
-      ['sent', new Date().toISOString(), emailId]
-    );
-  }
-
-  private async markWelcomeEmailSkipped(emailId: number): Promise<void> {
-    await this.db.run(
-      'UPDATE welcome_sequence_emails SET status = ? WHERE id = ?',
-      ['skipped', emailId]
-    );
-  }
-
-  private async markWelcomeEmailFailed(emailId: number): Promise<void> {
-    await this.db.run(
-      'UPDATE welcome_sequence_emails SET status = ? WHERE id = ?',
-      ['failed', emailId]
-    );
-  }
-
-  /**
-   * Send a welcome sequence email
-   */
-  private async sendWelcomeEmail(data: {
-    email: string;
-    clientName: string;
-    companyName?: string;
-    emailType: string;
-    portalUrl: string;
-  }): Promise<void> {
-    const { email, clientName, companyName, emailType, portalUrl } = data;
-
-    let subject: string;
-    let heading: string;
-    let message: string;
-    let ctaText: string;
-    let ctaUrl: string;
-
-    switch (emailType) {
-    case 'welcome':
-      subject = 'Welcome to No Bhad Codes!';
-      heading = 'Welcome Aboard!';
-      message = `We're thrilled to have ${companyName ? companyName : 'you'} as a client. Your client portal is now ready and waiting for you.`;
-      ctaText = 'Visit Your Portal';
-      ctaUrl = portalUrl;
-      break;
-
-    case 'getting_started':
-      subject = 'Getting Started with Your Client Portal';
-      heading = 'Quick Portal Tour';
-      message = `Here's a quick overview of what you can do in your client portal:
-        <ul style="text-align: left; margin: 15px auto; max-width: 400px;">
-          <li><strong>Dashboard</strong> - See your project status at a glance</li>
-          <li><strong>Messages</strong> - Communicate directly with your project team</li>
-          <li><strong>Files</strong> - Access and upload project documents</li>
-          <li><strong>Invoices</strong> - View and download invoices</li>
-        </ul>`;
-      ctaText = 'Explore Your Portal';
-      ctaUrl = portalUrl;
-      break;
-
-    case 'tips':
-      subject = 'Tips for Working Together';
-      heading = 'Let\'s Make This Project Amazing';
-      message = `A few tips for a smooth project experience:
-        <ul style="text-align: left; margin: 15px auto; max-width: 400px;">
-          <li><strong>Respond to messages promptly</strong> - This helps keep the project on track</li>
-          <li><strong>Upload files to the portal</strong> - Keeps everything organized in one place</li>
-          <li><strong>Review deliverables carefully</strong> - Your feedback is valuable</li>
-          <li><strong>Ask questions!</strong> - No question is too small</li>
-        </ul>`;
-      ctaText = 'Go to Portal';
-      ctaUrl = portalUrl;
-      break;
-
-    case 'check_in':
-      subject = 'How\'s Everything Going?';
-      heading = 'Quick Check-In';
-      message = 'It\'s been a week since you set up your portal. We wanted to check in and make sure everything is going smoothly. If you have any questions or need help with anything, don\'t hesitate to reach out through the messaging system in your portal.';
-      ctaText = 'Send Us a Message';
-      ctaUrl = `${portalUrl}#messages`;
-      break;
-
-    default:
-      subject = 'A Message from No Bhad Codes';
-      heading = 'Hello!';
-      message = 'We wanted to reach out and see how things are going.';
-      ctaText = 'Visit Portal';
-      ctaUrl = portalUrl;
-    }
-
-    await emailService.sendEmail({
-      to: email,
-      subject,
-      text: `
-Hi ${clientName},
-
-${heading}
-
-${message.replace(/<[^>]*>/g, '')}
-
-${ctaUrl}
-
-Best regards,
-No Bhad Codes Team
-      `,
-      html: `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
-    .content { padding: 30px; background: #f9f9f9; text-align: center; }
-    .button { display: inline-block; padding: 14px 28px; background: #00ff41; color: #000; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
-    .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
-    ul { list-style: none; padding: 0; }
-    li { padding: 8px 0; border-bottom: 1px solid #eee; }
-    li:last-child { border-bottom: none; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 style="margin: 0;">${heading}</h1>
-    </div>
-    <div class="content">
-      <p>Hi ${clientName},</p>
-      <p>${message}</p>
-      <a href="${ctaUrl}" class="button">${ctaText}</a>
-    </div>
-    <div class="footer">
-      <p>Best regards,<br>No Bhad Codes Team</p>
-      <p style="font-size: 12px; color: #999;">You're receiving this because you have an account with No Bhad Codes.</p>
     </div>
   </div>
 </body>
