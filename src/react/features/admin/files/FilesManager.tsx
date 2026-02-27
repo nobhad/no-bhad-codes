@@ -403,10 +403,10 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
                       {file.type !== 'folder' && (
                         <>
                           <button className="icon-btn" title="Preview">
-                            <Eye />
+                            <Eye size={18} />
                           </button>
                           <button className="icon-btn" title="Download">
-                            <Download />
+                            <Download size={18} />
                           </button>
                         </>
                       )}
@@ -415,7 +415,7 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
                         title="Delete"
                         onClick={() => handleDelete(file.id)}
                       >
-                        <Trash2 />
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </AdminTableCell>
@@ -492,7 +492,7 @@ function FilesGrid({
                 onDelete(file.id);
               }}
             >
-              <Trash2 />
+              <Trash2 size={18} />
             </button>
           </div>
         </div>

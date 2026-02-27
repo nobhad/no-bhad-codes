@@ -224,7 +224,7 @@ export function ProposalsTable({ onNavigate }: ProposalsTableProps) {
             onChange={(key, value) => setStatusFilter(value)}
           />
           <button className="icon-btn" title="Export">
-            <Download />
+            <Download size={18} />
           </button>
           <PortalButton variant="primary" size="sm">
             <Plus className="btn-icon" />
@@ -356,7 +356,7 @@ export function ProposalsTable({ onNavigate }: ProposalsTableProps) {
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <button className="icon-btn" title="View">
-                      <Eye />
+                      <Eye size={18} />
                     </button>
                     {proposal.status === 'draft' && (
                       <button
@@ -364,13 +364,13 @@ export function ProposalsTable({ onNavigate }: ProposalsTableProps) {
                         title="Send"
                         onClick={() => handleSendProposal(proposal.id)}
                       >
-                        <Send />
+                        <Send size={18} />
                       </button>
                     )}
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
                         <button className="icon-btn">
-                          <MoreHorizontal />
+                          <MoreHorizontal size={18} />
                         </button>
                       </PortalDropdownTrigger>
                       <PortalDropdownContent>

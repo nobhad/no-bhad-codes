@@ -429,7 +429,7 @@ export function ClientsTable({
             disabled={isExporting || filteredClients.length === 0}
             title="Export to CSV"
           >
-            <Download />
+            <Download size={18} />
           </button>
           <button
             className="icon-btn"
@@ -437,7 +437,7 @@ export function ClientsTable({
             disabled={isLoading}
             title="Refresh"
           >
-            <RefreshCw className={isLoading ? 'spinning' : ''} />
+            <RefreshCw size={18} className={isLoading ? 'spinning' : ''} />
           </button>
         </>
       }
@@ -628,7 +628,7 @@ export function ClientsTable({
                           onClick={() => handleViewClient(client.id)}
                           title="View client"
                         >
-                          <Eye />
+                          <Eye size={18} />
                         </button>
                         {inviteStatus === 'not-invited' && (
                           <button
@@ -637,7 +637,7 @@ export function ClientsTable({
                             disabled={inviteLoading === client.id}
                             title="Send invitation"
                           >
-                            <Send />
+                            <Send size={18} />
                           </button>
                         )}
                         {client.phone && (
@@ -646,7 +646,7 @@ export function ClientsTable({
                             onClick={() => window.location.href = `tel:${client.phone}`}
                             title="Call client"
                           >
-                            <Phone />
+                            <Phone size={18} />
                           </button>
                         )}
                       </div>

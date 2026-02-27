@@ -374,10 +374,10 @@ export function ProjectsTable({
               disabled={isExporting || filteredProjects.length === 0}
               title="Export to CSV"
             >
-              <Download />
+              <Download size={18} />
             </button>
             <button className="icon-btn" onClick={refetch} disabled={isLoading} title="Refresh">
-              <RefreshCw className={isLoading ? 'spinning' : ''} />
+              <RefreshCw size={18} className={isLoading ? 'spinning' : ''} />
             </button>
           </>
         }
@@ -580,7 +580,7 @@ export function ProjectsTable({
                         onClick={() => handleViewProject(project.id)}
                         title="View project"
                       >
-                        <Eye />
+                        <Eye size={16} />
                       </button>
                     </div>
                   </AdminTableCell>

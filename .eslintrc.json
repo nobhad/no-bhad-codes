@@ -16,7 +16,8 @@
     "CustomEase": "readonly",
     "NodeFilter": "readonly",
     "Text": "readonly",
-    "ParentNode": "readonly"
+    "ParentNode": "readonly",
+    "DocumentFragment": "readonly"
   },
   "rules": {
     "indent": ["error", 4],

@@ -393,7 +393,7 @@ export function DeletedItemsTable({ onNavigate }: DeletedItemsTableProps) {
                       title="Delete Permanently"
                       onClick={() => handlePermanentDelete(item.id)}
                     >
-                      <Trash2 />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </AdminTableCell>

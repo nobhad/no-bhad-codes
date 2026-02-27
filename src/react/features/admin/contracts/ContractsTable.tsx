@@ -246,7 +246,7 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
             onChange={(key, value) => setStatusFilter(value)}
           />
           <button className="icon-btn" title="Export">
-            <Download />
+            <Download size={18} />
           </button>
           <PortalButton variant="primary" size="sm">
             <Plus className="btn-icon" />
@@ -379,7 +379,7 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <button className="icon-btn" title="View">
-                      <Eye />
+                      <Eye size={18} />
                     </button>
                     {contract.status === 'draft' && (
                       <button
@@ -387,11 +387,11 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
                         title="Send"
                         onClick={() => handleSendContract(contract.id)}
                       >
-                        <Send />
+                        <Send size={18} />
                       </button>
                     )}
                     <button className="icon-btn" title="Download">
-                      <Download />
+                      <Download size={18} />
                     </button>
                   </div>
                 </AdminTableCell>

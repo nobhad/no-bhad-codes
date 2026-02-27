@@ -329,7 +329,7 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
                         <button className="icon-btn">
-                          <MoreHorizontal />
+                          <MoreHorizontal size={18} />
                         </button>
                       </PortalDropdownTrigger>
                       <PortalDropdownContent>

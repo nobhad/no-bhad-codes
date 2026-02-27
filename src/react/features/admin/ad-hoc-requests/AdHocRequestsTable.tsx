@@ -236,7 +236,7 @@ export function AdHocRequestsTable({ clientId, projectId, onNavigate }: AdHocReq
             }}
           />
           <button className="icon-btn" title="Export">
-            <Download />
+            <Download size={18} />
           </button>
           <PortalButton variant="primary" size="sm">
             <Plus className="btn-icon" />
@@ -377,7 +377,7 @@ export function AdHocRequestsTable({ clientId, projectId, onNavigate }: AdHocReq
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
                         <button className="icon-btn">
-                          <MoreHorizontal />
+                          <MoreHorizontal size={16} />
                         </button>
                       </PortalDropdownTrigger>
                       <PortalDropdownContent>

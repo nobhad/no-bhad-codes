@@ -314,22 +314,22 @@ export function DesignReviewPanel({ projectId, onNavigate }: DesignReviewPanelPr
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <button className="icon-btn" title="View">
-                      <Eye />
+                      <Eye size={18} />
                     </button>
                     {review.status === 'in-review' && (
                       <>
                         <button className="icon-btn" title="Approve">
-                          <ThumbsUp className="status-completed" />
+                          <ThumbsUp size={18} className="status-completed" />
                         </button>
                         <button className="icon-btn" title="Request Revision">
-                          <ThumbsDown className="status-cancelled" />
+                          <ThumbsDown size={18} className="status-cancelled" />
                         </button>
                       </>
                     )}
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
                         <button className="icon-btn">
-                          <MoreHorizontal />
+                          <MoreHorizontal size={18} />
                         </button>
                       </PortalDropdownTrigger>
                       <PortalDropdownContent>
