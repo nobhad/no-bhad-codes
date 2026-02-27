@@ -18,6 +18,7 @@ import {
 } from '../../../components/annotation-canvas';
 import { showToast } from '../../../utils/toast-notifications';
 import { createLogger } from '../../../utils/logger';
+import { SanitizationUtils } from '../../../utils/sanitization-utils';
 
 const logger = createLogger('DesignReview');
 
@@ -338,7 +339,7 @@ function setupElementApproval(): void {
       (element) =>
         `
     <div class="design-element-item" data-element-id="${element.id}">
-      <div class="element-name">${element.name}</div>
+      <div class="element-name">${SanitizationUtils.escapeHtml(element.name)}</div>
       <div class="element-approval">
         <button class="approval-btn pending ${element.approvalStatus === 'pending' ? 'active' : ''}" data-status="pending">
           Pending
@@ -415,7 +416,7 @@ async function exportFeedbackPDF(): Promise<void> {
       <html>
       <head>
         <meta charset="UTF-8">
-        <title>Design Review Feedback - ${currentDeliverable.title}</title>
+        <title>Design Review Feedback - ${SanitizationUtils.escapeHtml(currentDeliverable.title)}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
@@ -442,7 +443,7 @@ async function exportFeedbackPDF(): Promise<void> {
           <div class="header">
             <h1>Design Review Feedback</h1>
             <p class="meta">
-              <span class="meta-item"><strong>Project:</strong> ${currentDeliverable.title}</span>
+              <span class="meta-item"><strong>Project:</strong> ${SanitizationUtils.escapeHtml(currentDeliverable.title)}</span>
               <span class="meta-item"><strong>Round:</strong> ${currentRound}</span>
               <span class="meta-item"><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>
             </p>
@@ -461,7 +462,7 @@ async function exportFeedbackPDF(): Promise<void> {
     .map(
       (element) => `
                 <div class="element-item">
-                  <span class="element-name">${element.name}</span>
+                  <span class="element-name">${SanitizationUtils.escapeHtml(element.name)}</span>
                   <span class="element-status status-${element.approvalStatus === 'approved' ? 'approved' : element.approvalStatus === 'revisions_needed' ? 'revisions' : 'pending'}">
                     ${element.approvalStatus === 'approved' ? '✓ Approved' : element.approvalStatus === 'revisions_needed' ? '✗ Revisions Needed' : '○ Pending'}
                   </span>
