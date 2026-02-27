@@ -34,8 +34,37 @@ import {
   sendNotFound,
   ErrorCodes,
 } from '../utils/api-response.js';
+import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 
 const router = express.Router();
+
+// Auth-specific validation schemas
+const AuthValidationSchemas = {
+  clientLogin: {
+    email: [{ type: 'required' as const }, { type: 'email' as const }],
+    password: [{ type: 'required' as const }, { type: 'string' as const, minLength: 1, maxLength: 128 }],
+  },
+  adminLogin: {
+    password: [{ type: 'required' as const }, { type: 'string' as const, minLength: 1, maxLength: 128 }],
+  },
+  forgotPassword: {
+    email: [{ type: 'required' as const }, { type: 'email' as const }],
+  },
+  resetPassword: {
+    token: [{ type: 'required' as const }, { type: 'string' as const, minLength: 32, maxLength: 128 }],
+    password: [{ type: 'required' as const }, { type: 'string' as const, minLength: 12, maxLength: 128 }],
+  },
+  setPassword: {
+    token: [{ type: 'required' as const }, { type: 'string' as const, minLength: 32, maxLength: 128 }],
+    password: [{ type: 'required' as const }, { type: 'string' as const, minLength: 12, maxLength: 128 }],
+  },
+  magicLink: {
+    email: [{ type: 'required' as const }, { type: 'email' as const }],
+  },
+  verifyToken: {
+    token: [{ type: 'required' as const }, { type: 'string' as const, minLength: 32, maxLength: 256 }],
+  },
+};
 
 // Note: Using validatePassword from auth-constants.ts instead of local implementation
 
@@ -122,13 +151,10 @@ router.post(
     message: 'Too many login attempts. Please try again later.',
     keyGenerator: (req) => `login:${req.ip}`,
   }),
+  // Validate and sanitize input
+  validateRequest(AuthValidationSchemas.clientLogin),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
-
-    // Validate input
-    if (!email || !password) {
-      return sendBadRequest(res, 'Email and password are required', ErrorCodes.MISSING_CREDENTIALS);
-    }
 
     const db = getDatabase();
 
@@ -559,12 +585,10 @@ router.post(
     message: 'Too many password reset requests. Please try again later.',
     keyGenerator: (req) => `forgot-password:${req.ip}`,
   }),
+  // Validate and sanitize input
+  validateRequest(AuthValidationSchemas.forgotPassword),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email } = req.body;
-
-    if (!email) {
-      return sendBadRequest(res, 'Email is required', ErrorCodes.MISSING_FIELDS);
-    }
 
     // Validate email format before DB query
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -684,12 +708,10 @@ router.post(
  */
 router.post(
   '/reset-password',
+  // Validate and sanitize input
+  validateRequest(AuthValidationSchemas.resetPassword),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { token, password } = req.body;
-
-    if (!token || !password) {
-      return sendBadRequest(res, 'Token and password are required', ErrorCodes.MISSING_FIELDS);
-    }
 
     // Validate password strength using centralized validation
     const passwordValidation = validatePassword(password);
@@ -810,13 +832,11 @@ router.post(
     message: 'Too many admin login attempts. Please try again later.',
     keyGenerator: (req) => `admin-login:${req.ip}`,
   }),
+  // Validate and sanitize input
+  validateRequest(AuthValidationSchemas.adminLogin),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { password } = req.body;
     const db = getDatabase();
-
-    if (!password) {
-      return sendBadRequest(res, 'Password is required', ErrorCodes.MISSING_CREDENTIALS);
-    }
 
     // Check admin account lockout status from system_settings
     const lockoutSetting = await db.get(
@@ -997,6 +1017,8 @@ router.post(
     message: 'Too many magic link requests. Please try again later.',
     keyGenerator: (req) => `magic-link:${req.ip}`,
   }),
+  // Validate and sanitize input
+  validateRequest(AuthValidationSchemas.magicLink),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email } = req.body;
 
@@ -1114,12 +1136,10 @@ router.post(
  */
 router.post(
   '/verify-magic-link',
+  // Validate and sanitize input
+  validateRequest(AuthValidationSchemas.verifyToken),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { token } = req.body;
-
-    if (!token) {
-      return sendBadRequest(res, 'Token is required', ErrorCodes.MISSING_FIELDS);
-    }
 
     const db = getDatabase();
 
@@ -1242,12 +1262,10 @@ router.post(
  */
 router.post(
   '/verify-invitation',
+  // Validate and sanitize input
+  validateRequest(AuthValidationSchemas.verifyToken),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { token } = req.body;
-
-    if (!token) {
-      return sendBadRequest(res, 'Token is required', ErrorCodes.MISSING_FIELDS);
-    }
 
     const db = getDatabase();
     const client = await db.get(
@@ -1295,12 +1313,10 @@ router.post(
  */
 router.post(
   '/set-password',
+  // Validate and sanitize input
+  validateRequest(AuthValidationSchemas.setPassword),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { token, password } = req.body;
-
-    if (!token || !password) {
-      return sendBadRequest(res, 'Token and password are required', ErrorCodes.MISSING_FIELDS);
-    }
 
     // Password validation using centralized validation
     const passwordValidation = validatePassword(password);

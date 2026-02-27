@@ -21,8 +21,41 @@ import { softDeleteService } from '../services/soft-delete-service.js';
 import { notificationPreferencesService } from '../services/notification-preferences-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 import { clientService } from '../services/client-service.js';
+import { validateRequest } from '../middleware/validation.js';
 
 const router = express.Router();
+
+// Client validation schemas
+const ClientValidationSchemas = {
+  create: {
+    email: [{ type: 'required' as const }, { type: 'email' as const }],
+    password: { type: 'string' as const, minLength: 8, maxLength: 128 },
+    company_name: { type: 'string' as const, maxLength: 200 },
+    contact_name: { type: 'string' as const, maxLength: 100 },
+    phone: { type: 'string' as const, maxLength: 30 },
+    client_type: {
+      type: 'string' as const,
+      allowedValues: ['business', 'individual', 'nonprofit', 'government'],
+    },
+    status: {
+      type: 'string' as const,
+      allowedValues: ['active', 'inactive', 'pending'],
+    },
+  },
+  update: {
+    email: { type: 'email' as const },
+    company_name: { type: 'string' as const, maxLength: 200 },
+    contact_name: { type: 'string' as const, maxLength: 100 },
+    phone: { type: 'string' as const, maxLength: 30 },
+    status: {
+      type: 'string' as const,
+      allowedValues: ['active', 'inactive', 'pending'],
+    },
+  },
+  invite: {
+    // No body params needed - client info comes from DB via :id param
+  },
+};
 
 // =====================================================
 // CURRENT CLIENT ENDPOINTS (/me)
@@ -688,6 +721,7 @@ router.post(
   '/',
   authenticateToken,
   requireAdmin,
+  validateRequest(ClientValidationSchemas.create),
   invalidateCache(['clients']),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email, password, company_name, contact_name, phone, client_type, status } = req.body;
@@ -826,6 +860,7 @@ router.post(
 router.put(
   '/:id',
   authenticateToken,
+  validateRequest(ClientValidationSchemas.update),
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);

@@ -12,8 +12,28 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseRecurringInvoice } from './helpers.js';
+import { validateRequest } from '../../middleware/validation.js';
 
 const router = express.Router();
+
+// Recurring invoice validation schemas
+const RecurringValidationSchemas = {
+  create: {
+    projectId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    clientId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
+    frequency: [
+      { type: 'required' as const },
+      { type: 'string' as const, allowedValues: ['weekly', 'monthly', 'quarterly'] },
+    ],
+    startDate: [{ type: 'required' as const }, { type: 'string' as const, minLength: 8, maxLength: 20 }],
+    endDate: { type: 'string' as const, maxLength: 20 },
+    lineItems: [{ type: 'required' as const }, { type: 'array' as const, minLength: 1 }],
+    dayOfMonth: { type: 'number' as const, min: 1, max: 31 },
+    dayOfWeek: { type: 'number' as const, min: 0, max: 6 },
+    notes: { type: 'string' as const, maxLength: 2000 },
+    terms: { type: 'string' as const, maxLength: 2000 },
+  },
+};
 
 /**
  * @swagger
@@ -27,6 +47,8 @@ router.post(
   '/recurring',
   authenticateToken,
   requireAdmin,
+  // Validate and sanitize input
+  validateRequest(RecurringValidationSchemas.create),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const {
       projectId,
@@ -40,19 +62,6 @@ router.post(
       startDate,
       endDate,
     } = req.body;
-
-    if (!projectId || !clientId || !frequency || !lineItems?.length || !startDate) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['projectId', 'clientId', 'frequency', 'lineItems', 'startDate'],
-      });
-    }
-
-    const validFrequencies = ['weekly', 'monthly', 'quarterly'];
-    if (!validFrequencies.includes(frequency)) {
-      return errorResponseWithPayload(res, 'Invalid frequency', 400, 'INVALID_FREQUENCY', {
-        validFrequencies,
-      });
-    }
 
     try {
       const recurring = await getInvoiceService().createRecurringInvoice({

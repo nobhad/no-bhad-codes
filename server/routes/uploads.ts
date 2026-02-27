@@ -28,8 +28,85 @@ import {
   sendSuccess,
   sendCreated,
 } from '../utils/api-response.js';
+import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
+import { VALIDATION_PATTERNS } from '../../shared/validation/patterns.js';
 
 const router = express.Router();
+
+// Upload validation schemas for additional request body validation
+// Note: File validation is primarily handled by multer's fileFilter
+const UploadValidationSchemas = {
+  // For routes that accept file metadata in request body
+  fileMetadata: {
+    filename: {
+      type: 'string' as const,
+      maxLength: 255,
+      customValidator: (value: string) => {
+        // Prevent path traversal in filename
+        if (value.includes('..') || value.includes('/') || value.includes('\\')) {
+          return 'Filename cannot contain path traversal characters';
+        }
+        // Check against safe filename pattern
+        if (!VALIDATION_PATTERNS.FILENAME_SAFE.test(value)) {
+          return 'Filename contains invalid characters';
+        }
+        return true;
+      },
+    },
+    fileType: {
+      type: 'string' as const,
+      maxLength: 100,
+      allowedValues: [
+        // Images
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/svg+xml',
+        // Documents
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain',
+        'application/rtf',
+        // Spreadsheets
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv',
+        // Presentations
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        // Archives
+        'application/zip',
+        'application/x-rar-compressed',
+        'application/x-tar',
+        'application/gzip',
+        'application/x-7z-compressed',
+        // Data
+        'application/json',
+        'text/xml',
+        'application/xml',
+      ],
+    },
+    fileSize: {
+      type: 'number' as const,
+      min: 1,
+      max: 10 * 1024 * 1024, // 10MB max
+    },
+    description: { type: 'string' as const, maxLength: 1000 },
+    category: {
+      type: 'string' as const,
+      allowedValues: ['general', 'avatar', 'project_file', 'invoice_attachment', 'message_attachment'],
+    },
+  },
+  // For deliverable workflow actions
+  deliverableAction: {
+    notes: { type: 'string' as const, maxLength: 2000 },
+    feedback: { type: 'string' as const, maxLength: 5000 },
+    reason: { type: 'string' as const, maxLength: 2000 },
+    comment: { type: 'string' as const, maxLength: 2000 },
+  },
+};
 
 // Get uploads directory from centralized config (uses persistent storage on Railway)
 const uploadDir = getUploadsDir();
@@ -984,6 +1061,7 @@ router.get(
 router.post(
   '/deliverables/:fileId/submit',
   authenticateToken,
+  validateRequest({ notes: UploadValidationSchemas.deliverableAction.notes }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fileId = parseInt(req.params.fileId);
     const { notes } = req.body;
@@ -1043,6 +1121,12 @@ router.post(
 router.post(
   '/deliverables/:fileId/request-changes',
   authenticateToken,
+  validateRequest({
+    feedback: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 5000 },
+    ],
+  }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
       return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
@@ -1055,6 +1139,7 @@ router.post(
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
+    // Note: 'feedback' required check now handled by validation middleware
     if (!feedback) {
       return errorResponse(
         res,
@@ -1082,6 +1167,7 @@ router.post(
 router.post(
   '/deliverables/:fileId/approve',
   authenticateToken,
+  validateRequest({ comment: UploadValidationSchemas.deliverableAction.comment }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
       return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
@@ -1112,6 +1198,12 @@ router.post(
 router.post(
   '/deliverables/:fileId/reject',
   authenticateToken,
+  validateRequest({
+    reason: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 2000 },
+    ],
+  }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
       return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
@@ -1124,6 +1216,7 @@ router.post(
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
+    // Note: 'reason' required check now handled by validation middleware
     if (!reason) {
       return errorResponse(res, 'Reason is required when rejecting', 400, 'VALIDATION_ERROR');
     }
@@ -1146,6 +1239,7 @@ router.post(
 router.post(
   '/deliverables/:fileId/resubmit',
   authenticateToken,
+  validateRequest({ notes: UploadValidationSchemas.deliverableAction.notes }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fileId = parseInt(req.params.fileId);
     const { notes } = req.body;
@@ -1172,6 +1266,12 @@ router.post(
 router.post(
   '/deliverables/:fileId/comments',
   authenticateToken,
+  validateRequest({
+    comment: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 2000 },
+    ],
+  }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fileId = parseInt(req.params.fileId);
     const { comment } = req.body;
@@ -1180,6 +1280,7 @@ router.post(
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
     }
 
+    // Note: 'comment' required check now handled by validation middleware
     if (!comment) {
       return errorResponse(res, 'Comment is required', 400, 'VALIDATION_ERROR');
     }
@@ -1297,20 +1398,21 @@ router.post(
 router.use(
   (error: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (error instanceof multer.MulterError) {
-      if (error.code === 'LIMIT_FILE_SIZE') {
+      const multerError = error as multer.MulterError;
+      if (multerError.code === 'LIMIT_FILE_SIZE') {
         return errorResponseWithPayload(res, 'File too large', 400, 'FILE_TOO_LARGE', {
           message: 'File size cannot exceed 10MB',
         });
       }
 
-      if (error.code === 'LIMIT_FILE_COUNT') {
+      if (multerError.code === 'LIMIT_FILE_COUNT') {
         return errorResponseWithPayload(res, 'Too many files', 400, 'TOO_MANY_FILES', {
           message: 'Cannot upload more than 5 files at once',
         });
       }
 
       return errorResponseWithPayload(res, 'Upload error', 400, 'UPLOAD_ERROR', {
-        message: error.message,
+        message: multerError.message,
       });
     }
 
