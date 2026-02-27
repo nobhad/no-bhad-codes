@@ -27,6 +27,9 @@ import {
   applyPagination,
   createPaginationUI
 } from '../../../utils/table-pagination';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminGlobalTasks');
 
 // View toggle icons
 const BOARD_ICON =
@@ -231,10 +234,10 @@ async function fetchTasks(): Promise<void> {
       currentTasks = (data.tasks || []).map(mapTaskFromApi);
     } else {
       currentTasks = [];
-      console.error('[AdminGlobalTasks] Failed to fetch tasks');
+      logger.error(' Failed to fetch tasks');
     }
   } catch (error) {
-    console.error('[AdminGlobalTasks] Error loading tasks:', error);
+    logger.error(' Error loading tasks:', error);
     currentTasks = [];
   }
 }
@@ -492,7 +495,7 @@ function renderListView(): void {
         <table class="data-table">
           <thead>
             <tr>
-              <th scope="col" class="name-col">Task</th>
+              <th scope="col" class="identity-col">Task</th>
               <th scope="col" class="name-col">Project</th>
               <th scope="col" class="name-col">Milestone</th>
               <th scope="col" class="type-col">Priority</th>
@@ -572,18 +575,16 @@ function renderListItem(task: GlobalTask): string {
 
   return `
     <tr data-task-id="${task.id}" class="clickable-row" tabindex="0" role="button" aria-label="View task: ${SanitizationUtils.escapeHtml(task.title)}">
-      <td class="name-cell" data-label="Task">
-        <div class="cell-content">
-          <span class="task-title">${SanitizationUtils.escapeHtml(task.title)}</span>
-          ${task.description ? `<small class="task-subtitle">${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</small>` : ''}
-        </div>
+      <td class="identity-cell" data-label="Task">
+        <span class="identity-name" data-field="primary-name">${SanitizationUtils.escapeHtml(task.title)}</span>
+        ${task.description ? `<span class="identity-contact" data-field="secondary-name">${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</span>` : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
       </td>
-      <td class="project-cell" data-label="Project">
+      <td class="name-cell" data-label="Project">
         <button type="button" class="project-link-btn" data-action="view-project" data-project-id="${task.projectId}" title="View project">
           ${SanitizationUtils.escapeHtml(task.projectName)}
         </button>
       </td>
-      <td class="milestone-cell" data-label="Milestone">
+      <td class="name-cell" data-label="Milestone">
         ${task.milestoneTitle ? `
           <span class="task-milestone-tag">${SanitizationUtils.escapeHtml(task.milestoneTitle)}</span>
         ` : `
@@ -630,7 +631,7 @@ async function handleTaskStatusChange(
       renderCurrentView();
     }
   } catch (error) {
-    console.error('[AdminGlobalTasks] Error updating task status:', error);
+    logger.error(' Error updating task status:', error);
     alertError('Error updating task');
     await fetchTasks();
     renderCurrentView();
@@ -692,7 +693,7 @@ function showTaskDetailModal(task: GlobalTask): void {
 
     <div class="task-detail-section">
       <h4>Details</h4>
-      <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-1);">
+      <div class="meta-grid meta-grid--2col meta-grid--gap-xs">
         <div><strong>Status:</strong> ${statusLabel}</div>
         <div class="${isOverdue ? 'overdue' : ''}"><strong>Due:</strong> ${task.dueDate ? formatDate(task.dueDate) : ''}</div>
         <div><strong>Est. Hours:</strong> ${task.estimatedHours || ''}</div>
@@ -765,7 +766,7 @@ async function deleteTask(taskId: number): Promise<void> {
       alertError('Failed to delete task');
     }
   } catch (error) {
-    console.error('[AdminGlobalTasks] Error deleting task:', error);
+    logger.error(' Error deleting task:', error);
     alertError('Error deleting task');
   }
 }

@@ -25,6 +25,9 @@ import { getStatusDotHTML } from '../../../components/status-badge';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
 import { loadEmailTemplatesData } from './admin-email-templates';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminWorkflows');
 
 // ============================================
 // TYPES
@@ -262,7 +265,7 @@ async function loadApprovalWorkflows(): Promise<void> {
     renderWorkflowsTable();
     setupWorkflowHandlers();
   } catch (error) {
-    console.error('[AdminWorkflows] Error loading workflows:', error);
+    logger.error(' Error loading workflows:', error);
     if (tbody) {
       showTableError(tbody, 6, 'Error loading workflows', loadApprovalWorkflows);
     }
@@ -292,12 +295,12 @@ function renderWorkflowsTable(): void {
 
     return `
       <tr data-workflow-id="${w.id}">
-        <td class="name-cell" data-label="Name"><span class="workflow-name">${escapeHtml(w.name)}</span>${defaultIcon}</td>
+        <td class="name-cell" data-label="Name">${escapeHtml(w.name)}${defaultIcon}</td>
         <td class="type-cell entity-type-cell" data-label="Entity Type">
           ${entityLabel}
           <span class="type-stacked">${typeLabel}</span>
         </td>
-        <td class="type-cell workflow-type-cell" data-label="Type">${typeLabel}</td>
+        <td class="type-cell workflow-type-cell" data-label="Workflow Type">${typeLabel}</td>
         <td class="status-cell" data-label="Status">
           ${statusBadge}
           <span class="date-stacked">${formatDate(w.updated_at)}</span>
@@ -317,27 +320,27 @@ function renderWorkflowsTable(): void {
 
 function setupWorkflowHandlers(): void {
   const tbody = el('workflows-table-body');
-  console.log('[Workflows] setupWorkflowHandlers called, tbody:', !!tbody, 'already attached:', tbody?.dataset.handlersAttached);
+  logger.log(' setupWorkflowHandlers called, tbody:', !!tbody, 'already attached:', tbody?.dataset.handlersAttached);
   if (!tbody || tbody.dataset.handlersAttached === 'true') return;
   tbody.dataset.handlersAttached = 'true';
-  console.log('[Workflows] Attaching handlers to tbody');
+  logger.log(' Attaching handlers to tbody');
 
   // Table row actions
   tbody.addEventListener('click', async (e) => {
     const target = e.target as HTMLElement;
     const btn = target.closest('button');
-    console.log('[Workflows] Click on tbody, target:', target.tagName, 'btn found:', !!btn);
+    logger.log(' Click on tbody, target:', target.tagName, 'btn found:', !!btn);
     if (!btn) return;
 
     const id = parseInt(btn.dataset.id || '0', 10);
-    console.log('[Workflows] Button clicked, classes:', btn.className, 'id:', id);
+    logger.log(' Button clicked, classes:', btn.className, 'id:', id);
     if (!id) return;
 
     if (btn.classList.contains('workflow-edit')) {
-      console.log('[Workflows] Opening edit modal for id:', id);
+      logger.log(' Opening edit modal for id:', id);
       await openWorkflowModal(id);
     } else if (btn.classList.contains('workflow-steps')) {
-      console.log('[Workflows] Opening steps modal for id:', id);
+      logger.log(' Opening steps modal for id:', id);
       await openStepsModal(id);
     } else if (btn.classList.contains('workflow-delete')) {
       const name = btn.dataset.name || 'this workflow';
@@ -373,13 +376,13 @@ function setupWorkflowHandlers(): void {
 }
 
 async function openWorkflowModal(id?: number): Promise<void> {
-  console.log('[Workflows] openWorkflowModal called with id:', id);
+  logger.log(' openWorkflowModal called with id:', id);
   const isEdit = !!id;
   let workflow: WorkflowDefinition | null = null;
 
   if (isEdit) {
     workflow = cachedWorkflows.find(w => w.id === id) || null;
-    console.log('[Workflows] Found workflow in cache:', !!workflow);
+    logger.log(' Found workflow in cache:', !!workflow);
     if (!workflow) return;
   }
 
@@ -444,15 +447,15 @@ async function openWorkflowModal(id?: number): Promise<void> {
       await saveWorkflow();
     });
   }
-  console.log('[Workflows] Modal created/found, workflowModal:', !!workflowModal);
+  logger.log(' Modal created/found, workflowModal:', !!workflowModal);
 
   // Set title
   workflowModal.setTitle(isEdit ? 'Edit Workflow' : 'Create Workflow');
 
   // Show modal first so elements are in DOM, then populate form
-  console.log('[Workflows] About to show modal');
+  logger.log(' About to show modal');
   workflowModal.show();
-  console.log('[Workflows] Modal shown, overlay visible:', !workflowModal.overlay.classList.contains('hidden'));
+  logger.log(' Modal shown, overlay visible:', !workflowModal.overlay.classList.contains('hidden'));
 
   // Use modal body to query elements (they're now in DOM)
   const modalBody = workflowModal.body;
@@ -517,7 +520,7 @@ async function saveWorkflow(): Promise<void> {
     workflowModal?.hide();
     await loadApprovalWorkflows();
   } catch (error) {
-    console.error('[AdminWorkflows] Save error:', error);
+    logger.error(' Save error:', error);
     showToast(error instanceof Error ? error.message : 'Error saving workflow', 'error');
   }
 }
@@ -754,7 +757,7 @@ async function deleteWorkflow(id: number, name: string): Promise<void> {
     showToast('Workflow deleted', 'success');
     await loadApprovalWorkflows();
   } catch (error) {
-    console.error('[AdminWorkflows] Delete error:', error);
+    logger.error(' Delete error:', error);
     showToast('Error deleting workflow', 'error');
   }
 }
@@ -879,7 +882,7 @@ async function openStepsModal(workflowId: number): Promise<void> {
     stepModal.show();
     manageFocusTrap(stepModal.overlay);
   } catch (error) {
-    console.error('[AdminWorkflows] Error loading steps:', error);
+    logger.error(' Error loading steps:', error);
     showToast('Error loading workflow steps', 'error');
   }
 }
@@ -903,7 +906,7 @@ async function addStep(workflowId: number): Promise<void> {
     showToast('Step added', 'success');
     await openStepsModal(workflowId); // Refresh
   } catch (error) {
-    console.error('[AdminWorkflows] Add step error:', error);
+    logger.error(' Add step error:', error);
     showToast(error instanceof Error ? error.message : 'Error adding step', 'error');
   }
 }
@@ -916,7 +919,7 @@ async function deleteStep(workflowId: number, stepId: number): Promise<void> {
     showToast('Step removed', 'success');
     await openStepsModal(workflowId); // Refresh
   } catch (error) {
-    console.error('[AdminWorkflows] Delete step error:', error);
+    logger.error(' Delete step error:', error);
     showToast('Error removing step', 'error');
   }
 }
@@ -950,7 +953,7 @@ async function loadTriggers(): Promise<void> {
     renderTriggersTable();
     setupTriggerHandlers();
   } catch (error) {
-    console.error('[AdminWorkflows] Error loading triggers:', error);
+    logger.error(' Error loading triggers:', error);
     if (tbody) {
       showTableError(tbody, 6, 'Error loading triggers', loadTriggers);
     }
@@ -973,7 +976,7 @@ function renderTriggersTable(): void {
     return `
       <tr data-trigger-id="${t.id}">
         <td class="name-cell" data-label="Name">${escapeHtml(t.name)}</td>
-        <td class="type-cell" data-label="Event Type"><code>${escapeHtml(t.event_type)}</code></td>
+        <td class="slug-cell" data-label="Event">${escapeHtml(t.event_type)}</td>
         <td class="type-cell" data-label="Action">${actionLabel}</td>
         <td class="status-cell" data-label="Status">
           ${statusBadge}
@@ -1234,7 +1237,7 @@ async function saveTrigger(): Promise<void> {
     triggerModal?.hide();
     await loadTriggers();
   } catch (error) {
-    console.error('[AdminWorkflows] Save trigger error:', error);
+    logger.error(' Save trigger error:', error);
     showToast(error instanceof Error ? error.message : 'Error saving trigger', 'error');
   }
 }
@@ -1296,7 +1299,7 @@ async function testTrigger(): Promise<void> {
       await loadTriggerLogs();
     }
   } catch (error) {
-    console.error('[AdminWorkflows] Test trigger error:', error);
+    logger.error(' Test trigger error:', error);
     showToast(error instanceof Error ? error.message : 'Error testing trigger', 'error');
   } finally {
     if (testBtn) {
@@ -1407,7 +1410,7 @@ async function toggleTrigger(id: number): Promise<void> {
     showToast(`Trigger ${data.trigger.is_active ? 'enabled' : 'disabled'}`, 'success');
     await loadTriggers();
   } catch (error) {
-    console.error('[AdminWorkflows] Toggle error:', error);
+    logger.error(' Toggle error:', error);
     showToast('Error toggling trigger', 'error');
   }
 }
@@ -1428,7 +1431,7 @@ async function deleteTrigger(id: number, name: string): Promise<void> {
     showToast('Trigger deleted', 'success');
     await loadTriggers();
   } catch (error) {
-    console.error('[AdminWorkflows] Delete trigger error:', error);
+    logger.error(' Delete trigger error:', error);
     showToast('Error deleting trigger', 'error');
   }
 }
@@ -1547,7 +1550,7 @@ async function loadTriggerLogs(): Promise<void> {
 
     renderTriggerLogs(logs);
   } catch (error) {
-    console.error('[AdminWorkflows] Error loading trigger logs:', error);
+    logger.error(' Error loading trigger logs:', error);
     if (listEl) {
       listEl.innerHTML = '<div class="empty-state">Error loading logs</div>';
     }
@@ -1634,7 +1637,7 @@ async function loadPendingApprovals(): Promise<void> {
     updateApprovalStats();
     renderPendingApprovalsTable();
   } catch (error) {
-    console.error('[AdminWorkflows] Error loading pending approvals:', error);
+    logger.error(' Error loading pending approvals:', error);
     if (tbody) {
       showTableError(tbody, 7, 'Error loading approvals', loadPendingApprovals);
     }
@@ -2022,7 +2025,7 @@ async function handleApprovalAction(instanceId: number, action: 'approve' | 'rej
     showToast(`${entityLabel} ${actionPast}`, 'success');
     await loadPendingApprovals();
   } catch (error) {
-    console.error(`[AdminWorkflows] ${actionLabel} error:`, error);
+    logger.error(`${actionLabel} error:`, error);
     showToast(error instanceof Error ? error.message : `Error ${actionLabel}ing`, 'error');
   }
 }
@@ -2101,7 +2104,7 @@ async function openApprovalHistoryModal(entityType: EntityType, entityId: string
 
     historyModal.body.innerHTML = renderApprovalHistoryContent(data.instance, data.requests, data.history);
   } catch (error) {
-    console.error('[AdminWorkflows] Error loading history:', error);
+    logger.error(' Error loading history:', error);
     historyModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error loading approval history</span></div>';
   }
 }
@@ -2294,9 +2297,9 @@ export function renderWorkflowsTab(container: HTMLElement): void {
                       <input type="checkbox" id="approvals-select-all" aria-label="Select all approvals" />
                     </div>
                   </th>
-                  <th scope="col" class="type-col">Entity</th>
-                  <th scope="col" class="name-col">Name</th>
-                  <th scope="col" class="type-col">Workflow</th>
+                  <th scope="col" class="name-col">Workflow</th>
+                  <th scope="col" class="type-col">Entity Type</th>
+                  <th scope="col" class="type-col">Entity ID</th>
                   <th scope="col" class="status-col">Status</th>
                   <th scope="col" class="date-col">Initiated</th>
                   <th scope="col" class="actions-col">Actions</th>
@@ -2370,7 +2373,7 @@ export function renderWorkflowsTab(container: HTMLElement): void {
               <thead>
                 <tr>
                   <th scope="col" class="name-col">Name</th>
-                  <th scope="col" class="type-col">Event</th>
+                  <th scope="col" class="slug-col">Event</th>
                   <th scope="col" class="type-col">Action</th>
                   <th scope="col" class="status-col">Status</th>
                   <th scope="col" class="date-col">Updated</th>
@@ -2405,7 +2408,7 @@ export function renderWorkflowsTab(container: HTMLElement): void {
             <table class="data-table" aria-label="Email templates">
               <thead>
                 <tr>
-                  <th scope="col" class="name-col">Name</th>
+                  <th scope="col" class="identity-col">Name</th>
                   <th scope="col" class="type-col">Category</th>
                   <th scope="col" class="subject-col">Subject</th>
                   <th scope="col" class="status-col">Status</th>
@@ -2414,7 +2417,14 @@ export function renderWorkflowsTab(container: HTMLElement): void {
                 </tr>
               </thead>
               <tbody id="email-templates-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-                <tr class="loading-row"><td colspan="6"><div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading templates...</span></div></td></tr>
+                <tr class="loading-row">
+                  <td colspan="6">
+                    <div class="loading-state">
+                      <span class="loading-spinner" aria-hidden="true"></span>
+                      <span class="loading-message">Loading templates...</span>
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
