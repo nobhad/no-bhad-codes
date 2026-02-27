@@ -3,7 +3,7 @@
  * Handles webhook configuration, execution, delivery tracking, and retry logic
  */
 
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { getDatabase } from '../database/init.js';
 import { WebhookConfig, WebhookDelivery, WebhookPayload } from '../models/webhook.js';
 import type { Database } from '../database/init.js';

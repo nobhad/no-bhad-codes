@@ -8,7 +8,7 @@
  * for seamless integration with Zapier automations.
  */
 
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { getDatabase } from '../../database/init';
 
 // Zapier-compatible event payload formats

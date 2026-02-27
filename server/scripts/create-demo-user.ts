@@ -3,8 +3,8 @@
  * Run with: npx ts-node server/scripts/create-demo-user.ts
  */
 
-import bcrypt from 'bcryptjs';
-import sqlite3 from 'sqlite3';
+import * as bcrypt from 'bcryptjs';
+import * as sqlite3 from 'sqlite3';
 
 async function createDemoUser() {
   const email = 'demo@example.com';

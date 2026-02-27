@@ -8,7 +8,7 @@
  * and intake form data.
  */
 
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 export interface IntakeData {
   company?: string;

@@ -3,8 +3,8 @@
  * Run with: npx ts-node server/scripts/create-test-user.ts
  */
 
-import bcrypt from 'bcryptjs';
-import sqlite3 from 'sqlite3';
+import * as bcrypt from 'bcryptjs';
+import * as sqlite3 from 'sqlite3';
 
 async function createTestUser() {
   const email = 'test@nobhad.codes';
