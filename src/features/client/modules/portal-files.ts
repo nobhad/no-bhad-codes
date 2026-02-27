@@ -504,20 +504,22 @@ function renderFilesList(
     .join('');
 
   container.innerHTML = `
-    <div class="data-table-scroll-wrapper">
-      <table class="data-table" aria-label="Project files">
-        <thead>
-          <tr>
-            <th scope="col" class="name-col">File</th>
-            <th scope="col" class="type-col">Size</th>
-            <th scope="col" class="date-col">Uploaded</th>
-            <th scope="col" class="actions-col">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="portal-files-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-          ${tableRows}
-        </tbody>
-      </table>
+    <div class="data-table-container">
+      <div class="data-table-scroll-wrapper">
+        <table class="data-table" aria-label="Project files">
+          <thead>
+            <tr>
+              <th scope="col" class="name-col">File</th>
+              <th scope="col" class="type-col">Size</th>
+              <th scope="col" class="date-col">Uploaded</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="portal-files-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            ${tableRows}
+          </tbody>
+        </table>
+      </div>
     </div>
   `;
 
