@@ -17,6 +17,7 @@ import { createViewToggle } from '../../../components/view-toggle';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
 import { getStatusDotHTML as _getStatusDotHTML } from '../../../components/status-badge';
 import { showTableEmpty } from '../../../utils/loading-utils';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 
 // React mount functions - lazy loaded
 let mountOverviewDashboard: ((element: HTMLElement, options: any) => () => void) | null = null;
@@ -254,6 +255,17 @@ async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
       row.addEventListener('click', () => {
         ctx.switchTab?.('projects');
       });
+    });
+
+    // Initialize keyboard navigation for overview projects table
+    initTableKeyboardNav({
+      tableSelector: '#overview-projects-table-body',
+      rowSelector: 'tr[data-project-id]',
+      onRowSelect: () => {
+        ctx.switchTab?.('projects');
+      },
+      focusClass: 'row-focused',
+      selectedClass: 'row-selected'
     });
 
   } catch (error) {
