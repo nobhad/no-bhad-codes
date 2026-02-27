@@ -30,7 +30,6 @@
   align-items: center;
   gap: var(--space-0-5);
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-lg);
   font-size: var(--font-size-xs);
   font-weight: 600;
   margin-bottom: var(--space-1);
@@ -67,7 +66,6 @@
   text-transform: uppercase;
   background: var(--portal-bg-medium);
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-xs);
 }
 
 .lead-card-meta {
@@ -131,7 +129,6 @@
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  border-radius: var(--portal-radius-sm) var(--portal-radius-sm) 0 0;
   transition: all var(--transition-faster);
 }
 
@@ -156,7 +153,6 @@
 /* Score Section */
 .lead-score-section {
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
   margin-bottom: var(--space-1-5);
 }
@@ -169,7 +165,7 @@
 }
 
 .lead-score-value {
-  font-size: 2rem;
+  font-size: var(--font-size-3xl);
   font-weight: 700;
 }
 
@@ -215,7 +211,6 @@
 /* Lead Notes */
 .lead-note-item {
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-sm);
   padding: var(--space-1-5);
   margin-bottom: var(--space-1);
   border: 1px solid var(--portal-border);
@@ -269,7 +264,6 @@
   padding: var(--space-1);
   background: var(--portal-bg-dark);
   border: 1px dashed var(--portal-border);
-  border-radius: var(--portal-radius-sm);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   cursor: pointer;
@@ -317,29 +311,19 @@
 
 .analytics-column,
 .analytics-column-full {
-  background: var(--portal-bg-darker);
-  border-radius: var(--portal-radius-sm, 8px);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
   padding: var(--portal-card-padding);
   min-width: 0;
   color: var(--portal-text-light);
 }
 
-/* Make section headers bright white for good contrast */
-.analytics-column .field-label,
-.analytics-column-full .field-label {
-  color: var(--portal-text-light);
-  font-weight: 600;
-  margin-bottom: var(--space-1);
-}
+/* Analytics labels - use .field-label--light modifier from field-label-spacing.css */
 
 .analytics-column-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.analytics-column-header .field-label {
-  margin-bottom: 0;
 }
 
 /* .empty-state styling from components/loading.css */
@@ -368,8 +352,8 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
   min-width: 0;
   text-align: left;
   margin-bottom: var(--space-1);
@@ -389,14 +373,12 @@
   min-width: 0;
   height: 14px;
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-xs);
   overflow: hidden;
 }
 
 .leads-analytics-section .funnel-bar {
   height: 100%;
   background: var(--color-primary);
-  border-radius: var(--portal-radius-xs);
   min-width: var(--space-0-5);
   transition: width var(--transition-medium);
 }
@@ -440,8 +422,8 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
   margin-bottom: var(--space-1);
 }
 
@@ -492,7 +474,6 @@
   gap: var(--space-1);
   padding: 0;
   background: transparent;
-  border-radius: 0;
 }
 
 /* When full-width, display scoring rules in a 3-column grid */
@@ -530,9 +511,8 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-medium);
-  border: none;
-  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
 }
 
 /* Mobile: no border changes needed since we use card backgrounds */
@@ -568,7 +548,6 @@
 .rule-condition code {
   background: var(--portal-bg-dark);
   padding: var(--space-0-5) var(--space-0-5);
-  border-radius: var(--portal-radius-xs);
   font-family: monospace;
   font-size: var(--font-size-xs);
 }
@@ -623,7 +602,6 @@
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  border-radius: var(--portal-radius-sm) var(--portal-radius-sm) 0 0;
   transition: all var(--transition-faster);
 }
 
@@ -663,7 +641,7 @@
 
 /* Created date: very tight to header */
 #lead-details-panel .lead-details-created {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-muted);
   margin-top: -0.5rem;
   margin-bottom: 4px;
@@ -694,14 +672,7 @@
   column-gap: var(--space-1-5);
 }
 
-#lead-details-panel .meta-item {
-  min-width: 0;
-}
-
-#lead-details-panel .meta-value {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
+/* .meta-item, .meta-value base styles in shared/field-label-spacing.css */
 
 /* Email with copy icon: match spacing of other meta-values */
 #lead-details-panel .meta-value.meta-value-with-copy {
@@ -729,7 +700,6 @@
 /* Lead Score Badge in Header - high contrast on dark panel */
 .lead-score-badge {
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-lg);
   font-size: var(--font-size-xs);
   font-weight: 600;
   margin-left: auto;
@@ -787,10 +757,9 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1);
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-sm);
+  background: transparent;
   margin-bottom: var(--space-1);
-  border: 1px solid var(--portal-border);
+  border: 1px solid var(--table-border-color);
 }
 
 .lead-task-item.task-completed {
@@ -805,7 +774,6 @@
   width: 18px;
   height: 18px;
   border: 2px solid var(--portal-border);
-  border-radius: var(--portal-radius-xs);
   background: transparent;
   cursor: pointer;
   display: flex;
@@ -847,7 +815,6 @@
   padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-medium);
   color: var(--portal-text-secondary);
-  border-radius: var(--portal-radius-sm);
   text-transform: uppercase;
 }
 
@@ -857,11 +824,10 @@
 }
 
 .lead-note-item {
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-sm);
+  background: transparent;
   padding: var(--space-1-5);
   margin-bottom: var(--space-1);
-  border: 1px solid var(--portal-border);
+  border: 1px solid var(--table-border-color);
 }
 
 .lead-note-item.note-pinned {
@@ -911,7 +877,7 @@
   .lead-tab,
   .lead-detail-tabs button {
     white-space: nowrap;
-    font-size: 0.813rem;
+    font-size: var(--font-size-sm);
     padding: var(--space-0-5) var(--space-1);
   }
 

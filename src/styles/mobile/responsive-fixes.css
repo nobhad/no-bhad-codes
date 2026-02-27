@@ -23,7 +23,7 @@
 
 /* Base hover states - active only on hover-capable devices */
 @media (hover: hover) {
-  /* Portal buttons hover - from portal-buttons.css */
+  /* Portal buttons hover - uses token variables */
   :is([data-page="admin"], [data-page="client-portal"]) :is(
     .btn,
     .btn-primary,
@@ -31,19 +31,12 @@
     .btn-outline,
     button[type="submit"]
   ):hover {
-    background: var(--color-primary);
-    color: var(--portal-bg-dark);
+    background: var(--btn-portal-hover-bg);
+    color: var(--btn-portal-hover-color);
     box-shadow: var(--btn-portal-shadow-hover);
   }
 
-  /* Icon button hover */
-  :is([data-page="admin"], [data-page="client-portal"]) .icon-btn:hover {
-    color: var(--color-primary);
-  }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .icon-btn.icon-btn-danger:hover {
-    color: var(--color-error-500);
-  }
+  /* .icon-btn hover: portal-buttons.css */
 
   /* Sidebar button hover */
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn:hover,
@@ -63,12 +56,13 @@
   }
 
   /* Table row hover */
-  :is([data-page="admin"], [data-page="client-portal"]) .admin-table tbody tr:hover {
+  :is([data-page="admin"], [data-page="client-portal"]) .data-table tbody tr:hover {
     background: var(--portal-bg-hover);
   }
 
-  /* Dropdown item hover */
-  .custom-dropdown-item:hover {
+  /* Dropdown item hover - ONLY for modal dropdowns, NOT table dropdowns */
+  /* Table dropdowns use --portal-bg-hover defined in portal-dropdown.css */
+  .custom-dropdown[data-modal-dropdown] .custom-dropdown-item:hover {
     background: var(--color-primary);
     color: var(--portal-text-light);
   }
@@ -119,7 +113,7 @@
 
 /* Touch device fallback - active states instead of hover */
 @media (hover: none) {
-  /* Buttons show feedback on active/press */
+  /* Buttons show feedback on active/press - uses token variables */
   :is([data-page="admin"], [data-page="client-portal"]) :is(
     .btn,
     .btn-primary,
@@ -127,24 +121,20 @@
     .btn-outline,
     button[type="submit"]
   ):active {
-    background: var(--color-primary);
-    color: var(--portal-bg-dark);
+    background: var(--btn-portal-hover-bg);
+    color: var(--btn-portal-hover-color);
     transform: scale(0.98);
   }
 
-  /* Icon button active */
-  :is([data-page="admin"], [data-page="client-portal"]) .icon-btn:active {
-    color: var(--color-primary);
-    transform: scale(0.95);
-  }
+  /* .icon-btn:active - moved to portal-buttons.css */
 
   /* Table row - no hover background on touch */
-  :is([data-page="admin"], [data-page="client-portal"]) .admin-table tbody tr:hover {
+  :is([data-page="admin"], [data-page="client-portal"]) .data-table tbody tr:hover {
     background: transparent;
   }
 
   /* Show active state instead */
-  :is([data-page="admin"], [data-page="client-portal"]) .admin-table tbody tr:active {
+  :is([data-page="admin"], [data-page="client-portal"]) .data-table tbody tr:active {
     background: var(--portal-bg-hover);
   }
 }
@@ -156,14 +146,9 @@
  * touch targets of at least 44x44px.
  */
 
-/* Icon buttons - increase from 36px to 44px on touch devices */
+/* Icon buttons - ALL styling in portal-buttons.css */
 @media (pointer: coarse) {
-  :is([data-page="admin"], [data-page="client-portal"]) .icon-btn {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
-  }
+  /* .icon-btn 44px touch targets - moved to portal-buttons.css */
 
   /* Close buttons in modals and toasts */
   .modal-close,
@@ -202,24 +187,7 @@
     min-height: 44px;
   }
 
-  /* Table action buttons */
-  .admin-table .icon-btn,
-  .data-table .icon-btn {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  /* File action buttons */
-  .file-actions .icon-btn,
-  .file-item .icon-btn,
-  .folder-item .icon-btn {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
-  }
+  /* .icon-btn sizing in tables/files - moved to portal-buttons.css */
 
   /* Header toggle button */
   .header-toggle-button {
@@ -237,7 +205,7 @@
     min-height: 44px;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-logout {
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .sidebar-btn {
     width: 44px;
     height: 44px;
     min-width: 44px;
@@ -343,7 +311,7 @@
 }
 
 /* Small mobile - full width modals */
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .modal-content,
   .admin-modal,
   .invoice-modal-content,
@@ -354,7 +322,6 @@
     max-width: 100%;
     width: 100%;
     margin: 0;
-    border-radius: 0;
   }
 
   /* Full height on very small screens */
@@ -380,33 +347,28 @@
  * Add wrapper class for tables that may overflow.
  */
 
-/* Table scroll wrapper utility class */
-.table-scroll-wrapper {
-  width: 100%;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Ensure table has minimum width for readability */
-.table-scroll-wrapper > table,
-.table-scroll-wrapper > .admin-table,
-.table-scroll-wrapper > .data-table {
-  min-width: 600px;
-}
+/* Base table scroll wrapper styles in shared/portal-tables.css */
 
 /* Apply scroll to admin tables on mobile */
-@media (max-width: 767px) {
-  /* Admin tables - add scroll wrapper behavior */
+@media (--mobile) {
+  /* Table containers - scroll wrapper behavior */
   .admin-table-container,
   .table-container,
-  .data-table-container {
+  .data-table-container,
+  .admin-table-scroll-wrapper,
+  .table-scroll-wrapper,
+  .data-table-scroll-wrapper {
     width: 100%;
     -webkit-overflow-scrolling: touch;
   }
 
   /* Tables inside containers get minimum width */
-  .admin-table-container > .admin-table,
-  .table-container > table,
-  .data-table-container > .data-table {
+  .admin-table-container > .data-table,
+  .table-container > .data-table,
+  .data-table-container > .data-table,
+  .admin-table-scroll-wrapper > .data-table,
+  .table-scroll-wrapper > .data-table,
+  .data-table-scroll-wrapper > .data-table {
     min-width: 600px;
   }
 
@@ -442,10 +404,10 @@
 }
 
 /* Small mobile - tighter minimum widths */
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .table-scroll-wrapper > table,
-  .table-scroll-wrapper > .admin-table,
-  .admin-table-container > .admin-table,
+  .table-scroll-wrapper > .data-table,
+  .data-table-container > .data-table,
   .table-container > table {
     min-width: 500px;
   }
@@ -532,7 +494,7 @@
 }
 
 /* Full-screen modals on mobile */
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .modal-content,
   .admin-modal {
     max-height: 100vh;
@@ -549,7 +511,7 @@
 }
 
 /* Messages container height */
-@media (max-width: 767px) {
+@media (--mobile) {
   .messages-container {
     max-height: calc(100vh - 200px);
     max-height: calc(100dvh - 200px);
@@ -568,7 +530,7 @@
 }
 
 /* Reset min-height - use dvh for proper mobile sizing */
-@media (max-width: 767px) {
+@media (--mobile) {
   body[data-page="admin"] main,
   body[data-page="client-portal"] main {
     min-height: 100vh;
@@ -583,7 +545,6 @@
 /* Prevent text selection on interactive elements for better touch UX */
 @media (pointer: coarse) {
   .btn,
-  .icon-btn,
   .sidebar-buttons .btn,
   .custom-dropdown-trigger,
   .portal-tab,
@@ -591,12 +552,12 @@
     -webkit-user-select: none;
     user-select: none;
   }
+  /* .icon-btn user-select - moved to portal-buttons.css */
 }
 
 /* Improved tap highlight for iOS */
 @media (pointer: coarse) {
   .btn,
-  .icon-btn,
   .custom-dropdown-item,
   .portal-tab,
   .admin-tab,
@@ -604,6 +565,7 @@
   .folder-item {
     -webkit-tap-highlight-color: rgba(var(--color-primary-rgb, 255, 0, 0), 0.1);
   }
+  /* .icon-btn tap-highlight - moved to portal-buttons.css */
 }
 
 /* Safe area insets for notched devices */
@@ -614,7 +576,7 @@
     padding-right: max(var(--space-5), env(safe-area-inset-right));
   }
 
-  @media (max-width: 479px) {
+  @media (--small-mobile) {
     .modal-overlay,
     .admin-modal-overlay {
       padding-bottom: env(safe-area-inset-bottom);

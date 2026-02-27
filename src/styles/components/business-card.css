@@ -158,7 +158,6 @@
   background: transparent;
   border: none;
   box-shadow: none;
-  border-radius: 0;
   padding: 0;
   margin: 0;
 
@@ -267,7 +266,6 @@
   background: transparent;
   border: none;
   box-shadow: none;
-  border-radius: 0;
   padding: 0;
   margin: 0;
 }
@@ -313,7 +311,6 @@
   background: transparent;
   border: none;
   box-shadow: none;
-  border-radius: 0;
 }
 
 /* ==========================================
@@ -334,7 +331,6 @@
   /* No shadow here - shadows are on individual faces so they look correct after flip */
 
   /* NEVER round corners */
-  border-radius: 0;
 
   /* Performance: GPU-accelerated 3D transforms */
   will-change: transform;
@@ -386,7 +382,6 @@
   font-family: var(--font-family-acme, "Courier New", monospace);
 
   /* NEVER round corners */
-  border-radius: 0;
 }
 
 /* ==========================================
@@ -446,7 +441,6 @@
   object-fit: contain;
 
   /* No border radius on SVG */
-  border-radius: 0;
 
   /* CRITICAL: Disable pointer events on SVG so clicks pass through to parent */
   pointer-events: none;
@@ -481,7 +475,6 @@
   height: 100%;
   background-color: var(--color-card-bg);
   border: 2px dashed var(--color-border-secondary);
-  border-radius: 0;
 }
 
 /* ==========================================
@@ -654,6 +647,6 @@ html[data-theme="dark"] .intro-card-element {
 }
 
 html[data-theme="dark"] .business-card-container {
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.02), transparent);
+  background: radial-gradient(circle at center, var(--portal-alpha-white-02), transparent);
 }
 

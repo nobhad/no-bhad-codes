@@ -47,34 +47,15 @@
 
 /* Tasks table styling within main container */
 .tasks-main-container .admin-table-scroll-wrapper {
-  border-radius: var(--portal-radius-md);
   overflow: hidden;
 }
 
-.tasks-main-container .admin-table {
+.tasks-main-container .data-table {
   margin: 0;
 }
 
-/* Ensure first header row has top radius */
-.tasks-main-container .admin-table thead tr:first-child th:first-child {
-  border-top-left-radius: var(--portal-radius-md);
-}
-
-.tasks-main-container .admin-table thead tr:first-child th:last-child {
-  border-top-right-radius: var(--portal-radius-md);
-}
-
-/* Ensure last body row has bottom radius */
-.tasks-main-container .admin-table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: var(--portal-radius-md);
-}
-
-.tasks-main-container .admin-table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: var(--portal-radius-md);
-}
-
 /* Only stack columns on mobile */
-@media (max-width: 767px) {
+@media (--mobile) {
   #global-tasks-kanban-container .kanban-board,
   .tasks-main-container .kanban-board {
     flex-direction: column !important;
@@ -135,19 +116,20 @@
 
 /* Blocked card highlight when has items */
 .tasks-stat-card--alert.has-items {
-  background: color-mix(in srgb, var(--color-warning-500) 10%, var(--portal-bg-medium));
+  background: transparent;
+  border: 1px solid var(--color-warning-500);
 }
 
 /* .stat-card-value alert color from unified rule in portal-cards.css */
 
 /* Responsive: stack on smaller screens */
-@media (max-width: 900px) {
+@media (--tablet-landscape) {
   .tasks-stats-strip {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 480px) {
+@media (--small-mobile) {
   .tasks-stats-strip {
     grid-template-columns: 1fr;
   }
@@ -247,36 +229,11 @@
 }
 
 /* ============================================
-   Task List View (uses standard .admin-table)
-   Only task-specific overrides here
+   Task List View
+   REMOVED: .tasks-table specific styles
+   All table styles now in shared/portal-tables.css
+   using .data-table class
    ============================================ */
-
-/* Task table rows are clickable */
-.tasks-table tbody tr {
-  cursor: pointer;
-}
-
-/* Task title with subtitle in name cell */
-.tasks-table .cell-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.tasks-table .task-title {
-  font-weight: 500;
-  color: var(--portal-text-primary);
-}
-
-.tasks-table .task-subtitle {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-}
-
-/* Overdue date styling */
-.tasks-table .date-cell.overdue {
-  color: var(--status-cancelled);
-}
 
 /* ============================================
    Task Detail Modal
@@ -358,8 +315,7 @@
 .task-checklist-progress-bar {
   flex: 1;
   height: var(--space-0-5);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-xs);
+  background: var(--portal-alpha-white-10);
   overflow: hidden;
 }
 
@@ -386,20 +342,21 @@
   align-items: center;
   gap: var(--space-0-5);
   padding: var(--space-0-5) var(--space-1);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
   font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
 .task-dependency-pill.blocking {
-  background: rgba(var(--status-cancelled-rgb), 0.2);
+  background: transparent;
+  border-color: var(--status-cancelled);
   color: var(--status-cancelled);
 }
 
 .task-comment {
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
   padding: var(--space-1);
 }
 
@@ -449,11 +406,10 @@
 }
 
 .time-summary-card {
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
   padding: var(--space-2);
   text-align: center;
-  border: none;
 }
 
 .time-summary-value {
@@ -472,13 +428,13 @@
 /* Time Entries Table - Base styling from shared/portal-tables.css
    Only page-specific overrides here */
 .time-entries-table {
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
   overflow: hidden;
 }
 
 .time-entries-table th {
-  background: var(--portal-bg-medium);
+  background: transparent;
 }
 
 .time-entries-table tr:last-child td {
@@ -495,20 +451,21 @@
   align-items: center;
   gap: var(--space-0-5);
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-xs);
   font-size: var(--font-size-2xs);
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .time-entry-billable.yes {
-  background: var(--status-active);
-  color: var(--color-white);
+  background: transparent;
+  border: 1px solid var(--status-active);
+  color: var(--status-active);
 }
 
 .time-entry-billable.no {
-  background: var(--portal-text-secondary);
-  color: var(--color-white);
+  background: transparent;
+  border: 1px solid var(--portal-text-secondary);
+  color: var(--portal-text-secondary);
 }
 
 /* Uses universal empty state from loading.css */
@@ -590,7 +547,6 @@
 .task-standalone-tag {
   display: inline-block;
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-xs);
   font-size: var(--font-size-xs);
   font-weight: 500;
   margin-top: var(--space-1);
@@ -598,13 +554,13 @@
 }
 
 .task-milestone-tag {
-  background: rgba(var(--color-primary-rgb), 0.1);
+  background: transparent;
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
 }
 
 .task-standalone-tag {
-  background: var(--portal-bg-medium);
+  background: transparent;
   color: var(--portal-text-secondary);
   border: 1px solid var(--portal-border);
 }
@@ -619,27 +575,10 @@
   border-top: 1px solid var(--portal-border);
 }
 
+/* .task-delete-btn uses .icon-btn.icon-btn-outline.icon-btn-danger from portal-buttons.css */
 .task-delete-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   padding: var(--space-1);
-  background: none;
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-xs);
   color: var(--portal-text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.task-delete-btn:hover {
-  background: rgba(var(--color-danger-rgb), 0.1);
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-}
-
-.task-delete-btn svg {
-  flex-shrink: 0;
 }
 
 /* Project Link Button in Table */
@@ -663,4 +602,258 @@
 
 .milestone-col {
   width: 150px;
+}
+
+/* ============================================
+   GlobalTasksTable React Component Styles
+   ============================================ */
+
+/* Tasks stats bar - inline stats display */
+.tasks-stats-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.tasks-stats-bar .stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.tasks-stats-bar .stat-value {
+  color: var(--portal-text-primary);
+}
+
+.tasks-stats-bar .stat-pending {
+  color: var(--status-pending);
+}
+
+.tasks-stats-bar .stat-active {
+  color: var(--status-active);
+}
+
+.tasks-stats-bar .stat-completed {
+  color: var(--status-completed);
+}
+
+.tasks-stats-bar .stat-overdue {
+  color: var(--status-cancelled);
+}
+
+/* Filter search expanded */
+.filter-search-expanded {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+}
+
+/* Priority indicator wrapper */
+.priority-indicator-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.priority-label {
+  font-size: var(--font-size-sm);
+}
+
+/* Status trigger button */
+.status-trigger-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Error banner */
+.error-banner {
+  padding: var(--space-2);
+  background: transparent;
+  border: 1px solid var(--status-cancelled);
+  color: var(--status-cancelled);
+  margin-bottom: var(--space-2);
+}
+
+/* Text muted utility */
+.text-muted {
+  color: var(--portal-text-muted);
+}
+
+/* Date value styling */
+.date-value {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-primary);
+}
+
+.date-value.overdue {
+  color: var(--status-cancelled);
+}
+
+/* Kanban loading skeleton */
+.kanban-loading .kanban-column-skeleton {
+  height: 256px;
+  background: transparent;
+  border: 1px solid var(--table-border-color);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Kanban empty state */
+.kanban-empty-state {
+  padding: var(--space-4);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+  opacity: 0.5;
+}
+
+/* Kanban card header */
+.kanban-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.kanban-card-header .priority-indicator {
+  margin-top: var(--space-1);
+  flex-shrink: 0;
+}
+
+.kanban-card-title {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--portal-text-primary);
+}
+
+/* Kanban column title wrapper */
+.kanban-column-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Margin left utility */
+.ml-4 {
+  margin-left: var(--space-4);
+}
+
+/* ============================================
+   Task Board View (Alternative to table)
+   ============================================ */
+
+.board-view {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.board-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
+  min-height: 384px;
+}
+
+.board-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.board-column-title {
+  font-weight: 500;
+  color: var(--portal-text-primary);
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.board-column-count {
+  font-size: var(--font-size-sm);
+  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid var(--table-border-color);
+  color: var(--portal-text-secondary);
+}
+
+.board-column-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.board-card {
+  padding: var(--space-3);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.board-card:hover {
+  opacity: 0.9;
+}
+
+.board-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.board-card-header .priority-dot {
+  margin-top: 6px;
+}
+
+.board-card-title {
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.board-card-due {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+.board-card-assignee {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-secondary);
+  margin-top: var(--space-1);
+}
+
+/* Board view responsive */
+@media (--desktop-wide) {
+  .board-view {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (--tablet-landscape) {
+  .board-view {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (--compact-mobile) {
+  .board-view {
+    grid-template-columns: 1fr;
+  }
 }

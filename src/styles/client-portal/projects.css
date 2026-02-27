@@ -328,7 +328,7 @@
 }
 
 .project-title-section h1 {
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: 2rem;
   color: var(--portal-text-light);
   margin: 0;
@@ -369,7 +369,6 @@
   height: calc(100vh - 200px);
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-md);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
 }
@@ -391,7 +390,6 @@
   background: var(--portal-bg-medium);
   padding: 0.5rem 1rem;
   border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
   font-size: 0.9rem;
   color: var(--portal-text-light);
 }

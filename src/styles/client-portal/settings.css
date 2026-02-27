@@ -20,7 +20,6 @@
 [data-page="client-portal"] .settings-section {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
@@ -113,7 +112,6 @@
   gap: var(--space-1-5);
   cursor: pointer;
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
   padding: var(--space-1-5) var(--space-2);
   transition: background-color var(--transition-fast);
 }
@@ -133,18 +131,7 @@
   color: var(--portal-text-light);
 }
 
-.settings-form .btn {
-  width: 100%;
-  background: transparent;
-  color: var(--portal-text-light);
-  border: var(--portal-border-light-style);
-  border-radius: var(--portal-radius-lg);
-}
-
-.settings-form .btn:hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-}
+/* Settings form buttons should use .btn-outline .btn-full classes */
 
 /* Form Row/Group (generic) */
 .form-row {
@@ -165,7 +152,6 @@
   gap: var(--space-1-5);
   cursor: pointer;
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
   padding: var(--space-1-5) var(--space-2);
   flex: 1;
   transition: background-color var(--transition-fast);
@@ -189,7 +175,7 @@
 }
 
 .settings-header h1 {
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: 2rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-1) 0;
@@ -217,7 +203,7 @@
 
 /* Alternate Settings Section (with h2) */
 .settings-section h2 {
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: 1.4rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-3) 0;
@@ -249,7 +235,7 @@
 .contact-view-header h1,
 .billing-view-header h1,
 .notifications-view-header h1 {
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: 2rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-1) 0;
@@ -277,7 +263,6 @@
 .notifications-view-section {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
@@ -286,7 +271,7 @@
 .contact-view-section h2,
 .billing-view-section h2,
 .notifications-view-section h2 {
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: 1.4rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-3) 0;

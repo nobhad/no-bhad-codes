@@ -56,7 +56,7 @@
   --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
 
   /* Shadow color - navigation specific */
-  --color-shadow: rgba(0, 0, 0, 0.5);
+  --color-shadow: var(--portal-alpha-black-50);
 }
 
 /* Font defined in typography.css */

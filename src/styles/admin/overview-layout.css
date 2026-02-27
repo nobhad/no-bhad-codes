@@ -23,15 +23,15 @@
   max-width: 100%;
 }
 
-/* Overview greeting - negative margins to override parent gaps */
+/* Overview greeting - matches subtabs spacing exactly */
 [data-page="admin"] .overview-greeting {
-  font-family: var(--font-family-acme, sans-serif);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: 1.25rem;
   color: var(--portal-text-light);
   letter-spacing: 0.01em;
   line-height: var(--portal-header-height-line, 32px);
-  margin-top: calc(-1 * var(--space-3));
-  margin-bottom: calc(var(--space-2) - var(--portal-section-gap));
+  padding-top: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
 [data-page="admin"] .overview-greeting b {
@@ -104,7 +104,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-1);
 }
 
 /* .stat-card-label removed - using .field-label from unified rule in portal-cards.css */
@@ -112,13 +112,13 @@
 /* .stat-card-value styling from unified rule in portal-cards.css */
 
 .stat-card-value {
-  margin-bottom: 5px;
+  margin-bottom: var(--space-0-5);
 }
 
 /* .stat-value-alert color from unified rule in portal-cards.css */
 
 .stat-card-delta {
-  font-size: 10.5px;
+  font-size: var(--font-size-xs); /* 11px - matches micro-typography scale */
   color: var(--portal-text-muted);
   display: block;
 }
@@ -148,9 +148,8 @@
    ===================================================== */
 
 .overview-panel {
-  background: var(--portal-bg-darker);
-  border: none;
-  border-radius: var(--portal-radius-sm, 8px);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
   overflow: hidden;
 }
 
@@ -158,7 +157,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px 11px;
+  padding: var(--space-1-5) var(--portal-panel-padding-x, 14px);
   border-bottom: none;
 }
 
@@ -174,31 +173,30 @@
 
 .panel-badge {
   font-family: var(--font-family-mono);
-  font-size: 9.5px;
-  background: var(--portal-bg-hover);
-  border: 1px solid var(--portal-border-dark);
-  border-radius: 99px;
-  padding: 0 5px;
+  font-size: var(--font-size-2xs, 10px);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
+  padding: 0 var(--space-0-5);
   line-height: 14px;
   min-width: 18px;
   text-align: center;
   color: var(--portal-text-muted);
-  margin-left: 2px;
+  margin-left: var(--space-px);
 }
 
 .panel-badge.has-items {
   background: var(--status-cancelled-bg);
-  border-color: rgba(239, 68, 68, 0.25);
+  border-color: var(--status-cancelled-border, var(--color-danger-alpha-25));
   color: var(--status-cancelled);
 }
 
 .overview-panel-action {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   background: none;
   border: none;
   cursor: pointer;
-  transition: color 0.1s;
+  transition: color var(--transition-faster);
   font-family: inherit;
   padding: 0;
 }
@@ -223,7 +221,7 @@
    ===================================================== */
 
 /* Project cell - stacked name/client (reusable pattern) */
-.overview-table td.project-cell {
+#overview-projects-table td.project-cell {
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -240,7 +238,7 @@
 }
 
 .project-client {
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   line-height: 1.3;
 }
@@ -251,9 +249,8 @@
   align-items: center;
   gap: var(--icon-gap-xs);
   height: 19px;
-  padding: 0 7px;
-  border-radius: 99px;
-  font-size: 10.5px;
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-xs);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -293,22 +290,20 @@
 
 .progress-bar {
   flex: 1;
-  height: 3px;
-  background: var(--portal-border-dark);
-  border-radius: 2px;
+  height: 2px;
+  background: var(--portal-border-subtle, var(--portal-alpha-white-08));
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  border-radius: 2px;
   background: var(--color-primary);
   transition: width 0.5s ease;
 }
 
 .progress-pct {
   font-family: var(--font-family-mono);
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   color: var(--portal-text-muted);
   width: 24px;
   text-align: right;
@@ -318,7 +313,7 @@
 /* Due Date */
 .due-cell {
   font-family: var(--font-family-mono);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
@@ -337,7 +332,7 @@
    ===================================================== */
 
 .revenue-chart-wrap {
-  padding: 12px 14px 14px;
+  padding: var(--space-1-5) var(--portal-panel-padding-x, 14px) var(--portal-panel-padding-x, 14px);
 }
 
 .revenue-chart-svg {
@@ -352,20 +347,25 @@
   align-items: center;
   justify-content: center;
   color: var(--portal-text-muted);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .revenue-kpis {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  background: var(--portal-bg-dark);
-  gap: 1px;
-  border-top: none;
+  background: transparent;
+  gap: var(--space-px);
+  border-top: 1px solid var(--portal-border-subtle, var(--portal-alpha-white-08));
 }
 
 .revenue-kpi {
-  background: var(--portal-bg-dark);
-  padding: 11px 14px;
+  background: transparent;
+  padding: var(--space-1-5) var(--portal-panel-padding-x, 14px);
+  border-right: 1px solid var(--portal-border-subtle, var(--portal-alpha-white-08));
+}
+
+.revenue-kpi:last-child {
+  border-right: none;
 }
 
 /* Layout only - typography from unified .field-label rule */
@@ -399,10 +399,10 @@
 .activity-feed-item {
   display: flex;
   align-items: flex-start;
-  gap: 9px;
-  padding: 8px 14px;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--portal-panel-padding-x, 14px);
   border-bottom: none;
-  transition: background 0.1s;
+  transition: background var(--transition-faster);
   cursor: default;
 }
 
@@ -415,9 +415,8 @@
 }
 
 .activity-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+  width: 6px;
+  height: 6px;
   border: 1.5px solid;
   margin-top: 4px;
   flex-shrink: 0;
@@ -450,7 +449,7 @@
 }
 
 .activity-text {
-  font-size: 11.5px;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   line-height: 1.45;
   display: block;
@@ -463,9 +462,9 @@
 
 .activity-time {
   font-family: var(--font-family-mono);
-  font-size: 9.5px;
+  font-size: var(--font-size-2xs, 10px);
   color: var(--portal-text-muted);
-  margin-top: 1.5px;
+  margin-top: var(--space-px);
   display: block;
 }
 
@@ -484,11 +483,11 @@
 .leads-item {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 8px 14px;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--portal-panel-padding-x, 14px);
   border-bottom: none;
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background var(--transition-faster);
 }
 
 .leads-item:last-child {
@@ -502,11 +501,10 @@
 .leads-avatar {
   width: 28px;
   height: 28px;
-  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   font-weight: 700;
   flex-shrink: 0;
   color: var(--portal-text-light);
@@ -518,14 +516,14 @@
 }
 
 .leads-name {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-light);
   display: block;
 }
 
 .leads-context {
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   display: block;
 }
@@ -534,18 +532,18 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: var(--space-px);
 }
 
 .leads-budget {
   font-family: var(--font-family-mono);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
 .leads-time {
   font-family: var(--font-family-mono);
-  font-size: 9.5px;
+  font-size: var(--font-size-2xs, 10px);
   color: var(--portal-text-muted);
 }
 
@@ -558,8 +556,8 @@
 .health-chart-wrap {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 14px;
+  gap: var(--space-2);
+  padding: var(--portal-panel-padding-x, 14px);
 }
 
 .health-donut {
@@ -580,7 +578,7 @@
 
 .health-donut-center {
   font-family: var(--font-family-mono);
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   fill: var(--portal-text-light);
   text-anchor: middle;
   dominant-baseline: auto;
@@ -598,21 +596,20 @@
 .health-legend {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: var(--space-1);
   flex: 1;
 }
 
 .health-legend-row {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 11.5px;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
 }
 
 .health-legend-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+  width: 6px;
+  height: 6px;
   flex-shrink: 0;
 }
 
@@ -623,7 +620,7 @@
 
 .health-legend-value {
   font-family: var(--font-family-mono);
-  font-size: 10.5px;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-light);
 }
 
@@ -633,14 +630,14 @@
   padding: 20px;
   text-align: center;
   color: var(--portal-text-muted);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 /* =====================================================
    RESPONSIVE - TABLET/MOBILE
    ===================================================== */
 
-@media (max-width: 1024px) {
+@media (--laptop) {
   .overview-stats-strip {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -655,7 +652,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (--compact-mobile) {
   .overview-linear {
     padding-bottom: 20px;
   }

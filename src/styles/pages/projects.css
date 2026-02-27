@@ -143,7 +143,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   justify-content: center;
   min-width: 20px;
   height: 20px;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--portal-alpha-white-20);
   border-radius: 10px;
   font-size: 0.75rem;
   font-weight: 700;
@@ -151,7 +151,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 }
 
 .filter-btn.active .filter-count {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--portal-alpha-black-20);
 }
 
 /* ===============================================
@@ -545,7 +545,7 @@ div.page-hero-desktop {
   max-width: none;
   display: block;
   margin: 0 auto;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  filter: drop-shadow(0 4px 12px var(--portal-alpha-black-15));
   transition: transform var(--transition-mouse) var(--easing-spring);
 }
 
@@ -1078,8 +1078,8 @@ div.page-hero-desktop {
   inset: 0;
   background: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0.1) 0px,
-    rgba(0, 0, 0, 0.1) 1px,
+    var(--portal-alpha-black-10) 0px,
+    var(--portal-alpha-black-10) 1px,
     transparent 1px,
     transparent 2px
   );
@@ -1101,7 +1101,7 @@ div.page-hero-desktop {
   inset: 0;
   background: radial-gradient(
     ellipse at 30% 30%,
-    rgba(255, 255, 255, 0.08) 0%,
+    var(--portal-alpha-white-08) 0%,
     transparent 50%
   );
   pointer-events: none;

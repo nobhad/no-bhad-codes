@@ -73,8 +73,7 @@
 
 /* Page transitions moved to page-states layer (after pages) */
 
-/* Shared components */
-@import "./shared/progress.css" layer(components);
+/* Shared components - merged into portal-components.css */
 
 /* ============================================
  * 5. PAGE-SPECIFIC LAYER
@@ -93,8 +92,7 @@
 /* Client portal */
 @import "./pages/client.css" layer(pages);
 
-/* Client dashboard */
-@import "./pages/client-dashboard.css" layer(pages);
+/* Client dashboard - removed (empty placeholder) */
 
 /* Projects page */
 @import "./pages/projects.css" layer(pages);

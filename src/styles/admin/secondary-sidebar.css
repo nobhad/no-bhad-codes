@@ -1,32 +1,23 @@
 /* =====================================================
-   SECONDARY SIDEBAR
+   ADMIN - SECONDARY SIDEBAR
    Vertical tab navigation for multi-tab detail pages
    (Project details, Client details, Analytics)
-
-   Architecture:
-   .dashboard-container > .sidebar + .secondary-sidebar + .dashboard-content
-
-   Width: 180px expanded, 56px collapsed (icon-only)
-   Shows/hides based on current view via .has-secondary-sidebar class
    ===================================================== */
 
-/* =====================================================
-   BASE SECONDARY SIDEBAR (Mount Point)
-   ===================================================== */
-[data-page="admin"] #secondary-sidebar {
-  display: none; /* Hidden by default, shown via .has-secondary-sidebar */
+/* ==============================================
+   BASE SECONDARY SIDEBAR
+   ============================================== */
+
+#secondary-sidebar {
+  display: none;
   flex-shrink: 0;
   z-index: 50;
 }
 
-/* Show mount point when parent has .has-secondary-sidebar class */
-[data-page="admin"] .dashboard-container.has-secondary-sidebar #secondary-sidebar {
-  display: flex;
-}
+.dashboard-container.has-secondary-sidebar #secondary-sidebar { display: flex; }
 
-/* Inner sidebar element (created by component) */
-[data-page="admin"] #secondary-sidebar > .secondary-sidebar,
-[data-page="admin"] .secondary-sidebar {
+#secondary-sidebar > .secondary-sidebar,
+.secondary-sidebar {
   width: 180px;
   min-width: 180px;
   max-width: 180px;
@@ -40,24 +31,25 @@
   overflow: hidden;
   position: relative;
   z-index: 55;
-  /* Shadow casting onto content area - matches main sidebar depth */
   box-shadow: var(--shadow-sidebar);
 }
 
-/* =====================================================
+/* ==============================================
    COLLAPSED STATE
-   ===================================================== */
-[data-page="admin"] #secondary-sidebar > .secondary-sidebar.collapsed,
-[data-page="admin"] .secondary-sidebar.collapsed {
+   ============================================== */
+
+#secondary-sidebar > .secondary-sidebar.collapsed,
+.secondary-sidebar.collapsed {
   width: 56px;
   min-width: 56px;
   max-width: 56px;
 }
 
-/* =====================================================
-   SECONDARY SIDEBAR HEADER
-   ===================================================== */
-[data-page="admin"] .secondary-sidebar-header {
+/* ==============================================
+   HEADER
+   ============================================== */
+
+.secondary-sidebar-header {
   padding: var(--space-2) var(--space-3);
   display: flex;
   align-items: center;
@@ -66,14 +58,12 @@
   flex-shrink: 0;
 }
 
-/* Back button */
-[data-page="admin"] .secondary-sidebar-back {
+.secondary-sidebar-back {
   width: 28px;
   height: 28px;
   padding: 0;
   background: transparent;
   border: none;
-  border-radius: var(--portal-radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -83,17 +73,14 @@
   flex-shrink: 0;
 }
 
-[data-page="admin"] .secondary-sidebar-back:hover {
+.secondary-sidebar-back:hover {
   background: var(--portal-bg-hover);
   color: var(--color-primary);
 }
 
-[data-page="admin"] .secondary-sidebar-back svg {
-  width: 16px;
-  height: 16px;
-}
+.secondary-sidebar-back svg { width: 16px; height: 16px; }
 
-[data-page="admin"] .secondary-sidebar-title {
+.secondary-sidebar-title {
   flex: 1;
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: var(--font-size-xs);
@@ -106,20 +93,15 @@
   text-overflow: ellipsis;
 }
 
-/* Hide back button and title when collapsed */
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-sidebar-back,
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-sidebar-title {
-  display: none;
-}
+.secondary-sidebar.collapsed .secondary-sidebar-back,
+.secondary-sidebar.collapsed .secondary-sidebar-title { display: none; }
 
-/* Collapse toggle button */
-[data-page="admin"] .secondary-sidebar-toggle {
+.secondary-sidebar-toggle {
   width: 24px;
   height: 24px;
   padding: 0;
   background: transparent;
   border: none;
-  border-radius: var(--portal-radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -129,49 +111,43 @@
   flex-shrink: 0;
 }
 
-[data-page="admin"] .secondary-sidebar-toggle:hover {
+.secondary-sidebar-toggle:hover {
   background: var(--portal-bg-hover);
   color: var(--portal-text-light);
 }
 
-[data-page="admin"] .secondary-sidebar-toggle svg {
+.secondary-sidebar-toggle svg {
   width: 14px;
   height: 14px;
   transition: transform var(--transition-fast);
 }
 
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-sidebar-toggle svg {
-  transform: rotate(180deg);
-}
+.secondary-sidebar.collapsed .secondary-sidebar-toggle svg { transform: rotate(180deg); }
 
-/* Center toggle when collapsed */
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-sidebar-header {
+.secondary-sidebar.collapsed .secondary-sidebar-header {
   justify-content: center;
   padding: var(--space-2);
 }
 
-/* =====================================================
-   SECONDARY NAV TABS
-   Matches main sidebar button styling
-   ===================================================== */
-[data-page="admin"] .secondary-nav {
+/* ==============================================
+   NAV TABS
+   ============================================== */
+
+.secondary-nav {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: var(--space-1); /* Match main sidebar gap */
+  gap: var(--space-1);
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-[data-page="admin"] .secondary-nav::-webkit-scrollbar {
-  display: none;
-}
+.secondary-nav::-webkit-scrollbar { display: none; }
 
-/* Individual tab button - matches .btn.btn-secondary styling */
-[data-page="admin"] .secondary-nav-tab {
+.secondary-nav-tab {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -179,11 +155,10 @@
   padding: var(--space-1-5) var(--space-2);
   background: transparent;
   border: none;
-  border-radius: var(--portal-radius-sm);
   cursor: pointer;
   color: var(--portal-text-secondary);
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -193,29 +168,27 @@
   position: relative;
 }
 
-[data-page="admin"] .secondary-nav-tab:hover {
+.secondary-nav-tab:hover {
   background: var(--color-primary);
   color: var(--portal-bg-dark);
 }
 
-[data-page="admin"] .secondary-nav-tab:focus-visible {
+.secondary-nav-tab:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
 }
 
-/* Active tab state - matches main sidebar active state */
-[data-page="admin"] .secondary-nav-tab.active {
+.secondary-nav-tab.active {
   background: transparent;
   color: var(--color-primary);
 }
 
-[data-page="admin"] .secondary-nav-tab.active:hover {
+.secondary-nav-tab.active:hover {
   background: var(--color-primary);
   color: var(--portal-bg-dark);
 }
 
-/* Tab icon - matches main sidebar 20x20 */
-[data-page="admin"] .secondary-nav-tab-icon {
+.secondary-nav-tab-icon {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
@@ -224,29 +197,17 @@
   justify-content: center;
 }
 
-[data-page="admin"] .secondary-nav-tab-icon svg {
-  width: 20px;
-  height: 20px;
-}
+.secondary-nav-tab-icon svg { width: 20px; height: 20px; }
+.secondary-nav-tab-label { flex: 1; }
+.secondary-sidebar.collapsed .secondary-nav-tab-label { display: none; }
 
-/* Tab label */
-[data-page="admin"] .secondary-nav-tab-label {
-  flex: 1;
-}
-
-/* Hide labels when collapsed */
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab-label {
-  display: none;
-}
-
-/* Collapsed state - consistent spacing like main sidebar */
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav {
+.secondary-sidebar.collapsed .secondary-nav {
   padding: var(--space-2);
   gap: 0.5rem;
   align-items: center;
 }
 
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab {
+.secondary-sidebar.collapsed .secondary-nav-tab {
   justify-content: center;
   padding: 0;
   width: 40px;
@@ -255,10 +216,11 @@
   flex-shrink: 0;
 }
 
-/* =====================================================
-   TAB BADGE (for notification counts)
-   ===================================================== */
-[data-page="admin"] .secondary-nav-tab-badge {
+/* ==============================================
+   TAB BADGE
+   ============================================== */
+
+.secondary-nav-tab-badge {
   min-width: var(--space-2);
   height: var(--space-2);
   padding: 0 var(--space-1);
@@ -266,20 +228,18 @@
   color: var(--color-white);
   font-size: var(--font-size-2xs);
   font-weight: 600;
-  border-radius: var(--portal-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-/* Position badge absolutely when collapsed */
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab {
+.secondary-sidebar.collapsed .secondary-nav-tab {
   position: relative;
   overflow: visible;
 }
 
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab-badge {
+.secondary-sidebar.collapsed .secondary-nav-tab-badge {
   position: absolute;
   top: var(--space-0-5);
   right: var(--space-0-5);
@@ -289,14 +249,14 @@
   font-size: var(--font-size-2xs);
   font-weight: 700;
   padding: 0;
-  border-radius: var(--portal-radius-full);
   box-shadow: 0 0 0 2px var(--portal-bg-dark);
 }
 
-/* =====================================================
-   TOOLTIP FOR COLLAPSED STATE
-   ===================================================== */
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab::after {
+/* ==============================================
+   COLLAPSED TOOLTIP
+   ============================================== */
+
+.secondary-sidebar.collapsed .secondary-nav-tab::after {
   content: attr(data-tooltip);
   position: absolute;
   left: calc(100% + 8px);
@@ -305,7 +265,6 @@
   background: var(--portal-bg-darker);
   color: var(--portal-text-light);
   padding: var(--space-1) var(--space-2);
-  border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-sm);
   font-family: var(--font-family-sans, system-ui, sans-serif);
   text-transform: uppercase;
@@ -319,22 +278,22 @@
   box-shadow: var(--shadow-md);
 }
 
-[data-page="admin"] .secondary-sidebar.collapsed .secondary-nav-tab:hover::after {
+.secondary-sidebar.collapsed .secondary-nav-tab:hover::after {
   opacity: 1;
   visibility: visible;
 }
 
-/* =====================================================
-   HORIZONTAL TABS FALLBACK (Mobile)
-   When secondary sidebar is hidden, show horizontal tabs
-   ===================================================== */
-[data-page="admin"] #secondary-tabs-horizontal {
-  display: none; /* Hidden by default, shown on mobile */
+/* ==============================================
+   HORIZONTAL TABS (Mobile Fallback)
+   ============================================== */
+
+#secondary-tabs-horizontal {
+  display: none;
   flex-shrink: 0;
 }
 
-[data-page="admin"] #secondary-tabs-horizontal .secondary-tabs-horizontal,
-[data-page="admin"] .secondary-tabs-horizontal {
+#secondary-tabs-horizontal .secondary-tabs-horizontal,
+.secondary-tabs-horizontal {
   background: var(--portal-bg-dark);
   padding: 0 var(--space-3);
   overflow-x: auto;
@@ -344,19 +303,16 @@
   flex-shrink: 0;
 }
 
-[data-page="admin"] #secondary-tabs-horizontal .secondary-tabs-horizontal::-webkit-scrollbar,
-[data-page="admin"] .secondary-tabs-horizontal::-webkit-scrollbar {
-  display: none;
-}
+#secondary-tabs-horizontal .secondary-tabs-horizontal::-webkit-scrollbar,
+.secondary-tabs-horizontal::-webkit-scrollbar { display: none; }
 
-[data-page="admin"] .secondary-tabs-horizontal-nav {
+.secondary-tabs-horizontal-nav {
   display: flex;
   gap: var(--space-1);
   min-width: max-content;
 }
 
-/* Horizontal tab button */
-[data-page="admin"] .secondary-tab-horizontal {
+.secondary-tab-horizontal {
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -367,7 +323,7 @@
   cursor: pointer;
   color: var(--portal-text-secondary);
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -375,16 +331,14 @@
   transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
-[data-page="admin"] .secondary-tab-horizontal:hover {
-  color: var(--portal-text-light);
-}
+.secondary-tab-horizontal:hover { color: var(--portal-text-light); }
 
-[data-page="admin"] .secondary-tab-horizontal.active {
+.secondary-tab-horizontal.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }
 
-[data-page="admin"] .secondary-tab-horizontal-icon {
+.secondary-tab-horizontal-icon {
   width: 16px;
   height: 16px;
   display: flex;
@@ -392,72 +346,38 @@
   justify-content: center;
 }
 
-[data-page="admin"] .secondary-tab-horizontal-icon svg {
-  width: 16px;
-  height: 16px;
-}
+.secondary-tab-horizontal-icon svg { width: 16px; height: 16px; }
 
-/* =====================================================
-   RESPONSIVE BEHAVIOR
-   ===================================================== */
+/* ==============================================
+   RESPONSIVE
+   ============================================== */
 
-/* > 1300px: Both sidebars visible */
-/* (Default behavior - no media query needed) */
-
-/* 1024-1300px: Main sidebar auto-collapses, secondary stays */
 @media (--wide-down) {
-  /* Secondary sidebar stays at 180px */
-  [data-page="admin"] .secondary-sidebar {
+  .secondary-sidebar {
     width: 180px;
     min-width: 180px;
     max-width: 180px;
   }
 }
 
-/* < 1024px: Secondary sidebar hidden, horizontal tabs fallback */
-@media (max-width: 1024px) {
-  [data-page="admin"] #secondary-sidebar,
-  [data-page="admin"] .secondary-sidebar {
-    display: none !important;
-  }
+@media (--laptop) {
+  #secondary-sidebar,
+  .secondary-sidebar { display: none !important; }
 
-  /* Show horizontal tabs fallback when secondary sidebar is hidden */
-  [data-page="admin"] .dashboard-container.has-secondary-sidebar #secondary-tabs-horizontal {
-    display: block;
-  }
+  .dashboard-container.has-secondary-sidebar #secondary-tabs-horizontal { display: block; }
 }
 
-/* Tablet portrait: Horizontal tabs with smaller padding */
 @media (--tablet-down) {
-  [data-page="admin"] #secondary-tabs-horizontal .secondary-tabs-horizontal,
-  [data-page="admin"] .secondary-tabs-horizontal {
-    padding: 0 var(--space-2);
-  }
+  #secondary-tabs-horizontal .secondary-tabs-horizontal,
+  .secondary-tabs-horizontal { padding: 0 var(--space-2); }
 
-  [data-page="admin"] .secondary-tab-horizontal {
+  .secondary-tab-horizontal {
     padding: var(--space-1-5) var(--space-2);
     font-size: var(--font-size-xs);
   }
 }
 
-/* Mobile: Horizontal tabs only, icon + label */
 @media (--compact-mobile) {
-  [data-page="admin"] .secondary-tab-horizontal {
-    padding: var(--space-1) var(--space-2);
-  }
-
-  /* Hide labels on very small screens, show icons only */
-  [data-page="admin"] .secondary-tab-horizontal-label {
-    display: none;
-  }
+  .secondary-tab-horizontal { padding: var(--space-1) var(--space-2); }
+  .secondary-tab-horizontal-label { display: none; }
 }
-
-/* =====================================================
-   DASHBOARD CONTENT ADJUSTMENT
-   Adjust content when secondary sidebar is present
-   ===================================================== */
-[data-page="admin"] .dashboard-container.has-secondary-sidebar .dashboard-content {
-  /* Content area will naturally flex to fill remaining space */
-}
-
-/* Secondary sidebar is optional - original horizontal tabs remain visible by default */

@@ -289,9 +289,8 @@
   width: fit-content;
   background-color: transparent;
   box-shadow: none;
-  border-radius: 0;
   padding: 0;
-  color: var(--color-text-muted, rgba(0, 0, 0, 0.5));
+  color: var(--color-text-muted, var(--portal-alpha-black-50));
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -324,9 +323,8 @@
   width: fit-content;
   background-color: transparent;
   box-shadow: none;
-  border-radius: 0;
   padding: 0;
-  color: var(--color-text-muted, rgba(0, 0, 0, 0.5));
+  color: var(--color-text-muted, var(--portal-alpha-black-50));
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -762,7 +760,7 @@
 /* Project tagline */
 .project-tagline {
   font-size: 1.25rem;
-  color: var(--color-text-muted, rgba(0, 0, 0, 0.6));
+  color: var(--color-text-muted, var(--portal-alpha-black-60));
   margin: 0.5rem 0 1.5rem 0;
   font-style: italic;
 }
@@ -835,7 +833,7 @@
 }
 
 .project-nav-link:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--portal-alpha-black-05);
   transform: translateY(-2px);
 }
 
@@ -869,7 +867,7 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.5);
+  color: var(--portal-alpha-black-50);
 }
 
 .project-nav-title {
@@ -886,7 +884,7 @@
 }
 
 [data-theme="dark"] .project-nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--portal-alpha-white-05);
 }
 
 [data-theme="dark"] .project-nav-label {

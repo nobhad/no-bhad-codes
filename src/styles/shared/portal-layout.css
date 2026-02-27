@@ -49,8 +49,9 @@ body:has(.portal) {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Admin backend: no shadow on global header */
+/* Admin backend: transparent header, no shadow */
 [data-page="admin"] .portal-global-header {
+  background: transparent;
   box-shadow: none;
 }
 
@@ -70,7 +71,38 @@ body:has(.portal) {
   margin-left: auto;
 }
 
-/* Logo in global header - ACME font matching main site branding */
+/* Branding in global header - avatar + text */
+.portal-global-header .header-branding {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--portal-text-light);
+  transition: color var(--transition-mouse) ease;
+}
+
+.portal-global-header .header-branding:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.portal-global-header .header-avatar {
+  width: 32px;
+  height: 32px;
+  filter: invert(1);
+  flex-shrink: 0;
+}
+
+.portal-global-header .header-logo-text {
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 16px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Logo in global header - Sans-serif font matching main site branding */
 .portal-global-header .header-logo {
   display: flex;
   align-items: center;
@@ -90,12 +122,53 @@ body:has(.portal) {
   text-decoration: none;
 }
 
-/* Separator between logo and breadcrumbs */
+/* Separator between logo and breadcrumbs - hidden on admin */
+[data-page="admin"] .portal-global-header .header-separator {
+  display: none;
+}
+
 .portal-global-header .header-separator {
   width: 1px;
   height: 24px;
   background: var(--portal-border-medium);
   margin: 0 var(--space-1);
+}
+
+/* Sidebar toggle button in header */
+.portal-global-header .header-sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--portal-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.portal-global-header .header-sidebar-toggle:hover {
+  color: var(--portal-text-light);
+}
+
+.portal-global-header .header-sidebar-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Page title in header */
+.portal-global-header .header-page-title {
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  white-space: nowrap;
 }
 
 /* Breadcrumbs in global header */
@@ -254,7 +327,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Header subtabs - align with first nav item in sidebar, LEFT aligned */
-.portal .portal-header-title .header-subtabs {
+.portal .portal-header-subtabs .header-subtabs {
   display: flex;
   align-items: center;
   margin-top: var(--portal-nav-gap, 16px);
@@ -262,7 +335,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Hide all header subtab groups by default */
-.portal .portal-header-title .header-subtabs .header-subtab-group {
+.portal .portal-header-subtabs .header-subtabs .header-subtab-group {
   display: none;
 }
 
@@ -298,7 +371,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Header subtab groups - shared container styling */
-.portal .portal-header-title .header-subtab-group {
+.portal .portal-header-subtabs .header-subtab-group {
   gap: var(--space-1);
   padding: 0;
   margin: 0;
@@ -310,7 +383,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Header subtab buttons - UNIVERSAL styling for ALL subtab types */
-.portal .portal-header-title .header-subtab-group :is(> button, .portal-subtab, .view-toggle button) {
+.portal .portal-header-subtabs .header-subtab-group :is(> button, .portal-subtab, .view-toggle button) {
   padding: var(--space-0-5) var(--space-1-5);
   background: transparent;
   border: none;
@@ -327,19 +400,19 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   letter-spacing: normal;
 }
 
-.portal .portal-header-title .header-subtab-group :is(> button, .portal-subtab, .view-toggle button):hover {
+.portal .portal-header-subtabs .header-subtab-group :is(> button, .portal-subtab, .view-toggle button):hover {
   background: transparent;
   color: var(--portal-text-primary);
 }
 
-.portal .portal-header-title .header-subtab-group :is(> button, .portal-subtab, .view-toggle button).active {
+.portal .portal-header-subtabs .header-subtab-group :is(> button, .portal-subtab, .view-toggle button).active {
   background: transparent;
   border-bottom: 2px solid var(--color-primary);
   color: var(--color-primary);
 }
 
 /* View toggle in header - reset container styling */
-.portal .portal-header-title .header-subtab-group .view-toggle {
+.portal .portal-header-subtabs .header-subtab-group .view-toggle {
   display: flex;
   gap: var(--space-1);
   border-bottom: none;
@@ -370,19 +443,11 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   min-height: calc(100vh - var(--portal-header-height, 56px));
 }
 
-/* Admin: full viewport height (no global header visible) */
-[data-page="admin"] .portal-body .sidebar {
-  height: 100vh;
-  height: 100dvh;
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
+/* Admin: fill portal-body container (accounts for header) */
+[data-page="admin"] .portal-body .sidebar,
 [data-page="admin"] .portal-body .dashboard-content {
-  height: 100vh;
-  height: 100dvh;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
+  min-height: 100%;
 }
 
 /* =====================================================
@@ -397,9 +462,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 /* Disable focus outline on ALL sidebar elements */
 .sidebar :is(:focus, :focus-visible),
-.sidebar :is(.btn, .icon-btn, a, button, .sidebar-toggle-btn):is(:focus, :focus-visible),
-.sidebar-buttons .btn:is(:focus, :focus-visible),
-.sidebar-footer .btn:is(:focus, :focus-visible) {
+.sidebar :is(.sidebar-btn, .icon-btn, a, button, .sidebar-toggle-btn):is(:focus, :focus-visible) {
   outline: none;
   box-shadow: none;
 }
@@ -487,11 +550,11 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   }
 
   /* Header subtabs wrap on mobile */
-  .portal .portal-header-title .header-subtab-group {
+  .portal .portal-header-subtabs .header-subtab-group {
     flex-wrap: wrap;
   }
 
-  .portal .portal-header-title .header-subtab-group :is(> button, .portal-subtab, .view-toggle button) {
+  .portal .portal-header-subtabs .header-subtab-group :is(> button, .portal-subtab, .view-toggle button) {
     font-size: var(--font-size-xs);
     padding: var(--space-0-5) var(--space-1-5);
   }
@@ -561,7 +624,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: flex;
   align-items: flex-end;
   gap: 0;
-  border-bottom: 1px solid var(--portal-bg-medium);
+  border-bottom: var(--portal-border);
   flex-shrink: 0;
 }
 
@@ -711,7 +774,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   height: 18px;
   padding: 0 4px;
   background: transparent;
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
   border-radius: 4px;
   font-family: var(--font-mono, monospace);
   font-size: 0.65rem;
@@ -748,18 +811,18 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   position: relative;
 }
 
-.portal .sidebar.collapsed :is(.sidebar-buttons .btn, .sidebar-footer .btn) .btn-text {
+.portal .sidebar.collapsed .sidebar-btn .btn-text {
   display: none;
 }
 
-.portal .sidebar.collapsed .sidebar-footer .btn {
+.portal .sidebar.collapsed .sidebar-footer .sidebar-btn {
   justify-content: center;
   padding-left: 0;
   padding-right: 0;
 }
 
 /* Tooltips on collapsed nav items */
-.portal .sidebar.collapsed .sidebar-buttons .btn::after {
+.portal .sidebar.collapsed .sidebar-btn::after {
   content: attr(aria-label);
   position: absolute;
   left: calc(100% + 10px);
@@ -783,7 +846,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   transition: opacity var(--transition-faster), visibility var(--transition-faster);
 }
 
-.portal .sidebar.collapsed .sidebar-buttons .btn:hover::after {
+.portal .sidebar.collapsed .sidebar-btn:hover::after {
   opacity: 1;
   visibility: visible;
 }
@@ -830,16 +893,10 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   --sidebar-icon-size: 20px;
 }
 
-/* Sidebar branding - avatar + "NO BHAD CODES" text */
+/* Sidebar branding - hide when global header is visible */
+/* Branding is now in portal-global-header, not sidebar */
 .portal .sidebar-collapsed-logo {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-direction: row;
-  height: var(--portal-header-height-line, 32px);
-  margin: var(--portal-header-top, 20px) 0 var(--portal-nav-gap, 24px) 0;
-  padding: 0 var(--space-3) 0 var(--sidebar-icon-indent);
-  text-decoration: none;
+  display: none;
 }
 
 /* When sidebar is OPEN - move avatar slightly left */
@@ -860,7 +917,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 .portal .sidebar-collapsed-logo::after {
   content: 'NO BHAD CODES';
-  font-family: var(--font-family-acme, sans-serif);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 1.25rem;
   font-weight: 400;
   color: var(--portal-text-light);

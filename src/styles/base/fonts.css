@@ -3,13 +3,19 @@
  * FONT FACE DEFINITIONS
  * ===============================================
  * @file src/styles/base/fonts.css
- * 
+ *
  * Font face declarations must be defined BEFORE
  * any CSS that references them.
- * 
+ *
  * This file is imported FIRST in main.css to ensure
  * fonts are available when design tokens reference them.
  */
+
+/* ============================================
+ * INCONSOLATA (Google Fonts - Brutalist UI)
+ * Used by React components
+ * ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;500;600;700&display=swap');
 
 /* ============================================
  * ACME FONT

@@ -1,136 +1,235 @@
 /**
  * SHARED PORTAL BUTTON STYLES
  * @file src/styles/shared/portal-buttons.css
- * Uses .portal class on dashboard-container for scoping.
+ *
+ * Base button styling handled by design-system/tokens/buttons.css + form-buttons.css
+ * This file contains ONLY portal-specific button overrides:
+ * - Sidebar buttons (navigation)
+ * - Icon buttons
+ * - Toggle buttons
+ * - Context-specific variants
  */
 
-/* Base button styles */
-.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--icon-gap-md);
-  padding: var(--space-1-5) var(--space-3);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: var(--btn-portal-letter-spacing, 0.5px);
-  text-transform: uppercase;
-  text-align: left;
-  background: transparent;
-  color: var(--portal-text-light);
-  border: none;
-  border-radius: var(--portal-radius-lg, 12px);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: var(--btn-portal-shadow);
-  text-decoration: none;
-  white-space: nowrap;
-  text-shadow: none;
-}
-
 /* Button with icon - flex layout */
-.portal button:has(> svg) {
+button:has(> svg) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--icon-gap-md);
+  gap: var(--icon-gap-md, 0.5rem);
 }
 
-/* Icon before text */
-.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline) > :is(svg, .btn-icon),
-.portal .icon-btn > :is(svg, .icon-btn-svg),
-.portal button > :is(.icon-wrap, .tab-icon, svg) {
+/* Icon before text (default order) */
+:is(.btn, .btn-primary, .btn-secondary, .btn-outline) > :is(svg, .btn-icon),
+.icon-btn > :is(svg, .icon-btn-svg),
+button > :is(.icon-wrap, .tab-icon, svg) {
   order: -1;
 }
 
 /* Dropdown caret after text */
-.portal .custom-dropdown-trigger > svg,
-.portal .custom-dropdown-trigger .custom-dropdown-caret {
+.custom-dropdown-trigger > svg,
+.custom-dropdown-trigger .custom-dropdown-caret {
   order: 1;
 }
 
-/* Hover state */
-.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-  box-shadow: var(--btn-portal-shadow-hover);
-}
-
-/* Focus state */
-.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):is(:focus, :focus-visible) {
-  box-shadow: var(--btn-portal-shadow-focus);
-  outline: none;
-}
-
-/* Icon button focus */
-.portal .icon-btn:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-primary);
-  outline: none;
-}
-
-/* Active state */
-.portal :is(.btn, .btn-secondary).active {
-  background: transparent;
-  color: var(--color-primary);
-  box-shadow: var(--btn-portal-shadow);
-}
-
-/* Primary button */
-.portal :is(.btn-primary, button[type="submit"]) {
-  background: transparent;
-  color: var(--color-primary);
-}
-.portal :is(.btn-primary, button[type="submit"]):hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-}
+/* ============================================
+ * VARIANT BUTTONS - Color variants
+ * ============================================ */
 
 /* Danger button */
-.portal .btn-danger {
-  background: transparent;
-  color: var(--color-error-500, #ef4444);
+.btn-danger {
+  background: var(--btn-portal-danger-bg);
+  color: var(--btn-portal-danger-color);
+  border-color: var(--btn-portal-danger-border);
 }
-.portal .btn-danger:hover {
-  background: var(--color-error-500, #ef4444);
-  color: var(--color-white);
+.btn-danger:hover {
+  background: var(--btn-portal-danger-hover-bg);
+  color: var(--btn-portal-danger-hover-color);
+  border-color: var(--btn-portal-danger-hover-border);
 }
 
 /* Warning button */
-.portal .btn-warning {
-  background: transparent;
+.btn-warning {
+  background: var(--color-black);
   color: var(--color-warning-500, #f59e0b);
+  border-color: var(--color-warning-500, #f59e0b);
 }
-.portal .btn-warning:hover {
+.btn-warning:hover {
   background: var(--color-warning-500, #f59e0b);
   color: var(--color-black);
+  border-color: var(--color-warning-500, #f59e0b);
 }
 
 /* Success button */
-.portal .btn-success {
-  background: transparent;
+.btn-success {
+  background: var(--color-black);
   color: var(--color-success-500, #10b981);
+  border-color: var(--color-success-500, #10b981);
 }
-.portal .btn-success:hover {
+.btn-success:hover {
   background: var(--color-success-500, #10b981);
   color: var(--color-white);
+  border-color: var(--color-success-500, #10b981);
+}
+
+/* Link button - text-only button styled as a link */
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm, 12px);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
+  box-shadow: none;
+}
+.btn-link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+  background: transparent;
+  box-shadow: none;
 }
 
 /* Small button */
-.portal .btn-sm {
-  padding: var(--space-1) var(--space-2);
-  font-size: 0.8rem;
+.btn-sm {
+  padding: var(--btn-portal-sm-padding-y) var(--btn-portal-sm-padding-x);
+  font-size: var(--btn-portal-sm-font-size);
+  min-height: var(--btn-portal-sm-min-height);
 }
-.portal .btn-sm .btn-icon {
+
+/* Extra small button - for table actions */
+.btn-xs {
+  padding: 0.375rem 0.75rem;
+  font-size: var(--font-size-xs, 0.75rem);
+  min-height: auto;
+}
+
+/* Outline button - transparent with border */
+.btn-outline {
+  background: transparent;
+  color: var(--portal-text-light);
+  border: var(--portal-border);
+}
+.btn-outline:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
+}
+
+/* Ghost button - transparent, minimal */
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--portal-text-light);
+}
+.btn-ghost:hover {
+  background: var(--portal-bg-lighter);
+  color: var(--color-primary);
+  border-color: transparent;
+}
+
+/* Full width button */
+.btn-full {
+  width: 100%;
+}
+
+/* Large button - for prominent CTAs */
+.btn-lg {
+  height: 60px;
+  padding: 0 1.5rem;
+  font-size: var(--btn-portal-font-size);
+  line-height: 60px;
+}
+
+/* Animated button - for GSAP/animation contexts */
+.btn-animated {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Filled primary button - solid background */
+.btn-filled {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+}
+.btn-filled:hover {
+  background: var(--color-brand-hover, var(--color-primary-hover));
+  color: var(--color-white);
+  border: none;
+}
+.btn-filled:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Back button - navigation back action */
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: var(--portal-border);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.btn-back:hover {
+  background: var(--portal-bg-lighter);
+  border-color: var(--portal-border-light);
+}
+.btn-back svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+ * AUTH BUTTON - Full width outline button for login/auth forms
+ * ============================================ */
+.btn-auth {
+  width: 100%;
+  padding: var(--space-1-5) var(--space-3);
+  border: 2px solid var(--portal-border-light);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  letter-spacing: 1px;
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  background-color: transparent;
+  color: var(--portal-text-light);
+  box-shadow: none;
+}
+
+.btn-auth:hover {
+  background-color: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
+}
+
+.btn-auth:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-sm .btn-icon {
   width: 1em;
   height: 1em;
 }
 
 /* ============================================
- * SIDEBAR BUTTONS - Unified link style
- * Consolidated: .sidebar-buttons .btn + .sidebar-footer .btn-logout
+ * SIDEBAR BUTTONS - Navigation link style
+ * These have completely different styling from action buttons
+ * Uses .sidebar-btn class to exclude from form-buttons.css styling
  * ============================================ */
-.portal :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) {
+.portal .sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md, 0.5rem);
   width: 100%;
   padding: clamp(0.55rem, 1.3vw, 0.75rem) var(--space-3) clamp(0.55rem, 1.3vw, 0.75rem) var(--sidebar-icon-indent, 18px);
   font-size: clamp(0.9rem, 1.6vw, 1.05rem);
@@ -143,121 +242,227 @@
   overflow: hidden;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: var(--portal-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  border-radius: 0;
 }
-.portal :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout):hover,
-.portal .sidebar-buttons .btn.active {
+.portal .sidebar-btn:hover,
+.portal .sidebar-btn.active {
   background: transparent;
   box-shadow: none;
+  border: none;
 }
-.portal :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) .btn-icon {
+.portal .sidebar-btn .btn-icon {
   flex-shrink: 0;
   width: var(--sidebar-icon-size, 20px);
   height: var(--sidebar-icon-size, 20px);
 }
-.portal :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) .btn-icon svg {
+.portal .sidebar-btn .btn-icon svg {
   stroke-width: 2.5;
 }
-.portal :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) .btn-text {
+.portal .sidebar-btn .btn-text {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.portal :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout):hover,
-.portal :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout):hover .btn-icon,
-.portal .sidebar-buttons .btn.active:not(:hover),
-.portal .sidebar-buttons .btn.active:not(:hover) .btn-icon {
+.portal .sidebar-btn:hover,
+.portal .sidebar-btn:hover .btn-icon,
+.portal .sidebar-btn.active,
+.portal .sidebar-btn.active .btn-icon {
   color: var(--color-primary);
-}
-
-/* Send message button */
-.portal :is(#btn-send-message, #admin-send-message, #btn-pd-send-message) {
-  border: 2px solid var(--color-black);
-  color: var(--color-black);
-  box-shadow: none;
-}
-.portal :is(#btn-send-message, #admin-send-message, #btn-pd-send-message):hover {
-  background: var(--color-primary);
-  border: 2px solid var(--color-primary);
-  color: var(--color-white);
-  box-shadow: var(--btn-portal-shadow-hover);
-}
-
-/* Standalone icon button */
-.portal button.btn-icon {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  color: var(--portal-text-light);
-  cursor: pointer;
-  padding: var(--space-2);
-  border-radius: var(--portal-radius-xs);
-  transition: color var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.portal button.btn-icon:hover {
-  color: var(--color-primary);
-  background: transparent;
-  box-shadow: none;
-}
-.portal button.btn-icon svg {
-  display: block;
-  width: 18px;
-  height: 18px;
-  stroke-width: 2.5;
-}
-
-/* Icon button - shared 36x36 size */
-.portal .icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: var(--portal-radius-lg, 12px);
-  color: var(--portal-text-light);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: color var(--transition-mouse) ease, background-color var(--transition-mouse) ease;
-  text-decoration: none;
-}
-.portal .icon-btn:hover {
-  color: var(--color-primary);
-}
-.portal .icon-btn.icon-btn-danger:hover {
-  color: var(--color-error-500);
-}
-.portal .icon-btn.icon-btn-success:hover {
-  color: var(--color-success-500);
-}
-.portal .icon-btn svg {
-  width: 18px;
-  height: 18px;
-  stroke-width: 2.5;
 }
 
 /* ============================================
- * COLLAPSED SIDEBAR - UNIFIED
- * Single source of truth for icon-only sidebar state.
- * Applies to: .sidebar.collapsed, .sidebar.icon-only,
- * and automatically at --wide-down and --compact-mobile breakpoints.
+ * ICON BUTTONS - Small clickable icons
+ * Single source of truth: use .icon-btn class
+ * ============================================ */
+
+/* Icon button - single source of truth for ALL icon-only buttons */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--btn-portal-icon-size, 36px);
+  height: var(--btn-portal-icon-size, 36px);
+  min-width: var(--btn-portal-icon-size, 36px);
+  min-height: var(--btn-portal-icon-size, 36px);
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--portal-text-light);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-mouse) ease;
+  text-decoration: none;
+  outline: none;
+}
+.icon-btn:hover {
+  color: var(--color-primary);
+}
+.icon-btn.icon-btn-danger:hover {
+  color: var(--color-error-500);
+}
+.icon-btn.icon-btn-success {
+  color: var(--color-success);
+}
+.icon-btn.icon-btn-success:hover {
+  color: var(--color-success-500);
+  background-color: rgba(var(--color-success-rgb), 0.1);
+}
+.icon-btn.icon-btn-active {
+  color: var(--status-active);
+  background: rgba(var(--color-success-rgb), 0.15);
+}
+.icon-btn.icon-btn-active:hover {
+  background: rgba(var(--color-success-rgb), 0.25);
+}
+.icon-btn.icon-btn-warning {
+  color: var(--color-warning);
+}
+.icon-btn.icon-btn-warning:hover {
+  color: var(--color-warning);
+  background-color: rgba(var(--color-warning-rgb, 245, 158, 11), 0.1);
+}
+/* Outline variant - icon button with border */
+.icon-btn.icon-btn-outline {
+  border: 1px solid var(--portal-border);
+}
+.icon-btn.icon-btn-outline:hover {
+  border-color: var(--color-primary);
+}
+.icon-btn.icon-btn-outline.icon-btn-danger:hover {
+  border-color: var(--color-danger);
+  background: rgba(var(--color-danger-rgb), 0.1);
+}
+/* Size modifiers */
+.icon-btn.icon-btn-sm {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+}
+.icon-btn.icon-btn-xs {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+}
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
+/* Icon button focus */
+.icon-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-primary);
+  outline: none;
+}
+
+/* Icon button primary variant */
+.icon-btn.icon-btn-primary {
+  color: var(--color-primary);
+}
+.icon-btn.icon-btn-primary:hover {
+  color: var(--color-primary-hover, var(--color-primary));
+}
+
+/* Icon button with border active state */
+.icon-btn.icon-btn-outline.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* ============================================
+ * ICON BUTTON RESPONSIVE - Touch devices
+ * ============================================
+ * WCAG 2.1 requires 44x44px touch targets
+ */
+@media (pointer: coarse) {
+  :is([data-page="admin"], [data-page="client-portal"]) .icon-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .icon-btn:active {
+    color: var(--color-primary);
+    transform: scale(0.95);
+  }
+
+  .icon-btn {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: rgba(var(--color-primary-rgb, 255, 0, 0), 0.1);
+  }
+
+  /* Table action buttons stay compact (28px) even on touch devices */
+  :is([data-page="admin"], [data-page="client-portal"]) .data-table .icon-btn,
+  :is([data-page="admin"], [data-page="client-portal"]) .table-actions .icon-btn,
+  :is([data-page="admin"], [data-page="client-portal"]) .actions-cell .icon-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .data-table .icon-btn svg,
+  :is([data-page="admin"], [data-page="client-portal"]) .table-actions .icon-btn svg,
+  :is([data-page="admin"], [data-page="client-portal"]) .actions-cell .icon-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+}
+
+/* ============================================
+ * TABLE ACTION BUTTONS - Compact sizing
+ * ============================================
+ * Table action buttons use smaller size (28px) for denser display.
+ * These rules apply to both desktop and touch devices.
+ */
+:is([data-page="admin"], [data-page="client-portal"]) .data-table .icon-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .data-table .icon-btn svg {
+  /* !important needed to override inline SVG width/height attributes */
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Also target buttons inside table-actions and actions-cell wrappers */
+:is([data-page="admin"], [data-page="client-portal"]) .table-actions .icon-btn,
+:is([data-page="admin"], [data-page="client-portal"]) .actions-cell .icon-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .table-actions .icon-btn svg,
+:is([data-page="admin"], [data-page="client-portal"]) .actions-cell .icon-btn svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* ============================================
+ * COLLAPSED SIDEBAR - Icon-only state
  * ============================================ */
 
 /* Base icon-only button styles - applies to all collapsed states */
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn {
   width: 40px;
   height: 40px;
   padding: 0;
   justify-content: center;
   margin: 0 auto;
-  border-radius: var(--portal-radius-md, 8px);
   border: none;
   background: transparent;
   box-shadow: none;
@@ -266,20 +471,19 @@
 }
 
 /* Active/hover states */
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-buttons .btn.active {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn.active {
   background: transparent;
   border: none;
   outline: none;
   box-shadow: none;
 }
 
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout):is(.active, :hover, :focus) .btn-icon {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn:is(.active, :hover, :focus) .btn-icon {
   color: var(--color-primary);
 }
 
 /* Hidden text */
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) .btn-text,
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .logout-text {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-text {
   display: none;
   width: 0;
   height: 0;
@@ -290,37 +494,35 @@
 }
 
 /* Icon sizing */
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) .btn-icon {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-icon {
   margin: 0;
   width: 22px;
   height: 22px;
 }
 
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) .btn-icon svg {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-icon svg {
   stroke-width: 2;
   transition: stroke-width var(--transition-faster);
 }
 
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) :is(.sidebar-buttons .btn.active, .sidebar-buttons .btn:hover, .sidebar-footer .btn-logout:hover) .btn-icon svg {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn:is(.active, :hover) .btn-icon svg {
   stroke-width: 2.5;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 1px 1px var(--portal-alpha-black-30));
 }
 
 /* ============================================
- * RESPONSIVE: Sidebar auto-collapses at breakpoints
- * Reuses the same styles defined above via container query approach.
+ * RESPONSIVE: Sidebar auto-collapses
  * ============================================ */
 
 @media (--wide-down) {
   .portal .sidebar .sidebar-buttons { gap: 0.5rem; }
 
   /* Force icon-only appearance at this breakpoint */
-  .portal .sidebar :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) {
+  .portal .sidebar .sidebar-btn {
     width: 40px;
     height: 40px;
     padding: 0;
     justify-content: center;
-    border-radius: var(--portal-radius-md);
     border: none;
     background: transparent;
     box-shadow: none;
@@ -328,68 +530,69 @@
     overflow: visible;
   }
 
-  .portal .sidebar .sidebar-buttons .btn.active,
-  .portal .sidebar :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout):is(:hover, :focus) {
+  .portal .sidebar .sidebar-btn.active,
+  .portal .sidebar .sidebar-btn:is(:hover, :focus) {
     background: transparent;
     border: none;
     box-shadow: none;
   }
 
-  .portal .sidebar :is(.sidebar-buttons .btn.active, .sidebar-buttons .btn:hover, .sidebar-footer .btn-logout:hover) .btn-icon {
+  .portal .sidebar .sidebar-btn:is(.active, :hover) .btn-icon {
     color: var(--color-primary);
   }
 
-  .portal .sidebar :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) .btn-text,
-  .portal .sidebar .logout-text {
+  .portal .sidebar .sidebar-btn .btn-text {
     display: none;
     visibility: hidden;
     position: absolute;
     left: -9999px;
   }
 
-  .portal .sidebar :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) .btn-icon {
+  .portal .sidebar .sidebar-btn .btn-icon {
     margin: 0;
     width: 22px;
     height: 22px;
   }
 
-  .portal .sidebar :is(.sidebar-buttons .btn, .sidebar-footer .btn-logout) .btn-icon svg {
+  .portal .sidebar .sidebar-btn .btn-icon svg {
     stroke-width: 2;
     transition: stroke-width var(--transition-faster);
   }
 
-  .portal .sidebar :is(.sidebar-buttons .btn.active, .sidebar-buttons .btn:hover, .sidebar-footer .btn-logout:hover) .btn-icon svg {
+  .portal .sidebar .sidebar-btn:is(.active, :hover) .btn-icon svg {
     stroke-width: 2.5;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 1px 1px var(--portal-alpha-black-30));
   }
 }
 
-/* Toggle button group */
+/* ============================================
+ * TOGGLE BUTTON GROUP
+ * ============================================ */
 .toggle-group {
   display: flex;
-  border: 2px solid var(--color-border);
-  background: var(--color-neutral-200);
+  border: 1px solid var(--btn-portal-border-color);
+  background: transparent;
 }
 .toggle-btn {
   flex: 1;
   padding: 0.75rem 1.25rem;
   background: transparent;
   border: none;
-  font-family: var(--font-family-acme);
+  font-family: var(--btn-portal-font-family);
   font-size: 0.9rem;
   font-weight: normal;
   text-transform: uppercase;
-  color: var(--color-text-primary);
+  color: var(--color-white);
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 .toggle-btn:not(:last-child) {
-  border-right: 1px solid var(--color-border);
+  border-right: 1px solid var(--btn-portal-border-color);
 }
 .toggle-btn:hover:not(.active) {
-  background: var(--color-neutral-300);
+  background: var(--portal-alpha-white-10);
 }
 .toggle-btn.active {
-  background: var(--color-primary);
-  color: var(--color-dark);
+  background: var(--color-white);
+  color: var(--color-black);
 }

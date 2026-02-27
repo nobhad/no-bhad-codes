@@ -4,58 +4,76 @@
    ===================================================== */
 
 /*
-  RESPONSIVE TABLE SYSTEM
-  ------------------------------------------------------
-  - All table variables (padding, gap, font, color) are defined here for consistency.
-  - Padding and gap use clamp() for responsive shrinking on small screens.
-  - Action button spacing is responsive to prevent overflow.
-  - Use .cell-wrap for cells that should wrap instead of truncate.
-  - Use utility classes (.col-xs, .col-sm, etc.) for explicit column sizing.
-  - Mobile: Tables scroll horizontally by default, but you can add a stacked pattern if needed.
-  - DO NOT move table logic to general layout files. This is the single source of truth.
+  TABLE CLASS: .data-table
+  All tables MUST use .data-table class.
+  DO NOT use .admin-table - it is deprecated.
 */
 
 :root {
   /* Table dimensions - compact Linear-style */
   --table-header-height: 32px;
   --table-row-height: 40px;
-  --table-cell-padding-x: clamp(8px, 2vw, 16px); /* Responsive horizontal padding */
-  --table-cell-padding-y: clamp(4px, 1vw, 12px); /* Responsive vertical padding */
-  --table-outer-padding: clamp(12px, 3vw, 24px); /* Responsive outer padding */
-  --table-actions-gap: clamp(2px, 1vw, 12px);    /* Responsive gap between action buttons */
+  --table-cell-padding-x: clamp(8px, 2vw, 16px);
+  --table-cell-padding-y: clamp(4px, 1vw, 12px);
+  --table-outer-padding: clamp(12px, 3vw, 24px);
+  --table-actions-gap: 4px;
 
   /* Table typography */
-  --table-header-font-size: 0.6875rem;  /* 11px */
+  --table-header-font-size: 0.6875rem;
   --table-cell-font-size: 12px;
   --table-header-font-weight: 500;
   --table-header-letter-spacing: 0.05em;
 
-  /* Table colors - inherit from portal tokens */
-  --table-bg: var(--portal-bg-dark);
+  /* Table colors - uses shared border from variables.css */
+  --table-bg: transparent;
   --table-header-color: var(--portal-text-secondary);
   --table-cell-color: var(--portal-text-light);
-  --table-border-color: var(--portal-border-dark);
+
+  /* Table column sizing */
+  --table-identity-max-width: 220px;
+  --table-truncate-max-width: 300px;
+  --table-checkbox-min-width: 40px;
+
+  /* Table identity typography - derived from base scale */
+  --table-identity-primary-size: var(--table-cell-font-size);
+  --table-identity-secondary-size: 11px;
+  --table-identity-tertiary-size: 10px;
+
+  /* Table icon sizing */
+  --table-icon-size: 16px;
+  --table-sort-indicator-size: 10px;
+
+  /* Table mobile layout */
+  --table-mobile-label-width: 48%;
+  --table-mobile-label-padding: 0.75em;
+
+  /* Table column width scale */
+  --table-col-xs: 60px;
+  --table-col-sm: 100px;
+  --table-col-md: 150px;
+  --table-col-lg: 200px;
+  --table-col-xl: 280px;
 }
 
 /* ==============================================
-   BASE TABLE STYLES - Universal
-   Applies to: .admin-table, .overview-table,
-   .files-table, .invoices-table, .time-entries-table
+   BASE TABLE STYLES
    ============================================== */
 
-/* Use :is() to reduce selector repetition - all portal tables share these styles */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) {
+.data-table {
   width: 100%;
-  border-collapse: collapse;
-  background: transparent;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--table-bg);
   table-layout: auto;
+  border: var(--portal-border);
+  border-radius: var(--portal-radius-lg, 8px);
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) thead tr {
+.data-table thead tr {
   height: var(--table-header-height);
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) th {
+.data-table th {
   text-align: left;
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   color: var(--portal-text-secondary);
@@ -64,18 +82,18 @@
   text-transform: uppercase;
   letter-spacing: var(--table-header-letter-spacing);
   white-space: nowrap;
-  border-bottom: 1px solid var(--table-border-color);
+  border-bottom: var(--portal-border);
   vertical-align: middle;
   background: transparent;
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) tbody tr {
+.data-table tbody tr {
   height: var(--table-row-height);
   cursor: pointer;
   transition: background 0.1s;
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) td {
+.data-table td {
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   color: var(--table-cell-color);
   font-size: var(--table-cell-font-size);
@@ -85,64 +103,49 @@
 }
 
 /* ==============================================
-   OUTER COLUMN PADDING - UNIVERSAL
-   First and last columns get extra padding for visual breathing room
+   OUTER COLUMN PADDING
    ============================================== */
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(th, td):first-child {
+.data-table :is(th, td):first-child {
   padding-left: var(--table-outer-padding);
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(th, td):last-child {
+.data-table :is(th, td):last-child {
   padding-right: var(--table-outer-padding);
 }
 
 /* ==============================================
-   TABLE ROW HOVER - UNIVERSAL
-   Note: With border-collapse:collapse, tr background
-   may not show uniformly - use td background instead
+   TABLE ROW STATES
    ============================================== */
 
-/* Hover - apply to all cells in hovered row */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) tbody tr:hover td {
+.data-table tbody tr:hover td {
   background: var(--portal-bg-hover);
 }
 
-/* Active/pressed state */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) tbody tr:active td {
+.data-table tbody tr:active td {
   background: var(--portal-bg-active, rgba(255, 255, 255, 0.08));
 }
 
-/* Keyboard-focused row (J/K navigation) */
-.admin-table tbody tr.row-focused td,
-.admin-table tbody tr[data-focused="true"] td {
+.data-table tbody tr.row-focused td,
+.data-table tbody tr[data-focused="true"] td {
   background: var(--portal-bg-hover);
 }
 
-/* Focus indicator - subtle left border on first cell */
-.admin-table tbody tr.row-focused td:first-child,
-.admin-table tbody tr[data-focused="true"] td:first-child {
+.data-table tbody tr.row-focused td:first-child,
+.data-table tbody tr[data-focused="true"] td:first-child {
   box-shadow: inset 2px 0 0 var(--color-primary);
 }
 
-/* Selected row (checkbox/bulk selection) */
-.admin-table tbody tr.row-selected td,
-.admin-table tbody tr[data-selected="true"] td {
+.data-table tbody tr.row-selected td,
+.data-table tbody tr[data-selected="true"] td {
   background: var(--portal-bg-medium);
 }
 
 /* ==============================================
-   TABLE ACTIONS COLUMN - UNIVERSAL
-   Single source of truth for actions column handling
+   TABLE ACTIONS
    ============================================== */
 
-/*
-  TABLE ACTIONS COLUMN - Responsive gap
-  ------------------------------------------------------
-  - gap between action buttons shrinks as table gets smaller
-  - prevents overflow in action columns
-*/
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .table-actions {
+.data-table .table-actions {
   display: inline-flex;
   align-items: center;
   gap: var(--table-actions-gap);
@@ -150,159 +153,228 @@
   justify-content: flex-end;
 }
 
-/* Actions column - fixed width to prevent overflow */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(th, td).actions-col,
-.admin-table :is(th, td):last-child:has(.table-actions) {
+/* Action cell flex layout for proper button alignment
+   Button sizing handled by portal-buttons.css */
+.data-table .actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--table-actions-gap);
+}
+
+.data-table :is(th, td).actions-col,
+.data-table :is(th, td):last-child:has(.table-actions) {
   width: auto;
   min-width: fit-content;
   white-space: nowrap;
   text-align: right;
 }
 
-/* Actions header text */
-:is(.admin-table, .overview-table) th.actions-col {
+.data-table th.actions-col {
   text-align: right;
 }
 
-/* ==============================================
-   ACTIONS CELL - UNIVERSAL
-   Single source of truth for .actions-cell in all tables
-   Tight padding with gap between buttons, no margins
-   ============================================== */
-
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--table-actions-gap);
+.data-table .actions-cell {
   width: 1%;
   white-space: nowrap;
   text-align: right;
-  padding-top: var(--space-0-5);
-  padding-bottom: var(--space-0-5);
 }
 
-/* Ensure no margins on action buttons - use gap only */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell > * {
-  margin: 0;
-}
-
-/* Icon buttons in actions cell - consistent styling */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell .icon-btn {
-  color: var(--portal-text-light);
-  background: transparent;
-  border: none;
-  padding: var(--space-1);
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell .icon-btn:hover {
-  color: var(--color-primary);
-}
-
-/* Danger button variant in tables */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell .icon-btn-danger:hover {
-  color: var(--color-danger);
-}
-
-/* Primary button variant in tables */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell .icon-btn-primary:hover {
-  color: var(--color-primary);
-}
-
-/* Icon button SVG sizing in tables */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .actions-cell .icon-btn svg,
-.table-actions .icon-btn svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 1.5;
-}
+/* Action buttons: use .icon-btn .icon-btn-sm from portal-buttons.css
+   No table-specific overrides - base styles apply */
 
 /* ==============================================
-   TABLE CONTAINERS - UNIVERSAL
+   TABLE CONTAINERS
    ============================================== */
 
+/* Table card - outer wrapper with border
+   Note: .admin-table-card defined in pages/admin.css */
+.data-table-card {
+  background: transparent;
+  border: var(--portal-border);
+  border-radius: var(--portal-radius-sm, 8px);
+  overflow: visible;
+  min-width: 0;
+}
+
+/* Table containers - inner wrapper, no border */
 .admin-table-container,
-.table-container {
+.table-container,
+.data-table-container {
   background: transparent;
   border: none;
   overflow: visible;
   min-width: 0;
 }
 
+/* Table scroll wrappers - border and background */
 .admin-table-scroll-wrapper,
-.table-scroll-wrapper {
+.table-scroll-wrapper,
+.data-table-scroll-wrapper {
   width: 100%;
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
   background: var(--table-bg);
+  border: var(--portal-border);
   border-radius: var(--portal-radius-lg, 8px);
 }
 
+/* Remove border from scroll wrapper when inside a card that already has border */
+.admin-table-card .admin-table-scroll-wrapper,
+.admin-table-card .data-table-scroll-wrapper,
+.data-table-card .data-table-scroll-wrapper {
+  border: none;
+  border-radius: 0;
+}
+
 /* ==============================================
-   TABLE BORDER RADIUS - UNIVERSAL
+   TABLE BORDER RADIUS
    ============================================== */
 
-/* First row header corners */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) thead tr:first-child th:first-child {
+.data-table thead tr:first-child th:first-child {
   border-top-left-radius: var(--portal-radius-lg, 8px);
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) thead tr:first-child th:last-child {
+.data-table thead tr:first-child th:last-child {
   border-top-right-radius: var(--portal-radius-lg, 8px);
 }
 
-/* Last row body corners */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) tbody tr:last-child td:first-child {
+.data-table tbody tr:last-child td:first-child {
   border-bottom-left-radius: var(--portal-radius-lg, 8px);
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) tbody tr:last-child td:last-child {
+.data-table tbody tr:last-child td:last-child {
   border-bottom-right-radius: var(--portal-radius-lg, 8px);
 }
 
-/* Remove bottom corners when pagination is present (pagination provides its own corners) */
-/* Using :has() to detect pagination sibling - works universally */
+/* Remove corners when pagination present */
 :has(+ .table-pagination) tbody tr:last-child td:first-child,
 :has(~ .table-pagination) tbody tr:last-child td:first-child,
-.has-pagination tbody tr:last-child td:first-child,
-.table-with-pagination tbody tr:last-child td:first-child {
+.has-pagination tbody tr:last-child td:first-child {
   border-bottom-left-radius: 0;
 }
 
 :has(+ .table-pagination) tbody tr:last-child td:last-child,
 :has(~ .table-pagination) tbody tr:last-child td:last-child,
-.has-pagination tbody tr:last-child td:last-child,
-.table-with-pagination tbody tr:last-child td:last-child {
+.has-pagination tbody tr:last-child td:last-child {
   border-bottom-right-radius: 0;
 }
 
 /* ==============================================
-   TABLE LINKS - UNIVERSAL
+   TABLE PAGINATION
+   Same color as table cells - no overrides
    ============================================== */
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) td a {
+.table-pagination {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3);
+  border-top: var(--portal-border);
+  color: var(--table-cell-color, var(--portal-text-secondary));
+  font-size: var(--table-cell-font-size, 12px);
+}
+
+.pagination-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--space-4);
+}
+
+.pagination-info,
+.pagination-size label {
+  color: inherit;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.pagination-size {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: var(--portal-border);
+  color: inherit;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pagination-page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 var(--space-1);
+  background: transparent;
+  border: var(--portal-border);
+  color: inherit;
+  font-size: inherit;
+}
+
+.pagination-page-btn.active {
+  background: var(--portal-bg-lighter);
+}
+
+/* ==============================================
+   TABLE LINKS
+   ============================================== */
+
+.data-table td a {
   color: var(--portal-text-light);
   text-decoration: none;
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) td a:hover {
+.data-table td a:hover {
   color: var(--color-primary);
   text-decoration: underline;
 }
 
 /* ==============================================
-   IDENTITY CELL - UNIVERSAL
-   Stacked name/email/company pattern
+   IDENTITY CELL
    ============================================== */
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-cell {
+.data-table .identity-cell {
   min-width: 0;
-  max-width: 220px;
+  max-width: var(--table-identity-max-width);
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-name {
+.data-table .identity-name {
   display: block;
   font-weight: 500;
   color: var(--portal-text-light);
@@ -312,9 +384,9 @@
   white-space: nowrap;
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-email {
+.data-table .identity-email {
   display: block;
-  font-size: 10.5px;
+  font-size: var(--table-identity-secondary-size);
   color: var(--portal-text-muted);
   line-height: 1.4;
   overflow: hidden;
@@ -322,9 +394,9 @@
   white-space: nowrap;
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-contact {
+.data-table .identity-contact {
   display: block;
-  font-size: 11px;
+  font-size: var(--table-identity-secondary-size);
   color: var(--portal-text-muted);
   line-height: 1.4;
   overflow: hidden;
@@ -332,166 +404,106 @@
   white-space: nowrap;
 }
 
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-company {
+.data-table .identity-company {
   display: block;
-  font-size: 10px;
+  font-size: var(--table-identity-tertiary-size);
   color: var(--portal-text-secondary);
   line-height: 1.4;
 }
 
-/* Generic primary/secondary pattern for stacked identity cells */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-primary {
-  display: block;
-  font-weight: 500;
-  color: var(--portal-text-light);
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) .identity-secondary {
-  display: block;
-  font-size: 11px;
-  color: var(--portal-text-muted);
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 /* ==============================================
-   COMMON COLUMN TYPES - UNIVERSAL
+   COLUMN TYPES
+   All columns use consistent styling.
+   Width: auto = flexible, 1% = shrink to content
    ============================================== */
 
-/* ==============================================
-   COLUMN WIDTH PATTERN: width: 1% + white-space: nowrap
-   This makes columns shrink to fit their content.
-   The main content column (no class) gets remaining space.
-   ============================================== */
-
-/* Name/Title columns - primary content headers, gets remaining space */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.name-col, .title-col) {
-  width: auto;
-}
-
-/* Name/Title cells - primary content, allow natural expansion */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.name-cell, .title-cell) {
+/* Flexible width columns (primary content) */
+.data-table :is(
+  .name-col, .name-cell,
+  .title-col, .title-cell,
+  .subject-col, .subject-cell,
+  .message-col, .message-cell
+) {
   width: auto;
   white-space: nowrap;
 }
 
-/* Slug column and cells - shrink to content */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.slug-col, .slug-cell) {
+/* Identity columns (stacked name/email) */
+.data-table :is(.identity-col, .identity-cell) {
+  width: auto;
+  min-width: 0;
+  max-width: var(--table-identity-max-width);
+}
+
+/* Shrink-to-content columns */
+.data-table :is(
+  .type-col, .type-cell,
+  .status-col, .status-cell,
+  .date-col, .date-cell,
+  .slug-col, .slug-cell,
+  .email-col, .email-cell,
+  .contact-col, .contact-cell,
+  .timeline-col, .timeline-cell,
+  .target-col, .target-cell,
+  .start-col, .start-cell,
+  .created-col, .created-cell,
+  .last-active-col, .last-active-cell,
+  .budget-col, .budget-cell
+) {
   width: 1%;
   white-space: nowrap;
 }
 
-/* Subject column headers - auto width for email subjects */
-:is(.admin-table, .overview-table) .subject-col {
-  width: auto;
-}
-
-/* Subject cells - allow natural expansion for short subjects */
-:is(.admin-table, .overview-table) .subject-cell {
-  width: auto;
-  white-space: nowrap;
-}
-
-/* Type/Category column and cells - shrink to content */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.type-col, .type-cell) {
-  width: 1%;
-  white-space: nowrap;
-}
-
-/* Count column and cells - shrink to content, centered */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.count-col, .count-cell) {
+/* Centered columns */
+.data-table :is(.count-col, .count-cell) {
   width: 1%;
   text-align: center;
   white-space: nowrap;
 }
 
-/* Status column and cells - shrink to content */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.status-col, .status-cell) {
-  width: 1%;
-  white-space: nowrap;
-}
-
-/* Date column and cells - shrink to content */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.date-col, .date-cell) {
-  width: 1%;
-  white-space: nowrap;
-}
-
-/* Amount/currency column and cells - shrink to content, right-aligned */
-:is(.admin-table, .overview-table, .invoices-table, .time-entries-table) :is(.amount-col, .amount-cell) {
+/* Right-aligned columns */
+.data-table :is(.amount-col, .amount-cell) {
   width: 1%;
   text-align: right;
   white-space: nowrap;
   font-family: var(--font-family-mono, monospace);
 }
 
-/* Actions column and cells - shrink to content, right-aligned */
-:is(.admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table) :is(.actions-col, .actions-cell) {
+.data-table :is(.actions-col, .actions-cell) {
   width: 1%;
   white-space: nowrap;
   text-align: right;
 }
 
-/* Checkbox/bulk select column */
-.admin-table .bulk-select-cell,
-.admin-table .checkbox-col,
-.admin-table th.checkbox-col,
-.overview-table .bulk-select-cell {
+.data-table .bulk-select-cell,
+.data-table .checkbox-col,
+.data-table th.checkbox-col {
   width: 1%;
-  min-width: 40px;
+  min-width: var(--table-checkbox-min-width);
   text-align: center;
   padding-left: var(--table-outer-padding) !important;
   padding-right: var(--space-1) !important;
 }
 
 /* ==============================================
-   TEXT TRUNCATION - UNIVERSAL
-   Use .truncate for unbounded user-generated content
-   (notes, descriptions) that may be very long.
-   Prefer letting columns expand naturally elsewhere.
+   TEXT TRUNCATION
    ============================================== */
 
-.admin-table .truncate,
-.overview-table .truncate,
-.files-table .truncate,
-.invoices-table .truncate,
-.time-entries-table .truncate {
-  max-width: 300px;
+.data-table .truncate {
+  max-width: var(--table-truncate-max-width);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Notes/description cells - capped truncation for long user content */
-.admin-table .notes-cell,
-.admin-table .description-cell,
-.overview-table .notes-cell,
-.overview-table .description-cell,
-.files-table .notes-cell,
-.invoices-table .notes-cell,
-.time-entries-table .notes-cell,
-.time-entries-table .description-cell {
-  max-width: 300px;
+.data-table :is(.notes-cell, .description-cell) {
+  max-width: var(--table-truncate-max-width);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ==============================================
-   MULTILINE CELL - Override for cells that need wrapping
-   ============================================== */
-
-.admin-table td.cell-wrap,
-.overview-table td.cell-wrap,
-.files-table td.cell-wrap,
-.invoices-table td.cell-wrap,
-.time-entries-table td.cell-wrap {
+.data-table td.cell-wrap {
   white-space: normal;
   overflow: visible;
   text-overflow: clip;
@@ -499,19 +511,17 @@
 }
 
 /* ==============================================
-   COLUMN WIDTH UTILITIES - Explicit sizing
+   COLUMN WIDTH UTILITIES
    ============================================== */
 
-/* Fixed width columns - use on th to set column width */
-.col-xs { width: 60px; }
-.col-sm { width: 100px; }
-.col-md { width: 150px; }
-.col-lg { width: 200px; }
-.col-xl { width: 280px; }
+.col-xs { width: var(--table-col-xs); }
+.col-sm { width: var(--table-col-sm); }
+.col-md { width: var(--table-col-md); }
+.col-lg { width: var(--table-col-lg); }
+.col-xl { width: var(--table-col-xl); }
 .col-auto { width: auto; }
 .col-fill { width: 100%; }
 
-/* Percentage width columns */
 .col-10 { width: 10%; }
 .col-15 { width: 15%; }
 .col-20 { width: 20%; }
@@ -521,33 +531,11 @@
 .col-50 { width: 50%; }
 
 /* ==============================================
-   EMPTY/LOADING/ERROR STATE - Uses loading.css universal styles
-   Only override width/overflow for colspan cells
+   EMPTY/LOADING/ERROR STATES
    ============================================== */
 
-/* CRITICAL: Override ALL cell classes for colspanned cells (loading/error/empty rows) */
-/* This ensures error states are always centered regardless of cell classes */
-/* Must use !important to override specific cell class styles (name-cell, type-cell, etc.) */
-.admin-table td[colspan],
-.overview-table td[colspan],
-.files-table td[colspan],
-.invoices-table td[colspan],
-.time-entries-table td[colspan],
-.admin-table td.error-row,
-.admin-table td.loading-row,
-.admin-table td.empty-row,
-.overview-table td.error-row,
-.overview-table td.loading-row,
-.overview-table td.empty-row,
-.files-table td.error-row,
-.files-table td.loading-row,
-.files-table td.empty-row,
-.invoices-table td.error-row,
-.invoices-table td.loading-row,
-.invoices-table td.empty-row,
-.time-entries-table td.error-row,
-.time-entries-table td.loading-row,
-.time-entries-table td.empty-row {
+.data-table td[colspan],
+.data-table :is(td.error-row, td.loading-row, td.empty-row) {
   width: 100% !important;
   max-width: none !important;
   overflow: visible !important;
@@ -556,97 +544,217 @@
   text-align: center !important;
 }
 
-/* Loading/empty/error states in table cells: see components/loading.css */
-
 /* ==============================================
-   RESPONSIVE TABLE - Mobile horizontal scroll
+   SORTABLE TABLE HEADERS
+   Unified styles for all sorting patterns:
+   - .sort-header-btn (table-builder.ts)
+   - .sort-icon (table-filter.ts)
+   - .data-table-sort-icon (complex-components.ts)
    ============================================== */
 
+.data-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-right: calc(var(--table-cell-padding-x) + 20px);
+  transition: background-color 0.1s;
+}
+
+.data-table th.sortable:hover {
+  background: var(--portal-bg-hover);
+}
+
+/* Sort button pattern (table-builder.ts) */
+.sort-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sort-header-btn:hover {
+  color: var(--portal-text-light);
+}
+
+.sort-header-btn .sort-indicator {
+  font-size: var(--table-sort-indicator-size);
+  color: var(--color-primary);
+}
+
+/* Sort icon pattern (table-filter.ts, admin.css) */
+.data-table th.sortable .sort-icon,
+.data-table th.sortable .data-table-sort-icon {
+  display: inline-flex;
+  align-items: center;
+  position: absolute;
+  right: var(--table-cell-padding-x);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.data-table th.sortable .sort-icon svg,
+.data-table th.sortable .data-table-sort-icon svg {
+  width: var(--table-icon-size);
+  height: var(--table-icon-size);
+  color: var(--portal-text-muted);
+  transition: color 0.1s;
+}
+
+.data-table th.sortable:hover .sort-icon svg,
+.data-table th.sortable:hover .data-table-sort-icon svg {
+  color: var(--portal-text-light);
+}
+
+.data-table th.sortable .sort-icon svg.sort-asc,
+.data-table th.sortable .sort-icon svg.sort-desc,
+.data-table th.sortable .data-table-sort-icon svg.sort-asc,
+.data-table th.sortable .data-table-sort-icon svg.sort-desc {
+  color: var(--color-primary);
+}
+
+/* ==============================================
+   RESPONSIVE - Mobile
+   ============================================== */
+
+/* Horizontal scroll on tablets - table maintains structure */
 @media (--mobile) {
   .admin-table-scroll-wrapper,
   .table-scroll-wrapper {
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Ensure tables don't shrink below content */
-  .admin-table,
-  .overview-table,
-  .files-table,
-  .invoices-table,
-  .time-entries-table {
-    min-width: 600px;
+  .data-table {
+    min-width: var(--bp-sm);
   }
 }
 
-/*
-  FULLY RESPONSIVE TABLES: MOBILE STACKING ENABLED
-  ------------------------------------------------------
-  - At mobile breakpoints, tables collapse into card format.
-  - Each <td> must have a data-label attribute matching its column header.
-  - No horizontal scroll; all columns stack vertically with header labels.
-  - See markup example below for usage.
-*/
-@media (max-width: 700px) {
-  .admin-table, .overview-table, .files-table, .invoices-table, .time-entries-table,
-  .admin-table thead, .overview-table thead, .files-table thead, .invoices-table thead, .time-entries-table thead,
-  .admin-table tbody, .overview-table tbody, .files-table tbody, .invoices-table tbody, .time-entries-table tbody,
-  .admin-table tr, .overview-table tr, .files-table tr, .invoices-table tr, .time-entries-table tr,
-  .admin-table th, .overview-table th, .files-table th, .invoices-table th, .time-entries-table th,
-  .admin-table td, .overview-table td, .files-table td, .invoices-table td, .time-entries-table td {
+/* Mid-mobile: label/value stacking */
+@media (--mid-mobile) {
+  .data-table,
+  .data-table thead,
+  .data-table tbody,
+  .data-table tr,
+  .data-table th,
+  .data-table td {
     display: block;
     width: 100%;
   }
-  .admin-table thead, .overview-table thead, .files-table thead, .invoices-table thead, .time-entries-table thead {
+
+  .data-table thead {
     display: none;
   }
-  .admin-table tr, .overview-table tr, .files-table tr, .invoices-table tr, .time-entries-table tr {
-    margin-bottom: 1rem;
-    border-bottom: 2px solid var(--portal-border-dark, #222);
+
+  .data-table tr {
+    margin-bottom: var(--table-mobile-card-gap);
+    border-bottom: 2px solid var(--portal-border-color);
   }
-  .admin-table td, .overview-table td, .files-table td, .invoices-table td, .time-entries-table td {
+
+  .data-table td {
     position: relative;
     padding-left: 50%;
     min-height: 2.5em;
     box-sizing: border-box;
   }
-  .admin-table td:before, .overview-table td:before, .files-table td:before, .invoices-table td:before, .time-entries-table td:before {
+
+  .data-table td:before {
     position: absolute;
     left: 0;
     top: 0;
-    width: 48%;
-    padding-left: 0.75em;
+    width: var(--table-mobile-label-width);
+    padding-left: var(--table-mobile-label-padding);
     white-space: nowrap;
     font-weight: 600;
-    color: var(--portal-text-secondary, #aaa);
+    color: var(--portal-text-secondary);
     content: attr(data-label);
     box-sizing: border-box;
   }
-  /* Remove min-width for stacking */
-  .admin-table,
-  .overview-table,
-  .files-table,
-  .invoices-table,
-  .time-entries-table {
+
+  .data-table {
     min-width: 0;
   }
 }
 
-/*
-  MARKUP EXAMPLE FOR MOBILE STACKED TABLES:
-  <table class="admin-table">
-    <thead>
-      <tr>
-        <th>Project</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td data-label="Project">No Bhad Codes</td>
-        <td data-label="Status">In Progress</td>
-        <td data-label="Actions"><div class="table-actions">...</div></td>
-      </tr>
-    </tbody>
-  </table>
-*/
+/* Small mobile: card layout with typography adjustments */
+@media (--small-mobile) {
+  .data-table tbody tr {
+    background: var(--portal-bg-medium);
+    padding: var(--table-mobile-card-padding);
+    margin-bottom: var(--table-mobile-card-gap);
+    border: none;
+  }
+
+  .data-table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .data-table tbody td {
+    display: block;
+    padding: var(--space-1) 0;
+    background: transparent;
+    text-align: left;
+    border: none;
+    word-break: break-word;
+    max-width: 100%;
+  }
+
+  .data-table tbody td:first-child,
+  .data-table tbody td:last-child {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Hide checkbox column on mobile */
+  .data-table .bulk-select-cell,
+  .data-table th.checkbox-col {
+    display: none !important;
+  }
+
+  /* Identity cell - prominent display */
+  .data-table tbody td.identity-cell {
+    order: -2;
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
+  }
+
+  .data-table tbody td.identity-cell .identity-name {
+    font-size: var(--table-mobile-identity-name-size);
+    font-weight: 600;
+  }
+
+  .data-table tbody td.identity-cell .identity-contact {
+    font-size: var(--table-mobile-identity-secondary-size);
+  }
+
+  .data-table tbody td.identity-cell .identity-email,
+  .data-table tbody td.identity-cell .identity-company {
+    font-size: var(--table-mobile-identity-tertiary-size);
+  }
+
+  /* Standard cell typography */
+  .data-table tbody td.type-cell,
+  .data-table tbody td.status-cell,
+  .data-table tbody td.date-cell,
+  .data-table tbody td.amount-cell,
+  .data-table tbody td.count-cell {
+    font-size: var(--table-mobile-cell-size);
+  }
+
+  /* Actions cell */
+  .data-table tbody td.actions-cell {
+    order: 10;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--portal-border-color);
+    margin-top: var(--space-2);
+  }
+}

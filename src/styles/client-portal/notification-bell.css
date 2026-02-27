@@ -29,7 +29,6 @@
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: var(--portal-radius-sm);
   color: var(--portal-text-secondary);
   cursor: pointer;
   transition: color var(--transition-fast), background-color var(--transition-fast);
@@ -67,7 +66,6 @@
   text-align: center;
   color: white;
   background: var(--color-danger-500);
-  border-radius: var(--portal-radius-pill);
 }
 
 .notification-badge.hidden {
@@ -86,7 +84,6 @@
   max-height: 420px;
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border-medium);
-  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-lg);
   z-index: var(--z-index-portal-dropdown, 9700);
   overflow: hidden;
@@ -117,18 +114,7 @@
   margin: 0;
 }
 
-.notification-header .btn-text {
-  font-size: var(--font-size-xs);
-  color: var(--color-primary);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.notification-header .btn-text:hover {
-  text-decoration: underline;
-}
+/* .btn-link from portal-buttons.css provides base styling */
 
 /* ============================================================================
    NOTIFICATION LIST
@@ -223,7 +209,7 @@
    RESPONSIVE
    ============================================================================ */
 
-@media (max-width: 400px) {
+@media (--xs-mobile) {
   .notification-dropdown {
     width: 100%;
     right: -10px;

@@ -37,7 +37,6 @@
   background: var(--onboarding-bg);
   color: var(--onboarding-text);
   padding: var(--onboarding-spacing-xl);
-  border-radius: var(--portal-radius-lg);
   max-width: min(800px, calc(100vw - 2 * var(--space-4, 16px)));
   margin: 0 auto;
 }
@@ -79,7 +78,6 @@
   align-items: center;
   gap: var(--onboarding-spacing-sm);
   padding: var(--onboarding-spacing-sm) var(--onboarding-spacing-md);
-  border-radius: var(--portal-radius-pill);
   background: var(--portal-bg-medium);
   opacity: 0.5;
   transition: opacity var(--transition-medium), background-color var(--transition-medium);
@@ -124,7 +122,7 @@
   background: var(--portal-border-medium);
 }
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .onboarding-step-label {
     display: none;
   }
@@ -172,7 +170,7 @@
   gap: var(--onboarding-spacing-md);
 }
 
-@media (max-width: 600px) {
+@media (--compact-mobile) {
   .onboarding-form-row {
     grid-template-columns: 1fr;
   }
@@ -201,7 +199,6 @@
   width: 100%;
   padding: var(--onboarding-spacing-md);
   border: 1px solid var(--onboarding-card-border);
-  border-radius: var(--portal-radius-md);
   background: var(--portal-bg-darker);
   color: var(--onboarding-text);
   font-size: 0.9375rem;
@@ -252,7 +249,6 @@
   padding: var(--onboarding-spacing-md);
   background: var(--onboarding-card-bg);
   border: 1px solid var(--onboarding-card-border);
-  border-radius: var(--portal-radius-md);
   cursor: pointer;
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
@@ -297,7 +293,6 @@
 .onboarding-asset-card {
   background: var(--onboarding-card-bg);
   border: 2px solid var(--onboarding-card-border);
-  border-radius: var(--portal-radius-md);
   padding: var(--onboarding-spacing-lg);
   text-align: center;
   cursor: pointer;
@@ -354,7 +349,6 @@
 .onboarding-review-section {
   background: var(--onboarding-card-bg);
   border: 1px solid var(--onboarding-card-border);
-  border-radius: var(--portal-radius-md);
   padding: var(--onboarding-spacing-lg);
 }
 
@@ -414,7 +408,6 @@
   background: var(--color-state-selected);
   color: var(--onboarding-accent);
   padding: var(--space-0-5) var(--space-2);
-  border-radius: var(--portal-radius-pill);
   font-size: 0.75rem;
   font-weight: 500;
 }
@@ -427,7 +420,6 @@
   padding: var(--onboarding-spacing-lg);
   background: var(--portal-bg-darker);
   border: 2px solid var(--onboarding-card-border);
-  border-radius: var(--portal-radius-md);
   cursor: pointer;
   transition: border-color var(--transition-fast);
 }
@@ -475,7 +467,6 @@
 
 .onboarding-btn {
   padding: var(--onboarding-spacing-md) var(--onboarding-spacing-xl);
-  border-radius: var(--portal-radius-md);
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
@@ -556,7 +547,7 @@
    RESPONSIVE ADJUSTMENTS
    ============================================================================ */
 
-@media (max-width: 600px) {
+@media (--compact-mobile) {
   .onboarding-wizard {
     padding: var(--onboarding-spacing-lg) var(--onboarding-spacing-md);
   }
@@ -617,7 +608,7 @@
   overflow: auto;
 }
 
-@media (max-width: 600px) {
+@media (--compact-mobile) {
   .onboarding-wizard-overlay {
     padding: var(--space-2);
   }

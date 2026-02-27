@@ -96,7 +96,7 @@
   border: 2px solid var(--portal-bg-light);
   border-radius: var(--portal-radius-xs);
   cursor: crosshair;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--portal-alpha-black-15);
 }
 
 .annotation-canvas.pointer-mode {
@@ -206,18 +206,13 @@
   margin-top: auto;
 }
 
-.design-review-actions .btn {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 13px;
-  font-weight: 600;
-}
+/* Design review buttons should use .btn-full .btn-sm classes */
 
 /* ============================================
    RESPONSIVE DESIGN
    ============================================ */
 
-@media (max-width: 1200px) {
+@media (--desktop-wide) {
   .design-review-modal-content {
     flex-direction: column;
     height: auto;
@@ -233,7 +228,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .design-review-viewer {
     height: 250px;
   }

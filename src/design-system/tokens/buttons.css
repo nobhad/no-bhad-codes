@@ -10,76 +10,85 @@
 
 :root {
   /* ============================================
-   * PORTAL BUTTON TOKENS
+   * PORTAL BUTTON TOKENS - BRUTALIST DESIGN
    * ============================================
    * Used by admin and client portal buttons.
+   * Design: Black background, white border, monospace font
    */
 
   /* Button sizing */
-  --btn-portal-padding-y: var(--portal-spacing-md);
-  --btn-portal-padding-x: var(--portal-spacing-xl);
+  --btn-portal-padding-y: var(--space-2);
+  --btn-portal-padding-x: var(--space-4);
   --btn-portal-padding: var(--btn-portal-padding-y) var(--btn-portal-padding-x);
-  --btn-portal-min-height: 44px;
+  --btn-portal-min-height: 40px;
 
-  /* Button typography */
-  --btn-portal-font-family: var(--font-family-acme);
-  --btn-portal-font-size: 0.9rem;
-  --btn-portal-font-weight: 600;
-  --btn-portal-letter-spacing: 0.5px;
+  /* Button typography - BRUTALIST: monospace font */
+  --btn-portal-font-family: 'Courier New', 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;
+  --btn-portal-font-size: 0.875rem;
+  --btn-portal-font-weight: 500;
+  --btn-portal-letter-spacing: -0.02em;
   --btn-portal-text-transform: uppercase;
 
-  /* Button borders */
-  --btn-portal-border-width: 2px;
-  --btn-portal-border-radius: var(--portal-radius-lg);
-  --btn-portal-border-color: var(--portal-border-light);
+  /* Button borders - BRUTALIST: no radius, thin white border */
+  --btn-portal-border-width: 1px;
+  --btn-portal-border-radius: 0;
+  --btn-portal-border-color: rgb(255, 255, 255);
 
-  /* Button colors - secondary (default) */
-  --btn-portal-secondary-bg: transparent;
-  --btn-portal-secondary-color: var(--portal-text-light);
-  --btn-portal-secondary-border: var(--portal-border-light);
+  /* Button colors - base (black bg, white text/border) */
+  --btn-portal-bg: rgb(0, 0, 0);
+  --btn-portal-color: rgb(255, 255, 255);
+  --btn-portal-border: rgb(255, 255, 255);
+
+  /* Button colors - hover (inverted) */
+  --btn-portal-hover-bg: rgb(255, 255, 255);
+  --btn-portal-hover-color: rgb(0, 0, 0);
+  --btn-portal-hover-border: rgb(255, 255, 255);
+
+  /* Button colors - secondary (same as base) */
+  --btn-portal-secondary-bg: rgb(0, 0, 0);
+  --btn-portal-secondary-color: rgb(255, 255, 255);
+  --btn-portal-secondary-border: rgb(255, 255, 255);
 
   /* Button colors - secondary hover */
-  --btn-portal-secondary-hover-bg: var(--color-primary);
-  --btn-portal-secondary-hover-color: var(--portal-bg-dark);
-  --btn-portal-secondary-hover-border: var(--color-primary);
+  --btn-portal-secondary-hover-bg: rgb(255, 255, 255);
+  --btn-portal-secondary-hover-color: rgb(0, 0, 0);
+  --btn-portal-secondary-hover-border: rgb(255, 255, 255);
 
-  /* Button colors - primary */
-  --btn-portal-primary-bg: var(--color-primary);
-  --btn-portal-primary-color: var(--portal-bg-dark);
-  --btn-portal-primary-border: var(--color-primary);
+  /* Button colors - primary (same as base) */
+  --btn-portal-primary-bg: rgb(0, 0, 0);
+  --btn-portal-primary-color: rgb(255, 255, 255);
+  --btn-portal-primary-border: rgb(255, 255, 255);
 
   /* Button colors - primary hover */
-  --btn-portal-primary-hover-bg: var(--portal-bg-dark);
-  --btn-portal-primary-hover-color: var(--portal-text-light);
-  --btn-portal-primary-hover-border: var(--portal-bg-dark);
+  --btn-portal-primary-hover-bg: rgb(255, 255, 255);
+  --btn-portal-primary-hover-color: rgb(0, 0, 0);
+  --btn-portal-primary-hover-border: rgb(255, 255, 255);
 
-  /* Button colors - danger */
-  --btn-portal-danger-bg: transparent;
-  --btn-portal-danger-color: var(--color-error);
-  --btn-portal-danger-border: var(--color-error);
+  /* Button colors - danger (black bg, red text/border) */
+  --btn-portal-danger-bg: rgb(0, 0, 0);
+  --btn-portal-danger-color: var(--color-error-500, #ef4444);
+  --btn-portal-danger-border: var(--color-error-500, #ef4444);
 
   /* Button colors - danger hover */
-  --btn-portal-danger-hover-bg: var(--color-error);
-  --btn-portal-danger-hover-color: var(--color-white);
-  --btn-portal-danger-hover-border: var(--color-error);
+  --btn-portal-danger-hover-bg: var(--color-error-500, #ef4444);
+  --btn-portal-danger-hover-color: rgb(255, 255, 255);
+  --btn-portal-danger-hover-border: var(--color-error-500, #ef4444);
 
-  /* Button effects */
-  --btn-portal-transition: all 150ms;
-
-  /* Button shadows - subtle, modern look */
-  --btn-portal-shadow: var(--shadow-sm);
-  --btn-portal-shadow-hover: var(--shadow-md);
-  --btn-portal-shadow-focus: var(--shadow-sm), 0 0 0 2px var(--color-primary);
+  /* Button effects - BRUTALIST: no shadows */
+  --btn-portal-transition: all var(--transition-fast, 150ms);
+  --btn-portal-shadow: none;
+  --btn-portal-shadow-hover: none;
+  --btn-portal-shadow-focus: none;
 
   /* Small button variant */
-  --btn-portal-sm-padding-y: var(--portal-spacing-sm);
-  --btn-portal-sm-padding-x: var(--portal-spacing-lg);
+  --btn-portal-sm-padding-y: var(--space-1);
+  --btn-portal-sm-padding-x: var(--space-2);
   --btn-portal-sm-font-size: 0.8rem;
   --btn-portal-sm-min-height: 32px;
 
   /* Icon button (square) */
   --btn-portal-icon-size: 36px;
-  --btn-portal-icon-radius: var(--portal-radius-sm);
+  --btn-portal-icon-radius: 0;
 }
 
 /* ============================================

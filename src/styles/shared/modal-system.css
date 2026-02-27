@@ -29,3 +29,91 @@
   max-height: 80vh;
   overflow-y: auto;
 }
+
+/* =====================================================
+   MODAL BACKDROP
+   Full-screen overlay behind modals.
+   ===================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-portal-modal);
+  background: var(--color-overlay-medium);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* =====================================================
+   MODAL SIZE VARIANTS
+   Width constraints for different modal sizes.
+   ===================================================== */
+
+.modal-size-sm {
+  max-width: 400px;
+}
+
+.modal-size-md {
+  max-width: 560px;
+}
+
+.modal-size-lg {
+  max-width: 860px;
+}
+
+.modal-size-xl {
+  max-width: 1000px;
+}
+
+.modal-size-full {
+  max-width: calc(100vw - 2rem);
+}
+
+/* =====================================================
+   MODAL POSITIONING (for Radix Dialog)
+   Fixed centered positioning for portal modals.
+   ===================================================== */
+
+.modal.modal-content {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: var(--z-index-portal-modal);
+  width: calc(100% - 2rem);
+  background: var(--portal-bg-pitch);
+  border: var(--portal-border);
+  box-shadow: none;
+}
+
+/* =====================================================
+   MODAL HEADER TEXT CONTAINER
+   Wrapper for title and description.
+   ===================================================== */
+
+.modal-header-text {
+  flex: 1;
+}
+
+.modal-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-primary);
+  margin: 0;
+}
+
+.modal-description {
+  font-size: 0.75rem;
+  margin-top: var(--space-0-5);
+  color: var(--portal-text-muted);
+}
+
+/* =====================================================
+   MODAL CLOSE BUTTON
+   Close button styling for portal modals.
+   ===================================================== */
+
+.modal-close-icon {
+  width: 16px;
+  height: 16px;
+}
