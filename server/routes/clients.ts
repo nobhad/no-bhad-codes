@@ -556,7 +556,10 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const tagId = parseInt(req.params.tagId);
+    const tagId = parseInt(req.params.tagId, 10);
+    if (isNaN(tagId) || tagId <= 0) {
+      return errorResponse(res, 'Invalid tag ID', 400, 'VALIDATION_ERROR');
+    }
     const tag = await clientService.updateTag(tagId, req.body);
     sendSuccess(res, { tag });
   })
@@ -570,7 +573,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const tagId = parseInt(req.params.tagId);
+    const tagId = parseInt(req.params.tagId, 10);
+    if (isNaN(tagId) || tagId <= 0) {
+      return errorResponse(res, 'Invalid tag ID', 400, 'VALIDATION_ERROR');
+    }
     await clientService.deleteTag(tagId);
     sendSuccess(res, undefined, 'Tag deleted successfully');
   })
@@ -584,7 +590,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const tagId = parseInt(req.params.tagId);
+    const tagId = parseInt(req.params.tagId, 10);
+    if (isNaN(tagId) || tagId <= 0) {
+      return errorResponse(res, 'Invalid tag ID', 400, 'VALIDATION_ERROR');
+    }
     const clients = await clientService.getClientsByTag(tagId);
     sendSuccess(res, { clients });
   })
@@ -1579,9 +1588,13 @@ router.get(
       return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
-    const projectId = req.query.projectId ? parseInt(req.query.projectId as string) : undefined;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
-    const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+    const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
+    const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
+
+    if ((projectId !== undefined && isNaN(projectId)) || isNaN(limit) || isNaN(offset)) {
+      return errorResponse(res, 'Invalid query parameters', 400, 'VALIDATION_ERROR');
+    }
 
     const { events, total } = await timelineService.getClientTimeline(req.user!.id, {
       projectId,
@@ -1604,7 +1617,10 @@ router.get(
       return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
-    const days = req.query.days ? parseInt(req.query.days as string) : 7;
+    const days = req.query.days ? parseInt(req.query.days as string, 10) : 7;
+    if (isNaN(days) || days <= 0) {
+      return errorResponse(res, 'Invalid days parameter', 400, 'VALIDATION_ERROR');
+    }
     const summary = await timelineService.getRecentActivitySummary(req.user!.id, days);
 
     sendSuccess(res, summary);
@@ -1659,7 +1675,10 @@ router.get(
       return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
+    if (isNaN(limit) || limit < 0) {
+      return errorResponse(res, 'Invalid limit parameter', 400, 'VALIDATION_ERROR');
+    }
     const notifications = await notificationPreferencesService.getNotificationHistory(req.user!.id, 'client', limit);
 
     sendSuccess(res, { notifications });
@@ -1677,7 +1696,10 @@ router.put(
       return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
-    const notificationId = parseInt(req.params.id);
+    const notificationId = parseInt(req.params.id, 10);
+    if (isNaN(notificationId) || notificationId <= 0) {
+      return errorResponse(res, 'Invalid notification ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     // Update the notification as read (verify it belongs to this client)

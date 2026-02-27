@@ -3,19 +3,23 @@
  * Admin API for webhook configuration and delivery management
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { webhookService } from '../services/webhook-service.js';
-import { WebhookConfig } from '../models/webhook.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
+import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 
 const router = Router();
+
+// All webhook routes require admin authentication
+router.use(authenticateToken);
+router.use(requireAdmin);
 
 /**
  * GET /api/v1/webhooks
  * List all webhooks
  */
-router.get('/webhooks', async (req: Request, res: Response) => {
+router.get('/webhooks', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const webhooks = await webhookService.listWebhooks();
     sendSuccess(res, { webhooks });
@@ -29,17 +33,21 @@ router.get('/webhooks', async (req: Request, res: Response) => {
  * GET /api/v1/webhooks/:id
  * Get webhook by ID
  */
-router.get('/webhooks/:id', async (req: Request, res: Response) => {
+router.get('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const webhook = await webhookService.getWebhookById(parseInt(id));
+    const webhookId = parseInt(id, 10);
+    if (isNaN(webhookId) || webhookId <= 0) {
+      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+    }
+    const webhook = await webhookService.getWebhookById(webhookId);
 
     if (!webhook) {
       return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     // Don't expose secret key in response
-    const { secret_key, ...safe } = webhook;
+    const { secret_key: _secret_key, ...safe } = webhook;
     sendSuccess(res, { webhook: safe });
   } catch (error) {
     logger.error('[Webhooks] Failed to retrieve webhook', { error: error instanceof Error ? error : new Error(String(error)), category: 'WEBHOOK' });
@@ -52,7 +60,7 @@ router.get('/webhooks/:id', async (req: Request, res: Response) => {
  * Create new webhook
  * Body: { name, url, events[], payloadTemplate, method?, headers? }
  */
-router.post('/webhooks', async (req: Request, res: Response) => {
+router.post('/webhooks', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name, url, events, payloadTemplate, method, headers, retryMaxAttempts, retryBackoffSeconds } =
       req.body;
@@ -87,7 +95,7 @@ router.post('/webhooks', async (req: Request, res: Response) => {
     });
 
     // Don't expose secret key
-    const { secret_key, ...safe } = webhook;
+    const { secret_key: _secret_key, ...safe } = webhook;
     sendCreated(res, { webhook: safe });
   } catch (error) {
     logger.error('[Webhooks] Failed to create webhook', { error: error instanceof Error ? error : new Error(String(error)), category: 'WEBHOOK' });
@@ -99,9 +107,13 @@ router.post('/webhooks', async (req: Request, res: Response) => {
  * PUT /api/v1/webhooks/:id
  * Update webhook configuration
  */
-router.put('/webhooks/:id', async (req: Request, res: Response) => {
+router.put('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const webhookId = parseInt(id, 10);
+    if (isNaN(webhookId) || webhookId <= 0) {
+      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+    }
 
     // Validate payload template if provided
     if (req.body.payload_template) {
@@ -112,8 +124,8 @@ router.put('/webhooks/:id', async (req: Request, res: Response) => {
       }
     }
 
-    const webhook = await webhookService.updateWebhook(parseInt(id), req.body);
-    const { secret_key, ...safe } = webhook;
+    const webhook = await webhookService.updateWebhook(webhookId, req.body);
+    const { secret_key: _secret_key, ...safe } = webhook;
     sendSuccess(res, { webhook: safe });
   } catch (error: any) {
     if (error.message.includes('not found')) {
@@ -128,10 +140,14 @@ router.put('/webhooks/:id', async (req: Request, res: Response) => {
  * DELETE /api/v1/webhooks/:id
  * Delete webhook (and all associated deliveries)
  */
-router.delete('/webhooks/:id', async (req: Request, res: Response) => {
+router.delete('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
-    await webhookService.deleteWebhook(parseInt(id));
+    const webhookId = parseInt(id, 10);
+    if (isNaN(webhookId) || webhookId <= 0) {
+      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+    }
+    await webhookService.deleteWebhook(webhookId);
     sendSuccess(res, undefined, 'Webhook deleted');
   } catch (error) {
     logger.error('[Webhooks] Failed to delete webhook', { error: error instanceof Error ? error : new Error(String(error)), category: 'WEBHOOK' });
@@ -144,17 +160,21 @@ router.delete('/webhooks/:id', async (req: Request, res: Response) => {
  * Toggle webhook active/inactive
  * Body: { active: boolean }
  */
-router.patch('/webhooks/:id/toggle', async (req: Request, res: Response) => {
+router.patch('/webhooks/:id/toggle', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const webhookId = parseInt(id, 10);
+    if (isNaN(webhookId) || webhookId <= 0) {
+      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+    }
     const { active } = req.body;
 
     if (typeof active !== 'boolean') {
       return errorResponse(res, 'Active must be boolean', 400, 'VALIDATION_ERROR');
     }
 
-    const webhook = await webhookService.toggleWebhook(parseInt(id), active);
-    const { secret_key, ...safe } = webhook;
+    const webhook = await webhookService.toggleWebhook(webhookId, active);
+    const { secret_key: _secret_key, ...safe } = webhook;
     sendSuccess(res, { webhook: safe });
   } catch (error: any) {
     if (error.message.includes('not found')) {
@@ -170,16 +190,20 @@ router.patch('/webhooks/:id/toggle', async (req: Request, res: Response) => {
  * Test webhook by sending sample payload
  * Body: { eventType, sampleData? }
  */
-router.post('/webhooks/:id/test', async (req: Request, res: Response) => {
+router.post('/webhooks/:id/test', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const webhookId = parseInt(id, 10);
+    if (isNaN(webhookId) || webhookId <= 0) {
+      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+    }
     const { eventType, sampleData } = req.body;
 
     if (!eventType) {
       return errorResponse(res, 'eventType is required', 400, 'VALIDATION_ERROR');
     }
 
-    const webhook = await webhookService.getWebhookById(parseInt(id));
+    const webhook = await webhookService.getWebhookById(webhookId);
 
     if (!webhook) {
       return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
@@ -200,24 +224,33 @@ router.post('/webhooks/:id/test', async (req: Request, res: Response) => {
  * List webhook deliveries with filtering
  * Query: status?, eventType?, limit?, offset?
  */
-router.get('/webhooks/:id/deliveries', async (req: Request, res: Response) => {
+router.get('/webhooks/:id/deliveries', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { status, eventType, limit = 50, offset = 0 } = req.query;
+    const webhookId = parseInt(id, 10);
+    if (isNaN(webhookId) || webhookId <= 0) {
+      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+    }
+    const { status, eventType, limit = '50', offset = '0' } = req.query;
+    const parsedLimit = parseInt(limit as string, 10);
+    const parsedOffset = parseInt(offset as string, 10);
+    if (isNaN(parsedLimit) || isNaN(parsedOffset)) {
+      return errorResponse(res, 'Invalid pagination parameters', 400, 'VALIDATION_ERROR');
+    }
 
-    const result = await webhookService.getWebhookDeliveries(parseInt(id), {
+    const result = await webhookService.getWebhookDeliveries(webhookId, {
       status: status as string | undefined,
       eventType: eventType as string | undefined,
-      limit: parseInt(limit as string),
-      offset: parseInt(offset as string)
+      limit: parsedLimit,
+      offset: parsedOffset
     });
 
     sendSuccess(res, {
       deliveries: result.deliveries,
       pagination: {
         total: result.total,
-        limit: parseInt(limit as string),
-        offset: parseInt(offset as string)
+        limit: parsedLimit,
+        offset: parsedOffset
       }
     });
   } catch (error) {
@@ -230,11 +263,16 @@ router.get('/webhooks/:id/deliveries', async (req: Request, res: Response) => {
  * GET /api/v1/webhooks/:id/deliveries/:deliveryId
  * Get specific delivery details
  */
-router.get('/webhooks/:id/deliveries/:deliveryId', async (req: Request, res: Response) => {
+router.get('/webhooks/:id/deliveries/:deliveryId', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { deliveryId } = req.params;
+    const { id, deliveryId } = req.params;
+    const webhookId = parseInt(id, 10);
+    const parsedDeliveryId = parseInt(deliveryId, 10);
+    if (isNaN(webhookId) || webhookId <= 0 || isNaN(parsedDeliveryId) || parsedDeliveryId <= 0) {
+      return errorResponse(res, 'Invalid ID parameters', 400, 'VALIDATION_ERROR');
+    }
 
-    const delivery = await webhookService.getDeliveryById(parseInt(deliveryId));
+    const delivery = await webhookService.getDeliveryById(parsedDeliveryId);
 
     if (!delivery) {
       return errorResponse(res, 'Delivery not found', 404, 'RESOURCE_NOT_FOUND');
@@ -251,11 +289,15 @@ router.get('/webhooks/:id/deliveries/:deliveryId', async (req: Request, res: Res
  * GET /api/v1/webhooks/:id/stats
  * Get delivery statistics for webhook
  */
-router.get('/webhooks/:id/stats', async (req: Request, res: Response) => {
+router.get('/webhooks/:id/stats', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const webhookId = parseInt(id, 10);
+    if (isNaN(webhookId) || webhookId <= 0) {
+      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+    }
 
-    const stats = await webhookService.getDeliveryStats(parseInt(id));
+    const stats = await webhookService.getDeliveryStats(webhookId);
     sendSuccess(res, { stats });
   } catch (error) {
     logger.error('[Webhooks] Failed to retrieve statistics', { error: error instanceof Error ? error : new Error(String(error)), category: 'WEBHOOK' });
@@ -268,16 +310,25 @@ router.get('/webhooks/:id/stats', async (req: Request, res: Response) => {
  * Manually retry failed delivery
  * Body: { deliveryId }
  */
-router.post('/webhooks/:id/retry', async (req: Request, res: Response) => {
+router.post('/webhooks/:id/retry', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const webhookId = parseInt(id, 10);
+    if (isNaN(webhookId) || webhookId <= 0) {
+      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+    }
     const { deliveryId } = req.body;
 
     if (!deliveryId) {
       return errorResponse(res, 'deliveryId is required', 400, 'VALIDATION_ERROR');
     }
 
-    const delivery = await webhookService.getDeliveryById(deliveryId);
+    const parsedDeliveryId = parseInt(deliveryId, 10);
+    if (isNaN(parsedDeliveryId) || parsedDeliveryId <= 0) {
+      return errorResponse(res, 'Invalid delivery ID', 400, 'VALIDATION_ERROR');
+    }
+
+    const delivery = await webhookService.getDeliveryById(parsedDeliveryId);
     if (!delivery) {
       return errorResponse(res, 'Delivery not found', 404, 'RESOURCE_NOT_FOUND');
     }
@@ -285,7 +336,7 @@ router.post('/webhooks/:id/retry', async (req: Request, res: Response) => {
     // Trigger retry immediately
     await webhookService.processPendingRetries();
 
-    sendSuccess(res, { deliveryId }, 'Delivery queued for retry');
+    sendSuccess(res, { deliveryId: parsedDeliveryId }, 'Delivery queued for retry');
   } catch (error) {
     logger.error('[Webhooks] Failed to retry delivery', { error: error instanceof Error ? error : new Error(String(error)), category: 'WEBHOOK' });
     errorResponse(res, 'Failed to retry delivery', 500, 'INTERNAL_ERROR');
@@ -296,11 +347,15 @@ router.post('/webhooks/:id/retry', async (req: Request, res: Response) => {
  * POST /api/v1/webhooks/:id/secret/regenerate
  * Regenerate webhook secret key for security rotation
  */
-router.post('/webhooks/:id/secret/regenerate', async (req: Request, res: Response) => {
+router.post('/webhooks/:id/secret/regenerate', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const webhookId = parseInt(id, 10);
+    if (isNaN(webhookId) || webhookId <= 0) {
+      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+    }
 
-    const newSecret = await webhookService.regenerateSecret(parseInt(id));
+    const newSecret = await webhookService.regenerateSecret(webhookId);
 
     sendSuccess(res, {
       secret_key: newSecret,
@@ -317,7 +372,7 @@ router.post('/webhooks/:id/secret/regenerate', async (req: Request, res: Respons
  * Manually trigger webhook event (for testing/validation)
  * Body: { eventType, data? }
  */
-router.post('/events/trigger', async (req: Request, res: Response) => {
+router.post('/events/trigger', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { eventType, data } = req.body;
 

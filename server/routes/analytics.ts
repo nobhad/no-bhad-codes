@@ -718,7 +718,12 @@ router.post('/reports', authenticateToken, requireAdmin, asyncHandler(async (req
  * Get a specific saved report
  */
 router.get('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const report = await analyticsService.getSavedReport(parseInt(req.params.id, 10));
+  const reportId = parseInt(req.params.id, 10);
+  if (isNaN(reportId) || reportId <= 0) {
+    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  const report = await analyticsService.getSavedReport(reportId);
   if (!report) {
     errorResponse(res, 'Report not found', 404, 'RESOURCE_NOT_FOUND');
     return;
@@ -731,10 +736,12 @@ router.get('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (
  * Update a saved report
  */
 router.put('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const report = await analyticsService.updateSavedReport(
-    parseInt(req.params.id, 10),
-    req.body
-  );
+  const reportId = parseInt(req.params.id, 10);
+  if (isNaN(reportId) || reportId <= 0) {
+    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  const report = await analyticsService.updateSavedReport(reportId, req.body);
   sendSuccess(res, { report });
 }));
 
@@ -743,7 +750,12 @@ router.put('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (
  * Delete a saved report
  */
 router.delete('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  await analyticsService.deleteSavedReport(parseInt(req.params.id, 10));
+  const reportId = parseInt(req.params.id, 10);
+  if (isNaN(reportId) || reportId <= 0) {
+    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  await analyticsService.deleteSavedReport(reportId);
   sendSuccess(res, undefined);
 }));
 
@@ -752,7 +764,12 @@ router.delete('/reports/:id', authenticateToken, requireAdmin, asyncHandler(asyn
  * Toggle report favorite status
  */
 router.post('/reports/:id/favorite', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const report = await analyticsService.toggleReportFavorite(parseInt(req.params.id, 10));
+  const reportId = parseInt(req.params.id, 10);
+  if (isNaN(reportId) || reportId <= 0) {
+    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  const report = await analyticsService.toggleReportFavorite(reportId);
   sendSuccess(res, { report });
 }));
 
@@ -761,8 +778,12 @@ router.post('/reports/:id/favorite', authenticateToken, requireAdmin, asyncHandl
  * Run a saved report and get results
  */
 router.post('/reports/:id/run', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
-  const result = await analyticsService.runReport(parseInt(req.params.id, 10));
+  const reportId = parseInt(req.params.id, 10);
+  if (isNaN(reportId) || reportId <= 0) {
+    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  const result = await analyticsService.runReport(reportId);
   sendSuccess(res, result);
 }));
 
@@ -775,7 +796,12 @@ router.post('/reports/:id/run', authenticateToken, requireAdmin, asyncHandler(as
  * Get schedules for a report
  */
 router.get('/reports/:reportId/schedules', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const schedules = await analyticsService.getReportSchedules(parseInt(req.params.reportId, 10));
+  const reportId = parseInt(req.params.reportId, 10);
+  if (isNaN(reportId) || reportId <= 0) {
+    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  const schedules = await analyticsService.getReportSchedules(reportId);
   sendSuccess(res, { schedules });
 }));
 
@@ -784,10 +810,15 @@ router.get('/reports/:reportId/schedules', authenticateToken, requireAdmin, asyn
  * Create a schedule for a report
  */
 router.post('/reports/:reportId/schedules', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const reportId = parseInt(req.params.reportId, 10);
+  if (isNaN(reportId) || reportId <= 0) {
+    errorResponse(res, 'Invalid report ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
   const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
   const schedule = await analyticsService.createReportSchedule({
     ...req.body,
-    reportId: parseInt(req.params.reportId, 10),
+    reportId,
     createdBy: userEmail
   });
   sendCreated(res, { schedule });
@@ -798,10 +829,12 @@ router.post('/reports/:reportId/schedules', authenticateToken, requireAdmin, asy
  * Update a report schedule
  */
 router.put('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const schedule = await analyticsService.updateReportSchedule(
-    parseInt(req.params.id, 10),
-    req.body
-  );
+  const scheduleId = parseInt(req.params.id, 10);
+  if (isNaN(scheduleId) || scheduleId <= 0) {
+    errorResponse(res, 'Invalid schedule ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  const schedule = await analyticsService.updateReportSchedule(scheduleId, req.body);
   sendSuccess(res, { schedule });
 }));
 
@@ -810,7 +843,12 @@ router.put('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(async
  * Delete a report schedule
  */
 router.delete('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  await analyticsService.deleteReportSchedule(parseInt(req.params.id, 10));
+  const scheduleId = parseInt(req.params.id, 10);
+  if (isNaN(scheduleId) || scheduleId <= 0) {
+    errorResponse(res, 'Invalid schedule ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  await analyticsService.deleteReportSchedule(scheduleId);
   sendSuccess(res, undefined);
 }));
 
@@ -855,10 +893,12 @@ router.post('/widgets', authenticateToken, requireAdmin, asyncHandler(async (req
  * Update a dashboard widget
  */
 router.put('/widgets/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const widget = await analyticsService.updateDashboardWidget(
-    parseInt(req.params.id, 10),
-    req.body
-  );
+  const widgetId = parseInt(req.params.id, 10);
+  if (isNaN(widgetId) || widgetId <= 0) {
+    errorResponse(res, 'Invalid widget ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  const widget = await analyticsService.updateDashboardWidget(widgetId, req.body);
   sendSuccess(res, { widget });
 }));
 
@@ -867,7 +907,12 @@ router.put('/widgets/:id', authenticateToken, requireAdmin, asyncHandler(async (
  * Delete a dashboard widget
  */
 router.delete('/widgets/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  await analyticsService.deleteDashboardWidget(parseInt(req.params.id, 10));
+  const widgetId = parseInt(req.params.id, 10);
+  if (isNaN(widgetId) || widgetId <= 0) {
+    errorResponse(res, 'Invalid widget ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  await analyticsService.deleteDashboardWidget(widgetId);
   sendSuccess(res, undefined);
 }));
 
@@ -896,11 +941,13 @@ router.get('/widgets/presets', authenticateToken, requireAdmin, asyncHandler(asy
  * Apply a dashboard preset
  */
 router.post('/widgets/presets/:id/apply', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const presetId = parseInt(req.params.id, 10);
+  if (isNaN(presetId) || presetId <= 0) {
+    errorResponse(res, 'Invalid preset ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
   const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
-  const widgets = await analyticsService.applyDashboardPreset(
-    userEmail,
-    parseInt(req.params.id, 10)
-  );
+  const widgets = await analyticsService.applyDashboardPreset(userEmail, presetId);
   sendSuccess(res, { widgets });
 }));
 
@@ -975,10 +1022,12 @@ router.post('/alerts', authenticateToken, requireAdmin, asyncHandler(async (req:
  * Update a metric alert
  */
 router.put('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  const alert = await analyticsService.updateMetricAlert(
-    parseInt(req.params.id, 10),
-    req.body
-  );
+  const alertId = parseInt(req.params.id, 10);
+  if (isNaN(alertId) || alertId <= 0) {
+    errorResponse(res, 'Invalid alert ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  const alert = await analyticsService.updateMetricAlert(alertId, req.body);
   sendSuccess(res, { alert });
 }));
 
@@ -987,7 +1036,12 @@ router.put('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async (r
  * Delete a metric alert
  */
 router.delete('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
-  await analyticsService.deleteMetricAlert(parseInt(req.params.id, 10));
+  const alertId = parseInt(req.params.id, 10);
+  if (isNaN(alertId) || alertId <= 0) {
+    errorResponse(res, 'Invalid alert ID', 400, 'VALIDATION_ERROR');
+    return;
+  }
+  await analyticsService.deleteMetricAlert(alertId);
   sendSuccess(res, undefined);
 }));
 

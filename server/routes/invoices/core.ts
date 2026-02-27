@@ -15,7 +15,6 @@ import { InvoiceCreateData, InvoiceLineItem } from '../../services/invoice-servi
 import { emailService } from '../../services/email-service.js';
 import { getDatabase } from '../../database/init.js';
 import { getString } from '../../database/row-helpers.js';
-import { BUSINESS_INFO } from '../../config/business.js';
 import { generateInvoicePdf, InvoicePdfData } from './pdf.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
@@ -38,6 +37,10 @@ router.get(
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 100;
     const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
 
+    if (isNaN(limit) || limit < 0 || isNaN(offset) || offset < 0) {
+      return errorResponse(res, 'Invalid pagination parameters', 400, 'VALIDATION_ERROR');
+    }
+
     try {
       // If filters provided, delegate to searchInvoices for advanced filtering
       const hasFilters = !!(
@@ -53,16 +56,29 @@ router.get(
       );
 
       if (hasFilters) {
+        const clientId = req.query.clientId ? parseInt(req.query.clientId as string, 10) : undefined;
+        const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;
+        const minAmount = req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined;
+        const maxAmount = req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined;
+
+        // Validate numeric filters
+        if ((clientId !== undefined && isNaN(clientId)) ||
+            (projectId !== undefined && isNaN(projectId)) ||
+            (minAmount !== undefined && isNaN(minAmount)) ||
+            (maxAmount !== undefined && isNaN(maxAmount))) {
+          return errorResponse(res, 'Invalid filter parameters', 400, 'VALIDATION_ERROR');
+        }
+
         const filters: any = {
-          clientId: req.query.clientId ? parseInt(req.query.clientId as string, 10) : undefined,
-          projectId: req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined,
+          clientId,
+          projectId,
           status: req.query.status as string | undefined,
           invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
           search: req.query.search as string | undefined,
           dateFrom: req.query.dateFrom as string | undefined,
           dateTo: req.query.dateTo as string | undefined,
-          minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
-          maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
+          minAmount,
+          maxAmount,
           limit,
           offset
         };
@@ -259,9 +275,27 @@ router.post(
       });
     }
 
+    // Verify project exists and check authorization
+    const db = getDatabase();
+    const project = await db.get(
+      'SELECT id, client_id FROM projects WHERE id = ? AND deleted_at IS NULL',
+      [invoiceData.projectId]
+    );
+    if (!project) {
+      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     // Authorization check: verify user can access the project
     if (!(await canAccessProject(req, invoiceData.projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
+    // For non-admins, verify clientId matches the project's actual client
+    if (!(await isUserAdmin(req))) {
+      const projectClientId = (project as { client_id: number }).client_id;
+      if (projectClientId !== invoiceData.clientId) {
+        return errorResponse(res, 'Client ID must match the project owner', 400, 'VALIDATION_ERROR');
+      }
     }
 
     // Validate line items
@@ -862,9 +896,10 @@ router.post(
     }
 
     try {
-      const existingInvoice = await getInvoiceService().getInvoiceById(invoiceId);
+      // Verify invoice exists and user has access
+      await getInvoiceService().getInvoiceById(invoiceId);
       if (!(await canAccessInvoice(req, invoiceId))) {
-        return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+        return errorResponse(res, 'Invoice not found', 404, 'RESOURCE_NOT_FOUND');
       }
       const invoice = await getInvoiceService().markInvoiceAsPaid(invoiceId, {
         amountPaid: parseFloat(amountPaid),

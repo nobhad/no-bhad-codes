@@ -22,6 +22,7 @@ import {
   TIME_MS,
   RATE_LIMIT_CONFIG,
   COOKIE_CONFIG,
+  ACCOUNT_LOCKOUT_CONFIG,
   validatePassword
 } from '../utils/auth-constants.js';
 import { getString, getNumber, getBoolean, getDate } from '../database/row-helpers.js';
@@ -131,9 +132,9 @@ router.post(
 
     const db = getDatabase();
 
-    // Find user in database
+    // Find user in database (include lockout columns)
     const client = await db.get(
-      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin, last_login FROM clients WHERE email = ?',
+      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin, last_login, failed_login_attempts, locked_until FROM clients WHERE email = ?',
       [email.toLowerCase()]
     );
 
@@ -148,6 +149,28 @@ router.post(
     const clientStatus = getString(client, 'status');
     const clientIsAdmin = getBoolean(client, 'is_admin');
     const passwordHash = getString(client, 'password_hash');
+    const failedLoginAttempts = getNumber(client, 'failed_login_attempts') || 0;
+    const lockedUntilStr = getString(client, 'locked_until');
+
+    // Check if account is locked
+    if (lockedUntilStr) {
+      const lockedUntil = new Date(lockedUntilStr);
+      const now = new Date();
+      if (now < lockedUntil) {
+        const remainingMinutes = Math.ceil((lockedUntil.getTime() - now.getTime()) / 60000);
+        await auditLogger.logLoginFailed(email, req, 'Account locked');
+        return sendUnauthorized(
+          res,
+          `Account is temporarily locked. Please try again in ${remainingMinutes} minute(s).`,
+          ErrorCodes.ACCOUNT_LOCKED
+        );
+      }
+      // Lockout has expired - reset the counter so user gets fresh attempts
+      await db.run(
+        'UPDATE clients SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?',
+        [clientId]
+      );
+    }
 
     // Check if client is active
     if (clientStatus !== 'active') {
@@ -158,6 +181,30 @@ router.post(
     // Verify password
     const isValidPassword = await bcrypt.compare(password, passwordHash);
     if (!isValidPassword) {
+      // Increment failed login attempts
+      const newFailedAttempts = failedLoginAttempts + 1;
+
+      if (newFailedAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
+        // Lock the account
+        const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
+        await db.run(
+          'UPDATE clients SET failed_login_attempts = ?, locked_until = ? WHERE id = ?',
+          [newFailedAttempts, lockUntil.toISOString(), clientId]
+        );
+        await auditLogger.logLoginFailed(email, req, 'Account locked due to too many failed attempts');
+        return sendUnauthorized(
+          res,
+          'Account has been temporarily locked due to too many failed login attempts. Please try again in 15 minutes.',
+          ErrorCodes.ACCOUNT_LOCKED
+        );
+      }
+
+      // Just increment the counter
+      await db.run(
+        'UPDATE clients SET failed_login_attempts = ? WHERE id = ?',
+        [newFailedAttempts, clientId]
+      );
+
       await auditLogger.logLoginFailed(email, req, 'Invalid password');
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
@@ -188,9 +235,9 @@ router.post(
     const previousLastLogin = client.last_login;
     const isFirstLogin = previousLastLogin === null;
 
-    // Update last_login timestamp
+    // Update last_login timestamp and reset failed login attempts
     await db.run(
-      'UPDATE clients SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
+      'UPDATE clients SET last_login = CURRENT_TIMESTAMP, failed_login_attempts = 0, locked_until = NULL WHERE id = ?',
       [clientId]
     );
 
@@ -563,7 +610,7 @@ router.post(
           timestamp: new Date()
         });
       } catch (error) {
-         await logger.error('Failed to send password reset email:', { error: error instanceof Error ? error : undefined, category: 'AUTH' });
+        await logger.error('Failed to send password reset email:', { error: error instanceof Error ? error : undefined, category: 'AUTH' });
         // Still return success to user - don't reveal internal errors
       }
     }
@@ -751,9 +798,30 @@ router.post(
   }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { password } = req.body;
+    const db = getDatabase();
 
     if (!password) {
       return sendBadRequest(res, 'Password is required', ErrorCodes.MISSING_CREDENTIALS);
+    }
+
+    // Check admin account lockout status from system_settings
+    const lockoutSetting = await db.get(
+      'SELECT setting_value FROM system_settings WHERE setting_key = \'admin.locked_until\''
+    );
+    if (lockoutSetting) {
+      const lockedUntil = new Date(lockoutSetting.setting_value as string);
+      const now = new Date();
+      if (now < lockedUntil) {
+        const remainingMinutes = Math.ceil((lockedUntil.getTime() - now.getTime()) / 60000);
+        await auditLogger.logLoginFailed(process.env.ADMIN_EMAIL || 'admin', req, 'Admin account locked');
+        return sendUnauthorized(
+          res,
+          `Admin account is temporarily locked. Please try again in ${remainingMinutes} minute(s).`,
+          ErrorCodes.ACCOUNT_LOCKED
+        );
+      }
+      // Lockout expired - reset
+      await db.run('DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')');
     }
 
     // Get admin password hash from environment
@@ -766,9 +834,43 @@ router.post(
     // Verify password using bcrypt
     const isValidPassword = await bcrypt.compare(password, adminPasswordHash);
     if (!isValidPassword) {
+      // Get current failed attempts
+      const attemptsSetting = await db.get(
+        'SELECT setting_value FROM system_settings WHERE setting_key = \'admin.failed_login_attempts\''
+      );
+      const currentAttempts = attemptsSetting ? parseInt(attemptsSetting.setting_value as string, 10) : 0;
+      const newAttempts = currentAttempts + 1;
+
+      if (newAttempts >= ACCOUNT_LOCKOUT_CONFIG.MAX_FAILED_ATTEMPTS) {
+        // Lock the admin account
+        const lockUntil = new Date(Date.now() + ACCOUNT_LOCKOUT_CONFIG.LOCKOUT_DURATION_MS);
+        await db.run(
+          'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.locked_until\', ?, \'string\', \'Admin account lockout expiry\')',
+          [lockUntil.toISOString()]
+        );
+        await db.run(
+          'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.failed_login_attempts\', ?, \'number\', \'Admin failed login attempts\')',
+          [newAttempts.toString()]
+        );
+        await auditLogger.logLoginFailed(process.env.ADMIN_EMAIL || 'admin', req, 'Admin account locked due to too many failed attempts');
+        return sendUnauthorized(
+          res,
+          'Admin account has been temporarily locked due to too many failed login attempts. Please try again in 15 minutes.',
+          ErrorCodes.ACCOUNT_LOCKED
+        );
+      }
+
+      // Increment failed attempts
+      await db.run(
+        'INSERT OR REPLACE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (\'admin.failed_login_attempts\', ?, \'number\', \'Admin failed login attempts\')',
+        [newAttempts.toString()]
+      );
       await auditLogger.logLoginFailed(process.env.ADMIN_EMAIL || 'admin', req, 'Invalid admin password');
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
+
+    // Successful login - reset failed attempts
+    await db.run('DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')');
 
     // Generate JWT token for admin
     const secret = process.env.JWT_SECRET;
@@ -918,7 +1020,7 @@ router.post(
           userAgent: req.get('user-agent') || 'unknown'
         });
       } catch (error) {
-         await logger.error('Failed to send magic link email:', { error: error instanceof Error ? error : undefined, category: 'AUTH' });
+        await logger.error('Failed to send magic link email:', { error: error instanceof Error ? error : undefined, category: 'AUTH' });
         // Still return success to user - don't reveal internal errors
       }
     }
@@ -1276,7 +1378,7 @@ No Bhad Codes Team`
     );
 
     console.log(`[AUTH] Generated auto-login token for client ${clientId}`);
-  await logger.info(`[AUTH] Generated auto-login token for client ${clientId}`, { category: 'AUTH' });
+    await logger.info(`[AUTH] Generated auto-login token for client ${clientId}`, { category: 'AUTH' });
 
     return sendSuccess(res, { email: clientEmail, token: authToken }, 'Password set successfully.');
   })

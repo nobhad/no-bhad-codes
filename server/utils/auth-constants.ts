@@ -34,8 +34,8 @@ export const PASSWORD_CONFIG = {
  * JWT token configuration
  */
 export const JWT_CONFIG = {
-  /** Regular user token expiry */
-  USER_TOKEN_EXPIRY: config.JWT_EXPIRES_IN || '7d',
+  /** Regular user token expiry (reduced from 7d for security) */
+  USER_TOKEN_EXPIRY: config.JWT_EXPIRES_IN || '1d',
 
   /** Admin token expiry (shorter for security) */
   ADMIN_TOKEN_EXPIRY: '1h',
@@ -132,6 +132,18 @@ export const SESSION_CONFIG = {
 } as const;
 
 /**
+ * Account lockout configuration
+ * Prevents brute force attacks on individual accounts
+ */
+export const ACCOUNT_LOCKOUT_CONFIG = {
+  /** Maximum failed login attempts before account lockout */
+  MAX_FAILED_ATTEMPTS: 5,
+
+  /** Duration of account lockout in milliseconds (15 minutes) */
+  LOCKOUT_DURATION_MS: TIME_MS.FIFTEEN_MINUTES
+} as const;
+
+/**
  * Cookie configuration for HttpOnly auth tokens
  */
 export const COOKIE_CONFIG = {
@@ -144,7 +156,7 @@ export const COOKIE_CONFIG = {
     secure: process.env.NODE_ENV === 'production',
     // Use 'lax' in development so auth cookies work through dev proxies
     sameSite: process.env.NODE_ENV === 'production' ? 'strict' as const : 'lax' as const,
-    maxAge: TIME_MS.WEEK, // 7 days
+    maxAge: TIME_MS.DAY, // 1 day (reduced from 7 days for security)
     path: '/'
   },
 
