@@ -9,9 +9,9 @@
  */
 
 /* ============================================
- * CASCADE LAYER ORDER DECLARATION
+ * CASCADE LAYER ORDER - SINGLE SOURCE OF TRUTH
  * ============================================ */
-@layer reset, tokens, base, utilities, components;
+@import "../core/layer-order.css";
 
 /* ============================================
  * 0. FONT FACE DEFINITIONS (MUST BE FIRST, NO LAYER)
@@ -36,9 +36,9 @@
 @import "../base/layout.css" layer(base);
 
 /* ============================================
- * 3.5 UTILITIES LAYER
+ * 3.5 UTILITIES (imported, will be placed in utilities layer)
  * ============================================ */
-@import "../base/utilities.css" layer(utilities);
+@import "../base/utilities.css";
 
 /* ============================================
  * 4. SHARED COMPONENTS LAYER

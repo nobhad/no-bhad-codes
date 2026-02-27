@@ -10,18 +10,26 @@
 :root {
   /* ============================================
    * FONT FAMILIES
-   * ============================================ */
+   * ============================================
+   * Dual-font system (DISCOTHÈQUE-inspired):
+   * - Headings: Cormorant Garamond (classic serif)
+   * - Body/UI: Inconsolata (monospace)
+   */
 
+  /* Body/UI: Inconsolata monospace */
   --font-family-sans:
-    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-    "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
 
-  --font-family-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  /* Headings: Cormorant Garamond classic serif */
+  --font-family-serif:
+    "Cormorant Garamond", Georgia, Cambria, "Times New Roman", Times, serif;
 
+  /* Code: Inconsolata monospace */
   --font-family-mono:
-    ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
 
-  --font-family-display: "Acme", var(--font-family-sans);
+  /* Display headings: Uses serif for visual hierarchy */
+  --font-family-display: "Cormorant Garamond", Georgia, serif;
 
   /* ============================================
    * FONT SIZES - FLUID TYPOGRAPHY
@@ -67,8 +75,11 @@
 
   /* ============================================
    * LETTER SPACING
-   * ============================================ */
+   * ============================================
+   * DISCOTHÈQUE uses very tight heading tracking
+   */
 
+  --letter-spacing-tightest: -0.09em; /* DISCOTHÈQUE heading style */
   --letter-spacing-tighter: -0.05em;
   --letter-spacing-tight: -0.025em;
   --letter-spacing-normal: 0;
@@ -78,29 +89,34 @@
 
   /* ============================================
    * TEXT STYLES - COMPOSED TOKENS
-   * ============================================ */
+   * ============================================
+   * DISCOTHÈQUE: Tight tracking, bold monospace
+   */
 
-  /* Display Styles */
+  /* Display Styles - Serif with tight tracking */
   --text-display-large: var(--font-weight-bold) var(--font-size-5xl) / var(--line-height-tight)
-    var(--font-family-display);
+    var(--font-family-serif);
   --text-display-medium: var(--font-weight-bold) var(--font-size-4xl) / var(--line-height-tight)
-    var(--font-family-display);
+    var(--font-family-serif);
   --text-display-small: var(--font-weight-bold) var(--font-size-3xl) / var(--line-height-tight)
-    var(--font-family-display);
+    var(--font-family-serif);
 
-  /* Heading Styles */
+  /* Heading Styles - All headings use serif for visual hierarchy */
   --text-heading-1: var(--font-weight-bold) var(--font-size-3xl) / var(--line-height-tight)
-    var(--font-family-display);
+    var(--font-family-serif);
   --text-heading-2: var(--font-weight-semibold) var(--font-size-2xl) / var(--line-height-tight)
-    var(--font-family-display);
+    var(--font-family-serif);
   --text-heading-3: var(--font-weight-semibold) var(--font-size-xl) / var(--line-height-snug)
-    var(--font-family-display);
+    var(--font-family-serif);
   --text-heading-4: var(--font-weight-medium) var(--font-size-lg) / var(--line-height-snug)
-    var(--font-family-sans);
+    var(--font-family-serif);
   --text-heading-5: var(--font-weight-medium) var(--font-size-md) / var(--line-height-normal)
-    var(--font-family-sans);
+    var(--font-family-serif);
   --text-heading-6: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)
-    var(--font-family-sans);
+    var(--font-family-serif);
+
+  /* Heading letter spacing token */
+  --heading-letter-spacing: var(--letter-spacing-tightest);
 
   /* Body Styles */
   --text-body-large: var(--font-weight-regular) var(--font-size-lg) / var(--line-height-relaxed)

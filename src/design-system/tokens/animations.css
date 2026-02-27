@@ -71,7 +71,7 @@
 
   /* Smooth easing (standard animations) - THE DEFAULT */
   --easing-smooth-sal: cubic-bezier(0.3, 0.9, 0.3, 0.9);
-  
+
   /* Default easing - use this for consistency across all animations */
   --easing-default: var(--easing-smooth-sal);
 

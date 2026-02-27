@@ -9,12 +9,9 @@
  */
 
 /* ============================================
- * CASCADE LAYER ORDER DECLARATION
- * ============================================
- * Layers are listed in priority order - later layers win.
- * This eliminates the need for !important in overrides.
- */
-@layer reset, tokens, base, components, pages, page-states, portals, mobile, utilities;
+ * CASCADE LAYER ORDER - SINGLE SOURCE OF TRUTH
+ * ============================================ */
+@import "./core/layer-order.css";
 
 /* ============================================
  * 0. FONT FACE DEFINITIONS (MUST BE FIRST, NO LAYER)
@@ -39,6 +36,21 @@
  * ============================================ */
 @import "./base/typography.css" layer(base);
 @import "./base/layout.css" layer(base);
+
+/* ============================================
+ * LAYOUTS LAYER
+ * ============================================ */
+@import "./layouts/index.css";
+
+/* ============================================
+ * STATES LAYER
+ * ============================================ */
+@import "./states/index.css";
+
+/* ============================================
+ * RESPONSIVE LAYER
+ * ============================================ */
+@import "./responsive/breakpoints.css";
 
 /* ============================================
  * 4. COMPONENTS LAYER
@@ -109,17 +121,17 @@
  * Page transitions control display/visibility states.
  * Must override page-specific CSS without !important.
  */
-@import "./components/page-transitions.css" layer(page-states);
+@import "./components/page-transitions.css" layer(states);
 
 /* ============================================
  * 6. PORTALS LAYER (Admin & Client portals)
  * ============================================ */
-@import "./client-portal/index.css" layer(portals);
+@import "./client-portal/index.css" layer(pages);
 
 /* ============================================
- * 7. MOBILE OVERRIDES LAYER (highest priority)
+ * 7. MOBILE OVERRIDES LAYER (responsive layer)
  * ============================================ */
-@import "./mobile/index.css" layer(mobile);
+@import "./mobile/index.css" layer(responsive);
 
 /* ============================================
  * 8. UTILITIES LAYER (can override everything)
@@ -239,7 +251,7 @@ body {
     margin-bottom: 1.5rem;
     text-align: left;
     width: 100%;
-    letter-spacing: 0.10em;
+    letter-spacing: 0.1em;
   }
 }
 
@@ -264,7 +276,7 @@ html[data-theme="dark"] .tech-stack {
   color: var(--color-text-primary);
   font-weight: 600;
   text-align: left;
-  letter-spacing: 0.10em;
+  letter-spacing: 0.1em;
 }
 
 .tech-list {

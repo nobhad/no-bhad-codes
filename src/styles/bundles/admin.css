@@ -10,14 +10,24 @@
  */
 
 /* ============================================
- * CASCADE LAYER ORDER DECLARATION
- * ============================================ */
-@layer reset, tokens, base, components, admin, utilities;
-
-/* ============================================
- * FOUNDATION (reset, tokens, base, form components)
+ * FOUNDATION (includes layer-order.css, reset, tokens, base, form components)
  * ============================================ */
 @import "./foundation.css";
+
+/* ============================================
+ * LAYOUTS LAYER
+ * ============================================ */
+@import "../layouts/index.css";
+
+/* ============================================
+ * STATES LAYER
+ * ============================================ */
+@import "../states/index.css";
+
+/* ============================================
+ * RESPONSIVE LAYER
+ * ============================================ */
+@import "../responsive/breakpoints.css";
 
 /* ============================================
  * NAVIGATION (full nav styles for admin login page)
@@ -37,10 +47,10 @@
 @import "../components/inline-edit.css" layer(components);
 
 /* ============================================
- * ADMIN-SPECIFIC STYLES
+ * ADMIN-SPECIFIC STYLES (pages layer)
  * ============================================ */
-@import "../pages/admin.css" layer(admin);
-@import "../admin/index.css" layer(admin);
+@import "../pages/admin.css" layer(pages);
+@import "../admin/index.css" layer(pages);
 
 /* Wireframe mode merged into base/utilities.css */
 
@@ -55,11 +65,11 @@
     transform: translateX(-50%);
     z-index: 9999;
     padding: 12px 24px;
-    background-color: var(--color-dark, #333333);
-    color: var(--color-light, #ffffff);
+    background-color: var(--portal-bg-darker, #0a0a0a);
+    color: var(--portal-text-primary, #ffffff);
     text-decoration: none;
     font-weight: 600;
-    border-radius: 4px;
+    border-radius: 0; /* DISCOTHÈQUE: sharp corners */
     transition: top 0.2s ease;
   }
 
@@ -78,7 +88,7 @@
    the inline <style> in admin/index.html (which is also unlayered).
    Layered styles cannot beat unlayered styles regardless of specificity. */
 body.admin-logged-in[data-page="admin"] {
-  background-color: var(--portal-bg-medium);
+  background-color: var(--portal-bg-pitch);
   /* Fixed height prevents body from growing beyond viewport */
   height: 100vh;
   height: 100dvh;
@@ -88,7 +98,7 @@ body.admin-logged-in[data-page="admin"] {
 
 /* html background needs fallback since portal variables are scoped to body */
 html:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--portal-bg-dark, #333333);
+  background-color: var(--portal-bg-pitch, #000000);
   /* Fixed height to constrain body */
   height: 100%;
 }

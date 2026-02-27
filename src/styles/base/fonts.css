@@ -9,13 +9,36 @@
  *
  * This file is imported FIRST in main.css to ensure
  * fonts are available when design tokens reference them.
+ *
+ * Typography System:
+ * - Headings: Cormorant Garamond (classic serif)
+ * - Body/UI: Inconsolata (monospace)
+ * - Letter-spacing: -0.09em for tight heading tracking
  */
 
 /* ============================================
- * INCONSOLATA (Google Fonts - Brutalist UI)
- * Used by React components
+ * INCONSOLATA (Self-hosted - Monospace UI)
+ * Variable font with weights 400-700
  * ============================================ */
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;500;600;700&display=swap');
+@font-face {
+  font-family: "Inconsolata";
+  src: url("/fonts/Inconsolata/Inconsolata-Variable.woff2") format("woff2-variations");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================
+ * CORMORANT GARAMOND (Self-hosted - Serif Headings)
+ * Classic book serif for visual hierarchy
+ * ============================================ */
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("/fonts/CormorantGaramond/CormorantGaramond-Regular.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ============================================
  * ACME FONT
@@ -23,8 +46,9 @@
 
 @font-face {
   font-family: "Acme";
-  src: url("/fonts/Acme/Acme-Regular.woff2") format("woff2"),
-       url("/fonts/Acme/Acme-Regular.ttf") format("truetype");
+  src:
+    url("/fonts/Acme/Acme-Regular.woff2") format("woff2"),
+    url("/fonts/Acme/Acme-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -41,4 +65,3 @@
   font-style: normal;
   font-display: swap; /* Changed from optional to swap for consistency */
 }
-

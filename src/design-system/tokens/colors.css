@@ -11,15 +11,18 @@
 :root {
   /* ============================================
    * PRIMITIVE COLOR PALETTE
-   * ============================================ */
+   * ============================================
+   * DISCOTHÈQUE-inspired: High contrast black/white
+   * "The dancefloor aesthetic" - bold, minimal
+   */
 
-  /* Brand Colors */
-  --color-brand-primary: #dc2626; /* Crimson red for light mode */
-  --color-brand-primary-rgb: 220, 38, 38;
-  --color-brand-secondary: #10b981; /* Green as secondary */
-  --color-brand-secondary-rgb: 16, 185, 129;
-  --color-brand-accent: #dc2626; /* Red as accent */
-  --color-brand-accent-rgb: 220, 38, 38;
+  /* Brand Colors - Pure black/white high contrast */
+  --color-brand-primary: #ffffff; /* White as primary on dark backgrounds */
+  --color-brand-primary-rgb: 255, 255, 255;
+  --color-brand-secondary: #ffffff; /* White as secondary */
+  --color-brand-secondary-rgb: 255, 255, 255;
+  --color-brand-accent: #ffffff; /* White as accent */
+  --color-brand-accent-rgb: 255, 255, 255;
 
   /* Neutral Palette - Gray Scale */
   --color-gray-50: #fafafa;
@@ -45,56 +48,58 @@
   --color-info-600: #2563eb;
 
   /* ============================================
-   * SEMANTIC COLOR TOKENS - LIGHT THEME
-   * ============================================ */
+   * SEMANTIC COLOR TOKENS - DISCOTHÈQUE THEME
+   * ============================================
+   * High contrast black/white - "dancefloor aesthetic"
+   */
 
-  /* Background Colors */
-  --color-bg-primary: var(--color-gray-50);
-  --color-bg-secondary: var(--color-gray-100);
-  --color-bg-tertiary: var(--color-gray-200);
-  --color-bg-inverse: var(--color-gray-900);
-  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+  /* Background Colors - Pure black base */
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #0a0a0a;
+  --color-bg-tertiary: #1a1a1a;
+  --color-bg-inverse: #ffffff;
+  --color-bg-overlay: rgba(0, 0, 0, 0.85);
 
-  /* Surface Colors */
-  --color-surface-primary: #fffefd;
-  --color-surface-secondary: var(--color-gray-100);
-  --color-surface-tertiary: var(--color-gray-200);
-  --color-surface-elevated: #fffefd;
+  /* Surface Colors - Dark surfaces */
+  --color-surface-primary: #000000;
+  --color-surface-secondary: #0a0a0a;
+  --color-surface-tertiary: #1a1a1a;
+  --color-surface-elevated: #1a1a1a;
 
   /* Form Field Background */
-  --color-form-input-bg: #333333; /* rgb(51, 51, 51) - Dark gray background for form inputs in light mode */
+  --color-form-input-bg: #000000;
 
-  /* Text Colors */
-  --color-text-primary: var(--color-gray-900);
-  --color-text-secondary: var(--color-gray-700);
-  --color-text-tertiary: var(--color-gray-500);
-  --color-text-disabled: var(--color-gray-400);
-  --color-text-inverse: #fffefd;
-  --color-text-brand: var(--color-brand-primary);
+  /* Text Colors - White on black */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #f4f4f4;
+  --color-text-tertiary: #a0a0a0;
+  --color-text-disabled: #787878;
+  --color-text-inverse: #000000;
+  --color-text-brand: #ffffff;
 
   /* Header/Navigation Specific Text Color */
-  --color-nav-text: #333333; /* rgb(51, 51, 51) - Medium dark gray for headers/nav */
+  --color-nav-text: #ffffff;
 
-  /* Border Colors */
-  --color-border-primary: var(--color-gray-300);
-  --color-border-secondary: var(--color-gray-200);
-  --color-border-tertiary: var(--color-gray-100);
-  --color-border-focus: var(--color-brand-primary);
+  /* Border Colors - White borders for contrast */
+  --color-border-primary: #ffffff;
+  --color-border-secondary: #787878;
+  --color-border-tertiary: #24221b;
+  --color-border-focus: #ffffff;
   --color-border-error: var(--color-error-500);
 
-  /* Interactive Colors */
-  --color-interactive-primary: var(--color-brand-primary);
-  --color-interactive-primary-hover: #b91c1c; /* Darker red for hover */
-  --color-interactive-primary-active: #991b1b; /* Even darker red for active */
-  --color-interactive-secondary: var(--color-gray-700);
-  --color-interactive-secondary-hover: var(--color-gray-800);
-  --color-interactive-secondary-active: var(--color-gray-900);
+  /* Interactive Colors - Inverted on hover */
+  --color-interactive-primary: #ffffff;
+  --color-interactive-primary-hover: #000000; /* Inverts to black bg */
+  --color-interactive-primary-active: #1a1a1a;
+  --color-interactive-secondary: #787878;
+  --color-interactive-secondary-hover: #ffffff;
+  --color-interactive-secondary-active: #f4f4f4;
 
   /* State Colors */
-  --color-state-hover: rgba(0, 0, 0, 0.05);
-  --color-state-active: rgba(0, 0, 0, 0.1);
-  --color-state-selected: rgba(220, 38, 38, 0.1); /* Crimson red for light mode */
-  --color-state-disabled: var(--color-gray-300);
+  --color-state-hover: rgba(255, 255, 255, 0.1);
+  --color-state-active: rgba(255, 255, 255, 0.15);
+  --color-state-selected: rgba(255, 255, 255, 0.2);
+  --color-state-disabled: #787878;
 
   /* Shadow Colors */
   --color-shadow-sm: rgba(0, 0, 0, 0.05);
@@ -129,63 +134,66 @@
 
 /* ============================================
  * DARK THEME OVERRIDES
- * ============================================ */
+ * ============================================
+ * DISCOTHÈQUE style is dark-first, so dark theme
+ * matches the base theme (pure black/white)
+ */
 
 html[data-theme="dark"] {
-  /* Brand Colors - Crimson red for dark mode (same as light mode) */
-  --color-brand-primary: #dc2626;
-  --color-brand-primary-rgb: 220, 38, 38;
-  --color-brand-secondary: #dc2626;
-  --color-brand-secondary-rgb: 220, 38, 38;
-  --color-brand-accent: #dc2626;
-  --color-brand-accent-rgb: 220, 38, 38;
+  /* Brand Colors - White on black */
+  --color-brand-primary: #ffffff;
+  --color-brand-primary-rgb: 255, 255, 255;
+  --color-brand-secondary: #ffffff;
+  --color-brand-secondary-rgb: 255, 255, 255;
+  --color-brand-accent: #ffffff;
+  --color-brand-accent-rgb: 255, 255, 255;
 
-  /* Background Colors */
-  --color-bg-primary: var(--color-gray-950);
-  --color-bg-secondary: var(--color-gray-900);
-  --color-bg-tertiary: var(--color-gray-800);
-  --color-bg-inverse: var(--color-gray-200); /* Soft white instead of bright white */
-  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+  /* Background Colors - Pure black */
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #0a0a0a;
+  --color-bg-tertiary: #1a1a1a;
+  --color-bg-inverse: #ffffff;
+  --color-bg-overlay: rgba(0, 0, 0, 0.85);
 
   /* Surface Colors */
-  --color-surface-primary: var(--color-gray-900);
-  --color-surface-secondary: var(--color-gray-800);
-  --color-surface-tertiary: var(--color-gray-700);
-  --color-surface-elevated: var(--color-gray-800);
+  --color-surface-primary: #000000;
+  --color-surface-secondary: #0a0a0a;
+  --color-surface-tertiary: #1a1a1a;
+  --color-surface-elevated: #1a1a1a;
 
-  /* Text Colors */
-  --color-text-primary: var(--color-gray-100);
-  --color-text-secondary: var(--color-gray-300);
-  --color-text-tertiary: var(--color-gray-400);
-  --color-text-disabled: var(--color-gray-600);
-  --color-text-inverse: var(--color-gray-900);
+  /* Text Colors - Pure white */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #f4f4f4;
+  --color-text-tertiary: #a0a0a0;
+  --color-text-disabled: #787878;
+  --color-text-inverse: #000000;
 
-  /* Header/Navigation Specific Text Color - Light text on dark bg */
-  --color-nav-text: var(--color-gray-100);
+  /* Header/Navigation Specific Text Color */
+  --color-nav-text: #ffffff;
 
-  /* Form Field Background - Darker in dark mode */
-  --color-form-input-bg: var(--color-gray-900);
+  /* Form Field Background */
+  --color-form-input-bg: #000000;
 
-  /* Border Colors */
-  --color-border-primary: var(--color-gray-700);
-  --color-border-secondary: var(--color-gray-800);
-  --color-border-tertiary: var(--color-gray-900);
+  /* Border Colors - White borders */
+  --color-border-primary: #ffffff;
+  --color-border-secondary: #787878;
+  --color-border-tertiary: #24221b;
 
-  /* Interactive Colors - Crimson red for dark mode */
-  --color-interactive-primary: var(--color-brand-primary);
-  --color-interactive-primary-hover: #b91c1c; /* Darker red for hover */
-  --color-interactive-primary-active: #991b1b; /* Even darker red for active */
+  /* Interactive Colors - Inverted hover */
+  --color-interactive-primary: #ffffff;
+  --color-interactive-primary-hover: #000000;
+  --color-interactive-primary-active: #1a1a1a;
 
   /* State Colors */
-  --color-state-hover: rgba(255, 255, 255, 0.05);
-  --color-state-active: rgba(255, 255, 255, 0.1);
-  --color-state-selected: rgba(220, 38, 38, 0.2);
+  --color-state-hover: rgba(255, 255, 255, 0.1);
+  --color-state-active: rgba(255, 255, 255, 0.15);
+  --color-state-selected: rgba(255, 255, 255, 0.2);
 
   /* Shadow Colors */
-  --color-shadow-sm: rgba(0, 0, 0, 0.2);
-  --color-shadow-md: rgba(0, 0, 0, 0.4);
-  --color-shadow-lg: rgba(0, 0, 0, 0.6);
-  --color-shadow-xl: rgba(0, 0, 0, 0.8);
+  --color-shadow-sm: rgba(0, 0, 0, 0.3);
+  --color-shadow-md: rgba(0, 0, 0, 0.5);
+  --color-shadow-lg: rgba(0, 0, 0, 0.7);
+  --color-shadow-xl: rgba(0, 0, 0, 0.9);
 }
 
 /* ============================================
@@ -217,37 +225,37 @@ html[data-theme="dark"] {
 
 :root,
 html[data-theme="light"] {
-  /* Legacy neutral colors → gray scale */
-  --color-neutral-100: #fffdfc; /* Tech stack background - warm */
-  --color-neutral-200: var(--color-gray-200);
-  --color-neutral-300: #e0e0e0; /* Light theme background */
-  --color-neutral-400: var(--color-gray-400);
-  --color-neutral-500: var(--color-gray-500);
-  --color-neutral-600: var(--color-gray-600);
-  --color-neutral-700: var(--color-gray-700);
-  --color-neutral-800: var(--color-gray-800);
-  --color-neutral-900: var(--color-gray-900);
+  /* Legacy neutral colors → DISCOTHÈQUE dark scale */
+  --color-neutral-100: #1a1a1a;
+  --color-neutral-200: #0a0a0a;
+  --color-neutral-300: #000000; /* Base background - pure black */
+  --color-neutral-400: #787878;
+  --color-neutral-500: #a0a0a0;
+  --color-neutral-600: #c0c0c0;
+  --color-neutral-700: #e0e0e0;
+  --color-neutral-800: #f4f4f4;
+  --color-neutral-900: #ffffff;
 
-  /* Legacy semantic colors */
-  --color-dark: #333333;
-  --color-light: #ffffff;
+  /* Legacy semantic colors - DISCOTHÈQUE white-on-black */
+  --color-dark: #ffffff; /* Inverted - text on dark bg */
+  --color-light: #000000; /* Inverted - dark backgrounds */
   --color-primary: var(--color-brand-primary);
   --color-primary-rgb: var(--color-brand-primary-rgb);
   --color-secondary: var(--color-brand-secondary);
   --color-secondary-rgb: var(--color-brand-secondary-rgb);
   --color-accent: var(--color-brand-accent);
   --color-accent-rgb: var(--color-brand-accent-rgb);
-  --color-border: #000000;
-  --color-border-light: #e0e0e0;
-  --color-shadow: rgba(0, 0, 0, 0.2);
+  --color-border: #ffffff; /* White borders on black */
+  --color-border-light: #787878;
+  --color-shadow: rgba(0, 0, 0, 0.5);
 
   /* App-level aliases (for components that need a single variable) */
-  --app-color-primary: var(--color-brand-primary);
-  --app-color-primary-hover: var(--color-interactive-primary-hover);
+  --app-color-primary: #ffffff;
+  --app-color-primary-hover: #000000; /* Inverts on hover */
 
   /* Legacy base colors */
   --color-black: #000000;
-  --color-white: #fffefd;
+  --color-white: #ffffff;
 
   /* Legacy status colors */
   --color-success: #10b981;
@@ -288,35 +296,35 @@ html[data-theme="light"] {
      ================================================ */
 
   /* Primary status variables - USE THESE */
-  --status-active: #3b82f6;              /* Blue - Active/In Progress */
+  --status-active: #3b82f6; /* Blue - Active/In Progress */
   --status-active-rgb: 59, 130, 246;
   --status-active-bg: rgba(59, 130, 246, 0.15);
 
-  --status-pending: #fbbf24;             /* Yellow - Pending/On Hold */
+  --status-pending: #fbbf24; /* Yellow - Pending/On Hold */
   --status-pending-rgb: 251, 191, 36;
   --status-pending-bg: rgba(251, 191, 36, 0.15);
 
-  --status-completed: #10b981;           /* Green - Completed/Success */
+  --status-completed: #10b981; /* Green - Completed/Success */
   --status-completed-rgb: 16, 185, 129;
   --status-completed-bg: rgba(16, 185, 129, 0.15);
 
-  --status-cancelled: #ef4444;           /* Red - Cancelled/Lost */
+  --status-cancelled: #ef4444; /* Red - Cancelled/Lost */
   --status-cancelled-rgb: 239, 68, 68;
   --status-cancelled-bg: rgba(239, 68, 68, 0.15);
 
-  --status-qualified: #8b5cf6;           /* Purple - Qualified/Review */
+  --status-qualified: #8b5cf6; /* Purple - Qualified/Review */
   --status-qualified-rgb: 139, 92, 246;
   --status-qualified-bg: rgba(139, 92, 246, 0.15);
 
-  --status-inactive: #6b7280;            /* Gray - Inactive/Read */
+  --status-inactive: #6b7280; /* Gray - Inactive/Read */
   --status-inactive-rgb: 107, 114, 128;
   --status-inactive-bg: rgba(107, 114, 128, 0.15);
 
-  --status-new: #06b6d4;                 /* Cyan - New (distinct from pending) */
+  --status-new: #06b6d4; /* Cyan - New (distinct from pending) */
   --status-new-rgb: 6, 182, 212;
   --status-new-bg: rgba(6, 182, 212, 0.15);
 
-  --status-on-hold: #f97316;             /* Orange - On Hold/Blocked/High Priority */
+  --status-on-hold: #f97316; /* Orange - On Hold/Blocked/High Priority */
   --status-on-hold-rgb: 249, 115, 22;
   --status-on-hold-bg: rgba(249, 115, 22, 0.15);
 

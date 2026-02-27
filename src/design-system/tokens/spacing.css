@@ -107,11 +107,11 @@
    */
 
   /* Icon-text gaps - proportionate to icon size */
-  --icon-gap-xs: 4px;   /* For 12-14px icons */
-  --icon-gap-sm: 6px;   /* For 14-16px icons (DEFAULT) */
-  --icon-gap-md: 8px;   /* For 16-20px icons */
-  --icon-gap-lg: 10px;  /* For 20-24px icons */
-  --icon-gap-xl: 12px;  /* For 24px+ icons */
+  --icon-gap-xs: 4px; /* For 12-14px icons */
+  --icon-gap-sm: 6px; /* For 14-16px icons (DEFAULT) */
+  --icon-gap-md: 8px; /* For 16-20px icons */
+  --icon-gap-lg: 10px; /* For 20-24px icons */
+  --icon-gap-xl: 12px; /* For 24px+ icons */
 
   /* Default icon gap - use this for most cases */
   --icon-gap: var(--icon-gap-sm);

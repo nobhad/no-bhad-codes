@@ -1,0 +1,12 @@
+/**
+ * ===============================================
+ * LAYOUTS LAYER INDEX
+ * ===============================================
+ * @file src/styles/layouts/index.css
+ *
+ * Exports all layout CSS files.
+ * Import this file to include all layout patterns.
+ */
+
+@import "./grid-systems.css";
+@import "./flex-patterns.css";
