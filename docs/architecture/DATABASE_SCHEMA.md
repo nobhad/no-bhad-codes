@@ -1,9 +1,9 @@
 # Database Schema Documentation
 
-**Last Updated:** February 17, 2026
+**Last Updated:** February 27, 2026
 **Database:** SQLite (`data/client_portal.db`)
-**Total Tables:** 118 (includes new `users` table)
-**Total Migrations:** 89
+**Total Tables:** 129 (includes new `users` table and consolidated messaging/intake)
+**Total Migrations:** 90
 
 ## Table of Contents
 
@@ -35,11 +35,11 @@ This database supports a comprehensive freelance business management system incl
 
 | Metric | Value |
 |--------|-------|
-| Total Tables | 118 |
+| Total Tables | 129 |
 | High-complexity tables (40+ cols) | 3 (invoices, clients, projects) |
 | Total Indexes | 150+ |
 | JSON fields | 30+ (templates, configs, metadata) |
-| Soft-delete enabled tables | 6 |
+| Soft-delete enabled tables | 10+ (via soft-delete-service.ts) |
 
 ### Design Patterns Used
 
@@ -58,7 +58,7 @@ This database supports a comprehensive freelance business management system incl
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
 | `users` | Team member accounts | email, display_name, role (admin/team_member/contractor/system), is_active |
-| `clients` | Client accounts | 45 cols: auth, billing, health scoring, notifications |
+| `clients` | Client accounts | 48+ cols: auth, billing, health scoring, last_login, lockout |
 | `client_contacts` | Multiple contacts per client | first_name, last_name, email, role, is_primary |
 | `client_activities` | Activity log | activity_type, title, metadata (JSON) |
 | `client_notes` | Notes with pinning | author, content, is_pinned |
@@ -73,7 +73,7 @@ This database supports a comprehensive freelance business management system incl
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
-| `projects` | Project records | 42 cols: client_id, status, dates, budget, health |
+| `projects` | Project records | 44+ cols: client_id, status, dates, budget, health, source_type |
 | `milestones` | Project milestones | title, due_date, deliverables (JSON), is_completed |
 | `project_tasks` | Tasks with subtasks | milestone_id, parent_task_id, assigned_to, priority |
 | `task_dependencies` | Task dependencies | task_id, depends_on_task_id, dependency_type |
@@ -98,19 +98,20 @@ This database supports a comprehensive freelance business management system incl
 | `stripe_payments` | Stripe payments | stripe_payment_intent_id, amount, status |
 | `stripe_payment_attempts` | Failed attempts | stripe_payment_intent_id, error_message |
 
-### 4. Messaging (9 tables)
+### 4. Messaging (9 tables) ✅ CONSOLIDATED (Migration 085)
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
 | `message_threads` | Conversation threads | client_id, project_id, subject, thread_type, status |
-| `messages` | Project messages | project_id, sender_type, message, read_at |
-| `general_messages` | Full-featured messages | 23 cols: threading, reactions, mentions, soft-delete |
+| `messages` | **Unified messages** | context_type ('project'/'general'), threading, reactions, mentions |
 | `message_mentions` | @mentions | mentioned_type (user/team/all), mentioned_id |
 | `message_reactions` | Emoji reactions | message_id, user_email, reaction |
 | `message_subscriptions` | Thread subscriptions | notify_all, notify_mentions, muted_until |
 | `message_read_receipts` | Read tracking | message_id, user_email, read_at |
 | `pinned_messages` | Pinned messages | thread_id, message_id, pinned_by |
 | `contact_submissions` | Inbound contacts | name, email, subject, status, converted_at |
+
+**Note:** Migration 085 consolidated `messages` and `general_messages` into a unified `messages` table with `context_type` column. Legacy tables renamed to `_messages_deprecated_085` and `_general_messages_deprecated_085` (scheduled for deletion 2026-03-14).
 
 ### 5. Files (7 tables)
 
@@ -159,21 +160,28 @@ This database supports a comprehensive freelance business management system incl
 | `document_request_templates` | Request templates | title, document_type, days_until_due |
 | `document_request_history` | Request audit | action, old_status, new_status |
 
-### 10. Deliverables (4 tables)
+### 10. Deliverables (8 tables)
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
+| `deliverables` | Main deliverable entity | project_id, milestone_id, title, status, due_date |
+| `deliverable_versions` | Version control | deliverable_id, version_number, file_path, is_current |
+| `deliverable_reviews` | Review records | deliverable_id, reviewer_email, status, comments |
+| `deliverable_comments` | Annotations | deliverable_id, author_email, content, position (JSON) |
+| `design_elements` | Sub-components | deliverable_id, element_type, name, status |
 | `deliverable_workflows` | Review workflows | file_id, status, version, approved_at |
 | `deliverable_review_comments` | Review comments | comment_type (feedback/approval/rejection) |
 | `deliverable_history` | Status history | from_status, to_status, changed_by |
 
-### 11. Intake & Onboarding (5 tables)
+### 11. Intake & Onboarding (5 tables) ✅ CONSOLIDATED (Migration 086)
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
-| `client_intakes` | Intake submissions | company_name, email, status, client_id (after conversion) |
+| `client_intakes` | **VIEW** (backward compat) | Points to `projects` with `source_type = 'intake_form'` |
 | `questionnaires` | Question templates | questions (JSON), auto_send_on_project_create |
 | `questionnaire_responses` | Client answers | answers (JSON), status, completed_at |
+
+**Note:** Migration 086 archived `client_intakes` table to `_client_intakes_archived_086` and created a backward-compatible VIEW. Intake data now flows into `projects` table with `source_type` column ('intake_form', 'direct', etc.) and `intake_id` for reference.
 
 ### 12. Ad Hoc Requests (3 tables)
 
@@ -237,13 +245,33 @@ This database supports a comprehensive freelance business management system incl
 | `blocked_ips` | IP blocklist | ip_address, reason, expires_at |
 | `audit_logs` | Action audit | 17 cols: user, action, entity, changes (JSON) |
 
-### 18. Email Templates (3 tables)
+### 18. Email Templates & Sequences (5 tables)
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
 | `email_templates` | Email blueprints | category, subject, body_html, variables (JSON) |
 | `email_template_versions` | Template history | version, changed_by, change_reason |
 | `email_send_logs` | Delivery log | recipient_email, status, error_message |
+| `welcome_sequence_templates` | Sequence templates | name, sequence_steps (JSON), trigger_event |
+| `welcome_sequence_emails` | Sequence instances | template_id, client_id, current_step, status |
+
+### 19. System & Notifications (5 tables)
+
+| Table | Purpose | Key Columns |
+|-------|---------|-------------|
+| `system_events` | System event tracking | event_type, entity_type, entity_id, data (JSON) |
+| `workflow_trigger_logs` | Trigger execution logs | trigger_id, status, execution_time_ms, error |
+| `notification_log` | Notification delivery | notification_type, recipient, status, sent_at |
+| `notification_digest_queue` | Digest batching | user_id, notifications (JSON), scheduled_for |
+| `project_updates` | Project timeline | project_id, update_type, title, content |
+
+### 20. Saved Reports & Dashboards (3 tables)
+
+| Table | Purpose | Key Columns |
+|-------|---------|-------------|
+| `saved_reports` | Report templates | name, report_type, filters (JSON), created_by |
+| `dashboard_presets` | Dashboard configs | name, widgets (JSON), is_default |
+| `metric_alerts` | KPI alerting | kpi_type, threshold, operator, notify_emails |
 
 ---
 
@@ -266,7 +294,7 @@ clients (root entity)
 │   ├── files (1:N)
 │   │   └── file_versions (1:N)
 │   ├── message_threads (1:N optional)
-│   │   └── general_messages (1:N)
+│   │   └── messages (1:N) -- unified with context_type
 │   ├── document_requests (1:N)
 │   ├── deliverable_workflows (1:N)
 │   ├── ad_hoc_requests (1:N)
@@ -300,14 +328,14 @@ approval_workflow_definitions (templates)
 | Table | Columns | Primary FK | Notes |
 |-------|---------|------------|-------|
 | `invoices` | 52 | client_id, project_id | Wide table with all billing data |
-| `clients` | 45 | - | Root entity with auth, billing, health |
-| `projects` | 42 | client_id | Core project with contract fields |
+| `clients` | 48+ | - | Root entity with auth, billing, health, lockout |
+| `projects` | 44+ | client_id | Core project with source_type, intake_id |
 | `contracts` | 29 | project_id, client_id | Signature and countersigning |
 | `notification_preferences` | 29 | user_id | All notification toggles |
 | `files` | 25 | project_id | Versioning, locking, access |
-| `general_messages` | 23 | thread_id | Full messaging features |
+| `messages` | 25+ | thread_id | Unified messages with context_type |
 | `document_requests` | 22 | client_id, project_id | Request lifecycle |
-| `client_intakes` | 22 | - | Intake form data |
+| `projects` | 44+ | client_id | Now includes source_type, intake_id |
 | `ad_hoc_requests` | 21 | project_id, client_id | Feature/support requests |
 
 ### Index Coverage
@@ -354,12 +382,12 @@ In `invoices` table:
 
 **Impact**: Not multi-tenant ready
 
-### 4. Dual Message Systems
+### 4. Dual Message Systems ✅ RESOLVED
 
-- `messages` (11 cols) - simple project messages
-- `general_messages` (23 cols) - full features
+- ~~`messages` (11 cols) - simple project messages~~
+- ~~`general_messages` (23 cols) - full features~~
 
-**Impact**: Inconsistent messaging experience
+**Resolution**: Migration 085 consolidated both tables into unified `messages` table with `context_type` column. Legacy tables renamed with `_deprecated_085` suffix and scheduled for deletion 2026-03-14.
 
 ### 5. TEXT Foreign Keys (Being Addressed)
 

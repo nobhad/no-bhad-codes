@@ -1,5 +1,7 @@
 # API Documentation
 
+**Last Updated:** February 27, 2026
+
 ## Overview
 
 The No Bhad Codes API provides a RESTful interface for client management, project tracking, and administrative operations. All endpoints use JSON for request and response payloads unless otherwise specified.
@@ -14,7 +16,7 @@ All API responses include an `X-Request-ID` header for request correlation and d
 
 ## Authentication
 
-**Updated January 13, 2026:** All authentication uses HttpOnly cookies for enhanced security.
+All authentication uses HttpOnly cookies for enhanced security.
 
 ### JWT Token Structure
 
@@ -4358,6 +4360,200 @@ Update CRM-specific fields for a client.
 #### GET `/api/clients/follow-up`
 
 Get clients needing follow-up.
+
+---
+
+## Receipts API
+
+Manage payment receipts.
+
+### GET `/api/receipts`
+
+List receipts with optional filters.
+
+**Query Parameters:**
+
+- `client_id` - Filter by client
+- `invoice_id` - Filter by invoice
+- `start_date`, `end_date` - Date range
+
+### GET `/api/receipts/:id`
+
+Get a specific receipt.
+
+### POST `/api/receipts`
+
+Create a new receipt.
+
+### GET `/api/receipts/:id/pdf`
+
+Download receipt as PDF.
+
+---
+
+## Approvals API (User Actions)
+
+User-facing endpoints for managing approval requests.
+
+### GET `/api/approvals/pending`
+
+Get pending approval requests for the current user.
+
+### GET `/api/approvals/:id`
+
+Get details of a specific approval request.
+
+### POST `/api/approvals/:id/approve`
+
+Approve a pending request.
+
+**Request:**
+
+```json
+{
+  "comment": "Approved with modifications"
+}
+```
+
+### POST `/api/approvals/:id/reject`
+
+Reject a pending request.
+
+**Request:**
+
+```json
+{
+  "comment": "Needs revision - see notes"
+}
+```
+
+### GET `/api/approvals/history`
+
+Get approval history.
+
+---
+
+## Triggers API
+
+Manage workflow automation triggers.
+
+### GET `/api/triggers`
+
+List all workflow triggers.
+
+### GET `/api/triggers/:id`
+
+Get a specific trigger.
+
+### POST `/api/triggers`
+
+Create a new workflow trigger.
+
+**Request:**
+
+```json
+{
+  "name": "Auto-send invoice on milestone completion",
+  "event_type": "milestone_completed",
+  "conditions": { "project_type": "fixed-price" },
+  "action_type": "create_invoice",
+  "action_config": { "include_milestone_items": true },
+  "is_active": true
+}
+```
+
+### PUT `/api/triggers/:id`
+
+Update a trigger.
+
+### DELETE `/api/triggers/:id`
+
+Delete a trigger.
+
+### POST `/api/triggers/:id/test`
+
+Test trigger execution (dry run).
+
+### GET `/api/triggers/logs`
+
+Get trigger execution logs.
+
+---
+
+## Email Templates API
+
+Manage email templates.
+
+### GET `/api/email-templates`
+
+List all email templates.
+
+**Query Parameters:**
+
+- `category` - Filter by category (invoice, notification, reminder, etc.)
+
+### GET `/api/email-templates/:id`
+
+Get a specific template.
+
+### POST `/api/email-templates`
+
+Create a new template.
+
+### PUT `/api/email-templates/:id`
+
+Update a template.
+
+### DELETE `/api/email-templates/:id`
+
+Delete a template.
+
+### POST `/api/email-templates/:id/preview`
+
+Preview template with sample data.
+
+### GET `/api/email-templates/:id/versions`
+
+Get version history for a template.
+
+---
+
+## Health Check API
+
+System health monitoring.
+
+### GET `/api/health`
+
+Get system health status.
+
+**Response:**
+
+```json
+{
+  "status": "healthy",
+  "version": "1.0.0",
+  "uptime": 86400,
+  "database": "connected",
+  "cache": "connected"
+}
+```
+
+### GET `/api/health/detailed`
+
+Get detailed health metrics (admin only).
+
+---
+
+## Undocumented APIs (Placeholder)
+
+The following API sections require detailed documentation:
+
+- **Data Quality API** (`/api/data-quality`) - Duplicate detection, validation, sanitization
+- **Admin Dashboard API** (`/api/admin/*`) - 12 sub-routes for admin operations
+- **Intake API** (`/api/intake`) - New project intake processing
+- **Client Info API** (`/api/client-info`) - Extended client information
+
+See [THE_BACKEND.md](./THE_BACKEND.md) for route overview.
 
 ---
 

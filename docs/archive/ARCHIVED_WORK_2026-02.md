@@ -4281,3 +4281,578 @@ Total lines saved: 1,133 lines across 6 modules
 - Fixed ESLint warnings in `admin-overview.ts` (5 unused variables)
 - Fixed markdown violations in docs (MD032, MD036)
 - Documented Filter Dropdown system in CSS_ARCHITECTURE.md
+
+---
+
+## Completed - February 27, 2026
+
+### Input Validation Hardening - Phases 1-5 COMPLETE
+
+**Completed:** February 27, 2026
+
+Added consistent input validation middleware to critical API routes. Prior state: 374 write routes but only ~7% had validation. All security-critical routes now have validation.
+
+#### Phase 1: Auth Routes
+
+Added `validateRequest` middleware to all authentication endpoints:
+
+- `/api/auth/login` - email + password validation
+- `/api/auth/admin/login` - password validation
+- `/api/auth/forgot-password` - email validation
+- `/api/auth/reset-password` - token + password validation
+- `/api/auth/magic-link` - email validation
+- `/api/auth/verify-magic-link` - token validation
+- `/api/auth/verify-invitation` - token validation
+- `/api/auth/set-password` - token + password validation
+
+**File Modified:** `server/routes/auth.ts`
+
+#### Phase 2: Invoice Core Routes
+
+Added `validateRequest` middleware to invoice CRUD endpoints:
+
+- POST `/api/invoices` - create invoice (projectId, clientId, lineItems validation)
+- POST `/api/invoices/preview` - preview invoice PDF
+- PUT `/api/invoices/:id/status` - update status (valid status enum)
+- POST `/api/invoices/:id/pay` - record payment (amountPaid, paymentMethod)
+
+**File Modified:** `server/routes/invoices/core.ts`
+
+#### Phase 2: Client Login Route Fix
+
+Fixed 404 for `/client/index.html`:
+
+- Added GET `/client/login` route
+- Added redirect from `/client/index.html` to `/client/login` for backwards compatibility
+- Updated middleware to redirect to `/client/login` instead of `/client/index.html`
+
+**File Modified:** `server/routes/portal.ts`
+
+#### Phase 3: Invoice Sub-Routes
+
+Added validation to recurring invoice and payment plan routes:
+
+- POST `/api/invoices/recurring` - create recurring invoice pattern
+- POST `/api/invoices/payment-plans` - create payment plan template (with percentage validation)
+
+**Files Modified:**
+
+- `server/routes/invoices/recurring.ts`
+- `server/routes/invoices/payment-plans.ts`
+
+#### Phase 4: Client Routes
+
+Added validation to critical client management routes:
+
+- POST `/api/clients` - create client (email, name, phone, status validation)
+- PUT `/api/clients/:id` - update client
+
+**File Modified:** `server/routes/clients.ts`
+
+#### Phase 5: File Upload Routes
+
+Added validation to file upload and deliverable workflow routes:
+
+- Deliverable submit, approve, reject, request-changes, resubmit routes
+- Filename validation with path traversal protection
+- MIME type and file size validation
+- Comment/feedback field validation
+
+**File Modified:** `server/routes/uploads.ts`
+
+---
+
+### Admin Login Route Fix - COMPLETE
+
+**Fixed:** February 27, 2026
+
+The admin login page was returning a 404 error because there was no GET route for `/admin/login`. The `requirePortalAuth` middleware was redirecting unauthenticated users to `/admin/login`, but no route handler existed.
+
+**Fix:** Added GET `/admin/login` route in `server/routes/portal.ts` that renders the portal layout with the auth-gate (login form) visible.
+
+**File Modified:** `server/routes/portal.ts`
+
+---
+
+### Test Suite Fixes - COMPLETE
+
+**Fixed:** February 27, 2026
+
+Fixed failing tests caused by security hardening changes and dead test code.
+
+**Fixes Applied:**
+
+1. **workflow-trigger-service.test.ts** - Updated to use `expect.stringContaining('FROM system_events')` instead of `SELECT *` pattern
+
+2. **stripe-service.test.ts** - Updated tests to expect errors instead of null/false returns when Stripe is not configured
+
+3. **scheduler-service.test.ts** - Removed dead tests for `startWelcomeSequence` and `cancelWelcomeSequence` methods that were never implemented
+
+**Files Modified:**
+
+- `tests/unit/services/workflow-trigger-service.test.ts`
+- `tests/unit/services/stripe-service.test.ts`
+- `tests/unit/services/scheduler-service.test.ts`
+
+**Test Results:** 1218/1228 passing (9 failures are pre-existing email-service nodemailer mock issues)
+
+---
+
+### Backend Design Consistency Audit - Phases 1-4 COMPLETE
+
+**Completed:** February 27, 2026
+
+Comprehensive audit of the backend codebase with focus on design consistency.
+
+#### Phase 1: Critical Fixes
+
+- Consolidated `AuthenticatedRequest` type - Created `JWTAuthRequest` in `/server/types/request.ts`
+- Fixed audit logger to throw on failure - Changed `createAuditLog` from returning `false` to throwing `AuditLogError`
+- Removed duplicate rate limiter - Refactored `security.ts` to use consolidated `rate-limiter.ts`
+- Fixed response interceptor conflict - Updated `audit.ts` to use `res.on('finish')` event
+
+**Files Modified:**
+
+- `server/types/request.ts`
+- `server/middleware/auth.ts`
+- `server/middleware/audit.ts`
+- `server/middleware/security.ts`
+- `server/services/audit-logger.ts`
+- `tests/unit/services/audit-logger.test.ts`
+- `tests/unit/middleware/audit.test.ts`
+- `tests/unit/middleware/security.test.ts`
+
+#### Phase 2: Standardization
+
+- Created `types/index.ts` with all exports
+- Created `config/index.ts` - Central exports
+- Moved access-control.ts to utils
+
+**Files Created:**
+
+- `server/types/index.ts`
+- `server/config/index.ts`
+- `server/utils/access-control.ts`
+
+#### Phase 3: Cleanup & Quick Wins
+
+- Removed `migration-manager.ts` - Duplicate/unused migration manager
+- Removed unused `BaseModel` and `ClientIntake`
+
+**Files Removed:**
+
+- `server/database/migration-manager.ts`
+- `server/database/model.ts`
+- `server/models/ClientIntake.ts`
+
+#### Phase 4: Documentation
+
+- Created `BACKEND_PATTERNS.md` - Comprehensive backend design patterns documentation
+
+**Files Created:** `docs/architecture/BACKEND_PATTERNS.md`
+
+---
+
+### CSS Architecture Refactor & Typography System - Phases 1-2 COMPLETE
+
+**Completed:** February 27, 2026
+
+#### Phase 1: CSS Layer Architecture
+
+Created single source of truth for cascade layer ordering:
+
+- Created `src/styles/core/layer-order.css` - Single layer order declaration
+- Created `src/styles/states/` - Visibility and interactive state classes
+- Created `src/styles/layouts/` - Grid and flex layout patterns
+- Created `src/styles/responsive/breakpoints.css` - Media query overrides
+- Updated all bundles to use layer-order.css
+- Reduced !important declarations from 215 to 169 (46 removed)
+
+**Layer Order:**
+
+```css
+@layer reset, tokens, base, components, layouts, pages, states, responsive, utilities;
+```
+
+#### Phase 2: Dual-Font Typography System
+
+Implemented dual-font system for visual hierarchy:
+
+- Downloaded and self-hosted Inconsolata variable font (17.7KB)
+- Downloaded and self-hosted Cormorant Garamond (105KB)
+- Updated font CSS files
+
+**Typography System:**
+
+| Element | Font Family | Purpose |
+|---------|-------------|---------|
+| Headings (h1-h6) | Cormorant Garamond | Classic serif for visual hierarchy |
+| Body/UI | Inconsolata | Monospace for brutalist aesthetic |
+
+**Files Created:**
+
+- `src/styles/core/layer-order.css`
+- `src/styles/states/visibility.css`
+- `src/styles/states/interactive.css`
+- `src/styles/states/index.css`
+- `src/styles/layouts/grid-systems.css`
+- `src/styles/layouts/flex-patterns.css`
+- `src/styles/layouts/index.css`
+- `src/styles/responsive/breakpoints.css`
+- `public/fonts/Inconsolata/Inconsolata-Variable.woff2`
+- `public/fonts/CormorantGaramond/CormorantGaramond-Regular.woff2`
+
+---
+
+### DISCOTHÈQUE Design System Update - COMPLETE
+
+**Completed:** February 26, 2026
+
+Applied DISCOTHÈQUE-inspired styling at root level - high contrast black/white palette with Inconsolata monospace typography.
+
+**Design System Changes:**
+
+| Element | Before | After |
+|---------|--------|-------|
+| Primary Background | #fafafa (light gray) | #000000 (pure black) |
+| Primary Text | #171717 (dark gray) | #ffffff (white) |
+| Primary Font | System UI sans-serif | Inconsolata monospace |
+| Heading Letter Spacing | 0 to 0.1em | -0.09em (tight) |
+| Button Border | 1px | 2px |
+| Border Radius | Various | 0 (sharp corners) |
+| Text Shadows | Present | Removed |
+
+**Files Modified:**
+
+- `src/design-system/tokens/colors.css`
+- `src/design-system/tokens/typography.css`
+- `src/design-system/tokens/buttons.css`
+- `src/styles/base/typography.css`
+- `src/styles/variables.css`
+
+---
+
+### UI Factory Pattern System - COMPLETE
+
+**Completed:** February 26, 2026
+
+Implemented comprehensive factory system for UI components (icons, buttons, badges, states) across vanilla TypeScript and React.
+
+**Directory Structure:**
+
+```text
+src/factories/
+├── index.ts
+├── types.ts
+├── constants.ts
+├── icons/
+│   ├── icon-factory.ts
+│   └── icon-registry.ts
+├── buttons/
+│   ├── button-factory.ts
+│   ├── button-actions.ts
+│   └── button-sets.ts
+└── components/
+    ├── badge-factory.ts
+    └── state-factory.ts
+
+src/react/factories/
+├── index.ts
+├── IconButton.tsx
+├── useFactory.ts
+├── StatusBadge.tsx
+└── StateDisplay.tsx
+```
+
+**Key Features:**
+
+- Context-aware sizing (Tables: 18px icons, Modals: 24px icons)
+- 40+ predefined actions with icons/titles
+- Button sets for common patterns (CRUD, file, approval)
+- React integration with IconButton component and hooks
+
+---
+
+### Admin Portal Security Audit - XSS Fixes - COMPLETE
+
+**Completed:** February 26, 2026
+
+Comprehensive security audit of innerHTML assignments identified and fixed XSS vulnerabilities.
+
+**Security Utilities Added (safe-dom.ts):**
+
+| Function | Purpose |
+|----------|---------|
+| `safeHtml` | Template literal tag for auto-escaping |
+| `trustHtml` | Wrapper for pre-sanitized HTML |
+| `setInnerHTML` | Safe innerHTML setter with XSS detection |
+| `setText` | Safe textContent setter |
+| `buildTableRow` | DOM-based table row builder |
+| `parseHtmlSafe` | Parse HTML removing dangerous elements |
+
+**Files Fixed:**
+
+- `admin-dashboard.ts`
+- `admin-design-review.ts`
+- `admin-deliverables.ts`
+- `admin-messaging.ts`
+- `admin-questionnaires.ts`
+- `admin-analytics.ts`
+
+---
+
+### CSRF Token Protection - COMPLETE
+
+**Completed:** February 26, 2026
+
+Implemented full CSRF (Cross-Site Request Forgery) protection for all API state-changing requests.
+
+**Implementation:**
+
+| Component | File | Description |
+|-----------|------|-------------|
+| Cookie Setter | `server/app.ts` | Sets `csrf-token` cookie |
+| Validation | `server/middleware/security.ts` | Validates `x-csrf-token` header |
+| Client Extraction | `src/utils/api-client.ts` | `getCsrfToken()` reads cookie |
+| Header Injection | `src/utils/api-client.ts` | `addCsrfHeader()` adds to POST/PUT/DELETE |
+
+---
+
+### OpenTelemetry Observability Stack - COMPLETE
+
+**Completed:** February 26, 2026
+
+Added full OpenTelemetry integration for distributed tracing and metrics.
+
+**Health Endpoints:**
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /health` | Full diagnostic |
+| `GET /health/live` | Kubernetes liveness probe |
+| `GET /health/ready` | Kubernetes readiness probe |
+| `GET /health/db` | Database-specific health |
+
+**Files Created:**
+
+- `server/observability/index.ts`
+- `server/observability/tracing.ts`
+- `server/observability/metrics.ts`
+- `server/routes/health.ts`
+
+---
+
+### Table Module Factory Enhancements - COMPLETE
+
+**Completed:** February 26, 2026
+
+Enhanced factory pattern with multi-source data and view toggle support.
+
+**New Config Options:**
+
+- `fetchData` - Custom data fetcher for complex scenarios
+- `viewModes` - View modes for multi-view modules
+- `defaultViewMode` - Default view mode
+
+---
+
+### Remove Page-Specific Table CSS - COMPLETE
+
+**Completed:** February 26, 2026
+
+Removed ALL page-specific table CSS selectors and consolidated to generic utility classes.
+
+**Generic Utility Classes:**
+
+| Class | Breakpoint | Purpose |
+|-------|------------|---------|
+| `.stack-cols-wide` | 1760px | Tables with 7+ columns |
+| `.stack-cols-medium` | 1280px | Tables with 5-6 columns |
+| `.stack-cols-narrow` | 1100px | Tables with 4 columns |
+| `.stack-email` | 1550px | Stack email under contact |
+| `.stack-date` | 1118px | Stack date under status |
+
+---
+
+### Unified Table Structure - COMPLETE
+
+**Completed:** February 26, 2026
+
+Standardized table HTML structure and column classes across all admin and portal tables.
+
+**Column Class Standard:**
+
+| Header Class | Cell Class | Purpose |
+|--------------|------------|---------|
+| `.bulk-select-cell` | `.bulk-select-cell` | Checkbox column |
+| `.identity-col` | `.identity-cell` | Stacked name/email |
+| `.name-col` | `.name-cell` | Simple name/title |
+| `.type-col` | `.type-cell` | Type/category |
+| `.status-col` | `.status-cell` | Status badge |
+| `.date-col` | `.date-cell` | Date values |
+| `.amount-col` | `.amount-cell` | Currency |
+| `.count-col` | `.count-cell` | Numeric counts |
+| `.actions-col` | `.actions-cell` | Action buttons |
+
+---
+
+### Unified Header Merge - COMPLETE
+
+**Completed:** February 24, 2026
+
+Merged the page header and global header into one unified header bar.
+
+**New Structure:**
+
+```text
+portal-global-header (fixed at top)
+  ├── header-logo ("NO BHAD CODES")
+  ├── header-separator
+  ├── header-page-title (dynamic page title)
+  └── header-theme-toggle
+
+portal-body (below header)
+  ├── sidebar (avatar only, no text branding)
+  └── dashboard-content
+```
+
+---
+
+### Email Protection for Unactivated Accounts - COMPLETE
+
+**Completed:** February 24, 2026
+
+Implemented protection to prevent sending client-facing emails to unactivated accounts (status != 'active'). Removed welcome sequence feature entirely.
+
+**Email Behavior:**
+
+| Email Type | Pending Accounts | Active Accounts |
+|------------|------------------|-----------------|
+| Welcome Email (intake) | BLOCKED | N/A |
+| Welcome Email (admin create) | BLOCKED | ALLOWED |
+| Invitation Email | ALLOWED | N/A |
+| Proposal Signed Confirmation | BLOCKED | ALLOWED |
+| Admin Notifications | ALLOWED | ALLOWED |
+
+---
+
+### React + Shadcn/ui Migration - Phases 0-9 COMPLETE
+
+**Completed:** February 21, 2026
+
+Implemented foundation setup for incremental React migration using island architecture.
+
+#### Phase 0: Foundation
+
+- Installed React dependencies, Shadcn utilities, Zustand
+- Created `/src/react/` directory structure
+- Bidirectional state sync with vanilla StateManager
+
+#### Phase 1: Components
+
+- Installed Shadcn components: button, badge, dialog, dropdown-menu, table, input, select, tabs
+- Created PortalButton, StatusBadge, PortalModal, PortalDropdown, AdminTable
+
+#### Phase 2-3: ProjectsTable
+
+- Created admin feature types, useProjects hook, useTableFilters, usePagination
+- Created ProjectsTable with search, filter, sort, pagination, GSAP animation
+- Integrated into admin-projects.ts with code-splitting
+
+#### Phase 4: Inline Edit + Code-Splitting
+
+- Created InlineEdit component
+- Implemented dynamic imports for code-splitting
+
+#### Phase 5: Bulk Actions
+
+- Created useSelection hook, BulkActionsToolbar component
+- Added checkbox column with select all functionality
+
+#### Phase 6: LeadsTable
+
+- Created useLeads hook, LeadsTable component
+- Integrated into admin-leads.ts
+
+#### Phase 7: Bulk Delete
+
+- Created ConfirmDialog with variants (danger, warning, info)
+- Added bulkDelete to useProjects and useLeads hooks
+
+#### Phase 8: CSV Export
+
+- Created useExport hook
+- Added export buttons to Projects and Leads tables
+
+#### Phase 9: ClientsTable
+
+- Created useClients hook, ClientsTable component
+
+**Feature Flags:**
+
+- `localStorage.setItem('feature_react_projects_table', 'true')`
+- `localStorage.setItem('feature_react_leads_table', 'true')`
+
+---
+
+### React Brutalist/Minimalist Design System - COMPLETE
+
+**Completed:** February 25, 2026
+
+Implemented brutalist/minimalist design for React components.
+
+**Design Principles:**
+
+| Principle | Implementation |
+|-----------|----------------|
+| One background color | `#000000` black |
+| No border-radius | All radii set to `0` |
+| No shadows | All shadows set to `none` |
+| Monospace font | Inconsolata |
+| High contrast | White text on black |
+
+**Component Classes Created:**
+
+- Layout: `.tw-container`, `.tw-section`, `.tw-panel`, `.tw-card`
+- Typography: `.tw-heading`, `.tw-section-title`, `.tw-label`
+- Inputs: `.tw-input`, `.tw-select`, `.tw-textarea`
+- Buttons: `.tw-btn`, `.tw-btn-primary`, `.tw-btn-secondary`, `.tw-btn-ghost`
+- Tables: `.tw-table`, `.tw-table-header`, `.tw-table-cell`
+- States: `.tw-empty-state`, `.tw-loading`, `.tw-error`
+
+---
+
+### Inline Edit UX Pattern - COMPLETE
+
+**Completed:** February 25, 2026
+
+Established clear UX pattern for inline editing vs modals.
+
+**UX Pattern:**
+
+| View Type | Edit Pattern |
+|-----------|--------------|
+| Main overview tables | Click row to navigate to detail view - no inline edit |
+| Detail pages & panels | Edit-in-place for fields |
+
+**Rationale:**
+
+- Main tables are for scanning/overview - inline editing is distracting
+- Detail pages are focused on one item - inline editing is natural
+
+---
+
+### Documents Tab Unification - COMPLETE
+
+**Completed:** February 26, 2026
+
+Unified Documents tab to use single container with internal card switching.
+
+**Pattern:**
+
+1. Single `tab-documents` container rendered by admin-dashboard
+2. All four subtab cards rendered inside (invoices, contracts, document-requests, questionnaires)
+3. Subtab clicks dispatch `documentsSubtabChange` event
+4. Event listener calls `applyDocumentsSection()` to show/hide appropriate card
+
+**Files Created:** `src/features/admin/modules/admin-documents.ts`

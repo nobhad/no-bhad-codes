@@ -12,7 +12,7 @@
     "tailwind:watch": "tailwindcss -i ./src/react/styles/globals.css -o ./src/react/styles/tailwind-generated.css --config ./tailwind.config.js --watch",
     "dev:quiet": "concurrently --kill-others -r \"npm run dev 2>/dev/null\" \"npm run dev:server\"",
     "build": "DISABLE_PROMO=true vite build",
-    "build:server": "tsc server/**/*.ts --outDir dist/server --target ES2020 --module ES2020 --moduleResolution node",
+    "build:server": "tsc --project server/tsconfig.json",
     "preview": "vite preview",
     "lint": "eslint 'src/**/*.{js,ts}'",
     "format": "prettier --write \"**/*.{js,ts,json,css,html}\"",
@@ -37,7 +37,9 @@
     "migrate:status": "tsx scripts/migrate.ts status",
     "migrate:create": "tsx scripts/migrate.ts create",
     "db:setup": "npm run migrate",
-    "db:backup": "tsx scripts/backup-database.ts"
+    "db:backup": "tsx scripts/backup-database.ts",
+    "docs:validate": "bash scripts/validate-docs.sh",
+    "docs:fix": "bash scripts/validate-docs.sh --fix"
   },
   "keywords": [
     "portfolio",
