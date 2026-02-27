@@ -16,6 +16,10 @@ import { getStatusDotHTML } from '../../../components/status-badge';
 import { createPortalModal } from '../../../components/portal-modal';
 import { showToast } from '../../../utils/toast-notifications';
 import { ICONS } from '../../../constants/icons';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('ProjectInvoices');
 
 // Extended invoice type for deposit fields
 export type ExtendedInvoice = InvoiceResponse & { invoice_type?: string };
@@ -85,7 +89,7 @@ export async function loadProjectInvoices(projectId: number): Promise<void> {
       initializeStatusFilter();
     }
   } catch (error) {
-    console.error('[ProjectInvoices] Error loading invoices:', error);
+    logger.error(' Error loading invoices:', error);
     renderErrorState(invoicesList, 'Error loading invoices.', { type: 'general' });
   }
 }
@@ -170,8 +174,9 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
   today.setHours(0, 0, 0, 0);
 
   container.innerHTML = `
-    <div class="data-table-scroll-wrapper">
-      <table class="data-table invoices-table" aria-label="Project invoices">
+    <div class="data-table-container">
+      <div class="data-table-scroll-wrapper">
+        <table class="data-table" aria-label="Project invoices">
         <thead>
           <tr>
             <th scope="col" class="name-col">Invoice #</th>
@@ -181,7 +186,7 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
             <th scope="col" class="actions-col">Actions</th>
           </tr>
         </thead>
-        <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+        <tbody id="project-invoices-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
         ${filteredInvoices.map((inv: ExtendedInvoice) => {
     // Determine effective status (check for overdue)
     let effectiveStatus = inv.status;
@@ -233,14 +238,14 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
       : '';
 
     return `
-            <tr data-invoice-id="${inv.id}" class="${isDeposit ? 'invoice-deposit-row' : ''}">
-              <td data-label="Invoice">
+            <tr data-invoice-id="${inv.id}">
+              <td class="name-cell" data-label="Invoice">
                 <strong>${SanitizationUtils.escapeHtml(inv.invoice_number || `INV-${inv.id}`)}</strong>
-                ${isDeposit ? '<span class="invoice-type-badge">DEPOSIT</span>' : ''}
+                ${isDeposit ? '<span class="badge badge-muted">DEPOSIT</span>' : ''}
               </td>
-              <td data-label="Amount">${formatCurrency(typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0))}</td>
-              <td data-label="Due Date">${inv.due_date ? formatDate(inv.due_date) : '-'}</td>
-              <td data-label="Status">${getStatusDotHTML(effectiveStatus)}</td>
+              <td class="amount-cell" data-label="Amount">${formatCurrency(typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0))}</td>
+              <td class="date-cell" data-label="Due Date">${inv.due_date ? formatDate(inv.due_date) : '-'}</td>
+              <td class="status-cell" data-label="Status">${getStatusDotHTML(effectiveStatus)}</td>
               <td class="actions-cell" data-label="Actions">
                 <div class="table-actions">
                   ${viewBtn}
@@ -255,9 +260,22 @@ function renderInvoicesList(invoices: ExtendedInvoice[], container: HTMLElement)
           `;
   }).join('')}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   `;
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#project-invoices-table-body',
+    rowSelector: 'tr[data-invoice-id]',
+    onRowSelect: (row) => {
+      const viewBtn = row.querySelector('.btn-view-invoice') as HTMLButtonElement;
+      if (viewBtn) viewBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 
   // Attach event handlers using delegation
   setupInvoiceTableHandlers(container);
@@ -319,11 +337,11 @@ async function downloadInvoicePdf(invoiceId: number, invoiceNumber: string): Pro
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } else {
-      console.error('[ProjectInvoices] Failed to download PDF');
+      logger.error(' Failed to download PDF');
       showToast('Failed to download invoice PDF', 'error');
     }
   } catch (error) {
-    console.error('[ProjectInvoices] Download error:', error);
+    logger.error(' Download error:', error);
     showToast('Failed to download invoice PDF', 'error');
   }
 }
@@ -370,7 +388,7 @@ async function downloadReceiptPdf(invoiceId: number, invoiceNumber: string): Pro
 
     showToast('Receipt downloaded successfully', 'success');
   } catch (error) {
-    console.error('[ProjectInvoices] Receipt download error:', error);
+    logger.error(' Receipt download error:', error);
     showToast('Failed to download receipt', 'error');
   }
 }
@@ -386,13 +404,13 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
     try {
       const response = await apiFetch(`/api/invoices/${invoiceId}`);
       if (!response.ok) {
-        console.error('[ProjectInvoices] Failed to load invoice');
+        logger.error(' Failed to load invoice');
         return;
       }
       const data = await parseApiResponse<{ invoice: ExtendedInvoice }>(response);
       invoice = data.invoice;
     } catch (error) {
-      console.error('[ProjectInvoices] View invoice error:', error);
+      logger.error(' View invoice error:', error);
       return;
     }
   }
@@ -414,27 +432,29 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
   // Build line items table
   const lineItems = invoice.line_items || [];
   const lineItemsHTML = lineItems.length > 0
-    ? `<div class="data-table-scroll-wrapper">
-        <table class="data-table invoice-line-items">
-          <thead>
-            <tr>
-              <th scope="col" class="name-col">Description</th>
-              <th scope="col" class="count-col">Qty</th>
-              <th scope="col" class="amount-col">Rate</th>
-              <th scope="col" class="amount-col">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${lineItems.map((item: InvoiceLineItem) => `
+    ? `<div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+          <table class="data-table invoice-line-items">
+            <thead>
               <tr>
-                <td data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
-                <td class="text-right" data-label="Qty">${item.quantity || 1}</td>
-                <td class="text-right" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
-                <td class="text-right" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
+                <th scope="col" class="name-col">Description</th>
+                <th scope="col" class="count-col">Qty</th>
+                <th scope="col" class="amount-col">Rate</th>
+                <th scope="col" class="amount-col">Amount</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${lineItems.map((item: InvoiceLineItem) => `
+                <tr>
+                  <td class="name-cell" data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
+                  <td class="count-cell" data-label="Qty">${item.quantity || 1}</td>
+                  <td class="amount-cell" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
+                  <td class="amount-cell" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
       </div>`
     : '<p class="text-muted">No line items</p>';
 

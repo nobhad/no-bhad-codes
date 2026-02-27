@@ -18,6 +18,9 @@ import { formatDate } from '../../../utils/format-utils';
 import type { ProjectResponse } from '../../../types/api';
 import { createRichTextEditor, htmlToPlainText, plainTextToHTML, type RichTextEditorInstance } from '../../../components/rich-text-editor';
 import { ICONS } from '../../../constants/icons';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('ProjectActions');
 
 /** Base project type for action functions - compatible with both LeadProject and ProjectResponse */
 interface ProjectBase {
@@ -73,7 +76,7 @@ export async function deleteProject(
       alertError(errorData.error || 'Failed to delete project. Please try again.');
     }
   } catch (error) {
-    console.error('[ProjectActions] Error deleting project:', error);
+    logger.error(' Error deleting project:', error);
     alertError('Failed to delete project. Please try again.');
   }
 }
@@ -115,7 +118,7 @@ export async function archiveProject(
       alertError(errorData.error || 'Failed to archive project. Please try again.');
     }
   } catch (error) {
-    console.error('[ProjectActions] Error archiving project:', error);
+    logger.error(' Error archiving project:', error);
     alertError('Failed to archive project. Please try again.');
   }
 }
@@ -170,7 +173,7 @@ export async function duplicateProject(
       alertError(errorData.error || 'Failed to duplicate project. Please try again.');
     }
   } catch (error) {
-    console.error('[ProjectActions] Error duplicating project:', error);
+    logger.error(' Error duplicating project:', error);
     alertError('Failed to duplicate project. Please try again.');
   }
 }
@@ -216,7 +219,7 @@ export async function handleContractSign(
       showToast(error.message || 'Failed to send signature request', 'error');
     }
   } catch (error) {
-    console.error('Error requesting signature:', error);
+    logger.error('Error requesting signature:', error);
     showToast('Failed to send signature request', 'error');
   }
 }
@@ -394,7 +397,7 @@ export async function handleContractCountersign(
         alertError(error.error || 'Failed to countersign contract.');
       }
     } catch (error) {
-      console.error('[ProjectActions] Error countersigning contract:', error);
+      logger.error(' Error countersigning contract:', error);
       alertError('Failed to countersign contract. Please try again.');
     } finally {
       submitBtn.disabled = false;
@@ -573,7 +576,7 @@ export async function showContractBuilder(
         templateSelect.appendChild(option);
       });
     } catch (error) {
-      console.error('[ContractBuilder] Error loading templates:', error);
+      logger.error(' Error loading templates:', error);
       showToast('Failed to load contract templates', 'error');
     }
   };
@@ -618,7 +621,7 @@ export async function showContractBuilder(
       if (draftStatus) draftStatus.textContent = 'Draft loaded';
       alertSuccess('Contract draft created from template');
     } catch (error) {
-      console.error('[ContractBuilder] Error applying template:', error);
+      logger.error(' Error applying template:', error);
       showToast('Failed to apply template', 'error');
     }
   });
@@ -678,7 +681,7 @@ export async function showContractBuilder(
       if (draftStatus) draftStatus.textContent = 'Draft saved';
       alertSuccess('Contract draft saved');
     } catch (error) {
-      console.error('[ContractBuilder] Error saving draft:', error);
+      logger.error(' Error saving draft:', error);
       showToast('Failed to save draft', 'error');
     }
   });

@@ -14,6 +14,9 @@ import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
 import type { ProjectResponse } from '../../../types/api';
 import type { InvoiceLineItem } from './types';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('InvoiceModals');
 
 /**
  * Show custom modal to create a new invoice with multiple line items
@@ -245,7 +248,7 @@ export async function createInvoiceWithLineItems(
       alertError('Failed to create invoice. Please try again.');
     }
   } catch (error) {
-    console.error('[InvoiceModals] Error creating invoice:', error);
+    logger.error(' Error creating invoice:', error);
     alertError('Failed to create invoice. Please try again.');
   }
 }
@@ -279,7 +282,7 @@ export async function createDepositInvoice(
       alertError('Failed to create deposit invoice. Please try again.');
     }
   } catch (error) {
-    console.error('[InvoiceModals] Error creating deposit invoice:', error);
+    logger.error(' Error creating deposit invoice:', error);
     alertError('Failed to create deposit invoice. Please try again.');
   }
 }
@@ -319,7 +322,7 @@ export async function createInvoice(
       alertError('Failed to create invoice. Please try again.');
     }
   } catch (error) {
-    console.error('[InvoiceModals] Error creating invoice:', error);
+    logger.error(' Error creating invoice:', error);
     alertError('Failed to create invoice. Please try again.');
   }
 }

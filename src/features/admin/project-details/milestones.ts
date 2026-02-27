@@ -13,6 +13,9 @@ import { confirmDanger, alertError, multiPromptDialog } from '../../../utils/con
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { domCache } from './dom-cache';
 import type { ProjectMilestoneResponse } from '../../../types/api';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('ProjectMilestones');
 
 interface MilestoneTask {
   id: number;
@@ -117,7 +120,7 @@ export async function loadProjectMilestones(
       }
     }
   } catch (error) {
-    console.error('[ProjectMilestones] Error loading milestones:', error);
+    logger.error(' Error loading milestones:', error);
     renderErrorState(milestonesList, 'Error loading milestones.', { type: 'general' });
   }
 }
@@ -143,7 +146,7 @@ export function updateProgressBar(projectId: number, progress: number): void {
 
   // Save progress to database
   apiPut(`/api/projects/${projectId}`, { progress })
-    .catch(err => console.error('[ProjectMilestones] Error saving progress:', err));
+    .catch(err => logger.error(' Error saving progress:', err));
 }
 
 /**
@@ -213,7 +216,7 @@ export async function addMilestone(
       alertError('Failed to add milestone. Please try again.');
     }
   } catch (error) {
-    console.error('[ProjectMilestones] Error adding milestone:', error);
+    logger.error(' Error adding milestone:', error);
     alertError('Failed to add milestone. Please try again.');
   }
 }
@@ -241,7 +244,7 @@ export async function toggleMilestone(
       alertError('Failed to update milestone. Please try again.');
     }
   } catch (error) {
-    console.error('[ProjectMilestones] Error toggling milestone:', error);
+    logger.error(' Error toggling milestone:', error);
     alertError('Failed to update milestone. Please try again.');
   }
 }
@@ -273,7 +276,7 @@ export async function deleteMilestone(
       alertError('Failed to delete milestone. Please try again.');
     }
   } catch (error) {
-    console.error('[ProjectMilestones] Error deleting milestone:', error);
+    logger.error(' Error deleting milestone:', error);
     alertError('Failed to delete milestone. Please try again.');
   }
 }
@@ -347,7 +350,7 @@ export async function toggleMilestoneTasks(
           container.innerHTML = '<p class="milestone-tasks-error">Failed to load tasks.</p>';
         }
       } catch (error) {
-        console.error('[ProjectMilestones] Error loading milestone tasks:', error);
+        logger.error(' Error loading milestone tasks:', error);
         container.innerHTML = '<p class="milestone-tasks-error">Error loading tasks.</p>';
       }
     }
@@ -403,7 +406,7 @@ export async function toggleTaskCompletion(
       }
     }
   } catch (error) {
-    console.error('[ProjectMilestones] Error toggling task:', error);
+    logger.error(' Error toggling task:', error);
     alertError('Failed to update task. Please try again.');
   }
 }

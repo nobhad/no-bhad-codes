@@ -17,6 +17,9 @@ import { showToast } from '../../../utils/toast-notifications';
 import { createModalDropdown, type ModalDropdownOption } from '../../../components/modal-dropdown';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { ICONS } from '../../../constants/icons';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('ProjectFiles');
 
 // State for pending requests dropdown
 interface PendingRequest {
@@ -128,7 +131,7 @@ export async function loadProjectFiles(projectId: number): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[ProjectFiles] Error loading project files:', error);
+    logger.error(' Error loading project files:', error);
     renderEmptyState(filesList, 'Error loading files.');
   }
 }
@@ -162,7 +165,7 @@ function setupFileDeleteHandlers(projectId: number): void {
           alertError('Failed to delete file');
         }
       } catch (error) {
-        console.error('[ProjectFiles] Error deleting file:', error);
+        logger.error(' Error deleting file:', error);
         alertError('Failed to delete file');
       }
     });
@@ -208,7 +211,7 @@ function setupFileShareHandlers(projectId: number): void {
           alertError(errorMsg);
         }
       } catch (error) {
-        console.error('[ProjectFiles] Error toggling file share:', error);
+        logger.error(' Error toggling file share:', error);
         alertError('Failed to update file sharing');
       } finally {
         (btn as HTMLButtonElement).disabled = false;
@@ -272,7 +275,7 @@ export async function uploadFiles(
       alertError('Failed to upload files. Please try again.');
     }
   } catch (error) {
-    console.error('[ProjectFiles] Error uploading files:', error);
+    logger.error(' Error uploading files:', error);
     alertError('Failed to upload files. Please try again.');
   }
 }
@@ -289,7 +292,7 @@ export async function loadPendingRequestsDropdown(projectId: number): Promise<vo
     const requests: PendingRequest[] = data.requests || [];
     _pendingRequestsCache = requests;
   } catch (error) {
-    console.error('[ProjectFiles] Error loading pending requests:', error);
+    logger.error(' Error loading pending requests:', error);
   }
 }
 
@@ -488,7 +491,7 @@ async function handleUploadConfirm(): Promise<void> {
       alertError('Failed to upload files. Please try again.');
     }
   } catch (error) {
-    console.error('[ProjectFiles] Error uploading files:', error);
+    logger.error(' Error uploading files:', error);
     alertError('Failed to upload files. Please try again.');
   }
 }
@@ -526,7 +529,7 @@ async function linkFileToRequest(requestId: number, fileId: number): Promise<boo
     const response = await apiPost(`/api/document-requests/${requestId}/upload`, { fileId });
     return response.ok;
   } catch (error) {
-    console.error('[ProjectFiles] Error linking file to request:', error);
+    logger.error(' Error linking file to request:', error);
     return false;
   }
 }
