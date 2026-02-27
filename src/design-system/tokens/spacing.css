@@ -107,14 +107,26 @@
    */
 
   /* Icon-text gaps - proportionate to icon size */
-  --icon-gap-xs: 4px; /* For 12-14px icons */
-  --icon-gap-sm: 6px; /* For 14-16px icons (DEFAULT) */
-  --icon-gap-md: 8px; /* For 16-20px icons */
-  --icon-gap-lg: 10px; /* For 20-24px icons */
-  --icon-gap-xl: 12px; /* For 24px+ icons */
+  --icon-gap-xs: 6px; /* For 12-14px icons */
+  --icon-gap-sm: 8px; /* For 14-16px icons (DEFAULT) */
+  --icon-gap-md: 10px; /* For 16-20px icons */
+  --icon-gap-lg: 16px; /* For 20-24px icons - sidebar nav, loading states */
+  --icon-gap-xl: 20px; /* For 24px+ icons */
 
   /* Default icon gap - use this for most cases */
   --icon-gap: var(--icon-gap-sm);
+
+  /* ============================================
+   * PORTAL SECTION SPACING - Single Source of Truth
+   * ============================================
+   * Uniform spacing for all portal sections and headings.
+   */
+
+  /* Section gap between cards/sections */
+  --portal-section-gap: var(--space-2); /* 16px */
+
+  /* Section heading padding - uniform above and below */
+  --portal-section-heading-padding: var(--space-1-5) var(--space-2); /* 12px 16px */
 }
 
 /* ============================================
