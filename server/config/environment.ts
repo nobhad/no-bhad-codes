@@ -164,15 +164,16 @@ const configSchema: ConfigSchema = {
   ADMIN_EMAIL: { required: true, type: 'email' },
   ADMIN_PASSWORD: { required: true, minLength: 8 },
 
-  // Business Info (for invoices, PDFs, emails) - set these in .env for customization
-  BUSINESS_NAME: { required: false, default: 'No Bhad Codes' },
-  BUSINESS_OWNER: { required: false, default: 'Noelle Bhaduri' },
-  BUSINESS_CONTACT: { required: false, default: 'Noelle Bhaduri' },
-  BUSINESS_TAGLINE: { required: false, default: 'Web Development & Design' },
-  BUSINESS_EMAIL: { required: false, default: 'nobhaduri@gmail.com', type: 'email' },
-  BUSINESS_WEBSITE: { required: false, default: 'nobhad.codes' },
-  VENMO_HANDLE: { required: false, default: '@nobhaduri' },
-  ZELLE_EMAIL: { required: false, default: 'nobhaduri@gmail.com', type: 'email' },
+  // Business Info (for invoices, PDFs, emails) - MUST be set in .env
+  // No hardcoded defaults - these must come from environment
+  BUSINESS_NAME: { required: true },
+  BUSINESS_OWNER: { required: false }, // Falls back to BUSINESS_CONTACT in business.ts
+  BUSINESS_CONTACT: { required: false },
+  BUSINESS_TAGLINE: { required: false },
+  BUSINESS_EMAIL: { required: true, type: 'email' },
+  BUSINESS_WEBSITE: { required: false },
+  VENMO_HANDLE: { required: false },
+  ZELLE_EMAIL: { required: false, type: 'email' },
   PAYPAL_EMAIL: { required: false, type: 'email' },
 
   // Email
