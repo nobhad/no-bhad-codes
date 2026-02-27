@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { PortalFilesManager } from './PortalFilesManager';
+import { ErrorBoundary } from '../../../components/portal/ErrorBoundary';
 
 // Store root for cleanup
 const roots = new Map<HTMLElement, Root>();
@@ -38,11 +39,13 @@ export function mountPortalFiles(
 
   root.render(
     <React.StrictMode>
-      <PortalFilesManager
-        projectId={options.projectId}
-        getAuthToken={options.getAuthToken}
-        showNotification={options.showNotification}
-      />
+      <ErrorBoundary componentName="Files">
+        <PortalFilesManager
+          projectId={options.projectId}
+          getAuthToken={options.getAuthToken}
+          showNotification={options.showNotification}
+        />
+      </ErrorBoundary>
     </React.StrictMode>
   );
 
@@ -67,15 +70,5 @@ export function unmountPortalFiles(container: HTMLElement): void {
  * Check if React portal files should be used
  */
 export function shouldUseReactPortalFiles(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_portal_files') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_portal_files');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }
