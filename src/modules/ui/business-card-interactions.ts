@@ -542,9 +542,10 @@ export class BusinessCardInteractions extends BaseModule {
     if (!rect) return;
 
     // Use changedTouches for touchend, fallback to stored touchStartX
-    const touchX = event.changedTouches.length > 0
-      ? event.changedTouches[0].clientX
-      : this.touchStartX ?? (rect.left + rect.width / 2);
+    const touchX =
+      event.changedTouches.length > 0
+        ? event.changedTouches[0].clientX
+        : (this.touchStartX ?? rect.left + rect.width / 2);
 
     const cardCenterX = rect.left + rect.width / 2;
     const flipDirection = touchX < cardCenterX ? 'left' : 'right';

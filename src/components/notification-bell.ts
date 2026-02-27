@@ -145,7 +145,7 @@ export class NotificationBell {
 
       if (notificationItem) {
         const notificationId = parseInt(notificationItem.dataset.id || '0', 10);
-        const notification = this.notifications.find(n => n.id === notificationId);
+        const notification = this.notifications.find((n) => n.id === notificationId);
 
         if (notification) {
           // Mark as read
@@ -196,9 +196,12 @@ export class NotificationBell {
    */
   private async fetchNotifications(): Promise<void> {
     try {
-      const response = await fetch(`/api/clients/me/notifications/history?limit=${NOTIFICATION_LIMIT}`, {
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `/api/clients/me/notifications/history?limit=${NOTIFICATION_LIMIT}`,
+        {
+          credentials: 'include'
+        }
+      );
 
       if (!response.ok) {
         console.warn('[NotificationBell] Failed to fetch notifications');
@@ -207,7 +210,7 @@ export class NotificationBell {
 
       const data = await response.json();
       this.notifications = data.notifications || [];
-      this.unreadCount = this.notifications.filter(n => !n.is_read).length;
+      this.unreadCount = this.notifications.filter((n) => !n.is_read).length;
 
       this.updateBadge();
       this.renderNotifications();
@@ -241,7 +244,9 @@ export class NotificationBell {
       return;
     }
 
-    this.notificationList.innerHTML = this.notifications.map(notification => `
+    this.notificationList.innerHTML = this.notifications
+      .map(
+        (notification) => `
       <div class="notification-item ${notification.is_read ? '' : 'unread'}" data-id="${notification.id}" role="menuitem" tabindex="0">
         <div class="notification-item-content">
           <p class="notification-item-title">${SanitizationUtils.escapeHtml(notification.title)}</p>
@@ -250,7 +255,9 @@ export class NotificationBell {
         </div>
         ${!notification.is_read ? '<span class="notification-unread-dot"></span>' : ''}
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   /**
@@ -264,7 +271,7 @@ export class NotificationBell {
       });
 
       if (response.ok) {
-        const notification = this.notifications.find(n => n.id === notificationId);
+        const notification = this.notifications.find((n) => n.id === notificationId);
         if (notification && !notification.is_read) {
           notification.is_read = true;
           this.unreadCount = Math.max(0, this.unreadCount - 1);
@@ -288,7 +295,7 @@ export class NotificationBell {
       });
 
       if (response.ok) {
-        this.notifications.forEach(n => n.is_read = true);
+        this.notifications.forEach((n) => (n.is_read = true));
         this.unreadCount = 0;
         this.updateBadge();
         this.renderNotifications();

@@ -127,27 +127,27 @@ let allFilesCache: PortalFile[] = [];
 // File type to folder category mapping
 const FILE_TYPE_TO_FOLDER: Record<string, string> = {
   // Site folder - design and website files
-  'wireframe': 'site',
-  'mockup': 'site',
-  'asset': 'site',
-  'content': 'site',
-  'reference': 'site',
+  wireframe: 'site',
+  mockup: 'site',
+  asset: 'site',
+  content: 'site',
+  reference: 'site',
   // Forms folder - intake and documents
-  'intake': 'forms',
-  'proposal': 'forms',
-  'contract': 'forms',
+  intake: 'forms',
+  proposal: 'forms',
+  contract: 'forms',
   // Documents - invoices and receipts
-  'invoice': 'documents',
-  'receipt': 'documents'
+  invoice: 'documents',
+  receipt: 'documents'
 };
 
 // Folder display names
 const FOLDER_NAMES: Record<string, string> = {
-  'all': 'All Files',
-  'site': 'Site',
-  'forms': 'Forms',
-  'documents': 'Documents',
-  'client_uploads': 'Client Uploads'
+  all: 'All Files',
+  site: 'Site',
+  forms: 'Forms',
+  documents: 'Documents',
+  client_uploads: 'Client Uploads'
 };
 
 // ============================================================================
@@ -223,7 +223,11 @@ function populateProjectFilter(projects: { id: number; name: string }[]): void {
 /**
  * Categorize a file into a folder based on its type and upload source
  */
-function getFileFolder(file: { fileType?: string; category?: string; uploadedBy?: string }): string {
+function getFileFolder(file: {
+  fileType?: string;
+  category?: string;
+  uploadedBy?: string;
+}): string {
   // Check if uploaded by client
   if (file.uploadedBy?.includes('client') || file.category === 'client_upload') {
     return 'client_uploads';
@@ -241,12 +245,14 @@ function getFileFolder(file: { fileType?: string; category?: string; uploadedBy?
 /**
  * Count files per folder category
  */
-function countFilesByFolder(files: Array<{ fileType?: string; category?: string; uploadedBy?: string }>): FolderCategory[] {
+function countFilesByFolder(
+  files: Array<{ fileType?: string; category?: string; uploadedBy?: string }>
+): FolderCategory[] {
   const counts: Record<string, number> = {
-    'site': 0,
-    'forms': 0,
-    'documents': 0,
-    'client_uploads': 0
+    site: 0,
+    forms: 0,
+    documents: 0,
+    client_uploads: 0
   };
 
   files.forEach((file) => {
@@ -268,7 +274,10 @@ function countFilesByFolder(files: Array<{ fileType?: string; category?: string;
  * Populate folder tree with category-based folders
  * Only shows folders that contain files
  */
-function populateFolderTree(files: Array<{ fileType?: string; category?: string; uploadedBy?: string }>, ctx: ClientPortalContext): void {
+function populateFolderTree(
+  files: Array<{ fileType?: string; category?: string; uploadedBy?: string }>,
+  ctx: ClientPortalContext
+): void {
   const folderTree = document.getElementById('folder-tree');
   if (!folderTree) return;
 
@@ -276,7 +285,8 @@ function populateFolderTree(files: Array<{ fileType?: string; category?: string;
   const folders = countFilesByFolder(files);
   _folderCategoriesCache = folders;
 
-  const folderIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
+  const folderIcon =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
 
   // Build folder tree HTML - always show "All Files"
   let html = `
@@ -335,7 +345,8 @@ function selectFolder(folderId: string, ctx: ClientPortalContext): void {
 
   // If we have cached files, filter and render without refetching
   if (allFilesCache.length > 0) {
-    const filesContainer = document.getElementById('files-list') || document.querySelector('.files-list-section');
+    const filesContainer =
+      document.getElementById('files-list') || document.querySelector('.files-list-section');
     if (filesContainer) {
       let filteredFiles = allFilesCache;
       if (folderId !== 'all') {
@@ -357,7 +368,8 @@ function selectFolder(folderId: string, ctx: ClientPortalContext): void {
  */
 export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
   // Support both old layout (.files-list-section) and new layout (#files-list)
-  const filesContainer = document.getElementById('files-list') || document.querySelector('.files-list-section');
+  const filesContainer =
+    document.getElementById('files-list') || document.querySelector('.files-list-section');
   if (!filesContainer) return;
 
   // Check if React component should be used
@@ -432,7 +444,7 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
     // Filter files by selected folder category (client-side)
     let filteredFiles = files;
     if (currentFilters.category && currentFilters.category !== 'all') {
-      filteredFiles = files.filter((file: typeof files[0]) => {
+      filteredFiles = files.filter((file: (typeof files)[0]) => {
         const fileFolder = getFileFolder(file);
         return fileFolder === currentFilters.category;
       });
@@ -441,22 +453,17 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
     renderFilesList(filesContainer as HTMLElement, filteredFiles, ctx);
   } catch (error) {
     console.error('Error loading files:', error);
-    showContainerError(
-      filesContainer as HTMLElement,
-      'Unable to load files',
-      () => loadFiles(ctx)
-    );
+    showContainerError(filesContainer as HTMLElement, 'Unable to load files', () => loadFiles(ctx));
   }
 }
-
 
 /**
  * Get file icon CSS class based on mime type
  */
 function _getFileIconClass(mimetype: string): string {
   if (mimetype.startsWith('image/')) return 'image';
-  if (mimetype.includes('pdf') || mimetype.includes('document') || mimetype.includes('text')) return 'document';
-  if (mimetype.includes('zip') || mimetype.includes('rar') || mimetype.includes('archive')) return 'archive';
+  if (mimetype.includes('pdf') || mimetype.includes('document') || mimetype.includes('text')) {return 'document';}
+  if (mimetype.includes('zip') || mimetype.includes('rar') || mimetype.includes('archive')) {return 'archive';}
   return '';
 }
 
@@ -469,7 +476,9 @@ function renderFilesList(
   ctx: ClientPortalContext
 ): void {
   if (files.length === 0) {
-    renderEmptyState(container, 'No files uploaded yet. Drag and drop files above to upload.', { className: 'no-files' });
+    renderEmptyState(container, 'No files uploaded yet. Drag and drop files above to upload.', {
+      className: 'no-files'
+    });
     return;
   }
 
@@ -564,7 +573,13 @@ function attachFileActionListeners(container: HTMLElement, ctx: ClientPortalCont
       const filename = el.dataset.filename;
       const mimetype = el.dataset.mimetype;
       if (fileId) {
-        previewFile(parseInt(fileId), projectId ? parseInt(projectId) : undefined, filename || '', mimetype || '', ctx);
+        previewFile(
+          parseInt(fileId),
+          projectId ? parseInt(projectId) : undefined,
+          filename || '',
+          mimetype || '',
+          ctx
+        );
       }
     });
   });
@@ -579,7 +594,14 @@ function attachFileActionListeners(container: HTMLElement, ctx: ClientPortalCont
       const originalName = el.dataset.originalName;
       const mimetype = el.dataset.mimetype;
       if (fileId) {
-        downloadFile(parseInt(fileId), projectId ? parseInt(projectId) : undefined, filename || '', originalName || 'download', mimetype || '', ctx);
+        downloadFile(
+          parseInt(fileId),
+          projectId ? parseInt(projectId) : undefined,
+          filename || '',
+          originalName || 'download',
+          mimetype || '',
+          ctx
+        );
       }
     });
   });
@@ -702,7 +724,8 @@ async function deleteFile(
     // Check if table is now empty
     const filesTable = document.querySelector('.data-table tbody');
     if (filesTable && filesTable.children.length === 0) {
-      const container = document.getElementById('files-list') || document.querySelector('.files-list-section');
+      const container =
+        document.getElementById('files-list') || document.querySelector('.files-list-section');
       if (container) {
         const table = container.querySelector('.data-table');
         if (table) table.remove();
@@ -945,7 +968,7 @@ function showUploadRequestModal(files: File[], ctx: ClientPortalContext): void {
 
   // Populate pending requests options
   optionsContainer.innerHTML = pendingRequestsCache
-    .map(req => {
+    .map((req) => {
       const dueDate = req.due_date ? formatDate(req.due_date) : 'No due date';
       const isOverdue = req.due_date && new Date(req.due_date) < new Date();
 
@@ -969,7 +992,9 @@ function showUploadRequestModal(files: File[], ctx: ClientPortalContext): void {
     .join('');
 
   // Reset to "Other" selection
-  const otherRadio = modal.overlay.querySelector('input[name="upload-request-selection"][value="other"]') as HTMLInputElement | null;
+  const otherRadio = modal.overlay.querySelector(
+    'input[name="upload-request-selection"][value="other"]'
+  ) as HTMLInputElement | null;
   if (otherRadio) {
     otherRadio.checked = true;
   }
@@ -998,7 +1023,9 @@ function getSelectedRequestId(): number | null {
   const modal = uploadRequestModalInstance?.overlay;
   if (!modal) return null;
 
-  const selectedRadio = modal.querySelector('input[name="upload-request-selection"]:checked') as HTMLInputElement | null;
+  const selectedRadio = modal.querySelector(
+    'input[name="upload-request-selection"]:checked'
+  ) as HTMLInputElement | null;
   if (!selectedRadio || selectedRadio.value === 'other') {
     return null;
   }
@@ -1260,10 +1287,12 @@ function showDropzoneError(message: string, ctx: ClientPortalContext, filesToRet
   const dropzone = getElement('upload-dropzone');
   if (!dropzone) return;
 
-  const retryBtn = filesToRetry && filesToRetry.length > 0
-    ? '<button type="button" class="btn btn-xs btn-retry" id="btn-retry-upload">Try Again</button>'
-    : '';
-  const dismissBtn = '<button type="button" class="btn btn-xs btn-secondary" id="btn-dismiss-error">Dismiss</button>';
+  const retryBtn =
+    filesToRetry && filesToRetry.length > 0
+      ? '<button type="button" class="btn btn-xs btn-retry" id="btn-retry-upload">Try Again</button>'
+      : '';
+  const dismissBtn =
+    '<button type="button" class="btn btn-xs btn-secondary" id="btn-dismiss-error">Dismiss</button>';
 
   dropzone.innerHTML = `
     <div class="dropzone-error" role="alert">

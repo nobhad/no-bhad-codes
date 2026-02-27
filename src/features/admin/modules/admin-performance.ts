@@ -9,7 +9,15 @@
  * Dynamically imported for code splitting.
  */
 
-import type { AdminDashboardContext, PerformanceMetricsDisplay, PerformanceMetricDisplay } from '../admin-types';
+import type {
+  AdminDashboardContext,
+  PerformanceMetricsDisplay,
+  PerformanceMetricDisplay
+} from '../admin-types';
+import type {
+  PerformanceNavigationEntry,
+  PerformanceLayoutShiftEntry
+} from '../../../types/performance';
 import { renderEmptyState } from '../../../components/empty-state';
 import { createLogger } from '../../../utils/logger';
 
@@ -49,7 +57,6 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
     if (metrics.alerts && metrics.alerts.length > 0) {
       displayPerformanceAlerts(metrics.alerts);
     }
-
   } catch (error) {
     logger.error(' Error loading performance data:', error);
     showNoDataMessage();
@@ -111,19 +118,17 @@ async function measureWebVitals(): Promise<WebVitalsResult> {
     fcp: null
   };
 
-  // Get navigation timing (using unknown to avoid ESLint globals issue)
-  const navEntry = performance.getEntriesByType('navigation')[0] as unknown as {
-    responseStart: number;
-    requestStart: number;
-    startTime: number;
-  };
+  // Get navigation timing
+  const navEntry = performance.getEntriesByType('navigation')[0] as
+    | PerformanceNavigationEntry
+    | undefined;
   if (navEntry) {
     result.ttfb = navEntry.responseStart - navEntry.requestStart;
   }
 
   // Get paint timing
   const paintEntries = performance.getEntriesByType('paint');
-  const fcpEntry = paintEntries.find(e => e.name === 'first-contentful-paint');
+  const fcpEntry = paintEntries.find((e) => e.name === 'first-contentful-paint');
   if (fcpEntry) {
     result.fcp = fcpEntry.startTime;
   }
@@ -136,11 +141,12 @@ async function measureWebVitals(): Promise<WebVitalsResult> {
   }
 
   // Get CLS from stored layout shift data
-  const layoutShiftEntries = performance.getEntriesByType('layout-shift');
+  const layoutShiftEntries = performance.getEntriesByType(
+    'layout-shift'
+  ) as PerformanceLayoutShiftEntry[];
   if (layoutShiftEntries.length > 0) {
     result.cls = layoutShiftEntries.reduce((sum, entry) => {
-      const value = (entry as unknown as { value: number }).value || 0;
-      return sum + value;
+      return sum + (entry.value || 0);
     }, 0);
   }
 
@@ -245,16 +251,18 @@ function getGradeFromScore(score: number): string {
 /**
  * Get bundle sizes (estimate based on resources)
  */
-async function getBundleSizes(): Promise<{ total: string; main: string; vendor: string } | undefined> {
+async function getBundleSizes(): Promise<
+  { total: string; main: string; vendor: string } | undefined
+  > {
   try {
     const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
 
-    const jsResources = resources.filter(r =>
-      r.name.endsWith('.js') || r.initiatorType === 'script'
+    const jsResources = resources.filter(
+      (r) => r.name.endsWith('.js') || r.initiatorType === 'script'
     );
 
-    const cssResources = resources.filter(r =>
-      r.name.endsWith('.css') || r.initiatorType === 'link'
+    const cssResources = resources.filter(
+      (r) => r.name.endsWith('.css') || r.initiatorType === 'link'
     );
 
     const totalJsSize = jsResources.reduce((sum, r) => sum + (r.transferSize || 0), 0);
@@ -293,7 +301,9 @@ function generateAlerts(vitals: WebVitalsResult): string[] {
   const alerts: string[] = [];
 
   if (vitals.lcp !== null && vitals.lcp > 4000) {
-    alerts.push('Largest Contentful Paint is poor (>4s). Consider optimizing images and critical rendering path.');
+    alerts.push(
+      'Largest Contentful Paint is poor (>4s). Consider optimizing images and critical rendering path.'
+    );
   } else if (vitals.lcp !== null && vitals.lcp > 2500) {
     alerts.push('Largest Contentful Paint needs improvement (>2.5s).');
   }
@@ -303,7 +313,9 @@ function generateAlerts(vitals: WebVitalsResult): string[] {
   }
 
   if (vitals.cls !== null && vitals.cls > 0.25) {
-    alerts.push('Cumulative Layout Shift is poor (>0.25). Ensure elements have explicit dimensions.');
+    alerts.push(
+      'Cumulative Layout Shift is poor (>0.25). Ensure elements have explicit dimensions.'
+    );
   }
 
   if (vitals.ttfb !== null && vitals.ttfb > 1800) {
@@ -330,12 +342,14 @@ function formatPerformanceReport(report: unknown): PerformanceMetricsDisplay {
     ttfb: formatVital('ttfb', r.metrics?.ttfb || null),
     score: r.score || 80,
     grade: getGradeFromScore(r.score || 80),
-    bundleSize: r.metrics?.bundleSize ? {
-      total: formatBytes(r.metrics.bundleSize),
-      main: 'N/A',
-      vendor: 'N/A'
-    } : undefined,
-    alerts: r.alerts?.map(a => a.message) || []
+    bundleSize: r.metrics?.bundleSize
+      ? {
+        total: formatBytes(r.metrics.bundleSize),
+        main: 'N/A',
+        vendor: 'N/A'
+      }
+      : undefined,
+    alerts: r.alerts?.map((a) => a.message) || []
   };
 }
 
@@ -375,12 +389,16 @@ function displayPerformanceAlerts(alerts: string[]): void {
     return;
   }
 
-  container.innerHTML = alerts.map(alert => `
+  container.innerHTML = alerts
+    .map(
+      (alert) => `
     <div class="performance-alert warning">
       <span class="alert-icon">⚠</span>
       <span class="alert-message">${alert}</span>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 }
 
 /**

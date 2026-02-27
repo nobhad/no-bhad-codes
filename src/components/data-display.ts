@@ -181,7 +181,8 @@ export function createCard(config: CardConfig): HTMLElement {
       toggleBtn.type = 'button';
       toggleBtn.className = 'card-toggle';
       toggleBtn.setAttribute('aria-expanded', String(expanded));
-      toggleBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+      toggleBtn.innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
 
       toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -233,16 +234,7 @@ export function createCard(config: CardConfig): HTMLElement {
  * Create a statistics card with value, label, and optional trend.
  */
 export function createStatCard(config: StatCardConfig): HTMLElement {
-  const {
-    label,
-    value,
-    change,
-    changePositive,
-    trend,
-    icon,
-    className = '',
-    onClick
-  } = config;
+  const { label, value, change, changePositive, trend, icon, className = '', onClick } = config;
 
   const card = document.createElement('div');
   card.className = cx('stat-card', onClick && 'stat-card-clickable', className);
@@ -301,14 +293,7 @@ export function createStatCard(config: StatCardConfig): HTMLElement {
  * Create an info row (label + value pair).
  */
 export function createInfoRow(config: InfoRowConfig): HTMLElement {
-  const {
-    label,
-    value,
-    copyable = false,
-    isLink = false,
-    href,
-    className = ''
-  } = config;
+  const { label, value, copyable = false, isLink = false, href, className = '' } = config;
 
   const row = document.createElement('div');
   row.className = cx('info-row', className);
@@ -339,7 +324,8 @@ export function createInfoRow(config: InfoRowConfig): HTMLElement {
     copyBtn.type = 'button';
     copyBtn.className = 'info-row-copy';
     copyBtn.setAttribute('aria-label', 'Copy to clipboard');
-    copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+    copyBtn.innerHTML =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 
     copyBtn.addEventListener('click', async () => {
       try {
@@ -367,7 +353,7 @@ export function createInfoList(rows: InfoRowConfig[], twoColumn = false): HTMLEl
   const list = document.createElement('div');
   list.className = `info-list ${twoColumn ? 'info-list-two-column' : ''}`;
 
-  rows.forEach(rowConfig => {
+  rows.forEach((rowConfig) => {
     list.appendChild(createInfoRow(rowConfig));
   });
 
@@ -471,12 +457,7 @@ export function createAlert(config: AlertConfig): HTMLElement {
   } = config;
 
   const alert = document.createElement('div');
-  alert.className = cx(
-    'alert',
-    `alert-${variant}`,
-    dismissible && 'alert-dismissible',
-    className
-  );
+  alert.className = cx('alert', `alert-${variant}`, dismissible && 'alert-dismissible', className);
   alert.setAttribute('role', 'alert');
 
   // Icon
@@ -510,7 +491,8 @@ export function createAlert(config: AlertConfig): HTMLElement {
     dismissBtn.type = 'button';
     dismissBtn.className = 'alert-dismiss';
     dismissBtn.setAttribute('aria-label', 'Dismiss');
-    dismissBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+    dismissBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
 
     dismissBtn.addEventListener('click', () => {
       alert.remove();
@@ -544,12 +526,7 @@ function getAlertIcon(variant: string): string {
  * Create a loading spinner.
  */
 export function createSpinner(config: SpinnerConfig = {}): HTMLElement {
-  const {
-    size = 'md',
-    message,
-    centered = false,
-    className = ''
-  } = config;
+  const { size = 'md', message, centered = false, className = '' } = config;
 
   const wrapper = document.createElement('div');
   wrapper.className = cx(
@@ -591,14 +568,7 @@ export function createSpinner(config: SpinnerConfig = {}): HTMLElement {
  * Create a skeleton placeholder.
  */
 export function createSkeleton(config: SkeletonConfig = {}): HTMLElement {
-  const {
-    type = 'text',
-    lines = 3,
-    width,
-    height,
-    className = '',
-    animated = true
-  } = config;
+  const { type = 'text', lines = 3, width, height, className = '', animated = true } = config;
 
   const skeleton = document.createElement('div');
   skeleton.className = cx(

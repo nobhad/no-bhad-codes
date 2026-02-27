@@ -69,9 +69,7 @@ export function renderButton(config: ButtonConfig): string {
   }
 
   // Build data attributes
-  const dataAttrEntries: [string, string | number | boolean][] = [
-    ['data-action', action]
-  ];
+  const dataAttrEntries: [string, string | number | boolean][] = [['data-action', action]];
 
   if (dataId !== undefined) {
     dataAttrEntries.push(['data-id', dataId]);
@@ -81,9 +79,7 @@ export function renderButton(config: ButtonConfig): string {
     dataAttrEntries.push([`data-${key}`, value]);
   }
 
-  const dataAttrStr = dataAttrEntries
-    .map(([k, v]) => `${k}="${v}"`)
-    .join(' ');
+  const dataAttrStr = dataAttrEntries.map(([k, v]) => `${k}="${v}"`).join(' ');
 
   // Build class names
   const classNames = ['icon-btn'];
@@ -104,7 +100,7 @@ export function renderButton(config: ButtonConfig): string {
  */
 export function renderButtons(configs: ButtonConfig[]): string {
   return configs
-    .map(config => renderButton(config))
+    .map((config) => renderButton(config))
     .filter(Boolean)
     .join('');
 }
@@ -116,7 +112,7 @@ export function renderButtonGroup(config: ButtonGroupConfig): string {
   const { context, buttons, wrapperClass = '' } = config;
 
   // Apply context to all buttons
-  const contextualButtons = buttons.map(btn => ({
+  const contextualButtons = buttons.map((btn) => ({
     ...btn,
     context: btn.context ?? context
   }));
@@ -133,13 +129,8 @@ export function renderButtonGroup(config: ButtonGroupConfig): string {
 /**
  * Render table actions cell (convenience wrapper).
  */
-export function renderActionsCell(
-  configs: ButtonConfig[],
-  context: UIContext = 'table'
-): string {
-  const buttonsHtml = renderButtons(
-    configs.map(cfg => ({ ...cfg, context }))
-  );
+export function renderActionsCell(configs: ButtonConfig[], context: UIContext = 'table'): string {
+  const buttonsHtml = renderButtons(configs.map((cfg) => ({ ...cfg, context })));
 
   if (!buttonsHtml) return '';
   return `<div class="table-actions">${buttonsHtml}</div>`;
@@ -154,9 +145,7 @@ export function renderButtonSet<T extends ButtonSetName>(
   ...args: Parameters<(typeof BUTTON_SETS)[T]>
 ): string {
   const buttons = getButtonSet(setName, ...args);
-  return renderButtons(
-    buttons.map(btn => ({ ...btn, context }))
-  );
+  return renderButtons(buttons.map((btn) => ({ ...btn, context })));
 }
 
 // ============================================
@@ -180,7 +169,7 @@ export function createButton(config: ButtonConfig): HTMLButtonElement | null {
  */
 export function createButtons(configs: ButtonConfig[]): HTMLButtonElement[] {
   return configs
-    .map(config => createButton(config))
+    .map((config) => createButton(config))
     .filter((btn): btn is HTMLButtonElement => btn !== null);
 }
 

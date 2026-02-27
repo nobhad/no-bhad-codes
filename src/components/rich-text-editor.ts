@@ -34,11 +34,7 @@ export interface RichTextEditorInstance {
 
 // Toolbar configurations
 const TOOLBAR_CONFIGS = {
-  minimal: [
-    ['bold', 'italic', 'underline'],
-    [{ list: 'ordered' }, { list: 'bullet' }],
-    ['clean']
-  ],
+  minimal: [['bold', 'italic', 'underline'], [{ list: 'ordered' }, { list: 'bullet' }], ['clean']],
   standard: [
     [{ header: [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'strike'],
@@ -156,20 +152,29 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
  * Builds toolbar HTML from config
  */
 function buildToolbarHTML(config: (string | Record<string, unknown>)[][]): string {
-  return config.map(group => {
-    const buttons = group.map(item => {
-      if (typeof item === 'string') {
-        return `<button class="ql-${item}" type="button" aria-label="${item}"></button>`;
-      }
-      const [key, value] = Object.entries(item)[0];
-      if (Array.isArray(value)) {
-        const options = value.map(v => `<option value="${v === false ? '' : v}">${v === false ? 'Normal' : v}</option>`).join('');
-        return `<select class="ql-${key}" aria-label="${key}">${options}</select>`;
-      }
-      return `<button class="ql-${key}" value="${value}" type="button" aria-label="${key} ${value}"></button>`;
-    }).join('');
-    return `<span class="ql-formats">${buttons}</span>`;
-  }).join('');
+  return config
+    .map((group) => {
+      const buttons = group
+        .map((item) => {
+          if (typeof item === 'string') {
+            return `<button class="ql-${item}" type="button" aria-label="${item}"></button>`;
+          }
+          const [key, value] = Object.entries(item)[0];
+          if (Array.isArray(value)) {
+            const options = value
+              .map(
+                (v) =>
+                  `<option value="${v === false ? '' : v}">${v === false ? 'Normal' : v}</option>`
+              )
+              .join('');
+            return `<select class="ql-${key}" aria-label="${key}">${options}</select>`;
+          }
+          return `<button class="ql-${key}" value="${value}" type="button" aria-label="${key} ${value}"></button>`;
+        })
+        .join('');
+      return `<span class="ql-formats">${buttons}</span>`;
+    })
+    .join('');
 }
 
 /**
@@ -188,7 +193,7 @@ function attachToolbarHandlers(container: HTMLElement, quill: Quill): void {
   }
 
   // Format buttons
-  container.querySelectorAll('button[class^="ql-"]').forEach(btn => {
+  container.querySelectorAll('button[class^="ql-"]').forEach((btn) => {
     const format = btn.className.replace('ql-', '').split(' ')[0];
     if (format === 'clean') return;
 
@@ -207,7 +212,7 @@ function attachToolbarHandlers(container: HTMLElement, quill: Quill): void {
   });
 
   // Select dropdowns
-  container.querySelectorAll('select[class^="ql-"]').forEach(select => {
+  container.querySelectorAll('select[class^="ql-"]').forEach((select) => {
     const format = select.className.replace('ql-', '').split(' ')[0];
     select.addEventListener('change', () => {
       const value = (select as HTMLSelectElement).value;
@@ -238,7 +243,19 @@ export function htmlToPlainText(html: string): string {
     const tag = el.tagName.toLowerCase();
 
     // Handle block elements with line breaks
-    const isBlock = ['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'br', 'blockquote'].includes(tag);
+    const isBlock = [
+      'p',
+      'div',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'li',
+      'br',
+      'blockquote'
+    ].includes(tag);
 
     if (tag === 'br') {
       result += '\n';
@@ -268,7 +285,7 @@ export function htmlToPlainText(html: string): string {
     }
 
     // Process children
-    el.childNodes.forEach(child => processNode(child));
+    el.childNodes.forEach((child) => processNode(child));
 
     // Add line breaks after block elements
     if (isBlock && !['br', 'li'].includes(tag)) {

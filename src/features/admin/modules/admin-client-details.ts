@@ -254,7 +254,8 @@ export async function initClientDetailView(
       }
 
       // Render React mount container
-      container.innerHTML = '<div id="react-client-detail-mount" class="react-client-detail"></div>';
+      container.innerHTML =
+        '<div id="react-client-detail-mount" class="react-client-detail"></div>';
       const mountContainer = document.getElementById('react-client-detail-mount');
 
       if (mountContainer) {
@@ -346,17 +347,17 @@ function switchToTab(tabName: string): void {
   _currentTab = tabName;
 
   // Update inline tab buttons (hidden)
-  document.querySelectorAll('.client-detail-tabs button').forEach(btn => {
+  document.querySelectorAll('.client-detail-tabs button').forEach((btn) => {
     btn.classList.toggle('active', (btn as HTMLButtonElement).dataset.cdTab === tabName);
   });
 
   // Update header tab buttons
-  document.querySelectorAll('#client-detail-header-tabs .portal-subtab').forEach(btn => {
+  document.querySelectorAll('#client-detail-header-tabs .portal-subtab').forEach((btn) => {
     btn.classList.toggle('active', (btn as HTMLButtonElement).dataset.cdTab === tabName);
   });
 
   // Update tab content
-  document.querySelectorAll('#tab-client-detail [id^="cd-tab-"]').forEach(content => {
+  document.querySelectorAll('#tab-client-detail [id^="cd-tab-"]').forEach((content) => {
     content.classList.toggle('active', content.id === `cd-tab-${tabName}`);
   });
 
@@ -452,7 +453,7 @@ async function loadClientTags(clientId: number): Promise<void> {
       clientTags = (data.tags || []).map((t: { id: number; name: string; color: string }) => ({
         id: t.id,
         name: t.name,
-        color: t.color || '#6b7280'
+        color: t.color || 'var(--portal-text-muted)'
       }));
     }
   } catch (error) {
@@ -470,7 +471,7 @@ async function loadAvailableTags(): Promise<void> {
       availableTags = (data.tags || []).map((t: { id: number; name: string; color: string }) => ({
         id: t.id,
         name: t.name,
-        color: t.color || '#6b7280'
+        color: t.color || 'var(--portal-text-muted)'
       }));
     }
   } catch (error) {
@@ -682,7 +683,7 @@ function renderHeaderTags(): void {
       if (!currentClientId) return;
       try {
         await apiDelete(`/api/clients/${currentClientId}/tags/${tag.id}`);
-        clientTags = clientTags.filter(t => t.id !== tag.id);
+        clientTags = clientTags.filter((t) => t.id !== tag.id);
         storedContext?.showNotification('Tag removed', 'success');
       } catch (error) {
         storedContext?.showNotification('Failed to remove tag', 'error');
@@ -767,7 +768,7 @@ function renderProjectsSummary(): void {
 
   // Show up to 3 recent/active projects
   const recentProjects = clientProjects
-    .filter(p => p.status !== 'completed' && p.status !== 'cancelled')
+    .filter((p) => p.status !== 'completed' && p.status !== 'cancelled')
     .slice(0, 3);
 
   if (recentProjects.length === 0) {
@@ -777,30 +778,38 @@ function renderProjectsSummary(): void {
 
   container.innerHTML = `
     <div class="projects-list-compact flex flex-col gap-2">
-      ${recentProjects.map(project => `
+      ${recentProjects
+    .map(
+      (project) => `
         <div class="project-item-compact" data-project-id="${project.id}">
           <div class="project-item-info">
             <span class="project-item-name">${escapeHtml(project.project_name)}</span>
             ${getStatusBadgeHTML(project.status, project.status)}
           </div>
-          ${project.progress !== undefined ? `
+          ${
+  project.progress !== undefined
+    ? `
             <div class="project-progress-bar-wrapper">
               <div class="project-progress-bar-fill" style="width: ${project.progress}%"></div>
             </div>
-          ` : ''}
+          `
+    : ''
+}
         </div>
-      `).join('')}
+      `
+    )
+    .join('')}
     </div>
   `;
 
   // Add click handlers
-  container.querySelectorAll('.project-item-compact').forEach(item => {
+  container.querySelectorAll('.project-item-compact').forEach((item) => {
     item.addEventListener('click', () => {
       const projectId = parseInt((item as HTMLElement).dataset.projectId || '0');
       if (projectId && storedContext) {
         storedContext.switchTab('projects');
         setTimeout(() => {
-          import('./admin-projects').then(module => {
+          import('./admin-projects').then((module) => {
             module.showProjectDetails(projectId, storedContext!);
           });
         }, 100);
@@ -867,7 +876,9 @@ function renderRecentActivity(): void {
 
   container.innerHTML = `
     <div class="recent-activity-list flex flex-col gap-2">
-      ${recentActivities.map(activity => `
+      ${recentActivities
+    .map(
+      (activity) => `
         <div class="activity-item">
           <div class="activity-icon">${getActivityIcon(activity.type)}</div>
           <div class="activity-content">
@@ -875,7 +886,9 @@ function renderRecentActivity(): void {
             <div class="activity-time">${formatRelativeTime(activity.created_at)}</div>
           </div>
         </div>
-      `).join('')}
+      `
+    )
+    .join('')}
     </div>
     <div class="activity-view-all" data-action="view-all-activity">View all activity</div>
   `;
@@ -898,8 +911,14 @@ function renderCRMDetails(): void {
     setValue('cd-crm-company-size', clientCRMData.company_size);
     setValue('cd-crm-acquisition-source', clientCRMData.acquisition_source);
     setValue('cd-crm-website', clientCRMData.website);
-    setValue('cd-crm-last-contact', clientCRMData.last_contact_date ? formatDate(clientCRMData.last_contact_date) : null);
-    setValue('cd-crm-next-followup', clientCRMData.next_follow_up_date ? formatDate(clientCRMData.next_follow_up_date) : null);
+    setValue(
+      'cd-crm-last-contact',
+      clientCRMData.last_contact_date ? formatDate(clientCRMData.last_contact_date) : null
+    );
+    setValue(
+      'cd-crm-next-followup',
+      clientCRMData.next_follow_up_date ? formatDate(clientCRMData.next_follow_up_date) : null
+    );
   }
 
   // Setup edit CRM button
@@ -1008,12 +1027,16 @@ function renderCustomFields(): void {
   card.style.display = '';
   container.innerHTML = `
     <div class="custom-fields-grid">
-      ${clientCustomFields.map(field => `
+      ${clientCustomFields
+    .map(
+      (field) => `
         <div class="meta-item">
           <span class="field-label">${SanitizationUtils.escapeHtml(field.field_name)}</span>
           <span class="meta-value">${formatCustomFieldValue(field)}</span>
         </div>
-      `).join('')}
+      `
+    )
+    .join('')}
     </div>
   `;
 
@@ -1025,7 +1048,10 @@ function renderCustomFields(): void {
   }
 }
 
-function formatCustomFieldValue(field: { field_type: string; value: string | number | boolean | null }): string {
+function formatCustomFieldValue(field: {
+  field_type: string;
+  value: string | number | boolean | null;
+}): string {
   if (field.value === null || field.value === undefined || field.value === '') return '-';
 
   switch (field.field_type) {
@@ -1047,7 +1073,7 @@ async function showEditCustomFieldsDialog(): Promise<void> {
   }
 
   // Build fields dynamically based on custom field definitions
-  const fields = clientCustomFields.map(field => {
+  const fields = clientCustomFields.map((field) => {
     const baseField = {
       name: `field_${field.field_id}`,
       label: field.field_name,
@@ -1091,7 +1117,7 @@ async function showEditCustomFieldsDialog(): Promise<void> {
 
   // Build values object
   const values: Record<number, string | number | boolean> = {};
-  clientCustomFields.forEach(field => {
+  clientCustomFields.forEach((field) => {
     const key = `field_${field.field_id}`;
     let value: string | number | boolean = result[key] || '';
 
@@ -1144,7 +1170,7 @@ function renderContactsTab(): void {
 
   container.innerHTML = `
     <div class="contacts-list flex flex-col gap-2">
-      ${sortedContacts.map(contact => renderContactCard(contact)).join('')}
+      ${sortedContacts.map((contact) => renderContactCard(contact)).join('')}
     </div>
     <button class="btn btn-secondary add-contact-btn" id="btn-add-contact">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1172,7 +1198,9 @@ function renderContactCard(contact: ClientContact): string {
         </div>
         ${contact.title ? `<div class="contact-title">${escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.title))}</div>` : ''}
         <div class="contact-details">
-          ${contact.email ? `
+          ${
+  contact.email
+    ? `
             <span class="contact-detail">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect width="20" height="16" x="2" y="4" rx="2"/>
@@ -1180,25 +1208,35 @@ function renderContactCard(contact: ClientContact): string {
               </svg>
               ${getEmailWithCopyHtml(contact.email, escapeHtml(contact.email))}
             </span>
-          ` : ''}
-          ${contact.phone ? `
+          `
+    : ''
+}
+          ${
+  contact.phone
+    ? `
             <span class="contact-detail">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/>
               </svg>
               ${escapeHtml(contact.phone)}
             </span>
-          ` : ''}
+          `
+    : ''
+}
         </div>
       </div>
       <div class="contact-actions">
-        ${!contact.is_primary ? `
+        ${
+  !contact.is_primary
+    ? `
           <button class="icon-btn" data-action="set-primary" title="Set as primary" aria-label="Set as primary contact">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
           </button>
-        ` : ''}
+        `
+    : ''
+}
         <button class="icon-btn" data-action="edit" title="Edit contact" aria-label="Edit contact">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
@@ -1216,10 +1254,10 @@ function renderContactCard(contact: ClientContact): string {
 }
 
 function setupContactEventListeners(): void {
-  document.querySelectorAll('.contact-card').forEach(card => {
+  document.querySelectorAll('.contact-card').forEach((card) => {
     const contactId = parseInt((card as HTMLElement).dataset.contactId || '0');
 
-    card.querySelectorAll('button[data-action]').forEach(btn => {
+    card.querySelectorAll('button[data-action]').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const action = (btn as HTMLElement).dataset.action;
@@ -1297,7 +1335,7 @@ async function addContact(): Promise<void> {
 }
 
 async function editContact(contactId: number): Promise<void> {
-  const contact = clientContacts.find(c => c.id === contactId);
+  const contact = clientContacts.find((c) => c.id === contactId);
   if (!contact) return;
 
   const result = await multiPromptDialog({
@@ -1340,7 +1378,7 @@ async function editContact(contactId: number): Promise<void> {
     if (response.ok) {
       const json = await response.json();
       const data = json.data ?? json;
-      const index = clientContacts.findIndex(c => c.id === contactId);
+      const index = clientContacts.findIndex((c) => c.id === contactId);
       if (index !== -1) {
         clientContacts[index] = data.contact;
       }
@@ -1354,19 +1392,16 @@ async function editContact(contactId: number): Promise<void> {
 }
 
 async function deleteContact(contactId: number): Promise<void> {
-  const contact = clientContacts.find(c => c.id === contactId);
+  const contact = clientContacts.find((c) => c.id === contactId);
   if (!contact) return;
 
-  const confirmed = await confirmDanger(
-    `Delete contact "${contact.name}"?`,
-    'Delete Contact'
-  );
+  const confirmed = await confirmDanger(`Delete contact "${contact.name}"?`, 'Delete Contact');
   if (!confirmed) return;
 
   try {
     const response = await apiDelete(`/api/clients/contacts/${contactId}`);
     if (response.ok) {
-      clientContacts = clientContacts.filter(c => c.id !== contactId);
+      clientContacts = clientContacts.filter((c) => c.id !== contactId);
       renderContactsTab();
       storedContext?.showNotification('Contact deleted', 'success');
     }
@@ -1379,7 +1414,7 @@ async function deleteContact(contactId: number): Promise<void> {
 async function setContactPrimary(contactId: number): Promise<void> {
   if (!currentClientId) return;
 
-  const contact = clientContacts.find(c => c.id === contactId);
+  const contact = clientContacts.find((c) => c.id === contactId);
   if (!contact) return;
 
   const confirmed = await confirmDialog({
@@ -1391,10 +1426,12 @@ async function setContactPrimary(contactId: number): Promise<void> {
   if (!confirmed) return;
 
   try {
-    const response = await apiPost(`/api/clients/${currentClientId}/contacts/${contactId}/set-primary`);
+    const response = await apiPost(
+      `/api/clients/${currentClientId}/contacts/${contactId}/set-primary`
+    );
     if (response.ok) {
       // Update local state
-      clientContacts = clientContacts.map(c => ({
+      clientContacts = clientContacts.map((c) => ({
         ...c,
         is_primary: c.id === contactId
       }));
@@ -1433,9 +1470,11 @@ function renderActivityTab(): void {
   `;
 
   // Setup filter buttons
-  container.querySelectorAll('.activity-filter-btn').forEach(btn => {
+  container.querySelectorAll('.activity-filter-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      container.querySelectorAll('.activity-filter-btn').forEach(b => b.classList.remove('active'));
+      container
+        .querySelectorAll('.activity-filter-btn')
+        .forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       const filter = (btn as HTMLElement).dataset.filter || 'all';
       filterActivities(filter);
@@ -1447,11 +1486,10 @@ function renderActivityTab(): void {
 }
 
 function filterActivities(filter: string): void {
-  const filtered = filter === 'all'
-    ? clientActivities
-    : clientActivities.filter(a => a.type === filter);
+  const filtered =
+    filter === 'all' ? clientActivities : clientActivities.filter((a) => a.type === filter);
 
-  const events: TimelineEvent[] = filtered.map(activity => ({
+  const events: TimelineEvent[] = filtered.map((activity) => ({
     id: activity.id,
     type: activity.type,
     title: activity.title,
@@ -1540,9 +1578,11 @@ function renderNotesTab(): void {
       </div>
     </div>
     <div class="notes-section" id="cd-notes-section">
-      ${sortedNotes.length > 0
-    ? sortedNotes.map(note => renderNoteCard(note)).join('')
-    : '<div class="empty-state" role="status"><p>No notes yet.</p></div>'}
+      ${
+  sortedNotes.length > 0
+    ? sortedNotes.map((note) => renderNoteCard(note)).join('')
+    : '<div class="empty-state" role="status"><p>No notes yet.</p></div>'
+}
     </div>
   `;
 
@@ -1602,10 +1642,10 @@ function setupNoteEventListeners(): void {
   });
 
   // Note action buttons
-  document.querySelectorAll('.note-card').forEach(card => {
+  document.querySelectorAll('.note-card').forEach((card) => {
     const noteId = parseInt((card as HTMLElement).dataset.noteId || '0');
 
-    card.querySelectorAll('button[data-action]').forEach(btn => {
+    card.querySelectorAll('button[data-action]').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const action = (btn as HTMLElement).dataset.action;
 
@@ -1620,7 +1660,7 @@ function setupNoteEventListeners(): void {
 }
 
 async function toggleNotePin(noteId: number): Promise<void> {
-  const note = clientNotes.find(n => n.id === noteId);
+  const note = clientNotes.find((n) => n.id === noteId);
   if (!note) return;
 
   try {
@@ -1646,7 +1686,7 @@ async function deleteNote(noteId: number): Promise<void> {
   try {
     const response = await apiDelete(`/api/clients/notes/${noteId}`);
     if (response.ok) {
-      clientNotes = clientNotes.filter(n => n.id !== noteId);
+      clientNotes = clientNotes.filter((n) => n.id !== noteId);
       renderNotesTab();
       storedContext?.showNotification('Note deleted', 'success');
     }
@@ -1690,9 +1730,12 @@ export function getTagsHtml(tags: Tag[]): string {
   const extraCount = tags.length - 3;
 
   let html = '<div class="table-tags">';
-  html += displayTags.map(tag =>
-    `<span class="table-tag-mini" style="background-color: ${tag.color}; color: ${getContrastColor(tag.color)}">${escapeHtml(tag.name)}</span>`
-  ).join('');
+  html += displayTags
+    .map(
+      (tag) =>
+        `<span class="table-tag-mini" style="background-color: ${tag.color}; color: ${getContrastColor(tag.color)}">${escapeHtml(tag.name)}</span>`
+    )
+    .join('');
 
   if (extraCount > 0) {
     html += `<span class="table-tag-mini" style="background-color: ${APP_CONSTANTS.TAG_OVERFLOW_COLOR}; color: ${APP_CONSTANTS.CONTRAST_TEXT.LIGHT}">+${extraCount}</span>`;
@@ -1723,12 +1766,17 @@ const RENDER_ICONS = {
   EDIT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
   MORE: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>',
   MAIL: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
-  PHONE: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
-  BUILDING: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>',
+  PHONE:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  BUILDING:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>',
   KEY: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-  ARCHIVE: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>',
-  TRASH: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>',
-  EDIT_SM: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>'
+  ARCHIVE:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>',
+  TRASH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>',
+  EDIT_SM:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>'
 };
 
 // ============================================

@@ -183,7 +183,9 @@ export async function checkExistingAuth(callbacks: {
 
     return false;
   } catch (error) {
-    logger.error('Auth check failed', { error: error instanceof Error ? error.message : String(error) });
+    logger.error('Auth check failed', {
+      error: error instanceof Error ? error.message : String(error)
+    });
     return false;
   }
 }
@@ -232,7 +234,9 @@ export function setupAdminFeatures(): void {
       }
     }
   } catch (error) {
-    logger.error('Error checking admin status', { error: error instanceof Error ? error.message : String(error) });
+    logger.error('Error checking admin status', {
+      error: error instanceof Error ? error.message : String(error)
+    });
   }
 }
 
@@ -248,7 +252,11 @@ function showAdminButtons(): void {
  * Show field-specific error with ARIA for accessibility
  */
 export function showFieldError(fieldId: string, message: string): void {
-  const field = document.getElementById(fieldId) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null;
+  const field = document.getElementById(fieldId) as
+    | HTMLInputElement
+    | HTMLSelectElement
+    | HTMLTextAreaElement
+    | null;
   // Handle both 'portal-' and 'client-' prefixes for backward compatibility
   const errorId = `${fieldId.replace(/^(portal-|client-)/, '')}-error`;
   const errorElement = document.getElementById(errorId);
@@ -271,7 +279,8 @@ export function showFieldError(fieldId: string, message: string): void {
  */
 export function showLoginError(message: string): void {
   // Try both possible error element IDs for compatibility
-  const errorElement = document.getElementById('auth-error') || document.getElementById('login-error');
+  const errorElement =
+    document.getElementById('auth-error') || document.getElementById('login-error');
   if (errorElement) {
     errorElement.textContent = message;
     errorElement.style.display = 'block';

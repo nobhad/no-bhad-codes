@@ -158,7 +158,7 @@ export class ProjectsModule extends BaseModule {
   private renderProjectDetailForSlug(slug: string): void {
     if (!this.portfolioData || !this.projectDetailSection) return;
 
-    const project = this.portfolioData.projects.find(p => p.slug === slug);
+    const project = this.portfolioData.projects.find((p) => p.slug === slug);
     if (!project) {
       console.warn('[ProjectsModule] Project not found:', slug);
       // Navigate back to projects list
@@ -197,7 +197,7 @@ export class ProjectsModule extends BaseModule {
   private render(): void {
     if (!this.projectsContent || !this.portfolioData) return;
 
-    const documentedProjects = this.portfolioData.projects.filter(p => p.isDocumented);
+    const documentedProjects = this.portfolioData.projects.filter((p) => p.isDocumented);
     const hasEnoughDocumented = documentedProjects.length >= MIN_DOCUMENTED_PROJECTS;
 
     if (hasEnoughDocumented) {
@@ -309,9 +309,9 @@ export class ProjectsModule extends BaseModule {
 
     const cards = this.projectsContent.querySelectorAll('.work-card');
 
-    cards.forEach(card => {
+    cards.forEach((card) => {
       const projectId = (card as HTMLElement).dataset.projectId;
-      const project = this.portfolioData?.projects.find(p => p.id === projectId);
+      const project = this.portfolioData?.projects.find((p) => p.id === projectId);
 
       card.addEventListener('mouseenter', () => {
         if (project?.titleCard) {
@@ -342,17 +342,27 @@ export class ProjectsModule extends BaseModule {
 
     tl.to(image, { opacity: 0, duration: 0.05 })
       .to(staticOverlay, { opacity: 0.8, duration: 0.05 }, '<')
-      .call(() => { image.src = imageSrc; })
-      .to(staticOverlay, {
-        opacity: 0,
-        duration: 0.3,
-        ease: 'power2.out'
-      }, '+=0.1')
-      .to(image, {
-        opacity: 1,
-        duration: 0.2,
-        ease: 'power2.out'
-      }, '<');
+      .call(() => {
+        image.src = imageSrc;
+      })
+      .to(
+        staticOverlay,
+        {
+          opacity: 0,
+          duration: 0.3,
+          ease: 'power2.out'
+        },
+        '+=0.1'
+      )
+      .to(
+        image,
+        {
+          opacity: 1,
+          duration: 0.2,
+          ease: 'power2.out'
+        },
+        '<'
+      );
   }
 
   /**
@@ -426,7 +436,7 @@ export class ProjectsModule extends BaseModule {
     const cards = this.projectsContent?.querySelectorAll('.work-card');
     if (!cards) return;
 
-    cards.forEach(card => {
+    cards.forEach((card) => {
       const container = card.querySelector('.card-container');
       if (!container) return;
 
@@ -455,7 +465,6 @@ export class ProjectsModule extends BaseModule {
     if (!slug) return;
     window.location.hash = `#/projects/${slug}`;
   }
-
 
   /**
    * Render project detail content
@@ -526,7 +535,7 @@ export class ProjectsModule extends BaseModule {
     const toolsEl = this.projectDetailSection.querySelector('#project-tools');
     if (toolsEl) {
       toolsEl.innerHTML = project.tools
-        .map(tool => `<span class="tool-tag">${tool}</span>`)
+        .map((tool) => `<span class="tool-tag">${tool}</span>`)
         .join('');
     }
 
@@ -544,11 +553,13 @@ export class ProjectsModule extends BaseModule {
     if (infoEl) {
       if (project.screenshots && project.screenshots.length > 0) {
         infoEl.innerHTML = project.screenshots
-          .map((screenshot, index) => `
+          .map(
+            (screenshot, index) => `
             <figure>
               <img src="${screenshot}" alt="${project.title} screenshot ${index + 1}" />
             </figure>
-          `)
+          `
+          )
           .join('');
       } else {
         infoEl.innerHTML = '';
@@ -594,8 +605,8 @@ export class ProjectsModule extends BaseModule {
   private formatStatus(status: string): string {
     const statusMap: Record<string, string> = {
       'in-progress': 'In Progress',
-      'completed': 'Completed',
-      'planned': 'Planned'
+      completed: 'Completed',
+      planned: 'Planned'
     };
     return statusMap[status] || status;
   }
@@ -635,9 +646,7 @@ export class ProjectsModule extends BaseModule {
     const featuresEl = this.projectDetailSection.querySelector('#project-features');
     if (featuresSection && featuresEl) {
       if (project.keyFeatures && project.keyFeatures.length > 0) {
-        featuresEl.innerHTML = project.keyFeatures
-          .map(feature => `<li>${feature}</li>`)
-          .join('');
+        featuresEl.innerHTML = project.keyFeatures.map((feature) => `<li>${feature}</li>`).join('');
         (featuresSection as HTMLElement).style.display = '';
       } else {
         (featuresSection as HTMLElement).style.display = 'none';
@@ -649,9 +658,7 @@ export class ProjectsModule extends BaseModule {
     const resultsEl = this.projectDetailSection.querySelector('#project-results');
     if (resultsSection && resultsEl) {
       if (project.results && project.results.length > 0) {
-        resultsEl.innerHTML = project.results
-          .map(result => `<li>${result}</li>`)
-          .join('');
+        resultsEl.innerHTML = project.results.map((result) => `<li>${result}</li>`).join('');
         (resultsSection as HTMLElement).style.display = '';
       } else {
         (resultsSection as HTMLElement).style.display = 'none';
@@ -665,8 +672,8 @@ export class ProjectsModule extends BaseModule {
   private renderProjectNavigation(currentProject: PortfolioProject): void {
     if (!this.projectDetailSection || !this.portfolioData) return;
 
-    const documentedProjects = this.portfolioData.projects.filter(p => p.isDocumented);
-    const currentIndex = documentedProjects.findIndex(p => p.id === currentProject.id);
+    const documentedProjects = this.portfolioData.projects.filter((p) => p.isDocumented);
+    const currentIndex = documentedProjects.findIndex((p) => p.id === currentProject.id);
 
     const prevLink = this.projectDetailSection.querySelector('#project-prev') as HTMLAnchorElement;
     const nextLink = this.projectDetailSection.querySelector('#project-next') as HTMLAnchorElement;
@@ -728,7 +735,7 @@ export class ProjectsModule extends BaseModule {
       '.worksub-header, .worksub-intro, .worksub-info, .worksub-links, .back-button'
     );
 
-    animatedElements.forEach(el => {
+    animatedElements.forEach((el) => {
       // Force reflow to restart animations
       el.classList.remove('leaving');
       void (el as HTMLElement).offsetWidth;

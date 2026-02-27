@@ -92,8 +92,7 @@ export function registerServices(): void {
       // Use API URL from environment variable - avoids hardcoding production URLs
       // VITE_API_URL should be set in .env files for each environment
       const apiUrl =
-        import.meta.env.VITE_API_URL ||
-        (import.meta.env.PROD ? '' : 'http://localhost:4001');
+        import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:4001');
       return new VisitorTrackingService({
         enableTracking: true,
         respectDoNotTrack: false, // Track all visitors for analytics

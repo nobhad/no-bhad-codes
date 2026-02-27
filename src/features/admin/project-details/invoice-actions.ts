@@ -22,10 +22,7 @@ const logger = createLogger('InvoiceActions');
 /**
  * Edit a draft invoice
  */
-export async function editInvoice(
-  invoiceId: number,
-  onSuccess: () => void
-): Promise<void> {
+export async function editInvoice(invoiceId: number, onSuccess: () => void): Promise<void> {
   if (!AdminAuth.isAuthenticated()) {
     return;
   }
@@ -38,7 +35,13 @@ export async function editInvoice(
       return;
     }
 
-    const data = await parseApiResponse<{ invoice: { status: string; notes?: string; lineItems?: { description: string; amount: number }[] } }>(response);
+    const data = await parseApiResponse<{
+      invoice: {
+        status: string;
+        notes?: string;
+        lineItems?: { description: string; amount: number }[];
+      };
+    }>(response);
     const invoice = data.invoice;
 
     if (invoice.status !== 'draft') {
@@ -88,12 +91,14 @@ export async function editInvoice(
     }
 
     const updateResponse = await apiPut(`/api/invoices/${invoiceId}`, {
-      lineItems: [{
-        description: result.description,
-        quantity: 1,
-        rate: amount,
-        amount
-      }],
+      lineItems: [
+        {
+          description: result.description,
+          quantity: 1,
+          rate: amount,
+          amount
+        }
+      ],
       notes: result.notes || ''
     });
 
@@ -136,10 +141,12 @@ export async function showApplyCreditPrompt(
     }
 
     // Build options for deposit selection
-    const depositOptions = deposits.map((d: { invoice_id: number; invoice_number: string; available_amount: number }) => ({
-      value: String(d.invoice_id),
-      label: `${d.invoice_number} - $${d.available_amount.toFixed(2)} available`
-    }));
+    const depositOptions = deposits.map(
+      (d: { invoice_id: number; invoice_number: string; available_amount: number }) => ({
+        value: String(d.invoice_id),
+        label: `${d.invoice_number} - $${d.available_amount.toFixed(2)} available`
+      })
+    );
 
     const result = await multiPromptDialog({
       title: 'Apply Deposit Credit',
@@ -173,9 +180,13 @@ export async function showApplyCreditPrompt(
     }
 
     // Find the selected deposit to verify amount
-    const selectedDeposit = deposits.find((d: { invoice_id: number }) => String(d.invoice_id) === result.depositInvoiceId);
+    const selectedDeposit = deposits.find(
+      (d: { invoice_id: number }) => String(d.invoice_id) === result.depositInvoiceId
+    );
     if (selectedDeposit && amount > selectedDeposit.available_amount) {
-      alertWarning(`Amount exceeds available credit ($${selectedDeposit.available_amount.toFixed(2)})`);
+      alertWarning(
+        `Amount exceeds available credit ($${selectedDeposit.available_amount.toFixed(2)})`
+      );
       return;
     }
 
@@ -200,10 +211,7 @@ export async function showApplyCreditPrompt(
 /**
  * Send an invoice to the client
  */
-export async function sendInvoice(
-  invoiceId: number,
-  onSuccess: () => void
-): Promise<void> {
+export async function sendInvoice(invoiceId: number, onSuccess: () => void): Promise<void> {
   if (!AdminAuth.isAuthenticated()) {
     return;
   }
@@ -226,10 +234,7 @@ export async function sendInvoice(
 /**
  * Mark an invoice as paid
  */
-export async function markInvoicePaid(
-  invoiceId: number,
-  onSuccess: () => void
-): Promise<void> {
+export async function markInvoicePaid(invoiceId: number, onSuccess: () => void): Promise<void> {
   if (!AdminAuth.isAuthenticated()) return;
 
   try {
@@ -270,10 +275,7 @@ export async function sendInvoiceReminder(invoiceId: number): Promise<void> {
 /**
  * Duplicate an invoice (creates a new draft copy)
  */
-export async function duplicateInvoice(
-  invoiceId: number,
-  onSuccess: () => void
-): Promise<void> {
+export async function duplicateInvoice(invoiceId: number, onSuccess: () => void): Promise<void> {
   if (!AdminAuth.isAuthenticated()) return;
 
   const confirmed = await confirmDialog({
@@ -304,10 +306,7 @@ export async function duplicateInvoice(
 /**
  * Delete or void an invoice
  */
-export async function deleteInvoice(
-  invoiceId: number,
-  onSuccess: () => void
-): Promise<void> {
+export async function deleteInvoice(invoiceId: number, onSuccess: () => void): Promise<void> {
   if (!AdminAuth.isAuthenticated()) return;
 
   const confirmed = await confirmDanger(
@@ -344,10 +343,7 @@ export async function deleteInvoice(
 /**
  * Record a payment on an invoice
  */
-export async function recordPayment(
-  invoiceId: number,
-  onSuccess: () => void
-): Promise<void> {
+export async function recordPayment(invoiceId: number, onSuccess: () => void): Promise<void> {
   if (!AdminAuth.isAuthenticated()) return;
 
   const result = await multiPromptDialog({

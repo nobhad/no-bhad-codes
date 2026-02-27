@@ -84,13 +84,14 @@ class AdminMessagingRenderer {
     }
 
     if (threads.length === 0) {
-      renderEmptyState(listContainer, 'No message threads yet. Threads will appear when clients send messages.');
+      renderEmptyState(
+        listContainer,
+        'No message threads yet. Threads will appear when clients send messages.'
+      );
       return;
     }
 
-    listContainer.innerHTML = threads
-      .map((thread) => this.renderThreadItem(thread))
-      .join('');
+    listContainer.innerHTML = threads.map((thread) => this.renderThreadItem(thread)).join('');
 
     this.attachThreadClickHandlers(listContainer, threads);
   }
@@ -99,14 +100,15 @@ class AdminMessagingRenderer {
    * Render a single thread list item
    */
   private renderThreadItem(thread: MessageThread): string {
-    const safeClientName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(thread.client_name || 'Unknown Client'));
-    const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(thread.subject || 'No Subject'));
-    const lastMessageDate = thread.last_message_at
-      ? formatDate(thread.last_message_at)
-      : '';
-    const unreadBadge = thread.unread_count > 0
-      ? `<span class="unread-badge">${thread.unread_count}</span>`
-      : '';
+    const safeClientName = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(thread.client_name || 'Unknown Client')
+    );
+    const safeSubject = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(thread.subject || 'No Subject')
+    );
+    const lastMessageDate = thread.last_message_at ? formatDate(thread.last_message_at) : '';
+    const unreadBadge =
+      thread.unread_count > 0 ? `<span class="unread-badge">${thread.unread_count}</span>` : '';
     const activeClass = this.selectedThreadId === thread.id ? 'active' : '';
 
     return `
@@ -130,7 +132,7 @@ class AdminMessagingRenderer {
       item.addEventListener('click', () => {
         const threadId = parseInt((item as HTMLElement).dataset.threadId || '0');
         const clientId = parseInt((item as HTMLElement).dataset.clientId || '0');
-        const thread = threads.find(t => t.id === threadId);
+        const thread = threads.find((t) => t.id === threadId);
         const clientName = thread?.client_name || 'Unknown';
 
         this.selectThread(threadId, clientId);
@@ -212,9 +214,7 @@ class AdminMessagingRenderer {
       return;
     }
 
-    container.innerHTML = messages
-      .map((msg) => this.renderMessage(msg))
-      .join('');
+    container.innerHTML = messages.map((msg) => this.renderMessage(msg)).join('');
 
     // Scroll to bottom
     container.scrollTop = container.scrollHeight;
@@ -227,9 +227,13 @@ class AdminMessagingRenderer {
     const isAdmin = msg.sender_type === 'admin';
     const dateTime = formatDateTime(msg.created_at);
 
-    const rawSenderName = isAdmin ? 'You' : SanitizationUtils.decodeHtmlEntities(msg.sender_name || 'Client');
+    const rawSenderName = isAdmin
+      ? 'You'
+      : SanitizationUtils.decodeHtmlEntities(msg.sender_name || 'Client');
     const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
-    const safeContent = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(msg.message || msg.content || ''));
+    const safeContent = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(msg.message || msg.content || '')
+    );
     const safeInitials = SanitizationUtils.escapeHtml(rawSenderName.substring(0, 2).toUpperCase());
 
     if (isAdmin) {

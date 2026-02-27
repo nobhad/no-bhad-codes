@@ -14,11 +14,7 @@
 
 /* global Document, SVGGElement */
 
-import {
-  SVG_CARD,
-  SVG_ELEMENT_IDS,
-  SVG_VIEWBOX
-} from '../../../config/intro-animation-config';
+import { SVG_CARD, SVG_ELEMENT_IDS, SVG_VIEWBOX } from '../../../config/intro-animation-config';
 import { ANIMATION_CONSTANTS, calculateShadowOffset } from '../../../config/animation-constants';
 import type {
   SVGElements,
@@ -255,22 +251,97 @@ export function calculateSvgAlignment(
 
   // Solving: cardLeftRelativeToOverlay = svgDisplayX + (SVG_CARD.x * s + tx) * viewBoxToPixelScale
   //          tx = (cardLeftRelativeToOverlay - svgDisplayX) / viewBoxToPixelScale - SVG_CARD.x * s
-  const translateX = (cardLeftRelativeToOverlay - svgDisplayX) / viewBoxToPixelScale - SVG_CARD.x * scale;
-  const translateY = (cardTopRelativeToOverlay - svgDisplayY) / viewBoxToPixelScale - SVG_CARD.y * scale;
+  const translateX =
+    (cardLeftRelativeToOverlay - svgDisplayX) / viewBoxToPixelScale - SVG_CARD.x * scale;
+  const translateY =
+    (cardTopRelativeToOverlay - svgDisplayY) / viewBoxToPixelScale - SVG_CARD.y * scale;
 
   // Debug logging only in development
   if (import.meta.env?.DEV) {
     console.log('[SVG Alignment] Pixel-perfect alignment:');
-    console.log('  elementUsed:', svgImage ? 'svg-image' : cardFront ? 'card-front' : 'business-card');
-    console.log('  overlayOffset:', overlayLeft.toFixed(2), ',', overlayTop.toFixed(2), overlayElement ? '(from overlay)' : '(none)');
-    console.log('  elementRect:', elementRect.width.toFixed(2), 'x', elementRect.height.toFixed(2), 'at', elementRect.left.toFixed(2), ',', elementRect.top.toFixed(2));
-    console.log('  contentRect:', actualCardRect.width.toFixed(2), 'x', actualCardRect.height.toFixed(2), 'at', actualCardRect.left.toFixed(2), ',', actualCardRect.top.toFixed(2));
-    console.log('  cardRelOverlay:', cardLeftRelativeToOverlay.toFixed(2), ',', cardTopRelativeToOverlay.toFixed(2));
-    console.log('  svgViewBox:', SVG_VIEWBOX.width, 'x', SVG_VIEWBOX.height, '(aspect:', svgAspectRatio.toFixed(4), ')');
-    console.log('  viewport/overlay:', viewportWidth, 'x', viewportHeight, '(aspect:', viewportAspectRatio.toFixed(4), ')');
-    console.log('  svgDisplay:', svgDisplayWidth.toFixed(2), 'x', svgDisplayHeight.toFixed(2), 'at', svgDisplayX.toFixed(2), ',', svgDisplayY.toFixed(2));
-    console.log('  transforms: scale=', scale.toFixed(6), 'translate=', translateX.toFixed(2), ',', translateY.toFixed(2));
-    console.log('  SVG_CARD:', SVG_CARD.x, ',', SVG_CARD.y, 'size:', SVG_CARD.width, 'x', SVG_CARD.height);
+    console.log(
+      '  elementUsed:',
+      svgImage ? 'svg-image' : cardFront ? 'card-front' : 'business-card'
+    );
+    console.log(
+      '  overlayOffset:',
+      overlayLeft.toFixed(2),
+      ',',
+      overlayTop.toFixed(2),
+      overlayElement ? '(from overlay)' : '(none)'
+    );
+    console.log(
+      '  elementRect:',
+      elementRect.width.toFixed(2),
+      'x',
+      elementRect.height.toFixed(2),
+      'at',
+      elementRect.left.toFixed(2),
+      ',',
+      elementRect.top.toFixed(2)
+    );
+    console.log(
+      '  contentRect:',
+      actualCardRect.width.toFixed(2),
+      'x',
+      actualCardRect.height.toFixed(2),
+      'at',
+      actualCardRect.left.toFixed(2),
+      ',',
+      actualCardRect.top.toFixed(2)
+    );
+    console.log(
+      '  cardRelOverlay:',
+      cardLeftRelativeToOverlay.toFixed(2),
+      ',',
+      cardTopRelativeToOverlay.toFixed(2)
+    );
+    console.log(
+      '  svgViewBox:',
+      SVG_VIEWBOX.width,
+      'x',
+      SVG_VIEWBOX.height,
+      '(aspect:',
+      svgAspectRatio.toFixed(4),
+      ')'
+    );
+    console.log(
+      '  viewport/overlay:',
+      viewportWidth,
+      'x',
+      viewportHeight,
+      '(aspect:',
+      viewportAspectRatio.toFixed(4),
+      ')'
+    );
+    console.log(
+      '  svgDisplay:',
+      svgDisplayWidth.toFixed(2),
+      'x',
+      svgDisplayHeight.toFixed(2),
+      'at',
+      svgDisplayX.toFixed(2),
+      ',',
+      svgDisplayY.toFixed(2)
+    );
+    console.log(
+      '  transforms: scale=',
+      scale.toFixed(6),
+      'translate=',
+      translateX.toFixed(2),
+      ',',
+      translateY.toFixed(2)
+    );
+    console.log(
+      '  SVG_CARD:',
+      SVG_CARD.x,
+      ',',
+      SVG_CARD.y,
+      'size:',
+      SVG_CARD.width,
+      'x',
+      SVG_CARD.height
+    );
   }
 
   return {
@@ -285,10 +356,7 @@ export function calculateSvgAlignment(
 /**
  * Create shadow filter for SVG
  */
-export function createShadowFilter(
-  morphSvg: SVGSVGElement,
-  scale: number
-): void {
+export function createShadowFilter(morphSvg: SVGSVGElement, scale: number): void {
   const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
   const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
   filter.setAttribute('id', 'card-shadow');
@@ -312,9 +380,7 @@ export function createShadowFilter(
 /**
  * Create layer group structure
  */
-export function createLayerGroups(
-  alignment: SVGAlignment
-): SVGLayers {
+export function createLayerGroups(alignment: SVGAlignment): SVGLayers {
   // Main wrapper with transform for scaling and positioning
   const transformWrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   transformWrapper.setAttribute('id', 'intro-layers-wrapper');
@@ -375,10 +441,7 @@ export function assembleBehindCardLayer(
 /**
  * Assemble card layer
  */
-export function assembleCardLayer(
-  cardLayer: SVGGElement,
-  elements: SVGElements
-): void {
+export function assembleCardLayer(cardLayer: SVGGElement, elements: SVGElements): void {
   if (elements.cardGroup) {
     const clonedCard = elements.cardGroup.cloneNode(true) as Element;
     clonedCard.setAttribute('id', 'card-group-clone');
@@ -411,10 +474,7 @@ export function assembleAboveCardLayer(
 /**
  * Copy SVG styles from source document
  */
-export function copySvgStyles(
-  morphSvg: SVGSVGElement,
-  svgDoc: Document
-): void {
+export function copySvgStyles(morphSvg: SVGSVGElement, svgDoc: Document): void {
   const sourceStyles = svgDoc.querySelector('style');
   if (sourceStyles) {
     const clonedStyles = sourceStyles.cloneNode(true) as Element;
@@ -432,8 +492,12 @@ export function getFingerPathReferences(
 ): FingerPathReferences {
   return {
     fingerA1: clonedPos1.querySelector(`#${SVG_ELEMENT_IDS.fingerA1}`) as SVGPathElement,
-    fingerB1: clonedPos1.querySelector(`[id="${SVG_ELEMENT_IDS.fingerB1Container}"] path`) as SVGPathElement,
-    fingerC1: clonedPos1.querySelector(`[id="${SVG_ELEMENT_IDS.fingerC1Container}"] path`) as SVGPathElement,
+    fingerB1: clonedPos1.querySelector(
+      `[id="${SVG_ELEMENT_IDS.fingerB1Container}"] path`
+    ) as SVGPathElement,
+    fingerC1: clonedPos1.querySelector(
+      `[id="${SVG_ELEMENT_IDS.fingerC1Container}"] path`
+    ) as SVGPathElement,
     fingerA2: position2.querySelector(`#${SVG_ELEMENT_IDS.fingerA2}`) as SVGPathElement,
     fingerB2: position2.querySelector(`#${SVG_ELEMENT_IDS.fingerB2}`) as SVGPathElement,
     fingerC2: position2.querySelector(`#${SVG_ELEMENT_IDS.fingerC2}`) as SVGPathElement,

@@ -74,7 +74,10 @@ export function createFilterSelect(config: FilterSelectConfig): FilterSelectInst
     const optionRows = opts.map(
       (o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`
     );
-    const empty = emptyOption !== null && emptyOption !== undefined ? `<option value="">${escapeHtml(emptyOption)}</option>` : '';
+    const empty =
+      emptyOption !== null && emptyOption !== undefined
+        ? `<option value="">${escapeHtml(emptyOption)}</option>`
+        : '';
     return empty + optionRows.join('');
   }
 

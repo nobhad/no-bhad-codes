@@ -94,7 +94,9 @@ export class Application {
       // Initialize visitor tracking (config has cookieConsent: false, so no consent needed)
       if (typeof window !== 'undefined') {
         try {
-          const trackingService = (await container.resolve('VisitorTrackingService')) as ServiceInstance;
+          const trackingService = (await container.resolve(
+            'VisitorTrackingService'
+          )) as ServiceInstance;
           await trackingService.init?.();
         } catch (error) {
           console.error('[Application] Failed to initialize visitor tracking:', error);
@@ -162,7 +164,9 @@ export class Application {
             companyName: 'No Bhad Codes',
             onAccept: async () => {
               try {
-                const trackingService = (await container.resolve('VisitorTrackingService')) as ServiceInstance;
+                const trackingService = (await container.resolve(
+                  'VisitorTrackingService'
+                )) as ServiceInstance;
                 await trackingService.init?.();
               } catch (error) {
                 console.error('[Application] Failed to initialize visitor tracking:', error);
@@ -268,13 +272,27 @@ export class Application {
    * Register routes for home page sections
    * Uses hash routing: #/, #/about, #/contact
    */
-  private registerHomePageRoutes(routerService: { addRoute: (route: { path: string; section: string; title: string }) => void }): void {
+  private registerHomePageRoutes(routerService: {
+    addRoute: (route: { path: string; section: string; title: string }) => void;
+  }): void {
     // Hash routes
-    routerService.addRoute({ path: '#/', section: 'intro', title: 'No Bhad Codes - Professional Web Development' });
+    routerService.addRoute({
+      path: '#/',
+      section: 'intro',
+      title: 'No Bhad Codes - Professional Web Development'
+    });
     routerService.addRoute({ path: '#/about', section: 'about', title: 'About - No Bhad Codes' });
-    routerService.addRoute({ path: '#/contact', section: 'contact', title: 'Contact - No Bhad Codes' });
+    routerService.addRoute({
+      path: '#/contact',
+      section: 'contact',
+      title: 'Contact - No Bhad Codes'
+    });
     // Root path
-    routerService.addRoute({ path: '/', section: 'intro', title: 'No Bhad Codes - Professional Web Development' });
+    routerService.addRoute({
+      path: '/',
+      section: 'intro',
+      title: 'No Bhad Codes - Professional Web Development'
+    });
     this.log('Home page routes registered');
   }
 
@@ -283,7 +301,8 @@ export class Application {
    */
   private async initializeModules(): Promise<void> {
     const currentPath = window.location.pathname;
-    const isClientPortal = currentPath.startsWith('/client') && !currentPath.includes('/client/intake');
+    const isClientPortal =
+      currentPath.startsWith('/client') && !currentPath.includes('/client/intake');
     const isClientIntake = currentPath.includes('/client/intake');
     const isAdminPage = currentPath.includes('/admin');
     const isHomePage = currentPath === '/' || currentPath === '/index.html';
@@ -391,7 +410,10 @@ export class Application {
       modules: Object.fromEntries(
         Array.from(this.modules.entries()).map(([name, module]) => [
           name,
-          typeof module === 'object' && module && 'getStatus' in module && typeof module.getStatus === 'function'
+          typeof module === 'object' &&
+          module &&
+          'getStatus' in module &&
+          typeof module.getStatus === 'function'
             ? module.getStatus()
             : { loaded: true }
         ])
@@ -399,7 +421,10 @@ export class Application {
       services: Object.fromEntries(
         Array.from(this.services.entries()).map(([name, service]) => [
           name,
-          typeof service === 'object' && service && 'getStatus' in service && typeof service.getStatus === 'function'
+          typeof service === 'object' &&
+          service &&
+          'getStatus' in service &&
+          typeof service.getStatus === 'function'
             ? service.getStatus()
             : { loaded: true }
         ])

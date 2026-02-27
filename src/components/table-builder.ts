@@ -87,13 +87,7 @@ export interface StatusCellConfig {
  * Create a table row element with cells.
  */
 export function createTableRow(config: TableRowConfig): HTMLTableRowElement {
-  const {
-    id,
-    cells,
-    className = '',
-    onClick,
-    dataAttributes = {}
-  } = config;
+  const { id, cells, className = '', onClick, dataAttributes = {} } = config;
 
   const row = document.createElement('tr');
   row.className = className || '';
@@ -105,7 +99,7 @@ export function createTableRow(config: TableRowConfig): HTMLTableRowElement {
   });
 
   // Add cells
-  cells.forEach(cellConfig => {
+  cells.forEach((cellConfig) => {
     const cell = createTableCell(cellConfig);
     row.appendChild(cell);
   });
@@ -123,13 +117,7 @@ export function createTableRow(config: TableRowConfig): HTMLTableRowElement {
  * Create a single table cell element.
  */
 export function createTableCell(config: TableCellConfig): HTMLTableCellElement {
-  const {
-    content,
-    className = '',
-    dataAttributes = {},
-    isHTML = false,
-    header
-  } = config;
+  const { content, className = '', dataAttributes = {}, isHTML = false, header } = config;
 
   const cell = document.createElement('td');
   cell.className = className || '';
@@ -166,11 +154,7 @@ export function createTableCell(config: TableCellConfig): HTMLTableCellElement {
  * Create an actions cell with icon buttons.
  */
 export function createActionCell(config: ActionCellConfig): HTMLTableCellElement {
-  const {
-    actions,
-    className = 'actions-cell',
-    wrapperClassName = 'table-actions'
-  } = config;
+  const { actions, className = 'actions-cell', wrapperClassName = 'table-actions' } = config;
 
   const cell = document.createElement('td');
   cell.className = className;
@@ -178,7 +162,7 @@ export function createActionCell(config: ActionCellConfig): HTMLTableCellElement
   const wrapper = document.createElement('div');
   wrapper.className = wrapperClassName;
 
-  actions.forEach(action => {
+  actions.forEach((action) => {
     const buttonConfig: IconButtonConfig = {
       iconSvg: action.iconSvg,
       label: action.label,
@@ -212,18 +196,22 @@ export function getActionCellHTML(
   className = 'actions-cell',
   wrapperClassName = 'table-actions'
 ): string {
-  const actionsHTML = actions.map(action => {
-    const classes = ['icon-btn', action.className].filter(Boolean).join(' ');
-    const dataAttrs = [
-      action.dataAction ? `data-action="${action.dataAction}"` : '',
-      action.dataId !== undefined ? `data-id="${action.dataId}"` : '',
-      action.disabled ? 'disabled' : ''
-    ].filter(Boolean).join(' ');
+  const actionsHTML = actions
+    .map((action) => {
+      const classes = ['icon-btn', action.className].filter(Boolean).join(' ');
+      const dataAttrs = [
+        action.dataAction ? `data-action="${action.dataAction}"` : '',
+        action.dataId !== undefined ? `data-id="${action.dataId}"` : '',
+        action.disabled ? 'disabled' : ''
+      ]
+        .filter(Boolean)
+        .join(' ');
 
-    return `<button type="button" class="${classes}" aria-label="${escapeHtml(action.label)}" title="${escapeHtml(action.label)}" ${dataAttrs}>
+      return `<button type="button" class="${classes}" aria-label="${escapeHtml(action.label)}" title="${escapeHtml(action.label)}" ${dataAttrs}>
       <span class="icon-btn-svg">${action.iconSvg}</span>
     </button>`;
-  }).join('');
+    })
+    .join('');
 
   return `<td class="${className}"><div class="${wrapperClassName}">${actionsHTML}</div></td>`;
 }
@@ -236,12 +224,7 @@ export function getActionCellHTML(
  * Create a status cell with badge or dot indicator.
  */
 export function createStatusCell(config: StatusCellConfig): HTMLTableCellElement {
-  const {
-    status,
-    label,
-    style = 'badge',
-    className = ''
-  } = config;
+  const { status, label, style = 'badge', className = '' } = config;
 
   const cell = document.createElement('td');
   cell.className = cx('status-cell', className);
@@ -296,9 +279,7 @@ function variantToClass(variant: string): string {
 }
 
 function formatStatusLabel(status: string): string {
-  return status
-    .replace(/[_-]/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return status.replace(/[_-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 // ===============================================
@@ -322,13 +303,7 @@ export interface TablePaginationConfig {
  * Create pagination controls for a table.
  */
 export function createTablePagination(config: TablePaginationConfig): HTMLElement {
-  const {
-    total,
-    page,
-    perPage,
-    onPageChange,
-    className = ''
-  } = config;
+  const { total, page, perPage, onPageChange, className = '' } = config;
 
   const totalPages = Math.ceil(total / perPage);
   const startItem = (page - 1) * perPage + 1;
@@ -399,14 +374,7 @@ export interface SortableHeaderConfig {
  * Create a sortable table header cell.
  */
 export function createSortableHeader(config: SortableHeaderConfig): HTMLTableCellElement {
-  const {
-    key,
-    label,
-    currentSortKey,
-    currentSortDir,
-    onSort,
-    className = ''
-  } = config;
+  const { key, label, currentSortKey, currentSortDir, onSort, className = '' } = config;
 
   const th = document.createElement('th');
   th.className = cx('sortable-header', className);

@@ -46,16 +46,16 @@ interface KBArticle {
 const CATEGORY_ICONS: Record<string, string> = {
   'getting-started': ICONS.ROCKET,
   'account-billing': ICONS.FILE_TEXT,
-  'account': ICONS.FILE_TEXT,
-  'billing': ICONS.FILE_TEXT,
-  'projects': ICONS.CLIPBOARD,
-  'files': ICONS.FOLDER,
+  account: ICONS.FILE_TEXT,
+  billing: ICONS.FILE_TEXT,
+  projects: ICONS.CLIPBOARD,
+  files: ICONS.FOLDER,
   'files-documents': ICONS.FOLDER,
-  'documents': ICONS.DOCUMENT,
-  'communication': ICONS.MAIL,
-  'messages': ICONS.MAIL,
-  'faq': ICONS.SEARCH,
-  'general': ICONS.FILE
+  documents: ICONS.DOCUMENT,
+  communication: ICONS.MAIL,
+  messages: ICONS.MAIL,
+  faq: ICONS.SEARCH,
+  general: ICONS.FILE
 };
 
 function getCategoryIcon(slug: string): string {
@@ -221,7 +221,9 @@ async function toggleAccordion(slug: string, ctx: ClientPortalContext): Promise<
   // Load articles if not cached
   if (articlesContainer && !categoryArticlesCache.has(slug)) {
     try {
-      const data = await kbFetch<{ category: KBCategory; articles: KBArticle[] }>(`/categories/${encodeURIComponent(slug)}`);
+      const data = await kbFetch<{ category: KBCategory; articles: KBArticle[] }>(
+        `/categories/${encodeURIComponent(slug)}`
+      );
       categoryArticlesCache.set(slug, data.articles || []);
       renderAccordionArticles(articlesContainer as HTMLElement, data.articles || [], slug);
     } catch (err) {
@@ -229,11 +231,19 @@ async function toggleAccordion(slug: string, ctx: ClientPortalContext): Promise<
       articlesContainer.innerHTML = '<p class="help-accordion-empty">Failed to load articles.</p>';
     }
   } else if (articlesContainer && categoryArticlesCache.has(slug)) {
-    renderAccordionArticles(articlesContainer as HTMLElement, categoryArticlesCache.get(slug)!, slug);
+    renderAccordionArticles(
+      articlesContainer as HTMLElement,
+      categoryArticlesCache.get(slug)!,
+      slug
+    );
   }
 }
 
-function renderAccordionArticles(container: HTMLElement, articles: KBArticle[], categorySlug: string): void {
+function renderAccordionArticles(
+  container: HTMLElement,
+  articles: KBArticle[],
+  categorySlug: string
+): void {
   container.innerHTML = '';
 
   if (!articles.length) {
@@ -283,7 +293,9 @@ async function showSearchSuggestions(query: string, ctx: ClientPortalContext): P
   }
 
   try {
-    const data = await kbFetch<{ articles: KBArticle[]; query: string }>(`/search?q=${encodeURIComponent(query)}&limit=5`);
+    const data = await kbFetch<{ articles: KBArticle[]; query: string }>(
+      `/search?q=${encodeURIComponent(query)}&limit=5`
+    );
     renderSearchSuggestions(data.articles, suggestionsEl);
   } catch (err) {
     ctx.showNotification((err as Error).message, 'error');
@@ -336,7 +348,8 @@ function navigateSuggestions(direction: 'up' | 'down'): void {
   if (direction === 'down') {
     selectedSuggestionIndex = (selectedSuggestionIndex + 1) % items.length;
   } else {
-    selectedSuggestionIndex = selectedSuggestionIndex <= 0 ? items.length - 1 : selectedSuggestionIndex - 1;
+    selectedSuggestionIndex =
+      selectedSuggestionIndex <= 0 ? items.length - 1 : selectedSuggestionIndex - 1;
   }
 
   // Apply new selection
@@ -374,7 +387,11 @@ function hideSuggestions(): void {
 // Render: Search results (full page)
 // ---------------------------------------------------------------------------
 
-function renderSearchResults(articles: KBArticle[], query: string, _ctx: ClientPortalContext): void {
+function renderSearchResults(
+  articles: KBArticle[],
+  query: string,
+  _ctx: ClientPortalContext
+): void {
   const titleEl = el('help-search-results-title');
   const listEl = el('help-search-results-list');
   if (!listEl) return;
@@ -449,7 +466,11 @@ function showFeatured(): void {
 // Load and show single article
 // ---------------------------------------------------------------------------
 
-async function openArticle(categorySlug: string, articleSlug: string, ctx: ClientPortalContext): Promise<void> {
+async function openArticle(
+  categorySlug: string,
+  articleSlug: string,
+  ctx: ClientPortalContext
+): Promise<void> {
   const titleEl = el('help-article-title');
   const bodyEl = el('help-article-body');
   const categoryBadge = el('help-article-category');
@@ -461,7 +482,9 @@ async function openArticle(categorySlug: string, articleSlug: string, ctx: Clien
   showArticleView();
 
   try {
-    const data = await kbFetch<{ article: KBArticle }>(`/articles/${encodeURIComponent(categorySlug)}/${encodeURIComponent(articleSlug)}`);
+    const data = await kbFetch<{ article: KBArticle }>(
+      `/articles/${encodeURIComponent(categorySlug)}/${encodeURIComponent(articleSlug)}`
+    );
     const article = data.article;
     titleEl.textContent = article.title;
     bodyEl.innerHTML = article.content || '';
@@ -489,7 +512,9 @@ async function runSearch(query: string, ctx: ClientPortalContext): Promise<void>
   hideSuggestions();
 
   try {
-    const data = await kbFetch<{ articles: KBArticle[]; query: string }>(`/search?q=${encodeURIComponent(q)}&limit=20`);
+    const data = await kbFetch<{ articles: KBArticle[]; query: string }>(
+      `/search?q=${encodeURIComponent(q)}&limit=20`
+    );
     renderSearchResults(data.articles, data.query, ctx);
   } catch (err) {
     ctx.showNotification((err as Error).message, 'error');
@@ -521,10 +546,16 @@ function setupListeners(ctx: ClientPortalContext): void {
   if (browse) {
     browse.addEventListener('click', (e) => {
       // Featured card click
-      const card = (e.target as HTMLElement).closest('.help-featured-card[data-category-slug][data-article-slug]');
+      const card = (e.target as HTMLElement).closest(
+        '.help-featured-card[data-category-slug][data-article-slug]'
+      );
       if (card) {
         e.preventDefault();
-        openArticle(card.getAttribute('data-category-slug')!, card.getAttribute('data-article-slug')!, ctx);
+        openArticle(
+          card.getAttribute('data-category-slug')!,
+          card.getAttribute('data-article-slug')!,
+          ctx
+        );
         return;
       }
 
@@ -540,9 +571,15 @@ function setupListeners(ctx: ClientPortalContext): void {
       }
 
       // Accordion article click
-      const artLink = (e.target as HTMLElement).closest('.help-accordion-article[data-category-slug][data-article-slug]');
+      const artLink = (e.target as HTMLElement).closest(
+        '.help-accordion-article[data-category-slug][data-article-slug]'
+      );
       if (artLink) {
-        openArticle(artLink.getAttribute('data-category-slug')!, artLink.getAttribute('data-article-slug')!, ctx);
+        openArticle(
+          artLink.getAttribute('data-category-slug')!,
+          artLink.getAttribute('data-article-slug')!,
+          ctx
+        );
       }
     });
   }
@@ -551,7 +588,9 @@ function setupListeners(ctx: ClientPortalContext): void {
   const suggestionsEl = el('help-search-suggestions');
   if (suggestionsEl) {
     suggestionsEl.addEventListener('click', (e) => {
-      const item = (e.target as HTMLElement).closest('.help-suggestion-item[data-category-slug][data-article-slug]');
+      const item = (e.target as HTMLElement).closest(
+        '.help-suggestion-item[data-category-slug][data-article-slug]'
+      );
       if (item) {
         const categorySlug = item.getAttribute('data-category-slug')!;
         const articleSlug = item.getAttribute('data-article-slug')!;
@@ -569,10 +608,16 @@ function setupListeners(ctx: ClientPortalContext): void {
   const resultsList = el('help-search-results-list');
   if (resultsList) {
     resultsList.addEventListener('click', (e) => {
-      const link = (e.target as HTMLElement).closest('.help-result-item[data-category-slug][data-article-slug]');
+      const link = (e.target as HTMLElement).closest(
+        '.help-result-item[data-category-slug][data-article-slug]'
+      );
       if (link) {
         e.preventDefault();
-        openArticle(link.getAttribute('data-category-slug')!, link.getAttribute('data-article-slug')!, ctx);
+        openArticle(
+          link.getAttribute('data-category-slug')!,
+          link.getAttribute('data-article-slug')!,
+          ctx
+        );
       }
     });
   }

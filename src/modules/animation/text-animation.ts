@@ -160,14 +160,17 @@ export class TextAnimationModule extends BaseModule {
     const HOLD_DURATION = 100; // 0.1 seconds
 
     // Store original styles to restore after hold
-    let savedContainerStyles: { overflow: string; overflowY: string; touchAction: string } | null = null;
+    let savedContainerStyles: { overflow: string; overflowY: string; touchAction: string } | null =
+      null;
     let savedBodyStyles: { overflow: string; touchAction: string } | null = null;
 
     const triggerHold = (position: 'start' | 'end') => {
       if (isHolding) return;
 
       isHolding = true;
-      this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Starting ${HOLD_DURATION}ms hold at ${position}`);
+      this.log(
+        `${isMobile ? 'Mobile' : 'Desktop'}: Starting ${HOLD_DURATION}ms hold at ${position}`
+      );
 
       // Mobile: block container scroll. Desktop: block body scroll only
       if (isMobile && scrollContainer) {

@@ -86,14 +86,26 @@ class AdminContactsRenderer {
    */
   private renderContactRow(submission: Contact): string {
     const date = formatDate(submission.created_at);
-    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.name || ''));
-    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || ''));
-    const safeCompany = submission.company ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.company)) : '';
-    const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.message || ''));
+    const safeName = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(submission.name || '')
+    );
+    const safeEmail = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(submission.email || '')
+    );
+    const safeCompany = submission.company
+      ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.company))
+      : '';
+    const safeMessage = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(submission.message || '')
+    );
     const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
     const truncatedMessage =
-      safeMessage.length > truncateLen ? `${safeMessage.substring(0, truncateLen)}...` : safeMessage;
-    const safeTitleMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.message || ''));
+      safeMessage.length > truncateLen
+        ? `${safeMessage.substring(0, truncateLen)}...`
+        : safeMessage;
+    const safeTitleMessage = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(submission.message || '')
+    );
 
     return `
       <tr data-contact-id="${submission.id}">
@@ -182,10 +194,18 @@ class AdminContactsRenderer {
   private renderContactModal(contact: Contact): string {
     const date = formatDateTime(contact.created_at);
 
-    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.name || ''));
-    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || ''));
-    const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.subject || ''));
-    const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.message || ''));
+    const safeName = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(contact.name || '')
+    );
+    const safeEmail = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(contact.email || '')
+    );
+    const safeSubject = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(contact.subject || '')
+    );
+    const safeMessage = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(contact.message || '')
+    );
 
     let html = `
       <div class="detail-grid">

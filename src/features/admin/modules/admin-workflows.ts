@@ -30,6 +30,68 @@ import { createLogger } from '../../../utils/logger';
 const logger = createLogger('AdminWorkflows');
 
 // ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn = typeof import('../../../react/features/admin/workflows').mountWorkflowsManager;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/workflows').unmountWorkflowsManager;
+
+let mountWorkflowsManager: ReactMountFn | null = null;
+let unmountWorkflowsManager: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactWorkflowsManager(): Promise<boolean> {
+  if (mountWorkflowsManager && unmountWorkflowsManager) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/workflows');
+    mountWorkflowsManager = module.mountWorkflowsManager;
+    unmountWorkflowsManager = module.unmountWorkflowsManager;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React workflows table */
+function shouldUseReactWorkflowsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_workflows') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_workflows_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
+
+// ============================================
 // TYPES
 // ============================================
 
@@ -183,16 +245,40 @@ function escapeHtml(text: string): string {
 export async function loadWorkflowsData(ctx: AdminDashboardContext): Promise<void> {
   _storedContext = ctx;
 
+  // Check if React implementation should be used
+  const useReact = shouldUseReactWorkflowsTable();
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React WorkflowsTable
+    const mountContainer = document.getElementById('react-workflows-mount');
+    if (mountContainer) {
+      const loaded = await loadReactWorkflowsManager();
+      if (loaded && mountWorkflowsManager) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountWorkflowsManager) {
+          unmountWorkflowsManager();
+        }
+        mountWorkflowsManager(mountContainer, {});
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        return;
+      }
+    }
+  }
+
+  // Fallback to vanilla implementation
   // Setup subtab navigation if not already done
   setupSubtabNavigation();
   setupPendingApprovalsHandlers();
 
   // Load data for current subtab
   if (currentSubtab === 'approvals') {
-    await Promise.all([
-      loadApprovalWorkflows(),
-      loadPendingApprovals()
-    ]);
+    await Promise.all([loadApprovalWorkflows(), loadPendingApprovals()]);
   } else {
     await loadTriggers();
   }
@@ -202,13 +288,15 @@ export async function loadWorkflowsData(ctx: AdminDashboardContext): Promise<voi
 // SUBTAB NAVIGATION
 // ============================================
 
-async function switchWorkflowsSubtab(subtab: 'approvals' | 'triggers' | 'email-templates'): Promise<void> {
+async function switchWorkflowsSubtab(
+  subtab: 'approvals' | 'triggers' | 'email-templates'
+): Promise<void> {
   if (subtab === currentSubtab) return;
 
   const container = el('workflows-subtabs');
   if (container) {
     // Update active state
-    container.querySelectorAll('[data-subtab]').forEach(b => b.classList.remove('active'));
+    container.querySelectorAll('[data-subtab]').forEach((b) => b.classList.remove('active'));
     container.querySelector(`[data-subtab="${subtab}"]`)?.classList.add('active');
   }
 
@@ -281,19 +369,22 @@ function renderWorkflowsTable(): void {
     return;
   }
 
-  tbody.innerHTML = cachedWorkflows.map(w => {
-    const entityLabel = ENTITY_TYPE_LABELS[w.entity_type] || w.entity_type;
-    const typeLabel = WORKFLOW_TYPE_LABELS[w.workflow_type] || w.workflow_type;
-    const statusBadge = getStatusDotHTML(w.is_active ? 'active' : 'inactive');
-    // Purple star icon for default indicator
-    const defaultIcon = w.is_default ? `
+  tbody.innerHTML = cachedWorkflows
+    .map((w) => {
+      const entityLabel = ENTITY_TYPE_LABELS[w.entity_type] || w.entity_type;
+      const typeLabel = WORKFLOW_TYPE_LABELS[w.workflow_type] || w.workflow_type;
+      const statusBadge = getStatusDotHTML(w.is_active ? 'active' : 'inactive');
+      // Purple star icon for default indicator
+      const defaultIcon = w.is_default
+        ? `
       <span class="default-indicator" title="Default workflow for ${entityLabel}">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
         </svg>
-      </span>` : '';
+      </span>`
+        : '';
 
-    return `
+      return `
       <tr data-workflow-id="${w.id}">
         <td class="name-cell" data-label="Name">${escapeHtml(w.name)}${defaultIcon}</td>
         <td class="type-cell entity-type-cell" data-label="Entity Type">
@@ -308,19 +399,36 @@ function renderWorkflowsTable(): void {
         <td class="date-cell" data-label="Updated">${formatDate(w.updated_at)}</td>
         <td class="actions-cell" data-label="Actions">
           ${renderActionsCell([
-    createAction('edit', w.id, { className: 'workflow-edit', title: 'Edit workflow', ariaLabel: 'Edit workflow' }),
-    createAction('steps', w.id, { className: 'workflow-steps', ariaLabel: 'Manage approval steps' }),
-    createAction('delete', w.id, { className: 'workflow-delete', dataAttrs: { name: escapeHtml(w.name) }, ariaLabel: 'Delete workflow' })
+    createAction('edit', w.id, {
+      className: 'workflow-edit',
+      title: 'Edit workflow',
+      ariaLabel: 'Edit workflow'
+    }),
+    createAction('steps', w.id, {
+      className: 'workflow-steps',
+      ariaLabel: 'Manage approval steps'
+    }),
+    createAction('delete', w.id, {
+      className: 'workflow-delete',
+      dataAttrs: { name: escapeHtml(w.name) },
+      ariaLabel: 'Delete workflow'
+    })
   ])}
         </td>
       </tr>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 function setupWorkflowHandlers(): void {
   const tbody = el('workflows-table-body');
-  logger.log(' setupWorkflowHandlers called, tbody:', !!tbody, 'already attached:', tbody?.dataset.handlersAttached);
+  logger.log(
+    ' setupWorkflowHandlers called, tbody:',
+    !!tbody,
+    'already attached:',
+    tbody?.dataset.handlersAttached
+  );
   if (!tbody || tbody.dataset.handlersAttached === 'true') return;
   tbody.dataset.handlersAttached = 'true';
   logger.log(' Attaching handlers to tbody');
@@ -381,7 +489,7 @@ async function openWorkflowModal(id?: number): Promise<void> {
   let workflow: WorkflowDefinition | null = null;
 
   if (isEdit) {
-    workflow = cachedWorkflows.find(w => w.id === id) || null;
+    workflow = cachedWorkflows.find((w) => w.id === id) || null;
     logger.log(' Found workflow in cache:', !!workflow);
     if (!workflow) return;
   }
@@ -434,12 +542,16 @@ async function openWorkflowModal(id?: number): Promise<void> {
     `;
 
     // Cancel button - use footer.querySelector since modal isn't in DOM yet
-    workflowModal.footer.querySelector('#workflow-cancel-btn')?.addEventListener('click', () => workflowModal?.hide());
+    workflowModal.footer
+      .querySelector('#workflow-cancel-btn')
+      ?.addEventListener('click', () => workflowModal?.hide());
 
     // Preview button
-    workflowModal.footer.querySelector('#workflow-preview-btn')?.addEventListener('click', async () => {
-      await previewWorkflow();
-    });
+    workflowModal.footer
+      .querySelector('#workflow-preview-btn')
+      ?.addEventListener('click', async () => {
+        await previewWorkflow();
+      });
 
     // Form submit
     workflowModal.body.querySelector('#workflow-form')?.addEventListener('submit', async (e) => {
@@ -459,16 +571,18 @@ async function openWorkflowModal(id?: number): Promise<void> {
 
   // Use modal body to query elements (they're now in DOM)
   const modalBody = workflowModal.body;
-  (modalBody.querySelector('#workflow-id') as HTMLInputElement).value = workflow?.id?.toString() || '';
+  (modalBody.querySelector('#workflow-id') as HTMLInputElement).value =
+    workflow?.id?.toString() || '';
   (modalBody.querySelector('#workflow-name') as HTMLInputElement).value = workflow?.name || '';
-  (modalBody.querySelector('#workflow-description') as HTMLTextAreaElement).value = workflow?.description || '';
+  (modalBody.querySelector('#workflow-description') as HTMLTextAreaElement).value =
+    workflow?.description || '';
 
   // Create entity type dropdown
   const entityTypeContainer = modalBody.querySelector('#workflow-entity-type-dropdown');
   if (entityTypeContainer) {
     entityTypeContainer.innerHTML = '';
     const entityDropdown = createModalDropdown({
-      options: ENTITY_TYPES.map(t => ({ value: t, label: ENTITY_TYPE_LABELS[t] })),
+      options: ENTITY_TYPES.map((t) => ({ value: t, label: ENTITY_TYPE_LABELS[t] })),
       currentValue: workflow?.entity_type || 'proposal',
       ariaLabelPrefix: 'Entity Type'
     });
@@ -481,7 +595,7 @@ async function openWorkflowModal(id?: number): Promise<void> {
   if (workflowTypeContainer) {
     workflowTypeContainer.innerHTML = '';
     const typeDropdown = createModalDropdown({
-      options: WORKFLOW_TYPES.map(t => ({ value: t, label: WORKFLOW_TYPE_LABELS[t] })),
+      options: WORKFLOW_TYPES.map((t) => ({ value: t, label: WORKFLOW_TYPE_LABELS[t] })),
       currentValue: workflow?.workflow_type || 'sequential',
       ariaLabelPrefix: 'Workflow Type'
     });
@@ -489,7 +603,8 @@ async function openWorkflowModal(id?: number): Promise<void> {
     workflowTypeContainer.appendChild(typeDropdown);
   }
 
-  (modalBody.querySelector('#workflow-is-default') as HTMLInputElement).checked = workflow?.is_default || false;
+  (modalBody.querySelector('#workflow-is-default') as HTMLInputElement).checked =
+    workflow?.is_default || false;
 
   manageFocusTrap(workflowModal.overlay);
 }
@@ -530,7 +645,8 @@ async function previewWorkflow(): Promise<void> {
 
   // Get current form values
   const name = (el('workflow-name') as HTMLInputElement)?.value.trim() || 'Untitled Workflow';
-  const description = (el('workflow-description') as HTMLTextAreaElement)?.value.trim() || 'No description';
+  const description =
+    (el('workflow-description') as HTMLTextAreaElement)?.value.trim() || 'No description';
   const entityType = (el('workflow-entity-type') as HTMLSelectElement)?.value as EntityType;
   const workflowType = (el('workflow-type') as HTMLSelectElement)?.value as WorkflowType;
   const isDefault = (el('workflow-is-default') as HTMLInputElement)?.checked || false;
@@ -548,7 +664,8 @@ async function previewWorkflow(): Promise<void> {
   }
 
   // Show loading state
-  workflowPreviewModal.body.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  workflowPreviewModal.body.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   workflowPreviewModal.setTitle(`Preview: ${escapeHtml(name)}`);
   workflowPreviewModal.show();
   manageFocusTrap(workflowPreviewModal.overlay);
@@ -559,7 +676,10 @@ async function previewWorkflow(): Promise<void> {
     try {
       const res = await apiFetch(`${APPROVALS_API}/workflows/${workflowId}`);
       if (res.ok) {
-        const data = await parseApiResponse<{ workflow: WorkflowDefinition; steps: WorkflowStep[] }>(res);
+        const data = await parseApiResponse<{
+          workflow: WorkflowDefinition;
+          steps: WorkflowStep[];
+        }>(res);
         steps = data.steps || [];
       }
     } catch {
@@ -608,14 +728,20 @@ async function previewWorkflow(): Promise<void> {
 
       <div class="preview-section">
         <h4>Approval Steps (${steps.length})</h4>
-        ${steps.length > 0 ? renderPreviewSteps(steps, workflowType) : `
+        ${
+  steps.length > 0
+    ? renderPreviewSteps(steps, workflowType)
+    : `
           <div class="empty-state">
             ${workflowId ? 'No steps configured yet. Add steps after saving.' : 'Save the workflow first, then add approval steps.'}
           </div>
-        `}
+        `
+}
       </div>
 
-      ${steps.length > 0 ? `
+      ${
+  steps.length > 0
+    ? `
         <div class="preview-section">
           <h4>Simulation</h4>
           <div class="preview-simulation">
@@ -625,7 +751,9 @@ async function previewWorkflow(): Promise<void> {
             </ol>
           </div>
         </div>
-      ` : ''}
+      `
+    : ''
+}
     </div>
   `;
 }
@@ -678,7 +806,9 @@ function renderPreviewSteps(steps: WorkflowStep[], workflowType: WorkflowType): 
 
   return `
     <div class="preview-steps-list flex flex-col gap-1 ${workflowType === 'sequential' ? 'sequential' : 'parallel'}">
-      ${sortedSteps.map((step, index) => `
+      ${sortedSteps
+    .map(
+      (step, index) => `
         <div class="preview-step-item">
           <div class="preview-step-order">${step.step_order}</div>
           <div class="preview-step-content">
@@ -687,19 +817,29 @@ function renderPreviewSteps(steps: WorkflowStep[], workflowType: WorkflowType): 
               <span class="approver-value">${escapeHtml(step.approver_value)}</span>
               ${step.is_optional ? '<span class="optional-badge">Optional</span>' : ''}
             </div>
-            ${step.auto_approve_after_hours ? `
+            ${
+  step.auto_approve_after_hours
+    ? `
               <div class="preview-step-auto">
                 Auto-approves after ${step.auto_approve_after_hours} hours
               </div>
-            ` : ''}
+            `
+    : ''
+}
           </div>
-          ${workflowType === 'sequential' && index < sortedSteps.length - 1 ? `
+          ${
+  workflowType === 'sequential' && index < sortedSteps.length - 1
+    ? `
             <div class="step-arrow">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
             </div>
-          ` : ''}
+          `
+    : ''
+}
         </div>
-      `).join('')}
+      `
+    )
+    .join('')}
     </div>
   `;
 }
@@ -708,21 +848,29 @@ function renderSimulationSteps(steps: WorkflowStep[], workflowType: WorkflowType
   const sortedSteps = [...steps].sort((a, b) => a.step_order - b.step_order);
 
   if (workflowType === 'sequential') {
-    return sortedSteps.map((step, index) => `
+    return sortedSteps
+      .map(
+        (step, index) => `
       <li>
         ${index === 0 ? 'First, ' : 'Then, '}
         <strong>${step.approver_value}</strong> (${step.approver_type}) receives approval request
         ${step.is_optional ? ' (optional)' : ''}
         ${step.auto_approve_after_hours ? `, auto-approves after ${step.auto_approve_after_hours}h if no response` : ''}
       </li>
-    `).join('');
+    `
+      )
+      .join('');
   } else if (workflowType === 'parallel') {
     return `
       <li>All approvers receive requests simultaneously:
         <ul>
-          ${sortedSteps.map(step => `
+          ${sortedSteps
+    .map(
+      (step) => `
             <li><strong>${step.approver_value}</strong> (${step.approver_type})${step.is_optional ? ' (optional)' : ''}</li>
-          `).join('')}
+          `
+    )
+    .join('')}
         </ul>
       </li>
       <li>Workflow completes when <strong>all</strong> required approvers approve</li>
@@ -731,14 +879,17 @@ function renderSimulationSteps(steps: WorkflowStep[], workflowType: WorkflowType
   return `
       <li>All approvers receive requests simultaneously:
         <ul>
-          ${sortedSteps.map(step => `
+          ${sortedSteps
+    .map(
+      (step) => `
             <li><strong>${step.approver_value}</strong> (${step.approver_type})</li>
-          `).join('')}
+          `
+    )
+    .join('')}
         </ul>
       </li>
       <li>Workflow completes when <strong>any one</strong> approver approves</li>
     `;
-
 }
 
 async function deleteWorkflow(id: number, name: string): Promise<void> {
@@ -767,7 +918,7 @@ async function deleteWorkflow(id: number, name: string): Promise<void> {
 // ============================================
 
 async function openStepsModal(workflowId: number): Promise<void> {
-  const workflow = cachedWorkflows.find(w => w.id === workflowId);
+  const workflow = cachedWorkflows.find((w) => w.id === workflowId);
   if (!workflow) return;
 
   // Fetch workflow with steps
@@ -775,7 +926,9 @@ async function openStepsModal(workflowId: number): Promise<void> {
     const res = await apiFetch(`${APPROVALS_API}/workflows/${workflowId}`);
     if (!res.ok) throw new Error('Failed to load workflow');
 
-    const data = await parseApiResponse<{ workflow: WorkflowDefinition; steps: WorkflowStep[] }>(res);
+    const data = await parseApiResponse<{ workflow: WorkflowDefinition; steps: WorkflowStep[] }>(
+      res
+    );
 
     // Create modal if not exists
     if (!stepModal) {
@@ -793,7 +946,9 @@ async function openStepsModal(workflowId: number): Promise<void> {
       `;
 
       // Use footer.querySelector since modal isn't in DOM yet
-      stepModal.footer.querySelector('#steps-close-btn')?.addEventListener('click', () => stepModal?.hide());
+      stepModal.footer
+        .querySelector('#steps-close-btn')
+        ?.addEventListener('click', () => stepModal?.hide());
     }
 
     stepModal.setTitle(`Approval Steps: ${escapeHtml(workflow.name)}`);
@@ -803,7 +958,9 @@ async function openStepsModal(workflowId: number): Promise<void> {
     stepModal.body.innerHTML = `
       <div class="steps-list">
         ${steps.length === 0 ? '<div class="empty-state">No steps defined. Add steps below.</div>' : ''}
-        ${steps.map((s, i) => `
+        ${steps
+    .map(
+      (s, i) => `
           <div class="step-item" data-id="${s.id}">
             <div class="step-order">${i + 1}</div>
             <div class="step-details">
@@ -816,7 +973,9 @@ async function openStepsModal(workflowId: number): Promise<void> {
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
-        `).join('')}
+        `
+    )
+    .join('')}
       </div>
       <h4>Add New Step</h4>
       <form id="add-step-form" class="add-step-form">
@@ -848,7 +1007,7 @@ async function openStepsModal(workflowId: number): Promise<void> {
     `;
 
     // Handle step deletion
-    stepModal.body.querySelectorAll('.step-delete').forEach(btn => {
+    stepModal.body.querySelectorAll('.step-delete').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const stepId = parseInt((btn as HTMLElement).dataset.id || '0', 10);
         if (stepId) {
@@ -893,7 +1052,8 @@ async function addStep(workflowId: number): Promise<void> {
     approver_type: (el('step-approver-type') as HTMLElement)?.dataset.value || 'user',
     approver_value: (el('step-approver-value') as HTMLInputElement).value.trim(),
     is_optional: (el('step-optional') as HTMLInputElement).checked,
-    auto_approve_after_hours: parseInt((el('step-auto-hours') as HTMLInputElement).value, 10) || null
+    auto_approve_after_hours:
+      parseInt((el('step-auto-hours') as HTMLInputElement).value, 10) || null
   };
 
   try {
@@ -969,11 +1129,12 @@ function renderTriggersTable(): void {
     return;
   }
 
-  tbody.innerHTML = cachedTriggers.map(t => {
-    const actionLabel = ACTION_TYPE_LABELS[t.action_type] || t.action_type;
-    const statusBadge = getStatusDotHTML(t.is_active ? 'active' : 'inactive');
+  tbody.innerHTML = cachedTriggers
+    .map((t) => {
+      const actionLabel = ACTION_TYPE_LABELS[t.action_type] || t.action_type;
+      const statusBadge = getStatusDotHTML(t.is_active ? 'active' : 'inactive');
 
-    return `
+      return `
       <tr data-trigger-id="${t.id}">
         <td class="name-cell" data-label="Name">${escapeHtml(t.name)}</td>
         <td class="slug-cell" data-label="Event">${escapeHtml(t.event_type)}</td>
@@ -985,15 +1146,30 @@ function renderTriggersTable(): void {
         <td class="date-cell" data-label="Updated">${formatDate(t.updated_at)}</td>
         <td class="actions-cell" data-label="Actions">
           ${renderActionsCell([
-    conditionalAction(t.is_active, 'disable', t.id, { className: 'trigger-toggle', ariaLabel: 'Disable trigger' }),
-    conditionalAction(!t.is_active, 'enable', t.id, { className: 'trigger-toggle', ariaLabel: 'Enable trigger' }),
-    createAction('edit', t.id, { className: 'trigger-edit', title: 'Edit trigger', ariaLabel: 'Edit trigger' }),
-    createAction('delete', t.id, { className: 'trigger-delete', dataAttrs: { name: escapeHtml(t.name) }, ariaLabel: 'Delete trigger' })
+    conditionalAction(t.is_active, 'disable', t.id, {
+      className: 'trigger-toggle',
+      ariaLabel: 'Disable trigger'
+    }),
+    conditionalAction(!t.is_active, 'enable', t.id, {
+      className: 'trigger-toggle',
+      ariaLabel: 'Enable trigger'
+    }),
+    createAction('edit', t.id, {
+      className: 'trigger-edit',
+      title: 'Edit trigger',
+      ariaLabel: 'Edit trigger'
+    }),
+    createAction('delete', t.id, {
+      className: 'trigger-delete',
+      dataAttrs: { name: escapeHtml(t.name) },
+      ariaLabel: 'Delete trigger'
+    })
   ])}
         </td>
       </tr>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 function setupTriggerHandlers(): void {
@@ -1058,7 +1234,7 @@ async function openTriggerModal(id?: number): Promise<void> {
   let trigger: WorkflowTrigger | null = null;
 
   if (isEdit) {
-    trigger = cachedTriggers.find(t => t.id === id) || null;
+    trigger = cachedTriggers.find((t) => t.id === id) || null;
     if (!trigger) return;
   }
 
@@ -1149,16 +1325,18 @@ async function openTriggerModal(id?: number): Promise<void> {
 
   // Use modal body to query elements
   const modalBody = triggerModal.body;
-  (modalBody.querySelector('#trigger-id') as HTMLInputElement).value = trigger?.id?.toString() || '';
+  (modalBody.querySelector('#trigger-id') as HTMLInputElement).value =
+    trigger?.id?.toString() || '';
   (modalBody.querySelector('#trigger-name') as HTMLInputElement).value = trigger?.name || '';
-  (modalBody.querySelector('#trigger-description') as HTMLTextAreaElement).value = trigger?.description || '';
+  (modalBody.querySelector('#trigger-description') as HTMLTextAreaElement).value =
+    trigger?.description || '';
 
   // Create event type dropdown
   const eventTypeContainer = modalBody.querySelector('#trigger-event-type-dropdown');
   if (eventTypeContainer) {
     eventTypeContainer.innerHTML = '';
     const eventDropdown = createModalDropdown({
-      options: triggerOptions?.eventTypes?.map(e => ({ value: e, label: e })) || [],
+      options: triggerOptions?.eventTypes?.map((e) => ({ value: e, label: e })) || [],
       currentValue: trigger?.event_type || '',
       ariaLabelPrefix: 'Event Type',
       placeholder: 'Select event type...'
@@ -1172,7 +1350,8 @@ async function openTriggerModal(id?: number): Promise<void> {
   if (actionTypeContainer) {
     actionTypeContainer.innerHTML = '';
     const actionDropdown = createModalDropdown({
-      options: triggerOptions?.actionTypes?.map(a => ({ value: a.type, label: a.description })) || [],
+      options:
+        triggerOptions?.actionTypes?.map((a) => ({ value: a.type, label: a.description })) || [],
       currentValue: trigger?.action_type || '',
       ariaLabelPrefix: 'Action Type',
       placeholder: 'Select action type...'
@@ -1181,10 +1360,15 @@ async function openTriggerModal(id?: number): Promise<void> {
     actionTypeContainer.appendChild(actionDropdown);
   }
 
-  (modalBody.querySelector('#trigger-action-config') as HTMLTextAreaElement).value = trigger?.action_config ? JSON.stringify(trigger.action_config, null, 2) : '';
-  (modalBody.querySelector('#trigger-conditions') as HTMLTextAreaElement).value = trigger?.conditions ? JSON.stringify(trigger.conditions, null, 2) : '';
-  (modalBody.querySelector('#trigger-priority') as HTMLInputElement).value = (trigger?.priority ?? 0).toString();
-  (modalBody.querySelector('#trigger-active') as HTMLInputElement).checked = trigger?.is_active ?? true;
+  (modalBody.querySelector('#trigger-action-config') as HTMLTextAreaElement).value =
+    trigger?.action_config ? JSON.stringify(trigger.action_config, null, 2) : '';
+  (modalBody.querySelector('#trigger-conditions') as HTMLTextAreaElement).value =
+    trigger?.conditions ? JSON.stringify(trigger.conditions, null, 2) : '';
+  (modalBody.querySelector('#trigger-priority') as HTMLInputElement).value = (
+    trigger?.priority ?? 0
+  ).toString();
+  (modalBody.querySelector('#trigger-active') as HTMLInputElement).checked =
+    trigger?.is_active ?? true;
 
   manageFocusTrap(triggerModal.overlay);
 }
@@ -1315,7 +1499,11 @@ async function testTrigger(): Promise<void> {
 /**
  * Generate sample context data for testing triggers
  */
-function generateTestContext(eventType: string, conditions: Record<string, unknown> | null, _actionConfig: Record<string, unknown>): Record<string, unknown> {
+function generateTestContext(
+  eventType: string,
+  conditions: Record<string, unknown> | null,
+  _actionConfig: Record<string, unknown>
+): Record<string, unknown> {
   // Base context that applies to all events
   const base: Record<string, unknown> = {
     timestamp: new Date().toISOString(),
@@ -1483,12 +1671,14 @@ async function openTriggerLogsModal(triggerId?: number): Promise<void> {
   triggerLogsModal.show();
 
   // Create/update trigger filter dropdown
-  const triggerFilterContainer = triggerLogsModal.body.querySelector('#logs-trigger-filter-dropdown');
+  const triggerFilterContainer = triggerLogsModal.body.querySelector(
+    '#logs-trigger-filter-dropdown'
+  );
   if (triggerFilterContainer) {
     triggerFilterContainer.innerHTML = '';
     const triggerFilterOptions = [
       { value: '', label: 'All Triggers' },
-      ...cachedTriggers.map(t => ({ value: t.id.toString(), label: t.name }))
+      ...cachedTriggers.map((t) => ({ value: t.id.toString(), label: t.name }))
     ];
     const triggerDropdown = createModalDropdown({
       options: triggerFilterOptions,
@@ -1526,7 +1716,8 @@ async function loadTriggerLogs(): Promise<void> {
   const listEl = el('trigger-logs-list');
   if (!listEl) return;
 
-  listEl.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  listEl.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     const triggerFilter = (el('logs-trigger-filter') as HTMLElement)?.dataset.value || '';
@@ -1545,7 +1736,7 @@ async function loadTriggerLogs(): Promise<void> {
 
     // Client-side filter by result if needed
     if (resultFilter) {
-      logs = logs.filter(log => log.action_result === resultFilter);
+      logs = logs.filter((log) => log.action_result === resultFilter);
     }
 
     renderTriggerLogs(logs);
@@ -1568,10 +1759,14 @@ function renderTriggerLogs(logs: TriggerExecutionLog[]): void {
 
   const getResultBadgeClass = (result: string): string => {
     switch (result) {
-    case 'success': return 'status-badge--success';
-    case 'failed': return 'status-badge--danger';
-    case 'skipped': return 'status-badge--muted';
-    default: return '';
+    case 'success':
+      return 'status-badge--success';
+    case 'failed':
+      return 'status-badge--danger';
+    case 'skipped':
+      return 'status-badge--muted';
+    default:
+      return '';
     }
   };
 
@@ -1588,7 +1783,9 @@ function renderTriggerLogs(logs: TriggerExecutionLog[]): void {
     }
   };
 
-  listEl.innerHTML = logs.map(log => `
+  listEl.innerHTML = logs
+    .map(
+      (log) => `
     <div class="trigger-log-entry trigger-log-entry--${log.action_result}">
       <div class="trigger-log-header">
         <div class="trigger-log-title flex items-center gap-2">
@@ -1607,14 +1804,20 @@ function renderTriggerLogs(logs: TriggerExecutionLog[]): void {
         <div class="trigger-log-event">
           <code>${escapeHtml(log.event_type)}</code>
         </div>
-        ${log.error_message ? `
+        ${
+  log.error_message
+    ? `
           <div class="trigger-log-error">
             <strong>Error:</strong> ${escapeHtml(log.error_message)}
           </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 }
 
 // ============================================
@@ -1650,11 +1853,11 @@ function updateApprovalStats(): void {
   const urgentEl = el('approvals-urgent');
 
   const total = cachedApprovalInstances.length;
-  const proposals = cachedApprovalInstances.filter(a => a.entity_type === 'proposal').length;
+  const proposals = cachedApprovalInstances.filter((a) => a.entity_type === 'proposal').length;
 
   // Urgent = older than 24 hours
   const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
-  const urgent = cachedApprovalInstances.filter(a => {
+  const urgent = cachedApprovalInstances.filter((a) => {
     const initiated = new Date(a.initiated_at).getTime();
     return initiated < dayAgo;
   }).length;
@@ -1670,12 +1873,12 @@ function filterApprovalInstances(): ApprovalInstance[] {
   }
 
   if (currentApprovalFilter === 'proposals') {
-    return cachedApprovalInstances.filter(a => a.entity_type === 'proposal');
+    return cachedApprovalInstances.filter((a) => a.entity_type === 'proposal');
   }
 
   if (currentApprovalFilter === 'urgent') {
     const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
-    return cachedApprovalInstances.filter(a => {
+    return cachedApprovalInstances.filter((a) => {
       const initiated = new Date(a.initiated_at).getTime();
       return initiated < dayAgo;
     });
@@ -1695,9 +1898,10 @@ function renderPendingApprovalsTable(): void {
   updateBulkToolbar();
 
   if (filtered.length === 0) {
-    const message = currentApprovalFilter === 'all'
-      ? 'No pending approvals.'
-      : `No ${currentApprovalFilter} approvals found.`;
+    const message =
+      currentApprovalFilter === 'all'
+        ? 'No pending approvals.'
+        : `No ${currentApprovalFilter} approvals found.`;
     showTableEmpty(tbody, 7, message);
     // Uncheck select-all
     const selectAll = el('approvals-select-all') as HTMLInputElement;
@@ -1705,21 +1909,24 @@ function renderPendingApprovalsTable(): void {
     return;
   }
 
-  tbody.innerHTML = filtered.map(a => {
-    const entityLabel = ENTITY_TYPE_LABELS[a.entity_type] || a.entity_type;
-    const statusClass = a.status === 'in_progress' ? 'warning' : 'pending';
-    const statusLabel = a.status === 'in_progress' ? 'In Progress' : 'Pending';
-    const statusBadge = getStatusDotHTML(statusClass as 'pending' | 'warning', { label: statusLabel });
+  tbody.innerHTML = filtered
+    .map((a) => {
+      const entityLabel = ENTITY_TYPE_LABELS[a.entity_type] || a.entity_type;
+      const statusClass = a.status === 'in_progress' ? 'warning' : 'pending';
+      const statusLabel = a.status === 'in_progress' ? 'In Progress' : 'Pending';
+      const statusBadge = getStatusDotHTML(statusClass as 'pending' | 'warning', {
+        label: statusLabel
+      });
 
-    // Check if urgent (older than 24 hours)
-    const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
-    const initiated = new Date(a.initiated_at).getTime();
-    const isUrgent = initiated < dayAgo;
-    const urgentBadge = isUrgent
-      ? '<span class="urgent-badge" title="Waiting more than 24 hours">!</span>'
-      : '';
+      // Check if urgent (older than 24 hours)
+      const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+      const initiated = new Date(a.initiated_at).getTime();
+      const isUrgent = initiated < dayAgo;
+      const urgentBadge = isUrgent
+        ? '<span class="urgent-badge" title="Waiting more than 24 hours">!</span>'
+        : '';
 
-    return `
+      return `
       <tr data-approval-id="${a.id}">
         <td class="bulk-select-cell" data-label="">
           ${getPortalCheckboxHTML({
@@ -1757,7 +1964,8 @@ function renderPendingApprovalsTable(): void {
         </td>
       </tr>
     `;
-  }).join('');
+    })
+    .join('');
 
   // Reset select-all checkbox
   const selectAll = el('approvals-select-all') as HTMLInputElement;
@@ -1782,13 +1990,15 @@ function setupPendingApprovalsHandlers(): void {
   section.dataset.handlersAttached = 'true';
 
   // Filter stat cards
-  section.querySelectorAll('[data-approval-filter]').forEach(card => {
+  section.querySelectorAll('[data-approval-filter]').forEach((card) => {
     card.addEventListener('click', () => {
       const filter = (card as HTMLElement).dataset.approvalFilter as 'all' | 'proposals' | 'urgent';
       if (filter === currentApprovalFilter) return;
 
       // Update active state
-      section.querySelectorAll('[data-approval-filter]').forEach(c => c.classList.remove('active'));
+      section
+        .querySelectorAll('[data-approval-filter]')
+        .forEach((c) => c.classList.remove('active'));
       card.classList.add('active');
 
       currentApprovalFilter = filter;
@@ -1806,8 +2016,10 @@ function setupPendingApprovalsHandlers(): void {
   const selectAll = el('approvals-select-all') as HTMLInputElement;
   if (selectAll) {
     selectAll.addEventListener('change', () => {
-      const checkboxes = document.querySelectorAll('.approval-checkbox') as NodeListOf<HTMLInputElement>;
-      checkboxes.forEach(cb => {
+      const checkboxes = document.querySelectorAll(
+        '.approval-checkbox'
+      ) as NodeListOf<HTMLInputElement>;
+      checkboxes.forEach((cb) => {
         cb.checked = selectAll.checked;
         const id = parseInt(cb.dataset.id || '0', 10);
         if (id) {
@@ -1837,8 +2049,10 @@ function setupPendingApprovalsHandlers(): void {
   if (bulkClearBtn) {
     bulkClearBtn.addEventListener('click', () => {
       selectedApprovalIds.clear();
-      const checkboxes = document.querySelectorAll('.approval-checkbox') as NodeListOf<HTMLInputElement>;
-      checkboxes.forEach(cb => cb.checked = false);
+      const checkboxes = document.querySelectorAll(
+        '.approval-checkbox'
+      ) as NodeListOf<HTMLInputElement>;
+      checkboxes.forEach((cb) => (cb.checked = false));
       const selectAllCb = el('approvals-select-all') as HTMLInputElement;
       if (selectAllCb) selectAllCb.checked = false;
       updateBulkToolbar();
@@ -1915,9 +2129,11 @@ function updateSelectAllState(): void {
   const selectAll = el('approvals-select-all') as HTMLInputElement;
   if (!selectAll) return;
 
-  const checkboxes = document.querySelectorAll('.approval-checkbox') as NodeListOf<HTMLInputElement>;
-  const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(cb => cb.checked);
-  const someChecked = Array.from(checkboxes).some(cb => cb.checked);
+  const checkboxes = document.querySelectorAll(
+    '.approval-checkbox'
+  ) as NodeListOf<HTMLInputElement>;
+  const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every((cb) => cb.checked);
+  const someChecked = Array.from(checkboxes).some((cb) => cb.checked);
 
   selectAll.checked = allChecked;
   selectAll.indeterminate = someChecked && !allChecked;
@@ -1995,8 +2211,11 @@ function navigateToEntity(entityType: EntityType, entityId: string): void {
   }
 }
 
-async function handleApprovalAction(instanceId: number, action: 'approve' | 'reject'): Promise<void> {
-  const instance = cachedApprovalInstances.find(a => a.id === instanceId);
+async function handleApprovalAction(
+  instanceId: number,
+  action: 'approve' | 'reject'
+): Promise<void> {
+  const instance = cachedApprovalInstances.find((a) => a.id === instanceId);
   if (!instance) return;
 
   const entityLabel = ENTITY_TYPE_LABELS[instance.entity_type] || instance.entity_type;
@@ -2079,7 +2298,8 @@ async function openApprovalHistoryModal(entityType: EntityType, entityId: string
   }
 
   historyModal.setTitle(`${entityLabel} #${entityId} - Approval History`);
-  historyModal.body.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading history...</span></div>';
+  historyModal.body.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading history...</span></div>';
   historyModal.show();
   manageFocusTrap(historyModal.overlay);
 
@@ -2102,10 +2322,15 @@ async function openApprovalHistoryModal(entityType: EntityType, entityId: string
       return;
     }
 
-    historyModal.body.innerHTML = renderApprovalHistoryContent(data.instance, data.requests, data.history);
+    historyModal.body.innerHTML = renderApprovalHistoryContent(
+      data.instance,
+      data.requests,
+      data.history
+    );
   } catch (error) {
     logger.error(' Error loading history:', error);
-    historyModal.body.innerHTML = '<div class="error-state"><span class="error-message">Error loading approval history</span></div>';
+    historyModal.body.innerHTML =
+      '<div class="error-state"><span class="error-message">Error loading approval history</span></div>';
   }
 }
 
@@ -2117,11 +2342,16 @@ function renderApprovalHistoryContent(
   const workflowTypeLabel = WORKFLOW_TYPE_LABELS[instance.workflow_type] || instance.workflow_type;
 
   // Instance status badge
-  const statusClass = instance.status === 'pending' ? 'warning'
-    : instance.status === 'in_progress' ? 'info'
-      : instance.status === 'approved' ? 'success'
-        : instance.status === 'rejected' ? 'danger'
-          : 'muted';
+  const statusClass =
+    instance.status === 'pending'
+      ? 'warning'
+      : instance.status === 'in_progress'
+        ? 'info'
+        : instance.status === 'approved'
+          ? 'success'
+          : instance.status === 'rejected'
+            ? 'danger'
+            : 'muted';
 
   const instanceSection = `
     <div class="history-instance-info flex flex-col gap-1">
@@ -2141,24 +2371,36 @@ function renderApprovalHistoryContent(
         <span class="history-label">Started:</span>
         <span class="history-value">${formatDate(instance.initiated_at)}</span>
       </div>
-      ${instance.completed_at ? `
+      ${
+  instance.completed_at
+    ? `
         <div class="history-info-row flex items-center gap-2">
           <span class="history-label">Completed:</span>
           <span class="history-value">${formatDate(instance.completed_at)}</span>
         </div>
-      ` : ''}
+      `
+    : ''
+}
     </div>
   `;
 
   // Requests section
-  const requestsHtml = requests.length === 0 ? '<div class="empty-state">No approval requests.</div>' : `
+  const requestsHtml =
+    requests.length === 0
+      ? '<div class="empty-state">No approval requests.</div>'
+      : `
     <div class="history-requests-list flex flex-col gap-2">
-      ${requests.map(r => {
-    const reqStatusClass = r.status === 'pending' ? 'warning'
-      : r.status === 'approved' ? 'success'
-        : r.status === 'rejected' ? 'danger'
-          : 'muted';
-    return `
+      ${requests
+    .map((r) => {
+      const reqStatusClass =
+            r.status === 'pending'
+              ? 'warning'
+              : r.status === 'approved'
+                ? 'success'
+                : r.status === 'rejected'
+                  ? 'danger'
+                  : 'muted';
+      return `
           <div class="history-request-item">
             <div class="history-request-approver flex items-center justify-between gap-2 flex-wrap">
               <span class="approver-email">${escapeHtml(r.approver_email)}</span>
@@ -2168,22 +2410,30 @@ function renderApprovalHistoryContent(
             ${r.comment ? `<div class="history-request-comment">"${escapeHtml(r.comment)}"</div>` : ''}
           </div>
         `;
-  }).join('')}
+    })
+    .join('')}
     </div>
   `;
 
   // History section
-  const historyHtml = history.length === 0 ? '<div class="empty-state">No history entries.</div>' : `
+  const historyHtml =
+    history.length === 0
+      ? '<div class="empty-state">No history entries.</div>'
+      : `
     <div class="history-timeline flex flex-col gap-2">
-      ${history.map(h => {
-    const actionIcon = h.action === 'approved' ? '&#10003;'
-      : h.action === 'rejected' ? '&#10007;'
-        : h.action === 'initiated' ? '&#9658;'
-          : '&#8226;';
-    const actionClass = h.action === 'approved' ? 'success'
-      : h.action === 'rejected' ? 'danger'
-        : 'neutral';
-    return `
+      ${history
+    .map((h) => {
+      const actionIcon =
+            h.action === 'approved'
+              ? '&#10003;'
+              : h.action === 'rejected'
+                ? '&#10007;'
+                : h.action === 'initiated'
+                  ? '&#9658;'
+                  : '&#8226;';
+      const actionClass =
+            h.action === 'approved' ? 'success' : h.action === 'rejected' ? 'danger' : 'neutral';
+      return `
           <div class="history-entry history-entry--${actionClass}">
             <div class="history-entry-icon">${actionIcon}</div>
             <div class="history-entry-content">
@@ -2195,7 +2445,8 @@ function renderApprovalHistoryContent(
             </div>
           </div>
         `;
-  }).join('')}
+    })
+    .join('')}
     </div>
   `;
 
@@ -2222,11 +2473,14 @@ function renderApprovalHistoryContent(
 // ---------------------------------------------------------------------------
 
 const RENDER_ICONS = {
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
   PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
-  CHECK: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  CHECK:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
   X: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-  FILE_TEXT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
+  FILE_TEXT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
 };
 
 // ---------------------------------------------------------------------------
@@ -2234,9 +2488,34 @@ const RENDER_ICONS = {
 // ---------------------------------------------------------------------------
 
 /**
+ * Cleanup function called when leaving the workflows tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupWorkflowsTab(): void {
+  if (reactTableMounted && unmountWorkflowsManager) {
+    unmountWorkflowsManager();
+    reactTableMounted = false;
+    reactMountContainer = null;
+  }
+}
+
+/**
  * Render the workflows tab structure dynamically
  */
 export function renderWorkflowsTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactWorkflowsTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Workflows Table Mount Point -->
+      <div id="react-workflows-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <!-- Pending Approvals Dashboard -->
     <div id="pending-approvals-section" class="approval-dashboard-section flex flex-col gap-section">

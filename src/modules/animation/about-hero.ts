@@ -91,7 +91,9 @@ export class AboutHeroModule extends BaseHeroAnimation {
    */
   private setupElements(): void {
     this.hero = document.querySelector(this.heroSelector) as HTMLElement;
-    this.aboutContent = document.querySelector(`.about-section ${this.contentSelector}`) as HTMLElement;
+    this.aboutContent = document.querySelector(
+      `.about-section ${this.contentSelector}`
+    ) as HTMLElement;
 
     if (!this.hero) {
       this.log('Hero element not found');
@@ -211,12 +213,8 @@ export class AboutHeroModule extends BaseHeroAnimation {
 
     // Use base class wheel handling
     const progressRef = { value: this.targetProgress };
-    this.handleWheelAnimation(
-      event,
-      this.groupTimeline,
-      this.textTimeline,
-      progressRef,
-      () => this.revealContent()
+    this.handleWheelAnimation(event, this.groupTimeline, this.textTimeline, progressRef, () =>
+      this.revealContent()
     );
 
     // Update progress (handleWheelAnimation modifies the object)
@@ -235,16 +233,11 @@ export class AboutHeroModule extends BaseHeroAnimation {
     window.removeEventListener('wheel', this.handleWheel);
 
     // Use base class reveal method
-    super.revealHeroContent(
-      this.hero,
-      this.aboutContent,
-      () => {
-        this.hero?.classList.add('hero-revealed');
-        this.dispatchEvent('revealed');
-      }
-    );
+    super.revealHeroContent(this.hero, this.aboutContent, () => {
+      this.hero?.classList.add('hero-revealed');
+      this.dispatchEvent('revealed');
+    });
   }
-
 
   /**
    * Reset hero to initial state (for page navigation)

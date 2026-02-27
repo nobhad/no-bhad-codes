@@ -36,7 +36,12 @@ function escapeAttr(s: string): string {
 function dataAttrs(attrs: Record<string, string | number>): string {
   return Object.entries(attrs)
     .map(([key, value]) => {
-      const dataKey = key.startsWith('data-') ? key : `data-${key.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '')}`;
+      const dataKey = key.startsWith('data-')
+        ? key
+        : `data-${key
+          .replace(/([A-Z])/g, '-$1')
+          .toLowerCase()
+          .replace(/^-/, '')}`;
       return `${dataKey}="${escapeAttr(String(value))}"`;
     })
     .join(' ');
@@ -69,7 +74,9 @@ export function getPortalCheckboxHTML(config: PortalCheckboxConfig): string {
     `aria-label="${escapeAttr(ariaLabel)}"`,
     checked ? 'checked' : '',
     Object.keys(dataAttributes).length ? dataAttrs(dataAttributes) : ''
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return `<div class="${escapeAttr(wrapperClass)}"><input ${attrs} /></div>`;
 }

@@ -12,10 +12,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
-import type {
-  ProjectResponse,
-  InvoiceResponse
-} from '../../../types/api';
+import type { ProjectResponse, InvoiceResponse } from '../../../types/api';
 import { formatCurrency, formatDate, formatDateTime } from '../../../utils/format-utils';
 import { createModalDropdown } from '../../../components/modal-dropdown';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
@@ -66,7 +63,11 @@ let reactMountContainer: HTMLElement | null = null;
 function isReactTableActuallyMounted(): boolean {
   if (!reactTableMounted) return false;
   // Check if the container still exists in the DOM and has content
-  if (!reactMountContainer || !reactMountContainer.isConnected || reactMountContainer.children.length === 0) {
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
     reactTableMounted = false;
     reactMountContainer = null;
     return false;
@@ -223,9 +224,12 @@ let currentClientId: number | null = null;
 // ============================================
 
 const RENDER_ICONS = {
-  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
-  USER_PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>'
+  EXPORT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+  USER_PLUS:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>'
 };
 
 // ============================================
@@ -276,14 +280,18 @@ const clientsModule = createTableModule<Client, ClientsStats>({
     const clients = data.clients || [];
     const stats: ClientsStats = {
       total: clients.length,
-      active: clients.filter(c => c.status === 'active').length,
-      pending: clients.filter(c => c.status === 'pending').length,
-      inactive: clients.filter(c => c.status === 'inactive').length
+      active: clients.filter((c) => c.status === 'active').length,
+      pending: clients.filter((c) => c.status === 'pending').length,
+      inactive: clients.filter((c) => c.status === 'inactive').length
     };
     return { data: clients, stats };
   },
 
-  renderRow: (client: Client, _ctx: AdminDashboardContext, _helpers: TableModuleHelpers<Client>) => {
+  renderRow: (
+    client: Client,
+    _ctx: AdminDashboardContext,
+    _helpers: TableModuleHelpers<Client>
+  ) => {
     return buildClientRow(client);
   },
 
@@ -335,9 +343,6 @@ const clientsModule = createTableModule<Client, ClientsStats>({
 // Export factory-provided functions
 export const getClientsData = clientsModule.getData;
 
-// Store context for React callbacks (used for future detail view integration)
-let _storedContext: AdminDashboardContext | null = null;
-
 /**
  * Cleanup function called when leaving the clients tab
  * Unmounts React components if they were mounted
@@ -353,8 +358,6 @@ export function cleanupClientsTab(): void {
  * Load clients data - handles both React and vanilla implementations
  */
 export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
-  _storedContext = ctx;
-
   // Check if React implementation should be used
   const useReact = shouldUseReactClientsTable();
   let reactMountSuccess = false;
@@ -553,13 +556,17 @@ function buildClientRow(client: Client): HTMLTableRowElement {
   // For business clients with company, company is primary name; otherwise contact is primary
   const isBusinessWithCompany = clientType === 'business' && decodedCompany;
   const safeName = SanitizationUtils.escapeHtml(
-    isBusinessWithCompany ? decodedCompany : (decodedContact || '')
+    isBusinessWithCompany ? decodedCompany : decodedContact || ''
   );
   const safeEmail = SanitizationUtils.escapeHtml(client.email || '');
   // Secondary info: contact for business, company for personal
   const safeCompany = isBusinessWithCompany
-    ? (decodedContact ? SanitizationUtils.escapeHtml(decodedContact) : '')
-    : (decodedCompany ? SanitizationUtils.escapeHtml(decodedCompany) : '');
+    ? decodedContact
+      ? SanitizationUtils.escapeHtml(decodedContact)
+      : ''
+    : decodedCompany
+      ? SanitizationUtils.escapeHtml(decodedCompany)
+      : '';
   const projectCount = client.project_count || 0;
 
   const typeLabel = clientType === 'personal' ? 'Personal' : 'Business';
@@ -615,8 +622,18 @@ function buildClientRow(client: Client): HTMLTableRowElement {
     <td class="date-cell last-active-cell" data-label="Last Active">${lastActive}</td>
     <td class="actions-cell" data-label="Actions">
       ${renderActionsCell([
-    conditionalAction(showInviteBtn, 'send', client.id, { className: 'client-invite', title: 'Send invitation email', ariaLabel: 'Send invitation email to client', dataAttrs: { 'client-id': client.id } }),
-    createAction('view', client.id, { className: 'btn-view-client', title: 'View Client', ariaLabel: 'View client details', dataAttrs: { 'client-id': client.id } })
+    conditionalAction(showInviteBtn, 'send', client.id, {
+      className: 'client-invite',
+      title: 'Send invitation email',
+      ariaLabel: 'Send invitation email to client',
+      dataAttrs: { 'client-id': client.id }
+    }),
+    createAction('view', client.id, {
+      className: 'btn-view-client',
+      title: 'View Client',
+      ariaLabel: 'View client details',
+      dataAttrs: { 'client-id': client.id }
+    })
   ])}
     </td>
   `;
@@ -633,11 +650,13 @@ function setupClientRowHandlers(tableBody: HTMLElement, clients: Client[]): void
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       // Don't navigate if clicking the checkbox, invite button, bulk select cell, or inline-editable cell
-      if (target.closest('.bulk-select-cell') ||
-          target.closest('.btn-invite-inline') ||
-          target.closest('.client-invite') ||
-          target.closest('.inline-editable-cell') ||
-          target.tagName === 'INPUT') {
+      if (
+        target.closest('.bulk-select-cell') ||
+        target.closest('.btn-invite-inline') ||
+        target.closest('.client-invite') ||
+        target.closest('.inline-editable-cell') ||
+        target.tagName === 'INPUT'
+      ) {
         return;
       }
       const clientId = parseInt((row as HTMLElement).dataset.clientId || '0');
@@ -659,7 +678,7 @@ function setupClientRowHandlers(tableBody: HTMLElement, clients: Client[]): void
   // Setup inline editing for contact_name and company_name
   tableBody.querySelectorAll('.identity-cell.inline-editable-cell').forEach((cell) => {
     const clientId = parseInt((cell as HTMLElement).dataset.clientId || '0');
-    const client = clients.find(c => c.id === clientId);
+    const client = clients.find((c) => c.id === clientId);
     if (!client) return;
 
     setupInlineEditingForClient(cell as HTMLElement, client);
@@ -679,10 +698,12 @@ function setupInlineEditingForClient(cellEl: HTMLElement, client: Client): void 
   if (primaryNameEl) {
     makeEditable(
       primaryNameEl,
-      () => isBusinessWithCompany ? (client.company_name || '') : (client.contact_name || ''),
+      () => (isBusinessWithCompany ? client.company_name || '' : client.contact_name || ''),
       async (newValue) => {
         const fieldToUpdate = isBusinessWithCompany ? 'company_name' : 'contact_name';
-        const response = await apiPut(`/api/clients/${client.id}`, { [fieldToUpdate]: newValue || null });
+        const response = await apiPut(`/api/clients/${client.id}`, {
+          [fieldToUpdate]: newValue || null
+        });
         if (response.ok) {
           if (isBusinessWithCompany) {
             client.company_name = newValue || null;
@@ -692,7 +713,10 @@ function setupInlineEditingForClient(cellEl: HTMLElement, client: Client): void 
           primaryNameEl.textContent = newValue
             ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(newValue))
             : '';
-          showToast(`${isBusinessWithCompany ? 'Company name' : 'Contact name'} updated`, 'success');
+          showToast(
+            `${isBusinessWithCompany ? 'Company name' : 'Contact name'} updated`,
+            'success'
+          );
         } else {
           showToast('Failed to update client', 'error');
           throw new Error('Update failed');
@@ -705,10 +729,12 @@ function setupInlineEditingForClient(cellEl: HTMLElement, client: Client): void 
   if (secondaryNameEl) {
     makeEditable(
       secondaryNameEl,
-      () => isBusinessWithCompany ? (client.contact_name || '') : (client.company_name || ''),
+      () => (isBusinessWithCompany ? client.contact_name || '' : client.company_name || ''),
       async (newValue) => {
         const fieldToUpdate = isBusinessWithCompany ? 'contact_name' : 'company_name';
-        const response = await apiPut(`/api/clients/${client.id}`, { [fieldToUpdate]: newValue || null });
+        const response = await apiPut(`/api/clients/${client.id}`, {
+          [fieldToUpdate]: newValue || null
+        });
         if (response.ok) {
           if (isBusinessWithCompany) {
             client.contact_name = newValue || null;
@@ -719,7 +745,10 @@ function setupInlineEditingForClient(cellEl: HTMLElement, client: Client): void 
             ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(newValue))
             : '';
           secondaryNameEl.style.display = newValue ? '' : 'none';
-          showToast(`${isBusinessWithCompany ? 'Contact name' : 'Company name'} updated`, 'success');
+          showToast(
+            `${isBusinessWithCompany ? 'Contact name' : 'Company name'} updated`,
+            'success'
+          );
         } else {
           showToast('Failed to update client', 'error');
           throw new Error('Update failed');
@@ -730,7 +759,10 @@ function setupInlineEditingForClient(cellEl: HTMLElement, client: Client): void 
   }
 }
 
-export async function showClientDetails(clientId: number, ctx?: AdminDashboardContext): Promise<void> {
+export async function showClientDetails(
+  clientId: number,
+  ctx?: AdminDashboardContext
+): Promise<void> {
   const context = ctx || clientsModule.getContext();
   if (!context) {
     logger.error(' No context available');
@@ -802,62 +834,98 @@ function populateClientDetailView(client: Client): void {
   // Prepare sanitized values (decode entities before escape to fix &amp;amp; etc.)
   const decodedContact = SanitizationUtils.decodeHtmlEntities(client.contact_name || '');
   const decodedCompany = SanitizationUtils.decodeHtmlEntities(client.company_name || '');
-  const decodedBillingName = SanitizationUtils.decodeHtmlEntities(client.billing_name || client.contact_name || '');
+  const decodedBillingName = SanitizationUtils.decodeHtmlEntities(
+    client.billing_name || client.contact_name || ''
+  );
   const clientType = client.client_type || 'business';
 
   // For business clients with company name, company is primary; otherwise contact name is primary
   const isBusinessWithCompany = clientType === 'business' && decodedCompany;
   const primaryName = isBusinessWithCompany
     ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany))
-    : SanitizationUtils.escapeHtml(decodedContact ? SanitizationUtils.capitalizeName(decodedContact) : 'Unknown Client');
-  const secondaryName = isBusinessWithCompany && decodedContact
-    ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact))
-    : (decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '-');
+    : SanitizationUtils.escapeHtml(
+      decodedContact ? SanitizationUtils.capitalizeName(decodedContact) : 'Unknown Client'
+    );
+  const secondaryName =
+    isBusinessWithCompany && decodedContact
+      ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact))
+      : decodedCompany
+        ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany))
+        : '-';
 
   const safeEmail = SanitizationUtils.escapeHtml(client.email || '');
   const safePhone = SanitizationUtils.formatPhone(client.phone || '');
   const status = client.status || 'pending';
-  const clientAny = client as { last_login_at?: string; invitation_sent_at?: string; password_hash?: string; invited_at?: string };
+  const clientAny = client as {
+    last_login_at?: string;
+    invitation_sent_at?: string;
+    password_hash?: string;
+    invited_at?: string;
+  };
 
   // Check if client needs invitation (pending and never invited)
   // Check multiple fields: invitation_sent_at, password_hash (set after accepting invite), invited_at
-  const hasBeenInvited = !!clientAny.invitation_sent_at || !!clientAny.password_hash || !!clientAny.invited_at;
+  const hasBeenInvited =
+    !!clientAny.invitation_sent_at || !!clientAny.password_hash || !!clientAny.invited_at;
   const showInviteBtn = status !== 'active' && !hasBeenInvited;
 
   // Prepare billing values
-  const safeBillingName = decodedBillingName ? SanitizationUtils.escapeHtml(decodedBillingName) : '-';
-  const safeBillingEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_email || client.email || '')) || '';
+  const safeBillingName = decodedBillingName
+    ? SanitizationUtils.escapeHtml(decodedBillingName)
+    : '-';
+  const safeBillingEmail =
+    SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(client.billing_email || client.email || '')
+    ) || '';
 
   // Batch update all client detail fields (except status and emails which need copy button)
   // For business clients: primary = company name, secondary = contact name
   // For personal clients: primary = contact name, secondary = company name (if any)
   batchUpdateText({
     'cd-client-name': primaryName, // Header title - company for business, contact for personal
-    'cd-company': secondaryName,   // Secondary info - contact for business, company for personal
+    'cd-company': secondaryName, // Secondary info - contact for business, company for personal
     'cd-phone': safePhone,
     'cd-client-type': clientType === 'personal' ? 'Personal' : 'Business',
     'cd-created': formatDate(client.created_at),
-    'cd-last-login': clientAny.last_login_at
-      ? formatDateTime(clientAny.last_login_at)
-      : 'Never',
+    'cd-last-login': clientAny.last_login_at ? formatDateTime(clientAny.last_login_at) : 'Never',
     // Billing summary (Overview tab)
     'cd-billing-name': safeBillingName,
     // Billing details (Invoices tab)
     'cd-billing-name-full': safeBillingName,
-    'cd-billing-address': client.billing_address ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_address)) : '-',
-    'cd-billing-city': client.billing_city ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_city)) : '-',
-    'cd-billing-state': client.billing_state ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_state)) : '-',
-    'cd-billing-zip': client.billing_zip ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_zip)) : '-',
-    'cd-billing-country': client.billing_country ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_country)) : '-'
+    'cd-billing-address': client.billing_address
+      ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_address))
+      : '-',
+    'cd-billing-city': client.billing_city
+      ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_city))
+      : '-',
+    'cd-billing-state': client.billing_state
+      ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_state))
+      : '-',
+    'cd-billing-zip': client.billing_zip
+      ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_zip))
+      : '-',
+    'cd-billing-country': client.billing_country
+      ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_country))
+      : '-'
   });
 
   // Email fields with copy button (not set via batchUpdateText)
   const cdEmailEl = document.getElementById('cd-email');
   if (cdEmailEl) cdEmailEl.innerHTML = getEmailWithCopyHtml(client.email || '', safeEmail);
   const cdBillingEmailEl = document.getElementById('cd-billing-email');
-  if (cdBillingEmailEl) cdBillingEmailEl.innerHTML = getEmailWithCopyHtml(client.billing_email || client.email || '', safeBillingEmail);
+  if (cdBillingEmailEl) {
+    cdBillingEmailEl.innerHTML = getEmailWithCopyHtml(
+      client.billing_email || client.email || '',
+      safeBillingEmail
+    );
+  }
   const cdBillingEmailFullEl = document.getElementById('cd-billing-email-full');
-  if (cdBillingEmailFullEl) cdBillingEmailFullEl.innerHTML = getEmailWithCopyHtml(client.billing_email || client.email || '', safeBillingEmail);
+  if (cdBillingEmailFullEl) {
+    cdBillingEmailFullEl.innerHTML = getEmailWithCopyHtml(
+      client.billing_email || client.email || '',
+      safeBillingEmail
+    );
+  }
 
   // Update header status badge
   const statusBadge = document.getElementById('cd-status-badge');
@@ -937,13 +1005,15 @@ function setupClientDetailInlineEditing(client: Client, ctx: AdminDashboardConte
       // For business clients: editing company edits contact_name (secondary display)
       // For personal clients: editing company edits company_name
       const fieldToUpdate = isBusinessClient ? 'contact_name' : 'company_name';
-      const currentValue = isBusinessClient ? (client.contact_name || '') : (client.company_name || '');
+      const currentValue = isBusinessClient ? client.contact_name || '' : client.company_name || '';
 
       makeEditable(
         companyContainer,
         () => currentValue,
         async (newValue) => {
-          const response = await apiPut(`/api/admin/clients/${client.id}`, { [fieldToUpdate]: newValue });
+          const response = await apiPut(`/api/admin/clients/${client.id}`, {
+            [fieldToUpdate]: newValue
+          });
           if (response.ok) {
             const result = await response.json();
             clientsModule.updateItem(client.id, result.client);
@@ -976,7 +1046,7 @@ function setupClientDetailInlineEditing(client: Client, ctx: AdminDashboardConte
       // For business clients: header shows company_name
       // For personal clients: header shows contact_name
       const fieldToUpdate = isBusinessClient ? 'company_name' : 'contact_name';
-      const currentValue = isBusinessClient ? (client.company_name || '') : (client.contact_name || '');
+      const currentValue = isBusinessClient ? client.company_name || '' : client.contact_name || '';
 
       makeEditable(
         nameContainer,
@@ -985,7 +1055,9 @@ function setupClientDetailInlineEditing(client: Client, ctx: AdminDashboardConte
           if (!newValue.trim()) {
             throw new Error('Name cannot be empty');
           }
-          const response = await apiPut(`/api/admin/clients/${client.id}`, { [fieldToUpdate]: newValue });
+          const response = await apiPut(`/api/admin/clients/${client.id}`, {
+            [fieldToUpdate]: newValue
+          });
           if (response.ok) {
             const result = await response.json();
             clientsModule.updateItem(client.id, result.client);
@@ -997,7 +1069,10 @@ function setupClientDetailInlineEditing(client: Client, ctx: AdminDashboardConte
             nameEl.textContent = SanitizationUtils.escapeHtml(
               SanitizationUtils.capitalizeName(newValue)
             );
-            ctx.showNotification(`${isBusinessClient ? 'Company' : 'Contact'} name updated`, 'success');
+            ctx.showNotification(
+              `${isBusinessClient ? 'Company' : 'Contact'} name updated`,
+              'success'
+            );
           } else {
             throw new Error('Failed to update name');
           }
@@ -1103,7 +1178,7 @@ async function loadClientProjects(clientId: number): Promise<void> {
     const response = await apiFetch(`/api/clients/${clientId}/projects`);
 
     if (response.ok) {
-      const data = await response.json() as { projects?: ProjectResponse[] };
+      const data = (await response.json()) as { projects?: ProjectResponse[] };
       renderClientProjects(data.projects || [], container);
     } else {
       renderEmptyState(container, 'No projects found for this client.');
@@ -1166,7 +1241,7 @@ async function loadClientBilling(clientId: number): Promise<void> {
     const response = await apiFetch(`/api/invoices/client/${clientId}`);
 
     if (response.ok) {
-      const data = await response.json() as { invoices?: InvoiceResponse[] };
+      const data = (await response.json()) as { invoices?: InvoiceResponse[] };
       const invoices: InvoiceResponse[] = data.invoices || [];
 
       // Calculate billing totals
@@ -1174,7 +1249,10 @@ async function loadClientBilling(clientId: number): Promise<void> {
       let totalPaid = 0;
 
       invoices.forEach((inv: InvoiceResponse) => {
-        const amount = typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0);
+        const amount =
+          typeof inv.amount_total === 'string'
+            ? parseFloat(inv.amount_total)
+            : inv.amount_total || 0;
         totalInvoiced += amount;
         if (inv.status === 'paid') {
           totalPaid += amount;
@@ -1225,7 +1303,10 @@ function renderClientInvoices(invoices: InvoiceResponse[], container: HTMLElemen
   container.innerHTML = invoices
     .map((invoice) => {
       const invoiceNumber = SanitizationUtils.escapeHtml(invoice.invoice_number || '');
-      const amountValue = typeof invoice.amount_total === 'string' ? parseFloat(invoice.amount_total) : (invoice.amount_total || 0);
+      const amountValue =
+        typeof invoice.amount_total === 'string'
+          ? parseFloat(invoice.amount_total)
+          : invoice.amount_total || 0;
       const amount = formatCurrency(amountValue);
       const date = formatDate(invoice.created_at || invoice.due_date);
       const status = invoice.status || 'pending';
@@ -1411,7 +1492,8 @@ export function editClientInfo(clientId: number, ctx: AdminDashboardContext): vo
     const newName = nameInput?.value.trim();
     const newCompany = companyInput?.value.trim();
     const newPhone = phoneInput?.value.trim();
-    const newStatus = statusMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') ?? '';
+    const newStatus =
+      statusMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') ?? '';
 
     // Validate email format if provided
     if (newEmail) {
@@ -1422,37 +1504,41 @@ export function editClientInfo(clientId: number, ctx: AdminDashboardContext): vo
       }
     }
 
-    await withButtonLoading(submitBtn, async () => {
-      const response = await apiPut(`/api/clients/${clientId}`, {
-        email: newEmail || null,
-        contact_name: newName || null,
-        company_name: newCompany || null,
-        phone: newPhone || null,
-        status: newStatus
-      });
+    await withButtonLoading(
+      submitBtn,
+      async () => {
+        const response = await apiPut(`/api/clients/${clientId}`, {
+          email: newEmail || null,
+          contact_name: newName || null,
+          company_name: newCompany || null,
+          phone: newPhone || null,
+          status: newStatus
+        });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.client) {
-          showToast('Client info updated successfully', 'success');
-          closeModal();
-          // Update local client data via factory (preserves project_count)
-          const existingClient = clientsModule.findById(clientId);
-          if (existingClient) {
-            clientsModule.updateItem(clientId, {
-              ...result.client,
-              project_count: existingClient.project_count
-            });
+        if (response.ok) {
+          const result = await response.json();
+          if (result.client) {
+            showToast('Client info updated successfully', 'success');
+            closeModal();
+            // Update local client data via factory (preserves project_count)
+            const existingClient = clientsModule.findById(clientId);
+            if (existingClient) {
+              clientsModule.updateItem(clientId, {
+                ...result.client,
+                project_count: existingClient.project_count
+              });
+            }
+            showClientDetails(clientId, ctx);
+          } else {
+            showToast(result.error || 'Failed to update client info', 'error');
           }
-          showClientDetails(clientId, ctx);
         } else {
-          showToast(result.error || 'Failed to update client info', 'error');
+          const errorData = await response.json().catch(() => ({}));
+          showToast(errorData.error || 'Failed to update client info', 'error');
         }
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        showToast(errorData.error || 'Failed to update client info', 'error');
-      }
-    }, 'Saving...');
+      },
+      'Saving...'
+    );
   };
 
   form.addEventListener('submit', handleSubmit, { once: true });
@@ -1539,26 +1625,30 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
       }
     }
 
-    await withButtonLoading(submitBtn, async () => {
-      const response = await apiPut(`/api/clients/${clientId}`, {
-        billing_name: newBillingName || null,
-        billing_email: newBillingEmail || null,
-        billing_address: newBillingAddress || null,
-        billing_city: newBillingCity || null,
-        billing_state: newBillingState || null,
-        billing_zip: newBillingZip || null,
-        billing_country: newBillingCountry || null
-      });
+    await withButtonLoading(
+      submitBtn,
+      async () => {
+        const response = await apiPut(`/api/clients/${clientId}`, {
+          billing_name: newBillingName || null,
+          billing_email: newBillingEmail || null,
+          billing_address: newBillingAddress || null,
+          billing_city: newBillingCity || null,
+          billing_state: newBillingState || null,
+          billing_zip: newBillingZip || null,
+          billing_country: newBillingCountry || null
+        });
 
-      if (response.ok) {
-        showToast('Billing details updated successfully', 'success');
-        closeModal();
-        await clientsModule.load(ctx);
-        showClientDetails(clientId, ctx);
-      } else {
-        showToast('Failed to update billing details', 'error');
-      }
-    }, 'Saving...');
+        if (response.ok) {
+          showToast('Billing details updated successfully', 'success');
+          closeModal();
+          await clientsModule.load(ctx);
+          showClientDetails(clientId, ctx);
+        } else {
+          showToast('Failed to update billing details', 'error');
+        }
+      },
+      'Saving...'
+    );
   };
 
   form.addEventListener('submit', handleSubmit, { once: true });
@@ -1603,7 +1693,9 @@ async function deleteClient(clientId: number): Promise<void> {
     return;
   }
 
-  const deleteClientName = SanitizationUtils.decodeHtmlEntities(client.contact_name || client.email);
+  const deleteClientName = SanitizationUtils.decodeHtmlEntities(
+    client.contact_name || client.email
+  );
   const confirmed = await confirmDanger(
     `Are you sure you want to delete client "${deleteClientName}"? This cannot be undone.`,
     'Delete Client'
@@ -1689,34 +1781,42 @@ function addClient(ctx: AdminDashboardContext): void {
       return;
     }
 
-    await withButtonLoading(submitBtn, async () => {
-      const response = await apiPost('/api/clients', {
-        email,
-        contact_name: contactName || null,
-        company_name: companyName || null,
-        phone: phone || null,
-        status: 'pending'
-      });
+    await withButtonLoading(
+      submitBtn,
+      async () => {
+        const response = await apiPost('/api/clients', {
+          email,
+          contact_name: contactName || null,
+          company_name: companyName || null,
+          phone: phone || null,
+          status: 'pending'
+        });
 
-      if (response.ok) {
-        showToast('Client added successfully', 'success');
-        submitted = true;
-        form.removeEventListener('submit', handleSubmit);
-        closeModal();
-        await clientsModule.load(ctx);
-      } else {
-        showToast('Failed to add client. Please try again.', 'error');
-      }
-    }, 'Adding...');
+        if (response.ok) {
+          showToast('Client added successfully', 'success');
+          submitted = true;
+          form.removeEventListener('submit', handleSubmit);
+          closeModal();
+          await clientsModule.load(ctx);
+        } else {
+          showToast('Failed to add client. Please try again.', 'error');
+        }
+      },
+      'Adding...'
+    );
   }
 
   closeBtn?.addEventListener('click', closeModal, { once: true });
   cancelBtn?.addEventListener('click', closeModal, { once: true });
 
   // Click outside to close
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  }, { once: true });
+  modal.addEventListener(
+    'click',
+    (e) => {
+      if (e.target === modal) closeModal();
+    },
+    { once: true }
+  );
 
   // Add form submit listener (not once - will be removed on success or modal close)
   form.addEventListener('submit', handleSubmit);
@@ -1742,15 +1842,15 @@ async function bulkArchiveClients(clientIds: number[]): Promise<void> {
   try {
     // Archive each client (set status to inactive)
     const results = await Promise.all(
-      clientIds.map(id =>
+      clientIds.map((id) =>
         apiPut(`/api/clients/${id}`, { status: 'inactive' })
-          .then(res => ({ id, success: res.ok }))
+          .then((res) => ({ id, success: res.ok }))
           .catch(() => ({ id, success: false }))
       )
     );
 
-    const successCount = results.filter(r => r.success).length;
-    const failCount = results.filter(r => !r.success).length;
+    const successCount = results.filter((r) => r.success).length;
+    const failCount = results.filter((r) => !r.success).length;
 
     if (successCount > 0) {
       showToast(
@@ -1778,15 +1878,15 @@ async function bulkDeleteClients(clientIds: number[]): Promise<void> {
   try {
     // Delete each client
     const results = await Promise.all(
-      clientIds.map(id =>
+      clientIds.map((id) =>
         apiDelete(`/api/clients/${id}`)
-          .then(res => ({ id, success: res.ok }))
+          .then((res) => ({ id, success: res.ok }))
           .catch(() => ({ id, success: false }))
       )
     );
 
-    const successCount = results.filter(r => r.success).length;
-    const failCount = results.filter(r => !r.success).length;
+    const successCount = results.filter((r) => r.success).length;
+    const failCount = results.filter((r) => !r.success).length;
 
     if (successCount > 0) {
       showToast(

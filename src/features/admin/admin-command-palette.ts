@@ -374,11 +374,7 @@ function createKeyboardHandler(config: AdminCommandPaletteConfig): (e: KeyboardE
 
     // Don't handle if user is typing in an input
     const target = e.target as HTMLElement;
-    if (
-      target.tagName === 'INPUT' ||
-      target.tagName === 'TEXTAREA' ||
-      target.isContentEditable
-    ) {
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
       return;
     }
 
@@ -410,10 +406,7 @@ function createKeyboardHandler(config: AdminCommandPaletteConfig): (e: KeyboardE
  * Initialize the admin command palette and keyboard shortcuts
  */
 export function initAdminCommandPalette(config: AdminCommandPaletteConfig): void {
-  const items: CommandItem[] = [
-    ...buildNavigationItems(config),
-    ...buildActionItems(config)
-  ];
+  const items: CommandItem[] = [...buildNavigationItems(config), ...buildActionItems(config)];
 
   initCommandPalette({
     items,
@@ -442,16 +435,16 @@ export function destroyAdminCommandPalette(): void {
 /**
  * Add a recently viewed item to the command palette
  */
-export function addRecentAdminItem(
-  item: Omit<CommandItem, 'section'>
-): void {
+export function addRecentAdminItem(item: Omit<CommandItem, 'section'>): void {
   addRecentItem(item);
 }
 
 /**
  * Initialize keyboard navigation for an admin table
  */
-export function initAdminTableNav(config: Omit<TableKeyboardNavConfig, 'focusClass' | 'selectedClass'>): ReturnType<typeof initTableKeyboardNav> {
+export function initAdminTableNav(
+  config: Omit<TableKeyboardNavConfig, 'focusClass' | 'selectedClass'>
+): ReturnType<typeof initTableKeyboardNav> {
   return initTableKeyboardNav({
     ...config,
     focusClass: 'row-focused',

@@ -22,6 +22,72 @@ import { ICONS } from '../../../constants/icons';
 import { renderActionsCell, createAction } from '../../../factories';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminQuestionnaires');
+
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn =
+  typeof import('../../../react/features/admin/questionnaires').mountQuestionnairesTable;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/questionnaires').unmountQuestionnairesTable;
+
+let mountQuestionnairesTable: ReactMountFn | null = null;
+let unmountQuestionnairesTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactQuestionnairesTable(): Promise<boolean> {
+  if (mountQuestionnairesTable && unmountQuestionnairesTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/questionnaires');
+    mountQuestionnairesTable = module.mountQuestionnairesTable;
+    unmountQuestionnairesTable = module.unmountQuestionnairesTable;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React questionnaires table */
+function shouldUseReactQuestionnairesTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_questionnaires') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_questionnaires_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
 
 const QUESTIONNAIRES_API = '/api/questionnaires';
 
@@ -112,7 +178,6 @@ function statusLabel(status: ResponseStatus): string {
 let questionnairesCache: Questionnaire[] = [];
 let responsesCache: QuestionnaireResponse[] = [];
 let listenersSetup = false;
-let _storedContext: AdminDashboardContext | null = null;
 let editingQuestionnaireId: number | null = null;
 let questionsData: Question[] = [];
 let questionCounter = 0;
@@ -158,11 +223,17 @@ function renderQuestionnairesTable(questionnaires: Questionnaire[]): void {
   if (!tbody) return;
 
   if (questionnaires.length === 0) {
-    showTableEmpty(tbody, QUESTIONNAIRES_COLSPAN, 'No questionnaires found. Create one to get started.');
+    showTableEmpty(
+      tbody,
+      QUESTIONNAIRES_COLSPAN,
+      'No questionnaires found. Create one to get started.'
+    );
     return;
   }
 
-  tbody.innerHTML = questionnaires.map(q => `
+  tbody.innerHTML = questionnaires
+    .map(
+      (q) => `
     <tr data-questionnaire-id="${q.id}">
       <td class="name-cell" data-label="Name">${escapeHtml(q.name)}</td>
       <td class="name-cell" data-label="Description">${escapeHtml(q.description || '—')}</td>
@@ -171,12 +242,21 @@ function renderQuestionnairesTable(questionnaires: Questionnaire[]): void {
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
     createAction('edit', q.id, { className: 'questionnaire-edit' }),
-    createAction('send', q.id, { className: 'questionnaire-send', title: 'Send to client', ariaLabel: 'Send to client' }),
-    createAction('delete', q.id, { className: 'questionnaire-delete', dataAttrs: { name: escapeHtml(q.name) } })
+    createAction('send', q.id, {
+      className: 'questionnaire-send',
+      title: 'Send to client',
+      ariaLabel: 'Send to client'
+    }),
+    createAction('delete', q.id, {
+      className: 'questionnaire-delete',
+      dataAttrs: { name: escapeHtml(q.name) }
+    })
   ])}
       </td>
     </tr>
-  `).join('');
+  `
+    )
+    .join('');
 
   // Initialize keyboard navigation
   initTableKeyboardNav({
@@ -206,7 +286,9 @@ function renderResponsesTable(responses: QuestionnaireResponse[]): void {
     return;
   }
 
-  tbody.innerHTML = responses.map(r => `
+  tbody.innerHTML = responses
+    .map(
+      (r) => `
     <tr data-response-id="${r.id}">
       <td class="name-cell" data-label="Questionnaire">${escapeHtml(r.questionnaire_name || `#${r.questionnaire_id}`)}</td>
       <td class="name-cell" data-label="Client">${escapeHtml(SanitizationUtils.decodeHtmlEntities(r.client_name || String(r.client_id)))}</td>
@@ -216,11 +298,16 @@ function renderResponsesTable(responses: QuestionnaireResponse[]): void {
         ${renderActionsCell([
     createAction('view', r.id, { className: 'response-view', ariaLabel: 'View response' }),
     createAction('remind', r.id, { className: 'response-remind' }),
-    createAction('delete', r.id, { className: 'response-delete', ariaLabel: 'Delete response' })
+    createAction('delete', r.id, {
+      className: 'response-delete',
+      ariaLabel: 'Delete response'
+    })
   ])}
       </td>
     </tr>
-  `).join('');
+  `
+    )
+    .join('');
 
   // Initialize keyboard navigation
   initTableKeyboardNav({
@@ -291,9 +378,9 @@ function closeQuestionnaireModal(): void {
  */
 function renderConditionalBuilder(question: Question, index: number): string {
   // Can't set condition on first question or reference itself
-  const availableQuestions = questionsData.slice(0, index).filter(
-    (q) => q.type === 'select' || q.type === 'multiselect'
-  );
+  const availableQuestions = questionsData
+    .slice(0, index)
+    .filter((q) => q.type === 'select' || q.type === 'multiselect');
 
   if (availableQuestions.length === 0) {
     return ''; // No eligible parent questions
@@ -319,21 +406,33 @@ function renderConditionalBuilder(question: Question, index: number): string {
       <div class="question-conditional-config" style="${hasCondition ? '' : 'display: none;'}">
         <select class="conditional-question-select" data-index="${index}">
           <option value="">Select a question...</option>
-          ${availableQuestions.map((q, qIndex) => `
+          ${availableQuestions
+    .map(
+      (q, qIndex) => `
             <option value="${q.id}" ${selectedQuestionId === q.id ? 'selected' : ''}>
               Q${qIndex + 1}: ${escapeHtml(q.question.substring(0, 40))}${q.question.length > 40 ? '...' : ''}
             </option>
-          `).join('')}
+          `
+    )
+    .join('')}
         </select>
-        ${parentOptions.length > 0 ? `
+        ${
+  parentOptions.length > 0
+    ? `
           <span class="conditional-equals">=</span>
           <select class="conditional-value-select" data-index="${index}">
             <option value="">Select answer...</option>
-            ${parentOptions.map((opt) => `
+            ${parentOptions
+    .map(
+      (opt) => `
               <option value="${escapeHtml(opt)}" ${selectedValueStr === opt ? 'selected' : ''}>${escapeHtml(opt)}</option>
-            `).join('')}
+            `
+    )
+    .join('')}
           </select>
-        ` : ''}
+        `
+    : ''
+}
       </div>
     </div>
   `;
@@ -344,11 +443,14 @@ function renderQuestionsBuilder(): void {
   if (!container) return;
 
   if (questionsData.length === 0) {
-    container.innerHTML = '<div class="empty-state">No questions added yet. Click "Add Question" to start.</div>';
+    container.innerHTML =
+      '<div class="empty-state">No questions added yet. Click "Add Question" to start.</div>';
     return;
   }
 
-  container.innerHTML = questionsData.map((q, index) => `
+  container.innerHTML = questionsData
+    .map(
+      (q, index) => `
     <div class="question-item" data-question-index="${index}">
       <div class="question-item-header">
         <span class="question-number">${index + 1}.</span>
@@ -369,16 +471,22 @@ function renderQuestionsBuilder(): void {
       </div>
       <div class="question-item-body flex flex-col gap-2">
         <input type="text" class="question-text" data-index="${index}" value="${escapeHtml(q.question)}" placeholder="Enter your question..." />
-        ${['select', 'multiselect'].includes(q.type) ? `
+        ${
+  ['select', 'multiselect'].includes(q.type)
+    ? `
           <div class="question-options flex flex-col gap-1">
             <label>Options (one per line)</label>
             <textarea class="question-options-input" data-index="${index}" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3">${(q.options || []).join('\n')}</textarea>
           </div>
-        ` : ''}
+        `
+    : ''
+}
         ${renderConditionalBuilder(q, index)}
       </div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 }
 
 function addQuestion(): void {
@@ -459,7 +567,10 @@ async function saveQuestionnaire(): Promise<void> {
       throw new Error(errorData.error || `HTTP ${response.status}`);
     }
 
-    showToast(editingQuestionnaireId ? 'Questionnaire updated' : 'Questionnaire created', 'success');
+    showToast(
+      editingQuestionnaireId ? 'Questionnaire updated' : 'Questionnaire created',
+      'success'
+    );
     closeQuestionnaireModal();
     await refreshQuestionnaires();
   } catch (err) {
@@ -479,11 +590,11 @@ function openSendModal(questionnaireId: number): void {
   idInput.value = String(questionnaireId);
 
   // Load clients
-  loadClients().then(clients => {
+  loadClients().then((clients) => {
     const select = el('send-questionnaire-client') as HTMLSelectElement;
     if (select) {
       select.innerHTML = '<option value="">Select a client...</option>';
-      clients.forEach(c => {
+      clients.forEach((c) => {
         const option = document.createElement('option');
         option.value = String(c.id);
         option.textContent = c.company_name || c.contact_name || c.email || String(c.id);
@@ -516,7 +627,9 @@ async function sendQuestionnaire(): Promise<void> {
   const dueInput = el('send-questionnaire-due') as HTMLInputElement;
 
   // Get client value from hidden input (custom dropdown) or native select
-  const clientHiddenInput = document.querySelector('input[type="hidden"][id="send-questionnaire-client"]') as HTMLInputElement | null;
+  const clientHiddenInput = document.querySelector(
+    'input[type="hidden"][id="send-questionnaire-client"]'
+  ) as HTMLInputElement | null;
   const clientValue = clientHiddenInput?.value || clientSelect?.value || '';
 
   if (!clientValue) {
@@ -552,7 +665,8 @@ async function openViewResponseModal(responseId: number): Promise<void> {
   const bodyEl = el('view-response-body');
   if (!modal || !bodyEl) return;
 
-  bodyEl.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  bodyEl.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   openModalOverlay(modal);
   viewResponseModalFocusCleanup = manageFocusTrap(modal, {});
@@ -580,21 +694,24 @@ async function openViewResponseModal(responseId: number): Promise<void> {
       </div>
       <div class="response-answers">
         <h4>Answers</h4>
-        ${questionnaire.questions.map(q => {
-    const answer = response.answers[q.id];
-    const displayAnswer = answer === undefined || answer === null || answer === ''
-      ? '<em class="text-muted">No answer</em>'
-      : Array.isArray(answer)
-        ? answer.map(a => escapeHtml(String(a))).join(', ')
-        : escapeHtml(String(answer));
+        ${questionnaire.questions
+    .map((q) => {
+      const answer = response.answers[q.id];
+      const displayAnswer =
+              answer === undefined || answer === null || answer === ''
+                ? '<em class="text-muted">No answer</em>'
+                : Array.isArray(answer)
+                  ? answer.map((a) => escapeHtml(String(a))).join(', ')
+                  : escapeHtml(String(answer));
 
-    return `
+      return `
             <div class="response-answer-item">
               <div class="response-question">${escapeHtml(q.question)}${q.required ? ' <span class="text-danger">*</span>' : ''}</div>
               <div class="response-answer">${displayAnswer}</div>
             </div>
           `;
-  }).join('')}
+    })
+    .join('')}
       </div>
     `;
   } catch (err) {
@@ -616,7 +733,9 @@ function closeViewResponseModal(): void {
 // ---------------------------------------------------------------------------
 
 async function deleteQuestionnaire(id: number, name: string): Promise<void> {
-  const confirmed = await confirmDanger(`Delete questionnaire "${name}"? This will also delete all responses.`);
+  const confirmed = await confirmDanger(
+    `Delete questionnaire "${name}"? This will also delete all responses.`
+  );
   if (!confirmed) return;
 
   try {
@@ -692,10 +811,9 @@ async function refreshResponses(): Promise<void> {
 // Event Listeners
 // ---------------------------------------------------------------------------
 
-function setupListeners(ctx: AdminDashboardContext): void {
+function setupListeners(_ctx: AdminDashboardContext): void {
   if (listenersSetup) return;
   listenersSetup = true;
-  _storedContext = ctx;
 
   // Questionnaires actions
   el('questionnaires-refresh')?.addEventListener('click', () => refreshQuestionnaires());
@@ -730,11 +848,13 @@ function setupListeners(ctx: AdminDashboardContext): void {
     } else if (target.classList.contains('question-text')) {
       updateQuestionField(index, 'question', (target as HTMLInputElement).value);
     } else if (target.classList.contains('question-options-input')) {
-      const options = (target as HTMLTextAreaElement).value.split('\n').filter(o => o.trim());
+      const options = (target as HTMLTextAreaElement).value.split('\n').filter((o) => o.trim());
       updateQuestionField(index, 'options', options);
     } else if (target.classList.contains('conditional-enabled')) {
       // Toggle conditional visibility
-      const configEl = target.closest('.question-conditional')?.querySelector('.question-conditional-config') as HTMLElement;
+      const configEl = target
+        .closest('.question-conditional')
+        ?.querySelector('.question-conditional-config') as HTMLElement;
       if (configEl) {
         configEl.style.display = (target as HTMLInputElement).checked ? '' : 'none';
       }
@@ -799,7 +919,7 @@ function setupListeners(ctx: AdminDashboardContext): void {
 
     if (editBtn) {
       const id = parseInt(editBtn.getAttribute('data-id') || '0', 10);
-      const questionnaire = questionnairesCache.find(q => q.id === id);
+      const questionnaire = questionnairesCache.find((q) => q.id === id);
       if (questionnaire) openQuestionnaireModal(questionnaire);
       return;
     }
@@ -848,9 +968,11 @@ function setupListeners(ctx: AdminDashboardContext): void {
 // ---------------------------------------------------------------------------
 
 const RENDER_ICONS = {
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
   PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
-  PLUS_SM: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>'
+  PLUS_SM:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>'
 };
 
 // ---------------------------------------------------------------------------
@@ -858,10 +980,34 @@ const RENDER_ICONS = {
 // ---------------------------------------------------------------------------
 
 /**
+ * Cleanup function called when leaving the questionnaires tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupQuestionnairesTab(): void {
+  if (reactTableMounted && unmountQuestionnairesTable) {
+    unmountQuestionnairesTable();
+    reactTableMounted = false;
+  }
+}
+
+/**
  * Renders the Questionnaires tab structure dynamically.
  * Called by admin-dashboard before loading data.
  */
 export function renderQuestionnairesTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactQuestionnairesTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Questionnaires Table Mount Point -->
+      <div id="react-questionnaires-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <div class="data-table-card" id="questionnaires-table-card">
       <div class="data-table-header">
@@ -1068,9 +1214,49 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
 // ---------------------------------------------------------------------------
 
 export async function loadQuestionnairesModule(ctx: AdminDashboardContext): Promise<void> {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactQuestionnairesTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React QuestionnairesTable
+    const mountContainer = document.getElementById('react-questionnaires-mount');
+    if (mountContainer) {
+      const loaded = await loadReactQuestionnairesTable();
+      if (loaded && mountQuestionnairesTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountQuestionnairesTable) {
+          unmountQuestionnairesTable();
+        }
+        mountQuestionnairesTable(mountContainer, {
+          onNavigate: (tab: string, entityId?: string) => {
+            if (entityId) {
+              ctx.switchTab(tab);
+            } else {
+              ctx.switchTab(tab);
+            }
+          }
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        logger.error(' React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
   setupListeners(ctx);
-  await Promise.all([
-    refreshQuestionnaires(),
-    refreshResponses()
-  ]);
+  await Promise.all([refreshQuestionnaires(), refreshResponses()]);
 }

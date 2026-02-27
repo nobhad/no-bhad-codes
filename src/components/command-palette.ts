@@ -88,12 +88,12 @@ function fuzzyMatch(text: string, query: string): boolean {
 function filterItems(items: CommandItem[], query: string): CommandItem[] {
   if (!query.trim()) {
     // Show all items except search results when no query
-    return items.filter(item => item.section !== 'search');
+    return items.filter((item) => item.section !== 'search');
   }
 
-  return items.filter(item => {
+  return items.filter((item) => {
     if (fuzzyMatch(item.label, query)) return true;
-    if (item.keywords?.some(kw => fuzzyMatch(kw, query))) return true;
+    if (item.keywords?.some((kw) => fuzzyMatch(kw, query))) return true;
     return false;
   });
 }
@@ -310,7 +310,9 @@ export function initCommandPalette(config: CommandPaletteConfig): void {
     document.body.appendChild(paletteInstance);
 
     // Attach event listeners
-    const input = paletteInstance.querySelector('.command-palette-input') as HTMLInputElement | null;
+    const input = paletteInstance.querySelector(
+      '.command-palette-input'
+    ) as HTMLInputElement | null;
     input?.addEventListener('input', handleInput);
     input?.addEventListener('keydown', handleKeyDown as EventListener);
 
@@ -382,7 +384,7 @@ export function updateItems(items: CommandItem[]): void {
  */
 export function addRecentItem(item: Omit<CommandItem, 'section'>): void {
   // Remove existing item with same id
-  currentItems = currentItems.filter(i => i.id !== item.id || i.section !== 'recent');
+  currentItems = currentItems.filter((i) => i.id !== item.id || i.section !== 'recent');
 
   // Add to front of recent
   currentItems.unshift({
@@ -391,10 +393,10 @@ export function addRecentItem(item: Omit<CommandItem, 'section'>): void {
   });
 
   // Keep only last 5 recent items
-  const recentItems = currentItems.filter(i => i.section === 'recent');
+  const recentItems = currentItems.filter((i) => i.section === 'recent');
   if (recentItems.length > 5) {
     const toRemove = recentItems.slice(5);
-    currentItems = currentItems.filter(i => !toRemove.includes(i));
+    currentItems = currentItems.filter((i) => !toRemove.includes(i));
   }
 }
 

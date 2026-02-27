@@ -25,12 +25,16 @@ export function renderOnboardingWizardHTML(stepTitles: Record<OnboardingStep, st
       </div>
 
       <div class="onboarding-steps-indicator">
-        ${([1, 2, 3, 4, 5] as OnboardingStep[]).map(step => `
+        ${([1, 2, 3, 4, 5] as OnboardingStep[])
+    .map(
+      (step) => `
           <div class="onboarding-step-indicator" data-step="${step}">
             <div class="step-number">${step}</div>
             <div class="step-label">${stepTitles[step]}</div>
           </div>
-        `).join('')}
+        `
+    )
+    .join('')}
       </div>
 
       <div class="onboarding-content" id="onboardingContent">
@@ -140,11 +144,15 @@ function renderStep2(data: OnboardingStepData): string {
           <label for="project_type">Project Type</label>
           <select id="project_type" name="project_type" required>
             <option value="">Select a project type...</option>
-            ${projectTypes.map(pt => `
+            ${projectTypes
+    .map(
+      (pt) => `
               <option value="${pt.value}" ${data.project_type === pt.value ? 'selected' : ''}>
                 ${pt.label}
               </option>
-            `).join('')}
+            `
+    )
+    .join('')}
           </select>
         </div>
 
@@ -157,13 +165,17 @@ function renderStep2(data: OnboardingStepData): string {
         <div class="form-group">
           <label>Project Goals (select all that apply)</label>
           <div class="checkbox-group">
-            ${goals.map(g => `
+            ${goals
+    .map(
+      (g) => `
               <label class="checkbox-item">
                 <input type="checkbox" name="project_goals" value="${g.value}"
                   ${selectedGoals.includes(g.value) ? 'checked' : ''} />
                 <span>${g.label}</span>
               </label>
-            `).join('')}
+            `
+    )
+    .join('')}
           </div>
         </div>
       </form>
@@ -213,13 +225,17 @@ function renderStep3(data: OnboardingStepData): string {
         <div class="form-group">
           <label>Desired Features (select all that apply)</label>
           <div class="checkbox-group checkbox-group--columns">
-            ${features.map(f => `
+            ${features
+    .map(
+      (f) => `
               <label class="checkbox-item">
                 <input type="checkbox" name="features" value="${f.value}"
                   ${selectedFeatures.includes(f.value) ? 'checked' : ''} />
                 <span>${f.label}</span>
               </label>
-            `).join('')}
+            `
+    )
+    .join('')}
           </div>
         </div>
 
@@ -228,11 +244,15 @@ function renderStep3(data: OnboardingStepData): string {
             <label for="budget_range">Budget Range</label>
             <select id="budget_range" name="budget_range">
               <option value="">Select budget range...</option>
-              ${budgetRanges.map(b => `
+              ${budgetRanges
+    .map(
+      (b) => `
                 <option value="${b.value}" ${data.budget_range === b.value ? 'selected' : ''}>
                   ${b.label}
                 </option>
-              `).join('')}
+              `
+    )
+    .join('')}
             </select>
           </div>
 
@@ -240,11 +260,15 @@ function renderStep3(data: OnboardingStepData): string {
             <label for="timeline">Timeline</label>
             <select id="timeline" name="timeline">
               <option value="">Select timeline...</option>
-              ${timelines.map(t => `
+              ${timelines
+    .map(
+      (t) => `
                 <option value="${t.value}" ${data.timeline === t.value ? 'selected' : ''}>
                   ${t.label}
                 </option>
-              `).join('')}
+              `
+    )
+    .join('')}
             </select>
           </div>
         </div>
@@ -327,13 +351,17 @@ function renderStep4(data: OnboardingStepData): string {
         <div class="form-group" style="margin-top: var(--space-lg);">
           <label>Need help with any of these?</label>
           <div class="checkbox-group">
-            ${helpOptions.map(h => `
+            ${helpOptions
+    .map(
+      (h) => `
               <label class="checkbox-item">
                 <input type="checkbox" name="needs_help_with" value="${h.value}"
                   ${needsHelp.includes(h.value) ? 'checked' : ''} />
                 <span>${h.label}</span>
               </label>
-            `).join('')}
+            `
+    )
+    .join('')}
           </div>
         </div>
       </form>
@@ -410,9 +438,13 @@ function renderStep5(data: OnboardingStepData): string {
               ${data.has_photos ? '✓' : '○'} Photos / Images
             </li>
           </ul>
-          ${(data.needs_help_with || []).length > 0 ? `
+          ${
+  (data.needs_help_with || []).length > 0
+    ? `
             <p class="needs-help-note">Need help with: ${(data.needs_help_with || []).join(', ')}</p>
-          ` : ''}
+          `
+    : ''
+}
         </div>
       </div>
 
@@ -435,7 +467,7 @@ function renderStep5(data: OnboardingStepData): string {
 export function updateStepIndicators(currentStep: OnboardingStep): void {
   const indicators = document.querySelectorAll('.onboarding-step-indicator');
 
-  indicators.forEach(indicator => {
+  indicators.forEach((indicator) => {
     const stepAttr = indicator.getAttribute('data-step');
     if (!stepAttr) return;
 

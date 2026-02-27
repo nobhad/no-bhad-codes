@@ -8,12 +8,21 @@
  */
 
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
-import { confirmDanger, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
+import {
+  confirmDanger,
+  alertSuccess,
+  alertError,
+  multiPromptDialog
+} from '../../../utils/confirm-dialog';
 import { formatDate } from '../../../utils/format-utils';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
+import {
+  createKanbanBoard,
+  type KanbanColumn,
+  type KanbanItem
+} from '../../../components/kanban-board';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { createViewToggle } from '../../../components/view-toggle';
 import { createModalDropdown } from '../../../components/modal-dropdown';
@@ -89,7 +98,10 @@ let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
 // Pagination state - only show when > 10 items
 const PAGINATION_THRESHOLD = 10;
 const PAGINATION_STORAGE_KEY = 'project-tasks-pagination';
-let paginationState: PaginationState = getDefaultPaginationState({ tableId: 'project-tasks', defaultPageSize: 25 });
+let paginationState: PaginationState = getDefaultPaginationState({
+  tableId: 'project-tasks',
+  defaultPageSize: 25
+});
 
 // Status configuration
 const STATUS_CONFIG = {
@@ -150,8 +162,20 @@ function setupViewToggle(): void {
   const toggleEl = createViewToggle({
     id: 'tasks-view-toggle',
     options: [
-      { value: 'kanban', label: 'Board', title: 'Board view', ariaLabel: 'Board view', iconSvg: BOARD_ICON },
-      { value: 'list', label: 'List', title: 'List view', ariaLabel: 'List view', iconSvg: LIST_ICON }
+      {
+        value: 'kanban',
+        label: 'Board',
+        title: 'Board view',
+        ariaLabel: 'Board view',
+        iconSvg: BOARD_ICON
+      },
+      {
+        value: 'list',
+        label: 'List',
+        title: 'List view',
+        ariaLabel: 'List view',
+        iconSvg: LIST_ICON
+      }
     ],
     value: currentView,
     onChange: (v) => {
@@ -198,8 +222,8 @@ function renderKanbanView(): void {
   ];
 
   // Populate columns
-  currentTasks.forEach(task => {
-    const column = columns.find(c => c.id === task.status);
+  currentTasks.forEach((task) => {
+    const column = columns.find((c) => c.id === task.status);
     if (column) {
       column.items.push(taskToKanbanItem(task));
     }
@@ -229,7 +253,7 @@ function taskToKanbanItem(task: ProjectTask): KanbanItem {
       dueDate: task.due_date,
       assignee: task.assignee_name,
       checklistCount: task.checklist_items?.length || 0,
-      checklistCompleted: task.checklist_items?.filter(c => c.is_completed).length || 0,
+      checklistCompleted: task.checklist_items?.filter((c) => c.is_completed).length || 0,
       milestoneTitle: task.milestone_title,
       projectName: task.project_name,
       projectId: task.project_id
@@ -253,13 +277,16 @@ function renderTaskCard(item: KanbanItem): string {
   };
 
   const priorityClass = PRIORITY_CONFIG[meta.priority as keyof typeof PRIORITY_CONFIG]?.class || '';
-  const priorityLabel = PRIORITY_CONFIG[meta.priority as keyof typeof PRIORITY_CONFIG]?.label || meta.priority;
+  const priorityLabel =
+    PRIORITY_CONFIG[meta.priority as keyof typeof PRIORITY_CONFIG]?.label || meta.priority;
 
   const isOverdue = meta.dueDate && new Date(meta.dueDate) < new Date();
   const dueDateClass = isOverdue ? 'overdue' : '';
 
   return `
-    ${meta.projectName && meta.projectId ? `
+    ${
+  meta.projectName && meta.projectId
+    ? `
       <div class="task-project-link">
         <button type="button" class="task-project-name" data-action="view-project" data-project-id="${meta.projectId}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -269,32 +296,46 @@ function renderTaskCard(item: KanbanItem): string {
           ${SanitizationUtils.escapeHtml(meta.projectName)}
         </button>
       </div>
-    ` : ''}
+    `
+    : ''
+}
     <div class="kanban-card-title">${SanitizationUtils.escapeHtml(item.title)}</div>
     ${item.subtitle ? `<div class="kanban-card-subtitle">${SanitizationUtils.escapeHtml(item.subtitle)}</div>` : ''}
-    ${meta.milestoneTitle ? `
+    ${
+  meta.milestoneTitle
+    ? `
       <div class="task-milestone-tag">${SanitizationUtils.escapeHtml(meta.milestoneTitle)}</div>
-    ` : `
+    `
+    : `
       <div class="task-standalone-tag">Standalone</div>
-    `}
+    `
+}
     <div class="task-meta">
       <span class="task-priority ${priorityClass}">${priorityLabel}</span>
-      ${meta.dueDate ? `
+      ${
+  meta.dueDate
+    ? `
         <span class="task-due-date ${dueDateClass}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
           ${formatDate(meta.dueDate)}
         </span>
-      ` : ''}
-      ${meta.checklistCount > 0 ? `
+      `
+    : ''
+}
+      ${
+  meta.checklistCount > 0
+    ? `
         <span class="task-checklist-count">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
           </svg>
           ${meta.checklistCompleted}/${meta.checklistCount}
         </span>
-      ` : ''}
+      `
+    : ''
+}
     </div>
     <div class="task-card-actions">
       <button type="button" class="task-delete-btn" data-action="delete-project-task" data-task-id="${item.id}" title="Delete task">
@@ -394,7 +435,7 @@ function renderListView(): void {
               </tr>
             </thead>
             <tbody id="project-tasks-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-              ${displayTasks.map(task => renderListItem(task)).join('')}
+              ${displayTasks.map((task) => renderListItem(task)).join('')}
             </tbody>
           </table>
         </div>
@@ -409,7 +450,7 @@ function renderListView(): void {
     rowSelector: 'tr[data-task-id]',
     onRowSelect: (row) => {
       const taskId = parseInt(row.getAttribute('data-task-id') || '0');
-      const task = currentTasks.find(t => t.id === taskId);
+      const task = currentTasks.find((t) => t.id === taskId);
       if (task) handleTaskClick(taskToKanbanItem(task));
     },
     focusClass: 'row-focused',
@@ -438,7 +479,7 @@ function renderListView(): void {
     const row = (e.target as HTMLElement).closest('tr[data-task-id]');
     if (row) {
       const taskId = parseInt(row.getAttribute('data-task-id') || '0');
-      const task = currentTasks.find(t => t.id === taskId);
+      const task = currentTasks.find((t) => t.id === taskId);
       if (task) handleTaskClick(taskToKanbanItem(task));
     }
   });
@@ -450,7 +491,8 @@ function renderListView(): void {
 function renderListItem(task: ProjectTask): string {
   const priorityClass = PRIORITY_CONFIG[task.priority]?.class || '';
   const priorityLabel = PRIORITY_CONFIG[task.priority]?.label || task.priority;
-  const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed';
+  const isOverdue =
+    task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed';
 
   return `
     <tr data-task-id="${task.id}">
@@ -482,7 +524,7 @@ async function handleTaskStatusChange(
 
     if (response.ok) {
       // Update local state
-      const task = currentTasks.find(t => t.id === taskId);
+      const task = currentTasks.find((t) => t.id === taskId);
       if (task) {
         task.status = toColumn as ProjectTask['status'];
       }
@@ -502,7 +544,7 @@ async function handleTaskStatusChange(
  * Handle task click to show detail modal
  */
 function handleTaskClick(item: KanbanItem): void {
-  const task = currentTasks.find(t => t.id === item.id);
+  const task = currentTasks.find((t) => t.id === item.id);
   if (!task) return;
 
   showTaskDetailModal(task);
@@ -525,7 +567,11 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
   }
 
   const checklistProgress = fullTask.checklist_items?.length
-    ? Math.round((fullTask.checklist_items.filter(c => c.is_completed).length / fullTask.checklist_items.length) * 100)
+    ? Math.round(
+      (fullTask.checklist_items.filter((c) => c.is_completed).length /
+          fullTask.checklist_items.length) *
+          100
+    )
     : 0;
 
   // Create modal using portal modal component
@@ -544,12 +590,16 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
       <span class="task-priority ${PRIORITY_CONFIG[fullTask.priority]?.class || ''}">${PRIORITY_CONFIG[fullTask.priority]?.label || fullTask.priority}</span>
     </div>
 
-    ${fullTask.description ? `
+    ${
+  fullTask.description
+    ? `
       <div class="task-detail-section">
         <h4>Description</h4>
         <p>${SanitizationUtils.escapeHtml(fullTask.description)}</p>
       </div>
-    ` : ''}
+    `
+    : ''
+}
 
     <div class="task-detail-section">
       <h4>Details</h4>
@@ -560,16 +610,22 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
       </div>
     </div>
 
-    ${fullTask.checklist_items && fullTask.checklist_items.length > 0 ? `
+    ${
+  fullTask.checklist_items && fullTask.checklist_items.length > 0
+    ? `
       <div class="task-detail-section">
         <h4>Checklist</h4>
         <ul class="task-checklist">
-          ${fullTask.checklist_items.map(item => `
+          ${fullTask.checklist_items
+    .map(
+      (item) => `
             <li class="task-checklist-item ${item.is_completed ? 'completed' : ''}" data-item-id="${item.id}">
               <input type="checkbox" ${item.is_completed ? 'checked' : ''}>
               <label>${SanitizationUtils.escapeHtml(item.title)}</label>
             </li>
-          `).join('')}
+          `
+    )
+    .join('')}
         </ul>
         <div class="task-checklist-progress">
           <div class="task-checklist-progress-bar">
@@ -578,7 +634,9 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
           <span class="task-checklist-progress-text">${checklistProgress}%</span>
         </div>
       </div>
-    ` : ''}
+    `
+    : ''
+}
   `;
 
   // Build footer with action buttons
@@ -606,10 +664,12 @@ async function showTaskDetailModal(task: ProjectTask): Promise<void> {
   });
 
   // Checklist item toggles
-  modal.body.querySelectorAll('.task-checklist-item input').forEach(checkbox => {
+  modal.body.querySelectorAll('.task-checklist-item input').forEach((checkbox) => {
     checkbox.addEventListener('change', async (e) => {
       const target = e.target as HTMLInputElement;
-      const itemId = parseInt((target.closest('.task-checklist-item') as HTMLElement).dataset.itemId || '0');
+      const itemId = parseInt(
+        (target.closest('.task-checklist-item') as HTMLElement).dataset.itemId || '0'
+      );
       await toggleChecklistItem(fullTask.id, itemId, target.checked);
     });
   });
@@ -654,9 +714,12 @@ export async function showCreateTaskModal(): Promise<void> {
     const titleInput = modal.body.querySelector('#task-title') as HTMLInputElement;
     const descriptionInput = modal.body.querySelector('#task-description') as HTMLTextAreaElement;
     const dueDateInput = modal.body.querySelector('#task-due-date') as HTMLInputElement;
-    const estimatedHoursInput = modal.body.querySelector('#task-estimated-hours') as HTMLInputElement;
+    const estimatedHoursInput = modal.body.querySelector(
+      '#task-estimated-hours'
+    ) as HTMLInputElement;
     const priorityMount = modal.body.querySelector('#task-priority-mount');
-    const selectedPriority = priorityMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') || 'medium';
+    const selectedPriority =
+      priorityMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') || 'medium';
 
     const title = titleInput?.value?.trim();
     if (!title) {
@@ -764,8 +827,19 @@ async function showEditTaskModal(task: ProjectTask): Promise<void> {
   const result = await multiPromptDialog({
     title: 'Edit Task',
     fields: [
-      { name: 'title', label: 'Task Title', type: 'text', required: true, defaultValue: task.title },
-      { name: 'description', label: 'Description', type: 'textarea', defaultValue: task.description || '' },
+      {
+        name: 'title',
+        label: 'Task Title',
+        type: 'text',
+        required: true,
+        defaultValue: task.title
+      },
+      {
+        name: 'description',
+        label: 'Description',
+        type: 'textarea',
+        defaultValue: task.description || ''
+      },
       {
         name: 'priority',
         label: 'Priority',
@@ -793,8 +867,18 @@ async function showEditTaskModal(task: ProjectTask): Promise<void> {
           { value: 'cancelled', label: 'Cancelled' }
         ]
       },
-      { name: 'dueDate', label: 'Due Date', type: 'date', defaultValue: task.due_date?.split('T')[0] || '' },
-      { name: 'estimatedHours', label: 'Estimated Hours', type: 'number', defaultValue: task.estimated_hours?.toString() || '' }
+      {
+        name: 'dueDate',
+        label: 'Due Date',
+        type: 'date',
+        defaultValue: task.due_date?.split('T')[0] || ''
+      },
+      {
+        name: 'estimatedHours',
+        label: 'Estimated Hours',
+        type: 'number',
+        defaultValue: task.estimated_hours?.toString() || ''
+      }
     ],
     confirmText: 'Save Changes',
     cancelText: 'Cancel'
@@ -855,15 +939,19 @@ async function deleteTask(taskId: number): Promise<void> {
 /**
  * Toggle checklist item
  */
-async function toggleChecklistItem(taskId: number, itemId: number, isCompleted: boolean): Promise<void> {
+async function toggleChecklistItem(
+  taskId: number,
+  itemId: number,
+  isCompleted: boolean
+): Promise<void> {
   try {
     await apiPut(`/api/projects/${currentProjectId}/tasks/${taskId}/checklist/${itemId}`, {
       is_completed: isCompleted
     });
     // Update local state
-    const task = currentTasks.find(t => t.id === taskId);
+    const task = currentTasks.find((t) => t.id === taskId);
     if (task?.checklist_items) {
-      const item = task.checklist_items.find(c => c.id === itemId);
+      const item = task.checklist_items.find((c) => c.id === itemId);
       if (item) item.is_completed = isCompleted;
     }
   } catch (error) {

@@ -14,11 +14,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDateTime } from '../../../utils/format-utils';
 import type { Message, AdminDashboardContext } from '../admin-types';
 import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
-import type {
-  ClientResponse,
-  MessageThreadResponse,
-  MessageResponse
-} from '../../../types/api';
+import type { ClientResponse, MessageThreadResponse, MessageResponse } from '../../../types/api';
 import { ICONS } from '../../../constants/icons';
 import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
@@ -29,7 +25,19 @@ const logger = createLogger('AdminMessaging');
 // Attachment configuration
 const MAX_ATTACHMENTS = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'zip'];
+const ALLOWED_EXTENSIONS = [
+  'pdf',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'txt',
+  'zip'
+];
 
 // Pending attachments for current message
 let pendingAttachments: File[] = [];
@@ -94,9 +102,11 @@ let _cachedClientsWithThreads: ClientWithThread[] = [];
 // ============================================
 
 const RENDER_ICONS = {
-  SEARCH: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+  SEARCH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
   PIN: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M12 2L12 12M12 22L12 12M12 12L20 4M12 12L4 4"/></svg>',
-  ATTACH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>'
+  ATTACH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>'
 };
 
 // ============================================
@@ -192,7 +202,8 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
   if (!threadList) return;
 
   // Show loading state
-  threadList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  threadList.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
 
   try {
     // Fetch both clients and threads in parallel
@@ -201,33 +212,49 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
       apiFetch('/api/messages/threads')
     ]);
 
-    const clientsData = clientsResponse.ok ? await parseApiResponse<{ clients?: ClientResponse[] }>(clientsResponse) : { clients: [] };
-    const threadsData = threadsResponse.ok ? await parseApiResponse<{ threads?: (MessageThreadResponse & { message_count?: number; last_message_at?: string })[] }>(threadsResponse) : { threads: [] };
+    const clientsData = clientsResponse.ok
+      ? await parseApiResponse<{ clients?: ClientResponse[] }>(clientsResponse)
+      : { clients: [] };
+    const threadsData = threadsResponse.ok
+      ? await parseApiResponse<{
+          threads?: (MessageThreadResponse & {
+            message_count?: number;
+            last_message_at?: string;
+          })[];
+            }>(threadsResponse)
+      : { threads: [] };
 
     // Create a map of client_id -> thread info
-    const threadMap = new Map<number, MessageThreadResponse & { message_count?: number; last_message_at?: string }>();
-    (threadsData.threads || []).forEach((thread: MessageThreadResponse & { message_count?: number; last_message_at?: string }) => {
-      // Keep the thread with the most messages if client has multiple threads
-      const existing = threadMap.get(thread.client_id);
-      if (!existing || (thread.message_count || 0) > (existing.message_count || 0)) {
-        threadMap.set(thread.client_id, thread);
+    const threadMap = new Map<
+      number,
+      MessageThreadResponse & { message_count?: number; last_message_at?: string }
+    >();
+    (threadsData.threads || []).forEach(
+      (thread: MessageThreadResponse & { message_count?: number; last_message_at?: string }) => {
+        // Keep the thread with the most messages if client has multiple threads
+        const existing = threadMap.get(thread.client_id);
+        if (!existing || (thread.message_count || 0) > (existing.message_count || 0)) {
+          threadMap.set(thread.client_id, thread);
+        }
       }
-    });
+    );
 
     // Merge clients with their thread data
-    const clientsWithThreads: ClientWithThread[] = (clientsData.clients || []).map((client: ClientResponse) => {
-      const thread = threadMap.get(client.id);
-      return {
-        client_id: client.id,
-        thread_id: thread?.id || null,
-        contact_name: client.contact_name || '',
-        company_name: client.company_name || null,
-        email: client.email,
-        message_count: thread?.message_count || 0,
-        unread_count: thread?.unread_count || 0,
-        last_message_at: thread?.last_message_at || null
-      };
-    });
+    const clientsWithThreads: ClientWithThread[] = (clientsData.clients || []).map(
+      (client: ClientResponse) => {
+        const thread = threadMap.get(client.id);
+        return {
+          client_id: client.id,
+          thread_id: thread?.id || null,
+          contact_name: client.contact_name || '',
+          company_name: client.company_name || null,
+          email: client.email,
+          message_count: thread?.message_count || 0,
+          unread_count: thread?.unread_count || 0,
+          last_message_at: thread?.last_message_at || null
+        };
+      }
+    );
 
     // Sort: clients with unread messages first, then by last message time, then alphabetically
     clientsWithThreads.sort((a, b) => {
@@ -276,23 +303,34 @@ function formatRelativeTime(date: Date): string {
 /**
  * Render thread list in sidebar
  */
-function renderThreadList(container: HTMLElement, clients: ClientWithThread[], ctx: AdminDashboardContext): void {
+function renderThreadList(
+  container: HTMLElement,
+  clients: ClientWithThread[],
+  ctx: AdminDashboardContext
+): void {
   if (clients.length === 0) {
     renderEmptyState(container, 'No clients yet');
     return;
   }
 
-  container.innerHTML = clients.map(client => {
-    const isActive = client.client_id === selectedClientId;
-    const hasUnread = client.unread_count > 0;
-    const safeCompany = client.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.company_name)) : '';
-    const safeContact = client.contact_name ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.contact_name)) : '';
-    const primaryName = safeCompany || safeContact || 'Unknown Client';
-    const secondaryName = safeCompany && safeContact ? safeContact : '';
-    const timeStr = client.last_message_at ? formatRelativeTime(new Date(client.last_message_at)) : '';
+  container.innerHTML = clients
+    .map((client) => {
+      const isActive = client.client_id === selectedClientId;
+      const hasUnread = client.unread_count > 0;
+      const safeCompany = client.company_name
+        ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.company_name))
+        : '';
+      const safeContact = client.contact_name
+        ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.contact_name))
+        : '';
+      const primaryName = safeCompany || safeContact || 'Unknown Client';
+      const secondaryName = safeCompany && safeContact ? safeContact : '';
+      const timeStr = client.last_message_at
+        ? formatRelativeTime(new Date(client.last_message_at))
+        : '';
 
-    const itemId = `thread-item-${client.client_id}`;
-    return `
+      const itemId = `thread-item-${client.client_id}`;
+      return `
       <div class="thread-item ${isActive ? 'active' : ''} ${hasUnread ? 'unread' : ''}"
            id="${itemId}"
            data-client-id="${client.client_id}"
@@ -310,19 +348,22 @@ function renderThreadList(container: HTMLElement, clients: ClientWithThread[], c
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   // Populate mobile dropdown
   const mobileSelect = getElement('mobile-client-select') as HTMLSelectElement;
   if (mobileSelect) {
-    const options = clients.map(client => {
-      const name = client.company_name || client.contact_name || 'Unknown Client';
-      const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(name));
-      const value = `${client.client_id}:${client.thread_id || 'new'}`;
-      const isSelected = client.client_id === selectedClientId;
-      const unreadLabel = client.unread_count > 0 ? ` (${client.unread_count} new)` : '';
-      return `<option value="${value}"${isSelected ? ' selected' : ''}>${safeName}${unreadLabel}</option>`;
-    }).join('');
+    const options = clients
+      .map((client) => {
+        const name = client.company_name || client.contact_name || 'Unknown Client';
+        const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(name));
+        const value = `${client.client_id}:${client.thread_id || 'new'}`;
+        const isSelected = client.client_id === selectedClientId;
+        const unreadLabel = client.unread_count > 0 ? ` (${client.unread_count} new)` : '';
+        return `<option value="${value}"${isSelected ? ' selected' : ''}>${safeName}${unreadLabel}</option>`;
+      })
+      .join('');
     mobileSelect.innerHTML = `<option value="">Select a client...</option>${options}`;
   }
 
@@ -334,7 +375,7 @@ function renderThreadList(container: HTMLElement, clients: ClientWithThread[], c
  * Setup click and keyboard handlers for thread list
  */
 function setupThreadListHandlers(container: HTMLElement, ctx: AdminDashboardContext): void {
-  container.querySelectorAll('.thread-item').forEach(item => {
+  container.querySelectorAll('.thread-item').forEach((item) => {
     const handleSelect = async () => {
       const clientId = parseInt((item as HTMLElement).dataset.clientId || '0');
       const threadIdStr = (item as HTMLElement).dataset.threadId || 'new';
@@ -347,7 +388,7 @@ function setupThreadListHandlers(container: HTMLElement, ctx: AdminDashboardCont
       selectedClientName = clientName;
 
       // Update active state visually
-      container.querySelectorAll('.thread-item').forEach(i => {
+      container.querySelectorAll('.thread-item').forEach((i) => {
         i.classList.remove('active');
         i.setAttribute('aria-selected', 'false');
       });
@@ -419,11 +460,7 @@ function setupThreadListHandlers(container: HTMLElement, ctx: AdminDashboardCont
   });
 }
 
-export function selectThread(
-  clientId: number,
-  threadId: number,
-  ctx: AdminDashboardContext
-): void {
+export function selectThread(clientId: number, threadId: number, ctx: AdminDashboardContext): void {
   selectedClientId = clientId;
   selectedThreadId = threadId;
 
@@ -471,28 +508,29 @@ export async function loadThreadMessages(
       // Mark messages as read
       await apiPut(`/api/messages/threads/${threadId}/read`);
     } else {
-      container.innerHTML =
-        '<div class="empty-state">Failed to load messages</div>';
+      container.innerHTML = '<div class="empty-state">Failed to load messages</div>';
     }
   } catch (error) {
     logger.error(' Failed to load messages:', error);
-    container.innerHTML =
-      '<div class="empty-state">Error loading messages</div>';
+    container.innerHTML = '<div class="empty-state">Error loading messages</div>';
   }
 }
 
 /**
  * Render attachment list for a message
  */
-function renderAdminMessageAttachments(attachments: { filename: string; originalName: string; size: number; mimeType: string }[] | null): string {
+function renderAdminMessageAttachments(
+  attachments: { filename: string; originalName: string; size: number; mimeType: string }[] | null
+): string {
   if (!attachments || attachments.length === 0) return '';
 
-  const attachmentItems = attachments.map(att => {
-    const size = formatFileSize(att.size);
-    const name = att.originalName || att.filename;
-    const displayName = name.length > 25 ? `${name.substring(0, 22)  }...` : name;
+  const attachmentItems = attachments
+    .map((att) => {
+      const size = formatFileSize(att.size);
+      const name = att.originalName || att.filename;
+      const displayName = name.length > 25 ? `${name.substring(0, 22)}...` : name;
 
-    return `
+      return `
       <a href="/api/messages/attachments/${att.filename}/download"
          class="message-attachment"
          target="_blank"
@@ -504,72 +542,97 @@ function renderAdminMessageAttachments(attachments: { filename: string; original
         <span class="message-attachment-download">${ICONS.DOWNLOAD}</span>
       </a>
     `;
-  }).join('');
+    })
+    .join('');
 
   return `<div class="message-attachments">${attachmentItems}</div>`;
 }
 
 function renderMessages(messages: Message[], container: HTMLElement): void {
   if (messages.length === 0) {
-    container.innerHTML =
-      '<div class="empty-state">No messages yet. Start the conversation!</div>';
+    container.innerHTML = '<div class="empty-state">No messages yet. Start the conversation!</div>';
     return;
   }
 
   container.innerHTML = messages
-    .map((msg: MessageResponse & { is_pinned?: boolean; reactions?: MessageReaction[]; attachments?: { filename: string; originalName: string; size: number; mimeType: string }[] }) => {
-      const isAdmin = msg.sender_type === 'admin';
-      const dateTime = formatDateTime(msg.created_at);
-      const rawSenderName = isAdmin ? 'You' : SanitizationUtils.decodeHtmlEntities(selectedClientName || 'Client');
-      const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
-      const safeContent = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(msg.message || ''));
-      const initials = rawSenderName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-      const safeInitials = SanitizationUtils.escapeHtml(initials);
-      const isPinned = msg.is_pinned || false;
+    .map(
+      (
+        msg: MessageResponse & {
+          is_pinned?: boolean;
+          reactions?: MessageReaction[];
+          attachments?: {
+            filename: string;
+            originalName: string;
+            size: number;
+            mimeType: string;
+          }[];
+        }
+      ) => {
+        const isAdmin = msg.sender_type === 'admin';
+        const dateTime = formatDateTime(msg.created_at);
+        const rawSenderName = isAdmin
+          ? 'You'
+          : SanitizationUtils.decodeHtmlEntities(selectedClientName || 'Client');
+        const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
+        const safeContent = SanitizationUtils.escapeHtml(
+          SanitizationUtils.decodeHtmlEntities(msg.message || '')
+        );
+        const initials = rawSenderName
+          .split(' ')
+          .map((n) => n[0])
+          .join('')
+          .substring(0, 2)
+          .toUpperCase();
+        const safeInitials = SanitizationUtils.escapeHtml(initials);
+        const isPinned = msg.is_pinned || false;
 
-      // Build reactions HTML
-      const reactionsHtml = renderReactionsHtml(msg.id, msg.reactions || []);
+        // Build reactions HTML
+        const reactionsHtml = renderReactionsHtml(msg.id, msg.reactions || []);
 
-      // Build attachments HTML
-      const attachmentsHtml = renderAdminMessageAttachments(msg.attachments || null);
+        // Build attachments HTML
+        const attachmentsHtml = renderAdminMessageAttachments(msg.attachments || null);
 
-      // Read receipt for admin messages
-      const isRead = msg.read_at !== null;
-      const readReceiptHtml = isAdmin ? `
+        // Read receipt for admin messages
+        const isRead = msg.read_at !== null;
+        const readReceiptHtml = isAdmin
+          ? `
         <div class="message-status ${isRead ? 'read' : ''}">
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            ${isRead
+            ${
+  isRead
     ? '<polyline points="20 6 9 17 4 12"></polyline><polyline points="20 12 9 23 4 18"></polyline>'
-    : '<polyline points="20 6 9 17 4 12"></polyline>'}
+    : '<polyline points="20 6 9 17 4 12"></polyline>'
+}
           </svg>
           ${isRead ? 'Read' : 'Sent'}
         </div>
-      ` : '';
+      `
+          : '';
 
-      // Action buttons (pin, reaction picker)
-      // Use pin icon when NOT pinned (to pin), pin-off icon when IS pinned (to unpin)
-      const pinIcon = isPinned
-        ? `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        // Action buttons (pin, reaction picker)
+        // Use pin icon when NOT pinned (to pin), pin-off icon when IS pinned (to unpin)
+        const pinIcon = isPinned
+          ? `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 17v5"/><path d="M15 9.34V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H7.89"/><path d="m2 2 20 20"/><path d="M9 9v1.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h11"/>
           </svg>`
-        : `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          : `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>
           </svg>`;
-      const actionsHtml = `
+        const actionsHtml = `
         <div class="message-actions">
           <button class="pin-message-btn ${isPinned ? 'pinned' : ''}" data-message-id="${msg.id}" title="${isPinned ? 'Unpin' : 'Pin'} message">
             ${pinIcon}
           </button>
           <button class="add-reaction-btn" data-message-id="${msg.id}" title="Add reaction">+</button>
           <div class="reaction-picker hidden" data-message-id="${msg.id}">
-            ${REACTIONS.map(r => `<button data-reaction="${r}">${r}</button>`).join('')}
+            ${REACTIONS.map((r) => `<button data-reaction="${r}">${r}</button>`).join('')}
             <span class="picker-plus">+</span>
           </div>
         </div>
       `;
 
-      if (isAdmin) {
-        return `
+        if (isAdmin) {
+          return `
           <div class="message message-sent ${isPinned ? 'pinned' : ''}" data-message-id="${msg.id}">
             <div class="message-content">
               <div class="message-header">
@@ -587,9 +650,9 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
             </div>
           </div>
         `;
-      }
+        }
 
-      return `
+        return `
         <div class="message message-received ${isPinned ? 'pinned' : ''}" data-message-id="${msg.id}">
           <div class="message-avatar">
             <div class="avatar-placeholder">${safeInitials}</div>
@@ -606,7 +669,8 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
           </div>
         </div>
       `;
-    })
+      }
+    )
     .join('');
 
   // Add event listeners for reactions and pins
@@ -621,16 +685,18 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
 function renderReactionsHtml(messageId: number, reactions: MessageReaction[]): string {
   // Group reactions by emoji
   const grouped = new Map<string, number>();
-  reactions.forEach(r => {
+  reactions.forEach((r) => {
     grouped.set(r.reaction, (grouped.get(r.reaction) || 0) + 1);
   });
 
   const reactionBadges = Array.from(grouped.entries())
-    .map(([emoji, count]) => `
+    .map(
+      ([emoji, count]) => `
       <span class="reaction-badge" data-message-id="${messageId}" data-reaction="${emoji}">
         ${emoji} <span class="reaction-count">${count}</span>
       </span>
-    `)
+    `
+    )
     .join('');
 
   return `
@@ -654,7 +720,7 @@ function setupMessageInteractions(container: HTMLElement): void {
     const isOpen = !picker?.classList.contains('hidden');
 
     // Close all other pickers first
-    container.querySelectorAll('.reaction-picker').forEach(p => {
+    container.querySelectorAll('.reaction-picker').forEach((p) => {
       p.classList.add('hidden');
       p.closest('.message-actions')?.classList.remove('picker-open');
     });
@@ -667,7 +733,7 @@ function setupMessageInteractions(container: HTMLElement): void {
   };
 
   // Long press on message content (iMessage style)
-  container.querySelectorAll('.message-content').forEach(content => {
+  container.querySelectorAll('.message-content').forEach((content) => {
     const message = content.closest('.message') as HTMLElement;
     const messageId = message?.dataset.messageId;
     if (!messageId) return;
@@ -697,7 +763,7 @@ function setupMessageInteractions(container: HTMLElement): void {
   });
 
   // Add reaction button clicks (toggles picker)
-  container.querySelectorAll('.add-reaction-btn').forEach(btn => {
+  container.querySelectorAll('.add-reaction-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const messageId = (btn as HTMLElement).dataset.messageId;
@@ -708,7 +774,7 @@ function setupMessageInteractions(container: HTMLElement): void {
   });
 
   // X button inside picker closes it
-  container.querySelectorAll('.picker-plus').forEach(plus => {
+  container.querySelectorAll('.picker-plus').forEach((plus) => {
     plus.addEventListener('click', (e) => {
       e.stopPropagation();
       const picker = (plus as HTMLElement).closest('.reaction-picker');
@@ -719,7 +785,7 @@ function setupMessageInteractions(container: HTMLElement): void {
   });
 
   // Reaction picker button clicks
-  container.querySelectorAll('.reaction-picker button').forEach(btn => {
+  container.querySelectorAll('.reaction-picker button').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const picker = (btn as HTMLElement).closest('.reaction-picker') as HTMLElement;
@@ -735,7 +801,7 @@ function setupMessageInteractions(container: HTMLElement): void {
   });
 
   // Existing reaction badge clicks (toggle)
-  container.querySelectorAll('.reaction-badge').forEach(badge => {
+  container.querySelectorAll('.reaction-badge').forEach((badge) => {
     badge.addEventListener('click', async () => {
       const messageId = (badge as HTMLElement).dataset.messageId;
       const reaction = (badge as HTMLElement).dataset.reaction;
@@ -746,7 +812,7 @@ function setupMessageInteractions(container: HTMLElement): void {
   });
 
   // Pin button clicks
-  container.querySelectorAll('.pin-message-btn').forEach(btn => {
+  container.querySelectorAll('.pin-message-btn').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const messageId = (btn as HTMLElement).dataset.messageId;
@@ -761,7 +827,7 @@ function setupMessageInteractions(container: HTMLElement): void {
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
     if (!target.closest('.reaction-picker') && !target.closest('.add-reaction-btn')) {
-      container.querySelectorAll('.reaction-picker').forEach(picker => {
+      container.querySelectorAll('.reaction-picker').forEach((picker) => {
         picker.classList.add('hidden');
         picker.closest('.message-actions')?.classList.remove('picker-open');
       });
@@ -798,7 +864,9 @@ async function addReaction(messageId: number, reaction: string): Promise<void> {
 async function toggleReaction(messageId: number, reaction: string): Promise<void> {
   try {
     // Try to remove first, if fails then add
-    const response = await apiDelete(`/api/messages/${messageId}/reactions/${encodeURIComponent(reaction)}`);
+    const response = await apiDelete(
+      `/api/messages/${messageId}/reactions/${encodeURIComponent(reaction)}`
+    );
     if (!response.ok) {
       await apiPost(`/api/messages/${messageId}/reactions`, { reaction });
     }
@@ -840,7 +908,10 @@ async function togglePin(messageId: number, isPinned: boolean): Promise<void> {
 /**
  * Load thread messages with reactions
  */
-async function loadThreadMessagesWithReactions(threadId: number, container: HTMLElement): Promise<void> {
+async function loadThreadMessagesWithReactions(
+  threadId: number,
+  container: HTMLElement
+): Promise<void> {
   try {
     const response = await apiFetch(`/api/messages/threads/${threadId}/messages`);
     if (response.ok) {
@@ -870,7 +941,7 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
       const formData = new FormData();
       formData.append('message', message || '(Attachment)');
 
-      pendingAttachments.forEach(file => {
+      pendingAttachments.forEach((file) => {
         formData.append('attachments', file);
       });
 
@@ -1007,11 +1078,12 @@ function renderAdminAttachmentPreview(): void {
   }
 
   preview.classList.remove('hidden');
-  preview.innerHTML = pendingAttachments.map((file, index) => {
-    const size = formatFileSize(file.size);
-    const name = file.name.length > 20 ? `${file.name.substring(0, 17)  }...` : file.name;
+  preview.innerHTML = pendingAttachments
+    .map((file, index) => {
+      const size = formatFileSize(file.size);
+      const name = file.name.length > 20 ? `${file.name.substring(0, 17)}...` : file.name;
 
-    return `
+      return `
       <div class="attachment-chip" data-index="${index}">
         <span class="attachment-chip-icon">${ICONS.FILE}</span>
         <span class="attachment-chip-name" title="${SanitizationUtils.escapeHtml(file.name)}">${SanitizationUtils.escapeHtml(name)}</span>
@@ -1021,10 +1093,11 @@ function renderAdminAttachmentPreview(): void {
         </button>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   // Add remove button handlers
-  preview.querySelectorAll('.attachment-chip-remove').forEach(btn => {
+  preview.querySelectorAll('.attachment-chip-remove').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -1103,7 +1176,8 @@ export function setupMessagingListeners(ctx: AdminDashboardContext): void {
       hint.id = 'message-hint';
       hint.className = 'sr-only';
       hint.textContent = 'Press Enter to send, Shift+Enter for new line';
-      hint.style.cssText = 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;';
+      hint.style.cssText =
+        'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;';
       input.parentElement?.appendChild(hint);
     }
 
@@ -1147,14 +1221,14 @@ export function setupMessagingListeners(ctx: AdminDashboardContext): void {
 
       const [clientIdStr, threadIdStr] = value.split(':');
       const clientId = parseInt(clientIdStr);
-      const client = _cachedClientsWithThreads.find(c => c.client_id === clientId);
+      const client = _cachedClientsWithThreads.find((c) => c.client_id === clientId);
       const clientName = client?.contact_name || client?.company_name || 'Client';
       selectedClientName = clientName;
 
       // Update visual state in thread list
       const threadList = getElement('admin-thread-list');
       if (threadList) {
-        threadList.querySelectorAll('.thread-item').forEach(item => {
+        threadList.querySelectorAll('.thread-item').forEach((item) => {
           const itemClientId = (item as HTMLElement).dataset.clientId;
           item.classList.toggle('active', itemClientId === clientIdStr);
           item.setAttribute('aria-selected', String(itemClientId === clientIdStr));

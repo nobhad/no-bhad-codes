@@ -197,7 +197,9 @@ export class OnboardingWizardModule {
       const res = await fetch(`${API_BASE}/onboarding`, { credentials: 'include' });
       if (!res.ok) return;
 
-      const data = await res.json() as { progress?: { current_step: number; step_data: OnboardingStepData; status: string } };
+      const data = (await res.json()) as {
+        progress?: { current_step: number; step_data: OnboardingStepData; status: string };
+      };
       if (data.progress && data.progress.status !== 'completed') {
         this.state.currentStep = data.progress.current_step as OnboardingStep;
         this.state.stepData = data.progress.step_data || {};
@@ -269,7 +271,8 @@ export class OnboardingWizardModule {
 
       // Handle multi-select checkboxes (arrays)
       if (['project_goals', 'features', 'needs_help_with'].includes(fieldName)) {
-        const currentArray = (this.state.stepData[fieldName as keyof OnboardingStepData] as string[]) || [];
+        const currentArray =
+          (this.state.stepData[fieldName as keyof OnboardingStepData] as string[]) || [];
         const value = checkbox.value;
 
         if (checkbox.checked) {
@@ -277,7 +280,9 @@ export class OnboardingWizardModule {
             (this.state.stepData as Record<string, unknown>)[fieldName] = [...currentArray, value];
           }
         } else {
-          (this.state.stepData as Record<string, unknown>)[fieldName] = currentArray.filter(v => v !== value);
+          (this.state.stepData as Record<string, unknown>)[fieldName] = currentArray.filter(
+            (v) => v !== value
+          );
         }
       } else {
         // Handle boolean checkboxes
@@ -363,13 +368,13 @@ export class OnboardingWizardModule {
   /**
    * Go to a specific step
    */
-  private async goToStep(step: OnboardingStep, direction: 'forward' | 'back' = 'forward'): Promise<void> {
+  private async goToStep(
+    step: OnboardingStep,
+    direction: 'forward' | 'back' = 'forward'
+  ): Promise<void> {
     this.state.currentStep = step;
 
-    await animateStepTransition(
-      this.contentContainer!,
-      direction
-    );
+    await animateStepTransition(this.contentContainer!, direction);
 
     this.renderCurrentStep();
     updateStepIndicators(this.state.currentStep);
@@ -395,8 +400,14 @@ export class OnboardingWizardModule {
     }
 
     // Handle boolean checkboxes
-    const booleanCheckboxes = ['has_logo', 'has_brand_colors', 'has_content', 'has_photos', 'confirmed'];
-    booleanCheckboxes.forEach(name => {
+    const booleanCheckboxes = [
+      'has_logo',
+      'has_brand_colors',
+      'has_content',
+      'has_photos',
+      'confirmed'
+    ];
+    booleanCheckboxes.forEach((name) => {
       const checkbox = form.querySelector(`input[name="${name}"]`) as HTMLInputElement | null;
       if (checkbox) {
         (this.state.stepData as Record<string, unknown>)[name] = checkbox.checked;
@@ -410,7 +421,10 @@ export class OnboardingWizardModule {
   private validateCurrentStep(): boolean {
     switch (this.state.currentStep) {
     case 1:
-      if (!this.state.stepData.company_name?.trim() && !this.state.stepData.contact_name?.trim()) {
+      if (
+        !this.state.stepData.company_name?.trim() &&
+          !this.state.stepData.contact_name?.trim()
+      ) {
         this.showError('Please enter either a company name or contact name');
         return false;
       }
@@ -476,7 +490,10 @@ export class OnboardingWizardModule {
     if (!rawDraft) return;
 
     try {
-      const draft = JSON.parse(rawDraft) as { currentStep?: OnboardingStep; stepData?: OnboardingStepData };
+      const draft = JSON.parse(rawDraft) as {
+        currentStep?: OnboardingStep;
+        stepData?: OnboardingStepData;
+      };
 
       // Only use draft if it has more progress than server data
       if (draft?.stepData) {
@@ -531,15 +548,19 @@ export class OnboardingWizardModule {
     const wizard = this.container.querySelector('.onboarding-wizard');
     if (!wizard) return;
 
-    gsap.fromTo(wizard, {
-      opacity: 0,
-      y: 20
-    }, {
-      opacity: 1,
-      y: 0,
-      duration: 0.4,
-      ease: 'power2.out'
-    });
+    gsap.fromTo(
+      wizard,
+      {
+        opacity: 0,
+        y: 20
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        ease: 'power2.out'
+      }
+    );
   }
 
   /**

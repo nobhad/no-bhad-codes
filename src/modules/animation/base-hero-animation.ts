@@ -193,11 +193,15 @@ export abstract class BaseHeroAnimation extends BaseModule {
 
     // Fade in the content
     if (content) {
-      tl.to(content, {
-        opacity: 1,
-        duration: 0.5,
-        ease: 'power2.out'
-      }, '-=0.3');
+      tl.to(
+        content,
+        {
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power2.out'
+        },
+        '-=0.3'
+      );
     }
 
     this.addTimeline(tl);
@@ -287,4 +291,3 @@ export abstract class BaseHeroAnimation extends BaseModule {
     hero.style.display = 'none';
   }
 }
-

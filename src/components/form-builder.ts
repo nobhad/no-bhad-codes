@@ -566,7 +566,10 @@ export function createDatePicker(config: DatePickerConfig): HTMLInputElement {
 /**
  * Set error state on an input element
  */
-export function setInputError(input: HTMLInputElement | HTMLTextAreaElement, errorMessage: string): void {
+export function setInputError(
+  input: HTMLInputElement | HTMLTextAreaElement,
+  errorMessage: string
+): void {
   input.classList.add('error');
   input.setAttribute('aria-invalid', 'true');
 
@@ -741,14 +744,16 @@ export function createNumberInput(config: NumberInputConfig): HTMLElement {
     const decrementBtn = document.createElement('button');
     decrementBtn.type = 'button';
     decrementBtn.className = 'number-input-btn number-input-decrement';
-    decrementBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>';
+    decrementBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>';
     decrementBtn.setAttribute('aria-label', 'Decrease value');
     decrementBtn.disabled = disabled;
 
     const incrementBtn = document.createElement('button');
     incrementBtn.type = 'button';
     incrementBtn.className = 'number-input-btn number-input-increment';
-    incrementBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
+    incrementBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
     incrementBtn.setAttribute('aria-label', 'Increase value');
     incrementBtn.disabled = disabled;
 
@@ -879,16 +884,15 @@ export function createRadioGroup(config: RadioGroupConfig): HTMLElement {
  * Create a horizontal row for multiple form fields.
  */
 export function createFormRow(config: FormRowConfig): HTMLElement {
-  const {
-    children,
-    columns = 'equal',
-    gap = 'md',
-    stackOnMobile = true,
-    className = ''
-  } = config;
+  const { children, columns = 'equal', gap = 'md', stackOnMobile = true, className = '' } = config;
 
   const row = document.createElement('div');
-  row.className = cx('form-row', `form-row-gap-${gap}`, stackOnMobile && 'form-row-stack-mobile', className);
+  row.className = cx(
+    'form-row',
+    `form-row-gap-${gap}`,
+    stackOnMobile && 'form-row-stack-mobile',
+    className
+  );
 
   // Set grid columns
   if (columns === 'equal') {
@@ -899,7 +903,7 @@ export function createFormRow(config: FormRowConfig): HTMLElement {
     row.style.gridTemplateColumns = columns.join(' ');
   }
 
-  children.forEach(child => {
+  children.forEach((child) => {
     row.appendChild(child);
   });
 
@@ -938,7 +942,8 @@ export function createFormSection(config: FormSectionConfig): HTMLElement {
 
     const icon = document.createElement('span');
     icon.className = 'form-section-icon';
-    icon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
+    icon.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
 
     const titleEl = document.createElement('span');
     titleEl.className = 'form-section-title';
@@ -962,7 +967,7 @@ export function createFormSection(config: FormSectionConfig): HTMLElement {
 
     const fields = document.createElement('div');
     fields.className = 'form-section-fields';
-    children.forEach(child => fields.appendChild(child));
+    children.forEach((child) => fields.appendChild(child));
     content.appendChild(fields);
 
     toggle.addEventListener('click', () => {
@@ -995,7 +1000,7 @@ export function createFormSection(config: FormSectionConfig): HTMLElement {
 
     const fields = document.createElement('div');
     fields.className = 'form-section-fields';
-    children.forEach(child => fields.appendChild(child));
+    children.forEach((child) => fields.appendChild(child));
     section.appendChild(fields);
   }
 
@@ -1052,7 +1057,8 @@ export function createFileUpload(config: FileUploadConfig): HTMLElement {
 
   const icon = document.createElement('span');
   icon.className = 'file-upload-icon';
-  icon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
+  icon.innerHTML =
+    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
 
   const text = document.createElement('span');
   text.className = 'file-upload-text';
@@ -1089,11 +1095,11 @@ export function createFileUpload(config: FileUploadConfig): HTMLElement {
       return `File "${file.name}" exceeds maximum size of ${formatFileSize(maxSize)}`;
     }
     if (accept) {
-      const acceptedTypes = accept.split(',').map(t => t.trim().toLowerCase());
+      const acceptedTypes = accept.split(',').map((t) => t.trim().toLowerCase());
       const fileType = file.type.toLowerCase();
       const fileExt = `.${file.name.split('.').pop()?.toLowerCase()}`;
 
-      const isAccepted = acceptedTypes.some(type => {
+      const isAccepted = acceptedTypes.some((type) => {
         if (type.startsWith('.')) return fileExt === type;
         if (type.endsWith('/*')) return fileType.startsWith(type.replace('/*', '/'));
         return fileType === type;
@@ -1128,7 +1134,8 @@ export function createFileUpload(config: FileUploadConfig): HTMLElement {
     } else {
       const fileIcon = document.createElement('span');
       fileIcon.className = 'file-upload-file-icon';
-      fileIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+      fileIcon.innerHTML =
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
       item.appendChild(fileIcon);
     }
 
@@ -1150,7 +1157,8 @@ export function createFileUpload(config: FileUploadConfig): HTMLElement {
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.className = 'file-upload-remove';
-    removeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    removeBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
     removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
 
     removeBtn.addEventListener('click', () => {

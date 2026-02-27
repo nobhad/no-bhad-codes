@@ -27,6 +27,69 @@ import type { TableFilterConfig } from '../../../utils/table-filter';
 
 const logger = createLogger('AdminDeletedItems');
 
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn =
+  typeof import('../../../react/features/admin/deleted-items').mountDeletedItemsTable;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/deleted-items').unmountDeletedItemsTable;
+
+let mountDeletedItemsTable: ReactMountFn | null = null;
+let unmountDeletedItemsTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactDeletedItemsTable(): Promise<boolean> {
+  if (mountDeletedItemsTable && unmountDeletedItemsTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/deleted-items');
+    mountDeletedItemsTable = module.mountDeletedItemsTable;
+    unmountDeletedItemsTable = module.unmountDeletedItemsTable;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React deleted items table */
+function shouldUseReactDeletedItemsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_deleted_items') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_deleted_items_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
+
 // Late-bound module reload function (assigned after module creation)
 let reloadModule: ((ctx: AdminDashboardContext) => Promise<void>) | null = null;
 
@@ -86,11 +149,7 @@ function capitalizeFirst(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-async function restoreItem(
-  id: number,
-  type: string,
-  reloadFn: () => Promise<void>
-): Promise<void> {
+async function restoreItem(id: number, type: string, reloadFn: () => Promise<void>): Promise<void> {
   try {
     const response = await apiPost(`/api/admin/deleted-items/${type}/${id}/restore`, {});
 
@@ -142,11 +201,8 @@ function buildDeletedItemRow(
   row.dataset.type = item.type;
 
   const daysUntilPermanent = item.days_until_permanent;
-  const urgencyClass = daysUntilPermanent <= 7
-    ? 'status-danger'
-    : daysUntilPermanent <= 14
-      ? 'status-warning'
-      : '';
+  const urgencyClass =
+    daysUntilPermanent <= 7 ? 'status-danger' : daysUntilPermanent <= 14 ? 'status-warning' : '';
 
   row.innerHTML = `
     <td class="type-cell" data-label="Type">
@@ -277,10 +333,85 @@ reloadModule = deletedItemsModule.load;
 // PUBLIC API
 // ===============================================
 
-export const loadDeletedItems = deletedItemsModule.load;
-export const setDeletedItemsContext = deletedItemsModule.setContext;
-export const getDeletedItemsData = deletedItemsModule.getData;
-
-export function cleanupDeletedItems(): void {
+/**
+ * Cleanup function called when leaving the deleted items tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupDeletedItemsTab(): void {
+  if (reactTableMounted && unmountDeletedItemsTable) {
+    unmountDeletedItemsTable();
+    reactTableMounted = false;
+  }
   deletedItemsModule.resetCache();
 }
+
+/**
+ * Renders the Deleted Items tab structure dynamically.
+ * Called by admin-dashboard before loading data.
+ */
+export function renderDeletedItemsTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactDeletedItemsTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Deleted Items Table Mount Point -->
+      <div id="react-deleted-items-mount"></div>
+    `;
+  }
+  // Vanilla implementation - factory renders table structure on load
+}
+
+/**
+ * Load deleted items - handles both React and vanilla implementations
+ */
+export async function loadDeletedItems(ctx: AdminDashboardContext): Promise<void> {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactDeletedItemsTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React DeletedItemsTable
+    const mountContainer = document.getElementById('react-deleted-items-mount');
+    if (mountContainer) {
+      const loaded = await loadReactDeletedItemsTable();
+      if (loaded && mountDeletedItemsTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountDeletedItemsTable) {
+          unmountDeletedItemsTable();
+        }
+        mountDeletedItemsTable(mountContainer, {
+          onNavigate: (tab: string, entityId?: string) => {
+            if (entityId) {
+              ctx.switchTab(tab);
+            } else {
+              ctx.switchTab(tab);
+            }
+          }
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        logger.error(' React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
+  await deletedItemsModule.load(ctx);
+}
+
+export const setDeletedItemsContext = deletedItemsModule.setContext;
+export const getDeletedItemsData = deletedItemsModule.getData;

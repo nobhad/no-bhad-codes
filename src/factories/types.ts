@@ -7,11 +7,7 @@
  * Shared TypeScript interfaces for the UI factory system.
  */
 
-import {
-  UI_CONTEXTS,
-  ICON_SIZES,
-  BUTTON_SIZES
-} from './constants';
+import { UI_CONTEXTS, ICON_SIZES, BUTTON_SIZES } from './constants';
 
 // ============================================
 // CORE TYPES

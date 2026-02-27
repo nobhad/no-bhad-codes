@@ -24,11 +24,75 @@ import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils'
 import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { exportToCsv, DOCUMENT_REQUESTS_EXPORT_CONFIG } from '../../../utils/table-export';
+import { exportDataToCsv, DOCUMENT_REQUESTS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('DocRequests');
+
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn =
+  typeof import('../../../react/features/admin/document-requests').mountDocumentRequestsTable;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/document-requests').unmountDocumentRequestsTable;
+
+let mountDocumentRequestsTable: ReactMountFn | null = null;
+let unmountDocumentRequestsTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactDocumentRequestsTable(): Promise<boolean> {
+  if (mountDocumentRequestsTable && unmountDocumentRequestsTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/document-requests');
+    mountDocumentRequestsTable = module.mountDocumentRequestsTable;
+    unmountDocumentRequestsTable = module.unmountDocumentRequestsTable;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React document requests table */
+function shouldUseReactDocumentRequestsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_document_requests') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_document_requests_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
+
 import {
   createFilterUI,
   createSortableHeaders,
@@ -65,13 +129,7 @@ const DR_API = '/api/document-requests';
 // Types
 // ---------------------------------------------------------------------------
 
-type RequestStatus =
-  | 'requested'
-  | 'viewed'
-  | 'uploaded'
-  | 'under_review'
-  | 'approved'
-  | 'rejected';
+type RequestStatus = 'requested' | 'viewed' | 'uploaded' | 'under_review' | 'approved' | 'rejected';
 
 interface DocumentRequest {
   id: number;
@@ -212,13 +270,13 @@ const DR_BULK_CONFIG: BulkActionConfig = {
         if (!storedDrContext) return;
         try {
           const results = await Promise.all(
-            ids.map(id =>
+            ids.map((id) =>
               apiPost(`${DR_API}/${id}/remind`, {})
-                .then(res => ({ id, success: res.ok }))
+                .then((res) => ({ id, success: res.ok }))
                 .catch(() => ({ id, success: false }))
             )
           );
-          const successCount = results.filter(r => r.success).length;
+          const successCount = results.filter((r) => r.success).length;
           if (successCount > 0) {
             showToast(`Sent ${successCount} reminder${successCount > 1 ? 's' : ''}`, 'success');
             resetSelection('document-requests');
@@ -239,13 +297,13 @@ const DR_BULK_CONFIG: BulkActionConfig = {
         if (!storedDrContext) return;
         try {
           const results = await Promise.all(
-            ids.map(id =>
+            ids.map((id) =>
               apiDelete(`${DR_API}/${id}`)
-                .then(res => ({ id, success: res.ok }))
+                .then((res) => ({ id, success: res.ok }))
                 .catch(() => ({ id, success: false }))
             )
           );
-          const successCount = results.filter(r => r.success).length;
+          const successCount = results.filter((r) => r.success).length;
           if (successCount > 0) {
             showToast(`Deleted ${successCount} request${successCount > 1 ? 's' : ''}`, 'success');
             resetSelection('document-requests');
@@ -259,7 +317,6 @@ const DR_BULK_CONFIG: BulkActionConfig = {
     }
   ]
 };
-
 
 // ---------------------------------------------------------------------------
 // Load data
@@ -284,9 +341,21 @@ async function loadAllRequests(): Promise<DocumentRequest[]> {
     logger.error(' Failed to load overdue:', overdueRes.status);
   }
 
-  const pending = pendingRes.ok ? await parseApiResponse<{ requests: DocumentRequest[] }>(pendingRes).then((d) => d.requests || []) : [];
-  const forReview = forReviewRes.ok ? await parseApiResponse<{ requests: DocumentRequest[] }>(forReviewRes).then((d) => d.requests || []) : [];
-  const overdue = overdueRes.ok ? await parseApiResponse<{ requests: DocumentRequest[] }>(overdueRes).then((d) => d.requests || []) : [];
+  const pending = pendingRes.ok
+    ? await parseApiResponse<{ requests: DocumentRequest[] }>(pendingRes).then(
+      (d) => d.requests || []
+    )
+    : [];
+  const forReview = forReviewRes.ok
+    ? await parseApiResponse<{ requests: DocumentRequest[] }>(forReviewRes).then(
+      (d) => d.requests || []
+    )
+    : [];
+  const overdue = overdueRes.ok
+    ? await parseApiResponse<{ requests: DocumentRequest[] }>(overdueRes).then(
+      (d) => d.requests || []
+    )
+    : [];
 
   const byId = new Map<number, DocumentRequest>();
   [...pending, ...forReview, ...overdue].forEach((r) => byId.set(r.id, r));
@@ -307,7 +376,9 @@ async function loadTemplates(): Promise<DocumentRequestTemplate[]> {
   return data.templates || [];
 }
 
-async function loadRequestDetail(id: number): Promise<{ request: DocumentRequest; history: DocumentRequestHistory[] } | null> {
+async function loadRequestDetail(
+  id: number
+): Promise<{ request: DocumentRequest; history: DocumentRequestHistory[] } | null> {
   const res = await apiFetch(`${DR_API}/${id}`);
   if (!res.ok) return null;
   return parseApiResponse(res);
@@ -324,9 +395,10 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
   if (!tbody) return;
 
   if (requests.length === 0) {
-    const message = requestsCache.length === 0
-      ? 'No document requests yet.'
-      : 'No document requests match the current filters.';
+    const message =
+      requestsCache.length === 0
+        ? 'No document requests yet.'
+        : 'No document requests match the current filters.';
     showTableEmpty(tbody, DR_TABLE_COLSPAN, message);
     return;
   }
@@ -348,11 +420,22 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
     createAction('view', r.id, { className: 'dr-view' }),
-    conditionalAction(r.status === 'uploaded', 'start-review', r.id, { className: 'dr-start-review' }),
-    conditionalAction(r.status === 'under_review', 'approve', r.id, { className: 'dr-approve' }),
-    conditionalAction(r.status === 'under_review', 'reject', r.id, { className: 'dr-reject' }),
-    conditionalAction(r.status !== 'approved' && r.status !== 'rejected', 'remind', r.id, { className: 'dr-remind' }),
-    createAction('delete', r.id, { className: 'dr-delete', dataAttrs: { title: escapeHtml(r.title) } })
+    conditionalAction(r.status === 'uploaded', 'start-review', r.id, {
+      className: 'dr-start-review'
+    }),
+    conditionalAction(r.status === 'under_review', 'approve', r.id, {
+      className: 'dr-approve'
+    }),
+    conditionalAction(r.status === 'under_review', 'reject', r.id, {
+      className: 'dr-reject'
+    }),
+    conditionalAction(r.status !== 'approved' && r.status !== 'rejected', 'remind', r.id, {
+      className: 'dr-remind'
+    }),
+    createAction('delete', r.id, {
+      className: 'dr-delete',
+      dataAttrs: { title: escapeHtml(r.title) }
+    })
   ])}
       </td>
     </tr>
@@ -361,7 +444,7 @@ function renderRequestsTable(requests: DocumentRequest[], _ctx: AdminDashboardCo
     .join('');
 
   // Setup bulk selection handlers
-  const allRowIds = requests.map(r => r.id);
+  const allRowIds = requests.map((r) => r.id);
   setupBulkSelectionHandlers(DR_BULK_CONFIG, allRowIds);
 
   // Initialize keyboard navigation
@@ -388,18 +471,14 @@ function renderDRPaginationUI(totalItems: number, ctx: AdminDashboardContext): v
   paginationState.totalItems = totalItems;
 
   // Create pagination UI
-  const paginationUI = createPaginationUI(
-    DR_PAGINATION_CONFIG,
-    paginationState,
-    (newState) => {
-      paginationState = newState;
-      savePaginationState(DR_PAGINATION_CONFIG.storageKey!, paginationState);
-      // Re-render table with new pagination
-      if (requestsCache.length > 0) {
-        refreshFilteredTable(ctx);
-      }
+  const paginationUI = createPaginationUI(DR_PAGINATION_CONFIG, paginationState, (newState) => {
+    paginationState = newState;
+    savePaginationState(DR_PAGINATION_CONFIG.storageKey!, paginationState);
+    // Re-render table with new pagination
+    if (requestsCache.length > 0) {
+      refreshFilteredTable(ctx);
     }
-  );
+  });
 
   // Replace container content
   container.innerHTML = '';
@@ -435,10 +514,12 @@ function openCreateModal(_ctx: AdminDashboardContext): void {
   // Load templates for templates tab
   const listEl = el('dr-templates-list');
   if (listEl) {
-    listEl.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+    listEl.innerHTML =
+      '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
     loadTemplates().then((templates) => {
       if (templates.length === 0) {
-        listEl.innerHTML = '<div class="empty-state">No templates available. Use Single Request tab.</div>';
+        listEl.innerHTML =
+          '<div class="empty-state">No templates available. Use Single Request tab.</div>';
         return;
       }
       listEl.innerHTML = templates
@@ -500,7 +581,9 @@ function initClientDropdowns(): void {
 
   // Initialize templates client dropdown
   if (!drTemplatesClientDropdownInit) {
-    const templatesClientSelect = document.getElementById('dr-templates-client') as HTMLSelectElement;
+    const templatesClientSelect = document.getElementById(
+      'dr-templates-client'
+    ) as HTMLSelectElement;
     if (templatesClientSelect && !templatesClientSelect.dataset.dropdownInit) {
       initModalDropdown(templatesClientSelect);
       drTemplatesClientDropdownInit = true;
@@ -542,7 +625,9 @@ function syncClientSelection(fromTab: 'single' | 'templates', toTab: 'single' | 
   let sourceLabel = '';
 
   // Try custom dropdown first (hidden input with same id)
-  const sourceHiddenInput = document.querySelector(`input[type="hidden"][id="${sourceSelectId}"]`) as HTMLInputElement;
+  const sourceHiddenInput = document.querySelector(
+    `input[type="hidden"][id="${sourceSelectId}"]`
+  ) as HTMLInputElement;
   const sourceSelect = document.getElementById(sourceSelectId) as HTMLSelectElement | null;
 
   if (sourceHiddenInput && sourceHiddenInput.value) {
@@ -559,7 +644,9 @@ function syncClientSelection(fromTab: 'single' | 'templates', toTab: 'single' | 
   if (!sourceValue) return;
 
   // Update target - check both hidden input (custom dropdown) and native select
-  const targetHiddenInput = document.querySelector(`input[type="hidden"][id="${targetSelectId}"]`) as HTMLInputElement;
+  const targetHiddenInput = document.querySelector(
+    `input[type="hidden"][id="${targetSelectId}"]`
+  ) as HTMLInputElement;
   const targetSelect = document.getElementById(targetSelectId) as HTMLSelectElement | null;
 
   // Update hidden input for custom dropdown
@@ -591,7 +678,8 @@ function openDetailModal(requestId: number, ctx: AdminDashboardContext): void {
   if (!modal || !titleEl || !bodyEl || !footerEl) return;
 
   titleEl.textContent = 'Document Request';
-  bodyEl.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+  bodyEl.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   footerEl.innerHTML = '';
   openModalOverlay(modal);
   drDetailModalFocusCleanup = manageFocusTrap(modal, {});
@@ -618,27 +706,33 @@ function openDetailModal(requestId: number, ctx: AdminDashboardContext): void {
       ${history && history.length > 0 ? `<h3>History</h3><ul class="dr-history-list">${history.map((h) => `<li><strong>${escapeHtml(h.action)}</strong> ${escapeHtml(h.actor_email)} (${formatDate(h.created_at)})${h.notes ? ` – ${escapeHtml(h.notes)}` : ''}</li>`).join('')}</ul>` : ''}
     `;
     footerEl.innerHTML = `
-      ${r.status === 'uploaded' ? `<button type="button" class="btn btn-primary btn-xs dr-detail-start-review" data-id="${  r.id  }">Start review</button>` : ''}
-      ${r.status === 'under_review' ? `<button type="button" class="btn btn-primary btn-xs dr-detail-approve" data-id="${  r.id  }">Approve</button><button type="button" class="btn btn-danger btn-xs dr-detail-reject" data-id="${  r.id  }">Reject</button>` : ''}
-      ${r.status !== 'approved' && r.status !== 'rejected' ? `<button type="button" class="btn btn-outline btn-xs dr-detail-remind" data-id="${  r.id  }">Send reminder</button>` : ''}
+      ${r.status === 'uploaded' ? `<button type="button" class="btn btn-primary btn-xs dr-detail-start-review" data-id="${r.id}">Start review</button>` : ''}
+      ${r.status === 'under_review' ? `<button type="button" class="btn btn-primary btn-xs dr-detail-approve" data-id="${r.id}">Approve</button><button type="button" class="btn btn-danger btn-xs dr-detail-reject" data-id="${r.id}">Reject</button>` : ''}
+      ${r.status !== 'approved' && r.status !== 'rejected' ? `<button type="button" class="btn btn-outline btn-xs dr-detail-remind" data-id="${r.id}">Send reminder</button>` : ''}
       <button type="button" class="btn btn-secondary btn-xs" id="dr-detail-close">Close</button>
     `;
     footerEl.querySelector('#dr-detail-close')?.addEventListener('click', () => closeDetailModal());
-    footerEl.querySelectorAll('.dr-detail-start-review, .dr-detail-approve, .dr-detail-reject, .dr-detail-remind').forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
-        const id = parseInt((e.currentTarget as HTMLElement).getAttribute('data-id')!, 10);
-        const action = (e.currentTarget as HTMLElement).classList.contains('dr-detail-start-review')
-          ? 'start-review'
-          : (e.currentTarget as HTMLElement).classList.contains('dr-detail-approve')
-            ? 'approve'
-            : (e.currentTarget as HTMLElement).classList.contains('dr-detail-reject')
-              ? 'reject'
-              : 'remind';
-        await runDetailAction(id, action, ctx);
-        closeDetailModal();
-        await refreshDocumentRequests(ctx);
+    footerEl
+      .querySelectorAll(
+        '.dr-detail-start-review, .dr-detail-approve, .dr-detail-reject, .dr-detail-remind'
+      )
+      .forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+          const id = parseInt((e.currentTarget as HTMLElement).getAttribute('data-id')!, 10);
+          const action = (e.currentTarget as HTMLElement).classList.contains(
+            'dr-detail-start-review'
+          )
+            ? 'start-review'
+            : (e.currentTarget as HTMLElement).classList.contains('dr-detail-approve')
+              ? 'approve'
+              : (e.currentTarget as HTMLElement).classList.contains('dr-detail-reject')
+                ? 'reject'
+                : 'remind';
+          await runDetailAction(id, action, ctx);
+          closeDetailModal();
+          await refreshDocumentRequests(ctx);
+        });
       });
-    });
   });
 }
 
@@ -734,12 +828,16 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
   document.getElementById('dr-create-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     // Get client value from hidden input (custom dropdown) or native select
-    const clientHiddenInput = document.querySelector('input[type="hidden"][id="dr-create-client"]') as HTMLInputElement | null;
+    const clientHiddenInput = document.querySelector(
+      'input[type="hidden"][id="dr-create-client"]'
+    ) as HTMLInputElement | null;
     const clientSelect = document.getElementById('dr-create-client') as HTMLSelectElement | null;
     const clientValue = clientHiddenInput?.value || clientSelect?.value || '';
 
     const titleInput = document.getElementById('dr-create-title') as HTMLInputElement | null;
-    const descInput = document.getElementById('dr-create-description') as HTMLTextAreaElement | null;
+    const descInput = document.getElementById(
+      'dr-create-description'
+    ) as HTMLTextAreaElement | null;
     const dueInput = document.getElementById('dr-create-due') as HTMLInputElement | null;
 
     if (!clientValue || !titleInput?.value.trim()) {
@@ -778,11 +876,15 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
   document.getElementById('dr-from-templates-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     // Get client value from hidden input (custom dropdown) or native select
-    const clientHiddenInput = document.querySelector('input[type="hidden"][id="dr-templates-client"]') as HTMLInputElement | null;
+    const clientHiddenInput = document.querySelector(
+      'input[type="hidden"][id="dr-templates-client"]'
+    ) as HTMLInputElement | null;
     const clientSelect = document.getElementById('dr-templates-client') as HTMLSelectElement | null;
     const clientValue = clientHiddenInput?.value || clientSelect?.value || '';
 
-    const checked = document.querySelectorAll<HTMLInputElement>('input[name="dr-template-id"]:checked');
+    const checked = document.querySelectorAll<HTMLInputElement>(
+      'input[name="dr-template-id"]:checked'
+    );
     if (!clientValue || checked.length === 0) {
       showToast('Select a client and at least one template', 'error');
       return;
@@ -805,14 +907,10 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
   // Setup filter UI (search, status checkboxes, date range)
   const filterContainer = el('dr-filter-container');
   if (filterContainer && !filterUIContainer) {
-    filterUIContainer = createFilterUI(
-      DOCUMENT_REQUESTS_FILTER_CONFIG,
-      filterState,
-      (newState) => {
-        filterState = newState;
-        refreshFilteredTable(ctx);
-      }
-    );
+    filterUIContainer = createFilterUI(DOCUMENT_REQUESTS_FILTER_CONFIG, filterState, (newState) => {
+      filterState = newState;
+      refreshFilteredTable(ctx);
+    });
 
     // Insert filter UI before export button
     const exportBtn = filterContainer.querySelector('#dr-export');
@@ -842,7 +940,7 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
         showToast('No document requests to export', 'warning');
         return;
       }
-      exportToCsv(filtered as unknown as Record<string, unknown>[], DOCUMENT_REQUESTS_EXPORT_CONFIG);
+      exportDataToCsv(filtered, DOCUMENT_REQUESTS_EXPORT_CONFIG);
       showToast(`Exported ${filtered.length} document requests to CSV`, 'success');
     });
   }
@@ -950,10 +1048,13 @@ function setupDRListeners(ctx: AdminDashboardContext): void {
 // ---------------------------------------------------------------------------
 
 const RENDER_ICONS = {
-  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
+  EXPORT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
   PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
-  DOCUMENT: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
+  DOCUMENT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
 };
 
 // ---------------------------------------------------------------------------
@@ -961,9 +1062,33 @@ const RENDER_ICONS = {
 // ---------------------------------------------------------------------------
 
 /**
+ * Cleanup function called when leaving the document requests tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupDocumentRequestsTab(): void {
+  if (reactTableMounted && unmountDocumentRequestsTable) {
+    unmountDocumentRequestsTable();
+    reactTableMounted = false;
+  }
+}
+
+/**
  * Render the document requests tab structure dynamically
  */
 export function renderDocumentRequestsTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactDocumentRequestsTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Document Requests Table Mount Point -->
+      <div id="react-document-requests-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <div class="data-table-card">
       <div class="data-table-header">
@@ -1107,6 +1232,50 @@ export function renderDocumentRequestsTab(container: HTMLElement): void {
 
 export async function loadDocumentRequests(ctx: AdminDashboardContext): Promise<void> {
   storedDrContext = ctx;
+
+  // Check if React implementation should be used
+  const useReact = shouldUseReactDocumentRequestsTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React DocumentRequestsTable
+    const mountContainer = document.getElementById('react-document-requests-mount');
+    if (mountContainer) {
+      const loaded = await loadReactDocumentRequestsTable();
+      if (loaded && mountDocumentRequestsTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountDocumentRequestsTable) {
+          unmountDocumentRequestsTable();
+        }
+        mountDocumentRequestsTable(mountContainer, {
+          onNavigate: (tab: string, entityId?: string) => {
+            if (entityId) {
+              ctx.switchTab(tab);
+            } else {
+              ctx.switchTab(tab);
+            }
+          }
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        logger.error(' React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
   setupDRListeners(ctx);
   await refreshDocumentRequests(ctx);
 }

@@ -11,17 +11,12 @@
 
 import { gsap } from 'gsap';
 import { ANIMATION_CONSTANTS, ANIMATION_POSITIONS } from '../../../config/animation-constants';
-import type {
-  FingerPathReferences,
-  CompleteMorphPathData
-} from './intro-types';
+import type { FingerPathReferences, CompleteMorphPathData } from './intro-types';
 
 /**
  * Create main animation timeline
  */
-export function createMainTimeline(
-  onCompleteCallback: () => void
-): gsap.core.Timeline {
+export function createMainTimeline(onCompleteCallback: () => void): gsap.core.Timeline {
   return gsap.timeline({
     onComplete: onCompleteCallback
   });
@@ -53,27 +48,33 @@ export function addEntryPhase(
     ease: ANIMATION_CONSTANTS.EASING.HERO_REVEAL
   });
 
-  timeline.to(aboveCardGroup, {
-    x: centerX,
-    y: centerY,
-    duration,
-    ease: ANIMATION_CONSTANTS.EASING.HERO_REVEAL
-  }, '<');
+  timeline.to(
+    aboveCardGroup,
+    {
+      x: centerX,
+      y: centerY,
+      duration,
+      ease: ANIMATION_CONSTANTS.EASING.HERO_REVEAL
+    },
+    '<'
+  );
 
-  timeline.to(cardLayer, {
-    x: centerX,
-    y: centerY,
-    duration,
-    ease: ANIMATION_CONSTANTS.EASING.HERO_REVEAL
-  }, '<');
+  timeline.to(
+    cardLayer,
+    {
+      x: centerX,
+      y: centerY,
+      duration,
+      ease: ANIMATION_CONSTANTS.EASING.HERO_REVEAL
+    },
+    '<'
+  );
 }
 
 /**
  * Phase 1: Clutch hold (paw grips card motionless)
  */
-export function addClutchPhase(
-  timeline: gsap.core.Timeline
-): void {
+export function addClutchPhase(timeline: gsap.core.Timeline): void {
   const duration = ANIMATION_CONSTANTS.SEQUENCES.INTRO_MORPH.CLUTCH_HOLD;
   timeline.to({}, { duration });
 }
@@ -102,32 +103,44 @@ export function addFingerReleasePhase(
 
   // Finger B: Position 1 → 2 (simultaneous with A)
   if (fingerRefs.fingerB1 && pathData.b2) {
-    timeline.to(fingerRefs.fingerB1, {
-      morphSVG: { shape: pathData.b2, shapeIndex: 'auto' },
-      duration,
-      ease,
-      force3D: true
-    }, '<');
+    timeline.to(
+      fingerRefs.fingerB1,
+      {
+        morphSVG: { shape: pathData.b2, shapeIndex: 'auto' },
+        duration,
+        ease,
+        force3D: true
+      },
+      '<'
+    );
   }
 
   // Finger C: Position 1 → 2 (simultaneous with A and B)
   if (fingerRefs.fingerC1 && pathData.c2) {
-    timeline.to(fingerRefs.fingerC1, {
-      morphSVG: { shape: pathData.c2, shapeIndex: 'auto' },
-      duration,
-      ease,
-      force3D: true
-    }, '<');
+    timeline.to(
+      fingerRefs.fingerC1,
+      {
+        morphSVG: { shape: pathData.c2, shapeIndex: 'auto' },
+        duration,
+        ease,
+        force3D: true
+      },
+      '<'
+    );
   }
 
   // Thumb: Position 1 → 2 (morphs with fingers)
   if (clonedThumb && pathData.thumb2) {
-    timeline.to(clonedThumb, {
-      morphSVG: { shape: pathData.thumb2, shapeIndex: 'auto' },
-      duration,
-      ease,
-      force3D: true
-    }, '<');
+    timeline.to(
+      clonedThumb,
+      {
+        morphSVG: { shape: pathData.thumb2, shapeIndex: 'auto' },
+        duration,
+        ease,
+        force3D: true
+      },
+      '<'
+    );
   }
 }
 
@@ -144,20 +157,28 @@ export function addRetractionPhase(
   const delay = ANIMATION_CONSTANTS.SEQUENCES.INTRO_MORPH.RETRACTION_DELAY;
 
   // Start retraction after a small delay
-  timeline.to(behindCardGroup, {
-    x: endX,
-    y: endY,
-    duration,
-    ease: 'power2.in' // Accelerate as it exits
-  }, `+=${delay}`);
+  timeline.to(
+    behindCardGroup,
+    {
+      x: endX,
+      y: endY,
+      duration,
+      ease: 'power2.in' // Accelerate as it exits
+    },
+    `+=${delay}`
+  );
 
   // Above-card group retracts simultaneously
-  timeline.to(aboveCardGroup, {
-    x: endX,
-    y: endY,
-    duration,
-    ease: 'power2.in'
-  }, '<');
+  timeline.to(
+    aboveCardGroup,
+    {
+      x: endX,
+      y: endY,
+      duration,
+      ease: 'power2.in'
+    },
+    '<'
+  );
 }
 
 /**
@@ -176,42 +197,58 @@ export function addFinalMorphPhase(
 
   // Finger A: Position 2 → 3 (during retraction)
   if (fingerRefs.fingerA1 && pathData.a3) {
-    timeline.to(fingerRefs.fingerA1, {
-      morphSVG: { shape: pathData.a3, shapeIndex: 'auto' },
-      duration: durationA,
-      ease,
-      force3D: true // GPU acceleration
-    }, '<');
+    timeline.to(
+      fingerRefs.fingerA1,
+      {
+        morphSVG: { shape: pathData.a3, shapeIndex: 'auto' },
+        duration: durationA,
+        ease,
+        force3D: true // GPU acceleration
+      },
+      '<'
+    );
   }
 
   // Finger B: Position 2 → 3 (during retraction)
   if (fingerRefs.fingerB1 && pathData.b3) {
-    timeline.to(fingerRefs.fingerB1, {
-      morphSVG: { shape: pathData.b3, shapeIndex: 'auto' },
-      duration: durationB,
-      ease,
-      force3D: true
-    }, '<');
+    timeline.to(
+      fingerRefs.fingerB1,
+      {
+        morphSVG: { shape: pathData.b3, shapeIndex: 'auto' },
+        duration: durationB,
+        ease,
+        force3D: true
+      },
+      '<'
+    );
   }
 
   // Finger C: Position 2 → 3 (during retraction, slightly slower)
   if (fingerRefs.fingerC1 && pathData.c3) {
-    timeline.to(fingerRefs.fingerC1, {
-      morphSVG: { shape: pathData.c3, shapeIndex: 'auto' },
-      duration: durationC,
-      ease,
-      force3D: true
-    }, '<');
+    timeline.to(
+      fingerRefs.fingerC1,
+      {
+        morphSVG: { shape: pathData.c3, shapeIndex: 'auto' },
+        duration: durationC,
+        ease,
+        force3D: true
+      },
+      '<'
+    );
   }
 
   // Thumb: Position 2 → 3 (during retraction)
   if (clonedThumb && pathData.thumb3) {
-    timeline.to(clonedThumb, {
-      morphSVG: { shape: pathData.thumb3, shapeIndex: 'auto' },
-      duration: durationC,
-      ease,
-      force3D: true
-    }, '<');
+    timeline.to(
+      clonedThumb,
+      {
+        morphSVG: { shape: pathData.thumb3, shapeIndex: 'auto' },
+        duration: durationC,
+        ease,
+        force3D: true
+      },
+      '<'
+    );
   }
 }
 

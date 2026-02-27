@@ -264,7 +264,8 @@ async function setupDesignViewer(): Promise<void> {
     logger.error('Failed to setup design viewer:', error);
     const fallbackContainer = el('design-canvas-container');
     if (fallbackContainer) {
-      fallbackContainer.innerHTML = '<div class="error-state"><span class="error-message">Failed to load design file</span></div>';
+      fallbackContainer.innerHTML =
+        '<div class="error-state"><span class="error-message">Failed to load design file</span></div>';
     }
   }
 }
@@ -365,9 +366,7 @@ function setupElementApproval(): void {
       const status = button.dataset.status;
 
       // Update UI
-      item
-        ?.querySelectorAll('.approval-btn')
-        .forEach((b) => b.classList.remove('active'));
+      item?.querySelectorAll('.approval-btn').forEach((b) => b.classList.remove('active'));
       button.classList.add('active');
 
       // Save to server

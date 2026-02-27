@@ -202,7 +202,11 @@ export class PageTransitionModule extends BaseModule {
     // Listen for router navigation events
     this.on('router:navigate', ((event: CustomEvent) => {
       const { pageId } = event.detail || {};
-      this.log('[PageTransitionModule] router:navigate received', { pageId, introComplete: this.introComplete, currentPageId: this.currentPageId });
+      this.log('[PageTransitionModule] router:navigate received', {
+        pageId,
+        introComplete: this.introComplete,
+        currentPageId: this.currentPageId
+      });
 
       if (this.isTransitioning) {
         this.log('[PageTransitionModule] Blocked - already transitioning');
@@ -261,11 +265,11 @@ export class PageTransitionModule extends BaseModule {
 
     const hashToPage: Record<string, string> = {
       '': 'intro',
-      'intro': 'intro',
-      'home': 'intro',
-      'about': 'about',
-      'projects': 'projects',
-      'contact': 'contact',
+      intro: 'intro',
+      home: 'intro',
+      about: 'about',
+      projects: 'projects',
+      contact: 'contact',
       'admin-login': 'admin-login'
     };
 
@@ -400,7 +404,9 @@ export class PageTransitionModule extends BaseModule {
         targetPage.element.style.removeProperty('z-index');
 
         // Also clear intro children inline styles
-        const businessCardContainer = targetPage.element.querySelector('.business-card-container') as HTMLElement;
+        const businessCardContainer = targetPage.element.querySelector(
+          '.business-card-container'
+        ) as HTMLElement;
         const introNav = targetPage.element.querySelector('.intro-nav') as HTMLElement;
         const businessCardEl = targetPage.element.querySelector('.business-card') as HTMLElement;
 
@@ -481,9 +487,11 @@ export class PageTransitionModule extends BaseModule {
         from: currentPage?.id,
         to: pageId
       });
-      window.dispatchEvent(new CustomEvent('page-changed', {
-        detail: { from: currentPage?.id, to: pageId }
-      }));
+      window.dispatchEvent(
+        new CustomEvent('page-changed', {
+          detail: { from: currentPage?.id, to: pageId }
+        })
+      );
 
       // Dispatch contact-page-ready if needed
       if (pageId === 'contact') {
@@ -543,7 +551,9 @@ export class PageTransitionModule extends BaseModule {
 
         // Special handling for intro page - forcefully hide everything
         if (page.id === 'intro') {
-          const businessCardContainer = page.element.querySelector('.business-card-container') as HTMLElement;
+          const businessCardContainer = page.element.querySelector(
+            '.business-card-container'
+          ) as HTMLElement;
           const introNav = page.element.querySelector('.intro-nav') as HTMLElement;
           const businessCardEl = page.element.querySelector('.business-card') as HTMLElement;
 
@@ -621,7 +631,7 @@ export class PageTransitionModule extends BaseModule {
    */
   private async playIntroExitAnimation(): Promise<void> {
     try {
-      const introModule = await container.resolve('IntroAnimationModule') as IntroAnimationModule;
+      const introModule = (await container.resolve('IntroAnimationModule')) as IntroAnimationModule;
       if (introModule && typeof introModule.playExitAnimation === 'function') {
         await introModule.playExitAnimation();
       }
@@ -636,7 +646,7 @@ export class PageTransitionModule extends BaseModule {
    */
   private async playIntroEntryAnimation(): Promise<void> {
     try {
-      const introModule = await container.resolve('IntroAnimationModule') as IntroAnimationModule;
+      const introModule = (await container.resolve('IntroAnimationModule')) as IntroAnimationModule;
 
       if (introModule && typeof introModule.playEntryAnimation === 'function') {
         await introModule.playEntryAnimation();

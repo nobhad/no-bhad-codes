@@ -24,10 +24,13 @@ let systemListenersInitialized = false;
 // ============================================
 
 const RENDER_ICONS = {
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
-  TRASH: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
+  TRASH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
   MAIL: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
-  CLOCK: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+  CLOCK:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
 };
 
 // ============================================
@@ -157,10 +160,7 @@ export async function loadSystemData(ctx: AdminDashboardContext): Promise<void> 
 
   try {
     // Load health check and legacy status in parallel
-    await Promise.all([
-      loadHealthCheck(),
-      loadLegacyStatus()
-    ]);
+    await Promise.all([loadHealthCheck(), loadLegacyStatus()]);
 
     // Populate browser info
     populateBrowserInfo();
@@ -202,7 +202,7 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
             keysToRemove.push(key);
           }
         }
-        keysToRemove.forEach(key => localStorage.removeItem(key));
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
 
         // Clear sessionStorage (except auth tokens)
         const sessionKeysToRemove: string[] = [];
@@ -212,7 +212,7 @@ function setupSystemEventListeners(ctx: AdminDashboardContext): void {
             sessionKeysToRemove.push(key);
           }
         }
-        sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
+        sessionKeysToRemove.forEach((key) => sessionStorage.removeItem(key));
 
         ctx.showNotification('Cache cleared successfully', 'success');
       } catch (error) {
@@ -282,25 +282,27 @@ async function loadHealthCheck(): Promise<void> {
   ];
 
   // Check all health items in parallel
-  await Promise.all(healthItems.map(async (item) => {
-    const indicator = document.getElementById(`health-${item.id}`);
-    const status = document.getElementById(`health-${item.id}-status`);
+  await Promise.all(
+    healthItems.map(async (item) => {
+      const indicator = document.getElementById(`health-${item.id}`);
+      const status = document.getElementById(`health-${item.id}-status`);
 
-    if (indicator && status) {
-      // Set loading state
-      indicator.className = 'health-indicator health-loading';
-      status.textContent = 'Checking...';
+      if (indicator && status) {
+        // Set loading state
+        indicator.className = 'health-indicator health-loading';
+        status.textContent = 'Checking...';
 
-      try {
-        const result = await item.check();
-        indicator.className = `health-indicator health-${result.status}`;
-        status.textContent = result.message;
-      } catch {
-        indicator.className = 'health-indicator health-error';
-        status.textContent = 'Check failed';
+        try {
+          const result = await item.check();
+          indicator.className = `health-indicator health-${result.status}`;
+          status.textContent = result.message;
+        } catch {
+          indicator.className = 'health-indicator health-error';
+          status.textContent = 'Check failed';
+        }
       }
-    }
-  }));
+    })
+  );
 }
 
 /**
@@ -455,7 +457,8 @@ async function checkServicesDirectly(): Promise<ApplicationStatus> {
   services['API Server'] = apiHealth;
 
   // Check authentication status
-  const authToken = sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
+  const authToken =
+    sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
   services['Authentication'] = {
     status: authToken ? 'healthy' : 'warning',
     message: authToken ? 'Authenticated' : 'Not authenticated'
@@ -536,7 +539,10 @@ async function checkApiHealth(): Promise<StatusItem> {
     clearTimeout(timeoutId);
     // API might not have a /health endpoint, try root
     const rootController = new AbortControllerClass();
-    const rootTimeoutId = setTimeout(() => rootController.abort(), APP_CONSTANTS.TIMERS.API_REQUEST_TIMEOUT);
+    const rootTimeoutId = setTimeout(
+      () => rootController.abort(),
+      APP_CONSTANTS.TIMERS.API_REQUEST_TIMEOUT
+    );
 
     try {
       const response = await apiFetch('/api', {
@@ -628,20 +634,22 @@ function renderStatusList(items: Record<string, StatusItem>, type: string): stri
     return `<p class="no-status">No ${type.toLowerCase()}s to display</p>`;
   }
 
-  return entries.map(([name, item]) => {
-    // Handle cases where status is undefined (e.g., { loaded: true })
-    const status = item.status || (item.loaded ? 'healthy' : 'unknown');
-    const statusClass = getStatusClass(status);
-    const statusIcon = getStatusIcon(status);
+  return entries
+    .map(([name, item]) => {
+      // Handle cases where status is undefined (e.g., { loaded: true })
+      const status = item.status || (item.loaded ? 'healthy' : 'unknown');
+      const statusClass = getStatusClass(status);
+      const statusIcon = getStatusIcon(status);
 
-    return `
+      return `
       <div class="status-item ${statusClass}">
         <span class="status-icon">${statusIcon}</span>
         <span class="status-name">${formatName(name)}</span>
         ${getStatusDotHTML(status)}
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 /**
@@ -695,7 +703,8 @@ function showSystemError(): void {
   const modulesContainer = document.getElementById('modules-status');
   const servicesContainer = document.getElementById('services-status');
 
-  const errorHtml = '<div class="error-state"><span class="error-message">Unable to retrieve system status</span></div>';
+  const errorHtml =
+    '<div class="error-state"><span class="error-message">Unable to retrieve system status</span></div>';
 
   if (modulesContainer) {
     modulesContainer.innerHTML = errorHtml;
@@ -713,15 +722,15 @@ export async function getSystemHealth(): Promise<'healthy' | 'warning' | 'error'
   const status = await getApplicationStatus();
 
   const allStatuses = [
-    ...Object.values(status.modules).map(m => m.status),
-    ...Object.values(status.services).map(s => s.status)
+    ...Object.values(status.modules).map((m) => m.status),
+    ...Object.values(status.services).map((s) => s.status)
   ];
 
-  if (allStatuses.some(s => s === 'error')) {
+  if (allStatuses.some((s) => s === 'error')) {
     return 'error';
   }
 
-  if (allStatuses.some(s => s === 'warning')) {
+  if (allStatuses.some((s) => s === 'warning')) {
     return 'warning';
   }
 

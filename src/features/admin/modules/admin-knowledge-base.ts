@@ -21,7 +21,7 @@ import { renderActionsCell, createAction } from '../../../factories';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { exportToCsv, KNOWLEDGE_BASE_EXPORT_CONFIG } from '../../../utils/table-export';
+import { exportDataToCsv, KNOWLEDGE_BASE_EXPORT_CONFIG } from '../../../utils/table-export';
 import {
   createFilterUI,
   applyFilters,
@@ -40,7 +40,74 @@ import {
   type PaginationConfig
 } from '../../../utils/table-pagination';
 
+import { createLogger } from '../../../utils/logger';
+
 const KB_API = '/api/kb';
+
+const logger = createLogger('AdminKnowledgeBase');
+
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn =
+  typeof import('../../../react/features/admin/knowledge-base').mountKnowledgeBase;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/knowledge-base').unmountKnowledgeBase;
+
+let mountKnowledgeBase: ReactMountFn | null = null;
+let unmountKnowledgeBase: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactKnowledgeBase(): Promise<boolean> {
+  if (mountKnowledgeBase && unmountKnowledgeBase) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/knowledge-base');
+    mountKnowledgeBase = module.mountKnowledgeBase;
+    unmountKnowledgeBase = module.unmountKnowledgeBase;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React knowledge base table */
+function shouldUseReactKnowledgeBaseTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_knowledge_base') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_knowledge_base_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
 
 // ---------------------------------------------------------------------------
 // Section State
@@ -98,8 +165,13 @@ async function loadCategories(_ctx: AdminDashboardContext): Promise<KBCategory[]
   return data.categories || [];
 }
 
-async function loadArticles(ctx: AdminDashboardContext, categorySlug?: string): Promise<KBArticle[]> {
-  const url = categorySlug ? `${KB_API}/admin/articles?category=${encodeURIComponent(categorySlug)}` : `${KB_API}/admin/articles`;
+async function loadArticles(
+  ctx: AdminDashboardContext,
+  categorySlug?: string
+): Promise<KBArticle[]> {
+  const url = categorySlug
+    ? `${KB_API}/admin/articles?category=${encodeURIComponent(categorySlug)}`
+    : `${KB_API}/admin/articles`;
   const res = await apiFetch(url);
   if (!res.ok) return [];
   const data = await parseApiResponse<{ articles: KBArticle[] }>(res);
@@ -132,7 +204,11 @@ function renderCategoriesTable(categories: KBCategory[], _ctx: AdminDashboardCon
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
     createAction('edit', c.id, { className: 'kb-edit-category', ariaLabel: 'Edit category' }),
-    createAction('delete', c.id, { className: 'kb-delete-category', dataAttrs: { name: escapeHtml(c.name) }, ariaLabel: 'Delete category' })
+    createAction('delete', c.id, {
+      className: 'kb-delete-category',
+      dataAttrs: { name: escapeHtml(c.name) },
+      ariaLabel: 'Delete category'
+    })
   ])}
       </td>
     </tr>
@@ -181,7 +257,11 @@ function renderArticlesTable(articles: KBArticle[], _ctx: AdminDashboardContext)
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
     createAction('edit', a.id, { className: 'kb-edit-article', ariaLabel: 'Edit article' }),
-    createAction('delete', a.id, { className: 'kb-delete-article', dataAttrs: { title: escapeHtml(a.title) }, ariaLabel: 'Delete article' })
+    createAction('delete', a.id, {
+      className: 'kb-delete-article',
+      dataAttrs: { title: escapeHtml(a.title) },
+      ariaLabel: 'Delete article'
+    })
   ])}
       </td>
     </tr>
@@ -274,7 +354,9 @@ function openCategoryModal(category?: KBCategory): void {
   const idInput = document.getElementById('kb-category-id') as HTMLInputElement | null;
   const nameInput = document.getElementById('kb-category-name') as HTMLInputElement | null;
   const slugInput = document.getElementById('kb-category-slug') as HTMLInputElement | null;
-  const descInput = document.getElementById('kb-category-description') as HTMLTextAreaElement | null;
+  const descInput = document.getElementById(
+    'kb-category-description'
+  ) as HTMLTextAreaElement | null;
   const sortInput = document.getElementById('kb-category-sort') as HTMLInputElement | null;
 
   if (category) {
@@ -460,7 +542,9 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
     const idInput = document.getElementById('kb-category-id') as HTMLInputElement | null;
     const nameInput = document.getElementById('kb-category-name') as HTMLInputElement | null;
     const slugInput = document.getElementById('kb-category-slug') as HTMLInputElement | null;
-    const descInput = document.getElementById('kb-category-description') as HTMLTextAreaElement | null;
+    const descInput = document.getElementById(
+      'kb-category-description'
+    ) as HTMLTextAreaElement | null;
     const sortInput = document.getElementById('kb-category-sort') as HTMLInputElement | null;
     if (!nameInput?.value.trim() || !slugInput?.value.trim()) return;
     try {
@@ -518,14 +602,10 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
   // Setup filter UI (search, category checkboxes, date range) - insert before export button
   const filterContainer = el('kb-articles-filter-container');
   if (filterContainer && !filterUIContainer) {
-    filterUIContainer = createFilterUI(
-      KNOWLEDGE_BASE_FILTER_CONFIG,
-      filterState,
-      (newState) => {
-        filterState = newState;
-        refreshFilteredArticles(ctx);
-      }
-    );
+    filterUIContainer = createFilterUI(KNOWLEDGE_BASE_FILTER_CONFIG, filterState, (newState) => {
+      filterState = newState;
+      refreshFilteredArticles(ctx);
+    });
 
     // Insert filter UI before export button
     const exportBtn = filterContainer.querySelector('#kb-export');
@@ -546,7 +626,7 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
         showToast('No articles to export', 'warning');
         return;
       }
-      exportToCsv(filtered as unknown as Record<string, unknown>[], KNOWLEDGE_BASE_EXPORT_CONFIG);
+      exportDataToCsv(filtered, KNOWLEDGE_BASE_EXPORT_CONFIG);
       showToast(`Exported ${filtered.length} articles to CSV`, 'success');
     });
   }
@@ -576,11 +656,22 @@ function setupKBListeners(ctx: AdminDashboardContext): void {
     const catSelect = document.getElementById('kb-article-category') as HTMLSelectElement | null;
     const titleInput = document.getElementById('kb-article-title') as HTMLInputElement | null;
     const slugInput = document.getElementById('kb-article-slug') as HTMLInputElement | null;
-    const summaryInput = document.getElementById('kb-article-summary') as HTMLTextAreaElement | null;
-    const contentInput = document.getElementById('kb-article-content') as HTMLTextAreaElement | null;
+    const summaryInput = document.getElementById(
+      'kb-article-summary'
+    ) as HTMLTextAreaElement | null;
+    const contentInput = document.getElementById(
+      'kb-article-content'
+    ) as HTMLTextAreaElement | null;
     const featuredInput = document.getElementById('kb-article-featured') as HTMLInputElement | null;
-    const publishedInput = document.getElementById('kb-article-published') as HTMLInputElement | null;
-    if (!catSelect?.value || !titleInput?.value.trim() || !slugInput?.value.trim() || !contentInput?.value.trim()) return;
+    const publishedInput = document.getElementById(
+      'kb-article-published'
+    ) as HTMLInputElement | null;
+    if (
+      !catSelect?.value ||
+      !titleInput?.value.trim() ||
+      !slugInput?.value.trim() ||
+      !contentInput?.value.trim()
+    ) {return;}
     const payload = {
       category_id: parseInt(catSelect.value, 10),
       title: titleInput.value.trim(),
@@ -673,9 +764,11 @@ function setupKBSubtabListener(): void {
 // ============================================
 
 const RENDER_ICONS = {
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>',
   PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
-  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+  EXPORT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
 };
 
 // ============================================
@@ -683,10 +776,35 @@ const RENDER_ICONS = {
 // ============================================
 
 /**
+ * Cleanup function called when leaving the knowledge base tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupKnowledgeBaseTab(): void {
+  if (reactTableMounted && unmountKnowledgeBase) {
+    unmountKnowledgeBase();
+    reactTableMounted = false;
+    reactMountContainer = null;
+  }
+}
+
+/**
  * Renders the Knowledge Base tab structure dynamically.
  * Called by admin-dashboard before loading data.
  */
 export function renderKnowledgeBaseTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactKnowledgeBaseTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Knowledge Base Table Mount Point -->
+      <div id="react-knowledge-base-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <div class="data-table-card" id="kb-categories-card">
       <div class="data-table-header">
@@ -781,13 +899,41 @@ export function renderKnowledgeBaseTab(container: HTMLElement): void {
 
 export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<void> {
   _storedKbContext = ctx;
+
+  // Check if React implementation should be used
+  const useReact = shouldUseReactKnowledgeBaseTable();
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React KnowledgeBaseTable
+    const mountContainer = document.getElementById('react-knowledge-base-mount');
+    if (mountContainer) {
+      const loaded = await loadReactKnowledgeBase();
+      if (loaded && mountKnowledgeBase) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountKnowledgeBase) {
+          unmountKnowledgeBase();
+        }
+        mountKnowledgeBase(mountContainer, {});
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        return;
+      }
+    }
+  }
+
+  // Fallback to vanilla implementation
   setupKBListeners(ctx);
   setupKBSubtabListener();
 
   const categoriesTbody = el('kb-categories-table-body');
   const articlesTbody = el('kb-articles-table-body');
 
-  if (categoriesTbody) showTableLoading(categoriesTbody, CATEGORIES_COLSPAN, 'Loading categories...');
+  if (categoriesTbody) {showTableLoading(categoriesTbody, CATEGORIES_COLSPAN, 'Loading categories...');}
   if (articlesTbody) showTableLoading(articlesTbody, ARTICLES_COLSPAN, 'Loading articles...');
 
   try {
@@ -801,7 +947,7 @@ export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<voi
 
     // Update filter with category options
     if (filterUIContainer) {
-      const categoryOptions = categories.map(c => ({ value: c.name, label: c.name }));
+      const categoryOptions = categories.map((c) => ({ value: c.name, label: c.name }));
       updateFilterStatusOptions(
         filterUIContainer,
         categoryOptions,
@@ -822,7 +968,7 @@ export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<voi
     renderArticlesTable(paginated, ctx);
     renderKBArticlesPaginationUI(filtered.length, ctx);
   } catch (err) {
-    if (categoriesTbody) showTableEmpty(categoriesTbody, CATEGORIES_COLSPAN, 'Failed to load categories.');
+    if (categoriesTbody) {showTableEmpty(categoriesTbody, CATEGORIES_COLSPAN, 'Failed to load categories.');}
     if (articlesTbody) showTableEmpty(articlesTbody, ARTICLES_COLSPAN, 'Failed to load articles.');
     showToast((err as Error).message, 'error');
   }

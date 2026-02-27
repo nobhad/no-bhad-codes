@@ -42,6 +42,68 @@ import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('AdminContracts');
 
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn = typeof import('../../../react/features/admin/contracts').mountContractsTable;
+type ReactUnmountFn =
+  typeof import('../../../react/features/admin/contracts').unmountContractsTable;
+
+let mountContractsTable: ReactMountFn | null = null;
+let unmountContractsTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactContractsTable(): Promise<boolean> {
+  if (mountContractsTable && unmountContractsTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/contracts');
+    mountContractsTable = module.mountContractsTable;
+    unmountContractsTable = module.unmountContractsTable;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React contracts table */
+function shouldUseReactContractsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_contracts') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_contracts_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
+
 interface ContractListItem {
   id: number;
   projectId: number;
@@ -123,13 +185,13 @@ const CONTRACTS_BULK_CONFIG: BulkActionConfig = {
       confirmMessage: 'Send reminders for {count} selected contracts?',
       handler: async (ids: number[]) => {
         const results = await Promise.all(
-          ids.map(id =>
+          ids.map((id) =>
             apiPost(`/api/contracts/${id}/remind`, {})
-              .then(res => ({ id, success: res.ok }))
+              .then((res) => ({ id, success: res.ok }))
               .catch(() => ({ id, success: false }))
           )
         );
-        const successCount = results.filter(r => r.success).length;
+        const successCount = results.filter((r) => r.success).length;
         if (successCount > 0) {
           showToast(`Sent ${successCount} reminder${successCount > 1 ? 's' : ''}`, 'success');
           resetSelection('contracts');
@@ -144,15 +206,18 @@ const CONTRACTS_BULK_CONFIG: BulkActionConfig = {
       confirmMessage: 'Mark {count} selected contracts as expired?',
       handler: async (ids: number[]) => {
         const results = await Promise.all(
-          ids.map(id =>
+          ids.map((id) =>
             apiPut(`/api/contracts/${id}`, { status: 'expired' })
-              .then(res => ({ id, success: res.ok }))
+              .then((res) => ({ id, success: res.ok }))
               .catch(() => ({ id, success: false }))
           )
         );
-        const successCount = results.filter(r => r.success).length;
+        const successCount = results.filter((r) => r.success).length;
         if (successCount > 0) {
-          showToast(`Marked ${successCount} contract${successCount > 1 ? 's' : ''} as expired`, 'success');
+          showToast(
+            `Marked ${successCount} contract${successCount > 1 ? 's' : ''} as expired`,
+            'success'
+          );
           resetSelection('contracts');
           // Reload data to reflect changes - dispatch custom event
           window.dispatchEvent(new CustomEvent('contracts:reload'));
@@ -201,15 +266,19 @@ const contractsModule = createTableModule<ContractListItem, ContractStats>({
     const contracts = Array.isArray(data.contracts) ? data.contracts : [];
     const stats: ContractStats = {
       total: contracts.length,
-      draft: contracts.filter(c => c.status === 'draft').length,
-      sent: contracts.filter(c => c.status === 'sent').length,
-      viewed: contracts.filter(c => c.status === 'viewed').length,
-      signed: contracts.filter(c => c.status === 'signed').length
+      draft: contracts.filter((c) => c.status === 'draft').length,
+      sent: contracts.filter((c) => c.status === 'sent').length,
+      viewed: contracts.filter((c) => c.status === 'viewed').length,
+      signed: contracts.filter((c) => c.status === 'signed').length
     };
     return { data: contracts, stats };
   },
 
-  renderRow: (contract: ContractListItem, _ctx: AdminDashboardContext, _helpers: TableModuleHelpers<ContractListItem>) => {
+  renderRow: (
+    contract: ContractListItem,
+    _ctx: AdminDashboardContext,
+    _helpers: TableModuleHelpers<ContractListItem>
+  ) => {
     return buildContractRow(contract);
   },
 
@@ -253,8 +322,67 @@ const contractsModule = createTableModule<ContractListItem, ContractStats>({
   }
 });
 
-// Export factory-provided functions
-export const loadContracts = contractsModule.load;
+/**
+ * Cleanup function called when leaving the contracts tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupContractsTab(): void {
+  if (reactTableMounted && unmountContractsTable) {
+    unmountContractsTable();
+    reactTableMounted = false;
+  }
+}
+
+/**
+ * Load contracts data - handles both React and vanilla implementations
+ */
+export async function loadContracts(ctx: AdminDashboardContext): Promise<void> {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactContractsTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React ContractsTable
+    const mountContainer = document.getElementById('react-contracts-mount');
+    if (mountContainer) {
+      const loaded = await loadReactContractsTable();
+      if (loaded && mountContractsTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountContractsTable) {
+          unmountContractsTable();
+        }
+        mountContractsTable(mountContainer, {
+          onNavigate: (tab: string, entityId?: string) => {
+            if (entityId) {
+              ctx.switchTab(tab);
+            } else {
+              ctx.switchTab(tab);
+            }
+          }
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        logger.error(' React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
+  await contractsModule.load(ctx);
+}
+
 export const getContractsData = contractsModule.getData;
 
 // ============================================
@@ -295,8 +423,14 @@ function buildContractRow(contract: ContractListItem): HTMLTableRowElement {
     <td class="actions-cell" data-label="Actions">
       ${renderActionsCell([
     createAction('view', contract.id, { title: 'View details', ariaLabel: 'View contract' }),
-    createAction('remind', contract.id, { title: 'Resend reminder', ariaLabel: 'Resend reminder' }),
-    createAction('expire', contract.id, { title: 'Expire contract', ariaLabel: 'Expire contract' })
+    createAction('remind', contract.id, {
+      title: 'Resend reminder',
+      ariaLabel: 'Resend reminder'
+    }),
+    createAction('expire', contract.id, {
+      title: 'Expire contract',
+      ariaLabel: 'Expire contract'
+    })
   ])}
     </td>
   `;
@@ -311,14 +445,16 @@ function setupInlineExpiresEditing(tableBody: HTMLElement, contracts: ContractLi
   tableBody.querySelectorAll('.date-cell.inline-editable-cell').forEach((cell) => {
     const cellEl = cell as HTMLElement;
     const contractId = parseInt(cellEl.dataset.contractId || '0');
-    const contract = contracts.find(c => c.id === contractId);
+    const contract = contracts.find((c) => c.id === contractId);
     if (!contract) return;
 
     makeEditable(
       cellEl,
-      () => contract.expiresAt ? contract.expiresAt.split('T')[0] : '',
+      () => (contract.expiresAt ? contract.expiresAt.split('T')[0] : ''),
       async (newValue) => {
-        const response = await apiPut(`/api/contracts/${contractId}`, { expires_at: newValue || null });
+        const response = await apiPut(`/api/contracts/${contractId}`, {
+          expires_at: newValue || null
+        });
         if (response.ok) {
           contract.expiresAt = newValue || null;
           const expiresAtValue = cellEl.querySelector('.expires-at-value');
@@ -373,7 +509,6 @@ function applyStatusFilter(value: string): void {
   }
   contractsModule.rerender();
 }
-
 
 async function fetchContractActivity(contractId: number): Promise<ContractActivityItem[]> {
   const response = await apiFetch(`/api/contracts/${contractId}/activity`);
@@ -506,7 +641,8 @@ async function handleReminder(contractId: number): Promise<void> {
 async function handleExpire(contractId: number): Promise<void> {
   const confirmed = await confirmDialog({
     title: 'Expire Contract',
-    message: 'Expire this contract? The client will no longer be able to sign using the existing link.',
+    message:
+      'Expire this contract? The client will no longer be able to sign using the existing link.',
     confirmText: 'Expire',
     cancelText: 'Cancel'
   });
@@ -624,7 +760,8 @@ function attachContractsListeners(context: AdminDashboardContext): void {
 // ============================================
 
 const RENDER_ICONS = {
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
 };
 
 // ============================================
@@ -636,6 +773,19 @@ const RENDER_ICONS = {
  * Called by admin-dashboard before loading data.
  */
 export function renderContractsTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactContractsTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Contracts Table Mount Point -->
+      <div id="react-contracts-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <div class="quick-stats">
       <button class="stat-card stat-card-clickable" data-contract-filter="all">

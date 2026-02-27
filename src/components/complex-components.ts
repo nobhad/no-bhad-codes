@@ -200,7 +200,8 @@ export function createLineItemEditor(config: LineItemEditorConfig): HTMLElement 
   const addBtn = document.createElement('button');
   addBtn.type = 'button';
   addBtn.className = 'line-item-add btn btn-ghost btn-sm';
-  addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add Line Item';
+  addBtn.innerHTML =
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add Line Item';
 
   const totals = document.createElement('div');
   totals.className = 'line-item-totals';
@@ -246,7 +247,8 @@ export function createLineItemEditor(config: LineItemEditorConfig): HTMLElement 
     if (draggable) {
       const dragHandle = document.createElement('div');
       dragHandle.className = 'line-item-col line-item-drag';
-      dragHandle.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg>';
+      dragHandle.innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg>';
       dragHandle.setAttribute('draggable', 'true');
       row.appendChild(dragHandle);
 
@@ -322,7 +324,8 @@ export function createLineItemEditor(config: LineItemEditorConfig): HTMLElement 
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.className = 'line-item-delete btn btn-icon btn-ghost btn-sm';
-    deleteBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    deleteBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
     deleteBtn.setAttribute('aria-label', 'Remove item');
     deleteBtn.disabled = items.length <= minItems;
     deleteBtn.addEventListener('click', () => {
@@ -386,9 +389,14 @@ export function getLineItems(wrapper: HTMLElement): LineItem[] {
   const items: LineItem[] = [];
   wrapper.querySelectorAll('.line-item-row').forEach((row) => {
     const id = (row as HTMLElement).dataset.id || '';
-    const description = (row.querySelector('.line-item-description input') as HTMLInputElement)?.value || '';
-    const quantity = parseFloat((row.querySelector('.line-item-quantity input') as HTMLInputElement)?.value || '0');
-    const rate = parseFloat((row.querySelector('.line-item-rate input') as HTMLInputElement)?.value || '0');
+    const description =
+      (row.querySelector('.line-item-description input') as HTMLInputElement)?.value || '';
+    const quantity = parseFloat(
+      (row.querySelector('.line-item-quantity input') as HTMLInputElement)?.value || '0'
+    );
+    const rate = parseFloat(
+      (row.querySelector('.line-item-rate input') as HTMLInputElement)?.value || '0'
+    );
     items.push({ id, description, quantity, rate, amount: quantity * rate });
   });
   return items;
@@ -402,23 +410,64 @@ const FILE_ICONS: Record<string, string> = {
   pdf: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12h4M10 16h4M8 20h8"/></svg>',
   doc: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>',
   xls: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><rect x="8" y="12" width="8" height="6"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="8" y1="15" x2="16" y2="15"/></svg>',
-  image: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
-  video: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>',
-  audio: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
-  archive: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>',
+  image:
+    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+  video:
+    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>',
+  audio:
+    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+  archive:
+    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>',
   code: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
-  default: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+  default:
+    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
 };
 
 const FILE_TYPE_MAP: Record<string, string> = {
   pdf: 'pdf',
-  doc: 'doc', docx: 'doc', odt: 'doc', rtf: 'doc',
-  xls: 'xls', xlsx: 'xls', csv: 'xls', ods: 'xls',
-  jpg: 'image', jpeg: 'image', png: 'image', gif: 'image', svg: 'image', webp: 'image', bmp: 'image',
-  mp4: 'video', mov: 'video', avi: 'video', mkv: 'video', webm: 'video',
-  mp3: 'audio', wav: 'audio', ogg: 'audio', flac: 'audio', aac: 'audio',
-  zip: 'archive', rar: 'archive', '7z': 'archive', tar: 'archive', gz: 'archive',
-  js: 'code', ts: 'code', jsx: 'code', tsx: 'code', json: 'code', html: 'code', css: 'code', py: 'code', java: 'code', cpp: 'code', c: 'code', rb: 'code', php: 'code'
+  doc: 'doc',
+  docx: 'doc',
+  odt: 'doc',
+  rtf: 'doc',
+  xls: 'xls',
+  xlsx: 'xls',
+  csv: 'xls',
+  ods: 'xls',
+  jpg: 'image',
+  jpeg: 'image',
+  png: 'image',
+  gif: 'image',
+  svg: 'image',
+  webp: 'image',
+  bmp: 'image',
+  mp4: 'video',
+  mov: 'video',
+  avi: 'video',
+  mkv: 'video',
+  webm: 'video',
+  mp3: 'audio',
+  wav: 'audio',
+  ogg: 'audio',
+  flac: 'audio',
+  aac: 'audio',
+  zip: 'archive',
+  rar: 'archive',
+  '7z': 'archive',
+  tar: 'archive',
+  gz: 'archive',
+  js: 'code',
+  ts: 'code',
+  jsx: 'code',
+  tsx: 'code',
+  json: 'code',
+  html: 'code',
+  css: 'code',
+  py: 'code',
+  java: 'code',
+  cpp: 'code',
+  c: 'code',
+  rb: 'code',
+  php: 'code'
 };
 
 /**
@@ -502,13 +551,15 @@ export function createInlineEdit(config: InlineEditConfig): HTMLElement {
   const saveBtn = document.createElement('button');
   saveBtn.type = 'button';
   saveBtn.className = 'inline-edit-save btn btn-sm btn-primary';
-  saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+  saveBtn.innerHTML =
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
   saveBtn.setAttribute('aria-label', 'Save');
 
   const cancelBtn = document.createElement('button');
   cancelBtn.type = 'button';
   cancelBtn.className = 'inline-edit-cancel btn btn-sm btn-ghost';
-  cancelBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  cancelBtn.innerHTML =
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
   cancelBtn.setAttribute('aria-label', 'Cancel');
 
   actions.appendChild(saveBtn);
@@ -561,7 +612,7 @@ export function createInlineEdit(config: InlineEditConfig): HTMLElement {
       if (result instanceof Promise) {
         saveBtn.disabled = true;
         cancelBtn.disabled = true;
-        result.then(success => {
+        result.then((success) => {
           saveBtn.disabled = false;
           cancelBtn.disabled = false;
           if (success) {
@@ -617,15 +668,7 @@ export function createInlineEdit(config: InlineEditConfig): HTMLElement {
  * Create a table toolbar with search, filters, and actions.
  */
 export function createTableToolbar(config: TableToolbarConfig): HTMLElement {
-  const {
-    search,
-    filters,
-    viewToggle,
-    actions,
-    onExport,
-    onRefresh,
-    className = ''
-  } = config;
+  const { search, filters, viewToggle, actions, onExport, onRefresh, className = '' } = config;
 
   const toolbar = document.createElement('div');
   toolbar.className = cx('table-toolbar', className);
@@ -640,7 +683,9 @@ export function createTableToolbar(config: TableToolbarConfig): HTMLElement {
 
     const searchIcon = document.createElement('span');
     searchIcon.className = 'table-toolbar-search-icon';
-    searchIcon.innerHTML = ICONS.SEARCH || '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+    searchIcon.innerHTML =
+      ICONS.SEARCH ||
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
 
     const searchInput = document.createElement('input');
     searchInput.type = 'search';
@@ -665,7 +710,7 @@ export function createTableToolbar(config: TableToolbarConfig): HTMLElement {
     const filtersWrapper = document.createElement('div');
     filtersWrapper.className = 'table-toolbar-filters';
 
-    filters.forEach(filter => {
+    filters.forEach((filter) => {
       const select = document.createElement('select');
       select.className = 'table-toolbar-filter form-input';
       select.id = `filter-${filter.id}`;
@@ -675,7 +720,7 @@ export function createTableToolbar(config: TableToolbarConfig): HTMLElement {
       defaultOption.textContent = filter.label;
       select.appendChild(defaultOption);
 
-      filter.options.forEach(opt => {
+      filter.options.forEach((opt) => {
         const option = document.createElement('option');
         option.value = opt.value;
         option.textContent = opt.label;
@@ -704,7 +749,7 @@ export function createTableToolbar(config: TableToolbarConfig): HTMLElement {
     toggleWrapper.className = 'table-toolbar-view-toggle';
     toggleWrapper.setAttribute('role', 'group');
 
-    viewToggle.options.forEach(opt => {
+    viewToggle.options.forEach((opt) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = cx('table-toolbar-view-btn', opt.value === viewToggle.value && 'active');
@@ -713,7 +758,7 @@ export function createTableToolbar(config: TableToolbarConfig): HTMLElement {
       btn.setAttribute('aria-pressed', String(opt.value === viewToggle.value));
 
       btn.addEventListener('click', () => {
-        toggleWrapper.querySelectorAll('.table-toolbar-view-btn').forEach(b => {
+        toggleWrapper.querySelectorAll('.table-toolbar-view-btn').forEach((b) => {
           b.classList.remove('active');
           b.setAttribute('aria-pressed', 'false');
         });
@@ -732,7 +777,7 @@ export function createTableToolbar(config: TableToolbarConfig): HTMLElement {
     const actionsWrapper = document.createElement('div');
     actionsWrapper.className = 'table-toolbar-actions';
 
-    actions.forEach(action => {
+    actions.forEach((action) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = ['btn', `btn-${action.variant || 'secondary'}`, 'btn-sm'].join(' ');
@@ -752,7 +797,8 @@ export function createTableToolbar(config: TableToolbarConfig): HTMLElement {
     const exportBtn = document.createElement('button');
     exportBtn.type = 'button';
     exportBtn.className = 'table-toolbar-export btn btn-ghost btn-sm';
-    exportBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+    exportBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
     exportBtn.setAttribute('aria-label', 'Export');
     exportBtn.addEventListener('click', onExport);
     right.appendChild(exportBtn);
@@ -762,7 +808,8 @@ export function createTableToolbar(config: TableToolbarConfig): HTMLElement {
     const refreshBtn = document.createElement('button');
     refreshBtn.type = 'button';
     refreshBtn.className = 'table-toolbar-refresh btn btn-ghost btn-sm';
-    refreshBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>';
+    refreshBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>';
     refreshBtn.setAttribute('aria-label', 'Refresh');
     refreshBtn.addEventListener('click', onRefresh);
     right.appendChild(refreshBtn);
@@ -825,7 +872,7 @@ export function createDataTable(config: DataTableConfig): HTMLElement {
 
     checkbox.addEventListener('change', () => {
       if (checkbox.checked) {
-        selectedKeys = new Set(data.map(row => String(row[rowKey])));
+        selectedKeys = new Set(data.map((row) => String(row[rowKey])));
       } else {
         selectedKeys = new Set();
       }
@@ -837,9 +884,13 @@ export function createDataTable(config: DataTableConfig): HTMLElement {
     headerRow.appendChild(th);
   }
 
-  columns.forEach(col => {
+  columns.forEach((col) => {
     const th = document.createElement('th');
-    th.className = cx('data-table-header', col.sortable && 'sortable', col.align && `align-${col.align}`);
+    th.className = cx(
+      'data-table-header',
+      col.sortable && 'sortable',
+      col.align && `align-${col.align}`
+    );
     if (col.width) th.style.width = col.width;
 
     const content = document.createElement('span');
@@ -852,29 +903,34 @@ export function createDataTable(config: DataTableConfig): HTMLElement {
       sortIcon.className = 'data-table-sort-icon';
       if (currentSort?.key === col.key) {
         sortIcon.classList.add(currentSort.direction);
-        sortIcon.innerHTML = currentSort.direction === 'asc'
-          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>'
-          : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
+        sortIcon.innerHTML =
+          currentSort.direction === 'asc'
+            ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>'
+            : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
       } else {
-        sortIcon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"/></svg>';
+        sortIcon.innerHTML =
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"/></svg>';
       }
       th.appendChild(sortIcon);
 
       th.addEventListener('click', () => {
-        const newDirection = currentSort?.key === col.key && currentSort.direction === 'asc' ? 'desc' : 'asc';
+        const newDirection =
+          currentSort?.key === col.key && currentSort.direction === 'asc' ? 'desc' : 'asc';
         currentSort = { key: col.key, direction: newDirection };
         onSortChange?.(col.key, newDirection);
         // Update sort icons
-        thead.querySelectorAll('.data-table-sort-icon').forEach(icon => {
+        thead.querySelectorAll('.data-table-sort-icon').forEach((icon) => {
           icon.classList.remove('asc', 'desc');
-          icon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"/></svg>';
+          icon.innerHTML =
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"/></svg>';
         });
         const currentIcon = th.querySelector('.data-table-sort-icon');
         if (currentIcon) {
           currentIcon.classList.add(newDirection);
-          currentIcon.innerHTML = newDirection === 'asc'
-            ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>'
-            : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
+          currentIcon.innerHTML =
+            newDirection === 'asc'
+              ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>'
+              : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
         }
       });
     }
@@ -898,7 +954,7 @@ export function createDataTable(config: DataTableConfig): HTMLElement {
     }
 
     // Update row selection state
-    tbody.querySelectorAll('.data-table-row').forEach(row => {
+    tbody.querySelectorAll('.data-table-row').forEach((row) => {
       const key = (row as HTMLElement).dataset.key;
       const checkbox = row.querySelector('.data-table-checkbox') as HTMLInputElement;
       if (key && checkbox) {
@@ -963,7 +1019,7 @@ export function createDataTable(config: DataTableConfig): HTMLElement {
         tr.appendChild(td);
       }
 
-      columns.forEach(col => {
+      columns.forEach((col) => {
         const td = document.createElement('td');
         td.className = cx('data-table-cell', col.align && `align-${col.align}`);
 
@@ -1016,7 +1072,7 @@ export function updateDataTable(_wrapper: HTMLElement, _data: Record<string, unk
  */
 export function getSelectedKeys(wrapper: HTMLElement): string[] {
   const keys: string[] = [];
-  wrapper.querySelectorAll('.data-table-row.selected').forEach(row => {
+  wrapper.querySelectorAll('.data-table-row.selected').forEach((row) => {
     const key = (row as HTMLElement).dataset.key;
     if (key) keys.push(key);
   });

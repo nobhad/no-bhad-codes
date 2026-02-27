@@ -18,9 +18,18 @@ import type {
   RawVisitorData,
   AdminDashboardContext
 } from '../admin-types';
+import type {
+  PerformanceNavigationEntry,
+  PerformanceLCPEntry,
+  PerformanceResourceEntry
+} from '../../../types/performance';
 import { formatDateTime, formatCurrencyCompact } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { showTableLoading, showTableEmpty, getChartSkeletonHTML } from '../../../utils/loading-utils';
+import {
+  showTableLoading,
+  showTableEmpty,
+  getChartSkeletonHTML
+} from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { multiPromptDialog, alertDialog, confirmDialog } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
@@ -94,12 +103,12 @@ function switchAnalyticsSubtab(subtab: string): void {
   const group = document.querySelector('.header-subtab-group[data-for-tab="analytics"]');
   if (group) {
     // Update button active states
-    group.querySelectorAll('.portal-subtab').forEach(btn => btn.classList.remove('active'));
+    group.querySelectorAll('.portal-subtab').forEach((btn) => btn.classList.remove('active'));
     group.querySelector(`[data-subtab="${subtab}"]`)?.classList.add('active');
   }
 
   // Update content visibility
-  document.querySelectorAll('.analytics-subtab-content').forEach(content => {
+  document.querySelectorAll('.analytics-subtab-content').forEach((content) => {
     content.classList.toggle('active', content.id === `analytics-subtab-${subtab}`);
   });
 }
@@ -190,7 +199,8 @@ async function loadBusinessKPIs(): Promise<void> {
         const completionValue = completionEl.querySelector('.change-value');
         if (completionValue) {
           // Calculate completion rate as completed / total * 100
-          const completionRate = totalProjects > 0 ? Math.round((completedProjects / totalProjects) * 100) : 0;
+          const completionRate =
+            totalProjects > 0 ? Math.round((completedProjects / totalProjects) * 100) : 0;
           completionValue.textContent = `${completionRate}%`;
         }
       }
@@ -204,8 +214,10 @@ async function loadBusinessKPIs(): Promise<void> {
         const invoicesData = await invoicesRes.json();
         const invoices = invoicesData.invoices || [];
         // Use amount_total (snake_case from backend)
-        const outstandingTotal = invoices.reduce((sum: number, inv: { amount_total?: number }) =>
-          sum + (inv.amount_total || 0), 0);
+        const outstandingTotal = invoices.reduce(
+          (sum: number, inv: { amount_total?: number }) => sum + (inv.amount_total || 0),
+          0
+        );
         updateElement('kpi-invoices-value', formatCurrencyCompact(outstandingTotal));
 
         const countEl = document.getElementById('kpi-invoices-count');
@@ -219,7 +231,6 @@ async function loadBusinessKPIs(): Promise<void> {
     } catch (e) {
       logger.warn(' Could not load invoice KPIs:', e);
     }
-
   } catch (error) {
     logger.error(' Error loading business KPIs:', error);
   }
@@ -290,14 +301,16 @@ async function loadRevenueChart(): Promise<void> {
     type: 'bar',
     data: {
       labels,
-      datasets: [{
-        label: 'Revenue',
-        data,
-        backgroundColor: getChartColorWithAlpha('PRIMARY', 0.7),
-        borderColor: getChartColor('PRIMARY'),
-        borderWidth: 1,
-        borderRadius: 4
-      }]
+      datasets: [
+        {
+          label: 'Revenue',
+          data,
+          backgroundColor: getChartColorWithAlpha('PRIMARY', 0.7),
+          borderColor: getChartColor('PRIMARY'),
+          borderWidth: 1,
+          borderRadius: 4
+        }
+      ]
     },
     options: {
       responsive: true,
@@ -315,7 +328,7 @@ async function loadRevenueChart(): Promise<void> {
           beginAtZero: true,
           ticks: {
             color: getChartColor('TEXT'),
-            callback: (value) => `$${(value as number / 1000).toFixed(0)}k`
+            callback: (value) => `$${((value as number) / 1000).toFixed(0)}k`
           },
           grid: { color: getChartColor('GRID') }
         },
@@ -392,10 +405,12 @@ async function loadProjectStatusChart(): Promise<void> {
     type: 'doughnut',
     data: {
       labels,
-      datasets: [{
-        data,
-        backgroundColor: colors.slice(0, labels.length)
-      }]
+      datasets: [
+        {
+          data,
+          backgroundColor: colors.slice(0, labels.length)
+        }
+      ]
     },
     options: {
       responsive: true,
@@ -433,7 +448,6 @@ async function loadLeadFunnel(): Promise<void> {
 
     const avgValue = data.avgDealValue || 0;
     updateElement('funnel-avg-value', `Avg Deal Value: ${formatCurrencyCompact(avgValue)}`);
-
   } catch (error) {
     logger.warn(' Failed to load lead funnel:', error);
   }
@@ -454,17 +468,21 @@ async function loadSavedReports(): Promise<void> {
     const reports = data.reports || [];
 
     if (reports.length === 0) {
-      container.innerHTML = '<div class="report-empty">No saved reports yet. Create your first report to get started.</div>';
+      container.innerHTML =
+        '<div class="report-empty">No saved reports yet. Create your first report to get started.</div>';
       return;
     }
 
-    container.innerHTML = reports.slice(0, 5).map((report: {
-      id: number;
-      name: string;
-      type: string;
-      last_run_at?: string;
-      is_favorite?: boolean;
-    }) => `
+    container.innerHTML = reports
+      .slice(0, 5)
+      .map(
+        (report: {
+          id: number;
+          name: string;
+          type: string;
+          last_run_at?: string;
+          is_favorite?: boolean;
+        }) => `
       <div class="report-item" data-report-id="${report.id}">
         <div class="report-info flex flex-col gap-0-5">
           <span class="report-name">${report.is_favorite ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> ' : ''}${escapeHtml(report.name)}</span>
@@ -478,10 +496,12 @@ async function loadSavedReports(): Promise<void> {
           </button>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     // Add event listeners for run buttons
-    container.querySelectorAll('.run-report-btn').forEach(btn => {
+    container.querySelectorAll('.run-report-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         const reportId = (e.currentTarget as HTMLElement).dataset.reportId;
         if (reportId) {
@@ -491,7 +511,7 @@ async function loadSavedReports(): Promise<void> {
     });
 
     // Add event listeners for schedule buttons
-    container.querySelectorAll('.schedule-report-btn').forEach(btn => {
+    container.querySelectorAll('.schedule-report-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         const reportId = (e.currentTarget as HTMLElement).dataset.reportId;
         const reportName = (e.currentTarget as HTMLElement).dataset.reportName;
@@ -502,7 +522,7 @@ async function loadSavedReports(): Promise<void> {
     });
 
     // Add event listeners for delete buttons
-    container.querySelectorAll('.delete-report-btn').forEach(btn => {
+    container.querySelectorAll('.delete-report-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         const reportId = (e.currentTarget as HTMLElement).dataset.reportId;
         if (reportId) {
@@ -510,7 +530,6 @@ async function loadSavedReports(): Promise<void> {
         }
       });
     });
-
   } catch (error) {
     logger.error(' Error loading saved reports:', error);
     container.innerHTML = '<div class="report-empty">Error loading reports</div>';
@@ -568,7 +587,8 @@ async function showScheduleReportDialog(reportId: number, reportName: string): P
 async function deleteReport(reportId: number): Promise<void> {
   const confirmed = await confirmDialog({
     title: 'Delete Report',
-    message: 'Are you sure you want to delete this report? This will also delete all associated schedules.',
+    message:
+      'Are you sure you want to delete this report? This will also delete all associated schedules.',
     danger: true,
     confirmText: 'Delete'
   });
@@ -727,11 +747,14 @@ async function loadScheduledReports(): Promise<void> {
     }
 
     if (scheduledReports.length === 0) {
-      container.innerHTML = '<div class="report-empty">No scheduled reports. Click "Run" on a saved report to schedule it.</div>';
+      container.innerHTML =
+        '<div class="report-empty">No scheduled reports. Click "Run" on a saved report to schedule it.</div>';
       return;
     }
 
-    container.innerHTML = scheduledReports.map(sched => `
+    container.innerHTML = scheduledReports
+      .map(
+        (sched) => `
       <div class="report-item" data-schedule-id="${sched.id}">
         <div class="report-info flex flex-col gap-0-5">
           <span class="report-name">${escapeHtml(sched.reportName)}</span>
@@ -740,7 +763,8 @@ async function loadScheduledReports(): Promise<void> {
         <div class="report-actions flex items-center gap-0-5">
           <button class="icon-btn toggle-schedule-btn" data-schedule-id="${sched.id}" data-active="${sched.is_active}" title="${sched.is_active ? 'Pause' : 'Resume'}" aria-label="${sched.is_active ? 'Pause schedule' : 'Resume schedule'}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              ${sched.is_active
+              ${
+  sched.is_active
     ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
     : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
 }
@@ -751,10 +775,12 @@ async function loadScheduledReports(): Promise<void> {
           </button>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     // Add event listeners
-    container.querySelectorAll('.toggle-schedule-btn').forEach(btn => {
+    container.querySelectorAll('.toggle-schedule-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         const schedId = (e.currentTarget as HTMLElement).dataset.scheduleId;
         const isActive = (e.currentTarget as HTMLElement).dataset.active === 'true';
@@ -764,7 +790,7 @@ async function loadScheduledReports(): Promise<void> {
       });
     });
 
-    container.querySelectorAll('.delete-schedule-btn').forEach(btn => {
+    container.querySelectorAll('.delete-schedule-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         const schedId = (e.currentTarget as HTMLElement).dataset.scheduleId;
         if (schedId) {
@@ -772,7 +798,6 @@ async function loadScheduledReports(): Promise<void> {
         }
       });
     });
-
   } catch (error) {
     logger.error(' Error loading scheduled reports:', error);
     container.innerHTML = '<div class="report-empty">Error loading scheduled reports</div>';
@@ -841,19 +866,22 @@ async function loadMetricAlerts(): Promise<void> {
     const alerts = data.alerts || [];
 
     if (alerts.length === 0) {
-      container.innerHTML = '<div class="report-empty">No metric alerts configured. Create an alert to get notified when metrics cross thresholds.</div>';
+      container.innerHTML =
+        '<div class="report-empty">No metric alerts configured. Create an alert to get notified when metrics cross thresholds.</div>';
       return;
     }
 
-    container.innerHTML = alerts.map((alert: {
-      id: number;
-      name: string;
-      metric: string;
-      condition: string;
-      threshold: number;
-      is_active: boolean;
-      last_triggered_at?: string;
-    }) => `
+    container.innerHTML = alerts
+      .map(
+        (alert: {
+          id: number;
+          name: string;
+          metric: string;
+          condition: string;
+          threshold: number;
+          is_active: boolean;
+          last_triggered_at?: string;
+        }) => `
       <div class="report-item alert-item" data-alert-id="${alert.id}">
         <div class="report-info flex flex-col gap-0-5">
           <span class="report-name">
@@ -868,7 +896,8 @@ async function loadMetricAlerts(): Promise<void> {
         <div class="report-actions flex items-center gap-0-5">
           <button class="icon-btn toggle-alert-btn" data-alert-id="${alert.id}" data-active="${alert.is_active}" title="${alert.is_active ? 'Pause' : 'Resume'}" aria-label="${alert.is_active ? 'Pause alert' : 'Resume alert'}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              ${alert.is_active
+              ${
+  alert.is_active
     ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
     : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
 }
@@ -879,10 +908,12 @@ async function loadMetricAlerts(): Promise<void> {
           </button>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     // Add event listeners
-    container.querySelectorAll('.toggle-alert-btn').forEach(btn => {
+    container.querySelectorAll('.toggle-alert-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         const alertId = (e.currentTarget as HTMLElement).dataset.alertId;
         const isActive = (e.currentTarget as HTMLElement).dataset.active === 'true';
@@ -892,7 +923,7 @@ async function loadMetricAlerts(): Promise<void> {
       });
     });
 
-    container.querySelectorAll('.delete-alert-btn').forEach(btn => {
+    container.querySelectorAll('.delete-alert-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         const alertId = (e.currentTarget as HTMLElement).dataset.alertId;
         if (alertId) {
@@ -900,7 +931,6 @@ async function loadMetricAlerts(): Promise<void> {
         }
       });
     });
-
   } catch (error) {
     logger.error(' Error loading metric alerts:', error);
     container.innerHTML = '<div class="report-empty">Error loading alerts</div>';
@@ -909,12 +939,12 @@ async function loadMetricAlerts(): Promise<void> {
 
 function formatMetricName(metric: string): string {
   const names: Record<string, string> = {
-    'revenue': 'Revenue',
-    'pipeline_value': 'Pipeline Value',
-    'active_projects': 'Active Projects',
-    'outstanding_invoices': 'Outstanding Invoices',
-    'conversion_rate': 'Conversion Rate',
-    'avg_deal_value': 'Avg Deal Value'
+    revenue: 'Revenue',
+    pipeline_value: 'Pipeline Value',
+    active_projects: 'Active Projects',
+    outstanding_invoices: 'Outstanding Invoices',
+    conversion_rate: 'Conversion Rate',
+    avg_deal_value: 'Avg Deal Value'
   };
   return names[metric] || metric.replace(/_/g, ' ');
 }
@@ -1100,20 +1130,40 @@ async function loadAnalyticsSummary(): Promise<void> {
 
       if (lastWeek.length > 0) {
         // Visitors change
-        const thisWeekVisitors = thisWeek.reduce((sum: number, d: { visitors?: number }) => sum + (d.visitors || 0), 0);
-        const lastWeekVisitors = lastWeek.reduce((sum: number, d: { visitors?: number }) => sum + (d.visitors || 0), 0);
+        const thisWeekVisitors = thisWeek.reduce(
+          (sum: number, d: { visitors?: number }) => sum + (d.visitors || 0),
+          0
+        );
+        const lastWeekVisitors = lastWeek.reduce(
+          (sum: number, d: { visitors?: number }) => sum + (d.visitors || 0),
+          0
+        );
         const visitorChange = calculatePercentChange(lastWeekVisitors, thisWeekVisitors);
         updateChangeElement('visitors-change', visitorChange);
 
         // Page views change
-        const thisWeekViews = thisWeek.reduce((sum: number, d: { page_views?: number }) => sum + (d.page_views || 0), 0);
-        const lastWeekViews = lastWeek.reduce((sum: number, d: { page_views?: number }) => sum + (d.page_views || 0), 0);
+        const thisWeekViews = thisWeek.reduce(
+          (sum: number, d: { page_views?: number }) => sum + (d.page_views || 0),
+          0
+        );
+        const lastWeekViews = lastWeek.reduce(
+          (sum: number, d: { page_views?: number }) => sum + (d.page_views || 0),
+          0
+        );
         const viewsChange = calculatePercentChange(lastWeekViews, thisWeekViews);
         updateChangeElement('views-change', viewsChange);
 
         // Session duration change
-        const thisWeekSessions = thisWeek.reduce((sum: number, d: { avg_session?: number }) => sum + (d.avg_session || 0), 0) / thisWeek.length;
-        const lastWeekSessions = lastWeek.reduce((sum: number, d: { avg_session?: number }) => sum + (d.avg_session || 0), 0) / lastWeek.length;
+        const thisWeekSessions =
+          thisWeek.reduce(
+            (sum: number, d: { avg_session?: number }) => sum + (d.avg_session || 0),
+            0
+          ) / thisWeek.length;
+        const lastWeekSessions =
+          lastWeek.reduce(
+            (sum: number, d: { avg_session?: number }) => sum + (d.avg_session || 0),
+            0
+          ) / lastWeek.length;
         const sessionChange = calculatePercentChange(lastWeekSessions, thisWeekSessions);
         updateChangeElement('session-change', sessionChange);
       }
@@ -1123,7 +1173,6 @@ async function loadAnalyticsSummary(): Promise<void> {
       setChangeText('views-change', 'No prior data');
       setChangeText('session-change', 'No prior data');
     }
-
   } catch (error) {
     logger.error(' Error loading analytics summary:', error);
     showOverviewDefaults();
@@ -1270,10 +1319,12 @@ export async function loadAnalyticsData(_ctx: AdminDashboardContext): Promise<vo
     if (data.topInteractions && data.topInteractions.length > 0) {
       populateDataList(
         'engagement-events',
-        data.topInteractions.slice(0, 5).map((i: { event_type: string; element?: string; count: number }) => ({
-          label: formatInteractionType(i.event_type, i.element),
-          value: i.count.toLocaleString()
-        }))
+        data.topInteractions
+          .slice(0, 5)
+          .map((i: { event_type: string; element?: string; count: number }) => ({
+            label: formatInteractionType(i.event_type, i.element),
+            value: i.count.toLocaleString()
+          }))
       );
     } else {
       // Show summary stats as engagement if no interactions
@@ -1284,7 +1335,6 @@ export async function loadAnalyticsData(_ctx: AdminDashboardContext): Promise<vo
         { label: 'Pages per Session', value: (summary.avg_pages_per_session || 0).toFixed(1) }
       ]);
     }
-
   } catch (error) {
     logger.error(' Error loading analytics data:', error);
     showEmptyStates();
@@ -1310,7 +1360,7 @@ function capitalizeFirst(str: string): string {
 }
 
 function formatInteractionType(type: string, element?: string): string {
-  const formatted = type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const formatted = type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   if (element && element.length < 20) {
     return `${formatted} (${element})`;
   }
@@ -1329,11 +1379,8 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
 
     if (!response.ok) {
       if (response.status !== 401) {
-        showTableError(
-          container,
-          6,
-          `Failed to load visitor data (${response.status})`,
-          () => loadVisitorsData(_ctx)
+        showTableError(container, 6, `Failed to load visitor data (${response.status})`, () =>
+          loadVisitorsData(_ctx)
         );
       }
       return;
@@ -1348,23 +1395,25 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
     }
 
     container.innerHTML = sessions
-      .map((session: {
-        session_id: string;
-        start_time: string;
-        total_time_on_site: number;
-        page_views: number;
-        device_type: string;
-        city?: string;
-        country?: string;
-        browser?: string;
-      }) => {
-        const startTime = formatDateTime(session.start_time);
-        const duration = formatDuration(session.total_time_on_site || 0);
-        const location = session.city && session.country
-          ? `${session.city}, ${session.country}`
-          : session.country || '';
+      .map(
+        (session: {
+          session_id: string;
+          start_time: string;
+          total_time_on_site: number;
+          page_views: number;
+          device_type: string;
+          city?: string;
+          country?: string;
+          browser?: string;
+        }) => {
+          const startTime = formatDateTime(session.start_time);
+          const duration = formatDuration(session.total_time_on_site || 0);
+          const location =
+            session.city && session.country
+              ? `${session.city}, ${session.country}`
+              : session.country || '';
 
-        return `
+          return `
           <tr data-session-id="${session.session_id}">
             <td class="slug-cell" data-label="Session ID">${session.session_id.substring(0, 8)}...</td>
             <td class="date-cell" data-label="Started">${startTime}</td>
@@ -1374,7 +1423,8 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
             <td class="name-cell" data-label="Location">${location}</td>
           </tr>
         `;
-      })
+        }
+      )
       .join('');
 
     // Initialize keyboard navigation for visitors table
@@ -1387,14 +1437,10 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
       focusClass: 'row-focused',
       selectedClass: 'row-selected'
     });
-
   } catch (error) {
     logger.error(' Error loading visitors data:', error);
-    showTableError(
-      container,
-      6,
-      'Network error loading visitor data',
-      () => loadVisitorsData(_ctx)
+    showTableError(container, 6, 'Network error loading visitor data', () =>
+      loadVisitorsData(_ctx)
     );
   }
 }
@@ -1446,25 +1492,23 @@ async function getPerformanceMetrics(): Promise<PerformanceMetricsDisplay> {
 
   // Try browser Performance API as fallback
   try {
-    type NavTiming = { responseStart?: number; requestStart?: number };
-    type ResourceTiming = { name: string; transferSize?: number };
-    type LCPEntry = { startTime: number };
+    const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationEntry[];
+    const navigation = navEntries[0];
+    const lcpEntries = performance.getEntriesByType(
+      'largest-contentful-paint'
+    ) as PerformanceLCPEntry[];
 
-    const navEntries = performance.getEntriesByType('navigation');
-    const navigation = navEntries[0] as NavTiming | undefined;
-    const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
-
-    const ttfb = navigation?.responseStart && navigation?.requestStart
-      ? Math.round(navigation.responseStart - navigation.requestStart)
-      : undefined;
-    const lcp = lcpEntries.length > 0
-      ? Math.round((lcpEntries[lcpEntries.length - 1] as LCPEntry).startTime)
-      : undefined;
+    const ttfb =
+      navigation?.responseStart && navigation?.requestStart
+        ? Math.round(navigation.responseStart - navigation.requestStart)
+        : undefined;
+    const lcp =
+      lcpEntries.length > 0 ? Math.round(lcpEntries[lcpEntries.length - 1].startTime) : undefined;
 
     // Get resource sizes for bundle estimation
-    const resources = performance.getEntriesByType('resource') as ResourceTiming[];
-    const jsResources = resources.filter(r => r.name.endsWith('.js'));
-    const cssResources = resources.filter(r => r.name.endsWith('.css'));
+    const resources = performance.getEntriesByType('resource') as PerformanceResourceEntry[];
+    const jsResources = resources.filter((r) => r.name.endsWith('.js'));
+    const cssResources = resources.filter((r) => r.name.endsWith('.css'));
 
     const jsSize = jsResources.reduce((sum, r) => sum + (r.transferSize || 0), 0);
     const cssSize = cssResources.reduce((sum, r) => sum + (r.transferSize || 0), 0);
@@ -1569,7 +1613,9 @@ function formatAnalyticsData(rawData: RawVisitorData): AnalyticsData {
   };
 }
 
-function calculatePopularPages(pageViews: { url: string; timestamp: number }[]): AnalyticsDataItem[] {
+function calculatePopularPages(
+  pageViews: { url: string; timestamp: number }[]
+): AnalyticsDataItem[] {
   const pageCounts = new Map<string, number>();
   pageViews.forEach((pv) => {
     const url = pv.url || '/';
@@ -1592,11 +1638,13 @@ function formatPageLabel(url: string): string {
   // Capitalize first letter of each word
   return path
     .split('/')
-    .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(' / ');
 }
 
-function calculateDeviceBreakdown(sessions: { userAgent?: string; screenResolution?: string }[]): AnalyticsDataItem[] {
+function calculateDeviceBreakdown(
+  sessions: { userAgent?: string; screenResolution?: string }[]
+): AnalyticsDataItem[] {
   if (sessions.length === 0) return [];
 
   const deviceCounts = { desktop: 0, mobile: 0, tablet: 0 };
@@ -1652,8 +1700,7 @@ function detectDeviceType(
   const ua = userAgent.toLowerCase();
 
   // Check for tablets first (they often contain 'mobile' in UA too)
-  if (/ipad|tablet|playbook|silk/i.test(ua) ||
-      (/android/i.test(ua) && !/mobile/i.test(ua))) {
+  if (/ipad|tablet|playbook|silk/i.test(ua) || (/android/i.test(ua) && !/mobile/i.test(ua))) {
     return 'tablet';
   }
 
@@ -1665,15 +1712,18 @@ function detectDeviceType(
   return 'desktop';
 }
 
-function calculateGeoDistribution(sessions: { timezone?: string; language?: string }[]): AnalyticsDataItem[] {
+function calculateGeoDistribution(
+  sessions: { timezone?: string; language?: string }[]
+): AnalyticsDataItem[] {
   if (sessions.length === 0) return [];
 
   const regionCounts = new Map<string, number>();
 
   sessions.forEach((session) => {
-    const region = inferRegionFromTimezone(session.timezone) ||
-                   inferRegionFromLanguage(session.language) ||
-                   'Unknown';
+    const region =
+      inferRegionFromTimezone(session.timezone) ||
+      inferRegionFromLanguage(session.language) ||
+      'Unknown';
     regionCounts.set(region, (regionCounts.get(region) || 0) + 1);
   });
 
@@ -1694,14 +1744,24 @@ function inferRegionFromTimezone(timezone?: string): string | null {
   const tz = timezone.toLowerCase();
 
   // Americas
-  if (tz.includes('america/new_york') || tz.includes('america/chicago') ||
-      tz.includes('america/denver') || tz.includes('america/los_angeles') ||
-      tz.includes('america/phoenix') || tz.includes('est') || tz.includes('pst') ||
-      tz.includes('cst') || tz.includes('mst')) {
+  if (
+    tz.includes('america/new_york') ||
+    tz.includes('america/chicago') ||
+    tz.includes('america/denver') ||
+    tz.includes('america/los_angeles') ||
+    tz.includes('america/phoenix') ||
+    tz.includes('est') ||
+    tz.includes('pst') ||
+    tz.includes('cst') ||
+    tz.includes('mst')
+  ) {
     return 'United States';
   }
-  if (tz.includes('america/toronto') || tz.includes('america/vancouver') ||
-      tz.includes('america/montreal')) {
+  if (
+    tz.includes('america/toronto') ||
+    tz.includes('america/vancouver') ||
+    tz.includes('america/montreal')
+  ) {
     return 'Canada';
   }
   if (tz.includes('america/mexico')) {
@@ -1778,8 +1838,8 @@ function calculateEngagementEvents(
     });
 
     // Bounce rate
-    const bouncedSessions = sessions.filter(s => s.bounced === true).length;
-    if (bouncedSessions > 0 || sessions.some(s => s.bounced !== undefined)) {
+    const bouncedSessions = sessions.filter((s) => s.bounced === true).length;
+    if (bouncedSessions > 0 || sessions.some((s) => s.bounced !== undefined)) {
       const bounceRate = Math.round((bouncedSessions / sessions.length) * 100);
       events.push({
         label: 'Bounce Rate',
@@ -1788,7 +1848,7 @@ function calculateEngagementEvents(
     }
 
     // Average session duration
-    const sessionsWithDuration = sessions.filter(s => typeof s.totalTimeOnSite === 'number');
+    const sessionsWithDuration = sessions.filter((s) => typeof s.totalTimeOnSite === 'number');
     if (sessionsWithDuration.length > 0) {
       const totalTime = sessionsWithDuration.reduce((sum, s) => sum + (s.totalTimeOnSite || 0), 0);
       const avgDuration = totalTime / sessionsWithDuration.length;
@@ -1799,7 +1859,7 @@ function calculateEngagementEvents(
     }
 
     // Average pages per session
-    const sessionsWithPageViews = sessions.filter(s => typeof s.pageViews === 'number');
+    const sessionsWithPageViews = sessions.filter((s) => typeof s.pageViews === 'number');
     if (sessionsWithPageViews.length > 0) {
       const totalPages = sessionsWithPageViews.reduce((sum, s) => sum + (s.pageViews || 0), 0);
       const avgPages = totalPages / sessionsWithPageViews.length;
@@ -1847,9 +1907,7 @@ function formatDuration(ms: number): string {
 
 function formatInteractionLabel(type: string): string {
   // Convert snake_case or kebab-case to Title Case
-  return type
-    .replace(/[_-]/g, ' ')
-    .replace(/\b\w/g, char => char.toUpperCase());
+  return type.replace(/[_-]/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function getVitalStatus(metric: string, value?: number): string {
@@ -1875,10 +1933,7 @@ function getGradeFromScore(score: number): string {
   return 'F';
 }
 
-function updateVital(
-  metric: string,
-  data: { value: string; status: string }
-): void {
+function updateVital(metric: string, data: { value: string; status: string }): void {
   const valueEl = document.getElementById(`${metric}-value`);
   const statusEl = document.getElementById(`${metric}-status`);
 
@@ -1924,7 +1979,10 @@ async function loadVisitorsChart(): Promise<void> {
 
   // Add accessibility attributes to canvas
   canvas.setAttribute('role', 'img');
-  canvas.setAttribute('aria-label', 'Visitors chart showing daily visitor counts for the past week');
+  canvas.setAttribute(
+    'aria-label',
+    'Visitors chart showing daily visitor counts for the past week'
+  );
 
   // Show chart skeleton while loading
   const chartContainer = canvas.parentElement;
@@ -2044,19 +2102,30 @@ async function loadSourcesChart(): Promise<void> {
       if (result.topReferrers && result.topReferrers.length > 0) {
         // Map referrers to categories
         const sources: Record<string, number> = {
-          'Direct': 0,
-          'Search': 0,
-          'Social': 0,
-          'Referral': 0
+          Direct: 0,
+          Search: 0,
+          Social: 0,
+          Referral: 0
         };
 
         result.topReferrers.forEach((r: { source: string; count: number }) => {
           const source = r.source.toLowerCase();
           if (source === 'direct' || source === '') {
             sources['Direct'] += r.count;
-          } else if (source.includes('google') || source.includes('bing') || source.includes('yahoo') || source.includes('duckduckgo')) {
+          } else if (
+            source.includes('google') ||
+            source.includes('bing') ||
+            source.includes('yahoo') ||
+            source.includes('duckduckgo')
+          ) {
             sources['Search'] += r.count;
-          } else if (source.includes('facebook') || source.includes('twitter') || source.includes('linkedin') || source.includes('instagram') || source.includes('tiktok')) {
+          } else if (
+            source.includes('facebook') ||
+            source.includes('twitter') ||
+            source.includes('linkedin') ||
+            source.includes('instagram') ||
+            source.includes('tiktok')
+          ) {
             sources['Social'] += r.count;
           } else {
             sources['Referral'] += r.count;
@@ -2137,11 +2206,16 @@ export async function exportPerformanceData(): Promise<Record<string, unknown>> 
 // ---------------------------------------------------------------------------
 
 const RENDER_ICONS = {
-  DOLLAR: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>',
-  ACTIVITY: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>',
-  FOLDER: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
-  FILE_TEXT: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
-  CHEVRON_RIGHT: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>',
+  DOLLAR:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>',
+  ACTIVITY:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>',
+  FOLDER:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
+  FILE_TEXT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
+  CHEVRON_RIGHT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>',
   PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
   INFO: '<svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>'
 };

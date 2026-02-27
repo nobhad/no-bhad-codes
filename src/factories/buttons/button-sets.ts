@@ -123,35 +123,23 @@ export const BUTTON_SETS = {
   ],
 
   /** Modal close only */
-  modalClose: (): ButtonConfig[] => [
-    { action: 'close' }
-  ],
+  modalClose: (): ButtonConfig[] => [{ action: 'close' }],
 
   // ============================================
   // TOOLBAR ACTIONS
   // ============================================
 
   /** Toolbar refresh: Refresh */
-  toolbarRefresh: (): ButtonConfig[] => [
-    { action: 'refresh' }
-  ],
+  toolbarRefresh: (): ButtonConfig[] => [{ action: 'refresh' }],
 
   /** Toolbar with export: Refresh, Export */
-  toolbarWithExport: (): ButtonConfig[] => [
-    { action: 'refresh' },
-    { action: 'export' }
-  ],
+  toolbarWithExport: (): ButtonConfig[] => [{ action: 'refresh' }, { action: 'export' }],
 
   /** Toolbar with add: Add */
-  toolbarAdd: (): ButtonConfig[] => [
-    { action: 'add', variant: 'primary' }
-  ],
+  toolbarAdd: (): ButtonConfig[] => [{ action: 'add', variant: 'primary' }],
 
   /** Toolbar search and filter */
-  toolbarSearchFilter: (): ButtonConfig[] => [
-    { action: 'search' },
-    { action: 'filter' }
-  ],
+  toolbarSearchFilter: (): ButtonConfig[] => [{ action: 'search' }, { action: 'filter' }],
 
   // ============================================
   // CARD ACTIONS
@@ -164,9 +152,7 @@ export const BUTTON_SETS = {
   ],
 
   /** Card with more menu */
-  cardWithMore: (id: ButtonSetId): ButtonConfig[] => [
-    { action: 'more', dataId: id }
-  ],
+  cardWithMore: (id: ButtonSetId): ButtonConfig[] => [{ action: 'more', dataId: id }],
 
   /** Card edit actions */
   cardEdit: (id: ButtonSetId): ButtonConfig[] => [
@@ -181,7 +167,12 @@ export const BUTTON_SETS = {
   /** Questionnaire actions: Edit, Send, Delete */
   tableQuestionnaire: (id: ButtonSetId): ButtonConfig[] => [
     { action: 'edit', dataId: id },
-    { action: 'send', dataId: id, title: 'Send to client', ariaLabel: 'Send questionnaire to client' },
+    {
+      action: 'send',
+      dataId: id,
+      title: 'Send to client',
+      ariaLabel: 'Send questionnaire to client'
+    },
     { action: 'delete', dataId: id }
   ],
 
@@ -285,11 +276,8 @@ export function getButtonSet<T extends ButtonSetName>(
 /**
  * Apply context to a button set.
  */
-export function applyContextToSet(
-  buttons: ButtonConfig[],
-  context: UIContext
-): ButtonConfig[] {
-  return buttons.map(btn => ({ ...btn, context }));
+export function applyContextToSet(buttons: ButtonConfig[], context: UIContext): ButtonConfig[] {
+  return buttons.map((btn) => ({ ...btn, context }));
 }
 
 /**
@@ -309,5 +297,5 @@ export function extendButtonSet(
  * Filter a button set by show condition.
  */
 export function filterButtonSet(buttons: ButtonConfig[]): ButtonConfig[] {
-  return buttons.filter(btn => btn.show !== false);
+  return buttons.filter((btn) => btn.show !== false);
 }

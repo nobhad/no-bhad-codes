@@ -37,6 +37,67 @@ import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('AdminContacts');
 
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn = typeof import('../../../react/features/admin/contacts').mountContactsTable;
+type ReactUnmountFn = typeof import('../../../react/features/admin/contacts').unmountContactsTable;
+
+let mountContactsTable: ReactMountFn | null = null;
+let unmountContactsTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactContactsTable(): Promise<boolean> {
+  if (mountContactsTable && unmountContactsTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/contacts');
+    mountContactsTable = module.mountContactsTable;
+    unmountContactsTable = module.unmountContactsTable;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React contacts table */
+function shouldUseReactContactsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_contacts') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_contacts_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -53,21 +114,23 @@ interface ContactsStats {
 // ============================================================================
 
 // Module reference holder - assigned after module creation to avoid forward references
-let _contactsModuleRef: ReturnType<typeof createTableModule<ContactSubmission, ContactsStats>> | null = null;
+let _contactsModuleRef: ReturnType<
+  typeof createTableModule<ContactSubmission, ContactsStats>
+> | null = null;
 
 /**
  * Bulk update status for multiple contacts
  */
 async function bulkUpdateStatus(ids: number[], status: string): Promise<void> {
   try {
-    const promises = ids.map(id =>
+    const promises = ids.map((id) =>
       apiPut(`/api/admin/contact-submissions/${id}/status`, { status })
     );
     await Promise.all(promises);
 
     // Update local data via module
     if (_contactsModuleRef) {
-      ids.forEach(id => {
+      ids.forEach((id) => {
         _contactsModuleRef!.updateItem(id, { status: status as ContactSubmission['status'] });
       });
     }
@@ -84,7 +147,7 @@ async function bulkUpdateStatus(ids: number[], status: string): Promise<void> {
  */
 async function bulkDeleteContacts(ids: number[]): Promise<void> {
   try {
-    const promises = ids.map(id =>
+    const promises = ids.map((id) =>
       apiFetch(`/api/admin/contact-submissions/${id}`, { method: 'DELETE' })
     );
     await Promise.all(promises);
@@ -166,8 +229,12 @@ function buildContactRow(
   const decodedCompany = SanitizationUtils.decodeHtmlEntities(submission.company || '');
   const decodedMessage = SanitizationUtils.decodeHtmlEntities(submission.message || '');
   const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedName));
-  const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || ''));
-  const safeCompany = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
+  const safeEmail = SanitizationUtils.escapeHtml(
+    SanitizationUtils.decodeHtmlEntities(submission.email || '')
+  );
+  const safeCompany = decodedCompany
+    ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany))
+    : '';
   const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);
   const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
   const truncatedMessage =
@@ -193,9 +260,16 @@ function buildContactRow(
     <td class="date-cell" data-label="Date">${date}</td>
     <td class="actions-cell" data-label="Actions">
       ${renderActionsCell([
-    conditionalAction(canConvert, 'convert-client', submission.id, { className: 'btn-convert-contact', dataAttrs: { email: safeEmail, name: safeName } }),
-    conditionalAction(!isArchived, 'archive', submission.id, { className: 'btn-archive-contact' }),
-    conditionalAction(isArchived, 'restore', submission.id, { className: 'btn-restore-contact' })
+    conditionalAction(canConvert, 'convert-client', submission.id, {
+      className: 'btn-convert-contact',
+      dataAttrs: { email: safeEmail, name: safeName }
+    }),
+    conditionalAction(!isArchived, 'archive', submission.id, {
+      className: 'btn-archive-contact'
+    }),
+    conditionalAction(isArchived, 'restore', submission.id, {
+      className: 'btn-restore-contact'
+    })
   ])}
     </td>
   `;
@@ -217,7 +291,13 @@ function buildContactRow(
   // Row click handler
   row.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
-    if (target.closest('.table-dropdown') || target.closest('.table-actions') || target.closest('button') || target.closest('.bulk-select-cell') || target.tagName === 'INPUT') return;
+    if (
+      target.closest('.table-dropdown') ||
+      target.closest('.table-actions') ||
+      target.closest('button') ||
+      target.closest('.bulk-select-cell') ||
+      target.tagName === 'INPUT'
+    ) {return;}
     showContactDetails(submission.id);
   });
 
@@ -319,7 +399,67 @@ _contactsModuleRef = contactsModule;
 // PUBLIC EXPORTS
 // ============================================================================
 
-export const loadContacts = contactsModule.load;
+/**
+ * Cleanup function called when leaving the contacts tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupContactsTab(): void {
+  if (reactTableMounted && unmountContactsTable) {
+    unmountContactsTable();
+    reactTableMounted = false;
+  }
+}
+
+/**
+ * Load contacts data - handles both React and vanilla implementations
+ */
+export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactContactsTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React ContactsTable
+    const mountContainer = document.getElementById('react-contacts-mount');
+    if (mountContainer) {
+      const loaded = await loadReactContactsTable();
+      if (loaded && mountContactsTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountContactsTable) {
+          unmountContactsTable();
+        }
+        mountContactsTable(mountContainer, {
+          onNavigate: (tab: string, entityId?: string) => {
+            if (entityId) {
+              ctx.switchTab(tab);
+            } else {
+              ctx.switchTab(tab);
+            }
+          }
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        logger.error(' React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
+  await contactsModule.load(ctx);
+}
+
 export const getContactsData = contactsModule.getData;
 
 // ============================================================================
@@ -340,8 +480,12 @@ export function showContactDetails(contactId: number): void {
   const decodedCompany = SanitizationUtils.decodeHtmlEntities(contact.company || '');
   const decodedMessage = SanitizationUtils.decodeHtmlEntities(contact.message || '');
   const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedName));
-  const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || ''));
-  const safeCompany = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
+  const safeEmail = SanitizationUtils.escapeHtml(
+    SanitizationUtils.decodeHtmlEntities(contact.email || '')
+  );
+  const safeCompany = decodedCompany
+    ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany))
+    : '';
   const safePhone = contact.phone ? SanitizationUtils.formatPhone(contact.phone) : '';
   const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);
   const date = formatDateTime(contact.created_at);
@@ -353,7 +497,8 @@ export function showContactDetails(contactId: number): void {
     </div>
     <div class="contact-details-created">Created ${date}</div>
     <div class="details-actions">
-      ${contact.client_id
+      ${
+  contact.client_id
     ? getStatusDotHTML('converted')
     : `<button type="button" class="icon-btn" id="convert-to-client-btn" data-id="${contact.id}" data-email="${safeEmail}" data-name="${safeName}" title="Convert to Client" aria-label="Convert to Client">${ICONS.USER_PLUS}</button>`
 }
@@ -374,18 +519,26 @@ export function showContactDetails(contactId: number): void {
           <span class="field-label">Email</span>
           <span class="meta-value">${getEmailWithCopyHtml(contact.email || '', safeEmail)}</span>
         </div>
-        ${safeCompany ? `
+        ${
+  safeCompany
+    ? `
         <div class="meta-item">
           <span class="field-label">Company</span>
           <span class="meta-value">${safeCompany}</span>
         </div>
-        ` : ''}
-        ${safePhone ? `
+        `
+    : ''
+}
+        ${
+  safePhone
+    ? `
         <div class="meta-item">
           <span class="field-label">Phone</span>
           <span class="meta-value">${safePhone}</span>
         </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
       <div class="project-description-row">
         <div class="meta-item description-item">
@@ -406,11 +559,13 @@ export function showContactDetails(contactId: number): void {
         await updateContactStatus(contact.id, newStatus, storedContext);
         contactsModule.updateItem(contact.id, { status: newStatus as ContactSubmission['status'] });
         // Update table row dropdown if visible
-        const tableDropdown = document.querySelector(`tr[data-contact-id="${contact.id}"] .table-dropdown`);
+        const tableDropdown = document.querySelector(
+          `tr[data-contact-id="${contact.id}"] .table-dropdown`
+        );
         if (tableDropdown) {
           const textEl = tableDropdown.querySelector('.custom-dropdown-text');
           if (textEl) {
-            const option = CONTACT_STATUS_OPTIONS.find(o => o.value === newStatus);
+            const option = CONTACT_STATUS_OPTIONS.find((o) => o.value === newStatus);
             textEl.textContent = option?.label || newStatus;
           }
           (tableDropdown as HTMLElement).dataset.status = newStatus;
@@ -586,7 +741,9 @@ function updateDropdownStatus(
     (panelDropdown as HTMLElement).dataset.status = status;
   }
   // Update table row dropdown
-  const tableDropdown = document.querySelector(`tr[data-contact-id="${contactId}"] .table-dropdown`);
+  const tableDropdown = document.querySelector(
+    `tr[data-contact-id="${contactId}"] .table-dropdown`
+  );
   if (tableDropdown) {
     const textEl = tableDropdown.querySelector('.custom-dropdown-text');
     if (textEl) textEl.textContent = label;
@@ -621,10 +778,7 @@ export async function updateContactStatus(
 // CONVERT TO CLIENT
 // ============================================================================
 
-async function handleConvertToClient(
-  contact: ContactSubmission,
-  row: HTMLElement
-): Promise<void> {
+async function handleConvertToClient(contact: ContactSubmission, row: HTMLElement): Promise<void> {
   const decodedName = SanitizationUtils.decodeHtmlEntities(contact.name || '');
   const safeName = SanitizationUtils.capitalizeName(decodedName);
 
@@ -639,9 +793,12 @@ async function handleConvertToClient(
   if (!confirmed) return;
 
   try {
-    const response = await apiPost(`/api/admin/contact-submissions/${contact.id}/convert-to-client`, {
-      sendInvitation: true
-    });
+    const response = await apiPost(
+      `/api/admin/contact-submissions/${contact.id}/convert-to-client`,
+      {
+        sendInvitation: true
+      }
+    );
 
     if (response.ok) {
       const data = await response.json();
@@ -701,8 +858,10 @@ window.closeContactDetailsPanel = function (): void {
 // ============================================================================
 
 const RENDER_ICONS = {
-  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+  EXPORT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
 };
 
 /**
@@ -710,9 +869,22 @@ const RENDER_ICONS = {
  * Call this before loadContacts to create the DOM elements.
  */
 export function renderContactsTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactContactsTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Contacts Table Mount Point -->
+      <div id="react-contacts-mount"></div>
+    `;
+    return;
+  }
+
   // Reset module cache when tab re-renders
   contactsModule.resetCache();
 
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <div class="data-table-card" id="contact-submissions-card">
       <div class="data-table-header">

@@ -15,13 +15,7 @@
 // CONSTANTS & TYPES
 // ============================================
 
-export {
-  UI_CONTEXTS,
-  ICON_SIZES,
-  BUTTON_SIZES,
-  CONTEXT_DEFAULTS,
-  SVG_ATTRS
-} from './constants';
+export { UI_CONTEXTS, ICON_SIZES, BUTTON_SIZES, CONTEXT_DEFAULTS, SVG_ATTRS } from './constants';
 
 export type {
   UIContext,

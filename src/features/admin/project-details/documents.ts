@@ -120,7 +120,9 @@ export async function downloadSow(projectId: number): Promise<void> {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       if (error.code === 'NOT_FOUND') {
-        alertError('No proposal found for this project. Create a proposal first to generate an SOW.');
+        alertError(
+          'No proposal found for this project. Create a proposal first to generate an SOW.'
+        );
       } else {
         alertError(error.error || 'Failed to generate Statement of Work');
       }
@@ -158,7 +160,9 @@ export async function previewSow(projectId: number): Promise<void> {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       if (error.code === 'NOT_FOUND') {
-        alertError('No proposal found for this project. Create a proposal first to generate an SOW.');
+        alertError(
+          'No proposal found for this project. Create a proposal first to generate an SOW.'
+        );
       } else {
         alertError(error.error || 'Failed to generate SOW preview');
       }
@@ -180,17 +184,16 @@ export async function previewSow(projectId: number): Promise<void> {
 /**
  * Save SOW to project files
  */
-export async function saveSowToFiles(
-  projectId: number,
-  onSuccess?: () => void
-): Promise<void> {
+export async function saveSowToFiles(projectId: number, onSuccess?: () => void): Promise<void> {
   try {
     const response = await apiPost(`/api/projects/${projectId}/sow/save`, {});
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       if (error.code === 'NOT_FOUND') {
-        alertError('No proposal found for this project. Create a proposal first to generate an SOW.');
+        alertError(
+          'No proposal found for this project. Create a proposal first to generate an SOW.'
+        );
       } else {
         alertError(error.error || 'Failed to save Statement of Work');
       }

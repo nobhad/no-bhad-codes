@@ -48,7 +48,10 @@ export async function loadProjectMilestones(
       const milestones = data.milestones || [];
 
       if (milestones.length === 0) {
-        renderEmptyState(milestonesList, 'No milestones yet. Add milestones to track project progress.');
+        renderEmptyState(
+          milestonesList,
+          'No milestones yet. Add milestones to track project progress.'
+        );
       } else {
         milestonesList.innerHTML = milestones
           .map((m: ProjectMilestoneResponse) => {
@@ -57,9 +60,9 @@ export async function loadProjectMilestones(
             const safeDescription = SanitizationUtils.escapeHtml(m.description || '');
             const deliverablesArray = Array.isArray(m.deliverables)
               ? m.deliverables
-              : (typeof m.deliverables === 'string' && m.deliverables.trim()
+              : typeof m.deliverables === 'string' && m.deliverables.trim()
                 ? [m.deliverables]
-                : []);
+                : [];
             const safeDeliverables =
               deliverablesArray.length > 0
                 ? deliverablesArray
@@ -83,20 +86,30 @@ export async function loadProjectMilestones(
                   <h4 class="milestone-title">${safeTitle}</h4>
                   <div class="milestone-meta">
                     ${m.due_date ? `<span class="milestone-due-date">Due: ${formatDate(m.due_date)}</span>` : ''}
-                    ${taskCount > 0 ? `
+                    ${
+  taskCount > 0
+    ? `
                       <span class="milestone-task-count">${completedTaskCount}/${taskCount} tasks</span>
                       <span class="milestone-progress-text">${progressPercentage}%</span>
-                    ` : ''}
+                    `
+    : ''
+}
                   </div>
                 </div>
-                ${taskCount > 0 ? `
+                ${
+  taskCount > 0
+    ? `
                   <div class="milestone-progress-bar">
                     <div class="milestone-progress-fill" style="width: ${progressPercentage}%"></div>
                   </div>
-                ` : ''}
+                `
+    : ''
+}
                 ${safeDescription ? `<p class="milestone-description">${safeDescription}</p>` : ''}
                 ${safeDeliverables ? `<ul class="milestone-deliverables">${safeDeliverables}</ul>` : ''}
-                ${taskCount > 0 ? `
+                ${
+  taskCount > 0
+    ? `
                   <button class="btn btn-outline btn-sm btn-milestone-tasks" data-action="toggle-milestone-tasks" data-milestone-id="${m.id}" data-project-id="${projectId}">
                     <svg class="icon-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -104,7 +117,9 @@ export async function loadProjectMilestones(
                     <span>Show Tasks (${taskCount})</span>
                   </button>
                   <div class="milestone-tasks-container" id="milestone-tasks-${m.id}" style="display: none;"></div>
-                ` : ''}
+                `
+    : ''
+}
               </div>
               <button class="btn btn-danger btn-xs" data-action="delete-milestone" data-milestone-id="${m.id}">Delete</button>
             </div>
@@ -113,7 +128,9 @@ export async function loadProjectMilestones(
           .join('');
 
         // Calculate and update progress based on completed milestones
-        const completedCount = milestones.filter((m: ProjectMilestoneResponse) => m.is_completed).length;
+        const completedCount = milestones.filter(
+          (m: ProjectMilestoneResponse) => m.is_completed
+        ).length;
         const totalCount = milestones.length;
         const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
         onProgressUpdate(progress);
@@ -145,8 +162,9 @@ export function updateProgressBar(projectId: number, progress: number): void {
   }
 
   // Save progress to database
-  apiPut(`/api/projects/${projectId}`, { progress })
-    .catch(err => logger.error(' Error saving progress:', err));
+  apiPut(`/api/projects/${projectId}`, { progress }).catch((err) =>
+    logger.error(' Error saving progress:', err)
+  );
 }
 
 /**
@@ -156,7 +174,9 @@ export async function showAddMilestonePrompt(
   projectId: number,
   onSuccess: () => void
 ): Promise<void> {
-  const defaultDueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const defaultDueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
 
   const result = await multiPromptDialog({
     title: 'Add Milestone',
@@ -187,7 +207,13 @@ export async function showAddMilestonePrompt(
 
   if (!result) return;
 
-  await addMilestone(projectId, result.title, result.description || '', result.dueDate || '', onSuccess);
+  await addMilestone(
+    projectId,
+    result.title,
+    result.description || '',
+    result.dueDate || '',
+    onSuccess
+  );
 }
 
 /**
@@ -233,10 +259,9 @@ export async function toggleMilestone(
   if (!AdminAuth.isAuthenticated()) return;
 
   try {
-    const response = await apiPut(
-      `/api/projects/${projectId}/milestones/${milestoneId}`,
-      { is_completed: isCompleted }
-    );
+    const response = await apiPut(`/api/projects/${projectId}/milestones/${milestoneId}`, {
+      is_completed: isCompleted
+    });
 
     if (response.ok) {
       onSuccess();
@@ -266,9 +291,7 @@ export async function deleteMilestone(
   if (!AdminAuth.isAuthenticated()) return;
 
   try {
-    const response = await apiDelete(
-      `/api/projects/${projectId}/milestones/${milestoneId}`
-    );
+    const response = await apiDelete(`/api/projects/${projectId}/milestones/${milestoneId}`);
 
     if (response.ok) {
       onSuccess();
@@ -284,10 +307,7 @@ export async function deleteMilestone(
 /**
  * Toggle visibility of tasks for a milestone
  */
-export async function toggleMilestoneTasks(
-  milestoneId: number,
-  projectId: number
-): Promise<void> {
+export async function toggleMilestoneTasks(milestoneId: number, projectId: number): Promise<void> {
   const container = document.getElementById(`milestone-tasks-${milestoneId}`);
   const button = document.querySelector(
     `.milestone-item[data-milestone-id="${milestoneId}"] .btn-milestone-tasks`
@@ -319,7 +339,8 @@ export async function toggleMilestoneTasks(
           const tasks = data.tasks || [];
 
           if (tasks.length === 0) {
-            container.innerHTML = '<p class="milestone-tasks-empty">No tasks for this milestone yet.</p>';
+            container.innerHTML =
+              '<p class="milestone-tasks-empty">No tasks for this milestone yet.</p>';
           } else {
             container.innerHTML = `
               <ul class="milestone-task-list">

@@ -51,7 +51,19 @@ const CLIENT_THREAD_TITLE = 'Conversation with Noelle';
 // Attachment configuration
 const MAX_ATTACHMENTS = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'zip'];
+const ALLOWED_EXTENSIONS = [
+  'pdf',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'txt',
+  'zip'
+];
 
 // Pending attachments for current message
 let pendingAttachments: File[] = [];
@@ -118,7 +130,10 @@ let cachedThreads: MessageThread[] = [];
 /**
  * Load messages from API
  */
-export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: boolean = false): Promise<void> {
+export async function loadMessagesFromAPI(
+  ctx: ClientPortalContext,
+  bustCache: boolean = false
+): Promise<void> {
   // Force refresh DOM references since views are dynamically rendered
   const threadList = domCache.get('threadList', true);
   const messagesContainer = domCache.get('messagesThread', true);
@@ -151,9 +166,11 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: b
 
   // Show loading state
   if (threadList) {
-    threadList.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
+    threadList.innerHTML =
+      '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading...</span></div>';
   }
-  messagesContainer.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading messages...</span></div>';
+  messagesContainer.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading messages...</span></div>';
 
   try {
     // Add cache-busting parameter when needed (e.g., after sending a message)
@@ -178,13 +195,17 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: b
     }
 
     if (threads.length === 0) {
-      renderEmptyState(messagesContainer, 'No messages yet. Send a message to Noelle to get started.', { className: 'no-messages' });
+      renderEmptyState(
+        messagesContainer,
+        'No messages yet. Send a message to Noelle to get started.',
+        { className: 'no-messages' }
+      );
       return;
     }
 
     // If no thread is selected, select the first one
     const thread = currentThreadId
-      ? threads.find(t => t.id === currentThreadId) || threads[0]
+      ? threads.find((t) => t.id === currentThreadId) || threads[0]
       : threads[0];
 
     await loadThreadMessages(thread.id, ctx, bustCache);
@@ -193,7 +214,10 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: b
     checkPendingEmailChangeMessage();
   } catch (error) {
     console.error('Error loading messages:', error);
-    renderErrorState(messagesContainer, 'Unable to load messages. Please try again later.', { className: 'no-messages', type: 'network' });
+    renderErrorState(messagesContainer, 'Unable to load messages. Please try again later.', {
+      className: 'no-messages',
+      type: 'network'
+    });
   }
 }
 
@@ -221,20 +245,25 @@ function checkPendingEmailChangeMessage(): void {
 /**
  * Render thread list
  */
-function renderThreadList(container: HTMLElement, threads: MessageThread[], ctx: ClientPortalContext): void {
+function renderThreadList(
+  container: HTMLElement,
+  threads: MessageThread[],
+  ctx: ClientPortalContext
+): void {
   if (threads.length === 0) {
     renderEmptyState(container, 'No conversations', { className: 'no-messages' });
     return;
   }
 
-  container.innerHTML = threads.map(thread => {
-    const isActive = thread.id === currentThreadId;
-    const hasUnread = thread.unread_count > 0;
-    const lastMessageDate = new Date(thread.last_message_at);
-    const timeStr = formatRelativeTime(lastMessageDate);
-    const itemId = `portal-thread-item-${thread.id}`;
+  container.innerHTML = threads
+    .map((thread) => {
+      const isActive = thread.id === currentThreadId;
+      const hasUnread = thread.unread_count > 0;
+      const lastMessageDate = new Date(thread.last_message_at);
+      const timeStr = formatRelativeTime(lastMessageDate);
+      const itemId = `portal-thread-item-${thread.id}`;
 
-    return `
+      return `
       <div class="thread-item ${isActive ? 'active' : ''} ${hasUnread ? 'unread' : ''}"
            id="${itemId}"
            data-thread-id="${thread.id}"
@@ -251,7 +280,8 @@ function renderThreadList(container: HTMLElement, threads: MessageThread[], ctx:
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   // Set initial aria-activedescendant if there's an active thread
   const activeThread = container.querySelector('.thread-item.active') as HTMLElement;
@@ -260,7 +290,7 @@ function renderThreadList(container: HTMLElement, threads: MessageThread[], ctx:
   }
 
   // Add click handlers to threads
-  container.querySelectorAll('.thread-item').forEach(item => {
+  container.querySelectorAll('.thread-item').forEach((item) => {
     item.addEventListener('click', () => {
       const threadId = parseInt(item.getAttribute('data-thread-id') || '0');
       if (threadId && threadId !== currentThreadId) {
@@ -290,7 +320,7 @@ async function selectThread(threadId: number, ctx: ClientPortalContext): Promise
   // Update active state in thread list
   const threadList = domCache.get('threadList');
   if (threadList) {
-    threadList.querySelectorAll('.thread-item').forEach(item => {
+    threadList.querySelectorAll('.thread-item').forEach((item) => {
       const itemThreadId = parseInt(item.getAttribute('data-thread-id') || '0');
       const isSelected = itemThreadId === threadId;
       item.classList.toggle('active', isSelected);
@@ -309,7 +339,11 @@ async function selectThread(threadId: number, ctx: ClientPortalContext): Promise
 /**
  * Load messages for a specific thread
  */
-async function loadThreadMessages(threadId: number, ctx: ClientPortalContext, bustCache: boolean): Promise<void> {
+async function loadThreadMessages(
+  threadId: number,
+  ctx: ClientPortalContext,
+  bustCache: boolean
+): Promise<void> {
   const messagesContainer = domCache.get('messagesThread');
   const threadHeader = domCache.get('threadHeader');
   if (!messagesContainer) return;
@@ -317,7 +351,7 @@ async function loadThreadMessages(threadId: number, ctx: ClientPortalContext, bu
   currentThreadId = threadId;
 
   // Update header
-  const thread = cachedThreads.find(t => t.id === threadId);
+  const thread = cachedThreads.find((t) => t.id === threadId);
   if (threadHeader && thread) {
     const titleEl = threadHeader.querySelector('.thread-title');
     if (titleEl) {
@@ -326,7 +360,8 @@ async function loadThreadMessages(threadId: number, ctx: ClientPortalContext, bu
   }
 
   // Show loading
-  messagesContainer.innerHTML = '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading messages...</span></div>';
+  messagesContainer.innerHTML =
+    '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading messages...</span></div>';
 
   try {
     const messagesUrl = bustCache
@@ -361,7 +396,10 @@ async function loadThreadMessages(threadId: number, ctx: ClientPortalContext, bu
     }
   } catch (error) {
     console.error('Error loading thread messages:', error);
-    renderErrorState(messagesContainer, 'Unable to load messages.', { className: 'no-messages', type: 'network' });
+    renderErrorState(messagesContainer, 'Unable to load messages.', {
+      className: 'no-messages',
+      type: 'network'
+    });
   }
 }
 
@@ -390,15 +428,18 @@ function formatRelativeTime(date: Date): string {
 /**
  * Render attachment list for a message
  */
-function renderMessageAttachments(attachments: { filename: string; originalName: string; size: number; mimeType: string }[] | null): string {
+function renderMessageAttachments(
+  attachments: { filename: string; originalName: string; size: number; mimeType: string }[] | null
+): string {
   if (!attachments || attachments.length === 0) return '';
 
-  const attachmentItems = attachments.map(att => {
-    const size = formatFileSize(att.size);
-    const name = att.originalName || att.filename;
-    const displayName = name.length > 25 ? `${name.substring(0, 22)  }...` : name;
+  const attachmentItems = attachments
+    .map((att) => {
+      const size = formatFileSize(att.size);
+      const name = att.originalName || att.filename;
+      const displayName = name.length > 25 ? `${name.substring(0, 22)}...` : name;
 
-    return `
+      return `
       <a href="${MESSAGES_API_BASE}/attachments/${att.filename}/download"
          class="message-attachment"
          target="_blank"
@@ -410,7 +451,8 @@ function renderMessageAttachments(attachments: { filename: string; originalName:
         <span class="message-attachment-download">${ICONS.DOWNLOAD}</span>
       </a>
     `;
-  }).join('');
+    })
+    .join('');
 
   return `<div class="message-attachments">${attachmentItems}</div>`;
 }
@@ -429,7 +471,9 @@ function renderMessages(
   container.setAttribute('aria-live', 'polite');
 
   if (messages.length === 0) {
-    renderEmptyState(container, 'No messages yet. Send a message to Noelle to get started.', { className: 'no-messages' });
+    renderEmptyState(container, 'No messages yet. Send a message to Noelle to get started.', {
+      className: 'no-messages'
+    });
     return;
   }
 
@@ -438,7 +482,7 @@ function renderMessages(
       const isSent = msg.sender_type === 'client';
       const isAdmin = msg.sender_type === 'admin';
       const initials = (msg.sender_name || 'Unknown').substring(0, 3).toUpperCase();
-      const displayName = isAdmin ? 'Noelle' : (msg.sender_name || 'Unknown');
+      const displayName = isAdmin ? 'Noelle' : msg.sender_name || 'Unknown';
 
       // Admin uses avatar image, clients use initials placeholder
       const avatarHtml = isAdmin
@@ -449,10 +493,15 @@ function renderMessages(
 
       // Parse attachments if present
       const attachments = msg.attachments;
-      const attachmentsHtml = renderMessageAttachments(attachments as { filename: string; originalName: string; size: number; mimeType: string }[] | null);
+      const attachmentsHtml = renderMessageAttachments(
+        attachments as
+          | { filename: string; originalName: string; size: number; mimeType: string }[]
+          | null
+      );
 
       // Client messages get edit/delete actions
-      const actionsHtml = isSent ? `
+      const actionsHtml = isSent
+        ? `
         <div class="message-actions">
           <button type="button" class="message-action-btn message-edit-btn" data-message-id="${msg.id}" title="Edit message" aria-label="Edit message">
             ${ICONS.EDIT}
@@ -461,7 +510,8 @@ function renderMessages(
             ${ICONS.TRASH}
           </button>
         </div>
-      ` : '';
+      `
+        : '';
 
       return `
       <div class="message message-${isSent ? 'sent' : 'received'} ${senderClass}" data-message-id="${msg.id}">
@@ -493,7 +543,7 @@ function renderMessages(
  */
 function setupMessageActionHandlers(container: HTMLElement, ctx: ClientPortalContext): void {
   // Edit button handlers
-  container.querySelectorAll('.message-edit-btn').forEach(btn => {
+  container.querySelectorAll('.message-edit-btn').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -505,7 +555,7 @@ function setupMessageActionHandlers(container: HTMLElement, ctx: ClientPortalCon
   });
 
   // Delete button handlers
-  container.querySelectorAll('.message-delete-btn').forEach(btn => {
+  container.querySelectorAll('.message-delete-btn').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -520,7 +570,11 @@ function setupMessageActionHandlers(container: HTMLElement, ctx: ClientPortalCon
 /**
  * Handle editing a message
  */
-async function handleEditMessage(messageId: number, container: HTMLElement, ctx: ClientPortalContext): Promise<void> {
+async function handleEditMessage(
+  messageId: number,
+  container: HTMLElement,
+  ctx: ClientPortalContext
+): Promise<void> {
   // Find the message element to get current text
   const messageEl = container.querySelector(`[data-message-id="${messageId}"]`);
   const currentText = messageEl?.querySelector('.message-body')?.textContent || '';
@@ -617,7 +671,7 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
         formData.append('subject', 'General Inquiry');
       }
 
-      pendingAttachments.forEach(file => {
+      pendingAttachments.forEach((file) => {
         formData.append('attachments', file);
       });
 
@@ -631,9 +685,7 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
         body: formData
       };
     } else {
-      const body = currentThreadId
-        ? { message }
-        : { subject: 'General Inquiry', message };
+      const body = currentThreadId ? { message } : { subject: 'General Inquiry', message };
 
       url = currentThreadId
         ? `${MESSAGES_API_BASE}/threads/${currentThreadId}/messages`
@@ -773,11 +825,12 @@ function renderAttachmentPreview(): void {
   }
 
   preview.classList.remove('hidden');
-  preview.innerHTML = pendingAttachments.map((file, index) => {
-    const size = formatFileSize(file.size);
-    const name = file.name.length > 20 ? `${file.name.substring(0, 17)  }...` : file.name;
+  preview.innerHTML = pendingAttachments
+    .map((file, index) => {
+      const size = formatFileSize(file.size);
+      const name = file.name.length > 20 ? `${file.name.substring(0, 17)}...` : file.name;
 
-    return `
+      return `
       <div class="attachment-chip" data-index="${index}">
         <span class="attachment-chip-icon">${ICONS.FILE}</span>
         <span class="attachment-chip-name" title="${file.name}">${name}</span>
@@ -787,10 +840,11 @@ function renderAttachmentPreview(): void {
         </button>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   // Add remove button handlers
-  preview.querySelectorAll('.attachment-chip-remove').forEach(btn => {
+  preview.querySelectorAll('.attachment-chip-remove').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();

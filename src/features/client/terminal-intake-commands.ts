@@ -66,10 +66,7 @@ export const TERMINAL_COMMANDS: Record<string, TerminalCommand> = {
  * Format help text for display
  */
 export function formatHelpText(): string {
-  const lines = [
-    '--- AVAILABLE COMMANDS ---',
-    ''
-  ];
+  const lines = ['--- AVAILABLE COMMANDS ---', ''];
 
   Object.values(TERMINAL_COMMANDS).forEach((cmd) => {
     lines.push(`  ${cmd.usage?.padEnd(12) || cmd.name.padEnd(12)} - ${cmd.description}`);

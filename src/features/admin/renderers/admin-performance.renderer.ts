@@ -112,12 +112,16 @@ class AdminPerformanceRenderer {
       return;
     }
 
-    container.innerHTML = alerts.map(alert => `
+    container.innerHTML = alerts
+      .map(
+        (alert) => `
       <div class="performance-alert warning">
         <span class="alert-icon warning">&#9888;</span>
         <span class="alert-message">${SanitizationUtils.escapeHtml(alert)}</span>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   /**
@@ -130,7 +134,7 @@ class AdminPerformanceRenderer {
     }
 
     // Show loading indicators on vitals
-    ['lcp', 'fid', 'cls', 'ttfb'].forEach(type => {
+    ['lcp', 'fid', 'cls', 'ttfb'].forEach((type) => {
       const valueElement = document.getElementById(`${type}-value`);
       if (valueElement) {
         valueElement.textContent = '...';
@@ -248,7 +252,9 @@ class AdminPerformanceRenderer {
       return;
     }
 
-    container.innerHTML = sizes.map(item => `
+    container.innerHTML = sizes
+      .map(
+        (item) => `
       <div class="bundle-item">
         <div class="bundle-info flex flex-col gap-1">
           <span class="bundle-name">${SanitizationUtils.escapeHtml(item.name)}</span>
@@ -258,7 +264,9 @@ class AdminPerformanceRenderer {
           <div class="bundle-bar-fill" style="width: ${item.percentage}%"></div>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   /**

@@ -20,10 +20,7 @@ import type {
   ProposalCustomItem,
   DiscountType
 } from './proposal-builder-types';
-import {
-  getTierConfiguration,
-  calculatePriceBreakdown
-} from './proposal-builder-data';
+import { getTierConfiguration, calculatePriceBreakdown } from './proposal-builder-data';
 import { showToast } from '../../utils/toast-notifications';
 import {
   renderProposalBuilderHTML,
@@ -109,7 +106,7 @@ export class ProposalBuilderModule {
     this.state.configuration = getTierConfiguration(this.projectType);
 
     // Set default tier to the highlighted one (recommended)
-    const recommendedTier = this.state.configuration.tiers.find(t => t.highlighted);
+    const recommendedTier = this.state.configuration.tiers.find((t) => t.highlighted);
     if (recommendedTier) {
       this.state.selection.selectedTier = recommendedTier.id;
     }
@@ -156,7 +153,7 @@ export class ProposalBuilderModule {
     if (!this.contentContainer || !this.state.configuration) return;
 
     const { tiers, features, maintenanceOptions } = this.state.configuration;
-    const tier = tiers.find(t => t.id === this.state.selection.selectedTier);
+    const tier = tiers.find((t) => t.id === this.state.selection.selectedTier);
 
     let content = '';
 
@@ -180,12 +177,7 @@ export class ProposalBuilderModule {
 
     case 'summary':
       if (tier) {
-        content = renderSummary(
-          this.state.selection,
-          tier,
-          features,
-          maintenanceOptions
-        );
+        content = renderSummary(this.state.selection, tier, features, maintenanceOptions);
       }
       break;
     }
@@ -254,7 +246,6 @@ export class ProposalBuilderModule {
       if (maintenanceId) {
         this.selectMaintenance(maintenanceId);
       }
-
     }
 
     const addCustomItemBtn = target.closest('#add-custom-item-btn');
@@ -362,9 +353,9 @@ export class ProposalBuilderModule {
     this.updatePriceDisplay();
 
     // Update feature item visual state
-    const featureItem = this.contentContainer?.querySelector(
-      `.feature-item--addon input[data-feature-id="${featureId}"]`
-    )?.closest('.feature-item');
+    const featureItem = this.contentContainer
+      ?.querySelector(`.feature-item--addon input[data-feature-id="${featureId}"]`)
+      ?.closest('.feature-item');
 
     if (featureItem) {
       featureItem.classList.toggle('feature-item--selected', isAdded);
@@ -404,11 +395,7 @@ export class ProposalBuilderModule {
     // Go to previous step
     this.state.currentStep = STEP_ORDER[currentIndex - 1];
 
-    await animateContentTransition(
-      this.contentContainer!,
-      '',
-      'back'
-    );
+    await animateContentTransition(this.contentContainer!, '', 'back');
 
     this.renderCurrentStep();
     updateStepIndicators(this.state.currentStep);
@@ -435,11 +422,7 @@ export class ProposalBuilderModule {
     // Go to next step
     this.state.currentStep = STEP_ORDER[currentIndex + 1];
 
-    await animateContentTransition(
-      this.contentContainer!,
-      '',
-      'forward'
-    );
+    await animateContentTransition(this.contentContainer!, '', 'forward');
 
     this.renderCurrentStep();
     updateStepIndicators(this.state.currentStep);
@@ -492,17 +475,17 @@ export class ProposalBuilderModule {
     if (!this.priceBar || !this.state.configuration) return;
 
     const tier = this.state.configuration.tiers.find(
-      t => t.id === this.state.selection.selectedTier
+      (t) => t.id === this.state.selection.selectedTier
     );
 
     if (!tier) return;
 
-    const addedFeatures = this.state.configuration.features.filter(
-      f => this.state.selection.addedFeatures.includes(f.id)
+    const addedFeatures = this.state.configuration.features.filter((f) =>
+      this.state.selection.addedFeatures.includes(f.id)
     );
 
     const maintenance = this.state.configuration.maintenanceOptions.find(
-      m => m.id === this.state.selection.maintenanceOption
+      (m) => m.id === this.state.selection.maintenanceOption
     );
 
     const computed = calculatePriceBreakdown(
@@ -518,7 +501,7 @@ export class ProposalBuilderModule {
     const breakdown: PriceBreakdown = {
       tierBasePrice: computed.basePrice,
       tierName: tier.name,
-      addedFeatures: addedFeatures.map(f => ({
+      addedFeatures: addedFeatures.map((f) => ({
         id: f.id,
         name: f.name,
         price: f.price
@@ -588,15 +571,17 @@ export class ProposalBuilderModule {
   }
 
   private removeCustomItem(itemId: string): void {
-    this.state.selection.customItems = this.state.selection.customItems.filter(item => item.id !== itemId);
+    this.state.selection.customItems = this.state.selection.customItems.filter(
+      (item) => item.id !== itemId
+    );
     this.updateCalculatedPrice();
     this.renderCurrentStep();
     this.updatePriceDisplay();
   }
 
   private updateCustomItem(itemId: string, field: string, target: HTMLInputElement): void {
-    const items = this.state.selection.customItems.map(item => ({ ...item }));
-    const item = items.find(entry => entry.id === itemId);
+    const items = this.state.selection.customItems.map((item) => ({ ...item }));
+    const item = items.find((entry) => entry.id === itemId);
     if (!item) return;
 
     if (field === 'itemType') item.itemType = target.value as ProposalCustomItem['itemType'];
@@ -629,7 +614,10 @@ export class ProposalBuilderModule {
     if (!rawDraft) return;
 
     try {
-      const draft = JSON.parse(rawDraft) as { projectType?: ProjectType; selection?: ProposalSelection };
+      const draft = JSON.parse(rawDraft) as {
+        projectType?: ProjectType;
+        selection?: ProposalSelection;
+      };
       if (!draft?.selection) return;
       const shouldLoad = window.confirm('We found a saved proposal draft. Load it now?');
       if (!shouldLoad) return;
@@ -653,7 +641,7 @@ export class ProposalBuilderModule {
    */
   private animateTierSelection(tierId: TierId): void {
     // Remove selected class from all
-    document.querySelectorAll('.tier-card').forEach(card => {
+    document.querySelectorAll('.tier-card').forEach((card) => {
       card.classList.remove('tier-card--selected');
       const btn = card.querySelector('.tier-select-btn');
       if (btn) {
@@ -673,13 +661,17 @@ export class ProposalBuilderModule {
       }
 
       // Animate the selection
-      gsap.fromTo(selectedCard, {
-        scale: 0.98
-      }, {
-        scale: 1,
-        duration: 0.3,
-        ease: 'back.out(1.5)'
-      });
+      gsap.fromTo(
+        selectedCard,
+        {
+          scale: 0.98
+        },
+        {
+          scale: 1,
+          duration: 0.3,
+          ease: 'back.out(1.5)'
+        }
+      );
     }
   }
 
@@ -690,15 +682,19 @@ export class ProposalBuilderModule {
     const builder = this.container.querySelector('.proposal-builder');
     if (!builder) return;
 
-    gsap.fromTo(builder, {
-      opacity: 0,
-      y: 20
-    }, {
-      opacity: 1,
-      y: 0,
-      duration: 0.4,
-      ease: 'power2.out'
-    });
+    gsap.fromTo(
+      builder,
+      {
+        opacity: 0,
+        y: 20
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        ease: 'power2.out'
+      }
+    );
   }
 
   /**
@@ -724,7 +720,7 @@ export class ProposalBuilderModule {
 
     // Get all selected features (included in tier + addons)
     const tier = this.state.configuration.tiers.find(
-      t => t.id === this.state.selection.selectedTier
+      (t) => t.id === this.state.selection.selectedTier
     );
 
     if (!tier) {
@@ -732,17 +728,17 @@ export class ProposalBuilderModule {
       return;
     }
 
-    const includedFeatures = this.state.configuration.features.filter(
-      f => tier.baseFeatures.includes(f.id)
+    const includedFeatures = this.state.configuration.features.filter((f) =>
+      tier.baseFeatures.includes(f.id)
     );
 
-    const addonFeatures = this.state.configuration.features.filter(
-      f => this.state.selection.addedFeatures.includes(f.id)
+    const addonFeatures = this.state.configuration.features.filter((f) =>
+      this.state.selection.addedFeatures.includes(f.id)
     );
 
     // Build feature list for submission (reserved for future API integration)
     const _features = [
-      ...includedFeatures.map(f => ({
+      ...includedFeatures.map((f) => ({
         featureId: f.id,
         featureName: f.name,
         featurePrice: 0, // Included in tier
@@ -750,7 +746,7 @@ export class ProposalBuilderModule {
         isIncludedInTier: true,
         isAddon: false
       })),
-      ...addonFeatures.map(f => ({
+      ...addonFeatures.map((f) => ({
         featureId: f.id,
         featureName: f.name,
         featurePrice: f.price,

@@ -93,7 +93,9 @@ function getForm(formId: string): HTMLElement | null {
 }
 
 /** Get cached input element - does not cache null values for dynamic views */
-function getInput<T extends HTMLInputElement | HTMLSelectElement = HTMLInputElement>(inputId: string): T | null {
+function getInput<T extends HTMLInputElement | HTMLSelectElement = HTMLInputElement>(
+  inputId: string
+): T | null {
   // Check cache first
   if (cachedInputs.has(inputId)) {
     const cached = cachedInputs.get(inputId);
@@ -115,7 +117,8 @@ export function setupSettingsForms(ctx: ClientPortalContext): void {
   // Check if React component should be used
   if (shouldUseReactPortalSettings()) {
     const component = getReactComponent('portalSettings');
-    const settingsContainer = document.getElementById('settings-content') || document.querySelector('.settings-content');
+    const settingsContainer =
+      document.getElementById('settings-content') || document.querySelector('.settings-content');
     if (component && settingsContainer) {
       // Mount React component
       const unmountResult = component.mount(settingsContainer as HTMLElement, {
@@ -151,10 +154,13 @@ export function setupSettingsForms(ctx: ClientPortalContext): void {
       // Get current email from the settings form
       const currentEmail = getInput('settings-email')?.value || '';
       // Store email change request in sessionStorage for messages page to pick up
-      sessionStorage.setItem('pendingEmailChangeMessage', JSON.stringify({
-        currentEmail,
-        template: `Hi Noelle,\n\nI would like to update my email address.\n\nCurrent email: ${currentEmail}\nNew email: \n\nThank you!`
-      }));
+      sessionStorage.setItem(
+        'pendingEmailChangeMessage',
+        JSON.stringify({
+          currentEmail,
+          template: `Hi Noelle,\n\nI would like to update my email address.\n\nCurrent email: ${currentEmail}\nNew email: \n\nThank you!`
+        })
+      );
     });
   }
 
@@ -256,7 +262,7 @@ export async function loadUserSettings(_currentUser: string | null): Promise<voi
   const billingCountryInput = getInput('billing-country');
 
   if (billingNameInput) billingNameInput.value = profile.billing_name || profile.contact_name || '';
-  if (billingCompanyInput) billingCompanyInput.value = profile.billing_company || profile.company_name || '';
+  if (billingCompanyInput) {billingCompanyInput.value = profile.billing_company || profile.company_name || '';}
   if (billingAddressInput) billingAddressInput.value = profile.billing_address || '';
   if (billingAddress2Input) billingAddress2Input.value = profile.billing_address2 || '';
   if (billingCityInput) billingCityInput.value = profile.billing_city || '';

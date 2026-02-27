@@ -25,15 +25,13 @@ const logger = createLogger('InvoiceScheduling');
 /**
  * Process late fees for overdue invoices on a project
  */
-export async function processLateFees(
-  projectId: number,
-  onSuccess: () => void
-): Promise<void> {
+export async function processLateFees(projectId: number, onSuccess: () => void): Promise<void> {
   if (!AdminAuth.isAuthenticated()) return;
 
   const confirmed = await confirmDialog({
     title: 'Apply Late Fees',
-    message: 'This will calculate and apply late fees to all overdue invoices for this project. Continue?',
+    message:
+      'This will calculate and apply late fees to all overdue invoices for this project. Continue?',
     confirmText: 'Apply Late Fees',
     cancelText: 'Cancel',
     icon: 'warning'
@@ -205,20 +203,26 @@ export async function loadScheduledInvoices(projectId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/invoices/scheduled?projectId=${projectId}`);
     if (response.ok) {
-      const data = await parseApiResponse<{ scheduled: { id: number; amount: number; description: string; scheduled_date: string }[] }>(response);
+      const data = await parseApiResponse<{
+        scheduled: { id: number; amount: number; description: string; scheduled_date: string }[];
+      }>(response);
       const scheduled = data.scheduled || [];
 
       if (scheduled.length === 0) {
         renderEmptyState(container, 'No scheduled invoices.');
       } else {
-        container.innerHTML = scheduled.map((inv: { id: number; amount: number; description: string; scheduled_date: string }) => `
+        container.innerHTML = scheduled
+          .map(
+            (inv: { id: number; amount: number; description: string; scheduled_date: string }) => `
           <div class="scheduled-item">
             <span class="scheduled-date">${formatDate(inv.scheduled_date)}</span>
             <span class="scheduled-desc">${SanitizationUtils.escapeHtml(inv.description)}</span>
             <span class="scheduled-amount">${formatCurrency(inv.amount)}</span>
             <button class="btn btn-danger btn-xs" data-action="cancel-scheduled-invoice" data-schedule-id="${inv.id}">Cancel</button>
           </div>
-        `).join('');
+        `
+          )
+          .join('');
       }
     }
   } catch (error) {
@@ -236,13 +240,31 @@ export async function loadRecurringInvoices(projectId: number): Promise<void> {
   try {
     const response = await apiFetch(`/api/invoices/recurring?projectId=${projectId}`);
     if (response.ok) {
-      const data = await parseApiResponse<{ recurring: { id: number; amount: number; description: string; frequency: string; is_active: boolean; next_date: string }[] }>(response);
+      const data = await parseApiResponse<{
+        recurring: {
+          id: number;
+          amount: number;
+          description: string;
+          frequency: string;
+          is_active: boolean;
+          next_date: string;
+        }[];
+      }>(response);
       const recurring = data.recurring || [];
 
       if (recurring.length === 0) {
         renderEmptyState(container, 'No recurring invoices configured.');
       } else {
-        container.innerHTML = recurring.map((inv: { id: number; amount: number; description: string; frequency: string; is_active: boolean; next_date: string }) => `
+        container.innerHTML = recurring
+          .map(
+            (inv: {
+              id: number;
+              amount: number;
+              description: string;
+              frequency: string;
+              is_active: boolean;
+              next_date: string;
+            }) => `
           <div class="recurring-item">
             <span class="recurring-desc">${SanitizationUtils.escapeHtml(inv.description)}</span>
             <span class="recurring-freq">${inv.frequency}</span>
@@ -251,14 +273,17 @@ export async function loadRecurringInvoices(projectId: number): Promise<void> {
             <span class="recurring-status ${inv.is_active ? 'active' : 'paused'}">${inv.is_active ? 'Active' : 'Paused'}</span>
             <button class="icon-btn" data-action="toggle-recurring-invoice" data-recurring-id="${inv.id}" data-is-active="${inv.is_active}" title="${inv.is_active ? 'Pause' : 'Resume'}" aria-label="${inv.is_active ? 'Pause recurring invoice' : 'Resume recurring invoice'}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                ${inv.is_active
+                ${
+  inv.is_active
     ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
     : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
 }
               </svg>
             </button>
           </div>
-        `).join('');
+        `
+          )
+          .join('');
       }
     }
   } catch (error) {

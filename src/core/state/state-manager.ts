@@ -18,7 +18,6 @@ export class StateManager<T = AppState> {
   private listeners = new Map<string, StateListener<T>[]>();
   private selectors = new Map<
     string,
-
     { selector: StateSelector<T, any>; lastValue: any; listeners: ((value: any) => void)[] }
   >();
 

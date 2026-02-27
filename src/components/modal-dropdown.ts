@@ -41,7 +41,7 @@ export function createModalDropdown(config: ModalDropdownConfig): HTMLElement {
   const { options, currentValue, onChange, ariaLabelPrefix, placeholder = 'Select...' } = config;
 
   // Find current option label
-  const currentOption = options.find(opt => opt.value === currentValue);
+  const currentOption = options.find((opt) => opt.value === currentValue);
   const currentLabel = currentOption?.label || (currentValue ? currentValue : placeholder);
   const hasValue = !!currentValue && !!currentOption;
 
@@ -68,7 +68,7 @@ export function createModalDropdown(config: ModalDropdownConfig): HTMLElement {
   menu.className = 'custom-dropdown-menu';
 
   // Add all options
-  options.forEach(opt => {
+  options.forEach((opt) => {
     const li = document.createElement('li');
     li.className = 'custom-dropdown-item';
     if (opt.value === currentValue) {
@@ -123,7 +123,7 @@ export function createModalDropdown(config: ModalDropdownConfig): HTMLElement {
  */
 function toggleDropdown(wrapper: HTMLElement): void {
   // Close all other modal dropdowns first
-  document.querySelectorAll('.modal-dropdown.open').forEach(el => {
+  document.querySelectorAll('.modal-dropdown.open').forEach((el) => {
     if (el !== wrapper) {
       el.classList.remove('open');
     }
@@ -151,7 +151,8 @@ function selectOption(
   }
   const trigger = wrapper.querySelector('button.custom-dropdown-trigger');
   if (trigger) {
-    const prefix = ariaLabelPrefix || (wrapper as HTMLElement & { _ariaLabelPrefix?: string })._ariaLabelPrefix;
+    const prefix =
+      ariaLabelPrefix || (wrapper as HTMLElement & { _ariaLabelPrefix?: string })._ariaLabelPrefix;
     const ariaLabel = prefix ? `${prefix}, current: ${label}` : `Select option, current: ${label}`;
     trigger.setAttribute('aria-label', ariaLabel);
   }
@@ -161,7 +162,7 @@ function selectOption(
 
   // Update selected state in menu
   const menuItems = wrapper.querySelectorAll('.custom-dropdown-item');
-  menuItems.forEach(item => {
+  menuItems.forEach((item) => {
     if ((item as HTMLElement).dataset.value === value) {
       item.classList.add('selected');
     } else {

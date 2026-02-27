@@ -30,8 +30,18 @@ export function renderTerminalHTML(isModal: boolean): string {
   const now = new Date();
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
   ];
   const dayName = days[now.getDay()];
   const monthName = months[now.getMonth()];
@@ -104,7 +114,12 @@ export async function showAvatarIntro(chatContainer: HTMLElement): Promise<void>
       const images = svgElement.querySelectorAll('image');
       images.forEach((img) => {
         const href = img.getAttribute('xlink:href') || img.getAttribute('href');
-        if (href && !href.startsWith('/') && !href.startsWith('data:') && !href.startsWith('http')) {
+        if (
+          href &&
+          !href.startsWith('/') &&
+          !href.startsWith('data:') &&
+          !href.startsWith('http')
+        ) {
           img.setAttribute('xlink:href', `/images/${href}`);
           img.setAttribute('href', `/images/${href}`);
         }
@@ -127,7 +142,8 @@ export async function showAvatarIntro(chatContainer: HTMLElement): Promise<void>
     }
   } catch {
     // Fallback to img tag if fetch fails
-    wrapper.innerHTML = '<img src="/images/avatar_terminal.svg" alt="No Bhad Codes" class="terminal-avatar-img" />';
+    wrapper.innerHTML =
+      '<img src="/images/avatar_terminal.svg" alt="No Bhad Codes" class="terminal-avatar-img" />';
     gsap.to(avatarContainer, {
       opacity: 1,
       duration: 0.5,
@@ -158,7 +174,8 @@ let bootstrapTimeline: gsap.core.Timeline | null = null;
 export function addBootstrapMessage(chatContainer: HTMLElement): HTMLElement {
   const line = document.createElement('div');
   line.className = 'boot-line';
-  line.innerHTML = 'Bootstrapping<span class="pulsing-dots"><span>.</span><span>.</span><span>.</span></span>';
+  line.innerHTML =
+    'Bootstrapping<span class="pulsing-dots"><span>.</span><span>.</span><span>.</span></span>';
   chatContainer.appendChild(line);
   scrollToBottom(chatContainer);
 

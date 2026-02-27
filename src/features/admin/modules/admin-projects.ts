@@ -33,7 +33,13 @@ import {
   PROJECTS_FILTER_CONFIG,
   type FilterState
 } from '../../../utils/table-filter';
-import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
+import type {
+  ProjectMilestone,
+  ProjectFile,
+  ProjectInvoice,
+  AdminDashboardContext,
+  Message
+} from '../admin-types';
 import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { getStatusDotHTML } from '../../../components/status-badge';
@@ -42,7 +48,13 @@ import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { alertWarning, multiPromptDialog, confirmDanger } from '../../../utils/confirm-dialog';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
-import { createRowCheckbox, createBulkActionToolbar, setupBulkSelectionHandlers, resetSelection, type BulkActionConfig } from '../../../utils/table-bulk-actions';
+import {
+  createRowCheckbox,
+  createBulkActionToolbar,
+  setupBulkSelectionHandlers,
+  resetSelection,
+  type BulkActionConfig
+} from '../../../utils/table-bulk-actions';
 import {
   createPaginationUI,
   applyPagination,
@@ -52,20 +64,92 @@ import {
   type PaginationState,
   type PaginationConfig
 } from '../../../utils/table-pagination';
-import { exportToCsv, PROJECTS_EXPORT_CONFIG } from '../../../utils/table-export';
+import { exportDataToCsv, PROJECTS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { deleteProject, archiveProject, duplicateProject } from '../project-details/actions';
-import { setupFileUploadHandlers, loadPendingRequestsDropdown, loadProjectFiles as loadProjectFilesFromModule } from '../project-details';
-import { createSecondarySidebar, SECONDARY_TAB_ICONS, type SecondarySidebarController } from '../../../components/secondary-sidebar';
+import {
+  setupFileUploadHandlers,
+  loadPendingRequestsDropdown,
+  loadProjectFiles as loadProjectFilesFromModule
+} from '../project-details';
+import {
+  createSecondarySidebar,
+  SECONDARY_TAB_ICONS,
+  type SecondarySidebarController
+} from '../../../components/secondary-sidebar';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
 import { renderActionsCell, createAction } from '../../../factories';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
-import { initDetailKeyboardNav, cleanupDetailKeyboardNav } from '../../../components/detail-keyboard-nav';
+import {
+  initDetailKeyboardNav,
+  cleanupDetailKeyboardNav
+} from '../../../components/detail-keyboard-nav';
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('AdminProjects');
+
+// ============================================
+// REACT INTEGRATION (ISLAND ARCHITECTURE)
+// ============================================
+
+// React bundle only loads when feature flag is enabled
+type ReactMountFn = typeof import('../../../react/features/admin/projects').mountProjectsTable;
+type ReactUnmountFn = typeof import('../../../react/features/admin/projects').unmountProjectsTable;
+
+let mountProjectsTable: ReactMountFn | null = null;
+let unmountProjectsTable: ReactUnmountFn | null = null;
+let reactTableMounted = false;
+let reactMountContainer: HTMLElement | null = null;
+
+/**
+ * Check if React table is actually mounted (container exists and has content)
+ */
+function isReactTableActuallyMounted(): boolean {
+  if (!reactTableMounted) return false;
+  // Check if the container still exists in the DOM and has content
+  if (
+    !reactMountContainer ||
+    !reactMountContainer.isConnected ||
+    reactMountContainer.children.length === 0
+  ) {
+    reactTableMounted = false;
+    reactMountContainer = null;
+    return false;
+  }
+  return true;
+}
+
+/** Lazy load React mount functions */
+async function loadReactProjectsTable(): Promise<boolean> {
+  if (mountProjectsTable && unmountProjectsTable) return true;
+
+  try {
+    const module = await import('../../../react/features/admin/projects');
+    mountProjectsTable = module.mountProjectsTable;
+    unmountProjectsTable = module.unmountProjectsTable;
+    return true;
+  } catch (err) {
+    logger.error(' Failed to load React module:', err);
+    return false;
+  }
+}
+
+/** Feature flag for React projects table */
+function shouldUseReactProjectsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_projects') === 'true') return false;
+
+  // Check feature flag in localStorage
+  const flag = localStorage.getItem('feature_react_projects_table');
+  if (flag === 'false') return false;
+  if (flag === 'true') return true;
+
+  // Default: enabled (React implementation)
+  return true;
+}
 
 // ============================================
 // UTILITY HELPERS
@@ -261,8 +345,10 @@ let paginationState: PaginationState = {
 // ============================================
 
 const RENDER_ICONS = {
-  EXPORT: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-  REFRESH: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+  EXPORT:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  REFRESH:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
   PLUS: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>'
 };
 
@@ -271,10 +357,34 @@ const RENDER_ICONS = {
 // ============================================
 
 /**
+ * Cleanup function called when leaving the projects tab
+ * Unmounts React components if they were mounted
+ */
+export function cleanupProjectsTab(): void {
+  if (reactTableMounted && unmountProjectsTable) {
+    unmountProjectsTable();
+    reactTableMounted = false;
+  }
+}
+
+/**
  * Renders the Projects tab structure dynamically.
  * Called by admin-dashboard before loading data.
  */
 export function renderProjectsTab(container: HTMLElement): void {
+  // Check if React implementation should be used
+  const useReact = shouldUseReactProjectsTable();
+
+  if (useReact) {
+    // React implementation - render minimal container
+    container.innerHTML = `
+      <!-- React Projects Table Mount Point -->
+      <div id="react-projects-mount"></div>
+    `;
+    return;
+  }
+
+  // Vanilla implementation - original HTML
   container.innerHTML = `
     <!-- Projects Stats -->
     <div class="quick-stats">
@@ -371,6 +481,45 @@ export function setCurrentProjectId(id: number | null): void {
 export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
   storedContext = ctx;
 
+  // Check if React implementation should be used
+  const useReact = shouldUseReactProjectsTable();
+  let reactMountSuccess = false;
+
+  if (useReact) {
+    // Check if React table is already properly mounted
+    if (isReactTableActuallyMounted()) {
+      return; // Already mounted and working
+    }
+
+    // Lazy load and mount React ProjectsTable
+    const mountContainer = document.getElementById('react-projects-mount');
+    if (mountContainer) {
+      const loaded = await loadReactProjectsTable();
+      if (loaded && mountProjectsTable) {
+        // Unmount first if previously mounted to a different container
+        if (reactTableMounted && unmountProjectsTable) {
+          unmountProjectsTable();
+        }
+        mountProjectsTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          onViewProject: (projectId: number) => showProjectDetails(projectId, ctx),
+          showNotification: ctx.showNotification
+        });
+        reactTableMounted = true;
+        reactMountContainer = mountContainer;
+        reactMountSuccess = true;
+      } else {
+        logger.error(' React module failed to load, falling back to vanilla');
+      }
+    }
+
+    if (reactMountSuccess) {
+      return;
+    }
+    // Fall through to vanilla implementation if React failed
+  }
+
+  // Vanilla implementation
   // Initialize filter UI once
   if (!filterUIInitialized) {
     initializeFilterUI(ctx);
@@ -395,23 +544,15 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
     } else {
       logger.error(' API error:', response.status);
       if (tableBody) {
-        showTableError(
-          tableBody,
-          9,
-          `Error loading projects (${response.status})`,
-          () => loadProjects(ctx)
+        showTableError(tableBody, 9, `Error loading projects (${response.status})`, () =>
+          loadProjects(ctx)
         );
       }
     }
   } catch (error) {
     logger.error(' Failed to load projects:', error);
     if (tableBody) {
-      showTableError(
-        tableBody,
-        9,
-        'Network error loading projects',
-        () => loadProjects(ctx)
-      );
+      showTableError(tableBody, 9, 'Network error loading projects', () => loadProjects(ctx));
     }
   }
 }
@@ -424,20 +565,16 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
   if (!container) return;
 
   // Create filter UI
-  const filterUI = createFilterUI(
-    PROJECTS_FILTER_CONFIG,
-    filterState,
-    (newState) => {
-      filterState = newState;
-      // Re-render table with new filters
-      if (projectsData.length > 0) {
-        const projects = projectsData.filter(
-          (p) => normalizeStatus(p.status) !== 'pending' || p.project_name
-        );
-        renderProjectsTable(projects, ctx);
-      }
+  const filterUI = createFilterUI(PROJECTS_FILTER_CONFIG, filterState, (newState) => {
+    filterState = newState;
+    // Re-render table with new filters
+    if (projectsData.length > 0) {
+      const projects = projectsData.filter(
+        (p) => normalizeStatus(p.status) !== 'pending' || p.project_name
+      );
+      renderProjectsTable(projects, ctx);
     }
-  );
+  });
 
   // Insert before the refresh button
   // Insert before export button (Search → Filter → Export → Refresh → Add order)
@@ -451,7 +588,7 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
         showToast('No projects to export', 'warning');
         return;
       }
-      exportToCsv(filteredData as unknown as Record<string, unknown>[], PROJECTS_EXPORT_CONFIG);
+      exportDataToCsv(filteredData, PROJECTS_EXPORT_CONFIG);
       showToast(`Exported ${filteredData.length} projects to CSV`, 'success');
     });
   } else {
@@ -543,13 +680,21 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
   paginatedProjects.forEach((project) => {
     // Decode HTML entities first (data may have &amp; stored), then escape for safe HTML output
     const safeName = SanitizationUtils.escapeHtml(
-      SanitizationUtils.decodeHtmlEntities(project.project_name || project.description?.substring(0, 30) || 'Untitled Project')
+      SanitizationUtils.decodeHtmlEntities(
+        project.project_name || project.description?.substring(0, 30) || 'Untitled Project'
+      )
     );
     const safeContact = SanitizationUtils.escapeHtml(
-      SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.contact_name || ''))
+      SanitizationUtils.capitalizeName(
+        SanitizationUtils.decodeHtmlEntities(project.contact_name || '')
+      )
     );
     const safeCompany = project.company_name
-      ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.company_name)))
+      ? SanitizationUtils.escapeHtml(
+        SanitizationUtils.capitalizeName(
+          SanitizationUtils.decodeHtmlEntities(project.company_name)
+        )
+      )
       : '';
     // Normalize status to hyphen format for consistency
     const status = normalizeStatus(project.status);
@@ -563,7 +708,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       ${createRowCheckbox('projects', project.id)}
       <td class="identity-cell" data-label="Project">
         <span class="identity-name" data-field="primary-name">${safeName}</span>
-        ${(safeContact || safeCompany) ? `<span class="identity-contact" data-field="secondary-name">${safeContact}${safeCompany ? ` - ${safeCompany}` : ''}</span>` : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
+        ${safeContact || safeCompany ? `<span class="identity-contact" data-field="secondary-name">${safeContact}${safeCompany ? ` - ${safeCompany}` : ''}</span>` : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
         <span class="type-budget-stacked">${formatProjectType(project.project_type)} · ${formatDisplayValue(project.budget_range)}</span>
       </td>
       <td class="type-cell" data-label="Type">
@@ -585,7 +730,12 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       <td class="date-cell target-cell" data-label="Target">${formatDate(project.end_date)}</td>
       <td class="actions-cell" data-label="Actions">
         ${renderActionsCell([
-    createAction('view', project.id, { className: 'btn-view-project', dataAttrs: { 'project-id': project.id }, title: 'View Project', ariaLabel: 'View project details' })
+    createAction('view', project.id, {
+      className: 'btn-view-project',
+      dataAttrs: { 'project-id': project.id },
+      title: 'View Project',
+      ariaLabel: 'View project details'
+    })
   ])}
       </td>
     `;
@@ -607,7 +757,13 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
     // Add click handler for row (excluding status cell, checkbox, actions, and inline-editable cells)
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown') || target.closest('.bulk-select-cell') || target.closest('.actions-cell') || target.closest('.inline-editable-cell') || target.tagName === 'INPUT') return;
+      if (
+        target.closest('.table-dropdown') ||
+        target.closest('.bulk-select-cell') ||
+        target.closest('.actions-cell') ||
+        target.closest('.inline-editable-cell') ||
+        target.tagName === 'INPUT'
+      ) {return;}
       showProjectDetails(project.id, ctx);
     });
 
@@ -676,7 +832,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
     tableId: 'projects',
     actions: []
   };
-  const allRowIds = paginatedProjects.map(p => p.id);
+  const allRowIds = paginatedProjects.map((p) => p.id);
   setupBulkSelectionHandlers(projectsBulkConfig, allRowIds);
 
   // Render pagination
@@ -777,7 +933,9 @@ function _initSecondarySidebar(projectName: string): void {
   container?.classList.add('has-secondary-sidebar');
 
   // Get current active tab from horizontal tabs
-  const activeHorizontalTab = document.querySelector('.project-detail-tabs button.active') as HTMLElement;
+  const activeHorizontalTab = document.querySelector(
+    '.project-detail-tabs button.active'
+  ) as HTMLElement;
   const activeTabId = activeHorizontalTab?.dataset.pdTab || 'overview';
 
   // Truncate project name for sidebar title
@@ -884,10 +1042,7 @@ export function getCurrentProjectName(): string | null {
   return project?.project_name ?? null;
 }
 
-export function showProjectDetails(
-  projectId: number,
-  ctx: AdminDashboardContext
-): void {
+export function showProjectDetails(projectId: number, ctx: AdminDashboardContext): void {
   const project = projectsData.find((p) => p.id === projectId);
   if (!project) return;
 
@@ -976,7 +1131,9 @@ function populateProjectDetailView(project: LeadProject): void {
   const formattedType = formatProjectType(project.project_type);
 
   batchUpdateText({
-    'pd-project-name': SanitizationUtils.decodeHtmlEntities(project.project_name || 'Untitled Project'),
+    'pd-project-name': SanitizationUtils.decodeHtmlEntities(
+      project.project_name || 'Untitled Project'
+    ),
     'pd-client-name': SanitizationUtils.decodeHtmlEntities(project.contact_name || ''),
     'pd-company': SanitizationUtils.decodeHtmlEntities(project.company_name || ''),
     'pd-type': formattedType,
@@ -985,7 +1142,9 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-timeline': formatDisplayValue(project.timeline),
     'pd-start-date': formattedStartDate,
     'pd-end-date': formattedEndDate,
-    'pd-deposit': project.deposit_amount ? formatCurrency(parseNumericValue(project.deposit_amount)) : '',
+    'pd-deposit': project.deposit_amount
+      ? formatCurrency(parseNumericValue(project.deposit_amount))
+      : '',
     'pd-contract-date': formatDate(project.contract_signed_date),
     // Header card elements
     'pd-header-client-name': SanitizationUtils.decodeHtmlEntities(project.contact_name || ''),
@@ -1007,7 +1166,12 @@ function populateProjectDetailView(project: LeadProject): void {
 
   // Client email with copy button (innerHTML, not batchUpdateText)
   const pdClientEmailEl = document.getElementById('pd-client-email');
-  if (pdClientEmailEl) pdClientEmailEl.innerHTML = getEmailWithCopyHtml(project.email || '', SanitizationUtils.escapeHtml(project.email || ''));
+  if (pdClientEmailEl) {
+    pdClientEmailEl.innerHTML = getEmailWithCopyHtml(
+      project.email || '',
+      SanitizationUtils.escapeHtml(project.email || '')
+    );
+  }
 
   // Update URL links (preview, repo, production) - new format uses pd-url-link class
   const updateUrlLink = (linkId: string, url: string | null): void => {
@@ -1055,7 +1219,9 @@ function populateProjectDetailView(project: LeadProject): void {
   const adminNotesEl = document.getElementById('pd-admin-notes');
   if (adminNotesSection && adminNotesEl) {
     if (project.notes) {
-      adminNotesEl.innerHTML = formatTextWithLineBreaks(SanitizationUtils.decodeHtmlEntities(project.notes));
+      adminNotesEl.innerHTML = formatTextWithLineBreaks(
+        SanitizationUtils.decodeHtmlEntities(project.notes)
+      );
       adminNotesSection.style.display = '';
     } else {
       adminNotesSection.style.display = 'none';
@@ -1112,7 +1278,10 @@ function populateProjectDetailView(project: LeadProject): void {
     const excludedValues = ['basic-only', 'standard', 'premium', 'enterprise'];
     const featuresList = parsedFeatures
       .filter((f) => f && !excludedValues.includes(f.toLowerCase()))
-      .map((f) => `<span class="feature-tag">${SanitizationUtils.escapeHtml(f.replace(/-/g, ' '))}</span>`)
+      .map(
+        (f) =>
+          `<span class="feature-tag">${SanitizationUtils.escapeHtml(f.replace(/-/g, ' '))}</span>`
+      )
       .join('');
 
     // Check if features container already exists, otherwise append
@@ -1136,19 +1305,48 @@ function parseFeatures(featuresStr: string): string[] {
 
   // If comma-separated, split normally
   if (featuresStr.includes(',')) {
-    return featuresStr.split(',').map((f) => f.trim()).filter((f) => f);
+    return featuresStr
+      .split(',')
+      .map((f) => f.trim())
+      .filter((f) => f);
   }
 
   // Known feature values from all project types
   const knownFeatures = [
-    'contact-form', 'social-links', 'analytics', 'mobile-optimized',
-    'age-verification', 'basic-only', 'blog', 'gallery', 'testimonials',
-    'booking', 'cms', 'portfolio-gallery', 'case-studies', 'resume-download',
-    'shopping-cart', 'payment-processing', 'inventory-management',
-    'user-accounts', 'admin-dashboard', 'product-search', 'reviews',
-    'real-time-updates', 'api-integration', 'database', 'authentication',
-    'dashboard', 'notifications', 'file-upload', 'offline-support',
-    'tab-management', 'bookmarks', 'sync', 'dark-mode', 'keyboard-shortcuts'
+    'contact-form',
+    'social-links',
+    'analytics',
+    'mobile-optimized',
+    'age-verification',
+    'basic-only',
+    'blog',
+    'gallery',
+    'testimonials',
+    'booking',
+    'cms',
+    'portfolio-gallery',
+    'case-studies',
+    'resume-download',
+    'shopping-cart',
+    'payment-processing',
+    'inventory-management',
+    'user-accounts',
+    'admin-dashboard',
+    'product-search',
+    'reviews',
+    'real-time-updates',
+    'api-integration',
+    'database',
+    'authentication',
+    'dashboard',
+    'notifications',
+    'file-upload',
+    'offline-support',
+    'tab-management',
+    'bookmarks',
+    'sync',
+    'dark-mode',
+    'keyboard-shortcuts'
   ];
 
   // Sort by length (longest first) to match longer patterns before shorter ones
@@ -1200,7 +1398,7 @@ function setupDetailInlineEditing(project: LeadProject): void {
           if (response.ok) {
             const result = await response.json();
             // Update local data
-            const idx = projectsData.findIndex(p => p.id === project.id);
+            const idx = projectsData.findIndex((p) => p.id === project.id);
             if (idx !== -1) {
               projectsData[idx] = { ...projectsData[idx], ...result.project };
             }
@@ -1234,7 +1432,7 @@ function setupDetailInlineEditing(project: LeadProject): void {
           if (response.ok) {
             const result = await response.json();
             // Update local data
-            const idx = projectsData.findIndex(p => p.id === project.id);
+            const idx = projectsData.findIndex((p) => p.id === project.id);
             if (idx !== -1) {
               projectsData[idx] = { ...projectsData[idx], ...result.project };
             }
@@ -1268,7 +1466,7 @@ function setupDetailInlineEditing(project: LeadProject): void {
           if (response.ok) {
             const result = await response.json();
             // Update local data
-            const idx = projectsData.findIndex(p => p.id === project.id);
+            const idx = projectsData.findIndex((p) => p.id === project.id);
             if (idx !== -1) {
               projectsData[idx] = { ...projectsData[idx], ...result.project };
             }
@@ -1793,7 +1991,9 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
           <tbody id="project-files-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
           ${files
     .map((file) => {
-      const safeName = SanitizationUtils.escapeHtml(file.original_filename || file.filename);
+      const safeName = SanitizationUtils.escapeHtml(
+        file.original_filename || file.filename
+      );
       const storageFilename = file.filename || ''; // Actual filename on disk for intake detection
       // Use file_size or size (API returns both for compatibility)
       const fileSize = file.file_size || file.size || 0;
@@ -1803,8 +2003,11 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
       const fileApiUrl = `/api/uploads/file/${file.id}`;
       const downloadUrl = `${fileApiUrl}?download=true`;
       // Check if file is previewable (by display name extension OR intake files by storage name)
-      const isIntakeFile = /^(intake_|admin_project_)/i.test(storageFilename) && /\.json$/i.test(storageFilename);
-      const isPreviewable = /\.(json|txt|md|png|jpg|jpeg|gif|webp|svg|pdf)$/i.test(safeName) || isIntakeFile;
+      const isIntakeFile =
+                /^(intake_|admin_project_)/i.test(storageFilename) &&
+                /\.json$/i.test(storageFilename);
+      const isPreviewable =
+                /\.(json|txt|md|png|jpg|jpeg|gif|webp|svg|pdf)$/i.test(safeName) || isIntakeFile;
 
       return `
               <tr data-file-id="${file.id}">
@@ -1816,12 +2019,20 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
     createAction('preview', file.id, {
       show: isPreviewable,
       className: 'btn-preview',
-      dataAttrs: { 'file-url': fileApiUrl, 'file-name': safeName, 'storage-filename': storageFilename },
+      dataAttrs: {
+        'file-url': fileApiUrl,
+        'file-name': safeName,
+        'storage-filename': storageFilename
+      },
       ariaLabel: `Preview ${safeName}`
     }),
     createAction('download', file.id, {
       className: 'btn-download',
-      dataAttrs: { 'file-url': downloadUrl, 'file-name': safeName, 'storage-filename': storageFilename },
+      dataAttrs: {
+        'file-url': downloadUrl,
+        'file-name': safeName,
+        'storage-filename': storageFilename
+      },
       ariaLabel: `Download ${safeName}`
     }),
     createAction('delete', file.id, {
@@ -1933,11 +2144,18 @@ function getFilenameFromResponse(response: Response, fallback: string): string {
   return fallback;
 }
 
-async function downloadFile(fileUrl: string, fileName: string, projectId?: number, storageFilename?: string): Promise<void> {
+async function downloadFile(
+  fileUrl: string,
+  fileName: string,
+  projectId?: number,
+  storageFilename?: string
+): Promise<void> {
   try {
     // For intake files, download PDF instead of raw JSON
     const filenameToCheck = storageFilename || fileName;
-    const isIntakeFile = /^(intake_|admin_project_|project_intake_|nobhadcodes_intake_)/i.test(filenameToCheck) && /\.json$/i.test(filenameToCheck);
+    const isIntakeFile =
+      /^(intake_|admin_project_|project_intake_|nobhadcodes_intake_)/i.test(filenameToCheck) &&
+      /\.json$/i.test(filenameToCheck);
 
     let response: Response;
 
@@ -1951,7 +2169,10 @@ async function downloadFile(fileUrl: string, fileName: string, projectId?: numbe
     if (!response.ok) throw new Error('Failed to download file');
 
     // Get filename from response header or use fallback
-    const downloadName = getFilenameFromResponse(response, isIntakeFile ? fileName.replace(/\.json$/i, '.pdf') : fileName);
+    const downloadName = getFilenameFromResponse(
+      response,
+      isIntakeFile ? fileName.replace(/\.json$/i, '.pdf') : fileName
+    );
 
     const blob = await response.blob();
     const blobUrl = URL.createObjectURL(blob);
@@ -1973,12 +2194,19 @@ async function downloadFile(fileUrl: string, fileName: string, projectId?: numbe
  * Uses authenticated API fetch
  * @param storageFilename - The actual filename on disk (used for intake file detection)
  */
-async function openFilePreview(fileUrl: string, fileName: string, projectId?: number, storageFilename?: string): Promise<void> {
+async function openFilePreview(
+  fileUrl: string,
+  fileName: string,
+  projectId?: number,
+  storageFilename?: string
+): Promise<void> {
   try {
     // For intake JSON files, open as branded PDF instead of raw JSON
     // Check storage filename (actual disk name) for intake pattern, fall back to display name
     const filenameToCheck = storageFilename || fileName;
-    const isIntakeFile = /^(intake_|admin_project_|project_intake_|nobhadcodes_intake_)/i.test(filenameToCheck) && /\.json$/i.test(filenameToCheck);
+    const isIntakeFile =
+      /^(intake_|admin_project_|project_intake_|nobhadcodes_intake_)/i.test(filenameToCheck) &&
+      /\.json$/i.test(filenameToCheck);
     if (isIntakeFile && projectId) {
       // Open intake PDF directly - browser will use auth cookie
       // This allows proper filename in Content-Disposition header to work
@@ -2141,17 +2369,34 @@ function renderMarkdown(text: string): string {
   let html = SanitizationUtils.escapeHtml(text);
 
   // Code blocks (must be done before other formatting to preserve content)
-  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="md-code-block"><code>$2</code></pre>');
+  html = html.replace(
+    /```(\w*)\n([\s\S]*?)```/g,
+    '<pre class="md-code-block"><code>$2</code></pre>'
+  );
 
   // Tables
-  html = html.replace(/^\|(.+)\|\s*\n\|[-:\s|]+\|\s*\n((?:\|.+\|\s*\n?)+)/gm, (_match, header, body) => {
-    const headerCells = header.split('|').map((cell: string) => `<th>${cell.trim()}</th>`).join('');
-    const bodyRows = body.trim().split('\n').map((row: string) => {
-      const cells = row.split('|').filter((c: string) => c.trim()).map((cell: string) => `<td>${cell.trim()}</td>`).join('');
-      return `<tr>${cells}</tr>`;
-    }).join('');
-    return `<table class="md-table"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
-  });
+  html = html.replace(
+    /^\|(.+)\|\s*\n\|[-:\s|]+\|\s*\n((?:\|.+\|\s*\n?)+)/gm,
+    (_match, header, body) => {
+      const headerCells = header
+        .split('|')
+        .map((cell: string) => `<th>${cell.trim()}</th>`)
+        .join('');
+      const bodyRows = body
+        .trim()
+        .split('\n')
+        .map((row: string) => {
+          const cells = row
+            .split('|')
+            .filter((c: string) => c.trim())
+            .map((cell: string) => `<td>${cell.trim()}</td>`)
+            .join('');
+          return `<tr>${cells}</tr>`;
+        })
+        .join('');
+      return `<table class="md-table"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+    }
+  );
 
   // Headers
   html = html.replace(/^#### (.+)$/gm, '<h4 class="md-h4">$1</h4>');
@@ -2330,7 +2575,9 @@ export async function toggleMilestone(
   if (!currentProjectId) return;
 
   try {
-    const response = await apiPut(`/api/projects/${currentProjectId}/milestones/${milestoneId}`, { is_completed: isCompleted });
+    const response = await apiPut(`/api/projects/${currentProjectId}/milestones/${milestoneId}`, {
+      is_completed: isCompleted
+    });
 
     if (response.ok) {
       ctx.showNotification('Milestone updated', 'success');
@@ -2475,7 +2722,9 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
       const dueDate = formatDate(invoice.due_date);
       const isDraft = invoice.status === 'draft';
       const showSendBtn = isDraft;
-      const showMarkPaidBtn = ['sent', 'viewed', 'partial', 'overdue'].includes(invoice.status);
+      const showMarkPaidBtn = ['sent', 'viewed', 'partial', 'overdue'].includes(
+        invoice.status
+      );
 
       return `
               <tr data-invoice-id="${invoice.id}">
@@ -2651,7 +2900,7 @@ async function navigateToClientByEmail(email: string): Promise<void> {
 
     // Find the client by email
     const clients = clientsModule.getClientsData();
-    const client = clients.find(c => c.email === email);
+    const client = clients.find((c) => c.email === email);
 
     if (client) {
       clientsModule.showClientDetails(client.id, storedContext);
@@ -2731,7 +2980,8 @@ async function showCreateInvoicePrompt(): Promise<void> {
     let subtotal = 0;
     rows.forEach((row) => {
       const qty = parseFloat((row.querySelector('.line-item-qty') as HTMLInputElement)?.value) || 1;
-      const rate = parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
+      const rate =
+        parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
       const amount = qty * rate;
       subtotal += amount;
       const amountSpan = row.querySelector('.line-item-amount');
@@ -2768,7 +3018,7 @@ async function showCreateInvoicePrompt(): Promise<void> {
     saveCurrentValues();
 
     // Validate line items
-    const validLineItems = lineItems.filter(item => item.description.trim() && item.rate > 0);
+    const validLineItems = lineItems.filter((item) => item.description.trim() && item.rate > 0);
     if (validLineItems.length === 0) {
       alertWarning('Please add at least one line item with description and amount');
       return;
@@ -2777,10 +3027,11 @@ async function showCreateInvoicePrompt(): Promise<void> {
     const typeSelect = overlay.querySelector('#invoice-type-select') as HTMLSelectElement;
     const isDeposit = typeSelect?.value === 'deposit';
     const depositPercentageInput = overlay.querySelector('#deposit-percentage') as HTMLInputElement;
-    const depositPercentage = isDeposit && depositPercentageInput ? parseFloat(depositPercentageInput.value) : undefined;
+    const depositPercentage =
+      isDeposit && depositPercentageInput ? parseFloat(depositPercentageInput.value) : undefined;
 
     // Calculate total
-    const totalAmount = validLineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+    const totalAmount = validLineItems.reduce((sum, item) => sum + item.quantity * item.rate, 0);
     const clientId = project.client_id;
 
     if (!clientId) {
@@ -2803,7 +3054,7 @@ async function showCreateInvoicePrompt(): Promise<void> {
 
         if (response.ok) {
           showToast('Deposit invoice created successfully!', 'success');
-          if (currentProjectId && storedContext) loadProjectInvoices(currentProjectId, storedContext);
+          if (currentProjectId && storedContext) {loadProjectInvoices(currentProjectId, storedContext);}
         } else {
           showToast('Failed to create deposit invoice', 'error');
         }
@@ -2813,13 +3064,18 @@ async function showCreateInvoicePrompt(): Promise<void> {
       }
     } else {
       // Create standard invoice with line items (and apply deposit credit if selected)
-      createInvoiceWithLineItems(clientId, validLineItems, selectedDepositId, selectedDepositAmount);
+      createInvoiceWithLineItems(
+        clientId,
+        validLineItems,
+        selectedDepositId,
+        selectedDepositAmount
+      );
     }
   };
 
   // Render the modal (defined before attachModalHandlers which uses it)
   const renderModal = (): void => {
-    const totalAmount = lineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+    const totalAmount = lineItems.reduce((sum, item) => sum + item.quantity * item.rate, 0);
 
     overlay.innerHTML = `
       <div class="confirm-dialog invoice-modal">
@@ -2850,7 +3106,9 @@ async function showCreateInvoicePrompt(): Promise<void> {
           <div class="form-group">
             <label class="form-label">Line Items</label>
             <div class="line-items-container">
-              ${lineItems.map((item, index) => `
+              ${lineItems
+    .map(
+      (item, index) => `
                 <div class="line-item-row" data-index="${index}">
                   <input type="text" class="form-input line-item-desc" placeholder="Description" value="${SanitizationUtils.escapeHtml(item.description)}" required>
                   <input type="number" class="form-input line-item-qty" placeholder="Qty" value="${item.quantity}" min="1">
@@ -2858,29 +3116,39 @@ async function showCreateInvoicePrompt(): Promise<void> {
                   <span class="line-item-amount">$${(item.quantity * item.rate).toFixed(2)}</span>
                   ${lineItems.length > 1 ? `<button type="button" class="icon-btn icon-btn-danger icon-btn-xs btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
                 </div>
-              `).join('')}
+              `
+    )
+    .join('')}
             </div>
             <button type="button" class="btn btn-outline btn-sm" id="btn-add-line-item">+ Add Line Item</button>
           </div>
 
-          ${availableDeposits.length > 0 ? `
+          ${
+  availableDeposits.length > 0
+    ? `
           <div class="form-group deposit-credit-section" id="deposit-credit-section">
             <label class="form-label">Apply Deposit Credit</label>
             <select id="deposit-credit-select" class="form-input">
               <option value="">-- No deposit credit --</option>
-              ${availableDeposits.map(dep => `
+              ${availableDeposits
+    .map(
+      (dep) => `
                 <option value="${dep.invoice_id}" data-amount="${dep.available_amount}">
                   ${SanitizationUtils.escapeHtml(dep.invoice_number)} - $${dep.available_amount.toFixed(2)} available
                 </option>
-              `).join('')}
+              `
+    )
+    .join('')}
             </select>
             <small class="form-hint">Select a paid deposit to apply as credit to this invoice</small>
           </div>
-          ` : `
+          `
+    : `
           <div class="form-group" id="no-deposits-info" style="display: none;">
             <small class="form-hint">No paid deposits available for credit</small>
           </div>
-          `}
+          `
+}
 
           <div class="invoice-totals-section">
             <div class="invoice-subtotal">Subtotal: $${totalAmount.toFixed(2)}</div>
@@ -2932,7 +3200,9 @@ async function showCreateInvoicePrompt(): Promise<void> {
       typeSelect.dataset.dropdownInit = 'true';
       initModalDropdown(typeSelect, { placeholder: 'Invoice type...' });
     }
-    const depositCreditSelect = overlay.querySelector('#deposit-credit-select') as HTMLSelectElement;
+    const depositCreditSelect = overlay.querySelector(
+      '#deposit-credit-select'
+    ) as HTMLSelectElement;
     if (depositCreditSelect && !depositCreditSelect.dataset.dropdownInit) {
       depositCreditSelect.dataset.dropdownInit = 'true';
       initModalDropdown(depositCreditSelect, { placeholder: 'Apply deposit credit...' });
@@ -3000,7 +3270,7 @@ async function showCreateInvoicePrompt(): Promise<void> {
     });
 
     // Remove line item buttons
-    overlay.querySelectorAll('.btn-remove-line').forEach(btn => {
+    overlay.querySelectorAll('.btn-remove-line').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const index = parseInt((e.target as HTMLElement).dataset.index || '0');
         lineItems.splice(index, 1);
@@ -3010,7 +3280,7 @@ async function showCreateInvoicePrompt(): Promise<void> {
     });
 
     // Update amounts on input change
-    overlay.querySelectorAll('.line-item-qty, .line-item-rate').forEach(input => {
+    overlay.querySelectorAll('.line-item-qty, .line-item-rate').forEach((input) => {
       input.addEventListener('input', () => {
         updateLineItemAmounts();
       });
@@ -3063,7 +3333,7 @@ async function createInvoiceWithLineItems(
     const response = await apiPost('/api/invoices', {
       projectId: currentProjectId,
       clientId,
-      lineItems: lineItems.map(item => ({
+      lineItems: lineItems.map((item) => ({
         description: item.description,
         quantity: item.quantity,
         rate: item.rate,
@@ -3120,7 +3390,9 @@ async function createInvoiceWithLineItems(
 async function showAddMilestonePrompt(): Promise<void> {
   if (!currentProjectId || !storedContext) return;
 
-  const defaultDueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const defaultDueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
 
   const result = await multiPromptDialog({
     title: 'Add Milestone',
@@ -3158,11 +3430,7 @@ async function showAddMilestonePrompt(): Promise<void> {
 /**
  * Add a new milestone to the current project
  */
-async function addMilestone(
-  title: string,
-  description: string,
-  dueDate: string
-): Promise<void> {
+async function addMilestone(title: string, description: string, dueDate: string): Promise<void> {
   if (!currentProjectId || !storedContext) return;
 
   try {
@@ -3226,7 +3494,6 @@ interface ClientOption {
   company_name: string | null;
 }
 
-
 /**
  * Setup the add project button handler
  */
@@ -3286,9 +3553,13 @@ async function addProject(ctx: AdminDashboardContext): Promise<void> {
   closeBtn?.addEventListener('click', closeModal, { once: true });
   cancelBtn?.addEventListener('click', closeModal, { once: true });
 
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  }, { once: true });
+  modal.addEventListener(
+    'click',
+    (e) => {
+      if (e.target === modal) closeModal();
+    },
+    { once: true }
+  );
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
@@ -3316,13 +3587,17 @@ function ensureAddProjectSelects(): void {
         if (value === 'new') {
           newClientFields.classList.remove('hidden');
           const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
-          const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
+          const emailInput = document.getElementById(
+            'new-project-client-email'
+          ) as HTMLInputElement;
           if (nameInput) nameInput.required = true;
           if (emailInput) emailInput.required = true;
         } else {
           newClientFields.classList.add('hidden');
           const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
-          const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
+          const emailInput = document.getElementById(
+            'new-project-client-email'
+          ) as HTMLInputElement;
           if (nameInput) nameInput.required = false;
           if (emailInput) emailInput.required = false;
         }
@@ -3394,7 +3669,12 @@ function ensureAddProjectSelects(): void {
  */
 function resetAddProjectDropdowns(): void {
   // Reset ALL modal dropdowns by clearing their data-value and resetting display text
-  const dropdownIds = ['new-project-client', 'new-project-type', 'new-project-budget', 'new-project-timeline'];
+  const dropdownIds = [
+    'new-project-client',
+    'new-project-type',
+    'new-project-budget',
+    'new-project-timeline'
+  ];
   const placeholders: Record<string, string> = {
     'new-project-client': 'Select existing client...',
     'new-project-type': 'Select type...',
@@ -3431,7 +3711,9 @@ async function populateClientDropdown(): Promise<void> {
       const options = [
         ...clients.map((c) => {
           const displayName = SanitizationUtils.decodeHtmlEntities(c.contact_name || c.email);
-          const company = c.company_name ? ` (${SanitizationUtils.decodeHtmlEntities(c.company_name)})` : '';
+          const company = c.company_name
+            ? ` (${SanitizationUtils.decodeHtmlEntities(c.company_name)})`
+            : '';
           return { value: String(c.id), label: `${displayName}${company}` };
         }),
         { value: 'new', label: '+ Create New Client' }
@@ -3451,14 +3733,22 @@ async function populateClientDropdown(): Promise<void> {
           if (!newClientFields) return;
           if (value === 'new') {
             newClientFields.classList.remove('hidden');
-            const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
-            const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
+            const nameInput = document.getElementById(
+              'new-project-client-name'
+            ) as HTMLInputElement;
+            const emailInput = document.getElementById(
+              'new-project-client-email'
+            ) as HTMLInputElement;
             if (nameInput) nameInput.required = true;
             if (emailInput) emailInput.required = true;
           } else {
             newClientFields.classList.add('hidden');
-            const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
-            const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
+            const nameInput = document.getElementById(
+              'new-project-client-name'
+            ) as HTMLInputElement;
+            const emailInput = document.getElementById(
+              'new-project-client-email'
+            ) as HTMLInputElement;
             if (nameInput) nameInput.required = false;
             if (emailInput) emailInput.required = false;
           }
@@ -3529,12 +3819,14 @@ async function handleAddProjectSubmit(
     timeline: string;
     notes: string;
   } = {
-    newClient: isNewClient ? {
-      name: getInputValue('new-project-client-name'),
-      email: getInputValue('new-project-client-email'),
-      company: getInputValue('new-project-client-company'),
-      phone: getInputValue('new-project-client-phone')
-    } : null,
+    newClient: isNewClient
+      ? {
+        name: getInputValue('new-project-client-name'),
+        email: getInputValue('new-project-client-email'),
+        company: getInputValue('new-project-client-company'),
+        phone: getInputValue('new-project-client-phone')
+      }
+      : null,
     clientId: isNewClient ? null : parseInt(clientId),
     projectType,
     description,
