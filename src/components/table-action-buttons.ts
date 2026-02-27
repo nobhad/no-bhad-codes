@@ -11,6 +11,9 @@
 
 import { ICONS } from '../constants/icons';
 
+/** Standard size for all table action icons (in pixels) */
+const TABLE_ICON_SIZE = { width: 16, height: 16 };
+
 // ============================================
 // BUTTON DEFINITIONS
 // ============================================
@@ -70,7 +73,7 @@ export const TABLE_ACTIONS = {
   refresh: { icon: ICONS.REFRESH, title: 'Refresh', ariaLabel: 'Refresh' },
   add: { icon: ICONS.PLUS, title: 'Add', ariaLabel: 'Add' },
   test: { icon: ICONS.SEND, title: 'Send Test', ariaLabel: 'Send test' },
-  versions: { icon: ICONS.LIST, title: 'Version History', ariaLabel: 'View version history' },
+  versions: { icon: ICONS.LIST, title: 'Version History', ariaLabel: 'View version history' }
 } as const;
 
 export type TableActionType = keyof typeof TABLE_ACTIONS;
@@ -103,6 +106,16 @@ export interface TableActionConfig {
 // ============================================
 
 /**
+ * Normalize SVG icon to standard table size (16x16).
+ * Replaces width/height attributes in the SVG string.
+ */
+function normalizeIconSize(iconSvg: string): string {
+  return iconSvg
+    .replace(/width="\d+"/, `width="${TABLE_ICON_SIZE.width}"`)
+    .replace(/height="\d+"/, `height="${TABLE_ICON_SIZE.height}"`);
+}
+
+/**
  * Render a single table action button.
  */
 export function renderActionButton(config: TableActionConfig): string {
@@ -119,13 +132,16 @@ export function renderActionButton(config: TableActionConfig): string {
   const buttonTitle = title ?? def.title;
   const buttonAriaLabel = ariaLabel ?? def.ariaLabel;
 
+  // Normalize icon size for consistent table display
+  const normalizedIcon = normalizeIconSize(def.icon);
+
   // Build data attributes
   const dataAttrStr = Object.entries({
     'data-action': action,
     ...(dataId !== undefined ? { 'data-id': dataId } : {}),
     ...Object.fromEntries(
       Object.entries(dataAttrs).map(([k, v]) => [`data-${k}`, v])
-    ),
+    )
   })
     .map(([k, v]) => `${k}="${v}"`)
     .join(' ');
@@ -133,7 +149,7 @@ export function renderActionButton(config: TableActionConfig): string {
   const classNames = ['icon-btn', className].filter(Boolean).join(' ');
   const disabledAttr = disabled ? 'disabled' : '';
 
-  return `<button type="button" class="${classNames}" ${dataAttrStr} title="${buttonTitle}" aria-label="${buttonAriaLabel}" ${disabledAttr}>${def.icon}</button>`;
+  return `<button type="button" class="${classNames}" ${dataAttrStr} title="${buttonTitle}" aria-label="${buttonAriaLabel}" ${disabledAttr}>${normalizedIcon}</button>`;
 }
 
 /**
@@ -166,33 +182,33 @@ export const COMMON_ACTION_SETS = {
   crud: (id: string | number) => [
     { action: 'view' as const, dataId: id },
     { action: 'edit' as const, dataId: id },
-    { action: 'delete' as const, dataId: id },
+    { action: 'delete' as const, dataId: id }
   ],
 
   /** View, Delete */
   viewDelete: (id: string | number) => [
     { action: 'view' as const, dataId: id },
-    { action: 'delete' as const, dataId: id },
+    { action: 'delete' as const, dataId: id }
   ],
 
   /** Edit, Delete */
   editDelete: (id: string | number) => [
     { action: 'edit' as const, dataId: id },
-    { action: 'delete' as const, dataId: id },
+    { action: 'delete' as const, dataId: id }
   ],
 
   /** Preview, Download, Delete (files) */
   fileActions: (id: string | number, canPreview = true, canDelete = true) => [
     { action: 'preview' as const, dataId: id, show: canPreview },
     { action: 'download' as const, dataId: id },
-    { action: 'delete' as const, dataId: id, show: canDelete },
+    { action: 'delete' as const, dataId: id, show: canDelete }
   ],
 
   /** Restore, Delete (deleted items) */
   deletedItemActions: (id: string | number) => [
     { action: 'restore' as const, dataId: id },
-    { action: 'delete' as const, dataId: id, title: 'Delete Permanently', ariaLabel: 'Delete permanently' },
-  ],
+    { action: 'delete' as const, dataId: id, title: 'Delete Permanently', ariaLabel: 'Delete permanently' }
+  ]
 };
 
 // ============================================

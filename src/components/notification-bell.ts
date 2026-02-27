@@ -92,7 +92,7 @@ export class NotificationBell {
       <div class="notification-dropdown hidden" id="notification-dropdown" role="menu" aria-label="Notifications">
         <div class="notification-header">
           <h3 class="notification-dropdown-title">Notifications</h3>
-          <button type="button" class="btn-text" id="mark-all-read">Mark all read</button>
+          <button type="button" class="btn-link" id="mark-all-read">Mark all read</button>
         </div>
         <div class="notification-list" id="notification-list">
           <div class="notification-empty">No notifications</div>
