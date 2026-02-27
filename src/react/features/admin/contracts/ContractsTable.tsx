@@ -247,10 +247,7 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
             onChange={(key, value) => setStatusFilter(value)}
           />
           <IconButton action="download" title="Export" />
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            New Contract
-          </PortalButton>
+          <IconButton action="add" title="New Contract" />
         </>
       }
       error={
@@ -281,6 +278,7 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -341,27 +339,27 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
                   </div>
                 </AdminTableCell>
                 <AdminTableCell>
-                  <button
+                  <span
                     onClick={(e) => {
                       e.stopPropagation();
                       onNavigate?.('clients', contract.clientId);
                     }}
-                    className="link-btn"
+                    className="table-link"
                   >
                     {contract.clientName}
-                  </button>
+                  </span>
                 </AdminTableCell>
                 <AdminTableCell>
                   {contract.projectName ? (
-                    <button
+                    <span
                       onClick={(e) => {
                         e.stopPropagation();
                         onNavigate?.('projects', contract.projectId);
                       }}
-                      className="link-btn"
+                      className="table-link"
                     >
                       {contract.projectName}
-                    </button>
+                    </span>
                   ) : (
                     <span className="text-muted">-</span>
                   )}
@@ -393,6 +391,7 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

@@ -194,10 +194,7 @@ export function DesignReviewPanel({ projectId, onNavigate }: DesignReviewPanelPr
             values={{ status: statusFilter }}
             onChange={(key, value) => setStatusFilter(value)}
           />
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            Submit for Review
-          </PortalButton>
+          <IconButton action="add" title="Submit for Review" />
         </>
       }
       error={
@@ -228,6 +225,7 @@ export function DesignReviewPanel({ projectId, onNavigate }: DesignReviewPanelPr
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -344,6 +342,7 @@ export function DesignReviewPanel({ projectId, onNavigate }: DesignReviewPanelPr
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

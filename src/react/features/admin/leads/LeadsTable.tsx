@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, Download, RefreshCw, Eye, Mail } from 'lucide-react';
+import { Inbox, Download, RefreshCw, Eye, Mail, ChevronDown } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
@@ -425,7 +425,7 @@ export function LeadsTable({
                 Contact
               </AdminTableHead>
               <AdminTableHead
-                className="contact-col"
+                className="company-col"
                 sortable
                 sortDirection={sort?.column === 'company' ? sort.direction : null}
                 onClick={() => toggleSort('company')}
@@ -487,16 +487,30 @@ export function LeadsTable({
                     />
                   </AdminTableCell>
 
-                  {/* Contact Name & Email */}
-                  <AdminTableCell className="primary-cell">
+                  {/* Contact Name & Email (with stacked content for responsive) */}
+                  <AdminTableCell className="primary-cell contact-cell">
                     <div className="cell-content">
                       <span className="cell-title">{lead.contact_name || 'Unknown'}</span>
                       <span className="cell-subtitle">{lead.email}</span>
+                      {/* Stacked content - shown when columns hidden */}
+                      {lead.company_name && (
+                        <span className="company-stacked">{lead.company_name}</span>
+                      )}
+                      {lead.project_type && (
+                        <span className="type-stacked">
+                          {PROJECT_TYPE_LABELS[lead.project_type] || lead.project_type}
+                        </span>
+                      )}
+                      {lead.source && (
+                        <span className="source-stacked">
+                          {LEAD_SOURCE_LABELS[lead.source] || lead.source}
+                        </span>
+                      )}
                     </div>
                   </AdminTableCell>
 
-                  {/* Company */}
-                  <AdminTableCell className="primary-cell">
+                  {/* Company (hidden on narrow viewports) */}
+                  <AdminTableCell className="company-cell">
                     <div className="cell-content">
                       <span className="cell-title">{lead.company_name || '-'}</span>
                       {lead.phone && (
@@ -513,9 +527,10 @@ export function LeadsTable({
                           <StatusBadge status={getStatusVariant(lead.status)}>
                             {LEAD_STATUS_CONFIG[lead.status]?.label || lead.status}
                           </StatusBadge>
+                          <ChevronDown className="status-dropdown-caret" />
                         </button>
                       </PortalDropdownTrigger>
-                      <PortalDropdownContent>
+                      <PortalDropdownContent sideOffset={0} align="start">
                         {Object.entries(LEAD_STATUS_CONFIG).map(([status, config]) => (
                           <PortalDropdownItem
                             key={status}
@@ -531,12 +546,12 @@ export function LeadsTable({
                   </AdminTableCell>
 
                   {/* Project Type */}
-                  <AdminTableCell>
+                  <AdminTableCell className="type-cell">
                     {PROJECT_TYPE_LABELS[lead.project_type || ''] || lead.project_type || '-'}
                   </AdminTableCell>
 
                   {/* Source */}
-                  <AdminTableCell>
+                  <AdminTableCell className="source-cell">
                     {LEAD_SOURCE_LABELS[lead.source || ''] || lead.source || '-'}
                   </AdminTableCell>
 

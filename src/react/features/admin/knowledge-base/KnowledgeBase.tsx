@@ -13,6 +13,7 @@ import {
   Users,
   Download,
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -217,10 +218,7 @@ export function KnowledgeBase({ onNavigate }: KnowledgeBaseProps) {
           <button className="icon-btn" title="Export">
             <Download size={18} />
           </button>
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            New Article
-          </PortalButton>
+          <IconButton action="add" title="New Article" />
         </>
       }
       error={
@@ -251,6 +249,7 @@ export function KnowledgeBase({ onNavigate }: KnowledgeBaseProps) {
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -356,6 +355,7 @@ export function KnowledgeBase({ onNavigate }: KnowledgeBaseProps) {
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

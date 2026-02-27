@@ -126,14 +126,29 @@ export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, { label: string; varia
 
 /**
  * Project type display labels
+ * Includes multiple key formats to handle database variations
  */
 export const PROJECT_TYPE_LABELS: Record<string, string> = {
+  // Hyphenated keys
   'simple-site': 'Simple Site',
   'business-site': 'Business Site',
-  portfolio: 'Portfolio',
   'e-commerce': 'E-Commerce',
   'web-app': 'Web App',
-  'browser-extension': 'Browser Extension'
+  'browser-extension': 'Browser Extension',
+  // Space-separated keys
+  'simple site': 'Simple Site',
+  'business site': 'Business Site',
+  'web app': 'Web App',
+  'browser extension': 'Browser Extension',
+  // Single word keys
+  portfolio: 'Portfolio',
+  // Title case keys (as stored)
+  'Simple Site': 'Simple Site',
+  'Business Site': 'Business Site',
+  'E-Commerce': 'E-Commerce',
+  'Web App': 'Web App',
+  'Browser Extension': 'Browser Extension',
+  Portfolio: 'Portfolio'
 };
 
 // ============================================================================
@@ -145,6 +160,7 @@ export const PROJECT_TYPE_LABELS: Record<string, string> = {
  */
 export type LeadStatus =
   | 'new'
+  | 'pending'
   | 'contacted'
   | 'qualified'
   | 'in-progress'
@@ -195,6 +211,7 @@ export interface LeadStats {
  */
 export const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; variant: string }> = {
   new: { label: 'New', variant: 'pending' },
+  pending: { label: 'Pending', variant: 'pending' },
   contacted: { label: 'Contacted', variant: 'active' },
   qualified: { label: 'Qualified', variant: 'warning' },
   'in-progress': { label: 'In Progress', variant: 'active' },
@@ -206,14 +223,25 @@ export const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; variant: st
 
 /**
  * Lead source display labels
+ * Includes multiple key formats to handle database variations
  */
 export const LEAD_SOURCE_LABELS: Record<string, string> = {
+  // Lowercase keys
   website: 'Website',
   referral: 'Referral',
   social: 'Social Media',
   direct: 'Direct',
   'ad-campaign': 'Ad Campaign',
-  other: 'Other'
+  'ad campaign': 'Ad Campaign',
+  other: 'Other',
+  // Title case keys
+  Website: 'Website',
+  Referral: 'Referral',
+  Social: 'Social Media',
+  'Social Media': 'Social Media',
+  Direct: 'Direct',
+  'Ad Campaign': 'Ad Campaign',
+  Other: 'Other'
 };
 
 // ============================================================================
@@ -284,10 +312,13 @@ export const CLIENT_STATUS_CONFIG: Record<ClientStatus, { label: string; variant
 
 /**
  * Client type display labels
+ * Includes multiple key formats to handle database variations
  */
-export const CLIENT_TYPE_LABELS: Record<ClientType, string> = {
+export const CLIENT_TYPE_LABELS: Record<string, string> = {
   personal: 'Personal',
-  business: 'Business'
+  business: 'Business',
+  Personal: 'Personal',
+  Business: 'Business'
 };
 
 // ============================================================================
@@ -619,11 +650,21 @@ export const CLIENT_DETAIL_TABS: Array<{
 
 /**
  * Contact role display labels
+ * Includes multiple key formats to handle database variations
  */
 export const CONTACT_ROLE_LABELS: Record<string, string> = {
+  // Lowercase/underscore keys
   primary: 'Primary Contact',
   billing: 'Billing',
   technical: 'Technical',
   decision_maker: 'Decision Maker',
-  other: 'Other'
+  other: 'Other',
+  // Title case keys
+  Primary: 'Primary Contact',
+  Billing: 'Billing',
+  Technical: 'Technical',
+  'Decision Maker': 'Decision Maker',
+  Other: 'Other',
+  // Hyphenated keys
+  'decision-maker': 'Decision Maker'
 };

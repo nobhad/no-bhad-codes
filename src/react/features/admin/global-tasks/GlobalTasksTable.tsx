@@ -12,6 +12,7 @@ import {
   Inbox,
   LayoutGrid,
   List,
+  ChevronDown,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -302,10 +303,7 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
               <LayoutGrid className="icon-sm" />
             </button>
           </div>
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            Add Task
-          </PortalButton>
+          <IconButton action="add" title="Add Task" />
         </>
       }
       error={
@@ -336,19 +334,21 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
         ) : undefined
       }
     >
-      {viewMode === 'list' ? (
+      {!error && (viewMode === 'list' ? (
         <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>
               <AdminTableHead
+                className="name-col"
                 sortable
                 sortDirection={sort?.column === 'title' ? sort.direction : null}
                 onClick={() => toggleSort('title')}
               >
                 Task
               </AdminTableHead>
-              <AdminTableHead>Project</AdminTableHead>
+              <AdminTableHead className="project-col">Project</AdminTableHead>
               <AdminTableHead
+                className="priority-col"
                 sortable
                 sortDirection={sort?.column === 'priority' ? sort.direction : null}
                 onClick={() => toggleSort('priority')}
@@ -356,13 +356,14 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
                 Priority
               </AdminTableHead>
               <AdminTableHead
+                className="status-col"
                 sortable
                 sortDirection={sort?.column === 'status' ? sort.direction : null}
                 onClick={() => toggleSort('status')}
               >
                 Status
               </AdminTableHead>
-              <AdminTableHead>Assigned To</AdminTableHead>
+              <AdminTableHead className="assigned-col">Assigned To</AdminTableHead>
               <AdminTableHead
                 className="date-col"
                 sortable
@@ -387,27 +388,41 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
             ) : (
               paginatedTasks.map((task) => (
                 <AdminTableRow key={task.id} clickable>
-                  <AdminTableCell className="primary-cell">
+                  <AdminTableCell className="primary-cell name-cell">
                     <div className="cell-content">
                       <span className="cell-title">{task.title}</span>
                       {task.description && (
                         <span className="cell-subtitle">{task.description}</span>
                       )}
+                      {/* Stacked content for responsive - hidden on desktop */}
+                      {task.projectName && (
+                        <span className="project-stacked">{task.projectName}</span>
+                      )}
+                      <span className="priority-stacked">
+                        <span
+                          className="priority-indicator"
+                          style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
+                        />
+                        {PRIORITY_CONFIG[task.priority]?.label}
+                      </span>
+                      {task.dueDate && (
+                        <span className="date-stacked">{formatDateShort(task.dueDate)}</span>
+                      )}
                     </div>
                   </AdminTableCell>
-                  <AdminTableCell>
+                  <AdminTableCell className="project-cell">
                     {task.projectName ? (
-                      <button
+                      <span
                         onClick={() => onNavigate?.('projects', task.projectId)}
-                        className="link-btn"
+                        className="table-link"
                       >
                         {task.projectName}
-                      </button>
+                      </span>
                     ) : (
                       <span className="text-muted">-</span>
                     )}
                   </AdminTableCell>
-                  <AdminTableCell>
+                  <AdminTableCell className="priority-cell">
                     <div className="cell-with-icon">
                       <span
                         className="priority-indicator"
@@ -419,13 +434,14 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
                   <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
-                        <button className="status-trigger-btn">
+                        <button className="status-dropdown-trigger">
                           <StatusBadge status={getStatusVariant(task.status)}>
                             {TASK_STATUS_CONFIG[task.status]?.label || task.status}
                           </StatusBadge>
+                          <ChevronDown className="status-dropdown-caret" />
                         </button>
                       </PortalDropdownTrigger>
-                      <PortalDropdownContent>
+                      <PortalDropdownContent sideOffset={0} align="start">
                         {Object.entries(TASK_STATUS_CONFIG).map(([status, config]) => (
                           <PortalDropdownItem
                             key={status}
@@ -439,7 +455,7 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
                       </PortalDropdownContent>
                     </PortalDropdown>
                   </AdminTableCell>
-                  <AdminTableCell>
+                  <AdminTableCell className="assigned-cell">
                     {task.assignedToName || (
                       <span className="text-muted">Unassigned</span>
                     )}
@@ -476,7 +492,7 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
           onStatusChange={handleStatusChange}
           isLoading={isLoading}
         />
-      )}
+      ))}
     </TableLayout>
   );
 }

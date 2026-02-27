@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, Download, RefreshCw, Eye } from 'lucide-react';
+import { Inbox, Download, RefreshCw, Eye, ChevronDown } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
@@ -521,6 +521,16 @@ export function ProjectsTable({
                         {project.contact_name}
                         {project.company_name && ` - ${project.company_name}`}
                       </span>
+                      {/* Stacked content for responsive - hidden on desktop */}
+                      <span className="type-stacked">
+                        {PROJECT_TYPE_LABELS[project.project_type || ''] || project.project_type}
+                      </span>
+                      {project.budget && (
+                        <span className="budget-stacked">${project.budget.toLocaleString()}</span>
+                      )}
+                      {project.end_date && (
+                        <span className="target-stacked">Target: {formatDate(project.end_date)}</span>
+                      )}
                     </div>
                   </AdminTableCell>
 
@@ -533,13 +543,14 @@ export function ProjectsTable({
                   <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
-                        <button className="status-trigger">
+                        <button className="status-dropdown-trigger">
                           <StatusBadge status={getStatusVariant(project.status)}>
                             {PROJECT_STATUS_CONFIG[project.status]?.label || project.status}
                           </StatusBadge>
+                          <ChevronDown className="status-dropdown-caret" />
                         </button>
                       </PortalDropdownTrigger>
-                      <PortalDropdownContent>
+                      <PortalDropdownContent sideOffset={0} align="start">
                         {Object.entries(PROJECT_STATUS_CONFIG).map(([status, config]) => (
                           <PortalDropdownItem
                             key={status}

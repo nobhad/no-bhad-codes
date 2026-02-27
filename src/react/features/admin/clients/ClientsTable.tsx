@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, Download, RefreshCw, Eye, Send, Phone } from 'lucide-react';
+import { Inbox, Download, RefreshCw, Eye, Send, Phone, ChevronDown } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
@@ -17,6 +17,7 @@ import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBa
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { PortalButton } from '@react/components/portal/PortalButton';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -447,9 +448,11 @@ export function ClientsTable({
       }
       error={
         error ? (
-          <div className="error-message">
+          <div className="table-error-banner">
             {error}
-            <button className="btn btn-secondary btn-sm" onClick={refetch}>Retry</button>
+            <PortalButton variant="secondary" size="sm" onClick={refetch}>
+              Retry
+            </PortalButton>
           </div>
         ) : undefined
       }
@@ -558,18 +561,23 @@ export function ClientsTable({
                     </AdminTableCell>
 
                     {/* Client Name & Email */}
-                    <AdminTableCell className="primary-cell">
+                    <AdminTableCell className="primary-cell contact-cell">
                       <div className="cell-content">
                         <span className="cell-title">{displayName.primary}</span>
                         <span className="cell-subtitle">{client.email}</span>
                         {displayName.secondary && (
                           <span className="cell-subtitle">{displayName.secondary}</span>
                         )}
+                        {/* Stacked content for responsive - hidden on desktop */}
+                        <span className="type-stacked">{CLIENT_TYPE_LABELS[client.client_type]}</span>
+                        {(client.project_count || 0) > 0 && (
+                          <span className="count-stacked">{client.project_count} project{client.project_count !== 1 ? 's' : ''}</span>
+                        )}
                       </div>
                     </AdminTableCell>
 
                     {/* Type */}
-                    <AdminTableCell>
+                    <AdminTableCell className="type-cell">
                       {CLIENT_TYPE_LABELS[client.client_type]}
                     </AdminTableCell>
 
@@ -577,15 +585,16 @@ export function ClientsTable({
                     <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                       <PortalDropdown>
                         <PortalDropdownTrigger asChild>
-                          <button className="status-badge-btn">
+                          <button className="status-dropdown-trigger">
                             <StatusBadge status={inviteStatus === 'not-invited' ? 'not-invited' : getStatusVariant(client.status)}>
                               {inviteStatus === 'not-invited' ? 'Not Invited' :
                                inviteStatus === 'invited' ? 'Invited' :
                                CLIENT_STATUS_CONFIG[client.status]?.label || client.status}
                             </StatusBadge>
+                            <ChevronDown className="status-dropdown-caret" />
                           </button>
                         </PortalDropdownTrigger>
-                        <PortalDropdownContent>
+                        <PortalDropdownContent sideOffset={0} align="start">
                           {Object.entries(CLIENT_STATUS_CONFIG).map(([status, config]) => (
                             <PortalDropdownItem
                               key={status}
@@ -601,7 +610,7 @@ export function ClientsTable({
                     </AdminTableCell>
 
                     {/* Project Count */}
-                    <AdminTableCell>
+                    <AdminTableCell className="projects-cell">
                       {client.project_count || 0}
                     </AdminTableCell>
 

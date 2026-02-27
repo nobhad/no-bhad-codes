@@ -204,10 +204,7 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
             onChange={handleFilterChange}
           />
           <IconButton action="export" />
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            New Template
-          </PortalButton>
+          <IconButton action="add" title="New Template" />
         </>
       }
       error={
@@ -238,6 +235,7 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -348,6 +346,7 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }

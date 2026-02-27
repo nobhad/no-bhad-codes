@@ -19,6 +19,7 @@ import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/Confir
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { PortalButton } from '@react/components/portal/PortalButton';
 import { useInvoices } from '@react/hooks/useInvoices';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { usePagination } from '@react/hooks/usePagination';
@@ -457,7 +458,9 @@ export function InvoicesTable({
           error ? (
             <div className="table-error-banner">
               {error}
-              <button className="btn btn-secondary btn-sm" onClick={refetch}>Retry</button>
+              <PortalButton variant="secondary" size="sm" onClick={refetch}>
+                Retry
+              </PortalButton>
             </div>
           ) : undefined
         }
@@ -573,10 +576,16 @@ export function InvoicesTable({
                     </AdminTableCell>
 
                     {/* Client / Project */}
-                    <AdminTableCell className="contact-cell">
+                    <AdminTableCell className="primary-cell contact-cell">
                       <div className="cell-content">
                         <span className="cell-title">{invoice.client_name || 'Unknown Client'}</span>
                         <span className="cell-subtitle">{invoice.project_name || '-'}</span>
+                        {/* Stacked content for responsive - hidden on desktop */}
+                        <span className="invoice-stacked">{invoice.invoice_number}</span>
+                        <span className="amount-stacked">{formatCurrency(invoice.amount_total)}</span>
+                        {invoice.due_date && (
+                          <span className="date-stacked">Due: {formatDate(invoice.due_date)}</span>
+                        )}
                       </div>
                     </AdminTableCell>
 

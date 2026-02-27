@@ -236,10 +236,7 @@ export function AdHocRequestsTable({ clientId, projectId, onNavigate }: AdHocReq
             }}
           />
           <IconButton action="export" />
-          <PortalButton variant="primary" size="sm">
-            <Plus className="btn-icon" />
-            New Request
-          </PortalButton>
+          <IconButton action="add" title="New Request" />
         </>
       }
       error={
@@ -270,6 +267,7 @@ export function AdHocRequestsTable({ clientId, projectId, onNavigate }: AdHocReq
         ) : undefined
       }
     >
+      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -412,6 +410,7 @@ export function AdHocRequestsTable({ clientId, projectId, onNavigate }: AdHocReq
           )}
         </AdminTableBody>
       </AdminTable>
+      )}
     </TableLayout>
   );
 }
