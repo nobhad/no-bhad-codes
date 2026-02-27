@@ -80,7 +80,7 @@ export class AdminAuth {
         // Invalid credentials from server
         AdminSecurity.recordFailedAttempt();
         return false;
-      } catch (fetchError) {
+      } catch (_fetchError) {
         // In production, server auth is required - no fallback
         if (!isDevelopment) {
           logger.error('Server authentication failed. Backend server may be unavailable.');

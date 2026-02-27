@@ -19,7 +19,7 @@ import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction } from '../../../factories';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 
@@ -183,7 +183,6 @@ function renderQuestionnairesTable(questionnaires: Questionnaire[]): void {
     tableSelector: '#questionnaires-table-body',
     rowSelector: 'tr[data-questionnaire-id]',
     onRowSelect: (row) => {
-      const id = parseInt(row.dataset.questionnaireId || '0');
       const editBtn = row.querySelector('.questionnaire-edit') as HTMLButtonElement;
       if (editBtn) editBtn.click();
     },
