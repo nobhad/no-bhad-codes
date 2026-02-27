@@ -8,10 +8,10 @@
  * and project management.
  */
 
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
-import fs from 'fs/promises';
-import path from 'path';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { getDatabase } from '../database/init.js';
 import { logger } from './logger.js';

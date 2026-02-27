@@ -17,7 +17,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { logger } from './logger.js';
 import {
   validateJsonSchema,
