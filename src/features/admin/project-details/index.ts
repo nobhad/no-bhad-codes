@@ -84,8 +84,6 @@ export {
   deleteProject,
   archiveProject,
   duplicateProject,
-  openEditProjectModal,
-  saveProjectChanges,
   handleContractSign,
   handleContractCountersign,
   showContractBuilder
