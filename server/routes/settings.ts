@@ -14,11 +14,19 @@
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/security.js';
 import { settingsService } from '../services/settings-service.js';
 import { auditLogger } from '../services/audit-logger.js';
 import { errorResponse } from '../utils/api-response.js';
 
 const router = express.Router();
+
+// Strict rate limiting for settings modifications (10 requests per 5 minutes)
+const settingsModifyRateLimit = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  maxRequests: 10,
+  message: 'Too many settings modifications, please try again later'
+});
 
 /**
  * @swagger
@@ -132,6 +140,7 @@ router.get(
  */
 router.put(
   '/:key',
+  settingsModifyRateLimit,
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
@@ -181,6 +190,7 @@ router.put(
  */
 router.delete(
   '/:key',
+  settingsModifyRateLimit,
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
@@ -219,6 +229,7 @@ router.delete(
 router.get(
   '/business/info',
   authenticateToken,
+  requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const businessInfo = await settingsService.getBusinessInfo();
     res.json(businessInfo);
@@ -258,6 +269,7 @@ router.get(
  */
 router.put(
   '/business/info',
+  settingsModifyRateLimit,
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
@@ -325,6 +337,7 @@ router.get(
  */
 router.put(
   '/payment',
+  settingsModifyRateLimit,
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {

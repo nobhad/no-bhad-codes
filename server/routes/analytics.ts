@@ -45,6 +45,16 @@ const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>) =>
 
 const router = Router();
 
+/**
+ * Helper to compute a date threshold for SQL queries
+ * Returns ISO string that can be used as a parameterized query value
+ */
+function getDateThreshold(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date.toISOString();
+}
+
 // Rate limit for tracking events (generous limit for legitimate traffic)
 const trackingRateLimit = rateLimit({
   windowMs: 60 * 1000, // 1 minute
@@ -258,16 +268,19 @@ router.get(
       // Note: total_time_on_site is stored in milliseconds
       // Filter out sessions > 1 hour (3600000ms) as outliers (tabs left open)
       const MAX_SESSION_MS = 3600000; // 1 hour in milliseconds
+      const dateThreshold = getDateThreshold(daysNum);
+
       const summary = await db.get(
         `SELECT
           COUNT(DISTINCT session_id) as total_sessions,
           COUNT(DISTINCT visitor_id) as unique_visitors,
           SUM(page_views) as total_page_views,
-          CAST(AVG(CASE WHEN total_time_on_site <= ${MAX_SESSION_MS} THEN total_time_on_site ELSE NULL END) AS INTEGER) as avg_session_duration,
+          CAST(AVG(CASE WHEN total_time_on_site <= ? THEN total_time_on_site ELSE NULL END) AS INTEGER) as avg_session_duration,
           ROUND(AVG(page_views), 2) as avg_pages_per_session,
           ROUND(COUNT(CASE WHEN bounced = 1 THEN 1 END) * 100.0 / MAX(COUNT(*), 1), 2) as bounce_rate
         FROM visitor_sessions
-        WHERE start_time >= datetime('now', '-${daysNum} days')`
+        WHERE start_time >= ?`,
+        [MAX_SESSION_MS, dateThreshold]
       );
 
       // Get daily breakdown
@@ -278,9 +291,10 @@ router.get(
           COUNT(DISTINCT visitor_id) as visitors,
           SUM(page_views) as page_views
         FROM visitor_sessions
-        WHERE start_time >= datetime('now', '-${daysNum} days')
+        WHERE start_time >= ?
         GROUP BY DATE(start_time)
-        ORDER BY date DESC`
+        ORDER BY date DESC`,
+        [dateThreshold]
       );
 
       // Get top pages
@@ -290,10 +304,11 @@ router.get(
           COUNT(*) as views,
           CAST(AVG(time_on_page) AS INTEGER) as avg_time
         FROM page_views
-        WHERE timestamp >= datetime('now', '-${daysNum} days')
+        WHERE timestamp >= ?
         GROUP BY url
         ORDER BY views DESC
-        LIMIT 10`
+        LIMIT 10`,
+        [dateThreshold]
       );
 
       // Get top referrers
@@ -305,10 +320,11 @@ router.get(
           END as source,
           COUNT(*) as count
         FROM visitor_sessions
-        WHERE start_time >= datetime('now', '-${daysNum} days')
+        WHERE start_time >= ?
         GROUP BY source
         ORDER BY count DESC
-        LIMIT 10`
+        LIMIT 10`,
+        [dateThreshold]
       );
 
       // Get device breakdown
@@ -317,9 +333,10 @@ router.get(
           device_type,
           COUNT(*) as count
         FROM visitor_sessions
-        WHERE start_time >= datetime('now', '-${daysNum} days')
+        WHERE start_time >= ?
         GROUP BY device_type
-        ORDER BY count DESC`
+        ORDER BY count DESC`,
+        [dateThreshold]
       );
 
       // Get browser breakdown
@@ -328,10 +345,11 @@ router.get(
           browser,
           COUNT(*) as count
         FROM visitor_sessions
-        WHERE start_time >= datetime('now', '-${daysNum} days')
+        WHERE start_time >= ?
         GROUP BY browser
         ORDER BY count DESC
-        LIMIT 5`
+        LIMIT 5`,
+        [dateThreshold]
       );
 
       // Get top interactions
@@ -341,10 +359,11 @@ router.get(
           element,
           COUNT(*) as count
         FROM interaction_events
-        WHERE timestamp >= datetime('now', '-${daysNum} days')
+        WHERE timestamp >= ?
         GROUP BY event_type, element
         ORDER BY count DESC
-        LIMIT 10`
+        LIMIT 10`,
+        [dateThreshold]
       );
 
       sendSuccess(res, {
@@ -437,23 +456,27 @@ router.delete(
       const db = getDatabase();
       const { olderThanDays = 90 } = req.query;
       const days = Math.max(parseInt(olderThanDays as string, 10) || 90, 7);
+      const dateThreshold = getDateThreshold(days);
 
       // Delete old interaction events
       await db.run(
         `DELETE FROM interaction_events
-         WHERE timestamp < datetime('now', '-${days} days')`
+         WHERE timestamp < ?`,
+        [dateThreshold]
       );
 
       // Delete old page views
       await db.run(
         `DELETE FROM page_views
-         WHERE timestamp < datetime('now', '-${days} days')`
+         WHERE timestamp < ?`,
+        [dateThreshold]
       );
 
       // Delete old sessions (will cascade if foreign keys are set up)
       const result = await db.run(
         `DELETE FROM visitor_sessions
-         WHERE start_time < datetime('now', '-${days} days')`
+         WHERE start_time < ?`,
+        [dateThreshold]
       );
 
       logger.info('Analytics data cleared', {
@@ -499,11 +522,13 @@ router.get(
       const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 50));
       const daysNum = Math.min(365, Math.max(1, parseInt(days as string, 10) || 7));
       const offset = (pageNum - 1) * limitNum;
+      const dateThreshold = getDateThreshold(daysNum);
 
       // Get total count
       const countResult = await db.get(
         `SELECT COUNT(*) as total FROM visitor_sessions
-         WHERE start_time >= datetime('now', '-${daysNum} days')`
+         WHERE start_time >= ?`,
+        [dateThreshold]
       );
       const total = getNumber(countResult, 'total');
 
@@ -524,10 +549,10 @@ router.get(
           country,
           city
         FROM visitor_sessions
-        WHERE start_time >= datetime('now', '-${daysNum} days')
+        WHERE start_time >= ?
         ORDER BY start_time DESC
         LIMIT ? OFFSET ?`,
-        [limitNum, offset]
+        [dateThreshold, limitNum, offset]
       );
 
       sendSuccess(res, {
@@ -632,24 +657,28 @@ router.get(
       const db = getDatabase();
       const { days = 30 } = req.query;
       const daysNum = Math.min(365, Math.max(1, parseInt(days as string, 10) || 30));
+      const dateThreshold = getDateThreshold(daysNum);
 
       // Get all data for export
       const sessions = await db.all(
         `SELECT * FROM visitor_sessions
-         WHERE start_time >= datetime('now', '-${daysNum} days')
-         ORDER BY start_time DESC`
+         WHERE start_time >= ?
+         ORDER BY start_time DESC`,
+        [dateThreshold]
       );
 
       const pageViews = await db.all(
         `SELECT * FROM page_views
-         WHERE timestamp >= datetime('now', '-${daysNum} days')
-         ORDER BY timestamp DESC`
+         WHERE timestamp >= ?
+         ORDER BY timestamp DESC`,
+        [dateThreshold]
       );
 
       const interactions = await db.all(
         `SELECT * FROM interaction_events
-         WHERE timestamp >= datetime('now', '-${daysNum} days')
-         ORDER BY timestamp DESC`
+         WHERE timestamp >= ?
+         ORDER BY timestamp DESC`,
+        [dateThreshold]
       );
 
       const exportData = {

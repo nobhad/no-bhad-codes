@@ -40,11 +40,13 @@ router.get(
       return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
     }
 
+    // Check access BEFORE fetching to prevent timing attacks
+    if (!(await canAccessInvoice(req, invoiceId))) {
+      return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+    }
+
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
-      if (!(await canAccessInvoice(req, invoiceId))) {
-        return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
-      }
       res.json({ success: true, invoice });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -77,8 +79,9 @@ router.get(
       if (!invoice.id) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
+      // Check access and return 404 to prevent information disclosure
       if (!(await canAccessInvoice(req, invoice.id))) {
-        return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       res.json({ success: true, invoice });
     } catch (error: unknown) {
