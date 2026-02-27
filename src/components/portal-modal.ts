@@ -58,7 +58,7 @@ export interface PortalModalInstance {
 
 /**
  * Create a portal modal shell. Caller appends form/content to body and buttons to footer.
- * Uses modal-overlay, modal-content portal-shadow, modal-header, modal-body, modal-footer.
+ * Uses modal-overlay, modal-content, modal-header, modal-body, modal-footer.
  *
  * Accessibility:
  * - Focus trapping via Tab key
@@ -80,7 +80,7 @@ export function createPortalModal(config: PortalModalConfig): PortalModalInstanc
   overlay.setAttribute('aria-describedby', bodyId);
 
   const content = document.createElement('div');
-  content.className = ['modal-content', 'portal-shadow', contentClassName].filter(Boolean).join(' ');
+  content.className = ['modal-content', contentClassName].filter(Boolean).join(' ');
 
   const header = document.createElement('div');
   header.className = 'modal-header';

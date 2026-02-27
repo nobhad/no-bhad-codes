@@ -30,7 +30,7 @@ export function createQuickStats(items: QuickStatItem[]): HTMLElement {
   items.forEach((item) => {
     const isButton = Boolean(item.dataTab || item.dataFilter);
     const el = isButton ? document.createElement('button') : document.createElement('div');
-    el.className = 'stat-card stat-card-clickable portal-shadow';
+    el.className = 'stat-card stat-card-clickable';
     if (isButton) {
       (el as HTMLButtonElement).type = 'button';
       if (item.dataTab) el.setAttribute('data-tab', item.dataTab);

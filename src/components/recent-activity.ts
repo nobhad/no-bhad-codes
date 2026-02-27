@@ -25,7 +25,7 @@ export function createRecentActivity(
   listId?: string
 ): HTMLElement {
   const wrap = document.createElement('div');
-  wrap.className = 'recent-activity portal-shadow';
+  wrap.className = 'recent-activity';
 
   const h3 = document.createElement('h3');
   h3.textContent = title;

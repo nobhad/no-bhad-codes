@@ -179,16 +179,12 @@ export function createActionCell(config: ActionCellConfig): HTMLTableCellElement
   wrapper.className = wrapperClassName;
 
   actions.forEach(action => {
-    const variantClass = action.variant === 'danger' ? 'icon-btn-danger'
-      : action.variant === 'warning' ? 'icon-btn-warning'
-        : '';
-
     const buttonConfig: IconButtonConfig = {
       iconSvg: action.iconSvg,
       label: action.label,
       title: action.title || action.label,
       onClick: action.onClick,
-      className: [variantClass, action.className].filter(Boolean).join(' '),
+      className: action.className || '',
       disabled: action.disabled
     };
 
@@ -217,10 +213,7 @@ export function getActionCellHTML(
   wrapperClassName = 'table-actions'
 ): string {
   const actionsHTML = actions.map(action => {
-    const variantClass = action.variant === 'danger' ? 'icon-btn-danger'
-      : action.variant === 'warning' ? 'icon-btn-warning'
-        : '';
-    const classes = ['icon-btn', variantClass, action.className].filter(Boolean).join(' ');
+    const classes = ['icon-btn', action.className].filter(Boolean).join(' ');
     const dataAttrs = [
       action.dataAction ? `data-action="${action.dataAction}"` : '',
       action.dataId !== undefined ? `data-id="${action.dataId}"` : '',
