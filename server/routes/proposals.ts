@@ -15,6 +15,7 @@ import { join } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
+import { canAccessProject } from '../middleware/access-control.js';
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { proposalService } from '../services/proposal-service.js';
@@ -150,7 +151,8 @@ router.get(
  */
 router.post(
   '/',
-  asyncHandler(async (req: Request, res: Response) => {
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const submission: ProposalSubmission = req.body;
 
     // Validate required fields
@@ -161,6 +163,11 @@ router.post(
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'VALIDATION_ERROR', {
         missingFields
       });
+    }
+
+    // Authorization check: verify user can access the project
+    if (!(await canAccessProject(req, submission.projectId))) {
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     // Validate project type
