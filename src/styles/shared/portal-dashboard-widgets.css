@@ -1,0 +1,484 @@
+/**
+ * ===============================================
+ * PORTAL DASHBOARD WIDGETS
+ * ===============================================
+ * @file src/styles/shared/portal-dashboard-widgets.css
+ *
+ * Dashboard-specific components: activity feeds, task widgets,
+ * attention cards, kanban boards, and dashboard sections.
+ * Split from portal-cards.css for maintainability.
+ */
+
+/* =====================================================
+   ACTIVITY ITEMS
+   Activity item with icon, content, and time
+   ===================================================== */
+
+.portal .activity-item {
+  display: flex;
+  align-items: center;
+}
+
+.portal .activity-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  background: transparent;
+  border: var(--portal-border);
+  color: var(--portal-text-muted);
+}
+
+.portal .activity-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.portal .activity-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.portal .activity-title {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--portal-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal .activity-client {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+.portal :is(.activity-time, .activity-date) {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+  white-space: nowrap;
+}
+
+.portal .activity-item.empty {
+  justify-content: center;
+  color: var(--portal-text-muted);
+  font-style: italic;
+}
+
+/* =====================================================
+   UPCOMING TASKS WIDGET
+   ===================================================== */
+
+.portal .upcoming-tasks {
+  background: transparent;
+  border: var(--portal-border);
+  padding: var(--space-3);
+}
+
+.portal .upcoming-tasks .section-header-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.portal .upcoming-tasks .section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* =====================================================
+   DASHBOARD KANBAN VIEW
+   ===================================================== */
+
+.portal .dashboard-tasks-kanban {
+  min-height: 200px;
+}
+
+.portal .dashboard-tasks-kanban .kanban-board {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.portal .dashboard-tasks-kanban .kanban-column {
+  min-width: 180px;
+  flex: 1 1 0 !important;
+}
+
+.portal .dashboard-tasks-kanban .kanban-column-header {
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+}
+
+.portal .dashboard-tasks-kanban .kanban-card {
+  padding: var(--space-2);
+}
+
+.portal .dashboard-tasks-kanban .task-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--space-1);
+}
+
+.portal .dashboard-tasks-kanban .task-card-title {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--portal-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal .dashboard-tasks-kanban .task-card-project {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+.portal .dashboard-tasks-kanban .task-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.portal .dashboard-tasks-kanban .task-priority {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: var(--space-0-5) var(--space-1);
+  background: transparent;
+  border: var(--portal-border);
+  color: var(--portal-text-muted);
+}
+
+.portal .dashboard-tasks-kanban .task-priority.task-priority-urgent {
+  background: transparent;
+  border-color: var(--status-cancelled);
+  color: var(--status-cancelled);
+}
+
+.portal .dashboard-tasks-kanban .task-priority.task-priority-high {
+  background: transparent;
+  border-color: var(--status-on-hold);
+  color: var(--status-on-hold);
+}
+
+.portal .dashboard-tasks-kanban .task-priority.task-priority-medium {
+  background: transparent;
+  border-color: var(--app-color-primary);
+  color: var(--app-color-primary);
+}
+
+.portal .dashboard-tasks-kanban .task-due-date {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-xs);
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+.portal .dashboard-tasks-kanban .task-due-date.overdue {
+  color: var(--status-cancelled);
+}
+
+/* =====================================================
+   UPCOMING TASKS LIST
+   ===================================================== */
+
+.portal .upcoming-tasks-list .task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: var(--portal-border);
+  margin-bottom: var(--space-0-5);
+  cursor: pointer;
+  transition: border-color var(--transition-mouse) ease;
+}
+
+.portal .upcoming-tasks-list .task-item:hover {
+  border-color: var(--portal-border-color);
+}
+
+.portal .upcoming-tasks-list .task-item:last-child {
+  margin-bottom: 0;
+}
+
+.portal .upcoming-tasks-list .task-item.empty {
+  justify-content: center;
+  color: var(--portal-text-muted);
+  font-style: italic;
+  cursor: default;
+}
+
+.portal .upcoming-tasks-list .task-item.empty:hover {
+  border-color: var(--portal-border-color);
+}
+
+.portal .task-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.portal .task-item .task-title {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal .task-item .task-project {
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.portal .task-item-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.portal .task-item .task-due {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+  white-space: nowrap;
+}
+
+.portal .task-item.task-overdue .task-due {
+  color: var(--status-cancelled);
+}
+
+/* =====================================================
+   TASK PRIORITY BADGES - UNIFIED
+   Single source of truth for .task-priority and .task-priority-badge
+   ===================================================== */
+
+.portal :is(.task-priority, .task-priority-badge) {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: var(--space-0-5) var(--space-1);
+  background: transparent;
+  border: var(--portal-border);
+  color: var(--portal-text-muted);
+}
+
+.portal :is(.task-priority, .task-priority-badge).task-priority-urgent {
+  background: transparent;
+  border-color: var(--status-cancelled);
+  color: var(--status-cancelled);
+}
+
+.portal :is(.task-priority, .task-priority-badge).task-priority-high {
+  background: transparent;
+  border-color: var(--status-on-hold);
+  color: var(--status-on-hold);
+}
+
+.portal :is(.task-priority, .task-priority-badge).task-priority-medium {
+  background: transparent;
+  border-color: var(--app-color-primary);
+  color: var(--app-color-primary);
+}
+
+.portal :is(.task-priority, .task-priority-badge).task-priority-low {
+  background: transparent;
+  border-color: var(--portal-text-secondary);
+  color: var(--portal-text-secondary);
+}
+
+.portal .upcoming-tasks-list .loading-row {
+  padding: var(--space-2) var(--space-3);
+  color: var(--portal-text-muted);
+  font-style: italic;
+}
+
+/* =====================================================
+   DASHBOARD OVERVIEW CARD
+   Wraps all dashboard sections
+   ===================================================== */
+
+.portal .dashboard-overview-card {
+  padding: var(--space-6);
+  background: transparent;
+  border: var(--portal-border);
+}
+
+/* =====================================================
+   DASHBOARD SECTIONS
+   ===================================================== */
+
+.portal .dashboard-section {
+  margin-bottom: var(--space-3);
+}
+
+.portal .dashboard-section:last-child {
+  margin-bottom: 0;
+}
+
+.portal .dashboard-section-title {
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--portal-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--space-1-5) 0;
+}
+
+/* =====================================================
+   ATTENTION CARD
+   ===================================================== */
+
+.portal .attention-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  min-height: 88px;
+  background: transparent;
+  border: var(--portal-border);
+  color: var(--portal-text-light);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  text-align: center;
+  box-shadow: none;
+}
+
+.portal .attention-card:hover {
+  border-color: var(--portal-border-color);
+}
+
+/* Attention icon container - no background, just colored icon */
+.portal .attention-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  background: none;
+}
+
+.portal .attention-icon-warning {
+  color: var(--portal-text-secondary);
+}
+
+.portal .attention-icon-info {
+  color: var(--portal-text-secondary);
+}
+
+.portal .attention-icon-danger {
+  color: var(--portal-text-secondary);
+}
+
+/* Attention content */
+.portal .attention-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.portal .attention-count {
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-primary);
+  margin-bottom: var(--space-0-5);
+}
+
+/* Highlight attention cards with values > 0 */
+.portal .attention-card.has-items .attention-count {
+  color: var(--color-primary);
+}
+
+/* =====================================================
+   DASHBOARD WIDGETS MOBILE RESPONSIVE
+   ===================================================== */
+
+@media (--small-mobile) {
+  .portal .upcoming-tasks {
+    padding: 0.75rem;
+  }
+
+  .portal .upcoming-tasks .section-header-inline {
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .portal .upcoming-tasks .section-header-actions {
+    gap: var(--space-1);
+  }
+
+  .portal .upcoming-tasks-list .task-item {
+    flex-wrap: wrap;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .portal .task-item-meta {
+    width: 100%;
+    margin-top: var(--space-1);
+    justify-content: flex-end;
+  }
+
+  .portal .recent-activity {
+    padding: 0.75rem;
+  }
+
+  .portal .activity-list li {
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Kanban board - enable horizontal scroll on very small screens */
+  .portal .dashboard-tasks-kanban {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .portal .dashboard-tasks-kanban .kanban-board {
+    min-width: max-content;
+  }
+
+  .portal .dashboard-tasks-kanban .kanban-column {
+    min-width: 140px;
+  }
+
+  .portal .dashboard-overview-card {
+    padding: var(--space-4);
+  }
+
+  .portal .attention-card {
+    padding: var(--space-3);
+  }
+
+  .portal .attention-count {
+    font-size: 1.25rem;
+  }
+}
