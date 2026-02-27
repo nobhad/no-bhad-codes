@@ -7,81 +7,35 @@
  * Single source of truth for all table action buttons.
  * Tables declare which actions they need, this module
  * renders them consistently.
+ *
+ * NOTE: This module now uses the factory system internally.
+ * For new code, consider importing directly from @/factories.
  */
 
-import { ICONS } from '../constants/icons';
+import {
+  renderButton as factoryRenderButton,
+  renderButtons as factoryRenderButtons,
+  renderActionsCell as factoryRenderActionsCell,
+  createAction as factoryCreateAction,
+  conditionalAction as factoryConditionalAction,
+  BUTTON_ACTIONS,
+  getButtonSet
+} from '../factories';
+import type { ButtonConfig } from '../factories/types';
 
-/** Standard size for all table action icons (in pixels) */
-const TABLE_ICON_SIZE = { width: 16, height: 16 };
+// Re-export BUTTON_ACTIONS as TABLE_ACTIONS for backwards compatibility
+export const TABLE_ACTIONS = BUTTON_ACTIONS;
 
-// ============================================
-// BUTTON DEFINITIONS
-// ============================================
-
-/**
- * All available table action button types.
- * Each button has a consistent icon and title.
- */
-export const TABLE_ACTIONS = {
-  // View/Navigation
-  view: { icon: ICONS.EYE, title: 'View', ariaLabel: 'View' },
-  preview: { icon: ICONS.EYE, title: 'Preview', ariaLabel: 'Preview' },
-
-  // Edit/Modify
-  edit: { icon: ICONS.EDIT, title: 'Edit', ariaLabel: 'Edit' },
-
-  // Delete/Remove
-  delete: { icon: ICONS.TRASH, title: 'Delete', ariaLabel: 'Delete' },
-  remove: { icon: ICONS.X, title: 'Remove', ariaLabel: 'Remove' },
-
-  // Send/Share
-  send: { icon: ICONS.SEND, title: 'Send', ariaLabel: 'Send' },
-  remind: { icon: ICONS.BELL, title: 'Send reminder', ariaLabel: 'Send reminder' },
-
-  // Approve/Reject
-  approve: { icon: ICONS.CIRCLE_CHECK, title: 'Approve', ariaLabel: 'Approve' },
-  reject: { icon: ICONS.CIRCLE_X, title: 'Reject', ariaLabel: 'Reject' },
-  'start-review': { icon: ICONS.CHECK_SQUARE, title: 'Start review', ariaLabel: 'Start review' },
-
-  // Download/Export
-  download: { icon: ICONS.DOWNLOAD, title: 'Download', ariaLabel: 'Download' },
-  export: { icon: ICONS.DOWNLOAD, title: 'Export', ariaLabel: 'Export' },
-
-  // Convert/Transform
-  convert: { icon: ICONS.ROCKET, title: 'Convert', ariaLabel: 'Convert' },
-  'convert-client': { icon: ICONS.USER_PLUS, title: 'Convert to Client', ariaLabel: 'Convert to Client' },
-  'convert-project': { icon: ICONS.ROCKET, title: 'Convert to Project', ariaLabel: 'Convert to Project' },
-  'convert-invoice': { icon: ICONS.RECEIPT, title: 'Convert to Invoice', ariaLabel: 'Convert to Invoice' },
-
-  // Status/Toggle
-  toggle: { icon: ICONS.EYE, title: 'Toggle', ariaLabel: 'Toggle' },
-  enable: { icon: ICONS.EYE, title: 'Enable', ariaLabel: 'Enable' },
-  disable: { icon: ICONS.EYE_OFF, title: 'Disable', ariaLabel: 'Disable' },
-  'mark-paid': { icon: ICONS.CIRCLE_CHECK, title: 'Mark as Paid', ariaLabel: 'Mark as Paid' },
-
-  // Archive/Restore/Expire
-  archive: { icon: ICONS.ARCHIVE, title: 'Archive', ariaLabel: 'Archive' },
-  restore: { icon: ICONS.ROTATE_CCW, title: 'Restore', ariaLabel: 'Restore' },
-  expire: { icon: ICONS.CLOCK, title: 'Expire', ariaLabel: 'Expire' },
-
-  // Workflow
-  steps: { icon: ICONS.LIST, title: 'Manage steps', ariaLabel: 'Manage steps' },
-  history: { icon: ICONS.LIST, title: 'View History', ariaLabel: 'View History' },
-
-  // Other
-  copy: { icon: ICONS.COPY, title: 'Copy', ariaLabel: 'Copy' },
-  refresh: { icon: ICONS.REFRESH, title: 'Refresh', ariaLabel: 'Refresh' },
-  add: { icon: ICONS.PLUS, title: 'Add', ariaLabel: 'Add' },
-  test: { icon: ICONS.SEND, title: 'Send Test', ariaLabel: 'Send test' },
-  versions: { icon: ICONS.LIST, title: 'Version History', ariaLabel: 'View version history' }
-} as const;
-
-export type TableActionType = keyof typeof TABLE_ACTIONS;
+export type TableActionType = keyof typeof BUTTON_ACTIONS;
 
 // ============================================
 // BUTTON CONFIGURATION
 // ============================================
 
+/**
+ * Table action configuration interface.
+ * @deprecated Use ButtonConfig from @/factories/types instead.
+ */
 export interface TableActionConfig {
   /** Action type from TABLE_ACTIONS */
   action: TableActionType;
@@ -102,54 +56,18 @@ export interface TableActionConfig {
 }
 
 // ============================================
-// RENDER FUNCTIONS
+// RENDER FUNCTIONS (using factory internally)
 // ============================================
 
 /**
- * Normalize SVG icon to standard table size (16x16).
- * Replaces width/height attributes in the SVG string.
- */
-function normalizeIconSize(iconSvg: string): string {
-  return iconSvg
-    .replace(/width="\d+"/, `width="${TABLE_ICON_SIZE.width}"`)
-    .replace(/height="\d+"/, `height="${TABLE_ICON_SIZE.height}"`);
-}
-
-/**
  * Render a single table action button.
+ * Uses the factory system internally for consistency.
  */
 export function renderActionButton(config: TableActionConfig): string {
-  const { action, dataId, dataAttrs = {}, title, ariaLabel, className, show = true, disabled = false } = config;
-
-  if (!show) return '';
-
-  const def = TABLE_ACTIONS[action];
-  if (!def) {
-    console.warn(`Unknown table action: ${action}`);
-    return '';
-  }
-
-  const buttonTitle = title ?? def.title;
-  const buttonAriaLabel = ariaLabel ?? def.ariaLabel;
-
-  // Normalize icon size for consistent table display
-  const normalizedIcon = normalizeIconSize(def.icon);
-
-  // Build data attributes
-  const dataAttrStr = Object.entries({
-    'data-action': action,
-    ...(dataId !== undefined ? { 'data-id': dataId } : {}),
-    ...Object.fromEntries(
-      Object.entries(dataAttrs).map(([k, v]) => [`data-${k}`, v])
-    )
-  })
-    .map(([k, v]) => `${k}="${v}"`)
-    .join(' ');
-
-  const classNames = ['icon-btn', className].filter(Boolean).join(' ');
-  const disabledAttr = disabled ? 'disabled' : '';
-
-  return `<button type="button" class="${classNames}" ${dataAttrStr} title="${buttonTitle}" aria-label="${buttonAriaLabel}" ${disabledAttr}>${normalizedIcon}</button>`;
+  return factoryRenderButton({
+    ...config,
+    context: 'table'
+  } as ButtonConfig);
 }
 
 /**
@@ -157,16 +75,19 @@ export function renderActionButton(config: TableActionConfig): string {
  * Returns HTML string for the actions cell content.
  */
 export function renderActionButtons(configs: TableActionConfig[]): string {
-  return configs.map(renderActionButton).filter(Boolean).join('');
+  return factoryRenderButtons(
+    configs.map(cfg => ({ ...cfg, context: 'table' }) as ButtonConfig)
+  );
 }
 
 /**
  * Render a complete table actions cell.
  */
 export function renderActionsCell(configs: TableActionConfig[]): string {
-  const buttons = renderActionButtons(configs);
-  if (!buttons) return '';
-  return `<div class="table-actions">${buttons}</div>`;
+  return factoryRenderActionsCell(
+    configs.map(cfg => ({ ...cfg }) as ButtonConfig),
+    'table'
+  );
 }
 
 // ============================================
@@ -175,40 +96,30 @@ export function renderActionsCell(configs: TableActionConfig[]): string {
 
 /**
  * Common button sets for different entity types.
- * Use these as starting points and customize as needed.
+ * Uses the factory's BUTTON_SETS for consistency.
+ *
+ * @deprecated Use getButtonSet() from @/factories instead.
  */
 export const COMMON_ACTION_SETS = {
   /** View, Edit, Delete */
-  crud: (id: string | number) => [
-    { action: 'view' as const, dataId: id },
-    { action: 'edit' as const, dataId: id },
-    { action: 'delete' as const, dataId: id }
-  ],
+  crud: (id: string | number): TableActionConfig[] =>
+    getButtonSet('tableCrud', id) as TableActionConfig[],
 
   /** View, Delete */
-  viewDelete: (id: string | number) => [
-    { action: 'view' as const, dataId: id },
-    { action: 'delete' as const, dataId: id }
-  ],
+  viewDelete: (id: string | number): TableActionConfig[] =>
+    getButtonSet('tableViewDelete', id) as TableActionConfig[],
 
   /** Edit, Delete */
-  editDelete: (id: string | number) => [
-    { action: 'edit' as const, dataId: id },
-    { action: 'delete' as const, dataId: id }
-  ],
+  editDelete: (id: string | number): TableActionConfig[] =>
+    getButtonSet('tableEditDelete', id) as TableActionConfig[],
 
   /** Preview, Download, Delete (files) */
-  fileActions: (id: string | number, canPreview = true, canDelete = true) => [
-    { action: 'preview' as const, dataId: id, show: canPreview },
-    { action: 'download' as const, dataId: id },
-    { action: 'delete' as const, dataId: id, show: canDelete }
-  ],
+  fileActions: (id: string | number, canPreview = true, canDelete = true): TableActionConfig[] =>
+    getButtonSet('tableFile', id, canPreview, canDelete) as TableActionConfig[],
 
   /** Restore, Delete (deleted items) */
-  deletedItemActions: (id: string | number) => [
-    { action: 'restore' as const, dataId: id },
-    { action: 'delete' as const, dataId: id, title: 'Delete Permanently', ariaLabel: 'Delete permanently' }
-  ]
+  deletedItemActions: (id: string | number): TableActionConfig[] =>
+    getButtonSet('tableDeletedItem', id) as TableActionConfig[]
 };
 
 // ============================================
@@ -223,7 +134,7 @@ export function createAction(
   dataId?: string | number,
   options?: Partial<Omit<TableActionConfig, 'action' | 'dataId'>>
 ): TableActionConfig {
-  return { action, dataId, ...options };
+  return factoryCreateAction(action, dataId, options) as TableActionConfig;
 }
 
 /**
@@ -235,5 +146,5 @@ export function conditionalAction(
   dataId?: string | number,
   options?: Partial<Omit<TableActionConfig, 'action' | 'dataId' | 'show'>>
 ): TableActionConfig {
-  return { action, dataId, show: condition, ...options };
+  return factoryConditionalAction(condition, action, dataId, options) as TableActionConfig;
 }

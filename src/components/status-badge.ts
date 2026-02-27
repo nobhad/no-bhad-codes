@@ -6,33 +6,23 @@
  *
  * Renders a status/pill badge. Use in admin and client portal so badges
  * use the same markup and classes (shared CSS: portal-badges.css).
+ *
+ * NOTE: This module now uses the factory system internally.
+ * For new code, consider importing directly from @/factories.
  */
 
-export type StatusBadgeVariant =
-  | 'active'
-  | 'pending'
-  | 'in-progress'
-  | 'on_hold'
-  | 'completed'
-  | 'healthy'
-  | 'at-risk'
-  | 'critical'
-  | 'signed'
-  | 'not-signed'
-  | string;
+import {
+  getStatusBadgeHTML as factoryGetStatusBadgeHTML,
+  getStatusDotHTML as factoryGetStatusDotHTML,
+  createStatusBadge as factoryCreateStatusBadge,
+  createStatusDot as factoryCreateStatusDot,
+  normalizeStatus,
+  formatStatusLabel
+} from '../factories';
+import type { BadgeVariant } from '../factories/types';
 
-function escapeHtml(text: string): string {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-/**
- * Normalize variant for CSS class (e.g. on_hold -> on-hold).
- */
-function variantToClass(variant: string): string {
-  return variant.replace(/_/g, '-').toLowerCase();
-}
+// Re-export the variant type for backwards compatibility
+export type StatusBadgeVariant = BadgeVariant;
 
 /**
  * Create a status badge element. Use shared class .status-badge and
@@ -42,10 +32,7 @@ export function createStatusBadge(
   label: string,
   variant: StatusBadgeVariant = 'pending'
 ): HTMLElement {
-  const span = document.createElement('span');
-  span.className = `status-badge status-${variantToClass(variant)}`;
-  span.textContent = label;
-  return span;
+  return factoryCreateStatusBadge(label, variant);
 }
 
 /**
@@ -55,17 +42,7 @@ export function getStatusBadgeHTML(
   label: string,
   variant: StatusBadgeVariant = 'pending'
 ): string {
-  const cls = `status-badge status-${variantToClass(variant)}`;
-  return `<span class="${escapeHtml(cls)}">${escapeHtml(label)}</span>`;
-}
-
-/**
- * Format status text for display (capitalize, handle underscores/hyphens).
- */
-function formatStatusLabel(status: string): string {
-  return status
-    .replace(/[_-]/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return factoryGetStatusBadgeHTML(label, variant);
 }
 
 /**
@@ -79,12 +56,7 @@ export function getStatusDotHTML(
   status: string,
   options?: { label?: string; uppercase?: boolean }
 ): string {
-  const variant = variantToClass(status);
-  let label = options?.label ?? formatStatusLabel(status);
-  if (options?.uppercase) {
-    label = label.toUpperCase();
-  }
-  return `<span class="status-indicator status-${escapeHtml(variant)}"><span class="status-dot"></span><span class="status-text">${escapeHtml(label)}</span></span>`;
+  return factoryGetStatusDotHTML(status, options);
 }
 
 /**
@@ -94,21 +66,8 @@ export function createStatusDot(
   status: string,
   options?: { label?: string; uppercase?: boolean }
 ): HTMLElement {
-  const span = document.createElement('span');
-  span.className = `status-indicator status-${variantToClass(status)}`;
-
-  const dot = document.createElement('span');
-  dot.className = 'status-dot';
-
-  const text = document.createElement('span');
-  text.className = 'status-text';
-  let label = options?.label ?? formatStatusLabel(status);
-  if (options?.uppercase) {
-    label = label.toUpperCase();
-  }
-  text.textContent = label;
-
-  span.appendChild(dot);
-  span.appendChild(text);
-  return span;
+  return factoryCreateStatusDot(status, options);
 }
+
+// Re-export utility functions
+export { normalizeStatus, formatStatusLabel };

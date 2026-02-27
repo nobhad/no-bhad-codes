@@ -24,11 +24,11 @@ const ICON_ATTRS = {
  * Password visibility toggle icons
  */
 export const ICONS = {
-  // Eye icon (show password)
-  EYE: `<svg xmlns="${ICON_ATTRS.xmlns}" width="20" height="20" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
+  // Eye icon (show password / view action) - 18x18 for table actions (design system desktop)
+  EYE: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
 
-  // Eye-off icon (hide password)
-  EYE_OFF: `<svg xmlns="${ICON_ATTRS.xmlns}" width="20" height="20" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`,
+  // Eye-off icon (hide password) - 18x18 for consistency
+  EYE_OFF: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`,
 
   // Close/X icon
   CLOSE: `<svg xmlns="${ICON_ATTRS.xmlns}" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`,
@@ -36,7 +36,7 @@ export const ICONS = {
   // Dropdown caret (chevron down)
   CARET_DOWN: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" class="custom-dropdown-caret" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`,
 
-  // Trash icon (delete)
+  // Trash icon (delete) - 18x18 for table actions (design system desktop)
   TRASH: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`,
 
   // Image icon (file type)
@@ -51,11 +51,11 @@ export const ICONS = {
   // Upload icon
   UPLOAD: `<svg xmlns="${ICON_ATTRS.xmlns}" width="48" height="48" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
 
-  // Filter icon
-  FILTER: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>`,
+  // Filter icon - 16x16 for consistency
+  FILTER: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>`,
 
-  // Search icon
-  SEARCH: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
+  // Search icon - 16x16 for consistency
+  SEARCH: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
 
   // Sort icons
   SORT_NEUTRAL: `<svg xmlns="${ICON_ATTRS.xmlns}" width="14" height="14" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" class="sort-neutral" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>`,
@@ -64,11 +64,11 @@ export const ICONS = {
 
   SORT_DESC: `<svg xmlns="${ICON_ATTRS.xmlns}" width="14" height="14" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" class="sort-desc" aria-hidden="true"><path d="m7 15 5 5 5-5"/></svg>`,
 
-  // Check icon
-  CHECK: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+  // Check icon - 16x16 for consistency
+  CHECK: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
 
-  // Plus icon
-  PLUS: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+  // Plus icon - 16x16 for consistency
+  PLUS: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
 
   // Pencil/Edit icon
   PENCIL: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
@@ -91,37 +91,37 @@ export const ICONS = {
 
   CHEVRONS_RIGHT: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="m6 17 5-5-5-5"/><path d="m13 17 5-5-5-5"/></svg>`,
 
-  // Archive icon
-  ARCHIVE: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>`,
+  // Archive icon - 18x18 for table actions (design system desktop)
+  ARCHIVE: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>`,
 
-  // Download/Export icon
-  DOWNLOAD: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  // Download/Export icon - 18x18 for table actions (design system desktop)
+  DOWNLOAD: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
 
-  // Mail icon (reply via email)
+  // Mail icon (reply via email) - 18x18 for table actions (design system desktop)
   MAIL: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
 
-  // User plus icon (convert to client)
+  // User plus icon (convert to client) - 18x18 for table actions (design system desktop)
   USER_PLUS: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>`,
 
-  // Rotate ccw icon (restore)
+  // Rotate ccw icon (restore) - 18x18 for table actions (design system desktop)
   ROTATE_CCW: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`,
 
-  // Clock icon (time, expire)
-  CLOCK: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  // Clock icon (time, expire) - 18x18 for table actions (design system desktop)
+  CLOCK: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
 
-  // Rocket icon (activate as project / launch)
+  // Rocket icon (activate as project / launch) - 18x18 for table actions (design system desktop)
   ROCKET: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>`,
 
-  // Copy to clipboard (Lucide copy)
-  COPY: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
+  // Copy to clipboard (Lucide copy) - 18x18 for table actions (design system desktop)
+  COPY: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
 
-  // Bell icon (notifications/reminders)
+  // Bell icon (notifications/reminders) - 18x18 for table actions (design system desktop)
   BELL: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>`,
 
-  // Edit icon (alias for PENCIL)
-  EDIT: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
+  // Edit icon (alias for PENCIL) - 18x18 for table actions (design system desktop)
+  EDIT: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
 
-  // Send icon
+  // Send icon - 18x18 for table actions (design system desktop)
   SEND: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>`,
 
   // Palette icon (brand colors)
@@ -149,7 +149,7 @@ export const ICONS = {
   EXTERNAL_LINK: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
 
   // Refresh icon
-  REFRESH: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>`,
+  REFRESH: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>`,
 
   // Folder icon
   FOLDER: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
