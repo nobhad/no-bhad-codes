@@ -8,7 +8,8 @@
         try {
           // Theme detection
           var savedTheme = localStorage.getItem('theme');
-          var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var systemDark =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
           var theme = savedTheme || (systemDark ? 'dark' : 'light');
           document.documentElement.setAttribute('data-theme', theme);
           // Set theme-color meta immediately to match background
@@ -121,43 +122,81 @@
       /* CRITICAL: Hash-based initial page visibility - prevents flash on refresh */
       /* Only applies before JS initializes (html has data-initial-page but not .js-ready) */
       /* When on intro page (default), show intro, hide others */
-      html[data-initial-page="intro"]:not(.js-ready) #intro { display: grid !important; opacity: 1 !important; visibility: visible !important; }
-      html[data-initial-page="intro"]:not(.js-ready) #about,
-      html[data-initial-page="intro"]:not(.js-ready) #contact,
-      html[data-initial-page="intro"]:not(.js-ready) #projects,
-      html[data-initial-page="intro"]:not(.js-ready) #project-detail { display: none !important; }
+      html[data-initial-page='intro']:not(.js-ready) #intro {
+        display: grid !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      html[data-initial-page='intro']:not(.js-ready) #about,
+      html[data-initial-page='intro']:not(.js-ready) #contact,
+      html[data-initial-page='intro']:not(.js-ready) #projects,
+      html[data-initial-page='intro']:not(.js-ready) #project-detail {
+        display: none !important;
+      }
 
       /* When on about page, show about, hide others */
-      html[data-initial-page="about"]:not(.js-ready) #about { display: grid !important; opacity: 1 !important; visibility: visible !important; }
-      html[data-initial-page="about"]:not(.js-ready) #intro,
-      html[data-initial-page="about"]:not(.js-ready) #contact,
-      html[data-initial-page="about"]:not(.js-ready) #projects,
-      html[data-initial-page="about"]:not(.js-ready) #project-detail { display: none !important; }
-      html[data-initial-page="about"]:not(.js-ready) .intro-morph-overlay { display: none !important; }
+      html[data-initial-page='about']:not(.js-ready) #about {
+        display: grid !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      html[data-initial-page='about']:not(.js-ready) #intro,
+      html[data-initial-page='about']:not(.js-ready) #contact,
+      html[data-initial-page='about']:not(.js-ready) #projects,
+      html[data-initial-page='about']:not(.js-ready) #project-detail {
+        display: none !important;
+      }
+      html[data-initial-page='about']:not(.js-ready) .intro-morph-overlay {
+        display: none !important;
+      }
 
       /* When on contact page, show contact, hide others */
-      html[data-initial-page="contact"]:not(.js-ready) #contact { display: grid !important; opacity: 1 !important; visibility: visible !important; }
-      html[data-initial-page="contact"]:not(.js-ready) #intro,
-      html[data-initial-page="contact"]:not(.js-ready) #about,
-      html[data-initial-page="contact"]:not(.js-ready) #projects,
-      html[data-initial-page="contact"]:not(.js-ready) #project-detail { display: none !important; }
-      html[data-initial-page="contact"]:not(.js-ready) .intro-morph-overlay { display: none !important; }
+      html[data-initial-page='contact']:not(.js-ready) #contact {
+        display: grid !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      html[data-initial-page='contact']:not(.js-ready) #intro,
+      html[data-initial-page='contact']:not(.js-ready) #about,
+      html[data-initial-page='contact']:not(.js-ready) #projects,
+      html[data-initial-page='contact']:not(.js-ready) #project-detail {
+        display: none !important;
+      }
+      html[data-initial-page='contact']:not(.js-ready) .intro-morph-overlay {
+        display: none !important;
+      }
 
       /* When on projects page, show projects, hide others */
-      html[data-initial-page="projects"]:not(.js-ready) #projects { display: grid !important; opacity: 1 !important; visibility: visible !important; }
-      html[data-initial-page="projects"]:not(.js-ready) #intro,
-      html[data-initial-page="projects"]:not(.js-ready) #about,
-      html[data-initial-page="projects"]:not(.js-ready) #contact,
-      html[data-initial-page="projects"]:not(.js-ready) #project-detail { display: none !important; }
-      html[data-initial-page="projects"]:not(.js-ready) .intro-morph-overlay { display: none !important; }
+      html[data-initial-page='projects']:not(.js-ready) #projects {
+        display: grid !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      html[data-initial-page='projects']:not(.js-ready) #intro,
+      html[data-initial-page='projects']:not(.js-ready) #about,
+      html[data-initial-page='projects']:not(.js-ready) #contact,
+      html[data-initial-page='projects']:not(.js-ready) #project-detail {
+        display: none !important;
+      }
+      html[data-initial-page='projects']:not(.js-ready) .intro-morph-overlay {
+        display: none !important;
+      }
 
       /* When on project detail page, show project-detail, hide others */
-      html[data-initial-page="project-detail"]:not(.js-ready) #project-detail { display: grid !important; opacity: 1 !important; visibility: visible !important; }
-      html[data-initial-page="project-detail"]:not(.js-ready) #intro,
-      html[data-initial-page="project-detail"]:not(.js-ready) #about,
-      html[data-initial-page="project-detail"]:not(.js-ready) #contact,
-      html[data-initial-page="project-detail"]:not(.js-ready) #projects { display: none !important; }
-      html[data-initial-page="project-detail"]:not(.js-ready) .intro-morph-overlay { display: none !important; }
+      html[data-initial-page='project-detail']:not(.js-ready) #project-detail {
+        display: grid !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      html[data-initial-page='project-detail']:not(.js-ready) #intro,
+      html[data-initial-page='project-detail']:not(.js-ready) #about,
+      html[data-initial-page='project-detail']:not(.js-ready) #contact,
+      html[data-initial-page='project-detail']:not(.js-ready) #projects {
+        display: none !important;
+      }
+      html[data-initial-page='project-detail']:not(.js-ready) .intro-morph-overlay {
+        display: none !important;
+      }
     </style>
 
     <!-- SEO -->
@@ -186,7 +225,10 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="No Bhad Codes - Professional Web Development" />
-    <meta name="twitter:description" content="Professional web development services by Noelle Bhaduri" />
+    <meta
+      name="twitter:description"
+      content="Professional web development services by Noelle Bhaduri"
+    />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -196,10 +238,22 @@
     <link rel="manifest" href="/site.webmanifest" />
 
     <!-- Font Preload - eliminates FOIT/FOUT -->
-    <link rel="preload" href="/fonts/Acme/Acme-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link
+      rel="preload"
+      href="/fonts/Acme/Acme-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
     <!-- LCP Image Preloads - business card is the LCP element -->
-    <link rel="preload" href="/images/business-card_front.svg" as="image" type="image/svg+xml" fetchpriority="high" />
+    <link
+      rel="preload"
+      href="/images/business-card_front.svg"
+      as="image"
+      type="image/svg+xml"
+      fetchpriority="high"
+    />
     <link rel="preload" href="/images/business-card_back.svg" as="image" type="image/svg+xml" />
 
     <!-- Main Script -->
@@ -207,54 +261,59 @@
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "WebSite",
-          "@id": "https://nobhad.codes/#website",
-          "url": "https://nobhad.codes/",
-          "name": "No Bhad Codes",
-          "description": "Professional web development services by Noelle Bhaduri",
-          "publisher": { "@id": "https://nobhad.codes/#person" }
-        },
-        {
-          "@type": "Person",
-          "@id": "https://nobhad.codes/#person",
-          "name": "Noelle Bhaduri",
-          "url": "https://nobhad.codes/",
-          "email": "nobhaduri@gmail.com",
-          "jobTitle": "Full-Stack Web Developer",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Boston",
-            "addressRegion": "MA",
-            "addressCountry": "US"
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://nobhad.codes/#website",
+            "url": "https://nobhad.codes/",
+            "name": "No Bhad Codes",
+            "description": "Professional web development services by Noelle Bhaduri",
+            "publisher": { "@id": "https://nobhad.codes/#person" }
           },
-          "sameAs": [
-            "https://github.com/nobhad",
-            "https://www.linkedin.com/in/noelle-b-676286106/"
-          ],
-          "knowsAbout": ["Web Development", "TypeScript", "React", "Node.js"]
-        },
-        {
-          "@type": "ProfessionalService",
-          "@id": "https://nobhad.codes/#service",
-          "name": "No Bhad Codes",
-          "url": "https://nobhad.codes/",
-          "description": "Professional web development services",
-          "provider": { "@id": "https://nobhad.codes/#person" },
-          "areaServed": "Boston, MA",
-          "serviceType": ["Web Development", "Custom Website Design", "Client Portal Development"]
-        }
-      ]
-    }
+          {
+            "@type": "Person",
+            "@id": "https://nobhad.codes/#person",
+            "name": "Noelle Bhaduri",
+            "url": "https://nobhad.codes/",
+            "email": "nobhaduri@gmail.com",
+            "jobTitle": "Full-Stack Web Developer",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Boston",
+              "addressRegion": "MA",
+              "addressCountry": "US"
+            },
+            "sameAs": [
+              "https://github.com/nobhad",
+              "https://www.linkedin.com/in/noelle-b-676286106/"
+            ],
+            "knowsAbout": ["Web Development", "TypeScript", "React", "Node.js"]
+          },
+          {
+            "@type": "ProfessionalService",
+            "@id": "https://nobhad.codes/#service",
+            "name": "No Bhad Codes",
+            "url": "https://nobhad.codes/",
+            "description": "Professional web development services",
+            "provider": { "@id": "https://nobhad.codes/#person" },
+            "areaServed": "Boston, MA",
+            "serviceType": ["Web Development", "Custom Website Design", "Client Portal Development"]
+          }
+        ]
+      }
     </script>
   </head>
   <body>
     <!-- Intro Morph Animation Overlay - visible by default, hidden by JS when not on intro page -->
     <div id="intro-morph-overlay" class="intro-morph-overlay">
-      <svg id="intro-morph-svg" class="intro-morph-svg" viewBox="0 0 2331.1 1798.6" preserveAspectRatio="xMidYMid meet">
+      <svg
+        id="intro-morph-svg"
+        class="intro-morph-svg"
+        viewBox="0 0 2331.1 1798.6"
+        preserveAspectRatio="xMidYMid meet"
+      >
         <!-- Shadow filters matching business card box-shadow (light and dark modes) -->
         <defs>
           <filter id="card-shadow-light" x="-50%" y="-50%" width="200%" height="200%">
@@ -293,33 +352,97 @@
       <div class="portal-dropdown-header">Client Login</div>
 
       <div class="portal-auth-toggle">
-        <button type="button" class="portal-toggle-btn active" data-form="password">Password</button>
+        <button type="button" class="portal-toggle-btn active" data-form="password">
+          Password
+        </button>
         <button type="button" class="portal-toggle-btn" data-form="magic">Magic Link</button>
       </div>
 
       <!-- Password Form -->
       <form class="portal-dropdown-form form-active" id="portal-password-form" autocomplete="off">
         <label for="portal-email" class="sr-only">Email or Username</label>
-        <input type="text" id="portal-email" name="email" class="dropdown-input" placeholder="Email or Username" required aria-required="true" autocomplete="username" />
+        <input
+          type="text"
+          id="portal-email"
+          name="email"
+          class="dropdown-input"
+          placeholder="Email or Username"
+          required
+          aria-required="true"
+          autocomplete="username"
+        />
         <div class="password-field">
           <label for="portal-password" class="sr-only">Password</label>
-          <input type="password" id="portal-password" name="password" class="dropdown-input" placeholder="Password" required aria-required="true" autocomplete="current-password" />
+          <input
+            type="password"
+            id="portal-password"
+            name="password"
+            class="dropdown-input"
+            placeholder="Password"
+            required
+            aria-required="true"
+            autocomplete="current-password"
+          />
           <!-- NOTE: These icons should match ICONS.EYE and ICONS.EYE_OFF in src/constants/icons.ts -->
-          <button type="button" class="password-toggle" data-password-toggle aria-label="Toggle password visibility">
-            <svg class="password-icon-show" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            <svg class="password-icon-hide" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+          <button
+            type="button"
+            class="password-toggle"
+            data-password-toggle
+            aria-label="Toggle password visibility"
+          >
+            <svg
+              class="password-icon-show"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <svg
+              class="password-icon-hide"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+              ></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
           </button>
         </div>
         <p class="field-error" id="portal-login-error" role="alert" aria-live="polite"></p>
         <button type="submit" class="dropdown-submit">Sign In</button>
-        <button type="button" class="dropdown-link" id="forgot-password-link">Forgot password?</button>
+        <button type="button" class="dropdown-link" id="forgot-password-link">
+          Forgot password?
+        </button>
       </form>
 
       <!-- Forgot Password Form -->
       <form class="portal-dropdown-form" id="portal-forgot-form" autocomplete="off">
         <p class="forgot-info">Enter your email to receive a password reset link.</p>
         <label for="portal-forgot-email" class="sr-only">Email or Username</label>
-        <input type="text" id="portal-forgot-email" name="email" class="dropdown-input" placeholder="Email or Username" required aria-required="true" autocomplete="username" />
+        <input
+          type="text"
+          id="portal-forgot-email"
+          name="email"
+          class="dropdown-input"
+          placeholder="Email or Username"
+          required
+          aria-required="true"
+          autocomplete="username"
+        />
         <p class="field-error" id="portal-forgot-error" role="alert" aria-live="polite"></p>
         <button type="submit" class="dropdown-submit">Send Reset Link</button>
         <button type="button" class="dropdown-link" id="back-to-login">Back to login</button>
@@ -328,20 +451,42 @@
       <!-- Reset Link Sent Confirmation -->
       <div class="portal-dropdown-form" id="portal-reset-sent">
         <div class="reset-sent-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"/>
-            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-            <path d="m16 19 2 2 4-4"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8" />
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            <path d="m16 19 2 2 4-4" />
           </svg>
         </div>
-        <p class="reset-sent-message">Reset link sent! Check your email for a link to reset your password. You will be required to set a new password on login.</p>
+        <p class="reset-sent-message">
+          Reset link sent! Check your email for a link to reset your password. You will be required
+          to set a new password on login.
+        </p>
         <button type="button" class="dropdown-link" id="back-to-login-2">Back to login</button>
       </div>
 
       <!-- Magic Link Form -->
       <form class="portal-dropdown-form" id="portal-magic-form" autocomplete="off">
         <label for="portal-magic-email" class="sr-only">Email or Username</label>
-        <input type="text" id="portal-magic-email" name="email" class="dropdown-input" placeholder="Email or Username" required aria-required="true" autocomplete="username" />
+        <input
+          type="text"
+          id="portal-magic-email"
+          name="email"
+          class="dropdown-input"
+          placeholder="Email or Username"
+          required
+          aria-required="true"
+          autocomplete="username"
+        />
         <p class="field-error" id="portal-magic-error" role="alert" aria-live="polite"></p>
         <button type="submit" class="dropdown-submit">Send Link</button>
         <p class="magic-info">A secure login link will be sent to your email.</p>
@@ -352,13 +497,28 @@
     <header class="header">
       <div class="container is--full">
         <nav class="nav-row">
-          <a href="/" aria-label="no bhad codes - Go to homepage" class="nav-logo-row"> no bhad codes </a>
+          <a href="/" aria-label="no bhad codes - Go to homepage" class="nav-logo-row">
+            no bhad codes
+          </a>
           <div class="nav-row__right">
             <!-- CLIENT PORTAL BUTTON -->
             <button class="portal-button" aria-label="Client Portal Login" id="portal-trigger">
               <div class="icon-wrap">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 20a6 6 0 0 0-12 0" />
+                  <circle cx="12" cy="10" r="4" />
+                  <circle cx="12" cy="12" r="10" />
                 </svg>
               </div>
             </button>
@@ -393,7 +553,12 @@
                 </svg>
               </div>
             </button>
-            <button data-menu-toggle="" class="menu-button" aria-label="Toggle navigation menu" aria-expanded="false">
+            <button
+              data-menu-toggle=""
+              class="menu-button"
+              aria-label="Toggle navigation menu"
+              aria-expanded="false"
+            >
               <div class="icon-wrap">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -483,18 +648,56 @@
           <div class="menu-details" data-menu-fade>
             <p class="p-small">Socials</p>
             <div class="socials-row">
-              <a href="https://github.com/nobhad" target="_blank" rel="noopener noreferrer" class="p-large text-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="social-icon" aria-hidden="true">
-                  <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
-                  <path d="M9 18c-4.51 2-5-2-7-2"/>
+              <a
+                href="https://github.com/nobhad"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="p-large text-link"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="social-icon"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"
+                  />
+                  <path d="M9 18c-4.51 2-5-2-7-2" />
                 </svg>
                 GitHub
               </a>
-              <a href="https://www.linkedin.com/in/noelle-b-676286106/" target="_blank" rel="noopener noreferrer" class="p-large text-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="social-icon" aria-hidden="true">
-                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-                  <rect width="4" height="12" x="2" y="9"/>
-                  <circle cx="4" cy="4" r="2"/>
+              <a
+                href="https://www.linkedin.com/in/noelle-b-676286106/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="p-large text-link"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="social-icon"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"
+                  />
+                  <rect width="4" height="12" x="2" y="9" />
+                  <circle cx="4" cy="4" r="2" />
                 </svg>
                 LinkedIn
               </a>
@@ -513,7 +716,11 @@
       <section id="intro" class="business-card-section page-active" data-page="intro">
         <div class="business-card-container">
           <div id="business-card" class="business-card">
-            <div id="business-card-inner" class="business-card-inner" style="visibility:hidden;opacity:0">
+            <div
+              id="business-card-inner"
+              class="business-card-inner"
+              style="visibility: hidden; opacity: 0"
+            >
               <!-- FRONT OF CARD -->
               <div class="business-card-front">
                 <img
@@ -551,10 +758,10 @@
         <svg viewBox="0 0 1280 720" class="text-animation-svg">
           <defs>
             <mask id="maskLeft">
-              <rect x="-50%" width="100%" height="100%" fill="#fff"/>
+              <rect x="-50%" width="100%" height="100%" fill="#fff" />
             </mask>
             <mask id="maskRight">
-              <rect x="50%" width="100%" height="100%" fill="#fff"/>
+              <rect x="50%" width="100%" height="100%" fill="#fff" />
             </mask>
           </defs>
           <g font-size="150" class="text-animation-group" transform="translate(0, 110)">
@@ -578,18 +785,27 @@
           <div class="about-layout">
             <!-- Left column: Image -->
             <div class="about-image-column">
-              <img src="/images/photobooth_loop.gif" alt="Coyote the dog" class="about-photo" loading="lazy" decoding="async" />
+              <img
+                src="/images/photobooth_loop.gif"
+                alt="Coyote the dog"
+                class="about-photo"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
             <!-- Right column: Text -->
             <div class="about-text-column">
               <h2>ABOUT</h2>
-              <hr class="about-divider">
+              <hr class="about-divider" />
               <p>
-                Hi, I'm Noelle, a creative full-stack developer based in the Boston, MA area. Coding lets me utilize my love for tinkering and problem-solving by combining clean code with good design.
-                I work with modern frameworks, build type-safe apps, set up scalable backends, and make sure the UI actually feels nice to use.
+                Hi, I'm Noelle, a creative full-stack developer based in the Boston, MA area. Coding
+                lets me utilize my love for tinkering and problem-solving by combining clean code
+                with good design. I work with modern frameworks, build type-safe apps, set up
+                scalable backends, and make sure the UI actually feels nice to use.
               </p>
               <p>
-                When I'm not coding, I'm treasure hunting and engaging with art and nature. I draw inspiration from midcentury animation and children's book illustrations.
+                When I'm not coding, I'm treasure hunting and engaging with art and nature. I draw
+                inspiration from midcentury animation and children's book illustrations.
               </p>
               <p class="opportunities-text">
                 I am actively seeking both local and remote web development opportunities.
@@ -602,11 +818,11 @@
               <h3>tech stack</h3>
               <p class="tech-list">
                 JavaScript • TypeScript • HTML5 • CSS3 • PHP • React • Next.js • Vue.js • jQuery •
-                Tailwind CSS • Bootstrap • Vuetify • GSAP • Node.js • Express.js • EJS • Handlebars •
-                PostgreSQL • MongoDB • Redis • Supabase • MySQL • SQLite • Mongoose • Git • Vite •
-                Webpack • npm/yarn • Jotai • Zod • JWT Auth • Vitest • Playwright •
-                Sentry • Vercel • Railway • Chart.js • pdf-lib • Nodemailer • Chrome Extensions API •
-                Claude Code CLI • Adobe Illustrator • Photoshop
+                Tailwind CSS • Bootstrap • Vuetify • GSAP • Node.js • Express.js • EJS • Handlebars
+                • PostgreSQL • MongoDB • Redis • Supabase • MySQL • SQLite • Mongoose • Git • Vite •
+                Webpack • npm/yarn • Jotai • Zod • JWT Auth • Vitest • Playwright • Sentry • Vercel
+                • Railway • Chart.js • pdf-lib • Nodemailer • Chrome Extensions API • Claude Code
+                CLI • Adobe Illustrator • Photoshop
               </p>
             </div>
           </div>
@@ -615,10 +831,9 @@
 
       <!-- PROJECTS SECTION (order: 4.5) -->
       <section id="projects" class="projects-section page-hidden" data-page="projects">
-
         <div class="projects-content">
           <h2>projects</h2>
-          <hr>
+          <hr />
           <div class="wip-sign-container">
             <img src="/images/wile_404_sign.svg" alt="404 Work In Progress sign" class="wip-sign" />
           </div>
@@ -626,21 +841,43 @@
       </section>
 
       <!-- PROJECT DETAIL SECTION (order: 4.6) -->
-      <section id="project-detail" class="project-detail-section page-hidden" data-page="project-detail">
+      <section
+        id="project-detail"
+        class="project-detail-section page-hidden"
+        data-page="project-detail"
+      >
         <!-- Back button - fixed position -->
         <button class="back-button" aria-label="Back to projects" id="project-back-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M19 12H5"/>
-            <path d="m12 19-7-7 7-7"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M19 12H5" />
+            <path d="m12 19-7-7 7-7" />
           </svg>
         </button>
 
         <div class="worksub-wrapper">
           <!-- Back link for smaller screens -->
           <a href="#/projects" class="back-link" id="project-back-link">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M19 12H5"/>
-              <path d="m12 19-7-7 7-7"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M19 12H5" />
+              <path d="m12 19-7-7 7-7" />
             </svg>
             Back to Projects
           </a>
@@ -728,9 +965,18 @@
           <!-- Next/Previous project navigation -->
           <nav class="project-nav" id="project-nav" aria-label="Project navigation">
             <a href="" class="project-nav-link project-nav-prev" id="project-prev">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M19 12H5"/>
-                <path d="m12 19-7-7 7-7"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M19 12H5" />
+                <path d="m12 19-7-7 7-7" />
               </svg>
               <span class="project-nav-label">Previous</span>
               <span class="project-nav-title" id="project-prev-title"></span>
@@ -738,9 +984,18 @@
             <a href="" class="project-nav-link project-nav-next" id="project-next">
               <span class="project-nav-label">Next</span>
               <span class="project-nav-title" id="project-next-title"></span>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M5 12h14"/>
-                <path d="m12 5 7 7-7 7"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
               </svg>
             </a>
           </nav>
@@ -749,190 +1004,294 @@
 
       <!-- CONTACT SECTION (order: 5) -->
       <section id="contact" class="contact-section page-hidden" data-page="contact">
-
         <div class="contact-content">
-        <h2>contact</h2>
-        <hr>
+          <h2>contact</h2>
+          <hr />
 
-        <!-- Two-column layout -->
-        <div class="contact-layout">
-          <p class="contact-options">
-            <span class="contact-line-1">Message me here,</span> <span class="contact-line-2">fill out an <a href="#" class="contact-option-link" id="open-intake-link">intake form</a>,</span> <span class="contact-line-3">or email me at <a href="mailto:nobhaduri@gmail.com" class="contact-option-link">nobhaduri@gmail.com</a>.</span>
-          </p>
-          <!-- LEFT COLUMN: Contact Form -->
-          <div class="contact-form-column">
-            <form class="contact-form" method="post" name="contact-form" novalidate aria-label="Contact form" autocomplete="off" data-form-type="other" data-1p-ignore data-lpignore="true" data-bwignore>
-              <!-- Honeypot field for bot detection -->
-              <input name="bot-field" style="display: none" aria-hidden="true" tabindex="-1" autocomplete="off" />
+          <!-- Two-column layout -->
+          <div class="contact-layout">
+            <p class="contact-options">
+              <span class="contact-line-1">Message me here,</span>
+              <span class="contact-line-2"
+                >fill out an
+                <a href="#" class="contact-option-link" id="open-intake-link">intake form</a>,</span
+              >
+              <span class="contact-line-3"
+                >or email me at
+                <a href="mailto:nobhaduri@gmail.com" class="contact-option-link"
+                  >nobhaduri@gmail.com</a
+                >.</span
+              >
+            </p>
+            <!-- LEFT COLUMN: Contact Form -->
+            <div class="contact-form-column">
+              <form
+                class="contact-form"
+                method="post"
+                name="contact-form"
+                novalidate
+                aria-label="Contact form"
+                autocomplete="off"
+                data-form-type="other"
+                data-1p-ignore
+                data-lpignore="true"
+                data-bwignore
+              >
+                <!-- Honeypot field for bot detection -->
+                <input
+                  name="bot-field"
+                  style="display: none"
+                  aria-hidden="true"
+                  tabindex="-1"
+                  autocomplete="off"
+                />
 
-              <!-- Top row: inputs + submit button -->
-              <div class="contact-row">
-                <!-- Left column: name, company, email -->
-                <div class="contact-left">
+                <!-- Top row: inputs + submit button -->
+                <div class="contact-row">
+                  <!-- Left column: name, company, email -->
+                  <div class="contact-left">
+                    <div class="input-wrapper">
+                      <div class="input-item">
+                        <input
+                          id="name"
+                          placeholder="..."
+                          required
+                          aria-required="true"
+                          aria-describedby="contact-name-error"
+                          autocomplete="name"
+                          type="text"
+                          name="Name"
+                          maxlength="256"
+                          aria-label="Name"
+                          data-1p-ignore
+                          data-lpignore="true"
+                          data-bwignore
+                        />
+                        <label class="text-small" for="name">Name</label>
+                        <p
+                          class="field-error"
+                          id="contact-name-error"
+                          role="alert"
+                          aria-live="polite"
+                        ></p>
+                      </div>
+                    </div>
+
+                    <div class="input-wrapper">
+                      <div class="input-item">
+                        <input
+                          id="company"
+                          placeholder="..."
+                          autocomplete="organization"
+                          type="text"
+                          name="Company-Name"
+                          maxlength="256"
+                          aria-label="Company (optional)"
+                          data-1p-ignore
+                          data-lpignore="true"
+                          data-bwignore
+                        />
+                        <label class="text-small" for="company">Company (optional)</label>
+                      </div>
+                    </div>
+
+                    <div class="input-wrapper">
+                      <div class="input-item">
+                        <input
+                          id="email"
+                          placeholder="..."
+                          required
+                          aria-required="true"
+                          aria-describedby="contact-email-error"
+                          autocomplete="email"
+                          type="email"
+                          name="Email"
+                          maxlength="256"
+                          aria-label="Email"
+                          data-1p-ignore
+                          data-lpignore="true"
+                          data-bwignore
+                        />
+                        <label class="text-small" for="email">Email</label>
+                        <p
+                          class="field-error"
+                          id="contact-email-error"
+                          role="alert"
+                          aria-live="polite"
+                        ></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Right column: submit button -->
+                  <div class="contact-right">
+                    <button class="submit-button" type="submit" aria-label="Submit contact form">
+                      <span></span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-bow-arrow-icon lucide-bow-arrow"
+                        aria-hidden="true"
+                      >
+                        <!-- Bow group (the two curves) -->
+                        <g class="bow-group">
+                          <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05" />
+                          <path
+                            d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"
+                          />
+                        </g>
+                        <!-- Arrow group (will be animated on submit) -->
+                        <g class="arrow-group">
+                          <path d="M17 3h4v4" />
+                          <path d="M9.707 14.293 21 3" />
+                          <path
+                            d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"
+                          />
+                        </g>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Bottom row: message textarea spanning full width -->
+                <div class="contact-message-row">
                   <div class="input-wrapper">
                     <div class="input-item">
-                      <input
-                        id="name"
+                      <textarea
+                        id="message"
+                        name="Message"
                         placeholder="..."
                         required
                         aria-required="true"
-                        aria-describedby="contact-name-error"
-                        autocomplete="name"
-                        type="text"
-                        name="Name"
-                        maxlength="256"
-                        aria-label="Name"
+                        aria-describedby="contact-message-error"
+                        rows="4"
+                        maxlength="1000"
+                        aria-label="Message"
                         data-1p-ignore
                         data-lpignore="true"
                         data-bwignore
-                      />
-                      <label class="text-small" for="name">Name</label>
-                      <p class="field-error" id="contact-name-error" role="alert" aria-live="polite"></p>
-                    </div>
-                  </div>
-
-                  <div class="input-wrapper">
-                    <div class="input-item">
-                      <input
-                        id="company"
-                        placeholder="..."
-                        autocomplete="organization"
-                        type="text"
-                        name="Company-Name"
-                        maxlength="256"
-                        aria-label="Company (optional)"
-                        data-1p-ignore
-                        data-lpignore="true"
-                        data-bwignore
-                      />
-                      <label class="text-small" for="company">Company (optional)</label>
-                    </div>
-                  </div>
-
-                  <div class="input-wrapper">
-                    <div class="input-item">
-                      <input
-                        id="email"
-                        placeholder="..."
-                        required
-                        aria-required="true"
-                        aria-describedby="contact-email-error"
-                        autocomplete="email"
-                        type="email"
-                        name="Email"
-                        maxlength="256"
-                        aria-label="Email"
-                        data-1p-ignore
-                        data-lpignore="true"
-                        data-bwignore
-                      />
-                      <label class="text-small" for="email">Email</label>
-                      <p class="field-error" id="contact-email-error" role="alert" aria-live="polite"></p>
+                      ></textarea>
+                      <label class="text-small" for="message">Message</label>
+                      <p
+                        class="field-error"
+                        id="contact-message-error"
+                        role="alert"
+                        aria-live="polite"
+                      ></p>
                     </div>
                   </div>
                 </div>
+              </form>
+            </div>
 
-                <!-- Right column: submit button -->
-                <div class="contact-right">
-                  <button class="submit-button" type="submit"  aria-label="Submit contact form">
-                    <span></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bow-arrow-icon lucide-bow-arrow" aria-hidden="true">
-                      <!-- Bow group (the two curves) -->
-                      <g class="bow-group">
-                        <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/>
-                        <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
-                      </g>
-                      <!-- Arrow group (will be animated on submit) -->
-                      <g class="arrow-group">
-                        <path d="M17 3h4v4"/>
-                        <path d="M9.707 14.293 21 3"/>
-                        <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/>
-                      </g>
-                    </svg>
-                  </button>
+            <!-- RIGHT COLUMN: Avatar Blurb -->
+            <div class="contact-card-column">
+              <div class="avatar-blurb-container">
+                <svg
+                  id="AVATAR_BLURB"
+                  data-name="AVATAR + BLURB"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 514.67 487.98"
+                  class="avatar-blurb-svg"
+                  role="img"
+                  aria-label="Avatar with speech bubble"
+                >
+                  <defs>
+                    <style>
+                      .cls-1 {
+                        stroke: #000;
+                        stroke-miterlimit: 10;
+                        stroke-width: 6px;
+                      }
+
+                      .cls-1,
+                      .cls-2 {
+                        fill: #fff;
+                      }
+                    </style>
+                    <filter id="eye-glow">
+                      <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                      <feMerge>
+                        <feMergeNode in="coloredBlur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                    <filter id="star-glow" x="-30%" y="-30%" width="160%" height="160%">
+                      <feGaussianBlur stdDeviation="6" result="coloredBlur" />
+                      <feMerge>
+                        <feMergeNode in="coloredBlur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <g id="_AVATAR_" data-name="&lt;AVATAR&gt;">
+                    <path
+                      id="MAIN"
+                      d="M483.84,302.88l-.11-.22c17.83-48.99,4.37-96.42-32.96-131.06l-21.19,96.19c-31.28,2.58-49.67,6.73-62.33,40.7l-61.66,21.19c2.58,17.83-1.35,26.35-15.02,35.76,18.05,12.89,43.5,12.33,55.16,9.87-2.47-1.57-10.43-6.73-12.67-10.65-8.18-14.46,5.94-35.32,28.03-.78,9.87,9.87,28.81,5.27,28.81,5.27-18.95,12.89-54.37,12.67-75.12,11.44,0,0,17.27,10.43,35.65,16.7,18.39,6.17,35.43-4.82,35.43-4.82,1.12,5.49-12.67,42.94-26.79,87.67,17.38,5.16,35.65,7.85,54.26,7.85,36.55,0,71.42-10.2,101.35-29.26-10.99-61.33-21.53-118.28-30.83-155.84Z"
+                    />
+                    <path
+                      id="NOSE"
+                      d="M301.88,331.02l-28.7,9.87c3.25,10.99,7.06,17.04,14.46,22.53,13.01-9.08,16.7-15.02,14.24-32.4h0Z"
+                    />
+                    <!-- Original eye -->
+                    <path
+                      id="EYE"
+                      class="cls-2"
+                      d="M390.7,307.37c2.6-6.01,7.08-9.98,12.2-9.98,8.07,0,14.57,9.87,14.57,22.09s-6.5,22.09-14.57,22.09c-5.51,0-10.29-4.61-12.77-11.42,0,0,0,0,0,0l.02.03c2.47,3.74,6.17,6.09,10.3,6.03,7.29-.11,13.01-7.85,12.78-17.15-.01-.45-.05-.89-.08-1.33-6.2,1.12-7.43,3.16-8.44,11.76-1.57-7.51-1.68-10.09-8.97-11.44,7.62-2.35,8.52-3.14,8.52-11.77,1.45,8.59,2.46,10.52,8.88,11.42-.74-8.65-6.44-15.34-13.37-15.23-3.57.05-6.76,1.94-9.06,4.94v-.02Z"
+                    />
+                    <!-- Star glow - overflows slightly beyond crescent -->
+                    <path
+                      id="STAR_GLOW"
+                      class="star-glow"
+                      d="M404.69,329.45c-1.57-7.51-1.68-10.09-8.97-11.44,7.62-2.35,8.52-3.14,8.52-11.77,1.46,8.63,2.47,10.54,8.97,11.44-6.28,1.12-7.51,3.14-8.52,11.77h0Z"
+                      fill="none"
+                      opacity="0"
+                    />
+                    <path
+                      id="EAR"
+                      d="M408.16,171.04l-1.01,5.61c-2.47,21.97-1.68,41.59-1.01,63.9.34,4.26,1.68,22.31,2.02,26.35,2.02-.34,4.26-.67,6.39-.9h0c.67,0,1.46-.22,2.24-.22h0c1.46-.22,2.91-.34,4.48-.45h.22c.67,0,1.46-.11,2.13-.22h.34c.67,0,1.46-.11,2.24-.22l13.57-61.33c-9.19-10.99-26.46-29.49-31.5-32.29h0l-.11-.22Z"
+                    />
+                  </g>
+                  <path
+                    id="_BLURB_"
+                    data-name="&lt;BLURB&gt;"
+                    class="cls-1"
+                    d="M288.11,285.53l-62.53,1.59s-5.36,42.28,19.01,69.03c-28.1-11.08-59.56-19.03-82.12-67.9-17.15,1.03-61.24-1.29-61.24-1.29-54.03,0-98.23-50.39-98.23-111.98v-59.98C3,53.39,47.2,3,101.23,3h182.57c54.03,0,98.23,50.39,98.23,111.98v59.98c0,61.59-39.89,110.57-93.92,110.57Z"
+                  />
+                  <rect
+                    id="_ALIGN_TEXT_HERE_"
+                    data-name="&lt;ALIGN TEXT HERE&gt;"
+                    class="cls-2"
+                    x="39.86"
+                    y="32.23"
+                    width="301.38"
+                    height="223.4"
+                  />
+                </svg>
+                <div class="avatar-blurb-content">
+                  <p class="avatar-blurb-text">
+                    Message me here,<br />
+                    fill out an
+                    <a href="#" class="avatar-blurb-link" id="card-intake-link">intake form</a
+                    >,<br />
+                    or email me at
+                    <a href="mailto:nobhaduri@gmail.com" class="avatar-blurb-link"
+                      >nobhaduri@gmail.com</a
+                    >
+                  </p>
                 </div>
-              </div>
-
-              <!-- Bottom row: message textarea spanning full width -->
-              <div class="contact-message-row">
-                <div class="input-wrapper">
-                  <div class="input-item">
-                    <textarea
-                      id="message"
-                      name="Message"
-                      placeholder="..."
-                      required
-                      aria-required="true"
-                      aria-describedby="contact-message-error"
-                      rows="4"
-                      maxlength="1000"
-                      aria-label="Message"
-                      data-1p-ignore
-                      data-lpignore="true"
-                      data-bwignore
-                    ></textarea>
-                    <label class="text-small" for="message">Message</label>
-                    <p class="field-error" id="contact-message-error" role="alert" aria-live="polite"></p>
-                  </div>
-                </div>
-              </div>
-            </form>
-          </div>
-
-          <!-- RIGHT COLUMN: Avatar Blurb -->
-          <div class="contact-card-column">
-            <div class="avatar-blurb-container">
-              <svg id="AVATAR_BLURB" data-name="AVATAR + BLURB" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 514.67 487.98" class="avatar-blurb-svg" role="img" aria-label="Avatar with speech bubble">
-                <defs>
-                  <style>
-                    .cls-1 {
-                      stroke: #000;
-                      stroke-miterlimit: 10;
-                      stroke-width: 6px;
-                    }
-
-                    .cls-1, .cls-2 {
-                      fill: #fff;
-                    }
-                  </style>
-                  <filter id="eye-glow">
-                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                    <feMerge>
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                  <filter id="star-glow" x="-30%" y="-30%" width="160%" height="160%">
-                    <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
-                    <feMerge>
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-                <g id="_AVATAR_" data-name="&lt;AVATAR&gt;">
-                  <path id="MAIN" d="M483.84,302.88l-.11-.22c17.83-48.99,4.37-96.42-32.96-131.06l-21.19,96.19c-31.28,2.58-49.67,6.73-62.33,40.7l-61.66,21.19c2.58,17.83-1.35,26.35-15.02,35.76,18.05,12.89,43.5,12.33,55.16,9.87-2.47-1.57-10.43-6.73-12.67-10.65-8.18-14.46,5.94-35.32,28.03-.78,9.87,9.87,28.81,5.27,28.81,5.27-18.95,12.89-54.37,12.67-75.12,11.44,0,0,17.27,10.43,35.65,16.7,18.39,6.17,35.43-4.82,35.43-4.82,1.12,5.49-12.67,42.94-26.79,87.67,17.38,5.16,35.65,7.85,54.26,7.85,36.55,0,71.42-10.2,101.35-29.26-10.99-61.33-21.53-118.28-30.83-155.84Z"/>
-                  <path id="NOSE" d="M301.88,331.02l-28.7,9.87c3.25,10.99,7.06,17.04,14.46,22.53,13.01-9.08,16.7-15.02,14.24-32.4h0Z"/>
-                  <!-- Original eye -->
-                  <path id="EYE" class="cls-2" d="M390.7,307.37c2.6-6.01,7.08-9.98,12.2-9.98,8.07,0,14.57,9.87,14.57,22.09s-6.5,22.09-14.57,22.09c-5.51,0-10.29-4.61-12.77-11.42,0,0,0,0,0,0l.02.03c2.47,3.74,6.17,6.09,10.3,6.03,7.29-.11,13.01-7.85,12.78-17.15-.01-.45-.05-.89-.08-1.33-6.2,1.12-7.43,3.16-8.44,11.76-1.57-7.51-1.68-10.09-8.97-11.44,7.62-2.35,8.52-3.14,8.52-11.77,1.45,8.59,2.46,10.52,8.88,11.42-.74-8.65-6.44-15.34-13.37-15.23-3.57.05-6.76,1.94-9.06,4.94v-.02Z"/>
-                  <!-- Star glow - overflows slightly beyond crescent -->
-                  <path id="STAR_GLOW" class="star-glow" d="M404.69,329.45c-1.57-7.51-1.68-10.09-8.97-11.44,7.62-2.35,8.52-3.14,8.52-11.77,1.46,8.63,2.47,10.54,8.97,11.44-6.28,1.12-7.51,3.14-8.52,11.77h0Z" fill="none" opacity="0"/>
-                  <path id="EAR" d="M408.16,171.04l-1.01,5.61c-2.47,21.97-1.68,41.59-1.01,63.9.34,4.26,1.68,22.31,2.02,26.35,2.02-.34,4.26-.67,6.39-.9h0c.67,0,1.46-.22,2.24-.22h0c1.46-.22,2.91-.34,4.48-.45h.22c.67,0,1.46-.11,2.13-.22h.34c.67,0,1.46-.11,2.24-.22l13.57-61.33c-9.19-10.99-26.46-29.49-31.5-32.29h0l-.11-.22Z"/>
-                </g>
-                <path id="_BLURB_" data-name="&lt;BLURB&gt;" class="cls-1" d="M288.11,285.53l-62.53,1.59s-5.36,42.28,19.01,69.03c-28.1-11.08-59.56-19.03-82.12-67.9-17.15,1.03-61.24-1.29-61.24-1.29-54.03,0-98.23-50.39-98.23-111.98v-59.98C3,53.39,47.2,3,101.23,3h182.57c54.03,0,98.23,50.39,98.23,111.98v59.98c0,61.59-39.89,110.57-93.92,110.57Z"/>
-                <rect id="_ALIGN_TEXT_HERE_" data-name="&lt;ALIGN TEXT HERE&gt;" class="cls-2" x="39.86" y="32.23" width="301.38" height="223.4"/>
-              </svg>
-              <div class="avatar-blurb-content">
-                <p class="avatar-blurb-text">
-                  Message me here,<br> fill out an <a href="#" class="avatar-blurb-link" id="card-intake-link">intake form</a>,<br> or email me at <a href="mailto:nobhaduri@gmail.com" class="avatar-blurb-link">nobhaduri@gmail.com</a>
-                </p>
               </div>
             </div>
           </div>
         </div>
-        </div>
       </section>
-
     </main>
 
     <!-- Footer -->
@@ -944,7 +1303,7 @@
     <script>
       document.getElementById('copyright-year').textContent = new Date().getFullYear();
 
-      (function() {
+      (function () {
         const trigger = document.getElementById('portal-trigger');
         const dropdown = document.getElementById('portal-dropdown');
         const backdrop = document.getElementById('portal-backdrop');
@@ -969,11 +1328,11 @@
         function positionCaret() {
           const buttonRect = trigger.getBoundingClientRect();
           const dropdownRect = dropdown.getBoundingClientRect();
-          const caretLeft = buttonRect.left + (buttonRect.width / 2) - dropdownRect.left - 10;
+          const caretLeft = buttonRect.left + buttonRect.width / 2 - dropdownRect.left - 10;
           dropdown.style.setProperty('--caret-left', caretLeft + 'px');
         }
 
-        trigger.addEventListener('click', function(e) {
+        trigger.addEventListener('click', function (e) {
           e.stopPropagation();
           dropdown.classList.toggle('open');
           backdrop.classList.toggle('open');
@@ -982,18 +1341,18 @@
           }
         });
 
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
           if (dropdown.classList.contains('open')) {
             positionCaret();
           }
         });
 
-        backdrop.addEventListener('click', function() {
+        backdrop.addEventListener('click', function () {
           dropdown.classList.remove('open');
           backdrop.classList.remove('open');
         });
 
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape' && dropdown && dropdown.classList.contains('open')) {
             dropdown.classList.remove('open');
             backdrop.classList.remove('open');
@@ -1020,7 +1379,7 @@
           setInlineError(loginError, '');
         }
 
-        authToggle.addEventListener('click', function(e) {
+        authToggle.addEventListener('click', function (e) {
           const btn = e.target.closest('.portal-toggle-btn');
           if (!btn) return;
 
@@ -1030,7 +1389,7 @@
           forgotForm.classList.remove('form-active');
           resetSent.classList.remove('form-active');
 
-          authToggle.querySelectorAll('.portal-toggle-btn').forEach(function(b) {
+          authToggle.querySelectorAll('.portal-toggle-btn').forEach(function (b) {
             b.classList.remove('active');
           });
           btn.classList.add('active');
@@ -1060,7 +1419,7 @@
 
         const pwToggle = dropdown.querySelector('.password-toggle');
         if (pwToggle) {
-          pwToggle.addEventListener('click', function() {
+          pwToggle.addEventListener('click', function () {
             const input = this.previousElementSibling;
             const isPassword = input.type === 'password';
             input.type = isPassword ? 'text' : 'password';
@@ -1068,7 +1427,7 @@
           });
         }
 
-        forgotLink.addEventListener('click', function(e) {
+        forgotLink.addEventListener('click', function (e) {
           e.preventDefault();
           hideAllForms();
           forgotForm.classList.add('form-active');
@@ -1076,12 +1435,12 @@
           setInlineError(forgotError, '');
         });
 
-        backToLogin.addEventListener('click', function(e) {
+        backToLogin.addEventListener('click', function (e) {
           e.preventDefault();
           showLoginForm();
         });
 
-        backToLogin2.addEventListener('click', function(e) {
+        backToLogin2.addEventListener('click', function (e) {
           e.preventDefault();
           showLoginForm();
         });
@@ -1104,7 +1463,7 @@
           }
         }
 
-        passwordForm.querySelectorAll('input').forEach(function(input) {
+        passwordForm.querySelectorAll('input').forEach(function (input) {
           input.addEventListener('input', validatePasswordForm);
           input.addEventListener('change', validatePasswordForm);
         });
@@ -1115,8 +1474,10 @@
           const passwordInput = passwordForm.querySelector('input[type="password"]');
           if (emailInput && passwordInput) {
             // Check if inputs have been autofilled
-            const emailFilled = emailInput.matches(':-webkit-autofill') || emailInput.value.length > 0;
-            const passFilled = passwordInput.matches(':-webkit-autofill') || passwordInput.value.length > 0;
+            const emailFilled =
+              emailInput.matches(':-webkit-autofill') || emailInput.value.length > 0;
+            const passFilled =
+              passwordInput.matches(':-webkit-autofill') || passwordInput.value.length > 0;
             if (emailFilled || passFilled) {
               validatePasswordForm();
             }
@@ -1129,8 +1490,8 @@
         setTimeout(checkAutofill, 1000);
 
         // Also check when dropdown opens
-        var portalObserver = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
+        var portalObserver = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
             if (mutation.target.classList && mutation.target.classList.contains('open')) {
               setTimeout(checkAutofill, 50);
               setTimeout(checkAutofill, 200);
@@ -1155,11 +1516,11 @@
           }
         }
 
-        magicForm.querySelectorAll('input').forEach(function(input) {
+        magicForm.querySelectorAll('input').forEach(function (input) {
           input.addEventListener('input', validateMagicForm);
         });
 
-        magicForm.addEventListener('submit', async function(e) {
+        magicForm.addEventListener('submit', async function (e) {
           e.preventDefault();
           const emailInput = magicForm.querySelector('#portal-magic-email');
           const submitBtn = magicForm.querySelector('.dropdown-submit');
@@ -1184,7 +1545,7 @@
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({ email })
+              body: JSON.stringify({ email }),
             });
 
             /* Always show success for security (don't reveal if email exists) */
@@ -1192,7 +1553,7 @@
             submitBtn.classList.add('sent');
 
             /* Reset form after delay */
-            setTimeout(function() {
+            setTimeout(function () {
               emailInput.value = '';
               submitBtn.disabled = false;
               submitBtn.textContent = 'Send Link';
@@ -1200,13 +1561,12 @@
               submitBtn.classList.remove('valid');
               setInlineError(magicError, '');
             }, 3000);
-
           } catch (error) {
             console.error('Magic link error:', error);
             submitBtn.textContent = 'Link sent!';
             submitBtn.classList.add('sent');
 
-            setTimeout(function() {
+            setTimeout(function () {
               emailInput.value = '';
               submitBtn.disabled = false;
               submitBtn.textContent = 'Send Link';
@@ -1230,11 +1590,11 @@
           }
         }
 
-        forgotForm.querySelectorAll('input').forEach(function(input) {
+        forgotForm.querySelectorAll('input').forEach(function (input) {
           input.addEventListener('input', validateForgotForm);
         });
 
-        forgotForm.addEventListener('submit', function(e) {
+        forgotForm.addEventListener('submit', function (e) {
           e.preventDefault();
           const emailInput = forgotForm.querySelector('#portal-forgot-email');
           const submitBtn = forgotForm.querySelector('.dropdown-submit');
@@ -1255,7 +1615,7 @@
           }
         });
 
-        passwordForm.addEventListener('submit', async function(e) {
+        passwordForm.addEventListener('submit', async function (e) {
           e.preventDefault();
           const emailInput = passwordForm.querySelector('#portal-email');
           const passwordInput = passwordForm.querySelector('input[type="password"]');
@@ -1292,7 +1652,7 @@
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify(loginBody)
+              body: JSON.stringify(loginBody),
             });
 
             if (response.ok) {
@@ -1313,7 +1673,7 @@
                 }
 
                 /* Save session in authStore format (nbw_auth_*) */
-                const expiresAt = Date.now() + (7 * 24 * 60 * 60 * 1000); /* 7 days */
+                const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; /* 7 days */
                 const sessionId = crypto.randomUUID();
 
                 sessionStorage.setItem('nbw_auth_user', JSON.stringify(user));
@@ -1354,11 +1714,17 @@
 
             if (error instanceof TypeError && error.message.includes('fetch')) {
               sessionStorage.setItem('client_auth_mode', 'demo');
-              sessionStorage.setItem('client_auth_user', JSON.stringify({
-                id: 1,
-                email: email,
-                name: email.split('@')[0].replace(/[^a-zA-Z]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
-              }));
+              sessionStorage.setItem(
+                'client_auth_user',
+                JSON.stringify({
+                  id: 1,
+                  email: email,
+                  name: email
+                    .split('@')[0]
+                    .replace(/[^a-zA-Z]/g, ' ')
+                    .replace(/\b\w/g, (l) => l.toUpperCase()),
+                })
+              );
 
               dropdown.classList.remove('open');
               backdrop.classList.remove('open');
@@ -1371,19 +1737,23 @@
           }
         });
       })();
-
     </script>
     <script type="module">
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('DOMContentLoaded', function () {
         const intakeModal = document.getElementById('intake-modal');
         const intakeBackdrop = document.getElementById('intake-modal-backdrop');
         const intakeClose = document.getElementById('intake-modal-close');
-        const intakeContainer = intakeModal ? intakeModal.querySelector('.intake-modal-container') : null;
+        const intakeContainer = intakeModal
+          ? intakeModal.querySelector('.intake-modal-container')
+          : null;
         const openIntakeLink = document.getElementById('open-intake-link');
         let terminalModule = null;
 
         async function openIntakeModal() {
-          console.log('[IntakeModal] Opening modal, terminalModule:', terminalModule ? 'exists' : 'null');
+          console.log(
+            '[IntakeModal] Opening modal, terminalModule:',
+            terminalModule ? 'exists' : 'null'
+          );
           intakeModal.classList.add('open');
           intakeBackdrop.classList.add('open');
           document.body.style.overflow = 'hidden';
@@ -1398,13 +1768,17 @@
               console.log('[IntakeModal] TerminalIntakeModule initialized');
             } catch (error) {
               console.error('[IntakeModal] Failed to initialize:', error);
-              intakeContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ff4444; background: #1e1e1e; height: 100%; display: flex; flex-direction: column; justify-content: center;"><h2>Unable to load intake form</h2><p>Please try refreshing the page or <a href="/client/intake" style="color: #00ff41;">visit the intake page directly</a>.</p></div>';
+              intakeContainer.innerHTML =
+                '<div style="text-align: center; padding: 2rem; color: #ff4444; background: #1e1e1e; height: 100%; display: flex; flex-direction: column; justify-content: center;"><h2>Unable to load intake form</h2><p>Please try refreshing the page or <a href="/client/intake" style="color: #00ff41;">visit the intake page directly</a>.</p></div>';
             }
           }
         }
 
         function closeIntakeModal() {
-          console.log('[IntakeModal] Closing modal, terminalModule:', terminalModule ? 'exists' : 'null');
+          console.log(
+            '[IntakeModal] Closing modal, terminalModule:',
+            terminalModule ? 'exists' : 'null'
+          );
           intakeModal.classList.remove('open');
           intakeBackdrop.classList.remove('open');
           document.body.style.overflow = '';
@@ -1420,7 +1794,7 @@
         }
 
         if (openIntakeLink) {
-          openIntakeLink.addEventListener('click', function(e) {
+          openIntakeLink.addEventListener('click', function (e) {
             e.preventDefault();
             openIntakeModal();
           });
@@ -1428,7 +1802,7 @@
 
         const cardIntakeLink = document.getElementById('card-intake-link');
         if (cardIntakeLink) {
-          cardIntakeLink.addEventListener('click', function(e) {
+          cardIntakeLink.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation(); /* Prevent card flip */
             openIntakeModal();
@@ -1443,14 +1817,14 @@
           intakeBackdrop.addEventListener('click', closeIntakeModal);
         }
 
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape' && intakeModal && intakeModal.classList.contains('open')) {
             closeIntakeModal();
           }
         });
 
         // Listen for close event from terminal's own close button
-        window.addEventListener('intakeModalClosed', function() {
+        window.addEventListener('intakeModalClosed', function () {
           console.log('[IntakeModal] Received intakeModalClosed event');
           terminalModule = null;
         });
