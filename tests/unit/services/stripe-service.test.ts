@@ -130,18 +130,18 @@ describe('Stripe Service', () => {
       ).rejects.toThrow('Invoice 999 not found');
     });
 
-    it('returns null when Stripe is not configured', async () => {
+    it('throws when Stripe is not configured', async () => {
       process.env.STRIPE_SECRET_KEY = '';
       vi.resetModules();
       const { createPaymentLink } =
         await import('../../../server/services/integrations/stripe-service');
 
-      const result = await createPaymentLink({
-        invoiceId: 1,
-        amount: 10000,
-      });
-
-      expect(result).toBeNull();
+      await expect(
+        createPaymentLink({
+          invoiceId: 1,
+          amount: 10000,
+        })
+      ).rejects.toThrow('Stripe is not configured');
     });
 
     it('creates a payment link successfully', async () => {
@@ -273,14 +273,15 @@ describe('Stripe Service', () => {
   });
 
   describe('verifyWebhookSignature', () => {
-    it('returns false when webhook secret is not configured', async () => {
+    it('throws when webhook secret is not configured', async () => {
       process.env.STRIPE_WEBHOOK_SECRET = '';
       vi.resetModules();
       const { verifyWebhookSignature } =
         await import('../../../server/services/integrations/stripe-service');
 
-      const result = verifyWebhookSignature('payload', 'signature');
-      expect(result).toBe(false);
+      expect(() => verifyWebhookSignature('payload', 'signature')).toThrow(
+        'Stripe webhook secret is not configured'
+      );
     });
 
     it('returns false when signature header is malformed', async () => {

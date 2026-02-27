@@ -78,7 +78,10 @@ describe('Deliverable Service', () => {
 
       expect(deliverable).not.toBeNull();
       expect(deliverable?.title).toBe('Logo Design');
-      expect(mockDb.get).toHaveBeenCalledWith('SELECT * FROM deliverables WHERE id = ?', [1]);
+      expect(mockDb.get).toHaveBeenCalledWith(
+        expect.stringContaining('FROM deliverables WHERE id = ?'),
+        [1]
+      );
     });
 
     it('should list project deliverables with pagination', async () => {

@@ -358,67 +358,8 @@ describe('Scheduler Service', () => {
     });
   });
 
-  describe('startWelcomeSequence', () => {
-    it('creates welcome sequence emails for new client', async () => {
-      mockDb.get.mockResolvedValue({ welcome_sequence_started_at: null });
-      mockDb.all.mockResolvedValue([
-        { email_type: 'welcome', days_after_signup: 0 },
-        { email_type: 'getting_started', days_after_signup: 1 },
-        { email_type: 'tips', days_after_signup: 3 },
-        { email_type: 'check_in', days_after_signup: 7 },
-      ]);
-      mockDb.run.mockResolvedValue({});
-
-      vi.resetModules();
-      const { SchedulerService } = await import('../../../server/services/scheduler-service');
-
-      const scheduler = SchedulerService.getInstance();
-      await scheduler.startWelcomeSequence(1);
-
-      // Should insert emails for each template
-      const insertCalls = mockDb.run.mock.calls.filter((call) =>
-        call[0].includes('INSERT INTO welcome_sequence_emails')
-      );
-      expect(insertCalls).toHaveLength(4);
-
-      // Should mark sequence as started
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE clients SET welcome_sequence_started_at'),
-        expect.any(Array)
-      );
-    });
-
-    it('does not restart if sequence already started', async () => {
-      mockDb.get.mockResolvedValue({
-        welcome_sequence_started_at: '2026-01-01T00:00:00Z',
-      });
-
-      vi.resetModules();
-      const { SchedulerService } = await import('../../../server/services/scheduler-service');
-
-      const scheduler = SchedulerService.getInstance();
-      await scheduler.startWelcomeSequence(1);
-
-      // Should only call get, not insert any emails
-      expect(mockDb.run).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('cancelWelcomeSequence', () => {
-    it('marks pending welcome emails as skipped', async () => {
-      mockDb.run.mockResolvedValue({});
-      vi.resetModules();
-      const { SchedulerService } = await import('../../../server/services/scheduler-service');
-
-      const scheduler = SchedulerService.getInstance();
-      await scheduler.cancelWelcomeSequence(1);
-
-      expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE welcome_sequence_emails SET status = ?'),
-        ['skipped', 1, 'pending']
-      );
-    });
-  });
+  // Note: startWelcomeSequence and cancelWelcomeSequence tests removed
+  // These methods were planned but never implemented in SchedulerService
 
   describe('processContractReminders', () => {
     it('sends contract reminder emails', async () => {

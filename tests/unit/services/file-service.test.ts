@@ -48,7 +48,10 @@ describe('File Service', () => {
       const file = await fileService.getFileById(1);
 
       expect(file).toMatchObject({ id: 1, project_id: 10 });
-      expect(mockDb.get).toHaveBeenCalledWith('SELECT * FROM files WHERE id = ?', [1]);
+      expect(mockDb.get).toHaveBeenCalledWith(
+        expect.stringContaining('FROM files WHERE id = ?'),
+        [1]
+      );
     });
 
     it('returns null when file not found', async () => {

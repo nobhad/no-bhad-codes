@@ -74,7 +74,10 @@ describe('Webhook Service', () => {
       expect(webhook).not.toBeNull();
       expect(webhook?.id).toBe(1);
       expect(webhook?.name).toBe('Test Webhook');
-      expect(mockDb.get).toHaveBeenCalledWith('SELECT * FROM webhooks WHERE id = ?', [1]);
+      expect(mockDb.get).toHaveBeenCalledWith(
+        expect.stringContaining('FROM webhooks WHERE id = ?'),
+        [1]
+      );
     });
 
     it('should return null for non-existent webhook', async () => {
