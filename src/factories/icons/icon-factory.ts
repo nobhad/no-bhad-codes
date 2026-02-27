@@ -10,7 +10,7 @@
 
 import { ICON_SIZES, SVG_ATTRS } from '../constants';
 import type { IconConfig, IconSizeKey } from '../types';
-import { getIconDefinition, ICON_REGISTRY } from './icon-registry';
+import { getIconDefinition } from './icon-registry';
 
 // ============================================
 // ICON RENDERING

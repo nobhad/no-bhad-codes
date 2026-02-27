@@ -56,8 +56,6 @@ export function createEmptyState(
   message: string,
   options: Omit<EmptyStateConfig, 'message'> = {}
 ): HTMLElement {
-  const config: EmptyStateConfig = { message, ...options };
-
   const wrap = document.createElement('div');
   wrap.className = ['empty-state', options.className].filter(Boolean).join(' ');
   wrap.setAttribute('role', options.role ?? 'status');
