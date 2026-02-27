@@ -5,11 +5,10 @@
  * @file src/admin.ts
  *
  * Entry point for the admin dashboard.
- * Loads unified portal CSS bundle (shared with client portal).
  */
 
-// Import unified portal CSS bundle (covers both admin + client)
-import './styles/bundles/unified-portal.css';
+// Import admin CSS bundle
+import './styles/bundles/admin.css';
 
 // Vercel Analytics (privacy-focused, no cookies)
 import { inject } from '@vercel/analytics';

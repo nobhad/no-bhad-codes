@@ -121,7 +121,7 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
     <div class="bulk-toolbar-actions">
       ${buttonActions.map(action => `
         <button type="button"
-          class="icon-btn bulk-action-icon-btn ${action.variant === 'danger' ? 'icon-btn-danger' : action.variant === 'warning' ? 'icon-btn-warning' : ''}"
+          class="icon-btn bulk-action-icon-btn"
           data-action="${action.id}"
           title="${action.label}"
           aria-label="${action.label}">
@@ -271,7 +271,7 @@ function createBulkActionDropdown(config: {
  */
 export function createHeaderCheckbox(tableId: string): string {
   return `
-    <th class="bulk-select-cell" style="width: 40px;">
+    <th class="bulk-select-cell">
       ${getPortalCheckboxHTML({
     id: `${tableId}-select-all`,
     ariaLabel: 'Select all rows',
@@ -289,7 +289,7 @@ export function createRowCheckbox(tableId: string, rowId: number): string {
   const isSelected = state.selectedIds.has(rowId);
 
   return `
-    <td class="bulk-select-cell">
+    <td class="bulk-select-cell" data-label="">
       ${getPortalCheckboxHTML({
     ariaLabel: 'Select row',
     checked: isSelected,
