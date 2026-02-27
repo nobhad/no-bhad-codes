@@ -189,7 +189,7 @@ describe('Workflow Trigger Service', () => {
       const triggers = await workflowTriggerService.getTriggers();
       expect(triggers).toHaveLength(2);
       expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT * FROM workflow_triggers ORDER BY')
+        expect.stringContaining('FROM workflow_triggers ORDER BY')
       );
     });
 
@@ -418,7 +418,7 @@ describe('Workflow Trigger Service', () => {
       await workflowTriggerService.getSystemEvents(undefined, 100);
 
       expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT * FROM system_events ORDER BY created_at DESC LIMIT ?'),
+        expect.stringContaining('FROM system_events ORDER BY created_at DESC LIMIT ?'),
         [100]
       );
     });

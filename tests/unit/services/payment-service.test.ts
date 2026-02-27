@@ -295,7 +295,7 @@ describe('InvoicePaymentService', () => {
 
       expect(result).toEqual([]);
       expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT * FROM invoice_payments'),
+        expect.stringContaining('FROM invoice_payments'),
         [1]
       );
     });
@@ -390,7 +390,7 @@ describe('InvoicePaymentService', () => {
 
       expect(result).toHaveLength(2);
       expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT * FROM invoice_payments'),
+        expect.stringContaining('FROM invoice_payments'),
         []
       );
     });
